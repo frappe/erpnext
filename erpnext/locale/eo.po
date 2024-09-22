@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
-"POT-Creation-Date: 2024-09-15 09:35+0000\n"
-"PO-Revision-Date: 2024-09-15 19:52\n"
+"POT-Creation-Date: 2024-09-22 09:34+0000\n"
+"PO-Revision-Date: 2024-09-22 21:09\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Esperanto\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,7 @@ msgstr "crwdns62296:0crwdne62296:0"
 msgid " Amount"
 msgstr "crwdns62298:0crwdne62298:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:111
+#: public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"
 msgstr "crwdns132084:0crwdne132084:0"
 
@@ -45,7 +45,7 @@ msgstr "crwdns132086:0crwdne132086:0"
 msgid " Is Subcontracted"
 msgstr "crwdns132088:0crwdne132088:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:171
+#: public/js/bom_configurator/bom_configurator.bundle.js:174
 msgid " Item"
 msgstr "crwdns132090:0crwdne132090:0"
 
@@ -59,7 +59,7 @@ msgstr "crwdns62302:0crwdne62302:0"
 msgid " Rate"
 msgstr "crwdns62306:0crwdne62306:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:119
+#: public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
 msgstr "crwdns132092:0crwdne132092:0"
 
@@ -68,8 +68,8 @@ msgstr "crwdns132092:0crwdne132092:0"
 msgid " Skip Material Transfer"
 msgstr "crwdns132094:0crwdne132094:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:130
-#: public/js/bom_configurator/bom_configurator.bundle.js:160
+#: public/js/bom_configurator/bom_configurator.bundle.js:133
+#: public/js/bom_configurator/bom_configurator.bundle.js:163
 msgid " Sub Assembly"
 msgstr "crwdns132096:0crwdne132096:0"
 
@@ -207,7 +207,7 @@ msgstr "crwdns132122:0crwdne132122:0"
 msgid "% of materials delivered against this Sales Order"
 msgstr "crwdns132124:0crwdne132124:0"
 
-#: controllers/accounts_controller.py:2025
+#: controllers/accounts_controller.py:2016
 msgid "'Account' in the Accounting section of Customer {0}"
 msgstr "crwdns62472:0{0}crwdne62472:0"
 
@@ -227,11 +227,11 @@ msgstr "crwdns62478:0crwdne62478:0"
 msgid "'Days Since Last Order' must be greater than or equal to zero"
 msgstr "crwdns62480:0crwdne62480:0"
 
-#: controllers/accounts_controller.py:2030
+#: controllers/accounts_controller.py:2021
 msgid "'Default {0} Account' in Company {1}"
 msgstr "crwdns62482:0{0}crwdnd62482:0{1}crwdne62482:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1125
+#: accounts/doctype/journal_entry/journal_entry.py:1130
 msgid "'Entries' cannot be empty"
 msgstr "crwdns62484:0crwdne62484:0"
 
@@ -765,6 +765,14 @@ msgstr "crwdns148590:0crwdne148590:0"
 msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
 msgstr "crwdns148592:0crwdne148592:0"
 
+#: accounts/doctype/payment_request/payment_request.py:938
+msgid "<strong>Grand Total:</strong> {0}"
+msgstr "crwdns148848:0{0}crwdne148848:0"
+
+#: accounts/doctype/payment_request/payment_request.py:939
+msgid "<strong>Outstanding Amount:</strong> {0}"
+msgstr "crwdns148850:0{0}crwdne148850:0"
+
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgid "<table class=\"table table-bordered table-condensed\">\n"
@@ -1249,7 +1257,7 @@ msgid "Account Manager"
 msgstr "crwdns132252:0crwdne132252:0"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:864
-#: controllers/accounts_controller.py:2034
+#: controllers/accounts_controller.py:2025
 msgid "Account Missing"
 msgstr "crwdns62894:0crwdne62894:0"
 
@@ -1264,7 +1272,7 @@ msgstr "crwdns62894:0crwdne62894:0"
 msgid "Account Name"
 msgstr "crwdns132254:0crwdne132254:0"
 
-#: accounts/doctype/account/account.py:322
+#: accounts/doctype/account/account.py:336
 msgid "Account Not Found"
 msgstr "crwdns62904:0crwdne62904:0"
 
@@ -1274,7 +1282,7 @@ msgstr "crwdns62904:0crwdne62904:0"
 msgid "Account Number"
 msgstr "crwdns62906:0crwdne62906:0"
 
-#: accounts/doctype/account/account.py:473
+#: accounts/doctype/account/account.py:322
 msgid "Account Number {0} already used in account {1}"
 msgstr "crwdns62910:0{0}crwdnd62910:0{1}crwdne62910:0"
 
@@ -1313,7 +1321,7 @@ msgstr "crwdns132262:0crwdne132262:0"
 #. Label of the account_type (Select) field in DocType 'Payment Ledger Entry'
 #. Label of the account_type (Select) field in DocType 'Party Type'
 #: accounts/doctype/account/account.json
-#: accounts/doctype/account/account.py:204
+#: accounts/doctype/account/account.py:202
 #: accounts/doctype/account/account_tree.js:152
 #: accounts/doctype/bank_account/bank_account.json
 #: accounts/doctype/bank_account_type/bank_account_type.json
@@ -1329,11 +1337,11 @@ msgstr "crwdns62924:0crwdne62924:0"
 msgid "Account Value"
 msgstr "crwdns62938:0crwdne62938:0"
 
-#: accounts/doctype/account/account.py:295
+#: accounts/doctype/account/account.py:293
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
 msgstr "crwdns62940:0crwdne62940:0"
 
-#: accounts/doctype/account/account.py:289
+#: accounts/doctype/account/account.py:287
 msgid "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"
 msgstr "crwdns62942:0crwdne62942:0"
 
@@ -1355,28 +1363,28 @@ msgstr "crwdns62950:0crwdne62950:0"
 msgid "Account is not set for the dashboard chart {0}"
 msgstr "crwdns62952:0{0}crwdne62952:0"
 
-#: assets/doctype/asset/asset.py:679
+#: assets/doctype/asset/asset.py:682
 msgid "Account not Found"
 msgstr "crwdns62954:0crwdne62954:0"
 
-#: accounts/doctype/account/account.py:376
+#: accounts/doctype/account/account.py:390
 msgid "Account with child nodes cannot be converted to ledger"
 msgstr "crwdns62956:0crwdne62956:0"
 
-#: accounts/doctype/account/account.py:268
+#: accounts/doctype/account/account.py:266
 msgid "Account with child nodes cannot be set as ledger"
 msgstr "crwdns62958:0crwdne62958:0"
 
-#: accounts/doctype/account/account.py:387
+#: accounts/doctype/account/account.py:401
 msgid "Account with existing transaction can not be converted to group."
 msgstr "crwdns62960:0crwdne62960:0"
 
-#: accounts/doctype/account/account.py:416
+#: accounts/doctype/account/account.py:430
 msgid "Account with existing transaction can not be deleted"
 msgstr "crwdns62962:0crwdne62962:0"
 
-#: accounts/doctype/account/account.py:263
-#: accounts/doctype/account/account.py:378
+#: accounts/doctype/account/account.py:261
+#: accounts/doctype/account/account.py:392
 msgid "Account with existing transaction cannot be converted to ledger"
 msgstr "crwdns62964:0crwdne62964:0"
 
@@ -1392,7 +1400,7 @@ msgstr "crwdns62968:0{0}crwdnd62968:0{1}crwdne62968:0"
 msgid "Account {0} does not belongs to company {1}"
 msgstr "crwdns62970:0{0}crwdnd62970:0{1}crwdne62970:0"
 
-#: accounts/doctype/account/account.py:547
+#: accounts/doctype/account/account.py:548
 msgid "Account {0} does not exist"
 msgstr "crwdns62972:0{0}crwdne62972:0"
 
@@ -1408,7 +1416,7 @@ msgstr "crwdns62976:0{0}crwdnd62976:0{1}crwdne62976:0"
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
 msgstr "crwdns62978:0{0}crwdnd62978:0{1}crwdnd62978:0{2}crwdne62978:0"
 
-#: accounts/doctype/account/account.py:505
+#: accounts/doctype/account/account.py:506
 msgid "Account {0} exists in parent company {1}."
 msgstr "crwdns62980:0{0}crwdnd62980:0{1}crwdne62980:0"
 
@@ -1416,7 +1424,7 @@ msgstr "crwdns62980:0{0}crwdnd62980:0{1}crwdne62980:0"
 msgid "Account {0} has been entered multiple times"
 msgstr "crwdns62982:0{0}crwdne62982:0"
 
-#: accounts/doctype/account/account.py:360
+#: accounts/doctype/account/account.py:374
 msgid "Account {0} is added in the child company {1}"
 msgstr "crwdns62984:0{0}crwdnd62984:0{1}crwdne62984:0"
 
@@ -1428,35 +1436,35 @@ msgstr "crwdns62986:0{0}crwdne62986:0"
 msgid "Account {0} is invalid. Account Currency must be {1}"
 msgstr "crwdns62988:0{0}crwdnd62988:0{1}crwdne62988:0"
 
-#: accounts/doctype/account/account.py:150
+#: accounts/doctype/account/account.py:148
 msgid "Account {0}: Parent account {1} can not be a ledger"
 msgstr "crwdns62990:0{0}crwdnd62990:0{1}crwdne62990:0"
 
-#: accounts/doctype/account/account.py:156
+#: accounts/doctype/account/account.py:154
 msgid "Account {0}: Parent account {1} does not belong to company: {2}"
 msgstr "crwdns62992:0{0}crwdnd62992:0{1}crwdnd62992:0{2}crwdne62992:0"
 
-#: accounts/doctype/account/account.py:144
+#: accounts/doctype/account/account.py:142
 msgid "Account {0}: Parent account {1} does not exist"
 msgstr "crwdns62994:0{0}crwdnd62994:0{1}crwdne62994:0"
 
-#: accounts/doctype/account/account.py:147
+#: accounts/doctype/account/account.py:145
 msgid "Account {0}: You can not assign itself as parent account"
 msgstr "crwdns62996:0{0}crwdne62996:0"
 
-#: accounts/general_ledger.py:425
+#: accounts/general_ledger.py:428
 msgid "Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry"
 msgstr "crwdns62998:0{0}crwdne62998:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:268
+#: accounts/doctype/journal_entry/journal_entry.py:273
 msgid "Account: {0} can only be updated via Stock Transactions"
 msgstr "crwdns63000:0{0}crwdne63000:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:2173
+#: accounts/doctype/payment_entry/payment_entry.py:2582
 msgid "Account: {0} is not permitted under Payment Entry"
 msgstr "crwdns63004:0{0}crwdne63004:0"
 
-#: controllers/accounts_controller.py:2718
+#: controllers/accounts_controller.py:2709
 msgid "Account: {0} with currency: {1} can not be selected"
 msgstr "crwdns63006:0{0}crwdnd63006:0{1}crwdne63006:0"
 
@@ -1720,7 +1728,7 @@ msgstr "crwdns132270:0crwdne132270:0"
 msgid "Accounting Entries"
 msgstr "crwdns132272:0crwdne132272:0"
 
-#: assets/doctype/asset/asset.py:713 assets/doctype/asset/asset.py:728
+#: assets/doctype/asset/asset.py:716 assets/doctype/asset/asset.py:731
 #: assets/doctype/asset_capitalization/asset_capitalization.py:585
 msgid "Accounting Entry for Asset"
 msgstr "crwdns63168:0crwdne63168:0"
@@ -1729,15 +1737,15 @@ msgstr "crwdns63168:0crwdne63168:0"
 msgid "Accounting Entry for Service"
 msgstr "crwdns63170:0crwdne63170:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1004
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:988
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1008
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1024
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1040
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1057
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1076
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1099
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1198
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1396
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1414
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1041
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1060
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1083
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1182
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1380
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1398
 #: controllers/stock_controller.py:499 controllers/stock_controller.py:516
 #: stock/doctype/purchase_receipt/purchase_receipt.py:821
 #: stock/doctype/stock_entry/stock_entry.py:1579
@@ -1750,7 +1758,7 @@ msgstr "crwdns63172:0crwdne63172:0"
 msgid "Accounting Entry for {0}"
 msgstr "crwdns63174:0{0}crwdne63174:0"
 
-#: controllers/accounts_controller.py:2075
+#: controllers/accounts_controller.py:2066
 msgid "Accounting Entry for {0}: {1} can only be made in currency: {2}"
 msgstr "crwdns63176:0{0}crwdnd63176:0{1}crwdnd63176:0{2}crwdne63176:0"
 
@@ -2090,7 +2098,7 @@ msgstr "crwdns63252:0crwdne63252:0"
 msgid "Accounts User"
 msgstr "crwdns63258:0crwdne63258:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1224
+#: accounts/doctype/journal_entry/journal_entry.py:1229
 msgid "Accounts table cannot be blank."
 msgstr "crwdns63260:0crwdne63260:0"
 
@@ -2124,8 +2132,8 @@ msgstr "crwdns132290:0crwdne132290:0"
 msgid "Accumulated Depreciation Amount"
 msgstr "crwdns63274:0crwdne63274:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:408
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:426
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:444
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:462
 msgid "Accumulated Depreciation as on"
 msgstr "crwdns63278:0crwdne63278:0"
 
@@ -2240,7 +2248,7 @@ msgstr "crwdns132312:0crwdne132312:0"
 #: accounts/doctype/account/account.js:88
 #: accounts/doctype/account/account.js:116
 #: accounts/doctype/journal_entry/journal_entry.js:53
-#: accounts/doctype/payment_entry/payment_entry.js:215
+#: accounts/doctype/payment_entry/payment_entry.js:234
 #: accounts/doctype/subscription/subscription.js:38
 #: accounts/doctype/subscription/subscription.js:44
 #: accounts/doctype/subscription/subscription.js:50
@@ -2510,7 +2518,7 @@ msgstr "crwdns132344:0crwdne132344:0"
 msgid "Actual qty in stock"
 msgstr "crwdns63452:0crwdne63452:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1514
+#: accounts/doctype/payment_entry/payment_entry.js:1456
 #: public/js/controllers/accounts.js:176
 msgid "Actual type tax cannot be included in Item rate in row {0}"
 msgstr "crwdns63454:0{0}crwdne63454:0"
@@ -2523,9 +2531,9 @@ msgstr "crwdns63454:0{0}crwdne63454:0"
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: crm/doctype/lead/lead.js:84 manufacturing/doctype/bom/bom.js:889
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:55
-#: public/js/bom_configurator/bom_configurator.bundle.js:232
-#: public/js/bom_configurator/bom_configurator.bundle.js:261
-#: public/js/bom_configurator/bom_configurator.bundle.js:464
+#: public/js/bom_configurator/bom_configurator.bundle.js:235
+#: public/js/bom_configurator/bom_configurator.bundle.js:264
+#: public/js/bom_configurator/bom_configurator.bundle.js:474
 #: public/js/utils/crm_activities.js:170
 #: public/js/utils/serial_no_batch_selector.js:17
 #: public/js/utils/serial_no_batch_selector.js:182
@@ -2560,7 +2568,7 @@ msgid "Add Customers"
 msgstr "crwdns63470:0crwdne63470:0"
 
 #: selling/page/point_of_sale/pos_item_cart.js:92
-#: selling/page/point_of_sale/pos_item_cart.js:411
+#: selling/page/point_of_sale/pos_item_cart.js:415
 msgid "Add Discount"
 msgstr "crwdns111596:0crwdne111596:0"
 
@@ -2568,7 +2576,7 @@ msgstr "crwdns111596:0crwdne111596:0"
 msgid "Add Employees"
 msgstr "crwdns63472:0crwdne63472:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:231
+#: public/js/bom_configurator/bom_configurator.bundle.js:234
 #: selling/doctype/sales_order/sales_order.js:272
 #: stock/dashboard/item_dashboard.js:212
 msgid "Add Item"
@@ -2672,12 +2680,12 @@ msgstr "crwdns132360:0crwdne132360:0"
 msgid "Add Serial / Batch No (Rejected Qty)"
 msgstr "crwdns132362:0crwdne132362:0"
 
-#: manufacturing/doctype/plant_floor/plant_floor.js:172
+#: manufacturing/doctype/plant_floor/plant_floor.js:193
 msgid "Add Stock"
 msgstr "crwdns111598:0crwdne111598:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:256
-#: public/js/bom_configurator/bom_configurator.bundle.js:455
+#: public/js/bom_configurator/bom_configurator.bundle.js:259
+#: public/js/bom_configurator/bom_configurator.bundle.js:465
 msgid "Add Sub Assembly"
 msgstr "crwdns63512:0crwdne63512:0"
 
@@ -2775,7 +2783,7 @@ msgstr "crwdns63554:0{1}crwdnd63554:0{0}crwdne63554:0"
 msgid "Adding Lead to Prospect..."
 msgstr "crwdns63556:0crwdne63556:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:433
+#: selling/page/point_of_sale/pos_item_cart.js:423
 msgid "Additional"
 msgstr "crwdns111602:0crwdne111602:0"
 
@@ -3298,7 +3306,7 @@ msgstr "crwdns132432:0crwdne132432:0"
 msgid "Advance amount cannot be greater than {0} {1}"
 msgstr "crwdns63854:0{0}crwdnd63854:0{1}crwdne63854:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:806
+#: accounts/doctype/journal_entry/journal_entry.py:811
 msgid "Advance paid against {0} {1} cannot be greater than Grand Total {2}"
 msgstr "crwdns63856:0{0}crwdnd63856:0{1}crwdnd63856:0{2}crwdne63856:0"
 
@@ -3425,8 +3433,8 @@ msgstr "crwdns132454:0crwdne132454:0"
 msgid "Against Income Account"
 msgstr "crwdns132456:0crwdne132456:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:668
-#: accounts/doctype/payment_entry/payment_entry.py:707
+#: accounts/doctype/journal_entry/journal_entry.py:673
+#: accounts/doctype/payment_entry/payment_entry.py:742
 msgid "Against Journal Entry {0} does not have any unmatched {1} entry"
 msgstr "crwdns63908:0{0}crwdnd63908:0{1}crwdne63908:0"
 
@@ -3624,7 +3632,7 @@ msgstr "crwdns63986:0crwdne63986:0"
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:165
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:185
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:166
-#: accounts/utils.py:1370 public/js/setup_wizard.js:173
+#: accounts/utils.py:1372 public/js/setup_wizard.js:173
 msgid "All Accounts"
 msgstr "crwdns63990:0crwdne63990:0"
 
@@ -3816,7 +3824,7 @@ msgstr "crwdns64050:0crwdne64050:0"
 msgid "Allocate Advances Automatically (FIFO)"
 msgstr "crwdns132504:0crwdne132504:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:873
+#: accounts/doctype/payment_entry/payment_entry.js:893
 msgid "Allocate Payment Amount"
 msgstr "crwdns64056:0crwdne64056:0"
 
@@ -3825,6 +3833,10 @@ msgstr "crwdns64056:0crwdne64056:0"
 #: accounts/doctype/payment_terms_template/payment_terms_template.json
 msgid "Allocate Payment Based On Payment Terms"
 msgstr "crwdns132506:0crwdne132506:0"
+
+#: accounts/doctype/payment_entry/payment_entry.js:1677
+msgid "Allocate Payment Request"
+msgstr "crwdns148852:0crwdne148852:0"
 
 #. Label of the allocated_amount (Float) field in DocType 'Payment Entry
 #. Reference'
@@ -3853,6 +3865,7 @@ msgstr "crwdns132508:0crwdne132508:0"
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 #: accounts/doctype/bank_transaction/bank_transaction.json
 #: accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
+#: accounts/doctype/payment_entry/payment_entry.js:1668
 #: accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
 #: accounts/doctype/process_payment_reconciliation_log_allocations/process_payment_reconciliation_log_allocations.json
 #: accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
@@ -3915,7 +3928,7 @@ msgstr "crwdns132514:0crwdne132514:0"
 
 #. Label of the allow_account_creation_against_child_company (Check) field in
 #. DocType 'Company'
-#: accounts/doctype/account/account.py:503
+#: accounts/doctype/account/account.py:504
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:68
 #: setup/doctype/company/company.json
 msgid "Allow Account Creation Against Child Company"
@@ -4527,7 +4540,7 @@ msgstr "crwdns132600:0crwdne132600:0"
 #: accounts/doctype/bank_clearance_detail/bank_clearance_detail.json
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 #: accounts/doctype/cashier_closing_payments/cashier_closing_payments.json
-#: accounts/doctype/journal_entry/journal_entry.js:558
+#: accounts/doctype/journal_entry/journal_entry.js:560
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 #: accounts/doctype/payment_entry/payment_entry.json
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
@@ -4695,28 +4708,34 @@ msgstr "crwdns132608:0crwdne132608:0"
 msgid "Amount in Account Currency"
 msgstr "crwdns64568:0crwdne64568:0"
 
+#. Description of the 'Outstanding Amount' (Currency) field in DocType 'Payment
+#. Request'
+#: accounts/doctype/payment_request/payment_request.json
+msgid "Amount in party's bank account currency"
+msgstr "crwdns148854:0crwdne148854:0"
+
 #. Description of the 'Amount' (Currency) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
-msgid "Amount in customer's currency"
-msgstr "crwdns132610:0crwdne132610:0"
+msgid "Amount in transaction currency"
+msgstr "crwdns148856:0crwdne148856:0"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:72
 msgid "Amount in {0}"
 msgstr "crwdns148598:0{0}crwdne148598:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1174
+#: accounts/doctype/payment_entry/payment_entry.py:1209
 msgid "Amount {0} {1} against {2} {3}"
 msgstr "crwdns64574:0{0}crwdnd64574:0{1}crwdnd64574:0{2}crwdnd64574:0{3}crwdne64574:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1185
+#: accounts/doctype/payment_entry/payment_entry.py:1220
 msgid "Amount {0} {1} deducted against {2}"
 msgstr "crwdns64576:0{0}crwdnd64576:0{1}crwdnd64576:0{2}crwdne64576:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1149
+#: accounts/doctype/payment_entry/payment_entry.py:1184
 msgid "Amount {0} {1} transferred from {2} to {3}"
 msgstr "crwdns64578:0{0}crwdnd64578:0{1}crwdnd64578:0{2}crwdnd64578:0{3}crwdne64578:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1155
+#: accounts/doctype/payment_entry/payment_entry.py:1190
 msgid "Amount {0} {1} {2} {3}"
 msgstr "crwdns64580:0{0}crwdnd64580:0{1}crwdnd64580:0{2}crwdnd64580:0{3}crwdne64580:0"
 
@@ -5201,7 +5220,7 @@ msgstr "crwdns112204:0crwdne112204:0"
 msgid "Are you sure you want to clear all demo data?"
 msgstr "crwdns64782:0crwdne64782:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:506
+#: public/js/bom_configurator/bom_configurator.bundle.js:516
 msgid "Are you sure you want to delete this Item?"
 msgstr "crwdns64784:0crwdne64784:0"
 
@@ -5309,7 +5328,7 @@ msgstr "crwdns132704:0crwdne132704:0"
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:30
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:138
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.js:44
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:368
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:404
 #: assets/doctype/asset/asset.json
 #: assets/doctype/asset_activity/asset_activity.json
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
@@ -5376,7 +5395,7 @@ msgstr "crwdns64862:0crwdne64862:0"
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:36
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:188
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.js:37
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:358
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:394
 #: assets/doctype/asset/asset.json
 #: assets/doctype/asset_category/asset_category.json
 #: assets/doctype/asset_maintenance/asset_maintenance.json
@@ -5520,7 +5539,7 @@ msgstr "crwdns64936:0crwdne64936:0"
 msgid "Asset Movement Item"
 msgstr "crwdns64940:0crwdne64940:0"
 
-#: assets/doctype/asset/asset.py:942
+#: assets/doctype/asset/asset.py:945
 msgid "Asset Movement record {0} created"
 msgstr "crwdns64942:0{0}crwdne64942:0"
 
@@ -5666,7 +5685,7 @@ msgstr "crwdns65014:0crwdne65014:0"
 msgid "Asset created after Asset Capitalization {0} was submitted"
 msgstr "crwdns65016:0{0}crwdne65016:0"
 
-#: assets/doctype/asset/asset.py:1191
+#: assets/doctype/asset/asset.py:1194
 msgid "Asset created after being split from Asset {0}"
 msgstr "crwdns65018:0{0}crwdne65018:0"
 
@@ -5722,7 +5741,7 @@ msgstr "crwdns65042:0crwdne65042:0"
 msgid "Asset transferred to Location {0}"
 msgstr "crwdns65044:0{0}crwdne65044:0"
 
-#: assets/doctype/asset/asset.py:1125
+#: assets/doctype/asset/asset.py:1128
 msgid "Asset updated after being split into Asset {0}"
 msgstr "crwdns65046:0{0}crwdne65046:0"
 
@@ -5855,7 +5874,7 @@ msgstr "crwdns142816:0#{0}crwdnd142816:0{1}crwdnd142816:0{2}crwdnd142816:0{3}crw
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
 msgstr "crwdns142818:0#{0}crwdnd142818:0{1}crwdnd142818:0{2}crwdnd142818:0{3}crwdnd142818:0{4}crwdne142818:0"
 
-#: assets/doctype/asset/asset.py:1048
+#: assets/doctype/asset/asset.py:1051
 msgid "At least one asset has to be selected."
 msgstr "crwdns104530:0crwdne104530:0"
 
@@ -6411,7 +6430,7 @@ msgstr "crwdns65324:0crwdne65324:0"
 
 #: stock/report/stock_ageing/stock_ageing.py:151
 #: stock/report/stock_ageing/stock_ageing.py:185
-#: stock/report/stock_balance/stock_balance.py:497
+#: stock/report/stock_balance/stock_balance.py:500
 msgid "Average Age"
 msgstr "crwdns65326:0crwdne65326:0"
 
@@ -6805,8 +6824,8 @@ msgstr "crwdns65504:0crwdne65504:0"
 msgid "Backdated Stock Entry"
 msgstr "crwdns65506:0crwdne65506:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:361
-#: public/js/bom_configurator/bom_configurator.bundle.js:589
+#: public/js/bom_configurator/bom_configurator.bundle.js:371
+#: public/js/bom_configurator/bom_configurator.bundle.js:599
 msgid "Backflush Materials From WIP"
 msgstr "crwdns132874:0crwdne132874:0"
 
@@ -6880,7 +6899,7 @@ msgstr "crwdns132886:0crwdne132886:0"
 
 #: stock/report/available_batch_report/available_batch_report.py:63
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:89
-#: stock/report/stock_balance/stock_balance.py:425
+#: stock/report/stock_balance/stock_balance.py:428
 #: stock/report/stock_ledger/stock_ledger.py:250
 msgid "Balance Qty"
 msgstr "crwdns65526:0crwdne65526:0"
@@ -6918,7 +6937,7 @@ msgstr "crwdns111630:0crwdne111630:0"
 msgid "Balance Stock Value"
 msgstr "crwdns132890:0crwdne132890:0"
 
-#: stock/report/stock_balance/stock_balance.py:432
+#: stock/report/stock_balance/stock_balance.py:435
 #: stock/report/stock_ledger/stock_ledger.py:307
 msgid "Balance Value"
 msgstr "crwdns65544:0crwdne65544:0"
@@ -8042,7 +8061,7 @@ msgstr "crwdns133040:0crwdne133040:0"
 msgid "Bom No"
 msgstr "crwdns133042:0crwdne133042:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:238
+#: accounts/doctype/payment_entry/payment_entry.py:243
 msgid "Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}."
 msgstr "crwdns66082:0{0}crwdnd66082:0{1}crwdne66082:0"
 
@@ -8102,7 +8121,7 @@ msgstr "crwdns133054:0crwdne133054:0"
 msgid "Booking stock value across multiple accounts will make it harder to track stock and account value."
 msgstr "crwdns66106:0crwdne66106:0"
 
-#: accounts/general_ledger.py:744
+#: accounts/general_ledger.py:747
 msgid "Books have been closed till the period ending on {0}"
 msgstr "crwdns66108:0{0}crwdne66108:0"
 
@@ -8830,13 +8849,13 @@ msgstr "crwdns66402:0crwdne66402:0"
 msgid "Can not filter based on Voucher No, if grouped by Voucher"
 msgstr "crwdns66404:0crwdne66404:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1284
-#: accounts/doctype/payment_entry/payment_entry.py:2330
+#: accounts/doctype/journal_entry/journal_entry.py:1289
+#: accounts/doctype/payment_entry/payment_entry.py:2740
 msgid "Can only make payment against unbilled {0}"
 msgstr "crwdns66406:0{0}crwdne66406:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1482
-#: controllers/accounts_controller.py:2627 public/js/controllers/accounts.js:90
+#: accounts/doctype/payment_entry/payment_entry.js:1424
+#: controllers/accounts_controller.py:2618 public/js/controllers/accounts.js:90
 msgid "Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"
 msgstr "crwdns66408:0crwdne66408:0"
 
@@ -9022,7 +9041,7 @@ msgstr "crwdns66528:0crwdne66528:0"
 msgid "Cannot amend {0} {1}, please create a new one instead."
 msgstr "crwdns66530:0{0}crwdnd66530:0{1}crwdne66530:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:282
+#: accounts/doctype/journal_entry/journal_entry.py:287
 msgid "Cannot apply TDS against multiple parties in one entry"
 msgstr "crwdns66532:0crwdne66532:0"
 
@@ -9086,11 +9105,11 @@ msgstr "crwdns66562:0crwdne66562:0"
 msgid "Cannot convert Task to non-group because the following child Tasks exist: {0}."
 msgstr "crwdns66564:0{0}crwdne66564:0"
 
-#: accounts/doctype/account/account.py:389
+#: accounts/doctype/account/account.py:403
 msgid "Cannot convert to Group because Account Type is selected."
 msgstr "crwdns66566:0crwdne66566:0"
 
-#: accounts/doctype/account/account.py:266
+#: accounts/doctype/account/account.py:264
 msgid "Cannot covert to Group because Account Type is selected."
 msgstr "crwdns66568:0crwdne66568:0"
 
@@ -9098,7 +9117,7 @@ msgstr "crwdns66568:0crwdne66568:0"
 msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipts."
 msgstr "crwdns66570:0crwdne66570:0"
 
-#: selling/doctype/sales_order/sales_order.py:1636
+#: selling/doctype/sales_order/sales_order.py:1637
 #: stock/doctype/pick_list/pick_list.py:172
 msgid "Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
 msgstr "crwdns66574:0{0}crwdne66574:0"
@@ -9141,7 +9160,7 @@ msgstr "crwdns66586:0{0}crwdne66586:0"
 msgid "Cannot find Item with this Barcode"
 msgstr "crwdns66588:0crwdne66588:0"
 
-#: controllers/accounts_controller.py:3145
+#: controllers/accounts_controller.py:3136
 msgid "Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
 msgstr "crwdns143360:0{0}crwdne143360:0"
 
@@ -9165,12 +9184,12 @@ msgstr "crwdns66596:0{0}crwdne66596:0"
 msgid "Cannot produce more than {0} items for {1}"
 msgstr "crwdns66598:0{0}crwdnd66598:0{1}crwdne66598:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:303
+#: accounts/doctype/payment_entry/payment_entry.py:312
 msgid "Cannot receive from customer against negative outstanding"
 msgstr "crwdns66600:0crwdne66600:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1499
-#: controllers/accounts_controller.py:2642
+#: accounts/doctype/payment_entry/payment_entry.js:1441
+#: controllers/accounts_controller.py:2633
 #: public/js/controllers/accounts.js:100
 msgid "Cannot refer row number greater than or equal to current row number for this Charge type"
 msgstr "crwdns66602:0crwdne66602:0"
@@ -9183,10 +9202,10 @@ msgstr "crwdns66604:0crwdne66604:0"
 msgid "Cannot retrieve link token. Check Error Log for more information"
 msgstr "crwdns66606:0crwdne66606:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1491
-#: accounts/doctype/payment_entry/payment_entry.js:1670
-#: accounts/doctype/payment_entry/payment_entry.py:1653
-#: controllers/accounts_controller.py:2632 public/js/controllers/accounts.js:94
+#: accounts/doctype/payment_entry/payment_entry.js:1433
+#: accounts/doctype/payment_entry/payment_entry.js:1612
+#: accounts/doctype/payment_entry/payment_entry.py:1688
+#: controllers/accounts_controller.py:2623 public/js/controllers/accounts.js:94
 #: public/js/controllers/taxes_and_totals.js:455
 msgid "Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"
 msgstr "crwdns66608:0crwdne66608:0"
@@ -9203,11 +9222,11 @@ msgstr "crwdns66612:0{0}crwdne66612:0"
 msgid "Cannot set multiple Item Defaults for a company."
 msgstr "crwdns66614:0crwdne66614:0"
 
-#: controllers/accounts_controller.py:3293
+#: controllers/accounts_controller.py:3284
 msgid "Cannot set quantity less than delivered quantity"
 msgstr "crwdns66616:0crwdne66616:0"
 
-#: controllers/accounts_controller.py:3296
+#: controllers/accounts_controller.py:3287
 msgid "Cannot set quantity less than received quantity"
 msgstr "crwdns66618:0crwdne66618:0"
 
@@ -9215,9 +9234,9 @@ msgstr "crwdns66618:0crwdne66618:0"
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
 msgstr "crwdns66620:0{0}crwdne66620:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1092
-msgid "Cannot {0} {1} {2} without any negative outstanding invoice"
-msgstr "crwdns66622:0{0}crwdnd66622:0{1}crwdnd66622:0{2}crwdne66622:0"
+#: accounts/doctype/payment_entry/payment_entry.py:1798
+msgid "Cannot {0} from {2} without any negative outstanding invoice"
+msgstr "crwdns148858:0{0}crwdnd148858:0{2}crwdne148858:0"
 
 #. Label of the capacity (Float) field in DocType 'Putaway Rule'
 #: stock/doctype/putaway_rule/putaway_rule.json
@@ -9581,8 +9600,8 @@ msgstr "crwdns66762:0crwdne66762:0"
 msgid "Channel Partner"
 msgstr "crwdns133188:0crwdne133188:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1708
-#: controllers/accounts_controller.py:2695
+#: accounts/doctype/payment_entry/payment_entry.py:2117
+#: controllers/accounts_controller.py:2686
 msgid "Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount"
 msgstr "crwdns66766:0{0}crwdne66766:0"
 
@@ -9931,7 +9950,7 @@ msgstr "crwdns133242:0crwdne133242:0"
 msgid "Click on the link below to verify your email and confirm the appointment"
 msgstr "crwdns66910:0crwdne66910:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:468
+#: selling/page/point_of_sale/pos_item_cart.js:458
 msgid "Click to add email / phone"
 msgstr "crwdns111658:0crwdne111658:0"
 
@@ -9950,7 +9969,7 @@ msgstr "crwdns133246:0crwdne133246:0"
 msgid "Client Secret"
 msgstr "crwdns133248:0crwdne133248:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:328
+#: buying/doctype/purchase_order/purchase_order.js:362
 #: buying/doctype/purchase_order/purchase_order_list.js:49
 #: crm/doctype/opportunity/opportunity.js:118
 #: manufacturing/doctype/production_plan/production_plan.js:111
@@ -10133,6 +10152,7 @@ msgstr "crwdns133268:0crwdne133268:0"
 msgid "Cold Calling"
 msgstr "crwdns143376:0crwdne143376:0"
 
+#: public/js/bom_configurator/bom_configurator.bundle.js:144
 #: public/js/setup_wizard.js:189
 msgid "Collapse All"
 msgstr "crwdns67006:0crwdne67006:0"
@@ -10691,7 +10711,7 @@ msgstr "crwdns133292:0crwdne133292:0"
 #: stock/report/stock_analytics/stock_analytics.js:41
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:7
 #: stock/report/stock_balance/stock_balance.js:8
-#: stock/report/stock_balance/stock_balance.py:486
+#: stock/report/stock_balance/stock_balance.py:489
 #: stock/report/stock_ledger/stock_ledger.js:8
 #: stock/report/stock_ledger/stock_ledger.py:357
 #: stock/report/stock_ledger_variance/stock_ledger_variance.js:18
@@ -10921,7 +10941,7 @@ msgstr "crwdns133328:0crwdne133328:0"
 msgid "Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts"
 msgstr "crwdns67442:0{0}crwdne67442:0"
 
-#: accounts/doctype/account/account.py:458
+#: accounts/doctype/account/account.py:472
 msgid "Company {0} does not exist"
 msgstr "crwdns67444:0{0}crwdne67444:0"
 
@@ -11199,7 +11219,7 @@ msgstr "crwdns133354:0crwdne133354:0"
 msgid "Configuration"
 msgstr "crwdns133356:0crwdne133356:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:53
+#: public/js/bom_configurator/bom_configurator.bundle.js:56
 msgid "Configure Product Assembly"
 msgstr "crwdns67608:0crwdne67608:0"
 
@@ -11528,7 +11548,7 @@ msgstr "crwdns133400:0crwdne133400:0"
 msgid "Contact Desc"
 msgstr "crwdns133402:0crwdne133402:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:859
+#: selling/page/point_of_sale/pos_item_cart.js:849
 msgid "Contact Details"
 msgstr "crwdns133404:0crwdne133404:0"
 
@@ -11872,7 +11892,7 @@ msgstr "crwdns67978:0crwdne67978:0"
 msgid "Conversion factor for default Unit of Measure must be 1 in row {0}"
 msgstr "crwdns67986:0{0}crwdne67986:0"
 
-#: controllers/accounts_controller.py:2524
+#: controllers/accounts_controller.py:2515
 msgid "Conversion rate cannot be 0 or 1"
 msgstr "crwdns67988:0crwdne67988:0"
 
@@ -12172,7 +12192,7 @@ msgstr "crwdns68162:0crwdne68162:0"
 msgid "Cost Center is a part of Cost Center Allocation, hence cannot be converted to a group"
 msgstr "crwdns68164:0crwdne68164:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1365
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1349
 #: stock/doctype/purchase_receipt/purchase_receipt.py:787
 msgid "Cost Center is required in row {0} in Taxes table for type {1}"
 msgstr "crwdns68166:0{0}crwdnd68166:0{1}crwdne68166:0"
@@ -12224,8 +12244,8 @@ msgstr "crwdns133474:0crwdne133474:0"
 msgid "Cost and Freight"
 msgstr "crwdns143386:0crwdne143386:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:378
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:402
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:414
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:438
 msgid "Cost as on"
 msgstr "crwdns68190:0crwdne68190:0"
 
@@ -12245,7 +12265,7 @@ msgstr "crwdns68194:0crwdne68194:0"
 msgid "Cost of Issued Items"
 msgstr "crwdns68198:0crwdne68198:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:384
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:420
 msgid "Cost of New Purchase"
 msgstr "crwdns68200:0crwdne68200:0"
 
@@ -12258,11 +12278,11 @@ msgstr "crwdns68202:0crwdne68202:0"
 msgid "Cost of Purchased Items"
 msgstr "crwdns68204:0crwdne68204:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:396
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:432
 msgid "Cost of Scrapped Asset"
 msgstr "crwdns68206:0crwdne68206:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:390
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:426
 msgid "Cost of Sold Asset"
 msgstr "crwdns68208:0crwdne68208:0"
 
@@ -12468,14 +12488,14 @@ msgstr "crwdns68298:0crwdne68298:0"
 #: accounts/doctype/sales_invoice/sales_invoice.js:147
 #: accounts/doctype/sales_invoice/sales_invoice.js:158
 #: accounts/doctype/sales_invoice/sales_invoice.js:184
-#: buying/doctype/purchase_order/purchase_order.js:100
-#: buying/doctype/purchase_order/purchase_order.js:357
-#: buying/doctype/purchase_order/purchase_order.js:376
-#: buying/doctype/purchase_order/purchase_order.js:387
-#: buying/doctype/purchase_order/purchase_order.js:394
-#: buying/doctype/purchase_order/purchase_order.js:404
-#: buying/doctype/purchase_order/purchase_order.js:422
+#: buying/doctype/purchase_order/purchase_order.js:125
+#: buying/doctype/purchase_order/purchase_order.js:391
+#: buying/doctype/purchase_order/purchase_order.js:410
+#: buying/doctype/purchase_order/purchase_order.js:421
 #: buying/doctype/purchase_order/purchase_order.js:428
+#: buying/doctype/purchase_order/purchase_order.js:438
+#: buying/doctype/purchase_order/purchase_order.js:456
+#: buying/doctype/purchase_order/purchase_order.js:462
 #: buying/doctype/request_for_quotation/request_for_quotation.js:49
 #: buying/doctype/request_for_quotation/request_for_quotation.js:156
 #: buying/doctype/request_for_quotation/request_for_quotation.js:187
@@ -12500,7 +12520,7 @@ msgstr "crwdns68298:0crwdne68298:0"
 #: manufacturing/doctype/bom/bom.js:191 manufacturing/doctype/bom/bom.js:195
 #: manufacturing/doctype/bom/bom.js:409
 #: manufacturing/doctype/bom_creator/bom_creator.js:158
-#: manufacturing/doctype/plant_floor/plant_floor.js:240
+#: manufacturing/doctype/plant_floor/plant_floor.js:261
 #: manufacturing/doctype/production_plan/production_plan.js:125
 #: manufacturing/doctype/production_plan/production_plan.js:139
 #: manufacturing/doctype/production_plan/production_plan.js:146
@@ -12706,7 +12726,7 @@ msgstr "crwdns68356:0crwdne68356:0"
 msgid "Create Prospect"
 msgstr "crwdns68358:0crwdne68358:0"
 
-#: utilities/activation.py:105
+#: selling/doctype/sales_order/sales_order.js:1252 utilities/activation.py:105
 msgid "Create Purchase Order"
 msgstr "crwdns68360:0crwdne68360:0"
 
@@ -12793,6 +12813,10 @@ msgstr "crwdns68398:0crwdne68398:0"
 msgid "Create Variants"
 msgstr "crwdns68400:0crwdne68400:0"
 
+#: manufacturing/doctype/plant_floor/plant_floor.js:10
+msgid "Create Workstation"
+msgstr "crwdns148860:0crwdne148860:0"
+
 #. Option for the 'Capitalization Method' (Select) field in DocType 'Asset
 #. Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
@@ -12868,7 +12892,7 @@ msgid "Creating Purchase Order ..."
 msgstr "crwdns68472:0crwdne68472:0"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:690
-#: buying/doctype/purchase_order/purchase_order.js:489
+#: buying/doctype/purchase_order/purchase_order.js:523
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:73
 msgid "Creating Purchase Receipt ..."
 msgstr "crwdns68474:0crwdne68474:0"
@@ -12877,12 +12901,12 @@ msgstr "crwdns68474:0crwdne68474:0"
 msgid "Creating Sales Invoices ..."
 msgstr "crwdns148772:0crwdne148772:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:86
+#: buying/doctype/purchase_order/purchase_order.js:111
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:185
 msgid "Creating Stock Entry"
 msgstr "crwdns68476:0crwdne68476:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:504
+#: buying/doctype/purchase_order/purchase_order.js:538
 msgid "Creating Subcontracting Order ..."
 msgstr "crwdns68478:0crwdne68478:0"
 
@@ -12949,7 +12973,7 @@ msgstr "crwdns68504:0crwdne68504:0"
 msgid "Credit ({0})"
 msgstr "crwdns68506:0{0}crwdne68506:0"
 
-#: accounts/doctype/journal_entry/journal_entry.js:572
+#: accounts/doctype/journal_entry/journal_entry.js:574
 msgid "Credit Account"
 msgstr "crwdns68508:0crwdne68508:0"
 
@@ -13094,9 +13118,9 @@ msgstr "crwdns68574:0{0}crwdne68574:0"
 
 #. Label of the credit_to (Link) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:382
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:390
-#: controllers/accounts_controller.py:2014
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:366
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:374
+#: controllers/accounts_controller.py:2005
 msgid "Credit To"
 msgstr "crwdns133540:0crwdne133540:0"
 
@@ -13384,12 +13408,12 @@ msgstr "crwdns68688:0crwdne68688:0"
 msgid "Currency and Price List"
 msgstr "crwdns133558:0crwdne133558:0"
 
-#: accounts/doctype/account/account.py:311
+#: accounts/doctype/account/account.py:309
 msgid "Currency can not be changed after making entries using some other currency"
 msgstr "crwdns68708:0crwdne68708:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1434
-#: accounts/doctype/payment_entry/payment_entry.py:1496 accounts/utils.py:2149
+#: accounts/doctype/payment_entry/payment_entry.py:1469
+#: accounts/doctype/payment_entry/payment_entry.py:1531 accounts/utils.py:2151
 msgid "Currency for {0} must be {1}"
 msgstr "crwdns68710:0{0}crwdnd68710:0{1}crwdne68710:0"
 
@@ -14110,7 +14134,7 @@ msgstr "crwdns133650:0crwdne133650:0"
 msgid "Customer Warehouse (Optional)"
 msgstr "crwdns133652:0crwdne133652:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:956
+#: selling/page/point_of_sale/pos_item_cart.js:946
 msgid "Customer contact updated successfully."
 msgstr "crwdns69076:0crwdne69076:0"
 
@@ -14264,7 +14288,7 @@ msgstr "crwdns133668:0crwdne133668:0"
 msgid "Daily"
 msgstr "crwdns69144:0crwdne69144:0"
 
-#: projects/doctype/project/project.py:656
+#: projects/doctype/project/project.py:663
 msgid "Daily Project Summary for {0}"
 msgstr "crwdns69160:0{0}crwdne69160:0"
 
@@ -14358,7 +14382,7 @@ msgstr "crwdns133674:0crwdne133674:0"
 #: accounts/doctype/cashier_closing/cashier_closing.json
 #: accounts/doctype/discounted_invoice/discounted_invoice.json
 #: accounts/doctype/dunning/dunning.json
-#: accounts/doctype/journal_entry/journal_entry.js:582
+#: accounts/doctype/journal_entry/journal_entry.js:584
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/pos_invoice_reference/pos_invoice_reference.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:36
@@ -14624,7 +14648,7 @@ msgstr "crwdns69322:0crwdne69322:0"
 msgid "Debit ({0})"
 msgstr "crwdns69324:0{0}crwdne69324:0"
 
-#: accounts/doctype/journal_entry/journal_entry.js:562
+#: accounts/doctype/journal_entry/journal_entry.js:564
 msgid "Debit Account"
 msgstr "crwdns69326:0crwdne69326:0"
 
@@ -14686,7 +14710,7 @@ msgstr "crwdns133726:0crwdne133726:0"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/doctype/sales_invoice/sales_invoice.py:868
 #: accounts/doctype/sales_invoice/sales_invoice.py:879
-#: controllers/accounts_controller.py:2014
+#: controllers/accounts_controller.py:2005
 msgid "Debit To"
 msgstr "crwdns133728:0crwdne133728:0"
 
@@ -14694,7 +14718,7 @@ msgstr "crwdns133728:0crwdne133728:0"
 msgid "Debit To is required"
 msgstr "crwdns69352:0crwdne69352:0"
 
-#: accounts/general_ledger.py:487
+#: accounts/general_ledger.py:490
 msgid "Debit and Credit not equal for {0} #{1}. Difference is {2}."
 msgstr "crwdns69354:0{0}crwdnd69354:0#{1}crwdnd69354:0{2}crwdne69354:0"
 
@@ -14854,7 +14878,7 @@ msgstr "crwdns69414:0{0}crwdne69414:0"
 msgid "Default BOM for {0} not found"
 msgstr "crwdns69416:0{0}crwdne69416:0"
 
-#: controllers/accounts_controller.py:3334
+#: controllers/accounts_controller.py:3325
 msgid "Default BOM not found for FG Item {0}"
 msgstr "crwdns69418:0{0}crwdne69418:0"
 
@@ -15232,7 +15256,7 @@ msgstr "crwdns133876:0crwdne133876:0"
 #. Label of the default_warehouse (Link) field in DocType 'Stock Settings'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:354
+#: public/js/bom_configurator/bom_configurator.bundle.js:364
 #: stock/doctype/item_default/item_default.json
 #: stock/doctype/stock_entry/stock_entry.json
 #: stock/doctype/stock_reconciliation/stock_reconciliation.json
@@ -15482,7 +15506,7 @@ msgstr "crwdns142926:0crwdne142926:0"
 #. Option for the 'Status' (Select) field in DocType 'Serial No'
 #. Option for the 'Tracking Status' (Select) field in DocType 'Shipment'
 #. Option for the 'Status' (Select) field in DocType 'Stock Reservation Entry'
-#: buying/doctype/purchase_order/purchase_order.js:336
+#: buying/doctype/purchase_order/purchase_order.js:370
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/purchase_order/purchase_order_list.js:19
 #: controllers/website_list_for_contact.py:209
@@ -15859,7 +15883,7 @@ msgstr "crwdns69866:0crwdne69866:0"
 msgid "Depreciation Amount"
 msgstr "crwdns69872:0crwdne69872:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:414
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:450
 msgid "Depreciation Amount during the period"
 msgstr "crwdns69876:0crwdne69876:0"
 
@@ -15873,7 +15897,7 @@ msgstr "crwdns69878:0crwdne69878:0"
 msgid "Depreciation Details"
 msgstr "crwdns133952:0crwdne133952:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:420
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:456
 msgid "Depreciation Eliminated due to disposal of assets"
 msgstr "crwdns69882:0crwdne69882:0"
 
@@ -16387,7 +16411,7 @@ msgstr "crwdns70162:0crwdne70162:0"
 msgid "Difference Amount (Company Currency)"
 msgstr "crwdns133974:0crwdne133974:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:185
+#: accounts/doctype/payment_entry/payment_entry.py:190
 msgid "Difference Amount must be zero"
 msgstr "crwdns70176:0crwdne70176:0"
 
@@ -16624,8 +16648,8 @@ msgid "Disassemble"
 msgstr "crwdns148608:0crwdne148608:0"
 
 #: manufacturing/doctype/work_order/work_order.js:198
-msgid "Disassembly Order"
-msgstr "crwdns148610:0crwdne148610:0"
+msgid "Disassemble Order"
+msgstr "crwdns148862:0crwdne148862:0"
 
 #: accounts/doctype/invoice_discounting/invoice_discounting.js:64
 msgid "Disburse Loan"
@@ -16794,7 +16818,7 @@ msgstr "crwdns134018:0crwdne134018:0"
 msgid "Discount and Margin"
 msgstr "crwdns134020:0crwdne134020:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:791
+#: selling/page/point_of_sale/pos_item_cart.js:781
 msgid "Discount cannot be greater than 100%"
 msgstr "crwdns70408:0crwdne70408:0"
 
@@ -16802,7 +16826,7 @@ msgstr "crwdns70408:0crwdne70408:0"
 msgid "Discount must be less than 100"
 msgstr "crwdns70410:0crwdne70410:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:2631
+#: accounts/doctype/payment_entry/payment_entry.py:3211
 msgid "Discount of {} applied as per Payment Term"
 msgstr "crwdns70412:0crwdne70412:0"
 
@@ -17498,7 +17522,7 @@ msgstr "crwdns70712:0{0}crwdne70712:0"
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 #: accounts/doctype/overdue_payment/overdue_payment.json
-#: accounts/doctype/payment_entry/payment_entry.js:837
+#: accounts/doctype/payment_entry/payment_entry.js:857
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 #: accounts/doctype/payment_schedule/payment_schedule.json
@@ -17724,7 +17748,7 @@ msgstr "crwdns134146:0crwdne134146:0"
 msgid "Earliest"
 msgstr "crwdns70824:0crwdne70824:0"
 
-#: stock/report/stock_balance/stock_balance.py:498
+#: stock/report/stock_balance/stock_balance.py:501
 msgid "Earliest Age"
 msgstr "crwdns70826:0crwdne70826:0"
 
@@ -17738,7 +17762,7 @@ msgstr "crwdns70828:0crwdne70828:0"
 msgid "Edit"
 msgstr "crwdns70830:0crwdne70830:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:671
+#: public/js/bom_configurator/bom_configurator.bundle.js:681
 msgid "Edit BOM"
 msgstr "crwdns134148:0crwdne134148:0"
 
@@ -17791,7 +17815,7 @@ msgstr "crwdns70838:0crwdne70838:0"
 msgid "Edit Receipt"
 msgstr "crwdns70860:0crwdne70860:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:745
+#: selling/page/point_of_sale/pos_item_cart.js:735
 msgid "Editing {0} is not allowed as per POS Profile settings"
 msgstr "crwdns70862:0{0}crwdne70862:0"
 
@@ -17812,8 +17836,8 @@ msgid "Either 'Selling' or 'Buying' must be selected"
 msgstr "crwdns70868:0crwdne70868:0"
 
 #: manufacturing/doctype/bom_creator/bom_creator.js:180
-#: public/js/bom_configurator/bom_configurator.bundle.js:265
-#: public/js/bom_configurator/bom_configurator.bundle.js:468
+#: public/js/bom_configurator/bom_configurator.bundle.js:268
+#: public/js/bom_configurator/bom_configurator.bundle.js:478
 msgid "Either Workstation or Workstation Type is mandatory"
 msgstr "crwdns134154:0crwdne134154:0"
 
@@ -17890,7 +17914,7 @@ msgstr "crwdns112318:0crwdne112318:0"
 #: crm/doctype/prospect_lead/prospect_lead.json
 #: crm/report/lead_details/lead_details.py:41
 #: projects/doctype/project_user/project_user.json
-#: selling/page/point_of_sale/pos_item_cart.js:904
+#: selling/page/point_of_sale/pos_item_cart.js:894
 #: setup/doctype/company/company.json
 msgid "Email"
 msgstr "crwdns70890:0crwdne70890:0"
@@ -18541,11 +18565,11 @@ msgstr "crwdns71186:0crwdne71186:0"
 msgid "Enter an Item Code, the name will be auto-filled the same as Item Code on clicking inside the Item Name field."
 msgstr "crwdns71188:0crwdne71188:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:907
+#: selling/page/point_of_sale/pos_item_cart.js:897
 msgid "Enter customer's email"
 msgstr "crwdns71190:0crwdne71190:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:913
+#: selling/page/point_of_sale/pos_item_cart.js:903
 msgid "Enter customer's phone number"
 msgstr "crwdns71192:0crwdne71192:0"
 
@@ -18659,7 +18683,7 @@ msgstr "crwdns112322:0crwdne112322:0"
 #. Valuation'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 #: accounts/doctype/ledger_merge/ledger_merge.json
-#: accounts/doctype/payment_request/payment_request.py:406
+#: accounts/doctype/payment_request/payment_request.py:433
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 #: manufacturing/doctype/job_card/job_card.py:842
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
@@ -18734,7 +18758,7 @@ msgid "Error: This asset already has {0} depreciation periods booked.\n"
 "\t\t\t\tPlease correct the dates accordingly."
 msgstr "crwdns134268:0{0}crwdnd134268:0{1}crwdne134268:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:925
+#: accounts/doctype/payment_entry/payment_entry.js:945
 msgid "Error: {0} is mandatory field"
 msgstr "crwdns71274:0{0}crwdne71274:0"
 
@@ -18997,8 +19021,7 @@ msgstr "crwdns134308:0crwdne134308:0"
 msgid "Exit Interview Held On"
 msgstr "crwdns134310:0crwdne134310:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:141
-#: public/js/bom_configurator/bom_configurator.bundle.js:184
+#: public/js/bom_configurator/bom_configurator.bundle.js:187
 #: public/js/setup_wizard.js:180
 msgid "Expand All"
 msgstr "crwdns71400:0crwdne71400:0"
@@ -19172,13 +19195,13 @@ msgstr "crwdns134322:0crwdne134322:0"
 msgid "Expense Head"
 msgstr "crwdns134324:0crwdne134324:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:503
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:527
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:547
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:487
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:511
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:531
 msgid "Expense Head Changed"
 msgstr "crwdns71502:0crwdne71502:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:605
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:589
 msgid "Expense account is mandatory for item {0}"
 msgstr "crwdns71504:0{0}crwdne71504:0"
 
@@ -19414,6 +19437,10 @@ msgstr "crwdns71634:0crwdne71634:0"
 #: setup/setup_wizard/setup_wizard.py:42 setup/setup_wizard/setup_wizard.py:43
 msgid "Failed to login"
 msgstr "crwdns71636:0crwdne71636:0"
+
+#: assets/doctype/asset/asset.js:212
+msgid "Failed to post depreciation entries"
+msgstr "crwdns148864:0crwdne148864:0"
 
 #: setup/setup_wizard/setup_wizard.py:30 setup/setup_wizard/setup_wizard.py:31
 msgid "Failed to setup company"
@@ -19655,7 +19682,7 @@ msgstr "crwdns134382:0crwdne134382:0"
 #. Label of the filters (Section Break) field in DocType 'Production Plan'
 #. Label of the filters_section (Section Break) field in DocType 'Closing Stock
 #. Balance'
-#: accounts/doctype/payment_entry/payment_entry.js:900
+#: accounts/doctype/payment_entry/payment_entry.js:920
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: accounts/doctype/pos_profile/pos_profile.json
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
@@ -19816,7 +19843,7 @@ msgstr "crwdns71794:0crwdne71794:0"
 #. Label of the parent_item_code (Link) field in DocType 'Production Plan Sub
 #. Assembly Item'
 #. Label of the finished_good (Link) field in DocType 'Subcontracting BOM'
-#: buying/doctype/purchase_order/purchase_order.js:183
+#: buying/doctype/purchase_order/purchase_order.js:217
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/job_card/job_card.json
@@ -19853,15 +19880,15 @@ msgstr "crwdns71814:0crwdne71814:0"
 msgid "Finished Good Item Quantity"
 msgstr "crwdns134404:0crwdne134404:0"
 
-#: controllers/accounts_controller.py:3320
+#: controllers/accounts_controller.py:3311
 msgid "Finished Good Item is not specified for service item {0}"
 msgstr "crwdns71818:0{0}crwdne71818:0"
 
-#: controllers/accounts_controller.py:3337
+#: controllers/accounts_controller.py:3328
 msgid "Finished Good Item {0} Qty can not be zero"
 msgstr "crwdns71820:0{0}crwdne71820:0"
 
-#: controllers/accounts_controller.py:3331
+#: controllers/accounts_controller.py:3322
 msgid "Finished Good Item {0} must be a sub-contracted item"
 msgstr "crwdns71822:0{0}crwdne71822:0"
 
@@ -19886,8 +19913,8 @@ msgstr "crwdns134410:0crwdne134410:0"
 #. Label of the fg_warehouse (Link) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:397
-#: public/js/bom_configurator/bom_configurator.bundle.js:627
+#: public/js/bom_configurator/bom_configurator.bundle.js:407
+#: public/js/bom_configurator/bom_configurator.bundle.js:637
 msgid "Finished Good Warehouse"
 msgstr "crwdns134412:0crwdne134412:0"
 
@@ -20086,7 +20113,7 @@ msgstr "crwdns71904:0crwdne71904:0"
 #. Capitalization Asset Item'
 #. Label of the fixed_asset_account (Link) field in DocType 'Asset Category
 #. Account'
-#: assets/doctype/asset/asset.py:675
+#: assets/doctype/asset/asset.py:678
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 #: assets/doctype/asset_category_account/asset_category_account.json
 msgid "Fixed Asset Account"
@@ -20240,8 +20267,8 @@ msgstr "crwdns134460:0crwdne134460:0"
 msgid "For Default Supplier (Optional)"
 msgstr "crwdns71954:0crwdne71954:0"
 
-#: manufacturing/doctype/plant_floor/plant_floor.js:159
-#: manufacturing/doctype/plant_floor/plant_floor.js:183
+#: manufacturing/doctype/plant_floor/plant_floor.js:180
+#: manufacturing/doctype/plant_floor/plant_floor.js:204
 msgid "For Item"
 msgstr "crwdns111740:0crwdne111740:0"
 
@@ -20353,7 +20380,7 @@ msgstr "crwdns71998:0{0}crwdnd71998:0{1}crwdne71998:0"
 msgid "For reference"
 msgstr "crwdns134478:0crwdne134478:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1521
+#: accounts/doctype/payment_entry/payment_entry.js:1463
 #: public/js/controllers/accounts.js:182
 msgid "For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included"
 msgstr "crwdns72002:0{0}crwdnd72002:0{1}crwdnd72002:0{2}crwdnd72002:0{3}crwdne72002:0"
@@ -20585,8 +20612,8 @@ msgstr "crwdns134514:0crwdne134514:0"
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 #: accounts/doctype/loyalty_program/loyalty_program.json
-#: accounts/doctype/payment_entry/payment_entry.js:831
-#: accounts/doctype/payment_entry/payment_entry.js:838
+#: accounts/doctype/payment_entry/payment_entry.js:851
+#: accounts/doctype/payment_entry/payment_entry.js:858
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -21373,8 +21400,8 @@ msgstr "crwdns72404:0crwdne72404:0"
 #: accounts/doctype/sales_invoice/sales_invoice.js:259
 #: accounts/doctype/sales_invoice/sales_invoice.js:288
 #: accounts/doctype/sales_invoice/sales_invoice.js:319
-#: buying/doctype/purchase_order/purchase_order.js:532
-#: buying/doctype/purchase_order/purchase_order.js:552
+#: buying/doctype/purchase_order/purchase_order.js:566
+#: buying/doctype/purchase_order/purchase_order.js:586
 #: buying/doctype/request_for_quotation/request_for_quotation.js:335
 #: buying/doctype/request_for_quotation/request_for_quotation.js:357
 #: buying/doctype/request_for_quotation/request_for_quotation.js:402
@@ -21737,8 +21764,8 @@ msgstr "crwdns112372:0crwdne112372:0"
 #: selling/doctype/quotation/quotation.json
 #: selling/doctype/sales_order/sales_order.json
 #: selling/page/point_of_sale/pos_item_cart.js:92
-#: selling/page/point_of_sale/pos_item_cart.js:531
-#: selling/page/point_of_sale/pos_item_cart.js:535
+#: selling/page/point_of_sale/pos_item_cart.js:521
+#: selling/page/point_of_sale/pos_item_cart.js:525
 #: selling/page/point_of_sale/pos_past_order_summary.js:154
 #: selling/page/point_of_sale/pos_payment.js:590
 #: setup/doctype/authorization_rule/authorization_rule.json
@@ -21785,7 +21812,7 @@ msgstr "crwdns134670:0crwdne134670:0"
 msgid "Grant Commission"
 msgstr "crwdns134672:0crwdne134672:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:844
+#: accounts/doctype/payment_entry/payment_entry.js:864
 msgid "Greater Than Amount"
 msgstr "crwdns72570:0crwdne72570:0"
 
@@ -22334,7 +22361,7 @@ msgstr "crwdns134746:0crwdne134746:0"
 msgid "History In Company"
 msgstr "crwdns134748:0crwdne134748:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:316
+#: buying/doctype/purchase_order/purchase_order.js:350
 #: selling/doctype/sales_order/sales_order.js:633
 msgid "Hold"
 msgstr "crwdns72808:0crwdne72808:0"
@@ -22813,7 +22840,7 @@ msgstr "crwdns134846:0crwdne134846:0"
 msgid "If this is unchecked, direct GL entries will be created to book deferred revenue or expense"
 msgstr "crwdns134848:0crwdne134848:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:676
+#: accounts/doctype/payment_entry/payment_entry.py:711
 msgid "If this is undesirable please cancel the corresponding Payment Entry."
 msgstr "crwdns72984:0crwdne72984:0"
 
@@ -23321,7 +23348,7 @@ msgid "In Progress"
 msgstr "crwdns73230:0crwdne73230:0"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:87
-#: stock/report/stock_balance/stock_balance.py:453
+#: stock/report/stock_balance/stock_balance.py:456
 #: stock/report/stock_ledger/stock_ledger.py:236
 msgid "In Qty"
 msgstr "crwdns73250:0crwdne73250:0"
@@ -23353,7 +23380,7 @@ msgstr "crwdns73260:0crwdne73260:0"
 msgid "In Transit Warehouse"
 msgstr "crwdns73262:0crwdne73262:0"
 
-#: stock/report/stock_balance/stock_balance.py:459
+#: stock/report/stock_balance/stock_balance.py:462
 msgid "In Value"
 msgstr "crwdns73264:0crwdne73264:0"
 
@@ -23789,7 +23816,7 @@ msgstr "crwdns73460:0crwdne73460:0"
 msgid "Incorrect Movement Purpose"
 msgstr "crwdns73462:0crwdne73462:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:304
+#: accounts/doctype/payment_entry/payment_entry.py:313
 msgid "Incorrect Payment Type"
 msgstr "crwdns73464:0crwdne73464:0"
 
@@ -24071,8 +24098,8 @@ msgstr "crwdns134984:0crwdne134984:0"
 msgid "Insufficient Capacity"
 msgstr "crwdns73606:0crwdne73606:0"
 
-#: controllers/accounts_controller.py:3252
-#: controllers/accounts_controller.py:3276
+#: controllers/accounts_controller.py:3243
+#: controllers/accounts_controller.py:3267
 msgid "Insufficient Permissions"
 msgstr "crwdns73608:0crwdne73608:0"
 
@@ -24199,7 +24226,7 @@ msgstr "crwdns135016:0crwdne135016:0"
 msgid "Interest"
 msgstr "crwdns135018:0crwdne135018:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:2437
+#: accounts/doctype/payment_entry/payment_entry.py:2847
 msgid "Interest and/or dunning fee"
 msgstr "crwdns73660:0crwdne73660:0"
 
@@ -24289,16 +24316,25 @@ msgstr "crwdns135026:0crwdne135026:0"
 msgid "Invalid"
 msgstr "crwdns73710:0crwdne73710:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:383
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:391
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:367
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:375
 #: accounts/doctype/sales_invoice/sales_invoice.py:874
 #: accounts/doctype/sales_invoice/sales_invoice.py:884
 #: assets/doctype/asset_category/asset_category.py:70
 #: assets/doctype/asset_category/asset_category.py:98
-#: controllers/accounts_controller.py:2658
-#: controllers/accounts_controller.py:2664
+#: controllers/accounts_controller.py:2649
+#: controllers/accounts_controller.py:2655
 msgid "Invalid Account"
 msgstr "crwdns73712:0crwdne73712:0"
+
+#: accounts/doctype/payment_entry/payment_entry.py:352
+#: accounts/doctype/payment_request/payment_request.py:784
+msgid "Invalid Allocated Amount"
+msgstr "crwdns148866:0crwdne148866:0"
+
+#: accounts/doctype/payment_request/payment_request.py:111
+msgid "Invalid Amount"
+msgstr "crwdns148868:0crwdne148868:0"
 
 #: controllers/item_variant.py:128
 msgid "Invalid Attribute"
@@ -24325,7 +24361,7 @@ msgid "Invalid Company for Inter Company Transaction."
 msgstr "crwdns73724:0crwdne73724:0"
 
 #: assets/doctype/asset/asset.py:249 assets/doctype/asset/asset.py:256
-#: controllers/accounts_controller.py:2679
+#: controllers/accounts_controller.py:2670
 msgid "Invalid Cost Center"
 msgstr "crwdns73726:0crwdne73726:0"
 
@@ -24372,7 +24408,7 @@ msgid "Invalid Ledger Entries"
 msgstr "crwdns148796:0crwdne148796:0"
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.py:59
-#: accounts/general_ledger.py:736
+#: accounts/general_ledger.py:739
 msgid "Invalid Opening Entry"
 msgstr "crwdns73746:0crwdne73746:0"
 
@@ -24380,7 +24416,7 @@ msgstr "crwdns73746:0crwdne73746:0"
 msgid "Invalid POS Invoices"
 msgstr "crwdns73748:0crwdne73748:0"
 
-#: accounts/doctype/account/account.py:336
+#: accounts/doctype/account/account.py:350
 msgid "Invalid Parent Account"
 msgstr "crwdns73750:0crwdne73750:0"
 
@@ -24404,11 +24440,11 @@ msgstr "crwdns73758:0crwdne73758:0"
 msgid "Invalid Process Loss Configuration"
 msgstr "crwdns73760:0crwdne73760:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:635
+#: accounts/doctype/payment_entry/payment_entry.py:670
 msgid "Invalid Purchase Invoice"
 msgstr "crwdns73762:0crwdne73762:0"
 
-#: controllers/accounts_controller.py:3289
+#: controllers/accounts_controller.py:3280
 msgid "Invalid Qty"
 msgstr "crwdns73764:0crwdne73764:0"
 
@@ -24464,7 +24500,7 @@ msgstr "crwdns73786:0crwdne73786:0"
 
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:110
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:120
-#: accounts/general_ledger.py:779 accounts/general_ledger.py:789
+#: accounts/general_ledger.py:782 accounts/general_ledger.py:792
 msgid "Invalid value {0} for {1} against account {2}"
 msgstr "crwdns73788:0{0}crwdnd73788:0{1}crwdnd73788:0{2}crwdne73788:0"
 
@@ -25163,8 +25199,8 @@ msgstr "crwdns135160:0crwdne135160:0"
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: manufacturing/doctype/bom_operation/bom_operation.json
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:331
-#: public/js/bom_configurator/bom_configurator.bundle.js:548
+#: public/js/bom_configurator/bom_configurator.bundle.js:341
+#: public/js/bom_configurator/bom_configurator.bundle.js:558
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Is Subcontracted"
 msgstr "crwdns135162:0crwdne135162:0"
@@ -25372,7 +25408,7 @@ msgstr "crwdns74224:0crwdne74224:0"
 #: buying/workspace/buying/buying.json controllers/taxes_and_totals.py:1044
 #: manufacturing/doctype/blanket_order/blanket_order.json
 #: manufacturing/doctype/bom/bom.js:911 manufacturing/doctype/bom/bom.json
-#: manufacturing/doctype/plant_floor/plant_floor.js:81
+#: manufacturing/doctype/plant_floor/plant_floor.js:102
 #: manufacturing/doctype/workstation/workstation_job_card.html:25
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.py:49
 #: manufacturing/report/bom_stock_report/bom_stock_report.html:9
@@ -25382,8 +25418,8 @@ msgstr "crwdns74224:0crwdne74224:0"
 #: manufacturing/report/process_loss_report/process_loss_report.js:15
 #: manufacturing/report/process_loss_report/process_loss_report.py:74
 #: manufacturing/workspace/manufacturing/manufacturing.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:209
-#: public/js/bom_configurator/bom_configurator.bundle.js:424
+#: public/js/bom_configurator/bom_configurator.bundle.js:212
+#: public/js/bom_configurator/bom_configurator.bundle.js:434
 #: public/js/purchase_trends_filters.js:48
 #: public/js/purchase_trends_filters.js:63 public/js/sales_trends_filters.js:23
 #: public/js/sales_trends_filters.js:39 public/js/stock_analytics.js:92
@@ -25422,7 +25458,7 @@ msgstr "crwdns74224:0crwdne74224:0"
 #: stock/report/stock_analytics/stock_analytics.js:15
 #: stock/report/stock_analytics/stock_analytics.py:29
 #: stock/report/stock_balance/stock_balance.js:39
-#: stock/report/stock_balance/stock_balance.py:381
+#: stock/report/stock_balance/stock_balance.py:384
 #: stock/report/stock_ledger/stock_ledger.js:42
 #: stock/report/stock_ledger/stock_ledger.py:206
 #: stock/report/stock_ledger_variance/stock_ledger_variance.js:27
@@ -25709,7 +25745,7 @@ msgstr "crwdns74420:0crwdne74420:0"
 msgid "Item Code cannot be changed for Serial No."
 msgstr "crwdns74422:0crwdne74422:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:458
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:442
 msgid "Item Code required at Row No {0}"
 msgstr "crwdns74424:0{0}crwdne74424:0"
 
@@ -25833,7 +25869,7 @@ msgstr "crwdns111788:0crwdne111788:0"
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: manufacturing/doctype/job_card_item/job_card_item.json
-#: manufacturing/doctype/plant_floor/plant_floor.js:100
+#: manufacturing/doctype/plant_floor/plant_floor.js:121
 #: public/js/purchase_trends_filters.js:49 public/js/sales_trends_filters.js:24
 #: selling/doctype/party_specific_item/party_specific_item.json
 #: selling/doctype/quotation_item/quotation_item.json
@@ -25875,7 +25911,7 @@ msgstr "crwdns111788:0crwdne111788:0"
 #: stock/report/stock_analytics/stock_analytics.js:8
 #: stock/report/stock_analytics/stock_analytics.py:38
 #: stock/report/stock_balance/stock_balance.js:32
-#: stock/report/stock_balance/stock_balance.py:389
+#: stock/report/stock_balance/stock_balance.py:392
 #: stock/report/stock_ledger/stock_ledger.js:53
 #: stock/report/stock_ledger/stock_ledger.py:264
 #: stock/report/stock_projected_qty/stock_projected_qty.js:39
@@ -26097,7 +26133,7 @@ msgstr "crwdns74534:0crwdne74534:0"
 #: stock/report/serial_and_batch_summary/serial_and_batch_summary.py:133
 #: stock/report/stock_ageing/stock_ageing.py:119
 #: stock/report/stock_analytics/stock_analytics.py:31
-#: stock/report/stock_balance/stock_balance.py:387
+#: stock/report/stock_balance/stock_balance.py:390
 #: stock/report/stock_ledger/stock_ledger.py:212
 #: stock/report/stock_projected_qty/stock_projected_qty.py:105
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:32
@@ -26414,7 +26450,7 @@ msgstr "crwdns74804:0crwdne74804:0"
 msgid "Item operation"
 msgstr "crwdns135230:0crwdne135230:0"
 
-#: controllers/accounts_controller.py:3312
+#: controllers/accounts_controller.py:3303
 msgid "Item qty can not be updated as raw materials are already processed."
 msgstr "crwdns74808:0crwdne74808:0"
 
@@ -26675,7 +26711,7 @@ msgstr "crwdns74940:0crwdne74940:0"
 msgid "Items and Pricing"
 msgstr "crwdns74942:0crwdne74942:0"
 
-#: controllers/accounts_controller.py:3536
+#: controllers/accounts_controller.py:3527
 msgid "Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
 msgstr "crwdns74944:0{0}crwdne74944:0"
 
@@ -26891,7 +26927,7 @@ msgstr "crwdns75012:0{0}crwdne75012:0"
 msgid "Job: {0} has been triggered for processing failed transactions"
 msgstr "crwdns75014:0{0}crwdne75014:0"
 
-#: projects/doctype/project/project.py:337
+#: projects/doctype/project/project.py:344
 msgid "Join"
 msgstr "crwdns75016:0crwdne75016:0"
 
@@ -26914,7 +26950,7 @@ msgstr "crwdns112410:0crwdne112410:0"
 msgid "Journal Entries"
 msgstr "crwdns75020:0crwdne75020:0"
 
-#: accounts/utils.py:963
+#: accounts/utils.py:965
 msgid "Journal Entries {0} are un-linked"
 msgstr "crwdns75022:0{0}crwdne75022:0"
 
@@ -26973,7 +27009,7 @@ msgstr "crwdns75046:0crwdne75046:0"
 msgid "Journal Entry Type"
 msgstr "crwdns135254:0crwdne135254:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:520
+#: accounts/doctype/journal_entry/journal_entry.py:525
 msgid "Journal Entry for Asset scrapping cannot be cancelled. Please restore the Asset."
 msgstr "crwdns75050:0crwdne75050:0"
 
@@ -26982,11 +27018,11 @@ msgstr "crwdns75050:0crwdne75050:0"
 msgid "Journal Entry for Scrap"
 msgstr "crwdns135256:0crwdne135256:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:257
+#: accounts/doctype/journal_entry/journal_entry.py:262
 msgid "Journal Entry type should be set as Depreciation Entry for asset depreciation"
 msgstr "crwdns75054:0crwdne75054:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:656
+#: accounts/doctype/journal_entry/journal_entry.py:661
 msgid "Journal Entry {0} does not have account {1} or already matched against other voucher"
 msgstr "crwdns75056:0{0}crwdnd75056:0{1}crwdne75056:0"
 
@@ -27279,7 +27315,7 @@ msgstr "crwdns75140:0crwdne75140:0"
 msgid "Latest"
 msgstr "crwdns75142:0crwdne75142:0"
 
-#: stock/report/stock_balance/stock_balance.py:499
+#: stock/report/stock_balance/stock_balance.py:502
 msgid "Latest Age"
 msgstr "crwdns75144:0crwdne75144:0"
 
@@ -27474,7 +27510,7 @@ msgid "Leave blank to use the standard Delivery Note format"
 msgstr "crwdns135304:0crwdne135304:0"
 
 #: accounts/doctype/journal_entry/journal_entry.js:30
-#: accounts/doctype/payment_entry/payment_entry.js:368
+#: accounts/doctype/payment_entry/payment_entry.js:388
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.js:25
 msgid "Ledger"
 msgstr "crwdns75246:0crwdne75246:0"
@@ -27555,7 +27591,7 @@ msgstr "crwdns75266:0crwdne75266:0"
 msgid "Length (cm)"
 msgstr "crwdns135312:0crwdne135312:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:849
+#: accounts/doctype/payment_entry/payment_entry.js:869
 msgid "Less Than Amount"
 msgstr "crwdns75272:0crwdne75272:0"
 
@@ -27727,7 +27763,7 @@ msgstr "crwdns75418:0crwdne75418:0"
 msgid "Link existing Quality Procedure."
 msgstr "crwdns135344:0crwdne135344:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:571
+#: buying/doctype/purchase_order/purchase_order.js:605
 msgid "Link to Material Request"
 msgstr "crwdns75422:0crwdne75422:0"
 
@@ -28021,7 +28057,7 @@ msgstr "crwdns75554:0crwdne75554:0"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: selling/doctype/customer/customer.json
 #: selling/doctype/sales_order/sales_order.json
-#: selling/page/point_of_sale/pos_item_cart.js:924
+#: selling/page/point_of_sale/pos_item_cart.js:914
 msgid "Loyalty Points"
 msgstr "crwdns75556:0crwdne75556:0"
 
@@ -28054,7 +28090,7 @@ msgstr "crwdns75572:0{0}crwdne75572:0"
 #: accounts/doctype/sales_invoice/sales_invoice.js:1096
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: selling/doctype/customer/customer.json
-#: selling/page/point_of_sale/pos_item_cart.js:917
+#: selling/page/point_of_sale/pos_item_cart.js:907
 #: selling/workspace/selling/selling.json
 msgid "Loyalty Program"
 msgstr "crwdns75574:0crwdne75574:0"
@@ -28469,7 +28505,7 @@ msgstr "crwdns143466:0crwdne143466:0"
 
 #. Label of the reqd (Check) field in DocType 'POS Field'
 #. Label of the reqd (Check) field in DocType 'Inventory Dimension'
-#: accounts/doctype/payment_entry/payment_entry.js:223
+#: accounts/doctype/payment_entry/payment_entry.js:243
 #: accounts/doctype/pos_field/pos_field.json
 #: accounts/doctype/promotional_scheme/promotional_scheme.py:145
 #: buying/doctype/supplier_quotation/supplier_quotation.js:69
@@ -28516,11 +28552,11 @@ msgstr "crwdns135448:0crwdne135448:0"
 msgid "Mandatory Missing"
 msgstr "crwdns75808:0crwdne75808:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:641
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:625
 msgid "Mandatory Purchase Order"
 msgstr "crwdns75810:0crwdne75810:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:662
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:646
 msgid "Mandatory Purchase Receipt"
 msgstr "crwdns75812:0crwdne75812:0"
 
@@ -29008,7 +29044,7 @@ msgstr "crwdns76036:0crwdne76036:0"
 #. Label of the material_request (Link) field in DocType 'Subcontracting Order
 #. Service Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
-#: buying/doctype/purchase_order/purchase_order.js:511
+#: buying/doctype/purchase_order/purchase_order.js:545
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 #: buying/doctype/request_for_quotation/request_for_quotation.js:316
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
@@ -29119,7 +29155,7 @@ msgstr "crwdns135486:0crwdne135486:0"
 msgid "Material Request Type"
 msgstr "crwdns111814:0crwdne111814:0"
 
-#: selling/doctype/sales_order/sales_order.py:1582
+#: selling/doctype/sales_order/sales_order.py:1583
 msgid "Material Request not created, as quantity for Raw Materials already available."
 msgstr "crwdns76118:0crwdne76118:0"
 
@@ -29224,7 +29260,7 @@ msgstr "crwdns135500:0crwdne135500:0"
 msgid "Material Transferred for Subcontract"
 msgstr "crwdns135502:0crwdne135502:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:363
+#: buying/doctype/purchase_order/purchase_order.js:397
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:236
 msgid "Material to Supplier"
 msgstr "crwdns76170:0crwdne76170:0"
@@ -29474,7 +29510,7 @@ msgstr "crwdns76262:0crwdne76262:0"
 msgid "Merged"
 msgstr "crwdns135544:0crwdne135544:0"
 
-#: accounts/doctype/account/account.py:561
+#: accounts/doctype/account/account.py:562
 msgid "Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"
 msgstr "crwdns76266:0crwdne76266:0"
 
@@ -29816,7 +29852,7 @@ msgstr "crwdns76350:0crwdne76350:0"
 
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:69
 #: accounts/doctype/pos_profile/pos_profile.py:168
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:601
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:585
 #: accounts/doctype/sales_invoice/sales_invoice.py:2042
 #: accounts/doctype/sales_invoice/sales_invoice.py:2600
 #: assets/doctype/asset_category/asset_category.py:117
@@ -30253,7 +30289,7 @@ msgstr "crwdns76608:0crwdne76608:0"
 msgid "Move Item"
 msgstr "crwdns76610:0crwdne76610:0"
 
-#: manufacturing/doctype/plant_floor/plant_floor.js:211
+#: manufacturing/doctype/plant_floor/plant_floor.js:232
 msgid "Move Stock"
 msgstr "crwdns111820:0crwdne111820:0"
 
@@ -30566,8 +30602,8 @@ msgstr "crwdns135644:0crwdne135644:0"
 msgid "Net Amount (Company Currency)"
 msgstr "crwdns135646:0crwdne135646:0"
 
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:432
-#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:438
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:468
+#: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:474
 msgid "Net Asset value as on"
 msgstr "crwdns76778:0crwdne76778:0"
 
@@ -30720,8 +30756,8 @@ msgstr "crwdns135652:0crwdne135652:0"
 #: selling/doctype/quotation/quotation.json
 #: selling/doctype/sales_order/sales_order.json
 #: selling/page/point_of_sale/pos_item_cart.js:92
-#: selling/page/point_of_sale/pos_item_cart.js:505
-#: selling/page/point_of_sale/pos_item_cart.js:509
+#: selling/page/point_of_sale/pos_item_cart.js:495
+#: selling/page/point_of_sale/pos_item_cart.js:499
 #: selling/page/point_of_sale/pos_past_order_summary.js:124
 #: stock/doctype/delivery_note/delivery_note.json
 #: stock/doctype/purchase_receipt/purchase_receipt.json
@@ -31020,8 +31056,8 @@ msgstr "crwdns135690:0crwdne135690:0"
 #: accounts/doctype/payment_entry/payment_entry.json
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:638
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:659
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:622
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:643
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: buying/doctype/buying_settings/buying_settings.json
 #: projects/doctype/project/project.json
@@ -31100,9 +31136,9 @@ msgstr "crwdns77044:0crwdne77044:0"
 msgid "No POS Profile found. Please create a New POS Profile first"
 msgstr "crwdns77046:0crwdne77046:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1470
-#: accounts/doctype/journal_entry/journal_entry.py:1530
-#: accounts/doctype/journal_entry/journal_entry.py:1544
+#: accounts/doctype/journal_entry/journal_entry.py:1475
+#: accounts/doctype/journal_entry/journal_entry.py:1535
+#: accounts/doctype/journal_entry/journal_entry.py:1549
 #: stock/doctype/item/item.py:1341
 msgid "No Permission"
 msgstr "crwdns77048:0crwdne77048:0"
@@ -31198,7 +31234,7 @@ msgstr "crwdns77086:0crwdne77086:0"
 msgid "No failed logs"
 msgstr "crwdns111832:0crwdne111832:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1331
+#: accounts/doctype/payment_entry/payment_entry.js:1273
 msgid "No gain or loss in the exchange rate"
 msgstr "crwdns77088:0crwdne77088:0"
 
@@ -31299,7 +31335,7 @@ msgstr "crwdns77126:0crwdne77126:0"
 msgid "No outstanding invoices require exchange rate revaluation"
 msgstr "crwdns77128:0crwdne77128:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1876
+#: accounts/doctype/payment_entry/payment_entry.py:2285
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr "crwdns77130:0{0}crwdnd77130:0{1}crwdnd77130:0{2}crwdne77130:0"
 
@@ -31437,7 +31473,7 @@ msgstr "crwdns135718:0crwdne135718:0"
 msgid "Not Initiated"
 msgstr "crwdns135720:0crwdne135720:0"
 
-#: buying/doctype/purchase_order/purchase_order.py:756
+#: buying/doctype/purchase_order/purchase_order.py:763
 #: templates/pages/material_request_info.py:21 templates/pages/order.py:34
 #: templates/pages/rfq.py:46
 msgid "Not Permitted"
@@ -31502,12 +31538,12 @@ msgstr "crwdns111842:0crwdne111842:0"
 msgid "Not in stock"
 msgstr "crwdns77214:0crwdne77214:0"
 
-#: buying/doctype/purchase_order/purchase_order.py:677
+#: buying/doctype/purchase_order/purchase_order.py:684
 #: manufacturing/doctype/work_order/work_order.py:1320
 #: manufacturing/doctype/work_order/work_order.py:1460
 #: manufacturing/doctype/work_order/work_order.py:1527
 #: selling/doctype/sales_order/sales_order.py:791
-#: selling/doctype/sales_order/sales_order.py:1568
+#: selling/doctype/sales_order/sales_order.py:1569
 msgid "Not permitted"
 msgstr "crwdns77216:0crwdne77216:0"
 
@@ -31560,7 +31596,7 @@ msgstr "crwdns77236:0crwdne77236:0"
 msgid "Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 msgstr "crwdns77238:0{0}crwdne77238:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:961
+#: accounts/doctype/journal_entry/journal_entry.py:966
 msgid "Note: {0}"
 msgstr "crwdns77240:0{0}crwdne77240:0"
 
@@ -31990,7 +32026,7 @@ msgstr "crwdns135802:0crwdne135802:0"
 msgid "Only Include Allocated Payments"
 msgstr "crwdns135804:0crwdne135804:0"
 
-#: accounts/doctype/account/account.py:134
+#: accounts/doctype/account/account.py:132
 msgid "Only Parent can be of type {0}"
 msgstr "crwdns77444:0{0}crwdne77444:0"
 
@@ -32258,7 +32294,7 @@ msgstr "crwdns135830:0crwdne135830:0"
 msgid "Opening Entry"
 msgstr "crwdns135832:0crwdne135832:0"
 
-#: accounts/general_ledger.py:735
+#: accounts/general_ledger.py:738
 msgid "Opening Entry can not be created after Period Closing Voucher is created."
 msgstr "crwdns77568:0crwdne77568:0"
 
@@ -32284,7 +32320,7 @@ msgstr "crwdns77576:0crwdne77576:0"
 msgid "Opening Invoice Item"
 msgstr "crwdns77578:0crwdne77578:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1541
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1525
 #: accounts/doctype/sales_invoice/sales_invoice.py:1632
 msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
 msgstr "crwdns148804:0{0}crwdnd148804:0{1}crwdnd148804:0{2}crwdnd148804:0{3}crwdne148804:0"
@@ -32311,7 +32347,7 @@ msgid "Opening Purchase Invoices have been created."
 msgstr "crwdns148806:0crwdne148806:0"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
-#: stock/report/stock_balance/stock_balance.py:439
+#: stock/report/stock_balance/stock_balance.py:442
 msgid "Opening Qty"
 msgstr "crwdns77582:0crwdne77582:0"
 
@@ -32331,7 +32367,7 @@ msgstr "crwdns77584:0crwdne77584:0"
 msgid "Opening Time"
 msgstr "crwdns135836:0crwdne135836:0"
 
-#: stock/report/stock_balance/stock_balance.py:446
+#: stock/report/stock_balance/stock_balance.py:449
 msgid "Opening Value"
 msgstr "crwdns77592:0crwdne77592:0"
 
@@ -32414,8 +32450,8 @@ msgstr "crwdns135844:0crwdne135844:0"
 #: manufacturing/report/job_card_summary/job_card_summary.js:78
 #: manufacturing/report/job_card_summary/job_card_summary.py:167
 #: manufacturing/workspace/manufacturing/manufacturing.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:318
-#: public/js/bom_configurator/bom_configurator.bundle.js:535
+#: public/js/bom_configurator/bom_configurator.bundle.js:328
+#: public/js/bom_configurator/bom_configurator.bundle.js:545
 msgid "Operation"
 msgstr "crwdns77616:0crwdne77616:0"
 
@@ -32471,8 +32507,8 @@ msgstr "crwdns135858:0crwdne135858:0"
 #: manufacturing/doctype/bom_operation/bom_operation.json
 #: manufacturing/doctype/bom_website_operation/bom_website_operation.json
 #: manufacturing/doctype/sub_operation/sub_operation.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:325
-#: public/js/bom_configurator/bom_configurator.bundle.js:542
+#: public/js/bom_configurator/bom_configurator.bundle.js:335
+#: public/js/bom_configurator/bom_configurator.bundle.js:552
 msgid "Operation Time"
 msgstr "crwdns135860:0crwdne135860:0"
 
@@ -32946,12 +32982,12 @@ msgid "Ounce/Gallon (US)"
 msgstr "crwdns112546:0crwdne112546:0"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:88
-#: stock/report/stock_balance/stock_balance.py:461
+#: stock/report/stock_balance/stock_balance.py:464
 #: stock/report/stock_ledger/stock_ledger.py:243
 msgid "Out Qty"
 msgstr "crwdns77862:0crwdne77862:0"
 
-#: stock/report/stock_balance/stock_balance.py:467
+#: stock/report/stock_balance/stock_balance.py:470
 msgid "Out Value"
 msgstr "crwdns77864:0crwdne77864:0"
 
@@ -33020,6 +33056,8 @@ msgstr "crwdns135910:0crwdne135910:0"
 #. Creation Tool Item'
 #. Label of the outstanding_amount (Currency) field in DocType 'Payment
 #. Reconciliation Invoice'
+#. Label of the outstanding_amount (Currency) field in DocType 'Payment
+#. Request'
 #. Label of the outstanding_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the outstanding_amount (Currency) field in DocType 'Purchase
 #. Invoice'
@@ -33027,8 +33065,9 @@ msgstr "crwdns135910:0crwdne135910:0"
 #: accounts/doctype/cashier_closing/cashier_closing.json
 #: accounts/doctype/discounted_invoice/discounted_invoice.json
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
-#: accounts/doctype/payment_entry/payment_entry.js:841
+#: accounts/doctype/payment_entry/payment_entry.js:861
 #: accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
+#: accounts/doctype/payment_request/payment_request.json
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:180
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -33620,7 +33659,7 @@ msgstr "crwdns135972:0crwdne135972:0"
 msgid "Paid Amount After Tax (Company Currency)"
 msgstr "crwdns135974:0crwdne135974:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1101
+#: accounts/doctype/payment_entry/payment_entry.py:1805
 msgid "Paid Amount cannot be greater than total negative outstanding amount {0}"
 msgstr "crwdns78240:0{0}crwdne78240:0"
 
@@ -34059,12 +34098,15 @@ msgstr "crwdns78408:0crwdne78408:0"
 msgid "Party Account"
 msgstr "crwdns78442:0crwdne78442:0"
 
+#. Label of the party_account_currency (Link) field in DocType 'Payment
+#. Request'
 #. Label of the party_account_currency (Link) field in DocType 'POS Invoice'
 #. Label of the party_account_currency (Link) field in DocType 'Purchase
 #. Invoice'
 #. Label of the party_account_currency (Link) field in DocType 'Sales Invoice'
 #. Label of the party_account_currency (Link) field in DocType 'Purchase Order'
 #. Label of the party_account_currency (Link) field in DocType 'Sales Order'
+#: accounts/doctype/payment_request/payment_request.json
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: accounts/doctype/sales_invoice/sales_invoice.json
@@ -34079,7 +34121,7 @@ msgstr "crwdns136066:0crwdne136066:0"
 msgid "Party Account No. (Bank Statement)"
 msgstr "crwdns136068:0crwdne136068:0"
 
-#: controllers/accounts_controller.py:2106
+#: controllers/accounts_controller.py:2097
 msgid "Party Account {0} currency ({1}) and document currency ({2}) should be same"
 msgstr "crwdns78456:0{0}crwdnd78456:0{1}crwdnd78456:0{2}crwdne78456:0"
 
@@ -34212,7 +34254,7 @@ msgstr "crwdns78526:0{0}crwdne78526:0"
 msgid "Party Type and Party is required for Receivable / Payable account {0}"
 msgstr "crwdns78528:0{0}crwdne78528:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:443
+#: accounts/doctype/payment_entry/payment_entry.py:475
 msgid "Party Type is mandatory"
 msgstr "crwdns78530:0crwdne78530:0"
 
@@ -34221,11 +34263,11 @@ msgstr "crwdns78530:0crwdne78530:0"
 msgid "Party User"
 msgstr "crwdns136084:0crwdne136084:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:423
+#: accounts/doctype/payment_entry/payment_entry.js:443
 msgid "Party can only be one of {0}"
 msgstr "crwdns78534:0{0}crwdne78534:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:446
+#: accounts/doctype/payment_entry/payment_entry.py:478
 msgid "Party is mandatory"
 msgstr "crwdns78536:0crwdne78536:0"
 
@@ -34341,7 +34383,7 @@ msgstr "crwdns136100:0crwdne136100:0"
 #: accounts/doctype/sales_invoice/sales_invoice.js:84
 #: accounts/doctype/sales_invoice/sales_invoice_dashboard.py:25
 #: accounts/doctype/sales_invoice/sales_invoice_list.js:39
-#: buying/doctype/purchase_order/purchase_order.js:392
+#: buying/doctype/purchase_order/purchase_order.js:426
 #: buying/doctype/purchase_order/purchase_order_dashboard.py:20
 #: selling/doctype/sales_order/sales_order.js:784
 #: selling/doctype/sales_order/sales_order_dashboard.py:28
@@ -34417,7 +34459,7 @@ msgstr "crwdns78612:0crwdne78612:0"
 msgid "Payment Entries"
 msgstr "crwdns136110:0crwdne136110:0"
 
-#: accounts/utils.py:1030
+#: accounts/utils.py:1032
 msgid "Payment Entries {0} are un-linked"
 msgstr "crwdns78622:0{0}crwdne78622:0"
 
@@ -34461,7 +34503,7 @@ msgstr "crwdns78636:0crwdne78636:0"
 msgid "Payment Entry Reference"
 msgstr "crwdns78638:0crwdne78638:0"
 
-#: accounts/doctype/payment_request/payment_request.py:406
+#: accounts/doctype/payment_request/payment_request.py:433
 msgid "Payment Entry already exists"
 msgstr "crwdns78640:0crwdne78640:0"
 
@@ -34469,9 +34511,9 @@ msgstr "crwdns78640:0crwdne78640:0"
 msgid "Payment Entry has been modified after you pulled it. Please pull it again."
 msgstr "crwdns78642:0crwdne78642:0"
 
-#: accounts/doctype/payment_request/payment_request.py:112
-#: accounts/doctype/payment_request/payment_request.py:453
-#: accounts/doctype/payment_request/payment_request.py:577
+#: accounts/doctype/payment_request/payment_request.py:122
+#: accounts/doctype/payment_request/payment_request.py:544
+#: accounts/doctype/payment_request/payment_request.py:681
 msgid "Payment Entry is already created"
 msgstr "crwdns78644:0crwdne78644:0"
 
@@ -34511,7 +34553,7 @@ msgstr "crwdns136114:0crwdne136114:0"
 msgid "Payment Gateway Account"
 msgstr "crwdns78660:0crwdne78660:0"
 
-#: accounts/utils.py:1273
+#: accounts/utils.py:1275
 msgid "Payment Gateway Account not created, please create one manually."
 msgstr "crwdns78666:0crwdne78666:0"
 
@@ -34665,6 +34707,8 @@ msgstr "crwdns136134:0crwdne136134:0"
 
 #. Label of the payment_request_settings (Tab Break) field in DocType 'Accounts
 #. Settings'
+#. Label of the payment_request (Link) field in DocType 'Payment Entry
+#. Reference'
 #. Option for the 'Payment Order Type' (Select) field in DocType 'Payment
 #. Order'
 #. Label of the payment_request (Link) field in DocType 'Payment Order
@@ -34672,6 +34716,8 @@ msgstr "crwdns136134:0crwdne136134:0"
 #. Name of a DocType
 #. Label of a Link in the Receivables Workspace
 #: accounts/doctype/accounts_settings/accounts_settings.json
+#: accounts/doctype/payment_entry/payment_entry.js:1668
+#: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: accounts/doctype/payment_order/payment_order.js:19
 #: accounts/doctype/payment_order/payment_order.json
 #: accounts/doctype/payment_order_reference/payment_order_reference.json
@@ -34679,10 +34725,16 @@ msgstr "crwdns136134:0crwdne136134:0"
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:124
 #: accounts/doctype/sales_invoice/sales_invoice.js:122
 #: accounts/workspace/receivables/receivables.json
-#: buying/doctype/purchase_order/purchase_order.js:400
+#: buying/doctype/purchase_order/purchase_order.js:434
 #: selling/doctype/sales_order/sales_order.js:777
 msgid "Payment Request"
 msgstr "crwdns78732:0crwdne78732:0"
+
+#. Label of the payment_request_outstanding (Float) field in DocType 'Payment
+#. Entry Reference'
+#: accounts/doctype/payment_entry_reference/payment_entry_reference.json
+msgid "Payment Request Outstanding"
+msgstr "crwdns148870:0crwdne148870:0"
 
 #. Label of the payment_request_type (Select) field in DocType 'Payment
 #. Request'
@@ -34696,15 +34748,19 @@ msgstr "crwdns136136:0crwdne136136:0"
 msgid "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state."
 msgstr "crwdns143196:0crwdne143196:0"
 
-#: accounts/doctype/payment_request/payment_request.py:500
+#: accounts/doctype/payment_request/payment_request.py:603
 msgid "Payment Request for {0}"
 msgstr "crwdns78742:0{0}crwdne78742:0"
+
+#: accounts/doctype/payment_request/payment_request.py:569
+msgid "Payment Request is already created"
+msgstr "crwdns148872:0crwdne148872:0"
 
 #: accounts/doctype/pos_invoice/pos_invoice.js:289
 msgid "Payment Request took too long to respond. Please try requesting for payment again."
 msgstr "crwdns78744:0crwdne78744:0"
 
-#: accounts/doctype/payment_request/payment_request.py:446
+#: accounts/doctype/payment_request/payment_request.py:537
 msgid "Payment Requests cannot be created against: {0}"
 msgstr "crwdns104630:0{0}crwdne104630:0"
 
@@ -34750,6 +34806,12 @@ msgstr "crwdns78764:0crwdne78764:0"
 #: accounts/doctype/payment_term/payment_term.json
 msgid "Payment Term Name"
 msgstr "crwdns136138:0crwdne136138:0"
+
+#. Label of the payment_term_outstanding (Float) field in DocType 'Payment
+#. Entry Reference'
+#: accounts/doctype/payment_entry_reference/payment_entry_reference.json
+msgid "Payment Term Outstanding"
+msgstr "crwdns148874:0crwdne148874:0"
 
 #. Label of the terms (Table) field in DocType 'Payment Terms Template'
 #. Label of the payment_schedule_section (Section Break) field in DocType 'POS
@@ -34830,7 +34892,7 @@ msgstr "crwdns148618:0crwdne148618:0"
 msgid "Payment Type"
 msgstr "crwdns78816:0crwdne78816:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:531
+#: accounts/doctype/payment_entry/payment_entry.py:566
 msgid "Payment Type must be one of Receive, Pay and Internal Transfer"
 msgstr "crwdns78820:0crwdne78820:0"
 
@@ -34839,11 +34901,11 @@ msgstr "crwdns78820:0crwdne78820:0"
 msgid "Payment URL"
 msgstr "crwdns148816:0crwdne148816:0"
 
-#: accounts/utils.py:1022
+#: accounts/utils.py:1024
 msgid "Payment Unlink Error"
 msgstr "crwdns78822:0crwdne78822:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:829
+#: accounts/doctype/journal_entry/journal_entry.py:834
 msgid "Payment against {0} {1} cannot be greater than Outstanding Amount {2}"
 msgstr "crwdns78824:0{0}crwdnd78824:0{1}crwdnd78824:0{2}crwdne78824:0"
 
@@ -34872,7 +34934,7 @@ msgstr "crwdns78834:0{0}crwdne78834:0"
 msgid "Payment request failed"
 msgstr "crwdns78836:0crwdne78836:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:751
+#: accounts/doctype/payment_entry/payment_entry.py:786
 msgid "Payment term {0} not used in {1}"
 msgstr "crwdns78838:0{0}crwdnd78838:0{1}crwdne78838:0"
 
@@ -35133,7 +35195,7 @@ msgstr "crwdns78952:0crwdne78952:0"
 msgid "Period Based On"
 msgstr "crwdns78954:0crwdne78954:0"
 
-#: accounts/general_ledger.py:747
+#: accounts/general_ledger.py:750
 msgid "Period Closed"
 msgstr "crwdns78956:0crwdne78956:0"
 
@@ -35302,7 +35364,7 @@ msgstr "crwdns136196:0crwdne136196:0"
 
 #. Label of the customer_phone_number (Data) field in DocType 'Appointment'
 #: crm/doctype/appointment/appointment.json
-#: selling/page/point_of_sale/pos_item_cart.js:911
+#: selling/page/point_of_sale/pos_item_cart.js:901
 msgid "Phone Number"
 msgstr "crwdns79038:0crwdne79038:0"
 
@@ -35648,7 +35710,7 @@ msgstr "crwdns127838:0crwdne127838:0"
 msgid "Please Set Supplier Group in Buying Settings."
 msgstr "crwdns79182:0crwdne79182:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1339
+#: accounts/doctype/payment_entry/payment_entry.js:1281
 msgid "Please Specify Account"
 msgstr "crwdns79184:0crwdne79184:0"
 
@@ -35684,7 +35746,7 @@ msgstr "crwdns79198:0crwdne79198:0"
 msgid "Please add the account to root level Company - {0}"
 msgstr "crwdns79200:0{0}crwdne79200:0"
 
-#: accounts/doctype/account/account.py:231
+#: accounts/doctype/account/account.py:229
 msgid "Please add the account to root level Company - {}"
 msgstr "crwdns79202:0crwdne79202:0"
 
@@ -35704,7 +35766,7 @@ msgstr "crwdns79208:0crwdne79208:0"
 msgid "Please cancel and amend the Payment Entry"
 msgstr "crwdns79210:0crwdne79210:0"
 
-#: accounts/utils.py:1021
+#: accounts/utils.py:1023
 msgid "Please cancel payment entry manually first"
 msgstr "crwdns79212:0crwdne79212:0"
 
@@ -35713,7 +35775,7 @@ msgstr "crwdns79212:0crwdne79212:0"
 msgid "Please cancel related transaction."
 msgstr "crwdns79214:0crwdne79214:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:903
+#: accounts/doctype/journal_entry/journal_entry.py:908
 msgid "Please check Multi Currency option to allow accounts with other currency"
 msgstr "crwdns79216:0crwdne79216:0"
 
@@ -35761,7 +35823,7 @@ msgstr "crwdns79238:0crwdne79238:0"
 msgid "Please contact your administrator to extend the credit limits for {0}."
 msgstr "crwdns79240:0{0}crwdne79240:0"
 
-#: accounts/doctype/account/account.py:333
+#: accounts/doctype/account/account.py:347
 msgid "Please convert the parent account in corresponding child company to a group account."
 msgstr "crwdns79242:0crwdne79242:0"
 
@@ -35827,11 +35889,11 @@ msgstr "crwdns79266:0{0}crwdnd79266:0{1}crwdne79266:0"
 msgid "Please enable {} in {} to allow same item in multiple rows"
 msgstr "crwdns79268:0crwdne79268:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:380
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:364
 msgid "Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
 msgstr "crwdns143494:0{0}crwdne143494:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:388
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:372
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
 msgstr "crwdns143496:0{0}crwdnd143496:0{1}crwdne143496:0"
 
@@ -35909,7 +35971,7 @@ msgstr "crwdns79306:0crwdne79306:0"
 msgid "Please enter Receipt Document"
 msgstr "crwdns79308:0crwdne79308:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:967
+#: accounts/doctype/journal_entry/journal_entry.py:972
 msgid "Please enter Reference date"
 msgstr "crwdns79310:0crwdne79310:0"
 
@@ -35937,7 +35999,7 @@ msgstr "crwdns79318:0crwdne79318:0"
 msgid "Please enter Warehouse and Date"
 msgstr "crwdns79320:0crwdne79320:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:666
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:650
 #: accounts/doctype/sales_invoice/sales_invoice.py:1039
 msgid "Please enter Write Off Account"
 msgstr "crwdns79324:0crwdne79324:0"
@@ -35950,7 +36012,7 @@ msgstr "crwdns79326:0crwdne79326:0"
 msgid "Please enter company name first"
 msgstr "crwdns79328:0crwdne79328:0"
 
-#: controllers/accounts_controller.py:2518
+#: controllers/accounts_controller.py:2509
 msgid "Please enter default currency in Company Master"
 msgstr "crwdns79330:0crwdne79330:0"
 
@@ -36046,7 +36108,7 @@ msgstr "crwdns79370:0crwdne79370:0"
 msgid "Please mention 'Weight UOM' along with Weight."
 msgstr "crwdns79372:0crwdne79372:0"
 
-#: accounts/general_ledger.py:599 accounts/general_ledger.py:606
+#: accounts/general_ledger.py:602 accounts/general_ledger.py:609
 msgid "Please mention '{0}' in Company: {1}"
 msgstr "crwdns148818:0{0}crwdnd148818:0{1}crwdne148818:0"
 
@@ -36088,7 +36150,7 @@ msgstr "crwdns79392:0crwdne79392:0"
 msgid "Please select Apply Discount On"
 msgstr "crwdns79394:0crwdne79394:0"
 
-#: selling/doctype/sales_order/sales_order.py:1533
+#: selling/doctype/sales_order/sales_order.py:1534
 msgid "Please select BOM against item {0}"
 msgstr "crwdns79396:0{0}crwdne79396:0"
 
@@ -36108,12 +36170,12 @@ msgstr "crwdns136256:0crwdne136256:0"
 msgid "Please select Category first"
 msgstr "crwdns79402:0crwdne79402:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1473
+#: accounts/doctype/payment_entry/payment_entry.js:1415
 #: public/js/controllers/accounts.js:86 public/js/controllers/accounts.js:124
 msgid "Please select Charge Type first"
 msgstr "crwdns79404:0crwdne79404:0"
 
-#: accounts/doctype/journal_entry/journal_entry.js:419
+#: accounts/doctype/journal_entry/journal_entry.js:421
 msgid "Please select Company"
 msgstr "crwdns79406:0crwdne79406:0"
 
@@ -36122,8 +36184,8 @@ msgstr "crwdns79406:0crwdne79406:0"
 msgid "Please select Company and Posting Date to getting entries"
 msgstr "crwdns79408:0crwdne79408:0"
 
-#: accounts/doctype/journal_entry/journal_entry.js:667
-#: manufacturing/doctype/plant_floor/plant_floor.js:12
+#: accounts/doctype/journal_entry/journal_entry.js:669
+#: manufacturing/doctype/plant_floor/plant_floor.js:28
 msgid "Please select Company first"
 msgstr "crwdns79410:0crwdne79410:0"
 
@@ -36160,11 +36222,11 @@ msgstr "crwdns79422:0crwdne79422:0"
 msgid "Please select Party Type first"
 msgstr "crwdns79424:0crwdne79424:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:468
+#: accounts/doctype/payment_entry/payment_entry.js:488
 msgid "Please select Posting Date before selecting Party"
 msgstr "crwdns79426:0crwdne79426:0"
 
-#: accounts/doctype/journal_entry/journal_entry.js:668
+#: accounts/doctype/journal_entry/journal_entry.js:670
 msgid "Please select Posting Date first"
 msgstr "crwdns79428:0crwdne79428:0"
 
@@ -36172,7 +36234,7 @@ msgstr "crwdns79428:0crwdne79428:0"
 msgid "Please select Price List"
 msgstr "crwdns79430:0crwdne79430:0"
 
-#: selling/doctype/sales_order/sales_order.py:1535
+#: selling/doctype/sales_order/sales_order.py:1536
 msgid "Please select Qty against item {0}"
 msgstr "crwdns79432:0{0}crwdne79432:0"
 
@@ -36192,7 +36254,7 @@ msgstr "crwdns79438:0{0}crwdne79438:0"
 msgid "Please select Subcontracting Order instead of Purchase Order {0}"
 msgstr "crwdns79440:0{0}crwdne79440:0"
 
-#: controllers/accounts_controller.py:2414
+#: controllers/accounts_controller.py:2405
 msgid "Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}"
 msgstr "crwdns79442:0{0}crwdne79442:0"
 
@@ -36204,7 +36266,7 @@ msgstr "crwdns79444:0crwdne79444:0"
 msgid "Please select a Company"
 msgstr "crwdns79446:0crwdne79446:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:223
+#: accounts/doctype/payment_entry/payment_entry.js:243
 #: manufacturing/doctype/bom/bom.js:570 manufacturing/doctype/bom/bom.py:245
 #: public/js/controllers/accounts.js:249
 #: public/js/controllers/transaction.js:2637
@@ -36255,7 +36317,7 @@ msgstr "crwdns79466:0crwdne79466:0"
 msgid "Please select a default mode of payment"
 msgstr "crwdns79468:0crwdne79468:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:783
+#: selling/page/point_of_sale/pos_item_cart.js:773
 msgid "Please select a field to edit from numpad"
 msgstr "crwdns79470:0crwdne79470:0"
 
@@ -36283,7 +36345,7 @@ msgstr "crwdns79480:0{0}crwdnd79480:0{1}crwdne79480:0"
 msgid "Please select an item code before setting the warehouse."
 msgstr "crwdns142838:0crwdne142838:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1604
+#: accounts/doctype/journal_entry/journal_entry.py:1609
 msgid "Please select correct account"
 msgstr "crwdns79482:0crwdne79482:0"
 
@@ -36356,7 +36418,7 @@ msgstr "crwdns79506:0crwdne79506:0"
 msgid "Please select {0}"
 msgstr "crwdns79508:0{0}crwdne79508:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1244
+#: accounts/doctype/payment_entry/payment_entry.js:1186
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:578
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.py:82
 msgid "Please select {0} first"
@@ -36374,7 +36436,7 @@ msgstr "crwdns79514:0{0}crwdne79514:0"
 msgid "Please set 'Gain/Loss Account on Asset Disposal' in Company {0}"
 msgstr "crwdns79516:0{0}crwdne79516:0"
 
-#: accounts/general_ledger.py:511
+#: accounts/general_ledger.py:514
 msgid "Please set '{0}' in Company: {1}"
 msgstr "crwdns148820:0{0}crwdnd148820:0{1}crwdne148820:0"
 
@@ -36426,7 +36488,7 @@ msgstr "crwdns79530:0%scrwdne79530:0"
 msgid "Please set Fiscal Code for the public administration '%s'"
 msgstr "crwdns79532:0%scrwdne79532:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:598
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:582
 msgid "Please set Fixed Asset Account in {} against {}."
 msgstr "crwdns79534:0crwdne79534:0"
 
@@ -36468,11 +36530,11 @@ msgstr "crwdns79548:0crwdne79548:0"
 msgid "Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
 msgstr "crwdns79550:0crwdne79550:0"
 
-#: selling/doctype/sales_order/sales_order.py:1325
+#: selling/doctype/sales_order/sales_order.py:1326
 msgid "Please set a Supplier against the Items to be considered in the Purchase Order."
 msgstr "crwdns79552:0crwdne79552:0"
 
-#: projects/doctype/project/project.py:735
+#: projects/doctype/project/project.py:742
 msgid "Please set a default Holiday List for Company {0}"
 msgstr "crwdns79554:0{0}crwdne79554:0"
 
@@ -36480,7 +36542,7 @@ msgstr "crwdns79554:0{0}crwdne79554:0"
 msgid "Please set a default Holiday List for Employee {0} or Company {1}"
 msgstr "crwdns79556:0{0}crwdnd79556:0{1}crwdne79556:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1090
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1074
 msgid "Please set account in Warehouse {0}"
 msgstr "crwdns79558:0{0}crwdne79558:0"
 
@@ -36517,7 +36579,7 @@ msgstr "crwdns79570:0crwdne79570:0"
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
 msgstr "crwdns79572:0crwdne79572:0"
 
-#: accounts/utils.py:2144
+#: accounts/utils.py:2146
 msgid "Please set default Exchange Gain/Loss Account in Company {}"
 msgstr "crwdns79574:0crwdne79574:0"
 
@@ -36533,7 +36595,7 @@ msgstr "crwdns79578:0crwdne79578:0"
 msgid "Please set default cost of goods sold account in company {0} for booking rounding gain and loss during stock transfer"
 msgstr "crwdns79580:0{0}crwdne79580:0"
 
-#: accounts/utils.py:1039
+#: accounts/utils.py:1041
 msgid "Please set default {0} in Company {1}"
 msgstr "crwdns79582:0{0}crwdnd79582:0{1}crwdne79582:0"
 
@@ -36550,7 +36612,7 @@ msgstr "crwdns79586:0crwdne79586:0"
 msgid "Please set filters"
 msgstr "crwdns79588:0crwdne79588:0"
 
-#: controllers/accounts_controller.py:2022
+#: controllers/accounts_controller.py:2013
 msgid "Please set one of the following:"
 msgstr "crwdns79590:0crwdne79590:0"
 
@@ -36621,8 +36683,8 @@ msgstr "crwdns79620:0crwdne79620:0"
 msgid "Please specify Company to proceed"
 msgstr "crwdns79622:0crwdne79622:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1496
-#: controllers/accounts_controller.py:2638 public/js/controllers/accounts.js:97
+#: accounts/doctype/payment_entry/payment_entry.js:1438
+#: controllers/accounts_controller.py:2629 public/js/controllers/accounts.js:97
 msgid "Please specify a valid Row ID for row {0} in table {1}"
 msgstr "crwdns79624:0{0}crwdnd79624:0{1}crwdne79624:0"
 
@@ -36798,7 +36860,7 @@ msgstr "crwdns79678:0crwdne79678:0"
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
-#: accounts/doctype/payment_entry/payment_entry.js:828
+#: accounts/doctype/payment_entry/payment_entry.js:848
 #: accounts/doctype/payment_entry/payment_entry.json
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 #: accounts/doctype/payment_order/payment_order.json
@@ -38391,7 +38453,7 @@ msgstr "crwdns80480:0crwdne80480:0"
 msgid "Project"
 msgstr "crwdns80482:0crwdne80482:0"
 
-#: projects/doctype/project/project.py:349
+#: projects/doctype/project/project.py:356
 msgid "Project Collaboration Invitation"
 msgstr "crwdns80580:0crwdne80580:0"
 
@@ -38432,7 +38494,7 @@ msgstr "crwdns80596:0crwdne80596:0"
 msgid "Project Summary"
 msgstr "crwdns80600:0crwdne80600:0"
 
-#: projects/doctype/project/project.py:650
+#: projects/doctype/project/project.py:657
 msgid "Project Summary for {0}"
 msgstr "crwdns80602:0{0}crwdne80602:0"
 
@@ -38545,7 +38607,7 @@ msgstr "crwdns80658:0crwdne80658:0"
 
 #. Name of a Workspace
 #. Label of a Card Break in the Projects Workspace
-#: config/projects.py:7 projects/doctype/project/project.py:427
+#: config/projects.py:7 projects/doctype/project/project.py:434
 #: projects/workspace/projects/projects.json
 #: selling/doctype/customer/customer_dashboard.py:26
 #: selling/doctype/sales_order/sales_order_dashboard.py:25
@@ -38817,7 +38879,7 @@ msgstr "crwdns136430:0crwdne136430:0"
 #: accounts/workspace/accounting/accounting.json
 #: accounts/workspace/payables/payables.json assets/doctype/asset/asset.json
 #: assets/doctype/asset_repair/asset_repair.json
-#: buying/doctype/purchase_order/purchase_order.js:383
+#: buying/doctype/purchase_order/purchase_order.js:417
 #: buying/doctype/purchase_order/purchase_order_list.js:57
 #: buying/doctype/supplier_quotation/supplier_quotation_list.js:18
 #: buying/workspace/buying/buying.json crm/doctype/contract/contract.json
@@ -38868,7 +38930,7 @@ msgstr "crwdns80802:0{0}crwdne80802:0"
 msgid "Purchase Invoice {0} is already submitted"
 msgstr "crwdns80804:0{0}crwdne80804:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1917
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1901
 msgid "Purchase Invoices"
 msgstr "crwdns80806:0crwdne80806:0"
 
@@ -39018,11 +39080,11 @@ msgstr "crwdns80872:0crwdne80872:0"
 msgid "Purchase Order Pricing Rule"
 msgstr "crwdns136432:0crwdne136432:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:637
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:621
 msgid "Purchase Order Required"
 msgstr "crwdns80876:0crwdne80876:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:632
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:616
 msgid "Purchase Order Required for item {}"
 msgstr "crwdns80878:0crwdne80878:0"
 
@@ -39042,11 +39104,11 @@ msgstr "crwdns80882:0crwdne80882:0"
 msgid "Purchase Order number required for Item {0}"
 msgstr "crwdns80884:0{0}crwdne80884:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:675
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:659
 msgid "Purchase Order {0} is not submitted"
 msgstr "crwdns80886:0{0}crwdne80886:0"
 
-#: buying/doctype/purchase_order/purchase_order.py:838
+#: buying/doctype/purchase_order/purchase_order.py:850
 msgid "Purchase Orders"
 msgstr "crwdns80888:0crwdne80888:0"
 
@@ -39103,7 +39165,7 @@ msgstr "crwdns80900:0crwdne80900:0"
 #: accounts/report/purchase_register/purchase_register.py:223
 #: accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:20
 #: assets/doctype/asset/asset.json
-#: buying/doctype/purchase_order/purchase_order.js:353
+#: buying/doctype/purchase_order/purchase_order.js:387
 #: buying/doctype/purchase_order/purchase_order_list.js:61
 #: setup/doctype/authorization_rule/authorization_rule.json
 #: stock/doctype/landed_cost_item/landed_cost_item.json
@@ -39156,11 +39218,11 @@ msgstr "crwdns136444:0crwdne136444:0"
 msgid "Purchase Receipt No"
 msgstr "crwdns136446:0crwdne136446:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:658
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:642
 msgid "Purchase Receipt Required"
 msgstr "crwdns80940:0crwdne80940:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:653
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:637
 msgid "Purchase Receipt Required for item {}"
 msgstr "crwdns80942:0crwdne80942:0"
 
@@ -39181,7 +39243,7 @@ msgstr "crwdns80946:0crwdne80946:0"
 msgid "Purchase Receipt {0} created."
 msgstr "crwdns80948:0{0}crwdne80948:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:682
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:666
 msgid "Purchase Receipt {0} is not submitted"
 msgstr "crwdns80950:0{0}crwdne80950:0"
 
@@ -39403,10 +39465,10 @@ msgstr "crwdns81040:0{0}crwdnd81040:0{1}crwdne81040:0"
 #: manufacturing/doctype/work_order_item/work_order_item.json
 #: manufacturing/doctype/workstation/workstation_job_card.html:28
 #: manufacturing/report/bom_explorer/bom_explorer.py:58
-#: public/js/bom_configurator/bom_configurator.bundle.js:210
-#: public/js/bom_configurator/bom_configurator.bundle.js:304
-#: public/js/bom_configurator/bom_configurator.bundle.js:437
-#: public/js/bom_configurator/bom_configurator.bundle.js:525
+#: public/js/bom_configurator/bom_configurator.bundle.js:213
+#: public/js/bom_configurator/bom_configurator.bundle.js:307
+#: public/js/bom_configurator/bom_configurator.bundle.js:447
+#: public/js/bom_configurator/bom_configurator.bundle.js:535
 #: public/js/utils.js:706
 #: selling/doctype/product_bundle_item/product_bundle_item.json
 #: selling/doctype/sales_order/sales_order.js:385
@@ -39905,8 +39967,8 @@ msgstr "crwdns81312:0crwdne81312:0"
 #: manufacturing/doctype/bom/bom.js:368 manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/bom_creator/bom_creator.js:68
 #: manufacturing/doctype/bom_creator/bom_creator.json
-#: manufacturing/doctype/plant_floor/plant_floor.js:166
-#: manufacturing/doctype/plant_floor/plant_floor.js:190
+#: manufacturing/doctype/plant_floor/plant_floor.js:187
+#: manufacturing/doctype/plant_floor/plant_floor.js:211
 #: public/js/controllers/buying.js:509 public/js/stock_analytics.js:50
 #: public/js/utils/serial_no_batch_selector.js:455
 #: selling/doctype/quotation_item/quotation_item.json
@@ -40014,7 +40076,7 @@ msgstr "crwdns136504:0crwdne136504:0"
 msgid "Quantity in row {0} ({1}) must be same as manufactured quantity {2}"
 msgstr "crwdns81394:0{0}crwdnd81394:0{1}crwdnd81394:0{2}crwdne81394:0"
 
-#: manufacturing/doctype/plant_floor/plant_floor.js:246
+#: manufacturing/doctype/plant_floor/plant_floor.js:267
 msgid "Quantity is required"
 msgstr "crwdns111924:0crwdne111924:0"
 
@@ -40156,7 +40218,7 @@ msgstr "crwdns136512:0crwdne136512:0"
 msgid "Quick Entry"
 msgstr "crwdns81450:0crwdne81450:0"
 
-#: accounts/doctype/journal_entry/journal_entry.js:556
+#: accounts/doctype/journal_entry/journal_entry.js:558
 msgid "Quick Journal Entry"
 msgstr "crwdns81452:0crwdne81452:0"
 
@@ -40720,7 +40782,7 @@ msgstr "crwdns81766:0crwdne81766:0"
 #: manufacturing/doctype/job_card/job_card.json
 #: manufacturing/doctype/production_plan/production_plan.json
 #: manufacturing/doctype/workstation/workstation.js:459
-#: public/js/bom_configurator/bom_configurator.bundle.js:418
+#: public/js/bom_configurator/bom_configurator.bundle.js:428
 msgid "Raw Materials"
 msgstr "crwdns81768:0crwdne81768:0"
 
@@ -40778,7 +40840,7 @@ msgstr "crwdns136590:0crwdne136590:0"
 msgid "Raw Materials cannot be blank."
 msgstr "crwdns81796:0crwdne81796:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:343
+#: buying/doctype/purchase_order/purchase_order.js:377
 #: manufacturing/doctype/production_plan/production_plan.js:103
 #: manufacturing/doctype/work_order/work_order.js:652
 #: selling/doctype/sales_order/sales_order.js:614
@@ -40892,7 +40954,7 @@ msgstr "crwdns81838:0crwdne81838:0"
 msgid "Reason for Failure"
 msgstr "crwdns136622:0crwdne136622:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:668
+#: buying/doctype/purchase_order/purchase_order.js:702
 #: selling/doctype/sales_order/sales_order.js:1352
 msgid "Reason for Hold"
 msgstr "crwdns81842:0crwdne81842:0"
@@ -41031,7 +41093,7 @@ msgstr "crwdns136644:0crwdne136644:0"
 msgid "Received Amount After Tax (Company Currency)"
 msgstr "crwdns136646:0crwdne136646:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:946
+#: accounts/doctype/payment_entry/payment_entry.py:981
 msgid "Received Amount cannot be greater than Paid Amount"
 msgstr "crwdns81906:0crwdne81906:0"
 
@@ -41125,7 +41187,7 @@ msgstr "crwdns136654:0crwdne136654:0"
 msgid "Recent Orders"
 msgstr "crwdns111930:0crwdne111930:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:859
+#: selling/page/point_of_sale/pos_item_cart.js:849
 msgid "Recent Transactions"
 msgstr "crwdns136656:0crwdne136656:0"
 
@@ -41411,7 +41473,7 @@ msgstr "crwdns82028:0crwdne82028:0"
 msgid "Reference"
 msgstr "crwdns82030:0crwdne82030:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:965
+#: accounts/doctype/journal_entry/journal_entry.py:970
 msgid "Reference #{0} dated {1}"
 msgstr "crwdns82078:0#{0}crwdnd82078:0{1}crwdne82078:0"
 
@@ -41437,12 +41499,16 @@ msgstr "crwdns136696:0crwdne136696:0"
 msgid "Reference Detail No"
 msgstr "crwdns136698:0crwdne136698:0"
 
+#: accounts/doctype/payment_entry/payment_entry.js:1668
+msgid "Reference DocType"
+msgstr "crwdns148876:0crwdne148876:0"
+
 #. Label of the reference_doctype (Link) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgid "Reference Doctype"
 msgstr "crwdns136700:0crwdne136700:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:587
+#: accounts/doctype/payment_entry/payment_entry.py:622
 msgid "Reference Doctype must be one of {0}"
 msgstr "crwdns82092:0{0}crwdne82092:0"
 
@@ -41522,6 +41588,7 @@ msgstr "crwdns136708:0crwdne136708:0"
 #. Supplied Item'
 #: accounts/doctype/advance_tax/advance_tax.json
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
+#: accounts/doctype/payment_entry/payment_entry.js:1668
 #: accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
 #: accounts/doctype/payment_reconciliation_payment/payment_reconciliation_payment.json
 #: accounts/doctype/payment_request/payment_request.json
@@ -41544,15 +41611,15 @@ msgstr "crwdns82118:0crwdne82118:0"
 msgid "Reference No"
 msgstr "crwdns136710:0crwdne136710:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:578
+#: accounts/doctype/journal_entry/journal_entry.py:583
 msgid "Reference No & Reference Date is required for {0}"
 msgstr "crwdns82150:0{0}crwdne82150:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1141
+#: accounts/doctype/payment_entry/payment_entry.py:1176
 msgid "Reference No and Reference Date is mandatory for Bank transaction"
 msgstr "crwdns82152:0crwdne82152:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:583
+#: accounts/doctype/journal_entry/journal_entry.py:588
 msgid "Reference No is mandatory if you entered Reference Date"
 msgstr "crwdns82154:0crwdne82154:0"
 
@@ -41672,7 +41739,7 @@ msgstr "crwdns111936:0crwdne111936:0"
 msgid "References to Sales Orders are Incomplete"
 msgstr "crwdns111938:0crwdne111938:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:669
+#: accounts/doctype/payment_entry/payment_entry.py:704
 msgid "References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
 msgstr "crwdns82216:0{0}crwdnd82216:0{1}crwdne82216:0"
 
@@ -41940,7 +42007,7 @@ msgstr "crwdns136754:0crwdne136754:0"
 msgid "Rename Log"
 msgstr "crwdns136756:0crwdne136756:0"
 
-#: accounts/doctype/account/account.py:517
+#: accounts/doctype/account/account.py:518
 msgid "Rename Not Allowed"
 msgstr "crwdns82346:0crwdne82346:0"
 
@@ -41949,7 +42016,7 @@ msgstr "crwdns82346:0crwdne82346:0"
 msgid "Rename Tool"
 msgstr "crwdns82348:0crwdne82348:0"
 
-#: accounts/doctype/account/account.py:509
+#: accounts/doctype/account/account.py:510
 msgid "Renaming it is only allowed via parent company {0}, to avoid mismatch."
 msgstr "crwdns82350:0{0}crwdne82350:0"
 
@@ -42088,7 +42155,7 @@ msgstr "crwdns136778:0crwdne136778:0"
 msgid "Report Type"
 msgstr "crwdns136780:0crwdne136780:0"
 
-#: accounts/doctype/account/account.py:411
+#: accounts/doctype/account/account.py:425
 msgid "Report Type is mandatory"
 msgstr "crwdns82414:0crwdne82414:0"
 
@@ -42592,7 +42659,7 @@ msgstr "crwdns82640:0crwdne82640:0"
 #: stock/dashboard/item_dashboard_list.html:15 stock/doctype/bin/bin.json
 #: stock/doctype/pick_list/pick_list.js:146
 #: stock/report/reserved_stock/reserved_stock.json
-#: stock/report/stock_balance/stock_balance.py:479 stock/stock_ledger.py:2080
+#: stock/report/stock_balance/stock_balance.py:482 stock/stock_ledger.py:2080
 msgid "Reserved Stock"
 msgstr "crwdns82642:0crwdne82642:0"
 
@@ -42841,7 +42908,7 @@ msgstr "crwdns136874:0crwdne136874:0"
 msgid "Result Title Field"
 msgstr "crwdns136876:0crwdne136876:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:322
+#: buying/doctype/purchase_order/purchase_order.js:356
 #: manufacturing/doctype/workstation/workstation_job_card.html:84
 #: selling/doctype/sales_order/sales_order.js:600
 msgid "Resume"
@@ -42975,7 +43042,7 @@ msgstr "crwdns82810:0crwdne82810:0"
 msgid "Return Qty from Rejected Warehouse"
 msgstr "crwdns82812:0crwdne82812:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:81
+#: buying/doctype/purchase_order/purchase_order.js:106
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:180
 msgid "Return of Components"
 msgstr "crwdns82814:0crwdne82814:0"
@@ -43192,11 +43259,11 @@ msgstr "crwdns82910:0crwdne82910:0"
 msgid "Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity"
 msgstr "crwdns82916:0{0}crwdne82916:0"
 
-#: accounts/doctype/account/account.py:408
+#: accounts/doctype/account/account.py:422
 msgid "Root Type is mandatory"
 msgstr "crwdns82918:0crwdne82918:0"
 
-#: accounts/doctype/account/account.py:213
+#: accounts/doctype/account/account.py:211
 msgid "Root cannot be edited."
 msgstr "crwdns82920:0crwdne82920:0"
 
@@ -43447,12 +43514,16 @@ msgstr "crwdns83056:0#{0}crwdnd83056:0{1}crwdne83056:0"
 msgid "Row #{0}: Account {1} does not belong to company {2}"
 msgstr "crwdns83058:0#{0}crwdnd83058:0{1}crwdnd83058:0{2}crwdne83058:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:314
-#: accounts/doctype/payment_entry/payment_entry.py:398
+#: accounts/doctype/payment_entry/payment_entry.py:349
+msgid "Row #{0}: Allocated Amount cannot be greater than Outstanding Amount of Payment Request {1}"
+msgstr "crwdns148878:0#{0}crwdnd148878:0{1}crwdne148878:0"
+
+#: accounts/doctype/payment_entry/payment_entry.py:325
+#: accounts/doctype/payment_entry/payment_entry.py:430
 msgid "Row #{0}: Allocated Amount cannot be greater than outstanding amount."
 msgstr "crwdns83060:0#{0}crwdne83060:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:412
+#: accounts/doctype/payment_entry/payment_entry.py:444
 msgid "Row #{0}: Allocated amount:{1} is greater than outstanding amount:{2} for Payment Term {3}"
 msgstr "crwdns83062:0#{0}crwdnd83062:0{1}crwdnd83062:0{2}crwdnd83062:0{3}crwdne83062:0"
 
@@ -43472,27 +43543,27 @@ msgstr "crwdns83068:0#{0}crwdnd83068:0{0}crwdne83068:0"
 msgid "Row #{0}: Batch No {1} is already selected."
 msgstr "crwdns83070:0#{0}crwdnd83070:0{1}crwdne83070:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:774
+#: accounts/doctype/payment_entry/payment_entry.py:809
 msgid "Row #{0}: Cannot allocate more than {1} against payment term {2}"
 msgstr "crwdns83072:0#{0}crwdnd83072:0{1}crwdnd83072:0{2}crwdne83072:0"
 
-#: controllers/accounts_controller.py:3186
+#: controllers/accounts_controller.py:3177
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
 msgstr "crwdns83074:0#{0}crwdnd83074:0{1}crwdne83074:0"
 
-#: controllers/accounts_controller.py:3160
+#: controllers/accounts_controller.py:3151
 msgid "Row #{0}: Cannot delete item {1} which has already been delivered"
 msgstr "crwdns83076:0#{0}crwdnd83076:0{1}crwdne83076:0"
 
-#: controllers/accounts_controller.py:3179
+#: controllers/accounts_controller.py:3170
 msgid "Row #{0}: Cannot delete item {1} which has already been received"
 msgstr "crwdns83078:0#{0}crwdnd83078:0{1}crwdne83078:0"
 
-#: controllers/accounts_controller.py:3166
+#: controllers/accounts_controller.py:3157
 msgid "Row #{0}: Cannot delete item {1} which has work order assigned to it."
 msgstr "crwdns83080:0#{0}crwdnd83080:0{1}crwdne83080:0"
 
-#: controllers/accounts_controller.py:3172
+#: controllers/accounts_controller.py:3163
 msgid "Row #{0}: Cannot delete item {1} which is assigned to customer's purchase order."
 msgstr "crwdns83082:0#{0}crwdnd83082:0{1}crwdne83082:0"
 
@@ -43500,7 +43571,7 @@ msgstr "crwdns83082:0#{0}crwdnd83082:0{1}crwdne83082:0"
 msgid "Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor"
 msgstr "crwdns83084:0#{0}crwdne83084:0"
 
-#: controllers/accounts_controller.py:3428
+#: controllers/accounts_controller.py:3419
 msgid "Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}."
 msgstr "crwdns83086:0#{0}crwdnd83086:0{1}crwdne83086:0"
 
@@ -43548,7 +43619,7 @@ msgstr "crwdns83108:0#{0}crwdne83108:0"
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
 msgstr "crwdns83110:0#{0}crwdnd83110:0{1}crwdne83110:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:281
+#: accounts/doctype/payment_entry/payment_entry.py:289
 msgid "Row #{0}: Duplicate entry in References {1} {2}"
 msgstr "crwdns83112:0#{0}crwdnd83112:0{1}crwdnd83112:0{2}crwdne83112:0"
 
@@ -43584,11 +43655,11 @@ msgstr "crwdns83124:0#{0}crwdnd83124:0{1}crwdne83124:0"
 msgid "Row #{0}: For {1} Clearance date {2} cannot be before Cheque Date {3}"
 msgstr "crwdns148624:0#{0}crwdnd148624:0{1}crwdnd148624:0{2}crwdnd148624:0{3}crwdne148624:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:626
+#: accounts/doctype/journal_entry/journal_entry.py:631
 msgid "Row #{0}: For {1}, you can select reference document only if account gets credited"
 msgstr "crwdns83126:0#{0}crwdnd83126:0{1}crwdne83126:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:636
+#: accounts/doctype/journal_entry/journal_entry.py:641
 msgid "Row #{0}: For {1}, you can select reference document only if account gets debited"
 msgstr "crwdns83128:0#{0}crwdnd83128:0{1}crwdne83128:0"
 
@@ -43620,7 +43691,7 @@ msgstr "crwdns83140:0#{0}crwdnd83140:0{1}crwdne83140:0"
 msgid "Row #{0}: Item {1} is not a stock item"
 msgstr "crwdns83142:0#{0}crwdnd83142:0{1}crwdne83142:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:695
+#: accounts/doctype/payment_entry/payment_entry.py:730
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
 msgstr "crwdns83144:0#{0}crwdnd83144:0{1}crwdnd83144:0{2}crwdne83144:0"
 
@@ -43674,7 +43745,7 @@ msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (A
 msgstr "crwdns83170:0#{0}crwdnd83170:0{1}crwdnd83170:0{2}crwdnd83170:0{3}crwdnd83170:0{4}crwdne83170:0"
 
 #: controllers/accounts_controller.py:1104
-#: controllers/accounts_controller.py:3286
+#: controllers/accounts_controller.py:3277
 msgid "Row #{0}: Quantity for Item {1} cannot be zero."
 msgstr "crwdns83172:0#{0}crwdnd83172:0{1}crwdne83172:0"
 
@@ -43690,11 +43761,11 @@ msgstr "crwdns83176:0#{0}crwdnd83176:0{1}crwdnd83176:0{2}crwdnd83176:0{3}crwdnd8
 msgid "Row #{0}: Received Qty must be equal to Accepted + Rejected Qty for Item {1}"
 msgstr "crwdns83178:0#{0}crwdnd83178:0{1}crwdne83178:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1276
+#: accounts/doctype/payment_entry/payment_entry.js:1218
 msgid "Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry"
 msgstr "crwdns83180:0#{0}crwdne83180:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:1262
+#: accounts/doctype/payment_entry/payment_entry.js:1204
 msgid "Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning"
 msgstr "crwdns83182:0#{0}crwdne83182:0"
 
@@ -43765,7 +43836,7 @@ msgstr "crwdns111966:0#{0}crwdne111966:0"
 msgid "Row #{0}: Status is mandatory"
 msgstr "crwdns83210:0#{0}crwdne83210:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:403
+#: accounts/doctype/journal_entry/journal_entry.py:408
 msgid "Row #{0}: Status must be {1} for Invoice Discounting {2}"
 msgstr "crwdns83212:0#{0}crwdnd83212:0{1}crwdnd83212:0{2}crwdne83212:0"
 
@@ -43909,7 +43980,7 @@ msgstr "crwdns83280:0crwdne83280:0"
 msgid "Row #{}: {} {} doesn't belong to Company {}. Please select valid {}."
 msgstr "crwdns83282:0crwdne83282:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:447
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:431
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
 msgstr "crwdns83284:0{0}crwdnd83284:0{1}crwdnd83284:0{2}crwdne83284:0"
 
@@ -43941,11 +44012,11 @@ msgstr "crwdns83292:0{0}crwdnd83292:0{1}crwdnd83292:0{2}crwdnd83292:0{3}crwdne83
 msgid "Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time."
 msgstr "crwdns83294:0{0}crwdne83294:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:555
+#: accounts/doctype/journal_entry/journal_entry.py:560
 msgid "Row {0}: Account {1} and Party Type {2} have different account types"
 msgstr "crwdns83296:0{0}crwdnd83296:0{1}crwdnd83296:0{2}crwdne83296:0"
 
-#: controllers/accounts_controller.py:2663
+#: controllers/accounts_controller.py:2654
 msgid "Row {0}: Account {1} is a Group Account"
 msgstr "crwdns83298:0{0}crwdnd83298:0{1}crwdne83298:0"
 
@@ -43953,11 +44024,11 @@ msgstr "crwdns83298:0{0}crwdnd83298:0{1}crwdne83298:0"
 msgid "Row {0}: Activity Type is mandatory."
 msgstr "crwdns83300:0{0}crwdne83300:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:607
+#: accounts/doctype/journal_entry/journal_entry.py:612
 msgid "Row {0}: Advance against Customer must be credit"
 msgstr "crwdns83302:0{0}crwdne83302:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:609
+#: accounts/doctype/journal_entry/journal_entry.py:614
 msgid "Row {0}: Advance against Supplier must be debit"
 msgstr "crwdns83304:0{0}crwdne83304:0"
 
@@ -43977,7 +44048,7 @@ msgstr "crwdns111976:0{0}crwdnd111976:0{1}crwdnd111976:0{2}crwdnd111976:0{3}crwd
 msgid "Row {0}: Bill of Materials not found for the Item {1}"
 msgstr "crwdns83310:0{0}crwdnd83310:0{1}crwdne83310:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:861
+#: accounts/doctype/journal_entry/journal_entry.py:866
 msgid "Row {0}: Both Debit and Credit values cannot be zero"
 msgstr "crwdns83312:0{0}crwdne83312:0"
 
@@ -43985,7 +44056,7 @@ msgstr "crwdns83312:0{0}crwdne83312:0"
 msgid "Row {0}: Conversion Factor is mandatory"
 msgstr "crwdns83314:0{0}crwdne83314:0"
 
-#: controllers/accounts_controller.py:2676
+#: controllers/accounts_controller.py:2667
 msgid "Row {0}: Cost Center {1} does not belong to Company {2}"
 msgstr "crwdns83316:0{0}crwdnd83316:0{1}crwdnd83316:0{2}crwdne83316:0"
 
@@ -43993,7 +44064,7 @@ msgstr "crwdns83316:0{0}crwdnd83316:0{1}crwdnd83316:0{2}crwdne83316:0"
 msgid "Row {0}: Cost center is required for an item {1}"
 msgstr "crwdns83318:0{0}crwdnd83318:0{1}crwdne83318:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:706
+#: accounts/doctype/journal_entry/journal_entry.py:711
 msgid "Row {0}: Credit entry can not be linked with a {1}"
 msgstr "crwdns83320:0{0}crwdnd83320:0{1}crwdne83320:0"
 
@@ -44001,7 +44072,7 @@ msgstr "crwdns83320:0{0}crwdnd83320:0{1}crwdne83320:0"
 msgid "Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}"
 msgstr "crwdns83322:0{0}crwdnd83322:0#{1}crwdnd83322:0{2}crwdne83322:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:701
+#: accounts/doctype/journal_entry/journal_entry.py:706
 msgid "Row {0}: Debit entry can not be linked with a {1}"
 msgstr "crwdns83324:0{0}crwdnd83324:0{1}crwdne83324:0"
 
@@ -44013,7 +44084,7 @@ msgstr "crwdns83326:0{0}crwdnd83326:0{1}crwdnd83326:0{2}crwdne83326:0"
 msgid "Row {0}: Depreciation Start Date is required"
 msgstr "crwdns83328:0{0}crwdne83328:0"
 
-#: controllers/accounts_controller.py:2335
+#: controllers/accounts_controller.py:2326
 msgid "Row {0}: Due Date in the Payment Terms table cannot be before Posting Date"
 msgstr "crwdns83330:0{0}crwdne83330:0"
 
@@ -44025,7 +44096,7 @@ msgstr "crwdns83332:0{0}crwdne83332:0"
 msgid "Row {0}: Enter location for the asset item {1}"
 msgstr "crwdns83334:0{0}crwdnd83334:0{1}crwdne83334:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:952
+#: accounts/doctype/journal_entry/journal_entry.py:957
 #: controllers/taxes_and_totals.py:1146
 msgid "Row {0}: Exchange Rate is mandatory"
 msgstr "crwdns83336:0{0}crwdne83336:0"
@@ -44034,15 +44105,15 @@ msgstr "crwdns83336:0{0}crwdne83336:0"
 msgid "Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount"
 msgstr "crwdns83338:0{0}crwdne83338:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:538
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:522
 msgid "Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
 msgstr "crwdns83340:0{0}crwdnd83340:0{1}crwdnd83340:0{2}crwdne83340:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:495
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:479
 msgid "Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account"
 msgstr "crwdns83342:0{0}crwdnd83342:0{1}crwdnd83342:0{2}crwdnd83342:0{3}crwdne83342:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:520
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:504
 msgid "Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}"
 msgstr "crwdns83344:0{0}crwdnd83344:0{1}crwdnd83344:0{2}crwdne83344:0"
 
@@ -44071,7 +44142,7 @@ msgstr "crwdns83354:0{0}crwdne83354:0"
 msgid "Row {0}: Hours value must be greater than zero."
 msgstr "crwdns83356:0{0}crwdne83356:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:726
+#: accounts/doctype/journal_entry/journal_entry.py:731
 msgid "Row {0}: Invalid reference {1}"
 msgstr "crwdns83358:0{0}crwdnd83358:0{1}crwdne83358:0"
 
@@ -44099,11 +44170,11 @@ msgstr "crwdns83368:0{0}crwdnd83368:0{1}crwdne83368:0"
 msgid "Row {0}: Packing Slip is already created for Item {1}."
 msgstr "crwdns83370:0{0}crwdnd83370:0{1}crwdne83370:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:752
+#: accounts/doctype/journal_entry/journal_entry.py:757
 msgid "Row {0}: Party / Account does not match with {1} / {2} in {3} {4}"
 msgstr "crwdns83372:0{0}crwdnd83372:0{1}crwdnd83372:0{2}crwdnd83372:0{3}crwdnd83372:0{4}crwdne83372:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:546
+#: accounts/doctype/journal_entry/journal_entry.py:551
 msgid "Row {0}: Party Type and Party is required for Receivable / Payable account {1}"
 msgstr "crwdns83374:0{0}crwdnd83374:0{1}crwdne83374:0"
 
@@ -44111,11 +44182,11 @@ msgstr "crwdns83374:0{0}crwdnd83374:0{1}crwdne83374:0"
 msgid "Row {0}: Payment Term is mandatory"
 msgstr "crwdns83376:0{0}crwdne83376:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:600
+#: accounts/doctype/journal_entry/journal_entry.py:605
 msgid "Row {0}: Payment against Sales/Purchase Order should always be marked as advance"
 msgstr "crwdns83378:0{0}crwdne83378:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:593
+#: accounts/doctype/journal_entry/journal_entry.py:598
 msgid "Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry."
 msgstr "crwdns83380:0{0}crwdnd83380:0{1}crwdne83380:0"
 
@@ -44215,7 +44286,7 @@ msgstr "crwdns83426:0{0}crwdnd83426:0{1}crwdne83426:0"
 msgid "Row {0}: {1} {2} cannot be same as {3} (Party Account) {4}"
 msgstr "crwdns83428:0{0}crwdnd83428:0{1}crwdnd83428:0{2}crwdnd83428:0{3}crwdnd83428:0{4}crwdne83428:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:766
+#: accounts/doctype/journal_entry/journal_entry.py:771
 msgid "Row {0}: {1} {2} does not match with {3}"
 msgstr "crwdns83430:0{0}crwdnd83430:0{1}crwdnd83430:0{2}crwdnd83430:0{3}crwdne83430:0"
 
@@ -44223,7 +44294,7 @@ msgstr "crwdns83430:0{0}crwdnd83430:0{1}crwdnd83430:0{2}crwdnd83430:0{3}crwdne83
 msgid "Row {0}: {2} Item {1} does not exist in {2} {3}"
 msgstr "crwdns111978:0{0}crwdnd111978:0{2}crwdnd111978:0{1}crwdnd111978:0{2}crwdnd111978:0{3}crwdne111978:0"
 
-#: controllers/accounts_controller.py:2655
+#: controllers/accounts_controller.py:2646
 msgid "Row {0}: {3} Account {1} does not belong to Company {2}"
 msgstr "crwdns83432:0{0}crwdnd83432:0{3}crwdnd83432:0{1}crwdnd83432:0{2}crwdne83432:0"
 
@@ -44257,7 +44328,7 @@ msgstr "crwdns83444:0{0}crwdne83444:0"
 msgid "Rows with Same Account heads will be merged on Ledger"
 msgstr "crwdns136958:0crwdne136958:0"
 
-#: controllers/accounts_controller.py:2345
+#: controllers/accounts_controller.py:2336
 msgid "Rows with duplicate due dates in other rows were found: {0}"
 msgstr "crwdns83448:0{0}crwdne83448:0"
 
@@ -45274,7 +45345,7 @@ msgid "Saturday"
 msgstr "crwdns137024:0crwdne137024:0"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:118
-#: accounts/doctype/journal_entry/journal_entry.js:598
+#: accounts/doctype/journal_entry/journal_entry.js:600
 #: accounts/doctype/ledger_merge/ledger_merge.js:75
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:268
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:304
@@ -45653,7 +45724,7 @@ msgstr "crwdns84080:0crwdne84080:0"
 msgid "Segregate Serial / Batch Bundle"
 msgstr "crwdns111986:0crwdne111986:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:187
+#: buying/doctype/purchase_order/purchase_order.js:221
 #: selling/doctype/sales_order/sales_order.js:1121
 #: selling/doctype/sales_order/sales_order_list.js:85
 #: selling/report/sales_analytics/sales_analytics.js:93
@@ -45750,7 +45821,7 @@ msgstr "crwdns137090:0crwdne137090:0"
 msgid "Select Employees"
 msgstr "crwdns84124:0crwdne84124:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:177
+#: buying/doctype/purchase_order/purchase_order.js:211
 msgid "Select Finished Good"
 msgstr "crwdns84126:0crwdne84126:0"
 
@@ -45784,7 +45855,7 @@ msgid "Select Job Worker Address"
 msgstr "crwdns142964:0crwdne142964:0"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:1093
-#: selling/page/point_of_sale/pos_item_cart.js:920
+#: selling/page/point_of_sale/pos_item_cart.js:910
 msgid "Select Loyalty Program"
 msgstr "crwdns84138:0crwdne84138:0"
 
@@ -45903,7 +45974,7 @@ msgstr "crwdns84188:0crwdne84188:0"
 msgid "Select company name first."
 msgstr "crwdns137096:0crwdne137096:0"
 
-#: controllers/accounts_controller.py:2534
+#: controllers/accounts_controller.py:2525
 msgid "Select finance book for the item {0} at row {1}"
 msgstr "crwdns84192:0{0}crwdnd84192:0{1}crwdne84192:0"
 
@@ -46613,7 +46684,7 @@ msgstr "crwdns84498:0{0}crwdne84498:0"
 #: accounts/doctype/budget/budget.json
 #: accounts/doctype/cashier_closing/cashier_closing.json
 #: accounts/doctype/dunning/dunning.json
-#: accounts/doctype/journal_entry/journal_entry.js:590
+#: accounts/doctype/journal_entry/journal_entry.js:592
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -47074,15 +47145,15 @@ msgstr "crwdns137242:0crwdne137242:0"
 msgid "Set this if the customer is a Public Administration company."
 msgstr "crwdns84784:0crwdne84784:0"
 
-#: assets/doctype/asset/asset.py:674
+#: assets/doctype/asset/asset.py:677
 msgid "Set {0} in asset category {1} for company {2}"
 msgstr "crwdns84788:0{0}crwdnd84788:0{1}crwdnd84788:0{2}crwdne84788:0"
 
-#: assets/doctype/asset/asset.py:990
+#: assets/doctype/asset/asset.py:993
 msgid "Set {0} in asset category {1} or company {2}"
 msgstr "crwdns84790:0{0}crwdnd84790:0{1}crwdnd84790:0{2}crwdne84790:0"
 
-#: assets/doctype/asset/asset.py:987
+#: assets/doctype/asset/asset.py:990
 msgid "Set {0} in company {1}"
 msgstr "crwdns84792:0{0}crwdnd84792:0{1}crwdne84792:0"
 
@@ -47570,6 +47641,10 @@ msgstr "crwdns85014:0crwdne85014:0"
 msgid "Show Cumulative Amount"
 msgstr "crwdns85016:0crwdne85016:0"
 
+#: stock/report/stock_balance/stock_balance.js:112
+msgid "Show Dimension Wise Stock"
+msgstr "crwdns148880:0crwdne148880:0"
+
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.js:16
 msgid "Show Disabled Warehouses"
 msgstr "crwdns85018:0crwdne85018:0"
@@ -47869,8 +47944,8 @@ msgstr "crwdns137366:0crwdne137366:0"
 #: manufacturing/doctype/work_order/work_order.js:294
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 #: manufacturing/doctype/workstation/workstation.js:451
-#: public/js/bom_configurator/bom_configurator.bundle.js:356
-#: public/js/bom_configurator/bom_configurator.bundle.js:583
+#: public/js/bom_configurator/bom_configurator.bundle.js:366
+#: public/js/bom_configurator/bom_configurator.bundle.js:593
 msgid "Skip Material Transfer"
 msgstr "crwdns137368:0crwdne137368:0"
 
@@ -48049,8 +48124,8 @@ msgstr "crwdns137392:0crwdne137392:0"
 #: manufacturing/doctype/work_order_item/work_order_item.json
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:126
-#: public/js/bom_configurator/bom_configurator.bundle.js:367
-#: public/js/bom_configurator/bom_configurator.bundle.js:596
+#: public/js/bom_configurator/bom_configurator.bundle.js:377
+#: public/js/bom_configurator/bom_configurator.bundle.js:606
 #: stock/dashboard/item_dashboard.js:223
 #: stock/doctype/material_request_item/material_request_item.json
 #: stock/doctype/stock_entry/stock_entry.js:645
@@ -48158,11 +48233,11 @@ msgstr "crwdns85254:0crwdne85254:0"
 msgid "Split Qty"
 msgstr "crwdns85256:0crwdne85256:0"
 
-#: assets/doctype/asset/asset.py:1095
+#: assets/doctype/asset/asset.py:1098
 msgid "Split qty cannot be grater than or equal to asset qty"
 msgstr "crwdns85258:0crwdne85258:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1902
+#: accounts/doctype/payment_entry/payment_entry.py:2311
 msgid "Splitting {0} {1} into {2} rows as per Payment Terms"
 msgstr "crwdns85260:0{0}crwdnd85260:0{1}crwdnd85260:0{2}crwdne85260:0"
 
@@ -48570,12 +48645,12 @@ msgstr "crwdns112024:0crwdne112024:0"
 #: assets/report/fixed_asset_register/fixed_asset_register.js:16
 #: assets/report/fixed_asset_register/fixed_asset_register.py:425
 #: bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
-#: buying/doctype/purchase_order/purchase_order.js:318
-#: buying/doctype/purchase_order/purchase_order.js:324
-#: buying/doctype/purchase_order/purchase_order.js:330
-#: buying/doctype/purchase_order/purchase_order.js:336
-#: buying/doctype/purchase_order/purchase_order.js:338
-#: buying/doctype/purchase_order/purchase_order.js:345
+#: buying/doctype/purchase_order/purchase_order.js:352
+#: buying/doctype/purchase_order/purchase_order.js:358
+#: buying/doctype/purchase_order/purchase_order.js:364
+#: buying/doctype/purchase_order/purchase_order.js:370
+#: buying/doctype/purchase_order/purchase_order.js:372
+#: buying/doctype/purchase_order/purchase_order.js:379
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 #: buying/doctype/supplier_quotation/supplier_quotation.json
@@ -48700,7 +48775,7 @@ msgstr "crwdns137428:0crwdne137428:0"
 msgid "Status Illustration"
 msgstr "crwdns137430:0crwdne137430:0"
 
-#: projects/doctype/project/project.py:716
+#: projects/doctype/project/project.py:723
 msgid "Status must be Cancelled or Completed"
 msgstr "crwdns85524:0crwdne85524:0"
 
@@ -48735,7 +48810,7 @@ msgstr "crwdns85532:0crwdne85532:0"
 #: accounts/doctype/account/account.json
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:50
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:73
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1317
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1301
 #: accounts/report/account_balance/account_balance.js:58
 msgid "Stock Adjustment"
 msgstr "crwdns85540:0crwdne85540:0"
@@ -48866,7 +48941,7 @@ msgstr "crwdns85594:0{0}crwdne85594:0"
 msgid "Stock Entry {0} has created"
 msgstr "crwdns137448:0{0}crwdne137448:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1211
+#: accounts/doctype/journal_entry/journal_entry.py:1216
 msgid "Stock Entry {0} is not submitted"
 msgstr "crwdns85596:0{0}crwdne85596:0"
 
@@ -49217,7 +49292,7 @@ msgstr "crwdns137458:0crwdne137458:0"
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 #: stock/report/batch_item_expiry_status/batch_item_expiry_status.py:35
 #: stock/report/reserved_stock/reserved_stock.py:110
-#: stock/report/stock_balance/stock_balance.py:418
+#: stock/report/stock_balance/stock_balance.py:421
 #: stock/report/stock_ledger/stock_ledger.py:214
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
@@ -49330,7 +49405,7 @@ msgstr "crwdns85782:0{0}crwdne85782:0"
 msgid "Stock cannot be reserved in the group warehouse {0}."
 msgstr "crwdns85784:0{0}crwdne85784:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:740
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:724
 msgid "Stock cannot be updated against Purchase Receipt {0}"
 msgstr "crwdns85788:0{0}crwdne85788:0"
 
@@ -49451,7 +49526,7 @@ msgstr "crwdns85834:0crwdne85834:0"
 msgid "Sub Assemblies & Raw Materials"
 msgstr "crwdns137474:0crwdne137474:0"
 
-#: public/js/bom_configurator/bom_configurator.bundle.js:295
+#: public/js/bom_configurator/bom_configurator.bundle.js:298
 msgid "Sub Assembly Item"
 msgstr "crwdns85838:0crwdne85838:0"
 
@@ -49567,7 +49642,7 @@ msgstr "crwdns85878:0crwdne85878:0"
 #. Receipt Item'
 #. Label of the subcontracting_order (Link) field in DocType 'Subcontracting
 #. Receipt Supplied Item'
-#: buying/doctype/purchase_order/purchase_order.js:372
+#: buying/doctype/purchase_order/purchase_order.js:406
 #: controllers/subcontracting_controller.py:894
 #: stock/doctype/stock_entry/stock_entry.json
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -49601,7 +49676,7 @@ msgstr "crwdns85894:0crwdne85894:0"
 msgid "Subcontracting Order Supplied Item"
 msgstr "crwdns85896:0crwdne85896:0"
 
-#: buying/doctype/purchase_order/purchase_order.py:873
+#: buying/doctype/purchase_order/purchase_order.py:885
 msgid "Subcontracting Order {0} created."
 msgstr "crwdns85898:0{0}crwdne85898:0"
 
@@ -49677,7 +49752,7 @@ msgstr "crwdns85920:0crwdne85920:0"
 msgid "Submit"
 msgstr "crwdns85938:0crwdne85938:0"
 
-#: buying/doctype/purchase_order/purchase_order.py:869
+#: buying/doctype/purchase_order/purchase_order.py:881
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:776
 msgid "Submit Action Failed"
 msgstr "crwdns85940:0crwdne85940:0"
@@ -50256,7 +50331,7 @@ msgstr "crwdns137550:0crwdne137550:0"
 msgid "Supplier Invoice Date"
 msgstr "crwdns86258:0crwdne86258:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1641
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1625
 msgid "Supplier Invoice Date cannot be greater than Posting Date"
 msgstr "crwdns86262:0crwdne86262:0"
 
@@ -50271,7 +50346,7 @@ msgstr "crwdns86262:0crwdne86262:0"
 msgid "Supplier Invoice No"
 msgstr "crwdns86264:0crwdne86264:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1666
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1650
 msgid "Supplier Invoice No exists in Purchase Invoice {0}"
 msgstr "crwdns86270:0{0}crwdne86270:0"
 
@@ -50374,7 +50449,7 @@ msgstr "crwdns137564:0crwdne137564:0"
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
 #. Label of the supplier_quotation (Link) field in DocType 'Quotation'
-#: buying/doctype/purchase_order/purchase_order.js:536
+#: buying/doctype/purchase_order/purchase_order.js:570
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 #: buying/doctype/request_for_quotation/request_for_quotation.js:45
@@ -52025,7 +52100,7 @@ msgstr "crwdns87076:0crwdne87076:0"
 msgid "The Loyalty Program isn't valid for the selected company"
 msgstr "crwdns87078:0crwdne87078:0"
 
-#: accounts/doctype/payment_request/payment_request.py:755
+#: accounts/doctype/payment_request/payment_request.py:880
 msgid "The Payment Request {0} is already paid, cannot process payment twice"
 msgstr "crwdns87080:0{0}crwdne87080:0"
 
@@ -52069,7 +52144,11 @@ msgstr "crwdns137728:0crwdne137728:0"
 msgid "The accounts are set by the system automatically but do confirm these defaults"
 msgstr "crwdns137730:0crwdne137730:0"
 
-#: accounts/doctype/payment_request/payment_request.py:148
+#: accounts/doctype/payment_request/payment_request.py:781
+msgid "The allocated amount is greater than the outstanding amount of Payment Request {0}"
+msgstr "crwdns148882:0{0}crwdne148882:0"
+
+#: accounts/doctype/payment_request/payment_request.py:158
 msgid "The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document."
 msgstr "crwdns87098:0{0}crwdnd87098:0{1}crwdne87098:0"
 
@@ -52189,7 +52268,7 @@ msgstr "crwdns143552:0crwdne143552:0"
 msgid "The parent account {0} does not exists in the uploaded template"
 msgstr "crwdns87144:0{0}crwdne87144:0"
 
-#: accounts/doctype/payment_request/payment_request.py:137
+#: accounts/doctype/payment_request/payment_request.py:147
 msgid "The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
 msgstr "crwdns87146:0{0}crwdne87146:0"
 
@@ -52225,7 +52304,7 @@ msgstr "crwdns87154:0crwdne87154:0"
 msgid "The reserved stock will be released. Are you certain you wish to proceed?"
 msgstr "crwdns87156:0crwdne87156:0"
 
-#: accounts/doctype/account/account.py:216
+#: accounts/doctype/account/account.py:214
 msgid "The root account {0} must be a group"
 msgstr "crwdns87158:0{0}crwdne87158:0"
 
@@ -52344,7 +52423,7 @@ msgstr "crwdns87212:0crwdne87212:0"
 msgid "There are inconsistencies between the rate, no of shares and the amount calculated"
 msgstr "crwdns87214:0crwdne87214:0"
 
-#: accounts/doctype/account/account.py:201
+#: accounts/doctype/account/account.py:199
 msgid "There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
 msgstr "crwdns112056:0{0}crwdnd112056:0{1}crwdnd112056:0{2}crwdne112056:0"
 
@@ -52425,7 +52504,7 @@ msgstr "crwdns87250:0crwdne87250:0"
 msgid "There were errors while sending email. Please try again."
 msgstr "crwdns87252:0crwdne87252:0"
 
-#: accounts/utils.py:1019
+#: accounts/utils.py:1021
 msgid "There were issues unlinking payment entry {0}."
 msgstr "crwdns87254:0{0}crwdne87254:0"
 
@@ -52554,7 +52633,7 @@ msgstr "crwdns87314:0crwdne87314:0"
 msgid "This is considered dangerous from accounting point of view."
 msgstr "crwdns87318:0crwdne87318:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:544
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:528
 msgid "This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice"
 msgstr "crwdns87320:0crwdne87320:0"
 
@@ -52606,7 +52685,7 @@ msgstr "crwdns87342:0{0}crwdne87342:0"
 msgid "This schedule was created when Asset {0} was sold through Sales Invoice {1}."
 msgstr "crwdns87344:0{0}crwdnd87344:0{1}crwdne87344:0"
 
-#: assets/doctype/asset/asset.py:1156
+#: assets/doctype/asset/asset.py:1159
 msgid "This schedule was created when Asset {0} was updated after being split into new Asset {1}."
 msgstr "crwdns87346:0{0}crwdnd87346:0{1}crwdne87346:0"
 
@@ -52622,7 +52701,7 @@ msgstr "crwdns87350:0{0}crwdnd87350:0{1}crwdne87350:0"
 msgid "This schedule was created when Asset {0}'s shifts were adjusted through Asset Shift Allocation {1}."
 msgstr "crwdns87352:0{0}crwdnd87352:0{1}crwdne87352:0"
 
-#: assets/doctype/asset/asset.py:1213
+#: assets/doctype/asset/asset.py:1216
 msgid "This schedule was created when new Asset {0} was split from Asset {1}."
 msgstr "crwdns87354:0{0}crwdnd87354:0{1}crwdne87354:0"
 
@@ -53001,8 +53080,8 @@ msgstr "crwdns137802:0crwdne137802:0"
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 #: accounts/doctype/loyalty_program/loyalty_program.json
-#: accounts/doctype/payment_entry/payment_entry.js:836
-#: accounts/doctype/payment_entry/payment_entry.js:840
+#: accounts/doctype/payment_entry/payment_entry.js:856
+#: accounts/doctype/payment_entry/payment_entry.js:860
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -53301,7 +53380,7 @@ msgstr "crwdns137828:0crwdne137828:0"
 msgid "To Value"
 msgstr "crwdns137830:0crwdne137830:0"
 
-#: manufacturing/doctype/plant_floor/plant_floor.js:196
+#: manufacturing/doctype/plant_floor/plant_floor.js:217
 #: stock/doctype/batch/batch.js:98
 msgid "To Warehouse"
 msgstr "crwdns87698:0crwdne87698:0"
@@ -53343,7 +53422,7 @@ msgstr "crwdns137836:0crwdne137836:0"
 msgid "To cancel a {} you need to cancel the POS Closing Entry {}."
 msgstr "crwdns87714:0crwdne87714:0"
 
-#: accounts/doctype/payment_request/payment_request.py:101
+#: accounts/doctype/payment_request/payment_request.py:105
 msgid "To create a Payment Request reference document is required"
 msgstr "crwdns87716:0crwdne87716:0"
 
@@ -53359,8 +53438,8 @@ msgstr "crwdns87720:0crwdne87720:0"
 msgid "To include non-stock items in the material request planning. i.e. Items for which 'Maintain Stock' checkbox is unticked."
 msgstr "crwdns87722:0crwdne87722:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1699
-#: controllers/accounts_controller.py:2686
+#: accounts/doctype/payment_entry/payment_entry.py:2108
+#: controllers/accounts_controller.py:2677
 msgid "To include tax in row {0} in Item rate, taxes in rows {1} must also be included"
 msgstr "crwdns87724:0{0}crwdnd87724:0{1}crwdne87724:0"
 
@@ -53368,7 +53447,7 @@ msgstr "crwdns87724:0{0}crwdnd87724:0{1}crwdne87724:0"
 msgid "To merge, following properties must be same for both items"
 msgstr "crwdns87726:0crwdne87726:0"
 
-#: accounts/doctype/account/account.py:513
+#: accounts/doctype/account/account.py:514
 msgid "To overrule this, enable '{0}' in company {1}"
 msgstr "crwdns87728:0{0}crwdnd87728:0{1}crwdne87728:0"
 
@@ -53376,11 +53455,11 @@ msgstr "crwdns87728:0{0}crwdnd87728:0{1}crwdne87728:0"
 msgid "To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
 msgstr "crwdns87730:0{0}crwdne87730:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:634
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:618
 msgid "To submit the invoice without purchase order please set {0} as {1} in {2}"
 msgstr "crwdns87732:0{0}crwdnd87732:0{1}crwdnd87732:0{2}crwdne87732:0"
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:655
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:639
 msgid "To submit the invoice without purchase receipt please set {0} as {1} in {2}"
 msgstr "crwdns87734:0{0}crwdnd87734:0{1}crwdnd87734:0{2}crwdne87734:0"
 
@@ -53441,8 +53520,8 @@ msgstr "crwdns112064:0crwdne112064:0"
 #. Label of a Card Break in the Manufacturing Workspace
 #. Label of the tools (Column Break) field in DocType 'Email Digest'
 #. Label of a Card Break in the Stock Workspace
-#: buying/doctype/purchase_order/purchase_order.js:567
-#: buying/doctype/purchase_order/purchase_order.js:643
+#: buying/doctype/purchase_order/purchase_order.js:601
+#: buying/doctype/purchase_order/purchase_order.js:677
 #: buying/doctype/request_for_quotation/request_for_quotation.js:66
 #: buying/doctype/request_for_quotation/request_for_quotation.js:153
 #: buying/doctype/request_for_quotation/request_for_quotation.js:411
@@ -53765,7 +53844,7 @@ msgstr "crwdns137884:0crwdne137884:0"
 msgid "Total Credit"
 msgstr "crwdns137886:0crwdne137886:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:250
+#: accounts/doctype/journal_entry/journal_entry.py:255
 msgid "Total Credit/ Debit Amount should be same as linked Journal Entry"
 msgstr "crwdns87912:0crwdne87912:0"
 
@@ -53774,7 +53853,7 @@ msgstr "crwdns87912:0crwdne87912:0"
 msgid "Total Debit"
 msgstr "crwdns137888:0crwdne137888:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:867
+#: accounts/doctype/journal_entry/journal_entry.py:872
 msgid "Total Debit must be equal to Total Credit. The difference is {0}"
 msgstr "crwdns87916:0{0}crwdne87916:0"
 
@@ -53989,11 +54068,11 @@ msgstr "crwdns88002:0crwdne88002:0"
 msgid "Total Paid Amount"
 msgstr "crwdns88004:0crwdne88004:0"
 
-#: controllers/accounts_controller.py:2392
+#: controllers/accounts_controller.py:2383
 msgid "Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"
 msgstr "crwdns88006:0crwdne88006:0"
 
-#: accounts/doctype/payment_request/payment_request.py:116
+#: accounts/doctype/payment_request/payment_request.py:126
 msgid "Total Payment Request amount cannot be greater than {0} amount"
 msgstr "crwdns88008:0{0}crwdne88008:0"
 
@@ -54062,8 +54141,8 @@ msgstr "crwdns88022:0crwdne88022:0"
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:147
 #: selling/doctype/quotation/quotation.json
 #: selling/doctype/sales_order/sales_order.json
-#: selling/page/point_of_sale/pos_item_cart.js:520
-#: selling/page/point_of_sale/pos_item_cart.js:524
+#: selling/page/point_of_sale/pos_item_cart.js:510
+#: selling/page/point_of_sale/pos_item_cart.js:514
 #: stock/doctype/delivery_note/delivery_note.json
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -54487,7 +54566,7 @@ msgstr "crwdns137972:0crwdne137972:0"
 msgid "Transaction Type"
 msgstr "crwdns88252:0crwdne88252:0"
 
-#: accounts/doctype/payment_request/payment_request.py:126
+#: accounts/doctype/payment_request/payment_request.py:136
 msgid "Transaction currency must be same as Payment Gateway currency"
 msgstr "crwdns88256:0crwdne88256:0"
 
@@ -54499,7 +54578,7 @@ msgstr "crwdns104678:0{0}crwdnd104678:0{1}crwdnd104678:0{2}crwdne104678:0"
 msgid "Transaction not allowed against stopped Work Order {0}"
 msgstr "crwdns88258:0{0}crwdne88258:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1167
+#: accounts/doctype/payment_entry/payment_entry.py:1202
 msgid "Transaction reference no {0} dated {1}"
 msgstr "crwdns88260:0{0}crwdnd88260:0{1}crwdne88260:0"
 
@@ -54528,7 +54607,7 @@ msgstr "crwdns88266:0crwdne88266:0"
 #. Option for the 'Asset Status' (Select) field in DocType 'Serial No'
 #: accounts/doctype/share_transfer/share_transfer.json
 #: assets/doctype/asset_movement/asset_movement.json
-#: buying/doctype/purchase_order/purchase_order.js:367
+#: buying/doctype/purchase_order/purchase_order.js:401
 #: stock/doctype/item_reorder/item_reorder.json
 #: stock/doctype/serial_no/serial_no.json
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:238
@@ -55318,6 +55397,10 @@ msgstr "crwdns138070:0crwdne138070:0"
 msgid "Unsecured Loans"
 msgstr "crwdns88680:0crwdne88680:0"
 
+#: accounts/doctype/payment_entry/payment_entry.js:1672
+msgid "Unset Matched Payment Request"
+msgstr "crwdns148884:0crwdne148884:0"
+
 #. Option for the 'Status' (Select) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgid "Unsigned"
@@ -55364,7 +55447,7 @@ msgstr "crwdns88702:0crwdne88702:0"
 #: accounts/doctype/account/account.js:204
 #: accounts/doctype/cost_center/cost_center.js:107
 #: manufacturing/doctype/job_card/job_card.js:277
-#: public/js/bom_configurator/bom_configurator.bundle.js:672
+#: public/js/bom_configurator/bom_configurator.bundle.js:682
 #: public/js/utils.js:593 public/js/utils.js:825
 #: public/js/utils/barcode_scanner.js:183
 #: public/js/utils/serial_no_batch_selector.js:17
@@ -55490,7 +55573,7 @@ msgstr "crwdns138094:0crwdne138094:0"
 msgid "Update Existing Records"
 msgstr "crwdns138096:0crwdne138096:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:302 public/js/utils.js:777
+#: buying/doctype/purchase_order/purchase_order.js:336 public/js/utils.js:777
 #: selling/doctype/sales_order/sales_order.js:64
 msgid "Update Items"
 msgstr "crwdns88756:0crwdne88756:0"
@@ -55514,7 +55597,7 @@ msgstr "crwdns88758:0crwdne88758:0"
 msgid "Update Rate and Availability"
 msgstr "crwdns138100:0crwdne138100:0"
 
-#: buying/doctype/purchase_order/purchase_order.js:556
+#: buying/doctype/purchase_order/purchase_order.js:590
 msgid "Update Rate as per Last Purchase"
 msgstr "crwdns88762:0crwdne88762:0"
 
@@ -55704,7 +55787,7 @@ msgstr "crwdns138136:0crwdne138136:0"
 msgid "Use Transaction Date Exchange Rate"
 msgstr "crwdns138138:0crwdne138138:0"
 
-#: projects/doctype/project/project.py:542
+#: projects/doctype/project/project.py:549
 msgid "Use a name that is different from previous project name"
 msgstr "crwdns88824:0crwdne88824:0"
 
@@ -55773,7 +55856,7 @@ msgstr "crwdns88858:0{0}crwdne88858:0"
 #. Label of the user_remark (Small Text) field in DocType 'Journal Entry'
 #. Label of the user_remark (Small Text) field in DocType 'Journal Entry
 #. Account'
-#: accounts/doctype/journal_entry/journal_entry.js:586
+#: accounts/doctype/journal_entry/journal_entry.js:588
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "User Remark"
@@ -56081,7 +56164,7 @@ msgstr "crwdns88988:0crwdne88988:0"
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 #: stock/report/item_prices/item_prices.py:57
 #: stock/report/serial_no_ledger/serial_no_ledger.py:67
-#: stock/report/stock_balance/stock_balance.py:469
+#: stock/report/stock_balance/stock_balance.py:472
 #: stock/report/stock_ledger/stock_ledger.py:297
 msgid "Valuation Rate"
 msgstr "crwdns88992:0crwdne88992:0"
@@ -56125,8 +56208,8 @@ msgstr "crwdns89032:0crwdne89032:0"
 msgid "Valuation rate for the item as per Sales Invoice (Only for Internal Transfers)"
 msgstr "crwdns142970:0crwdne142970:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1723
-#: controllers/accounts_controller.py:2710
+#: accounts/doctype/payment_entry/payment_entry.py:2132
+#: controllers/accounts_controller.py:2701
 msgid "Valuation type charges can not be marked as Inclusive"
 msgstr "crwdns89034:0crwdne89034:0"
 
@@ -56429,7 +56512,7 @@ msgstr "crwdns89150:0crwdne89150:0"
 msgid "View Chart of Accounts"
 msgstr "crwdns89152:0crwdne89152:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:208
+#: accounts/doctype/payment_entry/payment_entry.js:227
 msgid "View Exchange Gain/Loss Journals"
 msgstr "crwdns89156:0crwdne89156:0"
 
@@ -56873,7 +56956,7 @@ msgstr "crwdns143564:0crwdne143564:0"
 #: stock/report/stock_ageing/stock_ageing.py:140
 #: stock/report/stock_analytics/stock_analytics.js:49
 #: stock/report/stock_balance/stock_balance.js:51
-#: stock/report/stock_balance/stock_balance.py:396
+#: stock/report/stock_balance/stock_balance.py:399
 #: stock/report/stock_ledger/stock_ledger.js:30
 #: stock/report/stock_ledger/stock_ledger.py:257
 #: stock/report/stock_ledger_variance/stock_ledger_variance.js:38
@@ -57114,7 +57197,7 @@ msgstr "crwdns138268:0crwdne138268:0"
 msgid "Warn for new Request for Quotations"
 msgstr "crwdns138270:0crwdne138270:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:677
+#: accounts/doctype/payment_entry/payment_entry.py:712
 #: controllers/accounts_controller.py:1792
 #: stock/doctype/delivery_trip/delivery_trip.js:145
 #: utilities/transaction_base.py:120
@@ -57133,7 +57216,7 @@ msgstr "crwdns143566:0crwdne143566:0"
 msgid "Warning!"
 msgstr "crwdns89462:0crwdne89462:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1217
+#: accounts/doctype/journal_entry/journal_entry.py:1222
 msgid "Warning: Another {0} # {1} exists against stock entry {2}"
 msgstr "crwdns89464:0{0}crwdnd89464:0{1}crwdnd89464:0{2}crwdne89464:0"
 
@@ -57486,11 +57569,11 @@ msgstr "crwdns138312:0crwdne138312:0"
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
 msgstr "crwdns89646:0crwdne89646:0"
 
-#: accounts/doctype/account/account.py:329
+#: accounts/doctype/account/account.py:343
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
 msgstr "crwdns89648:0{0}crwdnd89648:0{1}crwdne89648:0"
 
-#: accounts/doctype/account/account.py:319
+#: accounts/doctype/account/account.py:333
 msgid "While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA"
 msgstr "crwdns89650:0{0}crwdnd89650:0{1}crwdne89650:0"
 
@@ -57574,8 +57657,8 @@ msgstr "crwdns89678:0crwdne89678:0"
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:23
-#: public/js/bom_configurator/bom_configurator.bundle.js:382
-#: public/js/bom_configurator/bom_configurator.bundle.js:612
+#: public/js/bom_configurator/bom_configurator.bundle.js:392
+#: public/js/bom_configurator/bom_configurator.bundle.js:622
 msgid "Work In Progress Warehouse"
 msgstr "crwdns89686:0crwdne89686:0"
 
@@ -57778,8 +57861,8 @@ msgstr "crwdns89760:0crwdne89760:0"
 #: manufacturing/report/job_card_summary/job_card_summary.js:72
 #: manufacturing/report/job_card_summary/job_card_summary.py:160
 #: manufacturing/workspace/manufacturing/manufacturing.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:343
-#: public/js/bom_configurator/bom_configurator.bundle.js:563
+#: public/js/bom_configurator/bom_configurator.bundle.js:353
+#: public/js/bom_configurator/bom_configurator.bundle.js:573
 #: templates/generators/bom.html:70
 msgid "Workstation"
 msgstr "crwdns89766:0crwdne89766:0"
@@ -57823,8 +57906,8 @@ msgstr "crwdns138344:0crwdne138344:0"
 #: manufacturing/doctype/workstation/workstation.json
 #: manufacturing/doctype/workstation_type/workstation_type.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
-#: public/js/bom_configurator/bom_configurator.bundle.js:337
-#: public/js/bom_configurator/bom_configurator.bundle.js:556
+#: public/js/bom_configurator/bom_configurator.bundle.js:347
+#: public/js/bom_configurator/bom_configurator.bundle.js:566
 msgid "Workstation Type"
 msgstr "crwdns89782:0crwdne89782:0"
 
@@ -58091,11 +58174,11 @@ msgstr "crwdns138378:0crwdne138378:0"
 msgid "Yes"
 msgstr "crwdns138380:0crwdne138380:0"
 
-#: controllers/accounts_controller.py:3273
+#: controllers/accounts_controller.py:3264
 msgid "You are not allowed to update as per the conditions set in {} Workflow."
 msgstr "crwdns89926:0crwdne89926:0"
 
-#: accounts/general_ledger.py:726
+#: accounts/general_ledger.py:729
 msgid "You are not authorized to add or update entries before {0}"
 msgstr "crwdns89928:0{0}crwdne89928:0"
 
@@ -58103,7 +58186,7 @@ msgstr "crwdns89928:0{0}crwdne89928:0"
 msgid "You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
 msgstr "crwdns89930:0{0}crwdnd89930:0{1}crwdne89930:0"
 
-#: accounts/doctype/account/account.py:279
+#: accounts/doctype/account/account.py:277
 msgid "You are not authorized to set Frozen value"
 msgstr "crwdns89932:0crwdne89932:0"
 
@@ -58131,7 +58214,7 @@ msgstr "crwdns89942:0crwdne89942:0"
 msgid "You can not cancel this Period Closing Voucher, please cancel the future Period Closing Vouchers first"
 msgstr "crwdns89944:0crwdne89944:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:642
+#: accounts/doctype/journal_entry/journal_entry.py:647
 msgid "You can not enter current voucher in 'Against Journal Entry' column"
 msgstr "crwdns89946:0crwdne89946:0"
 
@@ -58176,11 +58259,11 @@ msgstr "crwdns89966:0{0}crwdnd89966:0{1}crwdne89966:0"
 msgid "You cannot create or cancel any accounting entries with in the closed Accounting Period {0}"
 msgstr "crwdns89968:0{0}crwdne89968:0"
 
-#: accounts/general_ledger.py:746
+#: accounts/general_ledger.py:749
 msgid "You cannot create/amend any accounting entries till this date."
 msgstr "crwdns89970:0crwdne89970:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:876
+#: accounts/doctype/journal_entry/journal_entry.py:881
 msgid "You cannot credit and debit same account at the same time"
 msgstr "crwdns89972:0crwdne89972:0"
 
@@ -58212,7 +58295,7 @@ msgstr "crwdns89984:0crwdne89984:0"
 msgid "You cannot submit the order without payment."
 msgstr "crwdns89986:0crwdne89986:0"
 
-#: controllers/accounts_controller.py:3249
+#: controllers/accounts_controller.py:3240
 msgid "You do not have permissions to {} items in a {}."
 msgstr "crwdns89988:0crwdne89988:0"
 
@@ -58232,7 +58315,7 @@ msgstr "crwdns89994:0crwdne89994:0"
 msgid "You have already selected items from {0} {1}"
 msgstr "crwdns89996:0{0}crwdnd89996:0{1}crwdne89996:0"
 
-#: projects/doctype/project/project.py:335
+#: projects/doctype/project/project.py:342
 msgid "You have been invited to collaborate on the project: {0}"
 msgstr "crwdns89998:0{0}crwdne89998:0"
 
@@ -58381,7 +58464,7 @@ msgstr "crwdns138394:0crwdne138394:0"
 msgid "development"
 msgstr "crwdns138396:0crwdne138396:0"
 
-#: selling/page/point_of_sale/pos_item_cart.js:433
+#: selling/page/point_of_sale/pos_item_cart.js:423
 msgid "discount applied"
 msgstr "crwdns112164:0crwdne112164:0"
 
@@ -58506,7 +58589,7 @@ msgstr "crwdns90120:0crwdne90120:0"
 msgid "out of 5"
 msgstr "crwdns90122:0crwdne90122:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1160
+#: accounts/doctype/payment_entry/payment_entry.py:1195
 msgid "paid to"
 msgstr "crwdns127528:0crwdne127528:0"
 
@@ -58567,7 +58650,7 @@ msgstr "crwdns138420:0crwdne138420:0"
 msgid "ratings"
 msgstr "crwdns90142:0crwdne90142:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1160
+#: accounts/doctype/payment_entry/payment_entry.py:1195
 msgid "received from"
 msgstr "crwdns90144:0crwdne90144:0"
 
@@ -58670,7 +58753,7 @@ msgstr "crwdns90202:0{0}crwdnd90202:0{1}crwdnd90202:0{2}crwdnd90202:0{3}crwdne90
 msgid "{0} <b>{1}</b> has submitted Assets. Remove Item <b>{2}</b> from table to continue."
 msgstr "crwdns90206:0{0}crwdnd90206:0{1}crwdnd90206:0{2}crwdne90206:0"
 
-#: controllers/accounts_controller.py:2021
+#: controllers/accounts_controller.py:2012
 msgid "{0} Account not found against Customer {1}."
 msgstr "crwdns90208:0{0}crwdnd90208:0{1}crwdne90208:0"
 
@@ -58690,7 +58773,7 @@ msgstr "crwdns90212:0{0}crwdnd90212:0{1}crwdne90212:0"
 msgid "{0} Digest"
 msgstr "crwdns90214:0{0}crwdne90214:0"
 
-#: accounts/utils.py:1332
+#: accounts/utils.py:1334
 msgid "{0} Number {1} is already used in {2} {3}"
 msgstr "crwdns90216:0{0}crwdnd90216:0{1}crwdnd90216:0{2}crwdnd90216:0{3}crwdne90216:0"
 
@@ -58718,19 +58801,19 @@ msgstr "crwdns90226:0{0}crwdnd90226:0{1}crwdne90226:0"
 msgid "{0} account not found while submitting purchase receipt"
 msgstr "crwdns90228:0{0}crwdne90228:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:996
+#: accounts/doctype/journal_entry/journal_entry.py:1001
 msgid "{0} against Bill {1} dated {2}"
 msgstr "crwdns90230:0{0}crwdnd90230:0{1}crwdnd90230:0{2}crwdne90230:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:1005
+#: accounts/doctype/journal_entry/journal_entry.py:1010
 msgid "{0} against Purchase Order {1}"
 msgstr "crwdns90232:0{0}crwdnd90232:0{1}crwdne90232:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:972
+#: accounts/doctype/journal_entry/journal_entry.py:977
 msgid "{0} against Sales Invoice {1}"
 msgstr "crwdns90234:0{0}crwdnd90234:0{1}crwdne90234:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:979
+#: accounts/doctype/journal_entry/journal_entry.py:984
 msgid "{0} against Sales Order {1}"
 msgstr "crwdns90236:0{0}crwdnd90236:0{1}crwdne90236:0"
 
@@ -58758,6 +58841,10 @@ msgstr "crwdns90246:0{0}crwdne90246:0"
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.py:136
 msgid "{0} cannot be used as a Main Cost Center because it has been used as child in Cost Center Allocation {1}"
 msgstr "crwdns90248:0{0}crwdnd90248:0{1}crwdne90248:0"
+
+#: accounts/doctype/payment_request/payment_request.py:110
+msgid "{0} cannot be zero"
+msgstr "crwdns148886:0{0}crwdne148886:0"
 
 #: manufacturing/doctype/production_plan/production_plan.py:797
 #: manufacturing/doctype/production_plan/production_plan.py:891
@@ -58792,7 +58879,7 @@ msgstr "crwdns90262:0{0}crwdnd90262:0{1}crwdne90262:0"
 msgid "{0} for {1}"
 msgstr "crwdns90264:0{0}crwdnd90264:0{1}crwdne90264:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:371
+#: accounts/doctype/payment_entry/payment_entry.py:403
 msgid "{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
 msgstr "crwdns90266:0{0}crwdnd90266:0#{1}crwdne90266:0"
 
@@ -58804,7 +58891,7 @@ msgstr "crwdns90268:0{0}crwdne90268:0"
 msgid "{0} hours"
 msgstr "crwdns112174:0{0}crwdne112174:0"
 
-#: controllers/accounts_controller.py:2340
+#: controllers/accounts_controller.py:2331
 msgid "{0} in row {1}"
 msgstr "crwdns90270:0{0}crwdnd90270:0{1}crwdne90270:0"
 
@@ -58826,7 +58913,7 @@ msgid "{0} is blocked so this transaction cannot proceed"
 msgstr "crwdns90274:0{0}crwdne90274:0"
 
 #: accounts/doctype/budget/budget.py:57
-#: accounts/doctype/payment_entry/payment_entry.py:574
+#: accounts/doctype/payment_entry/payment_entry.py:609
 #: accounts/report/general_ledger/general_ledger.py:53
 #: accounts/report/pos_register/pos_register.py:107 controllers/trends.py:50
 msgid "{0} is mandatory"
@@ -58837,7 +58924,7 @@ msgid "{0} is mandatory for Item {1}"
 msgstr "crwdns90278:0{0}crwdnd90278:0{1}crwdne90278:0"
 
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:101
-#: accounts/general_ledger.py:770
+#: accounts/general_ledger.py:773
 msgid "{0} is mandatory for account {1}"
 msgstr "crwdns90280:0{0}crwdnd90280:0{1}crwdne90280:0"
 
@@ -58845,7 +58932,7 @@ msgstr "crwdns90280:0{0}crwdnd90280:0{1}crwdne90280:0"
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}"
 msgstr "crwdns90282:0{0}crwdnd90282:0{1}crwdnd90282:0{2}crwdne90282:0"
 
-#: controllers/accounts_controller.py:2618
+#: controllers/accounts_controller.py:2609
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}."
 msgstr "crwdns90284:0{0}crwdnd90284:0{1}crwdnd90284:0{2}crwdne90284:0"
 
@@ -58881,7 +58968,7 @@ msgstr "crwdns112178:0{0}crwdne112178:0"
 msgid "{0} is not the default supplier for any items."
 msgstr "crwdns90298:0{0}crwdne90298:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:2399
+#: accounts/doctype/payment_entry/payment_entry.py:2809
 msgid "{0} is on hold till {1}"
 msgstr "crwdns90300:0{0}crwdnd90300:0{1}crwdne90300:0"
 
@@ -58989,9 +59076,9 @@ msgstr "crwdns90344:0{0}crwdnd90344:0{1}crwdne90344:0"
 msgid "{0} {1} created"
 msgstr "crwdns90346:0{0}crwdnd90346:0{1}crwdne90346:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:536
-#: accounts/doctype/payment_entry/payment_entry.py:594
-#: accounts/doctype/payment_entry/payment_entry.py:2140
+#: accounts/doctype/payment_entry/payment_entry.py:571
+#: accounts/doctype/payment_entry/payment_entry.py:629
+#: accounts/doctype/payment_entry/payment_entry.py:2549
 msgid "{0} {1} does not exist"
 msgstr "crwdns90348:0{0}crwdnd90348:0{1}crwdne90348:0"
 
@@ -58999,11 +59086,11 @@ msgstr "crwdns90348:0{0}crwdnd90348:0{1}crwdne90348:0"
 msgid "{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}."
 msgstr "crwdns90350:0{0}crwdnd90350:0{1}crwdnd90350:0{2}crwdnd90350:0{3}crwdnd90350:0{2}crwdne90350:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:381
+#: accounts/doctype/payment_entry/payment_entry.py:413
 msgid "{0} {1} has already been fully paid."
 msgstr "crwdns90352:0{0}crwdnd90352:0{1}crwdne90352:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:393
+#: accounts/doctype/payment_entry/payment_entry.py:425
 msgid "{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
 msgstr "crwdns90354:0{0}crwdnd90354:0{1}crwdne90354:0"
 
@@ -59021,7 +59108,7 @@ msgstr "crwdns90358:0{0}crwdnd90358:0{1}crwdne90358:0"
 msgid "{0} {1} is allocated twice in this Bank Transaction"
 msgstr "crwdns90360:0{0}crwdnd90360:0{1}crwdne90360:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:624
+#: accounts/doctype/payment_entry/payment_entry.py:659
 msgid "{0} {1} is associated with {2}, but Party Account is {3}"
 msgstr "crwdns90362:0{0}crwdnd90362:0{1}crwdnd90362:0{2}crwdnd90362:0{3}crwdne90362:0"
 
@@ -59038,7 +59125,7 @@ msgstr "crwdns90366:0{0}crwdnd90366:0{1}crwdne90366:0"
 msgid "{0} {1} is cancelled so the action cannot be completed"
 msgstr "crwdns90368:0{0}crwdnd90368:0{1}crwdne90368:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:790
+#: accounts/doctype/journal_entry/journal_entry.py:795
 msgid "{0} {1} is closed"
 msgstr "crwdns90370:0{0}crwdnd90370:0{1}crwdne90370:0"
 
@@ -59050,7 +59137,7 @@ msgstr "crwdns90372:0{0}crwdnd90372:0{1}crwdne90372:0"
 msgid "{0} {1} is frozen"
 msgstr "crwdns90374:0{0}crwdnd90374:0{1}crwdne90374:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:787
+#: accounts/doctype/journal_entry/journal_entry.py:792
 msgid "{0} {1} is fully billed"
 msgstr "crwdns90376:0{0}crwdnd90376:0{1}crwdne90376:0"
 
@@ -59058,7 +59145,7 @@ msgstr "crwdns90376:0{0}crwdnd90376:0{1}crwdne90376:0"
 msgid "{0} {1} is not active"
 msgstr "crwdns90378:0{0}crwdnd90378:0{1}crwdne90378:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:601
+#: accounts/doctype/payment_entry/payment_entry.py:636
 msgid "{0} {1} is not associated with {2} {3}"
 msgstr "crwdns90380:0{0}crwdnd90380:0{1}crwdnd90380:0{2}crwdnd90380:0{3}crwdne90380:0"
 
@@ -59066,12 +59153,12 @@ msgstr "crwdns90380:0{0}crwdnd90380:0{1}crwdnd90380:0{2}crwdnd90380:0{3}crwdne90
 msgid "{0} {1} is not in any active Fiscal Year"
 msgstr "crwdns90382:0{0}crwdnd90382:0{1}crwdne90382:0"
 
-#: accounts/doctype/journal_entry/journal_entry.py:784
-#: accounts/doctype/journal_entry/journal_entry.py:825
+#: accounts/doctype/journal_entry/journal_entry.py:789
+#: accounts/doctype/journal_entry/journal_entry.py:830
 msgid "{0} {1} is not submitted"
 msgstr "crwdns90384:0{0}crwdnd90384:0{1}crwdne90384:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:634
+#: accounts/doctype/payment_entry/payment_entry.py:669
 msgid "{0} {1} is on hold"
 msgstr "crwdns90386:0{0}crwdnd90386:0{1}crwdne90386:0"
 
@@ -59079,7 +59166,7 @@ msgstr "crwdns90386:0{0}crwdnd90386:0{1}crwdne90386:0"
 msgid "{0} {1} is {2}"
 msgstr "crwdns90388:0{0}crwdnd90388:0{1}crwdnd90388:0{2}crwdne90388:0"
 
-#: accounts/doctype/payment_entry/payment_entry.py:640
+#: accounts/doctype/payment_entry/payment_entry.py:675
 msgid "{0} {1} must be submitted"
 msgstr "crwdns90390:0{0}crwdnd90390:0{1}crwdne90390:0"
 
@@ -59176,7 +59263,7 @@ msgstr "crwdns90432:0{0}crwdnd90432:0{1}crwdnd90432:0{2}crwdne90432:0"
 msgid "{0}: {1} does not exists"
 msgstr "crwdns90434:0{0}crwdnd90434:0{1}crwdne90434:0"
 
-#: accounts/doctype/payment_entry/payment_entry.js:931
+#: accounts/doctype/payment_entry/payment_entry.js:951
 msgid "{0}: {1} must be less than {2}"
 msgstr "crwdns90436:0{0}crwdnd90436:0{1}crwdnd90436:0{2}crwdne90436:0"
 
