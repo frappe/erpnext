@@ -289,11 +289,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
-<<<<<<< HEAD
- "modified": "2024-04-02 16:30:59.779190",
-=======
- "modified": "2024-09-20 09:05:52.945112",
->>>>>>> b127a0c8b7 (fix: ui clean-up (#43305))
+ "modified": "2024-09-21 09:05:52.945112",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
