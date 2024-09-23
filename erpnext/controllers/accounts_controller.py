@@ -1036,7 +1036,9 @@ class AccountsController(TransactionBase):
 		gl_dict.update(
 			{
 				"transaction_currency": self.get("currency") or self.company_currency,
-				"transaction_exchange_rate": self.get("conversion_rate", 1),
+				"transaction_exchange_rate": item.get("exchange_rate", 1)
+				if self.doctype == "Journal Entry" and item
+				else self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 					account_currency, gl_dict, "debit"
 				),
