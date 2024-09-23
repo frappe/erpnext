@@ -721,11 +721,8 @@ class POSInvoice(SalesInvoice):
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
 
-		frappe.db.sql(
-			"""delete from `tabSales Invoice Payment` where parent = %s
-			and amount = 0""",
-			self.name,
-		)
+		sip = frappe.qb.DocType("Sales Invoice Payment")
+		frappe.qb.from_(sip).delete().where(sip.parent == self.name).where(sip.amount == 0).run()
 
 
 @frappe.whitelist()
