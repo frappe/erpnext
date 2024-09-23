@@ -59,11 +59,11 @@ def execute(filters=None):
 
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
-	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
-
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
+	chart = get_chart_data(filters, columns, income, expense, net_profit_loss, currency)
+
 	report_summary, primitive_summary = get_report_summary(
 		period_list, filters.periodicity, income, expense, net_profit_loss, currency, filters
 	)
@@ -152,7 +152,7 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 		return net_profit_loss
 
 
-def get_chart_data(filters, columns, income, expense, net_profit_loss):
+def get_chart_data(filters, columns, income, expense, net_profit_loss, currency):
 	labels = [d.get("label") for d in columns[2:]]
 
 	income_data, expense_data, net_profit = [], [], []
@@ -181,5 +181,7 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss):
 		chart["type"] = "line"
 
 	chart["fieldtype"] = "Currency"
+	chart["options"] = "currency"
+	chart["currency"] = currency
 
 	return chart
