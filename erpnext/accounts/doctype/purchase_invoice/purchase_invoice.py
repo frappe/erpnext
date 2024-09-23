@@ -877,7 +877,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
-		self.make_gl_entries_for_tax_withholding(gl_entries)
+		self.make_tax_withholding_gl_entries(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -1432,7 +1432,7 @@ class PurchaseInvoice(BuyingController):
 				)
 			)
 
-	def make_gl_entries_for_tax_withholding(self, gl_entries):
+	def make_tax_withholding_gl_entries(self, gl_entries):
 		"""
 		Tax withholding amount is not part of supplier invoice.
 		Separate supplier GL Entry for correct reporting.
