@@ -61,6 +61,7 @@ def create_prospect_against_crm_deal():
 		pass
 
 	create_contacts(json.loads(doc.contacts), prospect.company_name, "Prospect", prospect_name)
+	create_address("Prospect", prospect_name, doc.address)
 	frappe.response["message"] = prospect_name
 
 
@@ -86,17 +87,52 @@ def create_contacts(contacts, organization=None, link_doctype=None, link_docname
 			if c.get("mobile_no"):
 				contact.append("phone_nos", {"phone": c.get("mobile_no"), "is_primary_mobile_no": 1})
 
-		link_contact_to_prospect(contact, link_doctype, link_docname)
+		link_doc(contact, link_doctype, link_docname)
 
 		contact.save(ignore_permissions=True)
 
 
-def link_contact_to_prospect(contact, link_doctype, link_docname):
+def create_address(doctype, docname, address):
+	if not address:
+		return
+	if isinstance(address, str):
+		address = json.loads(address)
+	try:
+		_address = frappe.db.exists("Address", address.get("name"))
+		if not _address:
+			new_address_doc = frappe.new_doc("Address")
+			for field in [
+				"address_title",
+				"address_type",
+				"address_line1",
+				"address_line2",
+				"city",
+				"county",
+				"state",
+				"pincode",
+				"country",
+			]:
+				if address.get(field):
+					new_address_doc.set(field, address.get(field))
+
+			new_address_doc.append("links", {"link_doctype": doctype, "link_name": docname})
+			new_address_doc.insert(ignore_mandatory=True)
+			return new_address_doc.name
+		else:
+			address = frappe.get_doc("Address", _address)
+			link_doc(address, doctype, docname)
+			address.save(ignore_permissions=True)
+			return address.name
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), f"Error while creating address for {docname}")
+
+
+def link_doc(doc, link_doctype, link_docname):
 	already_linked = any(
-		[(link.link_doctype == link_doctype and link.link_name == link_docname) for link in contact.links]
+		[(link.link_doctype == link_doctype and link.link_name == link_docname) for link in doc.links]
 	)
 	if not already_linked:
-		contact.append(
+		doc.append(
 			"links", {"link_doctype": link_doctype, "link_name": link_docname, "link_title": link_docname}
 		)
 
@@ -130,6 +166,8 @@ def create_customer(customer_data=None):
 
 		contacts = json.loads(customer_data.get("contacts"))
 		create_contacts(contacts, customer_name, "Customer", customer_name)
+		create_address("Customer", customer_name, customer_data.get("address"))
+		return customer_name
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Error while creating customer against Frappe CRM Deal")
 		pass

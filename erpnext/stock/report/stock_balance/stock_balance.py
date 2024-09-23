@@ -252,7 +252,10 @@ class StockBalanceReport:
 		group_by_key = [row.company, row.item_code, row.warehouse]
 
 		for fieldname in self.inventory_dimensions:
-			if self.filters.get(fieldname):
+			if not row.get(fieldname):
+				continue
+
+			if self.filters.get(fieldname) or self.filters.get("show_dimension_wise_stock"):
 				group_by_key.append(row.get(fieldname))
 
 		return tuple(group_by_key)

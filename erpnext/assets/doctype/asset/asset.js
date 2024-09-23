@@ -213,7 +213,7 @@ frappe.ui.form.on("Asset", {
 			<div class="row">
 				<div class="col-xs-12 col-sm-6">
 					<span class="indicator whitespace-nowrap red">
-						<span>Failed to post depreciation entries</span>
+						<span>${__("Failed to post depreciation entries")}</span>
 					</span>
 				</div>
 			</div>`;
