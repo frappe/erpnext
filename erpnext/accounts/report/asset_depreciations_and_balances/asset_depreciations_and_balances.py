@@ -68,7 +68,7 @@ def get_group_by_asset_category_data(filters):
 def get_asset_categories_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
-		condition += " and asset_category = %(asset_category)s"
+		condition += " and a.asset_category = %(asset_category)s"
 	if filters.get("finance_book"):
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
 
@@ -113,11 +113,12 @@ def get_asset_categories_for_grouped_by_category(filters):
 								0
 						   end), 0) as cost_of_scrapped_asset
 		from `tabAsset` a
-		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {condition}
+		where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
 			and not exists(
 				select 1 from `tabAsset Capitalization Asset Item` acai join `tabAsset Capitalization` ac on acai.parent=ac.name
 				where acai.asset = a.name
-				and ac.posting_date between %(from_date)s AND %(to_date)s
+				and ac.posting_date <= %(to_date)s
+				and ac.docstatus=1
 			)
 		group by a.asset_category
 	""",
@@ -184,7 +185,8 @@ def get_asset_details_for_grouped_by_category(filters):
 		and not exists(
 				select 1 from `tabAsset Capitalization Asset Item` acai join `tabAsset Capitalization` ac on acai.parent=ac.name
 				where acai.asset = a.name
-				and ac.posting_date between %(from_date)s AND %(to_date)s
+				and ac.posting_date <= %(to_date)s
+				and ac.docstatus=1
 			)
 		group by a.name
 	""",
