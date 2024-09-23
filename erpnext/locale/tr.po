@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-22 09:34+0000\n"
-"PO-Revision-Date: 2024-09-22 21:09\n"
+"PO-Revision-Date: 2024-09-23 21:16\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -846,11 +846,11 @@ msgstr "<span class=\"h4\"><b>Kısayollarınız</b></span>"
 
 #: accounts/doctype/payment_request/payment_request.py:938
 msgid "<strong>Grand Total:</strong> {0}"
-msgstr ""
+msgstr "<strong>Genel Toplam:</strong> {0}"
 
 #: accounts/doctype/payment_request/payment_request.py:939
 msgid "<strong>Outstanding Amount:</strong> {0}"
-msgstr ""
+msgstr "<strong>Ödenmemiş Tutar:</strong> {0}"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
