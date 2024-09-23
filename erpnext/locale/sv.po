@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-22 09:34+0000\n"
-"PO-Revision-Date: 2024-09-22 21:09\n"
+"PO-Revision-Date: 2024-09-23 21:16\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -26960,7 +26960,7 @@ msgstr "Jobbkort Tid Logg"
 #. Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Job Card and Capacity Planning"
-msgstr "Jobbkort & Kapacitetsplanering"
+msgstr "Jobbkort & Kapacitet Planering"
 
 #: manufacturing/doctype/job_card/job_card.py:1229
 msgid "Job Card {0} has been completed"
@@ -55269,7 +55269,7 @@ msgstr "Kunde inte att hitta resultatkort från {0}. Du måste ha stående resul
 
 #: manufacturing/doctype/work_order/work_order.py:647
 msgid "Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
-msgstr "Kunde inte att hitta tider under de kommande {0} dagarna för åtgärd {1}.Öka \"Kapacitetsplanering för (Dagar)\" i {2}."
+msgstr "Kunde inte att hitta tider under de kommande {0} dagarna för åtgärd {1}. Öka \"Kapacitet Planering för (Dagar)\" i {2}."
 
 #: buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py:98
 msgid "Unable to find variable:"
