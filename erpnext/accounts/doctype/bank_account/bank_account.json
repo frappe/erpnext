@@ -210,23 +210,33 @@
  ],
  "links": [
   {
-   "group": "Payments",
-   "link_doctype": "Payment Entry",
-   "link_fieldname": "bank_account"
-  },
-  {
-   "group": "Payments",
+   "group": "Transactions",
    "link_doctype": "Payment Request",
    "link_fieldname": "bank_account"
   },
   {
-   "group": "Payments",
+   "group": "Transactions",
    "link_doctype": "Payment Order",
    "link_fieldname": "bank_account"
   },
   {
-   "group": "Payments",
+   "group": "Transactions",
+   "link_doctype": "Bank Guarantee",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Transactions",
    "link_doctype": "Payroll Entry",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Accounting",
+   "link_doctype": "Payment Entry",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Accounting",
+   "link_doctype": "Journal Entry",
    "link_fieldname": "bank_account"
   },
   {
@@ -238,17 +248,9 @@
    "group": "Party",
    "link_doctype": "Supplier",
    "link_fieldname": "default_bank_account"
-  },
-  {
-   "link_doctype": "Bank Guarantee",
-   "link_fieldname": "bank_account"
-  },
-  {
-   "link_doctype": "Journal Entry",
-   "link_fieldname": "bank_account"
   }
  ],
- "modified": "2024-09-24 06:53:28.597469",
+ "modified": "2024-09-24 06:56:15.488083",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
