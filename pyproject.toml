@@ -29,7 +29,7 @@ requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.bench.frappe-dependencies]
-frappe = ">=15.10.0,<16.0.0"
+frappe = ">=15.40.4,<16.0.0"
 
 [tool.ruff]
 line-length = 110
