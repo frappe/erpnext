@@ -60,7 +60,21 @@ def get_funnel_data(from_date, to_date, company):
 
 
 @frappe.whitelist()
-def get_opp_by_lead_source(from_date, to_date, company):
+def get_opp_by_utm_source(from_date, to_date, company):
+	return get_opp_by("utm_source", from_date, to_date, company)
+
+
+@frappe.whitelist()
+def get_opp_by_utm_campaign(from_date, to_date, company):
+	return get_opp_by("utm_campaign", from_date, to_date, company)
+
+
+@frappe.whitelist()
+def get_opp_by_utm_medium(from_date, to_date, company):
+	return get_opp_by("utm_medium", from_date, to_date, company)
+
+
+def get_opp_by(by_field, from_date, to_date, company):
 	validate_filters(from_date, to_date, company)
 
 	opportunities = frappe.get_all(
@@ -70,7 +84,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 			["company", "=", company],
 			["transaction_date", "Between", [from_date, to_date]],
 		],
-		fields=["currency", "sales_stage", "opportunity_amount", "probability", "source"],
+		fields=["currency", "sales_stage", "opportunity_amount", "probability", by_field],
 	)
 
 	if opportunities:
@@ -92,9 +106,11 @@ def get_opp_by_lead_source(from_date, to_date, company):
 
 		summary = {}
 		sales_stages = set()
-		group_key = lambda o: (o["source"], o["sales_stage"])  # noqa
-		for (source, sales_stage), rows in groupby(sorted(cp_opportunities, key=group_key), group_key):
-			summary.setdefault(source, {})[sales_stage] = sum(r["compound_amount"] for r in rows)
+		group_key = lambda o: (o[by_field], o["sales_stage"])  # noqa
+		for (by_field_group, sales_stage), rows in groupby(
+			sorted(cp_opportunities, key=group_key), group_key
+		):
+			summary.setdefault(by_field_group, {})[sales_stage] = sum(r["compound_amount"] for r in rows)
 			sales_stages.add(sales_stage)
 
 		pivot_table = []

@@ -117,14 +117,17 @@ erpnext.financial_statements = {
 		erpnext.financial_statements.filters = get_filters();
 
 		let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
+		var filters = report.get_values();
 
-		frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
-			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-			frappe.query_report.set_filter_value({
-				period_start_date: fy.year_start_date,
-				period_end_date: fy.year_end_date,
+		if (!filters.period_start_date || !filters.period_end_date) {
+			frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
+				var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+				frappe.query_report.set_filter_value({
+					period_start_date: fy.year_start_date,
+					period_end_date: fy.year_end_date,
+				});
 			});
-		});
+		}
 
 		if (report.page) {
 			const views_menu = report.page.add_custom_button_group(__("Financial Statements"));
@@ -268,11 +271,10 @@ function get_filters() {
 	let fy_filters = filters.filter((x) => {
 		return ["from_fiscal_year", "to_fiscal_year"].includes(x.fieldname);
 	});
-	let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), false, true);
+	let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), false, false);
 	if (fiscal_year) {
-		let fy = erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), false, false);
 		fy_filters.forEach((x) => {
-			x.default = fy;
+			x.default = fiscal_year;
 		});
 	}
 

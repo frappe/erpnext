@@ -35,6 +35,9 @@ def execute(filters=None):
 	if filters.get("party"):
 		filters.party = frappe.parse_json(filters.get("party"))
 
+	if filters.get("voucher_no") and not filters.get("group_by"):
+		filters.group_by = "Group by Voucher (Consolidated)"
+
 	validate_filters(filters, account_details)
 
 	validate_party(filters)

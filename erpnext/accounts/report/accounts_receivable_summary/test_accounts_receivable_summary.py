@@ -27,10 +27,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"company": self.company,
 			"customer": self.customer,
 			"posting_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 
 		si = create_sales_invoice(
@@ -121,10 +118,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"company": self.company,
 			"customer": self.customer,
 			"posting_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 
 		si = create_sales_invoice(
