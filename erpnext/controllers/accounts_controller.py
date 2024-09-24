@@ -1039,7 +1039,9 @@ class AccountsController(TransactionBase):
 		gl_dict.update(
 			{
 				"transaction_currency": self.get("currency") or self.company_currency,
-				"transaction_exchange_rate": self.get("conversion_rate", 1),
+				"transaction_exchange_rate": item.get("exchange_rate", 1)
+				if self.doctype == "Journal Entry" and item
+				else self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 					account_currency, gl_dict, "debit"
 				),
@@ -1966,33 +1968,24 @@ class AccountsController(TransactionBase):
 	def set_advance_payment_status(self):
 		new_status = None
 
-		stati = frappe.get_all(
-			"Payment Request",
-			{
+		paid_amount = frappe.get_value(
+			doctype="Payment Request",
+			filters={
 				"reference_doctype": self.doctype,
 				"reference_name": self.name,
 				"docstatus": 1,
 			},
-			pluck="status",
+			fieldname="sum(grand_total - outstanding_amount)",
 		)
-		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-			if not stati:
-				new_status = "Not Requested"
-			elif "Requested" in stati or "Failed" in stati:
-				new_status = "Requested"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
-		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-			if not stati:
-				new_status = "Not Initiated"
-			elif "Initiated" in stati or "Failed" in stati or "Payment Ordered" in stati:
-				new_status = "Initiated"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
+
+		if not paid_amount:
+			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+				new_status = "Not Requested" if paid_amount is None else "Requested"
+			elif self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+				new_status = "Not Initiated" if paid_amount is None else "Initiated"
+		else:
+			total_amount = self.get("rounded_total") or self.get("grand_total")
+			new_status = "Fully Paid" if paid_amount == total_amount else "Partially Paid"
 
 		if new_status == self.advance_payment_status:
 			return
