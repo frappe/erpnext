@@ -208,10 +208,6 @@
    "label": "Disabled"
   }
  ],
-<<<<<<< HEAD
- "links": [],
- "modified": "2024-02-02 17:50:09.768835",
-=======
  "links": [
   {
    "group": "Transactions",
@@ -260,7 +256,6 @@
   }
  ],
  "modified": "2024-09-24 06:57:41.292970",
->>>>>>> 5172629e06 (fix(Bank Account): dashboard connections (#43365))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
