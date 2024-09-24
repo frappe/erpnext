@@ -37,7 +37,7 @@ def get_group_by_asset_category_data(filters):
 			- flt(row.cost_of_sold_asset)
 			- flt(row.cost_of_scrapped_asset)
 		)
-
+		# Update row with corresponding asset data
 		row.update(
 			next(
 				asset
