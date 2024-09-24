@@ -108,8 +108,18 @@ class BankClearance(Document):
 				if not d.clearance_date:
 					d.clearance_date = None
 
-				payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
-				payment_entry.db_set("clearance_date", d.clearance_date)
+				if d.payment_document == "Sales Invoice":
+					frappe.db.set_value(
+						"Sales Invoice Payment",
+						{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
+						"clearance_date",
+						d.clearance_date,
+					)
+
+				else:
+					frappe.db.set_value(
+						d.payment_document, d.payment_entry, "clearance_date", d.clearance_date
+					)
 
 				clearance_date_updated = True
 
