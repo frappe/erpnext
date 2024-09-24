@@ -95,7 +95,9 @@ class Asset(AccountsController):
 		purchase_amount: DF.Currency
 		purchase_date: DF.Date | None
 		purchase_invoice: DF.Link | None
+		purchase_invoice_item: DF.Link | None
 		purchase_receipt: DF.Link | None
+		purchase_receipt_item: DF.Link | None
 		split_from: DF.Link | None
 		status: DF.Literal[
 			"Draft",
@@ -124,7 +126,6 @@ class Asset(AccountsController):
 		self.validate_cost_center()
 		self.set_missing_values()
 		self.validate_gross_and_purchase_amount()
-		self.validate_expected_value_after_useful_life()
 		self.validate_finance_books()
 
 		if not self.split_from:
@@ -145,6 +146,7 @@ class Asset(AccountsController):
 								"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 							).format(asset_depr_schedules_links)
 						)
+		self.validate_expected_value_after_useful_life()
 		self.set_total_booked_depreciations()
 		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
@@ -624,6 +626,9 @@ class Asset(AccountsController):
 		return records
 
 	def validate_make_gl_entry(self):
+		if self.is_composite_asset:
+			return True
+
 		purchase_document = self.get_purchase_document()
 		if not purchase_document:
 			return False
@@ -896,18 +901,19 @@ def create_asset_maintenance(asset, item_code, item_name, asset_category, compan
 
 
 @frappe.whitelist()
-def create_asset_repair(asset, asset_name):
+def create_asset_repair(company, asset, asset_name):
 	asset_repair = frappe.new_doc("Asset Repair")
-	asset_repair.update({"asset": asset, "asset_name": asset_name})
+	asset_repair.update({"company": company, "asset": asset, "asset_name": asset_name})
 	return asset_repair
 
 
 @frappe.whitelist()
-def create_asset_capitalization(asset, asset_name, item_code):
+def create_asset_capitalization(company, asset, asset_name, item_code):
 	asset_capitalization = frappe.new_doc("Asset Capitalization")
 	asset_capitalization.update(
 		{
 			"target_asset": asset,
+			"company": company,
 			"capitalization_method": "Choose a WIP composite asset",
 			"target_asset_name": asset_name,
 			"target_item_code": item_code,

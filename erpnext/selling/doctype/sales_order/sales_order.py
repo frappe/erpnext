@@ -80,7 +80,6 @@ class SalesOrder(SellingController):
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		billing_status: DF.Literal["Not Billed", "Fully Billed", "Partly Billed", "Closed"]
-		campaign: DF.Link | None
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
@@ -151,7 +150,6 @@ class SalesOrder(SellingController):
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		skip_delivery_note: DF.Check
-		source: DF.Link | None
 		status: DF.Literal[
 			"",
 			"Draft",
@@ -179,12 +177,18 @@ class SalesOrder(SellingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transaction_date: DF.Date
+		utm_campaign: DF.Link | None
+		utm_content: DF.Data | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
 	def onload(self) -> None:
+		super().onload()
+
 		if frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			if self.has_unreserved_stock():
 				self.set_onload("has_unreserved_stock", True)
@@ -936,7 +940,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
@@ -1043,6 +1047,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				)
 
 				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
+				dn_item.warehouse = sre.warehouse
 
 				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
 					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
@@ -1091,6 +1096,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
 			target.redeem_loyalty_points = 1
+			target.loyalty_points = source.loyalty_points
 
 		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
@@ -1136,7 +1142,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"condition": lambda doc: doc.qty
 				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"reset_value": True,
+			},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 		},
 		target_doc,
