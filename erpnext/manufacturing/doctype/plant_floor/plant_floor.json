@@ -69,9 +69,10 @@
    "options": "Company"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-30 11:59:07.508535",
+ "modified": "2024-09-19 19:06:36.481625",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",

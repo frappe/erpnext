@@ -201,7 +201,7 @@ frappe.ui.form.on("Work Order", {
 			frm.doc.produced_qty > 0
 		) {
 			frm.add_custom_button(
-				__("Disassembly Order"),
+				__("Disassemble Order"),
 				() => {
 					frm.trigger("make_disassembly_order");
 				},
