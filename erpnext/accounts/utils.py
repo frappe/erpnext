@@ -618,12 +618,11 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# Update Advance Paid in SO/PO since they might be getting unlinked
 	update_advance_paid = []
-	advance_payment_doctypes = frappe.get_hooks(
-		"advance_payment_customer_doctypes"
-	) + frappe.get_hooks("advance_payment_supplier_doctypes")
+	advance_payment_doctypes = frappe.get_hooks("advance_payment_customer_doctypes") + frappe.get_hooks(
+		"advance_payment_supplier_doctypes"
+	)
 	if jv_detail.get("reference_type") in advance_payment_doctypes:
 		update_advance_paid.append((jv_detail.reference_type, jv_detail.reference_name))
-
 
 	if flt(d["unadjusted_amount"]) - flt(d["allocated_amount"]) != 0:
 		# adjust the unreconciled balance
@@ -699,9 +698,9 @@ def update_reference_in_payment_entry(
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 
 		# Update Advance Paid in SO/PO since they are getting unlinked
-		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_customer_doctypes") + frappe.get_hooks(
+			"advance_payment_supplier_doctypes"
+		)
 		if existing_row.get("reference_doctype") in advance_payment_doctypes:
 			update_advance_paid.append((existing_row.reference_doctype, existing_row.reference_name))
 

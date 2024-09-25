@@ -1128,17 +1128,13 @@ class TestPurchaseOrder(FrappeTestCase):
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
 		po = create_purchase_order()
-		self.assertEqual(
-			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
-		)
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated")
 
 		pr = make_payment_request(dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True)
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
 
 		pe = get_payment_entry(po.doctype, po.name).save().submit()
-		self.assertEqual(
-			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid"
-		)
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid")
 
 		pe.reload()
 		pe.cancel()
@@ -1146,9 +1142,7 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		pr.reload()
 		pr.cancel()
-		self.assertEqual(
-			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
-		)
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated")
 
 
 def prepare_data_for_internal_transfer():

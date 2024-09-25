@@ -919,9 +919,9 @@ class PaymentEntry(AccountsController):
 
 	def calculate_base_allocated_amount_for_reference(self, d) -> float:
 		base_allocated_amount = 0
-		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_customer_doctypes") + frappe.get_hooks(
+			"advance_payment_supplier_doctypes"
+		)
 		if d.reference_doctype in advance_payment_doctypes:
 			# When referencing Sales/Purchase Order, use the source/target exchange rate depending on payment type.
 			# This is so there are no Exchange Gain/Loss generated for such doctypes

@@ -170,9 +170,9 @@ class PaymentRequest(Document):
 		elif self.payment_channel == "Phone":
 			self.request_phone_payment()
 
-		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_customer_doctypes") + frappe.get_hooks(
+			"advance_payment_supplier_doctypes"
+		)
 		if self.reference_doctype in advance_payment_doctypes:
 			# set advance payment status
 			ref_doc.set_total_advance_paid()
@@ -215,9 +215,9 @@ class PaymentRequest(Document):
 		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_customer_doctypes") + frappe.get_hooks(
+			"advance_payment_supplier_doctypes"
+		)
 		if self.reference_doctype in advance_payment_doctypes:
 			# set advance payment status
 			ref_doc.set_total_advance_paid()

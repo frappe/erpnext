@@ -9,15 +9,13 @@ def execute():
 
 	if frappe.reload_doc("selling", "doctype", "Sales Order"):
 		so = frappe.qb.DocType("Sales Order")
-		frappe.qb.update(so).set(so.advance_payment_status, "Not Requested").where(
-			so.docstatus == 1
-		).where(so.advance_paid == 0.0).run()
-
-		frappe.qb.update(so).set(so.advance_payment_status, "Partially Paid").where(
-			so.docstatus == 1
-		).where(so.advance_payment_status.isnull()).where(
-			so.advance_paid < (so.rounded_total or so.grand_total)
+		frappe.qb.update(so).set(so.advance_payment_status, "Not Requested").where(so.docstatus == 1).where(
+			so.advance_paid == 0.0
 		).run()
+
+		frappe.qb.update(so).set(so.advance_payment_status, "Partially Paid").where(so.docstatus == 1).where(
+			so.advance_payment_status.isnull()
+		).where(so.advance_paid < (so.rounded_total or so.grand_total)).run()
 
 		frappe.qb.update(so).set(so.advance_payment_status, "Fully Paid").where(so.docstatus == 1).where(
 			so.advance_payment_status.isnull()
@@ -32,15 +30,13 @@ def execute():
 
 	if frappe.reload_doc("buying", "doctype", "Purchase Order"):
 		po = frappe.qb.DocType("Purchase Order")
-		frappe.qb.update(po).set(po.advance_payment_status, "Not Initiated").where(
-			po.docstatus == 1
-		).where(po.advance_paid == 0.0).run()
-
-		frappe.qb.update(po).set(po.advance_payment_status, "Partially Paid").where(
-			po.docstatus == 1
-		).where(po.advance_payment_status.isnull()).where(
-			po.advance_paid < (po.rounded_total or po.grand_total)
+		frappe.qb.update(po).set(po.advance_payment_status, "Not Initiated").where(po.docstatus == 1).where(
+			po.advance_paid == 0.0
 		).run()
+
+		frappe.qb.update(po).set(po.advance_payment_status, "Partially Paid").where(po.docstatus == 1).where(
+			po.advance_payment_status.isnull()
+		).where(po.advance_paid < (po.rounded_total or po.grand_total)).run()
 
 		frappe.qb.update(po).set(po.advance_payment_status, "Fully Paid").where(po.docstatus == 1).where(
 			po.advance_payment_status.isnull()

@@ -2117,17 +2117,13 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
 		so = make_sales_order(qty=1, rate=100)
-		self.assertEqual(
-			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
-		)
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested")
 
 		pr = make_payment_request(dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True)
 		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
 
 		pe = get_payment_entry(so.doctype, so.name).save().submit()
-		self.assertEqual(
-			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid"
-		)
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
 
 		pe.reload()
 		pe.cancel()
@@ -2135,9 +2131,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		pr.reload()
 		pr.cancel()
-		self.assertEqual(
-			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
-		)
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested")
 
 
 def automatically_fetch_payment_terms(enable=1):

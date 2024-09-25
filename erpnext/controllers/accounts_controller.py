@@ -1975,9 +1975,7 @@ class AccountsController(TransactionBase):
 
 		self.set_advance_payment_status(advance_paid, order_total)
 
-	def set_advance_payment_status(
-		self, advance_paid: float | None = None, order_total: float | None = None
-	):
+	def set_advance_payment_status(self, advance_paid: float | None = None, order_total: float | None = None):
 		new_status = None
 		# if money is paid set the paid states
 		if advance_paid:
