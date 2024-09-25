@@ -605,8 +605,10 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters,
 		query_filters.append(["company", "=", filters.get("company")])
 
 	for field in searchfields:
-		or_filters.append([field, "LIKE", "%%%s%%" % txt])
-		fields.append(field)
+		field_meta = meta.get_field(field)
+		if field_meta and field_meta.fieldtype in ["Data", "Text", "Small Text", "Long Text"]:
+			or_filters.append([field, "ILIKE", "%%%s%%" % txt])  # ILIKE for case-insensitive search
+			fields.append(field)
 
 	if dimension_filters:
 		if dimension_filters["allow_or_restrict"] == "Allow":
