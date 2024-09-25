@@ -778,8 +778,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					]
 				}
 			],
-			primary_action_label: 'Create Purchase Order',
-			primary_action (args) {
+			primary_action_label: __("Create Purchase Order"),
+			primary_action(args) {
 				if (!args) return;
 
 				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children();
