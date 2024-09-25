@@ -134,7 +134,7 @@ class TestAssetRepair(unittest.TestCase):
 
 	def test_purchase_invoice(self):
 		asset_repair = create_asset_repair(capitalize_repair_cost=1, submit=1)
-		self.assertTrue(asset_repair.purchase_invoice_list)
+		self.assertTrue(asset_repair.asset_repair_purchase_invoices)
 
 	def test_gl_entries_with_perpetual_inventory(self):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
@@ -157,6 +157,8 @@ class TestAssetRepair(unittest.TestCase):
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 			submit=1,
+			pi_expense_account1="Administrative Expenses - TCP1",
+			pi_expense_account2="Legal Expenses - TCP1",
 		)
 
 		gl_entries = frappe.db.sql(
@@ -182,12 +184,8 @@ class TestAssetRepair(unittest.TestCase):
 			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
 		)
 
-		for pi in asset_repair.purchase_invoice_list:
-			purchase_invoice_items = frappe.get_all(
-				"Purchase Invoice Item", {"parent": pi.purchase_invoice}, ["expense_account", "base_amount"]
-			)
-			for purchase_invoice_item in purchase_invoice_items:
-				pi_expense_account = purchase_invoice_item.expense_account
+		pi_expense_accounts = [pi.expense_account for pi in asset_repair.asset_repair_purchase_invoices]
+		pi_repair_costs = [pi.repair_cost for pi in asset_repair.asset_repair_purchase_invoices]
 
 		stock_entry_expense_account = (
 			frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name}).get("items")[0].expense_account
@@ -195,7 +193,8 @@ class TestAssetRepair(unittest.TestCase):
 
 		expected_values = {
 			fixed_asset_account: [asset_repair.total_repair_cost, 0],
-			pi_expense_account: [0, asset_repair.repair_cost],
+			pi_expense_accounts[0]: [0, pi_repair_costs[0]],
+			pi_expense_accounts[1]: [0, pi_repair_costs[1]],
 			stock_entry_expense_account: [0, 100],
 		}
 
@@ -233,17 +232,16 @@ class TestAssetRepair(unittest.TestCase):
 		fixed_asset_account = get_asset_account(
 			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
 		)
-
-		for pi in asset_repair.purchase_invoice_list:
-			purchase_invoice_items = frappe.get_all(
-				"Purchase Invoice Item", {"parent": pi.purchase_invoice}, ["expense_account", "base_amount"]
-			)
-			for purchase_invoice_item in purchase_invoice_items:
-				expense_account = purchase_invoice_item.expense_account
+		default_expense_account = frappe.get_cached_value(
+			"Company", asset_repair.company, "default_expense_account"
+		)
+		pi_expense_accounts = [pi.expense_account for pi in asset_repair.asset_repair_purchase_invoices]
 
 		expected_values = {
-			fixed_asset_account: [350, 0],
-			expense_account: [0, 350],
+			fixed_asset_account: [650, 0],
+			pi_expense_accounts[0]: [0, 250],
+			default_expense_account: [0, 100],
+			pi_expense_accounts[1]: [0, 300],
 		}
 
 		for d in gl_entries:
@@ -364,18 +362,34 @@ def create_asset_repair(**args):
 			asset_repair.capitalize_repair_cost = 1
 			if asset.calculate_depreciation:
 				asset_repair.increase_in_asset_life = 12
-			pi = make_purchase_invoice(
+			pi1 = make_purchase_invoice(
 				company=asset.company,
 				expense_account=frappe.db.get_value("Company", asset.company, "default_expense_account"),
 				cost_center=asset_repair.cost_center,
 				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=asset.company),
+				rate="50",
 			)
-
+			pi2 = make_purchase_invoice(
+				company=asset.company,
+				expense_account=frappe.db.get_value("Company", asset.company, "default_expense_account"),
+				cost_center=asset_repair.cost_center,
+				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=asset.company),
+				rate="60",
+			)
 			asset_repair.append(
-				"purchase_invoice_list",
+				"asset_repair_purchase_invoices",
 				{
-					"purchase_invoice": pi.name,
-					"repair_cost": pi.total,
+					"purchase_invoice": pi1.name,
+					"expense_account": args.pi_expense_account1 or "Administrative Expenses - _TC",
+					"repair_cost": args.pi_repair_cost1 or 250,
+				},
+			)
+			asset_repair.append(
+				"asset_repair_purchase_invoices",
+				{
+					"purchase_invoice": pi2.name,
+					"expense_account": args.pi_expense_account2 or "Legal Expenses - _TC",
+					"repair_cost": args.pi_repair_cost2 or 300,
 				},
 			)
 		asset_repair.submit()

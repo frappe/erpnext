@@ -1,13 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2024-09-12 13:33:44.899035",
+ "creation": "2024-09-24 13:53:06.340062",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "purchase_invoice",
-  "repair_cost"
+  "repair_cost",
+  "expense_account"
  ],
  "fields": [
   {
@@ -17,19 +18,27 @@
    "options": "Purchase Invoice"
   },
   {
-   "fetch_from": "purchase_invoice.total",
    "fieldname": "repair_cost",
    "fieldtype": "Currency",
-   "label": "Repair Cost"
+   "in_list_view": 1,
+   "label": "Repair Cost",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-12 16:07:07.525437",
+ "modified": "2024-09-25 11:25:05.567869",
  "modified_by": "Administrator",
  "module": "Assets",
- "name": "Repair Purchase Invoice List",
+ "name": "Asset Repair Purchase Invoice",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "creation",

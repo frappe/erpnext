@@ -28,14 +28,15 @@ class AssetRepair(AccountsController):
 		from erpnext.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
 			AssetRepairConsumedItem,
 		)
-		from erpnext.assets.doctype.repair_purchase_invoice_list.repair_purchase_invoice_list import (
-			RepairPurchaseInvoiceList,
+		from erpnext.assets.doctype.asset_repair_purchase_invoice.asset_repair_purchase_invoice import (
+			AssetRepairPurchaseInvoice,
 		)
 
 		actions_performed: DF.LongText | None
 		amended_from: DF.Link | None
 		asset: DF.Link
 		asset_name: DF.ReadOnly | None
+		asset_repair_purchase_invoices: DF.Table[AssetRepairPurchaseInvoice]
 		capitalize_repair_cost: DF.Check
 		company: DF.Link | None
 		completion_date: DF.Datetime | None
@@ -46,7 +47,6 @@ class AssetRepair(AccountsController):
 		increase_in_asset_life: DF.Int
 		naming_series: DF.Literal["ACC-ASR-.YYYY.-"]
 		project: DF.Link | None
-		purchase_invoice_list: DF.Table[RepairPurchaseInvoiceList]
 		repair_cost: DF.Currency
 		repair_status: DF.Literal["Pending", "Completed", "Cancelled"]
 		stock_consumption: DF.Check
@@ -57,6 +57,7 @@ class AssetRepair(AccountsController):
 	def validate(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 		self.validate_dates()
+		self.validate_purchase_invoice_repair_cost()
 		self.update_status()
 
 		if self.get("stock_items"):
@@ -70,6 +71,13 @@ class AssetRepair(AccountsController):
 			frappe.throw(
 				_("Completion Date can not be before Failure Date. Please adjust the dates accordingly.")
 			)
+
+	def validate_purchase_invoice_repair_cost(self):
+		for pi in self.asset_repair_purchase_invoices:
+			if flt(pi.repair_cost) > frappe.db.get_value(
+				"Purchase Invoice", pi.purchase_invoice, "base_net_total"
+			):
+				frappe.throw(_("Repair cost cannot be greater than purchase invoice base net total"))
 
 	def update_status(self):
 		if self.repair_status == "Pending" and self.asset_doc.status != "Out of Order":
@@ -88,7 +96,7 @@ class AssetRepair(AccountsController):
 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 
 	def calculate_repair_cost(self):
-		self.repair_cost = sum(pi.repair_cost for pi in self.purchase_invoice_list)
+		self.repair_cost = sum(flt(pi.repair_cost) for pi in self.asset_repair_purchase_invoices)
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = flt(self.repair_cost)
@@ -277,28 +285,24 @@ class AssetRepair(AccountsController):
 
 		debit_against_account = set()
 
-		for pi in self.purchase_invoice_list:
-			purchase_invoice_items = frappe.get_all(
-				"Purchase Invoice Item", {"parent": pi.purchase_invoice}, ["expense_account", "base_amount"]
-			)
-			for purchase_invoice_item in purchase_invoice_items:
-				debit_against_account.add(purchase_invoice_item.expense_account)
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": purchase_invoice_item.expense_account,
-							"credit": purchase_invoice_item.base_amount,
-							"credit_in_account_currency": purchase_invoice_item.base_amount,
-							"against": fixed_asset_account,
-							"voucher_type": self.doctype,
-							"voucher_no": self.name,
-							"cost_center": self.cost_center,
-							"posting_date": getdate(),
-							"company": self.company,
-						},
-						item=self,
-					)
+		for pi in self.asset_repair_purchase_invoices:
+			debit_against_account.add(pi.expense_account)
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": pi.expense_account,
+						"credit": pi.repair_cost,
+						"credit_in_account_currency": pi.repair_cost,
+						"against": fixed_asset_account,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"cost_center": self.cost_center,
+						"posting_date": getdate(),
+						"company": self.company,
+					},
+					item=self,
 				)
+			)
 		debit_against_account = ", ".join(debit_against_account)
 		gl_entries.append(
 			self.get_gl_dict(
