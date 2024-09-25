@@ -7,6 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, fmt_money
 
 import erpnext
@@ -89,7 +90,7 @@ class GLEntry(Document):
 		if not self.flags.from_repost and self.voucher_type != "Period Closing Voucher":
 			self.validate_account_details(adv_adj)
 			self.validate_dimensions_for_pl_and_bs()
-			validate_balance_type(self.account, adv_adj)
+			validate_balance_type(self.account, adv_adj, self.finance_book)
 			validate_frozen_account(self.account, adv_adj)
 
 			if (
@@ -297,22 +298,53 @@ class GLEntry(Document):
 		frappe.throw(msg)
 
 
-def validate_balance_type(account, adv_adj=False):
-	if not adv_adj and account:
-		balance_must_be = frappe.get_cached_value("Account", account, "balance_must_be")
-		if balance_must_be:
-			balance = frappe.db.sql(
-				"""select sum(debit) - sum(credit)
-				from `tabGL Entry` where account = %s""",
-				account,
-			)[0][0]
+def validate_balance_type(account, adv_adj=False, finance_book=None):
+	if adv_adj or not account:
+		return
 
-			if (balance_must_be == "Debit" and flt(balance) < 0) or (
-				balance_must_be == "Credit" and flt(balance) > 0
-			):
-				frappe.throw(
-					_("Balance for Account {0} must always be {1}").format(account, _(balance_must_be))
-				)
+	balance_must_be = frappe.get_cached_value("Account", account, "balance_must_be")
+	if not balance_must_be:
+		return
+
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field(balance_must_be.lower()))
+
+	gl_entry = frappe.qb.DocType("GL Entry")
+	query = frappe.qb.from_(gl_entry).where(gl_entry.account == account)
+
+	if finance_book:
+		query = query.select(Sum(gl_entry.debit) - Sum(gl_entry.credit)).where(
+			IfNull(gl_entry.finance_book, "").isin(("", finance_book))
+		)
+		balance = query.run()[0][0]
+		return _validate_balance_must_be(balance_must_be, balance, account)
+
+	balances = dict(
+		query.select(IfNull(gl_entry.finance_book, "").as_("fb"))
+		.select(Sum(gl_entry.debit) - Sum(gl_entry.credit))
+		.groupby("fb")
+		.run()
+	)
+
+	default_balance = balances.pop("", 0)
+	if not balances:
+		return _validate_balance_must_be(balance_must_be, default_balance, account)
+
+	for finance_book, balance in balances.items():
+		_validate_balance_must_be(
+			balance_must_be, flt(default_balance + balance, precision), account, finance_book
+		)
+
+
+def _validate_balance_must_be(balance_must_be, balance, account, finance_book=None):
+	if balance_must_be == "Credit":
+		balance = -balance
+
+	if balance < 0:
+		error_message = _("Balance for Account {0} must always be {1}").format(account, _(balance_must_be))
+		if finance_book:
+			error_message += _(" (Finance Book {0})").format(finance_book)
+
+		frappe.throw(error_message)
 
 
 def update_outstanding_amt(
