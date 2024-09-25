@@ -17,7 +17,7 @@
 	<div class="row form-dashboard-section job-card-link form-links border-gray-200" data-name="{{d.name}}">
 		<div class="row form-section" style="width:100%;margin-top:10px">
 			<div class="form-column col-sm-2">
-				<div class="frappe-control bold" data-doctype="Job Card" data-name="{{d.name}}" title="{{__('Job Card ID')}}">
+				<div class="frappe-control bold indicator  {{d.status_colour}}" data-doctype="Job Card" data-name="{{d.name}}" title="{{__(d.status)}}">
 					{{ d.job_card_link }}
 				</div>
 			</div>
@@ -52,17 +52,30 @@
 				{% } %} -->
 
 			</div>
-			<div class="form-column col-sm-2">
-				<div class="frappe-control indicator-pill no-indicator-dot whitespace-nowrap job-card-status {{d.status_color}}" title="{{__('Status')}}">
-					{% if(d.status === "Open") { %}
-						{{__("Not Started")}}
-					{% } else { %}
-						{{ __(d.status) }}
-					{% } %}
-				</div>
+			<div class="form-column col-sm-1 btn-start" data-job-card="{{d.name}}">
+				<button class="btn btn-default">
+					<span class="menu-item-label" data-label="Start">{{ __('Start') }}</span>
+				</button>
+
 			</div>
+			<div class="form-column col-sm-1 btn-resume" data-job-card="{{d.name}}">
+				<button class="btn btn-default ">
+					<span class="menu-item-label" data-label="Start">{{ __('Resume') }}</span>
+				</button>
+			</div>
+			<div class="form-column col-sm-1 btn-pause" data-job-card="{{d.name}}">
+				<button class="btn btn-default">
+					<span class="menu-item-label" data-label="Start">{{ __('Pause') }}</span>
+				</button>
+			</div>
+			<div class="form-column col-sm-1 btn-complete" data-job-card="{{d.name}}" data-qty="{{d.for_quantity}}">
+				<button class="btn btn-default">
+					<span class="menu-item-label" data-label="Start">{{ __('Complete') }}</span>
+				</button>
+			</div>
+
 			<div class="form-column col-sm-1">
-				<div class="menu-btn-group">
+				<div class="menu-btn-group" style="margin-left: 15px;">
 					<button type="button" class="btn btn-default icon-btn" data-toggle="dropdown" aria-expanded="false" aria-label="{{ __("Menu") }}">
 						<span>
 							<span class="menu-btn-group-label">
@@ -74,26 +87,6 @@
 						</span>
 					</button>
 					<ul class="dropdown-menu dropdown-menu-right menu-actions" role="menu" data-job-card="{{d.name}}">
-						<li>
-							<a class="grey-link dropdown-item btn-start" href="#" onclick="return false;">
-								<span class="menu-item-label" data-label="Start">{{ __('Start') }}</span>
-							</a>
-						</li>
-						<li>
-							<a class="grey-link dropdown-item btn-resume" href="#" onclick="return false;">
-								<span class="menu-item-label" data-label="Resume">{{ __('Resume') }}</span>
-							</a>
-						</li>
-						<li>
-							<a class="grey-link dropdown-item btn-pause" href="#" onclick="return false;">
-								<span class="menu-item-label" data-label="Pause">{{ __('Pause') }}</span>
-							</a>
-						</li>
-						<li>
-							<a class="grey-link dropdown-item btn-complete" href="#" onclick="return false;" data-qty="{{d.for_quantity}}">
-								<span class="menu-item-label" data-label="Complete">{{ __('Complete') }}</span>
-							</a>
-						</li>
 						<li>
 							<a class="grey-link dropdown-item btn-transfer-materials" href="#" onclick="return false;">
 								<span class="menu-item-label" data-label="Transfer Materials">{{ __('Transfer Materials') }}</span>
