@@ -37,7 +37,7 @@ def get_group_by_asset_category_data(filters):
 			- flt(row.cost_of_sold_asset)
 			- flt(row.cost_of_scrapped_asset)
 		)
-
+		# Update row with corresponding asset data
 		row.update(
 			next(
 				asset
@@ -68,7 +68,7 @@ def get_group_by_asset_category_data(filters):
 def get_asset_categories_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
-		condition += " and asset_category = %(asset_category)s"
+		condition += " and a.asset_category = %(asset_category)s"
 	if filters.get("finance_book"):
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
 
@@ -113,8 +113,13 @@ def get_asset_categories_for_grouped_by_category(filters):
 								0
 						   end), 0) as cost_of_scrapped_asset
 		from `tabAsset` a
-		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {condition}
-		and not exists(select name from `tabAsset Capitalization Asset Item` where asset = a.name)
+		where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
+			and not exists(
+				select 1 from `tabAsset Capitalization Asset Item` acai join `tabAsset Capitalization` ac on acai.parent=ac.name
+				where acai.asset = a.name
+				and ac.posting_date <= %(to_date)s
+				and ac.docstatus=1
+			)
 		group by a.asset_category
 	""",
 		{
@@ -131,53 +136,59 @@ def get_asset_categories_for_grouped_by_category(filters):
 def get_asset_details_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset"):
-		condition += " and name = %(asset)s"
+		condition += " and a.name = %(asset)s"
 	if filters.get("finance_book"):
-		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = `tabAsset`.name and ads.finance_book = %(finance_book)s)"
+		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
 
 	# nosemgrep
 	return frappe.db.sql(
 		f"""
-		SELECT name,
-			   ifnull(sum(case when purchase_date < %(from_date)s then
-							   case when ifnull(disposal_date, 0) = 0 or disposal_date >= %(from_date)s then
-									gross_purchase_amount
+		SELECT a.name,
+			   ifnull(sum(case when a.purchase_date < %(from_date)s then
+							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
+									a.gross_purchase_amount
 							   else
 									0
 							   end
 						   else
 								0
 						   end), 0) as cost_as_on_from_date,
-			   ifnull(sum(case when purchase_date >= %(from_date)s then
-			   						gross_purchase_amount
+			   ifnull(sum(case when a.purchase_date >= %(from_date)s then
+			   						a.gross_purchase_amount
 			   				   else
 			   				   		0
 			   				   end), 0) as cost_of_new_purchase,
-			   ifnull(sum(case when ifnull(disposal_date, 0) != 0
-			   						and disposal_date >= %(from_date)s
-			   						and disposal_date <= %(to_date)s then
-							   case when status = "Sold" then
-							   		gross_purchase_amount
+			   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
+			   						and a.disposal_date >= %(from_date)s
+			   						and a.disposal_date <= %(to_date)s then
+							   case when a.status = "Sold" then
+							   		a.gross_purchase_amount
 							   else
 							   		0
 							   end
 						   else
 								0
 						   end), 0) as cost_of_sold_asset,
-			   ifnull(sum(case when ifnull(disposal_date, 0) != 0
-			   						and disposal_date >= %(from_date)s
-			   						and disposal_date <= %(to_date)s then
-							   case when status = "Scrapped" then
-							   		gross_purchase_amount
+			   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
+			   						and a.disposal_date >= %(from_date)s
+			   						and a.disposal_date <= %(to_date)s then
+							   case when a.status = "Scrapped" then
+							   		a.gross_purchase_amount
 							   else
 							   		0
 							   end
 						   else
 								0
 						   end), 0) as cost_of_scrapped_asset
-		from `tabAsset`
-		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {condition}
-		group by name
+		from `tabAsset` a
+		where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
+		and not exists(
+				select 1 from `tabAsset Capitalization Asset Item` acai join `tabAsset Capitalization` ac on acai.parent=ac.name
+				where acai.asset = a.name
+				and ac.posting_date <= %(to_date)s
+				and ac.docstatus=1
+			)
+		group by a.name
 	""",
 		{
 			"to_date": filters.to_date,
