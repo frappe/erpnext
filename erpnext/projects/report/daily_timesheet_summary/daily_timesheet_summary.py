@@ -12,7 +12,7 @@ def execute(filters=None):
 		filters = {}
 	elif filters.get("from_date") or filters.get("to_date"):
 		filters["from_time"] = "00:00:00"
-		filters["to_time"] = "24:00:00"
+		filters["to_time"] = "23:59:59"
 
 	columns = get_column()
 	conditions = get_conditions(filters)
@@ -54,9 +54,10 @@ def get_data(conditions, filters):
 def get_conditions(filters):
 	conditions = "`tabTimesheet`.docstatus = 1"
 	if filters.get("from_date"):
-		conditions += " and `tabTimesheet Detail`.from_time >= timestamp(%(from_date)s, %(from_time)s)"
+		conditions += " and `tabTimesheet Detail`.from_time >= to_timestamp(%(from_date)s || ' ' || %(from_time)s, 'YYYY-MM-DD HH24:MI:SS')"
+
 	if filters.get("to_date"):
-		conditions += " and `tabTimesheet Detail`.to_time <= timestamp(%(to_date)s, %(to_time)s)"
+		conditions += " and `tabTimesheet Detail`.to_time <= to_timestamp(%(to_date)s || ' ' || %(to_time)s, 'YYYY-MM-DD HH24:MI:SS')"
 
 	match_conditions = build_match_conditions("Timesheet")
 	if match_conditions:
