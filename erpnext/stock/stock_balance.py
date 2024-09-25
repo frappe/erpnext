@@ -95,7 +95,7 @@ def get_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql(
 		f"""
 		select
-			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - if(dont_reserve_qty_on_return, so_item_returned_qty, 0)) / so_item_qty))
+			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - case when dont_reserve_qty_on_return = 1 then so_item_returned_qty else 0 end) / so_item_qty))
 		from
 			(
 				(select
