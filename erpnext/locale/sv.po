@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-24 21:27\n"
+"PO-Revision-Date: 2024-09-25 21:25\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -457,7 +457,7 @@ msgstr "Var Tredje År"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:96
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:348
 msgid "30 - 60 Days"
-msgstr "30 - 60 Dagar"
+msgstr "30 - 60 dagar"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
@@ -470,7 +470,7 @@ msgstr "30-60"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
-msgstr "30-60 Dagar"
+msgstr "30-60 dagar"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -498,7 +498,7 @@ msgstr "6 timmar"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:97
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:349
 msgid "60 - 90 Days"
-msgstr "60 - 90 Dagar"
+msgstr "60 - 90 dagar"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:116
 msgid "60-90"
@@ -506,12 +506,12 @@ msgstr "60-90"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "60-90 Days"
-msgstr "60-90 Dagar"
+msgstr "60-90 dagar"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:98
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:350
 msgid "90 - 120 Days"
-msgstr "90 - 120 Dagar"
+msgstr "90 - 120 dagar"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
@@ -830,13 +830,13 @@ msgid "<span class=\"h4\"><b>Your Shortcuts\n"
 "\t\t\n"
 "\t\t\t\n"
 "\t\t</b></span>"
-msgstr "<span class=\"h4\"><b>Genvägar\n"
-"\t\t\t<unk>\t\t\t\n"
-"\t\t<unk>\t\t\n"
-"\t\t\t<unk>\t\t\t\n"
-"\t\t<unk>\t\t\n"
-"\t\t\t<unk>\t\t\t\n"
-"\t\t<unk>\t\t</b></span>"
+msgstr "<span class=\"h4\"><b>Dina genvägar\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Buying Workspace
@@ -855,7 +855,7 @@ msgstr "<span class=\"h4\"><b>Genvägar\n"
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
-msgstr "<span class=\"h4\"><b>Genvägar</b></span>"
+msgstr "<span class=\"h4\"><b>Dina genvägar</b></span>"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:938
 msgid "<strong>Grand Total:</strong> {0}"
@@ -1386,7 +1386,7 @@ msgstr "Konto Saknas"
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
 #: erpnext/accounts/doctype/ledger_merge_accounts/ledger_merge_accounts.json
 msgid "Account Name"
-msgstr "Konto Namn"
+msgstr "Kontonamn"
 
 #: erpnext/accounts/doctype/account/account.py:336
 msgid "Account Not Found"
@@ -2483,7 +2483,7 @@ msgstr "Aktivitet Kostnad per Personal"
 #: erpnext/public/js/projects/timer.js:9
 #: erpnext/templates/pages/timelog_info.html:25
 msgid "Activity Type"
-msgstr "Aktivitet Typ"
+msgstr "Aktivitetstyp"
 
 #. Option for the 'Type' (Select) field in DocType 'Advance Taxes and Charges'
 #. Option for the 'Type' (Select) field in DocType 'Purchase Taxes and Charges'
@@ -2772,7 +2772,7 @@ msgstr "Lägg till Order Rabatt"
 #: erpnext/public/js/event.js:36 erpnext/public/js/event.js:44
 #: erpnext/public/js/event.js:52
 msgid "Add Participants"
-msgstr "Lägg till Deltagare"
+msgstr "Lägg till deltagare"
 
 #. Label of the add_quote (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -3281,13 +3281,13 @@ msgstr "Adress HTML"
 #: erpnext/public/js/utils/contact_address_quick_entry.js:61
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Address Line 1"
-msgstr "Gata och Nummer"
+msgstr "Adressrad 1"
 
 #. Label of the address_line_2 (Data) field in DocType 'Warehouse'
 #: erpnext/public/js/utils/contact_address_quick_entry.js:66
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Address Line 2"
-msgstr "Co/Box"
+msgstr "Adressrad 2"
 
 #. Label of the address (Link) field in DocType 'Delivery Stop'
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
@@ -3472,7 +3472,7 @@ msgstr "Förskott betalningar allokerade mot order kommer att hämtas"
 #. Label of the section_break_13 (Tab Break) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Advanced Settings"
-msgstr "Avancerade Inställningar"
+msgstr "Avancerade inställningar"
 
 #. Label of the advances (Table) field in DocType 'POS Invoice'
 #. Label of the advances (Table) field in DocType 'Purchase Invoice'
@@ -6115,7 +6115,7 @@ msgstr "Bifoga CSV-fil med två kolumner, en för det gamla namnet och en för d
 #: erpnext/public/js/utils/serial_no_batch_selector.js:260
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:69
 msgid "Attach CSV File"
-msgstr "Bifoga CSV Fil"
+msgstr "Bifoga CSV-fil"
 
 #. Label of the import_file (Attach) field in DocType 'Chart of Accounts
 #. Importer'
@@ -6200,7 +6200,7 @@ msgstr "Revisor"
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_connector.py:68
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_connector.py:85
 msgid "Authentication Failed"
-msgstr "Autentisering Misslyckades"
+msgstr "Autentisering misslyckades"
 
 #. Label of the authorised_by_section (Section Break) field in DocType
 #. 'Contract'
@@ -7191,7 +7191,7 @@ msgstr "Bank Konto Nummer"
 #: erpnext/buying/doctype/supplier/supplier.js:108
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:514
 msgid "Bank Account"
-msgstr "Bank Konto"
+msgstr "Bankkonto"
 
 #. Label of the bank_account_details (Section Break) field in DocType 'Payment
 #. Order Reference'
@@ -7232,7 +7232,7 @@ msgstr "Bank Konto Typ"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:13
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:16
 msgid "Bank Accounts"
-msgstr "Bank Konton"
+msgstr "Bankkonton"
 
 #. Label of the bank_balance (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -7440,7 +7440,7 @@ msgstr "Bar"
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Barcode"
-msgstr "Streck/QR Kod"
+msgstr "Streckkod"
 
 #. Label of the barcode_type (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -7955,7 +7955,7 @@ msgstr "Fakturerad,Mottagen & Returnerad"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Billing Address"
-msgstr "Faktura Adress"
+msgstr "Faktureringsadress"
 
 #. Label of the billing_address_display (Text Editor) field in DocType
 #. 'Purchase Order'
@@ -10089,7 +10089,7 @@ msgstr "Rensa Noteringar"
 #. Label of the clear_table (Button) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Clear Table"
-msgstr "Rensa Tabell"
+msgstr "Rensa tabell"
 
 #. Label of the clearance_date (Date) field in DocType 'Bank Clearance Detail'
 #. Label of the clearance_date (Date) field in DocType 'Bank Transaction
@@ -10519,7 +10519,7 @@ msgstr "Kompakt Artikel Utskrift"
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
 #: erpnext/accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
 msgid "Companies"
-msgstr "Bolag"
+msgstr "Företag"
 
 #. Label of the company (Link) field in DocType 'Account'
 #. Label of the company (Link) field in DocType 'Account Closing Balance'
@@ -10932,7 +10932,7 @@ msgstr "Bolag"
 #: erpnext/support/report/issue_analytics/issue_analytics.js:8
 #: erpnext/support/report/issue_summary/issue_summary.js:8
 msgid "Company"
-msgstr "Bolag"
+msgstr "Företag"
 
 #: erpnext/public/js/setup_wizard.js:29
 msgid "Company Abbreviation"
@@ -11050,7 +11050,7 @@ msgstr "Bolag Logotyp"
 #: erpnext/crm/doctype/prospect/prospect.json
 #: erpnext/public/js/setup_wizard.js:23
 msgid "Company Name"
-msgstr "Bolag Namn"
+msgstr "Företagsnamn"
 
 #. Description of the 'Tally Company' (Data) field in DocType 'Tally Migration'
 #: erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -12637,7 +12637,7 @@ msgstr "Landskod i fil stämmer inte med landskod angiven i system"
 #. Label of the country_of_origin (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Country of Origin"
-msgstr "Ursprung Land"
+msgstr "Ursprungsland"
 
 #. Name of a DocType
 #. Label of the coupon_code (Data) field in DocType 'Coupon Code'
@@ -12653,7 +12653,7 @@ msgstr "Ursprung Land"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Coupon Code"
-msgstr "Rabatt Kod"
+msgstr "Kupongkod"
 
 #. Label of the coupon_code_based (Check) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
@@ -12842,7 +12842,7 @@ msgstr "Skapa Avskrivning Post"
 
 #: erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.js:316
 msgid "Create Document"
-msgstr "Skapa Dokument"
+msgstr "Skapa dokument"
 
 #: erpnext/utilities/activation.py:136
 msgid "Create Employee"
@@ -12918,11 +12918,11 @@ msgstr "Skapa Flernivå Stycklista"
 
 #: erpnext/public/js/call_popup/call_popup.js:122
 msgid "Create New Contact"
-msgstr "Skapa Ny Kontakt"
+msgstr "Skapa ny kontakt"
 
 #: erpnext/public/js/call_popup/call_popup.js:128
 msgid "Create New Customer"
-msgstr "Skapa Ny Kund"
+msgstr "Skapa ny kund"
 
 #: erpnext/public/js/call_popup/call_popup.js:134
 msgid "Create New Lead"
@@ -13022,7 +13022,7 @@ msgstr "Skapa Tidrapport"
 #: erpnext/setup/doctype/employee/employee.json
 #: erpnext/utilities/activation.py:116
 msgid "Create User"
-msgstr "Skapa Användare"
+msgstr "Skapa användare"
 
 #. Label of the create_user_permission (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -13031,7 +13031,7 @@ msgstr "Skapa Användare Behörighet"
 
 #: erpnext/utilities/activation.py:112
 msgid "Create Users"
-msgstr "Skapa Användare"
+msgstr "Skapa användare"
 
 #: erpnext/stock/doctype/item/item.js:745
 msgid "Create Variant"
@@ -13237,7 +13237,7 @@ msgstr "Kredit Saldo"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:241
 msgid "Credit Card"
-msgstr "Kredit Kort"
+msgstr "Kreditkort"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -13270,7 +13270,7 @@ msgstr "Kredit Dagar"
 #: erpnext/setup/doctype/customer_group/customer_group.json
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 msgid "Credit Limit"
-msgstr "Kredit Gräns"
+msgstr "Kreditgräns"
 
 #: erpnext/selling/doctype/customer/customer.py:555
 msgid "Credit Limit Crossed"
@@ -13290,7 +13290,7 @@ msgstr "Kredit Gräns och Betalning Villkor"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:50
 msgid "Credit Limit:"
-msgstr "Kredit Gräns:"
+msgstr "Kreditgräns:"
 
 #. Label of the invoicing_settings_tab (Tab Break) field in DocType 'Accounts
 #. Settings'
@@ -15702,7 +15702,7 @@ msgstr "Försenad Uppgifter Översikt"
 
 #: erpnext/setup/doctype/company/company.js:215
 msgid "Delete"
-msgstr "Ta bort"
+msgstr "Radera"
 
 #. Label of the delete_linked_ledger_entries (Check) field in DocType 'Accounts
 #. Settings'
@@ -15737,7 +15737,7 @@ msgstr "Ta bort Prospekt och Adresser"
 #: erpnext/setup/doctype/company/company.js:149
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Delete Transactions"
-msgstr "Ta bort Transaktioner"
+msgstr "Radera transaktioner"
 
 #: erpnext/setup/doctype/company/company.js:214
 msgid "Delete all the Transactions for this Company"
@@ -15856,7 +15856,7 @@ msgstr "Leverans"
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:321
 msgid "Delivery Date"
-msgstr "Leverans Datum"
+msgstr "Leveransdatum"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Delivery
 #. Trip'
@@ -17581,7 +17581,7 @@ msgstr "Säkerhetskopior"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:251
 msgid "Download CSV Template"
-msgstr "Ladda ner CSV Mall"
+msgstr "Ladda ner CSV-mall"
 
 #. Label of the download_materials_required (Button) field in DocType
 #. 'Production Plan'
@@ -17607,7 +17607,7 @@ msgstr "Ladda ner PDF"
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:31
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgid "Download Template"
-msgstr "Ladda ner Mall"
+msgstr "Ladda ner mall"
 
 #. Label of the downtime (Data) field in DocType 'Asset Repair'
 #. Label of the downtime (Float) field in DocType 'Downtime Entry'
@@ -18728,7 +18728,7 @@ msgstr "Uttag Datum"
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 #: erpnext/templates/pages/projects.html:47
 msgid "End Date"
-msgstr "Slut Datum"
+msgstr "Slutdatum"
 
 #: erpnext/crm/doctype/contract/contract.py:75
 msgid "End Date cannot be before Start Date."
@@ -19303,7 +19303,7 @@ msgstr "Befintlig Bolag"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:1
 msgid "Existing Customer"
-msgstr "Befintlig Kund"
+msgstr "Befintlig kund"
 
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -21888,7 +21888,7 @@ msgstr "Hämta Rest Artiklar"
 #. Option for the 'Coupon Type' (Select) field in DocType 'Coupon Code'
 #: erpnext/accounts/doctype/coupon_code/coupon_code.json
 msgid "Gift Card"
-msgstr "Present Kort"
+msgstr "Presentkort"
 
 #. Description of the 'Recurse Every (As Per Transaction UOM)' (Float) field in
 #. DocType 'Pricing Rule'
@@ -22580,7 +22580,7 @@ msgstr "Hjälp Artikel"
 
 #: erpnext/www/support/index.html:68
 msgid "Help Articles"
-msgstr "Hjälp Artiklar"
+msgstr "Hjälpartiklar"
 
 #: erpnext/templates/pages/search_help.py:14
 msgid "Help Results for"
@@ -22855,7 +22855,7 @@ msgstr "ID"
 #. Label of the ip_address (Data) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
 msgid "IP Address"
-msgstr "IP Adress"
+msgstr "IP-adress"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -24112,7 +24112,7 @@ msgstr "Inköp Pris (Kostnad)"
 
 #: erpnext/public/js/call_popup/call_popup.js:38
 msgid "Incoming call from {0}"
-msgstr "Inkommande Samtal från {0}"
+msgstr "Inkommande samtal från {0}"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
@@ -24134,11 +24134,11 @@ msgstr "Felaktig Komponent Kvantitet"
 #: erpnext/assets/doctype/asset/asset.py:278
 #: erpnext/assets/doctype/asset_value_adjustment/asset_value_adjustment.py:77
 msgid "Incorrect Date"
-msgstr "Felaktig Datum"
+msgstr "Felaktigt datum"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:120
 msgid "Incorrect Invoice"
-msgstr "Felaktig Faktura"
+msgstr "Felaktig faktura"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:70
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:81
@@ -27969,7 +27969,7 @@ msgstr "Lägre än Belopp"
 #. Description of the 'Is Short Year' (Check) field in DocType 'Fiscal Year'
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
 msgid "Less than 12 months."
-msgstr "Kortare än tolv månader."
+msgstr "Mindre än 12 månader."
 
 #. Label of the letter_head (Link) field in DocType 'Dunning'
 #. Label of the letter_head (Link) field in DocType 'Journal Entry'
@@ -30362,7 +30362,7 @@ msgstr "Mobil Nummer"
 
 #: erpnext/public/js/utils/contact_address_quick_entry.js:51
 msgid "Mobile Number"
-msgstr "Mobil Nummer"
+msgstr "Mobilnummer"
 
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:218
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:249
@@ -31260,7 +31260,7 @@ msgstr "Ny Parti Kvantitet"
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:18
 #: erpnext/setup/doctype/company/company_tree.js:23
 msgid "New Company"
-msgstr "Ny Bolag"
+msgstr "Nytt företag"
 
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:26
 msgid "New Cost Center Name"
@@ -31309,7 +31309,7 @@ msgstr "Ny Plats"
 
 #: erpnext/public/js/templates/crm_notes.html:7
 msgid "New Note"
-msgstr "Ny Nota"
+msgstr "Ny anteckning"
 
 #. Label of the purchase_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -31532,7 +31532,7 @@ msgstr "Inga matchande banktransaktioner hittades"
 
 #: erpnext/public/js/templates/crm_notes.html:46
 msgid "No Notes"
-msgstr "Inga Anteckningar"
+msgstr "Inga anteckningar"
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:223
 msgid "No Outstanding Invoices found for this party"
@@ -33297,7 +33297,7 @@ msgstr "Organisation"
 #. Label of the company_name (Data) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Organization Name"
-msgstr "Organisation Namn"
+msgstr "Organisationsnamn"
 
 #. Label of the orientation (Select) field in DocType 'Process Statement Of
 #. Accounts'
@@ -35514,7 +35514,7 @@ msgstr "Pensionsfonder"
 #. Scorecard'
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgid "Per Month"
-msgstr "Per Månad"
+msgstr "Per månad"
 
 #. Label of the per_received (Percent) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -35530,13 +35530,13 @@ msgstr "Per Överförd"
 #. Scorecard'
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgid "Per Week"
-msgstr "Per Vecka"
+msgstr "Per vecka"
 
 #. Option for the 'Evaluation Period' (Select) field in DocType 'Supplier
 #. Scorecard'
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgid "Per Year"
-msgstr "Per År"
+msgstr "Per år"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -35799,7 +35799,7 @@ msgstr "Telefon Nummer"
 #: erpnext/crm/doctype/appointment/appointment.json
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:901
 msgid "Phone Number"
-msgstr "Telefon Nummer"
+msgstr "Telefonnummer"
 
 #. Label of the pick_list (Link) field in DocType 'Delivery Note'
 #. Name of a DocType
@@ -38933,7 +38933,7 @@ msgstr "Projekt Ansvarig"
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.json
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:42
 msgid "Project Name"
-msgstr "Projekt Namn"
+msgstr "Projektnamn"
 
 #: erpnext/templates/pages/projects.html:114
 msgid "Project Progress:"
@@ -38963,7 +38963,7 @@ msgstr "Projekt Översikt för {0}"
 #: erpnext/projects/doctype/project_template/project_template.json
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Project Template"
-msgstr "Projekt Mall"
+msgstr "Projektmall"
 
 #. Name of a DocType
 #: erpnext/projects/doctype/project_template_task/project_template_task.json
@@ -45882,7 +45882,7 @@ msgstr "Spara"
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:198
 msgid "Save as Draft"
-msgstr "Spara som Utkast"
+msgstr "Spara som utkast"
 
 #: erpnext/erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py:364
 msgid "Saving {0}"
@@ -45924,7 +45924,7 @@ msgstr "Sazhen"
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgid "Scan Barcode"
-msgstr "Skanna"
+msgstr "Skanna streckkod"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:154
 msgid "Scan Batch No"
@@ -59262,7 +59262,7 @@ msgstr "payment app är inte installerad. Installera det från {0} eller {1}"
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.json
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
 msgid "per hour"
-msgstr "Kostnad per Timme"
+msgstr "per timme"
 
 #: erpnext/stock/stock_ledger.py:1800
 msgid "performing either one below:"
