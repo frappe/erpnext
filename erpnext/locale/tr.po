@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-24 21:27\n"
+"PO-Revision-Date: 2024-09-25 21:24\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -3996,7 +3996,7 @@ msgstr "Ödeme Koşullarına Göre Ödeme Tahsis Edin"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1677
 msgid "Allocate Payment Request"
-msgstr ""
+msgstr "Ödeme Talebini Tahsis Et"
 
 #. Label of the allocated_amount (Float) field in DocType 'Payment Entry
 #. Reference'
@@ -4875,12 +4875,12 @@ msgstr "Hesap Para Birimindeki Tutar"
 #. Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Amount in party's bank account currency"
-msgstr ""
+msgstr "Tarafın banka hesabındaki tutar para birimi"
 
 #. Description of the 'Amount' (Currency) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Amount in transaction currency"
-msgstr ""
+msgstr "İşlem para birimi cinsinden tutar"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:72
 msgid "Amount in {0}"
@@ -19742,7 +19742,7 @@ msgstr "Giriş Başarısız"
 
 #: erpnext/assets/doctype/asset/asset.js:212
 msgid "Failed to post depreciation entries"
-msgstr ""
+msgstr "Amortisman Kayıtları Gönderilemedi"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:30
 #: erpnext/setup/setup_wizard/setup_wizard.py:31
@@ -59141,7 +59141,7 @@ msgstr ""
 #: erpnext/templates/form_grid/item_grid.html:66
 #: erpnext/templates/form_grid/item_grid.html:80
 msgid "hidden"
-msgstr ""
+msgstr "gizli"
 
 #: erpnext/projects/doctype/project/project_dashboard.html:13
 msgid "hours"
@@ -59389,7 +59389,7 @@ msgstr "{0} ({1}) İş Emrindeki üretilecek ({2}) miktar {3} değerinden fazla 
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:288
 msgid "{0} <b>{1}</b> has submitted Assets. Remove Item <b>{2}</b> from table to continue."
-msgstr ""
+msgstr "{0} <b>{1}</b> Varlıklar gönderdi. Devam etmek için tablodan <b>{2}</b> Kalemini kaldırın."
 
 #: erpnext/controllers/accounts_controller.py:2014
 msgid "{0} Account not found against Customer {1}."
