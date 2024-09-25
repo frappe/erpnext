@@ -20,14 +20,8 @@ def get_data():
 			"Blanket Order": ["items", "blanket_order"],
 		},
 		"transactions": [
-			{
-				"label": _("Related"),
-				"items": ["Purchase Receipt", "Purchase Invoice", "Sales Order"]
-			},
-			{
-				"label": _("Payment"),
-				"items": ["Payment Entry", "Journal Entry", "Payment Request"]
-			},
+			{"label": _("Related"), "items": ["Purchase Receipt", "Purchase Invoice", "Sales Order"]},
+			{"label": _("Payment"), "items": ["Payment Entry", "Journal Entry", "Payment Request"]},
 			{
 				"label": _("Reference"),
 				"items": ["Supplier Quotation", "Project", "Auto Repeat"],
