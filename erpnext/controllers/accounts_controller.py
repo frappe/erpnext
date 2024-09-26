@@ -1920,25 +1920,18 @@ class AccountsController(TransactionBase):
 		return stock_items
 
 	def set_total_advance_paid(self):
-		ple = frappe.qb.DocType("Payment Ledger Entry")
-		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-			party = self.customer
-		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-			party = self.supplier
+		advance_paid, order_total = None, None
+		per = frappe.qb.DocType("Payment Entry Reference")
 		advance = (
-			frappe.qb.from_(ple)
-			.select(ple.account_currency, Abs(Sum(ple.amount_in_account_currency)).as_("amount"))
+			qb.from_(per)
+			.select(Sum(per.allocated_amount).as_("amount"))
 			.where(
-				(ple.against_voucher_type == self.doctype)
-				& (ple.against_voucher_no == self.name)
-				& (ple.party == party)
-				& (ple.delinked == 0)
-				& (ple.company == self.company)
+				per.reference_doctype.eq(self.doctype)
+				& per.reference_name.eq(self.name)
+				& per.docstatus.eq(1)
 			)
 			.run(as_dict=True)
 		)
-
-		advance_paid, order_total = None, None
 
 		if advance:
 			advance = advance[0]
