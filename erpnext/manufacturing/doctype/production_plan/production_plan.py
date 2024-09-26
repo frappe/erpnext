@@ -312,7 +312,7 @@ class ProductionPlan(Document):
 				so_item.parent,
 				so_item.item_code,
 				so_item.warehouse,
-				so_item.qty,
+				so_item.stock_qty,
 				so_item.work_order_qty,
 				so_item.delivered_qty,
 				so_item.conversion_factor,
