@@ -1308,11 +1308,20 @@ class PaymentEntry(AccountsController):
 				{
 					dr_or_cr: allocated_amount_in_company_currency,
 					dr_or_cr + "_in_account_currency": d.allocated_amount,
-					"against_voucher_type": d.reference_doctype,
-					"against_voucher": d.reference_name,
 					"cost_center": cost_center,
 				}
 			)
+			advance_payment_doctypes = frappe.get_hooks(
+				"advance_payment_receivable_doctypes"
+			) + frappe.get_hooks("advance_payment_payable_doctypes")
+			if d.reference_doctype not in advance_payment_doctypes:
+				gle.update(
+					{
+						"against_voucher_type": d.reference_doctype,
+						"against_voucher": d.reference_name,
+					}
+				)
+
 			gl_entries.append(gle)
 
 		if self.unallocated_amount:
