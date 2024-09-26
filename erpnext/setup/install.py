@@ -9,6 +9,7 @@ from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.utils import cint
 
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+from erpnext.setup.doctype.duty_tax_fee_type.duty_tax_fee_type import create_duty_tax_fee_types
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 
 from .default_success_action import get_default_success_action
@@ -28,6 +29,7 @@ def after_install():
 	create_default_success_action()
 	create_default_energy_point_rules()
 	create_incoterms()
+	create_duty_tax_fee_types()
 	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()

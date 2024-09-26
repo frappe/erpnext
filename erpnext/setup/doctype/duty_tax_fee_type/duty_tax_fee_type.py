@@ -19,3 +19,17 @@ class DutyTaxFeeType(Document):
 	# end: auto-generated types
 
 	pass
+
+
+def create_duty_tax_fee_types():
+	from csv import DictReader
+	from pathlib import Path
+
+	path = Path(__file__).parent / "data.csv"
+	with path.open() as file:
+		for row in DictReader(file):
+			doc = frappe.new_doc("Duty Tax Fee Type")
+			doc.name = row["code"]
+			doc.title = row["title"]
+			doc.description = row["description"]
+			doc.insert(ignore_if_duplicate=True)
