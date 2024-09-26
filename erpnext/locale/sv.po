@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-25 21:25\n"
+"PO-Revision-Date: 2024-09-26 21:25\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -13286,7 +13286,7 @@ msgstr "Kredit Gräns Inställningar"
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Credit Limit and Payment Terms"
-msgstr "Kredit Gräns och Betalning Villkor"
+msgstr "Kreditgräns och betalningsvillkor"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:50
 msgid "Credit Limit:"
@@ -13299,7 +13299,7 @@ msgstr "Kreditgräns:"
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 #: erpnext/setup/doctype/customer_group/customer_group.json
 msgid "Credit Limits"
-msgstr "Kredit Gränser"
+msgstr "Kreditgränser"
 
 #. Label of the credit_months (Int) field in DocType 'Payment Term'
 #. Label of the credit_months (Int) field in DocType 'Payment Terms Template
@@ -24659,7 +24659,7 @@ msgstr "Ogiltig"
 #: erpnext/controllers/accounts_controller.py:2651
 #: erpnext/controllers/accounts_controller.py:2657
 msgid "Invalid Account"
-msgstr "Ogiltig Konto"
+msgstr "Ogiltigt konto"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:364
 #: erpnext/accounts/doctype/payment_request/payment_request.py:784
@@ -36193,7 +36193,7 @@ msgstr "Justera kvantitet eller redigera {0} för att fortsätta."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:124
 msgid "Please attach CSV file"
-msgstr "Bifoga CSV fil"
+msgstr "Bifoga CSV-fil"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2740
 msgid "Please cancel and amend the Payment Entry"
@@ -36488,7 +36488,7 @@ msgstr "Ange giltig Bokföringsår Start och Slut Datum"
 
 #: erpnext/templates/includes/footer/footer_extension.html:37
 msgid "Please enter valid email address"
-msgstr "Ange giltig e-post adress"
+msgstr "Ange giltig e-postadress"
 
 #: erpnext/setup/doctype/employee/employee.py:225
 msgid "Please enter {0}"
