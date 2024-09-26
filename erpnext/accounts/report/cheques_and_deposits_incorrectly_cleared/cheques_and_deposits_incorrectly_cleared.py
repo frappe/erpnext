@@ -101,7 +101,7 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 		.select(
 			doctype_name.as_("doctype"),
 			pe.name,
-			ifelse(pe.paid_from.eq(filters.account), pe.paid_amount, pe.received_amount).as_("amount"),
+			(frappe.qb.terms.Case().when(pe.paid_from.eq(filters.account), pe.paid_amount).else_(pe.received_amount)).as_("amount"),
 			pe.payment_type,
 			pe.party_type,
 			pe.posting_date,
