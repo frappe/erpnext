@@ -1,10 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
+import json
 
 import frappe
 from frappe import _, qb, throw
-from frappe.model.mapper import get_mapped_doc
+from frappe.model import child_table_fields, default_fields, table_fields
+from frappe.model.mapper import get_mapped_doc, map_fetch_fields, map_fields
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
@@ -1932,6 +1933,31 @@ def make_stock_entry(source_name, target_doc=None):
 	)
 
 	return doc
+
+
+@frappe.whitelist()
+def link_purchase_order(pi_item_code, supplier):
+	pi_item_code = json.loads(pi_item_code)
+
+	purchase_orders = frappe.get_all(
+		"Purchase Order",
+		filters={"supplier": supplier, "docstatus": 1},
+		pluck="name",
+		order_by="creation asc",
+	)
+	purchase_order_items = frappe.get_all(
+		"Purchase Order Item",
+		filters={"parent": ["in", purchase_orders]},
+		fields=["parent", "item_code", "qty"],
+	)
+
+	item_to_po_map = {
+		item.item_code: {"purchase_order": item.parent, "qty": item.qty}
+		for item in purchase_order_items
+		if item.item_code in pi_item_code
+	}
+
+	return item_to_po_map
 
 
 @frappe.whitelist()

@@ -130,6 +130,26 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		if (doc.docstatus === 0) {
+			const cur_doc = this.frm.doc;
+			const invoice_items = cur_doc.items;
+
+			this.frm.add_custom_button(__("Link to Purchase Order"), function () {
+				let unmapped_items = get_unmapped_items(invoice_items);
+
+				frappe.call({
+					method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.link_purchase_order",
+					args: {
+						pi_item_code: unmapped_items,
+						supplier: cur_doc.supplier,
+					},
+					callback: function (r) {
+						assign_purchase_order(invoice_items, r.message, cur_doc);
+					},
+				});
+			});
+		}
+
+		if (doc.docstatus === 0) {
 			this.frm.add_custom_button(
 				__("Purchase Order"),
 				function () {
@@ -445,6 +465,51 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		});
 	}
 };
+
+function get_unmapped_items(invoice_items) {
+	return invoice_items.map((item) => {
+		item.purchase_order = "";
+		return item.item_code;
+	});
+}
+
+function assign_purchase_order(invoice_items, items_to_link, cur_doc) {
+	if (!Object.keys(items_to_link).length) {
+		frappe.msgprint(__("No Purchase Orders matched"));
+		return;
+	}
+
+	let total_idx = invoice_items.length;
+
+	invoice_items.forEach((item) => {
+		const matched_item = items_to_link[item.item_code];
+		if (!matched_item) return;
+
+		if (item.qty > matched_item.qty) {
+			const new_row = frappe.model.add_child(cur_doc, item.doctype, "items");
+			Object.assign(new_row, item);
+			new_row.qty = item.qty - matched_item.qty;
+			new_row.idx = ++total_idx;
+
+			frappe.msgprint("Splitting " + new_row.qty + " units of " + new_row.item_code);
+			item.qty = matched_item.qty;
+		}
+
+		frappe.msgprint(
+			"Assigning " + matched_item.purchase_order + " to " + item.item_code + " (row " + item.idx + ")"
+		);
+		item.purchase_order = matched_item.purchase_order;
+
+		if (items_to_link[item.item_code]) {
+			items_to_link[item.item_code] -= item.qty;
+
+			if (items_to_link[item.item_code] <= 0) {
+				delete items_to_link[item.item_code];
+			}
+		}
+	});
+	refresh_field("items");
+}
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
