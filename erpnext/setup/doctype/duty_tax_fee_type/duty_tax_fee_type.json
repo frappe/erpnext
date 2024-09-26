@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "autoname": "prompt",
+ "creation": "2024-09-26 19:03:34.051250",
+ "description": "This doctype represents the \"5153  Duty or tax or fee type name code\" as specified by UN/EDIFACT in https://service.unece.org/trade/untdid/d19b/tred/tred5153.htm\n\nIt is used in Sales Taxes and Charges / Purchase Taxes and Charges to specify the type of tax or fee. This is useful when generating or importing electronic\ninvoices.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "links": [],
+ "modified": "2024-09-26 19:34:06.068048",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Duty Tax Fee Type",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title"
+}
