@@ -30,6 +30,7 @@ class SalesTaxesandCharges(Document):
 		cost_center: DF.Link | None
 		description: DF.SmallText
 		dont_recompute_tax: DF.Check
+		duty_tax_fee_type: DF.Link | None
 		included_in_paid_amount: DF.Check
 		included_in_print_rate: DF.Check
 		item_wise_tax_detail: DF.Code | None
