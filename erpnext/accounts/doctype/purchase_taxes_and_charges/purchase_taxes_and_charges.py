@@ -31,6 +31,7 @@ class PurchaseTaxesandCharges(Document):
 		]
 		cost_center: DF.Link | None
 		description: DF.SmallText
+		duty_tax_fee_type: DF.Link | None
 		included_in_paid_amount: DF.Check
 		included_in_print_rate: DF.Check
 		is_tax_withholding_account: DF.Check

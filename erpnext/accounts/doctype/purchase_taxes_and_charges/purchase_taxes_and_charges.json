@@ -10,6 +10,7 @@
   "category",
   "add_deduct_tax",
   "charge_type",
+  "duty_tax_fee_type",
   "row_id",
   "included_in_print_rate",
   "included_in_paid_amount",
@@ -233,12 +234,18 @@
    "fieldtype": "Check",
    "label": "Is Tax Withholding Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "duty_tax_fee_type",
+   "fieldtype": "Link",
+   "label": "Duty Tax Fee Type",
+   "options": "Duty Tax Fee Type"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-08 19:51:36.678551",
+ "modified": "2024-09-26 19:37:54.566689",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
