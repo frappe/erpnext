@@ -1122,7 +1122,7 @@ def get_bom_items_as_dict(
 				and bom.name = %(bom)s
 				and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
-				group by bom_item.item_code, bom_item.stock_uom,
+				group by bom_item.item_code,
 				bom_item.idx,
                 item.item_name,
                 item.image,
@@ -1138,21 +1138,21 @@ def get_bom_items_as_dict(
                 bom_item.operation,
                 bom_item.include_item_in_manufacturing,
                 bom_item.description,
-                bom_item.rate,
                 bom_item.sourced_by_supplier,
-                bom_item_idx
+				{rate_field}
 				order by bom_item.idx"""
 
 	is_stock_item = 0 if include_non_stock_items else 1
 	if cint(fetch_exploded):
 		query = query.format(
 			table="BOM Explosion Item",
+			rate_field = """bom_item.rate""",
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			select_columns=""", bom_item.source_warehouse, bom_item.operation,
 				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
-				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as bom_item_idx""",
+				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) bom_itm_idx""",
 		)
 
 		items = frappe.db.sql(
@@ -1171,13 +1171,15 @@ def get_bom_items_as_dict(
 	else:
 		query = query.format(
 			table="BOM Item",
+			rate_field = """bom_item.uom, bom_item.conversion_factor, bom_item.base_rate""",
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate """,
+				bom_item.description, bom_item.base_rate as bom_rate""",
 		)
+		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 
 	for item in items:
