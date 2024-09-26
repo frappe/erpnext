@@ -36,8 +36,9 @@ def get_group_by_asset_category_data(filters):
 			+ flt(row.cost_of_new_purchase)
 			- flt(row.cost_of_sold_asset)
 			- flt(row.cost_of_scrapped_asset)
+			- flt(row.cost_of_capitalized_asset)
 		)
-		# Update row with corresponding asset data
+
 		row.update(
 			next(
 				asset
@@ -111,13 +112,24 @@ def get_asset_categories_for_grouped_by_category(filters):
 							   end
 						   else
 								0
-						   end), 0) as cost_of_scrapped_asset
+						   end), 0) as cost_of_scrapped_asset,
+				ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
+			   						and a.disposal_date >= %(from_date)s
+			   						and a.disposal_date <= %(to_date)s then
+							   case when a.status = "Capitalized" then
+							   		a.gross_purchase_amount
+							   else
+							   		0
+							   end
+						   else
+								0
+						   end), 0) as cost_of_capitalized_asset
 		from `tabAsset` a
 		where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
 			and not exists(
 				select 1 from `tabAsset Capitalization Asset Item` acai join `tabAsset Capitalization` ac on acai.parent=ac.name
 				where acai.asset = a.name
-				and ac.posting_date <= %(to_date)s
+				and ac.posting_date < %(from_date)s
 				and ac.docstatus=1
 			)
 		group by a.asset_category
@@ -179,13 +191,24 @@ def get_asset_details_for_grouped_by_category(filters):
 							   end
 						   else
 								0
-						   end), 0) as cost_of_scrapped_asset
+						   end), 0) as cost_of_scrapped_asset,
+				ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
+			   						and a.disposal_date >= %(from_date)s
+			   						and a.disposal_date <= %(to_date)s then
+							   case when a.status = "Capitalized" then
+							   		a.gross_purchase_amount
+							   else
+							   		0
+							   end
+						   else
+								0
+						   end), 0) as cost_of_capitalized_asset
 		from `tabAsset` a
 		where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
 		and not exists(
 				select 1 from `tabAsset Capitalization Asset Item` acai join `tabAsset Capitalization` ac on acai.parent=ac.name
 				where acai.asset = a.name
-				and ac.posting_date <= %(to_date)s
+				and ac.posting_date < %(from_date)s
 				and ac.docstatus=1
 			)
 		group by a.name
@@ -217,6 +240,7 @@ def get_group_by_asset_data(filters):
 			+ flt(row.cost_of_new_purchase)
 			- flt(row.cost_of_sold_asset)
 			- flt(row.cost_of_scrapped_asset)
+			- flt(row.cost_of_capitalized_asset)
 		)
 
 		row.update(next(asset for asset in assets if asset["asset"] == asset_detail.get("name", "")))
@@ -442,6 +466,12 @@ def get_columns(filters):
 		{
 			"label": _("Cost of Scrapped Asset"),
 			"fieldname": "cost_of_scrapped_asset",
+			"fieldtype": "Currency",
+			"width": 140,
+		},
+		{
+			"label": _("Cost of New Capitalized Asset"),
+			"fieldname": "cost_of_capitalized_asset",
 			"fieldtype": "Currency",
 			"width": 140,
 		},
