@@ -10,6 +10,7 @@
   "charge_type",
   "row_id",
   "account_head",
+  "duty_tax_fee_type",
   "col_break_1",
   "description",
   "included_in_paid_amount",
@@ -174,12 +175,18 @@
    "label": "Account Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "duty_tax_fee_type",
+   "fieldtype": "Link",
+   "label": "Duty Tax Fee Type",
+   "options": "Duty Tax Fee Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:05:58.437605",
+ "modified": "2024-09-26 19:36:05.874214",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Taxes and Charges",

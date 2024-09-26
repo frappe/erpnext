@@ -26,6 +26,7 @@ class AdvanceTaxesandCharges(Document):
 		cost_center: DF.Link | None
 		currency: DF.Link | None
 		description: DF.SmallText
+		duty_tax_fee_type: DF.Link | None
 		included_in_paid_amount: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
