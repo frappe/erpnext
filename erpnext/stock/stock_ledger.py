@@ -1746,7 +1746,7 @@ def get_valuation_rate(
 	# Get valuation rate from last sle for the same item and warehouse
 	if last_valuation_rate := frappe.db.sql(
 		"""select valuation_rate
-		from `tabStock Ledger Entry` force index (item_warehouse)
+		from "tabStock Ledger Entry"
 		where
 			item_code = %s
 			AND warehouse = %s
