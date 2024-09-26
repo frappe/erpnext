@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-25 21:24\n"
+"PO-Revision-Date: 2024-09-26 21:25\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -2318,7 +2318,7 @@ msgstr "Kalite Denetimi Reddedilirse Yapılacak İşlem"
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Action If Same Rate is Not Maintained"
-msgstr "Aynı Oran Sağlanmazsa Yapılacak İşlem"
+msgstr "Fiyat Uyuşmazlığında Yapılacak İşlem"
 
 #: erpnext/quality_management/doctype/quality_review/quality_review_list.js:7
 msgid "Action Initialised"
@@ -6259,7 +6259,7 @@ msgstr "Otomatik Döviz Kuru Değerleme Oluştur"
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Auto Create Purchase Receipt"
-msgstr "Otomatik Satınalma İrsaliyesi Oluştur"
+msgstr "İrsaliyeyi Otomatik Oluştur"
 
 #. Label of the auto_create_serial_and_batch_bundle_for_outward (Check) field
 #. in DocType 'Stock Settings'
@@ -7041,7 +7041,7 @@ msgstr "İşlemdeki Depodan Hammaddeleri Otomatik Kullan"
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Backflush Raw Materials of Subcontract Based On"
-msgstr "Taşerona Dayalı Hammadde Maliyetini Şuna göre yap"
+msgstr "Alt Yükleniciye Dayalı Hammadde Maliyetini Şuna göre yap"
 
 #: erpnext/accounts/report/account_balance/account_balance.py:36
 #: erpnext/accounts/report/purchase_register/purchase_register.py:242
@@ -21763,7 +21763,7 @@ msgstr "Bu Tedarikçiye karşılık gelen Malzeme Taleplerinden Ürünleri Getir
 #. 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Get Items from Open Material Requests"
-msgstr "Açık Malzeme Talepleri Öğeleri Alındı"
+msgstr "Açık Malzeme Taleplerinden Ürünleri Getir"
 
 #: erpnext/public/js/controllers/buying.js:498
 msgid "Get Items from Product Bundle"
@@ -25392,7 +25392,7 @@ msgstr "Kilometre Taşı"
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Is Old Subcontracting Flow"
-msgstr "Eski Alt Sözleşme Akışı"
+msgstr "Eski Alt Yüklenici Akışı"
 
 #. Label of the is_opening (Select) field in DocType 'GL Entry'
 #. Label of the is_opening (Select) field in DocType 'Journal Entry'
@@ -25440,12 +25440,12 @@ msgstr "Dönem Kapanış Fişi Girişi"
 #. Label of the po_required (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Is Purchase Order Required for Purchase Invoice & Receipt Creation?"
-msgstr "Alış Faturası ve İrsaliyesi oluşturmak için Satınalma Siparişi gerekli mi?"
+msgstr "Alış Faturası ve İrsaliye oluşturmak için Satın Alma Siparişi gerekli mi?"
 
 #. Label of the pr_required (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Is Purchase Receipt Required for Purchase Invoice Creation?"
-msgstr "Satınalma Faturası oluşturmak için Satınalma İrsaliyesi gerekli mi?"
+msgstr "Alış Faturası oluşturmak için İrsaliye gerekli mi?"
 
 #. Label of the is_debit_note (Check) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
@@ -27241,23 +27241,23 @@ msgstr "İş İlanı Başlığı"
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Job Worker"
-msgstr ""
+msgstr "Yüklenici"
 
 #. Label of the supplier_address (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Job Worker Address"
-msgstr ""
+msgstr "İş Adresi"
 
 #. Label of the address_display (Text Editor) field in DocType 'Subcontracting
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Job Worker Address Details"
-msgstr ""
+msgstr "İş Adresi Detayları"
 
 #. Label of the contact_person (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Job Worker Contact"
-msgstr ""
+msgstr "Yetkili Kişi"
 
 #. Label of the supplier_delivery_note (Data) field in DocType 'Subcontracting
 #. Receipt'
@@ -27270,7 +27270,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Job Worker Name"
-msgstr ""
+msgstr "Yetkili Kişi Adı"
 
 #. Label of the supplier_warehouse (Link) field in DocType 'Subcontracting
 #. Order'
@@ -27279,7 +27279,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Job Worker Warehouse"
-msgstr ""
+msgstr "Alt Yüklenici Deposu"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1656
 msgid "Job card {0} created"
@@ -32465,7 +32465,7 @@ msgstr "İşlemlerde sadece alt elemanlar kullanılanbilir."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:132
 msgid "Only one Subcontracting Order can be created against a Purchase Order, cancel the existing Subcontracting Order to create a new one."
-msgstr ""
+msgstr "Bir Satın Alma Siparişine karşı yalnızca bir Alt Yüklenici Siparişi oluşturulabilir, yeni bir Alt Yüklenici Siparişi oluşturmak için mevcut Siparişi iptal edin."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:960
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -35521,7 +35521,7 @@ msgstr "Aylık"
 #. Label of the per_received (Percent) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Per Received"
-msgstr ""
+msgstr "Alınan Başına"
 
 #. Label of the per_transferred (Percent) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -35839,7 +35839,7 @@ msgstr "Manuel Seçim"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Pick Serial / Batch Based On"
-msgstr ""
+msgstr "Seri / Parti Bazlı Seçim"
 
 #. Label of the pick_serial_and_batch (Button) field in DocType 'Sales Invoice
 #. Item'
@@ -36309,7 +36309,7 @@ msgstr "Lütfen make_bundle için Eski Seri / Toplu Alanları Kullan seçeneğin
 
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.js:13
 msgid "Please enable only if the understand the effects of enabling this."
-msgstr ""
+msgstr "Lütfen yalnızca bunu etkinleştirmenin etkilerini anlıyorsanız etkinleştirin."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:145
 #: erpnext/public/js/utils/serial_no_batch_selector.js:319
@@ -36691,7 +36691,7 @@ msgstr "Ürün {0} için Başlangıç ve Bitiş tarihini seçiniz"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1281
 msgid "Please select Subcontracting Order instead of Purchase Order {0}"
-msgstr ""
+msgstr "Lütfen Satın Alma Siparişi yerine Alt Yüklenici Siparişini seçin {0}"
 
 #: erpnext/controllers/accounts_controller.py:2407
 msgid "Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}"
@@ -36723,7 +36723,7 @@ msgstr "Lütfen bir İrsaliye seçin"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:154
 msgid "Please select a Subcontracting Purchase Order."
-msgstr ""
+msgstr "Lütfen bir Alt Yüklenici Siparişi seçin."
 
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.js:69
 msgid "Please select a Supplier"
@@ -39655,7 +39655,7 @@ msgstr "Alış İrsaliyesi"
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Purchase Receipt (Draft) will be auto-created on submission of Subcontracting Receipt."
-msgstr "Satınalma İrsaliyesi (Taslak) Fason Sözleşme Fişinin teslim edilmesi üzerine otomatik olarak oluşturulacaktır."
+msgstr "Satın Alma İrsaliyesi (Taslak) Alt Yüklenici Fişinin teslim edilmesi üzerine otomatik olarak oluşturulacaktır."
 
 #. Label of the pr_detail (Data) field in DocType 'Purchase Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -43542,7 +43542,7 @@ msgstr "Reddedilen Depodan İade Miktarı"
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:106
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:180
 msgid "Return of Components"
-msgstr ""
+msgstr "Bileşenlerin İadesi"
 
 #. Option for the 'Tracking Status' (Select) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -43722,7 +43722,7 @@ msgstr "Rolün Fazla Teslim/Alma İzni Var"
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Role Allowed to Override Stop Action"
-msgstr "Durdurma Eylemini Geçersiz kılma izni olan Rol"
+msgstr "Durdurma Eylemini Geçersiz Kılma İzni Olan Rol"
 
 #. Label of the frozen_accounts_modifier (Link) field in DocType 'Accounts
 #. Settings'
@@ -44177,7 +44177,7 @@ msgstr "Satır #{0}: {1} öğesi mevcut değil"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:938
 msgid "Row #{0}: Item {1} has been picked, please reserve stock from the Pick List."
-msgstr ""
+msgstr "Satır #{0}: Ürün {1} toplandı, lütfen Toplama Listesinden stok ayırın."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:644
 msgid "Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it."
@@ -44895,7 +44895,7 @@ msgstr "SLA'nın Gerçekleştiği Tarih"
 #. Name of a DocType
 #: erpnext/support/doctype/sla_fulfilled_on_status/sla_fulfilled_on_status.json
 msgid "SLA Fulfilled On Status"
-msgstr ""
+msgstr "SLA Gerçekleştirildi Durumu"
 
 #. Label of the pause_sla_on (Table) field in DocType 'Service Level Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
@@ -49559,12 +49559,12 @@ msgstr "Stok Defteri Kimliği"
 #. Name of a report
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.json
 msgid "Stock Ledger Invariant Check"
-msgstr ""
+msgstr "Stok Defteri Değişmez Kontrolü"
 
 #. Name of a report
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.json
 msgid "Stock Ledger Variance"
-msgstr ""
+msgstr "Stok Defteri Varyansı"
 
 #: erpnext/stock/doctype/batch/batch.js:63
 #: erpnext/stock/doctype/item/item.js:470
@@ -49692,7 +49692,7 @@ msgstr "Stok Raporları"
 #. Name of a DocType
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Stock Reposting Settings"
-msgstr ""
+msgstr "Stok Yeniden Gönderim Ayarları"
 
 #. Label of the stock_reservation_tab (Tab Break) field in DocType 'Stock
 #. Settings'
@@ -49750,7 +49750,7 @@ msgstr "Rezerv Stok Depo Uyuşmazlığı"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:509
 msgid "Stock Reservation can only be created against {0}."
-msgstr ""
+msgstr "Stok Rezervasyonu yalnızca {0} karşılığında oluşturulabilir."
 
 #. Label of the stock_reserved_qty (Float) field in DocType 'Sales Order Item'
 #. Label of the stock_reserved_qty (Float) field in DocType 'Pick List Item'
@@ -50254,7 +50254,7 @@ msgstr "Alt Sözleşme Siparişi {0} oluşturuldu."
 #. Label of the purchase_order (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Subcontracting Purchase Order"
-msgstr ""
+msgstr "Alt Yüklenici Siparişi"
 
 #. Label of the subcontracting_receipt (Link) field in DocType 'Purchase
 #. Receipt'
@@ -51186,7 +51186,7 @@ msgstr "Ters tahsilat hükmüne tabi tedarikler"
 #. Label of the is_sub_contracted_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Supply Raw Materials for Purchase"
-msgstr "Satın Alma için Malzeme Temini"
+msgstr "Satın Alma için Hammadde Temini"
 
 #. Name of a Workspace
 #: erpnext/selling/doctype/customer/customer_dashboard.py:23
@@ -56603,7 +56603,7 @@ msgstr "Satışlarda ve Diğer Tüm Çıktılarda KDV"
 #: erpnext/stock/doctype/item_tax/item_tax.json
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Valid From"
-msgstr "Geçerlilik Süresi"
+msgstr "Geçerlilik Başlangıç Tarihi"
 
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:45
 msgid "Valid From date not in Fiscal Year {0}"
@@ -56620,7 +56620,7 @@ msgstr ""
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/templates/pages/order.html:59
 msgid "Valid Till"
-msgstr "Geçerlilik Tarihi"
+msgstr "Geçerlilik Bitiş Tarihi"
 
 #. Label of the valid_upto (Date) field in DocType 'Coupon Code'
 #. Label of the valid_upto (Date) field in DocType 'Pricing Rule'
@@ -59136,7 +59136,7 @@ msgstr ""
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "frankfurter.app"
-msgstr ""
+msgstr "frankfurter.app"
 
 #: erpnext/templates/form_grid/item_grid.html:66
 #: erpnext/templates/form_grid/item_grid.html:80
