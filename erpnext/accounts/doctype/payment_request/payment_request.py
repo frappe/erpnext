@@ -148,6 +148,14 @@ class PaymentRequest(Document):
 				)
 
 	def on_submit(self):
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_customer_doctypes") + frappe.get_hooks(
+			"advance_payment_supplier_doctypes"
+		)
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		if self.reference_doctype in advance_payment_doctypes:
+			# set advance payment status
+			ref_doc.set_total_advance_paid()
+
 		if self.payment_request_type == "Outward":
 			self.db_set("status", "Initiated")
 			return
@@ -155,7 +163,6 @@ class PaymentRequest(Document):
 			self.db_set("status", "Requested")
 
 		send_mail = self.payment_gateway_validation() if self.payment_gateway else None
-		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (
 			hasattr(ref_doc, "order_type") and ref_doc.order_type == "Shopping Cart"
@@ -169,13 +176,6 @@ class PaymentRequest(Document):
 
 		elif self.payment_channel == "Phone":
 			self.request_phone_payment()
-
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_customer_doctypes") + frappe.get_hooks(
-			"advance_payment_supplier_doctypes"
-		)
-		if self.reference_doctype in advance_payment_doctypes:
-			# set advance payment status
-			ref_doc.set_total_advance_paid()
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
