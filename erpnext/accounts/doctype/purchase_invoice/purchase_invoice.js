@@ -129,7 +129,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			);
 		}
 
-		if (doc.docstatus === 0) {
+		if (doc.docstatus === 0 && !this.frm.is_new()) {
 			const cur_doc = this.frm.doc;
 			const invoice_items = cur_doc.items;
 
