@@ -365,11 +365,12 @@ def get_inventory_dimensions():
 		dimensions = frappe.get_all(
 			"Inventory Dimension",
 			fields=[
-				"distinct target_fieldname as fieldname",
+				"target_fieldname as fieldname",
 				"reference_document as doctype",
 				"validate_negative_stock",
 			],
 			filters={"disabled": 0},
+			distinct=1,
 		)
 
 		frappe.local.inventory_dimensions = dimensions
