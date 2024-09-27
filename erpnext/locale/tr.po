@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-26 21:25\n"
+"PO-Revision-Date: 2024-09-27 21:32\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -9985,7 +9985,7 @@ msgstr "Çek Genişliği"
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/public/js/controllers/transaction.js:2200
 msgid "Cheque/Reference Date"
-msgstr "Çek/Referans Tarihi"
+msgstr "Çek Vade Tarihi"
 
 #. Label of the reference_no (Data) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -13035,7 +13035,7 @@ msgstr "Kullanıcıları Oluştur"
 
 #: erpnext/stock/doctype/item/item.js:745
 msgid "Create Variant"
-msgstr "Varyant Oluştur"
+msgstr "Varyasyon Oluştur"
 
 #: erpnext/stock/doctype/item/item.js:566
 #: erpnext/stock/doctype/item/item.js:610
@@ -13044,7 +13044,7 @@ msgstr "Varyantları Oluştur"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:10
 msgid "Create Workstation"
-msgstr ""
+msgstr "İş İstasyonu Oluştur"
 
 #. Option for the 'Capitalization Method' (Select) field in DocType 'Asset
 #. Capitalization'
@@ -18813,7 +18813,7 @@ msgstr "API anahtarını Google Ayarlarına girin."
 
 #: erpnext/setup/doctype/employee/employee.js:91
 msgid "Enter First and Last name of Employee, based on Which Full Name will be updated. IN transactions, it will be Full Name which will be fetched."
-msgstr ""
+msgstr "Personelin Adı ve Soyadını Girin, buna göre Tam Adı güncellenecektir. İşlemlerde, Tam Ad kullanılacaktır."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:211
 msgid "Enter Serial No Range"
@@ -20720,7 +20720,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/subscription/subscription.js:42
 msgid "Force-Fetch Subscription Updates"
-msgstr ""
+msgstr "Abonelik Güncellemelerini Zorla Getir"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
@@ -22506,7 +22506,7 @@ msgstr "Seri Numarası Var"
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/stock/doctype/item/item.json
 msgid "Has Variants"
-msgstr "Varyasyonlu"
+msgstr "Varyasyonlar"
 
 #. Label of the use_naming_series (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -24669,7 +24669,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:111
 msgid "Invalid Amount"
-msgstr ""
+msgstr "Geçersiz Miktar"
 
 #: erpnext/controllers/item_variant.py:128
 msgid "Invalid Attribute"
@@ -34696,7 +34696,7 @@ msgstr "Cari Kullanıcısı"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:443
 msgid "Party can only be one of {0}"
-msgstr ""
+msgstr "Cari yalnızca {0} seçeneğinden biri olabilir"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:490
 msgid "Party is mandatory"
@@ -34753,7 +34753,7 @@ msgstr "İşi Duraklat"
 #. Name of a DocType
 #: erpnext/support/doctype/pause_sla_on_status/pause_sla_on_status.json
 msgid "Pause SLA On Status"
-msgstr ""
+msgstr "Durumda SLA'yı Duraklat"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation'
@@ -35185,7 +35185,7 @@ msgstr "{0} için Ödeme Talebi"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:569
 msgid "Payment Request is already created"
-msgstr ""
+msgstr "Ödeme Talebi zaten oluşturuldu"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:302
 msgid "Payment Request took too long to respond. Please try requesting for payment again."
@@ -35193,7 +35193,7 @@ msgstr "Ödeme Talebi yanıtlanması çok uzun sürdü. Lütfen ödemeyi tekrar 
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:537
 msgid "Payment Requests cannot be created against: {0}"
-msgstr ""
+msgstr "Ödeme Talepleri {0} için oluşturulamaz"
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Name of a DocType
@@ -39234,7 +39234,7 @@ msgstr "Geçici Gider Hesabı"
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:149
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:216
 msgid "Provisional Profit / Loss (Credit)"
-msgstr "Geçici Kar/Zarar (Alacak)"
+msgstr "Geçici Kar/Zarar"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -48362,7 +48362,7 @@ msgstr "Yaklaşan gelir/gider ile göster"
 #: erpnext/accounts/report/trial_balance/trial_balance.js:94
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:85
 msgid "Show zero values"
-msgstr "Sıfır değerlerini göster"
+msgstr "Sıfır Değerleri Göster"
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.js:35
 msgid "Show {0}"
