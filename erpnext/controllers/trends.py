@@ -256,8 +256,7 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.stock_qty, NULL)),
-					SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.base_net_amount, NULL)),
+	query_details += """SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.stock_qty ELSE NULL END),SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.base_net_amount ELSE NULL END),
 				""".format(
 		trans_date=trans_date,
 		sd=bet_dates[0],
@@ -312,7 +311,7 @@ def based_wise_columns_query(based_on, trans):
 	if based_on == "Item":
 		based_on_details["based_on_cols"] = ["Item:Link/Item:120", "Item Name:Data:120"]
 		based_on_details["based_on_select"] = "t2.item_code, t2.item_name,"
-		based_on_details["based_on_group_by"] = "t2.item_code"
+		based_on_details["based_on_group_by"] = "t2.item_code, t2.item_name"
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Item Group":
