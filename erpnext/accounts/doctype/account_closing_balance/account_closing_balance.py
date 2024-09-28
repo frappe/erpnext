@@ -113,9 +113,9 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 	entries = []
 	last_period_closing_voucher = frappe.db.get_all(
 		"Period Closing Voucher",
-		filters={"docstatus": 1, "company": company, "posting_date": ("<", closing_date)},
+		filters={"docstatus": 1, "company": company, "period_end_date": ("<", closing_date)},
 		fields=["name"],
-		order_by="posting_date desc",
+		order_by="period_end_date desc",
 		limit=1,
 	)
 
