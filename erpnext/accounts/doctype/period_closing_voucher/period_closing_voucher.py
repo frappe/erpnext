@@ -433,6 +433,7 @@ class PeriodClosingVoucher(AccountsController):
 			{"voucher_type": "Period Closing Voucher", "voucher_no": self.name, "is_cancelled": 0},
 		)
 
+
 def process_gl_and_closing_entries(doc):
 	from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -470,6 +471,7 @@ def delete_closing_entries(voucher_no):
 	frappe.qb.from_(closing_balance).delete().where(
 		closing_balance.period_closing_voucher == voucher_no
 	).run()
+
 
 @frappe.whitelist()
 def get_period_start_end_date(fiscal_year, company):
