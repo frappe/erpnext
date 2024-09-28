@@ -365,7 +365,6 @@ doc_events = {
 	"Payment Entry": {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
-			"erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status",
 			"erpnext.accounts.doctype.dunning.dunning.resolve_dunning",
 		],
 		"on_cancel": ["erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
