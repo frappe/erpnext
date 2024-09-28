@@ -206,9 +206,6 @@ class PaymentRequest(Document):
 					self.send_email()
 					self.make_communication_entry()
 
-	def on_submit(self):
-		self.update_reference_advance_payment_status()
-
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
 		request_amount = self.get_request_amount()
@@ -492,14 +489,6 @@ class PaymentRequest(Document):
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
 			return create_stripe_subscription(gateway_controller, data)
-
-	def update_reference_advance_payment_status(self):
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
-			"advance_payment_payable_doctypes"
-		)
-		if self.reference_doctype in advance_payment_doctypes:
-			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-			ref_doc.set_advance_payment_status()
 
 	def _allocate_payment_request_to_pe_references(self, references):
 		"""
