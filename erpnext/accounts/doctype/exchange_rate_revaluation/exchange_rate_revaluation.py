@@ -74,7 +74,7 @@ class ExchangeRateRevaluation(Document):
 		if not (self.company and self.posting_date):
 			frappe.throw(_("Please select Company and Posting Date to getting entries"))
 
-	def on_submit(self):
+	def before_submit(self):
 		self.remove_accounts_without_gain_loss()
 
 	def remove_accounts_without_gain_loss(self):
