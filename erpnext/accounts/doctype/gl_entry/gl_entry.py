@@ -430,8 +430,9 @@ def update_against_account(voucher_type, voucher_no):
 
 
 def on_doctype_update():
-	frappe.db.add_index("GL Entry", ["against_voucher_type", "against_voucher"])
 	frappe.db.add_index("GL Entry", ["voucher_type", "voucher_no"])
+	frappe.db.add_index("GL Entry", ["posting_date", "company"])
+	frappe.db.add_index("GL Entry", ["party_type", "party"])
 
 
 def rename_gle_sle_docs():
