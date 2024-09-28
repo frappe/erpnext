@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-24 21:26\n"
+"PO-Revision-Date: 2024-09-28 21:51\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -150,7 +150,7 @@ msgstr "٪ مشغول"
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:285
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:338
 msgid "% Of Grand Total"
-msgstr "% از کل بزرگ"
+msgstr "% از جمع کل"
 
 #. Label of the per_ordered (Percent) field in DocType 'Material Request'
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -17260,7 +17260,7 @@ msgstr "تماس نگیرید"
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 msgid "Do Not Explode"
-msgstr "منفجر نشوید"
+msgstr "گسترده نکنید"
 
 #. Label of the do_not_update_serial_batch_on_creation_of_auto_bundle (Check)
 #. field in DocType 'Stock Settings'
@@ -21711,7 +21711,7 @@ msgstr ""
 #. Label of the get_items_for_mr (Button) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Get Raw Materials for Purchase"
-msgstr "دریافت مواد اولیه را برای خرید"
+msgstr "دریافت مواد اولیه برای خرید"
 
 #. Label of the transfer_materials (Button) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
@@ -21985,7 +21985,7 @@ msgstr "گرم/لیتر"
 #: erpnext/templates/includes/order/order_taxes.html:105
 #: erpnext/templates/pages/rfq.html:58
 msgid "Grand Total"
-msgstr "کل بزرگ"
+msgstr "جمع کل"
 
 #. Label of the base_grand_total (Currency) field in DocType 'POS Invoice'
 #. Label of the base_grand_total (Currency) field in DocType 'Purchase Invoice'
@@ -23106,7 +23106,7 @@ msgstr "اگر نیاز به تطبیق معاملات خاصی با یکدیگ�
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:925
 msgid "If you still want to proceed, please disable 'Skip Available Sub Assembly Items' checkbox."
-msgstr ""
+msgstr "اگر همچنان می‌خواهید ادامه دهید، لطفاً کادر انتخاب «صرف نظر از آیتم‌های زیر مونتاژ موجود» را غیرفعال کنید."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1623
 msgid "If you still want to proceed, please enable {0}."
@@ -23505,12 +23505,12 @@ msgstr "در تعمیر و نگهداری"
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "In Mins"
-msgstr "در دقیقه"
+msgstr "به دقیقه"
 
 #. Description of the 'Time' (Float) field in DocType 'Work Order Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "In Minutes"
-msgstr "در چند دقیقه"
+msgstr "به دقیقه"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:130
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.js:162
@@ -23684,7 +23684,7 @@ msgstr "هنگامی که سفارش فروش را ذخیره کنید، در Wo
 #. Operation'
 #: erpnext/manufacturing/doctype/job_card_operation/job_card_operation.json
 msgid "In mins"
-msgstr "در دقیقه"
+msgstr "به دقیقه"
 
 #. Description of the 'Operation Time' (Float) field in DocType 'BOM Operation'
 #. Description of the 'Delay between Delivery Stops' (Int) field in DocType
@@ -23692,7 +23692,7 @@ msgstr "در دقیقه"
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 #: erpnext/stock/doctype/delivery_settings/delivery_settings.json
 msgid "In minutes"
-msgstr "در چند دقیقه"
+msgstr "به دقیقه"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.js:8
 msgid "In row {0} of Appointment Booking Slots: \"To Time\" must be later than \"From Time\"."
@@ -27022,7 +27022,7 @@ msgstr "JAN"
 #. Label of the production_capacity (Int) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 msgid "Job Capacity"
-msgstr ""
+msgstr "ظرفیت کاری"
 
 #. Label of the job_card (Link) field in DocType 'Purchase Order Item'
 #. Option for the 'Transfer Material Against' (Select) field in DocType 'BOM'
@@ -27104,7 +27104,7 @@ msgstr "گزارش زمان کارت شغلی"
 #. Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Job Card and Capacity Planning"
-msgstr ""
+msgstr "برنامه ریزی کارت کار و ظرفیت"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1229
 msgid "Job Card {0} has been completed"
@@ -30790,12 +30790,12 @@ msgstr "مکان نامگذاری شده"
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Naming Series"
-msgstr "نامگذاری سری"
+msgstr "سری نامگذاری"
 
 #. Label of the naming_series_prefix (Data) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Naming Series Prefix"
-msgstr "پیشوند نامگذاری سری"
+msgstr "پیشوند سری نامگذاری"
 
 #. Label of the supplier_and_price_defaults_section (Tab Break) field in
 #. DocType 'Buying Settings'
@@ -48354,7 +48354,7 @@ msgstr "اندازه"
 #. 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Skip Available Sub Assembly Items"
-msgstr "آیتم‌های زیر مونتاژ موجود را رد کنید"
+msgstr "صرف نظر از آیتم‌های زیر مونتاژ موجود"
 
 #. Label of the skip_delivery_note (Check) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
@@ -48604,7 +48604,7 @@ msgstr "انبار منبع برای ردیف {0} اجباری است"
 #: erpnext/manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 msgid "Sourced by Supplier"
-msgstr "منبع شده توسط تامین کننده"
+msgstr "به دست آمده توسط تامین کننده"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/south_africa_vat_account/south_africa_vat_account.json
@@ -53303,7 +53303,7 @@ msgstr "زمان بین عملیات (دقیقه)"
 #. Label of the time_in_mins (Float) field in DocType 'Job Card Time Log'
 #: erpnext/manufacturing/doctype/job_card_time_log/job_card_time_log.json
 msgid "Time In Mins"
-msgstr "زمان در دقیقه"
+msgstr "زمان به دقیقه"
 
 #. Label of the time_logs (Table) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
@@ -53355,13 +53355,13 @@ msgstr "زمان دریافت مواد"
 #. Description of the 'Operation Time' (Float) field in DocType 'Sub Operation'
 #: erpnext/manufacturing/doctype/sub_operation/sub_operation.json
 msgid "Time in mins"
-msgstr "زمان در دقیقه"
+msgstr "زمان به دقیقه"
 
 #. Description of the 'Total Operation Time' (Float) field in DocType
 #. 'Operation'
 #: erpnext/manufacturing/doctype/operation/operation.json
 msgid "Time in mins."
-msgstr "زمان در دقیقه"
+msgstr "زمان به دقیقه."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:712
 msgid "Time logs are required for {0} {1}"
@@ -54780,7 +54780,7 @@ msgstr "زمان کل (به دقیقه)"
 #. Label of the total_time_in_mins (Float) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Total Time in Mins"
-msgstr "کل زمان در دقیقه"
+msgstr "کل زمان به دقیقه"
 
 #: erpnext/public/js/utils.js:102
 msgid "Total Unpaid: {0}"
@@ -54917,7 +54917,7 @@ msgstr "مجموع (مقدار)"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals"
-msgstr "جمع کل"
+msgstr "جمع"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
@@ -56148,7 +56148,7 @@ msgstr "با موفقیت به روز شد"
 #. Order Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Updated via 'Time Log' (In Minutes)"
-msgstr "به روز شده از طریق \"Time Log\" (در چند دقیقه)"
+msgstr "به روز شده از طریق \"Time Log\" (به دقیقه)"
 
 #: erpnext/stock/doctype/item/item.py:1357
 msgid "Updating Variants..."
