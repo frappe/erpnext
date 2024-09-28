@@ -6,19 +6,20 @@
  "engine": "InnoDB",
  "field_order": [
   "transaction_date",
-  "posting_date",
-  "fiscal_year",
-  "year_start_date",
-  "amended_from",
   "company",
+  "fiscal_year",
+  "period_start_date",
+  "period_end_date",
+  "amended_from",
   "column_break1",
   "closing_account_head",
-  "remarks",
   "gle_processing_status",
+  "remarks",
   "error_message"
  ],
  "fields": [
   {
+   "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "label": "Transaction Date",
@@ -26,19 +27,11 @@
    "oldfieldtype": "Date"
   },
   {
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "label": "Posting Date",
-   "oldfieldname": "posting_date",
-   "oldfieldtype": "Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "fiscal_year",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Closing Fiscal Year",
+   "label": "Fiscal Year",
    "oldfieldname": "fiscal_year",
    "oldfieldtype": "Select",
    "options": "Fiscal Year",
@@ -103,16 +96,25 @@
    "read_only": 1
   },
   {
-   "fieldname": "year_start_date",
+   "fieldname": "period_end_date",
    "fieldtype": "Date",
-   "label": "Year Start Date"
+   "label": "Period End Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "period_start_date",
+   "fieldtype": "Date",
+   "label": "Period Start Date",
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:13.013336",
+ "modified": "2024-08-30 17:22:45.291628",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Period Closing Voucher",
@@ -148,7 +150,7 @@
    "write": 1
   }
  ],
- "search_fields": "posting_date, fiscal_year",
+ "search_fields": "fiscal_year, period_start_date, period_end_date",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
