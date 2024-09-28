@@ -243,7 +243,6 @@ class PaymentRequest(Document):
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
-		self.update_reference_advance_payment_status()
 
 	def make_invoice(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
