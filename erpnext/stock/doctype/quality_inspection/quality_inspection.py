@@ -245,6 +245,7 @@ class QualityInspection(Document):
 			for i in range(1, 11):
 				field = "reading_" + str(i)
 				if reading.get(field) is None:
+					data[field] = 0.0
 					continue
 
 				data[field] = parse_float(reading.get(field))
