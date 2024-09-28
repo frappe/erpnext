@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, Order
 
 
 class PaymentLedger:
@@ -133,6 +133,7 @@ class PaymentLedger:
 			.select(ple.star)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(self.conditions))
+			.orderby(ple.voucher_type, order=Order.desc)
 			.orderby(ple.posting_date)
 			.run(as_dict=True)
 		)
