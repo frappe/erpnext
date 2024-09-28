@@ -195,7 +195,15 @@ class QualityInspection(Document):
 			# numeric readings
 			for i in range(1, 11):
 				field = "reading_" + str(i)
+<<<<<<< HEAD
 				data[field] = flt(reading.get(field))
+=======
+				if reading.get(field) is None:
+					data[field] = 0.0
+					continue
+
+				data[field] = parse_float(reading.get(field))
+>>>>>>> a594c05296 (fix: quality inspection creation (#43416))
 			data["mean"] = self.calculate_mean(reading)
 
 		return data
