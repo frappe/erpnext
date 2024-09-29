@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ERPNext VERSION\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
-"POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-24 15:20+0000\n"
+"POT-Creation-Date: 2024-09-29 09:35+0000\n"
+"PO-Revision-Date: 2024-09-29 09:35+0000\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: info@erpnext.com\n"
 "MIME-Version: 1.0\n"
@@ -85,6 +85,10 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.py:310
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
+msgstr ""
+
+#: erpnext/public/js/utils/serial_no_batch_selector.js:257
+msgid "\"SN-01::10\" for \"SN-01\" to \"SN-10\""
 msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.js:132
@@ -1106,7 +1110,7 @@ msgstr ""
 
 #. Label of the qty (Float) field in DocType 'Purchase Receipt Item'
 #. Label of the qty (Float) field in DocType 'Subcontracting Receipt Item'
-#: erpnext/public/js/controllers/transaction.js:2263
+#: erpnext/public/js/controllers/transaction.js:2272
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Accepted Quantity"
@@ -2201,8 +2205,8 @@ msgstr ""
 msgid "Accumulated Depreciation Amount"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:455
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:473
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:485
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:503
 msgid "Accumulated Depreciation as on"
 msgstr ""
 
@@ -2616,7 +2620,7 @@ msgstr ""
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:474
 #: erpnext/public/js/utils/crm_activities.js:170
 #: erpnext/public/js/utils/serial_no_batch_selector.js:17
-#: erpnext/public/js/utils/serial_no_batch_selector.js:182
+#: erpnext/public/js/utils/serial_no_batch_selector.js:186
 #: erpnext/stock/dashboard/item_dashboard_list.html:59
 msgid "Add"
 msgstr ""
@@ -3893,7 +3897,7 @@ msgstr ""
 msgid "All items have already been transferred for this Work Order."
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:2352
+#: erpnext/public/js/controllers/transaction.js:2361
 msgid "All items in this document already have a linked Quality Inspection."
 msgstr ""
 
@@ -5438,7 +5442,7 @@ msgstr ""
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:30
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:138
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.js:44
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:415
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:439
 #: erpnext/assets/doctype/asset/asset.json
 #: erpnext/assets/doctype/asset_activity/asset_activity.json
 #: erpnext/assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
@@ -5505,7 +5509,7 @@ msgstr ""
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:36
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:188
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.js:37
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:405
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:429
 #: erpnext/assets/doctype/asset/asset.json
 #: erpnext/assets/doctype/asset_category/asset_category.json
 #: erpnext/assets/doctype/asset_maintenance/asset_maintenance.json
@@ -6054,7 +6058,7 @@ msgstr ""
 msgid "Attach .csv file with two columns, one for the old name and one for the new name"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:260
+#: erpnext/public/js/utils/serial_no_batch_selector.js:239
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:69
 msgid "Attach CSV File"
 msgstr ""
@@ -6237,7 +6241,7 @@ msgstr ""
 msgid "Auto Email Report"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:346
+#: erpnext/public/js/utils/serial_no_batch_selector.js:367
 msgid "Auto Fetch"
 msgstr ""
 
@@ -7646,9 +7650,9 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:89
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:115
-#: erpnext/public/js/controllers/transaction.js:2289
+#: erpnext/public/js/controllers/transaction.js:2298
 #: erpnext/public/js/utils/barcode_scanner.js:260
-#: erpnext/public/js/utils/serial_no_batch_selector.js:416
+#: erpnext/public/js/utils/serial_no_batch_selector.js:437
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/packed_item/packed_item.json
@@ -7676,7 +7680,7 @@ msgstr ""
 msgid "Batch No is mandatory"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2268
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2289
 msgid "Batch No {0} does not exists"
 msgstr ""
 
@@ -7690,7 +7694,7 @@ msgid "Batch No."
 msgstr ""
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:16
-#: erpnext/public/js/utils/serial_no_batch_selector.js:181
+#: erpnext/public/js/utils/serial_no_batch_selector.js:185
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:46
 msgid "Batch Nos"
 msgstr ""
@@ -9296,7 +9300,7 @@ msgstr ""
 msgid "Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
 msgstr ""
 
-#: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:491
+#: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:497
 msgid "Cannot make any transactions until the deletion job is completed"
 msgstr ""
 
@@ -9925,7 +9929,7 @@ msgstr ""
 
 #. Label of the reference_date (Date) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
-#: erpnext/public/js/controllers/transaction.js:2200
+#: erpnext/public/js/controllers/transaction.js:2209
 msgid "Cheque/Reference Date"
 msgstr ""
 
@@ -11888,7 +11892,7 @@ msgid "Content Type"
 msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:157
-#: erpnext/public/js/controllers/transaction.js:2213
+#: erpnext/public/js/controllers/transaction.js:2222
 #: erpnext/selling/doctype/quotation/quotation.js:359
 msgid "Continue"
 msgstr ""
@@ -12404,8 +12408,8 @@ msgstr ""
 msgid "Cost and Freight"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:425
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:449
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:479
 msgid "Cost as on"
 msgstr ""
 
@@ -12425,7 +12429,11 @@ msgstr ""
 msgid "Cost of Issued Items"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:431
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:473
+msgid "Cost of New Capitalized Asset"
+msgstr ""
+
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:455
 msgid "Cost of New Purchase"
 msgstr ""
 
@@ -12438,11 +12446,11 @@ msgstr ""
 msgid "Cost of Purchased Items"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:443
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:467
 msgid "Cost of Scrapped Asset"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:437
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:461
 msgid "Cost of Sold Asset"
 msgstr ""
 
@@ -12698,7 +12706,7 @@ msgstr ""
 #: erpnext/public/js/communication.js:41
 #: erpnext/public/js/controllers/transaction.js:331
 #: erpnext/public/js/controllers/transaction.js:332
-#: erpnext/public/js/controllers/transaction.js:2330
+#: erpnext/public/js/controllers/transaction.js:2339
 #: erpnext/selling/doctype/customer/customer.js:176
 #: erpnext/selling/doctype/quotation/quotation.js:127
 #: erpnext/selling/doctype/quotation/quotation.js:136
@@ -12937,10 +12945,6 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:403
 msgid "Create Sample Retention Stock Entry"
-msgstr ""
-
-#: erpnext/public/js/utils/serial_no_batch_selector.js:233
-msgid "Create Serial Nos"
 msgstr ""
 
 #: erpnext/stock/dashboard/item_dashboard.js:279
@@ -16091,7 +16095,7 @@ msgstr ""
 msgid "Depreciation Amount"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:461
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:491
 msgid "Depreciation Amount during the period"
 msgstr ""
 
@@ -16105,7 +16109,7 @@ msgstr ""
 msgid "Depreciation Details"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:467
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:497
 msgid "Depreciation Eliminated due to disposal of assets"
 msgstr ""
 
@@ -16417,7 +16421,7 @@ msgstr ""
 #: erpnext/projects/doctype/task_type/task_type.json
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.json
 #: erpnext/public/js/bank_reconciliation_tool/data_table_manager.js:55
-#: erpnext/public/js/controllers/transaction.js:2277
+#: erpnext/public/js/controllers/transaction.js:2286
 #: erpnext/selling/doctype/installation_note_item/installation_note_item.json
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/doctype/product_bundle_item/product_bundle_item.json
@@ -17342,7 +17346,7 @@ msgstr ""
 msgid "Do you still want to enable negative inventory?"
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:1017
+#: erpnext/public/js/controllers/transaction.js:1026
 msgid "Do you want to clear the selected {0}?"
 msgstr ""
 
@@ -17521,7 +17525,7 @@ msgstr ""
 msgid "Download Backups"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:251
+#: erpnext/public/js/utils/serial_no_batch_selector.js:230
 msgid "Download CSV Template"
 msgstr ""
 
@@ -17998,7 +18002,7 @@ msgstr ""
 msgid "Edit Cart"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:30
+#: erpnext/public/js/utils/serial_no_batch_selector.js:31
 msgid "Edit Full Form"
 msgstr ""
 
@@ -18745,10 +18749,6 @@ msgstr ""
 msgid "Ensure Delivery Based on Produced Serial No"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:214
-msgid "Enter \"ABC-001::100\" for serial nos \"ABC-001\" to \"ABC-100\"."
-msgstr ""
-
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.py:279
 msgid "Enter API key in Google Settings."
 msgstr ""
@@ -18757,11 +18757,11 @@ msgstr ""
 msgid "Enter First and Last name of Employee, based on Which Full Name will be updated. IN transactions, it will be Full Name which will be fetched."
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:211
-msgid "Enter Serial No Range"
+#: erpnext/public/js/utils/serial_no_batch_selector.js:196
+msgid "Enter Manually"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:221
+#: erpnext/public/js/utils/serial_no_batch_selector.js:274
 msgid "Enter Serial Nos"
 msgstr ""
 
@@ -18818,7 +18818,7 @@ msgstr ""
 msgid "Enter discount percentage."
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:224
+#: erpnext/public/js/utils/serial_no_batch_selector.js:277
 msgid "Enter each serial no in a new line"
 msgstr ""
 
@@ -19767,7 +19767,7 @@ msgstr ""
 msgid "Fees"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:362
+#: erpnext/public/js/utils/serial_no_batch_selector.js:383
 msgid "Fetch Based On"
 msgstr ""
 
@@ -19816,7 +19816,7 @@ msgid "Fetch items based on Default Supplier."
 msgstr ""
 
 #: erpnext/accounts/doctype/dunning/dunning.js:135
-#: erpnext/public/js/controllers/transaction.js:1177
+#: erpnext/public/js/controllers/transaction.js:1186
 msgid "Fetching exchange rates ..."
 msgstr ""
 
@@ -20579,7 +20579,7 @@ msgstr ""
 msgid "For Warehouse"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:119
+#: erpnext/public/js/utils/serial_no_batch_selector.js:120
 msgid "For Work Order"
 msgstr ""
 
@@ -21707,7 +21707,7 @@ msgstr ""
 msgid "Get Items from Open Material Requests"
 msgstr ""
 
-#: erpnext/public/js/controllers/buying.js:498
+#: erpnext/public/js/controllers/buying.js:504
 msgid "Get Items from Product Bundle"
 msgstr ""
 
@@ -23501,7 +23501,7 @@ msgstr ""
 msgid "Import Type"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:200
+#: erpnext/public/js/utils/serial_no_batch_selector.js:212
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:80
 msgid "Import Using CSV file"
 msgstr ""
@@ -24625,7 +24625,7 @@ msgstr ""
 msgid "Invalid Barcode. There is no Item attached to this barcode."
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:2515
+#: erpnext/public/js/controllers/transaction.js:2524
 msgid "Invalid Blanket Order for the selected Customer and Item"
 msgstr ""
 
@@ -24659,8 +24659,8 @@ msgstr ""
 msgid "Invalid Document Type"
 msgstr ""
 
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:229
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:234
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:231
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:236
 msgid "Invalid Formula"
 msgstr ""
 
@@ -25644,7 +25644,7 @@ msgstr ""
 msgid "It can take upto few hours for accurate stock values to be visible after merging items."
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:1976
+#: erpnext/public/js/controllers/transaction.js:1985
 msgid "It is needed to fetch Item Details."
 msgstr ""
 
@@ -25969,7 +25969,7 @@ msgstr ""
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:86
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:119
 #: erpnext/projects/doctype/timesheet/timesheet.js:213
-#: erpnext/public/js/controllers/transaction.js:2251
+#: erpnext/public/js/controllers/transaction.js:2260
 #: erpnext/public/js/utils.js:495 erpnext/public/js/utils.js:650
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 #: erpnext/selling/doctype/installation_note_item/installation_note_item.json
@@ -26396,7 +26396,7 @@ msgstr ""
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:359
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:92
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:128
-#: erpnext/public/js/controllers/transaction.js:2257
+#: erpnext/public/js/controllers/transaction.js:2266
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:35
@@ -28845,7 +28845,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom/bom.py:245
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.py:71
 #: erpnext/public/js/controllers/accounts.js:249
-#: erpnext/public/js/controllers/transaction.js:2637
+#: erpnext/public/js/controllers/transaction.js:2646
 #: erpnext/public/js/utils/party.js:317
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:164
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
@@ -30218,7 +30218,7 @@ msgstr ""
 msgid "Missing Finished Good"
 msgstr ""
 
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:214
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:216
 msgid "Missing Formula"
 msgstr ""
 
@@ -30753,7 +30753,7 @@ msgstr ""
 #: erpnext/crm/doctype/appointment/appointment.json
 #: erpnext/crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:29
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:44
-#: erpnext/public/js/utils/serial_no_batch_selector.js:466
+#: erpnext/public/js/utils/serial_no_batch_selector.js:487
 #: erpnext/selling/doctype/installation_note/installation_note.json
 #: erpnext/selling/doctype/quotation/quotation.js:276
 #: erpnext/setup/doctype/employee_group/employee_group.json
@@ -30951,8 +30951,8 @@ msgstr ""
 msgid "Net Amount (Company Currency)"
 msgstr ""
 
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:479
-#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:485
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:509
+#: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:515
 msgid "Net Asset value as on"
 msgstr ""
 
@@ -31690,7 +31690,7 @@ msgstr ""
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr ""
 
-#: erpnext/public/js/controllers/buying.js:430
+#: erpnext/public/js/controllers/buying.js:436
 msgid "No pending Material Requests found to link for the given items."
 msgstr ""
 
@@ -31909,7 +31909,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:929
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1625
 #: erpnext/projects/doctype/timesheet/timesheet.json
-#: erpnext/public/js/controllers/buying.js:431
+#: erpnext/public/js/controllers/buying.js:437
 #: erpnext/selling/doctype/customer/customer.py:125
 #: erpnext/selling/doctype/sales_order/sales_order.js:1194
 #: erpnext/stock/doctype/item/item.js:497
@@ -36111,7 +36111,7 @@ msgstr ""
 msgid "Please add a Temporary Opening account in Chart of Accounts"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:595
+#: erpnext/public/js/utils/serial_no_batch_selector.js:623
 msgid "Please add atleast one Serial No / Batch No"
 msgstr ""
 
@@ -36254,7 +36254,7 @@ msgid "Please enable only if the understand the effects of enabling this."
 msgstr ""
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:145
-#: erpnext/public/js/utils/serial_no_batch_selector.js:319
+#: erpnext/public/js/utils/serial_no_batch_selector.js:340
 #: erpnext/regional/report/electronic_invoice_register/electronic_invoice_register.js:49
 msgid "Please enable pop-ups"
 msgstr ""
@@ -36317,7 +36317,7 @@ msgstr ""
 msgid "Please enter Item Code to get Batch Number"
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:2388
+#: erpnext/public/js/controllers/transaction.js:2397
 msgid "Please enter Item Code to get batch no"
 msgstr ""
 
@@ -36361,7 +36361,7 @@ msgstr ""
 msgid "Please enter Root Type for account- {0}"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:286
+#: erpnext/public/js/utils/serial_no_batch_selector.js:307
 msgid "Please enter Serial Nos"
 msgstr ""
 
@@ -36651,7 +36651,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom/bom.js:570
 #: erpnext/manufacturing/doctype/bom/bom.py:245
 #: erpnext/public/js/controllers/accounts.js:249
-#: erpnext/public/js/controllers/transaction.js:2637
+#: erpnext/public/js/controllers/transaction.js:2646
 msgid "Please select a Company first."
 msgstr ""
 
@@ -36671,7 +36671,7 @@ msgstr ""
 msgid "Please select a Supplier"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:599
+#: erpnext/public/js/utils/serial_no_batch_selector.js:627
 msgid "Please select a Warehouse"
 msgstr ""
 
@@ -36999,7 +36999,7 @@ msgstr ""
 msgid "Please set one of the following:"
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:2106
+#: erpnext/public/js/controllers/transaction.js:2115
 msgid "Please set recurring after saving"
 msgstr ""
 
@@ -37053,7 +37053,7 @@ msgstr ""
 msgid "Please share this email with your support team so that they can find and fix the issue."
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:1974
+#: erpnext/public/js/controllers/transaction.js:1983
 msgid "Please specify"
 msgstr ""
 
@@ -38458,7 +38458,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/public/js/controllers/buying.js:260
-#: erpnext/public/js/controllers/buying.js:502
+#: erpnext/public/js/controllers/buying.js:508
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -40060,7 +40060,7 @@ msgstr ""
 msgid "Qty to Deliver"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:351
+#: erpnext/public/js/utils/serial_no_batch_selector.js:372
 msgid "Qty to Fetch"
 msgstr ""
 
@@ -40391,9 +40391,9 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:187
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:211
-#: erpnext/public/js/controllers/buying.js:509
+#: erpnext/public/js/controllers/buying.js:515
 #: erpnext/public/js/stock_analytics.js:50
-#: erpnext/public/js/utils/serial_no_batch_selector.js:455
+#: erpnext/public/js/utils/serial_no_batch_selector.js:476
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:46
@@ -41914,7 +41914,7 @@ msgstr ""
 msgid "Reference Date"
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:2212
+#: erpnext/public/js/controllers/transaction.js:2221
 msgid "Reference Date for Early Payment Discount"
 msgstr ""
 
@@ -43932,11 +43932,11 @@ msgstr ""
 msgid "Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}."
 msgstr ""
 
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:233
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:235
 msgid "Row #{0}: Acceptance Criteria Formula is incorrect."
 msgstr ""
 
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:213
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:215
 msgid "Row #{0}: Acceptance Criteria Formula is required."
 msgstr ""
 
@@ -44277,7 +44277,7 @@ msgstr ""
 msgid "Row #{0}: Start Time must be before End Time"
 msgstr ""
 
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:120
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:122
 msgid "Row #{0}: Status is mandatory"
 msgstr ""
 
@@ -44342,7 +44342,7 @@ msgstr ""
 msgid "Row #{0}: {1} can not be negative for item {2}"
 msgstr ""
 
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:226
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:228
 msgid "Row #{0}: {1} is not a valid reading field. Please refer to the field description."
 msgstr ""
 
@@ -45771,7 +45771,7 @@ msgstr ""
 
 #. Label of the sample_size (Float) field in DocType 'Quality Inspection'
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:93
-#: erpnext/public/js/controllers/transaction.js:2270
+#: erpnext/public/js/controllers/transaction.js:2279
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 msgid "Sample Size"
 msgstr ""
@@ -45867,7 +45867,7 @@ msgstr ""
 msgid "Scan Barcode"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:154
+#: erpnext/public/js/utils/serial_no_batch_selector.js:155
 msgid "Scan Batch No"
 msgstr ""
 
@@ -45883,7 +45883,7 @@ msgstr ""
 msgid "Scan Mode"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:139
+#: erpnext/public/js/utils/serial_no_batch_selector.js:140
 msgid "Scan Serial No"
 msgstr ""
 
@@ -46303,7 +46303,7 @@ msgstr ""
 msgid "Select Items based on Delivery Date"
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:2300
+#: erpnext/public/js/controllers/transaction.js:2309
 msgid "Select Items for Quality Inspection"
 msgstr ""
 
@@ -46812,8 +46812,8 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:74
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:114
-#: erpnext/public/js/controllers/transaction.js:2283
-#: erpnext/public/js/utils/serial_no_batch_selector.js:399
+#: erpnext/public/js/controllers/transaction.js:2292
+#: erpnext/public/js/utils/serial_no_batch_selector.js:420
 #: erpnext/selling/doctype/installation_note_item/installation_note_item.json
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/packed_item/packed_item.json
@@ -46851,6 +46851,10 @@ msgstr ""
 #. Name of a report
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.json
 msgid "Serial No Ledger"
+msgstr ""
+
+#: erpnext/public/js/utils/serial_no_batch_selector.js:254
+msgid "Serial No Range"
 msgstr ""
 
 #. Name of a report
@@ -46903,7 +46907,7 @@ msgstr ""
 msgid "Serial No is mandatory for Item {0}"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:541
+#: erpnext/public/js/utils/serial_no_batch_selector.js:564
 msgid "Serial No {0} already exists"
 msgstr ""
 
@@ -46924,7 +46928,7 @@ msgstr ""
 msgid "Serial No {0} does not exist"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2262
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2283
 msgid "Serial No {0} does not exists"
 msgstr ""
 
@@ -46950,13 +46954,13 @@ msgstr ""
 
 #: erpnext/public/js/utils/barcode_scanner.js:271
 #: erpnext/public/js/utils/serial_no_batch_selector.js:16
-#: erpnext/public/js/utils/serial_no_batch_selector.js:181
+#: erpnext/public/js/utils/serial_no_batch_selector.js:185
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:46
 msgid "Serial Nos"
 msgstr ""
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:20
-#: erpnext/public/js/utils/serial_no_batch_selector.js:185
+#: erpnext/public/js/utils/serial_no_batch_selector.js:189
 msgid "Serial Nos / Batch Nos"
 msgstr ""
 
@@ -47042,11 +47046,11 @@ msgstr ""
 msgid "Serial and Batch Bundle"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1349
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1358
 msgid "Serial and Batch Bundle created"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1403
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1424
 msgid "Serial and Batch Bundle updated"
 msgstr ""
 
@@ -47391,12 +47395,12 @@ msgid "Service Stop Date"
 msgstr ""
 
 #: erpnext/accounts/deferred_revenue.py:44
-#: erpnext/public/js/controllers/transaction.js:1347
+#: erpnext/public/js/controllers/transaction.js:1356
 msgid "Service Stop Date cannot be after Service End Date"
 msgstr ""
 
 #: erpnext/accounts/deferred_revenue.py:41
-#: erpnext/public/js/controllers/transaction.js:1344
+#: erpnext/public/js/controllers/transaction.js:1353
 msgid "Service Stop Date cannot be before Service Start Date"
 msgstr ""
 
@@ -49280,7 +49284,7 @@ msgstr ""
 msgid "Status must be one of {0}"
 msgstr ""
 
-#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:183
+#: erpnext/stock/doctype/quality_inspection/quality_inspection.py:185
 msgid "Status set to rejected as there are one or more rejected readings."
 msgstr ""
 
@@ -56005,7 +56009,7 @@ msgstr ""
 #: erpnext/public/js/utils.js:593 erpnext/public/js/utils.js:825
 #: erpnext/public/js/utils/barcode_scanner.js:183
 #: erpnext/public/js/utils/serial_no_batch_selector.js:17
-#: erpnext/public/js/utils/serial_no_batch_selector.js:182
+#: erpnext/public/js/utils/serial_no_batch_selector.js:186
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js:179
 #: erpnext/templates/pages/task_info.html:22
 msgid "Update"
@@ -57470,7 +57474,7 @@ msgstr ""
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:408
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.js:8
 #: erpnext/public/js/stock_analytics.js:69 erpnext/public/js/utils.js:537
-#: erpnext/public/js/utils/serial_no_batch_selector.js:94
+#: erpnext/public/js/utils/serial_no_batch_selector.js:95
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:372
 #: erpnext/selling/doctype/sales_order/sales_order.js:480
@@ -59643,7 +59647,7 @@ msgstr ""
 msgid "{0} {1}"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:206
+#: erpnext/public/js/utils/serial_no_batch_selector.js:249
 msgid "{0} {1} Manually"
 msgstr ""
 
@@ -59762,7 +59766,7 @@ msgstr ""
 msgid "{0} {1} status is {2}"
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:191
+#: erpnext/public/js/utils/serial_no_batch_selector.js:225
 msgid "{0} {1} via CSV File"
 msgstr ""
 
