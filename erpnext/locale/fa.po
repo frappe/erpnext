@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-28 21:51\n"
+"PO-Revision-Date: 2024-09-29 21:53\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -3851,7 +3851,7 @@ msgstr "همه آیتم‌ها قبلاً دریافت شده است"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2401
 msgid "All items have already been transferred for this Work Order."
-msgstr "همه موارد قبلاً برای این سفارش کاری منتقل شده اند."
+msgstr "همه موارد قبلاً برای این دستور کار منتقل شده اند."
 
 #: erpnext/public/js/controllers/transaction.js:2352
 msgid "All items in this document already have a linked Quality Inspection."
@@ -4235,7 +4235,7 @@ msgstr "نرخ ارزش گذاری صفر را مجاز کنید"
 #. DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Allow material consumptions without immediately manufacturing finished goods against a Work Order"
-msgstr "اجازه مصرف مواد را بدون تولید فوری کالاهای تمام شده در برابر سفارش کار بدهید"
+msgstr "اجازه مصرف مواد را بدون تولید فوری کالاهای تمام شده در برابر دستور کار بدهید"
 
 #. Label of the allow_multi_currency_invoices_against_single_party_account
 #. (Check) field in DocType 'Accounts Settings'
@@ -5927,13 +5927,13 @@ msgstr "اختصاص یافته به"
 
 #: erpnext/templates/pages/projects.html:48
 msgid "Assignment"
-msgstr "وظیفه"
+msgstr "تخصیص"
 
 #. Label of the filters_section (Section Break) field in DocType 'Service Level
 #. Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Assignment Conditions"
-msgstr "شرایط واگذاری"
+msgstr "شرایط تخصیص"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:5
 msgid "Associate"
@@ -8912,7 +8912,7 @@ msgstr "قابل تایید توسط {0}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1538
 msgid "Can not close Work Order. Since {0} Job Cards are in Work In Progress state."
-msgstr "نمی توان Work Order را بست. از آنجایی که کارت‌های شغلی {0} در حالت کار در حال انجام هستند."
+msgstr "نمی توان دستور کار را بست. از آنجایی که کارت کارهای {0} در حالت کار در حال انجام هستند."
 
 #: erpnext/accounts/report/pos_register/pos_register.py:124
 msgid "Can not filter based on Cashier, if grouped by Cashier"
@@ -9159,7 +9159,7 @@ msgstr "نمی توان این سند را لغو کرد زیرا با دارا�
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:347
 msgid "Cannot cancel transaction for Completed Work Order."
-msgstr "نمی توان تراکنش را برای سفارش کار تکمیل شده لغو کرد."
+msgstr "نمی توان تراکنش را برای دستور کار تکمیل شده لغو کرد."
 
 #: erpnext/stock/doctype/item/item.py:879
 msgid "Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item"
@@ -10158,7 +10158,7 @@ msgstr "اسناد بسته"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1465
 msgid "Closed Work Order can not be stopped or Re-opened"
-msgstr "سفارش کار بسته را نمی توان متوقف کرد یا دوباره باز کرد"
+msgstr "دستور کار بسته را نمی توان متوقف کرد یا دوباره باز کرد"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:441
 msgid "Closed order cannot be cancelled. Unclose to cancel."
@@ -12084,7 +12084,7 @@ msgstr "اقدام اصلاحی"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:300
 msgid "Corrective Job Card"
-msgstr "کارت شغلی اصلاحی"
+msgstr "کارت کار اصلاحی"
 
 #. Label of the corrective_operation_section (Tab Break) field in DocType 'Job
 #. Card'
@@ -12773,13 +12773,13 @@ msgstr "ایجاد فاکتورها"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:153
 msgid "Create Job Card"
-msgstr "ایجاد کارت شغلی"
+msgstr "ایجاد کارت کار"
 
 #. Label of the create_job_card_based_on_batch_size (Check) field in DocType
 #. 'Operation'
 #: erpnext/manufacturing/doctype/operation/operation.json
 msgid "Create Job Card based on Batch Size"
-msgstr "ایجاد کارت شغلی بر اساس اندازه دسته ای"
+msgstr "ایجاد کارت کار بر اساس اندازه دسته ای"
 
 #: erpnext/accounts/doctype/payment_order/payment_order.js:39
 msgid "Create Journal Entries"
@@ -15438,7 +15438,7 @@ msgstr "انبارهای پیش فرض برای تولید"
 #. Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Default Work In Progress Warehouse"
-msgstr "انبار پیش‌فرض Work In Progress"
+msgstr "انبار پیش‌فرض کار در حال انجام"
 
 #. Label of the workstation (Link) field in DocType 'Operation'
 #: erpnext/manufacturing/doctype/operation/operation.json
@@ -16823,7 +16823,7 @@ msgstr "واکشی خودکار مقدار موجود را غیرفعال می �
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Disassemble"
-msgstr ""
+msgstr "مجزا کردن (دیس اسمبل)"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:198
 msgid "Disassemble Order"
@@ -19514,7 +19514,7 @@ msgstr "مقدار مصرف اضافی"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:228
 msgid "Extra Job Card Quantity"
-msgstr "مقدار کارت شغلی اضافی"
+msgstr "مقدار کارت کار اضافی"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:258
 msgid "Extra Large"
@@ -20483,7 +20483,7 @@ msgstr ""
 #. Label of the for_job_card (Link) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "For Job Card"
-msgstr "برای کارت شغلی"
+msgstr "برای کارت کار"
 
 #. Label of the for_operation (Link) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.js:320
@@ -20535,7 +20535,7 @@ msgstr "برای انبار"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:119
 msgid "For Work Order"
-msgstr "برای سفارش کار"
+msgstr "برای دستور کار"
 
 #: erpnext/controllers/status_updater.py:261
 msgid "For an item {0}, quantity must be negative number"
@@ -20776,7 +20776,7 @@ msgstr "از شرکت"
 #. 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "From Corrective Job Card"
-msgstr "از کارت شغلی اصلاحی"
+msgstr "از کارت کار اصلاحی"
 
 #. Label of the from_currency (Link) field in DocType 'Currency Exchange'
 #: erpnext/setup/doctype/currency_exchange/currency_exchange.json
@@ -23078,7 +23078,7 @@ msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERP
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:10
 msgid "If ticked, multiple materials can be used for a single Work Order. This is useful if one or more time consuming products are being manufactured."
-msgstr "اگر علامت زده شود، می توان از چندین ماده برای یک سفارش کاری استفاده کرد. این در صورتی مفید است که یک یا چند محصول وقت گیر تولید شود."
+msgstr "اگر علامت زده شود، می توان از چندین ماده برای یک دستور کار استفاده کرد. این در صورتی مفید است که یک یا چند محصول وقت گیر تولید شود."
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:36
 msgid "If ticked, the BOM cost will be automatically updated based on Valuation Rate / Price List Rate / last purchase rate of raw materials."
@@ -23706,7 +23706,7 @@ msgstr "در انبار"
 #. (Check) field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "In the case of 'Use Multi-Level BOM' in a work order, if the user wishes to add sub-assembly costs to Finished Goods items without using a job card as well the scrap items, then this option needs to be enable."
-msgstr "در مورد «استفاده از BOM چند سطحی» در یک سفارش کاری، اگر کاربر بخواهد هزینه‌های زیر مونتاژ را بدون استفاده از کارت کار و همچنین آیتم‌های ضایعات به کالاهای نهایی اضافه کند، این گزینه باید فعال شود."
+msgstr "در مورد «استفاده از BOM چند سطحی» در یک دستور کار، اگر کاربر بخواهد هزینه‌های زیر مونتاژ را بدون استفاده از کارت کار و همچنین آیتم‌های ضایعات به کالاهای نهایی اضافه کند، این گزینه باید فعال شود."
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.js:12
 msgid "In the case of multi-tier program, Customers will be auto assigned to the concerned tier as per their spent"
@@ -25057,7 +25057,7 @@ msgstr "ظرف است"
 #. Label of the is_corrective_job_card (Check) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Is Corrective Job Card"
-msgstr "کارت شغلی اصلاحی است"
+msgstr "کارت کار اصلاحی است"
 
 #. Label of the is_corrective_operation (Check) field in DocType 'Operation'
 #: erpnext/manufacturing/doctype/operation/operation.json
@@ -27054,11 +27054,11 @@ msgstr "ظرفیت کاری"
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Job Card"
-msgstr "کارت شغلی"
+msgstr "کارت کار"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:167
 msgid "Job Card Analysis"
-msgstr "تجزیه و تحلیل کارت شغلی"
+msgstr "تجزیه و تحلیل کارت کار"
 
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:20
 msgid "Job Card ID"
@@ -27076,7 +27076,7 @@ msgstr "آیتم کارت کار"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_operation/job_card_operation.json
 msgid "Job Card Operation"
-msgstr "عملیات کارت شغلی"
+msgstr "عملیات کارت کار"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_scheduled_time/job_card_scheduled_time.json
@@ -27086,19 +27086,19 @@ msgstr "زمان برنامه ریزی شده کارت کار"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_scrap_item/job_card_scrap_item.json
 msgid "Job Card Scrap Item"
-msgstr "اقلام ضایعات کارت شغلی"
+msgstr "اقلام ضایعات کارت کار"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
 #: erpnext/manufacturing/report/job_card_summary/job_card_summary.json
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Job Card Summary"
-msgstr "خلاصه کارت شغلی"
+msgstr "خلاصه کارت کار"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_time_log/job_card_time_log.json
 msgid "Job Card Time Log"
-msgstr "گزارش زمان کارت شغلی"
+msgstr "گزارش زمان کارت کار"
 
 #. Label of the job_card_section (Tab Break) field in DocType 'Manufacturing
 #. Settings'
@@ -27177,7 +27177,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1656
 msgid "Job card {0} created"
-msgstr "کارت شغلی {0} ایجاد شد"
+msgstr "کارت کار {0} ایجاد شد"
 
 #: erpnext/utilities/bulk_transaction.py:50
 msgid "Job: {0} has been triggered for processing failed transactions"
@@ -27411,7 +27411,7 @@ msgstr "کیلووات-ساعت"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:837
 msgid "Kindly cancel the Manufacturing Entries first against the work order {0}."
-msgstr "لطفاً ابتدا ورودی‌های تولید را در برابر سفارش کاری {0} لغو کنید."
+msgstr "لطفاً ابتدا ورودی‌های تولید را در برابر دستور کار {0} لغو کنید."
 
 #: erpnext/public/js/utils/party.js:264
 msgid "Kindly select the company first"
@@ -28718,7 +28718,7 @@ msgstr "تهیه فاکتور فروش"
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Make Serial No / Batch from Work Order"
-msgstr "شماره سریال / دسته از سفارش کار را بسازید"
+msgstr "شماره سریال / دسته از دستور کار را بسازید"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:53
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:261
@@ -29561,7 +29561,7 @@ msgstr "مواد قبلاً در مقابل {0} {1} دریافت شده است"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:694
 msgid "Materials needs to be transferred to the work in progress warehouse for the job card {0}"
-msgstr "برای کارت شغلی باید مواد به انبار کار در حال انجام انتقال داده شود {0}"
+msgstr "برای کارت کار باید مواد به انبار کار در حال انجام انتقال داده شود {0}"
 
 #. Label of the max_amount (Currency) field in DocType 'Promotional Scheme
 #. Price Discount'
@@ -31488,7 +31488,7 @@ msgstr "هیچ پرداخت ناسازگاری برای این طرف یافت �
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:696
 msgid "No Work Orders were created"
-msgstr "هیچ سفارش کاری ایجاد نشد"
+msgstr "هیچ دستور کار ایجاد نشد"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:717
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:681
@@ -31701,7 +31701,7 @@ msgstr "تعداد کارمندان"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:66
 msgid "No. of parallel job cards which can be allowed on this workstation. Example: 2 would mean this workstation can process production for two Work Orders at a time."
-msgstr "تعداد کارت های شغلی موازی که می توانند در این ایستگاه کاری مجاز باشند. مثال: 2 به این معنی است که این ایستگاه کاری می تواند تولید را برای دو Work Order در یک زمان پردازش کند."
+msgstr "تعداد کارت کارهای موازی که می توانند در این ایستگاه کاری مجاز باشند. مثال: 2 به این معنی است که این ایستگاه کاری می تواند تولید را برای دو دستور کار در یک زمان پردازش کند."
 
 #. Name of a DocType
 #. Label of a Link in the Quality Workspace
@@ -32298,7 +32298,7 @@ msgstr ""
 
 #: erpnext/manufacturing/dashboard_fixtures.py:228
 msgid "Ongoing Job Cards"
-msgstr "کارت های شغلی در حال انجام"
+msgstr "کارت کارهای در حال انجام"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:35
 msgid "Online Auctions"
@@ -32712,7 +32712,7 @@ msgstr "هزینه عملیاتی به ازای هر مقدار BOM"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1380
 msgid "Operating Cost as per Work Order / BOM"
-msgstr "هزینه عملیاتی بر اساس سفارش کار / BOM"
+msgstr "هزینه عملیاتی بر اساس دستور کار / BOM"
 
 #. Label of the base_operating_cost (Currency) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -33538,13 +33538,13 @@ msgstr "درصد تولید بیش از حد برای سفارش فروش"
 #. DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Overproduction Percentage For Work Order"
-msgstr "درصد تولید بیش از حد برای سفارش کار"
+msgstr "درصد تولید بیش از حد برای دستور کار"
 
 #. Label of the over_production_for_sales_and_work_order_section (Section
 #. Break) field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Overproduction for Sales and Work Order"
-msgstr "تولید بیش از حد برای فروش و سفارش کار"
+msgstr "تولید بیش از حد برای فروش و دستور کار"
 
 #. Label of the overview_tab (Tab Break) field in DocType 'Prospect'
 #. Label of the basic_details_tab (Tab Break) field in DocType 'Employee'
@@ -36627,7 +36627,7 @@ msgstr "لطفاً یک انبار انتخاب کنید"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1335
 msgid "Please select a Work Order first."
-msgstr "لطفاً ابتدا یک سفارش کاری را انتخاب کنید."
+msgstr "لطفاً ابتدا یک دستور کار را انتخاب کنید."
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.py:80
 msgid "Please select a country"
@@ -43953,7 +43953,7 @@ msgstr "ردیف #{0}: نمی توان مورد {1} را که قبلاً دری�
 
 #: erpnext/controllers/accounts_controller.py:3159
 msgid "Row #{0}: Cannot delete item {1} which has work order assigned to it."
-msgstr "ردیف #{0}: نمی توان مورد {1} را که سفارش کاری به آن اختصاص داده است حذف کرد."
+msgstr "ردیف #{0}: نمی توان مورد {1} را که دستور کار به آن اختصاص داده است حذف کرد."
 
 #: erpnext/controllers/accounts_controller.py:3165
 msgid "Row #{0}: Cannot delete item {1} which is assigned to customer's purchase order."
@@ -43969,7 +43969,7 @@ msgstr "ردیف #{0}: اگر مبلغ بیشتر از مبلغ صورتحساب
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:931
 msgid "Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
-msgstr "ردیف #{0}: نمی توان بیش از مقدار لازم {1} برای مورد {2} در مقابل کارت شغلی {3} انتقال داد"
+msgstr "ردیف #{0}: نمی توان بیش از مقدار لازم {1} برای مورد {2} در مقابل کارت کار {3} انتقال داد"
 
 #: erpnext/selling/doctype/product_bundle/product_bundle.py:85
 msgid "Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
@@ -44097,7 +44097,7 @@ msgstr "ردیف #{0}: فقط {1} برای رزرو مورد {2} موجود اس
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:677
 msgid "Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
-msgstr "ردیف #{0}: عملیات {1} برای تعداد {2} کالای نهایی در سفارش کار {3} تکمیل نشده است. لطفاً وضعیت عملیات را از طریق کارت شغلی {4} به روز کنید."
+msgstr "ردیف #{0}: عملیات {1} برای تعداد {2} کالای نهایی در دستور کار {3} تکمیل نشده است. لطفاً وضعیت عملیات را از طریق کارت کار {4} به روز کنید."
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:95
 msgid "Row #{0}: Payment document is required to complete the transaction"
@@ -46411,7 +46411,7 @@ msgstr "حساب بانکی را برای تطبیق انتخاب کنید."
 
 #: erpnext/manufacturing/doctype/operation/operation.js:25
 msgid "Select the Default Workstation where the Operation will be performed. This will be fetched in BOMs and Work Orders."
-msgstr "ایستگاه کاری پیش‌فرض را که در آن عملیات انجام می‌شود، انتخاب کنید. این در BOM ها و Work Orders واکشی می شود."
+msgstr "ایستگاه کاری پیش‌فرض را که در آن عملیات انجام می‌شود، انتخاب کنید. این در BOM ها و دستور کارها واکشی می شود."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:938
 msgid "Select the Item to be manufactured."
@@ -49335,7 +49335,7 @@ msgstr "جزئیات موجودی"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:719
 msgid "Stock Entries already created for Work Order {0}: {1}"
-msgstr "ثبت های موجودی قبلاً برای سفارش کار {0} ایجاد شده‌اند: {1}"
+msgstr "ثبت های موجودی قبلاً برای دستور کار {0} ایجاد شده‌اند: {1}"
 
 #. Label of the stock_entry (Link) field in DocType 'Journal Entry'
 #. Label of a Link in the Manufacturing Workspace
@@ -50242,7 +50242,7 @@ msgstr "ارسال مطالب دفتر روزنامه"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:139
 msgid "Submit this Work Order for further processing."
-msgstr "این سفارش کاری را برای پردازش بیشتر ارسال کنید."
+msgstr "این دستور کار را برای پردازش بیشتر ارسال کنید."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:264
 msgid "Submit your Quotation"
@@ -52600,7 +52600,7 @@ msgstr "فهرست انتخابی دارای ورودی های رزرو موجو
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1951
 msgid "The Process Loss Qty has reset as per job cards Process Loss Qty"
-msgstr "Process Loss Qty مطابق با کارت های شغلی Process Loss Ty بازنشانی شده است"
+msgstr "Process Loss Qty مطابق با کارت کارهای Process Loss Ty بازنشانی شده است"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:137
 msgid "The Serial No at Row #{0}: {1} is not available in warehouse {2}."
@@ -52612,7 +52612,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
-msgstr "ثبت موجودی از نوع \"ساخت\" به عنوان پسرفت شناخته می شود. مواد اولیه ای که برای تولید کالاهای نهایی مصرف می شود به عنوان بک فلاشینگ شناخته می شود. <br><br> هنگام ایجاد ثبت ساخت، آیتم‌های مواد خام بر اساس BOM آیتم تولیدی، بک فلاش می شوند. اگر می‌خواهید آیتم‌های مواد خام بر اساس ورودی انتقال مواد که در مقابل آن سفارش کار انجام شده است، بک فلاش شوند، می‌توانید آن را در این قسمت تنظیم کنید."
+msgstr "ثبت موجودی از نوع \"ساخت\" به عنوان پسرفت شناخته می شود. مواد اولیه ای که برای تولید کالاهای نهایی مصرف می شود به عنوان بک فلاشینگ شناخته می شود. <br><br> هنگام ایجاد ثبت ساخت، آیتم‌های مواد خام بر اساس BOM آیتم تولیدی، بک فلاش می شوند. اگر می‌خواهید آیتم‌های مواد خام بر اساس ورودی انتقال مواد که در مقابل آن دستور کار انجام شده است، بک فلاش شوند، می‌توانید آن را در این قسمت تنظیم کنید."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1765
 msgid "The Work Order is mandatory for Disassembly Order"
@@ -52883,7 +52883,7 @@ msgstr "انباری که اقلام تمام شده را قبل از ارسال
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:964
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
-msgstr "انباری که مواد اولیه خود را در آن نگهداری می کنید. هر کالای مورد نیاز می تواند یک انبار منبع جداگانه داشته باشد. انبار گروهی نیز می تواند به عنوان انبار منبع انتخاب شود. پس از ارسال سفارش کار، مواد اولیه در این انبارها برای استفاده تولید رزرو می شود."
+msgstr "انباری که مواد اولیه خود را در آن نگهداری می کنید. هر کالای مورد نیاز می تواند یک انبار منبع جداگانه داشته باشد. انبار گروهی نیز می تواند به عنوان انبار منبع انتخاب شود. پس از ارسال دستور کار، مواد اولیه در این انبارها برای استفاده تولید رزرو می شود."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:976
 msgid "The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse."
@@ -53014,7 +53014,7 @@ msgstr "خلاصه این ماه"
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:31
 msgid "This Warehouse will be auto-updated in the Target Warehouse field of Work Order."
-msgstr "این انبار به طور خودکار در قسمت Target Warehouse سفارش کار به روز می شود."
+msgstr "این انبار به طور خودکار در قسمت Target Warehouse دستور کار به روز می شود."
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:24
 msgid "This Warehouse will be auto-updated in the Work In Progress Warehouse field of Work Orders."
@@ -53052,7 +53052,7 @@ msgstr "این فیلتر برای ثبت دفتر روزنامه اعمال خ�
 
 #: erpnext/manufacturing/doctype/bom/bom.js:220
 msgid "This is a Template BOM and will be used to make the work order for {0} of the item {1}"
-msgstr "این یک الگوی BOM است و برای ایجاد سفارش کاری برای {0} مورد {1} استفاده خواهد شد."
+msgstr "این یک الگوی BOM است و برای ایجاد دستور کار برای {0} مورد {1} استفاده خواهد شد."
 
 #. Description of the 'Target Warehouse' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -55701,7 +55701,7 @@ msgstr "تحت ضمانت"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:78
 msgid "Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified."
-msgstr "در جدول ساعات کاری، می توانید زمان شروع و پایان یک ایستگاه کاری را اضافه کنید. به عنوان مثال، یک ایستگاه کاری ممکن است از ساعت 9 صبح تا 1 بعد از ظهر و سپس از 2 بعد از ظهر تا 5 بعد از ظهر فعال باشد. همچنین می توانید ساعت کاری را بر اساس شیفت ها مشخص کنید. هنگام برنامه ریزی یک سفارش کار، سیستم بر اساس ساعات کاری مشخص شده، در دسترس بودن ایستگاه کاری را بررسی می کند."
+msgstr "در جدول ساعات کاری، می توانید زمان شروع و پایان یک ایستگاه کاری را اضافه کنید. به عنوان مثال، یک ایستگاه کاری ممکن است از ساعت 9 صبح تا 1 بعد از ظهر و سپس از 2 بعد از ظهر تا 5 بعد از ظهر فعال باشد. همچنین می توانید ساعت کاری را بر اساس شیفت ها مشخص کنید. هنگام برنامه ریزی یک دستور کار، سیستم بر اساس ساعات کاری مشخص شده، در دسترس بودن ایستگاه کاری را بررسی می کند."
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -56156,7 +56156,7 @@ msgstr "به روز رسانی گونه‌ها..."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:919
 msgid "Updating Work Order status"
-msgstr "به روز رسانی وضعیت سفارش کار"
+msgstr "به روز رسانی وضعیت دستور کار"
 
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.js:46
 msgid "Updating {0} of {1}, {2}"
@@ -58211,74 +58211,74 @@ msgstr "انبار کار در حال انجام"
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/templates/pages/material_request_info.html:45
 msgid "Work Order"
-msgstr "سفارش کار"
+msgstr "دستور کار"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:121
 msgid "Work Order / Subcontract PO"
-msgstr "سفارش کار / PO قرارداد فرعی"
+msgstr "دستور کار / PO قرارداد فرعی"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:93
 msgid "Work Order Analysis"
-msgstr "تجزیه و تحلیل سفارش کار"
+msgstr "تجزیه و تحلیل دستور کار"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.json
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Work Order Consumed Materials"
-msgstr "مواد مصرفی سفارش کار"
+msgstr "مواد مصرفی دستور کار"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_item/work_order_item.json
 msgid "Work Order Item"
-msgstr "مورد سفارش کار"
+msgstr "مورد دستور کار"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Work Order Operation"
-msgstr "عملیات سفارش کار"
+msgstr "عملیات دستور کار"
 
 #. Label of the work_order_qty (Float) field in DocType 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Work Order Qty"
-msgstr "تعداد سفارش کار"
+msgstr "تعداد دستور کار"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:152
 msgid "Work Order Qty Analysis"
-msgstr "تجزیه و تحلیل تعداد سفارش کار"
+msgstr "تجزیه و تحلیل تعداد دستور کار"
 
 #. Name of a report
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.json
 msgid "Work Order Stock Report"
-msgstr "گزارش موجودی سفارش کار"
+msgstr "گزارش موجودی دستور کار"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.json
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Work Order Summary"
-msgstr "خلاصه سفارش کار"
+msgstr "خلاصه دستور کار"
 
 #: erpnext/stock/doctype/material_request/material_request.py:794
 msgid "Work Order cannot be created for following reason: <br> {0}"
-msgstr "سفارش کار به دلایل زیر ایجاد نمی شود: <br> {0}"
+msgstr "دستور کار به دلایل زیر ایجاد نمی شود: <br> {0}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:979
 msgid "Work Order cannot be raised against a Item Template"
-msgstr "سفارش کار را نمی توان در برابر یک الگوی مورد مطرح کرد"
+msgstr "دستور کار را نمی توان در برابر یک الگوی مورد مطرح کرد"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1469
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1545
 msgid "Work Order has been {0}"
-msgstr "سفارش کار {0} بوده است"
+msgstr "دستور کار {0} بوده است"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:843
 msgid "Work Order not created"
-msgstr "سفارش کار ایجاد نشد"
+msgstr "دستور کار ایجاد نشد"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:669
 msgid "Work Order {0}: Job Card not found for the operation {1}"
-msgstr "سفارش کار {0}: کارت شغلی برای عملیات {1} یافت نشد"
+msgstr "دستور کار {0}: کارت کار برای عملیات {1} یافت نشد"
 
 #: erpnext/manufacturing/report/job_card_summary/job_card_summary.js:56
 #: erpnext/stock/doctype/material_request/material_request.py:782
@@ -58760,7 +58760,7 @@ msgstr "می توانید آن را به عنوان نام ماشین یا نو�
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1136
 msgid "You can't make any changes to Job Card since Work Order is closed."
-msgstr "از آنجایی که Work Order بسته شده است، نمی توانید هیچ تغییری در Job Card ایجاد کنید."
+msgstr "از آنجایی که دستور کار بسته شده است، نمی توانید هیچ تغییری در کارت کار ایجاد کنید."
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.py:182
 msgid "You can't redeem Loyalty Points having more value than the Rounded Total."
