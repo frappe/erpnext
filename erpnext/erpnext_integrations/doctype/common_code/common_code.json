@@ -1,15 +1,15 @@
 {
  "actions": [],
- "allow_rename": 1,
- "autoname": "prompt",
+ "autoname": "hash",
  "creation": "2024-09-29 07:01:18.133067",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "title",
-  "description",
-  "column_break_wxsw",
   "code_list",
+  "common_code",
+  "title",
+  "column_break_wxsw",
+  "description",
   "section_break_rhgh",
   "applies_to"
  ],
@@ -28,8 +28,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Title",
-   "reqd": 1
+   "label": "Title"
   },
   {
    "fieldname": "description",
@@ -49,14 +48,22 @@
    "fieldtype": "Table",
    "label": "Applies To",
    "options": "Dynamic Link"
+  },
+  {
+   "fieldname": "common_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Common Code",
+   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2024-09-29 07:06:16.448006",
+ "modified": "2024-09-29 07:27:58.292767",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Common Code",
- "naming_rule": "Set by user",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

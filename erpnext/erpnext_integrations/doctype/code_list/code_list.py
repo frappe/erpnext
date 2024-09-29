@@ -29,7 +29,7 @@ class CodeList(Document):
 			frappe.qb.from_(CommonCode)
 			.join(DynamicLink)
 			.on((CommonCode.name == DynamicLink.parent) & (DynamicLink.parenttype == "Common Code"))
-			.select(CommonCode.name)
+			.select(CommonCode.common_code)
 			.where(
 				(DynamicLink.link_doctype == doctype)
 				& (DynamicLink.link_name == name)
