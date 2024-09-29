@@ -1,6 +1,5 @@
 {
  "actions": [],
- "autoname": "hash",
  "creation": "2024-09-29 07:01:18.133067",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,7 +8,7 @@
   "common_code",
   "title",
   "column_break_wxsw",
-  "description",
+  "additional_data",
   "section_break_rhgh",
   "applies_to"
  ],
@@ -31,11 +30,6 @@
    "label": "Title"
   },
   {
-   "fieldname": "description",
-   "fieldtype": "Small Text",
-   "label": "Description"
-  },
-  {
    "fieldname": "column_break_wxsw",
    "fieldtype": "Column Break"
   },
@@ -55,15 +49,20 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Common Code",
+   "length": 300,
    "reqd": 1
+  },
+  {
+   "fieldname": "additional_data",
+   "fieldtype": "Code",
+   "label": "Additional Data"
   }
  ],
  "links": [],
- "modified": "2024-09-29 07:27:58.292767",
+ "modified": "2024-09-29 21:13:43.054943",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",
- "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

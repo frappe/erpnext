@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_copy": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2024-09-29 06:55:03.920375",
@@ -7,8 +8,11 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "publisher",
+  "canonical_uri",
+  "column_break_nkls",
   "version",
+  "publisher",
+  "section_break_npxp",
   "description"
  ],
  "fields": [
@@ -24,6 +28,7 @@
    "label": "Publisher"
   },
   {
+   "columns": 1,
    "fieldname": "version",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -33,6 +38,20 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "canonical_uri",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Canonical URI"
+  },
+  {
+   "fieldname": "column_break_nkls",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_npxp",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -42,7 +61,7 @@
    "link_fieldname": "code_list"
   }
  ],
- "modified": "2024-09-29 07:24:21.123903",
+ "modified": "2024-09-29 22:46:37.878075",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Code List",
