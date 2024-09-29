@@ -36,8 +36,13 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2024-09-29 06:59:20.803628",
+ "links": [
+  {
+   "link_doctype": "Common Code",
+   "link_fieldname": "code_list"
+  }
+ ],
+ "modified": "2024-09-29 07:24:21.123903",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Code List",
