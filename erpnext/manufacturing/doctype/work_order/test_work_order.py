@@ -1532,7 +1532,6 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertFalse(serial_nos)
 
-	###
 	def test_backflushed_batch_raw_materials_based_on_transferred_autosabb(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
