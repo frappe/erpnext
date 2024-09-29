@@ -419,6 +419,18 @@ class BOMConfigurator {
 					]
 				);
 			}
+		} else if (this.frm.doc.routing && is_root) {
+			fields.push(
+				...[
+					{ fieldtype: "Section Break" },
+					{
+						label: __("Operation"),
+						fieldname: "operation",
+						fieldtype: "Link",
+						options: "Operation",
+					},
+				]
+			);
 		}
 
 		fields.push(
@@ -473,6 +485,16 @@ class BOMConfigurator {
 		dialog.show();
 		dialog.set_primary_action(__("Add"), () => {
 			let bom_item = dialog.get_values();
+
+			if (!bom_item.item_code) {
+				frappe.throw(__("Sub Assembly Item is mandatory"));
+			}
+
+			bom_item.items.forEach((d) => {
+				if (!d.item_code) {
+					frappe.throw(__("Item is mandatory in Raw Materials table."));
+				}
+			});
 
 			if (dialog.operation && !dialog.workstation_type && !dialog.workstation) {
 				frappe.throw(__("Either Workstation or Workstation Type is mandatory"));
