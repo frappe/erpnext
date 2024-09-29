@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -22,7 +23,14 @@ class CommonCode(Document):
 		title: DF.Data | None
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		if frappe.db.exists(
+			"Common Code",
+			{"code_list": self.code_list, "common_code": self.common_code, "name": ("!=", self.name)},
+		):
+			frappe.throw(
+				_("Common Code {0} already exists in Code List {1}").format(self.common_code, self.code_list)
+			)
 
 
 def on_doctype_update():
