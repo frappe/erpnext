@@ -37,3 +37,4 @@ def on_doctype_update():
 	frappe.db.add_unique(
 		"Common Code", ["code_list", "common_code"], constraint_name="unique_code_list_common_code"
 	)
+	frappe.db.add_index("Common Code", ["code_list", "common_code"])
