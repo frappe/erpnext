@@ -1143,9 +1143,26 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		};
 		const mappped_fields = mapped_item_field_map[item.doctype] || [];
 
+<<<<<<< HEAD
 		return mappped_fields
 			.map((field) => item[field])
 			.filter(Boolean).length > 0;
+=======
+		if (item) {
+			return mappped_fields
+				.map((field) => item[field])
+				.filter(Boolean).length > 0;
+		} else if (this.frm.doc?.items) {
+			let first_row = this.frm.doc.items[0];
+			if (!first_row) {
+				return false
+			};
+
+			let mapped_rows = mappped_fields.filter(d => first_row[d])
+
+			return mapped_rows?.length > 0;
+		}
+>>>>>>> fb9d106633 (fix: last purchase rate for purchase invoice)
 	}
 
 	batch_no(doc, cdt, cdn) {

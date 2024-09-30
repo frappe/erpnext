@@ -1960,6 +1960,309 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		self.assertRaises(frappe.ValidationError, dr_note.save)
 
+<<<<<<< HEAD
+=======
+	def test_debit_note_without_item(self):
+		pi = make_purchase_invoice(item_name="_Test Item", qty=10, do_not_submit=True)
+		pi.items[0].item_code = ""
+		pi.save()
+
+		self.assertFalse(pi.items[0].item_code)
+		pi.submit()
+
+		return_pi = make_purchase_invoice(
+			item_name="_Test Item",
+			is_return=1,
+			return_against=pi.name,
+			qty=-10,
+			do_not_save=True,
+		)
+		return_pi.items[0].item_code = ""
+		return_pi.save()
+		return_pi.submit()
+		self.assertEqual(return_pi.docstatus, 1)
+
+	def test_purchase_invoice_with_use_serial_batch_field_for_rejected_qty(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		batch_item = make_item(
+			"_Test Purchase Invoice Batch Item For Rejected Qty",
+			properties={"has_batch_no": 1, "create_new_batch": 1, "is_stock_item": 1},
+		).name
+
+		serial_item = make_item(
+			"_Test Purchase Invoice Serial Item for Rejected Qty",
+			properties={"has_serial_no": 1, "is_stock_item": 1},
+		).name
+
+		rej_warehouse = create_warehouse("_Test Purchase INV Warehouse For Rejected Qty")
+
+		batch_no = "BATCH-PI-BNU-TPRBI-0001"
+		serial_nos = ["SNU-PI-TPRSI-0001", "SNU-PI-TPRSI-0002", "SNU-PI-TPRSI-0003"]
+
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"batch_id": batch_no,
+					"item": batch_item,
+				}
+			).insert()
+
+		for serial_no in serial_nos:
+			if not frappe.db.exists("Serial No", serial_no):
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": serial_item,
+						"serial_no": serial_no,
+					}
+				).insert()
+
+		pi = make_purchase_invoice(
+			item_code=batch_item,
+			received_qty=10,
+			qty=8,
+			rejected_qty=2,
+			update_stock=1,
+			rejected_warehouse=rej_warehouse,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			rate=100,
+			do_not_submit=1,
+		)
+
+		pi.append(
+			"items",
+			{
+				"item_code": serial_item,
+				"qty": 2,
+				"rate": 100,
+				"base_rate": 100,
+				"item_name": serial_item,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"rejected_qty": 1,
+				"warehouse": pi.items[0].warehouse,
+				"rejected_warehouse": rej_warehouse,
+				"use_serial_batch_fields": 1,
+				"serial_no": "\n".join(serial_nos[:2]),
+				"rejected_serial_no": serial_nos[2],
+			},
+		)
+
+		pi.save()
+		pi.submit()
+
+		pi.reload()
+
+		for row in pi.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(row.rejected_serial_and_batch_bundle)
+
+			if row.item_code == batch_item:
+				self.assertEqual(row.batch_no, batch_no)
+			else:
+				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
+				self.assertEqual(row.rejected_serial_no, serial_nos[2])
+
+	def test_make_pr_and_pi_from_po(self):
+		from erpnext.assets.doctype.asset.test_asset import create_asset_category
+
+		if not frappe.db.exists("Asset Category", "Computers"):
+			create_asset_category()
+
+		item = create_item(
+			item_code="_Test_Item", is_stock_item=0, is_fixed_asset=1, asset_category="Computers"
+		)
+		po = create_purchase_order(item_code=item.item_code)
+		pr = create_pr_against_po(po.name, 10)
+		pi = make_pi_from_po(po.name)
+		pi.insert()
+		pi.submit()
+
+		pr_gl_entries = frappe.db.sql(
+			"""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
+			order by account asc""",
+			pr.name,
+			as_dict=1,
+		)
+
+		pr_expected_values = [
+			["Asset Received But Not Billed - _TC", 0, 5000],
+			["CWIP Account - _TC", 5000, 0],
+		]
+
+		for i, gle in enumerate(pr_gl_entries):
+			self.assertEqual(pr_expected_values[i][0], gle.account)
+			self.assertEqual(pr_expected_values[i][1], gle.debit)
+			self.assertEqual(pr_expected_values[i][2], gle.credit)
+
+		pi_gl_entries = frappe.db.sql(
+			"""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""",
+			pi.name,
+			as_dict=1,
+		)
+		pi_expected_values = [
+			["Asset Received But Not Billed - _TC", 5000, 0],
+			["Creditors - _TC", 0, 5000],
+		]
+
+		for i, gle in enumerate(pi_gl_entries):
+			self.assertEqual(pi_expected_values[i][0], gle.account)
+			self.assertEqual(pi_expected_values[i][1], gle.debit)
+			self.assertEqual(pi_expected_values[i][2], gle.credit)
+
+	def test_adjust_incoming_rate_from_pi_with_multi_currency(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+
+		# Increase the cost of the item
+
+		pr = make_purchase_receipt(
+			qty=10, rate=1, currency="USD", do_not_save=1, supplier="_Test Supplier USD"
+		)
+		pr.conversion_rate = 6300
+		pr.plc_conversion_rate = 1
+		pr.save()
+		pr.submit()
+
+		self.assertEqual(pr.conversion_rate, 6300)
+		self.assertEqual(pr.plc_conversion_rate, 1)
+		self.assertEqual(pr.base_grand_total, 6300 * 10)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 6300 * 10)
+
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=3000,
+			distribute_charges_based_on="Qty",
+		)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.rate = 1.1
+
+		pi.save()
+		pi.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 7230 * 10)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+
+	def test_opening_invoice_rounding_adjustment_validation(self):
+		pi = make_purchase_invoice(do_not_save=1)
+		pi.items[0].rate = 99.98
+		pi.items[0].qty = 1
+		pi.items[0].expense_account = "Temporary Opening - _TC"
+		pi.is_opening = "Yes"
+		pi.save()
+		self.assertRaises(frappe.ValidationError, pi.submit)
+
+	def _create_opening_roundoff_account(self, company_name):
+		liability_root = frappe.db.get_all(
+			"Account",
+			filters={"company": company_name, "root_type": "Liability", "disabled": 0},
+			order_by="lft",
+			limit=1,
+		)[0]
+
+		# setup round off account
+		if acc := frappe.db.exists(
+			"Account",
+			{
+				"account_name": "Round Off for Opening",
+				"account_type": "Round Off for Opening",
+				"company": company_name,
+			},
+		):
+			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc)
+		else:
+			acc = frappe.new_doc("Account")
+			acc.company = company_name
+			acc.parent_account = liability_root.name
+			acc.account_name = "Round Off for Opening"
+			acc.account_type = "Round Off for Opening"
+			acc.save()
+			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc.name)
+
+	def test_ledger_entries_of_opening_invoice_with_rounding_adjustment(self):
+		pi = make_purchase_invoice(do_not_save=1)
+		pi.items[0].rate = 99.98
+		pi.items[0].qty = 1
+		pi.items[0].expense_account = "Temporary Opening - _TC"
+		pi.is_opening = "Yes"
+		pi.save()
+		self._create_opening_roundoff_account(pi.company)
+		pi.submit()
+		actual = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pi.name, "is_opening": "Yes", "is_cancelled": False},
+			fields=["account", "debit", "credit", "is_opening"],
+			order_by="account,debit",
+		)
+		expected = [
+			{"account": "Creditors - _TC", "debit": 0.0, "credit": 100.0, "is_opening": "Yes"},
+			{"account": "Round Off for Opening - _TC", "debit": 0.02, "credit": 0.0, "is_opening": "Yes"},
+			{"account": "Temporary Opening - _TC", "debit": 99.98, "credit": 0.0, "is_opening": "Yes"},
+		]
+		self.assertEqual(len(actual), 3)
+		self.assertEqual(expected, actual)
+
+	def test_last_purchase_rate(self):
+		item = create_item("_Test Item For Last Purchase Rate from PI", is_stock_item=1)
+		pi1 = make_purchase_invoice(item_code=item.item_code, qty=10, rate=100)
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 100)
+
+		pi2 = make_purchase_invoice(item_code=item.item_code, qty=10, rate=200)
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 200)
+
+		pi2.cancel()
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 100)
+
+		pi1.cancel()
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 0)
+
+
+def set_advance_flag(company, flag, default_account):
+	frappe.db.set_value(
+		"Company",
+		company,
+		{
+			"book_advance_payments_in_separate_party_account": flag,
+			"default_advance_paid_account": default_account,
+		},
+	)
+
+>>>>>>> fb9d106633 (fix: last purchase rate for purchase invoice)
 
 def check_gl_entries(
 	doc,
