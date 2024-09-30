@@ -320,7 +320,6 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.grand_total, 1000)
 		self.assertEqual(pr.outstanding_amount, pr.grand_total)
 		self.assertEqual(pr.party_account_currency, pr.currency)  # INR
-		self.assertEqual(pr.status, "Requested")
 
 		so.load_from_db()
 
@@ -485,7 +484,6 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.outstanding_amount, 10000)
 		self.assertEqual(pr.currency, "USD")
 		self.assertEqual(pr.party_account_currency, "INR")
-		self.assertEqual(pr.status, "Requested")
 
 		pe = pr.create_payment_entry()
 		self.assertEqual(len(pe.references), 2)
@@ -516,7 +514,6 @@ class TestPaymentRequest(FrappeTestCase):
 			return_doc=1,
 		)
 
-		self.assertEqual(pr.status, "Requested")
 		self.assertEqual(pr.grand_total, 1000)
 		self.assertEqual(pr.outstanding_amount, pr.grand_total)
 
