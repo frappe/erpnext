@@ -58,6 +58,13 @@ frappe.ui.form.on("Asset Repair", {
 				},
 			};
 		});
+
+		frm.set_query("expense_account", "invoices", function () {
+			return {
+				query: "erpnext.controllers.queries.get_expense_account",
+				filters: { company: frm.doc.company },
+			};
+		});
 	},
 
 	refresh: function (frm) {
