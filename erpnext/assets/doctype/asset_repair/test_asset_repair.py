@@ -183,7 +183,6 @@ class TestAssetRepair(unittest.TestCase):
 		fixed_asset_account = get_asset_account(
 			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
 		)
-
 		pi_expense_accounts = [pi.expense_account for pi in asset_repair.invoices]
 		stock_entry_expense_account = (
 			frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name}).get("items")[0].expense_account
