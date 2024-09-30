@@ -134,7 +134,7 @@ class TestAssetRepair(unittest.TestCase):
 
 	def test_purchase_invoice(self):
 		asset_repair = create_asset_repair(capitalize_repair_cost=1, submit=1)
-		self.assertTrue(asset_repair.purchase_invoice)
+		self.assertTrue(asset_repair.invoices)
 
 	def test_gl_entries_with_perpetual_inventory(self):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
@@ -157,6 +157,8 @@ class TestAssetRepair(unittest.TestCase):
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 			submit=1,
+			pi_expense_account1="Stock Received But Not Billed - TCP1",
+			pi_expense_account2="Stock Received But Not Billed - TCP1",
 		)
 
 		gl_entries = frappe.db.sql(
@@ -181,16 +183,15 @@ class TestAssetRepair(unittest.TestCase):
 		fixed_asset_account = get_asset_account(
 			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
 		)
-		pi_expense_account = (
-			frappe.get_doc("Purchase Invoice", asset_repair.purchase_invoice).items[0].expense_account
-		)
+
+		pi_expense_accounts = [pi.expense_account for pi in asset_repair.invoices]
 		stock_entry_expense_account = (
 			frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name}).get("items")[0].expense_account
 		)
 
 		expected_values = {
 			fixed_asset_account: [asset_repair.total_repair_cost, 0],
-			pi_expense_account: [0, asset_repair.repair_cost],
+			pi_expense_accounts[0]: [0, 550.0],
 			stock_entry_expense_account: [0, 100],
 		}
 
@@ -231,8 +232,14 @@ class TestAssetRepair(unittest.TestCase):
 		default_expense_account = frappe.get_cached_value(
 			"Company", asset_repair.company, "default_expense_account"
 		)
+		pi_expense_accounts = [pi.expense_account for pi in asset_repair.invoices]
 
-		expected_values = {fixed_asset_account: [1100, 0], default_expense_account: [0, 1100]}
+		expected_values = {
+			fixed_asset_account: [650, 0],
+			pi_expense_accounts[0]: [0, 250],
+			default_expense_account: [0, 100],
+			pi_expense_accounts[1]: [0, 300],
+		}
 
 		for d in gl_entries:
 			self.assertEqual(expected_values[d.account][0], d.debit)
@@ -288,7 +295,6 @@ def create_asset_repair(**args):
 			"asset_name": asset.asset_name,
 			"failure_date": nowdate(),
 			"description": "Test Description",
-			"repair_cost": 0,
 			"company": asset.company,
 		}
 	)
@@ -351,16 +357,36 @@ def create_asset_repair(**args):
 
 		if args.capitalize_repair_cost:
 			asset_repair.capitalize_repair_cost = 1
-			asset_repair.repair_cost = 1000
 			if asset.calculate_depreciation:
 				asset_repair.increase_in_asset_life = 12
-			pi = make_purchase_invoice(
+			pi1 = make_purchase_invoice(
 				company=asset.company,
-				expense_account=frappe.db.get_value("Company", asset.company, "default_expense_account"),
+				expense_account=args.pi_expense_account1 or "Administrative Expenses - _TC",
 				cost_center=asset_repair.cost_center,
 				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=asset.company),
+				rate="50",
 			)
-			asset_repair.purchase_invoice = pi.name
+			pi2 = make_purchase_invoice(
+				company=asset.company,
+				expense_account=args.pi_expense_account2 or "Legal Expenses - _TC",
+				cost_center=asset_repair.cost_center,
+				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=asset.company),
+				rate="60",
+			)
+			invoices = [
+				{
+					"purchase_invoice": pi1.name,
+					"expense_account": args.pi_expense_account1 or "Administrative Expenses - _TC",
+					"repair_cost": args.pi_repair_cost1 or 250,
+				},
+				{
+					"purchase_invoice": pi2.name,
+					"expense_account": args.pi_expense_account2 or "Legal Expenses - _TC",
+					"repair_cost": args.pi_repair_cost2 or 300,
+				},
+			]
 
+			for invoice in invoices:
+				asset_repair.append("invoices", invoice)
 		asset_repair.submit()
 	return asset_repair
