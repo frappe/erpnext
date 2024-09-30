@@ -79,8 +79,11 @@ class CodeList(Document):
 		if common_codes:
 			frappe.db.bulk_insert(
 				"Common Code",
-				fields=["name", "code_list", "common_code", "title"],
-				values=[(cc["name"], cc["code_list"], cc["common_code"], cc["title"]) for cc in common_codes],
+				fields=["name", "code_list", "common_code", "title", "additional_data"],
+				values=[
+					(cc["name"], cc["code_list"], cc["common_code"], cc["title"], cc["additional_data"])
+					for cc in common_codes
+				],
 			)
 
 		return {"code_list": self, "common_codes_count": len(common_codes)}
