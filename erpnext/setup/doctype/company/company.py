@@ -731,11 +731,11 @@ def update_company_current_month_sales(company):
 		f"""
 		SELECT
 			SUM(base_grand_total) AS total,
-			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+			TO_CHAR(`posting_date`, 'MM-YYYY') AS month_year
 		FROM
 			`tabSales Invoice`
 		WHERE
-			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			TO_CHAR(`posting_date`, 'MM-YYYY') = '{current_month_year}'
 			AND docstatus = 1
 			AND company = {frappe.db.escape(company)}
 		GROUP BY

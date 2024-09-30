@@ -1746,7 +1746,7 @@ def delink_original_entry(pl_entry, partial_cancel=False):
 		ple = qb.DocType("Payment Ledger Entry")
 		query = (
 			qb.update(ple)
-			.set(ple.delinked, True)
+			.set(ple.delinked, 1)
 			.set(ple.modified, now())
 			.set(ple.modified_by, frappe.session.user)
 			.where(
@@ -1886,7 +1886,7 @@ class QueryPaymentLedger:
 			.where(Criterion.all(self.common_filter))
 			.where(Criterion.all(self.dimensions_filter))
 			.where(Criterion.all(self.voucher_posting_date))
-			.groupby(ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
+			.groupby(ple.account, ple.voucher_type, ple.voucher_no, ple.party_type, ple.party, ple.posting_date, ple.due_date, ple.account_currency, ple.cost_center)
 		)
 
 		# build query for voucher outstanding
@@ -1907,7 +1907,7 @@ class QueryPaymentLedger:
 			.where(ple.delinked == 0)
 			.where(Criterion.all(filter_on_against_voucher_no))
 			.where(Criterion.all(self.common_filter))
-			.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+			.groupby(ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party, ple.posting_date, ple.due_date, ple.account_currency)
 		)
 
 		# build CTE for combining voucher amount and outstanding
@@ -1942,6 +1942,21 @@ class QueryPaymentLedger:
 				Table("vouchers").due_date,
 				Table("vouchers").currency,
 				Table("vouchers").cost_center.as_("cost_center"),
+			)
+			.groupby(
+				Table("vouchers").account,
+				Table("vouchers").voucher_type,
+				Table("vouchers").voucher_no,
+				Table("vouchers").party_type,
+				Table("vouchers").party,
+				Table("vouchers").posting_date,
+				Table("vouchers").due_date,
+				Table("vouchers").currency,
+				Table("vouchers").cost_center,
+				Table("vouchers").amount,
+				Table("outstanding").amount,
+				Table("vouchers").amount_in_account_currency,
+				Table("outstanding").amount_in_account_currency
 			)
 			.where(Criterion.all(filter_on_outstanding_amount))
 		)
