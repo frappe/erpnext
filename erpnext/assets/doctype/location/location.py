@@ -223,7 +223,7 @@ def get_children(doctype, parent=None, location=None, is_root=False):
 		from
 			`tabLocation` comp
 		where
-			ifnull(parent_location, "")={frappe.db.escape(parent)}
+			coalesce(parent_location, '') = {frappe.db.escape(parent)}
 		""",
 		as_dict=1,
 	)

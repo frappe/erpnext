@@ -792,7 +792,7 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 		from
 			`tabCompany` comp
 		where
-			ifnull(parent_company, "")={frappe.db.escape(parent)}
+			 coalesce(parent_company, '') = {frappe.db.escape(parent)}
 		""",
 		as_dict=1,
 	)
