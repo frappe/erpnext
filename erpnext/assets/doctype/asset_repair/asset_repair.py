@@ -36,6 +36,7 @@ class AssetRepair(AccountsController):
 		amended_from: DF.Link | None
 		asset: DF.Link
 		asset_name: DF.ReadOnly | None
+		asset_repair_purchase_invoices: DF.Table[AssetRepairPurchaseInvoice]
 		capitalize_repair_cost: DF.Check
 		company: DF.Link | None
 		completion_date: DF.Datetime | None
