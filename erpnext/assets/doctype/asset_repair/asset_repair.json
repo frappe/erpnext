@@ -238,22 +238,22 @@
    "options": "Company"
   },
   {
-    "fieldname": "section_break_rahs",
-    "fieldtype": "Section Break"
+   "fieldname": "section_break_rahs",
+   "fieldtype": "Section Break"
   },
   {
-    "fieldname": "invoices",
-    "fieldtype": "Table",
-    "label": "Asset Repair Purchase Invoices",
-    "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0;",
-    "no_copy": 1,
-    "options": "Asset Repair Purchase Invoice"
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "label": "Asset Repair Purchase Invoices",
+   "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0;",
+   "no_copy": 1,
+   "options": "Asset Repair Purchase Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-27 10:54:09.827008",
+ "modified": "2024-09-30 11:54:40.788774",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
