@@ -1549,15 +1549,12 @@ def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
 	data = frappe.db.sql(
 		"""
 		select item_code, warehouse, count(name) as total_row
-		from `tabStock Ledger Entry` force index (item_warehouse)
-		where
-			({})
-			and timestamp(posting_date, posting_time)
-				>= timestamp(%(posting_date)s, %(posting_time)s)
+		from "tabStock Ledger Entry"
+		where ({})
+			and to_timestamp(concat(%(posting_date)s, ' ', %(posting_time)s), 'YYYY-MM-DD HH24:MI:SS') >= to_timestamp(concat(posting_date, ' ', posting_time), 'YYYY-MM-DD HH24:MI:SS')
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
-		GROUP BY
-			item_code, warehouse
+		GROUP BY item_code, warehouse
 		""".format(" or ".join(or_conditions)),
 		args,
 		as_dict=1,
