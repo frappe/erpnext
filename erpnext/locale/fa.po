@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-29 21:53\n"
+"PO-Revision-Date: 2024-09-30 22:18\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -199,13 +199,13 @@ msgstr "% برگردانده شده"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials billed against this Sales Order"
-msgstr ""
+msgstr "٪ از مواد در برابر این سفارش فروش صورتحساب شدند"
 
 #. Description of the '%  Delivered' (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials delivered against this Sales Order"
-msgstr ""
+msgstr "٪ از مواد در برابر این سفارش فروش تحویل شدند"
 
 #: erpnext/controllers/accounts_controller.py:2018
 msgid "'Account' in the Accounting section of Customer {0}"
@@ -6848,7 +6848,7 @@ msgstr "BOM و مقدار تولید مورد نیاز است"
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "BOM and Production"
-msgstr ""
+msgstr "BOM و تولید"
 
 #: erpnext/stock/doctype/material_request/material_request.js:332
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:687
@@ -10248,7 +10248,7 @@ msgstr "کد"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:4
 msgid "Cold Calling"
-msgstr ""
+msgstr "تماس سرد"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:144
 #: erpnext/public/js/setup_wizard.js:189
@@ -11004,7 +11004,7 @@ msgstr "فیلد شرکت الزامی است"
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:77
 msgid "Company is mandatory"
-msgstr ""
+msgstr "شرکت الزامی است"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:73
 msgid "Company is mandatory for company account"
@@ -11037,7 +11037,7 @@ msgstr "شرکتی که مشتری داخلی نماینده آن است"
 #. Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Company which internal customer represents."
-msgstr ""
+msgstr "شرکتی که مشتری داخلی نماینده آن است."
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Purchase
 #. Invoice'
@@ -13017,7 +13017,7 @@ msgstr "ایجاد برگه بسته بندی ..."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:60
 msgid "Creating Purchase Invoices ..."
-msgstr ""
+msgstr "ایجاد فاکتورهای خرید ..."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1272
 msgid "Creating Purchase Order ..."
@@ -13031,7 +13031,7 @@ msgstr "ایجاد رسید خرید ..."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:58
 msgid "Creating Sales Invoices ..."
-msgstr ""
+msgstr "ایجاد فاکتورهای فروش ..."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:111
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:185
@@ -15481,7 +15481,7 @@ msgstr "پیش فرض ها"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:17
 msgid "Defense"
-msgstr ""
+msgstr "دفاعی"
 
 #. Label of the deferred_accounting_section (Section Break) field in DocType
 #. 'Item'
@@ -18689,7 +18689,7 @@ msgstr "انرژی"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:15
 msgid "Engineer"
-msgstr ""
+msgstr "مهندس"
 
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.html:13
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.html:23
@@ -19896,7 +19896,7 @@ msgstr "فیلترها"
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:74
 msgid "Filters missing"
-msgstr ""
+msgstr "فیلترها یافت نشدند"
 
 #. Label of the bom_no (Link) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
@@ -20165,7 +20165,7 @@ msgstr "مرجع کالاهای تمام شده"
 
 #: erpnext/manufacturing/report/process_loss_report/process_loss_report.py:106
 msgid "Finished Goods Value"
-msgstr ""
+msgstr "ارزش کالاهای تمام شده"
 
 #. Label of the fg_warehouse (Link) field in DocType 'BOM Operation'
 #. Label of the warehouse (Link) field in DocType 'Production Plan Item'
@@ -21337,7 +21337,7 @@ msgstr "پرداخت های آینده"
 
 #: erpnext/assets/doctype/asset/depreciation.py:482
 msgid "Future date is not allowed"
-msgstr ""
+msgstr "تاریخ آینده مجاز نیست"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:235
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:159
@@ -22420,7 +22420,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:27
 msgid "Health Care"
-msgstr ""
+msgstr "بهداشت و درمان"
 
 #. Label of the health_details (Small Text) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -31627,7 +31627,7 @@ msgstr "رویداد باز وجود ندارد"
 
 #: erpnext/public/js/templates/crm_activities.html:57
 msgid "No open task"
-msgstr ""
+msgstr "هیچ وظیفه بازی نیست"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:315
 msgid "No outstanding invoices found"
@@ -32659,7 +32659,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:35
 msgid "Opening Purchase Invoices have been created."
-msgstr ""
+msgstr "فاکتورهای خرید افتتاحیه ایجاد شده است."
 
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
 #: erpnext/stock/report/stock_balance/stock_balance.py:442
@@ -35222,7 +35222,7 @@ msgstr "نوع پرداخت باید یکی از دریافت، پرداخت و 
 #. Label of the payment_url (Data) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Payment URL"
-msgstr ""
+msgstr "آدرس اینترنتی پرداخت"
 
 #: erpnext/accounts/utils.py:1024
 msgid "Payment Unlink Error"
@@ -36439,7 +36439,7 @@ msgstr "لطفا \"وزن UOM\" را همراه با وزن ذکر کنید."
 #: erpnext/accounts/general_ledger.py:602
 #: erpnext/accounts/general_ledger.py:609
 msgid "Please mention '{0}' in Company: {1}"
-msgstr ""
+msgstr "لطفاً \"{0}\" را در شرکت: {1} ذکر کنید"
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:232
 msgid "Please mention no of visits required"
@@ -36770,7 +36770,7 @@ msgstr "لطفاً «حساب سود/زیان در دفع دارایی» را د
 
 #: erpnext/accounts/general_ledger.py:514
 msgid "Please set '{0}' in Company: {1}"
-msgstr ""
+msgstr "لطفاً \"{0}\" را در شرکت: {1} تنظیم کنید"
 
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.js:36
 msgid "Please set Account"
@@ -37393,7 +37393,7 @@ msgstr "ایمیل ترجیحی"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:24
 msgid "President"
-msgstr ""
+msgstr "رئیس کل"
 
 #. Label of the prevdoc_doctype (Data) field in DocType 'Packed Item'
 #: erpnext/stock/doctype/packed_item/packed_item.json
