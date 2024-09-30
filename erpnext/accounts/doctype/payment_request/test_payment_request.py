@@ -3,6 +3,7 @@
 
 import re
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -16,6 +17,8 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.setup.utils import get_exchange_rate
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
+
+PAYMENT_URL = "https://example.com/payment"
 
 payment_gateway = {"doctype": "Payment Gateway", "gateway": "_Test Gateway"}
 
@@ -48,6 +51,28 @@ class TestPaymentRequest(FrappeTestCase):
 				"name",
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
+
+		send_email = patch(
+			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email",
+			return_value=None,
+		)
+		self.send_email = send_email.start()
+		self.addCleanup(send_email.stop)
+		get_payment_url = patch(
+			# this also shadows one (1) call to _get_payment_gateway_controller
+			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+			return_value=PAYMENT_URL,
+		)
+		self.get_payment_url = get_payment_url.start()
+		self.addCleanup(get_payment_url.stop)
+		_get_payment_gateway_controller = patch(
+			"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller",
+		)
+		self._get_payment_gateway_controller = _get_payment_gateway_controller.start()
+		self.addCleanup(_get_payment_gateway_controller.stop)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)
