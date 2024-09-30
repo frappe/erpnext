@@ -11,6 +11,8 @@ from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 from frappe.utils.user import is_website_user
+from frappe.query_builder import functions as fn
+from datetime import timedelta
 
 from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
@@ -352,20 +354,40 @@ class Project(Document):
 				user.welcome_email_sent = 1
 
 
+# def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
+# 	"""Return timeline for attendance"""
+
+# 	timesheet_detail = frappe.qb.DocType("Timesheet Detail")
+
+# 	return dict(
+# 		frappe.qb.from_(timesheet_detail)
+# 		.select(UnixTimestamp(timesheet_detail.from_time), Count("*"))
+# 		.where(timesheet_detail.project == name)
+# 		.where(timesheet_detail.from_time > CurDate() - Interval(years=1))
+# 		.where(timesheet_detail.docstatus < 2)
+# 		.groupby(Date(timesheet_detail.from_time))
+# 		.run()
+# 	)
+
 def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 	"""Return timeline for attendance"""
-
 	timesheet_detail = frappe.qb.DocType("Timesheet Detail")
 
-	return dict(
+	# Execute the query and return results
+	timeline_data = (
 		frappe.qb.from_(timesheet_detail)
-		.select(UnixTimestamp(timesheet_detail.from_time), Count("*"))
+		.select(fn.UnixTimestamp(timesheet_detail.from_time), fn.Count("*"))
 		.where(timesheet_detail.project == name)
-		.where(timesheet_detail.from_time > CurDate() - Interval(years=1))
+		.where(timesheet_detail.from_time > frappe.utils.now_datetime() - timedelta(days=365))  # 1 year ago
 		.where(timesheet_detail.docstatus < 2)
-		.groupby(Date(timesheet_detail.from_time))
+		.groupby(fn.UnixTimestamp(timesheet_detail.from_time))  # Group by Unix timestamp
 		.run()
 	)
+	# Convert the list of tuples (from run()) to a dictionary
+	return {row[0]: row[1] for row in timeline_data}
+
+
+
 
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
