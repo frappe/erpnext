@@ -406,7 +406,7 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_stock_value_difference
 
 		difference_amount = get_stock_value_difference(
-			row.item_code, row.warehouse, self.posting_date, self.posting_time
+			row.item_code, row.warehouse, self.posting_date, self.posting_time, self.name
 		)
 
 		if not difference_amount:
