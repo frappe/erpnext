@@ -61,7 +61,7 @@
    "link_fieldname": "code_list"
   }
  ],
- "modified": "2024-09-29 22:46:37.878075",
+ "modified": "2024-09-30 17:17:27.818263",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Code List",
@@ -81,6 +81,7 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

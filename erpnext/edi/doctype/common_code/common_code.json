@@ -59,7 +59,7 @@
   }
  ],
  "links": [],
- "modified": "2024-09-29 21:13:43.054943",
+ "modified": "2024-09-30 17:18:44.818486",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",
@@ -78,6 +78,7 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
