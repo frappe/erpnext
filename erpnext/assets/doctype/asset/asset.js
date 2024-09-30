@@ -213,7 +213,7 @@ frappe.ui.form.on("Asset", {
 			<div class="row">
 				<div class="col-xs-12 col-sm-6">
 					<span class="indicator whitespace-nowrap red">
-						<span>Failed to post depreciation entries</span>
+						<span>${__("Failed to post depreciation entries")}</span>
 					</span>
 				</div>
 			</div>`;
@@ -802,15 +802,33 @@ frappe.ui.form.on("Asset Finance Book", {
 });
 
 erpnext.asset.scrap_asset = function (frm) {
-	frappe.confirm(__("Do you really want to scrap this asset?"), function () {
-		frappe.call({
-			args: {
-				asset_name: frm.doc.name,
+	var scrap_dialog = new frappe.ui.Dialog({
+		title: __("Enter date to scrap asset"),
+		fields: [
+			{
+				label: __("Select the date"),
+				fieldname: "scrap_date",
+				fieldtype: "Date",
+				reqd: 1,
 			},
-			method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
-			callback: (r) => frm.reload_doc(),
-		});
+		],
+		size: "medium",
+		primary_action_label: "Submit",
+		primary_action(values) {
+			frappe.call({
+				args: {
+					asset_name: frm.doc.name,
+					scrap_date: values.scrap_date,
+				},
+				method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
+				callback: function (r) {
+					frm.reload_doc();
+					scrap_dialog.hide();
+				},
+			});
+		},
 	});
+	scrap_dialog.show();
 };
 
 erpnext.asset.restore_asset = function (frm) {

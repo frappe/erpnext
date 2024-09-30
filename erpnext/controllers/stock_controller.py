@@ -64,6 +64,18 @@ class StockController(AccountsController):
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 
+	def validate_items_exist(self):
+		if not self.get("items"):
+			return
+
+		items = [d.item_code for d in self.get("items")]
+
+		exists_items = frappe.get_all("Item", filters={"name": ("in", items)}, pluck="name")
+		non_exists_items = set(items) - set(exists_items)
+
+		if non_exists_items:
+			frappe.throw(_("Items {0} do not exist in the Item master.").format(", ".join(non_exists_items)))
+
 	def validate_duplicate_serial_and_batch_bundle(self, table_name):
 		if not self.get(table_name):
 			return
