@@ -1,5 +1,6 @@
 frappe.listview_settings["Asset"] = {
 	add_fields: ["status"],
+	has_indicator_for_draft: 1,
 	get_indicator: function (doc) {
 		if (doc.status === "Fully Depreciated") {
 			return [__("Fully Depreciated"), "green", "status,=,Fully Depreciated"];

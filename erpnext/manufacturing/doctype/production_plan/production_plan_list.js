@@ -1,6 +1,7 @@
 frappe.listview_settings["Production Plan"] = {
 	hide_name_column: true,
 	add_fields: ["status"],
+	has_indicator_for_draft: 1,
 	filters: [["status", "!=", "Closed"]],
 	get_indicator: function (doc) {
 		if (doc.status === "Submitted") {
