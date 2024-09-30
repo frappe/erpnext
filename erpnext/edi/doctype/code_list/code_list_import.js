@@ -49,7 +49,7 @@ function show_column_selection_dialog(context) {
 	for (let column in context.filterable_columns) {
 		fields.push({
 			fieldname: `filter_${column}`,
-			label: __(`by ${column}`),
+			label: __("by {}", [column]),
 			fieldtype: "Select",
 			options: [null].concat(context.filterable_columns[column]),
 		});

@@ -97,9 +97,9 @@ class CommonCode(Document):
 			code_value = code.find(f"./Value[@ColumnRef='{code_column}']/SimpleValue").text
 			if code_value in seen_common_codes:
 				frappe.throw(
-					_(
-						"Duplicate value found for '{}':\n\n<pre><code class='language-xml'>{}</code></pre>"
-					).format(code_column, escape_html(content))
+					_("Duplicate value found for '{}'").format(code_column)
+					+ ":\n\n"
+					+ f"<pre><code class='language-xml'>{escape_html(content)}</code></pre>"
 				)
 			seen_common_codes.add(code_value)
 			code_hash = CommonCode.simple_hash(code_value, 10)
