@@ -6,6 +6,7 @@ import hashlib
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.data import get_link_to_form
 from frappe.utils.html_utils import escape_html
 from lxml import etree
 
@@ -35,6 +36,11 @@ class CommonCode(Document):
 		self.name = self.simple_hash(self.code_list) + "|" + self.simple_hash(self.common_code, 10)
 
 	def validate(self):
+		self.validate_unique_code()
+		self.validate_distinct_references()
+
+	def validate_unique_code(self):
+		"""Ensure the same Common Code does not appear twice in the same Code List."""
 		if frappe.db.exists(
 			"Common Code",
 			{"code_list": self.code_list, "common_code": self.common_code, "name": ("!=", self.name)},
@@ -42,6 +48,30 @@ class CommonCode(Document):
 			frappe.throw(
 				_("Common Code {0} already exists in Code List {1}").format(self.common_code, self.code_list)
 			)
+
+	def validate_distinct_references(self):
+		"""Ensure the same reference is not used on a different Common Code of the same Code List."""
+		for link in self.applies_to:
+			existing_links = frappe.get_all(
+				"Common Code",
+				filters=[
+					["common_code", "!=", self.common_code],
+					["code_list", "=", self.code_list],
+					["Dynamic Link", "link_doctype", "=", link.link_doctype],
+					["Dynamic Link", "link_name", "=", link.link_name],
+				],
+				fields=["name", "common_code"],
+			)
+
+			if existing_links:
+				existing_link = existing_links[0]
+				frappe.throw(
+					_("{0} {1} is already linked to Common Code {2}.").format(
+						link.link_doctype,
+						link.link_name,
+						get_link_to_form("Common Code", existing_link["name"], existing_link["common_code"]),
+					)
+				)
 
 	@staticmethod
 	def import_genericode(file_path, list_name, code_column, title_column=None, filters=None):
