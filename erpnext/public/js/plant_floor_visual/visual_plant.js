@@ -156,6 +156,8 @@ class VisualPlantFloor {
 	update_status(data) {
 		let workstation_card$ = this.wrapper.find(`.workstation-wrapper[data-workstation="${data.name}"]`);
 		workstation_card$.find(".workstation-image-container").empty();
+		let workstation_image = workstation_card$.find(".workstation-image");
+		workstation_image.removeClass("workstation-off");
 
 		if (data.status_image) {
 			workstation_card$
@@ -170,6 +172,10 @@ class VisualPlantFloor {
 						2
 					)}</div>`
 				);
+		}
+
+		if (data.status !== "Production") {
+			workstation_image.addClass("workstation-off");
 		}
 
 		workstation_card$.find(".indicator-pill").removeClass(data.old_color);
