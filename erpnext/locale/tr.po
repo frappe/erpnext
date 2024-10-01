@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-27 21:32\n"
+"PO-Revision-Date: 2024-10-01 22:34\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -19709,7 +19709,7 @@ msgstr "Fahrenayt"
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Failed"
-msgstr "Başarısız Oldu"
+msgstr "Başarısız"
 
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.js:17
 msgid "Failed Entries"
@@ -34095,7 +34095,7 @@ msgstr "Ödenen Tutar, toplam negatif ödenmemiş tutardan büyük olamaz {0}"
 #. Label of the paid_from_account_type (Data) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Paid From Account Type"
-msgstr ""
+msgstr "Ödeme Yapılacak Hesap Türü"
 
 #. Label of the paid_loan (Data) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -45223,7 +45223,7 @@ msgstr "Kampanyaya Göre Satış Fırsatları"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:152
 msgid "Sales Opportunities by Medium"
-msgstr ""
+msgstr "Medium Kaynağından Gelen Satış Fırsatları"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:148
 msgid "Sales Opportunities by Source"
