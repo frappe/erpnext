@@ -39,7 +39,7 @@ def get_funnel_data(from_date, to_date, company):
 	quotations = frappe.db.sql(
 		"""select count(*) from `tabQuotation`
 		where docstatus = 1 and (date(`creation`) between %s and %s)
-		and (opportunity!="" or quotation_to="Lead") and company=%s""",
+		and (opportunity!='' or quotation_to='Lead') and company=%s""",
 		(from_date, to_date, company),
 	)[0][0]
 

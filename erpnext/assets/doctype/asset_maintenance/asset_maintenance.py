@@ -175,7 +175,7 @@ def get_maintenance_log(asset_name):
 		"""
         select maintenance_status, count(asset_name) as count, asset_name
         from `tabAsset Maintenance Log`
-        where asset_name=%s group by maintenance_status""",
+        where asset_name=%s group by maintenance_status,asset_name""",
 		(asset_name),
 		as_dict=1,
 	)

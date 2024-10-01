@@ -156,7 +156,7 @@ class OpportunitySummaryBySalesStage:
 				if d.get(based_on) == "[]" or d.get(based_on) is None or d.get(based_on) == "Not Assigned":
 					assignments = ["Not Assigned"]
 				else:
-					assignments = json.loads(d.get(based_on))
+					assignments = json.loads(d.get(based_on)) if d.get(based_on) else ["Not Assigned"]
 
 				sales_stage = d.get("sales_stage")
 				count = d.get(data_based_on)

@@ -157,15 +157,15 @@ class Quotation(SellingController):
 
 	def get_ordered_status(self):
 		status = "Open"
-		ordered_items = frappe._dict(
-			frappe.db.get_all(
-				"Sales Order Item",
-				{"prevdoc_docname": self.name, "docstatus": 1},
-				["item_code", "sum(qty)"],
-				group_by="item_code",
-				as_list=1,
-			)
+		ordered_items = frappe.db.get_all(
+			"Sales Order Item",
+			{"prevdoc_docname": self.name, "docstatus": 1},
+			["item_code", "sum(qty)"],
+			group_by="item_code",
+			as_list=1,
 		)
+
+		ordered_items = {item[0]: item[1] for item in ordered_items}
 
 		if not ordered_items:
 			return status

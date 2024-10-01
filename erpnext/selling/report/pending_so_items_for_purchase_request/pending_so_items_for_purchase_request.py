@@ -59,15 +59,16 @@ def get_data():
 			so.transaction_date,
 			so.customer,
 			so.territory,
-			sum(so_item.qty) as total_qty,
+			SUM(so_item.qty) AS total_qty,
 			so.company
-		FROM `tabSales Order` so, `tabSales Order Item` so_item
+		FROM
+			"tabSales Order" so
+			JOIN "tabSales Order Item" so_item ON so.name = so_item.parent
 		WHERE
 			so.docstatus = 1
-			and so.name = so_item.parent
-			and so.status not in  ('Closed','Completed','Cancelled')
+			AND so.status NOT IN ('Closed', 'Completed', 'Cancelled')
 		GROUP BY
-			so.name,so_item.item_code
+			so.name, so_item.item_code, so_item.item_name, so_item.description, so.customer, so.territory, so.company, so.transaction_date
 		""",
 		as_dict=1,
 	)

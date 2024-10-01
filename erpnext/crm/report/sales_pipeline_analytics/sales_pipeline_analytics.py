@@ -83,8 +83,8 @@ class SalesPipelineAnalytics:
 		]
 
 		self.group_by_period = {
-			"Monthly": "month(expected_closing)",
-			"Quarterly": "QUARTER(expected_closing)",
+			"Monthly": "to_char(expected_closing, 'FMMonth')",
+			"Quarterly": "extract(quarter from expected_closing)",
 		}[self.filters.get("range")]
 
 		self.pipeline_by = {"Owner": "opportunity_owner", "Sales Stage": "sales_stage"}[
@@ -92,8 +92,8 @@ class SalesPipelineAnalytics:
 		]
 
 		self.duration = {
-			"Monthly": "monthname(expected_closing) as month",
-			"Quarterly": "QUARTER(expected_closing) as quarter",
+			"Monthly": "to_char(expected_closing, 'FMMonth') as month",
+			"Quarterly": "extract(quarter from expected_closing) as quarter",
 		}[self.filters.get("range")]
 
 		self.period_by = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]

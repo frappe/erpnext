@@ -444,12 +444,26 @@ def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposti
 		items_to_be_repost = json.loads(doc.items_to_be_repost) or []
 
 	if not items_to_be_repost and voucher_type and voucher_no:
-		items_to_be_repost = frappe.db.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-			fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
-			order_by="creation asc",
-			group_by="item_code, warehouse",
+		# items_to_be_repost = frappe.db.get_all(
+		# 	"Stock Ledger Entry",
+		# 	filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+		# 	fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
+		# 	order_by="creation asc",
+		# 	group_by="item_code, warehouse",
+		# )
+		
+		# postgres
+		items_to_be_repost = frappe.db.sql(
+			"""
+			SELECT item_code, warehouse, posting_date, posting_time, creation
+			FROM "tabStock Ledger Entry"
+			WHERE voucher_type = %(voucher_type)s
+			AND voucher_no = %(voucher_no)s
+			GROUP BY item_code, warehouse, posting_date, posting_time, creation
+			ORDER BY creation ASC
+			""",
+			{"voucher_type": voucher_type, "voucher_no": voucher_no},
+			as_dict=True
 		)
 
 	return items_to_be_repost or []
@@ -1890,7 +1904,6 @@ def get_next_stock_reco(kwargs):
 			sle.actual_qty,
 			sle.has_batch_no,
 		)
-		.force_index("item_warehouse")
 		.where(
 			(sle.item_code == kwargs.get("item_code"))
 			& (sle.warehouse == kwargs.get("warehouse"))

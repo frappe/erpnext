@@ -853,6 +853,7 @@ class JobCard(Document):
 				"operation_id": self.operation_id,
 				"is_corrective_job_card": 0,
 			},
+			group_by="work_order, operation_id"
 		)
 
 	def set_transferred_qty_in_job_card_item(self, ste_doc):
@@ -1105,17 +1106,19 @@ def get_operations(doctype, txt, searchfield, start, page_len, filters):
 	args = {"parent": filters.get("work_order")}
 	if txt:
 		args["operation"] = ("like", f"%{txt}%")
-
-	return frappe.get_all(
+	
+	operations = frappe.get_all(
 		"Work Order Operation",
 		filters=args,
-		fields=["distinct operation as operation"],
+		fields=["distinct operation as operation, idx"],
 		limit_start=start,
 		limit_page_length=page_len,
 		order_by="idx asc",
 		as_list=1,
 	)
 
+	operations_list = [t[:-1] for t in operations]
+	return operations_list
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):

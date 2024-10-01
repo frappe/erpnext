@@ -89,7 +89,10 @@ def get_data(filters):
 						& (DepreciationSchedule.schedule_date == d.posting_date)
 					)
 				).run(as_dict=True)
-				asset_data.accumulated_depreciation_amount = query[0]["accumulated_depreciation_amount"]
+				if query:
+					asset_data.accumulated_depreciation_amount = query[0]["accumulated_depreciation_amount"]
+				else:
+					asset_data.accumulated_depreciation_amount = 0 
 
 			else:
 				asset_data.accumulated_depreciation_amount += d.debit

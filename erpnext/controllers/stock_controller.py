@@ -1550,8 +1550,9 @@ def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
 		"""
 		select item_code, warehouse, count(name) as total_row
 		from "tabStock Ledger Entry"
-		where ({})
-			and to_timestamp(concat(%(posting_date)s, ' ', %(posting_time)s), 'YYYY-MM-DD HH24:MI:SS') >= to_timestamp(concat(posting_date, ' ', posting_time), 'YYYY-MM-DD HH24:MI:SS')
+		where
+			({})
+			and (posting_date + posting_time::time) >= %(posting_date)s::date + %(posting_time)s::time
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		GROUP BY item_code, warehouse
