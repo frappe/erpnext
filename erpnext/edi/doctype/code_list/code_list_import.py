@@ -43,7 +43,7 @@ def import_genericode():
 	file_path = file_doc.get_full_path()
 
 	# Get available columns and example values
-	columns, example_values, filterable_columns = get_columns_and_examples(file_path)
+	columns, example_values, filterable_columns = get_genericode_columns_and_examples(root)
 
 	return {
 		"code_list": code_list.name,
@@ -64,11 +64,7 @@ def process_genericode_import(
 	)
 
 
-def get_columns_and_examples(file_path):
-	parser = etree.XMLParser(remove_blank_text=True)
-	tree = etree.parse(file_path, parser=parser)
-	root = tree.getroot()
-
+def get_genericode_columns_and_examples(root):
 	columns = []
 	example_values = {}
 	filterable_columns = {}
