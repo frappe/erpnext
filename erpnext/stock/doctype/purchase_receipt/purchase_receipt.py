@@ -1102,24 +1102,27 @@ def adjust_incoming_rate_for_pr(doc):
 
 
 def get_item_wise_returned_qty(pr_doc):
-	items = [d.name for d in pr_doc.items]
-
-	return frappe._dict(
-		frappe.get_all(
-			"Purchase Receipt",
-			fields=[
-				"`tabPurchase Receipt Item`.purchase_receipt_item",
-				"sum(abs(`tabPurchase Receipt Item`.qty)) as qty",
-			],
-			filters=[
-				["Purchase Receipt", "docstatus", "=", 1],
-				["Purchase Receipt", "is_return", "=", 1],
-				["Purchase Receipt Item", "purchase_receipt_item", "in", items],
-			],
-			group_by="`tabPurchase Receipt Item`.purchase_receipt_item",
-			as_list=1,
-		)
-	)
+    items = [d.name for d in pr_doc.items]
+    
+    return frappe._dict(
+        frappe.db.sql("""
+            SELECT 
+                pri.purchase_receipt_item,
+                SUM(ABS(pri.qty)) as qty
+            FROM 
+                "tabPurchase Receipt" pr
+            INNER JOIN 
+                "tabPurchase Receipt Item" pri
+            ON 
+                pr.name = pri.parent
+            WHERE
+                pr.docstatus = 1
+                AND pr.is_return = 1
+                AND pri.purchase_receipt_item IN %s
+            GROUP BY 
+                pri.purchase_receipt_item
+        """, (tuple(items),), as_dict=1)
+    )
 
 
 @frappe.whitelist()
