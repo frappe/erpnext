@@ -30,6 +30,7 @@ function show_column_selection_dialog(context) {
 			label: __("as Title"),
 			fieldtype: "Select",
 			options: [null].concat(context.columns),
+			default: context.columns.includes("name") ? "name" : null,
 		},
 		{
 			fieldname: "code_column",
@@ -37,6 +38,11 @@ function show_column_selection_dialog(context) {
 			fieldtype: "Select",
 			options: context.columns,
 			reqd: 1,
+			default: context.columns.includes("code")
+				? "code"
+				: context.columns.includes("value")
+				? "value"
+				: null,
 		},
 		{
 			fieldname: "filters_column",
