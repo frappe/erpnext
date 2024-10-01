@@ -33,67 +33,76 @@ def validate_filters(filters):
 	elif date_diff(to_date, from_date) < 0:
 		frappe.throw(_("To Date cannot be before From Date."))
 
-
 def get_data(filters):
-	mr = frappe.qb.DocType("Material Request")
-	mr_item = frappe.qb.DocType("Material Request Item")
+    mr = frappe.qb.DocType("Material Request")
+    mr_item = frappe.qb.DocType("Material Request Item")
 
-	query = (
-		frappe.qb.from_(mr)
-		.join(mr_item)
-		.on(mr_item.parent == mr.name)
-		.select(
-			mr.name.as_("material_request"),
-			mr.transaction_date.as_("date"),
-			mr_item.schedule_date.as_("required_date"),
-			mr_item.item_code.as_("item_code"),
-			Sum(Coalesce(mr_item.qty, 0)).as_("qty"),
-			Sum(Coalesce(mr_item.stock_qty, 0)).as_("stock_qty"),
-			Coalesce(mr_item.uom, "").as_("uom"),
-			Coalesce(mr_item.stock_uom, "").as_("stock_uom"),
-			Sum(Coalesce(mr_item.ordered_qty, 0)).as_("ordered_qty"),
-			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
-			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.received_qty, 0))).as_(
-				"qty_to_receive"
-			),
-			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
-			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_("qty_to_order"),
-			mr_item.item_name,
-			mr_item.description,
-			mr.company,
-		)
-		.where(
-			(mr.material_request_type == "Purchase")
-			& (mr.docstatus == 1)
-			& (mr.status != "Stopped")
-			& (mr.per_received < 100)
-		)
-	)
+    query = (
+        frappe.qb.from_(mr)
+        .join(mr_item)
+        .on(mr_item.parent == mr.name)
+        .select(
+            mr.name.as_("material_request"),
+            mr.transaction_date.as_("date"),
+            mr_item.schedule_date.as_("required_date"),
+            mr_item.item_code.as_("item_code"),
+            Sum(Coalesce(mr_item.qty, 0)).as_("qty"),
+            Sum(Coalesce(mr_item.stock_qty, 0)).as_("stock_qty"),
+            Coalesce(mr_item.uom, "").as_("uom"),
+            Coalesce(mr_item.stock_uom, "").as_("stock_uom"),
+            Sum(Coalesce(mr_item.ordered_qty, 0)).as_("ordered_qty"),
+            Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
+            (Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.received_qty, 0))).as_(
+                "qty_to_receive"
+            ),
+            (Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_("qty_to_order"),
+            mr_item.item_name,
+            mr_item.description,
+            mr.company,
+        )
+        .where(
+            (mr.material_request_type == "Purchase")
+            & (mr.docstatus == 1)
+            & (mr.status != "Stopped")
+            & (mr.per_received < 100)
+        )
+    )
 
-	query = get_conditions(filters, query, mr, mr_item)  # add conditional conditions
+    query = get_conditions(filters, query, mr, mr_item)
 
-	query = query.groupby(mr.name, mr_item.item_code).orderby(mr.transaction_date, mr.schedule_date)
-	data = query.run(as_dict=True)
-	return data
+    # Add the missing columns to the GROUP BY clause
+    query = query.groupby(
+        mr.name,
+        mr.transaction_date,
+        mr_item.schedule_date,
+        mr_item.item_code,
+        mr_item.uom,
+        mr_item.stock_uom,
+        mr_item.item_name,
+        mr_item.description,
+        mr.company
+    ).orderby(mr.transaction_date, mr_item.schedule_date)
+    
+    data = query.run(as_dict=True)
+    return data
 
 
 def get_conditions(filters, query, mr, mr_item):
-	if filters.get("from_date") and filters.get("to_date"):
-		query = query.where(
-			(mr.transaction_date >= filters.get("from_date"))
-			& (mr.transaction_date <= filters.get("to_date"))
-		)
-	if filters.get("company"):
-		query = query.where(mr.company == filters.get("company"))
+    if filters.get("from_date") and filters.get("to_date"):
+        query = query.where(
+            (mr.transaction_date >= filters.get("from_date"))
+            & (mr.transaction_date <= filters.get("to_date"))
+        )
+    if filters.get("company"):
+        query = query.where(mr.company == filters.get("company"))
 
-	if filters.get("material_request"):
-		query = query.where(mr.name == filters.get("material_request"))
+    if filters.get("material_request"):
+        query = query.where(mr.name == filters.get("material_request"))
 
-	if filters.get("item_code"):
-		query = query.where(mr_item.item_code == filters.get("item_code"))
+    if filters.get("item_code"):
+        query = query.where(mr_item.item_code == filters.get("item_code"))
 
-	return query
-
+    return query
 
 def update_qty_columns(row_to_update, data_row):
 	fields = ["qty", "stock_qty", "ordered_qty", "received_qty", "qty_to_receive", "qty_to_order"]
