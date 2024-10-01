@@ -66,27 +66,37 @@ def get_item_details():
 
 def get_item_warehouse_quantity_map():
 	query = """SELECT parent, warehouse, MIN(qty) AS qty
-			   FROM (SELECT b.parent, bi.item_code, bi.warehouse,
-							sum(bi.projected_qty) / b.qty AS qty
-					 FROM tabBin AS bi, (SELECT pb.new_item_code as parent, b.item_code, b.qty, w.name
-										 FROM `tabProduct Bundle Item` b, `tabWarehouse` w,
-											  `tabProduct Bundle` pb
-										 where b.parent = pb.name) AS b
-					 WHERE bi.item_code = b.item_code
-						   AND bi.warehouse = b.name
-					 GROUP BY b.parent, b.item_code, bi.warehouse
-					 UNION ALL
-					 SELECT b.parent, b.item_code, b.name, 0 AS qty
-					 FROM (SELECT pb.new_item_code as parent, b.item_code, b.qty, w.name
-						   FROM `tabProduct Bundle Item` b, `tabWarehouse` w,
-								`tabProduct Bundle` pb
-						   where b.parent = pb.name) AS b
-					 WHERE NOT EXISTS(SELECT *
-									  FROM `tabBin` AS bi
-									  WHERE bi.item_code = b.item_code
-											AND bi.warehouse = b.name)) AS r
-			   GROUP BY parent, warehouse
-			   HAVING MIN(qty) != 0"""
+           FROM (SELECT b.parent, bi.item_code, bi.warehouse,
+                        SUM(bi.projected_qty) / NULLIF(b.qty, 0) AS qty
+                 FROM tabBin AS bi, 
+                      (SELECT pb.new_item_code AS parent, 
+                              b.item_code, 
+                              b.qty, 
+                              w.name
+                       FROM "tabProduct Bundle Item" b
+                       JOIN "tabWarehouse" w ON TRUE
+                       JOIN "tabProduct Bundle" pb ON b.parent = pb.name) AS b
+                 WHERE bi.item_code = b.item_code
+                   AND bi.warehouse = b.name
+                 GROUP BY b.parent, bi.item_code, bi.warehouse, b.qty
+                 
+                 UNION ALL
+                 
+                 SELECT b.parent, b.item_code, b.name, 0 AS qty
+                 FROM (SELECT pb.new_item_code AS parent, 
+                              b.item_code, 
+                              b.qty, 
+                              w.name
+                       FROM "tabProduct Bundle Item" b
+                       JOIN "tabWarehouse" w ON TRUE
+                       JOIN "tabProduct Bundle" pb ON b.parent = pb.name) AS b
+                 WHERE NOT EXISTS (SELECT 1
+                                   FROM tabBin AS bi
+                                   WHERE bi.item_code = b.item_code
+                                     AND bi.warehouse = b.name)) AS r
+           GROUP BY parent, warehouse
+           HAVING MIN(qty) != 0"""
+
 	result = frappe.db.sql(query, as_dict=1)
 	last_sbom = ""
 	sbom_map = {}
