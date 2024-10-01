@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "autoname": "hash",
  "creation": "2024-09-29 07:01:18.133067",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -59,10 +60,11 @@
   }
  ],
  "links": [],
- "modified": "2024-09-30 17:18:44.818486",
+ "modified": "2024-10-01 13:00:35.702299",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

@@ -32,30 +32,16 @@ class CommonCode(Document):
 	def simple_hash(input_string, length=6):
 		return hashlib.blake2b(input_string.encode(), digest_size=length // 2).hexdigest()
 
-	def autoname(self):
-		self.name = self.simple_hash(self.code_list) + "|" + self.simple_hash(self.common_code, 10)
-
 	def validate(self):
-		self.validate_unique_code()
 		self.validate_distinct_references()
 
-	def validate_unique_code(self):
-		"""Ensure the same Common Code does not appear twice in the same Code List."""
-		if frappe.db.exists(
-			"Common Code",
-			{"code_list": self.code_list, "common_code": self.common_code, "name": ("!=", self.name)},
-		):
-			frappe.throw(
-				_("Common Code {0} already exists in Code List {1}").format(self.common_code, self.code_list)
-			)
-
 	def validate_distinct_references(self):
-		"""Ensure the same reference is not used on a different Common Code of the same Code List."""
+		"""Ensure no two Common Codes of the same Code List are linked to the same document."""
 		for link in self.applies_to:
 			existing_links = frappe.get_all(
 				"Common Code",
 				filters=[
-					["common_code", "!=", self.common_code],
+					["name", "!=", self.name],
 					["code_list", "=", self.code_list],
 					["Dynamic Link", "link_doctype", "=", link.link_doctype],
 					["Dynamic Link", "link_name", "=", link.link_name],
@@ -80,7 +66,6 @@ class CommonCode(Document):
 		root = tree.getroot()
 
 		codes = []
-		seen_common_codes = set()
 		list_hash = CommonCode.simple_hash(list_name)
 
 		# Construct the XPath expression
@@ -95,13 +80,6 @@ class CommonCode(Document):
 			content = etree.tostring(code, encoding="unicode", pretty_print=True)
 
 			code_value = code.find(f"./Value[@ColumnRef='{code_column}']/SimpleValue").text
-			if code_value in seen_common_codes:
-				frappe.throw(
-					_("Duplicate value found for '{}'").format(code_column)
-					+ ":\n\n"
-					+ f"<pre><code class='language-xml'>{escape_html(content)}</code></pre>"
-				)
-			seen_common_codes.add(code_value)
 			code_hash = CommonCode.simple_hash(code_value, 10)
 
 			title = None
@@ -110,7 +88,7 @@ class CommonCode(Document):
 
 			codes.append(
 				{
-					"name": f"{list_hash}|{code_hash}|{idx}",  # according to autoname + row index
+					"name": f"{list_hash}|{idx}|{code_hash}",
 					"code_list": list_name,
 					"common_code": code_value,
 					"title": title,
@@ -122,7 +100,4 @@ class CommonCode(Document):
 
 
 def on_doctype_update():
-	frappe.db.add_unique(
-		"Common Code", ["code_list", "common_code"], constraint_name="unique_code_list_common_code"
-	)
 	frappe.db.add_index("Common Code", ["code_list", "common_code"])
