@@ -12,6 +12,7 @@
   "column_break_nkls",
   "version",
   "publisher",
+  "publisher_id",
   "section_break_npxp",
   "description"
  ],
@@ -52,6 +53,12 @@
   {
    "fieldname": "section_break_npxp",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "publisher_id",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Publisher ID"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -61,7 +68,7 @@
    "link_fieldname": "code_list"
   }
  ],
- "modified": "2024-09-30 17:17:27.818263",
+ "modified": "2024-10-01 12:07:33.187252",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Code List",
