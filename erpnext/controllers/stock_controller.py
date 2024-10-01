@@ -1547,20 +1547,21 @@ def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
 	or_conditions = get_conditions_to_validate_future_sle(sl_entries)
 
 	data = frappe.db.sql(
-    """
-    select item_code, warehouse, count(name) as total_row
-    from "tabStock Ledger Entry"
-    where
-        ({})
-        and (posting_date + posting_time::time) >= %(posting_date)s::date + %(posting_time)s::time
-        and voucher_no != %(voucher_no)s
-        and is_cancelled = 0
-    GROUP BY
-        item_code, warehouse
-    """.format(" or ".join(or_conditions)),
-    args,
-    as_dict=1,
-)
+		"""
+		select item_code, warehouse, count(name) as total_row
+		from `tabStock Ledger Entry` force index (item_warehouse)
+		where
+			({})
+			and timestamp(posting_date, posting_time)
+				>= timestamp(%(posting_date)s, %(posting_time)s)
+			and voucher_no != %(voucher_no)s
+			and is_cancelled = 0
+		GROUP BY
+			item_code, warehouse
+		""".format(" or ".join(or_conditions)),
+		args,
+		as_dict=1,
+	)
 
 	for d in data:
 		frappe.local.future_sle[key][(d.item_code, d.warehouse)] = d.total_row
