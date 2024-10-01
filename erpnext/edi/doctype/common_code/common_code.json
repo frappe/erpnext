@@ -6,8 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "code_list",
-  "common_code",
   "title",
+  "common_code",
+  "description",
   "column_break_wxsw",
   "additional_data",
   "section_break_rhgh",
@@ -57,10 +58,17 @@
    "fieldname": "additional_data",
    "fieldtype": "Code",
    "label": "Additional Data"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description",
+   "max_height": "60px"
   }
  ],
  "links": [],
- "modified": "2024-10-01 13:00:35.702299",
+ "modified": "2024-10-01 13:19:14.087201",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",

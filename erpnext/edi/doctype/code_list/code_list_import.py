@@ -55,9 +55,13 @@ def import_genericode():
 
 
 @frappe.whitelist()
-def process_genericode_import(code_list_name, file_path, code_column, title_column=None, filters=None):
+def process_genericode_import(
+	code_list_name, file_path, code_column, title_column=None, description_column=None, filters=None
+):
 	code_list = frappe.get_doc("Code List", code_list_name)
-	return code_list.import_genericode(file_path, code_column, title_column, filters and json.loads(filters))
+	return code_list.import_genericode(
+		file_path, code_column, title_column, description_column, filters and json.loads(filters)
+	)
 
 
 def get_columns_and_examples(file_path):

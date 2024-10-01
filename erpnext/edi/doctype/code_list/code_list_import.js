@@ -45,6 +45,13 @@ function show_column_selection_dialog(context) {
 				: null,
 		},
 		{
+			fieldname: "description_column",
+			label: __("as Description"),
+			fieldtype: "Select",
+			options: [null].concat(context.columns),
+			default: context.columns.includes("description") ? "description" : null,
+		},
+		{
 			fieldname: "filters_column",
 			label: __("Filter"),
 			fieldtype: "Column Break",
@@ -92,6 +99,7 @@ function show_column_selection_dialog(context) {
 					file_path: context.file_path,
 					code_column: values.code_column,
 					title_column: values.title_column,
+					description_column: values.description_column,
 					filters: filters,
 				},
 				callback: function (r) {
@@ -119,10 +127,12 @@ function show_column_selection_dialog(context) {
 function update_preview(dialog, context) {
 	let code_column = dialog.get_value("code_column");
 	let title_column = dialog.get_value("title_column");
+	let description_column = dialog.get_value("description_column");
 
 	let html = '<table class="table table-bordered"><thead><tr>';
 	if (title_column) html += `<th>${__("Title")}</th>`;
 	if (code_column) html += `<th>${__("Code")}</th>`;
+	if (description_column) html += `<th>${__("Description")}</th>`;
 
 	// Add headers for filterable columns
 	for (let column in context.filterable_columns) {
@@ -142,6 +152,10 @@ function update_preview(dialog, context) {
 		if (code_column) {
 			let code = context.example_values[code_column][i] || "";
 			html += `<td title="${code}">${truncate(code)}</td>`;
+		}
+		if (description_column) {
+			let description = context.example_values[description_column][i] || "";
+			html += `<td title="${description}">${truncate(description)}</td>`;
 		}
 
 		// Add values for filterable columns

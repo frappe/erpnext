@@ -59,7 +59,9 @@ class CodeList(Document):
 
 		return code[0][0] if code else None
 
-	def import_genericode(self, file_path, code_column, title_column=None, filters=None):
+	def import_genericode(
+		self, file_path, code_column, title_column=None, description_column=None, filters=None
+	):
 		"""Import genericode file and create Common Code entries"""
 		parser = etree.XMLParser(remove_blank_text=True)
 		tree = etree.parse(file_path, parser=parser)
@@ -79,7 +81,9 @@ class CodeList(Document):
 
 		self.save()
 
-		common_codes = CommonCode.import_genericode(file_path, self.name, code_column, title_column, filters)
+		common_codes = CommonCode.import_genericode(
+			file_path, self.name, code_column, title_column, description_column, filters
+		)
 
 		# Bulk insert common codes
 		if common_codes:
@@ -87,13 +91,23 @@ class CodeList(Document):
 			user = frappe.session.user
 			frappe.db.bulk_insert(
 				"Common Code",
-				fields=["name", "code_list", "common_code", "title", "additional_data", "owner", "creation"],
+				fields=[
+					"name",
+					"code_list",
+					"common_code",
+					"title",
+					"description",
+					"additional_data",
+					"owner",
+					"creation",
+				],
 				values=[
 					(
 						cc["name"],
 						cc["code_list"],
 						cc["common_code"],
 						cc["title"],
+						cc["description"],
 						cc["additional_data"],
 						user,
 						now,

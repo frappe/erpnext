@@ -25,6 +25,7 @@ class CommonCode(Document):
 		applies_to: DF.Table[DynamicLink]
 		code_list: DF.Link
 		common_code: DF.Data
+		description: DF.SmallText | None
 		title: DF.Data | None
 	# end: auto-generated types
 
@@ -60,7 +61,9 @@ class CommonCode(Document):
 				)
 
 	@staticmethod
-	def import_genericode(file_path, list_name, code_column, title_column=None, filters=None):
+	def import_genericode(
+		file_path, list_name, code_column, title_column=None, description_column=None, filters=None
+	):
 		parser = etree.XMLParser(remove_blank_text=True)
 		tree = etree.parse(file_path, parser=parser)
 		root = tree.getroot()
@@ -86,12 +89,17 @@ class CommonCode(Document):
 			if title_column:
 				title = code.find(f"./Value[@ColumnRef='{title_column}']/SimpleValue").text
 
+			description = None
+			if description_column:
+				description = code.find(f"./Value[@ColumnRef='{description_column}']/SimpleValue").text
+
 			codes.append(
 				{
 					"name": f"{list_hash}|{idx}|{code_hash}",
 					"code_list": list_name,
 					"common_code": code_value,
 					"title": title,
+					"description": description,
 					"additional_data": content,
 				}
 			)
