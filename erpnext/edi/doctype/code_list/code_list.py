@@ -22,6 +22,7 @@ class CodeList(Document):
 		publisher: DF.Data | None
 		publisher_id: DF.Data | None
 		title: DF.Data | None
+		url: DF.Data | None
 		version: DF.Data | None
 	# end: auto-generated types
 
@@ -74,6 +75,7 @@ class CodeList(Document):
 		if not self.publisher:
 			self.publisher = getattr(root.find(".//Identification/Agency/LongName"), "text", None)
 		self.publisher_id = getattr(root.find(".//Identification/Agency/Identifier"), "text", None)
+		self.url = getattr(root.find(".//Identification/LocationUri"), "text", None)
 
 		self.save()
 

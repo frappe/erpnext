@@ -9,6 +9,7 @@
  "field_order": [
   "title",
   "canonical_uri",
+  "url",
   "column_break_nkls",
   "version",
   "publisher",
@@ -59,6 +60,12 @@
    "fieldtype": "Data",
    "in_standard_filter": 1,
    "label": "Publisher ID"
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "label": "URL",
+   "options": "URL"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -68,7 +75,7 @@
    "link_fieldname": "code_list"
   }
  ],
- "modified": "2024-10-01 12:07:33.187252",
+ "modified": "2024-10-01 12:32:27.990888",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Code List",
