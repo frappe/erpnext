@@ -13,7 +13,10 @@ def import_genericode():
 
 	# Parse the uploaded file content
 	parser = etree.XMLParser(remove_blank_text=True)
-	root = etree.fromstring(frappe.local.uploaded_file, parser=parser)
+	try:
+		root = etree.fromstring(frappe.local.uploaded_file, parser=parser)
+	except Exception as e:
+		frappe.throw(f"<pre>{e!s}</pre>", title=_("Parsing Error"))
 
 	# Extract the name (CanonicalVersionUri) from the parsed XML
 	name = root.find(".//CanonicalVersionUri").text
