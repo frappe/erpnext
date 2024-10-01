@@ -3,7 +3,7 @@
 
 import copy
 import json
-
+from datetime import datetime, timedelta
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
@@ -1085,19 +1085,21 @@ def make_item_price(item, price_list_name, item_price):
 
 
 def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
-	"""get timeline data based on Stock Ledger Entry. This is displayed as heatmap on the item page."""
+    """Get timeline data based on Stock Ledger Entry. This is displayed as a heatmap on the item page."""
+    
+    # Calculate the date one year ago from today
+    one_year_ago = datetime.now() - timedelta(days=365)
+    
+    sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-
-	return dict(
-		frappe.qb.from_(sle)
-		.select(UnixTimestamp(sle.posting_date), Count("*"))
-		.where(sle.item_code == name)
-		.where(sle.posting_date > CurDate() - Interval(years=1))
-		.groupby(sle.posting_date)
-		.run()
-	)
-
+    return dict(
+        frappe.qb.from_(sle)
+        .select(UnixTimestamp(sle.posting_date), Count("*"))
+        .where(sle.item_code == name)
+        .where(sle.posting_date > one_year_ago)  # Use the calculated date here
+        .groupby(sle.posting_date)
+        .run()
+    )
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None):
 	if (not end_of_life) or (disabled is None):
