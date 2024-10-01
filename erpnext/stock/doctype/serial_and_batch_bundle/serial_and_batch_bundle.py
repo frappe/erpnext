@@ -1902,7 +1902,7 @@ def get_available_batches(kwargs):
 		)
 		.where(batch_table.disabled == 0)
 		.where(stock_ledger_entry.is_cancelled == 0)
-		.groupby(batch_ledger.batch_no, batch_ledger.warehouse)
+		.groupby(batch_ledger.batch_no, batch_ledger.warehouse, batch_table.creation)
 	)
 
 	if not kwargs.get("for_stock_levels"):
@@ -2186,7 +2186,12 @@ def get_stock_ledgers_batches(kwargs):
 			stock_ledger_entry.batch_no,
 		)
 		.where((stock_ledger_entry.is_cancelled == 0) & (stock_ledger_entry.batch_no.isnotnull()))
-		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
+		.groupby(
+			stock_ledger_entry.batch_no, 
+			stock_ledger_entry.warehouse, 
+			stock_ledger_entry.item_code, 
+			batch_table.creation
+		)
 	)
 
 	for field in ["warehouse", "item_code", "batch_no"]:
