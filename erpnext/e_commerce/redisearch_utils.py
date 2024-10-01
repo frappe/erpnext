@@ -37,18 +37,9 @@ def is_redisearch_enabled():
 def is_search_module_loaded():
 	try:
 		cache = frappe.cache()
-<<<<<<< HEAD
-		out = cache.execute_command("MODULE LIST")
-
-		parsed_output = " ".join(
-			" ".join([frappe.as_unicode(s) for s in o if not isinstance(s, int)]) for o in out
-		)
-		return "search" in parsed_output
-=======
 		for module in cache.module_list():
 			if module.get(b"name") == b"search":
 				return True
->>>>>>> 4a38ce659d (refactor!: drop redisearch)
 	except Exception:
 		return False  # handling older redis versions
 
@@ -66,11 +57,7 @@ def if_redisearch_enabled(function):
 
 
 def make_key(key):
-<<<<<<< HEAD
-	return f"{frappe.conf.db_name}|{key}".encode()
-=======
 	return frappe.cache().make_key(key)
->>>>>>> 4a38ce659d (refactor!: drop redisearch)
 
 
 @if_redisearch_enabled
@@ -100,14 +87,8 @@ def create_website_items_index():
 
 	idx_fields = [to_search_field(f) for f in idx_fields]
 
-<<<<<<< HEAD
-	client.create_index(
-		[TextField("web_item_name", sortable=True), *idx_fields],
-=======
-	# TODO: sortable?
 	index.create_index(
-		[TextField("web_item_name", sortable=True)] + idx_fields,
->>>>>>> 4a38ce659d (refactor!: drop redisearch)
+		[TextField("web_item_name", sortable=True), *idx_fields],
 		definition=idx_def,
 	)
 
@@ -202,16 +183,8 @@ def define_autocomplete_dictionary():
 @if_redisearch_enabled
 def create_items_autocomplete_dict():
 	"Add items as suggestions in Autocompleter."
-<<<<<<< HEAD
-	items = frappe.get_all("Website Item", fields=["web_item_name", "item_group"], filters={"published": 1})
-
-=======
-
 	ac = frappe.cache().ft()
-	items = frappe.get_all(
-		"Website Item", fields=["web_item_name", "item_group"], filters={"published": 1}
-	)
->>>>>>> 4a38ce659d (refactor!: drop redisearch)
+	items = frappe.get_all("Website Item", fields=["web_item_name", "item_group"], filters={"published": 1})
 	for item in items:
 		ac.sugadd(WEBSITE_ITEM_NAME_AUTOCOMPLETE, Suggestion(item.web_item_name))
 

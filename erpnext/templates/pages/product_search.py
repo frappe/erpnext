@@ -89,21 +89,12 @@ def product_search(query, limit=10, fuzzy_search=True):
 
 	# TODO: Check perf/correctness with Suggestions & Query vs only Query
 	# TODO: Use Levenshtein Distance in Query (max=3)
-<<<<<<< HEAD
-	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
-	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
-	suggestions = ac.get_suggestions(
-		query,
-		num=limit,
-		fuzzy=fuzzy_search and len(query) > 3,  # Fuzzy on length < 3 can be real slow
-=======
 	redisearch = redis.ft(WEBSITE_ITEM_INDEX)
 	suggestions = redisearch.sugget(
 		WEBSITE_ITEM_NAME_AUTOCOMPLETE,
 		query,
 		num=limit,
 		fuzzy=fuzzy_search and len(query) > 3,
->>>>>>> 4a38ce659d (refactor!: drop redisearch)
 	)
 
 	# Build a query
