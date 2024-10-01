@@ -853,6 +853,7 @@ class JobCard(Document):
 				"operation_id": self.operation_id,
 				"is_corrective_job_card": 0,
 			},
+			group_by="work_order, operation_id"
 		)
 
 	def set_transferred_qty_in_job_card_item(self, ste_doc):
