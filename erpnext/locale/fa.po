@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-30 22:18\n"
+"PO-Revision-Date: 2024-10-01 22:34\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -18594,7 +18594,7 @@ msgstr ""
 #. Label of the encashment_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Encashment Date"
-msgstr "تاریخ وصول"
+msgstr "تاریخ بازخرید"
 
 #. Label of the end_date (Date) field in DocType 'Accounting Period'
 #. Label of the end_date (Date) field in DocType 'Bank Guarantee'
@@ -42394,7 +42394,7 @@ msgstr "تغییر نام مجاز نیست"
 #. Name of a DocType
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
 msgid "Rename Tool"
-msgstr "تغییر نام ابزار"
+msgstr "ابزار تغییر نام"
 
 #: erpnext/accounts/doctype/account/account.py:510
 msgid "Renaming it is only allowed via parent company {0}, to avoid mismatch."
