@@ -21,6 +21,16 @@ erpnext.edi.import_genericode = function (listview_or_form) {
 function show_column_selection_dialog(context) {
 	let fields = [
 		{
+			fieldtype: "HTML",
+			fieldname: "code_list_info",
+			options: `<div class="text-muted">${__("You are importing data for the code list:")}<br><strong>${
+				context.code_list
+			}</strong></div>`,
+		},
+		{
+			fieldtype: "Section Break",
+		},
+		{
 			fieldname: "import_column",
 			label: __("Import"),
 			fieldtype: "Column Break",
