@@ -55,18 +55,21 @@ function show_column_selection_dialog(context) {
 				: null,
 		},
 		{
-			fieldname: "description_column",
-			label: __("as Description"),
-			fieldtype: "Select",
-			options: [null].concat(context.columns),
-			default: context.columns.includes("description") ? "description" : null,
-		},
-		{
 			fieldname: "filters_column",
 			label: __("Filter"),
 			fieldtype: "Column Break",
 		},
 	];
+
+	if (context.columns.length > 2) {
+		fields.splice(5, 0, {
+			fieldname: "description_column",
+			label: __("as Description"),
+			fieldtype: "Select",
+			options: [null].concat(context.columns),
+			default: context.columns.includes("description") ? "description" : null,
+		});
+	}
 
 	// Add filterable columns
 	for (let column in context.filterable_columns) {
