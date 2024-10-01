@@ -377,7 +377,7 @@ def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):
-	filters = [["docstatus", "<", "2"]]
+	filters = [["docstatus", "<", 2]]
 
 	if task:
 		filters.append(["parent_task", "=", task])
@@ -385,7 +385,7 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 		# via expand child
 		filters.append(["parent_task", "=", parent])
 	else:
-		filters.append(['ifnull(`parent_task`, "")', "=", ""])
+		filters.append(["parent_task", "=", ""])
 
 	if project:
 		filters.append(["project", "=", project])
