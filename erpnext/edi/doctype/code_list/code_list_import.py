@@ -80,6 +80,12 @@ def get_columns_and_examples(file_path):
 	for row in root.findall(".//SimpleCodeList/Row"):
 		for value in row.findall("Value"):
 			column_id = value.get("ColumnRef")
+			if column_id not in columns:
+				# Handle undeclared column
+				columns.append(column_id)
+				example_values[column_id] = []
+				filterable_columns[column_id] = set()
+
 			value_text = value.find("./SimpleValue").text
 			filterable_columns[column_id].add(value_text)
 
