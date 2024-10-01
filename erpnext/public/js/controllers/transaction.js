@@ -1277,6 +1277,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				.filter(Boolean).length > 0;
 		} else if (this.frm.doc?.items) {
 			let first_row = this.frm.doc.items[0];
+			if (!first_row) {
+				return false
+			};
+
 			let mapped_rows = mappped_fields.filter(d => first_row[d])
 
 			return mapped_rows?.length > 0;
