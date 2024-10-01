@@ -159,15 +159,15 @@ def get_entries(filters):
 			dt.name, dt.customer, dt.territory, dt.{} as posting_date, dt_item.item_code,
 			st.sales_person, st.allocated_percentage, dt_item.warehouse,
 		CASE
-			WHEN dt.status = "Closed" THEN dt_item.{} * dt_item.conversion_factor
+			WHEN dt.status = 'Closed' THEN dt_item.{} * dt_item.conversion_factor
 			ELSE dt_item.stock_qty
 		END as stock_qty,
 		CASE
-			WHEN dt.status = "Closed" THEN (dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor)
+			WHEN dt.status = 'Closed' THEN (dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor)
 			ELSE dt_item.base_net_amount
 		END as base_net_amount,
 		CASE
-			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor) * st.allocated_percentage/100)
+			WHEN dt.status = 'Closed' THEN ((dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor) * st.allocated_percentage/100)
 			ELSE dt_item.base_net_amount * st.allocated_percentage/100
 		END as contribution_amt
 		FROM
