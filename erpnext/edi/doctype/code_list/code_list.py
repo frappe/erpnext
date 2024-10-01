@@ -83,11 +83,21 @@ class CodeList(Document):
 
 		# Bulk insert common codes
 		if common_codes:
+			now = frappe.utils.data.now()
+			user = frappe.session.user
 			frappe.db.bulk_insert(
 				"Common Code",
-				fields=["name", "code_list", "common_code", "title", "additional_data"],
+				fields=["name", "code_list", "common_code", "title", "additional_data", "owner", "creation"],
 				values=[
-					(cc["name"], cc["code_list"], cc["common_code"], cc["title"], cc["additional_data"])
+					(
+						cc["name"],
+						cc["code_list"],
+						cc["common_code"],
+						cc["title"],
+						cc["additional_data"],
+						user,
+						now,
+					)
 					for cc in common_codes
 				],
 			)
