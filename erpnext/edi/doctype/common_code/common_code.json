@@ -57,7 +57,9 @@
   {
    "fieldname": "additional_data",
    "fieldtype": "Code",
-   "label": "Additional Data"
+   "label": "Additional Data",
+   "max_height": "190px",
+   "read_only": 1
   },
   {
    "fieldname": "description",
@@ -68,7 +70,7 @@
   }
  ],
  "links": [],
- "modified": "2024-10-01 13:19:14.087201",
+ "modified": "2024-10-01 13:24:29.299539",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",
