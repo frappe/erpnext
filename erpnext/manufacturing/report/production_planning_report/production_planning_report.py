@@ -223,7 +223,7 @@ class ProductionPlanReport:
 
 		purchased_items = frappe.get_all(
 			"Purchase Order Item",
-			fields=["item_code", "min(schedule_date) as arrival_date", "qty as arrival_qty", "warehouse"],
+			fields=["item_code", "min(schedule_date) as arrival_date", "(ARRAY_AGG(qty))[1] as arrival_qty", "warehouse"],
 			filters={
 				"item_code": ("in", self.item_codes),
 				"warehouse": ("in", self.warehouses),
