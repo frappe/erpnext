@@ -1223,7 +1223,7 @@ def get_item_details(item, project=None, skip_bom_info=False, throw=True):
 			include_item_in_manufacturing
 		from `tabItem`
 		where disabled=0
-			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
+			and (end_of_life is null or to_char(end_of_life, 'YYYY-MM-DD') = '0000-00-00' or end_of_life > %s)
 			and name=%s
 	""",
 		(nowdate(), item),
