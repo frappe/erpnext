@@ -62,8 +62,9 @@ class CommonCode(Document):
 
 	@staticmethod
 	def import_genericode(
-		file_path, list_name, code_column, title_column=None, description_column=None, filters=None
+		file_name, list_name, code_column, title_column=None, description_column=None, filters=None
 	):
+		file_path = frappe.utils.file_manager.get_file_path(file_name)
 		parser = etree.XMLParser(remove_blank_text=True)
 		tree = etree.parse(file_path, parser=parser)
 		root = tree.getroot()
