@@ -72,30 +72,9 @@ def set_single_defaults():
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
 
-<<<<<<< HEAD
 def create_compact_item_print_custom_field():
 	create_custom_field(
 		"Print Settings",
-=======
-def setup_currency_exchange():
-	ces = frappe.get_single("Currency Exchange Settings")
-	try:
-		ces.set("result_key", [])
-		ces.set("req_params", [])
-
-		ces.api_endpoint = "https://api.frankfurter.app/{transaction_date}"
-		ces.append("result_key", {"key": "rates"})
-		ces.append("result_key", {"key": "{to_currency}"})
-		ces.append("req_params", {"key": "base", "value": "{from_currency}"})
-		ces.append("req_params", {"key": "symbols", "value": "{to_currency}"})
-		ces.save()
-	except frappe.ValidationError:
-		pass
-
-
-def create_print_setting_custom_fields():
-	create_custom_fields(
->>>>>>> 33e72111c7 (fix: Fix API endpoint for Frankfurter)
 		{
 			"label": _("Compact Item Print"),
 			"fieldname": "compact_item_print",
