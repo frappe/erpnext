@@ -377,8 +377,4 @@ erpnext.patches.v15_0.drop_index_posting_datetime_from_sle
 erpnext.patches.v15_0.add_disassembly_order_stock_entry_type #1
 erpnext.patches.v15_0.set_standard_stock_entry_type
 erpnext.patches.v15_0.link_purchase_item_to_asset_doc
-<<<<<<< HEAD
-=======
-erpnext.patches.v15_0.migrate_to_utm_analytics
 erpnext.patches.v14_0.update_currency_exchange_settings_for_frankfurter
->>>>>>> c5889c5d2e (fix: patch to update Currency Exchange Settings for `frankfurter.app`)
