@@ -366,3 +366,4 @@ execute:frappe.db.set_single_value('E Commerce Settings', 'show_actual_qty', 1)
 erpnext.patches.v14_0.delete_orphaned_asset_movement_item_records
 erpnext.patches.v14_0.remove_cancelled_asset_capitalization_from_asset
 erpnext.patches.v14_0.enable_set_priority_for_pricing_rules #1
+erpnext.patches.v14_0.update_currency_exchange_settings_for_frankfurter
