@@ -32,8 +32,14 @@ class AccountsTestMixin:
 		else:
 			self.supplier = supplier_name
 
-	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None):
-		item = create_item(item_name, is_stock_item=is_stock, warehouse=warehouse, company=company)
+	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None, valuation_rate=0):
+		item = create_item(
+			item_name,
+			is_stock_item=is_stock,
+			warehouse=warehouse,
+			company=company,
+			valuation_rate=valuation_rate,
+		)
 		self.item = item.name
 
 	def create_company(self, company_name="_Test Company", abbr="_TC"):
@@ -103,6 +109,14 @@ class AccountsTestMixin:
 				)
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
+
+		self.identify_default_warehouses()
+
+	def identify_default_warehouses(self):
+		for w in frappe.db.get_all(
+			"Warehouse", filters={"company": self.company}, fields=["name", "warehouse_name"]
+		):
+			setattr(self, "warehouse_" + w.warehouse_name.lower().strip().replace(" ", "_"), w.name)
 
 	def create_usd_receivable_account(self):
 		account_name = "Debtors USD"
