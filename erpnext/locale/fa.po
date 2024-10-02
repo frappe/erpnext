@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-10-01 22:34\n"
+"PO-Revision-Date: 2024-10-02 22:30\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -2560,7 +2560,7 @@ msgstr "مقدار واقعی موجود در انبار"
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1456
 #: erpnext/public/js/controllers/accounts.js:176
 msgid "Actual type tax cannot be included in Item rate in row {0}"
-msgstr "مالیات نوع واقعی را نمی توان در نرخ مورد در ردیف {0} لحاظ کرد"
+msgstr "مالیات نوع واقعی را نمی توان در نرخ آیتم در ردیف {0} لحاظ کرد"
 
 #. Option for the 'Add Or Deduct' (Select) field in DocType 'Advance Taxes and
 #. Charges'
@@ -3433,7 +3433,7 @@ msgstr "در مقابل سفارش کلی"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:958
 #: erpnext/patches/v15_0/update_invoice_remarks.py:22
 msgid "Against Customer Order {0}"
-msgstr ""
+msgstr "در مقابل سفارش مشتری {0}"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1205
 msgid "Against Default Supplier"
@@ -3525,7 +3525,7 @@ msgstr "در مقابل ثبت موجودی"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:326
 #: erpnext/patches/v15_0/update_invoice_remarks.py:38
 msgid "Against Supplier Invoice {0}"
-msgstr ""
+msgstr "در مقابل فاکتور تامین کننده {0}"
 
 #. Label of the against_voucher (Dynamic Link) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -4909,7 +4909,7 @@ msgstr "فروشنده دیگری {0} با همان شناسه کارمند وج
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:37
 msgid "Any one of following filters required: warehouse, Item Code, Item Group"
-msgstr "هر یک از فیلترهای زیر مورد نیاز است: انبار، کد کالا، گروه کالا"
+msgstr "هر یک از فیلترهای زیر مورد نیاز است: انبار، کد آیتم، گروه آیتم"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:6
 msgid "Apparel & Accessories"
@@ -5291,7 +5291,7 @@ msgstr "آیا مطمئن هستید که می خواهید تمام داده ه
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:516
 msgid "Are you sure you want to delete this Item?"
-msgstr "آیا مطمئن هستید که میخواهید این مورد را حذف کنید؟"
+msgstr "آیا مطمئن هستید که میخواهید این آیتم را حذف کنید؟"
 
 #: erpnext/accounts/doctype/subscription/subscription.js:75
 msgid "Are you sure you want to restart this subscription?"
@@ -5444,7 +5444,7 @@ msgstr "دارایی دارایی با سرمایه"
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgid "Asset Capitalization Service Item"
-msgstr "مورد خدمات سرمایه گذاری دارایی"
+msgstr "آیتم خدمات سرمایه گذاری دارایی"
 
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
@@ -5836,7 +5836,7 @@ msgstr "دارایی {0} قابل حذف نیست، زیرا قبلاً {1} اس
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:229
 msgid "Asset {0} does not belong to Item {1}"
-msgstr "دارایی {0} به مورد {1} تعلق ندارد"
+msgstr "دارایی {0} به آیتم {1} تعلق ندارد"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:45
 msgid "Asset {0} does not belong to company {1}"
@@ -6342,7 +6342,7 @@ msgstr "افزودن خودکار موارد فیلتر شده به سبد خر�
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically Add Taxes and Charges from Item Tax Template"
-msgstr "به طور خودکار مالیات ها و هزینه ها را از الگوی مالیات مورد اضافه کنید"
+msgstr "به طور خودکار مالیات ها و هزینه ها را از الگوی مالیات آیتم اضافه کنید"
 
 #. Label of the create_new_batch (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -6694,7 +6694,7 @@ msgstr "اطلاعات BOM"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 msgid "BOM Item"
-msgstr "مورد BOM"
+msgstr "آیتم BOM"
 
 #: erpnext/manufacturing/report/bom_explorer/bom_explorer.py:60
 #: erpnext/manufacturing/report/production_plan_summary/production_plan_summary.py:147
@@ -6853,7 +6853,7 @@ msgstr "BOM و تولید"
 #: erpnext/stock/doctype/material_request/material_request.js:332
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:687
 msgid "BOM does not contain any stock item"
-msgstr "BOM شامل هیچ مورد موجودی نیست"
+msgstr "BOM شامل هیچ آیتم موجودی نیست"
 
 #: erpnext/manufacturing/doctype/bom_update_log/bom_updation_utils.py:85
 msgid "BOM recursion: {0} cannot be child of {1}"
@@ -6865,7 +6865,7 @@ msgstr "بازگشت BOM: {1} نمی تواند والد یا فرزند {0} ب�
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1276
 msgid "BOM {0} does not belong to Item {1}"
-msgstr "BOM {0} به مورد {1} تعلق ندارد"
+msgstr "BOM {0} به آیتم {1} تعلق ندارد"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1258
 msgid "BOM {0} must be active"
@@ -7351,7 +7351,7 @@ msgstr "نوع بارکد"
 
 #: erpnext/stock/doctype/item/item.py:454
 msgid "Barcode {0} already used in Item {1}"
-msgstr "بارکد {0} قبلاً در مورد {1} استفاده شده است"
+msgstr "بارکد {0} قبلاً در آیتم {1} استفاده شده است"
 
 #: erpnext/stock/doctype/item/item.py:469
 msgid "Barcode {0} is not a valid {1} code"
@@ -8885,7 +8885,7 @@ msgstr "برنامه ایمیل کمپین"
 #. Name of a DocType
 #: erpnext/accounts/doctype/campaign_item/campaign_item.json
 msgid "Campaign Item"
-msgstr "مورد کمپین"
+msgstr "آیتم کمپین"
 
 #. Label of the campaign_name (Data) field in DocType 'Campaign'
 #. Option for the 'Campaign Naming By' (Select) field in DocType 'CRM Settings'
@@ -17227,7 +17227,7 @@ msgstr "توزیع دستی"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Distributed Discount Amount"
-msgstr ""
+msgstr "مبلغ تخفیف توزیع شده"
 
 #. Label of the distribution_id (Data) field in DocType 'Monthly Distribution'
 #: erpnext/accounts/doctype/monthly_distribution/monthly_distribution.json
@@ -17804,7 +17804,7 @@ msgstr "کتاب مالی تکراری"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:132
 msgid "Duplicate Item Group"
-msgstr "گروه مورد تکراری"
+msgstr "گروه آیتم تکراری"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:77
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:61
@@ -17821,11 +17821,11 @@ msgstr "گروه مشتری تکراری در جدول گروه مشتری یا�
 
 #: erpnext/stock/doctype/item_manufacturer/item_manufacturer.py:44
 msgid "Duplicate entry against the item code {0} and manufacturer {1}"
-msgstr "ورودی تکراری در برابر کد مورد {0} و تولید کننده {1}"
+msgstr "ثبت تکراری در برابر کد آیتم {0} و تولید کننده {1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:132
 msgid "Duplicate item group found in the item group table"
-msgstr "گروه مورد تکراری در جدول گروه آیتم یافت شد"
+msgstr "گروه آیتم تکراری در جدول گروه آیتم یافت شد"
 
 #: erpnext/projects/doctype/project/project.js:182
 msgid "Duplicate project has been created"
@@ -20681,11 +20681,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:282
 msgid "Free item code is not selected"
-msgstr "کد مورد رایگان انتخاب نشده است"
+msgstr "کد آیتم رایگان انتخاب نشده است"
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:647
 msgid "Free item not set in the pricing rule {0}"
-msgstr "مورد رایگان در قانون قیمت گذاری تنظیم نشده است {0}"
+msgstr "آیتم رایگان در قانون قیمت گذاری تنظیم نشده است {0}"
 
 #. Label of the stock_frozen_upto_days (Int) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -24275,7 +24275,7 @@ msgstr "یادداشت نصب"
 #. Name of a DocType
 #: erpnext/selling/doctype/installation_note_item/installation_note_item.json
 msgid "Installation Note Item"
-msgstr "مورد یادداشت نصب"
+msgstr "آیتم یادداشت نصب"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:754
 msgid "Installation Note {0} has already been submitted"
@@ -24626,11 +24626,11 @@ msgstr "گروه نامعتبر توسط"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:389
 msgid "Invalid Item"
-msgstr "مورد نامعتبر"
+msgstr "آیتم نامعتبر"
 
 #: erpnext/stock/doctype/item/item.py:1380
 msgid "Invalid Item Defaults"
-msgstr "پیش فرض های مورد نامعتبر"
+msgstr "پیش فرض های آیتم نامعتبر"
 
 #. Name of a report
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.json
@@ -25598,7 +25598,7 @@ msgstr "ممکن است چند ساعت طول بکشد تا ارزش موجود
 
 #: erpnext/public/js/controllers/transaction.js:1976
 msgid "It is needed to fetch Item Details."
-msgstr "برای واکشی جزئیات مورد نیاز است."
+msgstr "برای واکشی جزئیات آیتم نیاز است."
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:156
 msgid "It's not possible to distribute charges equally when total amount is zero, please set 'Distribute Charges Based On' as 'Quantity'"
@@ -25725,23 +25725,23 @@ msgstr "آیتم"
 
 #: erpnext/stock/report/bom_search/bom_search.js:8
 msgid "Item 1"
-msgstr "مورد 1"
+msgstr "آیتم 1"
 
 #: erpnext/stock/report/bom_search/bom_search.js:14
 msgid "Item 2"
-msgstr "مورد 2"
+msgstr "آیتم 2"
 
 #: erpnext/stock/report/bom_search/bom_search.js:20
 msgid "Item 3"
-msgstr "مورد 3"
+msgstr "آیتم 3"
 
 #: erpnext/stock/report/bom_search/bom_search.js:26
 msgid "Item 4"
-msgstr "مورد 4"
+msgstr "آیتم 4"
 
 #: erpnext/stock/report/bom_search/bom_search.js:32
 msgid "Item 5"
-msgstr "مورد 5"
+msgstr "آیتم 5"
 
 #. Name of a DocType
 #. Label of a Link in the Stock Workspace
@@ -26010,7 +26010,7 @@ msgstr "جزئیات مشتری مورد"
 #. Name of a DocType
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Item Default"
-msgstr "مورد پیش فرض"
+msgstr "پیش فرض آیتم"
 
 #. Label of the item_defaults (Table) field in DocType 'Item'
 #. Label of the item_defaults_section (Section Break) field in DocType 'Stock
@@ -26183,11 +26183,11 @@ msgstr "نام گروه آیتم"
 
 #: erpnext/setup/doctype/item_group/item_group.js:82
 msgid "Item Group Tree"
-msgstr "درخت گروه مورد"
+msgstr "درخت گروه آیتم"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:516
 msgid "Item Group not mentioned in item master for item {0}"
-msgstr "گروه مورد در اصل آیتم برای مورد {0} ذکر نشده است"
+msgstr "گروه آیتم در مدیر آیتم برای آیتم {0} ذکر نشده است"
 
 #. Option for the 'Based On' (Select) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
@@ -26428,7 +26428,7 @@ msgstr "موجودی قیمت آیتم"
 
 #: erpnext/stock/get_item_details.py:900
 msgid "Item Price added for {0} in Price List {1}"
-msgstr "قیمت مورد برای {0} در لیست قیمت {1} اضافه شد"
+msgstr "قیمت آیتم برای {0} در لیست قیمت {1} اضافه شد"
 
 #: erpnext/stock/doctype/item_price/item_price.py:140
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
@@ -26451,7 +26451,7 @@ msgstr "قیمت‌های آیتم"
 #: erpnext/stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
 #: erpnext/stock/doctype/quality_inspection_template/quality_inspection_template.json
 msgid "Item Quality Inspection Parameter"
-msgstr "پارامتر بازرسی کیفیت مورد"
+msgstr "پارامتر بازرسی کیفیت آیتم"
 
 #. Label of the item_reference (Link) field in DocType 'Maintenance Schedule
 #. Detail'
@@ -26495,7 +26495,7 @@ msgstr "تامین کننده آیتم"
 #: erpnext/setup/doctype/item_group/item_group.json
 #: erpnext/stock/doctype/item_tax/item_tax.json
 msgid "Item Tax"
-msgstr "مالیات مورد"
+msgstr "مالیات آیتم"
 
 #. Label of the item_tax_amount (Currency) field in DocType 'Purchase Invoice
 #. Item'
@@ -26531,7 +26531,7 @@ msgstr "نرخ مالیات آیتم"
 
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.py:52
 msgid "Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable"
-msgstr "ردیف مالیات مورد {0} باید دارای حسابی از نوع مالیات یا درآمد یا هزینه یا قابل شارژ باشد"
+msgstr "ردیف مالیات آیتم {0} باید دارای حسابی از نوع مالیات یا درآمد یا هزینه یا قابل شارژ باشد"
 
 #. Name of a DocType
 #. Label of the item_tax_template (Link) field in DocType 'POS Invoice Item'
@@ -26566,7 +26566,7 @@ msgstr "الگوی مالیات آیتم"
 #. Name of a DocType
 #: erpnext/accounts/doctype/item_tax_template_detail/item_tax_template_detail.json
 msgid "Item Tax Template Detail"
-msgstr "جزئیات الگوی مالیات مورد"
+msgstr "جزئیات الگوی مالیات آیتم"
 
 #. Label of the production_item (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -26581,7 +26581,7 @@ msgstr "واحد اندازه گیری آیتم"
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:350
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:357
 msgid "Item Unavailable"
-msgstr "مورد در دسترس نیست"
+msgstr "آیتم در دسترس نیست"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/item_variant/item_variant.json
@@ -26739,7 +26739,7 @@ msgstr "مورد {0} را نمی توان بیش از {1} در مقابل سفا
 #: erpnext/assets/doctype/asset/asset.py:231
 #: erpnext/stock/doctype/item/item.py:627
 msgid "Item {0} does not exist"
-msgstr "مورد {0} وجود ندارد"
+msgstr "آیتم {0} وجود ندارد"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:562
 msgid "Item {0} does not exist in the system or has expired"
@@ -26747,7 +26747,7 @@ msgstr "مورد {0} در سیستم وجود ندارد یا منقضی شده 
 
 #: erpnext/controllers/selling_controller.py:694
 msgid "Item {0} entered multiple times."
-msgstr "مورد {0} چندین بار وارد شده است."
+msgstr "آیتم {0} چندین بار وارد شده است."
 
 #: erpnext/controllers/sales_and_purchase_return.py:182
 msgid "Item {0} has already been returned"
@@ -31541,7 +31541,7 @@ msgstr "بدون سود و زیان در نرخ ارز"
 
 #: erpnext/controllers/subcontracting_controller.py:1096
 msgid "No item available for transfer."
-msgstr "هیچ موردی برای انتقال موجود نیست"
+msgstr "هیچ آیتمی برای انتقال موجود نیست."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:142
 msgid "No items are available in sales orders {0} for production"
@@ -31554,7 +31554,7 @@ msgstr "هیچ موردی در سفارش فروش {0} برای تولید مو�
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:317
 msgid "No items found. Scan barcode again."
-msgstr "موردی یافت نشد. دوباره بارکد را اسکن کنید."
+msgstr "آیتمی یافت نشد. دوباره بارکد را اسکن کنید."
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:76
 msgid "No items in cart"
@@ -32974,7 +32974,7 @@ msgstr "فرصت از"
 #: erpnext/crm/doctype/opportunity_item/opportunity_item.json
 #: erpnext/selling/doctype/quotation/quotation.json
 msgid "Opportunity Item"
-msgstr "مورد فرصت"
+msgstr "آیتم فرصت"
 
 #. Label of the lost_reason (Link) field in DocType 'Lost Reason Detail'
 #. Name of a DocType
@@ -33650,7 +33650,7 @@ msgstr "فاکتور POS"
 #. Label of the pos_invoice_item (Data) field in DocType 'POS Invoice Item'
 #: erpnext/accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgid "POS Invoice Item"
-msgstr "مورد فاکتور POS"
+msgstr "آیتم فاکتور POS"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.json
@@ -33819,7 +33819,7 @@ msgstr "برگه بسته بندی از یادداشت تحویل"
 #. Name of a DocType
 #: erpnext/stock/doctype/packed_item/packed_item.json
 msgid "Packed Item"
-msgstr "مورد بسته بندی شده"
+msgstr "آیتم بسته بندی شده"
 
 #. Label of the packed_items (Table) field in DocType 'POS Invoice'
 #. Label of the packed_items (Table) field in DocType 'Sales Invoice'
@@ -35720,7 +35720,7 @@ msgstr "فهرست انتخابی ناقص است"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "Pick List Item"
-msgstr "مورد فهرست انتخابی"
+msgstr "آیتم فهرست انتخابی"
 
 #. Label of the pick_manually (Check) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
@@ -36185,7 +36185,7 @@ msgstr "لطفا هزینه چند دارایی را در مقابل یک دار
 
 #: erpnext/controllers/item_variant.py:235
 msgid "Please do not create more than 500 items at a time"
-msgstr "لطفا بیش از 500 مورد را همزمان ایجاد نکنید"
+msgstr "لطفا بیش از 500 آیتم را همزمان ایجاد نکنید"
 
 #: erpnext/accounts/doctype/budget/budget.py:130
 msgid "Please enable Applicable on Booking Actual Expenses"
@@ -42691,7 +42691,7 @@ msgstr "نمایندگی شرکت"
 #. Description of a DocType
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
 msgid "Represents a Financial Year. All accounting entries and other major transactions are tracked against the Fiscal Year."
-msgstr ""
+msgstr "نشان دهنده یک سال مالی است. کلیه ثبت‌های حسابداری و سایر تراکنش‌های عمده در برابر سال مالی ردیابی می شوند."
 
 #: erpnext/templates/form_grid/material_request_grid.html:25
 msgid "Reqd By Date"
@@ -44543,7 +44543,7 @@ msgstr "ردیف {0}: مرجع نامعتبر {1}"
 
 #: erpnext/controllers/taxes_and_totals.py:132
 msgid "Row {0}: Item Tax template updated as per validity and rate applied"
-msgstr "ردیف {0}: الگوی مالیات مورد بر اساس اعتبار و نرخ اعمال شده به روز شد"
+msgstr "ردیف {0}: الگوی مالیات آیتم بر اساس اعتبار و نرخ اعمال شده به روز شد"
 
 #: erpnext/controllers/buying_controller.py:377
 #: erpnext/controllers/selling_controller.py:494
@@ -46398,7 +46398,7 @@ msgstr "کتاب مالی را برای مورد {0} در ردیف {1} انتخ�
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:159
 msgid "Select item group"
-msgstr "گروه مورد را انتخاب کنید"
+msgstr "انتخاب گروه آیتم"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:355
 msgid "Select template item"
@@ -47213,7 +47213,7 @@ msgstr "هزینه های خدمات"
 #. Label of the service_item (Link) field in DocType 'Subcontracting BOM'
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
 msgid "Service Item"
-msgstr "مورد خدمات"
+msgstr "آیتم خدمات"
 
 #. Label of the service_item_qty (Float) field in DocType 'Subcontracting BOM'
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
@@ -51500,12 +51500,12 @@ msgstr "هدف دارایی ثابت است"
 #. Label of the target_item_code (Link) field in DocType 'Asset Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Target Item Code"
-msgstr "کد مورد هدف"
+msgstr "کد آیتم هدف"
 
 #. Label of the target_item_name (Data) field in DocType 'Asset Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Target Item Name"
-msgstr "نام مورد هدف"
+msgstr "نام آیتم هدف"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:195
 msgid "Target Item {0} is neither a Fixed Asset nor a Stock Item"
@@ -53210,7 +53210,7 @@ msgstr ""
 #. Value'
 #: erpnext/stock/doctype/item_attribute_value/item_attribute_value.json
 msgid "This will be appended to the Item Code of the variant. For example, if your abbreviation is \"SM\", and the item code is \"T-SHIRT\", the item code of the variant will be \"T-SHIRT-SM\""
-msgstr "این به کد مورد از نوع اضافه خواهد شد. به عنوان مثال، اگر مخفف شما \"SM\" و کد مورد \"T-SHIRT\" باشد، کد مورد نوع \"T-SHIRT-SM\" خواهد بود."
+msgstr "این به کد آیتم گونه اضافه خواهد شد. به عنوان مثال، اگر مخفف شما \"SM\" و کد آیتم \"T-SHIRT\" باشد، کد آیتم گونه \"T-SHIRT-SM\" خواهد بود"
 
 #. Description of the 'Create User Permission' (Check) field in DocType
 #. 'Employee'
@@ -58852,11 +58852,11 @@ msgstr "شما هنوز یک {0} ایجاد نکرده اید"
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:218
 msgid "You must add atleast one item to save it as draft."
-msgstr "برای ذخیره آن به عنوان پیش نویس باید حداقل یک مورد اضافه کنید."
+msgstr "برای ذخیره آن به عنوان پیش نویس باید حداقل یک آیتم اضافه کنید."
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:629
 msgid "You must select a customer before adding an item."
-msgstr "قبل از افزودن یک مورد باید مشتری را انتخاب کنید."
+msgstr "قبل از افزودن یک آیتم باید مشتری را انتخاب کنید."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:257
 msgid "You need to cancel POS Closing Entry {} to be able to cancel this document."
@@ -59275,7 +59275,7 @@ msgstr "{0} ({1}) نمی تواند بیشتر از مقدار برنامه ری
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:288
 msgid "{0} <b>{1}</b> has submitted Assets. Remove Item <b>{2}</b> from table to continue."
-msgstr "{0} <b>{1}</b> دارایی‌ها را ارسال کرده است. برای ادامه، مورد <b>{2}</b> را از جدول حذف کنید."
+msgstr "{0} <b>{1}</b> دارایی‌ها را ارسال کرده است. برای ادامه، آیتم <b>{2}</b> را از جدول حذف کنید."
 
 #: erpnext/controllers/accounts_controller.py:2014
 msgid "{0} Account not found against Customer {1}."
@@ -59393,12 +59393,12 @@ msgstr "{0} متعلق به شرکت {1} نیست"
 
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.py:58
 msgid "{0} entered twice in Item Tax"
-msgstr "{0} دو بار در مالیات مورد وارد شد"
+msgstr "{0} دو بار در مالیات آیتم وارد شد"
 
 #: erpnext/setup/doctype/item_group/item_group.py:48
 #: erpnext/stock/doctype/item/item.py:433
 msgid "{0} entered twice {1} in Item Taxes"
-msgstr "{0} دو بار {1} در مالیات مورد وارد شد"
+msgstr "{0} دو بار {1} در مالیات آیتم وارد شد"
 
 #: erpnext/accounts/utils.py:119
 #: erpnext/projects/doctype/activity_cost/activity_cost.py:40
@@ -59448,7 +59448,7 @@ msgstr "{0} اجباری است"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:989
 msgid "{0} is mandatory for Item {1}"
-msgstr "{0} برای مورد {1} اجباری است"
+msgstr "{0} برای آیتم {1} اجباری است"
 
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:101
 #: erpnext/accounts/general_ledger.py:773
@@ -59473,7 +59473,7 @@ msgstr "{0} یک گره گروهی نیست. لطفاً یک گره گروهی �
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:436
 msgid "{0} is not a stock Item"
-msgstr "{0} یک مورد موجودی نیست"
+msgstr "{0} یک آیتم موجودی نیست"
 
 #: erpnext/controllers/item_variant.py:141
 msgid "{0} is not a valid Value for Attribute {1} of Item {2}."
