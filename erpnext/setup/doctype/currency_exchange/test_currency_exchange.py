@@ -46,6 +46,42 @@ def save_new_records(test_records):
 			curr_exchange.insert()
 
 
+<<<<<<< HEAD
+=======
+test_exchange_values = {"2015-12-15": "66.999", "2016-01-15": "65.1"}
+
+
+# Removing API call from get_exchange_rate
+def patched_requests_get(*args, **kwargs):
+	class PatchResponse:
+		def __init__(self, json_data, status_code):
+			self.json_data = json_data
+			self.status_code = status_code
+
+		def raise_for_status(self):
+			if self.status_code != 200:
+				raise frappe.DoesNotExistError
+
+		def json(self):
+			return self.json_data
+
+	if args[0] == "https://api.exchangerate.host/convert" and kwargs.get("params"):
+		if kwargs["params"].get("date") and kwargs["params"].get("from") and kwargs["params"].get("to"):
+			if test_exchange_values.get(kwargs["params"]["date"]):
+				return PatchResponse({"result": test_exchange_values[kwargs["params"]["date"]]}, 200)
+	elif args[0].startswith("https://api.frankfurter.app") and kwargs.get("params"):
+		if kwargs["params"].get("base") and kwargs["params"].get("symbols"):
+			date = args[0].replace("https://api.frankfurter.app/", "")
+			if test_exchange_values.get(date):
+				return PatchResponse(
+					{"rates": {kwargs["params"].get("symbols"): test_exchange_values.get(date)}}, 200
+				)
+
+	return PatchResponse({"rates": None}, 404)
+
+
+@mock.patch("requests.get", side_effect=patched_requests_get)
+>>>>>>> c444de017a (test: update test for API change)
 class TestCurrencyExchange(unittest.TestCase):
 	def clear_cache(self):
 		cache = frappe.cache()
