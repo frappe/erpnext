@@ -29,7 +29,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Title"
+   "label": "Title",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_wxsw",
@@ -70,7 +71,7 @@
   }
  ],
  "links": [],
- "modified": "2024-10-01 13:24:29.299539",
+ "modified": "2024-10-02 15:43:58.213803",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",

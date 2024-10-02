@@ -20,6 +20,7 @@ erpnext.edi.import_genericode = function (listview_or_form) {
 };
 
 function show_column_selection_dialog(context) {
+	let title_description = __("If source has no separate title column: use code column as title.");
 	let fields = [
 		{
 			fieldtype: "HTML",
@@ -40,8 +41,10 @@ function show_column_selection_dialog(context) {
 			fieldname: "title_column",
 			label: __("as Title"),
 			fieldtype: "Select",
-			options: [null].concat(context.columns),
+			reqd: 1,
+			options: context.columns,
 			default: context.columns.includes("name") ? "name" : null,
+			description: context.columns.includes("name") ? null : title_description,
 		},
 		{
 			fieldname: "code_column",
@@ -127,7 +130,17 @@ function show_column_selection_dialog(context) {
 	});
 
 	d.fields_dict.code_column.df.onchange = () => update_preview(d, context);
-	d.fields_dict.title_column.df.onchange = () => update_preview(d, context);
+	d.fields_dict.title_column.df.onchange = (e) => {
+		let field = d.fields_dict.title_column;
+		if (!e.target.value) {
+			field.df.description = title_description;
+			field.refresh();
+		} else {
+			field.df.description = null;
+			field.refresh();
+		}
+		update_preview(d, context);
+	};
 
 	// Add onchange events for filterable columns
 	for (let column in context.filterable_columns) {

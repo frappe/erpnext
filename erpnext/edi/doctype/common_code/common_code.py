@@ -26,7 +26,7 @@ class CommonCode(Document):
 		code_list: DF.Link
 		common_code: DF.Data
 		description: DF.SmallText | None
-		title: DF.Data | None
+		title: DF.Data
 	# end: auto-generated types
 
 	@staticmethod
