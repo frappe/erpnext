@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-09-28 21:51\n"
+"PO-Revision-Date: 2024-10-02 22:30\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -57437,7 +57437,7 @@ msgstr "Arbetskostnad"
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.json
 msgid "Wages per hour"
-msgstr "Arbetskostnad per Timme"
+msgstr "Kostnad per Timme"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:283
 msgid "Waiting for payment..."
