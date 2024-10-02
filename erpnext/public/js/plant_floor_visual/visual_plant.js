@@ -152,6 +152,36 @@ class VisualPlantFloor {
 			this.render_plant_visualization();
 		});
 	}
+
+	update_status(data) {
+		let workstation_card$ = this.wrapper.find(`.workstation-wrapper[data-workstation="${data.name}"]`);
+		workstation_card$.find(".workstation-image-container").empty();
+		let workstation_image = workstation_card$.find(".workstation-image");
+		workstation_image.removeClass("workstation-off");
+
+		if (data.status_image) {
+			workstation_card$
+				.find(".workstation-image-container")
+				.append(`<img class="workstation-image-cls" src="${data.status_image}" />`);
+		} else {
+			workstation_card$
+				.find(".workstation-image-container")
+				.append(
+					`<div class="workstation-image-cls workstation-abbr" style="margin:6px; height:82px">${frappe.get_abbr(
+						data.name,
+						2
+					)}</div>`
+				);
+		}
+
+		if (data.status !== "Production") {
+			workstation_image.addClass("workstation-off");
+		}
+
+		workstation_card$.find(".indicator-pill").removeClass(data.old_color);
+		workstation_card$.find(".indicator-pill").addClass(data.color);
+		workstation_card$.find(".workstation-status-title").text(data.status);
+	}
 }
 
 frappe.ui.VisualPlantFloor = VisualPlantFloor;

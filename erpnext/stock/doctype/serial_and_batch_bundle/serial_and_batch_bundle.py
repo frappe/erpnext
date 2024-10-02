@@ -280,13 +280,25 @@ class SerialandBatchBundle(Document):
 				)
 
 	def validate_negative_batch(self, batch_no, available_qty):
-		if available_qty < 0:
+		if available_qty < 0 and not self.is_stock_reco_for_valuation_adjustment(available_qty):
 			msg = f"""Batch No {bold(batch_no)} of an Item {bold(self.item_code)}
 				has negative stock
 				of quantity {bold(available_qty)} in the
 				warehouse {self.warehouse}"""
 
 			frappe.throw(_(msg), BatchNegativeStockError)
+
+	def is_stock_reco_for_valuation_adjustment(self, available_qty):
+		if (
+			self.voucher_type == "Stock Reconciliation"
+			and self.type_of_transaction == "Outward"
+			and self.voucher_detail_no
+			and abs(frappe.db.get_value("Stock Reconciliation Item", self.voucher_detail_no, "qty"))
+			== abs(available_qty)
+		):
+			return True
+
+		return False
 
 	def get_sle_for_outward_transaction(self):
 		sle = frappe._dict(
@@ -1329,6 +1341,15 @@ def create_serial_batch_no_ledgers(
 		}
 	)
 
+	batch_no = None
+
+	if (
+		not entries[0].get("batch_no")
+		and entries[0].get("serial_no")
+		and frappe.get_cached_value("Item", child_row.item_code, "has_batch_no")
+	):
+		batch_no = get_batch(child_row.item_code)
+
 	for row in entries:
 		row = frappe._dict(row)
 		doc.append(
@@ -1336,7 +1357,7 @@ def create_serial_batch_no_ledgers(
 			{
 				"qty": (flt(row.qty) or 1.0) * (1 if type_of_transaction == "Inward" else -1),
 				"warehouse": warehouse,
-				"batch_no": row.batch_no,
+				"batch_no": row.batch_no or batch_no,
 				"serial_no": row.serial_no,
 			},
 		)
@@ -1349,6 +1370,18 @@ def create_serial_batch_no_ledgers(
 	frappe.msgprint(_("Serial and Batch Bundle created"), alert=True)
 
 	return doc
+
+
+def get_batch(item_code):
+	from erpnext.stock.doctype.batch.batch import make_batch
+
+	return make_batch(
+		frappe._dict(
+			{
+				"item": item_code,
+			}
+		)
+	)
 
 
 def get_type_of_transaction(parent_doc, child_row):
