@@ -573,12 +573,20 @@ class TestQuotation(FrappeTestCase):
 				"description": "VAT",
 				"doctype": "Sales Taxes and Charges",
 				"rate": 10,
+				"included_in_print_rate": 1,
 			},
 		)
 		quotation.submit()
 
-		self.assertEqual(quotation.net_total, 290)
-		self.assertEqual(quotation.grand_total, 319)
+		self.assertEqual(round(quotation.items[1].net_rate, 2), 136.36)
+		self.assertEqual(round(quotation.items[1].amount, 2), 150)
+
+		self.assertEqual(round(quotation.items[2].net_rate, 2), 163.64)
+		self.assertEqual(round(quotation.items[2].amount, 2), 180)
+
+		self.assertEqual(round(quotation.net_total, 2), 263.64)
+		self.assertEqual(round(quotation.total_taxes_and_charges, 2), 26.36)
+		self.assertEqual(quotation.grand_total, 290)
 
 	def test_alternative_items_sales_order_mapping_with_stock_items(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
