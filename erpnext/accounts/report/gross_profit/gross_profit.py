@@ -893,7 +893,7 @@ class GrossProfitGenerator:
 					dni.name.as_("item_row"),
 				)
 				.where((dni.docstatus == 1) & (dni.against_sales_invoice.isin(invoices)))
-				.groupby(dni.against_sales_invoice, dni.item_code)
+				.groupby(dni.against_sales_invoice, dni.item_code, dni.warehouse, dni.parent, dni.name)
 				.orderby(dni.creation, order=Order.desc)
 				.run(as_dict=True)
 			)
