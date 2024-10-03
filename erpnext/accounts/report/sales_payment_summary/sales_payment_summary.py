@@ -120,33 +120,38 @@ def get_conditions(filters):
 def get_pos_invoice_data(filters):
 	conditions = get_conditions(filters)
 	result = frappe.db.sql(
-		""
-		"SELECT "
-		'posting_date, owner, sum(net_total) as "net_total", sum(total_taxes) as "total_taxes", '
-		'sum(paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount", '
-		"mode_of_payment, warehouse, cost_center "
-		"FROM ("
-		"SELECT "
-		'parent, item_code, sum(amount) as "base_total", warehouse, cost_center '
-		"from `tabSales Invoice Item`  group by parent"
-		") t1 "
-		"left join "
-		"(select parent, mode_of_payment from `tabSales Invoice Payment` group by parent) t3 "
-		"on (t3.parent = t1.parent) "
-		"JOIN ("
-		"SELECT "
-		'docstatus, company, is_pos, name, posting_date, owner, sum(base_total) as "base_total", '
-		'sum(net_total) as "net_total", sum(total_taxes_and_charges) as "total_taxes", '
-		'sum(base_paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount" '
-		"FROM `tabSales Invoice` "
-		"GROUP BY name"
-		") a "
-		"ON ("
-		"t1.parent = a.name and t1.base_total = a.base_total) "
-		"WHERE a.docstatus = 1"
-		f" AND {conditions} "
-		"GROUP BY "
-		"owner, posting_date, warehouse",
+		f"""
+		SELECT 
+			posting_date, owner, sum(net_total) as "net_total", sum(total_taxes) as "total_taxes",
+			sum(paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount",
+			mode_of_payment, warehouse, cost_center 
+		FROM (
+			SELECT 
+				parent, item_code, sum(amount) as "base_total", warehouse, cost_center 
+			FROM `tabSales Invoice Item`
+			GROUP BY parent, item_code, warehouse, cost_center
+		) t1 
+		LEFT JOIN (
+			SELECT parent, mode_of_payment 
+			FROM `tabSales Invoice Payment` 
+			GROUP BY parent, mode_of_payment -- Added mode_of_payment to GROUP BY clause
+		) t3 
+		ON (t3.parent = t1.parent)
+		JOIN (
+			SELECT 
+				docstatus, company, is_pos, name, posting_date, owner, 
+				sum(base_total) as "base_total", sum(net_total) as "net_total", 
+				sum(total_taxes_and_charges) as "total_taxes", 
+				sum(base_paid_amount) as "paid_amount", 
+				sum(outstanding_amount) as "outstanding_amount"
+			FROM `tabSales Invoice`
+			GROUP BY name, posting_date, owner, docstatus, company, is_pos
+		) a 
+		ON (t1.parent = a.name AND t1.base_total = a.base_total)
+		WHERE a.docstatus = 1
+		AND {conditions}
+		GROUP BY owner, posting_date, warehouse, cost_center, mode_of_payment
+		""",
 		filters,
 		as_dict=1,
 	)
@@ -226,38 +231,48 @@ def get_mode_of_payment_details(filters):
 	if invoice_list:
 		inv_mop_detail = frappe.db.sql(
 			f"""
-			select t.owner,
-			       t.posting_date,
-				   t.mode_of_payment,
-				   sum(t.paid_amount) as paid_amount
-			from (
-				select a.owner, a.posting_date,
-				ifnull(b.mode_of_payment, '') as mode_of_payment, sum(b.base_amount) as paid_amount
-				from `tabSales Invoice` a, `tabSales Invoice Payment` b
-				where a.name = b.parent
-				and a.docstatus = 1
-				and a.name in ({invoice_list_names})
-				group by a.owner, a.posting_date, mode_of_payment
-				union
-				select a.owner,a.posting_date,
-				ifnull(b.mode_of_payment, '') as mode_of_payment, sum(c.allocated_amount) as paid_amount
-				from `tabSales Invoice` a, `tabPayment Entry` b,`tabPayment Entry Reference` c
-				where a.name = c.reference_name
-				and b.name = c.parent
-				and b.docstatus = 1
-				and a.name in ({invoice_list_names})
-				group by a.owner, a.posting_date, mode_of_payment
-				union
-				select a.owner, a.posting_date,
-				ifnull(a.voucher_type,'') as mode_of_payment, sum(b.credit)
-				from `tabJournal Entry` a, `tabJournal Entry Account` b
-				where a.name = b.parent
-				and a.docstatus = 1
-				and b.reference_type = 'Sales Invoice'
-				and b.reference_name in ({invoice_list_names})
-				group by a.owner, a.posting_date, mode_of_payment
+			SELECT t.owner,
+				t.posting_date,
+				t.mode_of_payment,
+				SUM(t.paid_amount) AS paid_amount
+			FROM (
+				-- First Subquery: Sales Invoice and Payment
+				SELECT a.owner, a.posting_date,
+					COALESCE(b.mode_of_payment, '') AS mode_of_payment, 
+					SUM(b.base_amount) AS paid_amount
+				FROM `tabSales Invoice` a
+				JOIN `tabSales Invoice Payment` b ON a.name = b.parent
+				WHERE a.docstatus = 1
+				AND a.name IN ({invoice_list_names})
+				GROUP BY a.owner, a.posting_date, b.mode_of_payment
+
+				UNION ALL
+				
+				-- Second Subquery: Sales Invoice and Payment Entry
+				SELECT a.owner, a.posting_date,
+					COALESCE(b.mode_of_payment, '') AS mode_of_payment, 
+					SUM(c.allocated_amount) AS paid_amount
+				FROM `tabSales Invoice` a
+				JOIN `tabPayment Entry Reference` c ON a.name = c.reference_name
+				JOIN `tabPayment Entry` b ON b.name = c.parent
+				WHERE b.docstatus = 1
+				AND a.name IN ({invoice_list_names})
+				GROUP BY a.owner, a.posting_date, b.mode_of_payment
+
+				UNION ALL
+				
+				-- Third Subquery: Journal Entry and Journal Entry Account
+				SELECT a.owner, a.posting_date,
+					COALESCE(a.voucher_type, '') AS mode_of_payment, 
+					SUM(b.credit) AS paid_amount
+				FROM `tabJournal Entry` a
+				JOIN `tabJournal Entry Account` b ON a.name = b.parent
+				WHERE a.docstatus = 1
+				AND b.reference_type = 'Sales Invoice'
+				AND b.reference_name IN ({invoice_list_names})
+				GROUP BY a.owner, a.posting_date, a.voucher_type
 			) t
-			group by t.owner, t.posting_date, t.mode_of_payment
+			GROUP BY t.owner, t.posting_date, t.mode_of_payment
 			""",
 			as_dict=1,
 		)
