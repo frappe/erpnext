@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-10-01 22:34\n"
+"PO-Revision-Date: 2024-10-03 23:28\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -26815,7 +26815,7 @@ msgstr "Ürün miktarı güncellenemez çünkü hammaddeler zaten işlenmiş dur
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:873
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
-msgstr ""
+msgstr "Aşağıdaki kalemler için Sıfır Değerlemeye İzin Ver işaretlendiğinden, fiyat sıfır olarak güncellenmiştir: {0}"
 
 #. Description of the 'Item' (Link) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
