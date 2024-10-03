@@ -2647,7 +2647,7 @@ def validate_account_head(idx: int, account: str, company: str, context: str | N
 	"""Throw a ValidationError if the account belongs to a different company or is a group account."""
 	if company != frappe.get_cached_value("Account", account, "company"):
 		frappe.throw(
-			_("Row {0}: {3} Account {1} does not belong to Company {2}").format(
+			_("Row {0}: The {3} Account {1} does not belong to the company {2}").format(
 				idx, frappe.bold(account), frappe.bold(company), context or ""
 			),
 			title=_("Invalid Account"),
@@ -2655,7 +2655,9 @@ def validate_account_head(idx: int, account: str, company: str, context: str | N
 
 	if frappe.get_cached_value("Account", account, "is_group"):
 		frappe.throw(
-			_("Row {0}: {2} Account {1} is a Group Account").format(idx, frappe.bold(account), context or ""),
+			_(
+				"You selected the account group {1} as {2} Account in row {0}. Please select a single account."
+			).format(idx, frappe.bold(account), context or ""),
 			title=_("Invalid Account"),
 		)
 
