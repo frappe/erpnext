@@ -167,7 +167,8 @@ def get_latest_stock_qty(item_code, warehouse=None):
 		if is_group:
 			values.extend([lft, rgt])
 			condition += "and exists (\
-				select name from `tabWarehouse` wh where wh.name = tabBin.warehouse\
+				select wh.name from `tabWarehouse` wh \
+				INNER JOIN `tabBin` bin ON bin.warehouse = wh.name \
 				and wh.lft >= %s and wh.rgt <= %s)"
 
 		else:
@@ -175,8 +176,8 @@ def get_latest_stock_qty(item_code, warehouse=None):
 			condition += " AND warehouse = %s"
 
 	actual_qty = frappe.db.sql(
-		f"""select sum(actual_qty) from tabBin
-		where item_code=%s {condition}""",
+		f"""select sum(bin.actual_qty) from `tabBin` bin
+		where bin.item_code=%s {condition}""",
 		values,
 	)[0][0]
 

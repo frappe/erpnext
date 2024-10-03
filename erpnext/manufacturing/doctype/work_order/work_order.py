@@ -913,19 +913,34 @@ class WorkOrder(Document):
 		else:
 			data = frappe.get_all(
 				"Stock Entry",
-				fields=["timestamp(posting_date, posting_time) as posting_datetime"],
+				# fields=["timestamp(posting_date, posting_time) as posting_datetime"],
+				fields=["posting_date", "posting_time"],
 				filters={
 					"work_order": self.name,
 					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
 				},
 			)
 
-			if data and len(data):
-				dates = [d.posting_datetime for d in data]
-				self.db_set("actual_start_date", min(dates))
+			# if data and len(data):
+			# 	dates = [d.posting_datetime for d in data]
+			# 	self.db_set("actual_start_date", min(dates))
 
-				if self.status == "Completed":
-					self.db_set("actual_end_date", max(dates))
+			# 	if self.status == "Completed":
+			# 		self.db_set("actual_end_date", max(dates))
+
+			if data:
+				dates = [
+					f"{d.posting_date} {d.posting_time}"
+					for d in data
+					if d.posting_date and d.posting_time
+				]
+				dates = [frappe.utils.get_datetime(date) for date in dates]
+
+				if dates:
+					self.db_set("actual_start_date", min(dates))
+
+					if self.status == "Completed":
+						self.db_set("actual_end_date", max(dates))
 
 		self.set_lead_time()
 
@@ -1108,10 +1123,10 @@ class WorkOrder(Document):
 			.where(
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
-				& (ste.purpose == "Material Transfer for Manufacture")
+				& (ste.purpose == 'Material Transfer for Manufacture')
 				& (ste.is_return == 0)
 			)
-			.groupby(ste_child.item_code)
+			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 
 		data = query.run(as_dict=1) or []
@@ -1138,10 +1153,10 @@ class WorkOrder(Document):
 			.where(
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
-				& (ste.purpose == "Material Transfer for Manufacture")
+				& (ste.purpose == 'Material Transfer for Manufacture')
 				& (ste.is_return == 1)
 			)
-			.groupby(ste_child.item_code)
+			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 
 		data = query.run(as_dict=1) or []
@@ -1166,11 +1181,11 @@ class WorkOrder(Document):
 					`tabStock Entry Detail` detail
 				WHERE
 					entry.work_order = %(name)s
-						AND (entry.purpose = "Material Consumption for Manufacture"
-							OR entry.purpose = "Manufacture")
+						AND (entry.purpose = 'Material Consumption for Manufacture'
+							OR entry.purpose = 'Manufacture')
 						AND entry.docstatus = 1
 						AND detail.parent = entry.name
-						AND detail.s_warehouse IS NOT null
+						AND detail.s_warehouse IS NOT NULL
 						AND (detail.item_code = %(item)s
 							OR detail.original_item = %(item)s)
 				""",
