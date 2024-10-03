@@ -9,6 +9,23 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, getdate
 
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
+import jdatetime
+import datetime
+
+def gregorian_to_jalali(gregorian_date):
+    # Create a Gregorian date using the datetime module
+    year = gregorian_date.year
+    month = gregorian_date.month
+    day = gregorian_date.day
+    
+    # Convert Gregorian date to Jalali date
+    jalali_date = jdatetime.date.fromgregorian(day=day, month=month, year=year)
+    
+    return jalali_date
+
+
 
 def execute(filters=None):
 	if not filters:
@@ -92,6 +109,7 @@ def get_data(filters):
 
 	data = query.run(as_dict=True)
 
+
 	return data
 
 
@@ -139,6 +157,7 @@ def prepare_data(data, filters):
 					po_row[field] = flt(row[field]) + flt(po_row[field])
 
 	chart_data = prepare_chart_data(pending, completed)
+
 
 	if filters.get("group_by_po"):
 		data = []

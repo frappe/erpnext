@@ -7,8 +7,10 @@ from typing import List
 import frappe
 from frappe import _, scrub
 from frappe.query_builder.functions import CombineDatetime
+
 from frappe.utils import get_first_day as get_first_day_of_month
 from frappe.utils import get_first_day_of_week, get_quarter_start, getdate
+
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -17,6 +19,7 @@ from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
 
 def execute(filters=None):
+
 	is_reposting_item_valuation_in_progress()
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters)
@@ -59,29 +62,40 @@ def get_columns(filters):
 	return columns
 
 
-def get_period_date_ranges(filters):
+def get_period_date_ranges(filters,standard_period:bool = True):
 	from dateutil.relativedelta import relativedelta
 
-	from_date = round_down_to_nearest_frequency(filters.from_date, filters.range)
+
+	period_from_date = round_down_to_nearest_frequency(filters.from_date, filters.range,standard_period=standard_period)
+	from_date = getdate(filters.from_date)
 	to_date = getdate(filters.to_date)
+
 
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(filters.range, 1)
 
 	periodic_daterange = []
 	for dummy in range(1, 53, increment):
 		if filters.range == "Weekly":
-			period_end_date = from_date + relativedelta(days=6)
+			period_end_date = period_from_date + relativedelta(days=6)
 		else:
-			period_end_date = add_months_to_date(from_date, increment)
+			period_end_date = add_months_to_date(period_from_date, increment)
 
+		if period_from_date<from_date:
+			period_from_date = from_date
+		
 		if period_end_date > to_date:
 			period_end_date = to_date
-		periodic_daterange.append([from_date, period_end_date])
 
-		from_date = period_end_date + relativedelta(days=1)
+		periodic_daterange.append([period_from_date, period_end_date])
+
+		period_from_date = period_end_date + relativedelta(days=1)
+		
 		if period_end_date == to_date:
 			break
+		
+		
 	return periodic_daterange
+
 
 def add_months_to_date(date, increment):
 	from dateutil.relativedelta import relativedelta
@@ -91,20 +105,35 @@ def add_months_to_date(date, increment):
 		overflow_years, month = divmod(date.month + increment - 1, 12)
 		month = month + 1
 		year = date.year + overflow_years
+
 		day = date.day - 1
 		if day == 0:
-			day = 30
+			day = 31
 			month = month - 1
 			if month == 0:
 				month = 12
 				year = year - 1
-		new_date = jdatetime.date(year, month, day)
+
+		for i in range(5):
+			try:
+				new_date = jdatetime.date(year, month, day)
+				break
+			except ValueError:
+				day=day-1
+				
 		return new_date.togregorian()
 	else:
 		return date + relativedelta(months=increment, days=-1)
 
+'''
+def add_months_to_date(date, increment):
+	from dateutil.relativedelta import relativedelta
 
-def round_down_to_nearest_frequency(date: str, frequency: str) -> datetime.datetime:
+	return date + relativedelta(months=increment, days=-1)
+'''
+
+
+def round_down_to_nearest_frequency(date: str, frequency: str,standard_period:bool = True) -> datetime.datetime:
 	"""Rounds down the date to nearest frequency unit.
 	example:
 
@@ -114,37 +143,78 @@ def round_down_to_nearest_frequency(date: str, frequency: str) -> datetime.datet
 	>>> round_down_to_nearest_frequency("2021-08-21", "Yearly")
 	datetime.datetime(2021, 1, 1)
 	"""
-
-	def _get_first_day_of_fiscal_year(date):
+	def _get_first_day_of_fiscal_year(date, use_custom_calendar: bool = False):
 		fiscal_year = get_fiscal_year(date)
 		return fiscal_year and fiscal_year[1] or date
 
-	round_down_function = {
-		"Monthly": get_first_day_of_month,
-		"Quarterly": get_quarter_start,
-		"Weekly": get_first_day_of_week,
-		"Yearly": _get_first_day_of_fiscal_year,
-	}.get(frequency, getdate)
-	return round_down_function(date, use_custom_calendar=True)
+	if standard_period: 
 
+		round_down_function = {
+			"Monthly": get_first_day_of_month,
+			"Quarterly": get_quarter_start,
+			"Weekly": get_first_day_of_week,
+			"Yearly": _get_first_day_of_fiscal_year,
+			"Half-Yearly": get_first_day_of_month,
 
-def get_period(posting_date, filters):
-	if get_calendar_name() == 'jalali':
-		posting_date = jdatetime.date.fromgregorian(date=posting_date)
+		}.get(frequency, getdate)
 
-	if filters.range == "Weekly":
-		period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
-	elif filters.range == "Monthly":
-		period = _(posting_date.strftime('%b')) + " " + str(posting_date.year)
-	elif filters.range == "Quarterly":
-		period = _("Quarter {0} {1}").format(
-			str(((posting_date.month - 1) // 3) + 1), str(posting_date.year)
-		)
+		return round_down_function(date, use_custom_calendar=True)
+
 	else:
-		year = get_fiscal_year(posting_date, company=filters.company)
-		period = str(year[2])
+		return get_first_day_of_month(date, use_custom_calendar=True)
+		
+
+def get_period(posting_date, filters,standard_period:bool = True,range=None):
+
+	
+	if standard_period:
+		
+		if get_calendar_name() == 'jalali':
+			posting_date = jdatetime.date.fromgregorian(date=posting_date)
+
+		if filters.range == "Weekly":
+			period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
+		elif filters.range == "Monthly":
+			period = _(posting_date.strftime('%b')) + " " + str(posting_date.year)
+
+		elif filters.range == "Quarterly":
+			period = _("Quarter {0} {1}").format(
+				str(((posting_date.month - 1) // 3) + 1), str(posting_date.year)
+			)
+
+		elif filters.range == "Half-Yearly":
+			period = _(from_date.strftime('%b')) + " " + str(from_date.year) + "-" + _(to_date.strftime('%b')) + " " + str(to_date.year)
+
+		else:
+			year = get_fiscal_year(posting_date, company=filters.company)
+			period = str(year[2])
+
+	else:
+		from_date=range[0]
+		to_date=range[1]
+
+		if get_calendar_name() == 'jalali':
+			from_date = jdatetime.date.fromgregorian(date=from_date)
+			to_date = jdatetime.date.fromgregorian(date=to_date)
+		
+		if filters.range == "Weekly":
+			period = _("Week {0} {1}").format(str(to_date.isocalendar()[1]), str(to_date.year))
+
+		elif filters.range == "Monthly":
+			period = _(to_date.strftime('%b')) + " " + str(to_date.year)
+
+		elif filters.range == "Yearly":
+
+			if from_date.year == to_date.year:
+				period = str(from_date.year)
+			else:
+				period = str(from_date.year) + "-" + str(to_date.year)
+
+		else:
+			period = _(from_date.strftime('%b')) + " " + str(from_date.year) + "-" + _(to_date.strftime('%b')) + " " + str(to_date.year)
 
 	return period
+
 
 def get_calendar_name():
 	return frappe.defaults.get_defaults().calendar_type
@@ -253,6 +323,7 @@ def get_data(filters):
 	data = []
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
+
 	item_details = get_item_details(items, sle)
 	periodic_data = get_periodic_data(sle, filters)
 	ranges = get_period_date_ranges(filters)

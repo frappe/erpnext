@@ -13,6 +13,9 @@ from frappe.utils import cint, flt
 from erpnext.setup.utils import get_exchange_rate
 
 
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
+
 def execute(filters=None):
 	return SalesPipelineAnalytics(filters).run()
 
@@ -25,6 +28,11 @@ class SalesPipelineAnalytics(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
+
+		print(self.data)
+		print("---------------")
+		print(self.columns)
+
 
 		return self.columns, self.data, None, self.chart
 
@@ -176,6 +184,7 @@ class SalesPipelineAnalytics(object):
 		for info in self.query_result:
 			if self.filters.get("range") == "Monthly":
 				period = info.get(frequency)
+				
 			if self.filters.get("range") == "Quarterly":
 				period = f'Q{cint(info.get("quarter"))}'
 
@@ -228,9 +237,15 @@ class SalesPipelineAnalytics(object):
 		current_date = date.today()
 		month_number = date.today().month
 
+		'''
 		for month in range(month_number, 13):
 			month_list.append(current_date.strftime("%B"))
 			current_date = current_date + relativedelta(months=1)
+		'''
+		for month in range(month_number, 13):
+			month_list.append(get_period(current_date,filters=self.filters))
+			current_date = current_date + relativedelta(months=1)
+
 
 		return month_list
 

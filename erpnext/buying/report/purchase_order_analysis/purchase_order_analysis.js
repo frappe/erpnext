@@ -3,6 +3,7 @@
 
 
 frappe.query_reports["Purchase Order Analysis"] = {
+	
 	"filters": [
 		{
 			"fieldname": "company",
@@ -81,6 +82,7 @@ frappe.query_reports["Purchase Order Analysis"] = {
 		if (in_list(format_fields, column.fieldname) && data && data[column.fieldname] > 0) {
 			value = "<span style='color:green'>" + value + "</span>";
 		}
+		
 		return value;
 	}
 };

@@ -10,6 +10,9 @@ import erpnext
 from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
+
 
 def execute(filters=None):
 	return ForecastingReport(filters).execute_report()
@@ -62,6 +65,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 		self.period_wise_data = {}
 
 		from_date = add_years(self.filters.from_date, cint(self.filters.no_of_years) * -1)
+		
 		self.period_list = get_period_list(
 			from_date,
 			self.filters.to_date,
@@ -71,6 +75,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 			self.filters.periodicity,
 			ignore_fiscal_year=True,
 		)
+		
 
 		order_data = self.get_data_for_forecast() or []
 

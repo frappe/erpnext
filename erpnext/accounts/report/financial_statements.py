@@ -18,6 +18,10 @@ from erpnext.accounts.report.utils import convert_to_presentation_currency, get_
 from erpnext.accounts.utils import get_fiscal_year
 
 
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
+
+
 def get_period_list(
 	from_fiscal_year,
 	to_fiscal_year,
@@ -43,13 +47,33 @@ def get_period_list(
 		year_start_date = getdate(period_start_date)
 		year_end_date = getdate(period_end_date)
 
+	
+	filters=frappe._dict()
+	filters["from_date"]=year_start_date
+	filters["to_date"]=year_end_date
+	filters["range"]=periodicity
+	
+	
+	period_array_list=get_period_date_ranges(filters,standard_period=False)
+	
+	period_list=[]
+	for period_array in period_array_list:
+		period=frappe._dict({"from_date": period_array[0],"to_date": period_array[1]})
+		if not ignore_fiscal_year:
+			period.to_date_fiscal_year = get_fiscal_year(period_array[1], company=company)[0]
+			period.from_date_fiscal_year_start_date = get_fiscal_year(period_array[0], company=company)[1]
+
+		period_list.append(period)
+
+
+	'''
 	months_to_add = {"Yearly": 12, "Half-Yearly": 6, "Quarterly": 3, "Monthly": 1}[periodicity]
 
 	period_list = []
 
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
-
+	
 	for i in range(cint(math.ceil(months / months_to_add))):
 		period = frappe._dict({"from_date": start_date})
 
@@ -78,21 +102,27 @@ def get_period_list(
 
 		if period.to_date == year_end_date:
 			break
+	'''
+	
 
 	# common processing
 	for opts in period_list:
-		key = opts["to_date"].strftime("%b_%Y").lower()
+		key = opts["to_date"].strftime("%b_%Y").lower()#احتمال خرابی در شمسی 
+		
 		if periodicity == "Monthly" and not accumulated_values:
-			label = formatdate(opts["to_date"], "MMM YYYY")
+
+			label = get_period(None, filters,False,[opts["from_date"], opts["to_date"]])
+			
 		else:
 			if not accumulated_values:
-				label = get_label(periodicity, opts["from_date"], opts["to_date"])
+				label = get_period(None, filters,False,[opts["from_date"], opts["to_date"]])
 			else:
+				
 				if reset_period_on_fy_change:
-					label = get_label(periodicity, opts.from_date_fiscal_year_start_date, opts["to_date"])
+					label = get_period(None, filters,False,[opts.from_date_fiscal_year_start_date, opts["to_date"]])
 				else:
-					label = get_label(periodicity, period_list[0].from_date, opts["to_date"])
-
+					label = get_period(None, filters,False,[period_list[0].from_date, opts["to_date"]])
+		
 		opts.update(
 			{
 				"key": key.replace(" ", "_").replace("-", "_"),
@@ -139,11 +169,17 @@ def get_months(start_date, end_date):
 
 
 def get_label(periodicity, from_date, to_date):
-	if periodicity == "Yearly":
+
+	if periodicity == "Monthly":
+		label = formatdate(to_date, "MMM YYYY")
+
+	elif periodicity == "Yearly":
+
 		if formatdate(from_date, "YYYY") == formatdate(to_date, "YYYY"):
 			label = formatdate(from_date, "YYYY")
 		else:
 			label = formatdate(from_date, "YYYY") + "-" + formatdate(to_date, "YYYY")
+
 	else:
 		label = formatdate(from_date, "MMM YY") + "-" + formatdate(to_date, "MMM YY")
 

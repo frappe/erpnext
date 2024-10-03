@@ -42,6 +42,7 @@ def get_periodic_data(filters, entry):
 
 	ranges = get_period_date_ranges(filters)
 
+
 	for from_date, end_date in ranges:
 		period = get_period(end_date, filters)
 		for d in entry:

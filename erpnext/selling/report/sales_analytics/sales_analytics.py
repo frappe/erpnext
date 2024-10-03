@@ -7,6 +7,7 @@ from frappe import _, scrub
 from frappe.utils import add_days, add_to_date, flt, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 
 
 def execute(filters=None):
@@ -312,6 +313,7 @@ class Analytics(object):
 				self.entity_periodic_data[d.entity]["stock_uom"] = d.stock_uom
 
 	def get_period(self, posting_date):
+		'''
 		if self.filters.range == "Weekly":
 			period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
 		elif self.filters.range == "Monthly":
@@ -323,7 +325,9 @@ class Analytics(object):
 		else:
 			year = get_fiscal_year(posting_date, company=self.filters.company)
 			period = str(year[0])
-		return period
+		'''
+
+		return get_period(posting_date, filters=self.filters)
 
 	def get_period_date_ranges(self):
 		from dateutil.relativedelta import MO, relativedelta

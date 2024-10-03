@@ -6,6 +6,9 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
+
 
 def get_columns(filters, trans):
 	validate_filters(filters)
@@ -17,6 +20,7 @@ def get_columns(filters, trans):
 	# get conditions for grouping filter cond
 	group_by_cols = group_wise_column(filters.get("group_by"))
 
+	
 	columns = (
 		based_on_details["based_on_cols"]
 		+ period_cols
@@ -121,6 +125,7 @@ def get_data(filters, conditions):
 			(filters.get("company"), year_start_date, year_end_date),
 			as_list=1,
 		)
+		
 
 		for d in range(len(data1)):
 			# to add blanck column
@@ -189,6 +194,7 @@ def get_data(filters, conditions):
 
 				data.append(des)
 	else:
+		
 		data = frappe.db.sql(
 			""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s and %s between %s and %s and
@@ -222,7 +228,17 @@ def get_mon(dt):
 def period_wise_columns_query(filters, trans):
 	query_details = ""
 	pwc = []
-	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
+
+	year_start_date, year_end_date = frappe.get_cached_value(
+		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
+	)
+	
+	filters["from_date"]=year_start_date
+	filters["to_date"]=year_end_date
+	filters["range"]=filters.period
+
+	bet_dates = get_period_date_ranges(filters,standard_period=False)
+
 
 	if trans in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
 		trans_date = "posting_date"
@@ -233,7 +249,7 @@ def period_wise_columns_query(filters, trans):
 
 	if filters.get("period") != "Yearly":
 		for dt in bet_dates:
-			get_period_wise_columns(dt, filters.get("period"), pwc)
+			get_period_wise_columns(dt, filters, pwc)
 			query_details = get_period_wise_query(dt, trans_date, query_details)
 	else:
 		pwc = [
@@ -243,9 +259,11 @@ def period_wise_columns_query(filters, trans):
 		query_details = " SUM(t2.stock_qty), SUM(t2.base_net_amount),"
 
 	query_details += "SUM(t2.stock_qty), SUM(t2.base_net_amount)"
+
+
 	return pwc, query_details
 
-
+'''
 def get_period_wise_columns(bet_dates, period, pwc):
 	if period == "Monthly":
 		pwc += [
@@ -257,6 +275,13 @@ def get_period_wise_columns(bet_dates, period, pwc):
 			_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Qty") + "):Float:120",
 			_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Amt") + "):Currency:120",
 		]
+'''
+
+def get_period_wise_columns(bet_dates, filters ,pwc):
+	pwc += [
+		_(get_period(None,filters,False,bet_dates)) + " (" + _("Qty") + "):Float:120",
+		_(get_period(None,filters,False,bet_dates)) + " (" + _("Amt") + "):Currency:120",
+	]
 
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
@@ -269,15 +294,17 @@ def get_period_wise_query(bet_dates, trans_date, query_details):
 	}
 	return query_details
 
-
+'''
 @frappe.whitelist(allow_guest=True)
 def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 	from dateutil.relativedelta import relativedelta
 
+	
 	if not year_start_date:
 		year_start_date, year_end_date = frappe.get_cached_value(
 			"Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"]
 		)
+	
 
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(period)
 
@@ -292,7 +319,7 @@ def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 			break
 
 	return period_date_ranges
-
+'''
 
 def get_period_month_ranges(period, fiscal_year):
 	from dateutil.relativedelta import relativedelta
