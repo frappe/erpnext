@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, date_diff, today
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
 	get_leaf_boms,
@@ -88,10 +88,12 @@ class BOMUpdateLog(Document):
 
 		wip_log = frappe.get_all(
 			"BOM Update Log",
-			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress"]]},
+			fields=["name", "modified"],
+			filters={"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress"]]},
 			limit_page_length=1,
 		)
-		if wip_log:
+
+		if wip_log and date_diff(today(), wip_log[0].modified) < 1:
 			log_link = frappe.utils.get_link_to_form("BOM Update Log", wip_log[0].name)
 			frappe.throw(
 				_("BOM Updation already in progress. Please wait until {0} is complete.").format(log_link),

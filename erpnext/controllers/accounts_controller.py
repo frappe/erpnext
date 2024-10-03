@@ -148,14 +148,16 @@ class AccountsController(TransactionBase):
 	def ensure_supplier_is_not_blocked(self):
 		is_supplier_payment = self.doctype == "Payment Entry" and self.party_type == "Supplier"
 		is_buying_invoice = self.doctype in ["Purchase Invoice", "Purchase Order"]
+		supplier_name = self.supplier if is_buying_invoice else self.party if is_supplier_payment else None
 		supplier = None
-		supplier_name = None
 
-		if is_buying_invoice or is_supplier_payment:
-			supplier_name = self.supplier if is_buying_invoice else self.party
-			supplier = frappe.get_doc("Supplier", supplier_name)
+		if supplier_name:
+			supplier = frappe.get_doc(
+				"Supplier",
+				supplier_name,
+			)
 
-		if supplier and supplier_name and supplier.on_hold:
+		if supplier and supplier.on_hold:
 			if (is_buying_invoice and supplier.hold_type in ["All", "Invoices"]) or (
 				is_supplier_payment and supplier.hold_type in ["All", "Payments"]
 			):
@@ -346,12 +348,17 @@ class AccountsController(TransactionBase):
 					repost_doc.save(ignore_permissions=True)
 
 	def on_trash(self):
+		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
 		self.remove_serial_and_batch_bundle()
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
+			# delete linked exchange gain/loss journal
+			delete_exchange_gain_loss_journal(self)
+
 			ple = frappe.qb.DocType("Payment Ledger Entry")
 			frappe.qb.from_(ple).delete().where(
 				(ple.voucher_type == self.doctype) & (ple.voucher_no == self.name)
@@ -1034,7 +1041,9 @@ class AccountsController(TransactionBase):
 		gl_dict.update(
 			{
 				"transaction_currency": self.get("currency") or self.company_currency,
-				"transaction_exchange_rate": self.get("conversion_rate", 1),
+				"transaction_exchange_rate": item.get("exchange_rate", 1)
+				if self.doctype == "Journal Entry" and item
+				else self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 					account_currency, gl_dict, "debit"
 				),
@@ -1961,33 +1970,24 @@ class AccountsController(TransactionBase):
 	def set_advance_payment_status(self):
 		new_status = None
 
-		stati = frappe.get_all(
-			"Payment Request",
-			{
+		paid_amount = frappe.get_value(
+			doctype="Payment Request",
+			filters={
 				"reference_doctype": self.doctype,
 				"reference_name": self.name,
 				"docstatus": 1,
 			},
-			pluck="status",
+			fieldname="sum(grand_total - outstanding_amount)",
 		)
-		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-			if not stati:
-				new_status = "Not Requested"
-			elif "Requested" in stati or "Failed" in stati:
-				new_status = "Requested"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
-		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-			if not stati:
-				new_status = "Not Initiated"
-			elif "Initiated" in stati or "Failed" in stati or "Payment Ordered" in stati:
-				new_status = "Initiated"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
+
+		if not paid_amount:
+			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+				new_status = "Not Requested" if paid_amount is None else "Requested"
+			elif self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+				new_status = "Not Initiated" if paid_amount is None else "Initiated"
+		else:
+			total_amount = self.get("rounded_total") or self.get("grand_total")
+			new_status = "Fully Paid" if paid_amount == total_amount else "Partially Paid"
 
 		if new_status == self.advance_payment_status:
 			return
@@ -2172,8 +2172,8 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 
-		base_grand_total = self.get("base_rounded_total") or self.base_grand_total
-		grand_total = self.get("rounded_total") or self.grand_total
+		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
+		grand_total = flt(self.get("rounded_total") or self.grand_total)
 		automatically_fetch_payment_terms = 0
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
@@ -2247,6 +2247,8 @@ class AccountsController(TransactionBase):
 			self.ignore_default_payment_terms_template = 1
 
 	def get_order_details(self):
+		if not self.get("items"):
+			return None, None, None
 		if self.doctype == "Sales Invoice":
 			po_or_so = self.get("items")[0].get("sales_order")
 			po_or_so_doctype = "Sales Order"
@@ -2357,8 +2359,8 @@ class AccountsController(TransactionBase):
 				total += flt(d.payment_amount, d.precision("payment_amount"))
 				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
-			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
-			grand_total = self.get("rounded_total") or self.grand_total
+			base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
+			grand_total = flt(self.get("rounded_total") or self.grand_total)
 
 			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
@@ -3337,7 +3339,6 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	items_added_or_removed = False  # updated to true if any new item is added or removed
 	any_conversion_factor_changed = False
 
-	sales_doctypes = ["Sales Order", "Sales Invoice", "Delivery Note", "Quotation"]
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
 	check_doc_permissions(parent, "write")
@@ -3453,25 +3454,21 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				#  if rate is greater than price_list_rate, set margin
 				#  or set discount
 				child_item.discount_percentage = 0
-
-				if parent_doctype in sales_doctypes:
-					child_item.margin_type = "Amount"
-					child_item.margin_rate_or_amount = flt(
-						child_item.rate - child_item.price_list_rate,
-						child_item.precision("margin_rate_or_amount"),
-					)
-					child_item.rate_with_margin = child_item.rate
+				child_item.margin_type = "Amount"
+				child_item.margin_rate_or_amount = flt(
+					child_item.rate - child_item.price_list_rate,
+					child_item.precision("margin_rate_or_amount"),
+				)
+				child_item.rate_with_margin = child_item.rate
 			else:
 				child_item.discount_percentage = flt(
 					(1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
 					child_item.precision("discount_percentage"),
 				)
 				child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
-
-				if parent_doctype in sales_doctypes:
-					child_item.margin_type = ""
-					child_item.margin_rate_or_amount = 0
-					child_item.rate_with_margin = 0
+				child_item.margin_type = ""
+				child_item.margin_rate_or_amount = 0
+				child_item.rate_with_margin = 0
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:

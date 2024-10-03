@@ -515,6 +515,23 @@ class TestJournalEntry(unittest.TestCase):
 				self.assertEqual(row.debit_in_account_currency, 100)
 				self.assertEqual(row.credit_in_account_currency, 100)
 
+	def test_transaction_exchange_rate_on_journals(self):
+		jv = make_journal_entry("_Test Bank - _TC", "_Test Receivable USD - _TC", 100, save=False)
+		jv.accounts[0].update({"debit_in_account_currency": 8500, "exchange_rate": 1})
+		jv.accounts[1].update({"party_type": "Customer", "party": "_Test Customer USD", "exchange_rate": 85})
+		jv.submit()
+		actual = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": jv.name, "is_cancelled": 0},
+			fields=["account", "transaction_exchange_rate"],
+			order_by="account",
+		)
+		expected = [
+			{"account": "_Test Bank - _TC", "transaction_exchange_rate": 1.0},
+			{"account": "_Test Receivable USD - _TC", "transaction_exchange_rate": 85.0},
+		]
+		self.assertEqual(expected, actual)
+
 
 def make_journal_entry(
 	account1,

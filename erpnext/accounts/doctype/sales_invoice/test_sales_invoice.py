@@ -8,7 +8,7 @@ import frappe
 from frappe import qb
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, getdate, nowdate, today
+from frappe.utils import add_days, flt, format_date, getdate, nowdate, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -4170,6 +4170,14 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 		self.assertTrue(jv)
 		self.assertEqual(jv[0], si.grand_total)
+
+	def test_invoice_remarks(self):
+		si = frappe.copy_doc(test_records[0])
+		si.po_no = "Test PO"
+		si.po_date = nowdate()
+		si.save()
+		si.submit()
+		self.assertEqual(si.remarks, f"Against Customer Order Test PO dated {format_date(nowdate())}")
 
 
 def set_advance_flag(company, flag, default_account):

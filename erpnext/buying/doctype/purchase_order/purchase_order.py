@@ -673,6 +673,13 @@ class PurchaseOrder(BuyingController):
 			current_ordered_cost = res and res[0][0] or 0
 			frappe.db.set_value("Project", proj, "total_ordered_cost", current_ordered_cost + value)
 
+	def set_missing_values(self, for_validate=False):
+		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		if tds_category and not for_validate:
+			self.set_onload("supplier_tds", tds_category)
+
+		super().set_missing_values(for_validate)
+
 
 @frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
@@ -785,6 +792,11 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
+
+		# set tax_withholding_category from Purchase Order
+		if source.apply_tds and source.tax_withholding_category and target.apply_tds:
+			target.tax_withholding_category = source.tax_withholding_category
+
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
