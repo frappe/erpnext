@@ -206,17 +206,15 @@ def get_opening_balance(
 			Sum(closing_balance.debit).as_("debit"),
 			Sum(closing_balance.credit).as_("credit"),
 			Sum(closing_balance.debit_in_account_currency).as_("debit_in_account_currency"),
-			Sum(closing_balance.credit_in_account_currency).as_("credit_in_account_currency"),
+			Sum(closing_balance.credit_in_account_currency).as_("credit_in_account_currency")
 		)
 		.where(
-			(closing_balance.company == filters.company)
-			& (
-				closing_balance.account.isin(
-					frappe.qb.from_(account).select("name").where(account.report_type == report_type)
-				)
-			)
+			(closing_balance.company == filters.company) &
+			(closing_balance.account.isin(
+				frappe.qb.from_(account).select(account.name).where(account.report_type == report_type)
+			))
 		)
-		.groupby(closing_balance.account)
+		.groupby(closing_balance.account, closing_balance.account_currency)  # Group by non-aggregated fields
 	)
 
 	if period_closing_voucher:
