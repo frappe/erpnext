@@ -714,6 +714,6 @@ def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_all(
 		"UOM Conversion Detail",
 		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
-		fields=["distinct uom"],
+		fields=["distinct uom", "modified"],
 		as_list=1,
 	)
