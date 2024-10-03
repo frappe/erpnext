@@ -1202,7 +1202,21 @@ def get_subitems(
 			& (bom_item.docstatus < 2)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
-		.groupby(bom_item.item_code)
+		.groupby(
+			bom_item.item_code,
+			item.default_material_request_type,
+			item.item_name,
+			bom_item.source_warehouse,
+			item.default_bom,
+			item.is_sub_contracted_item,
+			bom_item.description,
+			bom_item.stock_uom,
+			item.min_order_qty,
+			item.safety_stock,
+			item_default.default_warehouse,
+			item.purchase_uom,
+			item_uom.conversion_factor
+		)
 	).run(as_dict=True)
 
 	for d in items:
