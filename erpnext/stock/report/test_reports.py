@@ -62,7 +62,7 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Item Prices", {"items": "Enabled Items only"}),
 	("Delayed Item Report", {"based_on": "Sales Invoice"}),
 	("Delayed Item Report", {"based_on": "Delivery Note"}),
-	("Stock Ageing", {"range1": 30, "range2": 60, "range3": 90, "_optional": True}),
+	("Stock Ageing", {"range": "30, 60, 90", "_optional": True}),
 	("Stock Ledger Invariant Check", {"warehouse": "_Test Warehouse - _TC", "item": "_Test Item"}),
 	("FIFO Queue vs Qty After Transaction Comparison", {"warehouse": "_Test Warehouse - _TC"}),
 	("FIFO Queue vs Qty After Transaction Comparison", {"item_group": "All Item Groups"}),

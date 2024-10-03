@@ -514,7 +514,7 @@ class calculate_taxes_and_totals:
 			if tax.item_wise_tax_detail.get(key):
 				item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
 
-			tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount)]
+			tax.item_wise_tax_detail[key] = [tax_rate, item_wise_tax_amount]
 
 	def round_off_totals(self, tax):
 		if tax.account_head in frappe.flags.round_off_applicable_accounts:
@@ -684,6 +684,9 @@ class calculate_taxes_and_totals:
 					)
 
 					item.net_amount = flt(item.net_amount - distributed_amount, item.precision("net_amount"))
+					item.distributed_discount_amount = flt(
+						distributed_amount, item.precision("distributed_discount_amount")
+					)
 					net_total += item.net_amount
 
 					# discount amount rounding loss adjustment if no taxes
@@ -699,6 +702,10 @@ class calculate_taxes_and_totals:
 
 						item.net_amount = flt(
 							item.net_amount + discount_amount_loss, item.precision("net_amount")
+						)
+						item.distributed_discount_amount = flt(
+							distributed_amount + discount_amount_loss,
+							item.precision("distributed_discount_amount"),
 						)
 
 					item.net_rate = (

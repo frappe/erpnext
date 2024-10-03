@@ -52,7 +52,7 @@ def add_invariant_check_fields(sles):
 	balance_qty = 0.0
 	balance_stock_value = 0.0
 	for idx, sle in enumerate(sles):
-		queue = json.loads(sle.stock_queue)
+		queue = json.loads(sle.stock_queue) if sle.stock_queue else []
 
 		fifo_qty = 0.0
 		fifo_value = 0.0

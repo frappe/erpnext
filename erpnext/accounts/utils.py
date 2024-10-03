@@ -53,18 +53,28 @@ GL_REPOSTING_CHUNK = 100
 
 @frappe.whitelist()
 def get_fiscal_year(
-	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
+	date=None,
+	fiscal_year=None,
+	label="Date",
+	verbose=1,
+	company=None,
+	as_dict=False,
+	boolean=None,
+	raise_on_missing=True,
 ):
+	if isinstance(raise_on_missing, str):
+		raise_on_missing = loads(raise_on_missing)
+
+	# backwards compat
 	if isinstance(boolean, str):
 		boolean = loads(boolean)
+	if boolean is not None:
+		raise_on_missing = not boolean
 
 	fiscal_years = get_fiscal_years(
-		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
+		date, fiscal_year, label, verbose, company, as_dict=as_dict, raise_on_missing=raise_on_missing
 	)
-	if boolean:
-		return fiscal_years
-	else:
-		return fiscal_years[0]
+	return False if not fiscal_years else fiscal_years[0]
 
 
 def get_fiscal_years(
@@ -74,8 +84,48 @@ def get_fiscal_years(
 	verbose=1,
 	company=None,
 	as_dict=False,
-	boolean=False,
+	boolean=None,
+	raise_on_missing=True,
 ):
+	if transaction_date:
+		transaction_date = getdate(transaction_date)
+	# backwards compat
+	if boolean is not None:
+		raise_on_missing = not boolean
+
+	all_fiscal_years = _get_fiscal_years(company=company)
+
+	# No restricting selectors
+	if not transaction_date and not fiscal_year:
+		return all_fiscal_years
+
+	for fy in all_fiscal_years:
+		if (fiscal_year and fy.name == fiscal_year) or (
+			transaction_date
+			and getdate(fy.year_start_date) <= transaction_date
+			and getdate(fy.year_end_date) >= transaction_date
+		):
+			if as_dict:
+				return (fy,)
+			else:
+				return ((fy.name, fy.year_start_date, fy.year_end_date),)
+
+	# No match for restricting selectors
+	if raise_on_missing:
+		error_msg = _("""{0} {1} is not in any active Fiscal Year""").format(
+			label, formatdate(transaction_date)
+		)
+		if company:
+			error_msg = _("""{0} for {1}""").format(error_msg, frappe.bold(company))
+
+		if verbose == 1:
+			frappe.msgprint(error_msg)
+
+		raise FiscalYearError(error_msg)
+	return []
+
+
+def _get_fiscal_years(company=None):
 	fiscal_years = frappe.cache().hget("fiscal_years", company) or []
 
 	if not fiscal_years:
@@ -85,9 +135,6 @@ def get_fiscal_years(
 		query = (
 			frappe.qb.from_(FY).select(FY.name, FY.year_start_date, FY.year_end_date).where(FY.disabled == 0)
 		)
-
-		if fiscal_year:
-			query = query.where(FY.name == fiscal_year)
 
 		if company:
 			FYC = DocType("Fiscal Year Company")
@@ -105,42 +152,7 @@ def get_fiscal_years(
 		fiscal_years = query.run(as_dict=True)
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
-
-	if not transaction_date and not fiscal_year:
-		return fiscal_years
-
-	if transaction_date:
-		transaction_date = getdate(transaction_date)
-
-	for fy in fiscal_years:
-		matched = False
-		if fiscal_year and fy.name == fiscal_year:
-			matched = True
-
-		if (
-			transaction_date
-			and getdate(fy.year_start_date) <= transaction_date
-			and getdate(fy.year_end_date) >= transaction_date
-		):
-			matched = True
-
-		if matched:
-			if as_dict:
-				return (fy,)
-			else:
-				return ((fy.name, fy.year_start_date, fy.year_end_date),)
-
-	error_msg = _("""{0} {1} is not in any active Fiscal Year""").format(label, formatdate(transaction_date))
-	if company:
-		error_msg = _("""{0} for {1}""").format(error_msg, frappe.bold(company))
-
-	if boolean:
-		return False
-
-	if verbose == 1:
-		frappe.msgprint(error_msg)
-
-	raise FiscalYearError(error_msg)
+	return fiscal_years
 
 
 @frappe.whitelist()
@@ -673,6 +685,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# will work as update after submit
 	journal_entry.flags.ignore_validate_update_after_submit = True
+	# Ledgers will be reposted by Reconciliation tool
+	journal_entry.flags.ignore_reposting_on_reconciliation = True
 	if not do_not_save:
 		journal_entry.save(ignore_permissions=True)
 
@@ -757,40 +771,114 @@ def cancel_exchange_gain_loss_journal(
 	Cancel Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
 	"""
 	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
-		journals = frappe.db.get_all(
-			"Journal Entry Account",
-			filters={
-				"reference_type": parent_doc.doctype,
-				"reference_name": parent_doc.name,
-				"docstatus": 1,
-			},
-			fields=["parent"],
-			as_list=1,
+		gain_loss_journals = get_linked_exchange_gain_loss_journal(
+			referenced_dt=parent_doc.doctype, referenced_dn=parent_doc.name, je_docstatus=1
 		)
-
-		if journals:
-			gain_loss_journals = frappe.db.get_all(
-				"Journal Entry",
-				filters={
-					"name": ["in", [x[0] for x in journals]],
-					"voucher_type": "Exchange Gain Or Loss",
-					"docstatus": 1,
-				},
-				as_list=1,
-			)
-			for doc in gain_loss_journals:
-				gain_loss_je = frappe.get_doc("Journal Entry", doc[0])
-				if referenced_dt and referenced_dn:
-					references = [(x.reference_type, x.reference_name) for x in gain_loss_je.accounts]
-					if (
-						len(references) == 2
-						and (referenced_dt, referenced_dn) in references
-						and (parent_doc.doctype, parent_doc.name) in references
-					):
-						# only cancel JE generated against parent_doc and referenced_dn
-						gain_loss_je.cancel()
-				else:
+		for doc in gain_loss_journals:
+			gain_loss_je = frappe.get_doc("Journal Entry", doc)
+			if referenced_dt and referenced_dn:
+				references = [(x.reference_type, x.reference_name) for x in gain_loss_je.accounts]
+				if (
+					len(references) == 2
+					and (referenced_dt, referenced_dn) in references
+					and (parent_doc.doctype, parent_doc.name) in references
+				):
+					# only cancel JE generated against parent_doc and referenced_dn
 					gain_loss_je.cancel()
+			else:
+				gain_loss_je.cancel()
+
+
+def delete_exchange_gain_loss_journal(
+	parent_doc: dict | object, referenced_dt: str | None = None, referenced_dn: str | None = None
+) -> None:
+	"""
+	Delete Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
+	"""
+	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
+		gain_loss_journals = get_linked_exchange_gain_loss_journal(
+			referenced_dt=parent_doc.doctype, referenced_dn=parent_doc.name, je_docstatus=2
+		)
+		for doc in gain_loss_journals:
+			gain_loss_je = frappe.get_doc("Journal Entry", doc)
+			if referenced_dt and referenced_dn:
+				references = [(x.reference_type, x.reference_name) for x in gain_loss_je.accounts]
+				if (
+					len(references) == 2
+					and (referenced_dt, referenced_dn) in references
+					and (parent_doc.doctype, parent_doc.name) in references
+				):
+					# only delete JE generated against parent_doc and referenced_dn
+					gain_loss_je.delete()
+			else:
+				gain_loss_je.delete()
+
+
+def get_linked_exchange_gain_loss_journal(referenced_dt: str, referenced_dn: str, je_docstatus: int) -> list:
+	"""
+	Get all the linked exchange gain/loss journal entries for a given document.
+	"""
+	gain_loss_journals = []
+	if journals := frappe.db.get_all(
+		"Journal Entry Account",
+		{
+			"reference_type": referenced_dt,
+			"reference_name": referenced_dn,
+			"docstatus": je_docstatus,
+		},
+		pluck="parent",
+	):
+		gain_loss_journals = frappe.db.get_all(
+			"Journal Entry",
+			{
+				"name": ["in", journals],
+				"voucher_type": "Exchange Gain Or Loss",
+				"is_system_generated": 1,
+				"docstatus": je_docstatus,
+			},
+			pluck="name",
+		)
+	return gain_loss_journals
+
+
+def cancel_common_party_journal(self):
+	if self.doctype not in ["Sales Invoice", "Purchase Invoice"]:
+		return
+
+	if not frappe.db.get_single_value("Accounts Settings", "enable_common_party_accounting"):
+		return
+
+	party_link = self.get_common_party_link()
+	if not party_link:
+		return
+
+	journal_entry = frappe.db.get_value(
+		"Journal Entry Account",
+		filters={
+			"reference_type": self.doctype,
+			"reference_name": self.name,
+			"docstatus": 1,
+		},
+		fieldname="parent",
+	)
+
+	if not journal_entry:
+		return
+
+	common_party_journal = frappe.db.get_value(
+		"Journal Entry",
+		filters={
+			"name": journal_entry,
+			"is_system_generated": True,
+			"docstatus": 1,
+		},
+	)
+
+	if not common_party_journal:
+		return
+
+	common_party_je = frappe.get_doc("Journal Entry", common_party_journal)
+	common_party_je.cancel()
 
 
 def update_accounting_ledgers_after_reference_removal(
