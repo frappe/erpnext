@@ -2643,21 +2643,21 @@ def validate_taxes_and_charges(tax):
 		tax.rate = None
 
 
-def validate_account_head(idx, account, company, context=""):
-	account_company = frappe.get_cached_value("Account", account, "company")
-	is_group = frappe.get_cached_value("Account", account, "is_group")
-
-	if account_company != company:
+def validate_account_head(idx: int, account: str, company: str, context: str | None = None) -> None:
+	"""Throw a ValidationError if the account belongs to a different company or is a group account."""
+	if company != frappe.get_cached_value("Account", account, "company"):
 		frappe.throw(
-			_("Row {0}: {3} Account {1} does not belong to Company {2}").format(
-				idx, frappe.bold(account), frappe.bold(company), context
+			_("Row {0}: The {3} Account {1} does not belong to the company {2}").format(
+				idx, frappe.bold(account), frappe.bold(company), context or ""
 			),
 			title=_("Invalid Account"),
 		)
 
-	if is_group:
+	if frappe.get_cached_value("Account", account, "is_group"):
 		frappe.throw(
-			_("Row {0}: Account {1} is a Group Account").format(idx, frappe.bold(account)),
+			_(
+				"You selected the account group {1} as {2} Account in row {0}. Please select a single account."
+			).format(idx, frappe.bold(account), context or ""),
 			title=_("Invalid Account"),
 		)
 
