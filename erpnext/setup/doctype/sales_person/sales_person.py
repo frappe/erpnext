@@ -57,19 +57,21 @@ class SalesPerson(NestedSet):
 		company_default_currency = get_default_currency()
 
 		allocated_amount_against_order = flt(
-			frappe.db.get_value(
-				"Sales Team",
-				{"docstatus": 1, "parenttype": "Sales Order", "sales_person": self.sales_person_name},
-				"sum(allocated_amount)",
+			frappe.db.sql(
+				"""
+				SELECT sum(allocated_amount)
+				FROM `tabSales Team`
+				WHERE parenttype = 'Sales Order' and docstatus = 1 and 'sales_person' = '{sales_person}'
+			""".format(sales_person=self.sales_person_name),
 			)
 		)
 
 		allocated_amount_against_invoice = flt(
-			frappe.db.get_value(
-				"Sales Team",
-				{"docstatus": 1, "parenttype": "Sales Invoice", "sales_person": self.sales_person_name},
-				"sum(allocated_amount)",
-			)
+			"""
+				SELECT sum(allocated_amount)
+				FROM `tabSales Team`
+				WHERE parenttype = 'Sales Invoice' and docstatus = 1 and 'sales_person' = '{sales_person}'
+			""".format(sales_person=self.sales_person_name),
 		)
 
 		info = {}
