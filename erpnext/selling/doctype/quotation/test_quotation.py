@@ -588,6 +588,36 @@ class TestQuotation(FrappeTestCase):
 		self.assertEqual(round(quotation.total_taxes_and_charges, 2), 26.36)
 		self.assertEqual(quotation.grand_total, 290)
 
+	def test_amount_calculation_for_alternative_items(self):
+		"""Make sure that the amount is calculated correctly for alternative items when the qty is changed."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_list = []
+		stock_items = {
+			"_Test Simple Item 1": 100,
+			"_Test Alt 1": 120,
+		}
+
+		for item, rate in stock_items.items():
+			make_item(item, {"is_stock_item": 0})
+			item_list.append(
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": rate,
+					"is_alternative": "Alt" in item,
+				}
+			)
+
+		quotation = make_quotation(item_list=item_list, do_not_submit=1)
+
+		self.assertEqual(quotation.items[1].amount, 120)
+
+		quotation.items[1].qty = 2
+		quotation.save()
+
+		self.assertEqual(quotation.items[1].amount, 240)
+
 	def test_alternative_items_sales_order_mapping_with_stock_items(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
