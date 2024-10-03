@@ -134,7 +134,9 @@ class QualityInspection(Document):
 				)
 
 		else:
-			args = [quality_inspection, self.modified, self.reference_name, self.item_code]
+			# args = [quality_inspection, self.modified, self.reference_name, self.item_code]
+			# removed self.modified because in first query we dont need that paramenter in the query
+			args = [quality_inspection, self.reference_name, self.item_code]
 			doctype = self.reference_type + " Item"
 
 			if self.reference_type == "Stock Entry":
@@ -150,18 +152,48 @@ class QualityInspection(Document):
 					conditions += " and t1.quality_inspection = %s"
 					args.append(self.name)
 
+				# frappe.db.sql(
+				# 	f"""
+				# 	UPDATE
+				# 		`tab{doctype}` t1, `tab{self.reference_type}` t2
+				# 	SET
+				# 		t1.quality_inspection = %s, t2.modified = %s
+				# 	WHERE
+				# 		t1.parent = %s
+				# 		and t1.item_code = %s
+				# 		and t1.parent = t2.name
+				# 		{conditions}
+				# """,
+				# 	args,
+				# )
+
+
+			# in postgresql directly two tables updation is not allowed due to that created two querires
 				frappe.db.sql(
 					f"""
-					UPDATE
-						`tab{doctype}` t1, `tab{self.reference_type}` t2
-					SET
-						t1.quality_inspection = %s, t2.modified = %s
-					WHERE
-						t1.parent = %s
-						and t1.item_code = %s
-						and t1.parent = t2.name
+					UPDATE `tab{doctype}` t1
+					SET quality_inspection = %s
+					FROM `tab{self.reference_type}` t2
+					WHERE t1.parent = t2.name
+						AND t1.parent = %s
+						AND t1.item_code = %s
 						{conditions}
-				""",
+					""",
+					args,
+				)
+
+				# insted of quality_inspection we need self.modified paramenter to update the doctype
+				args[0] = self.modified
+				frappe.db.sql(
+					f"""
+					UPDATE `tab{self.reference_type}` t2
+					SET modified = %s
+					FROM `tab{doctype}` t1
+					WHERE t1.parent = t2.name
+						AND t1.parent = %s
+						AND t1.item_code = %s
+						{conditions}
+					""",
 					args,
 				)
 
