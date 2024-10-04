@@ -504,17 +504,32 @@ def get_delivery_notes_against_sales_order(item_list):
 
 
 def get_grand_total(filters, doctype):
-	return flt(
-		frappe.db.get_value(
-			doctype,
-			{
-				"docstatus": 1,
-				"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-			},
-			"sum(base_grand_total)",
-		)
-	)
+	# return flt(
+	# 	frappe.db.get_value(
+	# 		doctype,
+	# 		{
+	# 			"docstatus": 1,
+	# 			"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
+	# 		},
+	# 		"sum(base_grand_total)",
+	# 	)
+	# )
 
+	grand_total = frappe.db.sql(
+		"""
+		SELECT SUM(base_grand_total)
+		FROM `tab{0}`
+		WHERE docstatus = 1
+			AND posting_date BETWEEN '{1}' AND '{2}'
+		"""
+		.format(
+			doctype,
+			filters.get("from_date"),
+			filters.get("to_date")
+		),as_list = 1
+	)
+	if grand_total:
+		return flt(grand_total[0][0])
 
 def get_tax_accounts(
 	item_list,
