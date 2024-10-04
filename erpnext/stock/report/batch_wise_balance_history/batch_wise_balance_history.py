@@ -28,7 +28,7 @@ def execute(filters=None):
 		filters = {}
 
 	sle_count = _estimate_table_row_count("Stock Ledger Entry")
-	print(sle_count)
+	
 
 	if (
 		sle_count > SLE_COUNT_LIMIT
