@@ -447,7 +447,11 @@ class SubcontractingController(StockController):
 
 	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
 		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
-		fields = [f"`tab{doctype}`.`stock_qty` / `tabBOM`.`quantity` as qty_consumed_per_unit"]
+
+		# Construct the fields string for the SQL query
+		fields = [
+			f"`tab{doctype}`.`stock_qty` / `tabBOM`.`quantity` AS qty_consumed_per_unit",
+		]
 
 		alias_dict = {
 			"item_code": "rm_item_code",
@@ -462,18 +466,24 @@ class SubcontractingController(StockController):
 			"source_warehouse",
 			"description",
 			"item_name",
-			"stock_uom",
 		]:
-			fields.append(f"`tab{doctype}`.`{field}` As {alias_dict.get(field, field)}")
+			fields.append(f"`tab{doctype}`.`{field}` AS {alias_dict.get(field, field)}")
 
-		filters = [
-			[doctype, "parent", "=", bom_no],
-			[doctype, "docstatus", "=", 1],
-			["BOM", "item", "=", item_code],
-			[doctype, "sourced_by_supplier", "=", 0],
-		]
+		# Construct the SQL query
+		sql_query = f"""
+			SELECT {', '.join(fields)}
+			FROM `tabBOM`
+			INNER JOIN `tab{doctype}` ON `tab{doctype}`.`parent` = `tabBOM`.`name`
+			WHERE `tab{doctype}`.`parent` = %s
+			AND `tab{doctype}`.`docstatus` = 1
+			AND `tabBOM`.`item` = %s
+			AND `tab{doctype}`.`sourced_by_supplier` = 0
+			ORDER BY `tab{doctype}`.`idx`
+		"""
 
-		return frappe.get_all("BOM", fields=fields, filters=filters, order_by=f"`tab{doctype}`.`idx`") or []
+		# Execute the SQL query with parameters
+		result = frappe.db.sql(sql_query, (bom_no, item_code), as_dict=True)
+		return result or []
 
 	def __update_reserve_warehouse(self, row, item):
 		if self.doctype == self.subcontract_data.order_doctype:
