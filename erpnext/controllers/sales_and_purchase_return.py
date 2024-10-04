@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt, format_datetime, get_datetime
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum, Abs
 
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
@@ -274,38 +276,39 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	else:
 		party_type = "customer"
 
-	fields = [
-		f"sum(abs(`tab{child_doctype}`.qty)) as qty",
-	]
+	parent = DocType(doctype)
+	child = DocType(child_doctype)
+
+	query = frappe.qb.from_(parent).from_(child)
+
+	query = query.select(Sum(Abs(child.qty)).as_("qty"))
 
 	if doctype != "Subcontracting Receipt":
-		fields += [
-			f"sum(abs(`tab{child_doctype}`.stock_qty)) as stock_qty",
-		]
+		query = query.select(Sum(Abs(child.stock_qty)).as_("stock_qty"))
 
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
-		fields += [
-			f"sum(abs(`tab{child_doctype}`.rejected_qty)) as rejected_qty",
-			f"sum(abs(`tab{child_doctype}`.received_qty)) as received_qty",
-		]
+		query = query.select(
+			Sum(Abs(child.rejected_qty)).as_("rejected_qty"),
+			Sum(Abs(child.received_qty)).as_("received_qty")
+		)
 
 		if doctype == "Purchase Receipt":
-			fields += [f"sum(abs(`tab{child_doctype}`.received_stock_qty)) as received_stock_qty"]
+			query = query.select(Sum(Abs(child.received_stock_qty)).as_("received_stock_qty"))
 
-	# Used retrun against and supplier and is_retrun because there is an index added for it
-	data = frappe.get_all(
-		doctype,
-		fields=fields,
-		filters=[
-			[doctype, "return_against", "=", return_against],
-			[doctype, party_type, "=", party],
-			[doctype, "docstatus", "=", 1],
-			[doctype, "is_return", "=", 1],
-			[child_doctype, reference_field, "=", row_name],
-		],
+	# Apply filters
+	query = query.where(
+		(parent.return_against == return_against)
+		& (parent[party_type] == party)
+		& (parent.docstatus == 1)
+		& (parent.is_return == 1)
+		& (child[reference_field] == row_name)
 	)
 
-	return data[0]
+	query = query.where(child.parent == parent.name)
+
+	data = query.run(as_dict=True)
+
+	return data[0] if data else {}
 
 
 def make_return_doc(doctype: str, source_name: str, target_doc=None, return_against_rejected_qty=False):
