@@ -15,13 +15,12 @@ SLE_COUNT_LIMIT = 10_000
 
 def _estimate_table_row_count(doctype: str):
 	table = get_table_name(doctype)
-	return cint(
-		frappe.db.sql(
-			f"""select table_rows
-			   from  information_schema.tables
-			   where table_name = '{table}' ;"""
-		)[0][0]
-	)
+	row_count = frappe.db.sql(f"""
+        SELECT reltuples::BIGINT AS estimate
+        FROM pg_class
+        WHERE relname = '{table}';
+    """)
+	return cint(row_count[0][0]) if row_count else 0
 
 
 def execute(filters=None):
@@ -29,6 +28,7 @@ def execute(filters=None):
 		filters = {}
 
 	sle_count = _estimate_table_row_count("Stock Ledger Entry")
+	
 
 	if (
 		sle_count > SLE_COUNT_LIMIT
@@ -125,7 +125,7 @@ def get_stock_ledger_entries_for_batch_no(filters):
 			& (sle.batch_no != "")
 			& (sle.posting_datetime < posting_datetime)
 		)
-		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
+		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse, sle.posting_date)
 		.orderby(sle.item_code, sle.warehouse)
 	)
 
@@ -168,7 +168,13 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 			& (sle.has_batch_no == 1)
 			& (sle.posting_date <= filters["to_date"])
 		)
-		.groupby(sle.voucher_no, batch_package.batch_no, batch_package.warehouse)
+		.groupby(
+			sle.voucher_no,
+			batch_package.batch_no,
+			sle.item_code,
+			sle.warehouse,
+			sle.posting_date
+		)
 		.orderby(sle.item_code, sle.warehouse)
 	)
 
