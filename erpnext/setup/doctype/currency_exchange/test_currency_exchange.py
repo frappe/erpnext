@@ -68,9 +68,9 @@ def patched_requests_get(*args, **kwargs):
 		if kwargs["params"].get("date") and kwargs["params"].get("from") and kwargs["params"].get("to"):
 			if test_exchange_values.get(kwargs["params"]["date"]):
 				return PatchResponse({"result": test_exchange_values[kwargs["params"]["date"]]}, 200)
-	elif args[0].startswith("https://frankfurter.app") and kwargs.get("params"):
+	elif args[0].startswith("https://api.frankfurter.app") and kwargs.get("params"):
 		if kwargs["params"].get("base") and kwargs["params"].get("symbols"):
-			date = args[0].replace("https://frankfurter.app/", "")
+			date = args[0].replace("https://api.frankfurter.app/", "")
 			if test_exchange_values.get(date):
 				return PatchResponse(
 					{"rates": {kwargs["params"].get("symbols"): test_exchange_values.get(date)}}, 200
