@@ -15,6 +15,7 @@
   "workstation_name",
   "workstation_type",
   "plant_floor",
+  "disabled",
   "column_break_3",
   "production_capacity",
   "warehouse",
@@ -240,13 +241,20 @@
    "fieldname": "section_break_mqqv",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "icon-wrench",
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2024-06-20 14:17:13.806609",
+ "modified": "2024-09-26 13:41:12.279344",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",

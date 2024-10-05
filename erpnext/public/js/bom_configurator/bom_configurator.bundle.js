@@ -25,6 +25,9 @@ class BOMConfigurator {
 		};
 
 		frappe.views.trees["BOM Configurator"] = new frappe.views.TreeView(options);
+		let node = frappe.views.trees["BOM Configurator"].tree.root_node;
+		frappe.views.trees["BOM Configurator"].tree.show_toolbar(node);
+		frappe.views.trees["BOM Configurator"].tree.load_children(node, true);
 		this.tree_view = frappe.views.trees["BOM Configurator"];
 	}
 
@@ -138,7 +141,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __("Expand All"),
+								label: __("Collapse All"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 
@@ -307,6 +310,13 @@ class BOMConfigurator {
 				fieldtype: "Float",
 				reqd: 1,
 				read_only: read_only,
+				change() {
+					this.layout.fields_dict.items.grid.data.forEach((row) => {
+						row.qty = flt(this.value);
+					});
+
+					this.layout.fields_dict.items.grid.refresh();
+				},
 			},
 		];
 
@@ -409,6 +419,18 @@ class BOMConfigurator {
 					]
 				);
 			}
+		} else if (this.frm.doc.routing && is_root) {
+			fields.push(
+				...[
+					{ fieldtype: "Section Break" },
+					{
+						label: __("Operation"),
+						fieldname: "operation",
+						fieldtype: "Link",
+						options: "Operation",
+					},
+				]
+			);
 		}
 
 		fields.push(
@@ -463,6 +485,16 @@ class BOMConfigurator {
 		dialog.show();
 		dialog.set_primary_action(__("Add"), () => {
 			let bom_item = dialog.get_values();
+
+			if (!bom_item.item_code) {
+				frappe.throw(__("Sub Assembly Item is mandatory"));
+			}
+
+			bom_item.items.forEach((d) => {
+				if (!d.item_code) {
+					frappe.throw(__("Item is mandatory in Raw Materials table."));
+				}
+			});
 
 			if (dialog.operation && !dialog.workstation_type && !dialog.workstation) {
 				frappe.throw(__("Either Workstation or Workstation Type is mandatory"));

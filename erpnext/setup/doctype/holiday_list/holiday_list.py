@@ -149,7 +149,11 @@ class HolidayList(Document):
 		unique_dates = []
 		for row in self.holidays:
 			if row.holiday_date in unique_dates:
-				frappe.throw(_("Holiday Date {0} added multiple times").format(frappe.bold(row.holiday_date)))
+				frappe.throw(
+					_("Holiday Date {0} added multiple times").format(
+						frappe.bold(formatdate(row.holiday_date))
+					)
+				)
 
 			unique_dates.append(row.holiday_date)
 

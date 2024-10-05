@@ -22,7 +22,8 @@
   "column_break_14",
   "project",
   "accounting_details",
-  "purchase_invoice",
+  "invoices",
+  "section_break_y7cc",
   "capitalize_repair_cost",
   "stock_consumption",
   "column_break_8",
@@ -230,25 +231,29 @@
    "no_copy": 1
   },
   {
-   "fieldname": "purchase_invoice",
-   "fieldtype": "Link",
-   "label": "Purchase Invoice",
-   "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0",
-   "no_copy": 1,
-   "options": "Purchase Invoice"
-  },
-  {
    "fetch_from": "asset.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "label": "Asset Repair Purchase Invoices",
+   "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0;",
+   "no_copy": 1,
+   "options": "Asset Repair Purchase Invoice"
+  },
+  {
+   "fieldname": "section_break_y7cc",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-13 16:14:14.398356",
+ "modified": "2024-09-30 13:02:06.931188",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
