@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -14,6 +14,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	make_serial_nos,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+
+class UnitTestSerialAndBatchBundle(UnitTestCase):
+	"""
+	Unit tests for SerialAndBatchBundle.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestSerialandBatchBundle(IntegrationTestCase):

@@ -2,7 +2,16 @@
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
+
+
+class UnitTestAssetActivity(UnitTestCase):
+	"""
+	Unit tests for AssetActivity.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestAssetActivity(IntegrationTestCase):

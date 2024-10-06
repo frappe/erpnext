@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.tests.utils import make_test_records
 
 import erpnext
@@ -12,6 +12,15 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
 
 test_records = frappe.get_test_records("Warehouse")
+
+
+class UnitTestWarehouse(UnitTestCase):
+	"""
+	Unit tests for Warehouse.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestWarehouse(IntegrationTestCase):

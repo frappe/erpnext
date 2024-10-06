@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
 from pypika import functions as fn
 
@@ -24,6 +24,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+
+class UnitTestPurchaseReceipt(UnitTestCase):
+	"""
+	Unit tests for PurchaseReceipt.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPurchaseReceipt(IntegrationTestCase):

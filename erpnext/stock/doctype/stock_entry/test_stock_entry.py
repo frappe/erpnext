@@ -3,7 +3,7 @@
 
 
 from frappe.permissions import add_user_permission, remove_user_permission
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -47,6 +47,15 @@ def get_sle(**args):
 		values,
 		as_dict=1,
 	)
+
+
+class UnitTestStockEntry(UnitTestCase):
+	"""
+	Unit tests for StockEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestStockEntry(IntegrationTestCase):

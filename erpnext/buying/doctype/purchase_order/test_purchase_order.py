@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, flt, getdate, nowdate
 from frappe.utils.data import today
 
@@ -26,6 +26,15 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_pi_from_pr,
 )
+
+
+class UnitTestPurchaseOrder(UnitTestCase):
+	"""
+	Unit tests for PurchaseOrder.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPurchaseOrder(IntegrationTestCase):

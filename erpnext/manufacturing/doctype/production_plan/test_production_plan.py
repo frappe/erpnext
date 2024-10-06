@@ -1,7 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
@@ -20,6 +20,15 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+
+
+class UnitTestProductionPlan(UnitTestCase):
+	"""
+	Unit tests for ProductionPlan.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestProductionPlan(IntegrationTestCase):

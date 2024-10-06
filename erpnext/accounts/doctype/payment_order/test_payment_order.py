@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import getdate
 
 from erpnext.accounts.doctype.bank_transaction.test_bank_transaction import (
@@ -15,6 +15,15 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	make_payment_order,
 )
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+
+class UnitTestPaymentOrder(UnitTestCase):
+	"""
+	Unit tests for PaymentOrder.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPaymentOrder(IntegrationTestCase):

@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import (
@@ -16,6 +16,15 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 # test_records = frappe.get_test_records('Quality Inspection')
+
+
+class UnitTestQualityInspection(UnitTestCase):
+	"""
+	Unit tests for QualityInspection.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestQualityInspection(IntegrationTestCase):

@@ -6,7 +6,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import flt, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
@@ -18,6 +18,15 @@ from erpnext.stock.doctype.material_request.material_request import (
 	make_supplier_quotation,
 	raise_work_orders,
 )
+
+
+class UnitTestMaterialRequest(UnitTestCase):
+	"""
+	Unit tests for MaterialRequest.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestMaterialRequest(IntegrationTestCase):

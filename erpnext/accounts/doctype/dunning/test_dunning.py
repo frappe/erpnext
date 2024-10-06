@@ -1,7 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, nowdate, today
 
 from erpnext import get_default_cost_center
@@ -17,6 +17,15 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 )
 
 test_dependencies = ["Company", "Cost Center"]
+
+
+class UnitTestDunning(UnitTestCase):
+	"""
+	Unit tests for Dunning.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestDunning(IntegrationTestCase):

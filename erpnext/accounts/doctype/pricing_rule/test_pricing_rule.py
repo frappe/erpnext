@@ -5,7 +5,7 @@
 import unittest
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -13,6 +13,15 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_item_details
+
+
+class UnitTestPricingRule(UnitTestCase):
+	"""
+	Unit tests for PricingRule.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPricingRule(IntegrationTestCase):

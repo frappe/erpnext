@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -41,6 +41,15 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
+
+
+class UnitTestDeliveryNote(UnitTestCase):
+	"""
+	Unit tests for DeliveryNote.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestDeliveryNote(IntegrationTestCase):

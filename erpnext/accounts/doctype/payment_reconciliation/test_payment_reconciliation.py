@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, add_years, flt, getdate, nowdate, today
 
 from erpnext import get_default_cost_center
@@ -18,6 +18,15 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.stock.doctype.item.test_item import create_item
 
 test_dependencies = ["Item"]
+
+
+class UnitTestPaymentReconciliation(UnitTestCase):
+	"""
+	Unit tests for PaymentReconciliation.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPaymentReconciliation(IntegrationTestCase):

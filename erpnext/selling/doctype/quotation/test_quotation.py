@@ -2,12 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
 
 test_dependencies = ["Product Bundle"]
+
+
+class UnitTestQuotation(UnitTestCase):
+	"""
+	Unit tests for Quotation.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestQuotation(IntegrationTestCase):

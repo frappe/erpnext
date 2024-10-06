@@ -5,7 +5,7 @@ import copy
 from collections import defaultdict
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
@@ -30,6 +30,15 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+
+
+class UnitTestSubcontractingOrder(UnitTestCase):
+	"""
+	Unit tests for SubcontractingOrder.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestSubcontractingOrder(IntegrationTestCase):

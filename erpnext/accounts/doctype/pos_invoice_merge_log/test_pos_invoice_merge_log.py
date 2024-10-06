@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.tests.utils import change_settings
 
 from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
@@ -17,6 +17,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+
+class UnitTestPosInvoiceMergeLog(UnitTestCase):
+	"""
+	Unit tests for PosInvoiceMergeLog.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPOSInvoiceMergeLog(IntegrationTestCase):

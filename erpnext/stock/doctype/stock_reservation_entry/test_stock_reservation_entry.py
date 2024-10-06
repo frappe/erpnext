@@ -4,7 +4,7 @@
 from random import randint
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import today
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
@@ -19,6 +19,15 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	has_reserved_stock,
 )
 from erpnext.stock.utils import get_stock_balance
+
+
+class UnitTestStockReservationEntry(UnitTestCase):
+	"""
+	Unit tests for StockReservationEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestStockReservationEntry(IntegrationTestCase):

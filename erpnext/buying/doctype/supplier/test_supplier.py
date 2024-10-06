@@ -12,7 +12,16 @@ from erpnext.exceptions import PartyDisabled
 test_dependencies = ["Payment Term", "Payment Terms Template"]
 test_records = frappe.get_test_records("Supplier")
 
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
+
+
+class UnitTestSupplier(UnitTestCase):
+	"""
+	Unit tests for Supplier.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestSupplier(IntegrationTestCase):

@@ -2,13 +2,22 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.tests.utils import change_settings
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
+
+
+class UnitTestJournalEntry(UnitTestCase):
+	"""
+	Unit tests for JournalEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestJournalEntry(IntegrationTestCase):

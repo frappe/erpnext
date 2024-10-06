@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import utils
 from frappe.model.docstatus import DocStatus
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	get_linked_payments,
@@ -19,6 +19,15 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.tests.utils import if_lending_app_installed
 
 test_dependencies = ["Item", "Cost Center"]
+
+
+class UnitTestBankTransaction(UnitTestCase):
+	"""
+	Unit tests for BankTransaction.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestBankTransaction(IntegrationTestCase):

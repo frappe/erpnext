@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -26,6 +26,15 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
 test_dependencies = ["Item"]
+
+
+class UnitTestPaymentEntry(UnitTestCase):
+	"""
+	Unit tests for PaymentEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPaymentEntry(IntegrationTestCase):

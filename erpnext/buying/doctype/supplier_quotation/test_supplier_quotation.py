@@ -3,9 +3,18 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
+
+
+class UnitTestSupplierQuotation(UnitTestCase):
+	"""
+	Unit tests for SupplierQuotation.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestPurchaseOrder(IntegrationTestCase):

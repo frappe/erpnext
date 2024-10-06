@@ -8,7 +8,7 @@ from uuid import uuid4
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
@@ -1549,6 +1549,15 @@ def get_unique_suffix():
 	# Used to isolate valuation sensitive
 	# tests to prevent future tests from failing.
 	return str(uuid4())[:8].upper()
+
+
+class UnitTestStockLedgerEntry(UnitTestCase):
+	"""
+	Unit tests for StockLedgerEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestDeferredNaming(IntegrationTestCase):

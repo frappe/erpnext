@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe.exceptions import ValidationError
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import cint, flt
 from frappe.utils.data import add_to_date, getdate
 
@@ -22,6 +22,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+
+class UnitTestBatch(UnitTestCase):
+	"""
+	Unit tests for Batch.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestBatch(IntegrationTestCase):

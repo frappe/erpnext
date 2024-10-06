@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -19,6 +19,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
+
+
+class UnitTestLandedCostVoucher(UnitTestCase):
+	"""
+	Unit tests for LandedCostVoucher.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestLandedCostVoucher(IntegrationTestCase):

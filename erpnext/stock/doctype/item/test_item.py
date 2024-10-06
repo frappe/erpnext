@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_objects
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
@@ -72,6 +72,15 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	item.insert()
 
 	return item
+
+
+class UnitTestItem(UnitTestCase):
+	"""
+	Unit tests for Item.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestItem(IntegrationTestCase):

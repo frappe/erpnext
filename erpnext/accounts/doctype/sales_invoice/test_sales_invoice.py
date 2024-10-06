@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import qb
 from frappe.model.dynamic_links import get_dynamic_link_map
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, flt, format_date, getdate, nowdate, today
 
 import erpnext
@@ -44,6 +44,15 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+
+
+class UnitTestSalesInvoice(UnitTestCase):
+	"""
+	Unit tests for SalesInvoice.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestSalesInvoice(IntegrationTestCase):

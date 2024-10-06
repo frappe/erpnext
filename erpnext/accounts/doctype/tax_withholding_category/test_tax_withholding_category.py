@@ -6,7 +6,7 @@ import unittest
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -14,6 +14,15 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
 test_dependencies = ["Supplier Group", "Customer Group"]
+
+
+class UnitTestTaxWithholdingCategory(UnitTestCase):
+	"""
+	Unit tests for TaxWithholdingCategory.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestTaxWithholdingCategory(IntegrationTestCase):

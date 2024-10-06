@@ -5,7 +5,7 @@
 from typing import Literal
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.tests.utils import make_test_records
 from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now, today
@@ -24,6 +24,15 @@ from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_ord
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+
+class UnitTestJobCard(UnitTestCase):
+	"""
+	Unit tests for JobCard.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
 class TestJobCard(IntegrationTestCase):
