@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-10-03 23:28\n"
+"PO-Revision-Date: 2024-10-06 00:25\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -55074,12 +55074,12 @@ msgstr "Takip Durumu"
 #. Label of the tracking_status_info (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Tracking Status Info"
-msgstr ""
+msgstr "İzleme Durum Bilgisi"
 
 #. Label of the tracking_url (Small Text) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Tracking URL"
-msgstr ""
+msgstr "İzleme Bağlantısı"
 
 #. Option for the 'Apply On' (Select) field in DocType 'Pricing Rule'
 #. Option for the 'Apply On' (Select) field in DocType 'Promotional Scheme'
