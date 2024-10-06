@@ -194,7 +194,9 @@ function refresh_payments(d, frm) {
 		}
 		if (payment) {
 			payment.expected_amount += flt(p.amount);
-			payment.closing_amount = payment.expected_amount;
+			if (payment.closing_amount === 0) {
+				payment.closing_amount = payment.expected_amount;
+			}
 			payment.difference = payment.closing_amount - payment.expected_amount;
 		} else {
 			frm.add_child("payment_reconciliation", {

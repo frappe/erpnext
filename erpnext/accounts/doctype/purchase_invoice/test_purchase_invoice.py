@@ -2025,6 +2025,16 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		]
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
 
+	def test_create_purchase_invoice_without_mandatory(self):
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.flags.ignore_mandatory = True
+		pi.insert(ignore_permissions=True)
+
+		self.assertTrue(pi.name)
+		self.assertEqual(pi.docstatus, 0)
+
+		pi.delete()
+
 	@change_settings("Buying Settings", {"supplier_group": None})
 	def test_purchase_invoice_without_supplier_group(self):
 		# Create a Supplier
@@ -2360,6 +2370,24 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		]
 		self.assertEqual(len(actual), 3)
 		self.assertEqual(expected, actual)
+
+	def test_last_purchase_rate(self):
+		item = create_item("_Test Item For Last Purchase Rate from PI", is_stock_item=1)
+		pi1 = make_purchase_invoice(item_code=item.item_code, qty=10, rate=100)
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 100)
+
+		pi2 = make_purchase_invoice(item_code=item.item_code, qty=10, rate=200)
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 200)
+
+		pi2.cancel()
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 100)
+
+		pi1.cancel()
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 0)
 
 
 def set_advance_flag(company, flag, default_account):
