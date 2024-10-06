@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-24 15:20+0000\n"
-"PO-Revision-Date: 2024-10-02 22:30\n"
+"PO-Revision-Date: 2024-10-06 00:25\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -46402,7 +46402,7 @@ msgstr "انتخاب گروه آیتم"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:355
 msgid "Select template item"
-msgstr "مورد الگو را انتخاب کنید"
+msgstr "انتخاب آیتم الگو"
 
 #. Description of the 'Bank Account' (Link) field in DocType 'Bank Clearance'
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.json
@@ -52231,11 +52231,11 @@ msgstr "قالب"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:341
 msgid "Template Item"
-msgstr "مورد الگو"
+msgstr "آیتم الگو"
 
 #: erpnext/stock/get_item_details.py:218
 msgid "Template Item Selected"
-msgstr "مورد الگو انتخاب شد"
+msgstr "آیتم الگو انتخاب شد"
 
 #. Label of the template_name (Data) field in DocType 'Payment Terms Template'
 #. Label of the template (Data) field in DocType 'Quality Feedback Template'
@@ -58265,7 +58265,7 @@ msgstr "دستور کار به دلایل زیر ایجاد نمی شود: <br> 
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:979
 msgid "Work Order cannot be raised against a Item Template"
-msgstr "دستور کار را نمی توان در برابر یک الگوی مورد مطرح کرد"
+msgstr "دستور کار را نمی توان در برابر یک الگوی آیتم مطرح کرد"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1469
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1545
