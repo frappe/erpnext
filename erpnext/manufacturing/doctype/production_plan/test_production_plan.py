@@ -1,7 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
@@ -22,7 +22,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 
 
-class TestProductionPlan(FrappeTestCase):
+class TestProductionPlan(IntegrationTestCase):
 	def setUp(self):
 		for item in [
 			"Test Production Item 1",

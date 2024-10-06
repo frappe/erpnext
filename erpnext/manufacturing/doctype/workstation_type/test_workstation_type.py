@@ -2,10 +2,10 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 
-class TestWorkstationType(FrappeTestCase):
+class TestWorkstationType(IntegrationTestCase):
 	pass
 
 

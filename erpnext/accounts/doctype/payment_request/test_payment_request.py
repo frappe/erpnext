@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -57,7 +57,7 @@ payment_method = [
 ]
 
 
-class TestPaymentRequest(FrappeTestCase):
+class TestPaymentRequest(IntegrationTestCase):
 	def setUp(self):
 		for payment_gateway in payment_gateways:
 			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):

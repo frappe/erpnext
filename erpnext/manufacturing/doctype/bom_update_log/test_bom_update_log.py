@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import (
 	BOMMissingError,
@@ -16,7 +16,7 @@ from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import (
 test_records = frappe.get_test_records("BOM")
 
 
-class TestBOMUpdateLog(FrappeTestCase):
+class TestBOMUpdateLog(IntegrationTestCase):
 	"Test BOM Update Tool Operations via BOM Update Log."
 
 	def setUp(self):

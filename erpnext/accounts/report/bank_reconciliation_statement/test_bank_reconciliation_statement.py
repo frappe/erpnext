@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	execute,
@@ -10,7 +10,7 @@ from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_s
 from erpnext.tests.utils import if_lending_app_installed
 
 
-class TestBankReconciliationStatement(FrappeTestCase):
+class TestBankReconciliationStatement(IntegrationTestCase):
 	def setUp(self):
 		for dt in [
 			"Journal Entry",

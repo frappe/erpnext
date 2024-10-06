@@ -7,7 +7,7 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
@@ -25,7 +25,7 @@ test_dependencies = ["Item"]
 test_records = frappe.get_test_records("Serial No")
 
 
-class TestSerialNo(FrappeTestCase):
+class TestSerialNo(IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 

@@ -6,12 +6,12 @@ import frappe
 
 test_records = frappe.get_test_records("Item Attribute")
 
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
 
 
-class TestItemAttribute(FrappeTestCase):
+class TestItemAttribute(IntegrationTestCase):
 	def setUp(self):
 		super().setUp()
 		if frappe.db.exists("Item Attribute", "_Test_Length"):

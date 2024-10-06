@@ -2,12 +2,12 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from .quality_procedure import add_node
 
 
-class TestQualityProcedure(FrappeTestCase):
+class TestQualityProcedure(IntegrationTestCase):
 	def test_add_node(self):
 		procedure = create_procedure(
 			{

@@ -5,7 +5,7 @@
 from unittest.mock import MagicMock, call
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -21,7 +21,7 @@ from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError
 
 
-class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
+class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 	def tearDown(self):
 		frappe.flags.dont_execute_stock_reposts = False
 
@@ -195,7 +195,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		riv.set_status("Skipped")
 
-	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
 
@@ -373,7 +373,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
 
-	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_create_repost_entry_for_cancelled_document(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",

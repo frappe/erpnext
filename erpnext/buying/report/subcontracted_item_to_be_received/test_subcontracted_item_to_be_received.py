@@ -7,7 +7,7 @@
 import copy
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_to_be_received import (
 	execute,
@@ -24,7 +24,7 @@ from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order im
 )
 
 
-class TestSubcontractedItemToBeReceived(FrappeTestCase):
+class TestSubcontractedItemToBeReceived(IntegrationTestCase):
 	def test_pending_and_received_qty(self):
 		make_service_item("Subcontracted Service Item 1")
 		service_items = [

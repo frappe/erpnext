@@ -1,7 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, nowdate, today
 
 from erpnext import get_default_cost_center
@@ -19,7 +19,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 test_dependencies = ["Company", "Cost Center"]
 
 
-class TestDunning(FrappeTestCase):
+class TestDunning(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

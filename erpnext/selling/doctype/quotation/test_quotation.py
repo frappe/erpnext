@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
@@ -10,7 +10,7 @@ from erpnext.controllers.accounts_controller import InvalidQtyError
 test_dependencies = ["Product Bundle"]
 
 
-class TestQuotation(FrappeTestCase):
+class TestQuotation(IntegrationTestCase):
 	def test_quotation_qty(self):
 		qo = make_quotation(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):

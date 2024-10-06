@@ -3,10 +3,10 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 
-class TestTransactionDeletionRecord(FrappeTestCase):
+class TestTransactionDeletionRecord(IntegrationTestCase):
 	def setUp(self):
 		create_company("Dunder Mifflin Paper Co")
 

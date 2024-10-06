@@ -2,12 +2,12 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data
 
 
-class TestStockAgeing(FrappeTestCase):
+class TestStockAgeing(IntegrationTestCase):
 	def setUp(self) -> None:
 		self.filters = frappe._dict(company="_Test Company", to_date="2021-12-10", ranges=["30", "60", "90"])
 

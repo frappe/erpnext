@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe.exceptions import ValidationError
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import cint, flt
 from frappe.utils.data import add_to_date, getdate
 
@@ -24,7 +24,7 @@ from erpnext.stock.get_item_details import get_item_details
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 
-class TestBatch(FrappeTestCase):
+class TestBatch(IntegrationTestCase):
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(
 			ValidationError,

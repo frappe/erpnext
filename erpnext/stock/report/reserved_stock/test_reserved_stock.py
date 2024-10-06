@@ -2,7 +2,7 @@
 # See license.txt
 from random import randint
 
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils.data import today
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -14,7 +14,7 @@ from erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry 
 from erpnext.stock.report.reserved_stock.reserved_stock import get_data as reserved_stock_report
 
 
-class TestReservedStock(FrappeTestCase):
+class TestReservedStock(IntegrationTestCase):
 	def setUp(self) -> None:
 		super().setUp()
 		self.stock_qty = 100
@@ -24,7 +24,7 @@ class TestReservedStock(FrappeTestCase):
 		cancel_all_stock_reservation_entries()
 		return super().tearDown()
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,

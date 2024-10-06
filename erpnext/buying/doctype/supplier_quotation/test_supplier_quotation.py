@@ -3,12 +3,12 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
 
 
-class TestPurchaseOrder(FrappeTestCase):
+class TestPurchaseOrder(IntegrationTestCase):
 	def test_supplier_quotation_qty(self):
 		sq = frappe.copy_doc(test_records[0])
 		sq.items[0].qty = 0

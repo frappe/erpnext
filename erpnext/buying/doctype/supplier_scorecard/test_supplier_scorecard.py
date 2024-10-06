@@ -3,10 +3,10 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 
-class TestSupplierScorecard(FrappeTestCase):
+class TestSupplierScorecard(IntegrationTestCase):
 	def test_create_scorecard(self):
 		doc = make_supplier_scorecard().insert()
 		self.assertEqual(doc.name, valid_scorecard[0].get("supplier"))

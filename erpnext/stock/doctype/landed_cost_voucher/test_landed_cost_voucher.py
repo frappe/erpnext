@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
 
 
-class TestLandedCostVoucher(FrappeTestCase):
+class TestLandedCostVoucher(IntegrationTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 

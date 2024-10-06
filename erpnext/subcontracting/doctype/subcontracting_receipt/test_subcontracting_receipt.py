@@ -5,7 +5,7 @@
 import copy
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
@@ -40,7 +40,7 @@ from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order im
 )
 
 
-class TestSubcontractingReceipt(FrappeTestCase):
+class TestSubcontractingReceipt(IntegrationTestCase):
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
@@ -372,7 +372,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
 		service_items = [
@@ -1073,7 +1073,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.cancel()
 		self.assertTrue(scr.docstatus == 2)
 
-	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	@IntegrationTestCase.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
 		fg_item = "Subcontracted Item SA1"
 		service_items = [
