@@ -208,8 +208,54 @@
    "label": "Disabled"
   }
  ],
- "links": [],
- "modified": "2023-09-22 21:31:34.763977",
+ "links": [
+  {
+   "group": "Transactions",
+   "link_doctype": "Payment Request",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Transactions",
+   "link_doctype": "Payment Order",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Transactions",
+   "link_doctype": "Bank Guarantee",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Transactions",
+   "link_doctype": "Payroll Entry",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Transactions",
+   "link_doctype": "Bank Transaction",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Accounting",
+   "link_doctype": "Payment Entry",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Accounting",
+   "link_doctype": "Journal Entry",
+   "link_fieldname": "bank_account"
+  },
+  {
+   "group": "Party",
+   "link_doctype": "Customer",
+   "link_fieldname": "default_bank_account"
+  },
+  {
+   "group": "Party",
+   "link_doctype": "Supplier",
+   "link_fieldname": "default_bank_account"
+  }
+ ],
+ "modified": "2024-09-24 06:57:41.292970",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

@@ -1531,6 +1531,197 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertFalse(serial_nos)
 
+	def test_backflushed_batch_raw_materials_based_on_transferred_autosabb(self):
+		frappe.db.set_single_value(
+			"Manufacturing Settings",
+			"backflush_raw_materials_based_on",
+			"Material Transferred for Manufacture",
+		)
+
+		batch_item = "Test Batch MCC Keyboard"
+		fg_item = "Test FG Item with Batch Raw Materials"
+
+		ste_doc = test_stock_entry.make_stock_entry(
+			item_code=batch_item, target="Stores - _TC", qty=8, basic_rate=100, do_not_save=True
+		)
+
+		# Inward raw materials in Stores warehouse
+		ste_doc.submit()
+		ste_doc.reload()
+
+		batch_no = get_batch_from_bundle(ste_doc.items[0].serial_and_batch_bundle)
+
+		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
+		# action taken upon Start button:
+		transferred_ste_doc = frappe.get_doc(
+			make_stock_entry(wo_doc.name, "Material Transfer for Manufacture", 4)
+		)
+
+		transferred_ste_doc.submit()
+		transferred_ste_doc.reload()
+
+		self.assertTrue(transferred_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertEqual(
+			get_batch_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle), batch_no
+		)
+		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
+
+		# Make additional consumption and link to WO
+		test_stock_entry.make_stock_entry(
+			item_code="Test Batch Battery Consumable",
+			target="Stores - _TC",
+			qty=8,
+			basic_rate=2.33,
+		)
+		consume_use_doc = test_stock_entry.make_stock_entry(
+			item_code="Test Batch Battery Consumable",  # consumable not linked to BOM
+			source="Stores - _TC",
+			qty=4,
+			purpose="Material Consumption for Manufacture",
+			do_not_save=True,
+		)
+		consume_use_doc.work_order = wo_doc.name
+		consume_use_doc.fg_completed_qty = 4
+		consume_use_doc.submit()
+		consume_use_doc.reload()
+
+		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
+		mfr_items = [i.as_dict() for i in manufacture_ste_doc.items]
+		manufacture_ste_doc.submit()
+		manufacture_ste_doc.reload()
+
+		self.assertTrue(len(mfr_items), 2)
+		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertEqual(
+			get_batch_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle), batch_no
+		)
+		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
+
+	def test_backflushed_serial_no_raw_materials_based_on_transferred_autosabb(self):
+		frappe.db.set_single_value(
+			"Manufacturing Settings",
+			"backflush_raw_materials_based_on",
+			"Material Transferred for Manufacture",
+		)
+
+		sn_item = "Test Serial No BTT Headphone"
+		fg_item = "Test FG Item with Serial No Raw Materials"
+
+		ste_doc = test_stock_entry.make_stock_entry(
+			item_code=sn_item, target="Stores - _TC", qty=4, basic_rate=100, do_not_save=True
+		)
+
+		# Inward raw materials in Stores warehouse
+		ste_doc.submit()
+		ste_doc.reload()
+
+		serial_nos_list = sorted(get_serial_nos_from_bundle(ste_doc.items[0].serial_and_batch_bundle))
+
+		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
+		transferred_ste_doc = frappe.get_doc(
+			make_stock_entry(wo_doc.name, "Material Transfer for Manufacture", 4)
+		)
+
+		transferred_ste_doc.submit()
+		transferred_ste_doc.reload()
+
+		self.assertTrue(transferred_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertEqual(
+			sorted(get_serial_nos_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle)),
+			serial_nos_list,
+		)
+		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
+
+		# Make additional consumption and link to WO
+		test_stock_entry.make_stock_entry(
+			item_code="Test Serial Battery Consumable",
+			target="Stores - _TC",
+			qty=8,
+			basic_rate=3.33,
+		)
+		consume_use_doc = test_stock_entry.make_stock_entry(
+			item_code="Test Serial Battery Consumable",  # consumable not linked to BOM
+			source="Stores - _TC",
+			qty=4,
+			purpose="Material Consumption for Manufacture",
+			do_not_save=True,
+		)
+		consume_use_doc.work_order = wo_doc.name
+		consume_use_doc.fg_completed_qty = 4
+		consume_use_doc.submit()
+		consume_use_doc.reload()
+
+		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
+		mfr_items = [i.as_dict() for i in manufacture_ste_doc.items]
+		manufacture_ste_doc.submit()
+		manufacture_ste_doc.reload()
+
+		self.assertTrue(len(mfr_items), 2)
+		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertEqual(
+			sorted(get_serial_nos_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle)),
+			serial_nos_list,
+		)
+		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
+
+	def test_backflushed_serial_no_batch_raw_materials_based_on_transferred_autosabb(self):
+		frappe.db.set_single_value(
+			"Manufacturing Settings",
+			"backflush_raw_materials_based_on",
+			"Material Transferred for Manufacture",
+		)
+
+		sn_batch_item = "Test Batch Serial No WebCam"
+		fg_item = "Test FG Item with Serial & Batch No Raw Materials"
+
+		ste_doc = test_stock_entry.make_stock_entry(
+			item_code=sn_batch_item, target="Stores - _TC", qty=4, basic_rate=100, do_not_save=True
+		)
+
+		ste_doc.submit()
+		ste_doc.reload()
+
+		serial_nos_list = sorted(get_serial_nos_from_bundle(ste_doc.items[0].serial_and_batch_bundle))
+		batch_no = get_batch_from_bundle(ste_doc.items[0].serial_and_batch_bundle)
+
+		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
+		transferred_ste_doc = frappe.get_doc(
+			make_stock_entry(wo_doc.name, "Material Transfer for Manufacture", 4)
+		)
+
+		transferred_ste_doc.submit()
+		transferred_ste_doc.reload()
+
+		self.assertTrue(transferred_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertEqual(
+			sorted(get_serial_nos_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle)),
+			serial_nos_list,
+		)
+		self.assertEqual(
+			get_batch_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle), batch_no
+		)
+		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
+
+		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
+		manufacture_ste_doc.submit()
+		manufacture_ste_doc.reload()
+
+		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertEqual(
+			sorted(get_serial_nos_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle)),
+			serial_nos_list,
+		)
+		self.assertEqual(
+			get_batch_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle), batch_no
+		)
+		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
+
+		bundle = manufacture_ste_doc.items[0].serial_and_batch_bundle
+		bundle_doc = frappe.get_doc("Serial and Batch Bundle", bundle)
+		qty = sum(e.qty for e in bundle_doc.entries)
+		self.assertEqual(qty, -4.0)
+
+	###
 	def test_non_consumed_material_return_against_work_order(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
@@ -2334,6 +2525,29 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 	)
 
 	make_bom(item=item.name, source_warehouse="Stores - _TC", raw_materials=[batch_item_doc.name])
+
+	# Make additional items not attached to a BOM
+	make_item(
+		"Test Batch Battery Consumable",
+		{
+			"is_stock_item": 1,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "TBMK.#####",
+			"valuation_rate": 2.33,
+			"stock_uom": "Nos",
+		},
+	)
+	make_item(
+		"Test Serial Battery Consumable",
+		{
+			"is_stock_item": 1,
+			"has_serial_no": 1,
+			"serial_no_series": "TSBH.#####",
+			"valuation_rate": 3.33,
+			"stock_uom": "Nos",
+		},
+	)
 
 	sn_item_doc = make_item(
 		"Test Serial No BTT Headphone",

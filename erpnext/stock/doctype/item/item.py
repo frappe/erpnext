@@ -22,6 +22,7 @@ from frappe.utils import (
 	strip_html,
 )
 from frappe.utils.html_utils import clean_html
+from pypika import Order
 
 import erpnext
 from erpnext.controllers.item_variant import (
@@ -345,7 +346,13 @@ class Item(Document):
 	def validate_item_tax_net_rate_range(self):
 		for tax in self.get("taxes"):
 			if flt(tax.maximum_net_rate) < flt(tax.minimum_net_rate):
-				frappe.throw(_("Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"))
+				frappe.throw(
+					_("Taxes row #{0}: {1} cannot be smaller than {2}").format(
+						tax.idx,
+						bold(_(tax.meta.get_label("maximum_net_rate"))),
+						bold(_(tax.meta.get_label("minimum_net_rate"))),
+					)
+				)
 
 	def update_template_tables(self):
 		template = frappe.get_cached_doc("Item", self.variant_of)
@@ -1133,34 +1140,10 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
 
-	last_purchase_order = frappe.db.sql(
-		"""\
-		select po.name, po.transaction_date, po.conversion_rate,
-			po_item.conversion_factor, po_item.base_price_list_rate,
-			po_item.discount_percentage, po_item.base_rate, po_item.base_net_rate
-		from `tabPurchase Order` po, `tabPurchase Order Item` po_item
-		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and
-			po.name = po_item.parent
-		order by po.transaction_date desc, po.name desc
-		limit 1""",
-		(item_code, cstr(doc_name)),
-		as_dict=1,
-	)
+	last_purchase_order = get_purchase_voucher_details("Purchase Order", item_code, doc_name)
 
 	# get last purchase receipt item details
-	last_purchase_receipt = frappe.db.sql(
-		"""\
-		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
-			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
-			pr_item.base_rate, pr_item.base_net_rate
-		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
-		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
-			pr.name = pr_item.parent
-		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
-		limit 1""",
-		(item_code, cstr(doc_name)),
-		as_dict=1,
-	)
+	last_purchase_receipt = get_purchase_voucher_details("Purchase Receipt", item_code, doc_name)
 
 	purchase_order_date = getdate(
 		last_purchase_order and last_purchase_order[0].transaction_date or "1900-01-01"
@@ -1181,7 +1164,13 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		purchase_date = purchase_receipt_date
 
 	else:
-		return frappe._dict()
+		last_purchase_invoice = get_purchase_voucher_details("Purchase Invoice", item_code, doc_name)
+
+		if last_purchase_invoice:
+			last_purchase = last_purchase_invoice[0]
+			purchase_date = getdate(last_purchase.posting_date)
+		else:
+			return frappe._dict()
 
 	conversion_factor = flt(last_purchase.conversion_factor)
 	out = frappe._dict(
@@ -1205,6 +1194,40 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	)
 
 	return out
+
+
+def get_purchase_voucher_details(doctype, item_code, document_name):
+	parent_doc = frappe.qb.DocType(doctype)
+	child_doc = frappe.qb.DocType(doctype + " Item")
+
+	query = (
+		frappe.qb.from_(parent_doc)
+		.inner_join(child_doc)
+		.on(parent_doc.name == child_doc.parent)
+		.select(
+			parent_doc.name,
+			parent_doc.conversion_rate,
+			child_doc.conversion_factor,
+			child_doc.base_price_list_rate,
+			child_doc.discount_percentage,
+			child_doc.base_rate,
+			child_doc.base_net_rate,
+		)
+		.where(parent_doc.docstatus == 1)
+		.where(child_doc.item_code == item_code)
+		.where(parent_doc.name != document_name)
+	)
+
+	if doctype in ("Purchase Receipt", "Purchase Invoice"):
+		query = query.select(parent_doc.posting_date, parent_doc.posting_time)
+		query = query.orderby(
+			parent_doc.posting_date, parent_doc.posting_time, parent_doc.name, order=Order.desc
+		)
+	else:
+		query = query.select(parent_doc.transaction_date)
+		query = query.orderby(parent_doc.transaction_date, parent_doc.name, order=Order.desc)
+
+	return query.run(as_dict=1)
 
 
 def check_stock_uom_with_bin(item, stock_uom):

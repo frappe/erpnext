@@ -6,6 +6,7 @@ import frappe
 from frappe import _, bold
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -15,6 +16,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.controllers.queries import item_query as _item_query
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
@@ -449,7 +451,7 @@ class POSInvoice(SalesInvoice):
 			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
-		if self.is_return:
+		if self.is_return and self.docstatus != 0:
 			invoice_total = self.rounded_total or self.grand_total
 			total_amount_in_payments = flt(total_amount_in_payments, self.precision("grand_total"))
 			if total_amount_in_payments and total_amount_in_payments < invoice_total:
@@ -837,3 +839,29 @@ def add_return_modes(doc, pos_profile):
 		]:
 			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
 			append_payment(payment_mode[0])
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+	if pos_profile := filters.get("pos_profile")[1]:
+		pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
+		if item_groups := get_item_group(pos_profile):
+			filters["item_group"] = ["in", tuple(item_groups)]
+
+		del filters["pos_profile"]
+
+	else:
+		filters.pop("pos_profile", None)
+
+	return _item_query(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+
+def get_item_group(pos_profile):
+	item_groups = []
+	if pos_profile.get("item_groups"):
+		# Get items based on the item groups defined in the POS profile
+		for row in pos_profile.get("item_groups"):
+			item_groups.extend(get_descendants_of("Item Group", row.item_group))
+
+	return list(set(item_groups))

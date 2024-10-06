@@ -377,3 +377,4 @@ erpnext.patches.v15_0.drop_index_posting_datetime_from_sle
 erpnext.patches.v15_0.add_disassembly_order_stock_entry_type #1
 erpnext.patches.v15_0.set_standard_stock_entry_type
 erpnext.patches.v15_0.link_purchase_item_to_asset_doc
+erpnext.patches.v14_0.update_currency_exchange_settings_for_frankfurter

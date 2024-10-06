@@ -6,6 +6,22 @@ frappe.ui.form.on("Plant Floor", {
 		frm.trigger("setup_queries");
 	},
 
+	add_workstation(frm) {
+		frm.add_custom_button(__("Create Workstation"), () => {
+			var doc = frappe.model.get_new_doc("Workstation");
+			doc.plant_floor = frm.doc.name;
+			doc.status = "Off";
+			frappe.ui.form.make_quick_entry(
+				"Workstation",
+				() => {
+					frm.trigger("prepare_workstation_dashboard");
+				},
+				null,
+				doc
+			);
+		}).addClass("btn-primary");
+	},
+
 	setup_queries(frm) {
 		frm.set_query("warehouse", (doc) => {
 			if (!doc.company) {
@@ -24,6 +40,11 @@ frappe.ui.form.on("Plant Floor", {
 	refresh(frm) {
 		frm.trigger("prepare_stock_dashboard");
 		frm.trigger("prepare_workstation_dashboard");
+
+		if (!frm.is_new()) {
+			frm.trigger("add_workstation");
+			frm.disable_save();
+		}
 	},
 
 	prepare_workstation_dashboard(frm) {

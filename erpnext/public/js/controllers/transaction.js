@@ -574,6 +574,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						if(!r.exc) {
 							frappe.run_serially([
 								() => {
+									if (item.docstatus === 0
+										&& frappe.meta.has_field(item.doctype, "use_serial_batch_fields")
+										&& !item.use_serial_batch_fields
+										&& cint(frappe.user_defaults?.use_serial_batch_fields) === 1
+									) {
+										item["use_serial_batch_fields"] = 1;
+									}
+								},
+								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
 									if (d.free_item_data && d.free_item_data.length > 0) {
@@ -1102,7 +1111,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	apply_discount_on_item(doc, cdt, cdn, field) {
 		var item = frappe.get_doc(cdt, cdn);
-		if(!item.price_list_rate) {
+		if(!item?.price_list_rate) {
 			item[field] = 0.0;
 		} else {
 			this.price_list_rate(doc, cdt, cdn);
@@ -1268,6 +1277,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				.filter(Boolean).length > 0;
 		} else if (this.frm.doc?.items) {
 			let first_row = this.frm.doc.items[0];
+			if (!first_row) {
+				return false
+			};
+
 			let mapped_rows = mappped_fields.filter(d => first_row[d])
 
 			return mapped_rows?.length > 0;

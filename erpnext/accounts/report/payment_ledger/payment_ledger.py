@@ -210,7 +210,7 @@ class PaymentLedger:
 				)
 			)
 		self.columns.append(
-			dict(label=_("Currency"), fieldname="currency", fieldtype="Currency", hidden=True)
+			dict(label=_("Currency"), fieldname="currency", fieldtype="Link", options="Currency", hidden=True)
 		)
 
 	def run(self):

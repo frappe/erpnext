@@ -145,9 +145,21 @@ class PaymentEntry(AccountsController):
 				self.is_opening = "No"
 				return
 
-		liability_account = get_party_account(
-			self.party_type, self.party, self.company, include_advance=True
-		)[1]
+		accounts = get_party_account(self.party_type, self.party, self.company, include_advance=True)
+
+		liability_account = accounts[1] if len(accounts) > 1 else None
+		fieldname = (
+			"default_advance_received_account"
+			if self.party_type == "Customer"
+			else "default_advance_paid_account"
+		)
+
+		if not liability_account:
+			throw(
+				_("Please set default {0} in Company {1}").format(
+					frappe.bold(frappe.get_meta("Company").get_label(fieldname)), frappe.bold(self.company)
+				)
+			)
 
 		self.set(self.party_account_field, liability_account)
 

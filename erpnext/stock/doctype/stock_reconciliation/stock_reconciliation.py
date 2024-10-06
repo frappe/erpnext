@@ -61,6 +61,7 @@ class StockReconciliation(StockController):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
+		self.validate_items_exist()
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
 				"Company", self.company, "stock_adjustment_account"
@@ -162,6 +163,9 @@ class StockReconciliation(StockController):
 	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
 		for item in self.items:
+			if not frappe.db.exists("Item", item.item_code):
+				frappe.throw(_("Item {0} does not exist").format(item.item_code))
+
 			if not item.reconcile_all_serial_batch and item.serial_and_batch_bundle:
 				bundle = self.get_bundle_for_specific_serial_batch(item)
 				item.current_serial_and_batch_bundle = bundle.name
@@ -357,6 +361,9 @@ class StockReconciliation(StockController):
 
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
+			if not item.item_code:
+				continue
+
 			if item.use_serial_batch_fields:
 				continue
 
@@ -684,7 +691,7 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_stock_value_difference
 
 		difference_amount = get_stock_value_difference(
-			row.item_code, row.warehouse, self.posting_date, self.posting_time
+			row.item_code, row.warehouse, self.posting_date, self.posting_time, self.name
 		)
 
 		if not difference_amount:
