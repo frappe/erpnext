@@ -1,9 +1,9 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -15,7 +15,7 @@ from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDim
 test_dependencies = ["Location", "Cost Center", "Department"]
 
 
-class TestAccountingDimensionFilter(unittest.TestCase):
+class TestAccountingDimensionFilter(IntegrationTestCase):
 	def setUp(self):
 		create_dimension()
 		create_accounting_dimension_filter()
