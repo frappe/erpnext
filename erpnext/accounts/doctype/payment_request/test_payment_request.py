@@ -493,7 +493,7 @@ class TestPaymentRequest(IntegrationTestCase):
 		)
 
 	@IntegrationTestCase.change_settings(
-		"Accounts Settings", allow_multi_currency_invoices_against_single_party_account=1
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
 	)
 	def test_multiple_payment_if_partially_paid_for_multi_currency(self):
 		pi = make_purchase_invoice(currency="USD", conversion_rate=50, qty=1, rate=100, do_not_save=1)
@@ -599,7 +599,9 @@ class TestPaymentRequest(IntegrationTestCase):
 		self.assertEqual(pr.outstanding_amount, 0)
 		self.assertEqual(pr.grand_total, 20000)
 
-	@change_settings("Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_single_payment_with_payment_term_for_multi_currency(self):
 		create_payment_terms_template()
 
