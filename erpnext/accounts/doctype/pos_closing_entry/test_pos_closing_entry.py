@@ -1,9 +1,9 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -24,7 +24,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 
-class TestPOSClosingEntry(unittest.TestCase):
+class TestPOSClosingEntry(IntegrationTestCase):
 	def setUp(self):
 		# Make stock available for POS Sales
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
