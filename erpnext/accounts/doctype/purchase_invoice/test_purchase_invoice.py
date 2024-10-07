@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
@@ -42,7 +42,7 @@ test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Templ
 test_ignore = ["Serial No"]
 
 
-class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
+class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 	@classmethod
 	def setUpClass(self):
 		unlink_payment_on_cancel_of_invoice()
@@ -461,7 +461,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_purchase_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
@@ -516,7 +518,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			)
 		)
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_invoice_with_advance_and_multi_payment_terms(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
@@ -1251,7 +1255,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_gain_loss_with_advance_entry(self):
 		unlink_enabled = frappe.db.get_single_value(
 			"Accounts Settings", "unlink_payment_on_cancellation_of_invoice"
@@ -1452,7 +1458,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
@@ -2035,7 +2043,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		pi.delete()
 
-	@change_settings("Buying Settings", {"supplier_group": None})
+	@IntegrationTestCase.change_settings("Buying Settings", {"supplier_group": None})
 	def test_purchase_invoice_without_supplier_group(self):
 		# Create a Supplier
 		test_supplier_name = "_Test Supplier Without Supplier Group"

@@ -4,7 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, nowdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -14,7 +14,7 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 
 
-class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
+class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -114,7 +114,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
-	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_04_pcv_validation(self):
 		# Clear old GL entries so PCV can be submitted.
 		gl = frappe.qb.DocType("GL Entry")

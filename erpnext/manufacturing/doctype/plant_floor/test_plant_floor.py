@@ -2,8 +2,17 @@
 # See license.txt
 
 # import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 
-class TestPlantFloor(FrappeTestCase):
+class UnitTestPlantFloor(UnitTestCase):
+	"""
+	Unit tests for PlantFloor.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPlantFloor(IntegrationTestCase):
 	pass

@@ -3,7 +3,7 @@
 
 
 from frappe.permissions import add_user_permission, remove_user_permission
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -49,7 +49,16 @@ def get_sle(**args):
 	)
 
 
-class TestStockEntry(FrappeTestCase):
+class UnitTestStockEntry(UnitTestCase):
+	"""
+	Unit tests for StockEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestStockEntry(IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
@@ -857,7 +866,7 @@ class TestStockEntry(FrappeTestCase):
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item 2", stock_entry.get("items"))).amount
 		self.assertEqual(fg_cost, flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
-	@change_settings("Manufacturing Settings", {"material_consumption": 1})
+	@IntegrationTestCase.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
@@ -1261,7 +1270,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(se.value_difference, 0.0)
 		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
 		# Initialize item, batch, warehouse, opening qty
 		item_code = "_Test Future Neg Item"
@@ -1304,7 +1313,7 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle_batch(self):
 		from erpnext.stock.doctype.batch.test_batch import TestBatch
 
@@ -1432,7 +1441,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(se.items[0].item_name, item.item_name)
 		self.assertEqual(se.items[0].stock_uom, item.stock_uom)
 
-	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_reposting_for_depedent_warehouse(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse

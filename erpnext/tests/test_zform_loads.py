@@ -2,12 +2,12 @@
 
 import frappe
 from frappe.desk.form.load import getdoc
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.www.printview import get_html_and_style
 
 
-class TestFormLoads(FrappeTestCase):
-	@change_settings("Print Settings", {"allow_print_for_cancelled": 1})
+class TestFormLoads(IntegrationTestCase):
+	@IntegrationTestCase.change_settings("Print Settings", {"allow_print_for_cancelled": 1})
 	def test_load(self):
 		erpnext_modules = frappe.get_all("Module Def", filters={"app_name": "erpnext"}, pluck="name")
 		doctypes = frappe.get_all(

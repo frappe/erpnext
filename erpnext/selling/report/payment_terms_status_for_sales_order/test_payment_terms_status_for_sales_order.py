@@ -1,7 +1,7 @@
 import datetime
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -14,7 +14,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Template", "Customer"]
 
 
-class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
+class TestPaymentTermsStatusForSalesOrder(IntegrationTestCase):
 	def setUp(self):
 		self.cleanup_old_entries()
 
