@@ -51,7 +51,6 @@ class PaymentRequest(Document):
 		cost_center: DF.Link | None
 		currency: DF.Link | None
 		email_to: DF.Data | None
-		failed_reason: DF.Data | None
 		grand_total: DF.Currency
 		iban: DF.ReadOnly | None
 		is_a_subscription: DF.Check
