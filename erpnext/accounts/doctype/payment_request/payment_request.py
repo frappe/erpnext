@@ -101,9 +101,10 @@ class PaymentRequest(Document):
 				)
 
 	def before_submit(self):
+		company = frappe.get_value(self.reference_doctype, self.reference_name, "company")
 		if (
 			self.currency != self.party_account_currency
-			and self.party_account_currency == get_company_currency(self.company)
+			and self.party_account_currency == get_company_currency(company)
 		):
 			# set outstanding amount in party account currency
 			invoice = frappe.get_value(
