@@ -179,19 +179,28 @@ class PaymentRequest(Document):
 		else:
 			self.outstanding_amount = self.grand_total
 
+	def on_submit(self):
 		if self.payment_request_type == "Outward":
-			self.status = "Initiated"
+			self.db_set("status", "Initiated")
+			return
 		elif self.payment_request_type == "Inward":
-			self.status = "Requested"
+			self.db_set("status", "Requested")
 
-		if self.payment_request_type == "Inward":
-			if self.payment_channel == "Phone":
-				self.request_phone_payment()
-			else:
-				self.set_payment_request_url()
-				if not (self.mute_email or self.flags.mute_email):
-					self.send_email()
-					self.make_communication_entry()
+		send_mail = self.payment_gateway_validation() if self.payment_gateway else None
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+
+		if (
+			hasattr(ref_doc, "order_type") and ref_doc.order_type == "Shopping Cart"
+		) or self.flags.mute_email:
+			send_mail = False
+
+		if send_mail and self.payment_channel != "Phone":
+			self.set_payment_request_url()
+			self.send_email()
+			self.make_communication_entry()
+
+		elif self.payment_channel == "Phone":
+			self.request_phone_payment()
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
