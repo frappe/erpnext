@@ -431,10 +431,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_pnyv",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "party_account_currency",
    "fieldtype": "Link",
    "label": "Party Account Currency",
