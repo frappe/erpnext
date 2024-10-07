@@ -149,13 +149,9 @@
    "fieldtype": "Currency",
    "in_preview": 1,
    "label": "Amount",
-<<<<<<< HEAD
-   "options": "currency"
-=======
    "non_negative": 1,
    "options": "currency",
    "reqd": 1
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
   },
   {
    "default": "0",
@@ -371,8 +367,6 @@
    "read_only": 1
   },
   {
-<<<<<<< HEAD
-<<<<<<< HEAD
    "fetch_from": "payment_gateway_account.payment_channel",
    "fieldname": "payment_channel",
    "fieldtype": "Select",
@@ -401,7 +395,8 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
-=======
+  },
+  {
    "fieldname": "failed_reason",
    "fieldtype": "Data",
    "hidden": 1,
@@ -411,8 +406,6 @@
    "read_only": 1
   },
   {
-=======
->>>>>>> e785928c0f (fix: Remove unused  field)
    "depends_on": "eval: doc.docstatus === 1",
    "description": "Amount in party's bank account currency",
    "fieldname": "outstanding_amount",
@@ -436,18 +429,13 @@
    "label": "Party Account Currency",
    "options": "Currency",
    "read_only": 1
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-12-21 16:56:40.115737",
-=======
  "modified": "2024-09-16 17:50:54.440090",
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

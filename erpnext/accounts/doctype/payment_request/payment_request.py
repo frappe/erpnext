@@ -7,12 +7,8 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
-from frappe.utils import flt, get_url, nowdate
-=======
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, nowdate
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
+from frappe.utils import flt, get_url, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext import get_company_currency
@@ -38,71 +34,6 @@ def _get_payment_gateway_controller(*args, **kwargs):
 
 
 class PaymentRequest(Document):
-<<<<<<< HEAD
-=======
-	# begin: auto-generated types
-	# This code is auto-generated. Do not modify anything in this block.
-
-	from typing import TYPE_CHECKING
-
-	if TYPE_CHECKING:
-		from frappe.types import DF
-
-		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
-			SubscriptionPlanDetail,
-		)
-
-		account: DF.ReadOnly | None
-		amended_from: DF.Link | None
-		bank: DF.Link | None
-		bank_account: DF.Link | None
-		bank_account_no: DF.ReadOnly | None
-		branch_code: DF.ReadOnly | None
-		company: DF.Link | None
-		cost_center: DF.Link | None
-		currency: DF.Link | None
-		email_to: DF.Data | None
-		grand_total: DF.Currency
-		iban: DF.ReadOnly | None
-		is_a_subscription: DF.Check
-		make_sales_invoice: DF.Check
-		message: DF.Text | None
-		mode_of_payment: DF.Link | None
-		mute_email: DF.Check
-		naming_series: DF.Literal["ACC-PRQ-.YYYY.-"]
-		outstanding_amount: DF.Currency
-		party: DF.DynamicLink | None
-		party_account_currency: DF.Link | None
-		party_type: DF.Link | None
-		payment_account: DF.ReadOnly | None
-		payment_channel: DF.Literal["", "Email", "Phone", "Other"]
-		payment_gateway: DF.ReadOnly | None
-		payment_gateway_account: DF.Link | None
-		payment_order: DF.Link | None
-		payment_request_type: DF.Literal["Outward", "Inward"]
-		payment_url: DF.Data | None
-		print_format: DF.Literal[None]
-		project: DF.Link | None
-		reference_doctype: DF.Link | None
-		reference_name: DF.DynamicLink | None
-		status: DF.Literal[
-			"",
-			"Draft",
-			"Requested",
-			"Initiated",
-			"Partially Paid",
-			"Payment Ordered",
-			"Paid",
-			"Failed",
-			"Cancelled",
-		]
-		subject: DF.Data | None
-		subscription_plans: DF.Table[SubscriptionPlanDetail]
-		swift_number: DF.ReadOnly | None
-		transaction_date: DF.Date | None
-	# end: auto-generated types
-
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 	def validate(self):
 		if self.get("__islocal"):
 			self.status = "Draft"
@@ -628,12 +559,7 @@ def make_payment_request(**args):
 				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 				"reference_doctype": args.dt,
 				"reference_name": args.dn,
-<<<<<<< HEAD
-				"party_type": args.get("party_type") or "Customer",
-=======
-				"company": ref_doc.get("company"),
 				"party_type": party_type,
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
 			}

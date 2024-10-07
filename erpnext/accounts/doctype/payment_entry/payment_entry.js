@@ -653,16 +653,9 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_value("base_received_amount",
 			flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate));
 
-<<<<<<< HEAD
-		if(frm.doc.payment_type == "Pay")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, 1);
-		else
-			frm.events.set_unallocated_amount(frm);
-=======
 		if (frm.doc.payment_type == "Pay")
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, true);
 		else frm.events.set_unallocated_amount(frm);
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 
 		frm.set_paid_amount_based_on_received_amount = false;
 		frm.events.hide_unhide_fields(frm);
@@ -680,16 +673,9 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 		}
 
-<<<<<<< HEAD
-		if(frm.doc.payment_type == "Receive")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount, 1);
-		else
-			frm.events.set_unallocated_amount(frm);
-=======
 		if (frm.doc.payment_type == "Receive")
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount, true);
 		else frm.events.set_unallocated_amount(frm);
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 	},
 
 	get_outstanding_invoices_or_orders: function(frm, get_outstanding_invoices, get_orders_to_be_billed) {
@@ -875,19 +861,12 @@ frappe.ui.form.on('Payment Entry', {
 					}
 				}
 
-<<<<<<< HEAD
-				frm.events.allocate_party_amount_against_ref_docs(frm,
-					(frm.doc.payment_type=="Receive" ? frm.doc.paid_amount : frm.doc.received_amount));
-
-			}
-=======
 				frm.events.allocate_party_amount_against_ref_docs(
 					frm,
 					frm.doc.payment_type == "Receive" ? frm.doc.paid_amount : frm.doc.received_amount,
 					false
 				);
 			},
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 		});
 	},
 
@@ -899,78 +878,6 @@ frappe.ui.form.on('Payment Entry', {
 		return ["Sales Invoice", "Purchase Invoice"];
 	},
 
-<<<<<<< HEAD
-	allocate_party_amount_against_ref_docs: function(frm, paid_amount, paid_amount_change) {
-		var total_positive_outstanding_including_order = 0;
-		var total_negative_outstanding = 0;
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
-
-		paid_amount -= total_deductions;
-
-		$.each(frm.doc.references || [], function(i, row) {
-			if(flt(row.outstanding_amount) > 0)
-				total_positive_outstanding_including_order += flt(row.outstanding_amount);
-			else
-				total_negative_outstanding += Math.abs(flt(row.outstanding_amount));
-		})
-		var allocated_negative_outstanding = 0;
-		if (
-				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
-				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier") ||
-				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")
-			) {
-				if(total_positive_outstanding_including_order > paid_amount) {
-					var remaining_outstanding = total_positive_outstanding_including_order - paid_amount;
-					allocated_negative_outstanding = total_negative_outstanding < remaining_outstanding ?
-						total_negative_outstanding : remaining_outstanding;
-			}
-
-			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
-		} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
-			total_negative_outstanding = flt(total_negative_outstanding, precision("outstanding_amount"))
-			if(paid_amount > total_negative_outstanding) {
-				if(total_negative_outstanding == 0) {
-					frappe.msgprint(
-						__("Cannot {0} {1} {2} without any negative outstanding invoice", [frm.doc.payment_type,
-							(frm.doc.party_type=="Customer" ? "to" : "from"), frm.doc.party_type])
-					);
-					return false
-				} else {
-					frappe.msgprint(
-						__("Paid Amount cannot be greater than total negative outstanding amount {0}", [total_negative_outstanding])
-					);
-					return false;
-				}
-			} else {
-				allocated_positive_outstanding = total_negative_outstanding - paid_amount;
-				allocated_negative_outstanding = paid_amount +
-					(total_positive_outstanding_including_order < allocated_positive_outstanding ?
-						total_positive_outstanding_including_order : allocated_positive_outstanding)
-			}
-		}
-
-		$.each(frm.doc.references || [], function(i, row) {
-			if (frappe.flags.allocate_payment_amount == 0) {
-				//If allocate payment amount checkbox is unchecked, set zero to allocate amount
-				row.allocated_amount = 0;
-
-			} else if (frappe.flags.allocate_payment_amount != 0 && (!row.allocated_amount || paid_amount_change)) {
-				if (row.outstanding_amount > 0 && allocated_positive_outstanding >= 0) {
-					row.allocated_amount = (row.outstanding_amount >= allocated_positive_outstanding) ?
-						allocated_positive_outstanding : row.outstanding_amount;
-					allocated_positive_outstanding -= flt(row.allocated_amount);
-
-				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
-					row.allocated_amount = (Math.abs(row.outstanding_amount) >= allocated_negative_outstanding) ?
-						-1*allocated_negative_outstanding : row.outstanding_amount;
-					allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
-				}
-			}
-		})
-
-		frm.refresh_fields()
-=======
 	allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
 		await frm.call("allocate_amount_to_references", {
 			paid_amount: paid_amount,
@@ -978,7 +885,6 @@ frappe.ui.form.on('Payment Entry', {
 			allocate_payment_amount: frappe.flags.allocate_payment_amount ?? false,
 		});
 
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 		frm.events.set_total_allocated_amount(frm);
 	},
 
@@ -1603,40 +1509,5 @@ frappe.ui.form.on('Payment Entry Deduction', {
 
 	deductions_remove: function(frm) {
 		frm.events.set_unallocated_amount(frm);
-<<<<<<< HEAD
-	}
-})
-frappe.ui.form.on('Payment Entry', {
-	cost_center: function(frm){
-		if (frm.doc.posting_date && (frm.doc.paid_from||frm.doc.paid_to)) {
-			return frappe.call({
-				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_and_account_balance",
-				args: {
-					company: frm.doc.company,
-					date: frm.doc.posting_date,
-					paid_from: frm.doc.paid_from,
-					paid_to: frm.doc.paid_to,
-					ptype: frm.doc.party_type,
-					pty: frm.doc.party,
-					cost_center: frm.doc.cost_center
-				},
-				callback: function(r, rt) {
-					if(r.message) {
-						frappe.run_serially([
-							() => {
-								frm.set_value("paid_from_account_balance", r.message.paid_from_account_balance);
-								frm.set_value("paid_to_account_balance", r.message.paid_to_account_balance);
-								frm.set_value("party_balance", r.message.party_balance);
-							}
-						]);
-
-					}
-				}
-			});
-		}
-	},
-})
-=======
 	},
 });
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
