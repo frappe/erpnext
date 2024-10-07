@@ -1064,9 +1064,11 @@ class AccountsController(TransactionBase):
 			"Asset Capitalization": "entry_type",
 		}
 
-		extended_voucher_types = frappe.get_hooks("voucher_subtypes") or {}
-		for key, value in extended_voucher_types.items():
-			voucher_subtypes[key] = value[0]
+		for method_name in frappe.get_hooks("voucher_subtypes"):
+			voucher_subtype = frappe.get_attr(method_name)(self)
+
+		if voucher_subtype:
+			return voucher_subtype
 
 		if self.doctype in voucher_subtypes:
 			return self.get(voucher_subtypes[self.doctype])
