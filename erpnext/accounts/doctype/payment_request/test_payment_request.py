@@ -227,7 +227,7 @@ class TestPaymentRequest(IntegrationTestCase):
 
 	def test_payment_entry_against_purchase_invoice(self):
 		si_usd = make_purchase_invoice(
-			customer="_Test Supplier USD",
+			supplier="_Test Supplier USD",
 			debit_to="_Test Payable USD - _TC",
 			currency="USD",
 			conversion_rate=50,
@@ -252,7 +252,7 @@ class TestPaymentRequest(IntegrationTestCase):
 
 	def test_multiple_payment_entry_against_purchase_invoice(self):
 		purchase_invoice = make_purchase_invoice(
-			customer="_Test Supplier USD",
+			supplier="_Test Supplier USD",
 			debit_to="_Test Payable USD - _TC",
 			currency="USD",
 			conversion_rate=50,
@@ -492,6 +492,9 @@ class TestPaymentRequest(IntegrationTestCase):
 			return_doc=1,
 		)
 
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", allow_multi_currency_invoices_against_single_party_account=1
+	)
 	def test_multiple_payment_if_partially_paid_for_multi_currency(self):
 		pi = make_purchase_invoice(currency="USD", conversion_rate=50, qty=1, rate=100)
 
