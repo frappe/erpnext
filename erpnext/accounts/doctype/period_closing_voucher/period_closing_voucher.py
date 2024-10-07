@@ -392,8 +392,7 @@ def process_closing_entries(gl_entries, closing_entries, voucher_name, company, 
 	)
 
 	try:
-		if gl_entries + closing_entries:
-			make_closing_entries(gl_entries + closing_entries, voucher_name, company, closing_date)
+		make_closing_entries(gl_entries + closing_entries, voucher_name, company, closing_date)
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
