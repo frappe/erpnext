@@ -45,6 +45,11 @@ class UnreconcilePayment(Document):
 	@frappe.whitelist()
 	def get_allocations_from_payment(self):
 		allocated_references = []
+
+		advance_doctypes = frappe.get_hooks("advance_payment_payable_doctypes") + frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		)
+
 		ple = qb.DocType("Payment Ledger Entry")
 		allocated_references = (
 			qb.from_(ple)
@@ -66,6 +71,18 @@ class UnreconcilePayment(Document):
 			.groupby(ple.against_voucher_type, ple.against_voucher_no)
 			.run(as_dict=True)
 		)
+
+		if self.voucher_type == "Payment Entry":
+			res = frappe.db.get_all(
+				"Payment Entry Reference",
+				filters={
+					"docstatus": 1,
+					"parent": self.voucher_no,
+					"reference_doctype": ["in", advance_doctypes],
+				},
+				fields=["reference_doctype", "reference_name", "allocated_amount"],
+			)
+			allocated_references += res
 
 		return allocated_references
 
@@ -100,29 +117,44 @@ def doc_has_references(doctype: str | None = None, docname: str | None = None):
 			filters={"delinked": 0, "against_voucher_no": docname, "amount": ["<", 0]},
 		)
 	else:
-		return frappe.db.count(
+		# For Backwards compatibility, check ledger as well.
+		# On Old PLE records, this can lead to double counting. Thats fine.
+		# As we are not looking for exact count
+		ledger_references = frappe.db.count(
 			"Payment Ledger Entry",
 			filters={"delinked": 0, "voucher_no": docname, "against_voucher_no": ["!=", docname]},
 		)
 
+		advance_doctypes = frappe.get_hooks("advance_payment_payable_doctypes") + frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		)
+		pe_references = len(
+			frappe.db.get_all(
+				"Payment Entry Reference",
+				filters={
+					"docstatus": 1,
+					"parent": docname,
+					"reference_doctype": ["in", advance_doctypes],
+				},
+			)
+		)
+		return ledger_references + pe_references
 
-@frappe.whitelist()
-def get_linked_payments_for_doc(
+
+def get_linked_payments_for_invoices(
 	company: str | None = None, doctype: str | None = None, docname: str | None = None
 ) -> list:
+	res = []
 	if company and doctype and docname:
-		_dt = doctype
-		_dn = docname
 		ple = qb.DocType("Payment Ledger Entry")
-		if _dt in ["Sales Invoice", "Purchase Invoice"]:
+		if doctype in ["Sales Invoice", "Purchase Invoice"]:
 			criteria = [
 				(ple.company == company),
 				(ple.delinked == 0),
-				(ple.against_voucher_no == _dn),
+				(ple.against_voucher_no == docname),
 				(ple.amount < 0),
 			]
-
-			res = (
+			res.extend(
 				qb.from_(ple)
 				.select(
 					ple.company,
@@ -136,30 +168,67 @@ def get_linked_payments_for_doc(
 				.having(qb.Field("allocated_amount") > 0)
 				.run(as_dict=True)
 			)
-			return res
-		else:
-			criteria = [
-				(ple.company == company),
-				(ple.delinked == 0),
-				(ple.voucher_no == _dn),
-				(ple.against_voucher_no != _dn),
-			]
+	return res
 
-			query = (
-				qb.from_(ple)
-				.select(
-					ple.company,
-					ple.against_voucher_type.as_("voucher_type"),
-					ple.against_voucher_no.as_("voucher_no"),
-					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
-					ple.account_currency,
-				)
-				.where(Criterion.all(criteria))
-				.groupby(ple.against_voucher_no)
+
+def get_linked_docs_for_payments(
+	company: str | None = None, doctype: str | None = None, docname: str | None = None
+) -> list:
+	res = []
+	if company and doctype and docname:
+		ple = qb.DocType("Payment Ledger Entry")
+		criteria = [
+			(ple.company == company),
+			(ple.delinked == 0),
+			(ple.voucher_no == docname),
+			(ple.against_voucher_no != docname),
+		]
+
+		query = (
+			qb.from_(ple)
+			.select(
+				ple.company,
+				ple.against_voucher_type.as_("voucher_type"),
+				ple.against_voucher_no.as_("voucher_no"),
+				Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
+				ple.account_currency,
 			)
-			res = query.run(as_dict=True)
-			return res
-	return []
+			.where(Criterion.all(criteria))
+			.groupby(ple.against_voucher_no)
+		)
+		res.extend(query.run(as_dict=True))
+
+		# TODO: handle duplicates due to Old payments storing SO/PO references in Ledger
+		advance_doctypes = frappe.get_hooks("advance_payment_payable_doctypes") + frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		)
+		pe = qb.DocType("Payment Entry Reference")
+		pe_references = (
+			qb.from_(pe)
+			.select(
+				pe.reference_doctype.as_("voucher_type"),
+				pe.reference_name.as_("voucher_no"),
+				pe.allocated_amount,
+			)
+			.where(pe.docstatus.eq(1) & pe.parent.eq(docname) & pe.reference_doctype.isin(advance_doctypes))
+			.run(as_dict=True)
+		)
+		res.extend(pe_references)
+	return res
+
+
+@frappe.whitelist()
+def get_linked_payments_for_doc(
+	company: str | None = None, doctype: str | None = None, docname: str | None = None
+) -> list:
+	references = []
+	if company and doctype and docname:
+		get_linked_payments_for_invoices(company, doctype, docname)
+		if doctype in ["Sales Invoice", "Purchase Invoice"]:
+			references.extend(get_linked_payments_for_invoices(company, doctype, docname))
+		else:
+			references.extend(get_linked_docs_for_payments(company, doctype, docname))
+	return references
 
 
 @frappe.whitelist()
