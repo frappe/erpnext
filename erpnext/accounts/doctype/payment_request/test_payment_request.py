@@ -493,10 +493,12 @@ class TestPaymentRequest(IntegrationTestCase):
 		)
 
 	@IntegrationTestCase.change_settings(
-		"Accounts Settings", allow_multi_currency_invoices_against_single_party_account=1
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
 	)
 	def test_multiple_payment_if_partially_paid_for_multi_currency(self):
-		pi = make_purchase_invoice(currency="USD", conversion_rate=50, qty=1, rate=100)
+		pi = make_purchase_invoice(currency="USD", conversion_rate=50, qty=1, rate=100, do_not_save=1)
+		pi.credit_to = "Creditors - _TC"
+		pi.submit()
 
 		pr = make_payment_request(
 			dt="Purchase Invoice",
@@ -597,10 +599,15 @@ class TestPaymentRequest(IntegrationTestCase):
 		self.assertEqual(pr.outstanding_amount, 0)
 		self.assertEqual(pr.grand_total, 20000)
 
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_single_payment_with_payment_term_for_multi_currency(self):
 		create_payment_terms_template()
 
-		si = create_sales_invoice(do_not_save=1, currency="USD", qty=1, rate=200, conversion_rate=50)
+		si = create_sales_invoice(
+			do_not_save=1, currency="USD", debit_to="Debtors - _TC", qty=1, rate=200, conversion_rate=50
+		)
 		si.payment_terms_template = "Test Receivable Template"  # 84.746 and 15.254
 		si.save()
 		si.submit()
