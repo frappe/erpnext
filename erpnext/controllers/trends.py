@@ -129,10 +129,19 @@ def get_data(filters, conditions):
 
 			# to get distinct value of col specified by group_by in filter
 			row = frappe.db.sql(
-				"""select DISTINCT({}) from `tab{}` t1, `tab{} Item` t2 {}
-						where t2.parent = t1.name and t1.company = {} and {} between {} and {}
-						and t1.docstatus = 1 and {} = {} {} {}
-					""".format(
+				"""
+				SELECT
+					DISTINCT({})
+				FROM `tab{}` t1, `tab{} Item` t2 {}
+				WHERE
+					t2.parent = t1.name
+					AND t1.company = {}
+					AND {} BETWEEN {} AND {}
+					AND t1.docstatus = 1
+					AND {} = {}
+					{} {}
+				"""
+				.format(
 					sel_col,
 					conditions["trans"],
 					conditions["trans"],
@@ -141,7 +150,8 @@ def get_data(filters, conditions):
 					posting_date,
 					"%s",
 					"%s",
-					conditions["group_by"],
+					# previously in conditions["group_by"] only one value is coming but now two values are coming, so we need first value
+					conditions["group_by"].split(",")[0].strip(),
 					"%s",
 					conditions.get("addl_tables_relational_cond"),
 					cond,
@@ -155,10 +165,24 @@ def get_data(filters, conditions):
 
 				# get data for group_by filter
 				row1 = frappe.db.sql(
-					""" select {} , {} from `tab{}` t1, `tab{} Item` t2 {}
-							where t2.parent = t1.name and t1.company = {} and {} between {} and {}
-							and t1.docstatus = 1 and {} = {} and {} = {} {} {}
-						""".format(
+					"""
+					SELECT
+						{} , {}
+					FROM
+						`tab{}` t1,
+						`tab{} Item` t2
+						{}
+					WHERE
+						t2.parent = t1.name
+						AND t1.company = {}
+						AND {} BETWEEN {} AND {}
+						AND t1.docstatus = 1
+						AND {} = {}
+						AND {} = {}
+						{} {}
+					GROUP BY {}
+					"""
+					.format(
 						sel_col,
 						conditions["period_wise_select"],
 						conditions["trans"],
@@ -170,10 +194,12 @@ def get_data(filters, conditions):
 						"%s",
 						sel_col,
 						"%s",
-						conditions["group_by"],
+						# previously in conditions["group_by"] only one value is coming but now two values are coming, so we need first value
+						conditions["group_by"].split(",")[0].strip(),
 						"%s",
 						conditions.get("addl_tables_relational_cond"),
 						cond,
+						sel_col,
 					),
 					(filters.get("company"), year_start_date, year_end_date, row[i][0], data1[d][0]),
 					as_list=1,
@@ -187,11 +213,22 @@ def get_data(filters, conditions):
 				data.append(des)
 	else:
 		data = frappe.db.sql(
-			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
-					where t2.parent = t1.name and t1.company = {} and {} between {} and {} and
-					t1.docstatus = 1 {} {}
-					group by {}
-				""".format(
+			"""
+			SELECT
+				{}
+			FROM
+				`tab{}` t1,
+				`tab{} Item` t2
+				{}
+			WHERE
+				t2.parent = t1.name
+				AND t1.company = {}
+				AND {} BETWEEN {} AND {}
+				AND t1.docstatus = 1
+				{} {}
+				group by {}
+			"""
+			.format(
 				query_details,
 				conditions["trans"],
 				conditions["trans"],
@@ -341,7 +378,7 @@ def based_wise_columns_query(based_on, trans):
 			"Supplier Group:Link/Supplier Group:140",
 		]
 		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_group,"
-		based_on_details["based_on_group_by"] = "t1.supplier"
+		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_group"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
