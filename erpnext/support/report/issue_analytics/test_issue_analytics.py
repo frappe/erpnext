@@ -2,6 +2,7 @@ import unittest
 
 import frappe
 from frappe.desk.form.assign_to import add as add_assignment
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_months, getdate
 
 from erpnext.support.doctype.issue.test_issue import create_customer, make_issue
@@ -13,7 +14,7 @@ from erpnext.support.report.issue_analytics.issue_analytics import execute
 months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
-class TestIssueAnalytics(unittest.TestCase):
+class TestIssueAnalytics(IntegrationTestCase):
 	@classmethod
 	def setUpClass(self):
 		frappe.db.sql("delete from `tabIssue` where company='_Test Company'")

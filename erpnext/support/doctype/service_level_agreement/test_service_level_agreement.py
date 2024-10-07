@@ -1,10 +1,10 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import datetime
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
 
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
@@ -13,7 +13,7 @@ from erpnext.support.doctype.service_level_agreement.service_level_agreement imp
 )
 
 
-class TestServiceLevelAgreement(unittest.TestCase):
+class TestServiceLevelAgreement(IntegrationTestCase):
 	def setUp(self):
 		self.create_company()
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)

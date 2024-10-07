@@ -2,6 +2,7 @@ import unittest
 from functools import partial
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.controllers import queries
 
@@ -10,7 +11,7 @@ def add_default_params(func, doctype):
 	return partial(func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None)
 
 
-class TestQueries(unittest.TestCase):
+class TestQueries(IntegrationTestCase):
 	# All tests are based on doctype/test_records.json
 
 	def assert_nested_in(self, item, container):
