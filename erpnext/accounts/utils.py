@@ -1967,14 +1967,15 @@ class QueryPaymentLedger:
 			.where(Criterion.all(filter_on_outstanding_amount))
 		)
 
-		# Add having conditions based on invoice and payment flags
+		# build CTE filter
+		# only fetch invoices
 		if self.get_invoices:
 			self.cte_query_voucher_amount_and_outstanding = (
 				self.cte_query_voucher_amount_and_outstanding.having(
 					(Table("outstanding").amount_in_account_currency > 0)
 				)
 			)
-		# Only fetch payments
+		# only fetch payments
 		elif self.get_payments:
 			self.cte_query_voucher_amount_and_outstanding = (
 				self.cte_query_voucher_amount_and_outstanding.having(
