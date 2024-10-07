@@ -11,15 +11,12 @@
   "bill_no",
   "payment_term",
   "payment_term_outstanding",
-  "account_type",
-  "payment_type",
   "column_break_4",
   "total_amount",
   "outstanding_amount",
   "allocated_amount",
   "exchange_rate",
   "exchange_gain_loss",
-  "account",
   "payment_request",
   "payment_request_outstanding"
  ],
@@ -107,22 +104,6 @@
    "label": "Exchange Gain/Loss",
    "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "account",
-   "fieldtype": "Link",
-   "label": "Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "account_type",
-   "fieldtype": "Data",
-   "label": "Account Type"
-  },
-  {
-   "fieldname": "payment_type",
-   "fieldtype": "Data",
-   "label": "Payment Type"
   },
   {
    "fieldname": "payment_request",

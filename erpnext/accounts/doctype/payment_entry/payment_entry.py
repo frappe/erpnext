@@ -10,14 +10,8 @@ from frappe import ValidationError, _, qb, scrub, throw
 from frappe.query_builder import Tuple
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
-<<<<<<< HEAD
-from frappe.utils.data import comma_and, fmt_money
-from pypika.functions import Sum
-=======
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
-from pypika import Case
 from pypika.functions import Coalesce, Sum
->>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions

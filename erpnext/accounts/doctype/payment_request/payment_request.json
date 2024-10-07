@@ -397,15 +397,6 @@
    "options": "Project"
   },
   {
-   "fieldname": "failed_reason",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Reason for Failure",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "depends_on": "eval: doc.docstatus === 1",
    "description": "Amount in party's bank account currency",
    "fieldname": "outstanding_amount",
@@ -414,13 +405,6 @@
    "label": "Outstanding Amount",
    "non_negative": 1,
    "options": "party_account_currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
    "read_only": 1
   },
   {
