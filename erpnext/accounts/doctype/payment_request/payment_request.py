@@ -435,19 +435,40 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+<<<<<<< HEAD
+=======
+	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
 
-	ref_doc = frappe.get_doc(args.dt, args.dn)
+	if ref_doc.doctype not in [
+		"Sales Order",
+		"Purchase Order",
+		"Sales Invoice",
+		"Purchase Invoice",
+		"POS Invoice",
+		"Fees",
+	]:
+		frappe.throw(
+			_("Payment Requests cannot be created against: {0}").format(frappe.bold(ref_doc.doctype))
+		)
+>>>>>>> 340e35f209 (fix: lp during ref_doc save event)
+
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
+<<<<<<< HEAD
 	if args.loyalty_points and args.dt == "Sales Order":
+=======
+	if not grand_total:
+		frappe.throw(_("Payment Entry is already created"))
+
+	if args.loyalty_points and ref_doc.doctype == "Sales Order":
+>>>>>>> 340e35f209 (fix: lp during ref_doc save event)
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 
-		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
-		frappe.db.set_value(
-			"Sales Order", args.dn, "loyalty_points", int(args.loyalty_points), update_modified=False
-		)
-		frappe.db.set_value("Sales Order", args.dn, "loyalty_amount", loyalty_amount, update_modified=False)
+		loyalty_amount: Document = validate_loyalty_points(
+			ref_doc, int(args.loyalty_points)
+		)  # sets fields on ref_doc
+		loyalty_amount.db_update()
 		grand_total = grand_total - loyalty_amount
 
 	bank_account = (
@@ -456,10 +477,10 @@ def make_payment_request(**args):
 
 	draft_payment_request = frappe.db.get_value(
 		"Payment Request",
-		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": 0},
+		{"reference_doctype": ref_doc.doctype, "reference_name": ref_doc.name, "docstatus": 0},
 	)
 
-	existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
+	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc.doctype, ref_doc.name)
 
 	if existing_payment_request_amount:
 		grand_total -= existing_payment_request_amount
@@ -490,8 +511,8 @@ def make_payment_request(**args):
 				"email_to": args.recipient_id or ref_doc.owner,
 				"subject": _("Payment Request for {0}").format(args.dn),
 				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
-				"reference_doctype": args.dt,
-				"reference_name": args.dn,
+				"reference_doctype": ref_doc.doctype,
+				"reference_name": ref_doc.name,
 				"company": ref_doc.get("company"),
 				"party_type": args.get("party_type") or "Customer",
 				"party": args.get("party") or ref_doc.get("customer"),
