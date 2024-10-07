@@ -1067,8 +1067,8 @@ class AccountsController(TransactionBase):
 		for method_name in frappe.get_hooks("voucher_subtypes"):
 			voucher_subtype = frappe.get_attr(method_name)(self)
 
-		if voucher_subtype:
-			return voucher_subtype
+			if voucher_subtype:
+				return voucher_subtype
 
 		if self.doctype in voucher_subtypes:
 			return self.get(voucher_subtypes[self.doctype])
