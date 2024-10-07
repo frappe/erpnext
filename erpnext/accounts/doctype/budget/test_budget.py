@@ -1,9 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import now_datetime, nowdate
 
 from erpnext.accounts.doctype.budget.budget import BudgetError, get_actual_expense
@@ -14,7 +14,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 test_dependencies = ["Monthly Distribution"]
 
 
-class TestBudget(unittest.TestCase):
+class TestBudget(IntegrationTestCase):
 	def test_monthly_budget_crossed_ignore(self):
 		set_total_expense_zero(nowdate(), "cost_center")
 
