@@ -372,6 +372,7 @@
   },
   {
 <<<<<<< HEAD
+<<<<<<< HEAD
    "fetch_from": "payment_gateway_account.payment_channel",
    "fieldname": "payment_channel",
    "fieldtype": "Select",
@@ -410,6 +411,8 @@
    "read_only": 1
   },
   {
+=======
+>>>>>>> e785928c0f (fix: Remove unused  field)
    "depends_on": "eval: doc.docstatus === 1",
    "description": "Amount in party's bank account currency",
    "fieldname": "outstanding_amount",
