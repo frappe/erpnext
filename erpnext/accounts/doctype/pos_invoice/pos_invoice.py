@@ -862,6 +862,7 @@ def get_item_group(pos_profile):
 	if pos_profile.get("item_groups"):
 		# Get items based on the item groups defined in the POS profile
 		for row in pos_profile.get("item_groups"):
+			item_groups.append(row.item_group)
 			item_groups.extend(get_descendants_of("Item Group", row.item_group))
 
 	return list(set(item_groups))
