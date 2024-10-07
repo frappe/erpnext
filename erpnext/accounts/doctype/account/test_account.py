@@ -5,7 +5,7 @@
 import unittest
 
 import frappe
-from frappe.test_runner import make_test_records
+from frappe.tests.utils import make_test_records
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.account import (

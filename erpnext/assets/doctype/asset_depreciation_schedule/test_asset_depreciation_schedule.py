@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import cstr, flt
 
 from erpnext.assets.doctype.asset.depreciation import (
@@ -15,7 +15,16 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 )
 
 
-class TestAssetDepreciationSchedule(FrappeTestCase):
+class UnitTestAssetDepreciationSchedule(UnitTestCase):
+	"""
+	Unit tests for AssetDepreciationSchedule.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestAssetDepreciationSchedule(IntegrationTestCase):
 	def setUp(self):
 		create_asset_data()
 

@@ -2,7 +2,7 @@ import json
 import unittest
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -317,7 +317,7 @@ class TestLIFOValuation(unittest.TestCase):
 			self.assertTotalValue(total_value)
 
 
-class TestLIFOValuationSLE(FrappeTestCase):
+class TestLIFOValuationSLE(IntegrationTestCase):
 	ITEM_CODE = "_Test LIFO item"
 	WAREHOUSE = "_Test Warehouse - _TC"
 

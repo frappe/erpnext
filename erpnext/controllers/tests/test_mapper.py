@@ -4,7 +4,7 @@ import unittest
 import frappe
 import frappe.utils
 from frappe.model import mapper
-from frappe.test_runner import make_test_records
+from frappe.tests.utils import make_test_records
 from frappe.utils import add_months, nowdate
 
 

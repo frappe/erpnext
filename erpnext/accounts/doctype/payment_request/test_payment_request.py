@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -57,7 +57,16 @@ payment_method = [
 ]
 
 
-class TestPaymentRequest(FrappeTestCase):
+class UnitTestPaymentRequest(UnitTestCase):
+	"""
+	Unit tests for PaymentRequest.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPaymentRequest(IntegrationTestCase):
 	def setUp(self):
 		for payment_gateway in payment_gateways:
 			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
@@ -218,7 +227,7 @@ class TestPaymentRequest(FrappeTestCase):
 
 	def test_payment_entry_against_purchase_invoice(self):
 		si_usd = make_purchase_invoice(
-			customer="_Test Supplier USD",
+			supplier="_Test Supplier USD",
 			debit_to="_Test Payable USD - _TC",
 			currency="USD",
 			conversion_rate=50,
@@ -243,7 +252,7 @@ class TestPaymentRequest(FrappeTestCase):
 
 	def test_multiple_payment_entry_against_purchase_invoice(self):
 		purchase_invoice = make_purchase_invoice(
-			customer="_Test Supplier USD",
+			supplier="_Test Supplier USD",
 			debit_to="_Test Payable USD - _TC",
 			currency="USD",
 			conversion_rate=50,
@@ -483,6 +492,9 @@ class TestPaymentRequest(FrappeTestCase):
 			return_doc=1,
 		)
 
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", allow_multi_currency_invoices_against_single_party_account=1
+	)
 	def test_multiple_payment_if_partially_paid_for_multi_currency(self):
 		pi = make_purchase_invoice(currency="USD", conversion_rate=50, qty=1, rate=100)
 
