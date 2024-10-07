@@ -146,6 +146,9 @@ class TestPaymentTermsStatusForSalesOrder(IntegrationTestCase):
 			)
 			doc.insert()
 
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", allow_multi_currency_invoices_against_single_party_account=1
+	)
 	def test_02_alternate_currency(self):
 		transaction_date = "2021-06-15"
 		self.create_payment_terms_template()
