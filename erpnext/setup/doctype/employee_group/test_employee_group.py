@@ -1,14 +1,14 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
-class TestEmployeeGroup(unittest.TestCase):
+class TestEmployeeGroup(IntegrationTestCase):
 	pass
 
 

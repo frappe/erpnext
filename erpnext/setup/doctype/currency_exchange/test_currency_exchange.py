@@ -1,10 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 from unittest import mock
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import cint, flt
 
 from erpnext.setup.utils import get_exchange_rate
@@ -80,7 +80,7 @@ def patched_requests_get(*args, **kwargs):
 
 
 @mock.patch("requests.get", side_effect=patched_requests_get)
-class TestCurrencyExchange(unittest.TestCase):
+class TestCurrencyExchange(IntegrationTestCase):
 	def clear_cache(self):
 		cache = frappe.cache()
 		for date in test_exchange_values.keys():

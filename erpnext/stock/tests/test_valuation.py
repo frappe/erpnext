@@ -15,7 +15,7 @@ value_gen = st.floats(min_value=1, max_value=1e6)
 stock_queue_generator = st.lists(st.tuples(qty_gen, value_gen), min_size=10)
 
 
-class TestFIFOValuation(unittest.TestCase):
+class TestFIFOValuation(IntegrationTestCase):
 	def setUp(self):
 		self.queue = FIFOValuation([])
 
@@ -195,7 +195,7 @@ class TestFIFOValuation(unittest.TestCase):
 			self.assertTotalValue(total_value)
 
 
-class TestLIFOValuation(unittest.TestCase):
+class TestLIFOValuation(IntegrationTestCase):
 	def setUp(self):
 		self.stack = LIFOValuation([])
 
