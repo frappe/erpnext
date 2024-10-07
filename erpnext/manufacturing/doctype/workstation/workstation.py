@@ -49,6 +49,7 @@ class Workstation(Document):
 		)
 
 		description: DF.Text | None
+		disabled: DF.Check
 		holiday_list: DF.Link | None
 		hour_rate: DF.Currency
 		hour_rate_consumable: DF.Currency
@@ -71,6 +72,11 @@ class Workstation(Document):
 		self.set_data_based_on_workstation_type()
 		self.set_hour_rate()
 		self.set_total_working_hours()
+		self.disabled_workstation()
+
+	def disabled_workstation(self):
+		if self.disabled:
+			self.status = "Off"
 
 	def set_total_working_hours(self):
 		self.total_working_hours = 0.0
@@ -123,6 +129,28 @@ class Workstation(Document):
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
 		self.update_bom_operation()
+
+		if self.plant_floor:
+			self.publish_workstation_status()
+
+	def publish_workstation_status(self):
+		if not self._doc_before_save:
+			return
+
+		if self._doc_before_save.get("status") == self.status:
+			return
+
+		data = get_workstations(plant_floor=self.plant_floor, workstation_name=self.name)[0]
+
+		color_map = get_color_map()
+		data["old_color"] = color_map.get(self._doc_before_save.get("status"), "red")
+
+		frappe.publish_realtime(
+			"update_workstation_status",
+			data,
+			doctype="Plant Floor",
+			docname=self.plant_floor,
+		)
 
 	def validate_overlap_for_operation_timings(self):
 		"""Check if there is no overlap in setting Workstation Operating Hours"""
@@ -238,10 +266,13 @@ def get_job_cards(workstation, job_card=None):
 		user_employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
 
 		for row in jc_data:
+			if row.status == "Open":
+				row.status = "Not Started"
+
 			item_code = row.finished_good or row.production_item
 			row.fg_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
 
-			row.status_color = get_status_color(row.status)
+			row.status_colour = get_status_color(row.status)
 			row.job_card_link = f"""
 					<a class="ellipsis" data-doctype="Job Card" data-name="{row.name}" href="/app/job-card/{row.name}" title="" data-original-title="{row.name}">{row.name}</a>
 				"""
@@ -423,8 +454,8 @@ def get_workstations(**kwargs):
 			_workstation.on_status_image,
 			_workstation.off_status_image,
 		)
-		.orderby(_workstation.workstation_type, _workstation.name)
-		.where(_workstation.plant_floor == kwargs.plant_floor)
+		.orderby(_workstation.creation, _workstation.workstation_type, _workstation.name)
+		.where((_workstation.plant_floor == kwargs.plant_floor) & (_workstation.disabled == 0))
 	)
 
 	if kwargs.workstation:
@@ -436,9 +467,28 @@ def get_workstations(**kwargs):
 	if kwargs.workstation_status:
 		query = query.where(_workstation.status == kwargs.workstation_status)
 
+	if kwargs.workstation_name:
+		query = query.where(_workstation.name == kwargs.workstation_name)
+
 	data = query.run(as_dict=True)
 
-	color_map = {
+	color_map = get_color_map()
+
+	for d in data:
+		d.workstation_name = get_link_to_form("Workstation", d.name)
+		d.status_image = d.on_status_image
+		d.workstation_off = ""
+		d.color = color_map.get(d.status, "red")
+		d.workstation_link = get_url_to_form("Workstation", d.name)
+		if d.status != "Production":
+			d.status_image = d.off_status_image
+			d.workstation_off = "workstation-off"
+
+	return data
+
+
+def get_color_map():
+	return {
 		"Production": "green",
 		"Off": "gray",
 		"Idle": "gray",
@@ -446,16 +496,6 @@ def get_workstations(**kwargs):
 		"Maintenance": "yellow",
 		"Setup": "blue",
 	}
-
-	for d in data:
-		d.workstation_name = get_link_to_form("Workstation", d.name)
-		d.status_image = d.on_status_image
-		d.color = color_map.get(d.status, "red")
-		d.workstation_link = get_url_to_form("Workstation", d.name)
-		if d.status != "Production":
-			d.status_image = d.off_status_image
-
-	return data
 
 
 @frappe.whitelist()
