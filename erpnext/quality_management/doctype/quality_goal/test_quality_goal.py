@@ -1,12 +1,12 @@
 # Copyright (c) 2018, Frappe and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 
-class TestQualityGoal(unittest.TestCase):
+class TestQualityGoal(IntegrationTestCase):
 	def test_quality_goal(self):
 		# no code, just a basic sanity check
 		goal = get_quality_goal()
