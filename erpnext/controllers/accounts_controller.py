@@ -1919,8 +1919,8 @@ class AccountsController(TransactionBase):
 
 		return stock_items
 
-	def set_total_advance_paid(self):
-		advance_paid, order_total = None, None
+	def get_advances_from_payments(self) -> list:
+		# TODO: add company filter
 		per = frappe.qb.DocType("Payment Entry Reference")
 		advance = (
 			qb.from_(per)
@@ -1930,11 +1930,40 @@ class AccountsController(TransactionBase):
 				& per.reference_name.eq(self.name)
 				& per.docstatus.eq(1)
 			)
+			.groupby(per.parent)
 			.run(as_dict=True)
 		)
+		return advance
+
+	def get_advances_from_journals(self) -> list:
+		# TODO: add company filter
+		jea = frappe.qb.DocType("Journal Entry Account")
+		if self.doctype == "Purchase Order":
+			field = jea.debit - jea.credit
+		else:
+			field = jea.credit - jea.debit
+
+		advance = (
+			qb.from_(jea)
+			.select(Sum(field).as_("amount"), jea.account_currency)
+			.where(
+				jea.reference_type.eq(self.doctype) & jea.reference_name.eq(self.name) & jea.docstatus.eq(1)
+			)
+			.groupby(jea.parent)
+			.run(as_dict=True)
+		)
+		return advance
+
+	def set_total_advance_paid(self):
+		advance_paid, order_total = None, None
+		pe_advances = self.get_advances_from_payments()
+		je_advances = self.get_advances_from_journals()
+		advance = pe_advances + je_advances
 
 		if advance:
+			total_advance_paid = sum([x.amount for x in advance])
 			advance = advance[0]
+			advance.amount = total_advance_paid
 
 			advance_paid = flt(advance.amount, self.precision("advance_paid"))
 			formatted_advance_paid = fmt_money(
@@ -1965,6 +1994,8 @@ class AccountsController(TransactionBase):
 				)
 
 			self.db_set("advance_paid", advance_paid)
+		else:
+			self.db_set("advance_paid", 0)
 
 		self.set_advance_payment_status()
 
