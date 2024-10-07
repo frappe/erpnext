@@ -1853,9 +1853,15 @@ class QueryPaymentLedger:
 				.where(Criterion.all(self.common_filter))
 				.where(Criterion.all(self.dimensions_filter))
 				.where(Criterion.all(self.voucher_posting_date))
-				.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+				.groupby(
+					ple.against_voucher_type, 
+					ple.against_voucher_no, 
+					ple.party_type, 
+					ple.party,
+					ple.posting_date
+				)
 				.orderby(ple.posting_date, ple.voucher_no)
-				.having(qb.Field("amount_in_account_currency") > 0)
+				.having(Sum(ple.amount_in_account_currency) > 0)
 				.limit(self.limit)
 				.run()
 			)
@@ -1961,19 +1967,18 @@ class QueryPaymentLedger:
 			.where(Criterion.all(filter_on_outstanding_amount))
 		)
 
-		# build CTE filter
-		# only fetch invoices
+		# Add having conditions based on invoice and payment flags
 		if self.get_invoices:
 			self.cte_query_voucher_amount_and_outstanding = (
 				self.cte_query_voucher_amount_and_outstanding.having(
-					qb.Field("outstanding_in_account_currency") > 0
+					(Table("outstanding").amount_in_account_currency > 0)
 				)
 			)
-		# only fetch payments
+		# Only fetch payments
 		elif self.get_payments:
 			self.cte_query_voucher_amount_and_outstanding = (
 				self.cte_query_voucher_amount_and_outstanding.having(
-					qb.Field("outstanding_in_account_currency") < 0
+					(Table("outstanding").amount_in_account_currency < 0)
 				)
 			)
 
