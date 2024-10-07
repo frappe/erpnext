@@ -681,17 +681,6 @@ class TestPaymentEntry(FrappeTestCase):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_payment_against_negative_sales_invoice(self):
-		pe1 = frappe.new_doc("Payment Entry")
-		pe1.payment_type = "Pay"
-		pe1.company = "_Test Company"
-		pe1.party_type = "Customer"
-		pe1.party = "_Test Customer"
-		pe1.paid_from = "_Test Cash - _TC"
-		pe1.paid_amount = 100
-		pe1.received_amount = 100
-
-		self.assertRaises(InvalidPaymentEntry, pe1.validate)
-
 		si1 = create_sales_invoice()
 
 		# create full payment entry against si1
@@ -749,8 +738,6 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# pay more than outstanding against si1
 		pe3 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
-		pe3.paid_amount = pe3.received_amount = 300
-		self.assertRaises(InvalidPaymentEntry, pe3.validate)
 
 		# pay negative outstanding against si1
 		pe3.paid_to = "Debtors - _TC"
@@ -1437,6 +1424,39 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.delete()
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, pe.doctype, pe.name)
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, "Journal Entry", jv[0])
+
+	def test_receive_payment_from_payable_party_type(self):
+		pe = create_payment_entry(
+			party_type="Supplier",
+			party="_Test Supplier",
+			payment_type="Receive",
+			paid_from="Creditors - _TC",
+			paid_to="_Test Cash - _TC",
+			save=True,
+			submit=True,
+		)
+		self.voucher_no = pe.name
+		self.expected_gle = [
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+			{"account": "Creditors - _TC", "debit": 0.0, "credit": 1000.0},
+		]
+		self.check_gl_entries()
+
+	def check_gl_entries(self):
+		gle = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gle)
+			.select(
+				gle.account,
+				gle.debit,
+				gle.credit,
+			)
+			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
+			.orderby(gle.account)
+		).run(as_dict=True)
+		for row in range(len(self.expected_gle)):
+			for field in ["account", "debit", "credit"]:
+				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
 
 
 def create_payment_entry(**args):

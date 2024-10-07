@@ -31,6 +31,7 @@ from erpnext.accounts.utils import (
 	get_account_currency,
 	get_balance_on,
 	get_outstanding_invoices,
+	get_party_types_from_account_type,
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
@@ -79,7 +80,6 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
-		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -948,40 +948,6 @@ class PaymentEntry(AccountsController):
 			self.name,
 		)
 
-	def validate_payment_against_negative_invoice(self):
-		if (self.payment_type != "Pay" or self.party_type != "Customer") and (
-			self.payment_type != "Receive" or self.party_type != "Supplier"
-		):
-			return
-
-		total_negative_outstanding = flt(
-			sum(
-				abs(flt(d.outstanding_amount))
-				for d in self.get("references")
-				if flt(d.outstanding_amount) < 0
-			),
-			self.references[0].precision("outstanding_amount") if self.references else None,
-		)
-
-		paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
-		additional_charges = sum(flt(d.amount) for d in self.deductions)
-
-		if not total_negative_outstanding:
-			if self.party_type == "Customer":
-				msg = _("Cannot pay to Customer without any negative outstanding invoice")
-			else:
-				msg = _("Cannot receive from Supplier without any negative outstanding invoice")
-
-			frappe.throw(msg, InvalidPaymentEntry)
-
-		elif paid_amount - additional_charges > total_negative_outstanding:
-			frappe.throw(
-				_("Paid Amount cannot be greater than total negative outstanding amount {0}").format(
-					fmt_money(total_negative_outstanding)
-				),
-				InvalidPaymentEntry,
-			)
-
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
 			# do not set title dynamically if title exists during data import.
@@ -1086,40 +1052,55 @@ class PaymentEntry(AccountsController):
 				item=self,
 			)
 
-			dr_or_cr = (
-				"credit" if erpnext.get_party_account_type(self.party_type) == "Receivable" else "debit"
-			)
-
 			for d in self.get("references"):
+				dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 				cost_center = self.cost_center
 				if d.reference_doctype == "Sales Invoice" and not cost_center:
 					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
+
 				gle = party_gl_dict.copy()
+
+				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
+				reverse_dr_or_cr = 0
+
+				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
+					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
+					payable_party_types = get_party_types_from_account_type("Payable")
+					receivable_party_types = get_party_types_from_account_type("Receivable")
+					if (
+						is_return
+						and self.party_type in receivable_party_types
+						and (self.payment_type == "Pay")
+					):
+						reverse_dr_or_cr = 1
+					elif (
+						is_return
+						and self.party_type in payable_party_types
+						and (self.payment_type == "Receive")
+					):
+						reverse_dr_or_cr = 1
+
+					if is_return and not reverse_dr_or_cr:
+						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
 				gle.update(
 					{
+						dr_or_cr: abs(allocated_amount_in_company_currency),
+						dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
 						"against_voucher_type": d.reference_doctype,
 						"against_voucher": d.reference_name,
 						"cost_center": cost_center,
 					}
 				)
 
-				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
-
-				gle.update(
-					{
-						dr_or_cr + "_in_account_currency": d.allocated_amount,
-						dr_or_cr: allocated_amount_in_company_currency,
-					}
-				)
-
 				gl_entries.append(gle)
 
 			if self.unallocated_amount:
+				dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 				exchange_rate = self.get_exchange_rate()
 				base_unallocated_amount = self.unallocated_amount * exchange_rate
 
 				gle = party_gl_dict.copy()
-
 				gle.update(
 					{
 						dr_or_cr + "_in_account_currency": self.unallocated_amount,

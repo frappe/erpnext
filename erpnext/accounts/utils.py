@@ -2133,6 +2133,10 @@ def create_gain_loss_journal(
 	return journal_entry.name
 
 
+def get_party_types_from_account_type(account_type):
+	return frappe.db.get_all("Party Type", {"account_type": account_type}, pluck="name")
+
+
 def run_ledger_health_checks():
 	health_monitor_settings = frappe.get_doc("Ledger Health Monitor")
 	if health_monitor_settings.enable_health_monitor:
