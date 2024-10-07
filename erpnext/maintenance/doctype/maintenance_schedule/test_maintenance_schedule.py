@@ -1,9 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, today
 
@@ -17,7 +17,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_i
 # test_records = frappe.get_test_records('Maintenance Schedule')
 
 
-class TestMaintenanceSchedule(unittest.TestCase):
+class TestMaintenanceSchedule(IntegrationTestCase):
 	def test_events_should_be_created_and_deleted(self):
 		ms = make_maintenance_schedule()
 		ms.generate_schedule()
