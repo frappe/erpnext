@@ -1308,8 +1308,12 @@ def add_serial_batch_ledgers(entries, child_row, doc, warehouse, do_not_save=Fal
 	if parent_doc and isinstance(parent_doc, str):
 		parent_doc = parse_json(parent_doc)
 
-	if frappe.db.exists("Serial and Batch Bundle", child_row.serial_and_batch_bundle):
-		sb_doc = update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse)
+	bundle = child_row.serial_and_batch_bundle
+	if child_row.get("is_rejected"):
+		bundle = child_row.rejected_serial_and_batch_bundle
+
+	if frappe.db.exists("Serial and Batch Bundle", bundle):
+		sb_doc = update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, warehouse)
 	else:
 		sb_doc = create_serial_batch_no_ledgers(
 			entries, child_row, parent_doc, warehouse, do_not_save=do_not_save
@@ -1412,8 +1416,8 @@ def get_type_of_transaction(parent_doc, child_row):
 	return type_of_transaction
 
 
-def update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=None) -> object:
-	doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
+def update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, warehouse=None) -> object:
+	doc = frappe.get_doc("Serial and Batch Bundle", bundle)
 	doc.voucher_detail_no = child_row.name
 	doc.posting_date = parent_doc.posting_date
 	doc.posting_time = parent_doc.posting_time
