@@ -1923,6 +1923,7 @@ class AccountsController(TransactionBase):
 				& (ple.delinked == 0)
 				& (ple.company == self.company)
 			)
+			.groupby(ple.account_currency)
 			.run(as_dict=True)
 		)
 
