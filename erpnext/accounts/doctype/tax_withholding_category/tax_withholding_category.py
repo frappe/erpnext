@@ -382,6 +382,9 @@ def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, pa
 	Use Payment Ledger to fetch unallocated Advance Payments
 	"""
 
+	if party_type == "Supplier":
+		return []
+
 	ple = qb.DocType("Payment Ledger Entry")
 
 	conditions = []
