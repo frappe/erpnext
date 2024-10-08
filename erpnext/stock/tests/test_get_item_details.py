@@ -1,6 +1,6 @@
 import frappe
-from frappe.test_runner import make_test_records
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import make_test_records
 
 from erpnext.stock.get_item_details import get_item_details
 
@@ -8,7 +8,7 @@ test_ignore = ["BOM"]
 test_dependencies = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
 
 
-class TestGetItemDetail(FrappeTestCase):
+class TestGetItemDetail(IntegrationTestCase):
 	def setUp(self):
 		make_test_records("Price List")
 		super().setUp()

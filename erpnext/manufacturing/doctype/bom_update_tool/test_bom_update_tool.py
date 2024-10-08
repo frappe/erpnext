@@ -2,7 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, timeout
+from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import timeout
 
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
@@ -14,7 +15,16 @@ from erpnext.stock.doctype.item.test_item import create_item
 test_records = frappe.get_test_records("BOM")
 
 
-class TestBOMUpdateTool(FrappeTestCase):
+class UnitTestBomUpdateTool(UnitTestCase):
+	"""
+	Unit tests for BomUpdateTool.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestBOMUpdateTool(IntegrationTestCase):
 	"Test major functions run via BOM Update Tool."
 
 	def tearDown(self):

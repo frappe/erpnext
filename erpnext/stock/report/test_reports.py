@@ -1,6 +1,7 @@
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report
 
@@ -75,7 +76,7 @@ OPTIONAL_FILTERS = {
 }
 
 
-class TestReports(unittest.TestCase):
+class TestReports(IntegrationTestCase):
 	def test_execute_all_stock_reports(self):
 		"""Test that all script report in stock modules are executable with supported filters"""
 		for report, filter in REPORT_FILTER_TEST_CASES:

@@ -5,7 +5,7 @@
 from urllib.parse import urlparse
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
@@ -21,7 +21,16 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
-class TestRequestforQuotation(FrappeTestCase):
+class UnitTestRequestForQuotation(UnitTestCase):
+	"""
+	Unit tests for RequestForQuotation.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestRequestforQuotation(IntegrationTestCase):
 	def test_rfq_qty(self):
 		rfq = make_request_for_quotation(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):

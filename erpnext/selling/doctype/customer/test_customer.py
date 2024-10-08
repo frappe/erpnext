@@ -5,8 +5,8 @@
 import json
 
 import frappe
-from frappe.test_runner import make_test_records
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import make_test_records
 from frappe.utils import flt
 
 from erpnext.accounts.party import get_due_date
@@ -23,7 +23,16 @@ test_dependencies = ["Payment Term", "Payment Terms Template"]
 test_records = frappe.get_test_records("Customer")
 
 
-class TestCustomer(FrappeTestCase):
+class UnitTestCustomer(UnitTestCase):
+	"""
+	Unit tests for Customer.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestCustomer(IntegrationTestCase):
 	def setUp(self):
 		if not frappe.get_value("Item", "_Test Item"):
 			make_test_records("Item")

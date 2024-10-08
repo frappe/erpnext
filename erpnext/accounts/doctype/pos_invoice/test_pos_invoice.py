@@ -1,11 +1,11 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import copy
 import unittest
 
 import frappe
 from frappe import _
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -20,7 +20,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestPOSInvoice(unittest.TestCase):
+class TestPOSInvoice(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
