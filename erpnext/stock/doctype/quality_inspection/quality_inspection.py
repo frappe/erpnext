@@ -52,6 +52,7 @@ class QualityInspection(Document):
 		]
 		remarks: DF.Text | None
 		report_date: DF.Date
+		rowname: DF.Data | None
 		sample_size: DF.Float
 		status: DF.Literal["", "Accepted", "Rejected"]
 		verified_by: DF.Data | None
@@ -126,46 +127,30 @@ class QualityInspection(Document):
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:
-				frappe.db.sql(
-					f"""
-					UPDATE `tab{self.reference_type}`
-					SET quality_inspection = %s, modified = %s
-					WHERE name = %s and production_item = %s
-				""",
-					(quality_inspection, self.modified, self.reference_name, self.item_code),
+				frappe.db.set_value(
+					self.reference_type, self.reference_name, "quality_inspection", quality_inspection
 				)
+				frappe.db.set_value(self.reference_type, self.reference_name, "modified", self.modified)
 
 		else:
-			args = [quality_inspection, self.modified, self.reference_name, self.item_code]
-			doctype = self.reference_type + " Item"
+			conditions = {"parent": self.reference_name, "item_code": self.item_code}
+			if self.batch_no and self.docstatus == 1:
+				conditions["batch_no"] = self.batch_no
+
+			if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
+				conditions["quality_inspection"] = self.name
+
+			if hasattr(self, "rowname") and self.rowname:
+				conditions["name"] = self.rowname
 
 			if self.reference_type == "Stock Entry":
 				doctype = "Stock Entry Detail"
+			else:
+				doctype = self.reference_type + " Item"
 
-			if self.reference_type and self.reference_name:
-				conditions = ""
-				if self.batch_no and self.docstatus == 1:
-					conditions += " and t1.batch_no = %s"
-					args.append(self.batch_no)
+			frappe.db.set_value(doctype, conditions, "quality_inspection", quality_inspection)
 
-				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
-					conditions += " and t1.quality_inspection = %s"
-					args.append(self.name)
-
-				frappe.db.sql(
-					f"""
-					UPDATE
-						`tab{doctype}` t1, `tab{self.reference_type}` t2
-					SET
-						t1.quality_inspection = %s, t2.modified = %s
-					WHERE
-						t1.parent = %s
-						and t1.item_code = %s
-						and t1.parent = t2.name
-						{conditions}
-				""",
-					args,
-				)
+			frappe.db.set_value(self.reference_type, self.reference_name, "modified", self.modified)
 
 	def inspect_and_set_status(self):
 		for reading in self.readings:
