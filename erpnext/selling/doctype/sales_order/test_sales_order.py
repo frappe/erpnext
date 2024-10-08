@@ -8,8 +8,6 @@ import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
-from erpnext.stock.get_item_details import get_bin_details
-
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.accounts_controller import update_child_qty_rate
@@ -32,6 +30,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.get_item_details import get_bin_details
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
@@ -102,7 +101,9 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(mr.get("items")), len(so.get("items")))
 
 		for item in mr.get("items"):
-			actual_qty = get_bin_details(item.item_code, item.warehouse, mr.company, True).get("actual_qty", 0)
+			actual_qty = get_bin_details(item.item_code, item.warehouse, mr.company, True).get(
+				"actual_qty", 0
+			)
 			self.assertEqual(flt(item.actual_qty), actual_qty)
 
 	def test_make_delivery_note(self):
