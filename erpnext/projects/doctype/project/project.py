@@ -101,10 +101,10 @@ class Project(Document):
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
 	def copy_from_template(self):
-		self.copy_from_template_data()
-		self.copy_from_template_task()
+		self.copy_data_from_project_template()
+		self.copy_tasks_from_project_template()
 
-	def copy_from_template_task(self):
+	def copy_tasks_from_project_template(self):
 		if not self._project_template_applies():
 			return
 
@@ -139,7 +139,7 @@ class Project(Document):
 			)
 		).insert()
 
-	def copy_from_template_data(self):
+	def copy_data_from_project_template(self):
 		if not self._project_template_applies():
 			return
 
@@ -218,10 +218,10 @@ class Project(Document):
 		self.db_update()
 
 	def before_insert(self):
-		self.copy_from_template_data()
+		self.copy_data_from_project_template()
 
 	def after_insert(self):
-		self.copy_from_template_task()
+		self.copy_tasks_from_project_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
