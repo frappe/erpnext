@@ -14,6 +14,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
+from erpnext.stock.get_item_details import get_bin_details
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -838,6 +839,7 @@ def make_material_request(source_name, target_doc=None):
 		target.project = source_parent.project
 		target.qty = get_remaining_qty(source)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
+		target.actual_qty = get_bin_details(target.item_code, target.warehouse, source_parent.company, True).get("actual_qty", 0)
 
 		args = target.as_dict().copy()
 		args.update(
