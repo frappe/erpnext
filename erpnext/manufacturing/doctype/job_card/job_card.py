@@ -669,16 +669,11 @@ class JobCard(Document):
 		self.set_transferred_qty()
 
 	def validate_transfer_qty(self):
-<<<<<<< HEAD
-		if self.items and self.transferred_qty < self.for_quantity:
-=======
 		if (
-			not self.finished_good
-			and not self.is_corrective_job_card
-			and self.items
+			not self.is_corrective_job_card 
+			and self.items 
 			and self.transferred_qty < self.for_quantity
 		):
->>>>>>> 7a0a893d08 (fix: validation for corrective job card (#43555))
 			frappe.throw(
 				_(
 					"Materials needs to be transferred to the work in progress warehouse for the job card {0}"
