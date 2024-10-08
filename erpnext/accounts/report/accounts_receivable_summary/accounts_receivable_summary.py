@@ -104,25 +104,23 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.set_party_details(d)
 
 	def init_party_total(self, row):
+		default_dict = {
+			"invoiced": 0.0,
+			"paid": 0.0,
+			"credit_note": 0.0,
+			"outstanding": 0.0,
+			"total_due": 0.0,
+			"future_amount": 0.0,
+			"sales_person": [],
+			"party_type": row.party_type,
+		}
+		for i in self.range_numbers:
+			range_key = f"range{i}"
+			default_dict[range_key] = 0.0
+
 		self.party_total.setdefault(
 			row.party,
-			frappe._dict(
-				{
-					"invoiced": 0.0,
-					"paid": 0.0,
-					"credit_note": 0.0,
-					"outstanding": 0.0,
-					"range1": 0.0,
-					"range2": 0.0,
-					"range3": 0.0,
-					"range4": 0.0,
-					"range5": 0.0,
-					"total_due": 0.0,
-					"future_amount": 0.0,
-					"sales_person": [],
-					"party_type": row.party_type,
-				}
-			),
+			frappe._dict(default_dict),
 		)
 
 	def set_party_details(self, row):
@@ -173,6 +171,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.add_column(_("Difference"), fieldname="diff")
 
 		self.setup_ageing_columns()
+		self.add_column(label="Total Amount Due", fieldname="total_due")
 
 		if self.filters.show_future_payments:
 			self.add_column(label=_("Future Payment Amount"), fieldname="future_amount")
@@ -205,27 +204,6 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		self.add_column(
 			label=_("Currency"), fieldname="currency", fieldtype="Link", options="Currency", width=80
 		)
-
-	def setup_ageing_columns(self):
-		for i, label in enumerate(
-			[
-				"0-{range1}".format(range1=self.filters["range1"]),
-				"{range1}-{range2}".format(
-					range1=cint(self.filters["range1"]) + 1, range2=self.filters["range2"]
-				),
-				"{range2}-{range3}".format(
-					range2=cint(self.filters["range2"]) + 1, range3=self.filters["range3"]
-				),
-				"{range3}-{range4}".format(
-					range3=cint(self.filters["range3"]) + 1, range4=self.filters["range4"]
-				),
-				"{range4}-{above}".format(range4=cint(self.filters["range4"]) + 1, above=_("Above")),
-			]
-		):
-			self.add_column(label=label, fieldname="range" + str(i + 1))
-
-		# Add column for total due amount
-		self.add_column(label="Total Amount Due", fieldname="total_due")
 
 
 def get_gl_balance(report_date, company):

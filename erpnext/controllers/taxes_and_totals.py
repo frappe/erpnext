@@ -41,7 +41,7 @@ class calculate_taxes_and_totals:
 		return items
 
 	def calculate(self):
-		if not len(self._items):
+		if not len(self.doc.items):
 			return
 
 		self.discount_amount_applied = False
@@ -96,7 +96,7 @@ class calculate_taxes_and_totals:
 		if self.doc.get("is_return") and self.doc.get("return_against"):
 			return
 
-		for item in self._items:
+		for item in self.doc.items:
 			if item.item_code and item.get("item_tax_template"):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
 				args = {
@@ -155,7 +155,7 @@ class calculate_taxes_and_totals:
 			return
 
 		if not self.discount_amount_applied:
-			for item in self._items:
+			for item in self.doc.items:
 				self.doc.round_floats_in(item)
 
 				if item.discount_percentage == 100:
@@ -259,7 +259,7 @@ class calculate_taxes_and_totals:
 		if not any(cint(tax.included_in_print_rate) for tax in self.doc.get("taxes")):
 			return
 
-		for item in self._items:
+		for item in self.doc.items:
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			cumulated_tax_fraction = 0
 			total_inclusive_tax_amount_per_qty = 0
@@ -514,7 +514,7 @@ class calculate_taxes_and_totals:
 			if tax.item_wise_tax_detail.get(key):
 				item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
 
-			tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount)]
+			tax.item_wise_tax_detail[key] = [tax_rate, item_wise_tax_amount]
 
 	def round_off_totals(self, tax):
 		if tax.account_head in frappe.flags.round_off_applicable_accounts:
@@ -684,6 +684,9 @@ class calculate_taxes_and_totals:
 					)
 
 					item.net_amount = flt(item.net_amount - distributed_amount, item.precision("net_amount"))
+					item.distributed_discount_amount = flt(
+						distributed_amount, item.precision("distributed_discount_amount")
+					)
 					net_total += item.net_amount
 
 					# discount amount rounding loss adjustment if no taxes
@@ -699,6 +702,10 @@ class calculate_taxes_and_totals:
 
 						item.net_amount = flt(
 							item.net_amount + discount_amount_loss, item.precision("net_amount")
+						)
+						item.distributed_discount_amount = flt(
+							distributed_amount + discount_amount_loss,
+							item.precision("distributed_discount_amount"),
 						)
 
 					item.net_rate = (

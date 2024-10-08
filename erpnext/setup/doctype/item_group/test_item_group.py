@@ -1,10 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils.nestedset import (
 	NestedSetChildExistsError,
 	NestedSetInvalidMergeError,
@@ -17,7 +16,7 @@ from frappe.utils.nestedset import (
 test_records = frappe.get_test_records("Item Group")
 
 
-class TestItem(unittest.TestCase):
+class TestItem(IntegrationTestCase):
 	def test_basic_tree(self, records=None):
 		min_lft = 1
 		max_rgt = frappe.db.sql("select max(rgt) from `tabItem Group`")[0][0]

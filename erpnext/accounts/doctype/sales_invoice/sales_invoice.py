@@ -92,7 +92,6 @@ class SalesInvoice(SellingController):
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		base_write_off_amount: DF.Currency
-		campaign: DF.Link | None
 		cash_bank_account: DF.Link | None
 		change_amount: DF.Currency
 		commission_rate: DF.Float
@@ -154,6 +153,7 @@ class SalesInvoice(SellingController):
 		party_account_currency: DF.Link | None
 		payment_schedule: DF.Table[PaymentSchedule]
 		payment_terms_template: DF.Link | None
+		payment_url: DF.Data | None
 		payments: DF.Table[SalesInvoicePayment]
 		plc_conversion_rate: DF.Float
 		po_date: DF.Date | None
@@ -181,7 +181,6 @@ class SalesInvoice(SellingController):
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
-		source: DF.Link | None
 		status: DF.Literal[
 			"",
 			"Draft",
@@ -223,6 +222,10 @@ class SalesInvoice(SellingController):
 		update_outstanding_for_self: DF.Check
 		update_stock: DF.Check
 		use_company_roundoff_cost_center: DF.Check
+		utm_campaign: DF.Link | None
+		utm_content: DF.Data | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
 		write_off_account: DF.Link | None
 		write_off_amount: DF.Currency
 		write_off_cost_center: DF.Link | None
@@ -283,7 +286,6 @@ class SalesInvoice(SellingController):
 		self.check_sales_order_on_hold_or_close("sales_order")
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
-		self.add_remarks()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
@@ -315,17 +317,6 @@ class SalesInvoice(SellingController):
 		if not self.is_opening:
 			self.is_opening = "No"
 
-		if self.redeem_loyalty_points:
-			lp = frappe.get_doc("Loyalty Program", self.loyalty_program)
-			self.loyalty_redemption_account = (
-				lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
-			)
-			self.loyalty_redemption_cost_center = (
-				lp.cost_center
-				if not self.loyalty_redemption_cost_center
-				else self.loyalty_redemption_cost_center
-			)
-
 		self.set_against_income_account()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
@@ -344,14 +335,10 @@ class SalesInvoice(SellingController):
 		if self.is_pos and self.is_return:
 			self.verify_payment_amount_is_negative()
 
-		if (
-			self.redeem_loyalty_points
-			and self.loyalty_program
-			and self.loyalty_points
-			and not self.is_consolidated
-		):
+		if self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
+		self.allow_write_off_only_on_pos()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_accounts(self):
@@ -389,7 +376,7 @@ class SalesInvoice(SellingController):
 
 	def validate_income_account(self):
 		for item in self.get("items"):
-			validate_account_head(item.idx, item.income_account, self.company, "Income")
+			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
 	def set_tax_withholding(self):
 		if self.get("is_opening") == "Yes":
@@ -426,6 +413,9 @@ class SalesInvoice(SellingController):
 	def before_save(self):
 		self.set_account_for_mode_of_payment()
 		self.set_paid_amount()
+
+	def before_submit(self):
+		self.add_remarks()
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
@@ -695,7 +685,9 @@ class SalesInvoice(SellingController):
 				"print_format": print_format,
 				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
-				"campaign": pos.get("campaign"),
+				"utm_source": pos.get("utm_source"),
+				"utm_campaign": pos.get("utm_campaign"),
+				"utm_medium": pos.get("utm_medium"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
 			}
 
@@ -962,10 +954,11 @@ class SalesInvoice(SellingController):
 
 	def add_remarks(self):
 		if not self.remarks:
-			if self.po_no and self.po_date:
-				self.remarks = _("Against Customer Order {0} dated {1}").format(
-					self.po_no, formatdate(self.po_date)
-				)
+			if self.po_no:
+				self.remarks = _("Against Customer Order {0}").format(self.po_no)
+				if self.po_date:
+					self.remarks += " " + _("dated {0}").format(formatdate(self.po_date))
+
 			else:
 				self.remarks = _("No Remarks")
 
@@ -1038,6 +1031,10 @@ class SalesInvoice(SellingController):
 					comma_and(notes)
 				),
 			)
+
+	def allow_write_off_only_on_pos(self):
+		if not self.is_pos and self.write_off_account:
+			self.write_off_account = None
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
@@ -1444,7 +1441,7 @@ class SalesInvoice(SellingController):
 			asset.set_status("Sold" if self.docstatus == 1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
-		if cint(self.redeem_loyalty_points):
+		if cint(self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated):
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -1626,9 +1623,28 @@ class SalesInvoice(SellingController):
 			and self.base_rounding_adjustment
 			and not self.is_internal_transfer()
 		):
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+			(
+				round_off_account,
+				round_off_cost_center,
+				round_off_for_opening,
+			) = get_round_off_account_and_cost_center(
 				self.company, "Sales Invoice", self.name, self.use_company_roundoff_cost_center
 			)
+
+			if self.is_opening == "Yes" and self.rounding_adjustment:
+				if not round_off_for_opening:
+					frappe.throw(
+						_(
+							"Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
+						).format(
+							frappe.bold(self.rounding_adjustment),
+							frappe.bold("Round Off for Opening"),
+							get_link_to_form("Company", self.company),
+							frappe.bold("Disable Rounded Total"),
+						)
+					)
+				else:
+					round_off_account = round_off_for_opening
 
 			gl_entries.append(
 				self.get_gl_dict(
@@ -1776,7 +1792,8 @@ class SalesInvoice(SellingController):
 			loyalty_program=self.loyalty_program,
 			include_expired_entry=True,
 		)
-		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.db_set("loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
 		from frappe.query_builder.functions import Sum

@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -24,7 +24,16 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
 
-class TestPickList(FrappeTestCase):
+class UnitTestPickList(UnitTestCase):
+	"""
+	Unit tests for PickList.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPickList(IntegrationTestCase):
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:

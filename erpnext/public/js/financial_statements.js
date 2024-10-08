@@ -271,11 +271,10 @@ function get_filters() {
 	let fy_filters = filters.filter((x) => {
 		return ["from_fiscal_year", "to_fiscal_year"].includes(x.fieldname);
 	});
-	let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), false, true);
+	let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), false, false);
 	if (fiscal_year) {
-		let fy = erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), false, false);
 		fy_filters.forEach((x) => {
-			x.default = fy;
+			x.default = fiscal_year;
 		});
 	}
 

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
 from pypika import functions as fn
 
@@ -26,7 +26,16 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
-class TestPurchaseReceipt(FrappeTestCase):
+class UnitTestPurchaseReceipt(UnitTestCase):
+	"""
+	Unit tests for PurchaseReceipt.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPurchaseReceipt(IntegrationTestCase):
 	def setUp(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
@@ -1234,7 +1243,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 1})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 1})
 	def test_neg_to_positive(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 

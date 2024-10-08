@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import cstr
 
 from erpnext.assets.doctype.asset.test_asset import create_asset
@@ -11,7 +11,16 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 )
 
 
-class TestAssetShiftAllocation(FrappeTestCase):
+class UnitTestAssetShiftAllocation(UnitTestCase):
+	"""
+	Unit tests for AssetShiftAllocation.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestAssetShiftAllocation(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		create_asset_shift_factors()

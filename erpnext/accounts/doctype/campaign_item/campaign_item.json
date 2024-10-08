@@ -13,13 +13,13 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Campaign",
-   "options": "Campaign"
+   "options": "UTM Campaign"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:44.142625",
+ "modified": "2024-06-28 11:04:09.815940",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Campaign Item",

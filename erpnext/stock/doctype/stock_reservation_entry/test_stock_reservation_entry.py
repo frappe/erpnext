@@ -4,7 +4,7 @@
 from random import randint
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import today
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
@@ -21,13 +21,22 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 from erpnext.stock.utils import get_stock_balance
 
 
-class TestStockReservationEntry(FrappeTestCase):
+class UnitTestStockReservationEntry(UnitTestCase):
+	"""
+	Unit tests for StockReservationEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestStockReservationEntry(IntegrationTestCase):
 	def setUp(self) -> None:
 		self.warehouse = "_Test Warehouse - _TC"
 		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			validate_stock_reservation_settings,
@@ -40,10 +49,10 @@ class TestStockReservationEntry(FrappeTestCase):
 		)
 
 		# Case - 1: When `Stock Reservation` is disabled in `Stock Settings`, throw `ValidationError`
-		with change_settings("Stock Settings", {"enable_stock_reservation": 0}):
+		with self.change_settings("Stock Settings", {"enable_stock_reservation": 0}):
 			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
 
-		with change_settings("Stock Settings", {"enable_stock_reservation": 1}):
+		with self.change_settings("Stock Settings", {"enable_stock_reservation": 1}):
 			# Case - 2: When `Voucher Type` is not allowed for `Stock Reservation`, throw `ValidationError`
 			voucher.doctype = "NOT ALLOWED"
 			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
@@ -120,7 +129,9 @@ class TestStockReservationEntry(FrappeTestCase):
 		sre.load_from_db()
 		self.assertEqual(sre.status, "Cancelled")
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
+	@IntegrationTestCase.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
+	)
 	def test_update_reserved_qty_in_voucher(self) -> None:
 		# Step - 1: Create a `Sales Order`
 		so = make_sales_order(
@@ -187,7 +198,9 @@ class TestStockReservationEntry(FrappeTestCase):
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, 0)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
+	@IntegrationTestCase.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
+	)
 	def test_cant_consume_reserved_stock(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
@@ -235,7 +248,7 @@ class TestStockReservationEntry(FrappeTestCase):
 		se.submit()
 		se.cancel()
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -267,12 +280,12 @@ class TestStockReservationEntry(FrappeTestCase):
 		)
 
 		# Test - 1: Stock should not be reserved if the Available Qty to Reserve is less than the Ordered Qty and Partial Reservation is disabled in Stock Settings.
-		with change_settings("Stock Settings", {"allow_partial_reservation": 0}):
+		with self.change_settings("Stock Settings", {"allow_partial_reservation": 0}):
 			so.create_stock_reservation_entries()
 			self.assertFalse(has_reserved_stock("Sales Order", so.name))
 
 		# Test - 2: Stock should be Partially Reserved if the Partial Reservation is enabled in Stock Settings.
-		with change_settings("Stock Settings", {"allow_partial_reservation": 1}):
+		with self.change_settings("Stock Settings", {"allow_partial_reservation": 1}):
 			so.create_stock_reservation_entries()
 			so.load_from_db()
 			self.assertTrue(has_reserved_stock("Sales Order", so.name))
@@ -342,7 +355,7 @@ class TestStockReservationEntry(FrappeTestCase):
 				self.assertEqual(sre_details.status, "Partially Delivered")
 
 			# Test - 8: Over Delivery against Sales Order, SRE Delivered Qty should not be greater than the SRE Reserved Qty.
-			with change_settings("Stock Settings", {"over_delivery_receipt_allowance": 100}):
+			with self.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 100}):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
@@ -363,7 +376,7 @@ class TestStockReservationEntry(FrappeTestCase):
 				for sre_detail in sre_details:
 					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -483,7 +496,7 @@ class TestStockReservationEntry(FrappeTestCase):
 					# Test - 9: After Delivery Note cancellation, SB Entry Delivered Qty should be `0`.
 					self.assertEqual(sb_entry.delivered_qty, 0)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -564,7 +577,7 @@ class TestStockReservationEntry(FrappeTestCase):
 				# Test - 3: Reserved Serial/Batch Nos should be equal to Picked Serial/Batch Nos.
 				self.assertSetEqual(picked_sb_details, reserved_sb_details)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -644,7 +657,7 @@ class TestStockReservationEntry(FrappeTestCase):
 				# Test - 3: Reserved Serial/Batch Nos should be equal to PR Item Serial/Batch Nos.
 				self.assertEqual(set(sb_details), set(reserved_sb_details))
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,

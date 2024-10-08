@@ -25,6 +25,26 @@ class Campaign(Document):
 		naming_series: DF.Literal["SAL-CAM-.YYYY.-"]
 	# end: auto-generated types
 
+	def after_insert(self):
+		try:
+			mc = frappe.get_doc("UTM Campaign", self.campaign_name)
+		except frappe.DoesNotExistError:
+			mc = frappe.new_doc("UTM Campaign")
+			mc.name = self.campaign_name
+		mc.campaign_description = self.description
+		mc.crm_campaign = self.campaign_name
+		mc.save(ignore_permissions=True)
+
+	def on_change(self):
+		try:
+			mc = frappe.get_doc("UTM Campaign", self.campaign_name)
+		except frappe.DoesNotExistError:
+			mc = frappe.new_doc("UTM Campaign")
+			mc.name = self.campaign_name
+		mc.campaign_description = self.description
+		mc.crm_campaign = self.campaign_name
+		mc.save(ignore_permissions=True)
+
 	def autoname(self):
 		if frappe.defaults.get_global_default("campaign_naming_by") != "Naming Series":
 			self.name = self.campaign_name

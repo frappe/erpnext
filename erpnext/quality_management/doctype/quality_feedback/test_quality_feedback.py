@@ -1,12 +1,12 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 
-class TestQualityFeedback(unittest.TestCase):
+class TestQualityFeedback(IntegrationTestCase):
 	def test_quality_feedback(self):
 		template = frappe.get_doc(
 			dict(

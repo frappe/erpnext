@@ -2,6 +2,7 @@ import json
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings
@@ -10,7 +11,7 @@ from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
 )
 
 
-class TestItemVariant(unittest.TestCase):
+class TestItemVariant(IntegrationTestCase):
 	def test_tables_in_template_copied_to_variant(self):
 		fields = [{"field_name": "quality_inspection_template"}]
 		set_item_variant_settings(fields)
