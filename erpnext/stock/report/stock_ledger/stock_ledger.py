@@ -527,23 +527,20 @@ def get_sle_conditions(filters):
 
 
 def get_opening_balance_from_batch(filters, columns, sl_entries):
-	query_filters = {
-		"batch_no": filters.batch_no,
-		"docstatus": 1,
-		"is_cancelled": 0,
-		"posting_date": ("<", filters.from_date),
-		"company": filters.company,
-	}
-
+	query_filters = "and docstatus=1 and is_cancelled=0"
 	for fields in ["item_code", "warehouse"]:
 		if filters.get(fields):
-			query_filters[fields] = filters.get(fields)
+			query_filters += f"and '{fields}' = '{filters.get(fields)}'"
 
-	opening_data = frappe.get_all(
-		"Stock Ledger Entry",
-		fields=["sum(actual_qty) as qty_after_transaction", "sum(stock_value_difference) as stock_value"],
-		filters=query_filters,
-	)[0]
+	opening_data = frappe.db.sql(
+			"""
+			select sum(actual_qty) as qty_after_transaction, sum(stock_value_difference) as stock_value
+			from `tabStock Ledger Entry`
+			where posting_date<%s and batch_no=%s and company=%s%s
+		""",
+			(filters.from_date, filters.batch_no, filters.company,query_filters),
+			as_dict=1,
+		)[0]
 
 	for field in ["qty_after_transaction", "stock_value", "valuation_rate"]:
 		if opening_data.get(field) is None:
