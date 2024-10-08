@@ -1524,7 +1524,7 @@ class StockEntry(StockController):
 
 				sl_entries.append(sle)
 
-	def get_gl_entries(self, warehouse_account):
+	def get_gl_entries(self, warehouse_account=None):
 		gl_entries = super().get_gl_entries(warehouse_account)
 
 		if self.purpose in ("Repack", "Manufacture"):
