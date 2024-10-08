@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 
-from datetime import datetime
+from datetime import datetime,time
+
 
 import frappe
 from frappe import _
@@ -653,7 +654,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
 			if (
 				getdate(current_date_time) == getdate(start_date_time)
-				and get_time_in_timedelta(current_date_time.time()) > support_days[current_weekday].start_time
+				and get_time_in_timedelta(current_date_time.time()) > get_time_in_timedelta(support_days[current_weekday].start_time)
 			):
 				start_time = current_date_time - datetime(
 					current_date_time.year, current_date_time.month, current_date_time.day
@@ -662,6 +663,10 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 				start_time = support_days[current_weekday].start_time
 
 			end_time = support_days[current_weekday].end_time
+			if isinstance(start_time, time):
+				start_time = get_time_in_timedelta(start_time)
+			if isinstance(end_time, time):
+				end_time = get_time_in_timedelta(end_time)
 			time_left_today = time_diff_in_seconds(end_time, start_time)
 			# no time left for support today
 			if time_left_today <= 0:
