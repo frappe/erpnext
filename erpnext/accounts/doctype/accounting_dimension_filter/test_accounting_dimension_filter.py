@@ -16,6 +16,8 @@ test_dependencies = ["Location", "Cost Center", "Department"]
 
 
 class TestAccountingDimensionFilter(IntegrationTestCase):
+	SHOW_TRANSACTION_COMMIT_WARNINGS = True
+
 	def setUp(self):
 		create_dimension()
 		create_accounting_dimension_filter()
