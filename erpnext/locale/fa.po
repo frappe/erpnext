@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-06 09:35+0000\n"
-"PO-Revision-Date: 2024-10-07 00:39\n"
+"PO-Revision-Date: 2024-10-08 00:44\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -91,7 +91,7 @@ msgstr "علامت \"دارایی ثابت است\" را نمی توان برد�
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:257
 msgid "\"SN-01::10\" for \"SN-01\" to \"SN-10\""
-msgstr ""
+msgstr "\"SN-01::10\" برای \"SN-01\" تا \"SN-10\""
 
 #: erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
@@ -5758,7 +5758,7 @@ msgstr "دارایی را نمی توان لغو کرد، زیرا قبلاً {0
 
 #: erpnext/assets/doctype/asset/depreciation.py:507
 msgid "Asset cannot be scrapped before the last depreciation entry."
-msgstr ""
+msgstr "دارایی را نمی توان قبل از آخرین ثبت استهلاک اسقاط کرد."
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:697
 msgid "Asset capitalized after Asset Capitalization {0} was submitted"
@@ -18738,7 +18738,7 @@ msgstr "نام و نام خانوادگی کارمند را که بر اساس �
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:196
 msgid "Enter Manually"
-msgstr ""
+msgstr "ورود دستی"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:274
 msgid "Enter Serial Nos"
@@ -24665,7 +24665,7 @@ msgstr "پیش فرض های آیتم نامعتبر"
 #. Name of a report
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.json
 msgid "Invalid Ledger Entries"
-msgstr ""
+msgstr "ورودی های دفتر نامعتبر"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:59
 #: erpnext/accounts/general_ledger.py:739
@@ -26717,7 +26717,7 @@ msgstr "آیتم دارای گونه است."
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:495
 msgid "Item is mandatory in Raw Materials table."
-msgstr ""
+msgstr "آیتم در جدول مواد اولیه اجباری است."
 
 #: erpnext/selling/page/point_of_sale/pos_item_details.js:109
 msgid "Item is removed since no serial / batch no selected."
@@ -28961,7 +28961,7 @@ msgstr "تولید"
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Manufacture Sub-assembly in Operation"
-msgstr ""
+msgstr "تولید زیر مونتاژ در عملیات"
 
 #. Description of the 'Material Request' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -32702,7 +32702,7 @@ msgstr "مقدار افتتاحیه"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:33
 msgid "Opening Sales Invoices have been created."
-msgstr ""
+msgstr "فاکتورهای فروش افتتاحیه ایجاد شده است."
 
 #. Label of the opening_stock (Float) field in DocType 'Item'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Reconciliation'
@@ -32917,7 +32917,7 @@ msgstr "عملیات"
 #. Creator'
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
 msgid "Operations Routing"
-msgstr ""
+msgstr "مسیریابی عملیات"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1012
 msgid "Operations cannot be left blank"
@@ -32948,15 +32948,15 @@ msgstr "فرصت ها"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:49
 msgid "Opportunities by Campaign"
-msgstr ""
+msgstr "فرصت ها بر اساس کمپین"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:50
 msgid "Opportunities by Medium"
-msgstr ""
+msgstr "فرصت ها به طور متوسط"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:48
 msgid "Opportunities by Source"
-msgstr ""
+msgstr "فرصت ها بر اساس منبع"
 
 #. Label of the opportunity (Link) field in DocType 'Request for Quotation'
 #. Label of the opportunity (Link) field in DocType 'Supplier Quotation'
@@ -43555,7 +43555,7 @@ msgstr "دفترهای روزنامه تجدید ارزیابی"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:108
 msgid "Revaluation Surplus"
-msgstr ""
+msgstr "مازاد تجدید ارزیابی"
 
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:88
 msgid "Revenue"
@@ -43745,7 +43745,7 @@ msgstr "دور کردن مبلغ مالیات"
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Round Off for Opening"
-msgstr ""
+msgstr "گرد کردن برای افتتاحیه"
 
 #. Label of the round_row_wise_tax (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -45157,11 +45157,11 @@ msgstr "تاریخچه ماهانه فروش"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:150
 msgid "Sales Opportunities by Campaign"
-msgstr ""
+msgstr "فرصت های فروش بر اساس کمپین"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:152
 msgid "Sales Opportunities by Medium"
-msgstr ""
+msgstr "فرصت های فروش به طور متوسط"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:148
 msgid "Sales Opportunities by Source"
@@ -46085,7 +46085,7 @@ msgstr "انبار ضایعات"
 
 #: erpnext/assets/doctype/asset/depreciation.py:484
 msgid "Scrap date cannot be before purchase date"
-msgstr ""
+msgstr "تاریخ ضایعات نمی تواند قبل از تاریخ خرید باشد"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -46849,7 +46849,7 @@ msgstr "دفتر کل شماره سریال"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:254
 msgid "Serial No Range"
-msgstr ""
+msgstr "محدوده شماره سریال"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -50040,7 +50040,7 @@ msgstr "کد آیتم‌های زیر مونتاژ"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:490
 msgid "Sub Assembly Item is mandatory"
-msgstr ""
+msgstr "آیتم زیر مونتاژ اجباری است"
 
 #. Label of the section_break_24 (Section Break) field in DocType 'Production
 #. Plan'
