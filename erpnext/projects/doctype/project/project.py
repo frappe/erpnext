@@ -102,13 +102,8 @@ class Project(Document):
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
 	def copy_from_template_task(self):
-		"""
-		Copy tasks from template
-		"""
-		# has a template, and no loaded tasks, so lets create
 		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
 			template = frappe.get_cached_doc("Project Template", self.project_template)
-			# create tasks from template
 			project_tasks = []
 			tmp_task_details = []
 			for task in template.tasks:
@@ -140,13 +135,8 @@ class Project(Document):
 		).insert()
 
 	def copy_from_template_data(self):
-		"""
-		Copy data from template
-		"""
 		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
-			# has a template, and no loaded tasks, so lets create
 			if not self.expected_start_date:
-				# project starts today
 				self.expected_start_date = today()
 
 			template = frappe.get_doc("Project Template", self.project_template)
