@@ -210,6 +210,46 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 			d.reload()
 			d.cancel()
 
+	def test_tcs_on_allocated_advance_payments(self):
+		frappe.db.set_value(
+			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
+		)
+
+		vouchers = []
+
+		# create advance payment
+		pe = create_payment_entry(
+			payment_type="Receive", party_type="Customer", party="Test TCS Customer", paid_amount=30000
+		)
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_to = "Cash - _TC"
+		pe.submit()
+		vouchers.append(pe)
+
+		si = create_sales_invoice(customer="Test TCS Customer", rate=50000)
+		advances = si.get_advance_entries()
+		si.append(
+			"advances",
+			{
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"advance_amount": advances[0].amount,
+				"allocated_amount": 30000,
+			},
+		)
+		si.submit()
+		vouchers.append(si)
+
+		# assert tax collection on total invoice ,advance payment adjusted should be excluded.
+		tcs_charged = sum([d.base_tax_amount for d in si.taxes if d.account_head == "TCS - _TC"])
+		# tcs = (inv amt)50000+(adv amt)30000-(adv adj) 30000 - threshold(30000) * rate 10%
+		self.assertEqual(tcs_charged, 2000)
+
+		# cancel invoice and payments to avoid clashing
+		for d in reversed(vouchers):
+			d.reload()
+			d.cancel()
+
 	def test_tds_calculation_on_net_total(self):
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier4", "tax_withholding_category", "Cumulative Threshold TDS"
