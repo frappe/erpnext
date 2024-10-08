@@ -102,17 +102,19 @@ class Project(Document):
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
 	def copy_from_template_task(self):
-		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
-			template = frappe.get_cached_doc("Project Template", self.project_template)
-			project_tasks = []
-			tmp_task_details = []
-			for task in template.tasks:
-				template_task_details = frappe.get_doc("Task", task.task)
-				tmp_task_details.append(template_task_details)
-				task = self.create_task_from_template(template_task_details)
-				project_tasks.append(task)
+		if not self._project_template_applies():
+			return
 
-			self.dependency_mapping(tmp_task_details, project_tasks)
+		template = frappe.get_doc("Project Template", self.project_template)
+		project_tasks = []
+		tmp_task_details = []
+		for task in template.tasks:
+			template_task_details = frappe.get_doc("Task", task.task)
+			tmp_task_details.append(template_task_details)
+			task = self.create_task_from_template(template_task_details)
+			project_tasks.append(task)
+
+		self.dependency_mapping(tmp_task_details, project_tasks)
 
 	def create_task_from_template(self, task_details):
 		return frappe.get_doc(
@@ -135,14 +137,24 @@ class Project(Document):
 		).insert()
 
 	def copy_from_template_data(self):
-		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
-			if not self.expected_start_date:
-				self.expected_start_date = today()
+		if not self._project_template_applies():
+			return
 
-			template = frappe.get_doc("Project Template", self.project_template)
+		if not self.expected_start_date:
+			self.expected_start_date = today()
 
-			if not self.project_type:
-				self.project_type = template.project_type
+		if not self.project_type:
+			self.project_type = frappe.db.get_value("Project Template", self.project_template, "project_type")
+
+	def _project_template_applies(self) -> bool:
+		"""Return True if the project template should be applied."""
+		if not self.project_template:
+			return False
+
+		if frappe.db.exists("Task", dict(project=self.name)):
+			return False
+
+		return True
 
 	def calculate_start_date(self, task_details):
 		self.start_date = add_days(self.expected_start_date, task_details.start)
