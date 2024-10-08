@@ -1844,7 +1844,7 @@ class AccountsController(TransactionBase):
 					).format(formatted_advance_paid, self.name, formatted_order_total)
 				)
 
-			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+			self.db_set("advance_paid", advance_paid)
 
 	@property
 	def company_abbr(self):
