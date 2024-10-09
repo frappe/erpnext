@@ -11,7 +11,7 @@ from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, get_root_of
-
+from frappe.utils import nowdate, add_years
 from erpnext import get_default_currency
 
 
@@ -118,7 +118,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 			.on(transaction.name == sales_team.parent)
 			.select(UnixTimestamp(transaction[date_field]), Count("*"))
 			.where(sales_team.sales_person == name)
-			.where(transaction[date_field] > CurDate() - Interval(years=1))
+			.where(transaction[date_field] >  add_years(nowdate(), -1))
 			.groupby(transaction[date_field])
 			.run()
 		)
