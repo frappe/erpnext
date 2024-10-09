@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTC Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('https://cdn2.vectorstock.com/i/1000x1000/43/06/ctc-cost-to-company-concept-with-big-word-or-text-vector-27564306.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* Black border for input fields */
+        .form-control {
+            border: 2px solid #000; /* Black border */
+            border-radius: 5px; /* Optional rounded corners */
+            background-color: transparent; /* No background color */
+        }
+
+        /* Transparent form background so it doesn't hide the image */
+        form {
+            background-color: rgba(0, 0, 0, 0); /* Transparent */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Annual CTC Calculator</h1>
+        <form action="/calculate" method="post" class="mt-4">
+            <div class="mb-3">
+                <label for="basic_salary" class="form-label">Basic Salary</label>
+                <input type="number" step="0.01" class="form-control" id="basic_salary" name="basic_salary" required>
+            </div>
+            <div class="mb-3">
+                <label for="hra" class="form-label">HRA</label>
+                <input type="number" step="0.01" class="form-control" id="hra" name="hra" required>
+            </div>
+            <div class="mb-3">
+                <label for="special_allowance" class="form-label">Special Allowance</label>
+                <input type="number" step="0.01" class="form-control" id="special_allowance" name="special_allowance" required>
+            </div>
+            <div class="mb-3">
+                <label for="epf_employee" class="form-label">EPF (Employee PF %)</label>
+                <input type="number" step="0.01" class="form-control" id="epf_employee" name="epf_employee" required>
+            </div>
+            <div class="mb-3">
+                <label for="professional_tax" class="form-label">Professional Tax</label>
+                <input type="number" step="0.01" class="form-control" id="professional_tax" name="professional_tax" required>
+            </div>
+            <div class="mb-3">
+                <label for="income_tax" class="form-label">Income Tax Deduction</label>
+                <input type="number" step="0.01" class="form-control" id="income_tax" name="income_tax" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Calculate CTC</button>
+        </form>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

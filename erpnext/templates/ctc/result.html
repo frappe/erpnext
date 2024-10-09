@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTC Results</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('https://cdn2.vectorstock.com/i/1000x1000/43/06/ctc-cost-to-company-concept-with-big-word-or-text-vector-27564306.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* Black border for result table cells */
+        td, th {
+            border: 2px solid #000; /* Black border */
+        }
+
+        /* Optional: border radius for table cells */
+        td, th {
+            border-radius: 5px; /* Optional rounded corners */
+        }
+
+        /* Transparent table background so it doesn't hide the image */
+        table {
+            background-color: rgba(0, 0, 0, 0); /* Transparent */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">CTC Calculation Results</h1>
+        <table class="table table-striped mt-4">
+            <tbody>
+                <tr>
+                    <th>Annual CTC</th>
+                    <td>{{ result['annual_ctc'] }}</td>
+                </tr>
+                <tr>
+                    <th>Gratuity</th>
+                    <td>{{ result['gratuity'] }}</td>
+                </tr>
+                <tr>
+                    <th>Total Deductions</th>
+                    <td>{{ result['total_deductions'] }}</td>
+                </tr>
+                <tr>
+                    <th>Net Take-Home Salary</th>
+                    <td>{{ result['net_take_home'] }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- Button to Generate PDF -->
+        <button id="generate-pdf" class="btn btn-primary">Generate PDF</button>
+        <!-- Button to Print -->
+        <button onclick="window.print()" class="btn btn-secondary">Print</button>
+        <a href="/" class="btn btn-secondary">Calculate Again</a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Script to Generate PDF -->
+    <script>
+        document.getElementById('generate-pdf').addEventListener('click', function () {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text('CTC Calculation Results', 10, 10);
+            doc.text('Annual CTC: {{ result["annual_ctc"] }}', 10, 20);
+            doc.text('Gratuity: {{ result["gratuity"] }}', 10, 30);
+            doc.text('Total Deductions: {{ result["total_deductions"] }}', 10, 40);
+            doc.text('Net Take-Home Salary: {{ result["net_take_home"] }}', 10, 50);
+
+            // Save the PDF
+            doc.save('CTC_Calculation.pdf');
+        });
+    </script>
+</body>
+</html>
+
+
+
+
