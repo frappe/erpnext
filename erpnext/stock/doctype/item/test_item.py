@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_objects
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
@@ -74,7 +74,16 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
-class TestItem(FrappeTestCase):
+class UnitTestItem(UnitTestCase):
+	"""
+	Unit tests for Item.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestItem(IntegrationTestCase):
 	def setUp(self):
 		super().setUp()
 		frappe.flags.attribute_values = None
@@ -728,13 +737,13 @@ class TestItem(FrappeTestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"stock item considered non-stock item: {e}")
 
-	@change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
+	@IntegrationTestCase.change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
 	def test_autoname_series(self):
 		item = frappe.new_doc("Item")
 		item.item_group = "All Item Groups"
 		item.save()  # if item code saved without item_code then series worked
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_item_wise_negative_stock(self):
 		"""When global settings are disabled check that item that allows
 		negative stock can still consume material in all known stock
@@ -746,7 +755,7 @@ class TestItem(FrappeTestCase):
 
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_negative_stock(self):
 		"""same as test above but backdated entries"""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -759,7 +768,9 @@ class TestItem(FrappeTestCase):
 		)
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@change_settings("Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"})
+	@IntegrationTestCase.change_settings(
+		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"}
+	)
 	def test_retain_sample(self):
 		item = make_item("_TestRetainSample", {"has_batch_no": 1, "retain_sample": 1, "sample_quantity": 1})
 

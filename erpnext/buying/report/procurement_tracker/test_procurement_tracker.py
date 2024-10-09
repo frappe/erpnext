@@ -2,8 +2,8 @@
 # For license information, please see license.txt
 
 
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 
-class TestProcurementTracker(FrappeTestCase):
+class TestProcurementTracker(IntegrationTestCase):
 	pass

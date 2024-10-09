@@ -1,11 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import json
 import unittest
 
 import frappe
 from frappe import _
+from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
@@ -18,7 +18,7 @@ test_dependencies = ["Fiscal Year"]
 test_records = frappe.get_test_records("Company")
 
 
-class TestCompany(unittest.TestCase):
+class TestCompany(IntegrationTestCase):
 	def test_coa_based_on_existing_company(self):
 		company = frappe.new_doc("Company")
 		company.company_name = "COA from Existing Company"

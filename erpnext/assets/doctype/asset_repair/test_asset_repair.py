@@ -1,9 +1,9 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, nowdate, nowtime, today
 
 from erpnext.assets.doctype.asset.asset import (
@@ -25,7 +25,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 
 
-class TestAssetRepair(unittest.TestCase):
+class TestAssetRepair(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		set_depreciation_settings_in_company()

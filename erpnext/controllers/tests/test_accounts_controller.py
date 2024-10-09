@@ -5,7 +5,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -46,7 +46,7 @@ def make_supplier(supplier_name, currency=None):
 		return supplier_name
 
 
-class TestAccountsController(FrappeTestCase):
+class TestAccountsController(IntegrationTestCase):
 	"""
 	Test Exchange Gain/Loss booking on various scenarios.
 	Test Cases are numbered for better organization
@@ -805,7 +805,9 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
-	@change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
+	@IntegrationTestCase.change_settings(
+		"Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1}
+	)
 	def test_16_internal_transfer_at_arms_length_price(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 

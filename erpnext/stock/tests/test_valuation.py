@@ -2,7 +2,7 @@ import json
 import unittest
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -15,7 +15,7 @@ value_gen = st.floats(min_value=1, max_value=1e6)
 stock_queue_generator = st.lists(st.tuples(qty_gen, value_gen), min_size=10)
 
 
-class TestFIFOValuation(unittest.TestCase):
+class TestFIFOValuation(IntegrationTestCase):
 	def setUp(self):
 		self.queue = FIFOValuation([])
 
@@ -195,7 +195,7 @@ class TestFIFOValuation(unittest.TestCase):
 			self.assertTotalValue(total_value)
 
 
-class TestLIFOValuation(unittest.TestCase):
+class TestLIFOValuation(IntegrationTestCase):
 	def setUp(self):
 		self.stack = LIFOValuation([])
 
@@ -317,7 +317,7 @@ class TestLIFOValuation(unittest.TestCase):
 			self.assertTotalValue(total_value)
 
 
-class TestLIFOValuationSLE(FrappeTestCase):
+class TestLIFOValuationSLE(IntegrationTestCase):
 	ITEM_CODE = "_Test LIFO item"
 	WAREHOUSE = "_Test Warehouse - _TC"
 

@@ -1,9 +1,9 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
@@ -16,7 +16,7 @@ from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_r
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
-class TestAssetValueAdjustment(unittest.TestCase):
+class TestAssetValueAdjustment(IntegrationTestCase):
 	def setUp(self):
 		create_asset_data()
 		frappe.db.set_value(

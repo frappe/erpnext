@@ -1,9 +1,10 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 # import frappe
 import unittest
 
+from frappe.tests import IntegrationTestCase
 
-class TestPartyLink(unittest.TestCase):
+
+class TestPartyLink(IntegrationTestCase):
 	pass

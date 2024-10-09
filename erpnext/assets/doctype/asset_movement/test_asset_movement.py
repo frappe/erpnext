@@ -1,9 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import now
 
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
@@ -11,7 +11,7 @@ from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
-class TestAssetMovement(unittest.TestCase):
+class TestAssetMovement(IntegrationTestCase):
 	def setUp(self):
 		frappe.db.set_value(
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"

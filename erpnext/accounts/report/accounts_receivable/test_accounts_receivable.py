@@ -1,6 +1,6 @@
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -10,7 +10,7 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
-class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
+class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -275,7 +275,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			],
 		)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)

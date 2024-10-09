@@ -1,7 +1,7 @@
 import datetime
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -14,7 +14,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Template", "Customer"]
 
 
-class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
+class TestPaymentTermsStatusForSalesOrder(IntegrationTestCase):
 	def setUp(self):
 		self.cleanup_old_entries()
 
@@ -146,6 +146,9 @@ class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 			)
 			doc.insert()
 
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", allow_multi_currency_invoices_against_single_party_account=1
+	)
 	def test_02_alternate_currency(self):
 		transaction_date = "2021-06-15"
 		self.create_payment_terms_template()

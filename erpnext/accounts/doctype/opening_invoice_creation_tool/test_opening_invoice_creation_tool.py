@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -15,7 +15,16 @@ from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_crea
 test_dependencies = ["Customer", "Supplier", "Accounting Dimension"]
 
 
-class TestOpeningInvoiceCreationTool(FrappeTestCase):
+class UnitTestOpeningInvoiceCreationTool(UnitTestCase):
+	"""
+	Unit tests for OpeningInvoiceCreationTool.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestOpeningInvoiceCreationTool(IntegrationTestCase):
 	@classmethod
 	def setUpClass(self):
 		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):

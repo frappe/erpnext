@@ -1,10 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
-import unittest
-
 import frappe
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.tests.utils import change_settings
 from frappe.utils import flt, nowdate
 
@@ -13,8 +11,19 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInv
 from erpnext.exceptions import InvalidAccountCurrency
 
 
-class TestJournalEntry(unittest.TestCase):
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+class UnitTestJournalEntry(UnitTestCase):
+	"""
+	Unit tests for JournalEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestJournalEntry(IntegrationTestCase):
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_journal_entry_with_against_jv(self):
 		jv_invoice = frappe.copy_doc(test_records[2])
 		base_jv = frappe.copy_doc(test_records[0])

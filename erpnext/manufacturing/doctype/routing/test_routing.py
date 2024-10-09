@@ -1,15 +1,24 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.test_runner import make_test_records
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import make_test_records
 
 from erpnext.manufacturing.doctype.job_card.job_card import OperationSequenceError
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.stock.doctype.item.test_item import make_item
 
 
-class TestRouting(FrappeTestCase):
+class UnitTestRouting(UnitTestCase):
+	"""
+	Unit tests for Routing.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestRouting(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.item_code = "Test Routing Item - A"
