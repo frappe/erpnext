@@ -130,6 +130,7 @@ class PaymentLedger:
 		)
 
 	def get_columns(self):
+		company_currency = frappe.get_cached_value("Company", self.filters.get("company"), "default_currency")
 		options = None
 		self.columns.append(
 			dict(
@@ -194,7 +195,7 @@ class PaymentLedger:
 				label=_("Amount"),
 				fieldname="amount",
 				fieldtype="Currency",
-				options="Company:company:default_currency",
+				options=company_currency,
 				width="100",
 			)
 		)
@@ -210,7 +211,7 @@ class PaymentLedger:
 				)
 			)
 		self.columns.append(
-			dict(label=_("Currency"), fieldname="currency", fieldtype="Currency", hidden=True)
+			dict(label=_("Currency"), fieldname="currency", fieldtype="Link", options="Currency", hidden=True)
 		)
 
 	def run(self):

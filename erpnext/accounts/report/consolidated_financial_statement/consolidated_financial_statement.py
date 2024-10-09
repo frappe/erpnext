@@ -104,7 +104,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	if total_credit:
 		data.append(total_credit)
 
-	report_summary = get_bs_summary(
+	report_summary, primitive_summary = get_bs_summary(
 		companies,
 		asset,
 		liability,
@@ -115,7 +115,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 		True,
 	)
 
-	chart = get_chart_data(filters, columns, asset, liability, equity)
+	chart = get_chart_data(filters, columns, asset, liability, equity, company_currency)
 
 	return data, message, chart, report_summary
 
@@ -173,9 +173,9 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	if net_profit_loss:
 		data.append(net_profit_loss)
 
-	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss)
+	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss, company_currency)
 
-	report_summary = get_pl_summary(
+	report_summary, primitive_summary = get_pl_summary(
 		companies, "", income, expense, net_profit_loss, company_currency, filters, True
 	)
 

@@ -46,5 +46,11 @@ frappe.query_reports["Asset Depreciations and Balances"] = {
 			options: "Asset",
 			depends_on: "eval: doc.group_by == 'Asset'",
 		},
+		{
+			fieldname: "finance_book",
+			label: __("Finance Book"),
+			fieldtype: "Link",
+			options: "Finance Book",
+		},
 	],
 };

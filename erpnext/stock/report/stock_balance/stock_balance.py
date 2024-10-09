@@ -138,7 +138,12 @@ class StockBalanceReport:
 				{"reserved_stock": sre_details.get((report_data.item_code, report_data.warehouse), 0.0)}
 			)
 
-			if report_data and report_data.bal_qty == 0 and report_data.bal_val == 0:
+			if (
+				not self.filters.get("include_zero_stock_items")
+				and report_data
+				and report_data.bal_qty == 0
+				and report_data.bal_val == 0
+			):
 				continue
 
 			self.data.append(report_data)
@@ -247,7 +252,10 @@ class StockBalanceReport:
 		group_by_key = [row.company, row.item_code, row.warehouse]
 
 		for fieldname in self.inventory_dimensions:
-			if self.filters.get(fieldname):
+			if not row.get(fieldname):
+				continue
+
+			if self.filters.get(fieldname) or self.filters.get("show_dimension_wise_stock"):
 				group_by_key.append(row.get(fieldname))
 
 		return tuple(group_by_key)

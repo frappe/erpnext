@@ -652,6 +652,13 @@ class PurchaseOrder(BuyingController):
 			if sco:
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
 
+	def set_missing_values(self, for_validate=False):
+		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		if tds_category and not for_validate:
+			self.set_onload("supplier_tds", tds_category)
+
+		super().set_missing_values(for_validate)
+
 
 @frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
@@ -735,7 +742,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
 				and doc.delivered_by_supplier != 1,
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -764,6 +771,11 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
+
+		# set tax_withholding_category from Purchase Order
+		if source.apply_tds and source.tax_withholding_category and target.apply_tds:
+			target.tax_withholding_category = source.tax_withholding_category
+
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
@@ -811,7 +823,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"postprocess": update_item,
 			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 		},
-		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 	}
 
 	doc = get_mapped_doc(
@@ -881,6 +893,28 @@ def make_subcontracting_order(source_name, target_doc=None, save=False, submit=F
 
 
 def get_mapped_subcontracting_order(source_name, target_doc=None):
+	def post_process(source_doc, target_doc):
+		target_doc.populate_items_table()
+
+		if target_doc.set_warehouse:
+			for item in target_doc.items:
+				item.warehouse = target_doc.set_warehouse
+		else:
+			if source_doc.set_warehouse:
+				for item in target_doc.items:
+					item.warehouse = source_doc.set_warehouse
+			else:
+				for idx, item in enumerate(target_doc.items):
+					item.warehouse = source_doc.items[idx].warehouse
+
+		for idx, item in enumerate(target_doc.items):
+			item.job_card = source_doc.items[idx].job_card
+			if not target_doc.supplier_warehouse:
+				# WIP warehouse is set as Supplier Warehouse in Job Card
+				target_doc.supplier_warehouse = frappe.get_cached_value(
+					"Job Card", item.job_card, "wip_warehouse"
+				)
+
 	if target_doc and isinstance(target_doc, str):
 		target_doc = json.loads(target_doc)
 		for key in ["service_items", "items", "supplied_items"]:
@@ -911,29 +945,8 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 			},
 		},
 		target_doc,
+		post_process,
 	)
-
-	target_doc.populate_items_table()
-	source_doc = frappe.get_doc("Purchase Order", source_name)
-
-	if target_doc.set_warehouse:
-		for item in target_doc.items:
-			item.warehouse = target_doc.set_warehouse
-	else:
-		if source_doc.set_warehouse:
-			for item in target_doc.items:
-				item.warehouse = source_doc.set_warehouse
-		else:
-			for idx, item in enumerate(target_doc.items):
-				item.warehouse = source_doc.items[idx].warehouse
-
-	for idx, item in enumerate(target_doc.items):
-		item.job_card = source_doc.items[idx].job_card
-		if not target_doc.supplier_warehouse:
-			# WIP warehouse is set as Supplier Warehouse in Job Card
-			target_doc.supplier_warehouse = frappe.get_cached_value(
-				"Job Card", item.job_card, "wip_warehouse"
-			)
 
 	return target_doc
 

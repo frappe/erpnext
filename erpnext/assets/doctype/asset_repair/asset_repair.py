@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import DocType
 from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_diff_in_hours
 
 import erpnext
@@ -28,6 +29,9 @@ class AssetRepair(AccountsController):
 		from erpnext.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
 			AssetRepairConsumedItem,
 		)
+		from erpnext.assets.doctype.asset_repair_purchase_invoice.asset_repair_purchase_invoice import (
+			AssetRepairPurchaseInvoice,
+		)
 
 		actions_performed: DF.LongText | None
 		amended_from: DF.Link | None
@@ -41,9 +45,9 @@ class AssetRepair(AccountsController):
 		downtime: DF.Data | None
 		failure_date: DF.Datetime
 		increase_in_asset_life: DF.Int
+		invoices: DF.Table[AssetRepairPurchaseInvoice]
 		naming_series: DF.Literal["ACC-ASR-.YYYY.-"]
 		project: DF.Link | None
-		purchase_invoice: DF.Link | None
 		repair_cost: DF.Currency
 		repair_status: DF.Literal["Pending", "Completed", "Cancelled"]
 		stock_consumption: DF.Check
@@ -54,10 +58,15 @@ class AssetRepair(AccountsController):
 	def validate(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 		self.validate_dates()
+		self.validate_purchase_invoice()
+		self.validate_purchase_invoice_repair_cost()
+		self.validate_purchase_invoice_expense_account()
 		self.update_status()
 
 		if self.get("stock_items"):
 			self.set_stock_items_cost()
+
+		self.calculate_repair_cost()
 		self.calculate_total_repair_cost()
 
 	def validate_dates(self):
@@ -65,6 +74,31 @@ class AssetRepair(AccountsController):
 			frappe.throw(
 				_("Completion Date can not be before Failure Date. Please adjust the dates accordingly.")
 			)
+
+	def validate_purchase_invoice(self):
+		query = expense_item_pi_query(self.company)
+		purchase_invoice_list = [item[0] for item in query.run()]
+		for pi in self.invoices:
+			if pi.purchase_invoice not in purchase_invoice_list:
+				frappe.throw(_("Expense item not present in Purchase Invoice"))
+
+	def validate_purchase_invoice_repair_cost(self):
+		for pi in self.invoices:
+			if flt(pi.repair_cost) > frappe.db.get_value(
+				"Purchase Invoice", pi.purchase_invoice, "base_net_total"
+			):
+				frappe.throw(_("Repair cost cannot be greater than purchase invoice base net total"))
+
+	def validate_purchase_invoice_expense_account(self):
+		for pi in self.invoices:
+			if pi.expense_account not in frappe.db.get_all(
+				"Purchase Invoice Item", {"parent": pi.purchase_invoice}, pluck="expense_account"
+			):
+				frappe.throw(
+					_("Expense account not present in Purchase Invoice {0}").format(
+						get_link_to_form("Purchase Invoice", pi.purchase_invoice)
+					)
+				)
 
 	def update_status(self):
 		if self.repair_status == "Pending" and self.asset_doc.status != "Out of Order":
@@ -81,6 +115,9 @@ class AssetRepair(AccountsController):
 	def set_stock_items_cost(self):
 		for item in self.get("stock_items"):
 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
+
+	def calculate_repair_cost(self):
+		self.repair_cost = sum(flt(pi.repair_cost) for pi in self.invoices)
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = flt(self.repair_cost)
@@ -117,7 +154,9 @@ class AssetRepair(AccountsController):
 					get_link_to_form(self.doctype, self.name),
 				)
 				self.asset_doc.flags.ignore_validate_update_after_submit = True
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
+				make_new_active_asset_depr_schedules_and_cancel_current_ones(
+					self.asset_doc, notes, ignore_booked_entry=True
+				)
 				self.asset_doc.save()
 
 				add_asset_activity(
@@ -154,7 +193,9 @@ class AssetRepair(AccountsController):
 					get_link_to_form(self.doctype, self.name),
 				)
 				self.asset_doc.flags.ignore_validate_update_after_submit = True
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
+				make_new_active_asset_depr_schedules_and_cancel_current_ones(
+					self.asset_doc, notes, ignore_booked_entry=True
+				)
 				self.asset_doc.save()
 
 				add_asset_activity(
@@ -263,40 +304,39 @@ class AssetRepair(AccountsController):
 		if flt(self.repair_cost) <= 0:
 			return
 
-		pi_expense_account = (
-			frappe.get_doc("Purchase Invoice", self.purchase_invoice).items[0].expense_account
-		)
+		debit_against_account = set()
 
+		for pi in self.invoices:
+			debit_against_account.add(pi.expense_account)
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": pi.expense_account,
+						"credit": pi.repair_cost,
+						"credit_in_account_currency": pi.repair_cost,
+						"against": fixed_asset_account,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"cost_center": self.cost_center,
+						"posting_date": getdate(),
+						"company": self.company,
+					},
+					item=self,
+				)
+			)
+		debit_against_account = ", ".join(debit_against_account)
 		gl_entries.append(
 			self.get_gl_dict(
 				{
 					"account": fixed_asset_account,
 					"debit": self.repair_cost,
 					"debit_in_account_currency": self.repair_cost,
-					"against": pi_expense_account,
+					"against": debit_against_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
 					"posting_date": getdate(),
 					"against_voucher_type": "Purchase Invoice",
-					"against_voucher": self.purchase_invoice,
-					"company": self.company,
-				},
-				item=self,
-			)
-		)
-
-		gl_entries.append(
-			self.get_gl_dict(
-				{
-					"account": pi_expense_account,
-					"credit": self.repair_cost,
-					"credit_in_account_currency": self.repair_cost,
-					"against": fixed_asset_account,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"cost_center": self.cost_center,
-					"posting_date": getdate(),
 					"company": self.company,
 				},
 				item=self,
@@ -428,3 +468,31 @@ class AssetRepair(AccountsController):
 def get_downtime(failure_date, completion_date):
 	downtime = time_diff_in_hours(completion_date, failure_date)
 	return round(downtime, 2)
+
+
+@frappe.whitelist()
+def get_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
+	query = expense_item_pi_query(filters.get("company"))
+	return query.run(as_list=1)
+
+
+def expense_item_pi_query(company):
+	PurchaseInvoice = DocType("Purchase Invoice")
+	PurchaseInvoiceItem = DocType("Purchase Invoice Item")
+	Item = DocType("Item")
+
+	query = (
+		frappe.qb.from_(PurchaseInvoice)
+		.join(PurchaseInvoiceItem)
+		.on(PurchaseInvoiceItem.parent == PurchaseInvoice.name)
+		.join(Item)
+		.on(Item.name == PurchaseInvoiceItem.item_code)
+		.select(PurchaseInvoice.name)
+		.where(
+			(Item.is_stock_item == 0)
+			& (Item.is_fixed_asset == 0)
+			& (PurchaseInvoice.company == company)
+			& (PurchaseInvoice.docstatus == 1)
+		)
+	)
+	return query

@@ -45,7 +45,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 				chart: wrapper.page.add_select(__("Chart"), [
 					{ value: "sales_funnel", label: __("Sales Funnel") },
 					{ value: "sales_pipeline", label: __("Sales Pipeline") },
-					{ value: "opp_by_lead_source", label: __("Opportunities by lead source") },
+					{ value: "opp_by_utm_source", label: __("Opportunities by Source") },
+					{ value: "opp_by_utm_campaign", label: __("Opportunities by Campaign") },
+					{ value: "opp_by_utm_medium", label: __("Opportunities by Medium") },
 				]),
 				refresh_btn: wrapper.page.set_primary_action(
 					__("Refresh"),
@@ -111,7 +113,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 		const method_map = {
 			sales_funnel: "erpnext.selling.page.sales_funnel.sales_funnel.get_funnel_data",
-			opp_by_lead_source: "erpnext.selling.page.sales_funnel.sales_funnel.get_opp_by_lead_source",
+			opp_by_utm_source: "erpnext.selling.page.sales_funnel.sales_funnel.get_opp_by_utm_source",
+			opp_by_utm_campaign: "erpnext.selling.page.sales_funnel.sales_funnel.get_opp_by_utm_campaign",
+			opp_by_utm_medium: "erpnext.selling.page.sales_funnel.sales_funnel.get_opp_by_utm_medium",
 			sales_pipeline: "erpnext.selling.page.sales_funnel.sales_funnel.get_pipeline_data",
 		};
 		frappe.call({
@@ -140,8 +144,12 @@ erpnext.SalesFunnel = class SalesFunnel {
 		let me = this;
 		if (me.options.chart == "sales_funnel") {
 			me.render_funnel();
-		} else if (me.options.chart == "opp_by_lead_source") {
+		} else if (me.options.chart == "opp_by_utm_source") {
 			me.render_chart(__("Sales Opportunities by Source"));
+		} else if (me.options.chart == "opp_by_utm_campaign") {
+			me.render_chart(__("Sales Opportunities by Campaign"));
+		} else if (me.options.chart == "opp_by_utm_medium") {
+			me.render_chart(__("Sales Opportunities by Medium"));
 		} else if (me.options.chart == "sales_pipeline") {
 			me.render_chart(__("Sales Pipeline by Stage"));
 		}
@@ -193,6 +201,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 		this.options.width = ($(this.elements.funnel_wrapper).width() * 2.0) / 3.0;
 		this.options.height = (Math.sqrt(3) * this.options.width) / 2.0;
 
+		const min_height = (this.options.height * 0.1) / this.options.data.length;
+		const height = this.options.height * 0.9;
+
 		// calculate total weightage
 		// as height decreases, area decreases by the square of the reduction
 		// hence, compensating by squaring the index value
@@ -202,7 +213,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 		// calculate height for each data
 		$.each(this.options.data, function (i, d) {
-			d.height = (me.options.height * d.value * Math.pow(i + 1, 2)) / me.options.total_weightage;
+			d.height = (height * d.value * Math.pow(i + 1, 2)) / me.options.total_weightage + min_height;
 		});
 
 		this.elements.canvas = $("<canvas></canvas>")
@@ -245,7 +256,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 		context.fill();
 
 		// draw text
-		context.fillStyle = "black";
+		context.fillStyle = getComputedStyle(document.body).getPropertyValue("--text-color");
 		context.textBaseline = "middle";
 		context.font = "1.1em sans-serif";
 		context.fillText(__(title), width + 20, y_mid);

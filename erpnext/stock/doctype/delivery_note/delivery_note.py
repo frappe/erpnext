@@ -48,14 +48,13 @@ class DeliveryNote(SellingController):
 		base_rounding_adjustment: DF.Currency
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
-		campaign: DF.Link | None
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
 		company_address_display: DF.TextEditor | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
-		contact_mobile: DF.SmallText | None
+		contact_mobile: DF.Data | None
 		contact_person: DF.Link | None
 		conversion_rate: DF.Float
 		cost_center: DF.Link | None
@@ -121,7 +120,6 @@ class DeliveryNote(SellingController):
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
-		source: DF.Link | None
 		status: DF.Literal["", "Draft", "To Bill", "Completed", "Return Issued", "Cancelled", "Closed"]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
@@ -138,6 +136,10 @@ class DeliveryNote(SellingController):
 		total_taxes_and_charges: DF.Currency
 		transporter: DF.Link | None
 		transporter_name: DF.Data | None
+		utm_campaign: DF.Link | None
+		utm_content: DF.Data | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
 		vehicle_no: DF.Data | None
 	# end: auto-generated types
 
@@ -209,6 +211,8 @@ class DeliveryNote(SellingController):
 			)
 
 	def onload(self):
+		super().onload()
+
 		if self.docstatus == 0:
 			self.set_onload("has_unpacked_items", self.has_unpacked_items())
 
@@ -329,6 +333,9 @@ class DeliveryNote(SellingController):
 			return
 
 		for item in self.items:
+			if item.use_serial_batch_fields:
+				continue
+
 			if item.pick_list_item and not item.serial_and_batch_bundle:
 				filters = {
 					"item_code": item.item_code,
@@ -358,52 +365,33 @@ class DeliveryNote(SellingController):
 		self.validate_sales_invoice_references()
 
 	def validate_sales_order_references(self):
-		err_msg = ""
-		for item in self.items:
-			if (item.against_sales_order and not item.so_detail) or (
-				not item.against_sales_order and item.so_detail
-			):
-				if not item.against_sales_order:
-					err_msg += (
-						_("'Sales Order' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("against_sales_order")
-						)
-						+ "<br>"
-					)
-				else:
-					err_msg += (
-						_("'Sales Order Item' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("so_detail")
-						)
-						+ "<br>"
-					)
-
-		if err_msg:
-			frappe.throw(err_msg, title=_("References to Sales Orders are Incomplete"))
+		self._validate_dependent_item_fields(
+			"against_sales_order", "so_detail", _("References to Sales Orders are Incomplete")
+		)
 
 	def validate_sales_invoice_references(self):
-		err_msg = ""
-		for item in self.items:
-			if (item.against_sales_invoice and not item.si_detail) or (
-				not item.against_sales_invoice and item.si_detail
-			):
-				if not item.against_sales_invoice:
-					err_msg += (
-						_("'Sales Invoice' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("against_sales_invoice")
-						)
-						+ "<br>"
-					)
-				else:
-					err_msg += (
-						_("'Sales Invoice Item' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("si_detail")
-						)
-						+ "<br>"
-					)
+		self._validate_dependent_item_fields(
+			"against_sales_invoice", "si_detail", _("References to Sales Invoices are Incomplete")
+		)
 
-		if err_msg:
-			frappe.throw(err_msg, title=_("References to Sales Invoices are Incomplete"))
+	def _validate_dependent_item_fields(self, field_a: str, field_b: str, error_title: str):
+		errors = []
+		for item in self.items:
+			missing_label = None
+			if item.get(field_a) and not item.get(field_b):
+				missing_label = item.meta.get_label(field_b)
+			elif item.get(field_b) and not item.get(field_a):
+				missing_label = item.meta.get_label(field_a)
+
+			if missing_label and missing_label != "No Label":
+				errors.append(
+					_("The field {0} in row {1} is not set").format(
+						frappe.bold(_(missing_label)), frappe.bold(item.idx)
+					)
+				)
+
+		if errors:
+			frappe.throw("<br>".join(errors), title=error_title)
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -1045,7 +1033,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
-				"add_if_empty": True,
+				"reset_value": not (args and args.get("merge_taxes")),
 				"ignore": args.get("merge_taxes") if args else 0,
 			},
 			"Sales Team": {

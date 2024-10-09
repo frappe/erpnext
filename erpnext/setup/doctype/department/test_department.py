@@ -1,14 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 test_ignore = ["Leave Block List"]
 
 
-class TestDepartment(unittest.TestCase):
+class TestDepartment(IntegrationTestCase):
 	def test_remove_department_data(self):
 		doc = create_department("Test Department")
 		frappe.delete_doc("Department", doc.name)

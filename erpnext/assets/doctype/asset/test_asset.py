@@ -1,9 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -15,6 +15,7 @@ from frappe.utils import (
 	is_last_day_of_the_month,
 	nowdate,
 )
+from frappe.utils.data import add_to_date
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -41,7 +42,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
-class AssetSetup(unittest.TestCase):
+class AssetSetup(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		set_depreciation_settings_in_company()
@@ -219,6 +220,31 @@ class TestAsset(AssetSetup):
 		)
 		self.assertEqual(accumulated_depr_amount, 18000.0)
 
+		asset_depreciation = frappe.db.get_value(
+			"Asset Depreciation Schedule", {"asset": asset.name, "docstatus": 1}, "name"
+		)
+		last_booked_depreciation_date = frappe.db.get_value(
+			"Depreciation Schedule",
+			{
+				"parent": asset_depreciation,
+				"docstatus": 1,
+				"journal_entry": ["!=", ""],
+			},
+			"schedule_date",
+			order_by="schedule_date desc",
+		)
+
+		before_purchase_date = add_to_date(asset.purchase_date, days=-1)
+		future_date = add_to_date(nowdate(), days=1)
+		if last_booked_depreciation_date:
+			before_last_booked_depreciation_date = add_to_date(last_booked_depreciation_date, days=-1)
+
+		self.assertRaises(frappe.ValidationError, scrap_asset, asset.name, scrap_date=before_purchase_date)
+		self.assertRaises(frappe.ValidationError, scrap_asset, asset.name, scrap_date=future_date)
+		self.assertRaises(
+			frappe.ValidationError, scrap_asset, asset.name, scrap_date=before_last_booked_depreciation_date
+		)
+
 		scrap_asset(asset.name)
 		asset.load_from_db()
 		first_asset_depr_schedule.load_from_db()
@@ -234,7 +260,7 @@ class TestAsset(AssetSetup):
 		pro_rata_amount, _, _ = _get_pro_rata_amt(
 			asset.finance_books[0],
 			9000,
-			get_last_day(add_months(purchase_date, 1)),
+			add_days(get_last_day(add_months(purchase_date, 1)), 1),
 			date,
 			original_schedule_date=get_last_day(nowdate()),
 		)
@@ -320,7 +346,7 @@ class TestAsset(AssetSetup):
 		pro_rata_amount, _, _ = _get_pro_rata_amt(
 			asset.finance_books[0],
 			9000,
-			get_last_day(add_months(purchase_date, 1)),
+			add_days(get_last_day(add_months(purchase_date, 1)), 1),
 			date,
 			original_schedule_date=get_last_day(nowdate()),
 		)
@@ -740,7 +766,7 @@ class TestDepreciationMethods(AssetSetup):
 			available_for_use_date="2030-06-06",
 			is_existing_asset=1,
 			opening_number_of_booked_depreciations=2,
-			opening_accumulated_depreciation=47095.89,
+			opening_accumulated_depreciation=47178.08,
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2032-12-31",
 			total_number_of_depreciations=3,
@@ -748,7 +774,7 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		self.assertEqual(asset.status, "Draft")
-		expected_schedules = [["2032-12-31", 42904.11, 90000.0]]
+		expected_schedules = [["2032-12-31", 30000.0, 77178.08], ["2033-06-06", 12821.92, 90000.0]]
 		schedules = [
 			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in get_depr_schedule(asset.name, "Draft")

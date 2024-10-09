@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils.data import (
 	add_days,
 	add_months,
@@ -21,7 +21,16 @@ from erpnext.accounts.doctype.subscription.subscription import get_prorata_facto
 test_dependencies = ("UOM", "Item Group", "Item")
 
 
-class TestSubscription(FrappeTestCase):
+class UnitTestSubscription(UnitTestCase):
+	"""
+	Unit tests for Subscription.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestSubscription(IntegrationTestCase):
 	def setUp(self):
 		make_plans()
 		create_parties()
@@ -520,6 +529,18 @@ class TestSubscription(FrappeTestCase):
 
 		subscription.process(posting_date="2023-01-22")
 		self.assertEqual(len(subscription.invoices), 2)
+
+	def test_future_subscription(self):
+		"""Force-Fetch should not process future subscriptions"""
+		subscription = create_subscription(
+			start_date=add_months(nowdate(), 1),
+			submit_invoice=0,
+			generate_new_invoices_past_due_date=1,
+			party="_Test Subscription Customer John Doe",
+		)
+		subscription.force_fetch_subscription_updates()
+		subscription.reload()
+		self.assertEqual(len(subscription.invoices), 0)
 
 
 def make_plans():

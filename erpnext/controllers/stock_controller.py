@@ -64,6 +64,18 @@ class StockController(AccountsController):
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 
+	def validate_items_exist(self):
+		if not self.get("items"):
+			return
+
+		items = [d.item_code for d in self.get("items")]
+
+		exists_items = frappe.get_all("Item", filters={"name": ("in", items)}, pluck="name")
+		non_exists_items = set(items) - set(exists_items)
+
+		if non_exists_items:
+			frappe.throw(_("Items {0} do not exist in the Item master.").format(", ".join(non_exists_items)))
+
 	def validate_duplicate_serial_and_batch_bundle(self, table_name):
 		if not self.get(table_name):
 			return
@@ -218,7 +230,7 @@ class StockController(AccountsController):
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
-				if row.get("qty") or row.get("consumed_qty"):
+				if row.get("qty") or row.get("consumed_qty") or row.get("stock_qty"):
 					self.update_bundle_details(bundle_details, table_name, row)
 					self.create_serial_batch_bundle(bundle_details, row)
 
@@ -345,6 +357,9 @@ class StockController(AccountsController):
 
 	@frappe.request_cache
 	def is_serial_batch_item(self, item_code) -> bool:
+		if not frappe.db.exists("Item", item_code):
+			frappe.throw(_("Item {0} does not exist.").format(bold(item_code)))
+
 		item_details = frappe.db.get_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
 
 		if item_details.has_serial_no or item_details.has_batch_no:

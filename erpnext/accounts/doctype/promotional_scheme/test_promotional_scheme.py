@@ -1,15 +1,15 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.promotional_scheme.promotional_scheme import TransactionExists
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
-class TestPromotionalScheme(unittest.TestCase):
+class TestPromotionalScheme(IntegrationTestCase):
 	def setUp(self):
 		if frappe.db.exists("Promotional Scheme", "_Test Scheme"):
 			frappe.delete_doc("Promotional Scheme", "_Test Scheme")
@@ -128,6 +128,25 @@ class TestPromotionalScheme(unittest.TestCase):
 		self.assertSequenceEqual(
 			[pr.min_qty, pr.free_item, pr.free_qty, pr.recurse_for], [12, "_Test Item 2", 1, 12]
 		)
+
+	def test_validation_on_recurse_with_mixed_condition(self):
+		ps = make_promotional_scheme()
+		ps.set("price_discount_slabs", [])
+		ps.set(
+			"product_discount_slabs",
+			[
+				{
+					"rule_description": "12+1",
+					"min_qty": 12,
+					"free_item": "_Test Item 2",
+					"free_qty": 1,
+					"is_recursive": 1,
+					"recurse_for": 12,
+				}
+			],
+		)
+		ps.mixed_conditions = True
+		self.assertRaises(frappe.ValidationError, ps.save)
 
 
 def make_promotional_scheme(**args):

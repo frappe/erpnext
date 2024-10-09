@@ -36,6 +36,7 @@ class PurchaseReceiptItem(Document):
 		description: DF.TextEditor | None
 		discount_amount: DF.Currency
 		discount_percentage: DF.Percent
+		distributed_discount_amount: DF.Currency
 		expense_account: DF.Link | None
 		from_warehouse: DF.Link | None
 		has_item_scanned: DF.Check
@@ -88,6 +89,7 @@ class PurchaseReceiptItem(Document):
 		return_qty_from_rejected_warehouse: DF.Check
 		returned_qty: DF.Float
 		rm_supp_cost: DF.Currency
+		sales_incoming_rate: DF.Currency
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
 		sample_quantity: DF.Int

@@ -1,16 +1,16 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string
 
 from erpnext.crm.doctype.lead.lead import add_lead_to_prospect
 from erpnext.crm.doctype.lead.test_lead import make_lead
 
 
-class TestProspect(unittest.TestCase):
+class TestProspect(IntegrationTestCase):
 	def test_add_lead_to_prospect_and_address_linking(self):
 		lead_doc = make_lead()
 		address_doc = make_address(address_title=lead_doc.name)
@@ -26,6 +26,29 @@ class TestProspect(unittest.TestCase):
 		self.assertEqual(lead_exists_in_prosoect, True)
 		address_doc.reload()
 		self.assertEqual(address_doc.has_link("Prospect", prospect_doc.name), True)
+
+	def test_make_customer_from_prospect(self):
+		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+		frappe.delete_doc_if_exists("Customer", "_Test Prospect")
+
+		prospect = frappe.get_doc(
+			{
+				"doctype": "Prospect",
+				"company_name": "_Test Prospect",
+				"customer_group": "_Test Customer Group",
+			}
+		)
+		prospect.insert()
+
+		customer = make_customer_from_prospect("_Test Prospect")
+
+		self.assertEqual(customer.doctype, "Customer")
+		self.assertEqual(customer.company_name, "_Test Prospect")
+		self.assertEqual(customer.customer_group, "_Test Customer Group")
+
+		customer.company = "_Test Company"
+		customer.insert()
 
 
 def make_prospect(**args):

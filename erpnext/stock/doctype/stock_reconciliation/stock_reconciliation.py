@@ -16,7 +16,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_stock_balance
+from erpnext.stock.utils import get_incoming_rate, get_stock_balance
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -61,6 +61,7 @@ class StockReconciliation(StockController):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
+		self.validate_items_exist()
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
 				"Company", self.company, "stock_adjustment_account"
@@ -162,6 +163,9 @@ class StockReconciliation(StockController):
 	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
 		for item in self.items:
+			if not frappe.db.exists("Item", item.item_code):
+				frappe.throw(_("Item {0} does not exist").format(item.item_code))
+
 			if not item.reconcile_all_serial_batch and item.serial_and_batch_bundle:
 				bundle = self.get_bundle_for_specific_serial_batch(item)
 				item.current_serial_and_batch_bundle = bundle.name
@@ -357,6 +361,9 @@ class StockReconciliation(StockController):
 
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
+			if not item.item_code:
+				continue
+
 			if item.use_serial_batch_fields:
 				continue
 
@@ -684,7 +691,7 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_stock_value_difference
 
 		difference_amount = get_stock_value_difference(
-			row.item_code, row.warehouse, self.posting_date, self.posting_time
+			row.item_code, row.warehouse, self.posting_date, self.posting_time, self.name
 		)
 
 		if not difference_amount:
@@ -952,14 +959,21 @@ class StockReconciliation(StockController):
 			precesion = row.precision("current_qty")
 			if flt(current_qty, precesion) != flt(row.current_qty, precesion):
 				if not row.serial_no:
-					val_rate = get_valuation_rate(
-						row.item_code,
-						row.warehouse,
-						self.doctype,
-						self.name,
-						company=self.company,
-						batch_no=row.batch_no,
-						serial_and_batch_bundle=row.current_serial_and_batch_bundle,
+					val_rate = get_incoming_rate(
+						frappe._dict(
+							{
+								"item_code": row.item_code,
+								"warehouse": row.warehouse,
+								"qty": current_qty * -1,
+								"serial_and_batch_bundle": row.current_serial_and_batch_bundle,
+								"batch_no": row.batch_no,
+								"voucher_type": self.doctype,
+								"voucher_no": self.name,
+								"company": self.company,
+								"posting_date": self.posting_date,
+								"posting_time": self.posting_time,
+							}
+						)
 					)
 
 				row.current_valuation_rate = val_rate

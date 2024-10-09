@@ -3,8 +3,8 @@
 
 
 from frappe.permissions import add_user_permission, remove_user_permission
-from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, nowtime, today
+from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.accounts_controller import InvalidQtyError
@@ -49,7 +49,16 @@ def get_sle(**args):
 	)
 
 
-class TestStockEntry(FrappeTestCase):
+class UnitTestStockEntry(UnitTestCase):
+	"""
+	Unit tests for StockEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestStockEntry(IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
@@ -857,7 +866,7 @@ class TestStockEntry(FrappeTestCase):
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item 2", stock_entry.get("items"))).amount
 		self.assertEqual(fg_cost, flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
-	@change_settings("Manufacturing Settings", {"material_consumption": 1})
+	@IntegrationTestCase.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
@@ -1261,7 +1270,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(se.value_difference, 0.0)
 		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
 		# Initialize item, batch, warehouse, opening qty
 		item_code = "_Test Future Neg Item"
@@ -1304,7 +1313,7 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle_batch(self):
 		from erpnext.stock.doctype.batch.test_batch import TestBatch
 
@@ -1432,7 +1441,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(se.items[0].item_name, item.item_name)
 		self.assertEqual(se.items[0].stock_uom, item.stock_uom)
 
-	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_reposting_for_depedent_warehouse(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -1788,6 +1797,74 @@ class TestStockEntry(FrappeTestCase):
 		sbb = se.items[0].serial_and_batch_bundle
 		frappe.db.set_value("Serial and Batch Bundle", sbb, "type_of_transaction", "Inward")
 		self.assertRaises(frappe.ValidationError, se.submit)
+
+	def test_stock_entry_for_same_posting_date_and_time(self):
+		warehouse = "_Test Warehouse - _TC"
+		item_code = "Test Stock Entry For Same Posting Datetime 1"
+		make_item(item_code, {"is_stock_item": 1})
+		posting_date = nowdate()
+		posting_time = nowtime()
+
+		for index in range(25):
+			se = make_stock_entry(
+				item_code=item_code,
+				qty=1,
+				to_warehouse=warehouse,
+				posting_date=posting_date,
+				posting_time=posting_time,
+				do_not_submit=True,
+				purpose="Material Receipt",
+				basic_rate=100,
+			)
+
+			se.append(
+				"items",
+				{
+					"item_code": item_code,
+					"item_name": se.items[0].item_name,
+					"description": se.items[0].description,
+					"t_warehouse": se.items[0].t_warehouse,
+					"basic_rate": 100,
+					"qty": 1,
+					"stock_qty": 1,
+					"conversion_factor": 1,
+					"expense_account": se.items[0].expense_account,
+					"cost_center": se.items[0].cost_center,
+					"uom": se.items[0].uom,
+					"stock_uom": se.items[0].stock_uom,
+				},
+			)
+
+			se.remarks = f"The current number is {cstr(index)}"
+
+			se.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=[
+				"posting_date",
+				"posting_time",
+				"actual_qty",
+				"qty_after_transaction",
+				"incoming_rate",
+				"stock_value_difference",
+				"stock_value",
+			],
+			filters={"item_code": item_code, "warehouse": warehouse},
+			order_by="creation",
+		)
+
+		self.assertEqual(len(sles), 50)
+		i = 0
+		for sle in sles:
+			i += 1
+			self.assertEqual(getdate(sle.posting_date), getdate(posting_date))
+			self.assertEqual(get_time(sle.posting_time), get_time(posting_time))
+			self.assertEqual(sle.actual_qty, 1)
+			self.assertEqual(sle.qty_after_transaction, i)
+			self.assertEqual(sle.incoming_rate, 100)
+			self.assertEqual(sle.stock_value_difference, 100)
+			self.assertEqual(sle.stock_value, 100 * i)
 
 
 def make_serialized_item(**args):

@@ -18,4 +18,4 @@ max_line_length = 110
 [{*.json}]
 insert_final_newline = false
 indent_style = space
-indent_size = 2
+indent_size = 1

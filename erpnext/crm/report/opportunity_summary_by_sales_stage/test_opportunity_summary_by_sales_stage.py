@@ -1,6 +1,7 @@
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (
 	execute,
@@ -12,7 +13,7 @@ from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics i
 )
 
 
-class TestOpportunitySummaryBySalesStage(unittest.TestCase):
+class TestOpportunitySummaryBySalesStage(IntegrationTestCase):
 	@classmethod
 	def setUpClass(self):
 		frappe.db.delete("Opportunity")
@@ -40,7 +41,7 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 
 		report = execute(filters)
 
-		expected_data = [{"source": "Cold Calling", "Prospecting": 1}]
+		expected_data = [{"utm_source": "Cold Calling", "Prospecting": 1}]
 
 		self.assertEqual(expected_data, report[1])
 

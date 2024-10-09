@@ -6,6 +6,7 @@ import frappe
 from frappe import _, bold
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -15,6 +16,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.controllers.queries import item_query as _item_query
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
@@ -66,7 +68,6 @@ class POSInvoice(SalesInvoice):
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		base_write_off_amount: DF.Currency
-		campaign: DF.Link | None
 		cash_bank_account: DF.Link | None
 		change_amount: DF.Currency
 		commission_rate: DF.Float
@@ -141,7 +142,6 @@ class POSInvoice(SalesInvoice):
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
-		source: DF.Link | None
 		status: DF.Literal[
 			"",
 			"Draft",
@@ -176,6 +176,9 @@ class POSInvoice(SalesInvoice):
 		update_billed_amount_in_delivery_note: DF.Check
 		update_billed_amount_in_sales_order: DF.Check
 		update_stock: DF.Check
+		utm_campaign: DF.Link | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
 		write_off_account: DF.Link | None
 		write_off_amount: DF.Currency
 		write_off_cost_center: DF.Link | None
@@ -188,7 +191,7 @@ class POSInvoice(SalesInvoice):
 	def validate(self):
 		if not cint(self.is_pos):
 			frappe.throw(
-				_("POS Invoice should have {} field checked.").format(frappe.bold("Include Payment"))
+				_("POS Invoice should have the field {0} checked.").format(frappe.bold(_("Include Payment")))
 			)
 
 		# run on validate method of selling controller
@@ -229,7 +232,9 @@ class POSInvoice(SalesInvoice):
 		self.check_phone_payments()
 		self.set_status(update=True)
 		self.make_bundle_for_sales_purchase_return()
-		self.submit_serial_batch_bundle()
+		for table_name in ["items", "packed_items"]:
+			self.make_bundle_using_old_serial_batch_fields(table_name)
+			self.submit_serial_batch_bundle(table_name)
 
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
@@ -283,10 +288,11 @@ class POSInvoice(SalesInvoice):
 						{"is_cancelled": 1, "voucher_no": ""},
 					)
 
+				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
 				row.db_set("serial_and_batch_bundle", None)
 
-	def submit_serial_batch_bundle(self):
-		for item in self.items:
+	def submit_serial_batch_bundle(self, table_name):
+		for item in self.get(table_name):
 			if item.serial_and_batch_bundle:
 				doc = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 
@@ -355,10 +361,16 @@ class POSInvoice(SalesInvoice):
 		error_msg = []
 		for d in self.get("items"):
 			error_msg = ""
-			if d.get("has_serial_no") and not d.serial_and_batch_bundle:
+			if d.get("has_serial_no") and (
+				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
+				or (d.use_serial_batch_fields and not d.serial_no)
+			):
 				error_msg = f"Row #{d.idx}: Please select Serial No. for item {bold(d.item_code)}"
 
-			elif d.get("has_batch_no") and not d.serial_and_batch_bundle:
+			elif d.get("has_batch_no") and (
+				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
+				or (d.use_serial_batch_fields and not d.batch_no)
+			):
 				error_msg = f"Row #{d.idx}: Please select Batch No. for item {bold(d.item_code)}"
 
 		if error_msg:
@@ -440,7 +452,7 @@ class POSInvoice(SalesInvoice):
 			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
-		if self.is_return:
+		if self.is_return and self.docstatus != 0:
 			invoice_total = self.rounded_total or self.grand_total
 			total_amount_in_payments = flt(total_amount_in_payments, self.precision("grand_total"))
 			if total_amount_in_payments and total_amount_in_payments < invoice_total:
@@ -633,7 +645,9 @@ class POSInvoice(SalesInvoice):
 		if profile:
 			return {
 				"print_format": print_format,
-				"campaign": profile.get("campaign"),
+				"utm_source": profile.get("utm_source"),
+				"utm_campaign": profile.get("utm_campaign"),
+				"utm_medium": profile.get("utm_medium"),
 				"allow_print_before_pay": profile.get("allow_print_before_pay"),
 			}
 
@@ -828,3 +842,30 @@ def add_return_modes(doc, pos_profile):
 		]:
 			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
 			append_payment(payment_mode[0])
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+	if pos_profile := filters.get("pos_profile")[1]:
+		pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
+		if item_groups := get_item_group(pos_profile):
+			filters["item_group"] = ["in", tuple(item_groups)]
+
+		del filters["pos_profile"]
+
+	else:
+		filters.pop("pos_profile", None)
+
+	return _item_query(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+
+def get_item_group(pos_profile):
+	item_groups = []
+	if pos_profile.get("item_groups"):
+		# Get items based on the item groups defined in the POS profile
+		for row in pos_profile.get("item_groups"):
+			item_groups.append(row.item_group)
+			item_groups.extend(get_descendants_of("Item Group", row.item_group))
+
+	return list(set(item_groups))

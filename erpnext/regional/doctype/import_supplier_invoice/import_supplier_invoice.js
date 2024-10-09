@@ -36,7 +36,6 @@ frappe.ui.form.on("Import Supplier Invoice", {
 	toggle_read_only_fields: function (frm) {
 		if (["File Import Completed", "Processing File Data"].includes(frm.doc.status)) {
 			cur_frm.set_read_only();
-			cur_frm.refresh_fields();
 			frm.set_df_property("import_invoices", "hidden", 1);
 		} else {
 			frm.set_df_property("import_invoices", "hidden", 0);

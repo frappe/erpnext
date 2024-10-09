@@ -200,7 +200,7 @@ def get_bin(item_code, warehouse):
 	if not bin:
 		bin_obj = _create_bin(item_code, warehouse)
 	else:
-		bin_obj = frappe.get_doc("Bin", bin, for_update=True)
+		bin_obj = frappe.get_doc("Bin", bin)
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
@@ -244,6 +244,8 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
 	)
 
+	use_moving_avg_for_batch = frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+
 	if isinstance(args, dict):
 		args = frappe._dict(args)
 
@@ -257,7 +259,12 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 
 		return sn_obj.get_incoming_rate()
 
-	elif item_details and item_details.has_batch_no and args.get("serial_and_batch_bundle"):
+	elif (
+		item_details
+		and item_details.has_batch_no
+		and args.get("serial_and_batch_bundle")
+		and not use_moving_avg_for_batch
+	):
 		args.actual_qty = args.qty
 		batch_obj = BatchNoValuation(
 			sle=args,
@@ -274,7 +281,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
 		return sn_obj.get_incoming_rate()
-	elif args.get("batch_no") and not args.get("serial_and_batch_bundle"):
+	elif args.get("batch_no") and not args.get("serial_and_batch_bundle") and not use_moving_avg_for_batch:
 		args.actual_qty = args.qty
 		args.batch_nos = frappe._dict({args.batch_no: args})
 

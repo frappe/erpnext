@@ -10,7 +10,7 @@ from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
+from frappe.utils import add_days, add_months, cint, cstr, flt, getdate, parse_json
 
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
@@ -820,18 +820,21 @@ def get_price_list_rate(args, item_doc, out=None):
 		if price_list_rate is None or frappe.db.get_single_value(
 			"Stock Settings", "update_existing_price_list_rate"
 		):
-			if args.price_list and args.rate:
-				insert_item_price(args)
+			insert_item_price(args)
 
-			if not price_list_rate:
-				return out
+		if price_list_rate is None:
+			return out
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)
 
 		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
 			return out
 
-		if not out.price_list_rate and args.transaction_type == "buying":
+		if (
+			not args.get("is_internal_supplier")
+			and not out.price_list_rate
+			and args.transaction_type == "buying"
+		):
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
 			out.update(get_last_purchase_details(item_doc.name, args.name, args.conversion_rate))
@@ -841,6 +844,14 @@ def get_price_list_rate(args, item_doc, out=None):
 
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
+	if (
+		not args.price_list
+		or not args.rate
+		or args.get("is_internal_supplier")
+		or args.get("is_internal_customer")
+	):
+		return
+
 	if frappe.db.get_value("Price List", args.price_list, "currency", cache=True) == args.currency and cint(
 		frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")
 	):
@@ -891,7 +902,7 @@ def insert_item_price(args):
 				)
 
 
-def get_item_price(args, item_code, ignore_party=False) -> list[dict]:
+def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) -> list[dict]:
 	"""
 	Get name, price_list_rate from Item Price based on conditions
 	        Check if the desired qty is within the increment of the packing list.
@@ -908,13 +919,17 @@ def get_item_price(args, item_code, ignore_party=False) -> list[dict]:
 			(ip.item_code == item_code)
 			& (ip.price_list == args.get("price_list"))
 			& (IfNull(ip.uom, "").isin(["", args.get("uom")]))
-			& (IfNull(ip.batch_no, "").isin(["", args.get("batch_no")]))
 		)
 		.orderby(ip.valid_from, order=frappe.qb.desc)
 		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
 		.orderby(ip.uom, order=frappe.qb.desc)
 		.limit(1)
 	)
+
+	if force_batch_no:
+		query = query.where(ip.batch_no == args.get("batch_no"))
+	else:
+		query = query.where(IfNull(ip.batch_no, "").isin(["", args.get("batch_no")]))
 
 	if not ignore_party:
 		if args.get("customer"):
@@ -931,6 +946,21 @@ def get_item_price(args, item_code, ignore_party=False) -> list[dict]:
 		)
 
 	return query.run(as_dict=True)
+
+
+@frappe.whitelist()
+def get_batch_based_item_price(params, item_code) -> float:
+	if isinstance(params, str):
+		params = parse_json(params)
+
+	item_price = get_item_price(params, item_code, force_batch_no=True)
+	if not item_price:
+		item_price = get_item_price(params, item_code, ignore_party=True, force_batch_no=True)
+
+	if item_price and item_price[0].uom == params.get("uom"):
+		return item_price[0].price_list_rate
+
+	return 0.0
 
 
 def get_price_list_rate_for(args, item_code):
@@ -1203,7 +1233,7 @@ def get_batch_qty(batch_no, warehouse, item_code):
 
 
 @frappe.whitelist()
-def apply_price_list(args, as_doc=False):
+def apply_price_list(args, as_doc=False, doc=None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 
@@ -1242,7 +1272,7 @@ def apply_price_list(args, as_doc=False):
 		for item in item_list:
 			args_copy = frappe._dict(args.copy())
 			args_copy.update(item)
-			item_details = apply_price_list_on_item(args_copy)
+			item_details = apply_price_list_on_item(args_copy, doc=doc)
 			children.append(item_details)
 
 	if as_doc:
@@ -1260,10 +1290,10 @@ def apply_price_list(args, as_doc=False):
 		return {"parent": parent, "children": children}
 
 
-def apply_price_list_on_item(args):
+def apply_price_list_on_item(args, doc=None):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
-	item_details.update(get_pricing_rule_for_item(args))
+	item_details.update(get_pricing_rule_for_item(args, doc=doc))
 
 	return item_details
 

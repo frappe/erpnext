@@ -27,6 +27,7 @@ class StockSettings(Document):
 		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
 		allow_from_dn: DF.Check
 		allow_from_pr: DF.Check
+		allow_internal_transfer_at_arms_length_price: DF.Check
 		allow_negative_stock: DF.Check
 		allow_partial_reservation: DF.Check
 		allow_to_edit_stock_uom_qty_for_purchase: DF.Check
@@ -40,12 +41,14 @@ class StockSettings(Document):
 		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
+		do_not_use_batchwise_valuation: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
 		mr_qty_allowance: DF.Float
 		naming_series_prefix: DF.Data | None
 		over_delivery_receipt_allowance: DF.Float
+		over_picking_allowance: DF.Percent
 		pick_serial_and_batch_based_on: DF.Literal["FIFO", "LIFO", "Expiry"]
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
@@ -98,6 +101,22 @@ class StockSettings(Document):
 		self.validate_stock_reservation()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
+		self.validate_use_batch_wise_valuation()
+
+	def validate_use_batch_wise_valuation(self):
+		if not self.do_not_use_batchwise_valuation:
+			return
+
+		if self.valuation_method == "FIFO":
+			frappe.throw(_("Cannot disable batch wise valuation for FIFO valuation method."))
+
+		if frappe.get_all(
+			"Item", filters={"valuation_method": "FIFO", "is_stock_item": 1, "has_batch_no": 1}, limit=1
+		):
+			frappe.throw(_("Can't disable batch wise valuation for items with FIFO valuation method."))
+
+		if frappe.get_all("Batch", filters={"use_batchwise_valuation": 1}, limit=1):
+			frappe.throw(_("Can't disable batch wise valuation for active batches."))
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -156,7 +175,7 @@ class StockSettings(Document):
 			if self.allow_negative_stock and self.enable_stock_reservation:
 				frappe.throw(
 					_("As {0} is enabled, you can not enable {1}.").format(
-						frappe.bold("Stock Reservation"), frappe.bold("Allow Negative Stock")
+						frappe.bold(_("Stock Reservation")), frappe.bold(_("Allow Negative Stock"))
 					)
 				)
 
@@ -168,7 +187,7 @@ class StockSettings(Document):
 				if self.allow_negative_stock:
 					frappe.throw(
 						_("As {0} is enabled, you can not enable {1}.").format(
-							frappe.bold("Allow Negative Stock"), frappe.bold("Stock Reservation")
+							frappe.bold(_("Allow Negative Stock")), frappe.bold(_("Stock Reservation"))
 						)
 					)
 
@@ -188,7 +207,7 @@ class StockSettings(Document):
 					if bin_with_negative_stock:
 						frappe.throw(
 							_("As there are negative stock, you can not enable {0}.").format(
-								frappe.bold("Stock Reservation")
+								frappe.bold(_("Stock Reservation"))
 							)
 						)
 
@@ -202,7 +221,7 @@ class StockSettings(Document):
 				if has_reserved_stock:
 					frappe.throw(
 						_("As there are reserved stock, you cannot disable {0}.").format(
-							frappe.bold("Stock Reservation")
+							frappe.bold(_("Stock Reservation"))
 						)
 					)
 

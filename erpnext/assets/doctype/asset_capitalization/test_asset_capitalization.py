@@ -1,9 +1,9 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import cint, flt, getdate, now_datetime
 
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 
 
-class TestAssetCapitalization(unittest.TestCase):
+class TestAssetCapitalization(IntegrationTestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		create_asset_data()
@@ -31,6 +31,12 @@ class TestAssetCapitalization(unittest.TestCase):
 	def test_capitalization_with_perpetual_inventory(self):
 		company = "_Test Company with perpetual inventory"
 		set_depreciation_settings_in_company(company=company)
+		name = frappe.db.get_value(
+			"Asset Category Account",
+			filters={"parent": "Computers", "company_name": company},
+			fieldname=["name"],
+		)
+		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", "")
 
 		# Variables
 		consumed_asset_value = 100000
@@ -187,9 +193,10 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Test General Ledger Entries
 		default_expense_account = frappe.db.get_value("Company", company, "default_expense_account")
 		expected_gle = {
-			"_Test Fixed Asset - _TC": 3000,
-			"Expenses Included In Asset Valuation - _TC": -1000,
-			default_expense_account: -2000,
+			"_Test Fixed Asset - _TC": -100000.0,
+			default_expense_account: -2000.0,
+			"CWIP Account - _TC": 103000.0,
+			"Expenses Included In Asset Valuation - _TC": -1000.0,
 		}
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
 
@@ -214,6 +221,12 @@ class TestAssetCapitalization(unittest.TestCase):
 	def test_capitalization_with_wip_composite_asset(self):
 		company = "_Test Company with perpetual inventory"
 		set_depreciation_settings_in_company(company=company)
+		name = frappe.db.get_value(
+			"Asset Category Account",
+			filters={"parent": "Computers", "company_name": company},
+			fieldname=["name"],
+		)
+		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", "")
 
 		stock_rate = 1000
 		stock_qty = 2
@@ -383,6 +396,56 @@ class TestAssetCapitalization(unittest.TestCase):
 		asset_capitalization.reload()
 		asset_capitalization.cancel()
 		self.assertEqual(consumed_asset.db_get("status"), "Partially Depreciated")
+		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
+		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
+
+	def test_capitalize_only_service_item(self):
+		company = "_Test Company"
+		# Variables
+
+		service_rate = 500
+		service_qty = 2
+		service_amount = 1000
+
+		total_amount = 1000
+
+		wip_composite_asset = create_asset(
+			asset_name="Asset Capitalization WIP Composite Asset",
+			is_composite_asset=1,
+			warehouse="Stores - TCP1",
+			company=company,
+		)
+
+		# Create and submit Asset Captitalization
+		asset_capitalization = create_asset_capitalization(
+			entry_type="Capitalization",
+			capitalization_method="Choose a WIP composite asset",
+			target_asset=wip_composite_asset.name,
+			target_asset_location="Test Location",
+			service_qty=service_qty,
+			service_rate=service_rate,
+			service_expense_account="Expenses Included In Asset Valuation - _TC",
+			company=company,
+			submit=1,
+		)
+
+		self.assertEqual(asset_capitalization.service_items[0].amount, service_amount)
+		self.assertEqual(asset_capitalization.service_items_total, service_amount)
+
+		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
+		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
+		self.assertEqual(target_asset.purchase_amount, total_amount)
+
+		expected_gle = {
+			"CWIP Account - _TC": 1000.0,
+			"Expenses Included In Asset Valuation - _TC": -1000.0,
+		}
+
+		actual_gle = get_actual_gle_dict(asset_capitalization.name)
+		self.assertEqual(actual_gle, expected_gle)
+
+		# Cancel Asset Capitalization and make test entries and status are reversed
+		asset_capitalization.cancel()
 		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
 		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
 

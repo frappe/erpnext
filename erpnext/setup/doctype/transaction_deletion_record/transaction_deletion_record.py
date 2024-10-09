@@ -485,8 +485,14 @@ def is_deletion_doc_running(company: str | None = None, err_msg: str | None = No
 
 def check_for_running_deletion_job(doc, method=None):
 	# Check if DocType has 'company' field
-	df = qb.DocType("DocField")
-	if qb.from_(df).select(df.parent).where((df.fieldname == "company") & (df.parent == doc.doctype)).run():
-		is_deletion_doc_running(
-			doc.company, _("Cannot make any transactions until the deletion job is completed")
-		)
+	if doc.doctype not in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
+		df = qb.DocType("DocField")
+		if (
+			qb.from_(df)
+			.select(df.parent)
+			.where((df.fieldname == "company") & (df.parent == doc.doctype))
+			.run()
+		):
+			is_deletion_doc_running(
+				doc.company, _("Cannot make any transactions until the deletion job is completed")
+			)

@@ -109,23 +109,26 @@ def validate_filters(filters):
 		sle_count = flt(frappe.qb.from_("Stock Ledger Entry").select(Count("name")).run()[0][0])
 		if sle_count > 500000:
 			frappe.throw(_("Please set filter based on Item or Warehouse"))
-	if not filters.get("company"):
-		filters["company"] = frappe.defaults.get_user_default("Company")
 
 
 def get_warehouse_list(filters):
-	from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+	if not filters.get("warehouse"):
+		return frappe.get_all(
+			"Warehouse",
+			filters={"company": filters.get("company"), "is_group": 0},
+			fields=["name"],
+			order_by="name",
+		)
 
-	wh = frappe.qb.DocType("Warehouse")
-	query = frappe.qb.from_(wh).select(wh.name).where(wh.is_group == 0)
+	warehouse = frappe.qb.DocType("Warehouse")
+	lft, rgt = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"])
 
-	user_permitted_warehouse = get_permitted_documents("Warehouse")
-	if user_permitted_warehouse:
-		query = query.where(wh.name.isin(set(user_permitted_warehouse)))
-	elif filters.get("warehouse"):
-		query = query.where(wh.name == filters.get("warehouse"))
-
-	return query.run(as_dict=True)
+	return (
+		frappe.qb.from_(warehouse)
+		.select("name")
+		.where((warehouse.lft >= lft) & (warehouse.rgt <= rgt))
+		.run(as_dict=True)
+	)
 
 
 def add_warehouse_column(columns, warehouse_list):

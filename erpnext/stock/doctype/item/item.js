@@ -550,6 +550,24 @@ $.extend(erpnext.item, {
 					fields.push({ fieldtype: "Section Break" });
 				}
 				fields.push({ fieldtype: "Column Break", label: name });
+				fields.push({
+					fieldtype: "Data",
+					placeholder: "Search",
+					fieldname: `search_${frappe.scrub(name)}`,
+					onchange: function (e) {
+						let value = e.target.value;
+						let result = attr_dict[name].filter((attr_value) =>
+							attr_value.toString().toLowerCase().includes(value.toLowerCase())
+						);
+						attr_dict[name].forEach((attr_value) => {
+							if (result.includes(attr_value)) {
+								me.multiple_variant_dialog.set_df_property(attr_value, "hidden", 0);
+							} else {
+								me.multiple_variant_dialog.set_df_property(attr_value, "hidden", 1);
+							}
+						});
+					},
+				});
 				attr_dict[name].forEach((value) => {
 					fields.push({
 						fieldtype: "Check",
@@ -587,6 +605,14 @@ $.extend(erpnext.item, {
 			me.multiple_variant_dialog = new frappe.ui.Dialog({
 				title: __("Select Attribute Values"),
 				fields: [
+					frm.doc.image
+						? {
+								fieldtype: "Check",
+								label: __("Create a variant with the template image."),
+								fieldname: "use_template_image",
+								default: 0,
+						  }
+						: null,
 					{
 						fieldtype: "HTML",
 						fieldname: "help",
@@ -594,11 +620,14 @@ $.extend(erpnext.item, {
 							${__("Select at least one value from each of the attributes.")}
 						</label>`,
 					},
-				].concat(fields),
+				]
+					.concat(fields)
+					.filter(Boolean),
 			});
 
 			me.multiple_variant_dialog.set_primary_action(__("Create Variants"), () => {
 				let selected_attributes = get_selected_attributes();
+				let use_template_image = me.multiple_variant_dialog.get_value("use_template_image");
 
 				me.multiple_variant_dialog.hide();
 				frappe.call({
@@ -606,6 +635,7 @@ $.extend(erpnext.item, {
 					args: {
 						item: frm.doc.name,
 						args: selected_attributes,
+						use_template_image: use_template_image,
 					},
 					callback: function (r) {
 						if (r.message === "queued") {
@@ -631,6 +661,10 @@ $.extend(erpnext.item, {
 			me.multiple_variant_dialog.disable_primary_action();
 			me.multiple_variant_dialog.clear();
 			me.multiple_variant_dialog.show();
+			me.multiple_variant_dialog.$wrapper
+				.find("div[data-fieldname^='search_']")
+				.find(".clearfix")
+				.hide();
 		}
 
 		function get_selected_attributes() {
@@ -720,6 +754,15 @@ $.extend(erpnext.item, {
 			});
 		}
 
+		if (frm.doc.image) {
+			fields.push({
+				fieldtype: "Check",
+				label: __("Create a variant with the template image."),
+				fieldname: "use_template_image",
+				default: 0,
+			});
+		}
+
 		var d = new frappe.ui.Dialog({
 			title: __("Create Variant"),
 			fields: fields,
@@ -761,6 +804,7 @@ $.extend(erpnext.item, {
 							args: {
 								item: frm.doc.name,
 								args: d.get_values(),
+								use_template_image: args.use_template_image,
 							},
 							callback: function (r) {
 								var doclist = frappe.model.sync(r.message);

@@ -80,7 +80,6 @@ class SalesOrder(SellingController):
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		billing_status: DF.Literal["Not Billed", "Fully Billed", "Partly Billed", "Closed"]
-		campaign: DF.Link | None
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
@@ -151,7 +150,6 @@ class SalesOrder(SellingController):
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		skip_delivery_note: DF.Check
-		source: DF.Link | None
 		status: DF.Literal[
 			"",
 			"Draft",
@@ -179,12 +177,18 @@ class SalesOrder(SellingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transaction_date: DF.Date
+		utm_campaign: DF.Link | None
+		utm_content: DF.Data | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
 	def onload(self) -> None:
+		super().onload()
+
 		if frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			if self.has_unreserved_stock():
 				self.set_onload("has_unreserved_stock", True)
@@ -498,6 +502,10 @@ class SalesOrder(SellingController):
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
+		# Upon Sales Order Re-open, check for credit limit.
+		# Limit should be checked after the 'Hold/Closed' status is reset.
+		if status == "Draft" and self.docstatus == 1:
+			self.check_credit_limit()
 		self.update_reserved_qty()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -598,6 +606,17 @@ class SalesOrder(SellingController):
 
 		if total_picked_qty and total_qty:
 			per_picked = total_picked_qty / total_qty * 100
+
+			pick_percentage = frappe.db.get_single_value("Stock Settings", "over_picking_allowance")
+			if pick_percentage:
+				total_qty += flt(total_qty) * (pick_percentage / 100)
+
+			if total_picked_qty > total_qty:
+				frappe.throw(
+					_(
+						"Total Picked Quantity {0} is more than ordered qty {1}. You can set the Over Picking Allowance in Stock Settings."
+					).format(total_picked_qty, total_qty)
+				)
 
 		self.db_set("per_picked", flt(per_picked), update_modified=False)
 
@@ -921,11 +940,15 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
 	def set_missing_values(source, target):
+		if kwargs.get("ignore_pricing_rule"):
+			# Skip pricing rule when the dn is creating from the pick list
+			target.ignore_pricing_rule = 1
+
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1024,6 +1047,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				)
 
 				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
+				dn_item.warehouse = sre.warehouse
 
 				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
 					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
@@ -1072,6 +1096,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
 			target.redeem_loyalty_points = 1
+			target.loyalty_points = source.loyalty_points
 
 		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
@@ -1117,7 +1142,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"condition": lambda doc: doc.qty
 				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"reset_value": True,
+			},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 		},
 		target_doc,

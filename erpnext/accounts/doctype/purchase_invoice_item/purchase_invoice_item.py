@@ -34,6 +34,7 @@ class PurchaseInvoiceItem(Document):
 		description: DF.TextEditor | None
 		discount_amount: DF.Currency
 		discount_percentage: DF.Percent
+		distributed_discount_amount: DF.Currency
 		enable_deferred_expense: DF.Check
 		expense_account: DF.Link | None
 		from_warehouse: DF.Link | None
@@ -79,6 +80,7 @@ class PurchaseInvoiceItem(Document):
 		rejected_serial_no: DF.Text | None
 		rejected_warehouse: DF.Link | None
 		rm_supp_cost: DF.Currency
+		sales_incoming_rate: DF.Currency
 		sales_invoice_item: DF.Data | None
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None

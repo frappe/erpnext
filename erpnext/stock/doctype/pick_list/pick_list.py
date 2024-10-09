@@ -6,7 +6,7 @@ from collections import OrderedDict, defaultdict
 from itertools import groupby
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
@@ -50,6 +50,7 @@ class PickList(Document):
 		customer_name: DF.Data | None
 		for_qty: DF.Float
 		group_same_items: DF.Check
+		ignore_pricing_rule: DF.Check
 		locations: DF.Table[PickListItem]
 		material_request: DF.Link | None
 		naming_series: DF.Literal["STO-PICK-.YYYY.-"]
@@ -73,6 +74,9 @@ class PickList(Document):
 
 	def validate(self):
 		self.validate_for_qty()
+		if self.pick_manually and self.get("locations"):
+			self.validate_stock_qty()
+			self.check_serial_no_status()
 
 	def before_save(self):
 		self.update_status()
@@ -81,6 +85,60 @@ class PickList(Document):
 
 		if self.get("locations"):
 			self.validate_sales_order_percentage()
+
+	def validate_stock_qty(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		for row in self.get("locations"):
+			if row.batch_no and not row.qty:
+				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
+
+				if row.qty > batch_qty:
+					frappe.throw(
+						_(
+							"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}."
+						).format(row.idx, row.item_code, batch_qty, row.batch_no, bold(row.warehouse)),
+						title=_("Insufficient Stock"),
+					)
+
+				continue
+
+			bin_qty = frappe.db.get_value(
+				"Bin",
+				{"item_code": row.item_code, "warehouse": row.warehouse},
+				"actual_qty",
+			)
+
+			if row.qty > bin_qty:
+				frappe.throw(
+					_(
+						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
+					).format(row.idx, row.qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
+					title=_("Insufficient Stock"),
+				)
+
+	def check_serial_no_status(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		for row in self.get("locations"):
+			if not row.serial_no:
+				continue
+
+			picked_serial_nos = get_serial_nos(row.serial_no)
+			validated_serial_nos = frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", picked_serial_nos), "warehouse": row.warehouse},
+				pluck="name",
+			)
+
+			incorrect_serial_nos = set(picked_serial_nos) - set(validated_serial_nos)
+			if incorrect_serial_nos:
+				frappe.throw(
+					_("The Serial No at Row #{0}: {1} is not available in warehouse {2}.").format(
+						row.idx, ", ".join(incorrect_serial_nos), row.warehouse
+					),
+					title=_("Incorrect Warehouse"),
+				)
 
 	def validate_sales_order_percentage(self):
 		# set percentage picked in SO
@@ -592,6 +650,8 @@ class PickList(Document):
 		if self.name:
 			query = query.where(pi_item.parent != self.name)
 
+		query = query.for_update()
+
 		return query.run(as_dict=True)
 
 	def _get_product_bundles(self) -> dict[str, str]:
@@ -1040,7 +1100,8 @@ def create_delivery_note(source_name, target_doc=None):
 				)
 			)
 
-	for customer, rows in groupby(sales_orders, key=lambda so: so["customer"]):
+	group_key = lambda so: so["customer"]  # noqa
+	for customer, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
 		sales_dict[customer] = {row.sales_order for row in rows}
 
 	if sales_dict:
@@ -1086,7 +1147,7 @@ def create_dn_with_so(sales_dict, pick_list):
 	for customer in sales_dict:
 		for so in sales_dict[customer]:
 			delivery_note = None
-			kwargs = {"skip_item_mapping": True}
+			kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
 			delivery_note = create_delivery_note_from_sales_order(so, delivery_note, kwargs=kwargs)
 			break
 		if delivery_note:
@@ -1121,6 +1182,7 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 			dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
 			dn_item.batch_no = location.batch_no
 			dn_item.serial_no = location.serial_no
+			dn_item.use_serial_batch_fields = location.use_serial_batch_fields
 
 			update_delivery_note_item(source_doc, dn_item, delivery_note)
 

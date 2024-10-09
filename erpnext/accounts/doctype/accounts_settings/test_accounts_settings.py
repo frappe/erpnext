@@ -1,9 +1,10 @@
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 
-class TestAccountsSettings(unittest.TestCase):
+class TestAccountsSettings(IntegrationTestCase):
 	def tearDown(self):
 		# Just in case `save` method succeeds, we need to take things back to default so that other tests
 		# don't break

@@ -9,6 +9,7 @@ frappe.ui.form.on("Subcontracting Order", {
 	setup: (frm) => {
 		frm.get_field("items").grid.cannot_add_rows = true;
 		frm.get_field("items").grid.only_sortable();
+		frm.trigger("set_queries");
 
 		frm.set_indicator_formatter("item_code", (doc) => (doc.qty <= doc.received_qty ? "green" : "orange"));
 
@@ -27,6 +28,22 @@ frappe.ui.form.on("Subcontracting Order", {
 					docstatus: 1,
 					is_subcontracted: 1,
 					is_old_subcontracting_flow: 0,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", "items", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
 				},
 			};
 		});
@@ -77,6 +94,17 @@ frappe.ui.form.on("Subcontracting Order", {
 		});
 	},
 
+	set_queries: (frm) => {
+		frm.set_query("contact_person", erpnext.queries.contact_query);
+		frm.set_query("supplier_address", erpnext.queries.address_query);
+
+		frm.set_query("billing_address", erpnext.queries.company_address_query);
+
+		frm.set_query("shipping_address", () => {
+			return erpnext.queries.company_address_query(frm.doc);
+		});
+	},
+
 	onload: (frm) => {
 		if (!frm.doc.transaction_date) {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
@@ -100,6 +128,8 @@ frappe.ui.form.on("Subcontracting Order", {
 	},
 
 	refresh: function (frm) {
+		frappe.dynamic_link = { doc: frm.doc, fieldname: "supplier", doctype: "Supplier" };
+
 		if (frm.doc.docstatus == 1 && frm.has_perm("submit")) {
 			if (frm.doc.status == "Closed") {
 				frm.add_custom_button(

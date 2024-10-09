@@ -26,11 +26,13 @@
   "section_break_9",
   "over_delivery_receipt_allowance",
   "mr_qty_allowance",
+  "over_picking_allowance",
   "column_break_121",
   "role_allowed_to_over_deliver_receive",
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
+  "allow_internal_transfer_at_arms_length_price",
   "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
   "column_break_23",
@@ -44,6 +46,7 @@
   "auto_reserve_serial_and_batch",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
+  "do_not_use_batchwise_valuation",
   "auto_create_serial_and_batch_bundle_for_outward",
   "pick_serial_and_batch_based_on",
   "column_break_mhzc",
@@ -432,11 +435,31 @@
   },
   {
    "default": "1",
-   "depends_on": "use_serial_batch_fields",
    "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
    "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate.",
+   "fieldname": "allow_internal_transfer_at_arms_length_price",
+   "fieldtype": "Check",
+   "label": "Allow Internal Transfers at Arm's Length Price"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.valuation_method === \"Moving Average\"",
+   "description": "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate.",
+   "fieldname": "do_not_use_batchwise_valuation",
+   "fieldtype": "Check",
+   "label": "Do Not Use Batch-wise Valuation"
+  },
+  {
+   "description": "The percentage you are allowed to pick more items in the pick list than the ordered quantity.",
+   "fieldname": "over_picking_allowance",
+   "fieldtype": "Percent",
+   "label": "Over Picking Allowance"
   }
  ],
  "icon": "icon-cog",
@@ -444,7 +467,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:45.423987",
+ "modified": "2024-07-29 14:55:19.093508",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

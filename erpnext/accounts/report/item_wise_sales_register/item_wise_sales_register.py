@@ -410,8 +410,9 @@ def apply_group_by_conditions(query, si, ii, filters):
 
 
 def get_items(filters, additional_query_columns, additional_conditions=None):
-	si = frappe.qb.DocType("Sales Invoice")
-	sii = frappe.qb.DocType("Sales Invoice Item")
+	doctype = "Sales Invoice"
+	si = frappe.qb.DocType(doctype)
+	sii = frappe.qb.DocType(f"{doctype} Item")
 	item = frappe.qb.DocType("Item")
 
 	query = (
@@ -459,6 +460,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			sii.qty,
 		)
 		.where(si.docstatus == 1)
+		.where(sii.parenttype == doctype)
 	)
 
 	if additional_query_columns:

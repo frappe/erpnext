@@ -5,6 +5,7 @@
  "creation": "2013-05-21 16:16:39",
  "doctype": "DocType",
  "document_type": "Document",
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "title",
@@ -170,7 +171,6 @@
   "against_expense_account",
   "column_break_63",
   "unrealized_profit_loss_account",
-  "repost_required",
   "subscription_section",
   "subscription",
   "auto_repeat",
@@ -193,6 +193,7 @@
   "is_internal_supplier",
   "represents_company",
   "supplier_group",
+  "sender",
   "column_break_147",
   "inter_company_invoice_reference",
   "is_old_subcontracting_flow",
@@ -364,7 +365,8 @@
    "description": "Once set, this invoice will be on hold till the set date",
    "fieldname": "release_date",
    "fieldtype": "Date",
-   "label": "Release Date"
+   "label": "Release Date",
+   "search_index": 1
   },
   {
    "fieldname": "cb_17",
@@ -1606,15 +1608,6 @@
   },
   {
    "default": "0",
-   "fieldname": "repost_required",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Repost Required",
-   "options": "Account",
-   "read_only": 1
-  },
-  {
-   "default": "0",
    "fieldname": "use_transaction_date_exchange_rate",
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate",
@@ -1634,13 +1627,19 @@
    "fieldname": "update_outstanding_for_self",
    "fieldtype": "Check",
    "label": "Update Outstanding for Self"
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Data",
+   "label": "Sender",
+   "options": "Email"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-04-11 11:28:42.802211",
+ "modified": "2024-09-18 12:24:44.826539",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1696,6 +1695,7 @@
   }
  ],
  "search_fields": "posting_date, supplier, bill_no, base_grand_total, outstanding_amount",
+ "sender_field": "sender",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
