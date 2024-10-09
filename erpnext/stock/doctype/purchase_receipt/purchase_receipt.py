@@ -1214,7 +1214,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
-				"add_if_empty": True,
+				"reset_value": not (args and args.get("merge_taxes")),
 				"ignore": args.get("merge_taxes") if args else 0,
 			},
 		},
@@ -1370,3 +1370,26 @@ def get_item_account_wise_additional_cost(purchase_document):
 @erpnext.allow_regional
 def update_regional_gl_entries(gl_list, doc):
 	return
+
+
+@frappe.whitelist()
+def make_lcv(doctype, docname):
+	landed_cost_voucher = frappe.new_doc("Landed Cost Voucher")
+
+	details = frappe.db.get_value(doctype, docname, ["supplier", "company", "base_grand_total"], as_dict=1)
+
+	landed_cost_voucher.company = details.company
+
+	landed_cost_voucher.append(
+		"purchase_receipts",
+		{
+			"receipt_document_type": doctype,
+			"receipt_document": docname,
+			"grand_total": details.base_grand_total,
+			"supplier": details.supplier,
+		},
+	)
+
+	landed_cost_voucher.get_items_from_purchase_receipts()
+
+	return landed_cost_voucher.as_dict()

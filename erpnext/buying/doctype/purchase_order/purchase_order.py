@@ -738,7 +738,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
 				and doc.delivered_by_supplier != 1,
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -819,7 +819,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"postprocess": update_item,
 			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 		},
-		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 	}
 
 	doc = get_mapped_doc(
@@ -889,6 +889,20 @@ def make_subcontracting_order(source_name, target_doc=None, save=False, submit=F
 
 
 def get_mapped_subcontracting_order(source_name, target_doc=None):
+	def post_process(source_doc, target_doc):
+		target_doc.populate_items_table()
+
+		if target_doc.set_warehouse:
+			for item in target_doc.items:
+				item.warehouse = target_doc.set_warehouse
+		else:
+			if source_doc.set_warehouse:
+				for item in target_doc.items:
+					item.warehouse = source_doc.set_warehouse
+			else:
+				for idx, item in enumerate(target_doc.items):
+					item.warehouse = source_doc.items[idx].warehouse
+
 	if target_doc and isinstance(target_doc, str):
 		target_doc = json.loads(target_doc)
 		for key in ["service_items", "items", "supplied_items"]:
@@ -919,21 +933,8 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 			},
 		},
 		target_doc,
+		post_process,
 	)
-
-	target_doc.populate_items_table()
-	source_doc = frappe.get_doc("Purchase Order", source_name)
-
-	if target_doc.set_warehouse:
-		for item in target_doc.items:
-			item.warehouse = target_doc.set_warehouse
-	else:
-		if source_doc.set_warehouse:
-			for item in target_doc.items:
-				item.warehouse = source_doc.set_warehouse
-		else:
-			for idx, item in enumerate(target_doc.items):
-				item.warehouse = source_doc.items[idx].warehouse
 
 	return target_doc
 

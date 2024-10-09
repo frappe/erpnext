@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import re
 import unittest
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -14,6 +16,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.setup.utils import get_exchange_rate
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
+
 
 payment_gateway = {"doctype": "Payment Gateway", "gateway": "_Test Gateway"}
 
@@ -278,3 +281,246 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pe.paid_amount, 800)
 		self.assertEqual(pe.base_received_amount, 800)
 		self.assertEqual(pe.received_amount, 10)
+
+	def test_multiple_payment_if_partially_paid_for_same_currency(self):
+		so = make_sales_order(currency="INR", qty=1, rate=1000)
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.grand_total, 1000)
+		self.assertEqual(pr.outstanding_amount, pr.grand_total)
+		self.assertEqual(pr.party_account_currency, pr.currency)  # INR
+
+		so.load_from_db()
+
+		# to make partial payment
+		pe = pr.create_payment_entry(submit=False)
+		pe.paid_amount = 200
+		pe.references[0].allocated_amount = 200
+		pe.submit()
+
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		so.load_from_db()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Partially Paid")
+		self.assertEqual(pr.outstanding_amount, 800)
+		self.assertEqual(pr.grand_total, 1000)
+
+		# complete payment
+		pe = pr.create_payment_entry()
+
+		self.assertEqual(pe.paid_amount, 800)  # paid amount set from pr's outstanding amount
+		self.assertEqual(pe.references[0].allocated_amount, 800)
+		self.assertEqual(pe.references[0].outstanding_amount, 800)  # for Orders it is not zero
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		so.load_from_db()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(pr.grand_total, 1000)
+
+		# creating a more payment Request must not allowed
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"Payment Request is already created"),
+			make_payment_request,
+			dt="Sales Order",
+			dn=so.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+	@change_settings("Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1})
+	def test_multiple_payment_if_partially_paid_for_multi_currency(self):
+		pi = make_purchase_invoice(currency="USD", conversion_rate=50, qty=1, rate=100, do_not_save=1)
+		pi.credit_to = "Creditors - _TC"
+		pi.submit()
+
+		pr = make_payment_request(
+			dt="Purchase Invoice",
+			dn=pi.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		# 100 USD -> 5000 INR
+		self.assertEqual(pr.grand_total, 100)
+		self.assertEqual(pr.outstanding_amount, 5000)
+		self.assertEqual(pr.currency, "USD")
+		self.assertEqual(pr.party_account_currency, "INR")
+		self.assertEqual(pr.status, "Initiated")
+
+		# to make partial payment
+		pe = pr.create_payment_entry(submit=False)
+		pe.paid_amount = 2000
+		pe.references[0].allocated_amount = 2000
+		pe.submit()
+
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Partially Paid")
+		self.assertEqual(pr.outstanding_amount, 3000)
+		self.assertEqual(pr.grand_total, 100)
+
+		# complete payment
+		pe = pr.create_payment_entry()
+		self.assertEqual(pe.paid_amount, 3000)  # paid amount set from pr's outstanding amount
+		self.assertEqual(pe.references[0].allocated_amount, 3000)
+		self.assertEqual(pe.references[0].outstanding_amount, 0)  # for Invoices it will zero
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(pr.grand_total, 100)
+
+		# creating a more payment Request must not allowed
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"Payment Request is already created"),
+			make_payment_request,
+			dt="Purchase Invoice",
+			dn=pi.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+	def test_single_payment_with_payment_term_for_same_currency(self):
+		create_payment_terms_template()
+
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=20000)
+		po.payment_terms_template = "Test Receivable Template"  # 84.746 and 15.254
+		po.save()
+		po.submit()
+
+		pr = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.grand_total, 20000)
+		self.assertEqual(pr.outstanding_amount, pr.grand_total)
+		self.assertEqual(pr.party_account_currency, pr.currency)  # INR
+		self.assertEqual(pr.status, "Initiated")
+
+		po.load_from_db()
+
+		pe = pr.create_payment_entry()
+
+		self.assertEqual(len(pe.references), 2)
+		self.assertEqual(pe.paid_amount, 20000)
+
+		# check 1st payment term
+		self.assertEqual(pe.references[0].allocated_amount, 16949.2)
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		# check 2nd payment term
+		self.assertEqual(pe.references[1].allocated_amount, 3050.8)
+		self.assertEqual(pe.references[1].payment_request, pr.name)
+
+		po.load_from_db()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(pr.grand_total, 20000)
+
+	@change_settings("Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1})
+	def test_single_payment_with_payment_term_for_multi_currency(self):
+		create_payment_terms_template()
+
+		si = create_sales_invoice(
+			do_not_save=1, currency="USD", debit_to="Debtors - _TC", qty=1, rate=200, conversion_rate=50
+		)
+		si.payment_terms_template = "Test Receivable Template"  # 84.746 and 15.254
+		si.save()
+		si.submit()
+
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		# 200 USD -> 10000 INR
+		self.assertEqual(pr.grand_total, 200)
+		self.assertEqual(pr.outstanding_amount, 10000)
+		self.assertEqual(pr.currency, "USD")
+		self.assertEqual(pr.party_account_currency, "INR")
+
+		pe = pr.create_payment_entry()
+		self.assertEqual(len(pe.references), 2)
+		self.assertEqual(pe.paid_amount, 10000)
+
+		# check 1st payment term
+		# convert it via dollar and conversion_rate
+		self.assertEqual(pe.references[0].allocated_amount, 8474.5)  # multi currency conversion
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		# check 2nd payment term
+		self.assertEqual(pe.references[1].allocated_amount, 1525.5)  # multi currency conversion
+		self.assertEqual(pe.references[1].payment_request, pr.name)
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(pr.grand_total, 200)
+
+	def test_payment_cancel_process(self):
+		so = make_sales_order(currency="INR", qty=1, rate=1000)
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.grand_total, 1000)
+		self.assertEqual(pr.outstanding_amount, pr.grand_total)
+
+		so.load_from_db()
+
+		pe = pr.create_payment_entry(submit=False)
+		pe.paid_amount = 800
+		pe.references[0].allocated_amount = 800
+		pe.submit()
+
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		so.load_from_db()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Partially Paid")
+		self.assertEqual(pr.outstanding_amount, 200)
+		self.assertEqual(pr.grand_total, 1000)
+
+		# cancelling PE
+		pe.cancel()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Requested")
+		self.assertEqual(pr.outstanding_amount, 1000)
+		self.assertEqual(pr.grand_total, 1000)
+
+		so.load_from_db()
