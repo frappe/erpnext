@@ -214,6 +214,10 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 			d.reload()
 			d.cancel()
 
+	@change_settings(
+		"Accounts Settings",
+		{"unlink_payment_on_cancellation_of_invoice": 1},
+	)
 	def test_tcs_on_allocated_advance_payments(self):
 		frappe.db.set_value(
 			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
