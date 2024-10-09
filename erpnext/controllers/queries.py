@@ -161,7 +161,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		for field in [searchfield or "name", "item_code", "item_group", "item_name"]
 		if field not in searchfields
 	]
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join([field + " ilike %(txt)s" for field in searchfields])
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
@@ -195,7 +195,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	description_cond = ""
 	if frappe.db.count(doctype, cache=True) < 50000:
 		# scan description only if items are less than 50000
-		description_cond = "or `tabItem`.description LIKE %(txt)s"
+		description_cond = "or `tabItem`.description ILIKE %(txt)s"
 	return frappe.db.sql(
 		"""select
 			`tabItem`.name {columns}
@@ -204,7 +204,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			and `tabItem`.disabled=0
 			and `tabItem`.has_variants=0
 			and (`tabItem`.end_of_life > %(today)s or `tabItem`.end_of_life is null)
-			and ({scond} or `tabItem`.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+			and ({scond} or `tabItem`.item_code IN (select parent from `tabItem Barcode` where barcode ILIKE %(txt)s)
 				{description_cond})
 			{fcond} {mcond}
 		order by
