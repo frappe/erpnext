@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-06 09:35+0000\n"
-"PO-Revision-Date: 2024-10-07 00:39\n"
+"PO-Revision-Date: 2024-10-09 00:51\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -15010,11 +15010,11 @@ msgstr "Soll-Haben-Diskrepanz"
 
 #: erpnext/accounts/party.py:566
 msgid "Debtor/Creditor"
-msgstr ""
+msgstr "Schuldner/Gläubiger"
 
 #: erpnext/accounts/party.py:569
 msgid "Debtor/Creditor Advance"
-msgstr ""
+msgstr "Schuldner-/Gläubigervorschuss"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:12
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:13
@@ -18838,7 +18838,7 @@ msgstr "Geben Sie den Vor- und Nachnamen des Mitarbeiters ein, auf dessen Grundl
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:196
 msgid "Enter Manually"
-msgstr ""
+msgstr "Manuell eingeben"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:274
 msgid "Enter Serial Nos"
@@ -24694,11 +24694,11 @@ msgstr "Ungültiger Account"
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:364
 #: erpnext/accounts/doctype/payment_request/payment_request.py:784
 msgid "Invalid Allocated Amount"
-msgstr ""
+msgstr "Ungültiger zugewiesener Betrag"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:111
 msgid "Invalid Amount"
-msgstr ""
+msgstr "Ungültiger Betrag"
 
 #: erpnext/controllers/item_variant.py:128
 msgid "Invalid Attribute"
@@ -27144,7 +27144,7 @@ msgstr "Artikel unter diesem Lager werden vorgeschlagen"
 
 #: erpnext/controllers/stock_controller.py:77
 msgid "Items {0} do not exist in the Item master."
-msgstr ""
+msgstr "Artikel {0} sind nicht im Artikelstamm vorhanden."
 
 #. Option for the 'Based On' (Select) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
@@ -42618,7 +42618,7 @@ msgstr "Reparaturstatus"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:90
 msgid "Repair cost cannot be greater than purchase invoice base net total"
-msgstr ""
+msgstr "Die Reparaturkosten dürfen nicht höher sein als der Nettobetrag der Eingangsrechnung"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py:37
 msgid "Repeat Customer Revenue"
@@ -44809,7 +44809,7 @@ msgstr "Zeile {0}: Die Menge des Artikels {1} muss eine positive Zahl sein"
 
 #: erpnext/controllers/accounts_controller.py:2650
 msgid "Row {0}: The {3} Account {1} does not belong to the company {2}"
-msgstr ""
+msgstr "Zeile {0}: Das {3}-Konto {1} gehört nicht zum Unternehmen {2}"
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:217
 msgid "Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}"
@@ -46957,7 +46957,7 @@ msgstr ""
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:254
 msgid "Serial No Range"
-msgstr ""
+msgstr "Seriennummernbereich"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -49009,7 +49009,7 @@ msgstr "Startdatum darf nicht vor dem aktuellen Datum liegen"
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:80
 msgid "Start Date should be lower than End Date"
-msgstr ""
+msgstr "Das Startdatum muss vor dem Enddatum liegen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:21
 msgid "Start Deletion"
@@ -50150,7 +50150,7 @@ msgstr "Artikelcode der Unterbaugruppe"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:490
 msgid "Sub Assembly Item is mandatory"
-msgstr ""
+msgstr "Unterbaugruppe ist obligatorisch"
 
 #. Label of the section_break_24 (Section Break) field in DocType 'Production
 #. Plan'
@@ -52794,7 +52794,7 @@ msgstr "Die Konten werden vom System automatisch festgelegt, bestätigen jedoch 
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:781
 msgid "The allocated amount is greater than the outstanding amount of Payment Request {0}"
-msgstr ""
+msgstr "Der zugewiesene Betrag ist größer als der ausstehende Betrag der Zahlungsanforderung {0}"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:158
 msgid "The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document."
@@ -55786,7 +55786,7 @@ msgstr "URL kann nur eine Zeichenfolge sein"
 #. Label of a Link in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "UTM Source"
-msgstr ""
+msgstr "UTM-Quelle"
 
 #: erpnext/public/js/utils/unreconcile.js:24
 msgid "UnReconcile"
@@ -56721,7 +56721,7 @@ msgstr "Angewandte Regel validieren"
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Validate Components Quantities Per BOM"
-msgstr ""
+msgstr "Anzahl der Komponenten pro Stückliste überprüfen"
 
 #. Label of the validate_negative_stock (Check) field in DocType 'Inventory
 #. Dimension'
@@ -59022,7 +59022,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:2658
 msgid "You selected the account group {1} as {2} Account in row {0}. Please select a single account."
-msgstr ""
+msgstr "Sie haben die Kontengruppe {1} als {2}-Konto in Zeile {0} ausgewählt. Bitte wählen Sie ein einzelnes Konto."
 
 #. Option for the 'Provider' (Select) field in DocType 'Video'
 #: erpnext/utilities/doctype/video/video.json
