@@ -357,6 +357,9 @@ class StockController(AccountsController):
 
 	@frappe.request_cache
 	def is_serial_batch_item(self, item_code) -> bool:
+		if not frappe.db.exists("Item", item_code):
+			frappe.throw(_("Item {0} does not exist.").format(bold(item_code)))
+
 		item_details = frappe.db.get_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
 
 		if item_details.has_serial_no or item_details.has_batch_no:
