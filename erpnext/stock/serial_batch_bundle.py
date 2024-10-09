@@ -3,7 +3,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
+from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp, _PostgresTimestamp
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, now, nowtime, today
 from pypika import Order
 
@@ -532,7 +532,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 				& (bundle.item_code == self.sle.item_code)
 				& (bundle_child.warehouse == self.sle.warehouse)
 			)
-			.orderby(Timestamp(bundle.posting_date, bundle.posting_time), order=Order.desc)
+			.orderby(_PostgresTimestamp(bundle.posting_date, bundle.posting_time), order=Order.desc)
 			.limit(1)
 		)
 
