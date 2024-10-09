@@ -249,11 +249,15 @@ frappe.ui.form.on("Subcontracting Receipt", {
 		});
 
 		frm.set_query("batch_no", "supplied_items", (doc, cdt, cdn) => {
-			var row = locals[cdt][cdn];
+			let row = locals[cdt][cdn];
+			let filters = {
+				item_code: row.rm_item_code,
+				warehouse: doc.supplier_warehouse,
+			};
+
 			return {
-				filters: {
-					item: row.rm_item_code,
-				},
+				query: "erpnext.controllers.queries.get_batch_no",
+				filters: filters,
 			};
 		});
 

@@ -237,9 +237,14 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "BOM"
 			and self.supplied_items
-			and not any(item.serial_and_batch_bundle for item in self.supplied_items)
 		):
-			self.supplied_items = []
+			if not any(
+				item.serial_and_batch_bundle or item.batch_no or item.serial_no
+				for item in self.supplied_items
+			):
+				self.supplied_items = []
+			else:
+				self.update_rate_for_supplied_items()
 
 	@frappe.whitelist()
 	def get_scrap_items(self, recalculate_rate=False):
