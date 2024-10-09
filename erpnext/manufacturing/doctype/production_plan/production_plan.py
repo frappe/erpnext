@@ -1135,7 +1135,7 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			& (bom.name == bom_no)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
-		.groupby(bei.item_code, bei.stock_uom)
+		.groupby(item.item_name,item.name,bei.description,bei.stock_uom,bei.source_warehouse,item_default.default_warehouse,item_uom.conversion_factor)
 	).run(as_dict=True)
 
 	for d in data:
