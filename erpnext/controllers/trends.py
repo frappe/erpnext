@@ -69,7 +69,7 @@ def get_data(filters, conditions):
 		"Delivery Note",
 	]:
 		posting_date = "t1.posting_date"
-		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice","Purchase Invoice"]:
+		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
 			posting_date = "t1." + filters.period_based_on
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
