@@ -69,7 +69,7 @@ def get_data(filters, conditions):
 		"Delivery Note",
 	]:
 		posting_date = "t1.posting_date"
-		if filters.period_based_on:
+		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
 			posting_date = "t1." + filters.period_based_on
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
@@ -224,7 +224,7 @@ def period_wise_columns_query(filters, trans):
 
 	if trans in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
 		trans_date = "posting_date"
-		if filters.period_based_on:
+		if filters.period_based_on and trans in ["Purchase Invoice", "Sales Invoice"]:
 			trans_date = filters.period_based_on
 	else:
 		trans_date = "transaction_date"
