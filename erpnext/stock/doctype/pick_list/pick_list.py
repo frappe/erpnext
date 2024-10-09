@@ -721,22 +721,6 @@ def update_pick_list_status(pick_list):
 
 def get_picked_items_qty(items) -> list[dict]:
 	pi_item = frappe.qb.DocType("Pick List Item")
-	# return (
-	# 	frappe.qb.from_(pi_item)
-	# 	.select(
-	# 		pi_item.sales_order_item,
-	# 		pi_item.item_code,
-	# 		pi_item.sales_order,
-	# 		Sum(pi_item.stock_qty).as_("stock_qty"),
-	# 		Sum(pi_item.picked_qty).as_("picked_qty"),
-	# 	)
-	# 	.where((pi_item.docstatus == 1) & (pi_item.sales_order_item.isin(items)))
-	# 	.for_update()
-	# 	.groupby(
-	# 		pi_item.sales_order_item,
-	# 		pi_item.sales_order,
-	# 	)
-	# ).run(as_dict=True)
 
 	# postgres
 	subquery = (
