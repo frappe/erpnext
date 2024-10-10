@@ -326,6 +326,7 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 
 	if join_required:
 		query = query.inner_join(child_doc).on(parent_doc.name == child_doc.parent)
+		query = query.where(child_doc.parenttype == doctype)
 		query = query.distinct()
 
 	if parent_doc.get_table_name() != "tabJournal Entry":

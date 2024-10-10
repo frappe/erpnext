@@ -18,9 +18,11 @@
   "reference_name",
   "transaction_details",
   "grand_total",
+  "currency",
   "is_a_subscription",
   "column_break_18",
-  "currency",
+  "outstanding_amount",
+  "party_account_currency",
   "subscription_section",
   "subscription_plans",
   "bank_account_details",
@@ -68,6 +70,7 @@
   {
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "in_preview": 1,
    "label": "Transaction Date"
   },
   {
@@ -132,7 +135,8 @@
    "no_copy": 1,
    "options": "reference_doctype",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "transaction_details",
@@ -140,11 +144,14 @@
    "label": "Transaction Details"
   },
   {
-   "description": "Amount in customer's currency",
+   "description": "Amount in transaction currency",
    "fieldname": "grand_total",
    "fieldtype": "Currency",
+   "in_preview": 1,
    "label": "Amount",
-   "options": "currency"
+   "non_negative": 1,
+   "options": "currency",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -388,13 +395,31 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "depends_on": "eval: doc.docstatus === 1",
+   "description": "Amount in party's bank account currency",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_preview": 1,
+   "label": "Outstanding Amount",
+   "non_negative": 1,
+   "options": "party_account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_account_currency",
+   "fieldtype": "Link",
+   "label": "Party Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-21 16:56:40.115737",
+ "modified": "2024-09-16 17:50:54.440090",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
@@ -429,6 +454,7 @@
    "write": 1
   }
  ],
+ "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
