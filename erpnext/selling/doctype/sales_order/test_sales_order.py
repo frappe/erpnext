@@ -2269,6 +2269,57 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(dn.items[1].qty, 3)
 		self.assertEqual(dn.items[1].warehouse, self.warehouse_finished_goods)
 
+	def test_advance_paid_on_journal_to_multiple_so(self):
+		so1 = make_sales_order(qty=1, rate=100)
+		so2 = make_sales_order(qty=1, rate=100)
+
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": so1.company,
+				"posting_date": today(),
+				"accounts": [
+					{
+						"account": "Debtors - _TC",
+						"party_type": "Customer",
+						"party": so1.customer,
+						"credit": 90,
+						"credit_in_account_currency": 90,
+						"reference_type": so1.doctype,
+						"reference_name": so1.name,
+						"is_advance": "Yes",
+					},
+					{
+						"account": "Debtors - _TC",
+						"party_type": "Customer",
+						"party": so1.customer,
+						"credit": 85,
+						"credit_in_account_currency": 85,
+						"reference_type": so2.doctype,
+						"reference_name": so2.name,
+						"is_advance": "Yes",
+					},
+					{
+						"account": "Cash - _TC",
+						"debit": 175,
+						"debit_in_account_currency": 175,
+					},
+				],
+			}
+		)
+		je.insert().submit()
+
+		so1.reload()
+		self.assertEqual(so1.advance_paid, 90)
+		so2.reload()
+		self.assertEqual(so2.advance_paid, 85)
+
+		je.cancel()
+		so1.reload()
+		self.assertEqual(so1.advance_paid, 0)
+		so2.reload()
+		self.assertEqual(so2.advance_paid, 0)
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
