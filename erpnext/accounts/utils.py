@@ -1360,9 +1360,9 @@ def parse_naming_series_variable(doc, variable):
 	
 	elif variable == "ABBR":
 		if doc:
-			company = doc.get("company") or frappe.defaults.get_default("company")
+			company = doc.get("company") or frappe.db.get_default('company')
 		else:
-			company = frappe.defaults.get_default("company")
+			company = frappe.db.get_default('company')
 
 		return frappe.db.get_value("Company", company, "abbr") if company else ""
 
