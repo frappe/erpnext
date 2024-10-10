@@ -463,7 +463,7 @@ def unset_existing_data(company):
 		"Purchase Taxes and Charges Template",
 	]:
 		frappe.db.sql(
-			f'''delete from `tab{doctype}` where `company`="%s"''' % (company)  # nosec
+			f"""delete from `tab{doctype}` where `company`='%s'""" % (company)  # nosec
 		)
 
 
