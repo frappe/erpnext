@@ -879,9 +879,9 @@ def get_timeline_data(doctype, name):
 		date_to_value_dict = None
 
 	if date_to_value_dict is None:
-		update_transactions_annual_history(name, True)
-		history = frappe.get_cached_value("Company", name, "transactions_annual_history")
-		return json.loads(history) if history and "{" in history else {}
+		frappe.enqueue(update_transactions_annual_history, company = name, commit = True)
+		history = get_all_transactions_annual_history(name)
+		return history if isinstance(history, dict) else {}
 
 	return date_to_value_dict
 
