@@ -6,7 +6,7 @@ from frappe.tests import IntegrationTestCase
 
 # test_records = frappe.get_test_records('Payment Gateway Account')
 
-test_ignore = ["Payment Gateway"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Payment Gateway"]
 
 
 class TestPaymentGatewayAccount(IntegrationTestCase):

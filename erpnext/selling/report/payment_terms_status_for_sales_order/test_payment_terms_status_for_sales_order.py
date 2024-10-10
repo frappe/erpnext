@@ -11,7 +11,13 @@ from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_s
 )
 from erpnext.stock.doctype.item.test_item import create_item
 
-test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Template", "Customer"]
+EXTRA_TEST_RECORD_DEPENDENCIES = [
+	"Sales Order",
+	"Item",
+	"Sales Invoice",
+	"Payment Terms Template",
+	"Customer",
+]
 
 
 class TestPaymentTermsStatusForSalesOrder(IntegrationTestCase):

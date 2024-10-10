@@ -4356,7 +4356,7 @@ def create_sales_invoice_against_cost_center(**args):
 	return si
 
 
-test_dependencies = ["Journal Entry", "Contact", "Address"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Journal Entry", "Contact", "Address"]
 test_records = frappe.get_test_records("Sales Invoice")
 
 

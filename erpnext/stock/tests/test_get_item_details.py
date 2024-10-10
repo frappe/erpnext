@@ -4,7 +4,7 @@ from frappe.tests.utils import make_test_records
 
 from erpnext.stock.get_item_details import get_item_details
 
-test_dependencies = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
 
 
 class TestGetItemDetail(IntegrationTestCase):

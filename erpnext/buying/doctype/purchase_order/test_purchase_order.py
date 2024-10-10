@@ -1308,6 +1308,6 @@ def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC")
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
 
 
-test_dependencies = ["BOM", "Item Price"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM", "Item Price"]
 
 test_records = frappe.get_test_records("Purchase Order")

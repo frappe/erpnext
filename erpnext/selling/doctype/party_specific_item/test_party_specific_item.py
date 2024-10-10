@@ -6,7 +6,7 @@ from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.controllers.queries import item_query
 
-test_dependencies = ["Item", "Customer", "Supplier"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Customer", "Supplier"]
 
 
 def create_party_specific_item(**args):

@@ -23,7 +23,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 
 test_records = frappe.get_test_records("BOM")
-test_dependencies = ["Item", "Quality Inspection Template"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Quality Inspection Template"]
 
 
 class UnitTestBom(UnitTestCase):

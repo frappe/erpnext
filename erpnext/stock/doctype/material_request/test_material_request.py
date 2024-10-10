@@ -890,5 +890,5 @@ def make_material_request(**args):
 	return mr
 
 
-test_dependencies = ["Currency Exchange", "BOM"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records("Material Request")

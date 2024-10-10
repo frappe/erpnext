@@ -16,7 +16,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 
-test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 
 PAYMENT_URL = "https://example.com/payment"
 

@@ -13,7 +13,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
-test_dependencies = ["Supplier Group", "Customer Group"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Supplier Group", "Customer Group"]
 
 
 class UnitTestTaxWithholdingCategory(UnitTestCase):

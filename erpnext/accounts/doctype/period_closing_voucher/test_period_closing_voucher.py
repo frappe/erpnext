@@ -380,5 +380,5 @@ def create_cost_center(cc_name):
 	return costcenter.name
 
 
-test_dependencies = ["Customer", "Cost Center"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Cost Center"]
 test_records = frappe.get_test_records("Period Closing Voucher")

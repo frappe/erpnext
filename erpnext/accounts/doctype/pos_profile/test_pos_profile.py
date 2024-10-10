@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.pos_profile.pos_profile import (
 )
 from erpnext.stock.get_item_details import get_pos_profile
 
-test_dependencies = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 class TestPOSProfile(IntegrationTestCase):

@@ -12,7 +12,7 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 	check_if_within_operating_hours,
 )
 
-test_dependencies = ["Warehouse"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Warehouse"]
 test_records = frappe.get_test_records("Workstation")
 make_test_records("Workstation")
 

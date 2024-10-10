@@ -10,7 +10,7 @@ from erpnext.accounts.report.balance_sheet.balance_sheet import execute
 COMPANY = "_Test Company 6"
 COMPANY_SHORT_NAME = "_TC6"
 
-test_dependencies = ["Company"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Company"]
 
 
 class TestBalanceSheet(IntegrationTestCase):

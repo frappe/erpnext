@@ -5,7 +5,7 @@ import unittest
 import frappe
 from frappe.tests import IntegrationTestCase
 
-test_ignore = ["Leave Block List"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Leave Block List"]
 
 
 class TestDepartment(IntegrationTestCase):

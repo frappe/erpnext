@@ -12,7 +12,7 @@ from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_crea
 	get_temporary_opening_account,
 )
 
-test_dependencies = ["Customer", "Supplier", "Accounting Dimension"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Supplier", "Accounting Dimension"]
 
 
 class UnitTestOpeningInvoiceCreationTool(UnitTestCase):

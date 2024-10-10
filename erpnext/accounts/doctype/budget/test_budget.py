@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-test_dependencies = ["Monthly Distribution"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Monthly Distribution"]
 
 
 class TestBudget(IntegrationTestCase):

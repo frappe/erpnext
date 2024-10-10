@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
 )
 
-test_dependencies = ["Company", "Cost Center"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Company", "Cost Center"]
 
 
 class UnitTestDunning(UnitTestCase):
