@@ -2320,6 +2320,32 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		so2.reload()
 		self.assertEqual(so2.advance_paid, 0)
 
+	def test_advance_from_payment_to_multiple_so(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		so1 = make_sales_order(qty=1, rate=100)
+		so2 = make_sales_order(qty=1, rate=100)
+
+		pe = get_payment_entry("Sales Order", so1.name)
+		pe.paid_amount = pe.received_amount = 175
+		pe.references[0].allocated_amount = 90
+		pe.append(
+			"references",
+			{"reference_doctype": so2.doctype, "reference_name": so2.name, "allocated_amount": 85},
+		)
+		pe.insert().submit()
+
+		so1.reload()
+		self.assertEqual(so1.advance_paid, 90)
+		so2.reload()
+		self.assertEqual(so2.advance_paid, 85)
+
+		pe.cancel()
+		so1.reload()
+		so2.reload()
+		self.assertEqual(so1.advance_paid, 0)
+		self.assertEqual(so2.advance_paid, 0)
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
