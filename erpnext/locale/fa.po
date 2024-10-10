@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-06 09:35+0000\n"
-"PO-Revision-Date: 2024-10-08 00:44\n"
+"PO-Revision-Date: 2024-10-10 01:19\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -278,7 +278,7 @@ msgstr "به روز رسانی موجودی را نمی توان برای فرو
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:65
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr ""
+msgstr "حساب '{0}' قبلاً توسط {1} استفاده شده است. از حساب دیگری استفاده کنید."
 
 #: erpnext/controllers/accounts_controller.py:402
 msgid "'{0}' account: '{1}' should match the Return Against Invoice"
@@ -766,7 +766,13 @@ msgid "<span class=\"h4\"><b>Your Shortcuts\n"
 "\t\t\n"
 "\t\t\t\n"
 "\t\t</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>میانبرهای شما\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Buying Workspace
@@ -5360,7 +5366,7 @@ msgstr "از آنجایی که موجودی رزرو شده وجود دارد، 
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:920
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
-msgstr ""
+msgstr "از آنجایی که آیتم‌های زیر مونتاژ کافی وجود دارد، برای انبار {0} نیازی به دستور کار نیست."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1618
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
@@ -9929,7 +9935,7 @@ msgstr "مدیر ارشد اجرایی"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:10
 msgid "Chief Financial Officer"
-msgstr ""
+msgstr "مدیر ارشد مالی"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:11
 msgid "Chief Operating Officer"
@@ -9937,7 +9943,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/designation.txt:12
 msgid "Chief Technology Officer"
-msgstr ""
+msgstr "مدیر ارشد فناوری"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -17975,7 +17981,7 @@ msgstr "ویرایش BOM"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.html:37
 msgid "Edit Capacity"
-msgstr ""
+msgstr "ویرایش ظرفیت"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:92
 msgid "Edit Cart"
@@ -29478,7 +29484,7 @@ msgstr "برنامه ریزی درخواست مواد"
 #: erpnext/manufacturing/notification/material_request_receipt_notification/material_request_receipt_notification.html:1
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 msgid "Material Request Type"
-msgstr ""
+msgstr "نوع درخواست مواد"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1583
 msgid "Material Request not created, as quantity for Raw Materials already available."
@@ -36240,7 +36246,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.js:13
 msgid "Please enable only if the understand the effects of enabling this."
-msgstr ""
+msgstr "لطفاً فقط در صورتی فعال کنید که تأثیرات فعال کردن آن را درک کنید."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:145
 #: erpnext/public/js/utils/serial_no_batch_selector.js:340
@@ -48275,7 +48281,7 @@ msgstr "نمایش در وب سایت"
 
 #: erpnext/accounts/report/trial_balance/trial_balance.js:110
 msgid "Show net values in opening and closing columns"
-msgstr ""
+msgstr "نمایش مقادیر خالص در ستون افتتاحیه و اختتامیه"
 
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js:35
 msgid "Show only POS"
@@ -48899,7 +48905,7 @@ msgstr "تاریخ شروع نمی تواند قبل از تاریخ فعلی ب
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:80
 msgid "Start Date should be lower than End Date"
-msgstr ""
+msgstr "تاریخ شروع باید کمتر از تاریخ پایان باشد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:21
 msgid "Start Deletion"
@@ -49356,7 +49362,7 @@ msgstr "گزارش تراز موجودی"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:10
 msgid "Stock Capacity"
-msgstr ""
+msgstr "ظرفیت موجودی"
 
 #. Label of the stock_closing_tab (Tab Break) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -51004,7 +51010,7 @@ msgstr "پیش فاکتور تامین کننده {0} ایجاد شد"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:6
 msgid "Supplier Reference"
-msgstr ""
+msgstr "مرجع تامین کننده"
 
 #. Label of the supplier_score (Data) field in DocType 'Supplier Scorecard'
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
@@ -59078,7 +59084,7 @@ msgstr "frankfurter.app"
 #: erpnext/templates/form_grid/item_grid.html:66
 #: erpnext/templates/form_grid/item_grid.html:80
 msgid "hidden"
-msgstr ""
+msgstr "پنهان"
 
 #: erpnext/projects/doctype/project/project_dashboard.html:13
 msgid "hours"
