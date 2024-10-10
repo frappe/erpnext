@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
@@ -11,7 +11,7 @@ from erpnext.stock.report.item_shortage_report.item_shortage_report import (
 )
 
 
-class TestItemShortageReport(FrappeTestCase):
+class TestItemShortageReport(IntegrationTestCase):
 	def test_item_shortage_report(self):
 		item = make_item().name
 		so = make_sales_order(item_code=item)

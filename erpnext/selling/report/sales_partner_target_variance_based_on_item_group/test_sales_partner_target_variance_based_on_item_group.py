@@ -1,5 +1,5 @@
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -13,7 +13,7 @@ from erpnext.selling.report.sales_person_target_variance_based_on_item_group.tes
 )
 
 
-class TestSalesPartnerTargetVarianceBasedOnItemGroup(FrappeTestCase):
+class TestSalesPartnerTargetVarianceBasedOnItemGroup(IntegrationTestCase):
 	def setUp(self):
 		self.fiscal_year = get_fiscal_year(nowdate())[0]
 

@@ -6,7 +6,8 @@ from collections import deque
 from functools import partial
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, timeout
+from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import timeout
 from frappe.utils import cstr, flt
 
 from erpnext.controllers.tests.test_subcontracting_controller import (
@@ -22,10 +23,19 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 
 test_records = frappe.get_test_records("BOM")
-test_dependencies = ["Item", "Quality Inspection Template"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Quality Inspection Template"]
 
 
-class TestBOM(FrappeTestCase):
+class UnitTestBom(UnitTestCase):
+	"""
+	Unit tests for Bom.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestBOM(IntegrationTestCase):
 	@timeout
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict

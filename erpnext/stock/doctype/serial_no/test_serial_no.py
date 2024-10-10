@@ -7,7 +7,7 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
@@ -21,11 +21,20 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-test_dependencies = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 test_records = frappe.get_test_records("Serial No")
 
 
-class TestSerialNo(FrappeTestCase):
+class UnitTestSerialNo(UnitTestCase):
+	"""
+	Unit tests for SerialNo.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestSerialNo(IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 

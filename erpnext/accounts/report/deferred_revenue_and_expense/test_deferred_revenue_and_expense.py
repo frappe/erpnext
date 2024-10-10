@@ -1,6 +1,6 @@
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -13,7 +13,7 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 
 
-class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
+class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 	@classmethod
 	def setUpClass(self):
 		self.maxDiff = None
@@ -72,7 +72,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 	def tearDown(self):
 		frappe.db.rollback()
 
-	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_deferred_revenue(self):
 		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -141,7 +141,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
-	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_deferred_expense(self):
 		self.create_item("_Test Office Desk", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -213,7 +213,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
-	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_zero_months(self):
 		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -280,7 +280,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Months", "book_deferred_entries_via_journal_entry": 0},
 	)

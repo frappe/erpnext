@@ -1,10 +1,10 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import json
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils.response import json_handler
 
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
@@ -16,7 +16,7 @@ from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
 )
 
 
-class TestPlaidSettings(unittest.TestCase):
+class TestPlaidSettings(IntegrationTestCase):
 	def setUp(self):
 		pass
 

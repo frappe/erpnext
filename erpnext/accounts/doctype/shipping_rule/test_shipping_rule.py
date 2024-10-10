@@ -1,9 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
 	FromGreaterThanToError,
@@ -14,7 +14,7 @@ from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
 test_records = frappe.get_test_records("Shipping Rule")
 
 
-class TestShippingRule(unittest.TestCase):
+class TestShippingRule(IntegrationTestCase):
 	def test_from_greater_than_to(self):
 		shipping_rule = frappe.copy_doc(test_records[0])
 		shipping_rule.name = test_records[0].get("name")

@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -16,7 +16,16 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestSerialandBatchBundle(FrappeTestCase):
+class UnitTestSerialAndBatchBundle(UnitTestCase):
+	"""
+	Unit tests for SerialAndBatchBundle.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestSerialandBatchBundle(IntegrationTestCase):
 	def test_inward_outward_serial_valuation(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -524,7 +533,9 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		make_serial_nos(item_code, serial_nos)
 		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
 
-	@change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1})
+	@IntegrationTestCase.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
 	def test_duplicate_serial_and_batch_bundle(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
