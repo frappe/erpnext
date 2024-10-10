@@ -150,15 +150,16 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 def get_pos_invoices(start, end, pos_profile, user):
 	data = frappe.db.sql(
 		"""
-	select
-		name, timestamp(posting_date, posting_time) as "timestamp"
-	from
-		`tabPOS Invoice`
-	where
-		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
-	""",
-		(user, pos_profile),
-		as_dict=1,
+		SELECT
+			name,
+			(posting_date || ' ' || posting_time)::timestamp AS "timestamp"
+		FROM
+			`tabPOS Invoice`
+		WHERE
+			owner = %s and docstatus = 1 and pos_profile = %s and IFNULL(consolidated_invoice,'') = ''
+		""",
+			(user, pos_profile),
+			as_dict=1,
 	)
 
 	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
