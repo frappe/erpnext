@@ -1,5 +1,5 @@
-<b>Material Request Type</b>: {{ doc.material_request_type }}<br>
-<b>Company</b>: {{ doc.company }}
+<p> <b>Material Request Type</b>: <em>{{ doc.material_request_type }}</em> <br> 
+<b>Company</b>: {{ doc.company }}</p>
 
 <h3>Order Summary</h3>
 
