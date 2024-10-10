@@ -101,21 +101,23 @@ frappe.ui.form.on("POS Closing Entry", {
 	},
 
 	get_pos_invoices(frm) {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
-			args: {
-				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
-				end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
-				pos_profile: frm.doc.pos_profile,
-				user: frm.doc.user,
-			},
-			callback: (r) => {
-				let pos_docs = r.message;
-				set_form_data(pos_docs, frm);
-				refresh_fields(frm);
-				set_html_data(frm);
-			},
-		});
+		if (frm.doc.pos_profile && frm.doc.user){
+			return frappe.call({
+				method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
+				args: {
+					start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
+					end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
+					pos_profile: frm.doc.pos_profile,
+					user: frm.doc.user,
+				},
+				callback: (r) => {
+					let pos_docs = r.message;
+					set_form_data(pos_docs, frm);
+					refresh_fields(frm);
+					set_html_data(frm);
+				},
+			});
+		}
 	},
 
 	before_save: async function (frm) {
@@ -129,30 +131,31 @@ frappe.ui.form.on("POS Closing Entry", {
 		for (let row of frm.doc.payment_reconciliation) {
 			row.expected_amount = row.opening_amount;
 		}
-
-		await Promise.all([
-			frappe.call({
-				method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
-				args: {
-					start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
-					end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
-					pos_profile: frm.doc.pos_profile,
-					user: frm.doc.user,
-				},
-				callback: (r) => {
-					let pos_invoices = r.message;
-					for (let doc of pos_invoices) {
-						frm.doc.grand_total += flt(doc.grand_total);
-						frm.doc.net_total += flt(doc.net_total);
-						frm.doc.total_quantity += flt(doc.total_qty);
-						refresh_payments(doc, frm);
-						refresh_taxes(doc, frm);
-						refresh_fields(frm);
-						set_html_data(frm);
-					}
-				},
-			}),
-		]);
+		if (frm.doc.pos_profile && frm.doc.user){
+			await Promise.all([
+				frappe.call({
+					method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
+					args: {
+						start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
+						end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
+						pos_profile: frm.doc.pos_profile,
+						user: frm.doc.user,
+					},
+					callback: (r) => {
+						let pos_invoices = r.message;
+						for (let doc of pos_invoices) {
+							frm.doc.grand_total += flt(doc.grand_total);
+							frm.doc.net_total += flt(doc.net_total);
+							frm.doc.total_quantity += flt(doc.total_qty);
+							refresh_payments(doc, frm);
+							refresh_taxes(doc, frm);
+							refresh_fields(frm);
+							set_html_data(frm);
+						}
+					},
+				}),
+			]);
+		}
 		frappe.dom.unfreeze();
 	},
 });
