@@ -3954,5 +3954,5 @@ def make_purchase_receipt(**args):
 	return pr
 
 
-test_dependencies = ["BOM", "Item Price", "Location"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM", "Item Price", "Location"]
 test_records = frappe.get_test_records("Purchase Receipt")

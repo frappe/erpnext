@@ -18,7 +18,7 @@ from frappe.utils.data import (
 
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
 
-test_dependencies = ("UOM", "Item Group", "Item")
+EXTRA_TEST_RECORD_DEPENDENCIES = ("UOM", "Item Group", "Item")
 
 
 class UnitTestSubscription(UnitTestCase):

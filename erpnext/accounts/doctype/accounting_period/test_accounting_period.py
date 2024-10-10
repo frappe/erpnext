@@ -12,7 +12,7 @@ from erpnext.accounts.doctype.accounting_period.accounting_period import (
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-test_dependencies = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 class TestAccountingPeriod(IntegrationTestCase):

@@ -11,4 +11,4 @@ class TestProjectUpdate(IntegrationTestCase):
 
 
 test_records = frappe.get_test_records("Project Update")
-test_ignore = ["Sales Order"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Sales Order"]

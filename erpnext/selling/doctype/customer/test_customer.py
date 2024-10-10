@@ -18,8 +18,8 @@ from erpnext.selling.doctype.customer.customer import (
 )
 from erpnext.tests.utils import create_test_contact_and_address
 
-test_ignore = ["Price List"]
-test_dependencies = ["Payment Term", "Payment Terms Template"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Price List"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
 test_records = frappe.get_test_records("Customer")
 
 

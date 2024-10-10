@@ -18,7 +18,7 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.tests.utils import if_lending_app_installed
 
-test_dependencies = ["Item", "Cost Center"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Cost Center"]
 
 
 class UnitTestBankTransaction(UnitTestCase):

@@ -7,7 +7,7 @@ from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists
 
-test_dependencies = ["Share Type", "Shareholder"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Share Type", "Shareholder"]
 
 
 class TestShareTransfer(IntegrationTestCase):

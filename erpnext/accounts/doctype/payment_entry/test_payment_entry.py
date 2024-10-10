@@ -25,7 +25,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
-test_dependencies = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 class UnitTestPaymentEntry(UnitTestCase):

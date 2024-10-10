@@ -7,7 +7,7 @@ from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
-test_dependencies = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 def test_create_test_data():

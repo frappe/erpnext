@@ -1387,7 +1387,7 @@ class TestPricingRule(IntegrationTestCase):
 		pi.cancel()
 
 
-test_dependencies = ["UTM Campaign"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["UTM Campaign"]
 
 
 def make_pricing_rule(**args):

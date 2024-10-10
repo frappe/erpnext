@@ -21,7 +21,7 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 
-test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
 
 class UnitTestPickList(UnitTestCase):

@@ -14,7 +14,7 @@ from erpnext.accounts.doctype.account.account import (
 )
 from erpnext.stock import get_company_default_inventory_account, get_warehouse_account
 
-test_dependencies = ["Company"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Company"]
 
 
 class TestAccount(IntegrationTestCase):

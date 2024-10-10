@@ -1445,4 +1445,4 @@ def set_valuation_method(item_code, valuation_method):
 			)
 
 
-test_dependencies = ["Item", "Warehouse"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Warehouse"]

@@ -12,7 +12,7 @@ from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import 
 	get_mode_of_payments,
 )
 
-test_dependencies = ["Sales Invoice"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Sales Invoice"]
 
 
 class TestSalesPaymentSummary(IntegrationTestCase):
