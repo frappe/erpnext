@@ -23,6 +23,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 class TestPOSInvoice(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
 		frappe.db.sql("delete from `tabTax Rule`")
 
