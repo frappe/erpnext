@@ -1172,6 +1172,152 @@ class TestPurchaseOrder(IntegrationTestCase):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+	def test_advance_paid_on_journal_to_multiple_po(self):
+		po1 = create_purchase_order(qty=10, rate=100)
+		po2 = create_purchase_order(qty=10, rate=100)
+
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": po1.company,
+				"posting_date": today(),
+				"accounts": [
+					{
+						"account": "Creditors - _TC",
+						"party_type": "Supplier",
+						"party": po1.supplier,
+						"debit": 65,
+						"debit_in_account_currency": 90,
+						"reference_type": po1.doctype,
+						"reference_name": po1.name,
+						"is_advance": "Yes",
+					},
+					{
+						"account": "Creditors - _TC",
+						"party_type": "Supplier",
+						"party": po2.supplier,
+						"debit": 80,
+						"debit_in_account_currency": 85,
+						"reference_type": po2.doctype,
+						"reference_name": po2.name,
+						"is_advance": "Yes",
+					},
+					{
+						"account": "Cash - _TC",
+						"credit": 145,
+						"credit_in_account_currency": 145,
+					},
+				],
+			}
+		)
+		je.insert().submit()
+
+		po1.reload()
+		self.assertEqual(po1.advance_paid, 65)
+		po2.reload()
+		self.assertEqual(po2.advance_paid, 80)
+
+		je.cancel()
+		po1.reload()
+		self.assertEqual(po1.advance_paid, 0)
+		po2.reload()
+		self.assertEqual(po2.advance_paid, 0)
+
+	def test_advance_from_payment_to_multiple_po(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		po1 = create_purchase_order(qty=10, rate=100)
+		po2 = create_purchase_order(qty=10, rate=100)
+
+		pe = get_payment_entry("Purchase Order", po1.name)
+		pe.paid_amount = pe.received_amount = 145
+		pe.references[0].allocated_amount = 65
+		pe.append(
+			"references",
+			{"reference_doctype": po2.doctype, "reference_name": po2.name, "allocated_amount": 80},
+		)
+		pe.insert().submit()
+
+		po1.reload()
+		self.assertEqual(po1.advance_paid, 65)
+		po2.reload()
+		self.assertEqual(po2.advance_paid, 80)
+
+		pe.cancel()
+		po1.reload()
+		po2.reload()
+		self.assertEqual(po1.advance_paid, 0)
+		self.assertEqual(po2.advance_paid, 0)
+
+	def test_unreconcile_on_advance_journal_to_multiple_po(self):
+		po1 = create_purchase_order(qty=10, rate=100)
+		po2 = create_purchase_order(qty=10, rate=100)
+
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": po1.company,
+				"posting_date": today(),
+				"accounts": [
+					{
+						"account": "Creditors - _TC",
+						"party_type": "Supplier",
+						"party": po1.supplier,
+						"debit": 65,
+						"debit_in_account_currency": 65,
+						"reference_type": po1.doctype,
+						"reference_name": po1.name,
+						"is_advance": "Yes",
+					},
+					{
+						"account": "Creditors - _TC",
+						"party_type": "Supplier",
+						"party": po2.supplier,
+						"debit": 80,
+						"debit_in_account_currency": 80,
+						"reference_type": po2.doctype,
+						"reference_name": po2.name,
+						"is_advance": "Yes",
+					},
+					{
+						"account": "Cash - _TC",
+						"credit": 145,
+						"credit_in_account_currency": 145,
+					},
+				],
+			}
+		)
+		je.insert().submit()
+
+		po1.reload()
+		self.assertEqual(po1.advance_paid, 65)
+		po2.reload()
+		self.assertEqual(po2.advance_paid, 80)
+
+		unrecon = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": je.company,
+				"voucher_type": je.doctype,
+				"voucher_no": je.name,
+			}
+		)
+		unrecon.insert()
+		unrecon.add_references()
+		self.assertEqual(len(unrecon.allocations), 2)
+		self.assertEqual(
+			[(x.reference_name, x.allocated_amount) for x in unrecon.allocations],
+			[(po1.name, 65), (po2.name, 80)],
+		)
+		# unreconcile 80
+		unrecon.remove(unrecon.allocations[0])
+		unrecon.save().submit()
+
+		po1.reload()
+		po2.reload()
+		self.assertEqual(po1.advance_paid, 65)
+		self.assertEqual(po2.advance_paid, 0)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
