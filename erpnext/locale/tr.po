@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-06 09:35+0000\n"
-"PO-Revision-Date: 2024-10-07 00:39\n"
+"PO-Revision-Date: 2024-10-11 01:19\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -40703,7 +40703,7 @@ msgstr "{0}. Çeyrek  {1}"
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:81
 #: erpnext/support/report/issue_analytics/issue_analytics.js:43
 msgid "Quarterly"
-msgstr "Üç Aylık"
+msgstr "3 Aylık"
 
 #. Label of the query_options_sb (Section Break) field in DocType 'Support
 #. Search Source'
