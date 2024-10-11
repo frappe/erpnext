@@ -9,8 +9,6 @@ from frappe.utils import cint, flt
 
 from erpnext.setup.utils import get_exchange_rate
 
-test_records = frappe.get_test_records("Currency Exchange")
-
 
 def save_new_records(test_records):
 	for record in test_records:
@@ -92,7 +90,7 @@ class TestCurrencyExchange(IntegrationTestCase):
 		self.clear_cache()
 
 	def test_exchange_rate(self, mock_get):
-		save_new_records(test_records)
+		save_new_records(self.globalTestRecords["Currency Exchange"])
 
 		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
 
@@ -117,7 +115,7 @@ class TestCurrencyExchange(IntegrationTestCase):
 		self.assertEqual(flt(exchange_rate, 3), 65.1)
 
 	def test_exchange_rate_via_exchangerate_host(self, mock_get):
-		save_new_records(test_records)
+		save_new_records(self.globalTestRecords["Currency Exchange"])
 
 		# Update Currency Exchange Rate
 		settings = frappe.get_single("Currency Exchange Settings")

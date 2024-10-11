@@ -90,7 +90,7 @@ class TestAssetRepair(IntegrationTestCase):
 	def test_serialized_item_consumption(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
-		stock_entry = make_serialized_item()
+		stock_entry = make_serialized_item(self)
 		bundle_id = stock_entry.get("items")[0].serial_and_batch_bundle
 		serial_nos = get_serial_nos_from_bundle(bundle_id)
 		serial_no = serial_nos[0]

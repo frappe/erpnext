@@ -47,9 +47,7 @@ class TestRequestedItemsToOrderAndReceive(IntegrationTestCase):
 
 	def setup_material_request(self, order=False, receive=False, days=0):
 		po = None
-		test_records = frappe.get_test_records("Material Request")
-
-		mr = frappe.copy_doc(test_records[0])
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
 		mr.transaction_date = add_days(today(), days)
 		mr.schedule_date = add_days(mr.transaction_date, 1)
 		for row in mr.items:

@@ -55,7 +55,7 @@ class TestSerialNo(IntegrationTestCase):
 		self.assertTrue(SerialNoCannotCannotChangeError, sr.save)
 
 	def test_inter_company_transfer(self):
-		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 
 		create_delivery_note(item_code="_Test Serialized Item With Series", qty=1, serial_no=[serial_nos[0]])
@@ -85,7 +85,7 @@ class TestSerialNo(IntegrationTestCase):
 		Then Receive into and Deliver from second company.
 		Try to cancel intermediate receipts/deliveries to test if it is blocked.
 		"""
-		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 
 		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
@@ -145,7 +145,7 @@ class TestSerialNo(IntegrationTestCase):
 		If Receipt is cancelled, it should be Inactive in the same company.
 		"""
 		# Receipt in **first** company
-		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
 

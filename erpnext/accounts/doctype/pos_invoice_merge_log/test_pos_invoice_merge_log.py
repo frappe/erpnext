@@ -411,7 +411,7 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 
 		try:
-			se = make_serialized_item()
+			se = make_serialized_item(self)
 			serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
 
 			init_user_and_profile()

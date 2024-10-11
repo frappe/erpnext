@@ -13,8 +13,6 @@ from frappe.utils.nestedset import (
 	rebuild_tree,
 )
 
-test_records = frappe.get_test_records("Item Group")
-
 
 class TestItem(IntegrationTestCase):
 	def test_basic_tree(self, records=None):
@@ -22,7 +20,7 @@ class TestItem(IntegrationTestCase):
 		max_rgt = frappe.db.sql("select max(rgt) from `tabItem Group`")[0][0]
 
 		if not records:
-			records = test_records[2:]
+			records = self.globalTestRecords["Item Group"][2:]
 
 		for item_group in records:
 			lft, rgt, parent_item_group = frappe.db.get_value(
@@ -165,7 +163,7 @@ class TestItem(IntegrationTestCase):
 		)
 
 		frappe.delete_doc("Item Group", "_Test Item Group B - 3")
-		records_to_test = test_records[2:]
+		records_to_test = self.globalTestRecords["Item Group"][2:]
 		del records_to_test[4]
 		self.test_basic_tree(records=records_to_test)
 
@@ -175,7 +173,7 @@ class TestItem(IntegrationTestCase):
 			self.assertEqual(new_rgt, item_group.rgt - 2)
 
 		# insert it back
-		frappe.copy_doc(test_records[6]).insert()
+		frappe.copy_doc(self.globalTestRecords["Item Group"][6]).insert()
 
 		self.test_basic_tree()
 
@@ -185,12 +183,12 @@ class TestItem(IntegrationTestCase):
 
 	def test_merge_groups(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
-		records_to_test = test_records[2:]
+		records_to_test = self.globalTestRecords["Item Group"][2:]
 		del records_to_test[1]
 		self.test_basic_tree(records=records_to_test)
 
 		# insert Group B back
-		frappe.copy_doc(test_records[3]).insert()
+		frappe.copy_doc(self.globalTestRecords["Item Group"][3]).insert()
 		self.test_basic_tree()
 
 		# move its children back
@@ -206,12 +204,12 @@ class TestItem(IntegrationTestCase):
 
 	def test_merge_leaves(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B - 2", "_Test Item Group B - 1", merge=True)
-		records_to_test = test_records[2:]
+		records_to_test = self.globalTestRecords["Item Group"][2:]
 		del records_to_test[3]
 		self.test_basic_tree(records=records_to_test)
 
 		# insert Group B - 2back
-		frappe.copy_doc(test_records[5]).insert()
+		frappe.copy_doc(self.globalTestRecords["Item Group"][5]).insert()
 		self.test_basic_tree()
 
 	def test_merge_leaf_into_group(self):

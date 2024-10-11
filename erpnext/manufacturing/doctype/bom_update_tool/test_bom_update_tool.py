@@ -12,8 +12,6 @@ from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueu
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
 
-test_records = frappe.get_test_records("BOM")
-
 
 class UnitTestBomUpdateTool(UnitTestCase):
 	"""
@@ -22,6 +20,9 @@ class UnitTestBomUpdateTool(UnitTestCase):
 	"""
 
 	pass
+
+
+EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM"]
 
 
 class TestBOMUpdateTool(IntegrationTestCase):
@@ -34,7 +35,7 @@ class TestBOMUpdateTool(IntegrationTestCase):
 	def test_replace_bom(self):
 		current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
 
-		bom_doc = frappe.copy_doc(test_records[0])
+		bom_doc = frappe.copy_doc(self.globalTestRecords["BOM"][0])
 		bom_doc.items[1].item_code = "_Test Item"
 		bom_doc.insert()
 

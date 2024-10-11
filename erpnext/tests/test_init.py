@@ -5,7 +5,7 @@ from frappe.tests import IntegrationTestCase
 
 from erpnext import encode_company_abbr
 
-test_records = frappe.get_test_records("Company")
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Company"]
 
 
 class TestInit(IntegrationTestCase):
