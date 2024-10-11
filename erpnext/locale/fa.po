@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-06 09:35+0000\n"
-"PO-Revision-Date: 2024-10-10 01:19\n"
+"PO-Revision-Date: 2024-10-11 01:19\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -704,7 +704,7 @@ msgstr ""
 #. Header text in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Masters &amp; Reports</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>مستندات و گزارش ها</b></span>"
 
 #. Header text in the Selling Workspace
 #. Header text in the Stock Workspace
@@ -718,7 +718,7 @@ msgstr "<span class=\"h4\"><b>دسترسی سریع</b></span>"
 #: erpnext/assets/workspace/assets/assets.json
 #: erpnext/quality_management/workspace/quality/quality.json
 msgid "<span class=\"h4\"><b>Reports & Masters</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>گزارش ها و مستندات</b></span>"
 
 #. Header text in the Accounting Workspace
 #. Header text in the Payables Workspace
@@ -741,7 +741,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Reports &amp; Masters</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>گزارش ها و مستندات</b></span>"
 
 #. Header text in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
@@ -1052,7 +1052,7 @@ msgstr "فرمول معیارهای پذیرش"
 #: erpnext/stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgid "Acceptance Criteria Value"
-msgstr "ارزش معیارهای پذیرش"
+msgstr "مقدار معیارهای پذیرش"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Inspection'
 #. Option for the 'Status' (Select) field in DocType 'Quality Inspection
@@ -5169,7 +5169,7 @@ msgstr "اعمال قانون در مورد دیگر"
 #. Level Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Apply SLA for Resolution Time"
-msgstr "SLA را برای زمان وضوح اعمال کنید"
+msgstr "اعمال SLA برای زمان حل و فصل"
 
 #. Label of the apply_tds (Check) field in DocType 'Purchase Invoice Item'
 #. Label of the apply_tds (Check) field in DocType 'Purchase Order Item'
@@ -19237,7 +19237,7 @@ msgstr "خروج"
 #. Label of the held_on (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Exit Interview Held On"
-msgstr "خروج از مصاحبه برگزار شد"
+msgstr "مصاحبه خروج برگزار شد"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:187
 #: erpnext/public/js/setup_wizard.js:180
@@ -21294,7 +21294,7 @@ msgstr "نام و نام خانوادگی"
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Full and Final Statement"
-msgstr "بیانیه کامل و نهایی"
+msgstr "صورت کامل و نهایی"
 
 #. Option for the 'Billing Status' (Select) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
@@ -21724,7 +21724,7 @@ msgstr "دریافت فاکتورهای معوق"
 #. Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Get Outstanding Orders"
-msgstr "دریافت سفارش‌های برجسته"
+msgstr "دریافت سفارش‌های معوق"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.js:38
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.js:40
@@ -31680,7 +31680,7 @@ msgstr "هیچ فاکتور معوقی نیاز به تجدید ارزیابی �
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2297
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
-msgstr "هیچ {0} برجسته ای برای {1} {2} که واجد شرایط فیلترهایی است که شما مشخص کرده اید، یافت نشد."
+msgstr "هیچ {0} معوقاتی برای {1} {2} که واجد شرایط فیلترهایی است که شما مشخص کرده اید، یافت نشد."
 
 #: erpnext/public/js/controllers/buying.js:436
 msgid "No pending Material Requests found to link for the given items."
@@ -33412,7 +33412,7 @@ msgstr "نرخ خروجی"
 #: erpnext/accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: erpnext/accounts/doctype/payment_schedule/payment_schedule.json
 msgid "Outstanding"
-msgstr "برجسته"
+msgstr "معوق"
 
 #. Label of the outstanding_amount (Float) field in DocType 'Cashier Closing'
 #. Label of the outstanding_amount (Currency) field in DocType 'Discounted
@@ -33447,7 +33447,7 @@ msgstr "مبلغ معوقه"
 
 #: erpnext/selling/report/customer_credit_balance/customer_credit_balance.py:66
 msgid "Outstanding Amt"
-msgstr "مبلغ برجسته"
+msgstr "مبلغ معوق"
 
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:44
 msgid "Outstanding Cheques and Deposits to clear"
@@ -38340,12 +38340,12 @@ msgstr "تخصیص گزارش تطبیق پرداخت فرآیند"
 #. Name of a DocType
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Process Statement Of Accounts"
-msgstr "فرآیند بیانیه حساب ها"
+msgstr "پردازش صورت‌حساب‌ها"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/process_statement_of_accounts_customer/process_statement_of_accounts_customer.json
 msgid "Process Statement Of Accounts Customer"
-msgstr "فرآیند بیانیه حساب مشتری"
+msgstr "پردازش صورت‌حساب‌های مشتری"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/process_subscription/process_subscription.json
@@ -38693,7 +38693,7 @@ msgstr "تجزیه و تحلیل سودآوری"
 #: erpnext/projects/doctype/task/task_list.js:52
 #: erpnext/templates/pages/projects.html:25
 msgid "Progress"
-msgstr "پیش رفتن"
+msgstr "پیشرفت"
 
 #: erpnext/projects/doctype/task/task.py:148
 #, python-format
@@ -40129,7 +40129,7 @@ msgstr "اقدام کیفیت"
 #. Name of a DocType
 #: erpnext/quality_management/doctype/quality_action_resolution/quality_action_resolution.json
 msgid "Quality Action Resolution"
-msgstr "قطعنامه اقدام با کیفیت"
+msgstr "حل و فصل اقدام کیفیت"
 
 #. Name of a DocType
 #. Option for the 'Document Type' (Select) field in DocType 'Quality Meeting
@@ -43186,12 +43186,12 @@ msgstr "تاریخ استعفا نامه"
 #: erpnext/quality_management/doctype/quality_action_resolution/quality_action_resolution.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution"
-msgstr "وضوح"
+msgstr "حل و فصل"
 
 #. Label of the resolution_by (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Resolution By"
-msgstr "قطعنامه توسط"
+msgstr "حل و فصل توسط"
 
 #. Label of the resolution_date (Datetime) field in DocType 'Issue'
 #. Label of the resolution_date (Datetime) field in DocType 'Warranty Claim'
@@ -43206,13 +43206,13 @@ msgstr "تاریخ حل و فصل"
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution Details"
-msgstr "جزئیات رزولوشن"
+msgstr "جزئیات حل و فصل"
 
 #. Option for the 'Service Level Agreement Status' (Select) field in DocType
 #. 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Resolution Due"
-msgstr "قطعنامه سررسید"
+msgstr "سررسید حل و فصل"
 
 #. Label of the resolution_time (Duration) field in DocType 'Issue'
 #. Label of the resolution_time (Duration) field in DocType 'Service Level
@@ -43225,7 +43225,7 @@ msgstr "مدت زمان حل و فصل"
 #. Label of the resolutions (Table) field in DocType 'Quality Action'
 #: erpnext/quality_management/doctype/quality_action/quality_action.json
 msgid "Resolutions"
-msgstr "قطعنامه ها"
+msgstr "حل و فصل ها"
 
 #: erpnext/accounts/doctype/dunning/dunning.js:45
 msgid "Resolve"
@@ -43278,7 +43278,7 @@ msgstr "مسیر کلیدی نتیجه پاسخ"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:99
 msgid "Response Time for {0} priority in row {1} can't be greater than Resolution Time."
-msgstr "زمان پاسخ برای اولویت {0} در ردیف {1} نمی تواند بیشتر از زمان وضوح باشد."
+msgstr "زمان پاسخ برای اولویت {0} در ردیف {1} نمی تواند بیشتر از زمان حل و فصل باشد."
 
 #. Label of the response_and_resolution_time_section (Section Break) field in
 #. DocType 'Service Level Agreement'
@@ -45964,7 +45964,7 @@ msgstr "زمان‌بند غیرفعال است. اکنون نمی توان کا
 
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:237
 msgid "Scheduler is Inactive. Can't trigger jobs now."
-msgstr "زمان‌بند غیرفعال است. اکنون نمی توان مشاغل را آغاز کرد."
+msgstr "زمان‌بند غیرفعال است. اکنون نمی توان کارها را آغاز کرد."
 
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:554
 msgid "Scheduler is inactive. Cannot enqueue job."
@@ -54606,7 +54606,7 @@ msgstr "کل ارزش خروجی (مصرف)"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:98
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:79
 msgid "Total Outstanding"
-msgstr "مجموع برجسته"
+msgstr "مجموع معوقات"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:206
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:163
@@ -56419,7 +56419,7 @@ msgstr "نظر کاربر"
 #. Label of the user_resolution_time (Duration) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "User Resolution Time"
-msgstr "زمان وضوح کاربر"
+msgstr "زمان حل و فصل کاربر"
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:587
 msgid "User has not applied rule on the invoice {0}"
