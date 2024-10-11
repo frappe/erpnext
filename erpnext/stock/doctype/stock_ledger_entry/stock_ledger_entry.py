@@ -312,7 +312,7 @@ class StockLedgerEntry(Document):
 			if authorized_users and frappe.session.user not in authorized_users:
 				last_transaction_time = frappe.db.sql(
 					"""
-					select MAX(timestamp(posting_date, posting_time)) as posting_time
+					select MAX((posting_date || ' ' || posting_time)::timestamp) as posting_time
 					from `tabStock Ledger Entry`
 					where docstatus = 1 and is_cancelled = 0 and item_code = %s
 					and warehouse = %s""",
