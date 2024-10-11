@@ -28,6 +28,7 @@ class TestPricingRule(IntegrationTestCase):
 	def setUp(self):
 		delete_existing_pricing_rules()
 		setup_pricing_rule_data()
+		self.enterClassContext(self.change_settings("Selling Settings", validate_selling_price=0))
 
 	def tearDown(self):
 		delete_existing_pricing_rules()

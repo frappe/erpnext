@@ -28,6 +28,11 @@ class UnitTestPosInvoiceMergeLog(UnitTestCase):
 
 
 class TestPOSInvoiceMergeLog(IntegrationTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
+
 	def test_consolidated_invoice_creation(self):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 

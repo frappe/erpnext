@@ -75,8 +75,9 @@ class TestSalesInvoice(IntegrationTestCase):
 		return w
 
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
 		super().setUpClass()
+		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
 		unlink_payment_on_cancel_of_invoice()
 
 	@classmethod
