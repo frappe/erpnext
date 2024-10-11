@@ -588,12 +588,13 @@ class Item(Document):
 
 	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
 		records = frappe.db.sql(
-			""" SELECT parent, COUNT(*) as records
+			"""
+			SELECT parent, COUNT(*) as records
 			FROM `tabStock Reconciliation Item`
-			WHERE item_code = %s and docstatus = 1
-			GROUP By item_code, warehouse, parent
-			HAVING records > 1
-		""",
+			WHERE item_code = %s AND docstatus = 1
+			GROUP BY item_code, warehouse, parent
+			HAVING COUNT(*) > 1
+			""",
 			new_name,
 			as_dict=1,
 		)
