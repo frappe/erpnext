@@ -28,6 +28,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 class TestAssetRepair(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		create_item("_Test Stock Item")
