@@ -76,6 +76,7 @@ class TestSalesInvoice(IntegrationTestCase):
 
 	@classmethod
 	def setUpClass(self):
+		super().setUpClass()
 		unlink_payment_on_cancel_of_invoice()
 
 	@classmethod
