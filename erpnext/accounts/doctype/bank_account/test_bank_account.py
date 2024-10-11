@@ -6,8 +6,6 @@ import frappe
 from frappe import ValidationError
 from frappe.tests import IntegrationTestCase
 
-# test_records = frappe.get_test_records('Bank Account')
-
 
 class TestBankAccount(IntegrationTestCase):
 	def test_validate_iban(self):

@@ -5,8 +5,6 @@ import unittest
 import frappe
 from frappe.tests import IntegrationTestCase
 
-test_records = frappe.get_test_records("Sales Taxes and Charges Template")
-
 
 class TestSalesTaxesandChargesTemplate(IntegrationTestCase):
 	pass

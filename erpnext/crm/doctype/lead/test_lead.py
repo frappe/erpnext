@@ -9,8 +9,6 @@ from frappe.utils import random_string, today
 from erpnext.crm.doctype.lead.lead import make_opportunity
 from erpnext.crm.utils import get_linked_prospect
 
-test_records = frappe.get_test_records("Lead")
-
 
 class TestLead(IntegrationTestCase):
 	def test_make_customer(self):

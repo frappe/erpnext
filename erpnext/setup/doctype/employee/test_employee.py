@@ -9,8 +9,6 @@ from frappe.tests import IntegrationTestCase
 import erpnext
 from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
 
-test_records = frappe.get_test_records("Employee")
-
 
 class TestEmployee(IntegrationTestCase):
 	def test_employee_status_left(self):

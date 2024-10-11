@@ -13,7 +13,7 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 )
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Warehouse"]
-test_records = frappe.get_test_records("Workstation")
+
 make_test_records("Workstation")
 
 

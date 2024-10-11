@@ -3,6 +3,4 @@
 
 import frappe
 
-test_records = frappe.get_test_records("Territory")
-
 IGNORE_TEST_RECORD_DEPENDENCIES = ["Item Group"]

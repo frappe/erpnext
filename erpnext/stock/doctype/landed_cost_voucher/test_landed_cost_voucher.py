@@ -1165,6 +1165,3 @@ def distribute_landed_cost_on_items(lcv):
 	for item in lcv.get("items"):
 		item.applicable_charges = flt(item.get(based_on)) * flt(lcv.total_taxes_and_charges) / flt(total)
 		item.applicable_charges = flt(item.applicable_charges, lcv.precision("applicable_charges", item))
-
-
-test_records = frappe.get_test_records("Landed Cost Voucher")

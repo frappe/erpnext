@@ -11,8 +11,6 @@ from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.utils import get_linked_communication_list
 
-test_records = frappe.get_test_records("Opportunity")
-
 
 class TestOpportunity(IntegrationTestCase):
 	def test_opportunity_status(self):

@@ -5,5 +5,3 @@ IGNORE_TEST_RECORD_DEPENDENCIES = ["Price List"]
 
 
 import frappe
-
-test_records = frappe.get_test_records("Customer Group")

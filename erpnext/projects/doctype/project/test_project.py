@@ -10,7 +10,6 @@ from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.sales_order import make_project as make_project_from_so
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
-test_records = frappe.get_test_records("Project")
 IGNORE_TEST_RECORD_DEPENDENCIES = ["Sales Order"]
 
 

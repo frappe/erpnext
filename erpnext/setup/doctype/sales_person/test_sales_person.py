@@ -5,6 +5,4 @@ EXTRA_TEST_RECORD_DEPENDENCIES = ["Employee"]
 
 import frappe
 
-test_records = frappe.get_test_records("Sales Person")
-
 IGNORE_TEST_RECORD_DEPENDENCIES = ["Item Group"]

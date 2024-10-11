@@ -6,8 +6,6 @@ import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string
 
-# test_records = frappe.get_test_records('Vehicle')
-
 
 class TestVehicle(IntegrationTestCase):
 	def test_make_vehicle(self):

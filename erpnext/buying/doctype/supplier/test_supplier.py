@@ -10,7 +10,7 @@ from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.exceptions import PartyDisabled
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
-test_records = frappe.get_test_records("Supplier")
+
 
 from frappe.tests import IntegrationTestCase, UnitTestCase
 
