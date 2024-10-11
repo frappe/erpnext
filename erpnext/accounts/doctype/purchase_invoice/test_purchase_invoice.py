@@ -45,6 +45,7 @@ IGNORE_TEST_RECORD_DEPENDENCIES = ["Serial No"]
 class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 	@classmethod
 	def setUpClass(self):
+		super().setUpClass()
 		unlink_payment_on_cancel_of_invoice()
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
