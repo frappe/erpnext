@@ -10,5 +10,4 @@ class TestProjectUpdate(IntegrationTestCase):
 	pass
 
 
-test_records = frappe.get_test_records("Project Update")
 IGNORE_TEST_RECORD_DEPENDENCIES = ["Sales Order"]

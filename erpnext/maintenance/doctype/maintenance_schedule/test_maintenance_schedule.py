@@ -14,8 +14,6 @@ from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule impor
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
-# test_records = frappe.get_test_records('Maintenance Schedule')
-
 
 class TestMaintenanceSchedule(IntegrationTestCase):
 	def test_events_should_be_created_and_deleted(self):

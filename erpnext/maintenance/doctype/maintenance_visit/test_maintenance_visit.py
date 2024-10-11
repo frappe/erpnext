@@ -6,8 +6,6 @@ import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils.data import today
 
-# test_records = frappe.get_test_records('Maintenance Visit')
-
 
 class TestMaintenanceVisit(IntegrationTestCase):
 	pass

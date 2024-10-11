@@ -6,8 +6,6 @@ import unittest
 import frappe
 from frappe.tests import IntegrationTestCase
 
-test_records = frappe.get_test_records("Location")
-
 
 class TestLocation(IntegrationTestCase):
 	def runTest(self):

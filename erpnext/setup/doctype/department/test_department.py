@@ -26,6 +26,3 @@ def create_department(department_name, parent_department=None):
 	).insert()
 
 	return doc
-
-
-test_records = frappe.get_test_records("Department")

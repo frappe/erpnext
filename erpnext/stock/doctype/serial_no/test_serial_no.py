@@ -22,7 +22,6 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_i
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
-test_records = frappe.get_test_records("Serial No")
 
 
 class UnitTestSerialNo(UnitTestCase):

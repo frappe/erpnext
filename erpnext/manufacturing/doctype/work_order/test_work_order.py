@@ -2713,6 +2713,3 @@ def make_wo_order_test_record(**args):
 		if not args.do_not_submit:
 			wo_order.submit()
 	return wo_order
-
-
-test_records = frappe.get_test_records("Work Order")

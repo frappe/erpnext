@@ -3,9 +3,6 @@
 
 
 import frappe
-
-test_records = frappe.get_test_records("Item Attribute")
-
 from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError

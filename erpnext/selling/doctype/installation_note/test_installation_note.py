@@ -4,8 +4,6 @@ import unittest
 
 from frappe.tests import IntegrationTestCase
 
-# test_records = frappe.get_test_records('Installation Note')
-
 
 class TestInstallationNote(IntegrationTestCase):
 	pass
