@@ -14,8 +14,6 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Warehouse"]
 
-make_test_records("Workstation")
-
 
 class UnitTestWorkstation(UnitTestCase):
 	"""
