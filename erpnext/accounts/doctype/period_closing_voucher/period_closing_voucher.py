@@ -353,9 +353,10 @@ class PeriodClosingVoucher(AccountsController):
 
 		if get_opening_entries:
 			query = query.where(
-				gl_entry.posting_date.between(self.get("year_start_date"), self.posting_date)
-				| gl_entry.is_opening
-				== "Yes"
+				(  # noqa: UP034
+					(gl_entry.posting_date.between(self.get("year_start_date"), self.posting_date))
+					| (gl_entry.is_opening == "Yes")
+				)
 			)
 		else:
 			query = query.where(
