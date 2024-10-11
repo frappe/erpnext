@@ -636,9 +636,13 @@ class calculate_taxes_and_totals:
 				self.doc.grand_total, self.doc.currency, self.doc.precision("rounded_total")
 			)
 
-			# rounding adjustment should always be the difference vetween grand and rounded total
+			# rounding adjustment should always be the difference between grand and rounded total
+			# but in case of inclusive tax, net amount plus tax might not add up to the grand total,
+			# so we need to add that to rounding as well, even though grand and rounded totals are same
 			self.doc.rounding_adjustment = flt(
-				self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment")
+				flt(self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment"))
+				+ flt(self.doc.get("grand_total_diff"), self.doc.precision("rounding_adjustment")),
+				self.doc.precision("rounding_adjustment"),
 			)
 
 			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
