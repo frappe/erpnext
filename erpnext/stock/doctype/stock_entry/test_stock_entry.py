@@ -41,7 +41,7 @@ def get_sle(**args):
 
 	return frappe.db.sql(
 		"""select * from `tabStock Ledger Entry` %s
-		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""
+		order by (posting_date || ' ' || posting_time)::timestamp desc, creation desc limit 1"""
 		% condition,
 		values,
 		as_dict=1,
