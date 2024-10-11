@@ -96,7 +96,10 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 		account_type_condition = ""
 		if with_account_type_filter:
 			account_type_condition = "AND account_type in %(account_types)s"
-
+		if frappe.db.db_type == "postgres":
+			like_operator = "ILIKE"
+		else:
+			like_operator = "LIKE"
 		accounts = frappe.db.sql(
 			f"""
 			SELECT name, parent_account
@@ -107,7 +110,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 				AND company = %(company)s
 				AND disabled = %(disabled)s
 				AND (account_currency = %(currency)s or ifnull(account_currency, '') = '')
-				AND `{searchfield}` LIKE %(txt)s
+				AND `{searchfield}` {like_operator} %(txt)s
 				{get_match_cond(doctype)}
 			ORDER BY idx DESC, name
 			LIMIT %(limit)s offset %(offset)s
