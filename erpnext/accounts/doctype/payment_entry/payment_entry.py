@@ -1236,12 +1236,14 @@ class PaymentEntry(AccountsController):
 
 		self.set("remarks", "\n".join(remarks))
 
-	def build_gl_map(self):
+	def build_gl_map(self, include_advance_doctype_reference=False):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
 
 		gl_entries = []
-		self.add_party_gl_entries(gl_entries)
+		self.add_party_gl_entries(
+			gl_entries, include_advance_doctype_reference=include_advance_doctype_reference
+		)
 		self.add_bank_gl_entries(gl_entries)
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
@@ -1259,7 +1261,7 @@ class PaymentEntry(AccountsController):
 
 		self.make_advance_gl_entries(cancel=cancel)
 
-	def add_party_gl_entries(self, gl_entries):
+	def add_party_gl_entries(self, gl_entries, include_advance_doctype_reference=False):
 		if not self.party_account:
 			return
 
@@ -1311,10 +1313,11 @@ class PaymentEntry(AccountsController):
 					"cost_center": cost_center,
 				}
 			)
+
 			advance_payment_doctypes = frappe.get_hooks(
 				"advance_payment_receivable_doctypes"
 			) + frappe.get_hooks("advance_payment_payable_doctypes")
-			if d.reference_doctype not in advance_payment_doctypes:
+			if include_advance_doctype_reference or d.reference_doctype not in advance_payment_doctypes:
 				gle.update(
 					{
 						"against_voucher_type": d.reference_doctype,

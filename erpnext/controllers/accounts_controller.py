@@ -1919,51 +1919,85 @@ class AccountsController(TransactionBase):
 
 		return stock_items
 
-	def get_advances_from_payments(self) -> list:
-		# TODO: add company filter
-		per = frappe.qb.DocType("Payment Entry Reference")
-		advance = (
-			qb.from_(per)
-			.select(Sum(per.allocated_amount).as_("amount"))
-			.where(
-				per.reference_doctype.eq(self.doctype)
-				& per.reference_name.eq(self.name)
-				& per.docstatus.eq(1)
-			)
-			.groupby(per.parent)
-			.run(as_dict=True)
-		)
-		return advance
-
 	def get_advances_from_journals(self) -> list:
-		# TODO: add company filter
+		je = frappe.qb.DocType("Journal Entry")
 		jea = frappe.qb.DocType("Journal Entry Account")
-		if self.doctype == "Purchase Order":
-			field = jea.debit - jea.credit
-		else:
-			field = jea.credit - jea.debit
-
-		advance = (
-			qb.from_(jea)
-			.select(Sum(field).as_("amount"), jea.account_currency)
+		journals = (
+			qb.from_(je)
+			.inner_join(jea)
+			.on(je.name == jea.parent)
+			.select(ConstantColumn("Journal Entry").as_("doctype"))
+			.select(je.name)
+			.distinct()
 			.where(
-				jea.reference_type.eq(self.doctype) & jea.reference_name.eq(self.name) & jea.docstatus.eq(1)
+				je.company.eq(self.company)
+				& je.docstatus.eq(1)
+				& jea.reference_type.eq(self.doctype)
+				& jea.reference_name.eq(self.name)
 			)
-			.groupby(jea.parent)
 			.run(as_dict=True)
 		)
-		return advance
+		return journals
+
+	def get_advances_from_payments(self) -> list:
+		pe = frappe.qb.DocType("Payment Entry")
+		per = frappe.qb.DocType("Payment Entry Reference")
+		payments = (
+			qb.from_(pe)
+			.inner_join(per)
+			.on(pe.name == per.parent)
+			.select(ConstantColumn("Payment Entry").as_("doctype"))
+			.select(pe.name)
+			.distinct()
+			.where(
+				pe.company.eq(self.company)
+				& pe.docstatus.eq(1)
+				& per.reference_doctype.eq(self.doctype)
+				& per.reference_name.eq(self.name)
+			)
+			.run(as_dict=True)
+		)
+
+		return payments
+
+	def build_ledger_map_against_so_po(self, all_advances: list | None = None) -> list:
+		# build_gl_map() and get_payment_ledger_entries() are used solely to build and
+		# calculate advance amount allocated against this SO / PO.
+		# These entries are not be posted to ledger.
+		from erpnext.accounts.utils import get_payment_ledger_entries
+
+		with_so_po_reference = []
+		payment_ledger_entries = []
+		if all_advances:
+			for x in all_advances:
+				if x.doctype == "Payment Entry":
+					gle = frappe.get_doc(x.doctype, x.name).build_gl_map(
+						include_advance_doctype_reference=True
+					)
+				else:
+					gle = frappe.get_doc(x.doctype, x.name).build_gl_map()
+
+				payment_ledger_entries.extend(get_payment_ledger_entries(gle))
+
+			with_so_po_reference = [y for y in payment_ledger_entries if y.against_voucher_no == self.name]
+		return with_so_po_reference
+
+	def calculate_advance_paid_against_so_po(self, all_advances: list | None = None) -> list | None:
+		if with_so_po_reference := self.build_ledger_map_against_so_po(all_advances):
+			total_advance = abs(sum([y.amount_in_account_currency for y in with_so_po_reference]))
+			account_currency = with_so_po_reference[0].account_currency
+			return [frappe._dict(amount=total_advance, account_currency=account_currency)]
+		return None
 
 	def set_total_advance_paid(self):
 		advance_paid, order_total = None, None
 		pe_advances = self.get_advances_from_payments()
 		je_advances = self.get_advances_from_journals()
-		advance = pe_advances + je_advances
+		all_advances = pe_advances + je_advances
+		advance = self.calculate_advance_paid_against_so_po(all_advances)
 
 		if advance:
-			total_advance_paid = sum([x.amount for x in advance])
 			advance = advance[0]
-			advance.amount = total_advance_paid
 
 			advance_paid = flt(advance.amount, self.precision("advance_paid"))
 			formatted_advance_paid = fmt_money(
