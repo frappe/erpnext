@@ -476,8 +476,12 @@ def reconcile_against_document(
 
 		# For payments with `Advance` in separate account feature enabled, only new ledger entries are posted for each reference.
 		# No need to cancel/delete payment ledger entries
+		repost_whole_ledger = any([x.voucher_detail_no for x in entries])
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
-			doc.make_advance_gl_entries(cancel=1)
+			if repost_whole_ledger:
+				doc.make_gl_entries(cancel=1)
+			else:
+				doc.make_advance_gl_entries(cancel=1)
 		else:
 			_delete_pl_entries(voucher_type, voucher_no)
 
@@ -513,7 +517,10 @@ def reconcile_against_document(
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
 			# both ledgers must be posted to for `Advance` in separate account feature
 			# TODO: find a more efficient way post only for the new linked vouchers
-			doc.make_advance_gl_entries()
+			if repost_whole_ledger:
+				doc.make_gl_entries()
+			else:
+				doc.make_advance_gl_entries()
 		else:
 			gl_map = doc.build_gl_map()
 			# Make sure there is no overallocation
