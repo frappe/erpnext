@@ -21,7 +21,6 @@ IGNORE_TEST_RECORD_DEPENDENCIES = [
 	"Warehouse",
 ]
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Fiscal Year"]
-test_records = frappe.get_test_records("Company")
 
 
 class TestCompany(IntegrationTestCase):
@@ -116,7 +115,7 @@ class TestCompany(IntegrationTestCase):
 		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
 
 		if not records:
-			records = test_records[2:]
+			records = self.globalTestRecords["Company"][2:]
 
 		for company in records:
 			lft, rgt, parent_company = frappe.db.get_value(

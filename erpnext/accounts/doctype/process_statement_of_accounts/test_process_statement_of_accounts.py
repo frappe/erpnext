@@ -15,6 +15,11 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
 class TestProcessStatementOfAccounts(AccountsTestMixin, IntegrationTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
+
 	def setUp(self):
 		self.create_company()
 		self.create_customer()

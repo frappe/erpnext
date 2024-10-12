@@ -19,7 +19,7 @@ class UnitTestSupplierQuotation(UnitTestCase):
 
 class TestPurchaseOrder(IntegrationTestCase):
 	def test_supplier_quotation_qty(self):
-		sq = frappe.copy_doc(test_records[0])
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		sq.items[0].qty = 0
 		with self.assertRaises(InvalidQtyError):
 			sq.save()
@@ -32,7 +32,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
-		sq = frappe.copy_doc(test_records[0]).insert()
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, sq.name)
 
@@ -50,6 +50,3 @@ class TestPurchaseOrder(IntegrationTestCase):
 				doc.set("schedule_date", "2013-04-12")
 
 		po.insert()
-
-
-test_records = frappe.get_test_records("Supplier Quotation")

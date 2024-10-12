@@ -37,10 +37,18 @@ class UnitTestJobCard(UnitTestCase):
 
 class TestJobCard(IntegrationTestCase):
 	def setUp(self):
-		make_bom_for_jc_tests()
+		self.make_bom_for_jc_tests()
 		self.transfer_material_against: Literal["Work Order", "Job Card"] = "Work Order"
 		self.source_warehouse = None
 		self._work_order = None
+
+	def make_bom_for_jc_tests(self):
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
+		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		bom.rm_cost_as_per = "Valuation Rate"
+		bom.items[0].uom = "_Test UOM 1"
+		bom.items[0].conversion_factor = 5
+		bom.insert()
 
 	@property
 	def work_order(self) -> WorkOrder:
@@ -669,13 +677,3 @@ def make_wo_with_transfer_against_jc():
 	work_order.submit()
 
 	return work_order
-
-
-def make_bom_for_jc_tests():
-	test_records = frappe.get_test_records("BOM")
-	bom = frappe.copy_doc(test_records[2])
-	bom.set_rate_of_sub_assembly_item_based_on_bom = 0
-	bom.rm_cost_as_per = "Valuation Rate"
-	bom.items[0].uom = "_Test UOM 1"
-	bom.items[0].conversion_factor = 5
-	bom.insert()

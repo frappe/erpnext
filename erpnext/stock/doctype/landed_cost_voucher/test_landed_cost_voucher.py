@@ -30,6 +30,9 @@ class UnitTestLandedCostVoucher(UnitTestCase):
 	pass
 
 
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange"]
+
+
 class TestLandedCostVoucher(IntegrationTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
@@ -508,12 +511,9 @@ class TestLandedCostVoucher(IntegrationTestCase):
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 	def test_multi_currency_lcv(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
-			save_new_records,
-			test_records,
-		)
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
 
-		save_new_records(test_records)
+		save_new_records(self.globalTestRecords["Currency Exchange"])
 
 		## Create USD Shipping charges_account
 		usd_shipping = create_account(

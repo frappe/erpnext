@@ -374,7 +374,7 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"))
 
 	def test_rejected_warehouse_filter(self):
-		pr = frappe.copy_doc(test_records[0])
+		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
 		pr.get("items")[0].qty = 3
 		pr.get("items")[0].rejected_qty = 2
@@ -383,7 +383,7 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, pr.save)
 
 	def test_rejected_serial_no(self):
-		pr = frappe.copy_doc(test_records[0])
+		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
 		pr.get("items")[0].qty = 3
 		pr.get("items")[0].rejected_qty = 2
@@ -3955,4 +3955,3 @@ def make_purchase_receipt(**args):
 
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM", "Item Price", "Location"]
-test_records = frappe.get_test_records("Purchase Receipt")

@@ -89,16 +89,16 @@ class TestItem(IntegrationTestCase):
 		frappe.flags.attribute_values = None
 
 	def get_item(self, idx):
-		item_code = test_records[idx].get("item_code")
+		item_code = self.globalTestRecords["Item"][idx].get("item_code")
 		if not frappe.db.exists("Item", item_code):
-			item = frappe.copy_doc(test_records[idx])
+			item = frappe.copy_doc(self.globalTestRecords["Item"][idx])
 			item.insert()
 		else:
 			item = frappe.get_doc("Item", item_code)
 		return item
 
 	def test_get_item_details(self):
-		# delete modified item price record and make as per test_records
+		# delete modified item price record and make as per self.globalTestRecords["Item"]
 		frappe.db.sql("""delete from `tabItem Price`""")
 		frappe.db.sql("""delete from `tabBin`""")
 
@@ -693,7 +693,7 @@ class TestItem(IntegrationTestCase):
 		self.assertEqual(received_attrs, {"Extra Small", "Extra Large"})
 
 	def test_check_stock_uom_with_bin(self):
-		# this item has opening stock and stock_uom set in test_records.
+		# this item has opening stock and stock_uom set in self.globalTestRecords["Item"].
 		item = frappe.get_doc("Item", "_Test Item")
 		item.stock_uom = "Gram"
 		self.assertRaises(frappe.ValidationError, item.save)
@@ -934,9 +934,6 @@ def make_item_variant():
 		variant.item_code = "_Test Variant Item-S"
 		variant.item_name = "_Test Variant Item-S"
 		variant.save()
-
-
-test_records = frappe.get_test_records("Item")
 
 
 def create_item(

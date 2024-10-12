@@ -68,14 +68,16 @@ class TestSalesInvoice(IntegrationTestCase):
 		frappe.db.rollback()
 
 	def make(self):
-		w = frappe.copy_doc(test_records[0])
+		w = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		w.is_pos = 0
 		w.insert()
 		w.submit()
 		return w
 
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
 		unlink_payment_on_cancel_of_invoice()
 
 	@classmethod
@@ -93,7 +95,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(si.items[0].qty, 1)
 
 	def test_timestamp_change(self):
-		w = frappe.copy_doc(test_records[0])
+		w = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		w.docstatus = 0
 		w.insert()
 
@@ -110,27 +112,27 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
 
 	def test_sales_invoice_change_naming_series(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.insert()
 		si.naming_series = "TEST-"
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
 
-		si = frappe.copy_doc(test_records[1])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][1])
 		si.insert()
 		si.naming_series = "TEST-"
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
 
 	def test_add_terms_after_save(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.insert()
 
 		self.assertTrue(si.payment_schedule)
 		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(si.due_date))
 
 	def test_sales_invoice_calculation_base_currency(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.insert()
 
 		expected_values = {
@@ -182,7 +184,7 @@ class TestSalesInvoice(IntegrationTestCase):
 	def test_payment_entry_unlink_against_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.is_pos = 0
 		si.insert()
 		si.submit()
@@ -248,7 +250,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertRaises(PaymentEntryUnlinkError, si1.cancel)
 
 	def test_sales_invoice_calculation_export_currency(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.currency = "USD"
 		si.conversion_rate = 50
 		si.get("items")[0].rate = 1
@@ -367,7 +369,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(si.grand_total, 4900.00)
 
 	def test_sales_invoice_discount_amount(self):
-		si = frappe.copy_doc(test_records[3])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][3])
 		si.discount_amount = 104.94
 		si.append(
 			"taxes",
@@ -449,7 +451,7 @@ class TestSalesInvoice(IntegrationTestCase):
 
 	def test_discount_amount_gl_entry(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
-		si = frappe.copy_doc(test_records[3])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][3])
 		si.discount_amount = 104.94
 		si.append(
 			"taxes",
@@ -480,15 +482,15 @@ class TestSalesInvoice(IntegrationTestCase):
 			(d[0], d)
 			for d in [
 				[si.debit_to, 1500, 0.0],
-				[test_records[3]["items"][0]["income_account"], 0.0, 1163.45],
-				[test_records[3]["taxes"][0]["account_head"], 0.0, 130.31],
-				[test_records[3]["taxes"][1]["account_head"], 0.0, 2.61],
-				[test_records[3]["taxes"][2]["account_head"], 0.0, 1.30],
-				[test_records[3]["taxes"][3]["account_head"], 0.0, 25.95],
-				[test_records[3]["taxes"][4]["account_head"], 0.0, 145.43],
-				[test_records[3]["taxes"][5]["account_head"], 0.0, 116.34],
-				[test_records[3]["taxes"][6]["account_head"], 0.0, 100],
-				[test_records[3]["taxes"][7]["account_head"], 168.54, 0.0],
+				[self.globalTestRecords["Sales Invoice"][3]["items"][0]["income_account"], 0.0, 1163.45],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][0]["account_head"], 0.0, 130.31],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][1]["account_head"], 0.0, 2.61],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][2]["account_head"], 0.0, 1.30],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][3]["account_head"], 0.0, 25.95],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][4]["account_head"], 0.0, 145.43],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][5]["account_head"], 0.0, 116.34],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][6]["account_head"], 0.0, 100],
+				[self.globalTestRecords["Sales Invoice"][3]["taxes"][7]["account_head"], 168.54, 0.0],
 				["_Test Account Service Tax - _TC", 16.85, 0.0],
 				["Round Off - _TC", 0.01, 0.0],
 			]
@@ -638,7 +640,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(si.grand_total, 1116.0)
 
 	def test_inclusive_rate_validations(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		for i, tax in enumerate(si.get("taxes")):
 			tax.idx = i + 1
 
@@ -656,7 +658,7 @@ class TestSalesInvoice(IntegrationTestCase):
 
 	def test_sales_invoice_calculation_base_currency_with_tax_inclusive_price(self):
 		# prepare
-		si = frappe.copy_doc(test_records[3])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][3])
 		si.insert()
 
 		expected_values = {
@@ -730,7 +732,7 @@ class TestSalesInvoice(IntegrationTestCase):
 
 	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
 		# prepare
-		si = frappe.copy_doc(test_records[3])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][3])
 		si.currency = "USD"
 		si.conversion_rate = 50
 		si.get("items")[0].price_list_rate = 55.56
@@ -819,7 +821,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(w.outstanding_amount, w.base_rounded_total)
 
 	def test_rounded_total_with_cash_discount(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 
 		item = copy.deepcopy(si.get("items")[0])
 		item.update(
@@ -842,12 +844,7 @@ class TestSalesInvoice(IntegrationTestCase):
 
 	def test_payment(self):
 		w = self.make()
-
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
-			test_records as jv_test_records,
-		)
-
-		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
+		jv = frappe.get_doc(frappe.copy_doc(self.globalTestRecords["Journal Entry"][0]))
 		jv.get("accounts")[0].reference_type = w.doctype
 		jv.get("accounts")[0].reference_name = w.name
 		jv.insert()
@@ -886,7 +883,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		)
 
 		# make invoice
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.is_pos = 0
 		si.insert()
 		si.submit()
@@ -913,7 +910,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(si.outstanding_amount, 0)
 
 	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
-		si = frappe.copy_doc(test_records[1])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][1])
 		si.insert()
 		si.submit()
 
@@ -931,9 +928,9 @@ class TestSalesInvoice(IntegrationTestCase):
 			(d[0], d)
 			for d in [
 				[si.debit_to, 630.0, 0.0],
-				[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
-				[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
-				[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
+				[self.globalTestRecords["Sales Invoice"][1]["items"][0]["income_account"], 0.0, 500.0],
+				[self.globalTestRecords["Sales Invoice"][1]["taxes"][0]["account_head"], 0.0, 80.0],
+				[self.globalTestRecords["Sales Invoice"][1]["taxes"][1]["account_head"], 0.0, 50.0],
 			]
 		)
 
@@ -1310,7 +1307,7 @@ class TestSalesInvoice(IntegrationTestCase):
 	def test_pos_si_without_payment(self):
 		make_pos_profile()
 
-		pos = copy.deepcopy(test_records[1])
+		pos = copy.deepcopy(dict(self.globalTestRecords["Sales Invoice"][1]))
 		pos["is_pos"] = 1
 		pos["update_stock"] = 1
 
@@ -1365,7 +1362,7 @@ class TestSalesInvoice(IntegrationTestCase):
 			(d[0], d)
 			for d in [
 				[si.debit_to, 100.0, 0.0],
-				[test_records[1]["items"][0]["income_account"], 0.0, 100.0],
+				[self.globalTestRecords["Sales Invoice"][1]["items"][0]["income_account"], 0.0, 100.0],
 			]
 		)
 		for _i, gle in enumerate(gl_entries):
@@ -1374,21 +1371,13 @@ class TestSalesInvoice(IntegrationTestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def _insert_purchase_receipt(self):
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-			test_records as pr_test_records,
-		)
-
-		pr = frappe.copy_doc(pr_test_records[0])
+		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
 		pr.naming_series = "_T-Purchase Receipt-"
 		pr.insert()
 		pr.submit()
 
 	def _insert_delivery_note(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import (
-			test_records as dn_test_records,
-		)
-
-		dn = frappe.copy_doc(dn_test_records[0])
+		dn = frappe.copy_doc(self.globalTestRecords["Delivery Note"][0])
 		dn.naming_series = "_T-Delivery Note-"
 		dn.insert()
 		dn.submit()
@@ -1398,15 +1387,11 @@ class TestSalesInvoice(IntegrationTestCase):
 		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
 	)
 	def test_sales_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
-			test_records as jv_test_records,
-		)
-
-		jv = frappe.copy_doc(jv_test_records[0])
+		jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
 		jv.insert()
 		jv.submit()
 
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.allocate_advances_automatically = 0
 		si.append(
 			"advances",
@@ -1447,11 +1432,11 @@ class TestSalesInvoice(IntegrationTestCase):
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
-		se = make_serialized_item()
+		se = make_serialized_item(self)
 		se.load_from_db()
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.update_stock = 1
 		si.get("items")[0].item_code = "_Test Serialized Item With Series"
 		si.get("items")[0].qty = 1
@@ -1499,7 +1484,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
-		se = make_serialized_item()
+		se = make_serialized_item(self)
 		se.load_from_db()
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
 
@@ -1678,7 +1663,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(incoming_rate, 10.0)
 
 	def test_discount_on_net_total(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.apply_discount_on = "Net Total"
 		si.discount_amount = 625
 		si.insert()
@@ -1917,16 +1902,12 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate * 25) / 100 + price_list_rate))
 
 	def test_outstanding_amount_after_advance_jv_cancellation(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
-			test_records as jv_test_records,
-		)
-
-		jv = frappe.copy_doc(jv_test_records[0])
+		jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
 		jv.accounts[0].is_advance = "Yes"
 		jv.insert()
 		jv.submit()
 
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.append(
 			"advances",
 			{
@@ -2000,7 +1981,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		sales_order.reload()
 		self.assertEqual(sales_order.advance_paid, 300)
 
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.items[0].sales_order = sales_order.name
 		si.items[0].so_detail = sales_order.get("items")[0].name
 		si.is_pos = 0
@@ -2053,7 +2034,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		item_price.price_list_rate = 100
 		item_price.insert()
 
-		si = frappe.copy_doc(test_records[1])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][1])
 		si.items[0].uom = "_Test UOM 1"
 		si.items[0].conversion_factor = None
 		si.items[0].price_list_rate = None
@@ -2354,7 +2335,7 @@ class TestSalesInvoice(IntegrationTestCase):
 			shipping_rule_type="Selling", shipping_rule_name="Shipping Rule - Sales Invoice Test"
 		)
 
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 
 		si.shipping_rule = shipping_rule.name
 		si.insert()
@@ -2698,7 +2679,7 @@ class TestSalesInvoice(IntegrationTestCase):
 			basic_rate=500,
 		)
 
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.customer = "_Test Internal Customer 3"
 		si.update_stock = 1
 		si.set_warehouse = "Finished Goods - _TC"
@@ -3315,7 +3296,7 @@ class TestSalesInvoice(IntegrationTestCase):
 			self.assertEqual(invoice.status, "Overdue and Discounted")
 
 	def test_sales_commission(self):
-		si = frappe.copy_doc(test_records[2])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 
 		frappe.db.set_value("Item", si.get("items")[0].item_code, "grant_commission", 1)
 		frappe.db.set_value("Item", si.get("items")[1].item_code, "grant_commission", 0)
@@ -4187,7 +4168,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(jv[0], si.grand_total)
 
 	def test_invoice_remarks(self):
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.po_no = "Test PO"
 		si.po_date = nowdate()
 		si.save()
@@ -4357,7 +4338,6 @@ def create_sales_invoice_against_cost_center(**args):
 
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Journal Entry", "Contact", "Address"]
-test_records = frappe.get_test_records("Sales Invoice")
 
 
 def get_outstanding_amount(against_voucher_type, against_voucher, account, party, party_type):

@@ -327,7 +327,7 @@ class TestAccount(IntegrationTestCase):
 
 
 def _make_test_records(verbose=None):
-	from frappe.test_runner import make_test_objects
+	from frappe.tests.utils import make_test_objects
 
 	accounts = [
 		# [account_name, parent_account, is_group]

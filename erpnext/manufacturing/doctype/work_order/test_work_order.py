@@ -3,8 +3,7 @@
 
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import timeout
+from frappe.tests import IntegrationTestCase, UnitTestCase, timeout
 from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError

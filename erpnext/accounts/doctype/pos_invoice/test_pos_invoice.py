@@ -23,6 +23,8 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 class TestPOSInvoice(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
+		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
 		frappe.db.sql("delete from `tabTax Rule`")
 
@@ -248,6 +250,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -289,6 +292,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -377,6 +381,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -431,6 +436,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -482,6 +488,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -512,6 +519,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -901,7 +909,7 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		frappe.db.savepoint("before_test_delivered_serial_no_case")
 		try:
-			se = make_serialized_item()
+			se = make_serialized_item(self)
 			serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
 
 			dn = create_delivery_note(item_code="_Test Serialized Item With Series", serial_no=[serial_no])

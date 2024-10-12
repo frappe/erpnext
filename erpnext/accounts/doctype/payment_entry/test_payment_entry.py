@@ -25,7 +25,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Currency Exchange"]
 
 
 class UnitTestPaymentEntry(UnitTestCase):
@@ -619,12 +619,9 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(flt(pe.references[0].exchange_gain_loss, 2), -94.74)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
-			save_new_records,
-			test_records,
-		)
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
 
-		save_new_records(test_records)
+		save_new_records(self.globalTestRecords["Currency Exchange"])
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Pay"

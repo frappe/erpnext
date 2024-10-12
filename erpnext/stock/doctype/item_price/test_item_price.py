@@ -48,7 +48,7 @@ class TestItemPrice(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_duplicate_item(self):
-		doc = frappe.copy_doc(test_records[0])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][0])
 		self.assertRaises(ItemPriceDuplicateItem, doc.save)
 
 	def test_addition_of_new_fields(self):
@@ -63,13 +63,13 @@ class TestItemPrice(IntegrationTestCase):
 			"valid_upto",
 			"note",
 		]
-		doc_fields = frappe.copy_doc(test_records[1]).__dict__.keys()
+		doc_fields = frappe.copy_doc(self.globalTestRecords["Item Price"][1]).__dict__.keys()
 
 		for test_field in test_fields_existance:
 			self.assertTrue(test_field in doc_fields)
 
 	def test_dates_validation_error(self):
-		doc = frappe.copy_doc(test_records[1])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][1])
 		# Enter invalid dates valid_from  >= valid_upto
 		doc.valid_from = "2017-04-20"
 		doc.valid_upto = "2017-04-17"
@@ -78,7 +78,7 @@ class TestItemPrice(IntegrationTestCase):
 
 	def test_price_in_a_qty(self):
 		# Check correct price at this quantity
-		doc = frappe.copy_doc(test_records[2])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][2])
 
 		args = {
 			"price_list": doc.price_list,
@@ -93,7 +93,7 @@ class TestItemPrice(IntegrationTestCase):
 
 	def test_price_with_no_qty(self):
 		# Check correct price when no quantity
-		doc = frappe.copy_doc(test_records[2])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][2])
 		args = {
 			"price_list": doc.price_list,
 			"customer": doc.customer,
@@ -106,7 +106,7 @@ class TestItemPrice(IntegrationTestCase):
 
 	def test_prices_at_date(self):
 		# Check correct price at first date
-		doc = frappe.copy_doc(test_records[2])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][2])
 
 		args = {
 			"price_list": doc.price_list,
@@ -121,7 +121,7 @@ class TestItemPrice(IntegrationTestCase):
 
 	def test_prices_at_invalid_date(self):
 		# Check correct price at invalid date
-		doc = frappe.copy_doc(test_records[3])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][3])
 
 		args = {
 			"price_list": doc.price_list,
@@ -135,7 +135,7 @@ class TestItemPrice(IntegrationTestCase):
 
 	def test_prices_outside_of_date(self):
 		# Check correct price when outside of the date
-		doc = frappe.copy_doc(test_records[4])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][4])
 
 		args = {
 			"price_list": doc.price_list,
@@ -150,7 +150,7 @@ class TestItemPrice(IntegrationTestCase):
 
 	def test_lowest_price_when_no_date_provided(self):
 		# Check lowest price when no date provided
-		doc = frappe.copy_doc(test_records[1])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][1])
 
 		args = {
 			"price_list": doc.price_list,
@@ -162,14 +162,14 @@ class TestItemPrice(IntegrationTestCase):
 		self.assertEqual(price, 10)
 
 	def test_invalid_item(self):
-		doc = frappe.copy_doc(test_records[1])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][1])
 		# Enter invalid item code
 		doc.item_code = "This is not an item code"
 		# Valid item codes must already exist
 		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_invalid_price_list(self):
-		doc = frappe.copy_doc(test_records[1])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][1])
 		# Check for invalid price list
 		doc.price_list = "This is not a price list"
 		# Valid price list must already exist
@@ -177,7 +177,7 @@ class TestItemPrice(IntegrationTestCase):
 
 	def test_empty_duplicate_validation(self):
 		# Check if none/empty values are not compared during insert validation
-		doc = frappe.copy_doc(test_records[2])
+		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][2])
 		doc.customer = None
 		doc.price_list_rate = 21
 		doc.insert()
@@ -193,6 +193,3 @@ class TestItemPrice(IntegrationTestCase):
 		frappe.db.rollback()
 
 		self.assertEqual(price, 21)
-
-
-test_records = frappe.get_test_records("Item Price")

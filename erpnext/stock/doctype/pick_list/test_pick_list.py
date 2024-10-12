@@ -790,7 +790,7 @@ class TestPickList(IntegrationTestCase):
 		self.assertEqual(so.per_delivered, 100)
 
 	def test_picklist_with_partial_bundles(self):
-		# from test_records.json
+		# from self.globalTestRecords
 		warehouse = "_Test Warehouse - _TC"
 
 		quantities = [5, 2]

@@ -13,8 +13,6 @@ from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import (
 	enqueue_update_cost,
 )
 
-test_records = frappe.get_test_records("BOM")
-
 
 class UnitTestBomUpdateLog(UnitTestCase):
 	"""
@@ -25,11 +23,14 @@ class UnitTestBomUpdateLog(UnitTestCase):
 	pass
 
 
+EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM"]
+
+
 class TestBOMUpdateLog(IntegrationTestCase):
 	"Test BOM Update Tool Operations via BOM Update Log."
 
 	def setUp(self):
-		bom_doc = frappe.copy_doc(test_records[0])
+		bom_doc = frappe.copy_doc(self.globalTestRecords["BOM"][0])
 		bom_doc.items[1].item_code = "_Test Item"
 		bom_doc.insert()
 
