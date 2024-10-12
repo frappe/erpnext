@@ -1,0 +1,28 @@
+[["Payment Term"]]
+due_date_based_on = "Day(s) after invoice date"
+payment_term_name = "_Test N30"
+description = "_Test Net 30 Days"
+invoice_portion = 50
+credit_days = 30
+
+[["Payment Term"]]
+due_date_based_on = "Day(s) after invoice date"
+payment_term_name = "_Test COD"
+description = "_Test Cash on Delivery"
+invoice_portion = 50
+credit_days = 0
+
+[["Payment Term"]]
+due_date_based_on = "Month(s) after the end of the invoice month"
+payment_term_name = "_Test EONM"
+description = "_Test End of Next Month"
+invoice_portion = 100
+credit_months = 1
+
+[["Payment Term"]]
+due_date_based_on = "Day(s) after invoice date"
+payment_term_name = "_Test N30 1"
+description = "_Test Net 30 Days"
+invoice_portion = 100
+credit_days = 30
+
