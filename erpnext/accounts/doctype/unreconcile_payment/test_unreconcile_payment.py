@@ -7,7 +7,9 @@ from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
@@ -412,5 +414,51 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so2.advance_paid, 0)
 		self.assertEqual(len(pe.references), 1)
 		self.assertEqual(pe.unallocated_amount, 110)
+
+		self.disable_advance_as_liability()
+
+	def test_07_adv_from_so_to_invoice(self):
+		self.enable_advance_as_liability()
+		so = self.create_sales_order()
+		pe = self.create_payment_entry()
+		pe.paid_amount = 1000
+		pe.append(
+			"references",
+			{"reference_doctype": so.doctype, "reference_name": so.name, "allocated_amount": 1000},
+		)
+		pe.save().submit()
+
+		# Assert 'Advance Paid'
+		so.reload()
+		self.assertEqual(so.advance_paid, 1000)
+
+		si = make_sales_invoice(so.name)
+		si.insert().submit()
+
+		pr = frappe.get_doc(
+			{
+				"doctype": "Payment Reconciliation",
+				"company": self.company,
+				"party_type": "Customer",
+				"party": so.customer,
+			}
+		)
+		accounts = get_party_account("Customer", so.customer, so.company, True)
+		pr.receivable_payable_account = accounts[0]
+		pr.default_advance_account = accounts[1]
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.get("invoices")), 1)
+		self.assertEqual(len(pr.get("payments")), 1)
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		self.assertEqual(len(pr.get("invoices")), 0)
+		self.assertEqual(len(pr.get("payments")), 0)
+
+		# Assert 'Advance Paid'
+		so.reload()
+		self.assertEqual(so.advance_paid, 0)
 
 		self.disable_advance_as_liability()
