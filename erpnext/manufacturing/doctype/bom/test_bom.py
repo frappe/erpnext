@@ -6,8 +6,7 @@ from collections import deque
 from functools import partial
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import timeout
+from frappe.tests import IntegrationTestCase, UnitTestCase, timeout
 from frappe.utils import cstr, flt
 
 from erpnext.controllers.tests.test_subcontracting_controller import (

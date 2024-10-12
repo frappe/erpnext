@@ -4,7 +4,6 @@ import json
 
 import frappe
 from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import change_settings
 
 from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return

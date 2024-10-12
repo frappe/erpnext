@@ -3,7 +3,6 @@
 
 import frappe
 from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import change_settings
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account

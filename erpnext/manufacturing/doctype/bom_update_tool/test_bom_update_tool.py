@@ -2,8 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import timeout
+from frappe.tests import IntegrationTestCase, UnitTestCase, timeout
 
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
