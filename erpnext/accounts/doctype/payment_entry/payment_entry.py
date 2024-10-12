@@ -1215,18 +1215,26 @@ class PaymentEntry(AccountsController):
 				}
 			)
 
-			if self.book_advance_payments_in_separate_party_account and d.reference_doctype in [
-				"Sales Order",
-				"Purchase Order",
-			]:
+			if self.book_advance_payments_in_separate_party_account:
+				if d.reference_doctype in [
+					"Sales Order",
+					"Purchase Order",
+				]:
+					gle.update(
+						{
+							"against_voucher_type": d.reference_doctype,
+							"against_voucher": d.reference_name,
+						}
+					)
+				else:
+					gle.update({"against_voucher_type": self.doctype, "against_voucher": self.name})
+			else:
 				gle.update(
 					{
 						"against_voucher_type": d.reference_doctype,
 						"against_voucher": d.reference_name,
 					}
 				)
-			else:
-				gle.update({"against_voucher_type": self.doctype, "against_voucher": self.name})
 
 			gl_entries.append(gle)
 
