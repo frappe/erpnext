@@ -363,3 +363,54 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.advance_paid, 0)
 		self.assertEqual(len(pe.references), 0)
 		self.assertEqual(pe.unallocated_amount, 100)
+
+	def test_06_unreconcile_advance_from_payment_entry(self):
+		self.enable_advance_as_liability()
+		so1 = self.create_sales_order()
+		so2 = self.create_sales_order()
+
+		pe = self.create_payment_entry()
+		# Allocation payment against Sales Order
+		pe.paid_amount = 260
+		pe.append(
+			"references",
+			{"reference_doctype": so1.doctype, "reference_name": so1.name, "allocated_amount": 150},
+		)
+		pe.append(
+			"references",
+			{"reference_doctype": so2.doctype, "reference_name": so2.name, "allocated_amount": 110},
+		)
+		pe.save().submit()
+
+		# Assert 'Advance Paid'
+		so1.reload()
+		self.assertEqual(so1.advance_paid, 150)
+		so2.reload()
+		self.assertEqual(so2.advance_paid, 110)
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		self.assertEqual(len(unreconcile.allocations), 2)
+		allocations = [(x.reference_name, x.allocated_amount) for x in unreconcile.allocations]
+		self.assertListEqual(allocations, [(so1.name, 150), (so2.name, 110)])
+		# unreconcile so2
+		unreconcile.remove(unreconcile.allocations[0])
+		unreconcile.save().submit()
+
+		# Assert 'Advance Paid'
+		so1.reload()
+		so2.reload()
+		pe.reload()
+		self.assertEqual(so1.advance_paid, 150)
+		self.assertEqual(so2.advance_paid, 0)
+		self.assertEqual(len(pe.references), 1)
+		self.assertEqual(pe.unallocated_amount, 110)
+
+		self.disable_advance_as_liability()
