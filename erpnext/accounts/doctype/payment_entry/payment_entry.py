@@ -1166,6 +1166,10 @@ class PaymentEntry(AccountsController):
 		if not self.party_account:
 			return
 
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
+			"advance_payment_payable_doctypes"
+		)
+
 		if self.payment_type == "Receive":
 			against_account = self.paid_to
 		else:
@@ -1216,10 +1220,7 @@ class PaymentEntry(AccountsController):
 			)
 
 			if self.book_advance_payments_in_separate_party_account:
-				if d.reference_doctype in [
-					"Sales Order",
-					"Purchase Order",
-				]:
+				if d.reference_doctype in advance_payment_doctypes:
 					gle.update(
 						{
 							"against_voucher_type": d.reference_doctype,
