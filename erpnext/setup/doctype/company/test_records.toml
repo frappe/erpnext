@@ -1,0 +1,98 @@
+[[Company]]
+abbr = "_TC"
+company_name = "_Test Company"
+country = "India"
+default_currency = "INR"
+domain = "Manufacturing"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+allow_account_creation_against_child_company = 1
+
+[[Company]]
+abbr = "_TC1"
+company_name = "_Test Company 1"
+country = "United States"
+default_currency = "USD"
+domain = "Retail"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+
+[[Company]]
+abbr = "_TC2"
+company_name = "_Test Company 2"
+default_currency = "EUR"
+country = "Germany"
+domain = "Retail"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+
+[[Company]]
+abbr = "_TC3"
+company_name = "_Test Company 3"
+is_group = 1
+country = "Pakistan"
+default_currency = "INR"
+domain = "Manufacturing"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+
+[[Company]]
+abbr = "_TC4"
+company_name = "_Test Company 4"
+parent_company = "_Test Company 3"
+is_group = 1
+country = "Pakistan"
+default_currency = "INR"
+domain = "Manufacturing"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+
+[[Company]]
+abbr = "_TC5"
+company_name = "_Test Company 5"
+parent_company = "_Test Company 4"
+country = "Pakistan"
+default_currency = "INR"
+domain = "Manufacturing"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+
+[[Company]]
+abbr = "TCP1"
+company_name = "_Test Company with perpetual inventory"
+country = "India"
+default_currency = "INR"
+domain = "Manufacturing"
+chart_of_accounts = "Standard"
+enable_perpetual_inventory = 1
+default_holiday_list = "_Test Holiday List"
+
+[[Company]]
+abbr = "_TC6"
+company_name = "_Test Company 6"
+is_group = 1
+country = "India"
+default_currency = "INR"
+domain = "Manufacturing"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+
+[[Company]]
+abbr = "_TC7"
+company_name = "_Test Company 7"
+parent_company = "_Test Company 6"
+is_group = 1
+country = "United States"
+default_currency = "USD"
+domain = "Manufacturing"
+chart_of_accounts = "Standard"
+default_holiday_list = "_Test Holiday List"
+enable_perpetual_inventory = 0
+

@@ -1,0 +1,49 @@
+[["Material Request"]]
+company = "_Test Company"
+fiscal_year = "_Test Fiscal Year 2013"
+material_request_type = "Purchase"
+naming_series = "_T-Material Request-"
+transaction_date = "2013-02-18"
+schedule_date = "2013-02-19"
+[["Material Request".items]]
+description = "_Test Item Home Desktop 100"
+doctype = "Material Request Item"
+item_code = "_Test Item Home Desktop 100"
+item_name = "_Test Item Home Desktop 100"
+parentfield = "items"
+qty = 54.0
+schedule_date = "2013-02-18"
+uom = "_Test UOM 1"
+warehouse = "_Test Warehouse - _TC"
+
+[["Material Request".items]]
+description = "_Test Item Home Desktop 200"
+doctype = "Material Request Item"
+item_code = "_Test Item Home Desktop 200"
+item_name = "_Test Item Home Desktop 200"
+parentfield = "items"
+qty = 3.0
+schedule_date = "2013-02-19"
+uom = "_Test UOM 1"
+warehouse = "_Test Warehouse - _TC"
+
+
+[["Material Request"]]
+company = "_Test Company"
+fiscal_year = "_Test Fiscal Year 2013"
+material_request_type = "Manufacture"
+naming_series = "_T-Material Request-"
+transaction_date = "2013-02-18"
+schedule_date = "2013-02-19"
+[["Material Request".items]]
+description = "_Test FG Item"
+doctype = "Material Request Item"
+item_code = "_Test FG Item"
+item_name = "_Test FG Item"
+parentfield = "items"
+qty = 5
+schedule_date = "2013-02-19"
+uom = "_Test UOM 1"
+warehouse = "_Test Warehouse - _TC"
+
+
