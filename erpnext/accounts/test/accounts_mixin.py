@@ -121,8 +121,6 @@ class AccountsTestMixin:
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
 
-<<<<<<< HEAD
-=======
 		self.identify_default_warehouses()
 
 	def enable_advance_as_liability(self):
@@ -144,7 +142,6 @@ class AccountsTestMixin:
 		):
 			setattr(self, "warehouse_" + w.warehouse_name.lower().strip().replace(" ", "_"), w.name)
 
->>>>>>> a21a406d04 (refactor(test): utility methods for enabling advance in separate acc)
 	def create_usd_receivable_account(self):
 		account_name = "Debtors USD"
 		if not frappe.db.get_value(
