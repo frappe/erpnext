@@ -1166,9 +1166,7 @@ class PaymentEntry(AccountsController):
 		if not self.party_account:
 			return
 
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
-			"advance_payment_payable_doctypes"
-		)
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_doctypes")
 
 		if self.payment_type == "Receive":
 			against_account = self.paid_to
