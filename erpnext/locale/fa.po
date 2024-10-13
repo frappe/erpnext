@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-06 09:35+0000\n"
-"PO-Revision-Date: 2024-10-11 01:19\n"
+"PO-Revision-Date: 2024-10-13 01:42\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -282,7 +282,7 @@ msgstr "حساب '{0}' قبلاً توسط {1} استفاده شده است. ا�
 
 #: erpnext/controllers/accounts_controller.py:402
 msgid "'{0}' account: '{1}' should match the Return Against Invoice"
-msgstr ""
+msgstr "حساب '{0}': '{1}' باید با فاکتور برگشتی مطابقت داشته باشد"
 
 #: erpnext/setup/doctype/company/company.py:205
 #: erpnext/setup/doctype/company/company.py:216
@@ -795,11 +795,11 @@ msgstr "<span class=\"h4\"><b>میانبرهای شما</b></span>"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:938
 msgid "<strong>Grand Total:</strong> {0}"
-msgstr ""
+msgstr "<strong>جمع کل:</strong> {0}"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:939
 msgid "<strong>Outstanding Amount:</strong> {0}"
-msgstr ""
+msgstr "<strong>مبلغ معوق:</strong> {0}"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
@@ -898,7 +898,7 @@ msgstr "یک راننده باید برای ارسال تنظیم شود."
 #. Description of a DocType
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "A logical Warehouse against which stock entries are made."
-msgstr ""
+msgstr "یک انبار منطقی که در مقابل آن ثبت موجودی انجام می شود."
 
 #: erpnext/templates/emails/confirm_appointment.html:2
 msgid "A new appointment has been created for you with {0}"
@@ -3908,7 +3908,7 @@ msgstr "تخصیص پرداخت بر اساس شرایط پرداخت"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1677
 msgid "Allocate Payment Request"
-msgstr ""
+msgstr "تخصیص درخواست پرداخت"
 
 #. Label of the allocated_amount (Float) field in DocType 'Payment Entry
 #. Reference'
@@ -4059,7 +4059,7 @@ msgstr "اجازه دهید آیتم چندین بار در یک تراکنش ا
 
 #: erpnext/controllers/selling_controller.py:697
 msgid "Allow Item to Be Added Multiple Times in a Transaction"
-msgstr ""
+msgstr "اجازه دهید آیتم چندین بار در یک تراکنش اضافه شود"
 
 #. Label of the allow_multiple_items (Check) field in DocType 'Selling
 #. Settings'
@@ -4787,16 +4787,16 @@ msgstr "مبلغ به ارز حساب"
 #. Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Amount in party's bank account currency"
-msgstr ""
+msgstr "مبلغ به ارز حساب بانکی طرف"
 
 #. Description of the 'Amount' (Currency) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Amount in transaction currency"
-msgstr ""
+msgstr "مبلغ به ارز تراکنش"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:72
 msgid "Amount in {0}"
-msgstr ""
+msgstr "مبلغ در {0}"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1221
 msgid "Amount {0} {1} against {2} {3}"
@@ -4923,7 +4923,7 @@ msgstr "هر یک از فیلترهای زیر مورد نیاز است: انب�
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:6
 msgid "Apparel & Accessories"
-msgstr ""
+msgstr "پوشاک و لوازم جانبی"
 
 #. Label of the applicable_charges (Currency) field in DocType 'Landed Cost
 #. Item'
@@ -5695,12 +5695,12 @@ msgstr "کالای مصرفی تعمیر دارایی"
 #. Name of a DocType
 #: erpnext/assets/doctype/asset_repair_purchase_invoice/asset_repair_purchase_invoice.json
 msgid "Asset Repair Purchase Invoice"
-msgstr ""
+msgstr "فاکتور خرید تعمیر دارایی"
 
 #. Label of the invoices (Table) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Asset Repair Purchase Invoices"
-msgstr ""
+msgstr "فاکتورهای خرید تعمیر دارایی"
 
 #. Label of the asset_settings_section (Section Break) field in DocType
 #. 'Accounts Settings'
@@ -5961,11 +5961,11 @@ msgstr "دستیار"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:98
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}."
-msgstr ""
+msgstr "در ردیف #{0}: مقدار انتخاب شده {1} برای آیتم {2} بیشتر از موجودی در دسترس {3} برای دسته {4} در انبار {5} است."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:114
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
-msgstr ""
+msgstr "در ردیف #{0}: مقدار انتخاب شده {1} برای آیتم {2} بیشتر از موجودی در دسترس {3} در انبار {4} است."
 
 #: erpnext/assets/doctype/asset/asset.py:1051
 msgid "At least one asset has to be selected."
@@ -6006,11 +6006,11 @@ msgstr "در ردیف {0}: شماره دسته برای مورد {1} اجبار�
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:104
 msgid "At row {0}: Parent Row No cannot be set for item {1}"
-msgstr ""
+msgstr "در ردیف {0}: ردیف والد برای آیتم {1} قابل تنظیم نیست"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:607
 msgid "At row {0}: Qty is mandatory for the batch {1}"
-msgstr ""
+msgstr "در ردیف {0}: مقدار برای دسته {1} اجباری است"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:614
 msgid "At row {0}: Serial No is mandatory for Item {1}"
@@ -6022,7 +6022,7 @@ msgstr "در ردیف {0}: باندل سریال و دسته {1} قبلا ایج
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:98
 msgid "At row {0}: set Parent Row No for item {1}"
-msgstr ""
+msgstr "در ردیف {0}: تنظیم شماره ردیف والد برای آیتم {1}"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -6389,7 +6389,7 @@ msgstr "ثبت حسابداری تراز به طور خودکار"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:7
 msgid "Automotive"
-msgstr ""
+msgstr "خودرو"
 
 #. Label of the availability_of_slots (Table) field in DocType 'Appointment
 #. Booking Settings'
@@ -7026,7 +7026,7 @@ msgstr "خلاصه ترازنامه"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:13
 msgid "Balance Stock Qty"
-msgstr ""
+msgstr "تراز مقدار موجودی"
 
 #. Label of the stock_value (Currency) field in DocType 'Stock Ledger Entry'
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
@@ -7730,7 +7730,7 @@ msgstr "دسته {0} و انبار"
 
 #: erpnext/controllers/sales_and_purchase_return.py:1027
 msgid "Batch {0} is not available in warehouse {1}"
-msgstr ""
+msgstr "دسته {0} در انبار {1} موجود نیست"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2560
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:288
@@ -8370,11 +8370,11 @@ msgstr "درهم شکستن"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:10
 msgid "Broadcasting"
-msgstr ""
+msgstr "پخش"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:11
 msgid "Brokerage"
-msgstr ""
+msgstr "کارگزاری"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:144
 msgid "Browse BOM"
@@ -11516,7 +11516,7 @@ msgstr "مشاور"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:14
 msgid "Consulting"
-msgstr ""
+msgstr "مشاوره"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:71
 msgid "Consumable"
@@ -11608,7 +11608,7 @@ msgstr "ارزش کل موجودی مصرف شده"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:15
 msgid "Consumer Products"
-msgstr ""
+msgstr "محصولات مصرفی"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:175
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:99
@@ -12128,7 +12128,7 @@ msgstr "اصلاحی/پیشگیرانه"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:16
 msgid "Cosmetics"
-msgstr ""
+msgstr "لوازم آرایشی"
 
 #. Label of the cost (Currency) field in DocType 'Subscription Plan'
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
@@ -15992,7 +15992,7 @@ msgstr "دپارتمان"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
-msgstr ""
+msgstr "فروشگاه‌های زنجیره‌ای"
 
 #. Label of the departure_time (Datetime) field in DocType 'Delivery Trip'
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
@@ -18842,7 +18842,7 @@ msgstr "مقدار {0} را وارد کنید."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:22
 msgid "Entertainment & Leisure"
-msgstr ""
+msgstr "سرگرمی و تفریح"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:57
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:82
@@ -19204,7 +19204,7 @@ msgstr "دستیار اجرایی"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:23
 msgid "Executive Search"
-msgstr ""
+msgstr "جستجوی اجرایی"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:67
 msgid "Exempt Supplies"
@@ -20047,7 +20047,7 @@ msgstr "گزارشهای مالی"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:24
 msgid "Financial Services"
-msgstr ""
+msgstr "خدمات مالی"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #: erpnext/accounts/doctype/account/account_tree.js:234
@@ -20462,7 +20462,7 @@ msgstr "موارد زیر {0} به عنوان {1} مورد علامت گذاری
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:25
 msgid "Food, Beverage & Tobacco"
-msgstr ""
+msgstr "مواد غذایی، نوشیدنی و دخانیات"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -24569,7 +24569,7 @@ msgstr "نقل و انتقالات داخلی فقط با ارز پیش فرض �
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:28
 msgid "Internet Publishing"
-msgstr ""
+msgstr "انتشارات اینترنتی"
 
 #. Label of the introduction (Text) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -24808,7 +24808,7 @@ msgstr "تنظیمات موجودی"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
-msgstr ""
+msgstr "بانکداری سرمایه گذاری"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:38
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:53
@@ -30616,7 +30616,7 @@ msgstr "اطلاعات بیشتر"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:32
 msgid "Motion Picture & Video"
-msgstr ""
+msgstr "فیلم و ویدیو"
 
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:58
 #: erpnext/stock/dashboard/item_dashboard_list.html:53
@@ -30700,7 +30700,7 @@ msgstr "چند مورد را نمی توان به عنوان مورد تمام �
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:33
 msgid "Music"
-msgstr ""
+msgstr "موسیقی"
 
 #. Label of the must_be_whole_number (Check) field in DocType 'UOM'
 #: erpnext/manufacturing/doctype/work_order/work_order.py:998
@@ -31337,7 +31337,7 @@ msgstr "خبرنامه"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:34
 msgid "Newspaper Publishers"
-msgstr ""
+msgstr "ناشران روزنامه"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -32342,7 +32342,7 @@ msgstr "کارت کارهای در حال انجام"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:35
 msgid "Online Auctions"
-msgstr ""
+msgstr "مزایده‌های آنلاین"
 
 #. Description of the 'Default Advance Account' (Link) field in DocType
 #. 'Payment Reconciliation'
@@ -35447,7 +35447,7 @@ msgstr "در انتظار پردازش"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:36
 msgid "Pension Funds"
-msgstr ""
+msgstr "صندوق های بازنشستگی"
 
 #. Option for the 'Evaluation Period' (Select) field in DocType 'Supplier
 #. Scorecard'
@@ -35526,7 +35526,7 @@ msgstr "تخصیص درصد"
 
 #: erpnext/accounts/doctype/monthly_distribution/monthly_distribution.py:57
 msgid "Percentage Allocation should be equal to 100%"
-msgstr ""
+msgstr "تخصیص درصد باید برابر با 100٪ باشد"
 
 #. Description of the 'Blanket Order Allowance (%)' (Float) field in DocType
 #. 'Buying Settings'
@@ -35698,7 +35698,7 @@ msgstr "دارویی"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:37
 msgid "Pharmaceuticals"
-msgstr ""
+msgstr "داروسازی"
 
 #. Option for the 'Type' (Select) field in DocType 'Mode of Payment'
 #. Option for the 'Payment Channel' (Select) field in DocType 'Payment Gateway
@@ -36538,7 +36538,7 @@ msgstr "لطفاً BOM را در قسمت BOM برای مورد {0} انتخاب
 
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.js:63
 msgid "Please select Bank Account"
-msgstr ""
+msgstr "لطفا حساب بانکی را انتخاب کنید"
 
 #: erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js:13
 msgid "Please select Category first"
@@ -36720,7 +36720,7 @@ msgstr "لطفاً یک مقدار برای {0} quotation_to {1} انتخاب ک
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.js:153
 msgid "Please select an item code before setting the warehouse."
-msgstr ""
+msgstr "لطفاً قبل از تنظیم انبار یک کد آیتم را انتخاب کنید."
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1609
 msgid "Please select correct account"
@@ -36858,7 +36858,7 @@ msgstr "لطفا ایمیل/تلفن را برای مخاطب تنظیم کنی�
 #: erpnext/regional/italy/utils.py:277
 #, python-format
 msgid "Please set Fiscal Code for the customer '%s'"
-msgstr ""
+msgstr "لطفاً کد مالی را برای مشتری \"%s\" تنظیم کنید"
 
 #: erpnext/regional/italy/utils.py:285
 #, python-format
@@ -36875,7 +36875,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:267
 msgid "Please set Parent Row No for item {0}"
-msgstr ""
+msgstr "لطفاً شماره ردیف والد را برای آیتم {0} تنظیم کنید"
 
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.js:24
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.js:35
@@ -38206,7 +38206,7 @@ msgstr "اولویت به {0} تغییر کرده است."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:160
 msgid "Priority is mandatory"
-msgstr ""
+msgstr "اولویت الزامی است"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:109
 msgid "Priority {0} has been repeated."
@@ -38214,7 +38214,7 @@ msgstr "اولویت {0} تکرار شده است."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:38
 msgid "Private Equity"
-msgstr ""
+msgstr "سهام خصوصی"
 
 #. Label of the probability (Percent) field in DocType 'Prospect Opportunity'
 #: erpnext/crm/doctype/prospect_opportunity/prospect_opportunity.json
@@ -39189,7 +39189,7 @@ msgstr "تاریخ انتشار"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:39
 msgid "Publishing"
-msgstr ""
+msgstr "انتشارات"
 
 #. Option for the 'Invoice Type' (Select) field in DocType 'Opening Invoice
 #. Creation Tool'
@@ -43362,7 +43362,7 @@ msgstr "رزومه کاری"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:41
 msgid "Retail & Wholesale"
-msgstr ""
+msgstr "خرده فروشی و عمده فروشی"
 
 #: erpnext/setup/setup_wizard/data/sales_partner_type.txt:5
 msgid "Retailer"
@@ -44093,7 +44093,7 @@ msgstr "ردیف #{0}: آیتم کالای تمام شده {1} باید یک آ�
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:323
 msgid "Row #{0}: Finished Good must be {1}"
-msgstr ""
+msgstr "ردیف #{0}: کالای تمام شده باید {1} باشد"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:426
 msgid "Row #{0}: Finished Good reference is mandatory for Scrap Item {1}."
@@ -44195,7 +44195,7 @@ msgstr "ردیف #{0}: تعداد باید کمتر یا برابر با تعد�
 #: erpnext/controllers/accounts_controller.py:1108
 #: erpnext/controllers/accounts_controller.py:3283
 msgid "Row #{0}: Quantity for Item {1} cannot be zero."
-msgstr ""
+msgstr "ردیف #{0}: مقدار آیتم {1} نمی تواند صفر باشد."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1006
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
@@ -46174,7 +46174,7 @@ msgstr "وام های تضمین شده"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:42
 msgid "Securities & Commodity Exchanges"
-msgstr ""
+msgstr "بورس اوراق بهادار و کالا"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:18
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:26
@@ -48431,7 +48431,7 @@ msgstr "از یادداشت تحویل صرف نظر کنید"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:366
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:615
 msgid "Skip Material Transfer"
-msgstr ""
+msgstr "صرف نظر از انتقال مواد"
 
 #. Label of the skip_material_transfer (Check) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
@@ -48481,7 +48481,7 @@ msgstr "صاف کردن ثابت"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:44
 msgid "Soap & Detergent"
-msgstr ""
+msgstr "صابون و مواد شوینده"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:32
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:45
@@ -50563,7 +50563,7 @@ msgstr "رکورد {0} با موفقیت به روز شد."
 #. Option for the 'Request Type' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Suggestions"
-msgstr "پیشنهادات"
+msgstr "پیشنهادها"
 
 #. Description of the 'Total Repair Cost' (Currency) field in DocType 'Asset
 #. Repair'
@@ -51409,7 +51409,7 @@ msgstr ""
 #. Description of a DocType
 #: erpnext/stock/doctype/item_website_specification/item_website_specification.json
 msgid "Table for Item that will be shown in Web Site"
-msgstr ""
+msgstr "جدول برای آیتم که در وب سایت نشان داده خواهد شد"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -52257,11 +52257,11 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:47
 msgid "Technology"
-msgstr ""
+msgstr "تکنولوژی"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:48
 msgid "Telecommunications"
-msgstr ""
+msgstr "مخابرات"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:69
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:93
@@ -52275,7 +52275,7 @@ msgstr "نوع تماس تلفنی"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:49
 msgid "Television"
-msgstr ""
+msgstr "تلویزیون"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #. Label of the template (Link) field in DocType 'Quality Feedback'
@@ -55250,7 +55250,7 @@ msgstr "شماره رسید حمل و نقل"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:50
 msgid "Transportation"
-msgstr ""
+msgstr "حمل و نقل"
 
 #. Label of the transporter (Link) field in DocType 'Driver'
 #. Label of the transporter (Link) field in DocType 'Delivery Note'
@@ -56981,7 +56981,7 @@ msgstr "نام فروشنده"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:51
 msgid "Venture Capital"
-msgstr ""
+msgstr "سرمایه‌گذاری خطرپذیر"
 
 #: erpnext/www/book_appointment/verify/index.html:15
 msgid "Verification failed please check the link"
@@ -57122,7 +57122,7 @@ msgstr "بازدیدها"
 #. Option for the 'Provider' (Select) field in DocType 'Video'
 #: erpnext/utilities/doctype/video/video.json
 msgid "Vimeo"
-msgstr ""
+msgstr "Vimeo"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -57773,7 +57773,7 @@ msgstr "هشدار - ردیف {0}: ساعات صورتحساب بیشتر از �
 
 #: erpnext/stock/stock_ledger.py:763
 msgid "Warning on Negative Stock"
-msgstr ""
+msgstr "هشدار در مورد موجودی منفی"
 
 #: erpnext/accounts/doctype/cost_center_allocation/cost_center_allocation.py:114
 msgid "Warning!"
@@ -58446,7 +58446,7 @@ msgstr "ایستگاه کاری / ماشین"
 #. Label of the workstation_dashboard (HTML) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 msgid "Workstation Dashboard"
-msgstr ""
+msgstr "داشبورد ایستگاه کاری"
 
 #. Label of the workstation_name (Data) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
@@ -59021,7 +59021,7 @@ msgstr "بر اساس"
 
 #: erpnext/public/js/utils/sales_common.js:279
 msgid "cannot be greater than 100"
-msgstr ""
+msgstr "نمی تواند بیشتر از 100 باشد"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:329
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:960
@@ -59042,7 +59042,7 @@ msgstr "توسعه"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:423
 msgid "discount applied"
-msgstr ""
+msgstr "تخفیف اعمال شد"
 
 #: erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py:46
 #: erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:58
@@ -59425,7 +59425,7 @@ msgstr "{0} نمی‌تواند به‌عنوان مرکز هزینه اصلی �
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:110
 msgid "{0} cannot be zero"
-msgstr ""
+msgstr "{0} نمی تواند صفر باشد"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:797
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:891
@@ -59485,7 +59485,7 @@ msgstr "{0} یک بعد حسابداری اجباری است. <br>لطفاً ی�
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:73
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:57
 msgid "{0} is added multiple times on rows: {1}"
-msgstr ""
+msgstr "{0} چندین بار در ردیف ها اضافه می شود: {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "{0} is already running for {1}"
@@ -59577,7 +59577,7 @@ msgstr "{0} باید در سند برگشتی منفی باشد"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1993
 msgid "{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
-msgstr ""
+msgstr "{0} مجاز به معامله با {1} نیست. لطفاً شرکت را تغییر دهید یا شرکت را در بخش \"مجاز برای معامله با\" در رکورد مشتری اضافه کنید."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:465
 msgid "{0} not found for item {1}"
@@ -59833,7 +59833,7 @@ msgstr "{0}% تحویل داده شده"
 #: erpnext/accounts/doctype/payment_term/payment_term.js:15
 #, python-format
 msgid "{0}% of total invoice value will be given as discount."
-msgstr ""
+msgstr "{0}% از ارزش کل فاکتور به عنوان تخفیف داده می شود."
 
 #: erpnext/projects/doctype/task/task.py:124
 msgid "{0}'s {1} cannot be after {2}'s Expected End Date."
