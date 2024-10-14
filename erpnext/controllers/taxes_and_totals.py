@@ -630,6 +630,10 @@ class calculate_taxes_and_totals:
 		if self.doc.meta.get_field("rounded_total"):
 			if self.doc.is_rounded_total_disabled():
 				self.doc.rounded_total = self.doc.base_rounded_total = 0
+				self.doc.rounding_adjustment = flt(
+					self.doc.get("grand_total_diff"), self.doc.precision("rounding_adjustment")
+				)
+				self._set_in_company_currency(self.doc, ["rounding_adjustment"])
 				return
 
 			self.doc.rounded_total = round_based_on_smallest_currency_fraction(

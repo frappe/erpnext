@@ -5,18 +5,20 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
 		frappe.ui.form.on(this.frm.doctype, "set_rounding_adjustment_desc", function (frm) {
-			let has_inclusive_tax = frm.doc.taxes.some(tax => tax.included_in_print_rate);
-			if (has_inclusive_tax) {
+			frm.get_field("rounding_adjustment").set_description("");
+			if (frm.doc.rounded_total) {
 				let rounded_diff = flt(frm.doc.rounded_total) - flt(frm.doc.grand_total);
 				if (rounded_diff != frm.doc.rounding_adjustment) {
 					frm.get_field("rounding_adjustment").set_description(
-						__("Rounding adjustment calculated as net total plus tax doesn't equate to grand total.")
+						__("Rounding adjustment is calculated as net total plus tax doesn't equate to grand total.")
 					);
-				} else {
-					frm.get_field("rounding_adjustment").set_description("");
 				}
-			} else {
-				frm.get_field("rounding_adjustment").set_description("");
+			} else if (frm.doc.rounding_adjustment) {
+				frm.dashboard.add_comment(
+					__("Rounding adjustment is calculated as net total plus tax doesn't equate to grand total."),
+					"yellow",
+					true
+				);
 			}
 		});
 		frappe.ui.form.on(this.frm.doctype, "refresh", function (frm) {
@@ -646,6 +648,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (cint(disable_rounded_total)) {
 			this.frm.doc.rounded_total = 0;
 			this.frm.doc.base_rounded_total = 0;
+			this.frm.doc.rounding_adjustment = flt(this.frm.doc.grand_total_diff, precision("rounding_adjustment"))
+			this.frm.trigger("set_rounding_adjustment_desc");
+			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment"]);
 			return;
 		}
 
