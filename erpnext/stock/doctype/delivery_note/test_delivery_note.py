@@ -2075,6 +2075,64 @@ class TestDeliveryNote(IntegrationTestCase):
 			self.assertEqual(sn.status, "Delivered")
 			self.assertEqual(sn.warranty_period, 100)
 
+	def test_packed_items_batch_serial_nos(self):
+		service_item = make_item("Test Service Item 123", {"is_stock_item": 0})
+		serial_item = make_item(
+			"Test Serial Item 123",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN24-TSI123.#####"},
+		)
+
+		batch_item = make_item(
+			"Test Batch Item 123",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BN24-TBI123.#####",
+				"create_new_batch": 1,
+			},
+		)
+
+		product_bundle = make_product_bundle(
+			parent=service_item.name, items=[serial_item.name, batch_item.name], qty=1
+		)
+
+		item_details = frappe._dict()
+		for row in product_bundle.items:
+			se = make_stock_entry(
+				item_code=row.item_code,
+				target="_Test Warehouse - _TC",
+				qty=1,
+				basic_rate=100,
+			)
+
+			if row.item_code == serial_item.name:
+				item_details[row.item_code] = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+			else:
+				item_details[row.item_code] = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		so = make_sales_order(item_code=service_item.name, qty=1, do_not_submit=True)
+		for row in so.packed_items:
+			row.use_serial_batch_fields = 1
+
+			if row.item_code == serial_item.name:
+				row.serial_no = item_details[serial_item.name][0]
+			else:
+				row.batch_no = item_details[batch_item.name]
+
+		so.submit()
+		dn = create_dn_against_so(so.name, 1, do_not_submit=True)
+		dn.save()
+
+		for row in dn.packed_items:
+			self.assertTrue(row.serial_no or row.batch_no)
+
+		dn.submit()
+		dn.cancel()
+		so.reload()
+		so.cancel()
+
+		product_bundle.delete()
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
