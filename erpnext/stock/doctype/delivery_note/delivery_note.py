@@ -1049,7 +1049,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 	automatically_fetch_payment_terms = cint(
 		frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
-	if automatically_fetch_payment_terms:
+	if automatically_fetch_payment_terms and not doc.is_return:
 		doc.set_payment_schedule()
 
 	return doc
