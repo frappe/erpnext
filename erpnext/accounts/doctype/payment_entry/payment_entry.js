@@ -1096,12 +1096,10 @@ frappe.ui.form.on("Payment Entry", {
 		$.each(frm.doc.references || [], function (i, row) {
 			if (row.allocated_amount) {
 				total_allocated_amount += flt(row.allocated_amount);
-				base_total_allocated_amount += flt(
-					flt(row.allocated_amount) * flt(exchange_rate),
-					precision("base_paid_amount")
-				);
+				base_total_allocated_amount += flt(row.allocated_amount) * flt(exchange_rate);
 			}
 		});
+		base_total_allocated_amount = flt(base_total_allocated_amount, precision("base_paid_amount"));
 		frm.set_value("total_allocated_amount", Math.abs(total_allocated_amount));
 		frm.set_value("base_total_allocated_amount", Math.abs(base_total_allocated_amount));
 
@@ -1142,7 +1140,7 @@ frappe.ui.form.on("Payment Entry", {
 					frm.doc.target_exchange_rate;
 			}
 		}
-		frm.set_value("unallocated_amount", unallocated_amount);
+		frm.set_value("unallocated_amount", flt(unallocated_amount, precision("unallocated_amount")));
 		frm.trigger("set_difference_amount");
 	},
 
