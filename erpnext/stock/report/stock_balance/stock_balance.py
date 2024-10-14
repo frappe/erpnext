@@ -157,19 +157,18 @@ class StockBalanceReport:
 
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
-		with frappe.db.unbuffered_cursor():
-			if not self.filters.get("show_stock_ageing_data"):
-				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
+		if not self.filters.get("show_stock_ageing_data"):
+			self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
 
-			for entry in self.sle_entries:
-				group_by_key = self.get_group_by_key(entry)
-				if group_by_key not in item_warehouse_map:
-					self.initialize_data(item_warehouse_map, group_by_key, entry)
+		for entry in self.sle_entries:
+			group_by_key = self.get_group_by_key(entry)
+			if group_by_key not in item_warehouse_map:
+				self.initialize_data(item_warehouse_map, group_by_key, entry)
 
-				self.prepare_item_warehouse_map(item_warehouse_map, entry, group_by_key)
+			self.prepare_item_warehouse_map(item_warehouse_map, entry, group_by_key)
 
-				if self.opening_data.get(group_by_key):
-					del self.opening_data[group_by_key]
+			if self.opening_data.get(group_by_key):
+				del self.opening_data[group_by_key]
 
 		for group_by_key, entry in self.opening_data.items():
 			if group_by_key not in item_warehouse_map:
