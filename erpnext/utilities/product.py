@@ -154,6 +154,8 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 				)
 			GROUP BY
 				t1.parent
+			ORDER BY
+				NULL
 		"""
 
 		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
