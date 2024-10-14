@@ -220,12 +220,12 @@ class FIFOSlots:
 
 	def generate(self) -> dict:
 		"""
-		Returns dict of the foll.g structure:
+		Returns dict of the following structure:
 		Key = Item A / (Item A, Warehouse A)
 		Key: {
-		        'details' -> Dict: ** item details **,
-		        'fifo_queue' -> List: ** list of lists containing entries/slots for existing stock,
-		                consumed/updated and maintained via FIFO. **
+				'details' -> Dict: ** item details **,
+				'fifo_queue' -> List: ** list of lists containing entries/slots for existing stock,
+						consumed/updated and maintained via FIFO. **
 		}
 		"""
 
@@ -239,34 +239,34 @@ class FIFOSlots:
 		if stock_ledger_entries is None:
 			bundle_wise_serial_nos = self.__get_bundle_wise_serial_nos()
 
-		with frappe.db.unbuffered_cursor():
-			if stock_ledger_entries is None:
-				stock_ledger_entries = self.__get_stock_ledger_entries()
+		# Replace the cursor block with a SQL query to fetch stock ledger entries
+		if stock_ledger_entries is None:
+			stock_ledger_entries = self.__get_stock_ledger_entries()
 
-			for d in stock_ledger_entries:
-				key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
+		for d in stock_ledger_entries:
+			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
-				if d.voucher_type == "Stock Reconciliation":
-					# get difference in qty shift as actual qty
-					prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
-					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
+			if d.voucher_type == "Stock Reconciliation":
+				# get difference in qty shift as actual qty
+				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
+				d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
-				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
-				if d.serial_and_batch_bundle and d.has_serial_no:
-					if bundle_wise_serial_nos:
-						serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
-					else:
-						serial_nos = get_serial_nos_from_bundle(d.serial_and_batch_bundle) or []
-
-				if d.actual_qty > 0:
-					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
+			serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
+			if d.serial_and_batch_bundle and d.has_serial_no:
+				if bundle_wise_serial_nos:
+					serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
 				else:
-					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
+					serial_nos = get_serial_nos_from_bundle(d.serial_and_batch_bundle) or []
 
-				self.__update_balances(d, key)
+			if d.actual_qty > 0:
+				self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
+			else:
+				self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
 
-			# Note that stock_ledger_entries is an iterator, you can not reuse it  like a list
-			del stock_ledger_entries
+			self.__update_balances(d, key)
+
+		# Note that stock_ledger_entries is an iterator, you cannot reuse it like a list
+		del stock_ledger_entries
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
