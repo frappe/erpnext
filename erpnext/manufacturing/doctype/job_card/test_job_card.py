@@ -5,8 +5,8 @@
 from typing import Literal
 
 import frappe
-from frappe.test_runner import make_test_records
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import make_test_records
 from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now, today
 
@@ -26,12 +26,29 @@ from erpnext.manufacturing.doctype.workstation.test_workstation import make_work
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestJobCard(FrappeTestCase):
+class UnitTestJobCard(UnitTestCase):
+	"""
+	Unit tests for JobCard.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestJobCard(IntegrationTestCase):
 	def setUp(self):
-		make_bom_for_jc_tests()
+		self.make_bom_for_jc_tests()
 		self.transfer_material_against: Literal["Work Order", "Job Card"] = "Work Order"
 		self.source_warehouse = None
 		self._work_order = None
+
+	def make_bom_for_jc_tests(self):
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
+		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		bom.rm_cost_as_per = "Valuation Rate"
+		bom.items[0].uom = "_Test UOM 1"
+		bom.items[0].conversion_factor = 5
+		bom.insert()
 
 	@property
 	def work_order(self) -> WorkOrder:
@@ -206,7 +223,7 @@ class TestJobCard(FrappeTestCase):
 		# transfer was made for 2 fg qty in first transfer Stock Entry
 		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
 
-	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
+	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
 		self.transfer_material_against = "Job Card"
@@ -249,7 +266,7 @@ class TestJobCard(FrappeTestCase):
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
 
-	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_block(self):
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
@@ -272,7 +289,7 @@ class TestJobCard(FrappeTestCase):
 		transfer_entry_2.insert()
 		self.assertRaises(JobCardOverTransferError, transfer_entry_2.submit)
 
-	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_with_no_reference(self):
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
@@ -380,7 +397,7 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
 		self.assertEqual(transfer_entry.items[0].qty, 2)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_corrective_costing(self):
@@ -660,13 +677,3 @@ def make_wo_with_transfer_against_jc():
 	work_order.submit()
 
 	return work_order
-
-
-def make_bom_for_jc_tests():
-	test_records = frappe.get_test_records("BOM")
-	bom = frappe.copy_doc(test_records[2])
-	bom.set_rate_of_sub_assembly_item_based_on_bom = 0
-	bom.rm_cost_as_per = "Valuation Rate"
-	bom.items[0].uom = "_Test UOM 1"
-	bom.items[0].conversion_factor = 5
-	bom.insert()

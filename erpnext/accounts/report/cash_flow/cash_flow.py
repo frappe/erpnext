@@ -120,7 +120,7 @@ def execute(filters=None):
 	)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company, True)
 
-	chart = get_chart_data(columns, data)
+	chart = get_chart_data(columns, data, company_currency)
 
 	report_summary = get_report_summary(summary_data, company_currency)
 
@@ -261,7 +261,7 @@ def get_report_summary(summary_data, currency):
 	return report_summary
 
 
-def get_chart_data(columns, data):
+def get_chart_data(columns, data, currency):
 	labels = [d.get("label") for d in columns[2:]]
 	print(data)
 	datasets = [
@@ -277,5 +277,7 @@ def get_chart_data(columns, data):
 	chart = {"data": {"labels": labels, "datasets": datasets}, "type": "bar"}
 
 	chart["fieldtype"] = "Currency"
+	chart["options"] = "currency"
+	chart["currency"] = currency
 
 	return chart

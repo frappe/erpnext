@@ -342,12 +342,15 @@ erpnext.buying = {
 			add_serial_batch_bundle(doc, cdt, cdn) {
 				let item = locals[cdt][cdn];
 				let me = this;
+				let fields = ["has_batch_no", "has_serial_no"];
 
-				frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
+				frappe.db.get_value("Item", item.item_code, fields)
 					.then((r) => {
 						if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
-							item.has_serial_no = r.message.has_serial_no;
-							item.has_batch_no = r.message.has_batch_no;
+							fields.forEach((field) => {
+								item[field] = r.message[field];
+							});
+
 							item.type_of_transaction = item.qty > 0 ? "Inward" : "Outward";
 							item.is_rejected = false;
 
@@ -380,13 +383,16 @@ erpnext.buying = {
 			add_serial_batch_for_rejected_qty(doc, cdt, cdn) {
 				let item = locals[cdt][cdn];
 				let me = this;
+				let fields = ["has_batch_no", "has_serial_no"];
 
-				frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
+				frappe.db.get_value("Item", item.item_code, fields)
 					.then((r) => {
 						if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
-							item.has_serial_no = r.message.has_serial_no;
-							item.has_batch_no = r.message.has_batch_no;
-							item.type_of_transaction = item.rejected_qty > 0 ? "Inward" : "Outward";
+							fields.forEach((field) => {
+								item[field] = r.message[field];
+							});
+
+							item.type_of_transaction = !doc.is_return > 0 ? "Inward" : "Outward";
 							item.is_rejected = true;
 
 							new erpnext.SerialBatchPackageSelector(
@@ -398,7 +404,7 @@ erpnext.buying = {
 										}
 
 										let update_values = {
-											"serial_and_batch_bundle": r.name,
+											"rejected_serial_and_batch_bundle": r.name,
 											"use_serial_batch_fields": 0,
 											"rejected_qty": qty / flt(item.conversion_factor || 1, precision("conversion_factor", item))
 										}

@@ -2,13 +2,13 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.accounts.report.trial_balance.trial_balance import execute
 
 
-class TestTrialBalance(FrappeTestCase):
+class TestTrialBalance(IntegrationTestCase):
 	def setUp(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center

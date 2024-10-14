@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_objects
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
@@ -28,8 +28,8 @@ from erpnext.stock.doctype.item.item import (
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 
-test_ignore = ["BOM"]
-test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["BOM"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
 
 def make_item(item_code=None, properties=None, uoms=None, barcode=None):
@@ -74,22 +74,31 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
-class TestItem(FrappeTestCase):
+class UnitTestItem(UnitTestCase):
+	"""
+	Unit tests for Item.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestItem(IntegrationTestCase):
 	def setUp(self):
 		super().setUp()
 		frappe.flags.attribute_values = None
 
 	def get_item(self, idx):
-		item_code = test_records[idx].get("item_code")
+		item_code = self.globalTestRecords["Item"][idx].get("item_code")
 		if not frappe.db.exists("Item", item_code):
-			item = frappe.copy_doc(test_records[idx])
+			item = frappe.copy_doc(self.globalTestRecords["Item"][idx])
 			item.insert()
 		else:
 			item = frappe.get_doc("Item", item_code)
 		return item
 
 	def test_get_item_details(self):
-		# delete modified item price record and make as per test_records
+		# delete modified item price record and make as per self.globalTestRecords["Item"]
 		frappe.db.sql("""delete from `tabItem Price`""")
 		frappe.db.sql("""delete from `tabBin`""")
 
@@ -684,7 +693,7 @@ class TestItem(FrappeTestCase):
 		self.assertEqual(received_attrs, {"Extra Small", "Extra Large"})
 
 	def test_check_stock_uom_with_bin(self):
-		# this item has opening stock and stock_uom set in test_records.
+		# this item has opening stock and stock_uom set in self.globalTestRecords["Item"].
 		item = frappe.get_doc("Item", "_Test Item")
 		item.stock_uom = "Gram"
 		self.assertRaises(frappe.ValidationError, item.save)
@@ -728,13 +737,13 @@ class TestItem(FrappeTestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"stock item considered non-stock item: {e}")
 
-	@change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
+	@IntegrationTestCase.change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
 	def test_autoname_series(self):
 		item = frappe.new_doc("Item")
 		item.item_group = "All Item Groups"
 		item.save()  # if item code saved without item_code then series worked
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_item_wise_negative_stock(self):
 		"""When global settings are disabled check that item that allows
 		negative stock can still consume material in all known stock
@@ -746,7 +755,7 @@ class TestItem(FrappeTestCase):
 
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_negative_stock(self):
 		"""same as test above but backdated entries"""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -759,7 +768,9 @@ class TestItem(FrappeTestCase):
 		)
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@change_settings("Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"})
+	@IntegrationTestCase.change_settings(
+		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"}
+	)
 	def test_retain_sample(self):
 		item = make_item("_TestRetainSample", {"has_batch_no": 1, "retain_sample": 1, "sample_quantity": 1})
 
@@ -923,9 +934,6 @@ def make_item_variant():
 		variant.item_code = "_Test Variant Item-S"
 		variant.item_name = "_Test Variant Item-S"
 		variant.save()
-
-
-test_records = frappe.get_test_records("Item")
 
 
 def create_item(

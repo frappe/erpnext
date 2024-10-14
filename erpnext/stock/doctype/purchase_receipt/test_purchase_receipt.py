@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
 from pypika import functions as fn
 
@@ -26,7 +26,16 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
-class TestPurchaseReceipt(FrappeTestCase):
+class UnitTestPurchaseReceipt(UnitTestCase):
+	"""
+	Unit tests for PurchaseReceipt.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPurchaseReceipt(IntegrationTestCase):
 	def setUp(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
@@ -365,7 +374,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"))
 
 	def test_rejected_warehouse_filter(self):
-		pr = frappe.copy_doc(test_records[0])
+		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
 		pr.get("items")[0].qty = 3
 		pr.get("items")[0].rejected_qty = 2
@@ -374,7 +383,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, pr.save)
 
 	def test_rejected_serial_no(self):
-		pr = frappe.copy_doc(test_records[0])
+		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
 		pr.get("items")[0].qty = 3
 		pr.get("items")[0].rejected_qty = 2
@@ -1234,7 +1243,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 1})
+	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 1})
 	def test_neg_to_positive(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -3945,5 +3954,4 @@ def make_purchase_receipt(**args):
 	return pr
 
 
-test_dependencies = ["BOM", "Item Price", "Location"]
-test_records = frappe.get_test_records("Purchase Receipt")
+EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM", "Item Price", "Location"]

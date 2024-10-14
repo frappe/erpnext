@@ -582,7 +582,7 @@ def make_payment_request(**args):
 			)
 
 		party_type = args.get("party_type") or "Customer"
-		party_account_currency = ref_doc.party_account_currency
+		party_account_currency = ref_doc.get("party_account_currency")
 
 		if not party_account_currency:
 			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
@@ -881,33 +881,6 @@ def validate_payment(doc, method=None):
 			doc.reference_docname
 		)
 	)
-
-
-def get_paid_amount_against_order(dt, dn):
-	pe_ref = frappe.qb.DocType("Payment Entry Reference")
-	if dt == "Sales Order":
-		inv_dt, inv_field = "Sales Invoice Item", "sales_order"
-	else:
-		inv_dt, inv_field = "Purchase Invoice Item", "purchase_order"
-	inv_item = frappe.qb.DocType(inv_dt)
-	return (
-		frappe.qb.from_(pe_ref)
-		.select(
-			Sum(pe_ref.allocated_amount),
-		)
-		.where(
-			(pe_ref.docstatus == 1)
-			& (
-				(pe_ref.reference_name == dn)
-				| pe_ref.reference_name.isin(
-					frappe.qb.from_(inv_item)
-					.select(inv_item.parent)
-					.where(inv_item[inv_field] == dn)
-					.distinct()
-				)
-			)
-		)
-	).run()[0][0] or 0
 
 
 @frappe.whitelist()

@@ -2,8 +2,17 @@
 # See license.txt
 
 # import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 
-class TestBisectAccountingStatements(FrappeTestCase):
+class UnitTestBisectAccountingStatements(UnitTestCase):
+	"""
+	Unit tests for BisectAccountingStatements.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestBisectAccountingStatements(IntegrationTestCase):
 	pass

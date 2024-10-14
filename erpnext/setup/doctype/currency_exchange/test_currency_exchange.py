@@ -1,15 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 from unittest import mock
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import cint, flt
 
 from erpnext.setup.utils import get_exchange_rate
-
-test_records = frappe.get_test_records("Currency Exchange")
 
 
 def save_new_records(test_records):
@@ -68,9 +66,9 @@ def patched_requests_get(*args, **kwargs):
 		if kwargs["params"].get("date") and kwargs["params"].get("from") and kwargs["params"].get("to"):
 			if test_exchange_values.get(kwargs["params"]["date"]):
 				return PatchResponse({"result": test_exchange_values[kwargs["params"]["date"]]}, 200)
-	elif args[0].startswith("https://frankfurter.app") and kwargs.get("params"):
+	elif args[0].startswith("https://api.frankfurter.app") and kwargs.get("params"):
 		if kwargs["params"].get("base") and kwargs["params"].get("symbols"):
-			date = args[0].replace("https://frankfurter.app/", "")
+			date = args[0].replace("https://api.frankfurter.app/", "")
 			if test_exchange_values.get(date):
 				return PatchResponse(
 					{"rates": {kwargs["params"].get("symbols"): test_exchange_values.get(date)}}, 200
@@ -80,7 +78,7 @@ def patched_requests_get(*args, **kwargs):
 
 
 @mock.patch("requests.get", side_effect=patched_requests_get)
-class TestCurrencyExchange(unittest.TestCase):
+class TestCurrencyExchange(IntegrationTestCase):
 	def clear_cache(self):
 		cache = frappe.cache()
 		for date in test_exchange_values.keys():
@@ -92,7 +90,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		self.clear_cache()
 
 	def test_exchange_rate(self, mock_get):
-		save_new_records(test_records)
+		save_new_records(self.globalTestRecords["Currency Exchange"])
 
 		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
 
@@ -117,7 +115,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		self.assertEqual(flt(exchange_rate, 3), 65.1)
 
 	def test_exchange_rate_via_exchangerate_host(self, mock_get):
-		save_new_records(test_records)
+		save_new_records(self.globalTestRecords["Currency Exchange"])
 
 		# Update Currency Exchange Rate
 		settings = frappe.get_single("Currency Exchange Settings")

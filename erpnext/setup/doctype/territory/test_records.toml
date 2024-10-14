@@ -1,0 +1,25 @@
+[[Territory]]
+is_group = 0
+parent_territory = "All Territories"
+territory_name = "_Test Territory"
+
+[[Territory]]
+is_group = 1
+parent_territory = "All Territories"
+territory_name = "_Test Territory India"
+
+[[Territory]]
+is_group = 0
+parent_territory = "_Test Territory India"
+territory_name = "_Test Territory Maharashtra"
+
+[[Territory]]
+is_group = 0
+parent_territory = "All Territories"
+territory_name = "_Test Territory Rest Of The World"
+
+[[Territory]]
+is_group = 0
+parent_territory = "All Territories"
+territory_name = "_Test Territory United States"
+

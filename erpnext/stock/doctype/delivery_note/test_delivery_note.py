@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -43,7 +43,16 @@ from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
 
 
-class TestDeliveryNote(FrappeTestCase):
+class UnitTestDeliveryNote(UnitTestCase):
+	"""
+	Unit tests for DeliveryNote.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestDeliveryNote(IntegrationTestCase):
 	def test_delivery_note_qty(self):
 		dn = create_delivery_note(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):
@@ -747,7 +756,7 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(flt(bin_details.ordered_qty), flt(packed_item.ordered_qty))
 
 	def test_return_for_serialized_items(self):
-		se = make_serialized_item()
+		se = make_serialized_item(self)
 
 		serial_no = [get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]]
 
@@ -2139,4 +2148,4 @@ def create_delivery_note(**args):
 	return dn
 
 
-test_dependencies = ["Product Bundle"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Product Bundle"]

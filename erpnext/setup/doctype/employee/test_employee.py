@@ -1,18 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 
 import frappe
 import frappe.utils
+from frappe.tests import IntegrationTestCase
 
 import erpnext
 from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
 
-test_records = frappe.get_test_records("Employee")
 
-
-class TestEmployee(unittest.TestCase):
+class TestEmployee(IntegrationTestCase):
 	def test_employee_status_left(self):
 		employee1 = make_employee("test_employee_1@company.com")
 		employee2 = make_employee("test_employee_2@company.com")

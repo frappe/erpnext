@@ -3,8 +3,6 @@
 
 import frappe
 
-# test_records = frappe.get_test_records('Designation')
-
 
 def create_designation(**args):
 	args = frappe._dict(args)

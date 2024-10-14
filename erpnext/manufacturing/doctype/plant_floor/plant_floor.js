@@ -40,6 +40,7 @@ frappe.ui.form.on("Plant Floor", {
 	refresh(frm) {
 		frm.trigger("prepare_stock_dashboard");
 		frm.trigger("prepare_workstation_dashboard");
+		frm.trigger("update_realtime_status");
 
 		if (!frm.is_new()) {
 			frm.trigger("add_workstation");
@@ -55,6 +56,12 @@ frappe.ui.form.on("Plant Floor", {
 			wrapper: wrapper,
 			skip_filters: true,
 			plant_floor: frm.doc.name,
+		});
+	},
+
+	update_realtime_status(frm) {
+		frappe.realtime.on("update_workstation_status", (data) => {
+			frappe.visual_plant_floor.update_status(data);
 		});
 	},
 

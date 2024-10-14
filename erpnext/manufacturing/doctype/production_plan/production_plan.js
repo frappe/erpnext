@@ -277,7 +277,7 @@ frappe.ui.form.on("Production Plan", {
 		frm.clear_table("prod_plan_references");
 
 		frappe.call({
-			method: "get_items",
+			method: "combine_so_items",
 			freeze: true,
 			doc: frm.doc,
 			callback: function () {

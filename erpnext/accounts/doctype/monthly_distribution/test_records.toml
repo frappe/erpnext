@@ -1,0 +1,52 @@
+[["Monthly Distribution"]]
+distribution_id = "_Test Distribution"
+fiscal_year = "_Test Fiscal Year 2013"
+[["Monthly Distribution".percentages]]
+month = "January"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "February"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "March"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "April"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "May"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "June"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "July"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "August"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "September"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "October"
+percentage_allocation = "8"
+
+[["Monthly Distribution".percentages]]
+month = "November"
+percentage_allocation = "10"
+
+[["Monthly Distribution".percentages]]
+month = "December"
+percentage_allocation = "10"
+
+
