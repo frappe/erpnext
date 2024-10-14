@@ -10,7 +10,7 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import AliasedQuery, Criterion, Table
-from frappe.query_builder.functions import Count, Sum
+from frappe.query_builder.functions import Count, Sum, Min
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	add_days,
@@ -1904,8 +1904,8 @@ class QueryPaymentLedger:
 				ple.against_voucher_no.as_("voucher_no"),
 				ple.party_type,
 				ple.party,
-				ple.posting_date,
-				ple.due_date,
+				Min(ple.posting_date).as_("posting_date"),
+				Min(ple.due_date).as_("due_date"),
 				ple.account_currency.as_("currency"),
 				Sum(ple.amount).as_("amount"),
 				Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
@@ -1913,7 +1913,7 @@ class QueryPaymentLedger:
 			.where(ple.delinked == 0)
 			.where(Criterion.all(filter_on_against_voucher_no))
 			.where(Criterion.all(self.common_filter))
-			.groupby(ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party, ple.posting_date, ple.due_date, ple.account_currency)
+			.groupby(ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party, ple.account_currency)
 		)
 
 		# build CTE for combining voucher amount and outstanding
