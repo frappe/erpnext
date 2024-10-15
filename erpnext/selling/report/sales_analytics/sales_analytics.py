@@ -374,9 +374,10 @@ class Analytics:
 		self.depth_map = frappe._dict()
 
 		self.group_entries = frappe.db.sql(
-			f""" select * from (select "Order Types" as name, 0 as lft,
-			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
-			from `tab{self.filters.doc_type}` where ifnull(order_type, '') != '') as b order by lft, name
+			f"""
+			select * from (select 'Order Types' as name, 0 as lft,
+			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, 'Order Types' as parent
+			from `tab{self.filters.doc_type}` where coalesce(order_type, '') != '') as b order by lft, name
 		""",
 			as_dict=1,
 		)
