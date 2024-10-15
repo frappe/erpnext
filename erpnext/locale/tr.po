@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-13 09:35+0000\n"
-"PO-Revision-Date: 2024-10-14 01:46\n"
+"PO-Revision-Date: 2024-10-15 02:01\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -48504,7 +48504,7 @@ msgstr ""
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Single"
-msgstr "Tek"
+msgstr "Bekâr"
 
 #. Option for the 'Loyalty Program Type' (Select) field in DocType 'Loyalty
 #. Program'
