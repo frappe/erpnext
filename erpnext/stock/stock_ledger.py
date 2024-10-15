@@ -1075,6 +1075,15 @@ class update_entries_after:
 						}
 					)
 
+					if not rate and sle.voucher_type in ["Delivery Note", "Sales Invoice"]:
+						rate = get_rate_for_return(
+							sle.voucher_type,
+							sle.voucher_no,
+							sle.item_code,
+							voucher_detail_no=sle.voucher_detail_no,
+							sle=sle,
+						)
+
 				else:
 					rate = get_rate_for_return(
 						sle.voucher_type,
