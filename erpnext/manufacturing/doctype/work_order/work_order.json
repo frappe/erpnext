@@ -23,6 +23,7 @@
   "process_loss_qty",
   "project",
   "track_semi_finished_goods",
+  "reserve_stock",
   "warehouses",
   "source_warehouse",
   "wip_warehouse",
@@ -102,7 +103,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nClosed\nCancelled",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nStock Reserved\nStock Partially Reserved\nCompleted\nStopped\nClosed\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -214,7 +215,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -322,6 +322,8 @@
    "label": "Expected Delivery Date"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:!doc.operations",
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
@@ -584,6 +586,12 @@
    "fieldtype": "Check",
    "label": "Track Semi Finished Goods",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": " Reserve Stock"
   }
  ],
  "icon": "fa fa-cogs",
@@ -591,7 +599,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:13:00.129434",
+ "modified": "2024-09-23 16:56:00.483027",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

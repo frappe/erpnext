@@ -1489,7 +1489,7 @@ class update_entries_after:
 							msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
 						)
 					else:
-						msg = f"{msg} As the full stock is reserved for other sales orders, you're not allowed to consume the stock."
+						msg = f"{msg} As the full stock is reserved for other transactions, you're not allowed to consume the stock."
 
 				msg_list.append(msg)
 

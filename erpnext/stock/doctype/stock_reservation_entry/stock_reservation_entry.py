@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, nowdate, nowtime
+from frappe.utils import cint, flt, nowdate, nowtime, parse_json
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
 
@@ -21,17 +21,16 @@ class StockReservationEntry(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import (
-			SerialandBatchEntry,
-		)
+		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import SerialandBatchEntry
 
 		amended_from: DF.Link | None
 		available_qty: DF.Float
 		company: DF.Link | None
+		consumed_qty: DF.Float
 		delivered_qty: DF.Float
 		from_voucher_detail_no: DF.Data | None
 		from_voucher_no: DF.DynamicLink | None
-		from_voucher_type: DF.Literal["", "Pick List", "Purchase Receipt"]
+		from_voucher_type: DF.Literal["", "Pick List", "Purchase Receipt", "Stock Entry", "Work Order"]
 		has_batch_no: DF.Check
 		has_serial_no: DF.Check
 		item_code: DF.Link | None
@@ -43,10 +42,11 @@ class StockReservationEntry(Document):
 			"Draft", "Partially Reserved", "Reserved", "Partially Delivered", "Delivered", "Cancelled"
 		]
 		stock_uom: DF.Link | None
+		transferred_qty: DF.Float
 		voucher_detail_no: DF.Data | None
 		voucher_no: DF.DynamicLink | None
 		voucher_qty: DF.Float
-		voucher_type: DF.Literal["", "Sales Order"]
+		voucher_type: DF.Literal["", "Sales Order", "Work Order"]
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
@@ -330,7 +330,10 @@ class StockReservationEntry(Document):
 	) -> None:
 		"""Updates total reserved qty in the voucher."""
 
-		item_doctype = "Sales Order Item" if self.voucher_type == "Sales Order" else None
+		item_doctype = {
+			"Sales Order": "Sales Order Item",
+			"Work Order": "Work Order Item",
+		}.get(self.voucher_type, None)
 
 		if item_doctype:
 			sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -393,7 +396,7 @@ class StockReservationEntry(Document):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if self.reserved_qty == self.delivered_qty:
+				if self.reserved_qty == (self.delivered_qty or self.transferred_qty or self.consumed_qty):
 					status = "Delivered"
 				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
 					status = "Partially Delivered"
@@ -433,8 +436,17 @@ class StockReservationEntry(Document):
 			get_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),
 		)
 
+		from_voucher_detail_no = None
+		if self.from_voucher_type and self.from_voucher_type == "Stock Entry":
+			from_voucher_detail_no = self.from_voucher_detail_no
+
 		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
-			self.voucher_type, self.voucher_no, self.voucher_detail_no, ignore_sre=self.name
+			self.voucher_type,
+			self.voucher_no,
+			self.voucher_detail_no,
+			ignore_sre=self.name,
+			warehouse=self.warehouse,
+			from_voucher_detail_no=from_voucher_detail_no,
 		)
 
 		voucher_delivered_qty = 0
@@ -610,7 +622,11 @@ def get_sre_reserved_qty_for_item_and_warehouse(item_code: str, warehouse: str |
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
 		frappe.qb.from_(sre)
-		.select(Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"))
+		.select(
+			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_(
+				"reserved_qty"
+			)
+		)
 		.where(
 			(sre.docstatus == 1)
 			& (sre.item_code == item_code)
@@ -709,7 +725,12 @@ def get_sre_reserved_warehouses_for_voucher(
 
 
 def get_sre_reserved_qty_for_voucher_detail_no(
-	voucher_type: str, voucher_no: str, voucher_detail_no: str, ignore_sre=None
+	voucher_type: str,
+	voucher_no: str,
+	voucher_detail_no: str,
+	ignore_sre=None,
+	warehouse=None,
+	from_voucher_detail_no=None,
 ) -> float:
 	"""Returns `Reserved Qty` against the Voucher."""
 
@@ -717,7 +738,12 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	query = (
 		frappe.qb.from_(sre)
 		.select(
-			(Sum(sre.reserved_qty) - Sum(sre.delivered_qty)),
+			(
+				Sum(sre.reserved_qty)
+				- Sum(sre.delivered_qty)
+				- Sum(sre.transferred_qty)
+				- Sum(sre.consumed_qty)
+			),
 		)
 		.where(
 			(sre.docstatus == 1)
@@ -730,6 +756,12 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 
 	if ignore_sre:
 		query = query.where(sre.name != ignore_sre)
+
+	if warehouse:
+		query = query.where(sre.warehouse == warehouse)
+
+	if from_voucher_detail_no:
+		query = query.where(sre.from_voucher_detail_no == from_voucher_detail_no)
 
 	reserved_qty = query.run(as_list=True)
 
@@ -878,6 +910,151 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 		return True
 
 	return False
+
+
+class StockReservation:
+	def __init__(self, doc: object, items: list = None, notify: bool = True) -> None:
+		if isinstance(doc, str):
+			doc = parse_json(doc)
+			doc = frappe.get_doc("Work Order", doc.get("name"))
+
+		self.doc = doc
+		self.items = items
+		self.initialize_fields()
+
+	def initialize_fields(self) -> None:
+		self.table_name = "items"
+		self.qty_field = "stock_qty"
+		self.warehouse_field = "warehouse"
+		self.warehouse = None
+
+		if self.doc.doctype == "Work Order":
+			self.table_name = "required_items"
+			self.qty_field = "required_qty"
+			self.warehouse_field = "source_warehouse"
+			if self.doc.skip_transfer and self.doc.from_wip_warehouse:
+				self.warehouse = self.doc.wip_warehouse
+
+	def cancel_stock_reservation_entries(self, names=None) -> None:
+		"""Cancels Stock Reservation Entries for the Voucher."""
+
+		if isinstance(names, str):
+			names = parse_json(names)
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		query = (
+			frappe.qb.from_(sre)
+			.select(sre.name)
+			.where(
+				(sre.docstatus == 1)
+				& (sre.voucher_type == self.doc.doctype)
+				& (sre.voucher_no == self.doc.name)
+			)
+		)
+
+		if names:
+			query = query.where(sre.name.isin(names))
+		elif self.warehouse:
+			query = query.where(sre.warehouse == self.warehouse)
+
+		sre_names = query.run(as_dict=True)
+
+		if sre_names:
+			for sre_name in sre_names:
+				sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name.name)
+				sre_doc.cancel()
+
+		if sre_names and names:
+			frappe.msgprint(
+				_("Stock has been unreserved for work order {0}.").format(frappe.bold(self.doc.name)),
+				alert=True,
+			)
+
+	def make_stock_reservation_entries(self):
+		items = self.items
+		if not items:
+			items = self.doc.get(self.table_name)
+
+		child_doctype = frappe.scrub(self.doc.doctype + " Item")
+
+		for item in items:
+			sre = frappe.new_doc("Stock Reservation Entry")
+			if isinstance(item, dict):
+				item = frappe._dict(item)
+
+			item_details = frappe.get_cached_value(
+				"Item", item.item_code, ["has_serial_no", "has_batch_no", "stock_uom"], as_dict=True
+			)
+
+			warehouse = self.warehouse or item.get(self.warehouse_field) or item.warehouse
+			qty = item.get(self.qty_field) or item.get("stock_qty")
+
+			self.available_qty_to_reserve = self.get_available_qty_to_reserve(item.item_code, warehouse)
+			if not self.available_qty_to_reserve:
+				self.throw_stock_not_exists_error(item, warehouse)
+
+			self.qty_to_be_reserved = (
+				qty if self.available_qty_to_reserve >= qty else self.available_qty_to_reserve
+			)
+
+			if not self.qty_to_be_reserved:
+				continue
+
+			sre.item_code = item.item_code
+			sre.warehouse = warehouse
+			sre.has_serial_no = item_details.has_serial_no
+			sre.has_batch_no = item_details.has_batch_no
+			sre.voucher_type = item.get("voucher_type") or self.doc.doctype
+			sre.voucher_no = item.get("voucher_no") or self.doc.name
+			sre.voucher_detail_no = item.get(child_doctype) or item.name or item.voucher_detail_no
+			sre.available_qty = self.available_qty_to_reserve
+			sre.voucher_qty = qty
+			sre.reserved_qty = self.qty_to_be_reserved
+			sre.company = self.doc.company
+			sre.stock_uom = item_details.stock_uom
+			sre.project = self.doc.project
+			sre.from_voucher_no = item.get("from_voucher_no")
+			sre.from_voucher_detail_no = item.get("from_voucher_detail_no")
+			sre.from_voucher_type = item.get("from_voucher_type")
+
+			sre.save()
+			sre.submit()
+
+	def throw_stock_not_exists_error(self, item, warehouse):
+		frappe.msgprint(
+			_("Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}.").format(
+				item.idx, frappe.bold(item.item_code), frappe.bold(warehouse)
+			),
+			title=_("Stock Reservation"),
+			indicator="orange",
+		)
+
+	def get_available_qty_to_reserve(self, item_code, warehouse, ignore_sre=None):
+		available_qty = get_stock_balance(item_code, warehouse)
+
+		if available_qty:
+			sre = frappe.qb.DocType("Stock Reservation Entry")
+			query = (
+				frappe.qb.from_(sre)
+				.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
+				.where(
+					(sre.docstatus == 1)
+					& (sre.item_code == item_code)
+					& (sre.warehouse == warehouse)
+					& (sre.reserved_qty >= sre.delivered_qty)
+					& (sre.status.notin(["Delivered", "Cancelled"]))
+				)
+			)
+
+			if ignore_sre:
+				query = query.where(sre.name != ignore_sre)
+
+			reserved_qty = query.run()[0][0] or 0.0
+
+			if reserved_qty:
+				return available_qty - reserved_qty
+
+		return available_qty
 
 
 def create_stock_reservation_entries_for_so_items(
