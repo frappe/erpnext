@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-13 09:35+0000\n"
-"PO-Revision-Date: 2024-10-14 01:46\n"
+"PO-Revision-Date: 2024-10-15 02:01\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -4000,7 +4000,7 @@ msgstr "Ordnen Sie die Zahlung basierend auf den Zahlungsbedingungen zu"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1677
 msgid "Allocate Payment Request"
-msgstr ""
+msgstr "Zahlungsanfrage zuweisen"
 
 #. Label of the allocated_amount (Float) field in DocType 'Payment Entry
 #. Reference'
@@ -4884,7 +4884,7 @@ msgstr ""
 #. Description of the 'Amount' (Currency) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Amount in transaction currency"
-msgstr ""
+msgstr "Betrag in Transaktionswährung"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:72
 msgid "Amount in {0}"
@@ -6317,7 +6317,7 @@ msgstr "Automatischer Abruf"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Auto Insert Item Price If Missing"
-msgstr ""
+msgstr "Artikelpreis automatisch einfügen, falls er fehlt"
 
 #. Label of the auto_material_request (Section Break) field in DocType 'Stock
 #. Settings'
@@ -7118,12 +7118,12 @@ msgstr "Bilanzübersicht"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:13
 msgid "Balance Stock Qty"
-msgstr ""
+msgstr "Bestandsmenge"
 
 #. Label of the stock_value (Currency) field in DocType 'Stock Ledger Entry'
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Balance Stock Value"
-msgstr ""
+msgstr "Bestandswert"
 
 #: erpnext/stock/report/stock_balance/stock_balance.py:435
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:307
@@ -7493,7 +7493,7 @@ msgstr "Fass (Bier)"
 #. Label of the base_amount (Currency) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Base Amount"
-msgstr ""
+msgstr "Basisbetrag"
 
 #. Label of the base_amount (Currency) field in DocType 'Sales Invoice Payment'
 #: erpnext/accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
@@ -7510,7 +7510,7 @@ msgstr "Base-Änderungsbetrag (Unternehmenswährung)"
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Base Cost Per Unit"
-msgstr ""
+msgstr "Grundkosten pro Einheit"
 
 #. Label of the base_hour_rate (Currency) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -7822,7 +7822,7 @@ msgstr "Charge {0} und Lager"
 
 #: erpnext/controllers/sales_and_purchase_return.py:1027
 msgid "Batch {0} is not available in warehouse {1}"
-msgstr ""
+msgstr "Charge {0} ist im Lager {1} nicht verfügbar"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2560
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:288
