@@ -1449,6 +1449,446 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(so.items[0].rate, rate)
 		self.assertEqual(dn.items[0].rate, so.items[0].rate)
 
+<<<<<<< HEAD
+=======
+	def test_use_serial_batch_fields_for_packed_items(self):
+		bundle_item = make_item("Test _Packed Product Bundle Item ", {"is_stock_item": 0})
+		serial_item = make_item(
+			"Test _Packed Serial Item ",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-TESTSERIAL-.#####"},
+		)
+		batch_item = make_item(
+			"Test _Packed Batch Item ",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-TESTSERIAL-.#####",
+				"create_new_batch": 1,
+			},
+		)
+		make_product_bundle(parent=bundle_item.name, items=[serial_item.name, batch_item.name])
+
+		item_details = {}
+		for item in [serial_item, batch_item]:
+			se = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+			item_details[item.name] = se.items[0].serial_and_batch_bundle
+
+		dn = create_delivery_note(item_code=bundle_item.name, qty=1, do_not_submit=True)
+		serial_no = ""
+		for row in dn.packed_items:
+			row.use_serial_batch_fields = 1
+
+			if row.item_code == serial_item.name:
+				serial_and_batch_bundle = item_details[serial_item.name]
+				row.serial_no = get_serial_nos_from_bundle(serial_and_batch_bundle)[3]
+				serial_no = row.serial_no
+			else:
+				serial_and_batch_bundle = item_details[batch_item.name]
+				row.batch_no = get_batch_from_bundle(serial_and_batch_bundle)
+
+		dn.submit()
+		dn.load_from_db()
+
+		for row in dn.packed_items:
+			self.assertTrue(row.serial_no or row.batch_no)
+			self.assertTrue(row.serial_and_batch_bundle)
+
+			if row.serial_no:
+				self.assertEqual(row.serial_no, serial_no)
+
+	def test_delivery_note_legacy_serial_no_valuation(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		sn_item = "Old Serial NO Item Valuation Test - 2"
+		make_item(
+			sn_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "SN-SOVOSN-.####",
+				"is_stock_item": 1,
+			},
+		)
+
+		serial_nos = [
+			"SN-SOVOSN-1234",
+			"SN-SOVOSN-2234",
+		]
+
+		for sn in serial_nos:
+			if not frappe.db.exists("Serial No", sn):
+				sn_doc = frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": sn_item,
+						"serial_no": sn,
+					}
+				)
+				sn_doc.insert()
+
+		warehouse = "_Test Warehouse - _TC"
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		se_doc = make_stock_entry(
+			item_code=sn_item,
+			company=company,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=150,
+			do_not_submit=1,
+			use_serial_batch_fields=0,
+		)
+		se_doc.submit()
+
+		se_doc.items[0].db_set("serial_no", "\n".join(serial_nos))
+
+		sle_data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": se_doc.name, "voucher_type": "Stock Entry"},
+		)[0]
+
+		sle_doc = frappe.get_doc("Stock Ledger Entry", sle_data.name)
+		self.assertFalse(sle_doc.serial_no)
+		sle_doc.db_set("serial_no", "\n".join(serial_nos))
+		sle_doc.reload()
+		self.assertTrue(sle_doc.serial_no)
+		self.assertFalse(sle_doc.is_cancelled)
+
+		for sn in serial_nos:
+			sn_doc = frappe.get_doc("Serial No", sn)
+			sn_doc.db_set(
+				{
+					"status": "Active",
+					"warehouse": warehouse,
+				}
+			)
+
+		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+
+		se_doc = make_stock_entry(
+			item_code=sn_item,
+			company=company,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=200,
+		)
+
+		serial_nos.extend(get_serial_nos_from_bundle(se_doc.items[0].serial_and_batch_bundle))
+
+		dn = create_delivery_note(
+			item_code=sn_item,
+			qty=3,
+			rate=500,
+			warehouse=warehouse,
+			company=company,
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos[0:3]),
+		)
+
+		dn.reload()
+
+		sle_data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": dn.name, "voucher_type": "Delivery Note"},
+			fields=["stock_value_difference", "actual_qty"],
+		)[0]
+
+		self.assertEqual(sle_data.actual_qty, 3 * -1)
+		self.assertEqual(sle_data.stock_value_difference, 500.0 * -1)
+
+		dn = create_delivery_note(
+			item_code=sn_item,
+			qty=1,
+			rate=500,
+			warehouse=warehouse,
+			company=company,
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			use_serial_batch_fields=1,
+			serial_no=serial_nos[-1],
+		)
+
+		dn.reload()
+
+		sle_data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": dn.name, "voucher_type": "Delivery Note"},
+			fields=["stock_value_difference", "actual_qty"],
+		)[0]
+
+		self.assertEqual(sle_data.actual_qty, 1 * -1)
+		self.assertEqual(sle_data.stock_value_difference, 200.0 * -1)
+
+	def test_sales_return_batch_no_for_batched_item_in_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Batched Item for Sales Return 11",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "B11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=0,
+			batch_no=batch_no,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.save().submit()
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+
+	def test_partial_sales_return_batch_no_for_batched_item_in_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Partial Batched Item for Sales Return 11",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BPART11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=0,
+			batch_no=batch_no,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = 3 * -1
+		dn_return.save().submit()
+
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+		sabb_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", dn_return.items[0].serial_and_batch_bundle, "total_qty"
+		)
+		self.assertEqual(sabb_qty, 3)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = 2 * -1
+		dn_return.save().submit()
+
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+
+		sabb_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", dn_return.items[0].serial_and_batch_bundle, "total_qty"
+		)
+		self.assertEqual(sabb_qty, 2)
+
+	def test_sales_return_serial_no_for_serial_item_in_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Serial Item for Sales Return 11",
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "SNN11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=0,
+			serial_no=serial_nos,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.save().submit()
+		returned_serial_nos = get_serial_nos_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(serial_nos, returned_serial_nos)
+
+	def test_same_posting_date_and_posting_time(self):
+		item_code = make_item(
+			"Test Same Posting Datetime Item",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SS-ART11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=100,
+			basic_rate=50,
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		posting_date = today()
+		posting_time = nowtime()
+		dn1 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		dn2 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		dn3 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		dn4 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		for dn in [dn1, dn2, dn3, dn4]:
+			sles = frappe.get_all(
+				"Stock Ledger Entry",
+				fields=["stock_value_difference", "actual_qty"],
+				filters={"is_cancelled": 0, "voucher_no": dn.name, "docstatus": 1},
+			)
+
+			for sle in sles:
+				self.assertEqual(sle.actual_qty, 25.0 * -1)
+				self.assertEqual(sle.stock_value_difference, 25.0 * 50 * -1)
+
+		dn5 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		self.assertRaises(frappe.ValidationError, dn5.submit)
+
+	def test_warranty_expiry_date_for_serial_item(self):
+		item_code = make_item(
+			"Test Warranty Expiry Date Item",
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "TWE.#####",
+				"is_stock_item": 1,
+				"warranty_period": 100,
+			},
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=50,
+			posting_date=nowdate(),
+		)
+
+		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		create_delivery_note(
+			item_code=item_code,
+			qty=2,
+			rate=300,
+			use_serial_batch_fields=0,
+			serial_no=serial_nos,
+		)
+
+		for row in serial_nos:
+			sn = frappe.get_doc("Serial No", row)
+			self.assertEqual(getdate(sn.warranty_expiry_date), getdate(add_days(nowdate(), 100)))
+			self.assertEqual(sn.status, "Delivered")
+			self.assertEqual(sn.warranty_period, 100)
+
+	def test_batch_return_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Batch Return DN Item 1",
+			properties={
+				"has_batch_no": 1,
+				"valuation_method": "Moving Average",
+				"create_new_batch": 1,
+				"batch_number_series": "TBRDN1-.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.save().submit()
+
+		self.assertEqual(dn_return.items[0].qty, 5 * -1)
+
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": dn_return.name, "voucher_type": "Delivery Note"},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(stock_value_difference, 100.0 * 5)
+
+>>>>>>> 6087a57b0c (fix: zero incoming rate for delivery note return (#43642))
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
