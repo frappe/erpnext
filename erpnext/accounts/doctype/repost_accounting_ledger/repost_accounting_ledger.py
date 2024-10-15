@@ -183,8 +183,8 @@ def get_allowed_types_from_settings():
 	return [
 		x.document_type
 		for x in frappe.db.get_all(
-			"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
-		)
+			"Repost Allowed Types", filters={"allowed": True},  fields=["name", "modified"],  # Include "modified" in the fields list
+    		order_by="modified desc")
 	]
 
 
@@ -241,7 +241,8 @@ def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters
 		filters.update({"document_type": ("like", f"%{txt}%")})
 
 	if allowed_types := frappe.db.get_all(
-		"Repost Allowed Types", filters=filters, fields=["distinct(document_type)"], as_list=1
+		"Repost Allowed Types", filters=filters,  fields=["name", "modified"],  # Include "modified" in the fields list
+    	order_by="modified desc", as_list=1
 	):
 		return allowed_types
 	return []
