@@ -457,6 +457,7 @@ def create_rfq_items(sq_doc, supplier, data):
 		"material_request",
 		"material_request_item",
 		"stock_qty",
+		"uom",
 	]:
 		args[field] = data.get(field)
 
