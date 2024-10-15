@@ -391,6 +391,7 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 			"Request for Quotation": {
 				"doctype": "Supplier Quotation",
 				"validation": {"docstatus": ["=", 1]},
+				"field_map": {"opportunity": "opportunity"},
 			},
 			"Request for Quotation Item": {
 				"doctype": "Supplier Quotation Item",
