@@ -90,6 +90,31 @@ class TestPromotionalScheme(IntegrationTestCase):
 		price_rules = frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})
 		self.assertEqual(price_rules, [])
 
+	def test_change_applicable_for_values_in_promotional_scheme(self):
+		ps = make_promotional_scheme(applicable_for="Customer", customer="_Test Customer")
+		ps.append("customer", {"customer": "_Test Customer 2"})
+		ps.save()
+
+		price_rules = frappe.get_all(
+			"Pricing Rule", filters={"promotional_scheme": ps.name, "applicable_for": "Customer"}
+		)
+		self.assertTrue(len(price_rules), 2)
+
+		ps.set("customer", [])
+		ps.append("customer", {"customer": "_Test Customer 2"})
+		ps.save()
+
+		price_rules = frappe.get_all(
+			"Pricing Rule",
+			filters={
+				"promotional_scheme": ps.name,
+				"applicable_for": "Customer",
+				"customer": "_Test Customer",
+			},
+		)
+		self.assertEqual(price_rules, [])
+		frappe.delete_doc("Promotional Scheme", ps.name)
+
 	def test_min_max_amount_configuration(self):
 		ps = make_promotional_scheme()
 		ps.price_discount_slabs[0].min_amount = 10
