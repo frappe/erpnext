@@ -30,6 +30,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.get_item_details import get_bin_details
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
@@ -95,6 +96,12 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		self.assertEqual(mr.material_request_type, "Purchase")
 		self.assertEqual(len(mr.get("items")), len(so.get("items")))
+
+		for item in mr.get("items"):
+			actual_qty = get_bin_details(item.item_code, item.warehouse, mr.company, True).get(
+				"actual_qty", 0
+			)
+			self.assertEqual(flt(item.actual_qty), actual_qty)
 
 	def test_make_delivery_note(self):
 		so = make_sales_order(do_not_submit=True)
