@@ -511,10 +511,10 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 		payment_entry_filters.pop("apply_tax_withholding_amount", None)
 		payment_entry_filters.pop("tax_withholding_category", None)
 
-	supp_credit_amt = frappe.db.get_value("Purchase Invoice", invoice_filters, field) or 0.0
+	supp_credit_amt = (frappe.db.get_list("Purchase Invoice", invoice_filters, field)[0].get('sum') or 0.0)
 
 	supp_jv_credit_amt = (
-		frappe.db.get_value(
+		frappe.db.get_list(
 			"Journal Entry Account",
 			{
 				"parent": ("in", vouchers),
