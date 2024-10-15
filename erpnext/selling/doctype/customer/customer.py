@@ -110,9 +110,12 @@ class Customer(TransactionBase):
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			count = frappe.db.sql(
-				"""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
-				 where name like %s""",
-				f"%{self.customer_name} - %",
+				"""
+				SELECT COALESCE(MAX(CAST(SPLIT_PART(name, ' - ', 2) AS INTEGER)), 0) 
+				FROM tabCustomer
+				WHERE name LIKE %s
+				""",
+				(f"%{self.customer_name} - %",),
 				as_list=1,
 			)[0][0]
 			count = cint(count) + 1
