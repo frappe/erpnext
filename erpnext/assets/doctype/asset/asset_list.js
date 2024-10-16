@@ -43,4 +43,16 @@ frappe.listview_settings["Asset"] = {
 			});
 		});
 	},
+	refresh: function(listview) {
+		if (listview.page.fields_dict.item_code) {
+			listview.page.fields_dict.item_code.get_query = function () {
+				return {
+					filters: {
+						is_stock_item: 0,
+						is_fixed_asset: 1
+					},
+				};
+			};
+		}
+	}
 };
