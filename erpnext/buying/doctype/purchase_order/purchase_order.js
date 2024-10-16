@@ -382,7 +382,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 			}
 			if (doc.status != "Closed") {
 				if (doc.status != "On Hold") {
-					if (flt(doc.per_received, 2) < 100 && allow_receipt) {
+					if (flt(doc.per_received) < 100 && allow_receipt) {
 						this.frm.add_custom_button(
 							__("Purchase Receipt"),
 							() => {
@@ -412,7 +412,8 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 							}
 						}
 					}
-					if (flt(doc.per_billed, 2) < 100)
+					// Please do not add precision in the below flt function
+					if (flt(doc.per_billed) < 100)
 						this.frm.add_custom_button(
 							__("Purchase Invoice"),
 							() => {
