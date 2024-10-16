@@ -56,6 +56,7 @@
   "assets_tab",
   "asset_settings_section",
   "calculate_depr_using_total_days",
+  "calculate_daily_depreciation_using",
   "column_break_gjcc",
   "book_asset_depreciation_entry_automatically",
   "closing_settings_tab",
@@ -489,6 +490,13 @@
    "fieldname": "create_pr_in_draft_status",
    "fieldtype": "Check",
    "label": "Create in Draft Status"
+  },
+  {
+   "default": "Total years in depreciation period",
+   "fieldname": "calculate_daily_depreciation_using",
+   "fieldtype": "Select",
+   "label": "Calculate Daily Pro-rata Depreciation Using",
+   "options": "Total days in depreciation period\nTotal years in depreciation period"
   }
  ],
  "icon": "icon-cog",
@@ -496,7 +504,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-26 06:48:52.714630",
+ "modified": "2024-10-16 15:41:03.548766",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

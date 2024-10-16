@@ -85,7 +85,9 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 		self.assertEqual(schedules, expected_schedules)
 
 	def test_schedule_for_slm_for_existing_asset_daily_pro_rata_enabled(self):
-		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 1)
+		frappe.db.set_single_value(
+			"Accounts Settings", "calculate_daily_depreciation_using", "Total days in depreciation period"
+		)
 		asset = create_asset(
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
@@ -123,7 +125,9 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)
-		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 0)
+		frappe.db.set_single_value(
+			"Accounts Settings", "calculate_daily_depreciation_using", "Total years in depreciation period"
+		)
 
 	def test_schedule_for_slm_for_existing_asset(self):
 		asset = create_asset(
@@ -196,7 +200,9 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 
 	# Enable Checkbox to Calculate depreciation using total days in depreciation period
 	def test_daily_prorata_based_depr_after_enabling_configuration(self):
-		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 1)
+		frappe.db.set_single_value(
+			"Accounts Settings", "calculate_daily_depreciation_using", "Total days in depreciation period"
+		)
 
 		asset = create_asset(
 			calculate_depreciation=1,
@@ -254,7 +260,9 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedule)
-		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 0)
+		frappe.db.set_single_value(
+			"Accounts Settings", "calculate_daily_depreciation_using", "Total years in depreciation period"
+		)
 
 	# Test for Written Down Value Method
 	# Frequency of deprciation = 3
