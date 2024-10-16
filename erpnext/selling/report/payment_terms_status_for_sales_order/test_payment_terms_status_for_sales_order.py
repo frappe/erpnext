@@ -21,15 +21,8 @@ EXTRA_TEST_RECORD_DEPENDENCIES = [
 
 
 class TestPaymentTermsStatusForSalesOrder(IntegrationTestCase):
-	def setUp(self):
-		self.cleanup_old_entries()
-
 	def tearDown(self):
 		frappe.db.rollback()
-
-	def cleanup_old_entries(self):
-		frappe.db.delete("Sales Invoice", filters={"company": "_Test Company"})
-		frappe.db.delete("Sales Order", filters={"company": "_Test Company"})
 
 	def create_payment_terms_template(self):
 		# create template for 50-50 payments

@@ -11,15 +11,6 @@ from erpnext.tests.utils import if_lending_app_installed
 
 
 class TestBankReconciliationStatement(IntegrationTestCase):
-	def setUp(self):
-		for dt in [
-			"Journal Entry",
-			"Journal Entry Account",
-			"Payment Entry",
-		]:
-			frappe.db.delete(dt)
-		clear_loan_transactions()
-
 	@if_lending_app_installed
 	def test_loan_entries_in_bank_reco_statement(self):
 		from lending.loan_management.doctype.loan.test_loan import create_loan_accounts
@@ -42,12 +33,3 @@ class TestBankReconciliationStatement(IntegrationTestCase):
 		result = execute(filters)
 
 		self.assertEqual(result[1][0].payment_entry, repayment_entry.name)
-
-
-@if_lending_app_installed
-def clear_loan_transactions():
-	for dt in [
-		"Loan Disbursement",
-		"Loan Repayment",
-	]:
-		frappe.db.delete(dt)

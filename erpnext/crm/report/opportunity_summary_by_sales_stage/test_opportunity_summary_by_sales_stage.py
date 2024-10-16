@@ -16,7 +16,6 @@ from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics i
 class TestOpportunitySummaryBySalesStage(IntegrationTestCase):
 	@classmethod
 	def setUpClass(self):
-		frappe.db.delete("Opportunity")
 		create_company()
 		create_customer()
 		create_opportunity()
