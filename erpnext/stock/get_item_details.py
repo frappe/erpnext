@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import datetime
 import json
 
 import frappe
+from dateutil import parser
 from frappe import _, throw
 from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
@@ -919,7 +919,7 @@ def get_item_price(args, item_code, ignore_party=False):
 			query = query.where((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
 
 	if args.get("transaction_date"):
-		transaction_date = datetime.datetime.strptime(args["transaction_date"].replace("-", ""), "%m%d%Y")
+		transaction_date = parser.parse(str(args["transaction_date"]))
 		query = query.where(
 			(IfNull(ip.valid_from, "2000-01-01") <= transaction_date)
 			& (IfNull(ip.valid_upto, "2500-12-31") >= transaction_date)
