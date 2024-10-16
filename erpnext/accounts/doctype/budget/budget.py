@@ -398,7 +398,7 @@ def get_requested_amount(args):
 	condition = get_other_condition(args, "Material Request")
 
 	data = frappe.db.sql(
-		""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
+		""" select ifnull(sum((child.stock_qty - child.ordered_qty) * child.rate), 0) as amount
 		from `tabMaterial Request Item` child, `tabMaterial Request` parent where parent.name = child.parent and
 		child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty and {} and
 		parent.material_request_type = 'Purchase' and parent.status != 'Stopped'""".format(condition),
