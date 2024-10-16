@@ -1,11 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-import json
-
 import frappe
 from frappe import _, qb, throw
-from frappe.model import child_table_fields, default_fields, table_fields
-from frappe.model.mapper import get_mapped_doc, map_fetch_fields, map_fields
+from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
@@ -1938,25 +1935,31 @@ def make_stock_entry(source_name, target_doc=None):
 
 @frappe.whitelist()
 def link_purchase_order(pi_item_code, supplier):
-	pi_item_code = json.loads(pi_item_code)
-
-	purchase_orders = frappe.get_all(
-		"Purchase Order",
-		filters={"supplier": supplier, "docstatus": 1},
-		pluck="name",
-		order_by="creation asc",
-	)
 	purchase_order_items = frappe.get_all(
-		"Purchase Order Item",
-		filters={"parent": ["in", purchase_orders]},
-		fields=["parent", "item_code", "qty"],
+		"Purchase Order",
+		filters=[
+			["supplier", "=", supplier],
+			["docstatus", "=", 1],
+			["Purchase Order Item", "item_code", "in", frappe.parse_json(pi_item_code)],
+		],
+		fields=[
+			"name",
+			"`tabPurchase Order Item`.item_code",
+			"`tabPurchase Order Item`.qty",
+			"`tabPurchase Order Item`.received_qty",
+		],
+		order_by="`tabPurchase Order`.creation asc",
 	)
 
-	item_to_po_map = {
-		item.item_code: {"purchase_order": item.parent, "qty": item.qty}
-		for item in purchase_order_items
-		if item.item_code in pi_item_code
-	}
+	item_to_po_map = {}
+	for item in purchase_order_items:
+		remaining_qty = item.qty - item.received_qty
+		if remaining_qty <= 0:
+			continue
+
+		item_to_po_map.setdefault(item.item_code, []).append(
+			{"purchase_order": item.name, "qty": (remaining_qty)}
+		)
 
 	return item_to_po_map
 

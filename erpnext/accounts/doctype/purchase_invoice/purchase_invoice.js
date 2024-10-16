@@ -473,42 +473,71 @@ function get_unmapped_items(invoice_items) {
 	});
 }
 
-function assign_purchase_order(invoice_items, items_to_link, cur_doc) {
-	if (!Object.keys(items_to_link).length) {
+function assign_purchase_order(invoice_items, purchase_order_items, cur_doc) {
+	if (!Object.keys(purchase_order_items).length) {
 		frappe.msgprint(__("No Purchase Orders matched"));
 		return;
 	}
 
 	let total_idx = invoice_items.length;
+	let messages = [];
+	let last_index = 0;
 
-	invoice_items.forEach((item) => {
-		const matched_item = items_to_link[item.item_code];
-		if (!matched_item) return;
+	for (let item_code in purchase_order_items) {
+		let purchase_orders = purchase_order_items[item_code];
+		last_index = 0;
 
-		if (item.qty > matched_item.qty) {
-			const new_row = frappe.model.add_child(cur_doc, item.doctype, "items");
-			Object.assign(new_row, item);
-			new_row.qty = item.qty - matched_item.qty;
-			new_row.idx = ++total_idx;
+		for (let i = 0; i < purchase_orders.length; i++) {
+			const { purchase_order, qty: po_qty } = purchase_orders[i];
 
-			frappe.msgprint("Splitting " + new_row.qty + " units of " + new_row.item_code);
-			item.qty = matched_item.qty;
-		}
+			for (let j = last_index; j < invoice_items.length; j++) {
+				let item = invoice_items[j];
 
-		frappe.msgprint(
-			"Assigning " + matched_item.purchase_order + " to " + item.item_code + " (row " + item.idx + ")"
-		);
-		item.purchase_order = matched_item.purchase_order;
+				if (item.item_code != item_code || item.purchase_order != "") continue;
 
-		if (items_to_link[item.item_code]) {
-			items_to_link[item.item_code] -= item.qty;
+				if (item.qty > po_qty) {
+					const new_row = frappe.model.add_child(cur_doc, item.doctype, "items");
+					new_row.item_code = item.item_code;
+					new_row.item_name = item.item_name;
+					new_row.qty = item.qty - po_qty;
+					new_row.rate = item.rate;
+					new_row.amount = new_row.qty * new_row.rate;
+					new_row.uom = item.uom;
+					new_row.expense_account = item.expense_account;
+					new_row.purchase_order = "";
+					new_row.idx = ++total_idx;
 
-			if (items_to_link[item.item_code] <= 0) {
-				delete items_to_link[item.item_code];
+					messages.push("Splitting " + new_row.qty + " units of " + new_row.item_code);
+					messages.push(
+						"Assigning " + purchase_order + " to " + item.item_code + " (row " + item.idx + ")"
+					);
+
+					item.qty = po_qty;
+					item.purchase_order = purchase_order;
+					item.amount = item.qty * item.rate;
+
+					last_index = j + 1;
+					break;
+				} else {
+					item.purchase_order = purchase_order;
+					purchase_orders[i].qty -= item.qty;
+
+					messages.push(
+						"Assigning " + purchase_order + " to " + item.item_code + " (row " + item.idx + ")"
+					);
+
+					if (purchase_orders[i].qty == 0) {
+						last_index = j + 1;
+						break;
+					}
+				}
 			}
 		}
-	});
+	}
 	refresh_field("items");
+	if (messages.length) {
+		frappe.msgprint(messages.join("<br>"));
+	}
 }
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
