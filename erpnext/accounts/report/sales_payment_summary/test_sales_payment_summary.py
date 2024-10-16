@@ -17,7 +17,8 @@ EXTRA_TEST_RECORD_DEPENDENCIES = ["Sales Invoice"]
 
 class TestSalesPaymentSummary(IntegrationTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
 		create_records()
 		pes = frappe.get_all("Payment Entry")
 		jes = frappe.get_all("Journal Entry")

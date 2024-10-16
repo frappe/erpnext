@@ -18,6 +18,7 @@ from erpnext.tests.utils import if_lending_app_installed, if_lending_app_not_ins
 class TestBankClearance(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		create_warehouse(
 			warehouse_name="_Test Warehouse",
 			properties={"parent_warehouse": "All Warehouses - _TC"},

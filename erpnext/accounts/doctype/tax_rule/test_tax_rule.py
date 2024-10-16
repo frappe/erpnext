@@ -13,6 +13,7 @@ from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 class TestTaxRule(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.db.set_single_value("Shopping Cart Settings", "enabled", 0)
 
 	@classmethod
