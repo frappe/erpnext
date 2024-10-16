@@ -919,7 +919,7 @@ def get_item_price(args, item_code, ignore_party=False):
 			query = query.where((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
 
 	if args.get("transaction_date"):
-		transaction_date = parser.parse(args["transaction_date"])
+		transaction_date = parser.parse(str(args["transaction_date"]))
 		query = query.where(
 			(IfNull(ip.valid_from, "2000-01-01") <= transaction_date)
 			& (IfNull(ip.valid_upto, "2500-12-31") >= transaction_date)
