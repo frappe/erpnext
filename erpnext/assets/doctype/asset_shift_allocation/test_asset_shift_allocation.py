@@ -23,6 +23,7 @@ class UnitTestAssetShiftAllocation(UnitTestCase):
 class TestAssetShiftAllocation(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		create_asset_shift_factors()
 
 	@classmethod

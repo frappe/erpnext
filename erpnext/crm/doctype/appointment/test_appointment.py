@@ -27,7 +27,9 @@ def create_test_appointment():
 
 
 class TestAppointment(IntegrationTestCase):
-	def setUpClass():
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
 		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
 
 	def setUp(self):

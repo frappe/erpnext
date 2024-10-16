@@ -21,6 +21,7 @@ class UnitTestRouting(UnitTestCase):
 class TestRouting(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		cls.item_code = "Test Routing Item - A"
 
 	@classmethod

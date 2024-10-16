@@ -15,7 +15,8 @@ from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics i
 
 class TestOpportunitySummaryBySalesStage(IntegrationTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
 		create_company()
 		create_customer()
 		create_opportunity()

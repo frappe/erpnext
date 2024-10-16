@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 class TestLoyaltyPointEntry(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		# Create test records
 		create_records()
 		cls.loyalty_program_name = "Test Single Loyalty"

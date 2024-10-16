@@ -45,6 +45,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 class AssetSetup(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		enable_cwip_accounting("Computers")

@@ -26,7 +26,7 @@ class UnitTestOpeningInvoiceCreationTool(UnitTestCase):
 
 class TestOpeningInvoiceCreationTool(IntegrationTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
 		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
 			make_company()
 		create_dimension()
