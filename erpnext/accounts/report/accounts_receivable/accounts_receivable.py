@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb, query_builder, scrub
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, Case
 from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
@@ -588,11 +588,9 @@ class ReceivablePayableReport:
 				(pe.posting_date).as_("future_date"),
 				(pe_ref.allocated_amount).as_("future_amount"),
 				(pe.reference_no).as_("future_ref"),
-				ifelse(
-					pe.payment_type == "Receive",
-					pe.source_exchange_rate * pe_ref.allocated_amount,
-					pe.target_exchange_rate * pe_ref.allocated_amount,
-				).as_("future_amount_in_base_currency"),
+				Case()
+				.when(pe.payment_type == "Receive", pe.source_exchange_rate * pe_ref.allocated_amount)
+				.else_(pe.target_exchange_rate * pe_ref.allocated_amount).as_("future_amount_in_base_currency"),
 			)
 			.where(
 				(pe.docstatus < 2)
@@ -622,6 +620,7 @@ class ReceivablePayableReport:
 				& (jea.reference_name.isnotnull())
 				& (jea.reference_name != "")
 			)
+			.groupby(jea.reference_name, jea.party, jea.party_type, je.posting_date, je.cheque_no)
 		)
 
 		if self.filters.get("party"):
@@ -632,7 +631,7 @@ class ReceivablePayableReport:
 				query = query.select(Sum(jea.debit - jea.credit).as_("future_amount_in_base_currency"))
 			else:
 				query = query.select(
-					Sum(jea.credit_in_account_currency - jea.debit_in_account_currency).as_("future_amount")
+					Sum(jea.credit_in_account_currency - jea.debit_in_account_currency).as_("future_amount"),
 				)
 				query = query.select(Sum(jea.credit - jea.debit).as_("future_amount_in_base_currency"))
 		else:
@@ -649,7 +648,12 @@ class ReceivablePayableReport:
 				).as_("future_amount")
 			)
 
-		query = query.having(qb.Field("future_amount") > 0)
+		if self.account_type == "Payable":
+			query = query.having(Sum(jea.debit_in_account_currency - jea.credit_in_account_currency) > 0)
+		else:
+			query = query.having(Sum(jea.credit_in_account_currency - jea.debit_in_account_currency) > 0)
+
+
 		return query.run(as_dict=True)
 
 	def allocate_future_payments(self, row):
