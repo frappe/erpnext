@@ -14,7 +14,7 @@ def execute(filters=None):
 		"Project",
 		filters=filters,
 		fields=[
-			"name",
+			"project_name",
 			"status",
 			"percent_complete",
 			"expected_start_date",
@@ -42,7 +42,7 @@ def execute(filters=None):
 def get_columns():
 	return [
 		{
-			"fieldname": "name",
+			"fieldname": "project_name",
 			"label": _("Project"),
 			"fieldtype": "Link",
 			"options": "Project",
@@ -82,7 +82,7 @@ def get_chart_data(data):
 	overdue = []
 
 	for project in data:
-		labels.append(project.name)
+		labels.append(project.project_name)
 		total.append(project.total_tasks)
 		completed.append(project.completed_tasks)
 		overdue.append(project.overdue_tasks)
