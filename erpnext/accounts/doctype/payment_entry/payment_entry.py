@@ -273,6 +273,7 @@ class PaymentEntry(AccountsController):
 			"Repost Accounting Ledger Items",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
+			"Advance Payment Ledger Entry",
 		)
 		super().on_cancel()
 		self.make_gl_entries(cancel=1)
