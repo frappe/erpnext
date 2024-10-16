@@ -19,52 +19,60 @@
    "fieldname": "voucher_type",
    "fieldtype": "Link",
    "label": "Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
    "label": "Voucher No",
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "read_only": 1
   },
   {
    "fieldname": "against_voucher_type",
    "fieldtype": "Link",
    "label": "Against Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "against_voucher_no",
    "fieldtype": "Dynamic Link",
    "label": "Against Voucher No",
-   "options": "against_voucher_type"
+   "options": "against_voucher_type",
+   "read_only": 1
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
-   "label": "Amount"
+   "label": "Amount",
+   "read_only": 1
   },
   {
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "read_only": 1
   },
   {
    "fieldname": "event",
    "fieldtype": "Data",
-   "label": "Event"
+   "label": "Event",
+   "read_only": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-16 17:08:09.334330",
+ "modified": "2024-10-16 17:11:28.143979",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Payment Ledger Entry",
