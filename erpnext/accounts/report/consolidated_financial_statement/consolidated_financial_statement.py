@@ -469,10 +469,13 @@ def update_parent_account_names(accounts):
 
 	for d in accounts:
 		if d.account_number:
-			account_name = d.account_number + " - " + d.account_name
+			account_key = d.account_number + " - " + d.account_name
 		else:
-			account_name = d.account_name
-		name_to_account_map[d.name] = account_name
+			account_key = d.account_name
+
+		d.account_key = account_key
+
+		name_to_account_map[d.name] = account_key
 
 	for account in accounts:
 		if account.parent_account:
@@ -505,33 +508,26 @@ def get_subsidiary_companies(company):
 
 def get_accounts(root_type, companies):
 	accounts = []
-	added_accounts = []
 
 	for company in companies:
-		for account in frappe.get_all(
-			"Account",
-			fields=[
-				"name",
-				"is_group",
-				"company",
-				"parent_account",
-				"lft",
-				"rgt",
-				"root_type",
-				"report_type",
-				"account_name",
-				"account_number",
-			],
-			filters={"company": company, "root_type": root_type},
-		):
-			if account.account_number:
-				account_key = account.account_number + "-" + account.account_name
-			else:
-				account_key = account.account_name
-
-			if account_key not in added_accounts:
-				accounts.append(account)
-				added_accounts.append(account_key)
+		accounts.extend(
+			frappe.get_all(
+				"Account",
+				fields=[
+					"name",
+					"is_group",
+					"company",
+					"parent_account",
+					"lft",
+					"rgt",
+					"root_type",
+					"report_type",
+					"account_name",
+					"account_number",
+				],
+				filters={"company": company, "root_type": root_type},
+			)
+		)
 
 	return accounts
 
@@ -770,15 +766,17 @@ def add_total_row(out, root_type, balance_must_be, companies, company_currency):
 def filter_accounts(accounts, depth=10):
 	parent_children_map = {}
 	accounts_by_name = {}
-	for d in accounts:
-		if d.account_number:
-			account_name = d.account_number + " - " + d.account_name
-		else:
-			account_name = d.account_name
-		d["company_wise_opening_bal"] = defaultdict(float)
-		accounts_by_name[account_name] = d
+	added_accounts = []
 
-		parent_children_map.setdefault(d.parent_account or None, []).append(d)
+	for d in accounts:
+		if d.account_key in added_accounts:
+			continue
+
+		added_accounts.append(d.account_key)
+		d["company_wise_opening_bal"] = defaultdict(float)
+		accounts_by_name[d.account_key] = d
+
+		parent_children_map.setdefault(d.parent_account_name or None, []).append(d)
 
 	filtered_accounts = []
 
@@ -790,7 +788,7 @@ def filter_accounts(accounts, depth=10):
 			for child in children:
 				child.indent = level
 				filtered_accounts.append(child)
-				add_to_list(child.name, level + 1)
+				add_to_list(child.account_key, level + 1)
 
 	add_to_list(None, 0)
 

@@ -657,6 +657,9 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 			if pricing_rule.round_free_qty:
 				qty = math.floor(qty)
 
+	if not qty:
+		return
+
 	free_item_data_args = {
 		"item_code": free_item,
 		"qty": qty,

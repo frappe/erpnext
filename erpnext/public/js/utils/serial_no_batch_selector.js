@@ -678,6 +678,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_warehouse() {
+		if (this.item?.is_rejected) {
+			return this.item.rejected_warehouse;
+		}
+
 		return this.item?.type_of_transaction === "Outward"
 			? this.item.warehouse || this.item.s_warehouse
 			: this.item.warehouse || this.item.t_warehouse;
