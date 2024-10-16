@@ -133,7 +133,7 @@ class Dunning(AccountsController):
 				"Overdue Payment",
 				filters={
 					"payment_schedule": row.payment_schedule,
-					"parent": ("!=", row.parent),
+					"parent": ("!=", str(row.parent)),
 					"docstatus": 1,
 				},
 			)
