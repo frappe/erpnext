@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-13 09:35+0000\n"
-"PO-Revision-Date: 2024-10-15 02:01\n"
+"PO-Revision-Date: 2024-10-16 02:05\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -42400,7 +42400,7 @@ msgstr "Red Deposu"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:637
 msgid "Rejected Warehouse and Accepted Warehouse cannot be same."
-msgstr ""
+msgstr "Red Deposu ile Kabul Deposu aynı olamaz."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_dashboard.py:19
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation_dashboard.py:14
@@ -42632,7 +42632,7 @@ msgstr "Onarım Durumu"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:90
 msgid "Repair cost cannot be greater than purchase invoice base net total"
-msgstr ""
+msgstr "Onarım maliyeti satın alma faturası bazındaki net toplamdan fazla olamaz"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py:37
 msgid "Repeat Customer Revenue"
@@ -44486,7 +44486,7 @@ msgstr "Satır #{}: {} - {} para birimi şirket para birimiyle eşleşmiyor."
 
 #: erpnext/assets/doctype/asset/asset.py:306
 msgid "Row #{}: Finance Book should not be empty since you're using multiple."
-msgstr ""
+msgstr "Satır #{}: Birden fazla kullandığınız için Finans Defteri boş olmamalıdır."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:347
 msgid "Row #{}: Item Code: {} is not available under warehouse {}."
@@ -56555,7 +56555,7 @@ msgstr "{0} Kullanıcısının herhangi bir varsayılan POS Profili yok. Bu Kull
 
 #: erpnext/setup/doctype/employee/employee.py:211
 msgid "User {0} is already assigned to Employee {1}"
-msgstr ""
+msgstr "Kullanıcı {0} zaten {1} Personele atanmış"
 
 #: erpnext/setup/doctype/employee/employee.py:196
 msgid "User {0} is disabled"
@@ -56585,7 +56585,7 @@ msgstr "Kullanıcılar"
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can consume raw materials and add semi-finished goods or final finished goods against the operation using job cards."
-msgstr ""
+msgstr "Kullanıcılar iş kartlarını kullanarak hammadde tüketebilir, yarı mamul veya nihai ürünleri operasyona ekleyebilirler."
 
 #. Description of the 'Set Landed Cost Based on Purchase Invoice Rate' (Check)
 #. field in DocType 'Buying Settings'
@@ -56613,7 +56613,7 @@ msgstr "Bu rol sahibi kullanıcıların şifreli hesapları düzenleme ve şifre
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:38
 msgid "Using negative stock disables FIFO/Moving average valuation when inventory is negative."
-msgstr ""
+msgstr "Negatif stok kullanımı, envanter negatif olduğunda FIFO/Hareketli ortalama değerlemesini devre dışı bırakır."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:71
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:95
@@ -59920,7 +59920,7 @@ msgstr "{0} {1}: 'Kâr ve Zarar' {2} hesabı için Maliyet Merkezi gereklidir."
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:257
 msgid "{0} {1}: Cost Center {2} does not belong to Company {3}"
-msgstr ""
+msgstr "{0} {1}: Maliyet Merkezi {2}, {3} Şirketine ait değildir"
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:264
 msgid "{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot be used in transactions"
