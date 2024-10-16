@@ -14,6 +14,7 @@ def execute(filters=None):
 		"Project",
 		filters=filters,
 		fields=[
+			"name",
 			"project_name",
 			"status",
 			"percent_complete",
@@ -42,8 +43,15 @@ def execute(filters=None):
 def get_columns():
 	return [
 		{
-			"fieldname": "project_name",
+			"fieldname": "name",
 			"label": _("Project"),
+			"fieldtype": "Link",
+			"options": "Project",
+			"width": 200,
+		},
+		{
+			"fieldname": "project_name",
+			"label": _("Project Name"),
 			"fieldtype": "Link",
 			"options": "Project",
 			"width": 200,
