@@ -4,7 +4,6 @@ import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.tests.utils import make_test_records
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.account import (
@@ -201,8 +200,6 @@ class TestAccount(IntegrationTestCase):
 		"""
 		In a parent->child company setup, child should inherit parent account currency if explicitly specified.
 		"""
-
-		make_test_records("Company")
 
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
