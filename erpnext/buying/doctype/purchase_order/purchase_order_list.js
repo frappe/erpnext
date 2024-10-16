@@ -17,15 +17,8 @@ frappe.listview_settings["Purchase Order"] = {
 			return [__("On Hold"), "orange", "status,=,On Hold"];
 		} else if (doc.status === "Delivered") {
 			return [__("Delivered"), "green", "status,=,Closed"];
-<<<<<<< HEAD
-		} else if (flt(doc.per_received, 2) < 100 && doc.status !== "Closed") {
-			if (flt(doc.per_billed, 2) < 100) {
-=======
-		} else if (doc.advance_payment_status == "Initiated") {
-			return [__("To Pay"), "gray", "advance_payment_status,=,Initiated"];
 		} else if (flt(doc.per_received) < 100 && doc.status !== "Closed") {
 			if (flt(doc.per_billed) < 100) {
->>>>>>> a671fe13d4 (fix: list view and form status not same for purchase order (#43690))
 				return [
 					__("To Receive and Bill"),
 					"orange",
