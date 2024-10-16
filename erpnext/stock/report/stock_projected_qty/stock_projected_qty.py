@@ -297,6 +297,7 @@ def get_item_map(item_code, include_uom):
 
 	if include_uom:
 		ucd = frappe.qb.DocType("UOM Conversion Detail")
+		query = query.select(ucd.conversion_factor)
 		query = query.left_join(ucd).on((ucd.parent == item.name) & (ucd.uom == include_uom))
 
 	items = query.run(as_dict=True)
