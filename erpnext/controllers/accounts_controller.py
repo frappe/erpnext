@@ -3305,6 +3305,25 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.update_billing_percentage()
 	parent.set_status()
 
+<<<<<<< HEAD
+=======
+	parent.validate_uom_is_integer("uom", "qty")
+	parent.validate_uom_is_integer("stock_uom", "stock_qty")
+
+	# Cancel and Recreate Stock Reservation Entries.
+	if parent_doctype == "Sales Order":
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+			has_reserved_stock,
+		)
+
+		if has_reserved_stock(parent.doctype, parent.name):
+			cancel_stock_reservation_entries(parent.doctype, parent.name)
+
+			if parent.per_picked == 0:
+				parent.create_stock_reservation_entries()
+
+>>>>>>> 4fd4a37dc9 (fix: added validation for UOM must be whole number (#43710))
 
 def check_if_child_table_updated(child_table_before_update, child_table_after_update, fields_to_check):
 	accounting_dimensions = [*get_accounting_dimensions(), "cost_center", "project"]
