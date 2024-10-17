@@ -105,6 +105,9 @@ class PaymentRequest(Document):
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
 	def validate_payment_request_amount(self):
+		if frappe.db.get_single_value("Accounts Settings", "allow_mutliple_pr_against_invoice", cache=True):
+			return
+
 		if self.grand_total == 0:
 			frappe.throw(
 				_("{0} cannot be zero").format(self.get_label_from_fieldname("grand_total")),
@@ -559,14 +562,15 @@ def make_payment_request(**args):
 		{"reference_doctype": ref_doc.doctype, "reference_name": ref_doc.name, "docstatus": 0},
 	)
 
-	# fetches existing payment request `grand_total` amount
-	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc.doctype, ref_doc.name)
+	if not frappe.db.get_single_value("Accounts Settings", "allow_mutliple_pr_against_invoice", cache=True):
+		# fetches existing payment request `grand_total` amount
+		existing_payment_request_amount = get_existing_payment_request_amount(ref_doc.doctype, ref_doc.name)
 
-	if existing_payment_request_amount:
-		grand_total -= existing_payment_request_amount
+		if existing_payment_request_amount:
+			grand_total -= existing_payment_request_amount
 
-		if not grand_total:
-			frappe.throw(_("Payment Request is already created"))
+			if not grand_total:
+				frappe.throw(_("Payment Request is already created"))
 
 	if draft_payment_request:
 		frappe.db.set_value(

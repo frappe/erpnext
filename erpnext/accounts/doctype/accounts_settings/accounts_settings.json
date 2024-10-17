@@ -75,7 +75,8 @@
   "column_break_lvjk",
   "receivable_payable_remarks_length",
   "payment_request_settings",
-  "create_pr_in_draft_status"
+  "create_pr_in_draft_status",
+  "allow_mutliple_pr_against_invoice"
  ],
  "fields": [
   {
@@ -489,6 +490,12 @@
    "fieldname": "create_pr_in_draft_status",
    "fieldtype": "Check",
    "label": "Create in Draft Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_mutliple_pr_against_invoice",
+   "fieldtype": "Check",
+   "label": "Allow Multiple against Single Invoice"
   }
  ],
  "icon": "icon-cog",
@@ -496,7 +503,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-26 06:48:52.714630",
+ "modified": "2024-10-16 12:24:32.945330",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

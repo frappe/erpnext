@@ -25,6 +25,7 @@ class AccountsSettings(Document):
 		acc_frozen_upto: DF.Date | None
 		add_taxes_from_item_tax_template: DF.Check
 		allow_multi_currency_invoices_against_single_party_account: DF.Check
+		allow_mutliple_pr_against_invoice: DF.Check
 		allow_stale: DF.Check
 		auto_reconcile_payments: DF.Check
 		automatically_fetch_payment_terms: DF.Check
