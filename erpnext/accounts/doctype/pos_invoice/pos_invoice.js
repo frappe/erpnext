@@ -57,6 +57,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 	}
 
 	onload_post_render(frm) {
+		super.onload_post_render();
 		this.pos_profile(frm);
 	}
 
