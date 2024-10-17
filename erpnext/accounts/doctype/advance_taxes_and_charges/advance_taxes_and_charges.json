@@ -20,11 +20,13 @@
   "rate",
   "section_break_9",
   "currency",
+  "net_amount",
   "tax_amount",
   "total",
   "allocated_amount",
   "column_break_13",
   "base_tax_amount",
+  "base_net_amount",
   "base_total"
  ],
  "fields": [
@@ -174,12 +176,29 @@
    "label": "Account Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "net_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "base_net_amount",
+   "fieldtype": "Currency",
+   "label": "Net Amount (Company Currency)",
+   "oldfieldname": "tax_amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:05:58.437605",
+ "modified": "2024-09-24 06:51:07.417348",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Taxes and Charges",
