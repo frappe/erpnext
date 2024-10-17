@@ -11,15 +11,6 @@ EXTRA_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
-class TestAdvancePaymentLedgerEntry(UnitTestCase):
-	"""
-	Unit tests for AdvancePaymentLedgerEntry.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
 class TestAdvancePaymentLedgerEntry(IntegrationTestCase):
 	"""
 	Integration tests for AdvancePaymentLedgerEntry.
