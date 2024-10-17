@@ -131,6 +131,11 @@ frappe.ui.form.on("Account", {
 				},
 			],
 			primary_action: function () {
+				d.hide();
+				frappe.show_alert({
+					message: __('Accounts are being merged'),
+					indicator: 'orange'
+				});		
 				var data = d.get_values();
 				frappe.call({
 					method: "erpnext.accounts.doctype.account.account.merge_account",
@@ -143,7 +148,6 @@ frappe.ui.form.on("Account", {
 							if (r.message) {
 								frappe.set_route("Form", "Account", r.message);
 							}
-							d.hide();
 						}
 					},
 				});
