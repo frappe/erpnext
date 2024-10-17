@@ -290,18 +290,30 @@ class PartyLedgerSummaryReport:
 				)
 
 				conditions.append(
-					f"""party in (select name from tabCustomer
-					where exists(select name from `tabCustomer Group` where lft >= {lft} and rgt <= {rgt}
-						and name=tabCustomer.customer_group))"""
+					f"""party in (
+							select name
+							from "tabCustomer" as customer
+							where exists(
+								select name from "tabCustomer Group" where lft >= {lft} and rgt <= {rgt}
+								and name = customer.customer_group
+							)
+						)
+					"""
 				)
 
 			if self.filters.get("territory"):
 				lft, rgt = frappe.db.get_value("Territory", self.filters.get("territory"), ["lft", "rgt"])
 
 				conditions.append(
-					f"""party in (select name from tabCustomer
-					where exists(select name from `tabTerritory` where lft >= {lft} and rgt <= {rgt}
-						and name=tabCustomer.territory))"""
+					f"""party in (
+							select name
+							from "tabCustomer" as customer
+							where exists(
+								select name from "tabTerritory" where lft >= {lft} and rgt <= {rgt}
+								and name = customer.territory
+							)
+						)
+					"""
 				)
 
 			if self.filters.get("payment_terms_template"):
