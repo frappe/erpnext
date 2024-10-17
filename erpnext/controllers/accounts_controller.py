@@ -2220,7 +2220,7 @@ class AccountsController(TransactionBase):
 					d.outstanding = d.payment_amount
 				elif not d.invoice_portion:
 					d.base_payment_amount = flt(
-						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
+						flt(d.payment_amount) * self.get("conversion_rate"), d.precision("base_payment_amount")
 					)
 		else:
 			self.fetch_payment_terms_from_order(po_or_so, doctype)
