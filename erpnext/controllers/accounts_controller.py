@@ -3551,6 +3551,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.update_billing_percentage()
 	parent.set_status()
 
+	parent.validate_uom_is_integer("uom", "qty")
+	parent.validate_uom_is_integer("stock_uom", "stock_qty")
+
 	# Cancel and Recreate Stock Reservation Entries.
 	if parent_doctype == "Sales Order":
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
