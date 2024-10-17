@@ -351,6 +351,14 @@ class AccountsController(TransactionBase):
 		adv = qb.DocType("Advance Payment Ledger Entry")
 		qb.from_(adv).delete().where(adv.voucher_type.eq(self.doctype) & adv.voucher_no.eq(self.name)).run()
 
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
+			"advance_payment_payable_doctypes"
+		)
+		if self.doctype in advance_payment_doctypes:
+			qb.from_(adv).delete().where(
+				adv.against_voucher_type.eq(self.doctype) & adv.against_voucher_no.eq(self.name)
+			).run()
+
 	def on_trash(self):
 		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
 
