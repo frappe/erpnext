@@ -229,12 +229,19 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 
 def get_gl_balance(report_date, company):
-	return frappe._dict(
-		frappe.db.get_all(
-			"GL Entry",
-			fields=["party", "sum(debit -  credit)"],
-			filters={"posting_date": ("<=", report_date), "is_cancelled": 0, "company": company},
-			group_by="party",
-			as_list=1,
-		)
+	gl_entries = frappe.db.get_all(
+		"GL Entry",
+		fields = ["party", "sum(debit - credit) as balance"],
+		filters = {"posting_date": ("<=", report_date), "is_cancelled": 0, "company": company},
+		group_by = "party",
+		as_list = True
 	)
+
+	gl_balance_map = {}
+
+	for entry in gl_entries:
+		party, balance, date = entry
+		gl_balance_map[party] = balance
+	
+	return gl_balance_map
+
