@@ -135,6 +135,7 @@ def get_data(filters, conditions):
 				FROM `tab{}` t1, `tab{} Item` t2 {}
 				WHERE
 					t2.parent = t1.name
+					AND {} IS NOT NULL
 					AND t1.company = {}
 					AND {} BETWEEN {} AND {}
 					AND t1.docstatus = 1
@@ -146,6 +147,7 @@ def get_data(filters, conditions):
 					conditions["trans"],
 					conditions["trans"],
 					conditions["addl_tables"],
+					sel_col,
 					"%s",
 					posting_date,
 					"%s",
