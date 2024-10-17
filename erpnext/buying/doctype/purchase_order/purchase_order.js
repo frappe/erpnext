@@ -218,17 +218,8 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			}
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
-<<<<<<< HEAD
 					if(flt(doc.per_received) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
-=======
-					if (flt(doc.per_received) < 100 && allow_receipt) {
-						cur_frm.add_custom_button(
-							__("Purchase Receipt"),
-							this.make_purchase_receipt,
-							__("Create")
-						);
->>>>>>> a33d5535a7 (fix: list view and form status not same for purchase order (backport #43690) (#43692))
 						if (doc.is_subcontracted) {
 							if (doc.is_old_subcontracting_flow) {
 								if (me.has_unsupplied_items()) {
@@ -240,18 +231,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 							}
 						}
 					}
-<<<<<<< HEAD
 					if(flt(doc.per_billed) < 100)
 						cur_frm.add_custom_button(__('Purchase Invoice'),
 							this.make_purchase_invoice, __('Create'));
-=======
-					if (flt(doc.per_billed) < 100)
-						cur_frm.add_custom_button(
-							__("Purchase Invoice"),
-							this.make_purchase_invoice,
-							__("Create")
-						);
->>>>>>> a33d5535a7 (fix: list view and form status not same for purchase order (backport #43690) (#43692))
 
 					if(flt(doc.per_billed) < 100 && doc.status != "Delivered") {
 						this.frm.add_custom_button(
