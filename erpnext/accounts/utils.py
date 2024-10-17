@@ -1366,6 +1366,14 @@ def parse_naming_series_variable(doc, variable):
 			date = getdate()
 			company = None
 		return get_fiscal_year(date=date, company=company)[0]
+	
+	elif variable == "ABBR":
+		if doc:
+			company = doc.get("company") or frappe.db.get_default('company')
+		else:
+			company = frappe.db.get_default('company')
+
+		return frappe.db.get_value("Company", company, "abbr") if company else ""
 
 
 @frappe.whitelist()
