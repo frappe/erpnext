@@ -383,4 +383,5 @@ erpnext.patches.v15_0.set_standard_stock_entry_type
 erpnext.patches.v15_0.set_difference_amount_in_asset_value_adjustment
 erpnext.patches.v15_0.link_purchase_item_to_asset_doc
 erpnext.patches.v15_0.migrate_to_utm_analytics
+erpnext.patches.v15_0.update_task_assignee_email_field_in_asset_maintenance_log
 erpnext.patches.v14_0.update_currency_exchange_settings_for_frankfurter
