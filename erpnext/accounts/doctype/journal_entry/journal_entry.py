@@ -188,6 +188,7 @@ class JournalEntry(AccountsController):
 		self.validate_cheque_info()
 		self.check_credit_limit()
 		self.make_gl_entries()
+		self.make_advance_payment_ledger_entries()
 		self.update_advance_paid()
 		self.update_asset_value()
 		self.update_inter_company_jv()
@@ -220,6 +221,7 @@ class JournalEntry(AccountsController):
 			"Unreconcile Payment Entries",
 		)
 		self.make_gl_entries(1)
+		self.make_advance_payment_ledger_entries()
 		self.update_advance_paid()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
@@ -230,6 +232,32 @@ class JournalEntry(AccountsController):
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
+
+	def make_advance_payment_ledger_entries(self):
+		if self.docstatus == 1 or self.docstatus == 2:
+			advance_payment_doctypes = frappe.get_hooks(
+				"advance_payment_receivable_doctypes"
+			) + frappe.get_hooks("advance_payment_payable_doctypes")
+
+			advance_doctype_references = [
+				x for x in self.accounts if x.reference_type in advance_payment_doctypes
+			]
+
+			for x in advance_doctype_references:
+				# Looking for payments
+				dr_or_cr = "credit" if x.account_type == "Receivable" else "debit"
+
+				amount = x.get(dr_or_cr)
+				if amount > 0:
+					doc = frappe.new_doc("Advance Payment Ledger Entry")
+					doc.company = self.company
+					doc.voucher_type = self.doctype
+					doc.voucher_no = self.name
+					doc.against_voucher_type = x.reference_type
+					doc.against_voucher_no = x.reference_name
+					doc.amount = amount if self.docstatus == 1 else -1 * amount
+					doc.event = "Submit" if self.docstatus == 1 else "Cancel"
+					doc.save()
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
