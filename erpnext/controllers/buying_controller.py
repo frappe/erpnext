@@ -810,10 +810,6 @@ class BuyingController(SubcontractingController):
 		asset_quantity = row.qty if is_grouped_asset else 1
 		purchase_amount = flt(row.valuation_rate) * asset_quantity
 
-		# getting default value of status from Asset
-		asset_meta = frappe.get_meta("Asset")
-		default_asset_status = asset_meta.get_field("status")
-
 		asset = frappe.get_doc(
 			{
 				"doctype": "Asset",
@@ -831,7 +827,6 @@ class BuyingController(SubcontractingController):
 				"asset_quantity": asset_quantity,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
-				"status": default_asset_status.default if default_asset_status.default else None
 			}
 		)
 
