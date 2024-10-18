@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-13 09:35+0000\n"
-"PO-Revision-Date: 2024-10-14 01:46\n"
+"PO-Revision-Date: 2024-10-18 02:16\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -79,11 +79,11 @@ msgstr " خلاصه"
 
 #: erpnext/stock/doctype/item/item.py:233
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
-msgstr "\"آیتم تأمین شده توسط مشتری\" نمی تواند آیتم خرید هم باشد"
+msgstr "\"آیتم تامین شده توسط مشتری\" نمی تواند آیتم خرید هم باشد"
 
 #: erpnext/stock/doctype/item/item.py:235
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr "\"آیتم تأمین شده توسط مشتری\" نمی تواند دارای نرخ ارزیابی باشد"
+msgstr "\"آیتم تامین شده توسط مشتری\" نمی تواند دارای نرخ ارزیابی باشد"
 
 #: erpnext/stock/doctype/item/item.py:311
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
@@ -8616,7 +8616,7 @@ msgstr "اگر Applicable For به عنوان {0} انتخاب شده باشد،
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:13
 msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
-msgstr "به‌طور پیش‌فرض، نام تأمین‌کننده مطابق با نام تأمین‌کننده وارد شده تنظیم می‌شود. اگر می‌خواهید تأمین‌کنندگان با <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/name-series' target='_blank'>سری نام‌گذاری نام‌گذاری شوند. </a> گزینه \"Naming Series\" را انتخاب کنید."
+msgstr "به‌طور پیش‌فرض، نام تامین‌کننده مطابق با نام تامین‌کننده وارد شده تنظیم می‌شود. اگر می‌خواهید تامین‌کنندگان با <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/name-series' target='_blank'>سری نام‌گذاری نام‌گذاری شوند. </a> گزینه \"Naming Series\" را انتخاب کنید."
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -14274,7 +14274,7 @@ msgstr "مخاطب اصلی مشتری"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Customer Provided"
-msgstr "تأمین شده توسط مشتری"
+msgstr "تامین شده توسط مشتری"
 
 #: erpnext/setup/doctype/company/company.py:377
 msgid "Customer Service"
@@ -23107,11 +23107,11 @@ msgstr "اگر این آیتم دارای گونه باشد، نمی توان آ
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:27
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
-msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext شما را از ایجاد فاکتور خرید یا رسید بدون ایجاد یک سفارش خرید جلوگیری می کند. این پیکربندی را می‌توان با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون سفارش خرید» در بخش اصلی تأمین‌کننده، برای یک تأمین‌کننده خاص لغو کرد."
+msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext شما را از ایجاد فاکتور خرید یا رسید بدون ایجاد یک سفارش خرید جلوگیری می کند. این پیکربندی را می‌توان با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون سفارش خرید» در بخش اصلی تامین‌کننده، برای یک تامین‌کننده خاص لغو کرد."
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:34
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
-msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext از ایجاد فاکتور خرید بدون ایجاد یک رسید خرید جلوگیری می کند. این پیکربندی را می‌توان برای یک تامین‌کننده خاص با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون رسید خرید» در قسمت اصلی تأمین‌کننده لغو کرد."
+msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext از ایجاد فاکتور خرید بدون ایجاد یک رسید خرید جلوگیری می کند. این پیکربندی را می‌توان برای یک تامین‌کننده خاص با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون رسید خرید» در قسمت اصلی تامین‌کننده لغو کرد."
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:10
 msgid "If ticked, multiple materials can be used for a single Work Order. This is useful if one or more time consuming products are being manufactured."
@@ -39623,7 +39623,7 @@ msgstr "کالای رسید خرید"
 #. Name of a DocType
 #: erpnext/buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgid "Purchase Receipt Item Supplied"
-msgstr "اقلام رسید خرید تأمین شد"
+msgstr "اقلام رسید خرید تامین شد"
 
 #. Label of the purchase_receipt_items (Section Break) field in DocType 'Landed
 #. Cost Voucher'
@@ -59450,7 +59450,7 @@ msgstr "ارز {0} باید با واحد پول پیش‌فرض شرکت یکس
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:311
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
-msgstr "{0} در حال حاضر دارای {1} کارت امتیازی تأمین‌کننده است و سفارش‌های خرید به این تأمین‌کننده باید با احتیاط صادر شوند."
+msgstr "{0} در حال حاضر دارای {1} کارت امتیازی تامین‌کننده است و سفارش‌های خرید به این تامین‌کننده باید با احتیاط صادر شوند."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:95
 msgid "{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution."

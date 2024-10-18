@@ -3,7 +3,6 @@
 
 import frappe
 from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import make_test_records
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -22,11 +21,6 @@ class UnitTestWarehouse(UnitTestCase):
 
 
 class TestWarehouse(IntegrationTestCase):
-	def setUp(self):
-		super().setUp()
-		if not frappe.get_value("Item", "_Test Item"):
-			make_test_records("Item")
-
 	def test_parent_warehouse(self):
 		parent_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
 		self.assertEqual(parent_warehouse.is_group, 1)
