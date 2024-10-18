@@ -28,6 +28,7 @@ erpnext.sales_common = {
 						query: "erpnext.controllers.queries.get_project_name",
 						filters: {
 							customer: doc.customer,
+							company: doc.company
 						},
 					};
 				});
