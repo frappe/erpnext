@@ -130,9 +130,11 @@ frappe.ui.form.on("Account", {
 					default: frm.doc.name,
 				},
 			],
-			primary_action: function () {
+			primary_action: function () {		
 				var data = d.get_values();
 				frappe.call({
+					freeze: true,
+    				freeze_message: __('Accounts are being merged'), 
 					method: "erpnext.accounts.doctype.account.account.merge_account",
 					args: {
 						old: frm.doc.name,
