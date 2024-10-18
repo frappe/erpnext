@@ -122,21 +122,24 @@ class Deferred_Item:
 		"""
 		simulate future posting by creating dummy gl entries. starts from the last posting date.
 		"""
-		if self.service_start_date != self.service_end_date:
-			if add_days(self.last_entry_date, 1) < self.period_list[-1].to_date:
-				self.estimate_for_period_list = get_period_list(
-					self.filters.from_fiscal_year,
-					self.filters.to_fiscal_year,
-					add_days(self.last_entry_date, 1),
-					self.period_list[-1].to_date,
-					"Date Range",
-					"Monthly",
-					company=self.filters.company,
-				)
-				for period in self.estimate_for_period_list:
-					amount = self.calculate_amount(period.from_date, period.to_date)
-					gle = self.make_dummy_gle(period.key, period.to_date, amount)
-					self.gle_entries.append(gle)
+		if (
+			self.service_start_date != self.service_end_date
+			and add_days(self.last_entry_date, 1) < self.service_end_date
+		):
+			self.estimate_for_period_list = get_period_list(
+				self.filters.from_fiscal_year,
+				self.filters.to_fiscal_year,
+				add_days(self.last_entry_date, 1),
+				self.service_end_date,
+				"Date Range",
+				"Monthly",
+				company=self.filters.company,
+			)
+
+			for period in self.estimate_for_period_list:
+				amount = self.calculate_amount(period.from_date, period.to_date)
+				gle = self.make_dummy_gle(period.key, period.to_date, amount)
+				self.gle_entries.append(gle)
 
 	def calculate_item_revenue_expense_for_period(self):
 		"""
