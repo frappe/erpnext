@@ -1162,12 +1162,13 @@ def create_new_asset_after_split(asset, split_qty):
 
 	for row in new_asset.get("finance_books"):
 		depr_schedule = get_depr_schedule(new_asset.name, "Active", row.finance_book)
-		for term in depr_schedule:
-			# Update references in JV
-			if term.journal_entry:
-				add_reference_in_jv_on_split(
-					term.journal_entry, new_asset.name, asset.name, term.depreciation_amount
-				)
+		if depr_schedule:
+			for term in depr_schedule:
+				# Update references in JV
+				if term.journal_entry:
+					add_reference_in_jv_on_split(
+						term.journal_entry, new_asset.name, asset.name, term.depreciation_amount
+					)
 
 	return new_asset
 
