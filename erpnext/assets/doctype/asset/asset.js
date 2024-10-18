@@ -32,6 +32,14 @@ frappe.ui.form.on("Asset", {
 			};
 		});
 
+		frm.set_query("custodian", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
