@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "hash",
+ "autoname": "prompt",
  "creation": "2024-09-29 07:01:18.133067",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -71,11 +71,11 @@
   }
  ],
  "links": [],
- "modified": "2024-10-02 15:43:58.213803",
+ "modified": "2024-10-19 14:18:54.322017",
  "modified_by": "Administrator",
  "module": "EDI",
  "name": "Common Code",
- "naming_rule": "Random",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {

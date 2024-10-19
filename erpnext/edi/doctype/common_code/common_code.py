@@ -29,12 +29,11 @@ class CommonCode(Document):
 		title: DF.Data
 	# end: auto-generated types
 
-	@staticmethod
-	def simple_hash(input_string, length=6):
-		return hashlib.blake2b(input_string.encode(), digest_size=length // 2).hexdigest()
-
 	def validate(self):
 		self.validate_distinct_references()
+
+	def autoname(self):
+		self.name = get_code_name(self.code_list, self.common_code)
 
 	def validate_distinct_references(self):
 		"""Ensure no two Common Codes of the same Code List are linked to the same document."""
@@ -60,52 +59,68 @@ class CommonCode(Document):
 					)
 				)
 
-	@staticmethod
-	def import_genericode(
-		file_name, list_name, code_column, title_column=None, description_column=None, filters=None
-	):
-		file_path = frappe.utils.file_manager.get_file_path(file_name)
-		parser = etree.XMLParser(remove_blank_text=True)
-		tree = etree.parse(file_path, parser=parser)
-		root = tree.getroot()
+	def from_genericode(self, column_map: dict, xml_element: "etree.Element"):
+		"""Populate the Common Code document from a genericode XML element
 
-		codes = []
-		list_hash = CommonCode.simple_hash(list_name)
+		Args:
+		    column_map (dict): A mapping of column names to XML column references. Keys: code, title, description
+		    code (etree.Element): The XML element representing a code in the genericode file
+		"""
+		title_column = column_map.get("title")
+		description_column = column_map.get("description")
 
-		# Construct the XPath expression
-		xpath_expr = ".//SimpleCodeList/Row"
-		filter_conditions = []
-		for column_ref, value in filters.items():
-			filter_conditions.append(f"Value[@ColumnRef='{column_ref}']/SimpleValue='{value}'")
-		if filter_conditions:
-			xpath_expr += "[" + " and ".join(filter_conditions) + "]"
+		title = None
+		if title_column:
+			title = xml_element.find(f"./Value[@ColumnRef='{title_column}']/SimpleValue").text
 
-		for idx, code in enumerate(root.xpath(xpath_expr)):
-			content = etree.tostring(code, encoding="unicode", pretty_print=True)
+		description = None
+		if description_column:
+			description = xml_element.find(f"./Value[@ColumnRef='{description_column}']/SimpleValue").text
 
-			code_value = code.find(f"./Value[@ColumnRef='{code_column}']/SimpleValue").text
-			code_hash = CommonCode.simple_hash(code_value, 10)
+		self.title = title
+		self.description = description
+		self.additional_data = etree.tostring(xml_element, encoding="unicode", pretty_print=True)
 
-			title = None
-			if title_column:
-				title = code.find(f"./Value[@ColumnRef='{title_column}']/SimpleValue").text
 
-			description = None
-			if description_column:
-				description = code.find(f"./Value[@ColumnRef='{description_column}']/SimpleValue").text
+def simple_hash(input_string, length=6):
+	return hashlib.blake2b(input_string.encode(), digest_size=length // 2).hexdigest()
 
-			codes.append(
-				{
-					"name": f"{list_hash}|{idx}|{code_hash}",
-					"code_list": list_name,
-					"common_code": code_value,
-					"title": title,
-					"description": description,
-					"additional_data": content,
-				}
-			)
 
-		return codes
+def get_code_name(code_list: str, code_value: str):
+	return f"{simple_hash(code_list)}|{simple_hash(code_value, 10)}"
+
+
+def import_genericode(code_list: str, file_name: str, column_map: dict, filters: dict | None = None):
+	"""Import genericode file and create Common Code entries"""
+	file_path = frappe.utils.file_manager.get_file_path(file_name)
+	parser = etree.XMLParser(remove_blank_text=True)
+	tree = etree.parse(file_path, parser=parser)
+	root = tree.getroot()
+
+	# Construct the XPath expression
+	xpath_expr = ".//SimpleCodeList/Row"
+	filter_conditions = [
+		f"Value[@ColumnRef='{column_ref}']/SimpleValue='{value}'" for column_ref, value in filters.items()
+	]
+	if filter_conditions:
+		xpath_expr += "[" + " and ".join(filter_conditions) + "]"
+
+	for xml_element in root.xpath(xpath_expr):
+		code_column = column_map["code"]
+		code_value = xml_element.find(f"./Value[@ColumnRef='{code_column}']/SimpleValue").text
+		code_name = get_code_name(code_list, code_value)
+
+		if frappe.db.exists("Common Code", code_name):
+			common_code = frappe.get_doc("Common Code", code_name)
+		else:
+			common_code: "CommonCode" = frappe.new_doc("Common Code")
+			common_code.common_code = code_value
+			common_code.code_list = code_list
+
+		common_code.from_genericode(column_map, xml_element)
+		common_code.save()
+
+	return {"code_list": code_list, "common_codes_count": len(root.xpath(xpath_expr))}
 
 
 def on_doctype_update():

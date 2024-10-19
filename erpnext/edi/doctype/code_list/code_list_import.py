@@ -3,7 +3,6 @@ import json
 import frappe
 import requests
 from frappe import _
-from frappe.utils.file_manager import save_file
 from lxml import etree
 
 URL_PREFIXES = ("http://", "https://")
@@ -41,8 +40,9 @@ def import_genericode():
 
 	# Extract the name (CanonicalVersionUri) from the parsed XML
 	name = root.find(".//CanonicalVersionUri").text
+	docname = docname or name
 
-	if docname:
+	if frappe.db.exists(doctype, docname):
 		code_list = frappe.get_doc(doctype, docname)
 		if code_list.name != name:
 			frappe.throw(_("The uploaded file does not match the selected Code List."))
@@ -50,7 +50,9 @@ def import_genericode():
 		# Create a new Code List document with the extracted name
 		code_list = frappe.new_doc(doctype)
 		code_list.name = name
-		code_list.insert(ignore_permissions=True)
+
+	code_list.from_genericode(root)
+	code_list.save()
 
 	# Attach the file and provide a recoverable identifier
 	file_doc = frappe.get_doc(
@@ -64,7 +66,7 @@ def import_genericode():
 			"is_private": 1,
 			"content": content,
 		}
-	).save(ignore_permissions=True)
+	).save()
 
 	# Get available columns and example values
 	columns, example_values, filterable_columns = get_genericode_columns_and_examples(root)
@@ -80,12 +82,18 @@ def import_genericode():
 
 @frappe.whitelist()
 def process_genericode_import(
-	code_list_name, file, code_column, title_column=None, description_column=None, filters=None
+	code_list_name: str,
+	file_name: str,
+	code_column: str,
+	title_column: str | None = None,
+	description_column: str | None = None,
+	filters: str | None = None,
 ):
-	code_list = frappe.get_doc("Code List", code_list_name)
-	return code_list.import_genericode(
-		file, code_column, title_column, description_column, filters and json.loads(filters)
-	)
+	from erpnext.edi.doctype.common_code.common_code import import_genericode
+
+	column_map = {"code": code_column, "title": title_column, "description": description_column}
+
+	return import_genericode(code_list_name, file_name, column_map, json.loads(filters) if filters else None)
 
 
 def get_genericode_columns_and_examples(root):

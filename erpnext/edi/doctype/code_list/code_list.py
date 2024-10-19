@@ -1,11 +1,13 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from typing import TYPE_CHECKING
+
 import frappe
 from frappe.model.document import Document
-from lxml import etree
 
-from erpnext.edi.doctype.common_code.common_code import CommonCode
+if TYPE_CHECKING:
+	from lxml.etree import Element
 
 
 class CodeList(Document):
@@ -59,16 +61,8 @@ class CodeList(Document):
 
 		return code[0][0] if code else None
 
-	def import_genericode(
-		self, file_name, code_column, title_column=None, description_column=None, filters=None
-	):
-		"""Import genericode file and create Common Code entries"""
-		file_path = frappe.utils.file_manager.get_file_path(file_name)
-		parser = etree.XMLParser(remove_blank_text=True)
-		tree = etree.parse(file_path, parser=parser)
-		root = tree.getroot()
-
-		# Extract Code List details
+	def from_genericode(self, root: "Element"):
+		"""Extract Code List details from genericode XML"""
 		self.title = root.find(".//Identification/ShortName").text
 		self.version = root.find(".//Identification/Version").text
 		self.canonical_uri = root.find(".//CanonicalUri").text
@@ -79,42 +73,3 @@ class CodeList(Document):
 			self.publisher = getattr(root.find(".//Identification/Agency/LongName"), "text", None)
 		self.publisher_id = getattr(root.find(".//Identification/Agency/Identifier"), "text", None)
 		self.url = getattr(root.find(".//Identification/LocationUri"), "text", None)
-
-		self.save()
-
-		common_codes = CommonCode.import_genericode(
-			file_name, self.name, code_column, title_column, description_column, filters
-		)
-
-		# Bulk insert common codes
-		if common_codes:
-			now = frappe.utils.data.now()
-			user = frappe.session.user
-			frappe.db.bulk_insert(
-				"Common Code",
-				fields=[
-					"name",
-					"code_list",
-					"common_code",
-					"title",
-					"description",
-					"additional_data",
-					"owner",
-					"creation",
-				],
-				values=[
-					(
-						cc["name"],
-						cc["code_list"],
-						cc["common_code"],
-						cc["title"],
-						cc["description"],
-						cc["additional_data"],
-						user,
-						now,
-					)
-					for cc in common_codes
-				],
-			)
-
-		return {"code_list": self, "common_codes_count": len(common_codes)}

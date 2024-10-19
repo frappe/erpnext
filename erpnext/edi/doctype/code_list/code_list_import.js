@@ -113,7 +113,7 @@ function show_column_selection_dialog(context) {
 				method: "erpnext.edi.doctype.code_list.code_list_import.process_genericode_import",
 				args: {
 					code_list_name: context.code_list,
-					file: context.file,
+					file_name: context.file,
 					code_column: values.code_column,
 					title_column: values.title_column,
 					description_column: values.description_column,
