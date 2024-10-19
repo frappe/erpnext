@@ -25,9 +25,14 @@ function show_column_selection_dialog(context) {
 		{
 			fieldtype: "HTML",
 			fieldname: "code_list_info",
-			options: `<div class="text-muted">${__("You are importing data for the code list:")}<br><strong>${
-				context.code_list
-			}</strong></div>`,
+			options: `<div class="text-muted">${__(
+				"You are importing data for the code list:"
+			)} ${frappe.utils.get_form_link(
+				"Code List",
+				context.code_list,
+				true,
+				context.code_list_title
+			)}</div>`,
 		},
 		{
 			fieldtype: "Section Break",

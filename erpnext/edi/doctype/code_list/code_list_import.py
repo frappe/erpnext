@@ -73,6 +73,7 @@ def import_genericode():
 
 	return {
 		"code_list": code_list.name,
+		"code_list_title": code_list.title,
 		"file": file_doc.name,
 		"columns": columns,
 		"example_values": example_values,
