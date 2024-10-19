@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-13 09:35+0000\n"
-"PO-Revision-Date: 2024-10-14 01:46\n"
+"PO-Revision-Date: 2024-10-19 02:19\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -91,7 +91,7 @@ msgstr "\"Es activo fijo\" no puede estar sin marcar, ya que existe registro de 
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:262
 msgid "\"SN-01::10\" for \"SN-01\" to \"SN-10\""
-msgstr ""
+msgstr "\"SN-01::10\" para \"SN-01\" a \"SN-10\""
 
 #: erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
@@ -384,7 +384,7 @@ msgstr ", con el inventario {0}: {1}"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:95
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:347
 msgid "0 - 30 Days"
-msgstr ""
+msgstr "0 - 30 días"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:114
 msgid "0-30"
@@ -461,7 +461,7 @@ msgstr "3 Anual"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:96
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:348
 msgid "30 - 60 Days"
-msgstr ""
+msgstr "30 - 60 días"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
@@ -502,7 +502,7 @@ msgstr "6 horas"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:97
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:349
 msgid "60 - 90 Days"
-msgstr ""
+msgstr "60 - 90 días"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:116
 msgid "60-90"
@@ -515,7 +515,7 @@ msgstr "60-90 días"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:98
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:350
 msgid "90 - 120 Days"
-msgstr ""
+msgstr "90 - 120 días"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
@@ -38687,7 +38687,7 @@ msgstr "Rentabilidad"
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Profitability Analysis"
-msgstr "Cuenta de Resultados"
+msgstr "Análisis de Rentabilidad"
 
 #. Label of the progress_section (Section Break) field in DocType 'BOM Update
 #. Log'
@@ -42894,7 +42894,7 @@ msgstr "Solicitante"
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Required By"
-msgstr "Solicitado por"
+msgstr "Requerido para"
 
 #. Label of the schedule_date (Date) field in DocType 'Request for Quotation'
 #. Label of the schedule_date (Date) field in DocType 'Request for Quotation
@@ -51910,7 +51910,7 @@ msgstr "Categoría de Impuesto fue cambiada a \"Total\" debido a que todos los P
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Tax ID"
-msgstr "ID de impuesto"
+msgstr "ID Fiscal"
 
 #. Label of the tax_id (Data) field in DocType 'POS Invoice'
 #. Label of the tax_id (Read Only) field in DocType 'Purchase Invoice'
