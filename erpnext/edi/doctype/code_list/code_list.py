@@ -46,6 +46,10 @@ class CodeList(Document):
 		"""Get code for a doctype and name"""
 		return get_code_for(self.name, doctype, name)
 
+	def get_doc_for(self, doctype: str, code: str) -> str | None:
+		"""Get docname for a doctype and code"""
+		return get_doc_for(self.name, doctype, code)
+
 	def from_genericode(self, root: "Element"):
 		"""Extract Code List details from genericode XML"""
 		self.title = root.find(".//Identification/ShortName").text
@@ -78,3 +82,23 @@ def get_code_for(code_list: str, doctype: str, name: str) -> str | None:
 	).run()
 
 	return codes[0][0] if codes else None
+
+
+def get_doc_for(code_list: str, doctype: str, code: str) -> str | None:
+	"""Return the record name for a given common code"""
+	CommonCode = frappe.qb.DocType("Common Code")
+	DynamicLink = frappe.qb.DocType("Dynamic Link")
+
+	docnames = (
+		frappe.qb.from_(CommonCode)
+		.join(DynamicLink)
+		.on((CommonCode.name == DynamicLink.parent) & (DynamicLink.parenttype == "Common Code"))
+		.select(DynamicLink.link_name)
+		.where(
+			(DynamicLink.link_doctype == doctype)
+			& (CommonCode.common_code == code)
+			& (CommonCode.code_list == code_list)
+		)
+	).run()
+
+	return docnames[0][0] if docnames else None
