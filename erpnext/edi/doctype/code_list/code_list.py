@@ -44,22 +44,7 @@ class CodeList(Document):
 
 	def get_code_for(self, doctype: str, name: str):
 		"""Get code for a doctype and name"""
-		CommonCode = frappe.qb.DocType("Common Code")
-		DynamicLink = frappe.qb.DocType("Dynamic Link")
-
-		code = (
-			frappe.qb.from_(CommonCode)
-			.join(DynamicLink)
-			.on((CommonCode.name == DynamicLink.parent) & (DynamicLink.parenttype == "Common Code"))
-			.select(CommonCode.common_code)
-			.where(
-				(DynamicLink.link_doctype == doctype)
-				& (DynamicLink.link_name == name)
-				& (CommonCode.code_list == self.name)
-			)
-		).run()
-
-		return code[0][0] if code else None
+		return get_code_for(self.name, doctype, name)
 
 	def from_genericode(self, root: "Element"):
 		"""Extract Code List details from genericode XML"""
@@ -73,3 +58,23 @@ class CodeList(Document):
 			self.publisher = getattr(root.find(".//Identification/Agency/LongName"), "text", None)
 		self.publisher_id = getattr(root.find(".//Identification/Agency/Identifier"), "text", None)
 		self.url = getattr(root.find(".//Identification/LocationUri"), "text", None)
+
+
+def get_code_for(code_list: str, doctype: str, name: str) -> str | None:
+	"""Return the common code for a given record"""
+	CommonCode = frappe.qb.DocType("Common Code")
+	DynamicLink = frappe.qb.DocType("Dynamic Link")
+
+	codes = (
+		frappe.qb.from_(CommonCode)
+		.join(DynamicLink)
+		.on((CommonCode.name == DynamicLink.parent) & (DynamicLink.parenttype == "Common Code"))
+		.select(CommonCode.common_code)
+		.where(
+			(DynamicLink.link_doctype == doctype)
+			& (DynamicLink.link_name == name)
+			& (CommonCode.code_list == code_list)
+		)
+	).run()
+
+	return codes[0][0] if codes else None
