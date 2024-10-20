@@ -2,11 +2,12 @@
 # See license.txt
 import frappe
 from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import make_test_records
 
 from erpnext.manufacturing.doctype.job_card.job_card import OperationSequenceError
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.stock.doctype.item.test_item import make_item
+
+EXTRA_TEST_RECORD_DEPENDENCIES = ["UOM"]
 
 
 class UnitTestRouting(UnitTestCase):
@@ -21,6 +22,7 @@ class UnitTestRouting(UnitTestCase):
 class TestRouting(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		cls.item_code = "Test Routing Item - A"
 
 	@classmethod
@@ -32,8 +34,6 @@ class TestRouting(IntegrationTestCase):
 			{"operation": "Test Operation A", "workstation": "Test Workstation A", "time_in_mins": 30},
 			{"operation": "Test Operation B", "workstation": "Test Workstation A", "time_in_mins": 20},
 		]
-
-		make_test_records("UOM")
 
 		setup_operations(operations)
 		routing_doc = create_routing(routing_name="Testing Route", operations=operations)

@@ -14,9 +14,7 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
-	@classmethod
-	def setUpClass(self):
-		self.maxDiff = None
+	maxDiff = None
 
 	def clear_old_entries(self):
 		sinv = qb.DocType("Sales Invoice")

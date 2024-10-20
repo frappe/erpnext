@@ -15,7 +15,8 @@ from erpnext.accounts.party import get_dashboard_info
 
 class TestLoyaltyProgram(IntegrationTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
 		# create relevant item, customer, loyalty program, etc
 		create_records()
 

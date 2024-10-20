@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-13 09:35+0000\n"
-"PO-Revision-Date: 2024-10-15 02:02\n"
+"PO-Revision-Date: 2024-10-17 02:01\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Chinese Simplified\n"
 "MIME-Version: 1.0\n"
@@ -71,7 +71,7 @@ msgstr " 跳过物料转移"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:133
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:163
 msgid " Sub Assembly"
-msgstr " 次级装配"
+msgstr " 半成品"
 
 #: erpnext/projects/doctype/project_update/project_update.py:104
 msgid " Summary"
@@ -83,7 +83,7 @@ msgstr "“客户提供的物料”也不能是采购物料"
 
 #: erpnext/stock/doctype/item/item.py:235
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr "“客户提供的物料”不能具有估值价格"
+msgstr "“客户提供的物料”不能具有估价率"
 
 #: erpnext/stock/doctype/item/item.py:311
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
@@ -303,11 +303,11 @@ msgstr ""
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:223
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:124
 msgid "(C) Total Qty in Queue"
-msgstr ""
+msgstr "(C) 队列中的总数量"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:184
 msgid "(C) Total qty in queue"
-msgstr ""
+msgstr "(C) 队列中的总数量"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:194
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:233
@@ -384,15 +384,15 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:95
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:347
 msgid "0 - 30 Days"
-msgstr ""
+msgstr "0 - 30 天"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:114
 msgid "0-30"
-msgstr ""
+msgstr "0-30"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "0-30 Days"
-msgstr ""
+msgstr "0-30 天"
 
 #. Description of the 'Conversion Factor' (Float) field in DocType 'Loyalty
 #. Program'
@@ -403,7 +403,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "1 hr"
-msgstr ""
+msgstr "1小时"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -412,7 +412,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -421,7 +421,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "1000+"
-msgstr ""
+msgstr "1000+"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -450,7 +450,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "201-500"
-msgstr ""
+msgstr "201-500"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Asset Maintenance
 #. Task'
@@ -461,20 +461,20 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:96
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:348
 msgid "30 - 60 Days"
-msgstr ""
+msgstr "30 - 60 天"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "30 mins"
-msgstr ""
+msgstr "30 分钟"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:115
 msgid "30-60"
-msgstr ""
+msgstr "30-60"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
-msgstr ""
+msgstr "30-60 天"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -483,7 +483,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -492,35 +492,35 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "51-200"
-msgstr ""
+msgstr "51-200"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "6 hrs"
-msgstr ""
+msgstr "6 小时"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:97
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:349
 msgid "60 - 90 Days"
-msgstr ""
+msgstr "60 - 90 天"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:116
 msgid "60-90"
-msgstr ""
+msgstr "60-90"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "60-90 Days"
-msgstr ""
+msgstr "60-90 天"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:98
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:350
 msgid "90 - 120 Days"
-msgstr ""
+msgstr "90 - 120 天"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "90 Above"
-msgstr ""
+msgstr "90 以上"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:61
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
@@ -554,13 +554,13 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "<div class=\"columnHeading\">Other Details</div>"
-msgstr ""
+msgstr "<div class=\"columnHeading\">其他详细信息</div>"
 
 #. Content of the 'no_bank_transactions' (HTML) field in DocType 'Bank
 #. Reconciliation Tool'
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgid "<div class=\"text-muted text-center\">No Matching Bank Transactions Found</div>"
-msgstr ""
+msgstr "<div class=\"text-muted text-center\">未找到匹配的银行交易</div>"
 
 #: erpnext/public/js/bank_reconciliation_tool/dialog_manager.js:262
 msgid "<div class=\"text-muted text-center\">{0}</div>"
@@ -1577,7 +1577,7 @@ msgstr "“资产负债表”帐户{1}需要会计维度<b>{0</b> }。"
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:189
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:140
 msgid "Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}."
-msgstr "“损益”帐户{1}需要会计维度<b>{0</b> }。"
+msgstr "“损益表”科目 {1} 需要会计维度 <b>{0}</b>。"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/accounting_dimension_detail/accounting_dimension_detail.json

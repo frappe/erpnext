@@ -27,7 +27,8 @@ class UnitTestTaxWithholdingCategory(UnitTestCase):
 
 class TestTaxWithholdingCategory(IntegrationTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
 		# create relevant supplier, etc
 		create_records()
 		create_tax_withholding_category_records()

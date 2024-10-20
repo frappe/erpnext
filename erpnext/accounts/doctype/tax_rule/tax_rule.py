@@ -62,9 +62,6 @@ class TaxRule(Document):
 		use_for_shopping_cart: DF.Check
 	# end: auto-generated types
 
-	def __setup__(self):
-		self.flags.ignore_these_exceptions_in_test = [ConflictingTaxRule]
-
 	def validate(self):
 		self.validate_tax_template()
 		self.validate_from_to_dates("from_date", "to_date")

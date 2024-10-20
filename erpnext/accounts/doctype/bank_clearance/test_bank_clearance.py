@@ -18,6 +18,7 @@ from erpnext.tests.utils import if_lending_app_installed, if_lending_app_not_ins
 class TestBankClearance(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		create_warehouse(
 			warehouse_name="_Test Warehouse",
 			properties={"parent_warehouse": "All Warehouses - _TC"},
@@ -26,9 +27,6 @@ class TestBankClearance(IntegrationTestCase):
 		create_item("_Test Item")
 		create_cost_center(cost_center_name="_Test Cost Center", company="_Test Company")
 
-		clear_payment_entries()
-		clear_loan_transactions()
-		clear_pos_sales_invoices()
 		make_bank_account()
 		add_transactions()
 
@@ -121,23 +119,6 @@ class TestBankClearance(IntegrationTestCase):
 		)
 
 		self.assertEqual(si_clearance_date, date)
-
-
-def clear_payment_entries():
-	frappe.db.delete("Payment Entry")
-
-
-def clear_pos_sales_invoices():
-	frappe.db.delete("Sales Invoice", {"is_pos": 1})
-
-
-@if_lending_app_installed
-def clear_loan_transactions():
-	for dt in [
-		"Loan Disbursement",
-		"Loan Repayment",
-	]:
-		frappe.db.delete(dt)
 
 
 def make_bank_account():
