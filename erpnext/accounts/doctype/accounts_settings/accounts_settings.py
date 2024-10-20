@@ -36,7 +36,6 @@ class AccountsSettings(Document):
 		calculate_daily_depreciation_using: DF.Literal[
 			"Total days in depreciation period", "Total years in depreciation period"
 		]
-		calculate_depr_using_total_days: DF.Check
 		check_supplier_invoice_uniqueness: DF.Check
 		create_pr_in_draft_status: DF.Check
 		credit_controller: DF.Link | None

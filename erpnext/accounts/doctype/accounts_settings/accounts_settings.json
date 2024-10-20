@@ -55,7 +55,6 @@
   "post_change_gl_entries",
   "assets_tab",
   "asset_settings_section",
-  "calculate_depr_using_total_days",
   "calculate_daily_depreciation_using",
   "column_break_gjcc",
   "book_asset_depreciation_entry_automatically",
@@ -473,13 +472,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation",
-   "fieldname": "calculate_depr_using_total_days",
-   "fieldtype": "Check",
-   "label": "Calculate daily depreciation using total days in depreciation period"
-  },
-  {
    "description": "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state.",
    "fieldname": "payment_request_settings",
    "fieldtype": "Tab Break",
@@ -493,6 +485,7 @@
   },
   {
    "default": "Total years in depreciation period",
+   "description": "This field lets you select your preferred method for calculating pro rata depreciation. Each approach has different implication. For detailed explanations, please refer to the <a href=\"https://docs.erpnext.com/docs/user/manual/en/pro-rata-based-depreciation-for-slm\" target=\"_blank\"><u>Documentation</u></a>.",
    "fieldname": "calculate_daily_depreciation_using",
    "fieldtype": "Select",
    "label": "Calculate Daily Pro-rata Depreciation Using",
@@ -504,7 +497,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-16 15:41:03.548766",
+ "modified": "2024-10-21 04:29:02.556355",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
