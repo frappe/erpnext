@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-13 09:35+0000\n"
-"PO-Revision-Date: 2024-10-14 01:46\n"
+"PO-Revision-Date: 2024-10-20 02:18\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4952,7 +4952,7 @@ msgstr "Fel uppstod under uppdatering process"
 
 #: erpnext/stock/reorder_item.py:376
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
-msgstr "Fel uppstod för vissa artiklar när Material Förslag skapades baserat på Ombeställning nivå. Vänligen åtgärda dessa problem:"
+msgstr "Fel uppstod för vissa artiklar när Material Begäran skapades baserat på beställning nivå. Vänligen åtgärda dessa problem:"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:4
 msgid "Analyst"
@@ -6540,7 +6540,7 @@ msgstr "Tillgänglig Kvantitet för Förbrukning"
 #. Item'
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 msgid "Available Qty at Company"
-msgstr "Tillgänlig Kvantitet på Bolaget"
+msgstr "Tillgänglig Kvantitet"
 
 #. Label of the actual_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -15361,7 +15361,7 @@ msgstr "Standard Rabatt Konto"
 #. Label of the message (Small Text) field in DocType 'Payment Gateway Account'
 #: erpnext/accounts/doctype/payment_gateway_account/payment_gateway_account.json
 msgid "Default Payment Request Message"
-msgstr "Standard Betalning Förslag Meddelande"
+msgstr "Standard Betalning Begäran Meddelande"
 
 #. Label of the payment_terms (Link) field in DocType 'Supplier'
 #. Label of the payment_terms (Link) field in DocType 'Customer'
@@ -20545,7 +20545,7 @@ msgstr "Följ Kalender Månader"
 
 #: erpnext/templates/emails/reorder_item.html:1
 msgid "Following Material Requests have been raised automatically based on Item's re-order level"
-msgstr "Följande Inköp Förslag skapades automatiskt baserat på Artikel ombeställning nivå"
+msgstr "Följande Material Begäran skapades automatiskt baserat på Artikel beställning nivå"
 
 #: erpnext/selling/doctype/customer/customer.py:742
 msgid "Following fields are mandatory to create address:"
@@ -21787,13 +21787,13 @@ msgstr "Hämta Artiklar från Stycklista"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:374
 msgid "Get Items from Material Requests against this Supplier"
-msgstr "Hämta Artiklar från Inköp Förslag mot denna Leverantör"
+msgstr "Hämta Artiklar från Material Begäran mot denna Leverantör"
 
 #. Label of the get_items_from_open_material_requests (Button) field in DocType
 #. 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Get Items from Open Material Requests"
-msgstr "Hämta Artiklar från Öppen Inköp Förslag"
+msgstr "Hämta Artiklar från Material Begäran"
 
 #: erpnext/public/js/controllers/buying.js:504
 msgid "Get Items from Product Bundle"
@@ -23096,7 +23096,7 @@ msgstr "Om aktiverad, kommer artikel pris inte att sättas till grund pris vid i
 #. 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'."
-msgstr "Om aktiverad, kommer system att skapa material förslag även om det finns på 'Råmaterial Lager'."
+msgstr "Om aktiverad, kommer system att skapa material begäran även om det finns på 'Råmaterial Lager'."
 
 #. Description of the 'Do Not Use Batch-wise Valuation' (Check) field in
 #. DocType 'Stock Settings'
@@ -27118,7 +27118,7 @@ msgstr "Artiklar kan inte uppdateras eftersom underleverantör order är skapad 
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1040
 msgid "Items for Raw Material Request"
-msgstr "Artiklar för Råmaterial Förslag"
+msgstr "Artiklar för Råmaterial Begäran"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:869
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -29567,7 +29567,7 @@ msgstr "Material Begäran Detalj"
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgid "Material Request Item"
-msgstr "Material Begäran Post"
+msgstr "Material Begäran Artikel"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:25
 msgid "Material Request No"
@@ -29634,7 +29634,7 @@ msgstr "Material Begäran Erfordras"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/stock/report/material_requests_for_which_supplier_quotations_are_not_created/material_requests_for_which_supplier_quotations_are_not_created.json
 msgid "Material Requests for which Supplier Quotations are not created"
-msgstr "Material Begäran för vilka Inköp Offerter inte är skapade"
+msgstr "Material Begäran för vilka Leverantör Offerter inte är skapade"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry_list.js:13
 msgid "Material Returned from WIP"
@@ -31791,7 +31791,7 @@ msgstr "Inga utestående {0} hittades för {1} {2} som uppfyller angiven filter.
 
 #: erpnext/public/js/controllers/buying.js:436
 msgid "No pending Material Requests found to link for the given items."
-msgstr "Inga pågående Inköp Förslag hittades att länka för angivna Artiklar."
+msgstr "Inga pågående Material Begäran hittades att länka för angivna artiklar."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:424
 msgid "No primary email found for customer: {0}"
@@ -32158,7 +32158,7 @@ msgstr "Avisera via E-post"
 #. Label of the reorder_email_notify (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Notify by Email on Creation of Automatic Material Request"
-msgstr "Avisera via E-post om skapande av Automatisk Inköp Förslag"
+msgstr "Avisera via E-post om skapande av Automatisk Material Begäran"
 
 #. Description of the 'Notify Via Email' (Check) field in DocType 'Appointment
 #. Booking Settings'
@@ -51913,7 +51913,7 @@ msgstr "Moms Konto"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:137
 msgid "Tax Amount"
-msgstr "Moms Belopp"
+msgstr "Momspliktig Belopp"
 
 #. Label of the tax_amount_after_discount_amount (Currency) field in DocType
 #. 'Purchase Taxes and Charges'
@@ -59487,7 +59487,7 @@ msgstr "{0} Åtgärder: {1}"
 
 #: erpnext/stock/doctype/material_request/material_request.py:167
 msgid "{0} Request for {1}"
-msgstr "{0} Förslag för {1}"
+msgstr "{0} Begäran för {1}"
 
 #: erpnext/stock/doctype/item/item.py:321
 msgid "{0} Retain Sample is based on batch, please check Has Batch No to retain sample of item"
