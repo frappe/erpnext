@@ -32,8 +32,14 @@ class AccountsTestMixin:
 		else:
 			self.supplier = supplier_name
 
-	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None):
-		item = create_item(item_name, is_stock_item=is_stock, warehouse=warehouse, company=company)
+	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None, valuation_rate=0):
+		item = create_item(
+			item_name,
+			is_stock_item=is_stock,
+			warehouse=warehouse,
+			company=company,
+			valuation_rate=valuation_rate,
+		)
 		self.item = item.name
 
 	def create_company(self, company_name="_Test Company", abbr="_TC"):
