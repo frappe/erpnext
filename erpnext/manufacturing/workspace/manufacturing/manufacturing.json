@@ -1,4 +1,5 @@
 {
+ "app": "erpnext",
  "charts": [],
  "content": "[{\"id\":\"csBCiDglCE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"YHCQG3wAGv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Creator\",\"col\":3}},{\"id\":\"xit0dg7KvY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"id\":\"LRhGV9GAov\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"id\":\"69KKosI6Hg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"id\":\"PwndxuIpB3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Card\",\"col\":3}},{\"id\":\"Ubj6zXcmIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Plant Floor\",\"col\":3}},{\"id\":\"OtMcArFRa5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"id\":\"76yYsI5imF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"id\":\"PIQJYZOMnD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Learn Manufacturing\",\"col\":3}},{\"id\":\"OaiDqTT03Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"id\":\"bN_6tHS-Ct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yVEFZMqVwd\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"rwrmsTI58-\",\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"id\":\"6dnsyX-siZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"id\":\"CIq-v5f5KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"8RRiQeYr0G\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"Pu8z7-82rT\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
  "creation": "2020-03-02 17:11:37.032604",
@@ -127,8 +128,83 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Bill of Materials",
+   "link_count": 6,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Bill of Materials",
+   "link_count": 0,
+   "link_to": "BOM",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workstation Type",
+   "link_count": 0,
+   "link_to": "Workstation Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workstation",
+   "link_count": 0,
+   "link_to": "Workstation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Operation",
+   "link_count": 0,
+   "link_to": "Operation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Work Order",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Routing",
+   "link_count": 0,
+   "link_to": "Routing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Reports",
    "link_count": 10,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -233,90 +309,16 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "Work Order Consumed Materials",
    "link_count": 0,
    "link_to": "Work Order Consumed Materials",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bill of Materials",
-   "link_count": 6,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item",
-   "link_count": 0,
-   "link_to": "Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bill of Materials",
-   "link_count": 0,
-   "link_to": "BOM",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Workstation Type",
-   "link_count": 0,
-   "link_to": "Workstation Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Workstation",
-   "link_count": 0,
-   "link_to": "Workstation",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Operation",
-   "link_count": 0,
-   "link_to": "Operation",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Work Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Routing",
-   "link_count": 0,
-   "link_to": "Routing",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2024-01-30 21:49:58.577218",
+ "modified": "2024-10-21 14:13:38.777556",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -398,5 +400,6 @@
    "type": "Report"
   }
  ],
- "title": "Manufacturing"
+ "title": "Manufacturing",
+ "type": "Workspace"
 }
