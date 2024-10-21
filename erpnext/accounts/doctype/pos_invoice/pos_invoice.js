@@ -170,9 +170,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 	}
 
 	change_amount() {
-		if (this.frm.doc.paid_amount > this.frm.doc.grand_total) {
-			this.calculate_write_off_amount();
-		} else {
+		if (this.frm.doc.paid_amount <= this.frm.doc.grand_total) {
 			this.frm.set_value("change_amount", 0.0);
 			this.frm.set_value("base_change_amount", 0.0);
 		}
@@ -194,7 +192,10 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			this.frm.set_value(
 				"write_off_amount",
 				flt(
-					this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance,
+					this.frm.doc.grand_total -
+						this.frm.doc.paid_amount +
+						this.frm.doc.change_amount -
+						this.frm.doc.total_advance,
 					precision("write_off_amount")
 				)
 			);

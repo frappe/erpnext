@@ -919,27 +919,38 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 				var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
 
-				this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - grand_total,
-					precision("change_amount"));
+				this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - grand_total +
+					this.frm.doc.write_off_amount, precision("change_amount"));
 
 				this.frm.doc.base_change_amount = flt(this.frm.doc.base_paid_amount -
-					base_grand_total, precision("base_change_amount"));
+					base_grand_total + this.frm.doc.base_write_off_amount,
+					precision("base_change_amount"));
 			}
 		}
 	}
 
 	calculate_write_off_amount() {
-		if(this.frm.doc.write_off_outstanding_amount_automatically) {
-			this.frm.doc.write_off_amount = flt(this.frm.doc.outstanding_amount, precision("write_off_amount"));
-			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
-				precision("base_write_off_amount"));
-
-			this.calculate_outstanding_amount(false);
+		if (this.frm.doc.paid_amount > this.frm.doc.grand_total){
+			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount
+				+ this.frm.doc.change_amount, precision("write_off_amount"));
 		}
+		else if(this.frm.doc.write_off_outstanding_amount_automatically) {
+			this.frm.doc.write_off_amount = flt(this.frm.doc.outstanding_amount, precision("write_off_amount"));
+		}
+		this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
+			precision("base_write_off_amount"));
+
+		this.calculate_outstanding_amount(false);
 
 	}
 
 	filtered_items() {
 		return this.frm.doc.items.filter(item => !item["is_alternative"]);
+	}
+
+
+	write_off_amount() {
+		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
+		this.write_off_outstanding_amount_automatically();
 	}
 };
