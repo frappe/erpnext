@@ -13,6 +13,7 @@ frappe.listview_settings["Sales Invoice"] = {
 		"currency",
 		"is_return",
 	],
+	has_indicator_for_draft: 1,
 	get_indicator: function (doc) {
 		const status_colors = {
 			Draft: "grey",

@@ -7,6 +7,7 @@ frappe.listview_settings["Stock Entry"] = {
 		"`tabStock Entry`.`bom_no`",
 		"`tabStock Entry`.`is_return`",
 	],
+	has_indicator_for_draft: 1,
 	get_indicator: function (doc) {
 		if (doc.is_return === 1 && doc.purpose === "Material Transfer for Manufacture") {
 			return [

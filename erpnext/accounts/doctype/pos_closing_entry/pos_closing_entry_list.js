@@ -3,6 +3,7 @@
 
 // render
 frappe.listview_settings["POS Closing Entry"] = {
+	has_indicator_for_draft: 1,
 	get_indicator: function (doc) {
 		var status_color = {
 			Draft: "red",

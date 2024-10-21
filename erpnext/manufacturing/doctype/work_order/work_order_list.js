@@ -9,6 +9,7 @@ frappe.listview_settings["Work Order"] = {
 		"planned_start_date",
 		"planned_end_date",
 	],
+	has_indicator_for_draft: 1,
 	filters: [["status", "!=", "Stopped"]],
 	get_indicator: function (doc) {
 		if (doc.status === "Submitted") {
