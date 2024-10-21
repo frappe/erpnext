@@ -881,16 +881,17 @@ def get_party_shipping_address(doctype: str, name: str) -> str | None:
 def get_partywise_advanced_payment_amount(
 	party_type, posting_date=None, future_payment=0, company=None, party=None
 ):
+	account_type = frappe.get_cached_value("Party Type", party_type, "account_type")
+
 	ple = frappe.qb.DocType("Payment Ledger Entry")
+	acc = frappe.qb.DocType("Account")
+
 	query = (
 		frappe.qb.from_(ple)
-		.select(ple.party, Abs(Sum(ple.amount).as_("amount")))
-		.where(
-			(ple.party_type.isin(party_type))
-			& (ple.amount < 0)
-			& (ple.against_voucher_no == ple.voucher_no)
-			& (ple.delinked == 0)
-		)
+		.inner_join(acc)
+		.on(ple.account == acc.name)
+		.select(ple.party)
+		.where((ple.party_type.isin(party_type)) & (acc.account_type == account_type) & (ple.delinked == 0))
 		.groupby(ple.party)
 	)
 
@@ -909,9 +910,32 @@ def get_partywise_advanced_payment_amount(
 	if invoice_doctypes := frappe.get_hooks("invoice_doctypes"):
 		query = query.where(ple.voucher_type.notin(invoice_doctypes))
 
-	data = query.run()
-	if data:
-		return frappe._dict(data)
+	# Get advance amount from Receivable / Payable Account
+	party_ledger = query.select(Abs(Sum(ple.amount).as_("amount")))
+	party_ledger = party_ledger.where(ple.amount < 0)
+	party_ledger = party_ledger.where(ple.against_voucher_no == ple.voucher_no)
+	party_ledger = party_ledger.where(
+		acc.root_type == ("Liability" if account_type == "Payable" else "Asset")
+	)
+
+	data = party_ledger.run()
+	data = frappe._dict(data or {})
+
+	# Get advance amount from Advance Account
+	advance_ledger = query.select(Sum(ple.amount).as_("amount"), ple.account)
+	advance_ledger = advance_ledger.where(
+		acc.root_type == ("Asset" if account_type == "Payable" else "Liability")
+	)
+	advance_ledger = advance_ledger.groupby(ple.account)
+	advance_ledger = advance_ledger.having(Sum(ple.amount) < 0)
+
+	advance_data = advance_ledger.run()
+
+	for row in advance_data:
+		data.setdefault(row[0], 0)
+		data[row[0]] += abs(row[1])
+
+	return data
 
 
 def get_default_contact(doctype: str, name: str) -> str | None:
