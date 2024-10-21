@@ -248,7 +248,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		supplier.save()
 
 	def test_purchase_invoice_for_blocked_supplier_payment_past_date(self):
-		# this test is meant to fail only if something fails in the try block
+		# this test is meant to fail only if nothing fails in the try block
 		with self.assertRaises(Exception):
 			try:
 				supplier = frappe.get_doc("Supplier", "_Test Supplier")

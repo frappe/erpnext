@@ -155,7 +155,7 @@ class TestPaymentEntry(IntegrationTestCase):
 		supplier.save()
 
 	def test_payment_entry_for_blocked_supplier_payments_past_date(self):
-		# this test is meant to fail only if something fails in the try block
+		# this test is meant to fail only if nothing fails in the try block
 		with self.assertRaises(Exception):
 			try:
 				supplier = frappe.get_doc("Supplier", "_Test Supplier")
