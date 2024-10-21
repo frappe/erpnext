@@ -255,7 +255,7 @@ def get_journal_entries(filters, args):
 		)
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
-	query = apply_common_conditions(filters, query, doctype="Journal Entry", payments=True)
+	query = apply_common_conditions(filters, query, doctype="Journal Entry", payments=False)
 
 	journal_entries = query.run(as_dict=True)
 	return journal_entries
@@ -293,6 +293,7 @@ def get_payment_entries(filters, args):
 
 def apply_common_conditions(filters, query, doctype, child_doctype=None, payments=False):
 	parent_doc = frappe.qb.DocType(doctype)
+	child_doc = ""
 	if child_doctype:
 		child_doc = frappe.qb.DocType(child_doctype)
 
@@ -308,7 +309,7 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 	if payments:
 		if filters.get("cost_center"):
 			query = query.where(parent_doc.cost_center == filters.cost_center)
-	else:
+	if not payments and child_doc:
 		if filters.get("cost_center"):
 			query = query.where(child_doc.cost_center == filters.cost_center)
 			join_required = True
@@ -318,8 +319,7 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 		if filters.get("item_group"):
 			query = query.where(child_doc.item_group == filters.item_group)
 			join_required = True
-
-	if not payments:
+			
 		if filters.get("brand"):
 			query = query.where(child_doc.brand == filters.brand)
 			join_required = True
