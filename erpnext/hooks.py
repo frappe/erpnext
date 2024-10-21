@@ -385,6 +385,7 @@ doc_events = {
 # function should expect the variable and doc as arguments
 naming_series_variables = {
 	"FY": "erpnext.accounts.utils.parse_naming_series_variable",
+	"ABBR": "erpnext.accounts.utils.parse_naming_series_variable",
 }
 
 # On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
