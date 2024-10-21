@@ -25,6 +25,7 @@
   "payment_terms_template",
   "sales_partner",
   "sales_person",
+  "show_remarks",
   "based_on_payment_terms",
   "section_break_3",
   "customer_collection",
@@ -390,10 +391,16 @@
    "fieldname": "ignore_cr_dr_notes",
    "fieldtype": "Check",
    "label": "Ignore System Generated Credit / Debit Notes"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_remarks",
+   "fieldtype": "Check",
+   "label": "Show Remarks"
   }
  ],
  "links": [],
- "modified": "2024-08-13 10:41:18.381165",
+ "modified": "2024-10-18 17:51:39.108481",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
