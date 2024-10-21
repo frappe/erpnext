@@ -1,14 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.regional.report.irs_1099.irs_1099 import execute as execute_1099_report
 
 
-class TestUnitedStates(unittest.TestCase):
+class TestUnitedStates(IntegrationTestCase):
 	def test_irs_1099_custom_field(self):
 		if not frappe.db.exists("Supplier", "_US 1099 Test Supplier"):
 			doc = frappe.new_doc("Supplier")

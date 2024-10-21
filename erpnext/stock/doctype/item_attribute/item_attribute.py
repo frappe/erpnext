@@ -37,9 +37,6 @@ class ItemAttribute(Document):
 		to_range: DF.Float
 	# end: auto-generated types
 
-	def __setup__(self):
-		self.flags.ignore_these_exceptions_in_test = [InvalidItemAttributeValueError]
-
 	def validate(self):
 		frappe.flags.attribute_values = None
 		self.validate_numeric()

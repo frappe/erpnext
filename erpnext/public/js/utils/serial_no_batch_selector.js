@@ -16,7 +16,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let label = this.item?.has_serial_no ? __("Serial Nos") : __("Batch Nos");
 		let primary_label = this.bundle ? __("Update") : __("Add");
 
-		if (this.item?.has_serial_no && this.item?.batch_no) {
+		if (this.item?.has_serial_no && this.item?.has_batch_no) {
 			label = __("Serial Nos / Batch Nos");
 		}
 
@@ -24,6 +24,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		this.dialog = new frappe.ui.Dialog({
 			title: this.item?.title || primary_label,
+			size: "large",
 			fields: this.get_dialog_fields(),
 			primary_action_label: primary_label,
 			primary_action: () => this.update_bundle_entries(),
@@ -95,7 +96,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			options: "Warehouse",
 			default: this.get_warehouse(),
 			onchange: () => {
-				this.item.warehouse = this.dialog.get_value("warehouse");
+				if (this.item?.is_rejected) {
+					this.item.rejected_warehouse = this.dialog.get_value("warehouse");
+				} else {
+					this.item.warehouse = this.dialog.get_value("warehouse");
+				}
+
 				this.get_auto_data();
 			},
 			get_query: () => {
@@ -164,12 +170,14 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		fields.push({
 			fieldtype: "Section Break",
+			depends_on: "eval:doc.enter_manually !== 1 || doc.entries?.length > 0",
 		});
 
 		fields.push({
 			fieldname: "entries",
 			fieldtype: "Table",
 			allow_bulk_edit: true,
+			depends_on: "eval:doc.enter_manually !== 1 || doc.entries?.length > 0",
 			data: [],
 			fields: this.get_dialog_table_fields(),
 		});
@@ -178,6 +186,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_attach_field() {
+		let me = this;
 		let label = this.item?.has_serial_no ? __("Serial Nos") : __("Batch Nos");
 		let primary_label = this.bundle ? __("Update") : __("Add");
 
@@ -185,66 +194,41 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			label = __("Serial Nos / Batch Nos");
 		}
 
-		let fields = [
-			{
-				fieldtype: "Section Break",
-				label: __("{0} {1} via CSV File", [primary_label, label]),
-			},
-		];
-
-		if (this.item?.has_serial_no) {
-			fields = [
-				...fields,
-				{
-					fieldtype: "Check",
-					label: __("Import Using CSV file"),
-					fieldname: "import_using_csv_file",
-					default: 0,
+		let fields = [];
+		if (this.item.has_serial_no) {
+			fields.push({
+				fieldtype: "Check",
+				label: __("Enter Manually"),
+				fieldname: "enter_manually",
+				default: 1,
+				depends_on: "eval:doc.import_using_csv_file !== 1",
+				change() {
+					if (me.dialog.get_value("enter_manually")) {
+						me.dialog.set_value("import_using_csv_file", 0);
+					}
 				},
-				{
-					fieldtype: "Section Break",
-					label: __("{0} {1} Manually", [primary_label, label]),
-					depends_on: "eval:doc.import_using_csv_file === 0",
-				},
-				{
-					fieldtype: "Data",
-					label: __("Enter Serial No Range"),
-					fieldname: "serial_no_range",
-					depends_on: "eval:doc.import_using_csv_file === 0",
-					description: __('Enter "ABC-001::100" for serial nos "ABC-001" to "ABC-100".'),
-					onchange: () => {
-						this.set_serial_nos_from_range();
-					},
-				},
-				{
-					fieldtype: "Small Text",
-					label: __("Enter Serial Nos"),
-					fieldname: "upload_serial_nos",
-					depends_on: "eval:doc.import_using_csv_file === 0",
-					description: __("Enter each serial no in a new line"),
-				},
-				{
-					fieldtype: "Column Break",
-					depends_on: "eval:doc.import_using_csv_file === 0",
-				},
-				{
-					fieldtype: "Button",
-					fieldname: "make_serial_nos",
-					label: __("Create Serial Nos"),
-					depends_on: "eval:doc.import_using_csv_file === 0",
-					click: () => {
-						this.create_serial_nos();
-					},
-				},
-				{
-					fieldtype: "Section Break",
-					depends_on: "eval:doc.import_using_csv_file === 1",
-				},
-			];
+			});
 		}
 
 		fields = [
 			...fields,
+			{
+				fieldtype: "Check",
+				label: __("Import Using CSV file"),
+				fieldname: "import_using_csv_file",
+				depends_on: "eval:doc.enter_manually !== 1",
+				default: !this.item.has_serial_no ? 1 : 0,
+				change() {
+					if (me.dialog.get_value("import_using_csv_file")) {
+						me.dialog.set_value("enter_manually", 0);
+					}
+				},
+			},
+			{
+				fieldtype: "Section Break",
+				depends_on: "eval:doc.import_using_csv_file === 1",
+				label: __("{0} {1} via CSV File", [primary_label, label]),
+			},
 			{
 				fieldtype: "Button",
 				fieldname: "download_csv",
@@ -261,6 +245,44 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				onchange: () => this.upload_csv_file(),
 			},
 		];
+
+		if (this.item?.has_serial_no) {
+			fields = [
+				...fields,
+				{
+					fieldtype: "Section Break",
+					label: __("{0} {1} Manually", [primary_label, label]),
+					depends_on: "eval:doc.enter_manually === 1",
+				},
+				{
+					fieldtype: "Data",
+					label: __("Serial No Range"),
+					fieldname: "serial_no_range",
+					depends_on: "eval:doc.enter_manually === 1 && !doc.serial_no_series",
+					description: __('"SN-01::10" for "SN-01" to "SN-10"'),
+					onchange: () => {
+						this.set_serial_nos_from_range();
+					},
+				},
+			];
+		}
+
+		if (this.item?.has_serial_no) {
+			fields = [
+				...fields,
+				{
+					fieldtype: "Column Break",
+					depends_on: "eval:doc.enter_manually === 1",
+				},
+				{
+					fieldtype: "Small Text",
+					label: __("Enter Serial Nos"),
+					fieldname: "upload_serial_nos",
+					depends_on: "eval:doc.enter_manually === 1",
+					description: __("Enter each serial no in a new line"),
+				},
+			];
+		}
 
 		return fields;
 	}
@@ -487,12 +509,17 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			based_on = "FIFO";
 		}
 
+		let warehouse = this.item.warehouse || this.item.s_warehouse;
+		if (this.item?.is_rejected) {
+			warehouse = this.item.rejected_warehouse;
+		}
+
 		if (qty) {
 			frappe.call({
 				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_auto_data",
 				args: {
 					item_code: this.item.item_code,
-					warehouse: this.item.warehouse || this.item.s_warehouse,
+					warehouse: warehouse,
 					has_serial_no: this.item.has_serial_no,
 					has_batch_no: this.item.has_batch_no,
 					qty: qty,
@@ -510,6 +537,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 	scan_barcode_data() {
 		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
+
+		this.dialog.set_value("enter_manually", 0);
 
 		if (scan_serial_no || scan_batch_no) {
 			frappe.call({
@@ -554,14 +583,13 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						serial_no: scan_serial_no,
 					},
 					callback: (r) => {
-						if (r.message) {
-							this.dialog.fields_dict.entries.df.data.push({
-								serial_no: scan_serial_no,
-								batch_no: r.message,
-							});
+						this.dialog.fields_dict.entries.df.data.push({
+							serial_no: scan_serial_no,
+							batch_no: r.message,
+						});
 
-							this.dialog.fields_dict.scan_serial_no.set_value("");
-						}
+						this.dialog.fields_dict.scan_serial_no.set_value("");
+						this.dialog.fields_dict.entries.grid.refresh();
 					},
 				});
 			}
@@ -590,6 +618,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	update_bundle_entries() {
 		let entries = this.dialog.get_values().entries;
 		let warehouse = this.dialog.get_value("warehouse");
+		let upload_serial_nos = this.dialog.get_value("upload_serial_nos");
+
+		if (!entries?.length && upload_serial_nos) {
+			this.create_serial_nos();
+			return;
+		}
 
 		if ((entries && !entries.length) || !entries) {
 			frappe.throw(__("Please add atleast one Serial No / Batch No"));
@@ -597,6 +631,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		if (!warehouse) {
 			frappe.throw(__("Please select a Warehouse"));
+		}
+
+		if (this.item?.is_rejected && this.item.rejected_warehouse === this.item.warehouse) {
+			frappe.throw(__("Rejected Warehouse and Accepted Warehouse cannot be same."));
 		}
 
 		frappe
@@ -610,9 +648,13 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				},
 			})
 			.then((r) => {
-				this.callback && this.callback(r.message);
-				this.frm.save();
-				this.dialog.hide();
+				frappe.run_serially([
+					() => {
+						this.callback && this.callback(r.message);
+					},
+					() => this.frm.save(),
+					() => this.dialog.hide(),
+				]);
 			});
 	}
 
@@ -636,6 +678,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_warehouse() {
+		if (this.item?.is_rejected) {
+			return this.item.rejected_warehouse;
+		}
+
 		return this.item?.type_of_transaction === "Outward"
 			? this.item.warehouse || this.item.s_warehouse
 			: this.item.warehouse || this.item.t_warehouse;
@@ -669,5 +715,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		});
 
 		this.dialog.fields_dict.entries.grid.refresh();
+		if (this.dialog.fields_dict.entries.df.data?.length) {
+			this.dialog.set_value("enter_manually", 0);
+		}
 	}
 };

@@ -8,7 +8,7 @@ from uuid import uuid4
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
@@ -30,7 +30,7 @@ from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.tests.test_utils import StockTestMixin
 
 
-class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
+class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 	def setUp(self):
 		items = create_items()
 		reset("Stock Entry")
@@ -1218,7 +1218,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual(sle[0].qty_after_transaction, 105)
 		self.assertEqual(sle[0].actual_qty, 100)
 
-	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
 	def test_transfer_invariants(self):
 		"""Extact stock value should be transferred."""
 
@@ -1253,7 +1253,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
-	@change_settings("System Settings", {"float_precision": 4})
+	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 4})
 	def test_negative_qty_with_precision(self):
 		"Test if system precision is respected while validating negative qty."
 		from erpnext.stock.doctype.item.test_item import create_item
@@ -1293,7 +1293,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
 
-	@change_settings("System Settings", {"float_precision": 4})
+	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 4})
 	def test_future_negative_qty_with_precision(self):
 		"""
 		Ledger:
@@ -1551,7 +1551,16 @@ def get_unique_suffix():
 	return str(uuid4())[:8].upper()
 
 
-class TestDeferredNaming(FrappeTestCase):
+class UnitTestStockLedgerEntry(UnitTestCase):
+	"""
+	Unit tests for StockLedgerEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestDeferredNaming(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls) -> None:
 		super().setUpClass()

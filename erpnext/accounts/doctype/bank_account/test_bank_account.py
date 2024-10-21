@@ -1,15 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
 from frappe import ValidationError
+from frappe.tests import IntegrationTestCase
 
-# test_records = frappe.get_test_records('Bank Account')
 
-
-class TestBankAccount(unittest.TestCase):
+class TestBankAccount(IntegrationTestCase):
 	def test_validate_iban(self):
 		valid_ibans = [
 			"GB82 WEST 1234 5698 7654 32",

@@ -3,10 +3,19 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 
-class TestSupplierScorecard(FrappeTestCase):
+class UnitTestSupplierScorecard(UnitTestCase):
+	"""
+	Unit tests for SupplierScorecard.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestSupplierScorecard(IntegrationTestCase):
 	def test_create_scorecard(self):
 		doc = make_supplier_scorecard().insert()
 		self.assertEqual(doc.name, valid_scorecard[0].get("supplier"))

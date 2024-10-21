@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -21,10 +21,19 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 
-test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
 
-class TestPickList(FrappeTestCase):
+class UnitTestPickList(UnitTestCase):
+	"""
+	Unit tests for PickList.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPickList(IntegrationTestCase):
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:
@@ -781,7 +790,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(so.per_delivered, 100)
 
 	def test_picklist_with_partial_bundles(self):
-		# from test_records.json
+		# from self.globalTestRecords
 		warehouse = "_Test Warehouse - _TC"
 
 		quantities = [5, 2]

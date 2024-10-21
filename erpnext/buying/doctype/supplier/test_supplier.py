@@ -3,19 +3,27 @@
 
 
 import frappe
-from frappe.test_runner import make_test_records
 
 from erpnext.accounts.party import get_due_date
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.exceptions import PartyDisabled
 
-test_dependencies = ["Payment Term", "Payment Terms Template"]
-test_records = frappe.get_test_records("Supplier")
-
-from frappe.tests.utils import FrappeTestCase
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
 
 
-class TestSupplier(FrappeTestCase):
+from frappe.tests import IntegrationTestCase, UnitTestCase
+
+
+class UnitTestSupplier(UnitTestCase):
+	"""
+	Unit tests for Supplier.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestSupplier(IntegrationTestCase):
 	def test_get_supplier_group_details(self):
 		doc = frappe.new_doc("Supplier Group")
 		doc.supplier_group_name = "_Testing Supplier Group"
@@ -96,8 +104,6 @@ class TestSupplier(FrappeTestCase):
 		self.assertEqual(due_date, "2017-01-22")
 
 	def test_supplier_disabled(self):
-		make_test_records("Item")
-
 		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 1)
 
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -180,7 +186,7 @@ def create_supplier(**args):
 	return doc
 
 
-class TestSupplierPortal(FrappeTestCase):
+class TestSupplierPortal(IntegrationTestCase):
 	def test_portal_user_can_access_supplier_data(self):
 		supplier = create_supplier()
 

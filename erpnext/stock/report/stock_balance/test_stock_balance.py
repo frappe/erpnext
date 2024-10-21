@@ -2,7 +2,7 @@ from typing import Any
 
 import frappe
 from frappe import _dict
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -15,7 +15,7 @@ def stock_balance(filters):
 	return [_dict(row) for row in execute(filters)[1]]
 
 
-class TestStockBalance(FrappeTestCase):
+class TestStockBalance(IntegrationTestCase):
 	# ----------- utils
 
 	def setUp(self):

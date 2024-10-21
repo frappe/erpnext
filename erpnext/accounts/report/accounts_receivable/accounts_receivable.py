@@ -310,8 +310,8 @@ class ReceivablePayableReport:
 
 			must_consider = False
 			if self.filters.get("for_revaluation_journals"):
-				if (abs(row.outstanding) >= 0.0 / 10**self.currency_precision) or (
-					abs(row.outstanding_in_account_currency) >= 0.0 / 10**self.currency_precision
+				if (abs(row.outstanding) >= 1.0 / 10**self.currency_precision) or (
+					abs(row.outstanding_in_account_currency) >= 1.0 / 10**self.currency_precision
 				):
 					must_consider = True
 			else:

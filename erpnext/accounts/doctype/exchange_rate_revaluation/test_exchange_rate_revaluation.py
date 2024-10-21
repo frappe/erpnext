@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
-class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
+class TestExchangeRateRevaluation(AccountsTestMixin, IntegrationTestCase):
 	def setUp(self):
 		self.create_company()
 		self.create_usd_receivable_account()
@@ -35,7 +35,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
 		company_doc.save()
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -88,7 +88,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 		)[0]
 		self.assertEqual(acc_balance.balance, 8500.0)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -158,7 +158,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(acc_balance.balance, 0.0)
 		self.assertEqual(acc_balance.balance_in_account_currency, 0.0)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -247,7 +247,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(flt(acc_balance.balance, precision), 0.0)
 		self.assertEqual(flt(acc_balance.balance_in_account_currency, precision), 0.0)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)

@@ -3,14 +3,23 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
 
 
-class TestPurchaseOrder(FrappeTestCase):
+class UnitTestSupplierQuotation(UnitTestCase):
+	"""
+	Unit tests for SupplierQuotation.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPurchaseOrder(IntegrationTestCase):
 	def test_supplier_quotation_qty(self):
-		sq = frappe.copy_doc(test_records[0])
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		sq.items[0].qty = 0
 		with self.assertRaises(InvalidQtyError):
 			sq.save()
@@ -23,7 +32,7 @@ class TestPurchaseOrder(FrappeTestCase):
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
-		sq = frappe.copy_doc(test_records[0]).insert()
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, sq.name)
 
@@ -41,6 +50,3 @@ class TestPurchaseOrder(FrappeTestCase):
 				doc.set("schedule_date", "2013-04-12")
 
 		po.insert()
-
-
-test_records = frappe.get_test_records("Supplier Quotation")

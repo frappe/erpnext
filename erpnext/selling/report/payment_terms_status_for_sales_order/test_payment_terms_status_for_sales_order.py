@@ -1,7 +1,7 @@
 import datetime
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -11,19 +11,18 @@ from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_s
 )
 from erpnext.stock.doctype.item.test_item import create_item
 
-test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Template", "Customer"]
+EXTRA_TEST_RECORD_DEPENDENCIES = [
+	"Sales Order",
+	"Item",
+	"Sales Invoice",
+	"Payment Terms Template",
+	"Customer",
+]
 
 
-class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
-	def setUp(self):
-		self.cleanup_old_entries()
-
+class TestPaymentTermsStatusForSalesOrder(IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
-
-	def cleanup_old_entries(self):
-		frappe.db.delete("Sales Invoice", filters={"company": "_Test Company"})
-		frappe.db.delete("Sales Order", filters={"company": "_Test Company"})
 
 	def create_payment_terms_template(self):
 		# create template for 50-50 payments
@@ -146,6 +145,9 @@ class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 			)
 			doc.insert()
 
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", allow_multi_currency_invoices_against_single_party_account=1
+	)
 	def test_02_alternate_currency(self):
 		transaction_date = "2021-06-15"
 		self.create_payment_terms_template()

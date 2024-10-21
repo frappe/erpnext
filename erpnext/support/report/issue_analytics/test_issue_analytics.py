@@ -2,6 +2,7 @@ import unittest
 
 import frappe
 from frappe.desk.form.assign_to import add as add_assignment
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_months, getdate
 
 from erpnext.support.doctype.issue.test_issue import create_customer, make_issue
@@ -13,19 +14,20 @@ from erpnext.support.report.issue_analytics.issue_analytics import execute
 months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
-class TestIssueAnalytics(unittest.TestCase):
+class TestIssueAnalytics(IntegrationTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
 		frappe.db.sql("delete from `tabIssue` where company='_Test Company'")
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 
 		current_month_date = getdate()
 		last_month_date = add_months(current_month_date, -1)
-		self.current_month = str(months[current_month_date.month - 1]).lower()
-		self.last_month = str(months[last_month_date.month - 1]).lower()
+		cls.current_month = str(months[current_month_date.month - 1]).lower()
+		cls.last_month = str(months[last_month_date.month - 1]).lower()
 		if current_month_date.year != last_month_date.year:
-			self.current_month += "_" + str(current_month_date.year)
-			self.last_month += "_" + str(last_month_date.year)
+			cls.current_month += "_" + str(current_month_date.year)
+			cls.last_month += "_" + str(last_month_date.year)
 
 	def test_issue_analytics(self):
 		create_service_level_agreements_for_issues()

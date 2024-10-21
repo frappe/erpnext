@@ -5,8 +5,7 @@
 import json
 
 import frappe
-from frappe.test_runner import make_test_records
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import flt
 
 from erpnext.accounts.party import get_due_date
@@ -18,16 +17,20 @@ from erpnext.selling.doctype.customer.customer import (
 )
 from erpnext.tests.utils import create_test_contact_and_address
 
-test_ignore = ["Price List"]
-test_dependencies = ["Payment Term", "Payment Terms Template"]
-test_records = frappe.get_test_records("Customer")
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Price List"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
 
 
-class TestCustomer(FrappeTestCase):
-	def setUp(self):
-		if not frappe.get_value("Item", "_Test Item"):
-			make_test_records("Item")
+class UnitTestCustomer(UnitTestCase):
+	"""
+	Unit tests for Customer.
+	Use this class for testing individual functions and methods.
+	"""
 
+	pass
+
+
+class TestCustomer(IntegrationTestCase):
 	def tearDown(self):
 		set_credit_limit("_Test Customer", "_Test Company", 0)
 
@@ -197,8 +200,6 @@ class TestCustomer(FrappeTestCase):
 		frappe.db.rollback()
 
 	def test_freezed_customer(self):
-		make_test_records("Item")
-
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 1)
 
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -222,8 +223,6 @@ class TestCustomer(FrappeTestCase):
 		frappe.delete_doc("Customer", customer.name)
 
 	def test_disabled_customer(self):
-		make_test_records("Item")
-
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
 
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order

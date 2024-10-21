@@ -1,0 +1,10 @@
+[["Customer Group"]]
+customer_group_name = "_Test Customer Group"
+is_group = 0
+parent_customer_group = "All Customer Groups"
+
+[["Customer Group"]]
+customer_group_name = "_Test Customer Group 1"
+is_group = 0
+parent_customer_group = "All Customer Groups"
+

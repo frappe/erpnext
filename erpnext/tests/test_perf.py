@@ -1,5 +1,5 @@
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 INDEXED_FIELDS = {
 	"Bin": ["item_code"],
@@ -9,7 +9,7 @@ INDEXED_FIELDS = {
 }
 
 
-class TestPerformance(FrappeTestCase):
+class TestPerformance(IntegrationTestCase):
 	def test_ensure_indexes(self):
 		# These fields are not explicitly indexed BUT they are prefix in some
 		# other composite index. If those are removed this test should be

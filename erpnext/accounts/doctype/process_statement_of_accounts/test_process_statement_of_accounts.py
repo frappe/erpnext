@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts import (
@@ -14,7 +14,12 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
-class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
+class TestProcessStatementOfAccounts(AccountsTestMixin, IntegrationTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
+
 	def setUp(self):
 		self.create_company()
 		self.create_customer()

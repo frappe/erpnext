@@ -1,0 +1,17 @@
+[["Holiday List"]]
+from_date = "2013-01-01"
+to_date = "2013-12-31"
+holiday_list_name = "_Test Holiday List"
+[["Holiday List".holidays]]
+description = "New Year"
+holiday_date = "2013-01-01"
+
+[["Holiday List".holidays]]
+description = "Republic Day"
+holiday_date = "2013-01-26"
+
+[["Holiday List".holidays]]
+description = "Test Holiday"
+holiday_date = "2013-02-01"
+
+

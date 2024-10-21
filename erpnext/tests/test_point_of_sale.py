@@ -1,9 +1,9 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.selling.page.point_of_sale.point_of_sale import get_items
@@ -11,15 +11,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestPointOfSale(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls) -> None:
-		frappe.db.savepoint("before_test_point_of_sale")
-
-	@classmethod
-	def tearDownClass(cls) -> None:
-		frappe.db.rollback(save_point="before_test_point_of_sale")
-
+class TestPointOfSale(IntegrationTestCase):
 	def test_item_search(self):
 		"""
 		Test Stock and Service Item Search.

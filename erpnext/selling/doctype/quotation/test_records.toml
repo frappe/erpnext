@@ -1,0 +1,32 @@
+[[Quotation]]
+company = "_Test Company"
+conversion_rate = 1.0
+currency = "INR"
+party_name = "_Test Customer"
+customer_group = "_Test Customer Group"
+customer_name = "_Test Customer"
+base_grand_total = 1000.0
+grand_total = 1000.0
+order_type = "Sales"
+plc_conversion_rate = 1.0
+price_list_currency = "INR"
+quotation_to = "Customer"
+selling_price_list = "_Test Price List"
+territory = "_Test Territory"
+transaction_date = "2013-02-21"
+valid_till = "2013-03-21"
+[[Quotation.items]]
+base_amount = 1000.0
+base_rate = 100.0
+description = "CPU"
+doctype = "Quotation Item"
+item_code = "_Test Item Home Desktop 100"
+item_name = "CPU"
+parentfield = "items"
+qty = 10.0
+rate = 100.0
+uom = "_Test UOM 1"
+stock_uom = "_Test UOM 1"
+conversion_factor = 1.0
+
+

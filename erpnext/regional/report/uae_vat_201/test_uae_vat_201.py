@@ -16,7 +16,7 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse_account
 
-test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Territory", "Customer Group", "Supplier Group", "Item"]
 
 
 class TestUaeVat201(TestCase):

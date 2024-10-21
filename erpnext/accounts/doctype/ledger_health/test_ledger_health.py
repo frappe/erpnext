@@ -3,14 +3,14 @@
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import run_ledger_health_checks
 
 
-class TestLedgerHealth(AccountsTestMixin, FrappeTestCase):
+class TestLedgerHealth(AccountsTestMixin, IntegrationTestCase):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()

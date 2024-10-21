@@ -1,0 +1,18 @@
+[["Cost Center"]]
+company = "_Test Company"
+cost_center_name = "_Test Cost Center"
+is_group = 0
+parent_cost_center = "_Test Company - _TC"
+
+[["Cost Center"]]
+company = "_Test Company"
+cost_center_name = "_Test Cost Center 2"
+is_group = 0
+parent_cost_center = "_Test Company - _TC"
+
+[["Cost Center"]]
+company = "_Test Company"
+cost_center_name = "_Test Write Off Cost Center"
+is_group = 0
+parent_cost_center = "_Test Company - _TC"
+

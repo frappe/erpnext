@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -43,7 +43,16 @@ from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
 
 
-class TestDeliveryNote(FrappeTestCase):
+class UnitTestDeliveryNote(UnitTestCase):
+	"""
+	Unit tests for DeliveryNote.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestDeliveryNote(IntegrationTestCase):
 	def test_delivery_note_qty(self):
 		dn = create_delivery_note(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):
@@ -747,7 +756,7 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(flt(bin_details.ordered_qty), flt(packed_item.ordered_qty))
 
 	def test_return_for_serialized_items(self):
-		se = make_serialized_item()
+		se = make_serialized_item(self)
 
 		serial_no = [get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]]
 
@@ -2066,6 +2075,47 @@ class TestDeliveryNote(FrappeTestCase):
 			self.assertEqual(sn.status, "Delivered")
 			self.assertEqual(sn.warranty_period, 100)
 
+	def test_batch_return_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Batch Return DN Item 1",
+			properties={
+				"has_batch_no": 1,
+				"valuation_method": "Moving Average",
+				"create_new_batch": 1,
+				"batch_number_series": "TBRDN1-.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.save().submit()
+
+		self.assertEqual(dn_return.items[0].qty, 5 * -1)
+
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": dn_return.name, "voucher_type": "Delivery Note"},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(stock_value_difference, 100.0 * 5)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
@@ -2139,4 +2189,4 @@ def create_delivery_note(**args):
 	return dn
 
 
-test_dependencies = ["Product Bundle"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Product Bundle"]

@@ -1,0 +1,27 @@
+[[Lead]]
+email_id = "test_lead@example.com"
+lead_name = "_Test Lead"
+status = "Open"
+territory = "_Test Territory"
+
+[[Lead]]
+email_id = "test_lead1@example.com"
+lead_name = "_Test Lead 1"
+status = "Open"
+
+[[Lead]]
+email_id = "test_lead2@example.com"
+lead_name = "_Test Lead 2"
+status = "Lead"
+
+[[Lead]]
+email_id = "test_lead3@example.com"
+lead_name = "_Test Lead 3"
+status = "Converted"
+
+[[Lead]]
+email_id = "test_lead4@example.com"
+lead_name = "_Test Lead 4"
+company_name = "_Test Lead 4"
+status = "Open"
+

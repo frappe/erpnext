@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -25,10 +25,19 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
-test_dependencies = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Currency Exchange"]
 
 
-class TestPaymentEntry(FrappeTestCase):
+class UnitTestPaymentEntry(UnitTestCase):
+	"""
+	Unit tests for PaymentEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPaymentEntry(IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
@@ -383,7 +392,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 50)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{
 			"allow_multi_currency_invoices_against_single_party_account": 1,
@@ -610,12 +619,9 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(flt(pe.references[0].exchange_gain_loss, 2), -94.74)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
-			save_new_records,
-			test_records,
-		)
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
 
-		save_new_records(test_records)
+		save_new_records(self.globalTestRecords["Currency Exchange"])
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Pay"
@@ -1090,7 +1096,7 @@ class TestPaymentEntry(FrappeTestCase):
 		}
 		self.assertDictEqual(ref_details, expected_response)
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{
 			"unlink_payment_on_cancellation_of_invoice": 1,
@@ -1185,7 +1191,7 @@ class TestPaymentEntry(FrappeTestCase):
 		si3.cancel()
 		si3.delete()
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{
 			"unlink_payment_on_cancellation_of_invoice": 1,
@@ -1791,7 +1797,7 @@ class TestPaymentEntry(FrappeTestCase):
 		# 'Is Opening' should always be 'No' for normal advance payments
 		self.assertEqual(gl_with_opening_set, [])
 
-	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_delete_linked_exchange_gain_loss_journal(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (

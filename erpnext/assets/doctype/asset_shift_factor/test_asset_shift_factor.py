@@ -2,8 +2,17 @@
 # See license.txt
 
 # import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 
-class TestAssetShiftFactor(FrappeTestCase):
+class UnitTestAssetShiftFactor(UnitTestCase):
+	"""
+	Unit tests for AssetShiftFactor.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestAssetShiftFactor(IntegrationTestCase):
 	pass

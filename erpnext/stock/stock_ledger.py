@@ -866,7 +866,7 @@ class update_entries_after:
 		sle.stock_value = self.wh_data.stock_value
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
 
-		if not sle.is_adjustment_entry or not self.args.get("sle_id"):
+		if not sle.is_adjustment_entry:
 			sle.stock_value_difference = stock_value_difference
 
 		sle.doctype = "Stock Ledger Entry"
@@ -1074,6 +1074,15 @@ class update_entries_after:
 							"sle": sle.name,
 						}
 					)
+
+					if not rate and sle.voucher_type in ["Delivery Note", "Sales Invoice"]:
+						rate = get_rate_for_return(
+							sle.voucher_type,
+							sle.voucher_no,
+							sle.item_code,
+							voucher_detail_no=sle.voucher_detail_no,
+							sle=sle,
+						)
 
 				else:
 					rate = get_rate_for_return(
@@ -1732,6 +1741,9 @@ def get_valuation_rate(
 
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
+		sabb = frappe.db.get_value(
+			"Serial and Batch Bundle", serial_and_batch_bundle, ["posting_date", "posting_time"], as_dict=True
+		)
 		batch_obj = BatchNoValuation(
 			sle=frappe._dict(
 				{
@@ -1739,6 +1751,8 @@ def get_valuation_rate(
 					"warehouse": warehouse,
 					"actual_qty": -1,
 					"serial_and_batch_bundle": serial_and_batch_bundle,
+					"posting_date": sabb.posting_date,
+					"posting_time": sabb.posting_time,
 				}
 			)
 		)
