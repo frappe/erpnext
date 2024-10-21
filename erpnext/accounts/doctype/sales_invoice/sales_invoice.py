@@ -303,17 +303,6 @@ class SalesInvoice(SellingController):
 		if not self.is_opening:
 			self.is_opening = "No"
 
-		if self.redeem_loyalty_points:
-			lp = frappe.get_doc("Loyalty Program", self.loyalty_program)
-			self.loyalty_redemption_account = (
-				lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
-			)
-			self.loyalty_redemption_cost_center = (
-				lp.cost_center
-				if not self.loyalty_redemption_cost_center
-				else self.loyalty_redemption_cost_center
-			)
-
 		self.set_against_income_account()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
@@ -332,12 +321,7 @@ class SalesInvoice(SellingController):
 		if self.is_pos and self.is_return:
 			self.verify_payment_amount_is_negative()
 
-		if (
-			self.redeem_loyalty_points
-			and self.loyalty_program
-			and self.loyalty_points
-			and not self.is_consolidated
-		):
+		if self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.allow_write_off_only_on_pos()
@@ -1447,7 +1431,7 @@ class SalesInvoice(SellingController):
 			asset.set_status("Sold" if self.docstatus == 1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
-		if cint(self.redeem_loyalty_points):
+		if cint(self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated):
 			gl_entries.append(
 				self.get_gl_dict(
 					{
