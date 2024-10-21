@@ -48,6 +48,7 @@
   "column_break_37",
   "discount_percentage",
   "discount_amount",
+  "distributed_discount_amount",
   "base_rate_with_margin",
   "sec_break1",
   "rate",
@@ -911,7 +912,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount || doc.distributed_discount_amount",
    "fieldname": "discount_and_margin_section",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -1135,6 +1136,12 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1
+  },
+  {
+   "fieldname": "distributed_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Distributed Discount Amount",
+   "options": "currency"
   }
  ],
  "idx": 1,
