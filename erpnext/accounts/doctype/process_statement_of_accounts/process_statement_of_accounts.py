@@ -132,6 +132,7 @@ def get_common_filters(doc):
 			"finance_book": doc.finance_book if doc.finance_book else None,
 			"account": [doc.account] if doc.account else None,
 			"cost_center": [cc.cost_center_name for cc in doc.cost_center],
+			"show_remarks": doc.show_remarks,
 		}
 	)
 
