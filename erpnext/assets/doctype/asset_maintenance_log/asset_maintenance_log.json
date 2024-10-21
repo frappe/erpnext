@@ -180,11 +180,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-01-22 12:33:45.888124",
-=======
  "modified": "2024-09-24 15:12:37.497853",
->>>>>>> 5911934dc7 (feat: added assignee email field in asset maintenance log)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Log",
