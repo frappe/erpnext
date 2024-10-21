@@ -446,7 +446,10 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			if isinstance(pricing_rule, str):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 				update_pricing_rule_uom(pricing_rule, args)
-				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule) or []
+				fetch_other_item = True if pricing_rule.apply_rule_on_other else False
+				pricing_rule.apply_rule_on_other_items = (
+					get_pricing_rule_items(pricing_rule, other_items=fetch_other_item) or []
+				)
 
 			if pricing_rule.get("suggestion"):
 				continue
