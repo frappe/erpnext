@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.utils import add_days, getdate, nowdate
+from frappe.utils import add_days, getdate, nowdate, today
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
 from erpnext.projects.doctype.task.test_task import create_task
@@ -46,6 +46,9 @@ class TestProject(IntegrationTestCase):
 			dict(project=project.name),
 			order_by="creation asc",
 		)
+
+		self.assertEqual(project.project_type, "Internal")
+		self.assertEqual(project.expected_start_date, today())
 
 		self.assertEqual(tasks[0].priority, "High")
 		self.assertEqual(tasks[0].subject, "Test Template Task with No Parent and Dependency")
@@ -98,6 +101,9 @@ class TestProject(IntegrationTestCase):
 			order_by="creation asc",
 		)
 
+		self.assertEqual(project.project_type, "Internal")
+		self.assertEqual(project.expected_start_date, today())
+
 		self.assertEqual(tasks[0].subject, "Test Template Task Parent")
 		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 10))
 
@@ -140,6 +146,9 @@ class TestProject(IntegrationTestCase):
 			dict(project=project.name),
 			order_by="creation asc",
 		)
+
+		self.assertEqual(project.project_type, "Internal")
+		self.assertEqual(project.expected_start_date, today())
 
 		self.assertEqual(tasks[1].subject, "Test Template Task with Dependency")
 		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, 2, 2))
