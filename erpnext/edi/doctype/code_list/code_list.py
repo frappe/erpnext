@@ -42,13 +42,13 @@ class CodeList(Document):
 		for doc in linked_docs:
 			frappe.delete_doc("Common Code", doc.name, force=1)
 
-	def get_code_for(self, doctype: str, name: str):
-		"""Get code for a doctype and name"""
-		return get_code_for(self.name, doctype, name)
+	def get_codes_for(self, doctype: str, name: str) -> tuple[str]:
+		"""Get the applicable codes for a doctype and name"""
+		return get_codes_for(self.name, doctype, name)
 
-	def get_doc_for(self, doctype: str, code: str) -> str | None:
-		"""Get docname for a doctype and code"""
-		return get_doc_for(self.name, doctype, code)
+	def get_docnames_for(self, doctype: str, code: str) -> tuple[str]:
+		"""Get the mapped docnames for a doctype and code"""
+		return get_docnames_for(self.name, doctype, code)
 
 	def from_genericode(self, root: "Element"):
 		"""Extract Code List details from genericode XML"""
@@ -64,7 +64,7 @@ class CodeList(Document):
 		self.url = getattr(root.find(".//Identification/LocationUri"), "text", None)
 
 
-def get_code_for(code_list: str, doctype: str, name: str) -> str | None:
+def get_codes_for(code_list: str, doctype: str, name: str) -> tuple[str]:
 	"""Return the common code for a given record"""
 	CommonCode = frappe.qb.DocType("Common Code")
 	DynamicLink = frappe.qb.DocType("Dynamic Link")
@@ -79,12 +79,14 @@ def get_code_for(code_list: str, doctype: str, name: str) -> str | None:
 			& (DynamicLink.link_name == name)
 			& (CommonCode.code_list == code_list)
 		)
+		.distinct()
+		.orderby(CommonCode.common_code)
 	).run()
 
-	return codes[0][0] if codes else None
+	return tuple(c[0] for c in codes) if codes else ()
 
 
-def get_doc_for(code_list: str, doctype: str, code: str) -> str | None:
+def get_docnames_for(code_list: str, doctype: str, code: str) -> tuple[str]:
 	"""Return the record name for a given common code"""
 	CommonCode = frappe.qb.DocType("Common Code")
 	DynamicLink = frappe.qb.DocType("Dynamic Link")
@@ -99,6 +101,8 @@ def get_doc_for(code_list: str, doctype: str, code: str) -> str | None:
 			& (CommonCode.common_code == code)
 			& (CommonCode.code_list == code_list)
 		)
+		.distinct()
+		.orderby(DynamicLink.link_name)
 	).run()
 
-	return docnames[0][0] if docnames else None
+	return tuple(d[0] for d in docnames) if docnames else ()
