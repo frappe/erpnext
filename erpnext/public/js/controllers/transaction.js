@@ -591,9 +591,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								() => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									if ((me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) && me.frm.doc.represents_company === me.frm.doc.company) {
-										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
-											me.frm.doc.doctype, me.frm.doc.company);
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										let posting_date = me.frm.doc.posting_date || me.frm.doc.transaction_date;
+										let posting_time = me.frm.doc.posting_time || frappe.datetime.now_time();
+
+										me.get_incoming_rate(item, posting_date, posting_time, me.frm.doc.doctype,
+											me.frm.doc.company);
 									} else {
 										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 									}
