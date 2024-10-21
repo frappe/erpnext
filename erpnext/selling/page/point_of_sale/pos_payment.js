@@ -203,6 +203,15 @@ erpnext.PointOfSale.Payment = class {
 			const doc = this.events.get_frm().doc;
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
+			const customer = doc.customer;
+			if (!customer) {
+				frappe.show_alert({
+					message: __("You must choose a customer to complete the order."),
+					indicator: "orange",
+				});
+				frappe.utils.play_sound("error");
+				return;
+			}
 
 			if (!items.length || (paid_amount == 0 && doc.additional_discount_percentage != 100)) {
 				const message = items.length
