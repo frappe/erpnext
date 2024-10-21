@@ -28,6 +28,16 @@ def _get_payment_gateway_controller(*args, **kwargs):
 	return get_payment_gateway_controller(*args, **kwargs)
 
 
+ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
+	"Sales Order",
+	"Purchase Order",
+	"Sales Invoice",
+	"Purchase Invoice",
+	"POS Invoice",
+	"Fees",
+]
+
+
 class PaymentRequest(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -525,14 +535,7 @@ def make_payment_request(**args):
 	args = frappe._dict(args)
 	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
 
-	if ref_doc.doctype not in [
-		"Sales Order",
-		"Purchase Order",
-		"Sales Invoice",
-		"Purchase Invoice",
-		"POS Invoice",
-		"Fees",
-	]:
+	if ref_doc.doctype not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
 		frappe.throw(
 			_("Payment Requests cannot be created against: {0}").format(frappe.bold(ref_doc.doctype))
 		)
