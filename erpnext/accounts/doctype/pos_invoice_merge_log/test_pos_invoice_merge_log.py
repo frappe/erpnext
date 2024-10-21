@@ -158,13 +158,15 @@ class TestPOSInvoiceMergeLog(IntegrationTestCase):
 			consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
 			item_wise_tax_detail = json.loads(consolidated_invoice.get("taxes")[0].item_wise_tax_detail)
 
-			tax_rate, amount = item_wise_tax_detail.get("_Test Item")
+			tax_rate, amount, net_amount = item_wise_tax_detail.get("_Test Item")
 			self.assertEqual(tax_rate, 9)
 			self.assertEqual(amount, 9)
+			self.assertEqual(net_amount, 100)
 
-			tax_rate2, amount2 = item_wise_tax_detail.get("_Test Item 2")
+			tax_rate2, amount2, net_amount2 = item_wise_tax_detail.get("_Test Item 2")
 			self.assertEqual(tax_rate2, 5)
 			self.assertEqual(amount2, 5)
+			self.assertEqual(net_amount2, 100)
 		finally:
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")

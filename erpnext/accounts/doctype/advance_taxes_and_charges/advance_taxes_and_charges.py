@@ -18,6 +18,7 @@ class AdvanceTaxesandCharges(Document):
 		account_head: DF.Link
 		add_deduct_tax: DF.Literal["Add", "Deduct"]
 		allocated_amount: DF.Currency
+		base_net_amount: DF.Currency
 		base_tax_amount: DF.Currency
 		base_total: DF.Currency
 		charge_type: DF.Literal[
@@ -27,6 +28,7 @@ class AdvanceTaxesandCharges(Document):
 		currency: DF.Link | None
 		description: DF.SmallText
 		included_in_paid_amount: DF.Check
+		net_amount: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
