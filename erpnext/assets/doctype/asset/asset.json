@@ -15,6 +15,7 @@
   "asset_owner_company",
   "is_existing_asset",
   "is_composite_asset",
+  "is_composite_component",
   "supplier",
   "customer",
   "image",
@@ -234,18 +235,18 @@
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
    "label": "Available-for-use Date",
-   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)"
+   "mandatory_depends_on": "eval:(!(doc.is_composite_component || doc.is_composite_asset) || doc.docstatus==1)"
   },
   {
    "default": "0",
    "fieldname": "calculate_depreciation",
    "fieldtype": "Check",
    "label": "Calculate Depreciation",
-   "read_only_depends_on": "eval:doc.is_composite_asset && !doc.gross_purchase_amount"
+   "read_only_depends_on": "eval:(doc.is_composite_asset && !doc.gross_purchase_amount) || doc.is_composite_component"
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.is_composite_asset",
+   "depends_on": "eval:(!doc.is_composite_asset && !doc.is_composite_component)",
    "fieldname": "is_existing_asset",
    "fieldtype": "Check",
    "label": "Is Existing Asset"
@@ -503,7 +504,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.is_existing_asset",
+   "depends_on": "eval:(!doc.is_existing_asset && !doc.is_composite_component)",
    "fieldname": "is_composite_asset",
    "fieldtype": "Check",
    "label": "Is Composite Asset"
@@ -540,6 +541,11 @@
    "label": "Opening Number of Booked Depreciations"
   },
   {
+   "default": "0",
+   "depends_on": "eval:(!doc.is_existing_asset && !doc.is_composite_asset)",
+   "fieldname": "is_composite_component",
+   "fieldtype": "Check",
+   "label": "Is Composite Component",
    "fieldname": "purchase_receipt_item",
    "fieldtype": "Link",
    "hidden": 1,

@@ -231,7 +231,7 @@ class AssetCapitalization(StockController):
 					)
 				)
 
-			if target_asset.status in ("Scrapped", "Sold", "Capitalized", "Decapitalized"):
+			if target_asset.status in ("Scrapped", "Sold"):
 				frappe.throw(
 					_("Target Asset {0} cannot be {1}").format(target_asset.name, target_asset.status)
 				)
