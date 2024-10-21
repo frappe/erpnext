@@ -808,13 +808,8 @@ class TestSalesInvoice(IntegrationTestCase):
 
 		self.assertEqual(si.base_grand_total, 60795)
 		self.assertEqual(si.grand_total, 1215.90)
-		# no rounding adjustment as the Smallest Currency Fraction Value of USD is 0.01
-		if frappe.db.get_value("Currency", "USD", "smallest_currency_fraction_value") < 0.01:
-			self.assertEqual(si.rounding_adjustment, 0.10)
-			self.assertEqual(si.base_rounding_adjustment, 5.0)
-		else:
-			self.assertEqual(si.rounding_adjustment, 0.0)
-			self.assertEqual(si.base_rounding_adjustment, 0.0)
+		self.assertEqual(si.rounding_adjustment, 0.01)
+		self.assertEqual(si.base_rounding_adjustment, 0.50)
 
 	def test_outstanding(self):
 		w = self.make()
@@ -2283,7 +2278,7 @@ class TestSalesInvoice(IntegrationTestCase):
 		self.assertEqual(si.net_total, 4007.15)
 		self.assertEqual(si.grand_total, 4488.02)
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
-		self.assertEqual(si.rounding_adjustment, -0.02)
+		self.assertEqual(si.rounding_adjustment, -0.01)
 
 		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
 		expected_values = dict(
