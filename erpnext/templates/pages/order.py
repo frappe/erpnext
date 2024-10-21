@@ -4,7 +4,14 @@
 import frappe
 from frappe import _
 
+<<<<<<< HEAD
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import show_attachments
+=======
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST,
+	get_amount,
+)
+>>>>>>> fc2cac62c1 (fix: only show pay button for specific doctype in portal)
 
 
 def get_context(context):
@@ -66,3 +73,22 @@ def get_attachments(dt, dn):
 		fields=["name", "file_name", "file_url", "is_private"],
 		filters={"attached_to_name": dn, "attached_to_doctype": dt, "is_private": 0},
 	)
+<<<<<<< HEAD
+=======
+
+
+def get_payment_details(doc):
+	show_pay_button, amount = (
+		(
+			"payments" in frappe.get_installed_apps()
+			and frappe.db.get_single_value("Buying Settings", "show_pay_button")
+			and doc.doctype in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST
+		),
+		0,
+	)
+	if not show_pay_button:
+		return show_pay_button, amount
+
+	amount = get_amount(doc)
+	return bool(amount), amount
+>>>>>>> fc2cac62c1 (fix: only show pay button for specific doctype in portal)
