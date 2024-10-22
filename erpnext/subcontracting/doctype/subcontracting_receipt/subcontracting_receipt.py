@@ -690,64 +690,83 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 	if source_doc.is_return:
 		return
 
-	po_doc = frappe.get_doc("Purchase Order", source_doc.items[0].purchase_order)
-	target_doc = get_mapped_doc(
-		"Purchase Order",
-		po_doc.name,
-		{
-			"Purchase Order": {
-				"doctype": "Purchase Receipt",
-				"validation": {
-					"docstatus": ["=", 1],
-				},
-				"field_no_map": ["items"],
-			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
-		},
-	)
-
-	target_doc.update(
-		{
-			"posting_date": source_doc.posting_date,
-			"posting_time": source_doc.posting_time,
-			"subcontracting_receipt": source_doc.name,
-			"supplier_warehouse": source_doc.supplier_warehouse,
-			"is_subcontracted": 1,
-			"is_old_subcontracting_flow": 0,
-			"currency": frappe.get_cached_value("Company", target_doc.company, "default_currency"),
-		}
-	)
-
-	po_items_details = {po_item.name: po_item for po_item in po_doc.items}
-
+	po_sr_item_dict = {}
+	po_name = None
 	for item in source_doc.items:
-		if po_item := po_items_details.get(item.purchase_order_item):
-			conversion_factor = flt(po_item.qty) / flt(po_item.fg_item_qty)
-			item_row = {
-				"item_code": po_item.item_code,
-				"item_name": po_item.item_name,
-				"conversion_factor": conversion_factor,
-				"qty": flt(item.qty) * conversion_factor,
-				"rejected_qty": flt(item.rejected_qty) * conversion_factor,
-				"uom": po_item.uom,
-				"rate": po_item.rate,
-				"warehouse": item.warehouse,
-				"rejected_warehouse": item.rejected_warehouse,
-				"purchase_order": po_doc.name,
-				"purchase_order_item": item.purchase_order_item,
-				"subcontracting_receipt_item": item.name,
-				"project": po_item.project,
-			}
-			target_doc.append("items", item_row)
+		if not item.purchase_order:
+			continue
 
-	if not target_doc.items:
+		if not po_name:
+			po_name = item.purchase_order
+
+		po_sr_item_dict[item.purchase_order_item] = {
+			"qty": flt(item.qty),
+			"rejected_qty": flt(item.rejected_qty),
+			"warehouse": item.warehouse,
+			"rejected_warehouse": item.rejected_warehouse,
+			"subcontracting_receipt_item": item.name,
+		}
+
+	if not po_name:
 		frappe.throw(
 			_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
 				source_doc.name
 			)
 		)
 
-	target_doc.set_missing_values()
+	def update_item(obj, target, source_parent):
+		sr_item_details = po_sr_item_dict.get(obj.name)
+		ratio = flt(obj.qty) / flt(obj.fg_item_qty)
+
+		target.update(
+			{
+				"qty": ratio * sr_item_details["qty"],
+				"rejected_qty": ratio * sr_item_details["rejected_qty"],
+				"warehouse": sr_item_details["warehouse"],
+				"rejected_warehouse": sr_item_details["rejected_warehouse"],
+				"subcontracting_receipt_item": sr_item_details["subcontracting_receipt_item"],
+			}
+		)
+
+	def post_process(source, target):
+		target.set_missing_values()
+		target.update(
+			{
+				"posting_date": source_doc.posting_date,
+				"posting_time": source_doc.posting_time,
+				"subcontracting_receipt": source_doc.name,
+				"supplier_warehouse": source_doc.supplier_warehouse,
+				"is_subcontracted": 1,
+				"is_old_subcontracting_flow": 0,
+				"currency": frappe.get_cached_value("Company", target.company, "default_currency"),
+			}
+		)
+
+	target_doc = get_mapped_doc(
+		"Purchase Order",
+		po_name,
+		{
+			"Purchase Order": {
+				"doctype": "Purchase Receipt",
+				"field_map": {"supplier_warehouse": "supplier_warehouse"},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Purchase Order Item": {
+				"doctype": "Purchase Receipt Item",
+				"field_map": {
+					"name": "purchase_order_item",
+					"parent": "purchase_order",
+					"bom": "bom",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: doc.name in po_sr_item_dict,
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		},
+		postprocess=post_process,
+	)
 
 	if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
 		target_doc.save()
