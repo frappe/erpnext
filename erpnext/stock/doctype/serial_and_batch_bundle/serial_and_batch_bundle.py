@@ -164,6 +164,11 @@ class SerialandBatchBundle(Document):
 		if not self.warehouse:
 			return
 
+		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+			is_internal_transfer = frappe.get_value(self.voucher_type, self.voucher_no, "is_internal_supplier")
+			if is_internal_transfer:
+				return
+
 		if self.voucher_type in ["Stock Reconciliation", "Stock Entry"] and self.docstatus != 1:
 			return
 
