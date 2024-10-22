@@ -154,14 +154,14 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
    "options": "Purchase Order"
   },
   {
-   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
    "fieldname": "subcontracting_order",
    "fieldtype": "Link",
    "label": "Subcontracting Order",
@@ -427,13 +427,13 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
    "label": "Supplier Details"
   },
   {
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -445,7 +445,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "label": "Supplier Name",
@@ -455,7 +455,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",
