@@ -159,6 +159,8 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	if not items_data:
 		return result
 
+	current_date = frappe.utils.today()
+
 	for item in items_data:
 		uoms = frappe.get_doc("Item", item.item_code).get("uoms", [])
 
@@ -167,12 +169,16 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 		item_price = frappe.get_all(
 			"Item Price",
-			fields=["price_list_rate", "currency", "uom", "batch_no"],
+			fields=["price_list_rate", "currency", "uom", "batch_no", "valid_from", "valid_upto"],
 			filters={
 				"price_list": price_list,
 				"item_code": item.item_code,
 				"selling": True,
+				"valid_from": ["<=", current_date],
+				"valid_upto": ["in", [None, "", current_date]],
 			},
+			order_by="valid_from desc",
+			limit=1,
 		)
 
 		if not item_price:
