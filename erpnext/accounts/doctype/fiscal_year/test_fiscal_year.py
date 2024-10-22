@@ -1,16 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import now_datetime
 
-test_ignore = ["Company"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Company"]
 
 
-class TestFiscalYear(unittest.TestCase):
+class TestFiscalYear(IntegrationTestCase):
 	def test_extra_year(self):
 		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 2000"):
 			frappe.delete_doc("Fiscal Year", "_Test Fiscal Year 2000")
@@ -39,8 +38,21 @@ def test_record_generator():
 	]
 
 	start = 2012
+	this_year = now_datetime().year
 	end = now_datetime().year + 25
-	for year in range(start, end):
+	# The current year fails to load with the following error:
+	# Year start date or end date is overlapping with 2024. To avoid please set company
+	# This is a quick-fix: if current FY is needed, please refactor test data properly
+	for year in range(start, this_year):
+		test_records.append(
+			{
+				"doctype": "Fiscal Year",
+				"year": f"_Test Fiscal Year {year}",
+				"year_start_date": f"{year}-01-01",
+				"year_end_date": f"{year}-12-31",
+			}
+		)
+	for year in range(this_year + 1, end):
 		test_records.append(
 			{
 				"doctype": "Fiscal Year",

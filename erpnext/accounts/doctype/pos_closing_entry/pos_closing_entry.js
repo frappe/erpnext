@@ -80,8 +80,10 @@ frappe.ui.form.on("POS Closing Entry", {
 		) {
 			reset_values(frm);
 			frappe.run_serially([
+				() => frappe.dom.freeze(__("Loading Invoices! Please Wait...")),
 				() => frm.trigger("set_opening_amounts"),
 				() => frm.trigger("get_pos_invoices"),
+				() => frappe.dom.unfreeze(),
 			]);
 		}
 	},
@@ -194,7 +196,9 @@ function refresh_payments(d, frm) {
 		}
 		if (payment) {
 			payment.expected_amount += flt(p.amount);
-			payment.closing_amount = payment.expected_amount;
+			if (payment.closing_amount === 0) {
+				payment.closing_amount = payment.expected_amount;
+			}
 			payment.difference = payment.closing_amount - payment.expected_amount;
 		} else {
 			frm.add_child("payment_reconciliation", {

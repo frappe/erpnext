@@ -1,10 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
-
 import unittest
 
-# test_records = frappe.get_test_records('Purchase Taxes and Charges Template')
+from frappe.tests import IntegrationTestCase
 
 
-class TestPurchaseTaxesandChargesTemplate(unittest.TestCase):
+class TestPurchaseTaxesandChargesTemplate(IntegrationTestCase):
 	pass

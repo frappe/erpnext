@@ -1,9 +1,10 @@
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
 
-class TestUtils(unittest.TestCase):
+class TestUtils(IntegrationTestCase):
 	def test_reset_default_field_value(self):
 		doc = frappe.get_doc(
 			{

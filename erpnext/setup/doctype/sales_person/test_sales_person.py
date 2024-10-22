@@ -1,10 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-test_dependencies = ["Employee"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Employee"]
 
 import frappe
 
-test_records = frappe.get_test_records("Sales Person")
-
-test_ignore = ["Item Group"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Item Group"]

@@ -1,14 +1,13 @@
 import unittest
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.crm.report.sales_pipeline_analytics.sales_pipeline_analytics import execute
 
 
-class TestSalesPipelineAnalytics(FrappeTestCase):
+class TestSalesPipelineAnalytics(IntegrationTestCase):
 	def setUp(self):
-		frappe.db.delete("Opportunity")
 		create_company()
 		create_customer()
 		create_opportunity()
@@ -207,7 +206,7 @@ def create_opportunity():
 		customer_name = frappe.db.get_value("Customer", {"customer_name": "_Test NC"}, ["customer_name"])
 		doc.party_name = customer_name
 		doc.opportunity_amount = 150000
-		doc.source = "Cold Calling"
+		doc.utm_source = "Cold Calling"
 		doc.currency = "INR"
 		doc.expected_closing = "2021-08-31"
 		doc.company = "Best Test"

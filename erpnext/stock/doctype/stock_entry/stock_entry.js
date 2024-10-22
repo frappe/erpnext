@@ -447,9 +447,11 @@ frappe.ui.form.on("Stock Entry", {
 						source_doctype: "Stock Entry",
 						target: frm,
 						date_field: "posting_date",
+						read_only_setters: ["stock_entry_type", "purpose", "add_to_transit"],
 						setters: {
 							stock_entry_type: "Material Transfer",
 							purpose: "Material Transfer",
+							add_to_transit: 1,
 						},
 						get_query_filters: {
 							docstatus: 1,

@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, flt, getdate, nowdate
 from frappe.utils.data import today
 
@@ -28,7 +28,16 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 )
 
 
-class TestPurchaseOrder(FrappeTestCase):
+class UnitTestPurchaseOrder(UnitTestCase):
+	"""
+	Unit tests for PurchaseOrder.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPurchaseOrder(IntegrationTestCase):
 	def test_purchase_order_qty(self):
 		po = create_purchase_order(qty=1, do_not_save=True)
 
@@ -735,7 +744,9 @@ class TestPurchaseOrder(FrappeTestCase):
 		pi.insert()
 		self.assertTrue(pi.get("payment_schedule"))
 
-	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1}
+	)
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -806,7 +817,9 @@ class TestPurchaseOrder(FrappeTestCase):
 		company_doc.book_advance_payments_in_separate_party_account = False
 		company_doc.save()
 
-	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1}
+	)
 	def test_advance_paid_upon_payment_entry_cancellation(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -1067,7 +1080,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
-	@change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
+	@IntegrationTestCase.change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
 	def test_auto_create_subcontracting_order(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			make_bom_for_subcontracted_items,
@@ -1295,6 +1308,4 @@ def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC")
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
 
 
-test_dependencies = ["BOM", "Item Price"]
-
-test_records = frappe.get_test_records("Purchase Order")
+EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM", "Item Price", "Warehouse"]

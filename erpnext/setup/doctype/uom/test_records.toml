@@ -1,0 +1,7 @@
+[[UOM]]
+must_be_whole_number = 1
+uom_name = "_Test UOM"
+
+[[UOM]]
+uom_name = "_Test UOM 1"
+

@@ -1,0 +1,9 @@
+[["Work Order"]]
+bom_no = "BOM-_Test FG Item-001"
+company = "_Test Company"
+fg_warehouse = "_Test Warehouse 1 - _TC"
+production_item = "_Test FG Item"
+qty = 10.0
+stock_uom = "_Test UOM"
+wip_warehouse = "_Test Warehouse - _TC"
+

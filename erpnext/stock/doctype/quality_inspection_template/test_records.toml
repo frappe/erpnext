@@ -1,0 +1,11 @@
+[["Quality Inspection Parameter"]]
+parameter = "_Test Param"
+
+[["Quality Inspection Template"]]
+quality_inspection_template_name = "_Test Quality Inspection Template"
+[["Quality Inspection Template".item_quality_inspection_parameter]]
+specification = "_Test Param"
+doctype = "Item Quality Inspection Parameter"
+parentfield = "item_quality_inspection_parameter"
+
+

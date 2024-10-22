@@ -44,7 +44,7 @@ frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 			fieldname: "opportunity_source",
 			label: __("Opportunity Source"),
 			fieldtype: "Link",
-			options: "Lead Source",
+			options: "UTM Source",
 		},
 		{
 			fieldname: "opportunity_type",

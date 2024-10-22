@@ -1,9 +1,9 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -17,13 +17,15 @@ from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation impo
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 
-class TestCostCenterAllocation(unittest.TestCase):
+class TestCostCenterAllocation(IntegrationTestCase):
 	def setUp(self):
 		cost_centers = [
 			"Main Cost Center 1",
 			"Main Cost Center 2",
+			"Main Cost Center 3",
 			"Sub Cost Center 1",
 			"Sub Cost Center 2",
+			"Sub Cost Center 3",
 		]
 		for cc in cost_centers:
 			create_cost_center(cost_center_name=cc, company="_Test Company")
@@ -36,7 +38,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 		)
 
 		jv = make_journal_entry(
-			"_Test Cash - _TC", "Sales - _TC", 100, cost_center="Main Cost Center 1 - _TC", submit=True
+			"Cash - _TC", "Sales - _TC", 100, cost_center="Main Cost Center 1 - _TC", submit=True
 		)
 
 		expected_values = [["Sub Cost Center 1 - _TC", 0.0, 60], ["Sub Cost Center 2 - _TC", 0.0, 40]]
@@ -120,7 +122,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 	def test_valid_from_based_on_existing_gle(self):
 		# GLE posted against Sub Cost Center 1 on today
 		jv = make_journal_entry(
-			"_Test Cash - _TC",
+			"Cash - _TC",
 			"Sales - _TC",
 			100,
 			cost_center="Main Cost Center 1 - _TC",
@@ -139,6 +141,53 @@ class TestCostCenterAllocation(unittest.TestCase):
 
 		self.assertRaises(InvalidDateError, cca.save)
 
+		jv.cancel()
+
+	def test_multiple_cost_center_allocation_on_same_main_cost_center(self):
+		coa1 = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 3 - _TC",
+			{"Sub Cost Center 1 - _TC": 30, "Sub Cost Center 2 - _TC": 30, "Sub Cost Center 3 - _TC": 40},
+			valid_from=add_days(today(), -5),
+		)
+
+		coa2 = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 3 - _TC",
+			{"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 50},
+			valid_from=add_days(today(), -1),
+		)
+
+		jv = make_journal_entry(
+			"Cash - _TC",
+			"Sales - _TC",
+			100,
+			cost_center="Main Cost Center 3 - _TC",
+			posting_date=today(),
+			submit=True,
+		)
+
+		expected_values = {"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 50}
+
+		gle = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gle)
+			.select(gle.cost_center, gle.debit, gle.credit)
+			.where(gle.voucher_type == "Journal Entry")
+			.where(gle.voucher_no == jv.name)
+			.where(gle.account == "Sales - _TC")
+			.orderby(gle.cost_center)
+		).run(as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertTrue(gle.cost_center in expected_values)
+			self.assertEqual(gle.debit, 0)
+			self.assertEqual(gle.credit, expected_values[gle.cost_center])
+
+		coa1.cancel()
+		coa2.cancel()
 		jv.cancel()
 
 

@@ -1,10 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
-# test_records = frappe.get_test_records('Email Digest')
+from frappe.tests import IntegrationTestCase
 
 
-class TestEmailDigest(unittest.TestCase):
+class TestEmailDigest(IntegrationTestCase):
 	pass

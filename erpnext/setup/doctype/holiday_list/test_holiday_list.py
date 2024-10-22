@@ -1,17 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 from contextlib import contextmanager
 from datetime import date, timedelta
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import getdate
 
 from erpnext.setup.doctype.holiday_list.holiday_list import local_country_name
 
 
-class TestHolidayList(unittest.TestCase):
+class TestHolidayList(IntegrationTestCase):
 	def test_holiday_list(self):
 		today_date = getdate()
 		test_holiday_dates = [today_date - timedelta(days=5), today_date - timedelta(days=4)]

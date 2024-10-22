@@ -12,7 +12,9 @@
   "disabled",
   "column_break_9",
   "warehouse",
-  "campaign",
+  "utm_source",
+  "utm_campaign",
+  "utm_medium",
   "company_address",
   "section_break_15",
   "applicable_for_users",
@@ -87,12 +89,6 @@
    "fieldname": "country",
    "fieldtype": "Read Only",
    "label": "Country"
-  },
-  {
-   "fieldname": "campaign",
-   "fieldtype": "Link",
-   "label": "Campaign",
-   "options": "Campaign"
   },
   {
    "fieldname": "company_address",
@@ -375,6 +371,27 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "utm_campaign",
+   "print_hide": 1,
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "options": "UTM Campaign"
+  },
+  {
+   "fieldname": "utm_source",
+   "print_hide": 1,
+   "fieldtype": "Link",
+   "label": "Source",
+   "options": "UTM Source"
+  },
+  {
+   "fieldname": "utm_medium",
+   "print_hide": 1,
+   "fieldtype": "Link",
+   "label": "Medium",
+   "options": "UTM Campaign"
   }
  ],
  "icon": "icon-cog",
@@ -402,7 +419,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2024-03-27 13:10:16.476972",
+ "modified": "2024-06-28 10:51:48.543766",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

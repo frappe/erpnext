@@ -32,8 +32,14 @@ class AccountsTestMixin:
 		else:
 			self.supplier = supplier_name
 
-	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None):
-		item = create_item(item_name, is_stock_item=is_stock, warehouse=warehouse, company=company)
+	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None, valuation_rate=0):
+		item = create_item(
+			item_name,
+			is_stock_item=is_stock,
+			warehouse=warehouse,
+			company=company,
+			valuation_rate=valuation_rate,
+		)
 		self.item = item.name
 
 	def create_company(self, company_name="_Test Company", abbr="_TC"):
@@ -87,6 +93,22 @@ class AccountsTestMixin:
 					"parent_account": "Bank Accounts - " + abbr,
 				}
 			),
+			frappe._dict(
+				{
+					"attribute_name": "advance_received",
+					"account_name": "Advance Received",
+					"parent_account": "Current Liabilities - " + abbr,
+					"account_type": "Receivable",
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "advance_paid",
+					"account_name": "Advance Paid",
+					"parent_account": "Current Assets - " + abbr,
+					"account_type": "Payable",
+				}
+			),
 		]
 		for acc in other_accounts:
 			acc_name = acc.account_name + " - " + abbr
@@ -101,8 +123,30 @@ class AccountsTestMixin:
 						"company": self.company,
 					}
 				)
+				new_acc.account_type = acc.get("account_type", None)
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
+
+		self.identify_default_warehouses()
+
+	def enable_advance_as_liability(self):
+		company = frappe.get_doc("Company", self.company)
+		company.book_advance_payments_in_separate_party_account = True
+		company.default_advance_received_account = self.advance_received
+		company.default_advance_paid_account = self.advance_paid
+		company.save()
+
+	def disable_advance_as_liability(self):
+		company = frappe.get_doc("Company", self.company)
+		company.book_advance_payments_in_separate_party_account = False
+		company.default_advance_paid_account = company.default_advance_received_account = None
+		company.save()
+
+	def identify_default_warehouses(self):
+		for w in frappe.db.get_all(
+			"Warehouse", filters={"company": self.company}, fields=["name", "warehouse_name"]
+		):
+			setattr(self, "warehouse_" + w.warehouse_name.lower().strip().replace(" ", "_"), w.name)
 
 	def create_usd_receivable_account(self):
 		account_name = "Debtors USD"

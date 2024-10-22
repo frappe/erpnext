@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import (
@@ -15,10 +15,17 @@ from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delive
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-# test_records = frappe.get_test_records('Quality Inspection')
+
+class UnitTestQualityInspection(UnitTestCase):
+	"""
+	Unit tests for QualityInspection.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
-class TestQualityInspection(FrappeTestCase):
+class TestQualityInspection(IntegrationTestCase):
 	def setUp(self):
 		super().setUp()
 		create_item("_Test Item with QA")
@@ -218,7 +225,7 @@ class TestQualityInspection(FrappeTestCase):
 		qa.save()
 		self.assertEqual(qa.status, "Accepted")
 
-	@change_settings("System Settings", {"number_format": "#.###,##"})
+	@IntegrationTestCase.change_settings("System Settings", {"number_format": "#.###,##"})
 	def test_diff_number_format(self):
 		self.assertEqual(frappe.db.get_default("number_format"), "#.###,##")  # sanity check
 

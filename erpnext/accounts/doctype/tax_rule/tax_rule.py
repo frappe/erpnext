@@ -62,9 +62,6 @@ class TaxRule(Document):
 		use_for_shopping_cart: DF.Check
 	# end: auto-generated types
 
-	def __setup__(self):
-		self.flags.ignore_these_exceptions_in_test = [ConflictingTaxRule]
-
 	def validate(self):
 		self.validate_tax_template()
 		self.validate_from_to_dates("from_date", "to_date")
@@ -185,7 +182,7 @@ def get_tax_template(posting_date, args):
 		conditions.append("(from_date is null) and (to_date is null)")
 
 	conditions.append(
-		"ifnull(tax_category, '') = {}".format(frappe.db.escape(cstr(args.get("tax_category"))))
+		"ifnull(tax_category, '') = {}".format(frappe.db.escape(cstr(args.get("tax_category")), False))
 	)
 	if "tax_category" in args.keys():
 		del args["tax_category"]

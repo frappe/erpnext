@@ -11,25 +11,10 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Receipt", {
 	setup: (frm) => {
-		frm.make_methods = {
-			"Landed Cost Voucher": () => {
-				let lcv = frappe.model.get_new_doc("Landed Cost Voucher");
-				lcv.company = frm.doc.company;
-
-				let lcv_receipt = frappe.model.get_new_doc("Landed Cost Purchase Receipt");
-				lcv_receipt.receipt_document_type = "Purchase Receipt";
-				lcv_receipt.receipt_document = frm.doc.name;
-				lcv_receipt.supplier = frm.doc.supplier;
-				lcv_receipt.grand_total = frm.doc.grand_total;
-				lcv.purchase_receipts = [lcv_receipt];
-
-				frappe.set_route("Form", lcv.doctype, lcv.name);
-			},
-		};
-
 		frm.custom_make_buttons = {
 			"Stock Entry": "Return",
 			"Purchase Invoice": "Purchase Invoice",
+			"Landed Cost Voucher": "Landed Cost Voucher",
 		};
 
 		frm.set_query("expense_account", "items", function () {
@@ -114,7 +99,33 @@ frappe.ui.form.on("Purchase Receipt", {
 			}
 		}
 
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(
+				__("Landed Cost Voucher"),
+				() => {
+					frm.events.make_lcv(frm);
+				},
+				__("Create")
+			);
+		}
+
 		frm.events.add_custom_buttons(frm);
+	},
+
+	make_lcv(frm) {
+		frappe.call({
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_lcv",
+			args: {
+				doctype: frm.doc.doctype,
+				docname: frm.doc.name,
+			},
+			callback: (r) => {
+				if (r.message) {
+					var doc = frappe.model.sync(r.message);
+					frappe.set_route("Form", doc[0].doctype, doc[0].name);
+				}
+			},
+		});
 	},
 
 	add_custom_buttons: function (frm) {

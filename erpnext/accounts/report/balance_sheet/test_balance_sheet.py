@@ -2,7 +2,7 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 from frappe.utils.data import today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
@@ -10,10 +10,10 @@ from erpnext.accounts.report.balance_sheet.balance_sheet import execute
 COMPANY = "_Test Company 6"
 COMPANY_SHORT_NAME = "_TC6"
 
-test_dependencies = ["Company"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Company"]
 
 
-class TestBalanceSheet(FrappeTestCase):
+class TestBalanceSheet(IntegrationTestCase):
 	def test_balance_sheet(self):
 		frappe.db.sql(f"delete from `tabJournal Entry` where company='{COMPANY}'")
 		frappe.db.sql(f"delete from `tabGL Entry` where company='{COMPANY}'")
