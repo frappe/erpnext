@@ -241,6 +241,8 @@ class POSInvoice(SalesInvoice):
 
 			update_coupon_code_count(self.coupon_code, "used")
 
+		self.clear_unallocated_mode_of_payments()
+
 	def before_cancel(self):
 		if (
 			self.consolidated_invoice
@@ -717,6 +719,12 @@ class POSInvoice(SalesInvoice):
 		pr = frappe.db.get_value("Payment Request", filters=filters)
 		if pr:
 			return frappe.get_doc("Payment Request", pr)
+
+	def clear_unallocated_mode_of_payments(self):
+		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
+
+		sip = frappe.qb.DocType("Sales Invoice Payment")
+		frappe.qb.from_(sip).delete().where(sip.parent == self.name).where(sip.amount == 0).run()
 
 
 @frappe.whitelist()
