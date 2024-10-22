@@ -25,6 +25,15 @@ from erpnext.accounts.utils import get_account_currency, get_currency_precision
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.utilities import payment_app_import_guard
 
+ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
+	"Sales Order",
+	"Purchase Order",
+	"Sales Invoice",
+	"Purchase Invoice",
+	"POS Invoice",
+	"Fees",
+]
+
 
 def _get_payment_gateway_controller(*args, **kwargs):
 	with payment_app_import_guard():
@@ -491,6 +500,9 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+
+	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
+		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args) or frappe._dict()

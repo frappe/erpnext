@@ -4,7 +4,13 @@
 import frappe
 from frappe import _
 
+<<<<<<< HEAD
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import show_attachments
+=======
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST,
+)
+>>>>>>> d2e5b2aa1d (fix: only show pay button for specific doctype in portal)
 
 
 def get_context(context):
@@ -53,7 +59,15 @@ def get_context(context):
 			)
 			context.available_loyalty_points = int(loyalty_program_details.get("loyalty_points"))
 
+<<<<<<< HEAD
 	context.show_pay_button = frappe.db.get_single_value("Buying Settings", "show_pay_button")
+=======
+	context.show_pay_button = (
+		"payments" in frappe.get_installed_apps()
+		and frappe.db.get_single_value("Buying Settings", "show_pay_button")
+		and context.doc.doctype in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST
+	)
+>>>>>>> d2e5b2aa1d (fix: only show pay button for specific doctype in portal)
 	context.show_make_pi_button = False
 	if context.doc.get("supplier"):
 		# show Make Purchase Invoice button based on permission
