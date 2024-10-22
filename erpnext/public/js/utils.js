@@ -938,11 +938,12 @@ erpnext.utils.map_current_doc = function (opts) {
 			read_only_setters: opts.read_only_setters,
 			data_fields: data_fields,
 			get_query: opts.get_query,
-			add_filters_group: 1,
+			add_filters_group: opts.add_filters_group ?? 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
 			child_fieldname: opts.child_fieldname,
 			child_columns: opts.child_columns,
 			size: opts.size,
+			primary_action_label: opts.primary_action_label || __("Get Items"),
 			action: function (selections, args) {
 				let values = selections;
 				if (values.length === 0) {
