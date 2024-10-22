@@ -724,10 +724,7 @@ def get_daily_prorata_based_straight_line_depr(
 
 
 def get_daily_depr_amount(asset, row, schedule_idx, amount):
-	if (
-		frappe.db.get_single_value("Accounts Settings", "calculate_daily_depreciation_using")
-		== "Total days in depreciation period"
-	):
+	if cint(frappe.db.get_single_value("Accounts Settings", "calculate_depr_using_total_days")):
 		total_days = (
 			date_diff(
 				get_last_day(
