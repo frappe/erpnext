@@ -217,7 +217,10 @@ class StockBalanceReport:
 				qty_dict.in_val += value_diff
 			else:
 				qty_dict.out_qty += abs(qty_diff)
-				qty_dict.out_val += abs(value_diff)
+				if value_diff > 0:
+					qty_dict.in_val += value_diff
+				else:
+					qty_dict.out_val += abs(value_diff)
 
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
