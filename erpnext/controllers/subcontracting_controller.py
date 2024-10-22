@@ -1235,6 +1235,17 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 def make_return_stock_entry_for_subcontract(
 	available_materials, order_doc, rm_details, order_doctype="Subcontracting Order"
 ):
+	def post_process(source_doc, target_doc):
+		target_doc.purpose = "Material Transfer"
+
+		if source_doc.doctype == "Purchase Order":
+			target_doc.purchase_order = source_doc.name
+		else:
+			target_doc.subcontracting_order = source_doc.name
+
+		target_doc.company = source_doc.company
+		target_doc.is_return = 1
+
 	ste_doc = get_mapped_doc(
 		order_doctype,
 		order_doc.name,
@@ -1245,18 +1256,13 @@ def make_return_stock_entry_for_subcontract(
 			},
 		},
 		ignore_child_tables=True,
+		postprocess=post_process,
 	)
 
-	ste_doc.purpose = "Material Transfer"
-
 	if order_doctype == "Purchase Order":
-		ste_doc.purchase_order = order_doc.name
 		rm_detail_field = "po_detail"
 	else:
-		ste_doc.subcontracting_order = order_doc.name
 		rm_detail_field = "sco_rm_detail"
-	ste_doc.company = order_doc.company
-	ste_doc.is_return = 1
 
 	for _key, value in available_materials.items():
 		if not value.qty:
