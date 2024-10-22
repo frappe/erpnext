@@ -20,14 +20,6 @@ from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
-
-def _get_payment_gateway_controller(*args, **kwargs):
-	with payment_app_import_guard():
-		from payments.utils import get_payment_gateway_controller
-
-	return get_payment_gateway_controller(*args, **kwargs)
-
-
 ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"Sales Order",
 	"Purchase Order",
@@ -36,6 +28,13 @@ ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"POS Invoice",
 	"Fees",
 ]
+
+
+def _get_payment_gateway_controller(*args, **kwargs):
+	with payment_app_import_guard():
+		from payments.utils import get_payment_gateway_controller
+
+	return get_payment_gateway_controller(*args, **kwargs)
 
 
 class PaymentRequest(Document):
@@ -533,12 +532,10 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
-	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
+	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
+		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
-	if ref_doc.doctype not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
-		frappe.throw(
-			_("Payment Requests cannot be created against: {0}").format(frappe.bold(ref_doc.doctype))
-		)
+	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
 
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
