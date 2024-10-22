@@ -41,8 +41,12 @@ frappe.query_reports["Stock Balance"] = {
 			width: "80",
 			options: "Item",
 			get_query: function () {
+				let item_group = frappe.query_report.get_filter_value("item_group");
 				return {
 					query: "erpnext.controllers.queries.item_query",
+					filters: {
+						...(item_group && { item_group }),
+					},
 				};
 			},
 		},
