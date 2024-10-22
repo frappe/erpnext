@@ -144,6 +144,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 				"has_certificate": task.certificate_required,
 				"description": task.description,
 				"assign_to_name": task.assign_to_name,
+				"task_assignee_email": task.assign_to,
 				"periodicity": str(task.periodicity),
 				"maintenance_type": task.maintenance_type,
 				"due_date": task.next_due_date,
