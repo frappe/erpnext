@@ -33,9 +33,7 @@ class AccountsSettings(Document):
 		book_deferred_entries_based_on: DF.Literal["Days", "Months"]
 		book_deferred_entries_via_journal_entry: DF.Check
 		book_tax_discount_loss: DF.Check
-		calculate_daily_depreciation_using: DF.Literal[
-			"Total days in depreciation period", "Total years in depreciation period"
-		]
+		calculate_depr_using_total_days: DF.Check
 		check_supplier_invoice_uniqueness: DF.Check
 		create_pr_in_draft_status: DF.Check
 		credit_controller: DF.Link | None
