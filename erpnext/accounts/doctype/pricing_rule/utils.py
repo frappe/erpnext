@@ -728,12 +728,10 @@ def get_pricing_rule_items(pr_doc, other_items=False) -> list:
 
 def validate_coupon_code(coupon_name):
 	coupon = frappe.get_doc("Coupon Code", coupon_name)
-	if coupon.valid_from:
-		if coupon.valid_from > getdate(today()):
-			frappe.throw(_("Sorry, this coupon code's validity has not started"))
-	elif coupon.valid_upto:
-		if coupon.valid_upto < getdate(today()):
-			frappe.throw(_("Sorry, this coupon code's validity has expired"))
+	if coupon.valid_from and coupon.valid_from > getdate(today()):
+		frappe.throw(_("Sorry, this coupon code's validity has not started"))
+	elif coupon.valid_upto and coupon.valid_upto < getdate(today()):
+		frappe.throw(_("Sorry, this coupon code's validity has expired"))
 	elif coupon.maximum_use and coupon.used >= coupon.maximum_use:
 		frappe.throw(_("Sorry, this coupon code is no longer valid"))
 
