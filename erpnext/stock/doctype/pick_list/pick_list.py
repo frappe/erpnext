@@ -652,7 +652,7 @@ def get_available_item_locations(
 				else:
 					location["qty"] -= picked_detail.get("picked_qty")
 
-			if location["qty"] < 1:
+			if location["qty"] <= 0:
 				locations.remove(location)
 
 		total_qty_available = sum(location.get("qty") for location in locations)
