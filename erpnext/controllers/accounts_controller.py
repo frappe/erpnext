@@ -404,7 +404,7 @@ class AccountsController(TransactionBase):
 						"Please set {0} to {1}, the same account that was used in the original invoice {2}."
 					).format(
 						frappe.bold(_(cr_dr_account_label, context=self.doctype)),
-						frappe.bold(cr_dr_account),
+						frappe.bold(original_account),
 						frappe.bold(self.return_against),
 					)
 				)
