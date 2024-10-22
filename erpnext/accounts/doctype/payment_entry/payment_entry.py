@@ -1954,26 +1954,6 @@ class PaymentEntry(AccountsController):
 					allocated_negative_outstanding,
 				)
 
-	def make_advance_payment_ledger_entries(self):
-		if self.docstatus == 1 or self.docstatus == 2:
-			advance_payment_doctypes = frappe.get_hooks(
-				"advance_payment_receivable_doctypes"
-			) + frappe.get_hooks("advance_payment_payable_doctypes")
-
-			advance_doctype_references = [
-				x for x in self.references if x.reference_doctype in advance_payment_doctypes
-			]
-			for x in advance_doctype_references:
-				doc = frappe.new_doc("Advance Payment Ledger Entry")
-				doc.company = self.company
-				doc.voucher_type = self.doctype
-				doc.voucher_no = self.name
-				doc.against_voucher_type = x.reference_doctype
-				doc.against_voucher_no = x.reference_name
-				doc.amount = x.allocated_amount if self.docstatus == 1 else -1 * x.allocated_amount
-				doc.event = "Submit" if self.docstatus == 1 else "Cancel"
-				doc.save()
-
 	@frappe.whitelist()
 	def set_matched_payment_requests(self, matched_payment_requests):
 		"""

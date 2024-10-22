@@ -2578,6 +2578,56 @@ class AccountsController(TransactionBase):
 		repost_ledger.insert()
 		repost_ledger.submit()
 
+	def get_advance_payment_doctypes(self) -> list:
+		return frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
+			"advance_payment_payable_doctypes"
+		)
+
+	def make_advance_payment_ledger_for_journal(self):
+		advance_payment_doctypes = self.get_advance_payment_doctypes()
+		advance_doctype_references = [
+			x for x in self.accounts if x.reference_type in advance_payment_doctypes
+		]
+
+		for x in advance_doctype_references:
+			# Looking for payments
+			dr_or_cr = "credit" if x.account_type == "Receivable" else "debit"
+
+			amount = x.get(dr_or_cr)
+			if amount > 0:
+				doc = frappe.new_doc("Advance Payment Ledger Entry")
+				doc.company = self.company
+				doc.voucher_type = self.doctype
+				doc.voucher_no = self.name
+				doc.against_voucher_type = x.reference_type
+				doc.against_voucher_no = x.reference_name
+				doc.amount = amount if self.docstatus == 1 else -1 * amount
+				doc.event = "Submit" if self.docstatus == 1 else "Cancel"
+				doc.save()
+
+	def make_advance_payment_ledger_for_payment(self):
+		advance_payment_doctypes = self.get_advance_payment_doctypes()
+		advance_doctype_references = [
+			x for x in self.references if x.reference_doctype in advance_payment_doctypes
+		]
+		for x in advance_doctype_references:
+			doc = frappe.new_doc("Advance Payment Ledger Entry")
+			doc.company = self.company
+			doc.voucher_type = self.doctype
+			doc.voucher_no = self.name
+			doc.against_voucher_type = x.reference_doctype
+			doc.against_voucher_no = x.reference_name
+			doc.amount = x.allocated_amount if self.docstatus == 1 else -1 * x.allocated_amount
+			doc.event = "Submit" if self.docstatus == 1 else "Cancel"
+			doc.save()
+
+	def make_advance_payment_ledger_entries(self):
+		if self.docstatus != 0:
+			if self.doctype == "Journal Entry":
+				self.make_advance_payment_ledger_for_journal()
+			elif self.doctype == "Payment Entry":
+				self.make_advance_payment_ledger_for_payment()
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
