@@ -144,7 +144,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 							"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_bank_accounts",
 							{
 								response: response,
-								bank: result,
+								bank_name: result,
 								company: me.company,
 							}
 						);

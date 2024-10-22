@@ -56,37 +56,37 @@ def add_institution(token, response):
 
 	plaid = PlaidConnector()
 	access_token = plaid.get_access_token(token)
-	bank = None
 
-	if not frappe.db.exists("Bank", response["institution"]["name"]):
-		try:
-			bank = frappe.get_doc(
+	try:
+		bank_name = response.get("institution").get("name")
+
+		if not frappe.db.exists("Bank", bank_name):
+			frappe.get_doc(
 				{
 					"doctype": "Bank",
 					"bank_name": response["institution"]["name"],
 					"plaid_access_token": access_token,
 				}
-			)
-			bank.insert()
-		except Exception:
-			frappe.log_error("Plaid Link Error")
-	else:
-		bank = frappe.get_doc("Bank", response["institution"]["name"])
-		bank.plaid_access_token = access_token
-		bank.save()
+			).insert()
+		else:
+			frappe.db.set_value("Bank", bank_name, "plaid_access_token", access_token)
 
-	return bank
+	except Exception:
+		frappe.log_error("Plaid Link Error")
+
+	if bank_name:
+		return bank_name
+	else:
+		frappe.throw(_("Bank name not found in the response"))
 
 
 @frappe.whitelist()
-def add_bank_accounts(response, bank, company):
+def add_bank_accounts(response, bank_name, company):
 	try:
 		response = json.loads(response)
 	except TypeError:
 		pass
 
-	if isinstance(bank, str):
-		bank = json.loads(bank)
 	result = []
 
 	parent_gl_account = frappe.db.get_all(
@@ -108,7 +108,7 @@ def add_bank_accounts(response, bank, company):
 		if not acc_subtype:
 			add_account_subtype(account["subtype"])
 
-		bank_account_name = "{} - {}".format(account["name"], bank["bank_name"])
+		bank_account_name = "{} - {}".format(account["name"], bank_name)
 		existing_bank_account = frappe.db.exists("Bank Account", bank_account_name)
 
 		if not existing_bank_account:
@@ -127,7 +127,7 @@ def add_bank_accounts(response, bank, company):
 				new_account = frappe.get_doc(
 					{
 						"doctype": "Bank Account",
-						"bank": bank["bank_name"],
+						"bank": bank_name,
 						"account": gl_account.name,
 						"account_name": account["name"],
 						"account_type": account.get("type", ""),
@@ -159,7 +159,7 @@ def add_bank_accounts(response, bank, company):
 				existing_account = frappe.get_doc("Bank Account", existing_bank_account)
 				existing_account.update(
 					{
-						"bank": bank["bank_name"],
+						"bank": bank_name,
 						"account_name": account["name"],
 						"account_type": account.get("type", ""),
 						"account_subtype": account.get("subtype", ""),
