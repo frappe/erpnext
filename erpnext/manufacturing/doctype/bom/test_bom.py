@@ -755,6 +755,19 @@ class TestBOM(FrappeTestCase):
 		self.assertTrue("_Test RM Item 2 Fixed Asset Item" not in items)
 		self.assertTrue("_Test RM Item 3 Manufacture Item" in items)
 
+	def test_get_scrap_items_from_sub_assemblies(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_scrap_items_from_sub_assemblies
+
+		bom = frappe.copy_doc(test_records[1])
+		bom.insert(ignore_mandatory=True)
+
+		bom_scraped_items = [i.get("item_code") for i in bom.get("scrap_items", [])]
+
+		# get scrapted items for parent bom
+		scraped_items = get_scrap_items_from_sub_assemblies(bom.name, bom.company, 2, None)
+		for item_code in scraped_items.keys():
+			self.assertIn(item_code, bom_scraped_items, f"Item {item_code} not found in BOM scrap items")
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

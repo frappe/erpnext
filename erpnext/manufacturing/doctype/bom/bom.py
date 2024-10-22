@@ -1511,6 +1511,9 @@ def get_scrap_items_from_sub_assemblies(bom_no, company, qty, scrap_items=None):
 		fields=["bom_no", "qty"],
 		order_by="idx asc",
 	)
+	# fetch Scrap Items for Parent Bom
+	items = get_bom_items_as_dict(bom_no, company, qty=qty, fetch_exploded=0, fetch_scrap_items=1)
+	scrap_items.update(items)
 
 	for row in bom_items:
 		if not row.bom_no:
