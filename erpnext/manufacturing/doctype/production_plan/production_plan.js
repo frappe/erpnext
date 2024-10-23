@@ -269,24 +269,116 @@ frappe.ui.form.on("Production Plan", {
 			freeze: true,
 			doc: frm.doc,
 			callback: function () {
-				refresh_field("po_items");
+				refresh_field('po_items');
+				frm.trigger("combine_items");
 			},
 		});
 	},
 	combine_items(frm) {
-		frm.clear_table("prod_plan_references");
+		// Separate "consolidate items" function with server side by using front-end combined.
+		if (frm.doc.po_items.length > 0) {
+			// attributes list
+			const doc_arr = [
+								"item_code",
+								"bom_no",
+								"planned_qty",
+								"pending_qty",
+								"stock_uom",
+								"warehouse",
+								"description",
+								"sales_order",
+								"sales_order_item",
+								"Is_combined",
+							];
 
-		frappe.call({
-			method: "get_items",
-			freeze: true,
-			doc: frm.doc,
-			callback: function () {
-				frm.refresh_field("po_items");
-				if (frm.doc.sub_assembly_items.length > 0) {
-					frm.trigger("get_sub_assembly_items");
+			if (frm.doc.combine_items) {
+
+				var tmp_obj = JSON.parse(JSON.stringify(frm.doc.po_items));
+				var tmp_idx = [];
+				frm.set_value("po_items", []);
+
+				var tmp_count = 0;
+				for (var i = 0; i < tmp_obj.length; i++) {
+					
+					// find same po_items
+					var tmp_index = frm.doc.po_items.findIndex(
+						(obj) => obj.item_code == tmp_obj[i].item_code && obj.bom_no == tmp_obj[i].bom_no
+					);
+										
+					if (-1 == tmp_index) {
+						frm.get_field("po_items").grid.add_new_row();
+						frm.doc.po_items[tmp_count].idx = tmp_count + 1;
+
+						// fill data without name attribute in table.
+						for (var key in tmp_obj[i]) {
+							doc_arr.includes(key) && (frm.doc.po_items[tmp_count][key] = tmp_obj[i][key]);
+						}
+						tmp_count += 1;
+					} else {
+						// check & save
+						if (!tmp_idx.includes(tmp_index)) {
+							// initialize global variables to store data shall be combined.
+							if (!frm.doc.hasOwnProperty("tmp_po_items")) {
+								frm.doc.tmp_po_items = [];
+								frm.doc.tmp_category = 1;
+							}
+							// save frist appeared data and combine category to global variables.
+							frm.doc.po_items[tmp_index].Is_combined = frm.doc.tmp_category;
+							frm.doc.tmp_po_items.push(
+								JSON.parse(JSON.stringify(frm.doc.po_items[tmp_index]))
+							);
+							frm.doc.tmp_category += 1;
+							// record index for original items
+							tmp_idx.push(tmp_index);
+						}
+
+						// save data appeared more than second times.
+						tmp_obj[i].Is_combined = frm.doc.po_items[tmp_index].Is_combined;
+						frm.doc.tmp_po_items.push(
+							JSON.parse(JSON.stringify(tmp_obj[i]))
+						);
+						
+						// increase quantity for data appeared more than second times.
+						frm.doc.po_items[tmp_index].hasOwnProperty("sales_order") && 
+							delete frm.doc.po_items[tmp_index].sales_order;
+						frm.doc.po_items[tmp_index].planned_qty += tmp_obj[i].planned_qty;
+						frm.doc.po_items[tmp_index].pending_qty += tmp_obj[i].pending_qty;
+					}
 				}
-			},
-		});
+
+			} else {
+					if (frm.doc.hasOwnProperty("tmp_po_items")) {
+
+						var tmp_obj = JSON.parse(JSON.stringify(frm.doc.po_items));
+						frm.set_value("po_items", []);
+					
+							for (var i = 1; i < frm.doc.tmp_category; i++) {
+								var tmp_index = tmp_obj.findIndex((obj) => obj.Is_combined == i);
+								if (-1 != tmp_index) {
+									var temp = frm.doc.tmp_po_items.filter((ele) => ele.Is_combined == i);
+									temp.forEach((ele) => delete ele.Is_combined);
+									tmp_obj.splice.apply(tmp_obj, [tmp_index, 1].concat(temp));
+								}
+							}
+
+						// fill data without name attribute in table
+						for (var i = 0; i < tmp_obj.length; i++) {
+							frm.get_field("po_items").grid.add_new_row();
+
+							for (var key in tmp_obj[i]) {
+								doc_arr.includes(key) &&
+									(frm.doc.po_items[i][key] = JSON.parse(JSON.stringify(tmp_obj[i][key])));
+							}
+						}
+						delete frm.doc.tmp_po_items;
+						delete frm.doc.tmp_category;
+					}
+			}
+			frm.refresh_field("po_items");
+			if (frm.doc.sub_assembly_items.length > 0) {
+				frm.trigger("get_sub_assembly_items");
+			}
+		}
 	},
 
 	combine_sub_items(frm) {
