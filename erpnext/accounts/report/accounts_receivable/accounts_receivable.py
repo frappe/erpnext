@@ -486,6 +486,8 @@ class ReceivablePayableReport:
 				self.invoice_details.setdefault(je.name, je)
 
 	def set_party_details(self, row):
+		if not row.party:
+			return
 		# customer / supplier name
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
