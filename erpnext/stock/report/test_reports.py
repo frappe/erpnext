@@ -13,7 +13,7 @@ DEFAULT_FILTERS = {
 }
 
 
-batch = frappe.get_random("Batch")
+batch = get_random("Batch")
 
 REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Stock Ledger", {"_optional": True}),
