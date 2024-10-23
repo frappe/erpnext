@@ -632,8 +632,12 @@ class PurchaseOrder(BuyingController):
 			prev_ordered_qty = frappe.get_cached_value(
 				"Sales Order Item", item.get("sales_order_item"), "ordered_qty"
 			)
+
+			# Safeguard against NoneType, convert to float, and calculate the new ordered_qty
+			new_ordered_qty = max(float(prev_ordered_qty or 0) - float(item.get("qty") or 0), 0)
+
 			frappe.db.set_value(
-				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
+				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", new_ordered_qty
 			)
 
 	def auto_create_subcontracting_order(self):
