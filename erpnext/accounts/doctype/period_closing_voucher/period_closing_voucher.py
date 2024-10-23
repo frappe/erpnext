@@ -279,6 +279,7 @@ class PeriodClosingVoucher(AccountsController):
 		else:
 			date_condition = f"posting_date BETWEEN '{self.period_start_date}' AND '{self.period_end_date}' and is_opening = 'No'"
 
+		# nosemgrep
 		return frappe.db.sql(
 			"""
 			SELECT

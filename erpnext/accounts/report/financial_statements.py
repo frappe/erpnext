@@ -526,7 +526,7 @@ def get_accounting_entries(
 		account_filter_query = get_account_filter_query(root_lft, root_rgt, root_type, gl_entry)
 		query = query.where(ExistsCriterion(account_filter_query))
 
-	entries = query.run(as_dict=True, debug=1)
+	entries = query.run(as_dict=True)
 
 	return entries
 
