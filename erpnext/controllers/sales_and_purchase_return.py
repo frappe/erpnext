@@ -361,8 +361,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 						{
 							"mode_of_payment": data.mode_of_payment,
 							"type": data.type,
-							"amount": -1 * paid_amount,
-							"base_amount": -1 * base_paid_amount,
+							"amount": -1 * (paid_amount - source.change_amount),
+							"base_amount": -1 * (base_paid_amount - source.base_change_amount),
 							"account": data.account,
 							"default": data.default,
 						},
