@@ -403,7 +403,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.set_value(
 				"write_off_amount",
 				flt(
-					this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance,
+					this.frm.doc.grand_total -
+						this.frm.doc.paid_amount +
+						this.frm.doc.change_amount -
+						this.frm.doc.total_advance,
 					precision("write_off_amount")
 				)
 			);
@@ -411,11 +414,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 		this.calculate_outstanding_amount(false);
 		this.frm.refresh_fields();
-	}
-
-	write_off_amount() {
-		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
-		this.write_off_outstanding_amount_automatically();
 	}
 
 	items_add(doc, cdt, cdn) {
@@ -512,9 +510,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	}
 
 	change_amount() {
-		if (this.frm.doc.paid_amount > this.frm.doc.grand_total) {
-			this.calculate_write_off_amount();
-		} else {
+		if (this.frm.doc.paid_amount <= this.frm.doc.grand_total) {
 			this.frm.set_value("change_amount", 0.0);
 			this.frm.set_value("base_change_amount", 0.0);
 		}
