@@ -719,14 +719,61 @@ class POSInvoice(SalesInvoice):
 			return frappe.get_doc("Payment Request", pr)
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
+def get_pos_reserved_qty_of_bundles(item_code):
+    """
+	Calculate the total reserved quantity of item get sold in bundles.
+
+    Args:
+	    item_code (str): The item code for which to calculate the reserved quantity.
+
+    Returns:
+        int: The total reserved quantity of item get sold in bundles.
+
+    """
+    
+    bundles = frappe.get_all("Product Bundle Item", filters={"item_code": item_code}, fields=["parent", "qty"])
+    
+    bundle_quantity_map = {bundle["parent"]: bundle["qty"] for bundle in bundles}
+    
+    associated_bundle_names = list(bundle_quantity_map.keys())
+
+    if not associated_bundle_names:
+        return 0  
+
+    p_item = frappe.qb.DocType("POS Invoice Item")
+    p_inv = frappe.qb.DocType("POS Invoice")
+
+    all_items = (
+        frappe.qb.from_(p_inv)
+		.from_(p_item)
+        .select(p_item.item_code, p_item.qty, p_item.conversion_factor)
+        .where(
+			(p_inv.name == p_item.parent)&
+            (IfNull(p_inv.consolidated_invoice, "") == "") & 
+            (p_item.docstatus == 1) &
+            (p_inv.docstatus == 1) &
+            (p_item.item_code.isin(associated_bundle_names))
+        )
+    ).run(as_dict=True)
+
+    total_qty = sum(
+        item['qty'] * bundle_quantity_map[item['item_code']] * item['conversion_factor']
+        for item in all_items
+    )
+
+    return total_qty 
+	
+@frappe.whitelist(allow_guest=True)
 def get_stock_availability(item_code, warehouse):
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
+		pos_sales_qty_bundles = get_pos_reserved_qty_of_bundles(item_code)
 
-		return bin_qty - pos_sales_qty, is_stock_item
+
+		return bin_qty - pos_sales_qty - pos_sales_qty_bundles ,  is_stock_item
 	else:
 		is_stock_item = True
 		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
