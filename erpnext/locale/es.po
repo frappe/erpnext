@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-20 09:35+0000\n"
-"PO-Revision-Date: 2024-10-21 02:26\n"
+"PO-Revision-Date: 2024-10-23 02:48\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -1122,7 +1122,7 @@ msgstr "Quedan aproximadamente {0} segundos"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:99
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:351
 msgid "Above 120 Days"
-msgstr ""
+msgstr "Más de 120 días"
 
 #. Name of a role
 #: erpnext/setup/doctype/department/department.json
@@ -1164,7 +1164,7 @@ msgstr "Cantidad aceptada"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Accepted Qty in Stock UOM"
-msgstr ""
+msgstr "Cantidad Aceptada en UdM de Stock"
 
 #. Label of the qty (Float) field in DocType 'Purchase Receipt Item'
 #. Label of the qty (Float) field in DocType 'Subcontracting Receipt Item'
@@ -1194,7 +1194,7 @@ msgstr "Clave de Acceso"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:48
 msgid "Access Key is required for Service Provider: {0}"
-msgstr ""
+msgstr "Se requiere clave de acceso para el proveedor de servicios: {0}"
 
 #. Label of the access_token (Small Text) field in DocType 'QuickBooks
 #. Migrator'
@@ -1957,7 +1957,7 @@ msgstr "Cuentas"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Accounts Closing"
-msgstr ""
+msgstr "Cierre de Cuentas"
 
 #. Label of the acc_frozen_upto (Date) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -2124,7 +2124,7 @@ msgstr "Cuentas por cobrar Cuenta impaga"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Accounts Receivable/Payable"
-msgstr ""
+msgstr "Cuentas por Cobrar/Pagar"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -2316,13 +2316,13 @@ msgstr "Acción si la inspección de calidad no se ha validado"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Action If Quality Inspection Is Rejected"
-msgstr ""
+msgstr "Acción si se rechaza la inspección de calidad"
 
 #. Label of the maintain_same_rate_action (Select) field in DocType 'Buying
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Action If Same Rate is Not Maintained"
-msgstr ""
+msgstr "Acción si no se mantiene la misma tasa"
 
 #: erpnext/quality_management/doctype/quality_review/quality_review_list.js:7
 msgid "Action Initialised"
@@ -2952,7 +2952,7 @@ msgstr "Costo adicional"
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Additional Cost Per Qty"
-msgstr ""
+msgstr "Costo adicional por cantidad"
 
 #. Label of the additional_costs_section (Tab Break) field in DocType 'Stock
 #. Entry'
@@ -3358,7 +3358,7 @@ msgstr "Ajuste contra"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:582
 msgid "Adjustment based on Purchase Invoice rate"
-msgstr ""
+msgstr "Ajuste basado en la tarifa de la Factura de Compra"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:2
 msgid "Administrative Assistant"
@@ -3392,7 +3392,7 @@ msgstr "Cuenta anticipada"
 
 #: erpnext/utilities/transaction_base.py:209
 msgid "Advance Account: {0} must be in either customer billing currency: {1} or Company default currency: {2}"
-msgstr ""
+msgstr "La cuenta de anticipo: {0} debe estar en la moneda de facturación del cliente: {1} o en la moneda predeterminada de la empresa: {2}"
 
 #. Label of the advance_amount (Currency) field in DocType 'Purchase Invoice
 #. Advance'
@@ -3462,7 +3462,7 @@ msgstr "Cantidad de avance no puede ser mayor que {0} {1}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:811
 msgid "Advance paid against {0} {1} cannot be greater than Grand Total {2}"
-msgstr ""
+msgstr "El anticipo pagado contra {0} {1} no puede ser mayor que el total general {2}."
 
 #. Description of the 'Only Include Allocated Payments' (Check) field in
 #. DocType 'Purchase Invoice'
@@ -3535,7 +3535,7 @@ msgstr "Contra la orden general"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:958
 #: erpnext/patches/v15_0/update_invoice_remarks.py:22
 msgid "Against Customer Order {0}"
-msgstr ""
+msgstr "Contra pedido del cliente {0}"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1205
 msgid "Against Default Supplier"
@@ -3627,7 +3627,7 @@ msgstr "Contra entrada de stock"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:327
 #: erpnext/patches/v15_0/update_invoice_remarks.py:38
 msgid "Against Supplier Invoice {0}"
-msgstr ""
+msgstr "Contra factura del proveedor {0}"
 
 #. Label of the against_voucher (Dynamic Link) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -3642,7 +3642,7 @@ msgstr "Contra comprobante"
 #: erpnext/accounts/report/payment_ledger/payment_ledger.js:70
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:186
 msgid "Against Voucher No"
-msgstr ""
+msgstr "Contra el Número de Comprobante"
 
 #. Label of the against_voucher_type (Link) field in DocType 'GL Entry'
 #. Label of the against_voucher_type (Link) field in DocType 'Payment Ledger
@@ -3692,7 +3692,7 @@ msgstr "Rango de antigüedad"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:87
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:339
 msgid "Ageing Report based on {0} up to {1}"
-msgstr ""
+msgstr "Informe de Antigüedad basado en {0} hasta {1}"
 
 #. Label of the agenda (Table) field in DocType 'Quality Meeting'
 #. Label of the agenda (Text Editor) field in DocType 'Quality Meeting Agenda'
@@ -3712,7 +3712,7 @@ msgstr "Agente"
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.json
 #: erpnext/telephony/doctype/voice_call_settings/voice_call_settings.json
 msgid "Agent Busy Message"
-msgstr ""
+msgstr "Mensaje de agente ocupado"
 
 #. Label of the agent_detail_section (Section Break) field in DocType
 #. 'Appointment Booking Settings'
@@ -3724,7 +3724,7 @@ msgstr "Detalles del agente"
 #. Schedule'
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 msgid "Agent Group"
-msgstr ""
+msgstr "Grupo de agentes"
 
 #. Label of the agent_unavailable_message (Data) field in DocType 'Incoming
 #. Call Settings'
@@ -3733,7 +3733,7 @@ msgstr ""
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.json
 #: erpnext/telephony/doctype/voice_call_settings/voice_call_settings.json
 msgid "Agent Unavailable Message"
-msgstr ""
+msgstr "Mensaje de agente no disponible"
 
 #. Label of the agent_list (Table MultiSelect) field in DocType 'Appointment
 #. Booking Settings'
