@@ -380,9 +380,7 @@ class PeriodClosingVoucher(AccountsController):
 
 		for dimensions, account_balances in balance_sheet_account_balances.items():
 			for acc, balances in account_balances.items():
-				balance_in_company_currency = flt(balances.debit_in_account_currency) - flt(
-					balances.credit_in_account_currency
-				)
+				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
 				if acc != "balances" and balance_in_company_currency:
 					closing_entries.append(self.get_closing_entry(acc, balances, dimensions))
 
