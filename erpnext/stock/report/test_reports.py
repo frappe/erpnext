@@ -2,6 +2,7 @@ import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+from frappe.utils.make_random import get_random
 
 from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report
 
@@ -12,7 +13,7 @@ DEFAULT_FILTERS = {
 }
 
 
-batch = frappe.db.get_value("Batch", fieldname=["name"], as_dict=True, order_by="creation desc")
+batch = get_random("Batch")
 
 REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Stock Ledger", {"_optional": True}),
