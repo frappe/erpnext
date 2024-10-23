@@ -6,6 +6,7 @@ import frappe
 
 
 def execute():
+	# nosemgrep
 	frappe.db.sql(
 		"""
 		UPDATE `tabPeriod Closing Voucher`
