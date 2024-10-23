@@ -335,6 +335,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
 			if source.tax_withholding_category:
 				doc.set_onload("supplier_tds", source.tax_withholding_category)
+		elif doctype == "Delivery Note":
+			# manual additions to the return should hit the return warehous, too
+			doc.set_warehouse = default_warehouse_for_sales_return
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
