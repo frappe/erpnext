@@ -15,6 +15,7 @@
   "inspection_type",
   "reference_type",
   "reference_name",
+  "company",
   "section_break_7",
   "item_code",
   "item_serial_no",
@@ -238,6 +239,13 @@
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
    "label": "Manual Inspection"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-search",
@@ -245,7 +253,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:28.680815",
+ "modified": "2024-08-01 16:31:27.363920",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",
