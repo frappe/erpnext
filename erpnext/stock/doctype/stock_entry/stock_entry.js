@@ -1298,7 +1298,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		this.frm.cscript.toggle_enable_bom();
 
-		if (doc.purpose == "Send to Subcontractor") {
+		if (erpnext.stock.is_subcontracting_or_return_transfer(doc)) {
 			doc.customer =
 				doc.customer_name =
 				doc.customer_address =
@@ -1362,6 +1362,10 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			});
 		}
 	});
+};
+
+erpnext.stock.is_subcontracting_or_return_transfer = (doc) => {
+	return doc.purpose == "Send to Subcontractor" || (doc.purpose == "Material Transfer" && doc.is_return);
 };
 
 function attach_bom_items(bom_no) {

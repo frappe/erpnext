@@ -122,13 +122,13 @@ def get_provisional_profit_loss(
 
 		for period in period_list:
 			key = period if consolidated else period.key
-			total_assets = flt(asset[0].get(key))
+			total_assets = flt(asset[-2].get(key))
 			effective_liability = 0.00
 
-			if liability:
-				effective_liability += flt(liability[0].get(key))
-			if equity:
-				effective_liability += flt(equity[0].get(key))
+			if liability and liability[-1] == {}:
+				effective_liability += flt(liability[-2].get(key))
+			if equity and equity[-1] == {}:
+				effective_liability += flt(equity[-2].get(key))
 
 			provisional_profit_loss[key] = total_assets - effective_liability
 			total_row[key] = provisional_profit_loss[key] + effective_liability
@@ -195,9 +195,9 @@ def get_report_summary(
 		key = period if consolidated else period.key
 		if asset:
 			net_asset += asset[-2].get(key)
-		if liability:
+		if liability and liability[-1] == {}:
 			net_liability += liability[-2].get(key)
-		if equity:
+		if equity and equity[-1] == {}:
 			net_equity += equity[-2].get(key)
 		if provisional_profit_loss:
 			net_provisional_profit_loss += provisional_profit_loss.get(key)

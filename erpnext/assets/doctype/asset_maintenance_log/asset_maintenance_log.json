@@ -23,6 +23,7 @@
   "column_break_6",
   "maintenance_status",
   "assign_to_name",
+  "task_assignee_email",
   "due_date",
   "completion_date",
   "description",
@@ -168,15 +169,22 @@
    "in_preview": 1,
    "label": "Task Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "task_assignee_email",
+   "fieldtype": "Data",
+   "label": "Task Assignee Email",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 12:33:45.888124",
+ "modified": "2024-09-24 15:12:37.497853",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Log",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

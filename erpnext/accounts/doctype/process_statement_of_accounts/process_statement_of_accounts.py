@@ -70,6 +70,7 @@ class ProcessStatementOfAccounts(Document):
 		sales_person: DF.Link | None
 		sender: DF.Link | None
 		show_net_values_in_party_account: DF.Check
+		show_remarks: DF.Check
 		start_date: DF.Date | None
 		subject: DF.Data | None
 		terms_and_conditions: DF.Link | None
@@ -187,6 +188,7 @@ def get_common_filters(doc):
 			"finance_book": doc.finance_book if doc.finance_book else None,
 			"account": [doc.account] if doc.account else None,
 			"cost_center": [cc.cost_center_name for cc in doc.cost_center],
+			"show_remarks": doc.show_remarks,
 		}
 	)
 
