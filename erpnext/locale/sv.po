@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-20 09:35+0000\n"
-"PO-Revision-Date: 2024-10-21 02:26\n"
+"PO-Revision-Date: 2024-10-23 02:48\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -25098,7 +25098,7 @@ msgstr "Fakturering Funktioner"
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Inward"
-msgstr "In"
+msgstr "Ingående"
 
 #. Label of the is_account_payable (Check) field in DocType 'Cheque Print
 #. Template'
@@ -33580,7 +33580,7 @@ msgstr "Utstående för {0} kan inte vara mindre än noll ({1})"
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Outward"
-msgstr "Ut"
+msgstr "Utgående"
 
 #. Label of the over_billing_allowance (Currency) field in DocType 'Accounts
 #. Settings'
@@ -52793,7 +52793,7 @@ msgstr "Serie Nummer på rad #{0}: {1} är inte tillgänglig i lager {2}."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1417
 msgid "The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
-msgstr "Serie och Parti Paket {0} är inte giltigt för denna transaktion. \"Typ av Transaktion\" ska vara \"Ut\" istället för \"In\" i Serie och Parti Paket {0}"
+msgstr "Serie och Parti Paket {0} är inte giltigt för denna transaktion. \"Typ av Transaktion\" ska vara \"Utgående\" istället för \"Ingående\" i Serie och Parti Paket {0}"
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."

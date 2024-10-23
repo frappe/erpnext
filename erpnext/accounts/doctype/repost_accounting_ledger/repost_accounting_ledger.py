@@ -46,8 +46,8 @@ class RepostAccountingLedger(Document):
 				frappe.db.get_all(
 					"Period Closing Voucher",
 					filters={"company": self.company},
-					order_by="posting_date desc",
-					pluck="posting_date",
+					order_by="period_end_date desc",
+					pluck="period_end_date",
 					limit=1,
 				)
 				or None

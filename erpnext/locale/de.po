@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-20 09:35+0000\n"
-"PO-Revision-Date: 2024-10-21 02:25\n"
+"PO-Revision-Date: 2024-10-23 02:48\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -282,7 +282,7 @@ msgstr "Das Konto '{0}' wird bereits von {1} verwendet. Verwenden Sie ein andere
 
 #: erpnext/controllers/accounts_controller.py:402
 msgid "'{0}' account: '{1}' should match the Return Against Invoice"
-msgstr "'{0}' Konto: '{1}' sollte mit dem der zu berichtigenden Rechnung übereinstimmen"
+msgstr "„{0}“-Konto: „{1}“ sollte mit dem der zu berichtigenden Rechnung übereinstimmen"
 
 #: erpnext/setup/doctype/company/company.py:205
 #: erpnext/setup/doctype/company/company.py:216

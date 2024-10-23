@@ -38,13 +38,14 @@ def make_gl_entries(
 			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
-				create_payment_ledger_entry(
-					gl_map,
-					cancel=0,
-					adv_adj=adv_adj,
-					update_outstanding=update_outstanding,
-					from_repost=from_repost,
-				)
+				if gl_map[0].voucher_type != "Period Closing Voucher":
+					create_payment_ledger_entry(
+						gl_map,
+						cancel=0,
+						adv_adj=adv_adj,
+						update_outstanding=update_outstanding,
+						from_repost=from_repost,
+					)
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
 			# Post GL Map process there may no be any GL Entries
 			elif gl_map:
@@ -117,17 +118,16 @@ def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
 def validate_disabled_accounts(gl_map):
 	accounts = [d.account for d in gl_map if d.account]
 
-	Account = frappe.qb.DocType("Account")
+	disabled_accounts = frappe.get_all(
+		"Account",
+		filters={"disabled": 1, "is_group": 0, "company": gl_map[0].company},
+		fields=["name"],
+	)
 
-	disabled_accounts = (
-		frappe.qb.from_(Account)
-		.where(Account.name.isin(accounts) & Account.disabled == 1)
-		.select(Account.name, Account.disabled)
-	).run(as_dict=True)
-
-	if disabled_accounts:
+	used_disabled_accounts = set(accounts).intersection(set([d.name for d in disabled_accounts]))
+	if used_disabled_accounts:
 		account_list = "<br>"
-		account_list += ", ".join([frappe.bold(d.name) for d in disabled_accounts])
+		account_list += ", ".join([frappe.bold(d) for d in used_disabled_accounts])
 		frappe.throw(
 			_("Cannot create accounting entries against disabled accounts: {0}").format(account_list),
 			title=_("Disabled Account Selected"),
@@ -740,7 +740,7 @@ def validate_against_pcv(is_opening, posting_date, company):
 		)
 
 	last_pcv_date = frappe.db.get_value(
-		"Period Closing Voucher", {"docstatus": 1, "company": company}, "max(posting_date)"
+		"Period Closing Voucher", {"docstatus": 1, "company": company}, "max(period_end_date)"
 	)
 
 	if last_pcv_date and getdate(posting_date) <= getdate(last_pcv_date):

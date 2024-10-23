@@ -6,38 +6,50 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "dates_section",
   "posting_date",
   "transaction_date",
+  "column_break_avko",
+  "fiscal_year",
+  "due_date",
+  "account_details_section",
   "account",
+  "account_currency",
+  "column_break_ifvf",
+  "against",
   "party_type",
   "party",
-  "cost_center",
-  "debit",
-  "credit",
-  "account_currency",
-  "debit_in_account_currency",
-  "credit_in_account_currency",
-  "against",
+  "transaction_details_section",
+  "voucher_type",
+  "voucher_no",
+  "voucher_subtype",
+  "transaction_currency",
+  "column_break_dpsx",
   "against_voucher_type",
   "against_voucher",
-  "voucher_type",
-  "voucher_subtype",
-  "voucher_no",
   "voucher_detail_no",
+  "transaction_exchange_rate",
+  "amounts_section",
+  "debit_in_account_currency",
+  "debit",
+  "debit_in_transaction_currency",
+  "column_break_bm1w",
+  "credit_in_account_currency",
+  "credit",
+  "credit_in_transaction_currency",
+  "dimensions_section",
+  "cost_center",
+  "column_break_lmnm",
   "project",
-  "remarks",
+  "more_info_section",
+  "finance_book",
+  "company",
   "is_opening",
   "is_advance",
-  "fiscal_year",
-  "company",
-  "finance_book",
+  "column_break_8abq",
   "to_rename",
-  "due_date",
   "is_cancelled",
-  "transaction_currency",
-  "debit_in_transaction_currency",
-  "credit_in_transaction_currency",
-  "transaction_exchange_rate"
+  "remarks"
  ],
  "fields": [
   {
@@ -285,13 +297,67 @@
    "fieldname": "voucher_subtype",
    "fieldtype": "Small Text",
    "label": "Voucher Subtype"
+  },
+  {
+   "fieldname": "dates_section",
+   "fieldtype": "Section Break",
+   "label": "Dates"
+  },
+  {
+   "fieldname": "column_break_avko",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_details_section",
+   "fieldtype": "Section Break",
+   "label": "Account Details"
+  },
+  {
+   "fieldname": "column_break_ifvf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Details"
+  },
+  {
+   "fieldname": "amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fieldname": "column_break_dpsx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_section",
+   "fieldtype": "Section Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "column_break_bm1w",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Dimensions"
+  },
+  {
+   "fieldname": "column_break_lmnm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_8abq",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2024-03-27 13:09:45.205364",
+ "modified": "2024-08-22 13:03:39.997475",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
