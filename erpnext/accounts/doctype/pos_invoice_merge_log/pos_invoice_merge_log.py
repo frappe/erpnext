@@ -174,6 +174,7 @@ class POSInvoiceMergeLog(Document):
 
 		rounding_adjustment, base_rounding_adjustment = 0, 0
 		rounded_total, base_rounded_total = 0, 0
+		base_write_off_amount, write_off_amount = 0, 0
 
 		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
 
@@ -247,8 +248,11 @@ class POSInvoiceMergeLog(Document):
 
 			rounding_adjustment += doc.rounding_adjustment
 			rounded_total += doc.rounded_total
+			write_off_amount += doc.write_off_amount
 			base_rounding_adjustment += doc.base_rounding_adjustment
 			base_rounded_total += doc.base_rounded_total
+			base_write_off_amount += doc.base_write_off_amount
+
 
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
@@ -262,6 +266,8 @@ class POSInvoiceMergeLog(Document):
 		invoice.set("base_rounding_adjustment", base_rounding_adjustment)
 		invoice.set("rounded_total", rounded_total)
 		invoice.set("base_rounded_total", base_rounded_total)
+		invoice.set("write_off_amount", write_off_amount)
+		invoice.set("base_write_off_amount", base_write_off_amount)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
