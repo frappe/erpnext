@@ -3,7 +3,7 @@ from frappe.tests.utils import FrappeTestCase
 
 INDEXED_FIELDS = {
 	"Bin": ["item_code"],
-	"GL Entry": ["voucher_type", "against_voucher_type"],
+	"GL Entry": ["voucher_no", "posting_date", "company", "party"],
 	"Purchase Order Item": ["item_code"],
 	"Stock Ledger Entry": ["warehouse"],
 }
