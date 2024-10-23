@@ -55,7 +55,7 @@ def get_gle_fields():
 def get_period_closing_vouchers(company):
 	return frappe.db.get_all(
 		"Period Closing Voucher",
-		fields=["name", "closing_account", "period_start_date", "period_end_date", "company"],
+		fields=["name", "closing_account_head", "period_start_date", "period_end_date", "company"],
 		filters={"docstatus": 1, "company": company},
 		order_by="period_end_date",
 	)
@@ -64,7 +64,7 @@ def get_period_closing_vouchers(company):
 def get_pcv_gl_entries(pcv, gle_fields):
 	gl_entries = frappe.db.get_all(
 		"GL Entry",
-		filters={"voucher_no": pcv.name, "account": ["!=", pcv.closing_account], "is_cancelled": 0},
+		filters={"voucher_no": pcv.name, "account": ["!=", pcv.closing_account_head], "is_cancelled": 0},
 		fields=gle_fields,
 	)
 	for entry in gl_entries:
