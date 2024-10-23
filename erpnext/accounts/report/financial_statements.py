@@ -9,6 +9,7 @@ import re
 import frappe
 from frappe import _
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
+from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -181,12 +182,12 @@ def get_data(
 			company,
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
 			period_list[-1]["to_date"],
-			root.lft,
-			root.rgt,
 			filters,
 			gl_entries_by_account,
-			ignore_closing_entries=ignore_closing_entries,
+			root.lft,
+			root.rgt,
 			root_type=root_type,
+			ignore_closing_entries=ignore_closing_entries,
 		)
 
 	calculate_values(
@@ -419,93 +420,78 @@ def set_gl_entries_by_account(
 	company,
 	from_date,
 	to_date,
-	root_lft,
-	root_rgt,
 	filters,
 	gl_entries_by_account,
+	root_lft=None,
+	root_rgt=None,
+	root_type=None,
 	ignore_closing_entries=False,
 	ignore_opening_entries=False,
-	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
-	account_filters = {
-		"company": company,
-		"is_group": 0,
-		"lft": (">=", root_lft),
-		"rgt": ("<=", root_rgt),
-	}
-
-	if root_type:
-		account_filters.update(
-			{
-				"root_type": root_type,
-			}
+	# For balance sheet
+	ignore_closing_balances = frappe.db.get_single_value(
+		"Accounts Settings", "ignore_account_closing_balance"
+	)
+	if not from_date and not ignore_closing_balances:
+		last_period_closing_voucher = frappe.db.get_all(
+			"Period Closing Voucher",
+			filters={
+				"docstatus": 1,
+				"company": filters.company,
+				"period_end_date": ("<", filters["period_start_date"]),
+			},
+			fields=["period_end_date", "name"],
+			order_by="period_end_date desc",
+			limit=1,
 		)
+		if last_period_closing_voucher:
+			gl_entries += get_accounting_entries(
+				"Account Closing Balance",
+				from_date,
+				to_date,
+				filters,
+				root_lft,
+				root_rgt,
+				root_type,
+				ignore_closing_entries,
+				last_period_closing_voucher[0].name,
+			)
+			from_date = add_days(last_period_closing_voucher[0].period_end_date, 1)
+			ignore_opening_entries = True
 
-	accounts_list = frappe.db.get_all(
-		"Account",
-		filters=account_filters,
-		pluck="name",
+	gl_entries += get_accounting_entries(
+		"GL Entry",
+		from_date,
+		to_date,
+		filters,
+		root_lft,
+		root_rgt,
+		root_type,
+		ignore_closing_entries,
+		ignore_opening_entries=ignore_opening_entries,
 	)
 
-	if accounts_list:
-		# For balance sheet
-		ignore_closing_balances = frappe.db.get_single_value(
-			"Accounts Settings", "ignore_account_closing_balance"
-		)
-		if not from_date and not ignore_closing_balances:
-			last_period_closing_voucher = frappe.db.get_all(
-				"Period Closing Voucher",
-				filters={
-					"docstatus": 1,
-					"company": filters.company,
-					"posting_date": ("<", filters["period_start_date"]),
-				},
-				fields=["posting_date", "name"],
-				order_by="posting_date desc",
-				limit=1,
-			)
-			if last_period_closing_voucher:
-				gl_entries += get_accounting_entries(
-					"Account Closing Balance",
-					from_date,
-					to_date,
-					accounts_list,
-					filters,
-					ignore_closing_entries,
-					last_period_closing_voucher[0].name,
-				)
-				from_date = add_days(last_period_closing_voucher[0].posting_date, 1)
-				ignore_opening_entries = True
+	if filters and filters.get("presentation_currency"):
+		convert_to_presentation_currency(gl_entries, get_currency(filters))
 
-		gl_entries += get_accounting_entries(
-			"GL Entry",
-			from_date,
-			to_date,
-			accounts_list,
-			filters,
-			ignore_closing_entries,
-			ignore_opening_entries=ignore_opening_entries,
-		)
+	for entry in gl_entries:
+		gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
-		if filters and filters.get("presentation_currency"):
-			convert_to_presentation_currency(gl_entries, get_currency(filters))
-
-		for entry in gl_entries:
-			gl_entries_by_account.setdefault(entry.account, []).append(entry)
-
-		return gl_entries_by_account
+	return gl_entries_by_account
 
 
 def get_accounting_entries(
 	doctype,
 	from_date,
 	to_date,
-	accounts,
 	filters,
-	ignore_closing_entries,
+	root_lft=None,
+	root_rgt=None,
+	root_type=None,
+	ignore_closing_entries=None,
 	period_closing_voucher=None,
 	ignore_opening_entries=False,
 ):
@@ -535,11 +521,28 @@ def get_accounting_entries(
 		query = query.where(gl_entry.period_closing_voucher == period_closing_voucher)
 
 	query = apply_additional_conditions(doctype, query, from_date, ignore_closing_entries, filters)
-	query = query.where(gl_entry.account.isin(accounts))
+
+	if (root_lft and root_rgt) or root_type:
+		account_filter_query = get_account_filter_query(root_lft, root_rgt, root_type, gl_entry)
+		query = query.where(ExistsCriterion(account_filter_query))
 
 	entries = query.run(as_dict=True)
 
 	return entries
+
+
+def get_account_filter_query(root_lft, root_rgt, root_type, gl_entry):
+	acc = frappe.qb.DocType("Account")
+	exists_query = (
+		frappe.qb.from_(acc).select(acc.name).where(acc.name == gl_entry.account).where(acc.is_group == 0)
+	)
+	if root_lft and root_rgt:
+		exists_query = exists_query.where(acc.lft >= root_lft).where(acc.rgt <= root_rgt)
+
+	if root_type:
+		exists_query = exists_query.where(acc.root_type == root_type)
+
+	return exists_query
 
 
 def apply_additional_conditions(doctype, query, from_date, ignore_closing_entries, filters):
