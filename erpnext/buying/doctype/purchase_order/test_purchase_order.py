@@ -20,6 +20,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -1172,6 +1173,33 @@ class TestPurchaseOrder(IntegrationTestCase):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+	def test_total_ordered_cost_for_project(self):
+		if not frappe.db.exists("Project", {"project_name": "_Test Project for Ordered"}):
+			project = make_project({"project_name": "_Test Project for Ordered"})
+		else:
+			project = frappe.get_doc("Project", "_Test Project for Ordered")
+
+		pi = create_purchase_order(qty=1, rate=500, project=project.name)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
+			500.0,
+		)
+
+		pi1 = create_purchase_order(qty=10, rate=500, project=project.name)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
+			5500.0,
+		)
+
+		pi1.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
+			500.0,
+		)
+
+		pi.cancel()
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_ordered_cost"), 0)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1275,6 +1303,7 @@ def create_purchase_order(**args):
 				"against_blanket": args.against_blanket,
 				"material_request": args.material_request,
 				"material_request_item": args.material_request_item,
+				"project": args.project,
 			},
 		)
 
