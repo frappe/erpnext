@@ -1236,6 +1236,61 @@ class PaymentEntry(AccountsController):
 
 		self.set("remarks", "\n".join(remarks))
 
+	@frappe.requires_permission("Account", "read")
+	@frappe.requires_permission("Sales Order", "read")
+	@frappe.requires_permission("Payment Entry", "create")
+	def _from_sales_order(self, so):
+		return get_payment_entry(
+			so.doctype,
+			so.name,
+			payment_type="Receive",
+			party_type="Customer",
+		)
+
+	@frappe.requires_permission("Account", "read")
+	@frappe.requires_permission("Sales Invoice", "read")
+	@frappe.requires_permission("Payment Entry", "create")
+	def _from_sales_invoice(self, si):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(
+			si.doctype,
+			si.name,
+			payment_type="Receive",
+			party_type="Customer",
+		)
+
+	@frappe.requires_permission("Account", "read")
+	@frappe.requires_permission("Purchase Order", "read")
+	@frappe.requires_permission("Payment Entry", "create")
+	def _from_purchase_order(self, po):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(
+			po.doctype,
+			po.name,
+			payment_type="Receive",
+			party_type="Supplier",
+		)
+
+	@frappe.requires_permission("Account", "read")
+	@frappe.requires_permission("Purchase Invoice", "read")
+	@frappe.requires_permission("Payment Entry", "create")
+	def _from_purchase_invoice(self, pi):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(
+			pi.doctype,
+			pi.name,
+			payment_type="Receive",
+			party_type="Supplier",
+		)
+
+	@frappe.requires_permission("Account", "read")
+	@frappe.requires_permission("Dunning", "read")
+	@frappe.requires_permission("Payment Entry", "create")
+	def _from_dunning(self, d):
+		frappe.flags.ignore_account_permission = frappe.flags.ignore_permissions
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(d.doctype, d.name)
+
 	def build_gl_map(self):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
@@ -2808,7 +2863,7 @@ def get_payment_entry(
 		paid_amount, received_amount, doc, party_account_currency, reference_date
 	)
 
-	pe = frappe.new_doc("Payment Entry")
+	pe = frappe.flags.new_payment_entry or frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
 	pe.company = doc.company
 	pe.cost_center = doc.get("cost_center")

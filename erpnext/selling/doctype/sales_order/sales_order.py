@@ -756,6 +756,11 @@ class SalesOrder(SellingController):
 			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
 		)
 
+	@frappe.requires_permission("Sales Order", "read")
+	@frappe.requires_permission("Sales Invoice", "create")
+	def _into_sales_invoice(self, si):
+		make_sales_invoice(self.name, target_doc=si)
+
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 	"""Returns the unreserved quantity for the Sales Order Item."""
