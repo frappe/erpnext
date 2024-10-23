@@ -12,6 +12,8 @@ EXTRA_TEST_RECORD_DEPENDENCIES = ["Cost Center", "Location", "Warehouse", "Depar
 
 
 class TestAccountingDimension(IntegrationTestCase):
+	SHOW_TRANSACTION_COMMIT_WARNINGS = True
+
 	def setUp(self):
 		create_dimension()
 
