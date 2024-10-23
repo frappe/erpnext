@@ -1083,6 +1083,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
 			target.redeem_loyalty_points = 1
+			target.loyalty_points = source.loyalty_points
 
 		target.debit_to = get_party_account("Customer", source.customer, source.company)
 

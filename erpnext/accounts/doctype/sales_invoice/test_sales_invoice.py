@@ -3755,6 +3755,65 @@ class TestSalesInvoice(FrappeTestCase):
 		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
 
+	def test_loyalty_points_redemption_with_shopping_cart(self):
+		from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import (
+			create_records,
+			create_sales_invoice_record,
+		)
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# Set up loyalty program
+		create_records()
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
+		create_sales_invoice_record(10).insert().submit()
+
+		# Create a sales order
+		so = make_sales_order(qty=10, do_not_save=True, customer="Test Loyalty Customer")
+		so.name = "_T-Sales Order LP-0001"
+		so.order_type = "Shopping Cart"
+		so.loyalty_points = 50
+		so.loyalty_amount = 50
+		so.insert()
+		so.submit()
+
+		# Create sales invoice from the sales order
+		si = make_sales_invoice(so.name)
+		from frappe.model.trace import traced_field_context
+
+		with traced_field_context(si.__class__, "loyalty_program", forbidden_values=[None]):
+			si.insert()
+		si.submit()
+
+		# Check if loyalty points are applied correctly
+		self.assertEqual(si.loyalty_program, "Test Single Loyalty")
+		self.assertEqual(si.loyalty_points, 50)
+		self.assertEqual(si.loyalty_amount, 50)
+
+		# Check GL entries for loyalty points redemption
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit"],
+		)
+
+		loyalty_account = frappe.db.get_value("Loyalty Program", "Test Single Loyalty", "expense_account")
+		expected_gl_entries = [
+			{"account": si.debit_to, "debit": si.grand_total, "credit": 0},
+			{"account": si.items[0].income_account, "debit": 0, "credit": si.net_total},
+			{"account": loyalty_account, "debit": 50, "credit": 0},
+		]
+
+		for entry in expected_gl_entries:
+			self.assertTrue(
+				any(
+					gl_entry.account == entry["account"]
+					and gl_entry.debit == entry["debit"]
+					and gl_entry.credit == entry["credit"]
+					for gl_entry in gl_entries
+				)
+			)
+
 	def test_pulling_advance_based_on_debit_to(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
