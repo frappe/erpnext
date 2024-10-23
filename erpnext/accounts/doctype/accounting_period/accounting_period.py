@@ -101,6 +101,8 @@ def validate_accounting_period_on_doc_save(doc, method=None):
 			date = doc.available_for_use_date
 	elif doc.doctype == "Asset Repair":
 		date = doc.completion_date
+	elif doc.doctype == "Period Closing Voucher":
+		date = doc.period_end_date
 	else:
 		date = doc.posting_date
 
