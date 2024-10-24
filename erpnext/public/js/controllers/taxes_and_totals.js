@@ -4,6 +4,26 @@
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
+		frappe.ui.form.on(this.frm.doctype, "set_rounding_adjustment_desc", function (frm) {
+			frm.get_field("rounding_adjustment").set_description("");
+			if (frm.doc.rounded_total) {
+				let rounded_diff = flt(frm.doc.rounded_total) - flt(frm.doc.grand_total);
+				if (rounded_diff != frm.doc.rounding_adjustment) {
+					frm.get_field("rounding_adjustment").set_description(
+						__("Rounding adjustment is calculated as net total plus tax doesn't equate to grand total.")
+					);
+				}
+			} else if (frm.doc.rounding_adjustment) {
+				frm.dashboard.add_comment(
+					__("Rounding adjustment is calculated as net total plus tax doesn't equate to grand total."),
+					"yellow",
+					true
+				);
+			}
+		});
+		frappe.ui.form.on(this.frm.doctype, "refresh", function (frm) {
+			frm.trigger("set_rounding_adjustment_desc");
+		});
 	}
 
 	apply_pricing_rule_on_item(item) {
@@ -560,7 +580,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 				diff = flt(diff, precision("rounding_adjustment"));
 
-				if ( diff && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
+				if (diff && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
 					me.frm.doc.grand_total_diff = diff;
 				} else {
 					me.frm.doc.grand_total_diff = 0;
@@ -628,15 +648,24 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (cint(disable_rounded_total)) {
 			this.frm.doc.rounded_total = 0;
 			this.frm.doc.base_rounded_total = 0;
+			this.frm.doc.rounding_adjustment = flt(this.frm.doc.grand_total_diff, precision("rounding_adjustment"))
+			this.frm.trigger("set_rounding_adjustment_desc");
+			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment"]);
 			return;
 		}
 
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
-			this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(this.frm.doc.grand_total,
-				this.frm.doc.currency, precision("rounded_total"));
-			this.frm.doc.rounding_adjustment = flt(this.frm.doc.rounded_total - this.frm.doc.grand_total,
-				precision("rounding_adjustment"));
+			this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(
+				this.frm.doc.grand_total,
+				this.frm.doc.currency, precision("rounded_total")
+			);
 
+			this.frm.doc.rounding_adjustment = flt(
+				(this.frm.doc.rounded_total - this.frm.doc.grand_total) + flt(this.frm.doc.grand_total_diff),
+				precision("rounding_adjustment")
+			);
+
+			this.frm.trigger("set_rounding_adjustment_desc");
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
 		}
 	}
