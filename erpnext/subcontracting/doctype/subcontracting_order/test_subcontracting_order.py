@@ -703,10 +703,10 @@ class TestSubcontractingOrder(IntegrationTestCase):
 			{
 				"warehouse": "_Test Warehouse - _TC",
 				"item_code": "Subcontracted Service Item 9",
-				"qty": 202.0656,
+				"qty": 1,  # 202.0656,
 				"rate": 100,
 				"fg_item": "Subcontracted Item SA9",
-				"fg_item_qty": 1,
+				"fg_item_qty": 202.0656,
 			},
 		]
 

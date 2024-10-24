@@ -1234,7 +1234,7 @@ def make_subcontracted_items():
 		"Subcontracted Item SA6": {},
 		"Subcontracted Item SA7": {},
 		"Subcontracted Item SA8": {},
-		"Subcontracted Item SA9": {},
+		"Subcontracted Item SA9": {"stock_uom": "Litre"},
 	}
 
 	for item, properties in sub_contracted_items.items():
@@ -1255,7 +1255,7 @@ def make_raw_materials():
 		"Subcontracted SRM Item 4": {"has_serial_no": 1, "serial_no_series": "SRII.####"},
 		"Subcontracted SRM Item 5": {"has_serial_no": 1, "serial_no_series": "SRIID.####"},
 		"Subcontracted SRM Item 8": {},
-		"Subcontracted SRM Item 9": {},
+		"Subcontracted SRM Item 9": {"stock_uom": "Litre"},
 	}
 
 	for item, properties in raw_materials.items():
