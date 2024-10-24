@@ -262,7 +262,7 @@ class JournalEntry(AccountsController):
 			frappe.throw(_("Journal Entry type should be set as Depreciation Entry for asset depreciation"))
 
 	def validate_stock_accounts(self):
-		stock_accounts = get_stock_accounts(self.company, self.doctype, self.name)
+		stock_accounts = get_stock_accounts(self.company, accounts=self.accounts)
 		for account in stock_accounts:
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(
 				account, self.posting_date, self.company

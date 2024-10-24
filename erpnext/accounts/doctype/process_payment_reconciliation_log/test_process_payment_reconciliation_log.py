@@ -2,8 +2,17 @@
 # See license.txt
 
 # import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 
-class TestProcessPaymentReconciliationLog(FrappeTestCase):
+class UnitTestProcessPaymentReconciliationLog(UnitTestCase):
+	"""
+	Unit tests for ProcessPaymentReconciliationLog.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestProcessPaymentReconciliationLog(IntegrationTestCase):
 	pass

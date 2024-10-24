@@ -28,6 +28,7 @@ BOM_ITEM_FIELDS = [
 	"stock_uom",
 	"conversion_factor",
 	"do_not_explode",
+	"operation",
 ]
 
 
@@ -64,6 +65,7 @@ class BOMCreator(Document):
 		raw_material_cost: DF.Currency
 		remarks: DF.TextEditor | None
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
+		routing: DF.Link | None
 		set_rate_based_on_warehouse: DF.Check
 		skip_material_transfer: DF.Check
 		source_warehouse: DF.Link | None
@@ -409,6 +411,11 @@ class BOMCreator(Document):
 						},
 					)
 
+		elif row.item_code == self.item_code and self.routing:
+			bom.routing = self.routing
+			bom.with_operations = 1
+			bom.transfer_material_against = "Work Order"
+
 		for field in BOM_FIELDS:
 			if self.get(field):
 				bom.set(field, self.get(field))
@@ -595,6 +602,7 @@ def add_sub_assembly(**kwargs):
 			{
 				"item_code": row.item_code,
 				"qty": row.qty,
+				"operation": row.operation,
 				"fg_item": bom_item.item_code,
 				"uom": item_info.stock_uom,
 				"fg_reference_id": name,

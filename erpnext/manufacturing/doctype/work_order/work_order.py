@@ -176,10 +176,19 @@ class WorkOrder(Document):
 		self.validate_operation_time()
 		self.status = self.get_status()
 		self.validate_workstation_type()
+		self.reset_use_multi_level_bom()
 
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
 
 		self.set_required_items(reset_only_qty=len(self.get("required_items")))
+
+	def reset_use_multi_level_bom(self):
+		if self.is_new():
+			return
+
+		before_save_obj = self.get_doc_before_save()
+		if before_save_obj.use_multi_level_bom != self.use_multi_level_bom:
+			self.get_items_and_operations_from_bom()
 
 	def validate_workstation_type(self):
 		for row in self.operations:
@@ -543,7 +552,6 @@ class WorkOrder(Document):
 	def delete_auto_created_batch_and_serial_no(self):
 		for row in frappe.get_all("Serial No", filters={"work_order": self.name}):
 			frappe.delete_doc("Serial No", row.name)
-			self.db_set("serial_no", "")
 
 		for row in frappe.get_all("Batch", filters={"reference_name": self.name}):
 			frappe.delete_doc("Batch", row.name)

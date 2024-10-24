@@ -576,30 +576,56 @@ class SubcontractingController(StockController):
 				self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
 		if self.doctype == "Subcontracting Receipt" and not use_serial_batch_fields:
-			args = frappe._dict(
-				{
-					"item_code": rm_obj.rm_item_code,
-					"warehouse": self.supplier_warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-					"qty": -1 * flt(rm_obj.consumed_qty),
-					"actual_qty": -1 * flt(rm_obj.consumed_qty),
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"voucher_detail_no": item_row.name,
-					"company": self.company,
-					"allow_zero_valuation": 1,
-				}
-			)
-
 			rm_obj.serial_and_batch_bundle = self.__set_serial_and_batch_bundle(
 				item_row, rm_obj, rm_obj.consumed_qty
 			)
 
-			if rm_obj.serial_and_batch_bundle:
-				args["serial_and_batch_bundle"] = rm_obj.serial_and_batch_bundle
+			self.set_rate_for_supplied_items(rm_obj, item_row)
 
-			rm_obj.rate = get_incoming_rate(args)
+	def update_rate_for_supplied_items(self):
+		if self.doctype != "Subcontracting Receipt":
+			return
+
+		for row in self.supplied_items:
+			item_row = None
+			if row.reference_name:
+				item_row = self.get_item_row(row.reference_name)
+
+			if not item_row:
+				continue
+
+			self.set_rate_for_supplied_items(row, item_row)
+
+	def get_item_row(self, reference_name):
+		for item in self.items:
+			if item.name == reference_name:
+				return item
+
+	def set_rate_for_supplied_items(self, rm_obj, item_row):
+		args = frappe._dict(
+			{
+				"item_code": rm_obj.rm_item_code,
+				"warehouse": self.supplier_warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"qty": -1 * flt(rm_obj.consumed_qty),
+				"actual_qty": -1 * flt(rm_obj.consumed_qty),
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"voucher_detail_no": item_row.name,
+				"company": self.company,
+				"allow_zero_valuation": 1,
+			}
+		)
+
+		if rm_obj.serial_and_batch_bundle:
+			args["serial_and_batch_bundle"] = rm_obj.serial_and_batch_bundle
+
+		if rm_obj.use_serial_batch_fields:
+			args["batch_no"] = rm_obj.batch_no
+			args["serial_no"] = rm_obj.serial_no
+
+		rm_obj.rate = get_incoming_rate(args)
 
 	def __set_batch_nos(self, bom_item, item_row, rm_obj, qty):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
@@ -1209,6 +1235,17 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 def make_return_stock_entry_for_subcontract(
 	available_materials, order_doc, rm_details, order_doctype="Subcontracting Order"
 ):
+	def post_process(source_doc, target_doc):
+		target_doc.purpose = "Material Transfer"
+
+		if source_doc.doctype == "Purchase Order":
+			target_doc.purchase_order = source_doc.name
+		else:
+			target_doc.subcontracting_order = source_doc.name
+
+		target_doc.company = source_doc.company
+		target_doc.is_return = 1
+
 	ste_doc = get_mapped_doc(
 		order_doctype,
 		order_doc.name,
@@ -1219,18 +1256,13 @@ def make_return_stock_entry_for_subcontract(
 			},
 		},
 		ignore_child_tables=True,
+		postprocess=post_process,
 	)
 
-	ste_doc.purpose = "Material Transfer"
-
 	if order_doctype == "Purchase Order":
-		ste_doc.purchase_order = order_doc.name
 		rm_detail_field = "po_detail"
 	else:
-		ste_doc.subcontracting_order = order_doc.name
 		rm_detail_field = "sco_rm_detail"
-	ste_doc.company = order_doc.company
-	ste_doc.is_return = 1
 
 	for _key, value in available_materials.items():
 		if not value.qty:

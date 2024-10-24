@@ -1,11 +1,11 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import copy
 import unittest
 
 import frappe
 from frappe import _
+from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -20,9 +20,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestPOSInvoice(unittest.TestCase):
+class TestPOSInvoice(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
+		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
 		frappe.db.sql("delete from `tabTax Rule`")
 
@@ -248,6 +250,7 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -289,6 +292,7 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -377,6 +381,7 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -431,6 +436,7 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -482,6 +488,7 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -512,6 +519,7 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+			self,
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -901,7 +909,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 		frappe.db.savepoint("before_test_delivered_serial_no_case")
 		try:
-			se = make_serialized_item()
+			se = make_serialized_item(self)
 			serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
 
 			dn = create_delivery_note(item_code="_Test Serialized Item With Series", serial_no=[serial_no])

@@ -19,6 +19,24 @@ frappe.ui.form.on("Period Closing Voucher", {
 		});
 	},
 
+	fiscal_year: function (frm) {
+		if (frm.doc.fiscal_year) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.get_period_start_end_date",
+				args: {
+					fiscal_year: frm.doc.fiscal_year,
+					company: frm.doc.company,
+				},
+				callback: function (r) {
+					if (r.message) {
+						frm.set_value("period_start_date", r.message[0]);
+						frm.set_value("period_end_date", r.message[1]);
+					}
+				},
+			});
+		}
+	},
+
 	refresh: function (frm) {
 		if (frm.doc.docstatus > 0) {
 			frm.add_custom_button(

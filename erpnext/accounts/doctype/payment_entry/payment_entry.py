@@ -1263,6 +1263,10 @@ class PaymentEntry(AccountsController):
 		if not self.party_account:
 			return
 
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
+			"advance_payment_payable_doctypes"
+		)
+
 		if self.payment_type == "Receive":
 			against_account = self.paid_to
 		else:
@@ -1308,11 +1312,30 @@ class PaymentEntry(AccountsController):
 				{
 					dr_or_cr: allocated_amount_in_company_currency,
 					dr_or_cr + "_in_account_currency": d.allocated_amount,
-					"against_voucher_type": d.reference_doctype,
-					"against_voucher": d.reference_name,
 					"cost_center": cost_center,
 				}
 			)
+
+			if self.book_advance_payments_in_separate_party_account:
+				if d.reference_doctype in advance_payment_doctypes:
+					# Upon reconciliation, whole ledger will be reposted. So, reference to SO/PO is fine
+					gle.update(
+						{
+							"against_voucher_type": d.reference_doctype,
+							"against_voucher": d.reference_name,
+						}
+					)
+				else:
+					# Do not reference Invoices while Advance is in separate party account
+					gle.update({"against_voucher_type": self.doctype, "against_voucher": self.name})
+			else:
+				gle.update(
+					{
+						"against_voucher_type": d.reference_doctype,
+						"against_voucher": d.reference_name,
+					}
+				)
+
 			gl_entries.append(gle)
 
 		if self.unallocated_amount:
@@ -2565,7 +2588,9 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	account_balance = get_balance_on(party_account, date, cost_center=cost_center)
 	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
 	party_name = frappe.db.get_value(party_type, party, _party_name)
-	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
+	party_balance = get_balance_on(
+		party_type=party_type, party=party, company=company, cost_center=cost_center
+	)
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
 		bank_account = get_default_company_bank_account(company, party_type, party)

@@ -1,11 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
-import unittest
-
 import frappe
-from frappe.tests.utils import change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -13,25 +10,36 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInv
 from erpnext.exceptions import InvalidAccountCurrency
 
 
-class TestJournalEntry(unittest.TestCase):
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+class UnitTestJournalEntry(UnitTestCase):
+	"""
+	Unit tests for JournalEntry.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestJournalEntry(IntegrationTestCase):
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_journal_entry_with_against_jv(self):
-		jv_invoice = frappe.copy_doc(test_records[2])
-		base_jv = frappe.copy_doc(test_records[0])
+		jv_invoice = frappe.copy_doc(self.globalTestRecords["Journal Entry"][2])
+		base_jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
 		self.jv_against_voucher_testcase(base_jv, jv_invoice)
 
 	def test_jv_against_sales_order(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		sales_order = make_sales_order(do_not_save=True)
-		base_jv = frappe.copy_doc(test_records[0])
+		base_jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
 		self.jv_against_voucher_testcase(base_jv, sales_order)
 
 	def test_jv_against_purchase_order(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		purchase_order = create_purchase_order(do_not_save=True)
-		base_jv = frappe.copy_doc(test_records[1])
+		base_jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][1])
 		self.jv_against_voucher_testcase(base_jv, purchase_order)
 
 	def jv_against_voucher_testcase(self, base_jv, test_voucher):
@@ -580,6 +588,3 @@ def make_journal_entry(
 			jv.submit()
 
 	return jv
-
-
-test_records = frappe.get_test_records("Journal Entry")

@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, add_years, flt, getdate, nowdate, today
 
 from erpnext import get_default_cost_center
@@ -17,10 +17,19 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.stock.doctype.item.test_item import create_item
 
-test_dependencies = ["Item"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
-class TestPaymentReconciliation(FrappeTestCase):
+class UnitTestPaymentReconciliation(UnitTestCase):
+	"""
+	Unit tests for PaymentReconciliation.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestPaymentReconciliation(IntegrationTestCase):
 	def setUp(self):
 		self.create_company()
 		self.create_item()
@@ -1104,7 +1113,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		payment_vouchers = [x.get("reference_name") for x in pr.get("payments")]
 		self.assertCountEqual(payment_vouchers, [je2.name, pe2.name])
 
-	@change_settings(
+	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{
 			"allow_multi_currency_invoices_against_single_party_account": 1,
@@ -1986,13 +1995,15 @@ def make_period_closing_voucher(company, cost_center, posting_date=None, submit=
 		parent_account=parent_account,
 		doctype="Account",
 	)
+	fy = get_fiscal_year(posting_date, company=company)
 	pcv = frappe.get_doc(
 		{
 			"doctype": "Period Closing Voucher",
 			"transaction_date": posting_date or today(),
-			"posting_date": posting_date or today(),
+			"period_start_date": fy[1],
+			"period_end_date": fy[2],
 			"company": company,
-			"fiscal_year": get_fiscal_year(posting_date or today(), company=company)[0],
+			"fiscal_year": fy[0],
 			"cost_center": cost_center,
 			"closing_account_head": surplus_account,
 			"remarks": "test",

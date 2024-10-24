@@ -2,8 +2,17 @@
 # See license.txt
 
 # import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 
-class TestLedgerHealthMonitor(FrappeTestCase):
+class UnitTestLedgerHealthMonitor(UnitTestCase):
+	"""
+	Unit tests for LedgerHealthMonitor.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestLedgerHealthMonitor(IntegrationTestCase):
 	pass

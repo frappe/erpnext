@@ -257,9 +257,14 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "BOM"
 			and self.supplied_items
-			and not any(item.serial_and_batch_bundle for item in self.supplied_items)
 		):
-			self.supplied_items = []
+			if not any(
+				item.serial_and_batch_bundle or item.batch_no or item.serial_no
+				for item in self.supplied_items
+			):
+				self.supplied_items = []
+			else:
+				self.update_rate_for_supplied_items()
 
 	@frappe.whitelist()
 	def get_scrap_items(self, recalculate_rate=False):
@@ -702,86 +707,103 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 	else:
 		source_doc = source_name
 
-	if not source_doc.is_return:
-		if not target_doc:
-			target_doc = frappe.new_doc("Purchase Receipt")
-			target_doc.is_subcontracted = 1
-			target_doc.is_old_subcontracting_flow = 0
+	if source_doc.is_return:
+		return
 
-		target_doc = get_mapped_doc(
-			"Subcontracting Receipt",
-			source_doc.name,
-			{
-				"Subcontracting Receipt": {
-					"doctype": "Purchase Receipt",
-					"field_map": {
-						"posting_date": "posting_date",
-						"posting_time": "posting_time",
-						"name": "subcontracting_receipt",
-						"supplier_warehouse": "supplier_warehouse",
-					},
-					"field_no_map": ["total_qty", "total"],
-				},
-			},
-			target_doc,
-			ignore_child_tables=True,
+	po_sr_item_dict = {}
+	po_name = None
+	for item in source_doc.items:
+		if not item.purchase_order:
+			continue
+
+		if not po_name:
+			po_name = item.purchase_order
+
+		po_sr_item_dict[item.purchase_order_item] = {
+			"qty": flt(item.qty),
+			"rejected_qty": flt(item.rejected_qty),
+			"warehouse": item.warehouse,
+			"rejected_warehouse": item.rejected_warehouse,
+			"subcontracting_receipt_item": item.name,
+		}
+
+	if not po_name:
+		frappe.throw(
+			_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
+				source_doc.name
+			)
 		)
 
-		target_doc.currency = frappe.get_cached_value("Company", target_doc.company, "default_currency")
+	def update_item(obj, target, source_parent):
+		sr_item_details = po_sr_item_dict.get(obj.name)
+		ratio = flt(obj.qty) / flt(obj.fg_item_qty)
 
-		po_items_details = {}
-		for item in source_doc.items:
-			if item.purchase_order and item.purchase_order_item:
-				if item.purchase_order not in po_items_details:
-					po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
-					po_items_details[item.purchase_order] = {
-						po_item.name: po_item for po_item in po_doc.items
-					}
+		target.update(
+			{
+				"qty": ratio * sr_item_details["qty"],
+				"rejected_qty": ratio * sr_item_details["rejected_qty"],
+				"warehouse": sr_item_details["warehouse"],
+				"rejected_warehouse": sr_item_details["rejected_warehouse"],
+				"subcontracting_receipt_item": sr_item_details["subcontracting_receipt_item"],
+			}
+		)
 
-				if po_item := po_items_details[item.purchase_order].get(item.purchase_order_item):
-					conversion_factor = flt(po_item.qty) / flt(po_item.fg_item_qty)
-					item_row = {
-						"item_code": po_item.item_code,
-						"item_name": po_item.item_name,
-						"conversion_factor": conversion_factor,
-						"qty": flt(item.qty) * conversion_factor,
-						"rejected_qty": flt(item.rejected_qty) * conversion_factor,
-						"uom": po_item.uom,
-						"rate": po_item.rate,
-						"warehouse": item.warehouse,
-						"rejected_warehouse": item.rejected_warehouse,
-						"purchase_order": item.purchase_order,
-						"purchase_order_item": item.purchase_order_item,
-						"subcontracting_receipt_item": item.name,
-						"project": po_item.project,
-					}
-					target_doc.append("items", item_row)
+	def post_process(source, target):
+		target.set_missing_values()
+		target.update(
+			{
+				"posting_date": source_doc.posting_date,
+				"posting_time": source_doc.posting_time,
+				"subcontracting_receipt": source_doc.name,
+				"supplier_warehouse": source_doc.supplier_warehouse,
+				"is_subcontracted": 1,
+				"is_old_subcontracting_flow": 0,
+				"currency": frappe.get_cached_value("Company", target.company, "default_currency"),
+			}
+		)
 
-		if not target_doc.items:
-			frappe.throw(
-				_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
-					source_doc.name
-				)
+	target_doc = get_mapped_doc(
+		"Purchase Order",
+		po_name,
+		{
+			"Purchase Order": {
+				"doctype": "Purchase Receipt",
+				"field_map": {"supplier_warehouse": "supplier_warehouse"},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Purchase Order Item": {
+				"doctype": "Purchase Receipt Item",
+				"field_map": {
+					"name": "purchase_order_item",
+					"parent": "purchase_order",
+					"bom": "bom",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: doc.name in po_sr_item_dict,
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		},
+		postprocess=post_process,
+	)
+
+	if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
+		target_doc.save()
+
+		if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+			try:
+				target_doc.submit()
+			except Exception as e:
+				target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+
+		if notify:
+			frappe.msgprint(
+				_("Purchase Receipt {0} created.").format(
+					get_link_to_form(target_doc.doctype, target_doc.name)
+				),
+				indicator="green",
+				alert=True,
 			)
 
-		target_doc.set_missing_values()
-
-		if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
-			target_doc.save()
-
-			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
-				try:
-					target_doc.submit()
-				except Exception as e:
-					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
-
-			if notify:
-				frappe.msgprint(
-					_("Purchase Receipt {0} created.").format(
-						get_link_to_form(target_doc.doctype, target_doc.name)
-					),
-					indicator="green",
-					alert=True,
-				)
-
-		return target_doc
+	return target_doc

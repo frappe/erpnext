@@ -1,0 +1,13 @@
+[[Brand]]
+brand = "_Test Brand"
+
+[[Brand]]
+brand = "_Test Brand With Item Defaults"
+[[Brand.brand_defaults]]
+company = "_Test Company"
+expense_account = "_Test Account Cost for Goods Sold - _TC"
+income_account = "_Test Account Sales - _TC"
+buying_cost_center = "_Test Cost Center - _TC"
+selling_cost_center = "_Test Cost Center - _TC"
+
+

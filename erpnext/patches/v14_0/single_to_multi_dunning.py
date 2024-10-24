@@ -66,7 +66,7 @@ def get_accounts_closing_date():
 	)  # always returns datetime.date
 
 	period_closing_date = frappe.db.get_value(
-		"Period Closing Voucher", {"docstatus": 1}, "posting_date", order_by="posting_date desc"
+		"Period Closing Voucher", {"docstatus": 1}, "period_end_date", order_by="period_end_date desc"
 	)
 
 	# Set most recent frozen/closing date as filter

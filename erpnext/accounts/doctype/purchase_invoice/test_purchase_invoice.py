@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
@@ -38,18 +38,19 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.stock.tests.test_utils import StockTestMixin
 
-test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
-test_ignore = ["Serial No"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
+IGNORE_TEST_RECORD_DEPENDENCIES = ["Serial No"]
 
 
-class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
+class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
 		unlink_payment_on_cancel_of_invoice()
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
 	@classmethod
-	def tearDownClass(self):
+	def tearDownClass(cls):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def tearDown(self):
@@ -115,7 +116,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		self.assertTrue(not cint(erpnext.is_perpetual_inventory_enabled(pi.company)))
 		pi.insert()
 		pi.submit()
@@ -156,7 +157,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.check_gle_for_pi(pi.name)
 
 	def test_terms_added_after_save(self):
-		pi = frappe.copy_doc(test_records[1])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][1])
 		pi.insert()
 		self.assertTrue(pi.payment_schedule)
 		self.assertEqual(pi.payment_schedule[0].due_date, pi.due_date)
@@ -383,13 +384,13 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
 	def test_purchase_invoice_change_naming_series(self):
-		pi = frappe.copy_doc(test_records[1])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][1])
 		pi.insert()
 		pi.naming_series = "TEST-"
 
 		self.assertRaises(frappe.CannotChangeConstantError, pi.save)
 
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		pi.insert()
 		pi.load_from_db()
 
@@ -429,7 +430,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			self.assertEqual(expected_values[i][2], gle.credit)
 
 	def test_purchase_invoice_calculation(self):
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		pi.insert()
 		pi.load_from_db()
 
@@ -461,17 +462,15 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_purchase_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
-			test_records as jv_test_records,
-		)
-
-		jv = frappe.copy_doc(jv_test_records[1])
+		jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][1])
 		jv.insert()
 		jv.submit()
 
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		pi.disable_rounded_total = 1
 		pi.allocate_advances_automatically = 0
 		pi.append(
@@ -516,17 +515,15 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			)
 		)
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_invoice_with_advance_and_multi_payment_terms(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
-			test_records as jv_test_records,
-		)
-
-		jv = frappe.copy_doc(jv_test_records[1])
+		jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][1])
 		jv.insert()
 		jv.submit()
 
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		pi.disable_rounded_total = 1
 		pi.allocate_advances_automatically = 0
 		pi.append(
@@ -941,16 +938,12 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
-			test_records as jv_test_records,
-		)
-
-		jv = frappe.copy_doc(jv_test_records[1])
+		jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][1])
 		jv.accounts[0].is_advance = "Yes"
 		jv.insert()
 		jv.submit()
 
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		pi.append(
 			"advances",
 			{
@@ -1000,7 +993,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pe.insert()
 		pe.submit()
 
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		pi.is_pos = 0
 		pi.append(
 			"advances",
@@ -1036,7 +1029,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			shipping_rule_type="Buying", shipping_rule_name="Shipping Rule - Purchase Invoice Test"
 		)
 
-		pi = frappe.copy_doc(test_records[0])
+		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 
 		pi.shipping_rule = shipping_rule.name
 		pi.insert()
@@ -1251,7 +1244,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_gain_loss_with_advance_entry(self):
 		unlink_enabled = frappe.db.get_single_value(
 			"Accounts Settings", "unlink_payment_on_cancellation_of_invoice"
@@ -1452,7 +1447,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1}
+	)
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
@@ -2025,7 +2022,17 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		]
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
 
-	@change_settings("Buying Settings", {"supplier_group": None})
+	def test_create_purchase_invoice_without_mandatory(self):
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.flags.ignore_mandatory = True
+		pi.insert(ignore_permissions=True)
+
+		self.assertTrue(pi.name)
+		self.assertEqual(pi.docstatus, 0)
+
+		pi.delete()
+
+	@IntegrationTestCase.change_settings("Buying Settings", {"supplier_group": None})
 	def test_purchase_invoice_without_supplier_group(self):
 		# Create a Supplier
 		test_supplier_name = "_Test Supplier Without Supplier Group"
@@ -2361,6 +2368,24 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(len(actual), 3)
 		self.assertEqual(expected, actual)
 
+	def test_last_purchase_rate(self):
+		item = create_item("_Test Item For Last Purchase Rate from PI", is_stock_item=1)
+		pi1 = make_purchase_invoice(item_code=item.item_code, qty=10, rate=100)
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 100)
+
+		pi2 = make_purchase_invoice(item_code=item.item_code, qty=10, rate=200)
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 200)
+
+		pi2.cancel()
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 100)
+
+		pi1.cancel()
+		item.reload()
+		self.assertEqual(item.last_purchase_rate, 0)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
@@ -2626,6 +2651,3 @@ def toggle_provisional_accounting_setting(**args):
 	company.enable_provisional_accounting_for_non_stock_items = args.enable or 0
 	company.default_provisional_account = args.provisional_account
 	company.save()
-
-
-test_records = frappe.get_test_records("Purchase Invoice")

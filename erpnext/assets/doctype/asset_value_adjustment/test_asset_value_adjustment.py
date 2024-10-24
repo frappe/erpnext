@@ -1,9 +1,9 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
@@ -16,7 +16,7 @@ from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_r
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
-class TestAssetValueAdjustment(unittest.TestCase):
+class TestAssetValueAdjustment(IntegrationTestCase):
 	def setUp(self):
 		create_asset_data()
 		frappe.db.set_value(
@@ -153,7 +153,9 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		post_depreciation_entries(getdate("2023-08-21"))
 
 		# create asset repair
-		asset_repair = create_asset_repair(asset=asset_doc, capitalize_repair_cost=1, submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset_doc, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
 
 		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
 		self.assertEqual(first_asset_depr_schedule.status, "Active")
@@ -177,8 +179,8 @@ class TestAssetValueAdjustment(unittest.TestCase):
 
 		# Test gl entry creted from asset value adjustemnet
 		expected_gle = (
-			("_Test Difference Account - _TC", 5625.29, 0.0),
-			("_Test Fixed Asset - _TC", 0.0, 5625.29),
+			("_Test Difference Account - _TC", 5175.29, 0.0),
+			("_Test Fixed Asset - _TC", 0.0, 5175.29),
 		)
 
 		gle = frappe.db.sql(
@@ -244,12 +246,12 @@ class TestAssetValueAdjustment(unittest.TestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 8133.33, 73508.04],
-			["2023-09-30", 8133.33, 81641.37],
-			["2023-10-31", 8133.33, 89774.7],
-			["2023-11-30", 8133.33, 97908.03],
-			["2023-12-31", 8133.33, 106041.36],
-			["2024-01-15", 8133.35, 114174.71],
+			["2023-08-31", 8208.33, 73583.04],
+			["2023-09-30", 8208.33, 81791.37],
+			["2023-10-31", 8208.33, 89999.7],
+			["2023-11-30", 8208.33, 98208.03],
+			["2023-12-31", 8208.33, 106416.36],
+			["2024-01-15", 8208.35, 114624.71],
 		]
 
 		schedules = [

@@ -1,0 +1,18 @@
+[["Sales Person"]]
+employee = "_T-Employee-00001"
+is_group = 0
+parent_sales_person = "Sales Team"
+sales_person_name = "_Test Sales Person"
+
+[["Sales Person"]]
+employee = "_T-Employee-00002"
+is_group = 0
+parent_sales_person = "Sales Team"
+sales_person_name = "_Test Sales Person 1"
+
+[["Sales Person"]]
+employee = "_T-Employee-00003"
+is_group = 0
+parent_sales_person = "Sales Team"
+sales_person_name = "_Test Sales Person 2"
+

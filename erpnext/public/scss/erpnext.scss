@@ -552,8 +552,16 @@ body[data-route="pos"] {
 	padding-bottom: 25px;
 }
 
+.workstation-image {
+	cursor: pointer;
+}
+
+.workstation-image-container {
+	height: 4.5rem;
+}
+
 .workstation-image-cls {
-	height: 9rem;
+	padding-top: 2px;
 }
 
 .plant-floor-filter {
@@ -565,7 +573,11 @@ body[data-route="pos"] {
 .plant-floor-container {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
-	gap: var(--margin-lg);
+	gap: 6px;
+}
+
+.workstation-off {
+	opacity: 0.6;
 }
 
 @media screen and (max-width: 620px) {

@@ -6,19 +6,29 @@ import unittest
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
-test_dependencies = ["Supplier Group", "Customer Group"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Supplier Group", "Customer Group"]
 
 
-class TestTaxWithholdingCategory(FrappeTestCase):
+class UnitTestTaxWithholdingCategory(UnitTestCase):
+	"""
+	Unit tests for TaxWithholdingCategory.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestTaxWithholdingCategory(IntegrationTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
+		super().setUpClass()
 		# create relevant supplier, etc
 		create_records()
 		create_tax_withholding_category_records()
@@ -204,6 +214,46 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 		tcs_charged = sum([d.base_tax_amount for d in si2.taxes if d.account_head == "TCS - _TC"])
 		tcs_charged += sum([d.base_tax_amount for d in si3.taxes if d.account_head == "TCS - _TC"])
 		self.assertEqual(tcs_charged, 1500)
+
+		# cancel invoice and payments to avoid clashing
+		for d in reversed(vouchers):
+			d.reload()
+			d.cancel()
+
+	def test_tcs_on_allocated_advance_payments(self):
+		frappe.db.set_value(
+			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
+		)
+
+		vouchers = []
+
+		# create advance payment
+		pe = create_payment_entry(
+			payment_type="Receive", party_type="Customer", party="Test TCS Customer", paid_amount=30000
+		)
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_to = "Cash - _TC"
+		pe.submit()
+		vouchers.append(pe)
+
+		si = create_sales_invoice(customer="Test TCS Customer", rate=50000)
+		advances = si.get_advance_entries()
+		si.append(
+			"advances",
+			{
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"advance_amount": advances[0].amount,
+				"allocated_amount": 30000,
+			},
+		)
+		si.submit()
+		vouchers.append(si)
+
+		# assert tax collection on total invoice ,advance payment adjusted should be excluded.
+		tcs_charged = sum([d.base_tax_amount for d in si.taxes if d.account_head == "TCS - _TC"])
+		# tcs = (inv amt)50000+(adv amt)30000-(adv adj) 30000 - threshold(30000) * rate 10%
+		self.assertEqual(tcs_charged, 2000)
 
 		# cancel invoice and payments to avoid clashing
 		for d in reversed(vouchers):

@@ -6,7 +6,7 @@ from collections import deque
 from functools import partial
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, timeout
+from frappe.tests import IntegrationTestCase, UnitTestCase, timeout
 from frappe.utils import cstr, flt
 
 from erpnext.controllers.tests.test_subcontracting_controller import (
@@ -21,11 +21,19 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 
-test_records = frappe.get_test_records("BOM")
-test_dependencies = ["Item", "Quality Inspection Template"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Quality Inspection Template"]
 
 
-class TestBOM(FrappeTestCase):
+class UnitTestBom(UnitTestCase):
+	"""
+	Unit tests for Bom.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
+
+
+class TestBOM(IntegrationTestCase):
 	@timeout
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
@@ -33,8 +41,8 @@ class TestBOM(FrappeTestCase):
 		items_dict = get_bom_items_as_dict(
 			bom=get_default_bom(), company="_Test Company", qty=1, fetch_exploded=0
 		)
-		self.assertTrue(test_records[2]["items"][0]["item_code"] in items_dict)
-		self.assertTrue(test_records[2]["items"][1]["item_code"] in items_dict)
+		self.assertTrue(self.globalTestRecords["BOM"][2]["items"][0]["item_code"] in items_dict)
+		self.assertTrue(self.globalTestRecords["BOM"][2]["items"][1]["item_code"] in items_dict)
 		self.assertEqual(len(items_dict.values()), 2)
 
 	@timeout
@@ -44,10 +52,10 @@ class TestBOM(FrappeTestCase):
 		items_dict = get_bom_items_as_dict(
 			bom=get_default_bom(), company="_Test Company", qty=1, fetch_exploded=1
 		)
-		self.assertTrue(test_records[2]["items"][0]["item_code"] in items_dict)
-		self.assertFalse(test_records[2]["items"][1]["item_code"] in items_dict)
-		self.assertTrue(test_records[0]["items"][0]["item_code"] in items_dict)
-		self.assertTrue(test_records[0]["items"][1]["item_code"] in items_dict)
+		self.assertTrue(self.globalTestRecords["BOM"][2]["items"][0]["item_code"] in items_dict)
+		self.assertFalse(self.globalTestRecords["BOM"][2]["items"][1]["item_code"] in items_dict)
+		self.assertTrue(self.globalTestRecords["BOM"][0]["items"][0]["item_code"] in items_dict)
+		self.assertTrue(self.globalTestRecords["BOM"][0]["items"][1]["item_code"] in items_dict)
 		self.assertEqual(len(items_dict.values()), 3)
 
 	@timeout
@@ -105,7 +113,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_bom_cost(self):
-		bom = frappe.copy_doc(test_records[2])
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
 		bom.insert()
 
 		raw_material_cost = 0.0
@@ -134,7 +142,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_bom_cost_with_batch_size(self):
-		bom = frappe.copy_doc(test_records[2])
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
 		bom.docstatus = 0
 		op_cost = 0.0
 		for op_row in bom.operations:
@@ -164,7 +172,7 @@ class TestBOM(FrappeTestCase):
 			item_price.price_list_rate = rate
 			item_price.insert()
 
-		bom = frappe.copy_doc(test_records[2])
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
 		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Price List"
 		bom.buying_price_list = "_Test Price List"
@@ -190,7 +198,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_bom_cost_multi_uom_based_on_valuation_rate(self):
-		bom = frappe.copy_doc(test_records[2])
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
 		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Valuation Rate"
 		bom.items[0].uom = "_Test UOM 1"
@@ -210,7 +218,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_bom_cost_with_fg_based_operating_cost(self):
-		bom = frappe.copy_doc(test_records[4])
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][4])
 		bom.insert()
 
 		raw_material_cost = 0.0
@@ -565,7 +573,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_clear_inpection_quality(self):
-		bom = frappe.copy_doc(test_records[2], ignore_no_copy=True)
+		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2], ignore_no_copy=True)
 		bom.docstatus = 0
 		bom.is_default = 0
 		bom.quality_inspection_template = "_Test Quality Inspection Template"

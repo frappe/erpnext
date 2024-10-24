@@ -2,8 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.test_runner import make_test_records
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -11,15 +10,17 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
 
-test_records = frappe.get_test_records("Warehouse")
+
+class UnitTestWarehouse(UnitTestCase):
+	"""
+	Unit tests for Warehouse.
+	Use this class for testing individual functions and methods.
+	"""
+
+	pass
 
 
-class TestWarehouse(FrappeTestCase):
-	def setUp(self):
-		super().setUp()
-		if not frappe.get_value("Item", "_Test Item"):
-			make_test_records("Item")
-
+class TestWarehouse(IntegrationTestCase):
 	def test_parent_warehouse(self):
 		parent_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
 		self.assertEqual(parent_warehouse.is_group, 1)

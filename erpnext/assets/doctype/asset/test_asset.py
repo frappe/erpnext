@@ -1,9 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -42,9 +42,10 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
-class AssetSetup(unittest.TestCase):
+class AssetSetup(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		enable_cwip_accounting("Computers")

@@ -125,7 +125,7 @@ class RepostItemValuation(Document):
 
 		query = (
 			frappe.qb.from_(table)
-			.select(Max(table.posting_date))
+			.select(Max(table.period_end_date))
 			.where((table.company == company) & (table.docstatus == 1))
 		).run()
 

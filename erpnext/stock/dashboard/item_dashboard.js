@@ -48,17 +48,18 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			let actual_qty = unescape(element.attr("data-actual_qty"));
 			let disable_quick_entry = Number(unescape(element.attr("data-disable_quick_entry")));
 			let entry_type = action === "Move" ? "Material Transfer" : "Material Receipt";
+			let stock_uom = unescape(element.attr("data-stock-uom"));
 
 			if (disable_quick_entry) {
 				open_stock_entry(item, warehouse, entry_type);
 			} else {
 				if (action === "Add") {
 					let rate = unescape($(this).attr("data-rate"));
-					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function () {
+					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, stock_uom, function () {
 						me.refresh();
 					});
 				} else {
-					erpnext.stock.move_item(item, warehouse, null, actual_qty, null, function () {
+					erpnext.stock.move_item(item, warehouse, null, actual_qty, null, stock_uom, function () {
 						me.refresh();
 					});
 				}
@@ -207,7 +208,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 	}
 };
 
-erpnext.stock.move_item = function (item, source, target, actual_qty, rate, callback) {
+erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stock_uom, callback) {
 	var dialog = new frappe.ui.Dialog({
 		title: target ? __("Add Item") : __("Move Item"),
 		fields: [
@@ -295,6 +296,8 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 			let row = frappe.model.add_child(doc, "items");
 			row.item_code = dialog.get_value("item_code");
 			row.s_warehouse = dialog.get_value("source");
+			row.stock_uom = stock_uom;
+			row.uom = stock_uom;
 			row.t_warehouse = dialog.get_value("target");
 			row.qty = dialog.get_value("qty");
 			row.conversion_factor = 1;

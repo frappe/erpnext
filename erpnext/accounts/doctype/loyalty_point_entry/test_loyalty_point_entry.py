@@ -1,18 +1,19 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import create_records
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 
-class TestLoyaltyPointEntry(unittest.TestCase):
+class TestLoyaltyPointEntry(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		# Create test records
 		create_records()
 		cls.loyalty_program_name = "Test Single Loyalty"

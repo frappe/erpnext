@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import IfNull
 
 pricing_rule_fields = [
 	"apply_on",
@@ -162,22 +164,50 @@ class PromotionalScheme(Document):
 		if self.is_new():
 			return
 
-		transaction_exists = False
-		docnames = []
+		invalid_pricing_rule = self.get_invalid_pricing_rules()
 
-		# If user has changed applicable for
-		if self.get_doc_before_save() and self.get_doc_before_save().applicable_for == self.applicable_for:
+		if not invalid_pricing_rule:
 			return
 
-		docnames = frappe.get_all("Pricing Rule", filters={"promotional_scheme": self.name})
+		if frappe.db.exists(
+			"Pricing Rule Detail",
+			{
+				"pricing_rule": ["in", invalid_pricing_rule],
+				"docstatus": ["<", 2],
+			},
+		):
+			raise_for_transaction_exists(self.name)
 
-		for docname in docnames:
-			if frappe.db.exists("Pricing Rule Detail", {"pricing_rule": docname.name, "docstatus": ("<", 2)}):
-				raise_for_transaction_exists(self.name)
+		for doc in invalid_pricing_rule:
+			frappe.delete_doc("Pricing Rule", doc)
 
-		if docnames and not transaction_exists:
-			for docname in docnames:
-				frappe.delete_doc("Pricing Rule", docname.name)
+		frappe.msgprint(
+			_("The following invalid Pricing Rules are deleted:")
+			+ "<br><br><ul><li>"
+			+ "</li><li>".join(invalid_pricing_rule)
+			+ "</li></ul>"
+		)
+
+	def get_invalid_pricing_rules(self):
+		pr = frappe.qb.DocType("Pricing Rule")
+		conditions = []
+		conditions.append(pr.promotional_scheme == self.name)
+
+		if self.applicable_for:
+			applicable_for = frappe.scrub(self.applicable_for)
+			applicable_for_list = [d.get(applicable_for) for d in self.get(applicable_for)]
+
+			conditions.append(
+				(IfNull(pr.applicable_for, "") != self.applicable_for)
+				| (
+					(IfNull(pr.applicable_for, "") == self.applicable_for)
+					& IfNull(pr[applicable_for], "").notin(applicable_for_list)
+				)
+			)
+		else:
+			conditions.append(IfNull(pr.applicable_for, "") != "")
+
+		return frappe.qb.from_(pr).select(pr.name).where(Criterion.all(conditions)).run(pluck=True)
 
 	def on_update(self):
 		self.validate()

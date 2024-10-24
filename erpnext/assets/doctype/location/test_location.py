@@ -1,15 +1,13 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import json
 import unittest
 
 import frappe
+from frappe.tests import IntegrationTestCase
 
-test_records = frappe.get_test_records("Location")
 
-
-class TestLocation(unittest.TestCase):
+class TestLocation(IntegrationTestCase):
 	def runTest(self):
 		locations = ["Basil Farm", "Division 1", "Field 1", "Block 1"]
 		area = 0

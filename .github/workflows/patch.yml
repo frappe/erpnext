@@ -137,7 +137,8 @@ jobs:
           update_to_version 15
 
           echo "Updating to latest version"
-          git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
+          git -C "apps/frappe" fetch --depth 1 upstream "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
+          git -C "apps/frappe" checkout -q -f FETCH_HEAD
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
           pgrep honcho | xargs kill

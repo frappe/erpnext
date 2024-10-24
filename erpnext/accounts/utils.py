@@ -486,10 +486,14 @@ def reconcile_against_document(
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
 
-		# For payments with `Advance` in separate account feature enabled, only new ledger entries are posted for each reference.
-		# No need to cancel/delete payment ledger entries
+		# When Advance is allocated from an Order to an Invoice
+		# whole ledger must be reposted
+		repost_whole_ledger = any([x.voucher_detail_no for x in entries])
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
-			doc.make_advance_gl_entries(cancel=1)
+			if repost_whole_ledger:
+				doc.make_gl_entries(cancel=1)
+			else:
+				doc.make_advance_gl_entries(cancel=1)
 		else:
 			_delete_pl_entries(voucher_type, voucher_no)
 
@@ -523,9 +527,14 @@ def reconcile_against_document(
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
 
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
-			# both ledgers must be posted to for `Advance` in separate account feature
-			# TODO: find a more efficient way post only for the new linked vouchers
-			doc.make_advance_gl_entries()
+			# When Advance is allocated from an Order to an Invoice
+			# whole ledger must be reposted
+			if repost_whole_ledger:
+				doc.make_gl_entries()
+			else:
+				# both ledgers must be posted to for `Advance` in separate account feature
+				# TODO: find a more efficient way post only for the new linked vouchers
+				doc.make_advance_gl_entries()
 		else:
 			gl_map = doc.build_gl_map()
 			# Make sure there is no overallocation
@@ -1566,12 +1575,16 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 	return matched
 
 
-def get_stock_accounts(company, voucher_type=None, voucher_no=None):
+def get_stock_accounts(company, voucher_type=None, voucher_no=None, accounts=None):
 	stock_accounts = [
 		d.name
 		for d in frappe.db.get_all("Account", {"account_type": "Stock", "company": company, "is_group": 0})
 	]
-	if voucher_type and voucher_no:
+
+	if accounts:
+		stock_accounts = [row.account for row in accounts if row.account in stock_accounts]
+
+	elif voucher_type and voucher_no:
 		if voucher_type == "Journal Entry":
 			stock_accounts = [
 				d.account

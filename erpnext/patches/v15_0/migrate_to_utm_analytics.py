@@ -10,6 +10,8 @@ def execute():
 	Remove Lead Source doctype and use UTM Source Instead
 	Ensure that for each Campaign, a UTM Campaign is also set
 	"""
+	if not frappe.db.exists("DocType", "Lead Source") or not frappe.db.exists("DocType", "UTM Source"):
+		return
 
 	ls = frappe.qb.DocType("Lead Source")
 	ms = frappe.qb.DocType("UTM Source")

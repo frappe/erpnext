@@ -447,9 +447,11 @@ frappe.ui.form.on("Stock Entry", {
 						source_doctype: "Stock Entry",
 						target: frm,
 						date_field: "posting_date",
+						read_only_setters: ["stock_entry_type", "purpose", "add_to_transit"],
 						setters: {
 							stock_entry_type: "Material Transfer",
 							purpose: "Material Transfer",
+							add_to_transit: 1,
 						},
 						get_query_filters: {
 							docstatus: 1,
@@ -1296,7 +1298,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		this.frm.cscript.toggle_enable_bom();
 
-		if (doc.purpose == "Send to Subcontractor") {
+		if (erpnext.stock.is_subcontracting_or_return_transfer(doc)) {
 			doc.customer =
 				doc.customer_name =
 				doc.customer_address =
@@ -1360,6 +1362,10 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			});
 		}
 	});
+};
+
+erpnext.stock.is_subcontracting_or_return_transfer = (doc) => {
+	return doc.purpose == "Send to Subcontractor" || (doc.purpose == "Material Transfer" && doc.is_return);
 };
 
 function attach_bom_items(bom_no) {

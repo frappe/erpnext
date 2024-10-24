@@ -311,8 +311,11 @@ class SalesInvoice(SellingController):
 
 		self.validate_delivery_note()
 
+		is_deferred_invoice = any(d.get("enable_deferred_revenue") for d in self.get("items"))
+
 		# validate service stop date to lie in between start and end date
-		validate_service_stop_date(self)
+		if is_deferred_invoice:
+			validate_service_stop_date(self)
 
 		if not self.is_opening:
 			self.is_opening = "No"
@@ -376,7 +379,7 @@ class SalesInvoice(SellingController):
 
 	def validate_income_account(self):
 		for item in self.get("items"):
-			validate_account_head(item.idx, item.income_account, self.company, "Income")
+			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
 	def set_tax_withholding(self):
 		if self.get("is_opening") == "Yes":
@@ -1354,14 +1357,15 @@ class SalesInvoice(SellingController):
 
 					else:
 						if asset.calculate_depreciation:
-							notes = _(
-								"This schedule was created when Asset {0} was sold through Sales Invoice {1}."
-							).format(
-								get_link_to_form(asset.doctype, asset.name),
-								get_link_to_form(self.doctype, self.get("name")),
-							)
-							depreciate_asset(asset, self.posting_date, notes)
-							asset.reload()
+							if not asset.status == "Fully Depreciated":
+								notes = _(
+									"This schedule was created when Asset {0} was sold through Sales Invoice {1}."
+								).format(
+									get_link_to_form(asset.doctype, asset.name),
+									get_link_to_form(self.doctype, self.get("name")),
+								)
+								depreciate_asset(asset, self.posting_date, notes)
+								asset.reload()
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset,

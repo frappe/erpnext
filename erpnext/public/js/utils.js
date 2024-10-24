@@ -935,6 +935,7 @@ erpnext.utils.map_current_doc = function (opts) {
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
+			read_only_setters: opts.read_only_setters,
 			data_fields: data_fields,
 			get_query: opts.get_query,
 			add_filters_group: 1,
@@ -976,41 +977,36 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
-frappe.form.link_formatters["Item"] = function (value, doc) {
-	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
-		return value + ": " + doc.item_name;
-	} else if (!value && doc.doctype && doc.item_name) {
-		// format blank value in child table
-		return doc.item_name;
-	} else {
-		// if value is blank in report view or item code and name are the same, return as is
-		return value;
-	}
+frappe.form.link_formatters["Item"] = function (value, doc, df) {
+	return add_link_title(value, doc, df, "item_name");
 };
 
-frappe.form.link_formatters["Employee"] = function (value, doc) {
-	if (doc && value && doc.employee_name && doc.employee_name !== value && doc.employee === value) {
-		return value + ": " + doc.employee_name;
-	} else if (!value && doc.doctype && doc.employee_name) {
-		// format blank value in child table
-		return doc.employee;
-	} else {
-		// if value is blank in report view or project name and name are the same, return as is
-		return value;
-	}
+frappe.form.link_formatters["Employee"] = function (value, doc, df) {
+	return add_link_title(value, doc, df, "employee_name");
 };
 
-frappe.form.link_formatters["Project"] = function (value, doc) {
-	if (doc && value && doc.project_name && doc.project_name !== value && doc.project === value) {
-		return value + ": " + doc.project_name;
-	} else if (!value && doc.doctype && doc.project_name) {
-		// format blank value in child table
-		return doc.project;
+frappe.form.link_formatters["Project"] = function (value, doc, df) {
+	return add_link_title(value, doc, df, "project_name");
+};
+
+/**
+ * Add a title to a link value based on the provided document and field information.
+ *
+ * @param {string} value - The value to add a link title to.
+ * @param {Object} doc - The document object.
+ * @param {Object} df - The field object.
+ * @param {string} title_field - The field name for the title.
+ * @returns {string} - The link value with the added title.
+ */
+function add_link_title(value, doc, df, title_field) {
+	if (doc && value && doc[title_field] && doc[title_field] !== value && doc[df.fieldname] === value) {
+		return value + ": " + doc[title_field];
+	} else if (!value && doc.doctype && doc[title_field]) {
+		return doc[title_field];
 	} else {
-		// if value is blank in report view or project name and name are the same, return as is
 		return value;
 	}
-};
+}
 
 // add description on posting time
 $(document).on("app_ready", function () {
