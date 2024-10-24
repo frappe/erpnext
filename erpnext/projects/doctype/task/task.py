@@ -8,7 +8,17 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, add_to_date, cstr, date_diff, flt, get_link_to_form, getdate, today
+from frappe.utils import (
+	add_days,
+	add_to_date,
+	cstr,
+	date_diff,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	today,
+)
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
 
@@ -249,11 +259,11 @@ class Task(NestedSet):
 				{"project": self.project, "task": self.name},
 				as_dict=1,
 			):
-				task = frappe.get_doc("Task", task_name.name)
+				task: "Task" = frappe.get_doc("Task", task_name.name)
 				if (
 					task.exp_start_date
 					and task.exp_end_date
-					and task.exp_start_date < end_date
+					and task.exp_start_date < get_datetime(end_date)
 					and task.status == "Open"
 				):
 					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
