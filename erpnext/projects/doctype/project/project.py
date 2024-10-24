@@ -101,30 +101,23 @@ class Project(Document):
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
 	def copy_from_template(self):
-		"""
-		Copy tasks from template
-		"""
-		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
-			# has a template, and no loaded tasks, so lets create
-			if not self.expected_start_date:
-				# project starts today
-				self.expected_start_date = today()
+		self.copy_data_from_project_template()
+		self.copy_tasks_from_project_template()
 
-			template = frappe.get_doc("Project Template", self.project_template)
+	def copy_tasks_from_project_template(self):
+		if not self._project_template_applies():
+			return
 
-			if not self.project_type:
-				self.project_type = template.project_type
+		template = frappe.get_doc("Project Template", self.project_template)
+		project_tasks = []
+		tmp_task_details = []
+		for task in template.tasks:
+			template_task_details = frappe.get_doc("Task", task.task)
+			tmp_task_details.append(template_task_details)
+			task = self.create_task_from_template(template_task_details)
+			project_tasks.append(task)
 
-			# create tasks from template
-			project_tasks = []
-			tmp_task_details = []
-			for task in template.tasks:
-				template_task_details = frappe.get_doc("Task", task.task)
-				tmp_task_details.append(template_task_details)
-				task = self.create_task_from_template(template_task_details)
-				project_tasks.append(task)
-
-			self.dependency_mapping(tmp_task_details, project_tasks)
+		self.dependency_mapping(tmp_task_details, project_tasks)
 
 	def create_task_from_template(self, task_details):
 		return frappe.get_doc(
@@ -145,6 +138,26 @@ class Project(Document):
 				priority=task_details.priority,
 			)
 		).insert()
+
+	def copy_data_from_project_template(self):
+		if not self._project_template_applies():
+			return
+
+		if not self.expected_start_date:
+			self.expected_start_date = today()
+
+		if not self.project_type:
+			self.project_type = frappe.db.get_value("Project Template", self.project_template, "project_type")
+
+	def _project_template_applies(self) -> bool:
+		"""Return True if the project template should be applied."""
+		if not self.project_template:
+			return False
+
+		if frappe.db.exists("Task", dict(project=self.name)):
+			return False
+
+		return True
 
 	def calculate_start_date(self, task_details):
 		self.start_date = add_days(self.expected_start_date, task_details.start)
@@ -204,8 +217,11 @@ class Project(Document):
 		self.update_costing()
 		self.db_update()
 
+	def before_insert(self):
+		self.copy_data_from_project_template()
+
 	def after_insert(self):
-		self.copy_from_template()
+		self.copy_tasks_from_project_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
