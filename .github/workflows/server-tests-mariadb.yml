@@ -1,6 +1,8 @@
 name: Server (Mariadb)
 
 on:
+  repository_dispatch:
+    types: [frappe-framework-change]
   pull_request:
     paths-ignore:
       - '**.js'
@@ -117,7 +119,7 @@ jobs:
           DB: mariadb
           TYPE: server
           FRAPPE_USER: ${{ github.event.inputs.user }}
-          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
+          FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
 
       - name: Run Tests
         run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --total-builds ${{ strategy.job-total }} --build-number ${{ matrix.container }}'
