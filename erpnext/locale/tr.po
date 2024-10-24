@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-10-20 09:35+0000\n"
-"PO-Revision-Date: 2024-10-21 02:26\n"
+"PO-Revision-Date: 2024-10-24 02:56\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -18845,7 +18845,7 @@ msgstr "Personelin Adı ve Soyadını Girin, buna göre Tam Adı güncellenecekt
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:201
 msgid "Enter Manually"
-msgstr ""
+msgstr "Elle Girin"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:279
 msgid "Enter Serial Nos"
@@ -20320,7 +20320,7 @@ msgstr "Ürün Kabul Deposu"
 #. Label of the fg_based_operating_cost (Check) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Finished Goods based Operating Cost"
-msgstr ""
+msgstr "Bitmiş Ürün Operasyon Maliyeti"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1343
 msgid "Finished Item {0} does not match with Work Order {1}"
@@ -28576,7 +28576,7 @@ msgstr "Operatör Hataları"
 #: erpnext/setup/doctype/company/company.py:597
 #: erpnext/setup/doctype/company/company.py:598
 msgid "Main"
-msgstr "Asıl"
+msgstr "Ana Kategori"
 
 #. Label of the main_cost_center (Link) field in DocType 'Cost Center
 #. Allocation'
@@ -29335,7 +29335,7 @@ msgstr "Kâr Türü"
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:15
 msgid "Margin View"
-msgstr ""
+msgstr "Kâr Görünümü"
 
 #. Label of the marital_status (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -47822,7 +47822,7 @@ msgstr "Hesabın Şirket Hesabı olarak ayarlanması Banka Mutabakatı için ger
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:29
 msgid "Setting up company"
-msgstr "Şirket Kuruluyor"
+msgstr "Şirket kuruluyor"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1002
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1049
@@ -50579,7 +50579,7 @@ msgstr "Abonelik Başlangıç Tarihi"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:729
 msgid "Subscription for Future dates cannot be processed."
-msgstr ""
+msgstr "İleri tarihler için abonelik işlemi yapılamaz."
 
 #: erpnext/selling/doctype/customer/customer_dashboard.py:28
 msgid "Subscriptions"
@@ -57144,7 +57144,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/data/designation.txt:31
 msgid "Vice President"
-msgstr ""
+msgstr "Başkan Yardımcısı"
 
 #. Name of a DocType
 #: erpnext/utilities/doctype/video/video.json
@@ -58627,7 +58627,7 @@ msgstr "İş İstasyonları"
 #: erpnext/setup/setup_wizard/setup_wizard.py:16
 #: erpnext/setup/setup_wizard/setup_wizard.py:41
 msgid "Wrapping up"
-msgstr "Son Dokunuşlar"
+msgstr "Son dokunuşlar"
 
 #. Label of the write_off (Section Break) field in DocType 'Journal Entry'
 #. Label of the column_break4 (Section Break) field in DocType 'POS Invoice'
