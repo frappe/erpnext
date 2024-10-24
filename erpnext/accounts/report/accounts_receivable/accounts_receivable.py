@@ -522,7 +522,8 @@ class ReceivablePayableReport:
 			from `tab{row.voucher_type}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
-				si.name = %s
+				si.name = %s and
+				si.is_return = 0
 			order by ps.paid_amount desc, due_date
 		""",
 			row.voucher_no,
