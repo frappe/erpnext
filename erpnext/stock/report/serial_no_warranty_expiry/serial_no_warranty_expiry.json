@@ -13,11 +13,11 @@
  "modified": "2024-09-26 13:07:23.451182",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Serial No Service Contract Expiry",
+ "name": "Serial No Warranty Expiry",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Serial No",
- "report_name": "Serial No Service Contract Expiry",
+ "report_name": "Serial No Warranty Expiry",
  "report_type": "Report Builder",
  "roles": [
   {
