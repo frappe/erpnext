@@ -144,14 +144,21 @@ def get_cash_flow_accounts():
 		"section_name": "Investing",
 		"section_footer": _("Net Cash from Investing"),
 		"section_header": _("Cash Flow from Investing"),
-		"account_types": [{"account_type": "Fixed Asset", "label": _("Net Change in Fixed Asset")}],
+		"account_types": [
+			{"account_type": "Current Asset", "label": _("Net Change in Current Assets")},
+			{"account_type": "Fixed Asset", "label": _("Net Change in Fixed Assets")},
+		],
 	}
 
 	financing_accounts = {
 		"section_name": "Financing",
 		"section_footer": _("Net Cash from Financing"),
 		"section_header": _("Cash Flow from Financing"),
-		"account_types": [{"account_type": "Equity", "label": _("Net Change in Equity")}],
+		"account_types": [
+			{"account_type": "Current Liability", "label": _("Net Change in Current Liabilities")},
+			{"account_type": "Liability", "label": _("Net Change in Liabilities")},
+			{"account_type": "Equity", "label": _("Net Change in Equity")},
+		],
 	}
 
 	# combine all cash flow accounts for iteration
