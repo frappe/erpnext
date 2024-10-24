@@ -17,6 +17,7 @@ class PurchaseTaxesandCharges(Document):
 		account_currency: DF.Link | None
 		account_head: DF.Link
 		add_deduct_tax: DF.Literal["Add", "Deduct"]
+		base_net_amount: DF.Currency
 		base_tax_amount: DF.Currency
 		base_tax_amount_after_discount_amount: DF.Currency
 		base_total: DF.Currency
@@ -35,6 +36,7 @@ class PurchaseTaxesandCharges(Document):
 		included_in_print_rate: DF.Check
 		is_tax_withholding_account: DF.Check
 		item_wise_tax_detail: DF.Code | None
+		net_amount: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

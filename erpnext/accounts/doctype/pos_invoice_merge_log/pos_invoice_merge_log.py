@@ -339,7 +339,13 @@ def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
 		if consolidated_tax_detail.get(item_code):
 			consolidated_tax_data = consolidated_tax_detail.get(item_code)
 			consolidated_tax_detail.update(
-				{item_code: [consolidated_tax_data[0], consolidated_tax_data[1] + tax_data[1]]}
+				{
+					item_code: [
+						consolidated_tax_data[0],
+						consolidated_tax_data[1] + tax_data[1],
+						consolidated_tax_data[2] + tax_data[2],
+					]
+				}
 			)
 		else:
 			consolidated_tax_detail.update({item_code: [tax_data[0], tax_data[1]]})
