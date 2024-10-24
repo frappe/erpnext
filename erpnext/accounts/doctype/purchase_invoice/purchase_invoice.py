@@ -1,7 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
 import frappe
 from frappe import _, qb, throw
 from frappe.model.mapper import get_mapped_doc
@@ -1933,6 +1931,37 @@ def make_stock_entry(source_name, target_doc=None):
 	)
 
 	return doc
+
+
+@frappe.whitelist()
+def link_purchase_order(pi_item_code, supplier):
+	purchase_order_items = frappe.get_all(
+		"Purchase Order",
+		filters=[
+			["supplier", "=", supplier],
+			["docstatus", "=", 1],
+			["Purchase Order Item", "item_code", "in", frappe.parse_json(pi_item_code)],
+		],
+		fields=[
+			"name",
+			"`tabPurchase Order Item`.item_code",
+			"`tabPurchase Order Item`.qty",
+			"`tabPurchase Order Item`.received_qty",
+		],
+		order_by="`tabPurchase Order`.creation asc",
+	)
+
+	item_to_po_map = {}
+	for item in purchase_order_items:
+		remaining_qty = item.qty - item.received_qty
+		if remaining_qty <= 0:
+			continue
+
+		item_to_po_map.setdefault(item.item_code, []).append(
+			{"purchase_order": item.name, "qty": (remaining_qty)}
+		)
+
+	return item_to_po_map
 
 
 @frappe.whitelist()
