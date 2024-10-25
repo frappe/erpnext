@@ -66,18 +66,16 @@ class CommonCode(Document):
 		code_column = column_map["code"]
 		description_column = column_map.get("description")
 
-		title = None
-		if title_column:
-			title = xml_element.find(f"./Value[@ColumnRef='{title_column}']/SimpleValue").text
-
 		self.common_code = xml_element.find(f"./Value[@ColumnRef='{code_column}']/SimpleValue").text
 
-		description = None
-		if description_column:
-			description = xml_element.find(f"./Value[@ColumnRef='{description_column}']/SimpleValue").text
+		if title_column:
+			simple_value_title = xml_element.find(f"./Value[@ColumnRef='{title_column}']/SimpleValue")
+			self.title = simple_value_title.text if simple_value_title is not None else self.common_code
 
-		self.title = title or self.common_code
-		self.description = description
+		if description_column:
+			simple_value_descr = xml_element.find(f"./Value[@ColumnRef='{description_column}']/SimpleValue")
+			self.description = simple_value_descr.text if simple_value_descr is not None else None
+
 		self.additional_data = etree.tostring(xml_element, encoding="unicode", pretty_print=True)
 
 

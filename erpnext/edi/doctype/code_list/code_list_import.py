@@ -119,14 +119,21 @@ def get_genericode_columns_and_examples(root):
 				example_values[column_id] = []
 				filterable_columns[column_id] = set()
 
-			value_text = value.find("./SimpleValue").text
-			filterable_columns[column_id].add(value_text)
+			simple_value = value.find("./SimpleValue")
+			if simple_value is None:
+				continue
+
+			filterable_columns[column_id].add(simple_value.text)
 
 	# Get example values (up to 3) and filter columns with cardinality <= 5
 	for row in root.findall(".//SimpleCodeList/Row")[:3]:
 		for value in row.findall("Value"):
 			column_id = value.get("ColumnRef")
-			example_values[column_id].append(value.find("./SimpleValue").text)
+			simple_value = value.find("./SimpleValue")
+			if simple_value is None:
+				continue
+
+			example_values[column_id].append(simple_value.text)
 
 	filterable_columns = {k: list(v) for k, v in filterable_columns.items() if len(v) <= 5}
 
