@@ -98,11 +98,14 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	if filter_conditions:
 		xpath_expr += "[" + " and ".join(filter_conditions) + "]"
 
-	for xml_element in root.xpath(xpath_expr):
+	elements = root.xpath(xpath_expr)
+	total_elements = len(elements)
+	for i, xml_element in enumerate(elements, start=1):
 		common_code: "CommonCode" = frappe.new_doc("Common Code")
 		common_code.code_list = code_list
 		common_code.from_genericode(column_map, xml_element)
 		common_code.save()
+		frappe.publish_progress(i / total_elements * 100, title=_("Importing Common Codes"))
 
 	return {"code_list": code_list, "common_codes_count": len(root.xpath(xpath_expr))}
 
