@@ -114,22 +114,18 @@ function show_column_selection_dialog(context) {
 					filters[field.replace("filter_", "")] = values[field];
 				}
 			}
-			frappe.call({
-				method: "erpnext.edi.doctype.code_list.code_list_import.process_genericode_import",
-				args: {
+			frappe
+				.xcall("erpnext.edi.doctype.code_list.code_list_import.process_genericode_import", {
 					code_list_name: context.code_list,
 					file_name: context.file,
 					code_column: values.code_column,
 					title_column: values.title_column,
 					description_column: values.description_column,
 					filters: filters,
-				},
-				callback: function (r) {
-					frappe.msgprint(
-						__("Import completed. {0} common codes created.", [r.message.common_codes_count])
-					);
-				},
-			});
+				})
+				.then((count) => {
+					frappe.msgprint(__("Import completed. {0} common codes created.", [count]));
+				});
 			d.hide();
 		},
 	});

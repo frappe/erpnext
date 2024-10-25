@@ -107,7 +107,7 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 		common_code.save()
 		frappe.publish_progress(i / total_elements * 100, title=_("Importing Common Codes"))
 
-	return {"code_list": code_list, "common_codes_count": len(root.xpath(xpath_expr))}
+	return total_elements
 
 
 def on_doctype_update():
