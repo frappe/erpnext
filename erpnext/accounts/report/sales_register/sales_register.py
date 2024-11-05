@@ -526,7 +526,8 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts, inclu
 	tax_details = frappe.db.sql(
 		"""select parent, account_head,
 		sum(base_tax_amount_after_discount_amount) as tax_amount
-		from `tabSales Taxes and Charges` where parent in (%s) group by parent, account_head"""
+		from `tabSales Taxes and Charges` where parent in (%s) and parenttype = 'Sales Invoice'
+		group by parent, account_head"""
 		% ", ".join(["%s"] * len(invoice_list)),
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,

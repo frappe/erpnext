@@ -79,6 +79,9 @@ def validate_returned_items(doc):
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		select_fields += ",rejected_qty, received_qty"
 
+	if doc.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+		select_fields += ",name"
+
 	for d in frappe.db.sql(
 		f"""select {select_fields} from `tab{doc.doctype} Item` where parent = %s""",
 		doc.return_against,
@@ -104,15 +107,24 @@ def validate_returned_items(doc):
 
 	items_returned = False
 	for d in doc.get("items"):
+		key = d.item_code
+		raise_exception = False
+		if doc.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+			field = frappe.scrub(doc.doctype) + "_item"
+			if d.get(field):
+				key = (d.item_code, d.get(field))
+				raise_exception = True
+
 		if d.item_code and (flt(d.qty) < 0 or flt(d.get("received_qty")) < 0):
-			if d.item_code not in valid_items:
-				frappe.throw(
+			if key not in valid_items:
+				frappe.msgprint(
 					_("Row # {0}: Returned Item {1} does not exist in {2} {3}").format(
 						d.idx, d.item_code, doc.doctype, doc.return_against
-					)
+					),
+					raise_exception=raise_exception,
 				)
 			else:
-				ref = valid_items.get(d.item_code, frappe._dict())
+				ref = valid_items.get(key, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
 
 				if (
@@ -193,8 +205,12 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+	key = ref_item_row.item_code
+	if ref_item_row.get("name"):
+		key = (ref_item_row.item_code, ref_item_row.name)
+
 	valid_items.setdefault(
-		ref_item_row.item_code,
+		key,
 		frappe._dict(
 			{
 				"qty": 0,
@@ -208,7 +224,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 			}
 		),
 	)
-	item_dict = valid_items[ref_item_row.item_code]
+	item_dict = valid_items[key]
 	item_dict["qty"] += ref_item_row.qty
 	item_dict["stock_qty"] += ref_item_row.get("stock_qty", 0)
 	if ref_item_row.get("rate", 0) > item_dict["rate"]:

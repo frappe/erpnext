@@ -14,7 +14,7 @@
   "amount",
   "difference_amount",
   "sec_break1",
-  "remark",
+  "remarks",
   "currency",
   "exchange_rate",
   "cost_center"
@@ -75,12 +75,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "remark",
-   "fieldtype": "Small Text",
-   "label": "Remark",
-   "read_only": 1
-  },
-  {
    "fieldname": "currency",
    "fieldtype": "Link",
    "hidden": 1,
@@ -105,12 +99,18 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "read_only": 1
   }
  ],
  "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-17 17:33:34.818530",
+ "modified": "2024-10-29 16:24:43.021230",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Payment",

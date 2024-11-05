@@ -323,6 +323,7 @@ class PaymentReconciliation(Document):
 								"posting_date": inv.posting_date,
 								"currency": inv.currency,
 								"cost_center": inv.cost_center,
+								"remarks": inv.remarks,
 							}
 						)
 					)

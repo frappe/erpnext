@@ -58,7 +58,7 @@ frappe.ui.form.on("Accounting Dimension", {
 	},
 
 	label: function (frm) {
-		frm.set_value("fieldname", frappe.model.scrub(frm.doc.label));
+		frm.set_value("fieldname", frm.doc.label.replace(/ /g, "_").replace(/-/g, "_").toLowerCase());
 	},
 
 	document_type: function (frm) {

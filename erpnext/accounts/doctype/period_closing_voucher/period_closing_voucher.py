@@ -354,7 +354,8 @@ class PeriodClosingVoucher(AccountsController):
 	def get_account_closing_balances(self):
 		pl_closing_entries = self.get_closing_entries_for_pl_accounts()
 		bs_closing_entries = self.get_closing_entries_for_balance_sheet_accounts()
-		closing_entries = pl_closing_entries + bs_closing_entries
+		closing_entries_for_closing_account = self.get_closing_entries_for_closing_account()
+		closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
 		return closing_entries
 
 	def get_closing_entries_for_pl_accounts(self):
@@ -404,11 +405,23 @@ class PeriodClosingVoucher(AccountsController):
 		self.update_default_dimensions(closing_entry, dimensions)
 		return closing_entry
 
+	def get_closing_entries_for_closing_account(self):
+		closing_entries = copy.deepcopy(self.closing_account_gle)
+		for d in closing_entries:
+			d.period_closing_voucher = self.name
+
+		return closing_entries
+
 	def is_first_period_closing_voucher(self):
-		return not frappe.db.exists(
+		first_pcv = frappe.db.get_value(
 			"Period Closing Voucher",
-			{"company": self.company, "docstatus": 1, "name": ("!=", self.name)},
+			{"company": self.company, "docstatus": 1},
+			"name",
+			order_by="period_end_date",
 		)
+
+		if not first_pcv or first_pcv == self.name:
+			return True
 
 	def cancel_gl_entries(self):
 		if self.get_gle_count_against_current_pcv() > 5000:
@@ -442,8 +455,7 @@ def process_gl_and_closing_entries(doc):
 			make_gl_entries(gl_entries, merge_entries=False)
 
 		closing_entries = doc.get_account_closing_balances()
-		if closing_entries:
-			make_closing_entries(closing_entries, doc.name, doc.company, doc.period_end_date)
+		make_closing_entries(closing_entries, doc.name, doc.company, doc.period_end_date)
 
 		frappe.db.set_value(doc.doctype, doc.name, "gle_processing_status", "Completed")
 	except Exception as e:

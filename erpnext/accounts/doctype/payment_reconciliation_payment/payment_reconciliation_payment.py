@@ -27,7 +27,7 @@ class PaymentReconciliationPayment(Document):
 		reference_name: DF.DynamicLink | None
 		reference_row: DF.Data | None
 		reference_type: DF.Link | None
-		remark: DF.SmallText | None
+		remarks: DF.SmallText | None
 	# end: auto-generated types
 
 	@staticmethod

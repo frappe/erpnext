@@ -830,6 +830,15 @@ frappe.ui.form.on("Stock Entry", {
 });
 
 frappe.ui.form.on("Stock Entry Detail", {
+	set_basic_rate_manually(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		frm.fields_dict.items.grid.update_docfield_property(
+			"basic_rate",
+			"read_only",
+			row?.set_basic_rate_manually ? 0 : 1
+		);
+	},
+
 	qty(frm, cdt, cdn) {
 		frm.events.set_basic_rate(frm, cdt, cdn);
 	},

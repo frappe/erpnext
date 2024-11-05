@@ -350,6 +350,11 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	checkout() {
+		const frm = this.events.get_frm();
+		frm.cscript.calculate_outstanding_amount();
+		frm.refresh_field("outstanding_amount");
+		frm.refresh_field("paid_amount");
+		frm.refresh_field("base_paid_amount");
 		this.events.toggle_other_sections(true);
 		this.toggle_component(true);
 

@@ -45,6 +45,7 @@ frappe.ui.form.on("Project", {
 		frm.set_query("sales_order", function () {
 			var filters = {
 				project: ["in", frm.doc.__islocal ? [""] : [frm.doc.name, ""]],
+				company: frm.doc.company,
 			};
 
 			if (frm.doc.customer) {

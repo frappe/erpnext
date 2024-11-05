@@ -561,11 +561,11 @@ class SubcontractingController(StockController):
 		use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 		if self.doctype == self.subcontract_data.order_doctype:
-			rm_obj.required_qty = qty
-			rm_obj.amount = rm_obj.required_qty * rm_obj.rate
+			rm_obj.required_qty = flt(qty, rm_obj.precision("required_qty"))
+			rm_obj.amount = flt(rm_obj.required_qty * rm_obj.rate, rm_obj.precision("amount"))
 		else:
-			rm_obj.consumed_qty = qty
-			rm_obj.required_qty = bom_item.required_qty or qty
+			rm_obj.consumed_qty = flt(qty, rm_obj.precision("consumed_qty"))
+			rm_obj.required_qty = flt(bom_item.required_qty or qty, rm_obj.precision("required_qty"))
 			rm_obj.serial_and_batch_bundle = None
 			setattr(
 				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
@@ -664,8 +664,8 @@ class SubcontractingController(StockController):
 			self.__set_serial_nos(item_row, rm_obj)
 
 	def __set_consumed_qty(self, rm_obj, consumed_qty, required_qty=0):
-		rm_obj.required_qty = required_qty
-		rm_obj.consumed_qty = consumed_qty
+		rm_obj.required_qty = flt(required_qty, rm_obj.precision("required_qty"))
+		rm_obj.consumed_qty = flt(consumed_qty, rm_obj.precision("consumed_qty"))
 
 	def __set_serial_nos(self, item_row, rm_obj):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))

@@ -24,10 +24,11 @@ def execute():
 		for pcv in get_period_closing_vouchers(company):
 			company_wise_order.setdefault(pcv.company, [])
 			if pcv.period_end_date not in company_wise_order[pcv.company]:
-				pcv.pl_accounts_reverse_gle = get_pcv_gl_entries(pcv, gle_fields)
-				closing_entries = pcv.get_account_closing_balances()
-				if closing_entries:
-					make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
+				pcv_doc = frappe.get_doc("Period Closing Voucher", pcv.name)
+				pcv_doc.pl_accounts_reverse_gle = get_pcv_gl_entries_for_pl_accounts(pcv, gle_fields)
+				pcv_doc.closing_account_gle = get_pcv_gl_entries_for_closing_accounts(pcv, gle_fields)
+				closing_entries = pcv_doc.get_account_closing_balances()
+				make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
 				company_wise_order[pcv.company].append(pcv.period_end_date)
 				i += 1
@@ -38,6 +39,7 @@ def get_gle_fields():
 	accounting_dimension_fields = get_accounting_dimensions()
 	gle_fields = [
 		"name",
+		"company",
 		"posting_date",
 		"account",
 		"account_currency",
@@ -61,14 +63,27 @@ def get_period_closing_vouchers(company):
 	)
 
 
-def get_pcv_gl_entries(pcv, gle_fields):
+def get_pcv_gl_entries_for_pl_accounts(pcv, gle_fields):
+	return get_gl_entries(pcv, gle_fields, {"account": ["!=", pcv.closing_account_head]})
+
+
+def get_pcv_gl_entries_for_closing_accounts(pcv, gle_fields):
+	return get_gl_entries(pcv, gle_fields, {"account": pcv.closing_account_head})
+
+
+def get_gl_entries(pcv, gle_fields, accounts_filter=None):
+	filters = {"voucher_no": pcv.name, "is_cancelled": 0}
+	if accounts_filter:
+		filters.update(accounts_filter)
+
 	gl_entries = frappe.db.get_all(
 		"GL Entry",
-		filters={"voucher_no": pcv.name, "account": ["!=", pcv.closing_account_head], "is_cancelled": 0},
+		filters=filters,
 		fields=gle_fields,
 	)
 	for entry in gl_entries:
 		entry["is_period_closing_voucher_entry"] = 1
 		entry["closing_date"] = pcv.period_end_date
 		entry["period_closing_voucher"] = pcv.name
+
 	return gl_entries

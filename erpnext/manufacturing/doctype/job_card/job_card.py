@@ -941,26 +941,19 @@ class JobCard(Document):
 
 		qty = 0
 		if self.work_order:
-			doc = frappe.get_doc("Work Order", self.work_order)
 			if doc.transfer_material_against == "Job Card" and not doc.skip_transfer:
-				completed = True
+				min_qty = []
 				for d in doc.operations:
-					if d.status != "Completed":
-						completed = False
+					if d.completed_qty:
+						min_qty.append(d.completed_qty)
+					else:
+						min_qty = []
 						break
 
-				if completed:
-					job_cards = frappe.get_all(
-						"Job Card",
-						filters={"work_order": self.work_order, "docstatus": ("!=", 2)},
-						fields="sum(transferred_qty) as qty",
-						group_by="operation_id",
-					)
+				if min_qty:
+					qty = min(min_qty)
 
-					if job_cards:
-						qty = min(d.qty for d in job_cards)
-
-			doc.db_set("material_transferred_for_manufacturing", qty)
+				doc.db_set("material_transferred_for_manufacturing", qty)
 
 		self.set_status(update_status)
 

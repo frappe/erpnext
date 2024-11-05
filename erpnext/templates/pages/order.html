@@ -173,7 +173,7 @@
 		<div class="col-xs-8 col-sm-10">
 			{{ d.item_code }}
 			<div class="text-muted small item-description">
-				{{ html2text(d.description) | truncate(140) }}
+				{{ html2text(d.description or  "") | truncate(140) }}
 			</div>
 			<span class="text-muted mt-2 d-l-n order-qty">
 				{{ _("Qty ") }}({{ d.get_formatted("qty") }})

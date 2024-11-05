@@ -790,14 +790,19 @@ class Asset(AccountsController):
 					args.get("value_after_depreciation")
 				)
 			else:
-				value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+				value = flt(args.get("expected_value_after_useful_life")) / (
+					flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)
+				)
 
 			depreciation_rate = math.pow(
 				value,
 				1.0
 				/ (
 					(
-						flt(args.get("total_number_of_depreciations"), 2)
+						(
+							flt(args.get("total_number_of_depreciations"), 2)
+							- flt(self.opening_number_of_booked_depreciations)
+						)
 						* flt(args.get("frequency_of_depreciation"))
 					)
 					/ 12

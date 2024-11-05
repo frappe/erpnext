@@ -71,6 +71,7 @@ class PaymentRequest(Document):
 		outstanding_amount: DF.Currency
 		party: DF.DynamicLink | None
 		party_account_currency: DF.Link | None
+		party_name: DF.Data | None
 		party_type: DF.Link | None
 		payment_account: DF.ReadOnly | None
 		payment_channel: DF.Literal["", "Email", "Phone", "Other"]
@@ -303,12 +304,12 @@ class PaymentRequest(Document):
 		return controller.get_payment_url(
 			**{
 				"amount": flt(self.grand_total, self.precision("grand_total")),
-				"title": data.company.encode("utf-8"),
-				"description": self.subject.encode("utf-8"),
+				"title": data.company,
+				"description": self.subject,
 				"reference_doctype": "Payment Request",
 				"reference_docname": self.name,
 				"payer_email": self.email_to or frappe.session.user,
-				"payer_name": frappe.safe_encode(data.customer_name),
+				"payer_name": data.customer_name,
 				"order_id": self.name,
 				"currency": self.currency,
 			}
@@ -609,6 +610,7 @@ def make_payment_request(**args):
 				"party_type": party_type,
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
+				"party_name": args.get("party_name") or ref_doc.get("customer_name"),
 			}
 		)
 

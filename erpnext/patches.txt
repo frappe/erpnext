@@ -315,7 +315,7 @@ erpnext.patches.v15_0.update_asset_value_for_manual_depr_entries
 erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.set_period_start_end_date_in_pcv
-erpnext.patches.v14_0.update_closing_balances #14-07-2023
+erpnext.patches.v14_0.update_closing_balances #29-10-2024
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
 erpnext.patches.v14_0.update_subscription_details

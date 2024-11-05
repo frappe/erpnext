@@ -127,8 +127,8 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 					fieldname: "prospect_name",
 					fieldtype: "Data",
 					default: frm.doc.company_name,
-					reqd: 1,
 					depends_on: "create_prospect",
+					mandatory_depends_on: "create_prospect",
 				}
 			);
 		}
