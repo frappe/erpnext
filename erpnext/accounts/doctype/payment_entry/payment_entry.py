@@ -110,6 +110,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_payment_schedule()
 		self.update_payment_requests()
+		self.make_advance_payment_ledger_entries()
 		self.update_advance_paid()  # advance_paid_status depends on the payment request amount
 		self.set_status()
 
@@ -190,6 +191,7 @@ class PaymentEntry(AccountsController):
 			"Repost Accounting Ledger Items",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
+			"Advance Payment Ledger Entry",
 		)
 		super().on_cancel()
 		self.make_gl_entries(cancel=1)
@@ -197,6 +199,7 @@ class PaymentEntry(AccountsController):
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
 		self.update_payment_requests(cancel=True)
+		self.make_advance_payment_ledger_entries()
 		self.update_advance_paid()  # advance_paid_status depends on the payment request amount
 		self.set_status()
 

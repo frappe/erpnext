@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -2080,6 +2081,264 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(stock_value_difference, 100.0 * 5)
 
+	def test_delivery_note_return_valuation_without_use_serial_batch_field(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		batch_item = make_item(
+			"_Test Delivery Note Return Valuation Batch Item",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+				"batch_number_series": "BRTN-DNN-BI-.#####",
+			},
+		).name
+
+		serial_item = make_item(
+			"_Test Delivery Note Return Valuation Serial Item",
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "SRTN-DNN-TP-.#####"},
+		).name
+
+		batches = {}
+		serial_nos = []
+		for qty, rate in {3: 300, 2: 100}.items():
+			se = make_stock_entry(
+				item_code=batch_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=rate
+			)
+			batches[get_batch_from_bundle(se.items[0].serial_and_batch_bundle)] = qty
+
+		for qty, rate in {2: 100, 1: 50}.items():
+			make_stock_entry(item_code=serial_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=rate)
+			serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+
+		dn = create_delivery_note(
+			item_code=batch_item,
+			qty=5,
+			rate=1000,
+			use_serial_batch_fields=0,
+			batches=batches,
+			do_not_submit=True,
+		)
+
+		bundle_id = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": serial_item,
+					"warehouse": dn.items[0].warehouse,
+					"qty": 3,
+					"voucher_type": "Delivery Note",
+					"serial_nos": serial_nos,
+					"posting_date": dn.posting_date,
+					"posting_time": dn.posting_time,
+					"type_of_transaction": "Outward",
+					"do_not_submit": True,
+				}
+			)
+		).name
+
+		dn.append(
+			"items",
+			{
+				"item_code": serial_item,
+				"qty": 3,
+				"rate": 700,
+				"base_rate": 700,
+				"item_name": serial_item,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"warehouse": dn.items[0].warehouse,
+				"use_serial_batch_fields": 0,
+				"serial_and_batch_bundle": bundle_id,
+			},
+		)
+
+		dn.save()
+		dn.submit()
+		dn.reload()
+
+		batch_no_valuation = defaultdict(float)
+		serial_no_valuation = defaultdict(float)
+
+		for row in dn.items:
+			if row.serial_and_batch_bundle:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					fields=["incoming_rate", "serial_no", "batch_no"],
+				)
+
+				for d in bundle_data:
+					if d.batch_no:
+						batch_no_valuation[d.batch_no] = d.incoming_rate
+					elif d.serial_no:
+						serial_no_valuation[d.serial_no] = d.incoming_rate
+
+		return_entry = make_sales_return(dn.name)
+
+		return_entry.save()
+		return_entry.submit()
+		return_entry.reload()
+
+		for row in return_entry.items:
+			if row.item_code == batch_item:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					fields=["incoming_rate", "batch_no"],
+				)
+
+				for d in bundle_data:
+					self.assertEqual(d.incoming_rate, batch_no_valuation[d.batch_no])
+			else:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					fields=["incoming_rate", "serial_no"],
+				)
+
+				for d in bundle_data:
+					self.assertEqual(d.incoming_rate, serial_no_valuation[d.serial_no])
+
+	def test_delivery_note_return_valuation_with_use_serial_batch_field(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		batch_item = make_item(
+			"_Test Delivery Note Return Valuation WITH Batch Item",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+				"batch_number_series": "BRTN-DNN-BIW-.#####",
+			},
+		).name
+
+		serial_item = make_item(
+			"_Test Delivery Note Return Valuation WITH Serial Item",
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "SRTN-DNN-TPW-.#####"},
+		).name
+
+		batches = []
+		serial_nos = []
+		for qty, rate in {3: 300, 2: 100}.items():
+			se = make_stock_entry(
+				item_code=batch_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=rate
+			)
+			batches.append(get_batch_from_bundle(se.items[0].serial_and_batch_bundle))
+
+		for qty, rate in {2: 100, 1: 50}.items():
+			se = make_stock_entry(
+				item_code=serial_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=rate
+			)
+			serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+
+		dn = create_delivery_note(
+			item_code=batch_item,
+			qty=3,
+			rate=1000,
+			use_serial_batch_fields=1,
+			batch_no=batches[0],
+			do_not_submit=True,
+		)
+
+		dn.append(
+			"items",
+			{
+				"item_code": batch_item,
+				"qty": 2,
+				"rate": 1000,
+				"base_rate": 1000,
+				"item_name": batch_item,
+				"uom": dn.items[0].uom,
+				"stock_uom": dn.items[0].uom,
+				"conversion_factor": 1,
+				"warehouse": dn.items[0].warehouse,
+				"use_serial_batch_fields": 1,
+				"batch_no": batches[1],
+			},
+		)
+
+		dn.append(
+			"items",
+			{
+				"item_code": serial_item,
+				"qty": 2,
+				"rate": 700,
+				"base_rate": 700,
+				"item_name": serial_item,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"warehouse": dn.items[0].warehouse,
+				"use_serial_batch_fields": 1,
+				"serial_no": "\n".join(serial_nos[0:2]),
+			},
+		)
+
+		dn.append(
+			"items",
+			{
+				"item_code": serial_item,
+				"qty": 1,
+				"rate": 700,
+				"base_rate": 700,
+				"item_name": serial_item,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"warehouse": dn.items[0].warehouse,
+				"use_serial_batch_fields": 1,
+				"serial_no": serial_nos[-1],
+			},
+		)
+
+		dn.save()
+		dn.submit()
+		dn.reload()
+
+		batch_no_valuation = defaultdict(float)
+		serial_no_valuation = defaultdict(float)
+
+		for row in dn.items:
+			if row.serial_and_batch_bundle:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					fields=["incoming_rate", "serial_no", "batch_no"],
+				)
+
+				for d in bundle_data:
+					if d.batch_no:
+						batch_no_valuation[d.batch_no] = d.incoming_rate
+					elif d.serial_no:
+						serial_no_valuation[d.serial_no] = d.incoming_rate
+
+		return_entry = make_sales_return(dn.name)
+
+		return_entry.save()
+		return_entry.submit()
+		return_entry.reload()
+
+		for row in return_entry.items:
+			if row.item_code == batch_item:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					fields=["incoming_rate", "batch_no"],
+				)
+
+				for d in bundle_data:
+					self.assertEqual(d.incoming_rate, batch_no_valuation[d.batch_no])
+			else:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					fields=["incoming_rate", "serial_no"],
+				)
+
+				for d in bundle_data:
+					self.assertEqual(d.incoming_rate, serial_no_valuation[d.serial_no])
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
@@ -2106,6 +2365,9 @@ def create_delivery_note(**args):
 		batches = {}
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
+
+		if args.get("batches"):
+			batches = frappe._dict(args.batches)
 
 		bundle_id = make_serial_batch_bundle(
 			frappe._dict(

@@ -334,6 +334,11 @@ class StockController(AccountsController):
 					}
 				)
 
+				if self.doctype in ["Sales Invoice", "Delivery Note"]:
+					row.db_set(
+						"incoming_rate", frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
+					)
+
 	def get_reference_ids(self, table_name, qty_field=None, bundle_field=None) -> tuple[str, list[str]]:
 		field = {
 			"Sales Invoice": "sales_invoice_item",

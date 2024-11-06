@@ -226,11 +226,6 @@
   },
   {
    "group": "Transactions",
-   "link_doctype": "Payroll Entry",
-   "link_fieldname": "bank_account"
-  },
-  {
-   "group": "Transactions",
    "link_doctype": "Bank Transaction",
    "link_fieldname": "bank_account"
   },
@@ -255,7 +250,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2024-09-24 06:57:41.292970",
+ "modified": "2024-10-30 09:41:14.113414",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

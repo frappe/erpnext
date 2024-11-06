@@ -968,6 +968,13 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
+				if not d.workstation and not d.workstation_type:
+					frappe.throw(
+						_(
+							"Row {0}: Workstation or Workstation Type is mandatory for an operation {1}"
+						).format(d.idx, d.operation)
+					)
+
 	def get_tree_representation(self) -> BOMTree:
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)

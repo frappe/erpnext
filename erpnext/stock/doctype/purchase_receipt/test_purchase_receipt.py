@@ -3672,6 +3672,234 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertEqual(pr.items[0].conversion_factor, 1.0)
 
+	def test_purchase_receipt_return_valuation_without_use_serial_batch_field(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		batch_item = make_item(
+			"_Test Purchase Receipt Return Valuation Batch Item",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+				"batch_number_series": "BRTN-TPRBI-.#####",
+			},
+		).name
+
+		serial_item = make_item(
+			"_Test Purchase Receipt Return Valuation Serial Item",
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "SRTN-TPRSI-.#####"},
+		).name
+
+		rej_warehouse = create_warehouse("_Test Purchase Warehouse For Rejected Qty")
+
+		pr = make_purchase_receipt(
+			item_code=batch_item,
+			received_qty=10,
+			qty=8,
+			rejected_qty=2,
+			rejected_warehouse=rej_warehouse,
+			rate=300,
+			do_not_submit=1,
+			use_serial_batch_fields=0,
+		)
+
+		pr.append(
+			"items",
+			{
+				"item_code": serial_item,
+				"qty": 2,
+				"rate": 100,
+				"base_rate": 100,
+				"item_name": serial_item,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"rejected_qty": 1,
+				"warehouse": pr.items[0].warehouse,
+				"use_serial_batch_fields": 0,
+				"rejected_warehouse": rej_warehouse,
+			},
+		)
+
+		pr.save()
+		pr.submit()
+		pr.reload()
+
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		rejected_batch_no = get_batch_from_bundle(pr.items[0].rejected_serial_and_batch_bundle)
+
+		self.assertEqual(batch_no, rejected_batch_no)
+
+		return_entry = make_purchase_return(pr.name)
+
+		return_entry.save()
+		return_entry.submit()
+		return_entry.reload()
+
+		for row in return_entry.items:
+			if row.item_code == batch_item:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 300.00)
+			else:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 100.00)
+
+		for row in return_entry.items:
+			if row.item_code == batch_item:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.rejected_serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 0)
+			else:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.rejected_serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 0)
+
+	def test_purchase_receipt_return_valuation_with_use_serial_batch_field(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		batch_item = make_item(
+			"_Test Purchase Receipt Return Valuation With Batch Item",
+			properties={"has_batch_no": 1, "create_new_batch": 1, "is_stock_item": 1},
+		).name
+
+		serial_item = make_item(
+			"_Test Purchase Receipt Return Valuation With Serial Item",
+			properties={"has_serial_no": 1, "is_stock_item": 1},
+		).name
+
+		rej_warehouse = create_warehouse("_Test Purchase Warehouse For Rejected Qty")
+
+		batch_no = "BATCH-RTN-BNU-TPRBI-0001"
+		serial_nos = ["SNU-RTN-TPRSI-0001", "SNU-RTN-TPRSI-0002", "SNU-RTN-TPRSI-0003"]
+
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"batch_id": batch_no,
+					"item": batch_item,
+				}
+			).insert()
+
+		for serial_no in serial_nos:
+			if not frappe.db.exists("Serial No", serial_no):
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": serial_item,
+						"serial_no": serial_no,
+					}
+				).insert()
+
+		pr = make_purchase_receipt(
+			item_code=batch_item,
+			received_qty=10,
+			qty=8,
+			rejected_qty=2,
+			rejected_warehouse=rej_warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+			rate=300,
+			do_not_submit=1,
+		)
+
+		pr.append(
+			"items",
+			{
+				"item_code": serial_item,
+				"qty": 2,
+				"rate": 100,
+				"base_rate": 100,
+				"item_name": serial_item,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"rejected_qty": 1,
+				"warehouse": pr.items[0].warehouse,
+				"use_serial_batch_fields": 1,
+				"rejected_warehouse": rej_warehouse,
+				"serial_no": "\n".join(serial_nos[:2]),
+				"rejected_serial_no": serial_nos[2],
+			},
+		)
+
+		pr.save()
+		pr.submit()
+		pr.reload()
+
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		rejected_batch_no = get_batch_from_bundle(pr.items[0].rejected_serial_and_batch_bundle)
+
+		self.assertEqual(batch_no, rejected_batch_no)
+
+		return_entry = make_purchase_return(pr.name)
+
+		return_entry.save()
+		return_entry.submit()
+		return_entry.reload()
+
+		for row in return_entry.items:
+			if row.item_code == batch_item:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 300.00)
+			else:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 100.00)
+
+		for row in return_entry.items:
+			if row.item_code == batch_item:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.rejected_serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 0)
+			else:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.rejected_serial_and_batch_bundle},
+					pluck="incoming_rate",
+				)
+
+				for incoming_rate in bundle_data:
+					self.assertEqual(incoming_rate, 0)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

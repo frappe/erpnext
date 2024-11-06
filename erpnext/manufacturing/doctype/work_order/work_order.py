@@ -173,10 +173,16 @@ class WorkOrder(Document):
 			self.get_items_and_operations_from_bom()
 
 	def validate_workstation_type(self):
+		if not self.docstatus.is_submitted():
+			return
+
 		for row in self.operations:
 			if not row.workstation and not row.workstation_type:
-				msg = f"Row {row.idx}: Workstation or Workstation Type is mandatory for an operation {row.operation}"
-				frappe.throw(_(msg))
+				frappe.throw(
+					_("Row {0}: Workstation or Workstation Type is mandatory for an operation {1}").format(
+						row.idx, row.operation
+					)
+				)
 
 	def validate_sales_order(self):
 		if self.sales_order:

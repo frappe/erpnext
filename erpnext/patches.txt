@@ -359,6 +359,7 @@ erpnext.patches.v15_0.allow_on_submit_dimensions_for_repostable_doctypes
 erpnext.patches.v14_0.update_flag_for_return_invoices #2024-03-22
 erpnext.patches.v15_0.create_accounting_dimensions_in_payment_request
 erpnext.patches.v14_0.update_pos_return_ledger_entries #2024-08-16
+erpnext.patches.v15_0.create_advance_payment_ledger_records
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20

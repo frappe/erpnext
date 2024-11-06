@@ -984,7 +984,7 @@ class SerialBatchCreation:
 			required_qty = flt(abs(self.actual_qty), precision)
 
 			if required_qty - total_qty > 0:
-				msg = f"For the item {bold(doc.item_code)}, the Avaliable qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."
+				msg = f"For the item {bold(doc.item_code)}, the Available qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."
 				frappe.throw(msg, title=_("Insufficient Stock"))
 
 	def set_auto_serial_batch_entries_for_outward(self):
@@ -1088,6 +1088,8 @@ class SerialBatchCreation:
 			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	def set_serial_batch_entries(self, doc):
+		incoming_rate = self.get("incoming_rate")
+
 		if self.get("serial_nos"):
 			serial_no_wise_batch = frappe._dict({})
 			if self.has_batch_no:
@@ -1095,29 +1097,53 @@ class SerialBatchCreation:
 
 			qty = -1 if self.type_of_transaction == "Outward" else 1
 			for serial_no in self.serial_nos:
+				if self.get("serial_nos_valuation"):
+					incoming_rate = self.get("serial_nos_valuation").get(serial_no)
+
 				doc.append(
 					"entries",
 					{
 						"serial_no": serial_no,
 						"qty": qty,
 						"batch_no": serial_no_wise_batch.get(serial_no) or self.get("batch_no"),
-						"incoming_rate": self.get("incoming_rate"),
+						"incoming_rate": incoming_rate,
 					},
 				)
 
 		elif self.get("batches"):
 			for batch_no, batch_qty in self.batches.items():
+				if self.get("batches_valuation"):
+					incoming_rate = self.get("batches_valuation").get(batch_no)
+
 				doc.append(
 					"entries",
 					{
 						"batch_no": batch_no,
 						"qty": batch_qty * (-1 if self.type_of_transaction == "Outward" else 1),
-						"incoming_rate": self.get("incoming_rate"),
+						"incoming_rate": incoming_rate,
 					},
 				)
 
 	def create_batch(self):
 		from erpnext.stock.doctype.batch.batch import make_batch
+
+		if self.is_rejected:
+			bundle = frappe.db.get_value(
+				"Serial and Batch Bundle",
+				{
+					"voucher_no": self.voucher_no,
+					"voucher_type": self.voucher_type,
+					"voucher_detail_no": self.voucher_detail_no,
+					"is_rejected": 0,
+					"docstatus": 1,
+					"is_cancelled": 0,
+				},
+				"name",
+			)
+
+			if bundle:
+				if batch_no := frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "batch_no"):
+					return batch_no
 
 		return make_batch(
 			frappe._dict(

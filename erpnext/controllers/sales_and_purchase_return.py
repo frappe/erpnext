@@ -351,6 +351,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
 			if source.tax_withholding_category:
 				doc.set_onload("supplier_tds", source.tax_withholding_category)
+		elif doctype == "Delivery Note":
+			# manual additions to the return should hit the return warehous, too
+			doc.set_warehouse = default_warehouse_for_sales_return
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
@@ -596,6 +599,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
+
+		if not source_doc.use_serial_batch_fields and source_doc.serial_and_batch_bundle:
+			target_doc.serial_no = None
+			target_doc.batch_no = None
 
 		if (
 			(source_doc.serial_no or source_doc.batch_no)
@@ -899,6 +906,7 @@ def get_serial_batches_based_on_bundle(field, _bundle_ids):
 			"`tabSerial and Batch Entry`.`serial_no`",
 			"`tabSerial and Batch Entry`.`batch_no`",
 			"`tabSerial and Batch Entry`.`qty`",
+			"`tabSerial and Batch Entry`.`incoming_rate`",
 			"`tabSerial and Batch Bundle`.`voucher_detail_no`",
 			"`tabSerial and Batch Bundle`.`voucher_type`",
 			"`tabSerial and Batch Bundle`.`voucher_no`",
@@ -920,15 +928,23 @@ def get_serial_batches_based_on_bundle(field, _bundle_ids):
 
 		if key not in available_dict:
 			available_dict[key] = frappe._dict(
-				{"qty": 0.0, "serial_nos": defaultdict(float), "batches": defaultdict(float)}
+				{
+					"qty": 0.0,
+					"serial_nos": defaultdict(float),
+					"batches": defaultdict(float),
+					"serial_nos_valuation": defaultdict(float),
+					"batches_valuation": defaultdict(float),
+				}
 			)
 
 		available_dict[key]["qty"] += row.qty
 
 		if row.serial_no:
 			available_dict[key]["serial_nos"][row.serial_no] += row.qty
+			available_dict[key]["serial_nos_valuation"][row.serial_no] = row.incoming_rate
 		elif row.batch_no:
 			available_dict[key]["batches"][row.batch_no] += row.qty
+			available_dict[key]["batches_valuation"][row.batch_no] = row.incoming_rate
 
 	return available_dict
 
@@ -964,12 +980,13 @@ def get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=False
 			)
 		)
 	else:
-		fields = [
-			"serial_and_batch_bundle",
-		]
+		fields = ["serial_and_batch_bundle"]
 
 		if is_rejected:
-			fields.extend(["rejected_serial_and_batch_bundle", "return_qty_from_rejected_warehouse"])
+			fields.append("rejected_serial_and_batch_bundle")
+
+			if doctype == "Purchase Receipt Item":
+				fields.append("return_qty_from_rejected_warehouse")
 
 		del filters["rejected_serial_and_batch_bundle"]
 		data = frappe.get_all(
@@ -1003,7 +1020,14 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 	warehouse = row.get(warehouse_field)
 	qty = abs(row.get(qty_field))
 
-	filterd_serial_batch = frappe._dict({"serial_nos": [], "batches": defaultdict(float)})
+	filterd_serial_batch = frappe._dict(
+		{
+			"serial_nos": [],
+			"batches": defaultdict(float),
+			"serial_nos_valuation": data.get("serial_nos_valuation"),
+			"batches_valuation": data.get("batches_valuation"),
+		}
+	)
 
 	if data.serial_nos:
 		available_serial_nos = []
@@ -1013,7 +1037,7 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 
 		if available_serial_nos:
 			if parent_doc.doctype in ["Purchase Invoice", "Purchase Reecipt"]:
-				available_serial_nos = get_available_serial_nos(available_serial_nos)
+				available_serial_nos = get_available_serial_nos(available_serial_nos, warehouse)
 
 			if len(available_serial_nos) > qty:
 				filterd_serial_batch["serial_nos"] = sorted(available_serial_nos[0 : cint(qty)])
@@ -1098,6 +1122,8 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 			"warehouse": warehouse,
 			"serial_nos": data.get("serial_nos"),
 			"batches": data.get("batches"),
+			"serial_nos_valuation": data.get("serial_nos_valuation"),
+			"batches_valuation": data.get("batches_valuation"),
 			"posting_date": parent_doc.posting_date,
 			"posting_time": parent_doc.posting_time,
 			"voucher_type": parent_doc.doctype,

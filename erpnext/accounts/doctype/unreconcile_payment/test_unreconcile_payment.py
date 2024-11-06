@@ -362,9 +362,13 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		# Assert 'Advance Paid'
 		so.reload()
 		pe.reload()
-		self.assertEqual(so.advance_paid, 0)
+		self.assertEqual(so.advance_paid, 100)
 		self.assertEqual(len(pe.references), 0)
 		self.assertEqual(pe.unallocated_amount, 100)
+
+		pe.cancel()
+		so.reload()
+		self.assertEqual(so.advance_paid, 100)
 
 	def test_06_unreconcile_advance_from_payment_entry(self):
 		self.enable_advance_as_liability()
@@ -411,7 +415,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		so2.reload()
 		pe.reload()
 		self.assertEqual(so1.advance_paid, 150)
-		self.assertEqual(so2.advance_paid, 0)
+		self.assertEqual(so2.advance_paid, 110)
 		self.assertEqual(len(pe.references), 1)
 		self.assertEqual(pe.unallocated_amount, 110)
 
@@ -459,6 +463,6 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 
 		# Assert 'Advance Paid'
 		so.reload()
-		self.assertEqual(so.advance_paid, 0)
+		self.assertEqual(so.advance_paid, 1000)
 
 		self.disable_advance_as_liability()

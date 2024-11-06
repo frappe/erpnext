@@ -188,6 +188,7 @@ class JournalEntry(AccountsController):
 		self.validate_cheque_info()
 		self.check_credit_limit()
 		self.make_gl_entries()
+		self.make_advance_payment_ledger_entries()
 		self.update_advance_paid()
 		self.update_asset_value()
 		self.update_inter_company_jv()
@@ -218,8 +219,10 @@ class JournalEntry(AccountsController):
 			"Repost Accounting Ledger Items",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
+			"Advance Payment Ledger Entry",
 		)
 		self.make_gl_entries(1)
+		self.make_advance_payment_ledger_entries()
 		self.update_advance_paid()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
@@ -1668,6 +1671,8 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 					"debit": "credit",
 					"credit_in_account_currency": "debit_in_account_currency",
 					"credit": "debit",
+					"reference_type": "reference_type",
+					"reference_name": "reference_name",
 				},
 			},
 		},

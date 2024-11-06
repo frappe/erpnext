@@ -1995,7 +1995,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 		# Check if SO is unlinked/replaced by SI in PE & if SO advance paid is 0
 		self.assertEqual(pe.references[0].reference_name, si.name)
-		self.assertEqual(sales_order.advance_paid, 0.0)
+		self.assertEqual(sales_order.advance_paid, 300.0)
 
 		# check outstanding after advance allocation
 		self.assertEqual(

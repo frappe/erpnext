@@ -1275,6 +1275,60 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		qty = get_batch_qty(batch_id, warehouse, batch_item_code)
 		self.assertEqual(qty, 110)
 
+	def test_skip_reposting_for_entries_after_stock_reco(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = create_item("Test Item For Skip Reposting After Stock Reco", is_stock_item=1).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			posting_date="2024-11-01",
+			posting_time="11:00",
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+		)
+
+		create_stock_reconciliation(
+			posting_date="2024-11-02",
+			posting_time="11:00",
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=20,
+			rate=100,
+		)
+
+		se = make_stock_entry(
+			posting_date="2024-11-03",
+			posting_time="11:00",
+			item_code=item_code,
+			source=warehouse,
+			qty=15,
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": se.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+
+		self.assertEqual(stock_value_difference, 1500.00 * -1)
+
+		make_stock_entry(
+			posting_date="2024-10-29",
+			posting_time="11:00",
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": se.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+
+		self.assertEqual(stock_value_difference, 1500.00 * -1)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
