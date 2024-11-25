@@ -109,7 +109,7 @@ class PickList(Document):
 				"actual_qty",
 			)
 
-			if row.qty > bin_qty:
+			if row.qty > flt(bin_qty):
 				frappe.throw(
 					_(
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."

@@ -60,6 +60,7 @@ class Account(NestedSet):
 			"Payable",
 			"Receivable",
 			"Round Off",
+			"Round Off for Opening",
 			"Stock",
 			"Stock Adjustment",
 			"Stock Received But Not Billed",

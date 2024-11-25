@@ -343,7 +343,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			inv.load_from_db()
 			consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
 			self.assertEqual(consolidated_invoice.status, "Return")
-			self.assertEqual(consolidated_invoice.rounding_adjustment, -0.001)
+			self.assertEqual(consolidated_invoice.rounding_adjustment, -0.002)
 
 		finally:
 			frappe.set_user("Administrator")

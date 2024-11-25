@@ -74,12 +74,12 @@ def get_dimension_filter_map():
 				a.applicable_on_account, d.dimension_value, p.accounting_dimension,
 				p.allow_or_restrict, a.is_mandatory
 			FROM
-				`tabApplicable On Account` a, `tabAllowed Dimension` d,
+				`tabApplicable On Account` a,
 				`tabAccounting Dimension Filter` p
+			LEFT JOIN `tabAllowed Dimension` d ON d.parent = p.name
 			WHERE
 				p.name = a.parent
 				AND p.disabled = 0
-				AND p.name = d.parent
 		""",
 			as_dict=1,
 		)
@@ -97,7 +97,6 @@ def get_dimension_filter_map():
 				f.allow_or_restrict,
 				f.is_mandatory,
 			)
-
 		frappe.flags.dimension_filter_map = dimension_filter_map
 
 	return frappe.flags.dimension_filter_map

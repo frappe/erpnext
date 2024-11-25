@@ -689,6 +689,9 @@ class SerialandBatchBundle(Document):
 		serial_batches = {}
 		for row in self.entries:
 			if not row.qty and row.batch_no and not row.serial_no:
+				if self.voucher_type == "Stock Reconciliation" and self.type_of_transaction == "Inward":
+					continue
+
 				frappe.throw(
 					_("At row {0}: Qty is mandatory for the batch {1}").format(
 						bold(row.idx), bold(row.batch_no)
@@ -746,10 +749,6 @@ class SerialandBatchBundle(Document):
 				)
 
 	def validate_incorrect_serial_nos(self, serial_nos):
-		if self.voucher_type == "Stock Entry" and self.voucher_no:
-			if frappe.get_cached_value("Stock Entry", self.voucher_no, "purpose") == "Repack":
-				return
-
 		incorrect_serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"name": ("in", serial_nos), "item_code": ("!=", self.item_code)},

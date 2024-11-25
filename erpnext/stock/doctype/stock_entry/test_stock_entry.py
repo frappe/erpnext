@@ -970,61 +970,6 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, ste.submit)
 
-	def test_same_serial_nos_in_repack_or_manufacture_entries(self):
-		s1 = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
-		serial_nos = get_serial_nos_from_bundle(s1.get("items")[0].serial_and_batch_bundle)
-
-		s2 = make_stock_entry(
-			item_code="_Test Serialized Item With Series",
-			source="_Test Warehouse - _TC",
-			qty=2,
-			basic_rate=100,
-			purpose="Repack",
-			serial_no=serial_nos,
-			do_not_save=True,
-		)
-
-		frappe.flags.use_serial_and_batch_fields = True
-
-		cls_obj = SerialBatchCreation(
-			{
-				"type_of_transaction": "Inward",
-				"serial_and_batch_bundle": s2.items[0].serial_and_batch_bundle,
-				"item_code": "_Test Serialized Item",
-				"warehouse": "_Test Warehouse - _TC",
-			}
-		)
-
-		cls_obj.duplicate_package()
-		bundle_id = cls_obj.serial_and_batch_bundle
-		doc = frappe.get_doc("Serial and Batch Bundle", bundle_id)
-		doc.db_set(
-			{
-				"item_code": "_Test Serialized Item",
-				"warehouse": "_Test Warehouse - _TC",
-			}
-		)
-
-		doc.load_from_db()
-
-		s2.append(
-			"items",
-			{
-				"item_code": "_Test Serialized Item",
-				"t_warehouse": "_Test Warehouse - _TC",
-				"qty": 2,
-				"basic_rate": 120,
-				"expense_account": "Stock Adjustment - _TC",
-				"conversion_factor": 1.0,
-				"cost_center": "_Test Cost Center - _TC",
-				"serial_and_batch_bundle": bundle_id,
-			},
-		)
-
-		s2.submit()
-		s2.cancel()
-		frappe.flags.use_serial_and_batch_fields = False
-
 	def test_quality_check(self):
 		item_code = "_Test Item For QC"
 		if not frappe.db.exists("Item", item_code):

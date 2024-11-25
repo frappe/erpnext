@@ -37,7 +37,7 @@ frappe.ui.form.on("Job Card", {
 		frappe.flags.resume_job = 0;
 		let has_items = frm.doc.items && frm.doc.items.length;
 
-		if (!frm.is_new() && frm.doc.__onload.work_order_closed) {
+		if (!frm.is_new() && frm.doc.__onload?.work_order_closed) {
 			frm.disable_save();
 			return;
 		}

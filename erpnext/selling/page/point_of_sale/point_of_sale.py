@@ -35,6 +35,7 @@ def search_by_term(search_term, warehouse, price_list):
 		"description": item_doc.description,
 		"is_stock_item": item_doc.is_stock_item,
 		"item_code": item_doc.name,
+		"item_group": item_doc.item_group,
 		"item_image": item_doc.image,
 		"item_name": item_doc.item_name,
 		"serial_no": serial_no,
@@ -92,6 +93,12 @@ def search_by_term(search_term, warehouse, price_list):
 	return {"items": [item]}
 
 
+def filter_result_items(result, pos_profile):
+	if result and result.get("items"):
+		pos_item_groups = frappe.db.get_all("POS Item Group", {"parent": pos_profile}, pluck="item_group")
+		result["items"] = [item for item in result.get("items") if item.get("item_group") in pos_item_groups]
+
+
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, pos_profile, search_term=""):
 	warehouse, hide_unavailable_items = frappe.db.get_value(
@@ -102,6 +109,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 	if search_term:
 		result = search_by_term(search_term, warehouse, price_list) or []
+		filter_result_items(result, pos_profile)
 		if result:
 			return result
 
@@ -159,6 +167,8 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	if not items_data:
 		return result
 
+	current_date = frappe.utils.today()
+
 	for item in items_data:
 		uoms = frappe.get_doc("Item", item.item_code).get("uoms", [])
 
@@ -167,12 +177,16 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 		item_price = frappe.get_all(
 			"Item Price",
-			fields=["price_list_rate", "currency", "uom", "batch_no"],
+			fields=["price_list_rate", "currency", "uom", "batch_no", "valid_from", "valid_upto"],
 			filters={
 				"price_list": price_list,
 				"item_code": item.item_code,
 				"selling": True,
+				"valid_from": ["<=", current_date],
+				"valid_upto": ["in", [None, "", current_date]],
 			},
+			order_by="valid_from desc",
+			limit=1,
 		)
 
 		if not item_price:

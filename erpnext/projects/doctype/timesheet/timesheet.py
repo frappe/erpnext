@@ -169,9 +169,13 @@ class Timesheet(Document):
 				task.save()
 				tasks.append(data.task)
 
-			elif data.project and data.project not in projects:
-				frappe.get_doc("Project", data.project).update_project()
+			if data.project and data.project not in projects:
 				projects.append(data.project)
+
+		for project in projects:
+			project_doc = frappe.get_doc("Project", project)
+			project_doc.update_project()
+			project_doc.save()
 
 	def validate_dates(self):
 		for data in self.time_logs:

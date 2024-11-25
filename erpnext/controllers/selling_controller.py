@@ -167,6 +167,9 @@ class SellingController(StockController):
 
 		total = 0.0
 		sales_team = self.get("sales_team")
+
+		self.validate_sales_team(sales_team)
+
 		for sales_person in sales_team:
 			self.round_floats_in(sales_person)
 
@@ -185,6 +188,20 @@ class SellingController(StockController):
 
 		if sales_team and total != 100.0:
 			throw(_("Total allocated percentage for sales team should be 100"))
+
+	def validate_sales_team(self, sales_team):
+		sales_persons = [d.sales_person for d in sales_team]
+
+		if not sales_persons:
+			return
+
+		sales_person_status = frappe.db.get_all(
+			"Sales Person", filters={"name": ["in", sales_persons]}, fields=["name", "enabled"]
+		)
+
+		for row in sales_person_status:
+			if not row.enabled:
+				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
 
 	def validate_max_discount(self):
 		for d in self.get("items"):

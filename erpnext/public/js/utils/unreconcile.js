@@ -100,6 +100,7 @@ erpnext.accounts.unreconcile_payment = {
 					fieldtype: "Table",
 					read_only: 1,
 					fields: child_table_fields,
+					cannot_add_rows: true,
 				},
 			];
 
@@ -123,7 +124,6 @@ erpnext.accounts.unreconcile_payment = {
 							title: "UnReconcile Allocations",
 							fields: unreconcile_dialog_fields,
 							size: "large",
-							cannot_add_rows: true,
 							primary_action_label: "UnReconcile",
 							primary_action(values) {
 								let selected_allocations = values.allocations.filter((x) => x.__checked);

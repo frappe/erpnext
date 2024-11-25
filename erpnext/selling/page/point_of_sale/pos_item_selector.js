@@ -99,7 +99,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				return `<div class="item-qty-pill">
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
-						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+						<div class="flex items-center justify-center border-b-grey text-6xl text-grey-100" style="height:8rem; min-height:8rem">
 							<img
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
 								class="h-full item-img" src="${item_image}"
@@ -138,7 +138,6 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	make_search_bar() {
 		const me = this;
-		const doc = me.events.get_frm().doc;
 		this.$component.find(".search-field").html("");
 		this.$component.find(".item-group-field").html("");
 
@@ -163,6 +162,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					me.filter_items();
 				},
 				get_query: function () {
+					const doc = me.events.get_frm().doc;
 					return {
 						query: "erpnext.selling.page.point_of_sale.point_of_sale.item_group_query",
 						filters: {

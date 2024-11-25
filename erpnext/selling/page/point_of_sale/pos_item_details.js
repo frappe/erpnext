@@ -272,7 +272,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			};
 			this.warehouse_control.df.get_query = () => {
 				return {
-					filters: { company: this.events.get_frm().doc.company },
+					filters: { company: this.events.get_frm().doc.company, is_group: 0 },
 				};
 			};
 			this.warehouse_control.refresh();

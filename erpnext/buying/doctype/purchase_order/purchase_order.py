@@ -581,7 +581,7 @@ class PurchaseOrder(BuyingController):
 	def update_receiving_percentage(self):
 		total_qty, received_qty = 0.0, 0.0
 		for item in self.items:
-			received_qty += item.received_qty
+			received_qty += min(item.received_qty, item.qty)
 			total_qty += item.qty
 		if total_qty:
 			self.db_set("per_received", flt(received_qty / total_qty) * 100, update_modified=False)
@@ -625,9 +625,11 @@ class PurchaseOrder(BuyingController):
 		if not self.is_against_so():
 			return
 		for item in removed_items:
-			prev_ordered_qty = frappe.get_cached_value(
-				"Sales Order Item", item.get("sales_order_item"), "ordered_qty"
+			prev_ordered_qty = (
+				frappe.get_cached_value("Sales Order Item", item.get("sales_order_item"), "ordered_qty")
+				or 0.0
 			)
+
 			frappe.db.set_value(
 				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
 			)

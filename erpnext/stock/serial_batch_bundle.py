@@ -124,7 +124,7 @@ class SerialBatchBundle:
 			"Outward": self.sle.actual_qty < 0,
 		}.get(sn_doc.type_of_transaction)
 
-		if not condition:
+		if not condition and self.sle.actual_qty:
 			correct_type = "Inward"
 			if sn_doc.type_of_transaction == "Inward":
 				correct_type = "Outward"
@@ -133,7 +133,7 @@ class SerialBatchBundle:
 			frappe.throw(_(msg), title=_("Incorrect Type of Transaction"))
 
 		precision = sn_doc.precision("total_qty")
-		if flt(sn_doc.total_qty, precision) != flt(self.sle.actual_qty, precision):
+		if self.sle.actual_qty and flt(sn_doc.total_qty, precision) != flt(self.sle.actual_qty, precision):
 			msg = f"Total qty {flt(sn_doc.total_qty, precision)} of Serial and Batch Bundle {link} is not equal to Actual Qty {flt(self.sle.actual_qty, precision)} in the {self.sle.voucher_type} {self.sle.voucher_no}"
 			frappe.throw(_(msg))
 
@@ -288,7 +288,7 @@ class SerialBatchBundle:
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "docstatus"
 			)
 
-			if docstatus != 1:
+			if docstatus == 0:
 				self.submit_serial_and_batch_bundle()
 
 		if self.item_details.has_serial_no == 1:
@@ -311,7 +311,9 @@ class SerialBatchBundle:
 		if self.is_pos_transaction():
 			return
 
-		frappe.get_cached_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle).cancel()
+		doc = frappe.get_cached_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle)
+		if doc.docstatus == 1:
+			doc.cancel()
 
 	def is_pos_transaction(self):
 		if (

@@ -51,7 +51,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 			"parent_task",
 		],
 		limit_start=start,
-		limit_page_length=10,
+		limit_page_length=100,
 	)
 	task_nest = []
 	for task in tasks:

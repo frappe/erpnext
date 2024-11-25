@@ -449,18 +449,355 @@
 	},
 
 	"France": {
-		"France VAT 20%": {
-			"account_name": "VAT 20%",
-			"tax_rate": 20,
-			"default": 1
-		},
-		"France VAT 10%": {
-			"account_name": "VAT 10%",
-			"tax_rate": 10
-		},
-		"France VAT 5.5%": {
-			"account_name": "VAT 5.5%",
-			"tax_rate": 5.5
+		"chart_of_accounts": {
+			"France - Plan Comptable General avec code": {
+				"sales_tax_templates": [
+					{
+						"title": "TVA 20% Collectée",
+						"tax_category": "Vente Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 20% Collectée",
+									"account_number": "445720",
+									"root_type": "Liability",
+									"tax_rate": 20.0
+								},
+								"description": "TVA 20%",
+								"rate": 20
+							}
+						]
+					},
+					{
+						"title": "TVA 10% Collectée",
+						"tax_category": "Vente Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 10% Collectée",
+									"account_number": "445710",
+									"root_type": "Liability",
+									"tax_rate": 10.0
+								},
+								"description": "TVA 10%",
+								"rate": 10
+							}
+						]
+					},
+					{
+						"title": "TVA 5.5% Collectée",
+						"tax_category": "Vente Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 5.5% Collectée",
+									"account_number": "445755",
+									"root_type": "Liability",
+									"tax_rate": 5.5
+								},
+								"description": "TVA 5.5%",
+								"rate": 5.5
+							}
+						]
+					},
+					{
+						"title": "TVA 2.1% Collectée",
+						"tax_category": "Vente Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 2.1% Collectée",
+									"account_number": "445721",
+									"root_type": "Liability",
+									"tax_rate": 2.10
+								},
+								"description": "TVA 2.1%",
+								"rate": 2.1
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "TVA 20% Déductible",
+						"tax_category": "Achat Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 20% Déductible",
+									"account_number": "445620",
+									"root_type": "Asset",
+									"tax_rate": 20.0
+								},
+								"description": "TVA 20%",
+								"rate": 20
+							}
+						]
+					},
+					{
+						"title": "TVA 10% Déductible",
+						"tax_category": "Achat Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 10% Déductible",
+									"account_number": "445610",
+									"root_type": "Asset",
+									"tax_rate": 10.0
+								},
+								"description": "TVA 10%",
+								"rate": 10
+							}
+						]
+					},
+					{
+						"title": "TVA 5.5% Déductible",
+						"tax_category": "Achat Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 5.5% Déductible",
+									"account_number": "445655",
+									"root_type": "Asset",
+									"tax_rate": 5.5
+								},
+								"description": "TVA 5.5%",
+								"rate": 5.5
+							}
+						]
+					},
+					{
+						"title": "TVA 2.1% Déductible",
+						"tax_category": "Achat Domestique",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 2.1% Déductible",
+									"account_number": "445621",
+									"root_type": "Asset",
+									"tax_rate": 2.1
+								},
+								"description": "TVA 2.1%",
+								"rate": 2.1
+							}
+						]
+					},
+					{
+						"title": "TVA 20% Déductible - Incluse dans le prix",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 20% Déductible",
+									"account_number": "445620",
+									"root_type": "Asset",
+									"tax_rate": 20.0
+								},
+								"included_in_print_rate": 1,
+								"description": "TVA 20%",
+								"rate": 20
+							}
+						]
+					},
+					{
+						"title": "TVA 10% Déductible - Incluse dans le prix",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 10% Déductible",
+									"account_number": "445610",
+									"root_type": "Asset",
+									"tax_rate": 10.0
+								},
+								"included_in_print_rate": 1,
+								"description": "TVA 10%",
+								"rate": 10
+							}
+						]
+					},
+					{
+						"title": "TVA 5.5% Déductible - Incluse dans le prix",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 5.5% Déductible",
+									"account_number": "445655",
+									"root_type": "Asset",
+									"tax_rate": 5.5
+								},
+								"included_in_print_rate": 1,
+								"description": "TVA 5.5%",
+								"rate": 5.5
+							}
+						]
+					},
+					{
+						"title": "TVA 2.1% Déductible - Incluse dans le prix",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA 2.1% Déductible",
+									"account_number": "445621",
+									"root_type": "Asset",
+									"tax_rate": 2.1
+								},
+								"included_in_print_rate": 1,
+								"description": "TVA 2.1%",
+								"rate": 2.1
+							}
+						]
+					},
+					{
+						"title": "TVA Intracommunautaire",
+						"tax_category": "Achat - EU",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "TVA déductible sur acquisition intracommunautaires",
+									"account_number": "445662",
+									"root_type": "Asset",
+									"tax_rate": 20.0,
+									"add_deduct_tax": "Add"
+								},
+								"description": "TVA déductible sur acquisition intracommunautaires",
+								"rate": 20
+							},
+							{
+								"account_head": {
+									"account_name": "TVA due intracommunautaire",
+									"account_number": "445200",
+									"root_type": "Asset",
+									"tax_rate": 20.0,
+									"add_deduct_tax": "Deduct"
+								},
+								"description": "TVA due intracommunautaire",
+								"rate": 20
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "TVA 20% Déductible - Achat",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 20% Déductible",
+									"account_number": "445620",
+									"root_type": "Asset",
+									"tax_rate": 20.0
+								},
+								"description": "TVA 20%",
+								"tax_rate": 20
+							}
+						]
+					},
+					{
+						"title": "TVA 10% Déductible - Achat",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 10% Déductible",
+									"account_number": "445610",
+									"root_type": "Asset",
+									"tax_rate": 10.0
+								},
+								"description": "TVA 10%",
+								"tax_rate": 10
+							}
+						]
+					},
+					{
+						"title": "TVA 5.5% Déductible - Achat",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 5.5% Déductible",
+									"account_number": "445655",
+									"root_type": "Asset",
+									"tax_rate": 5.5
+								},
+								"description": "TVA 5.5%",
+								"tax_rate": 5.5
+							}
+						]
+					},
+					{
+						"title": "TVA 2.1% Déductible - Achat",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 2.1% Déductible",
+									"account_number": "445621",
+									"root_type": "Asset",
+									"tax_rate": 2.1
+								},
+								"description": "TVA 2.1%",
+								"tax_rate": 2.1
+							}
+						]
+					},
+					{
+						"title": "TVA 20% Collecté - Vente",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 20% Collecté",
+									"account_number": "445720",
+									"root_type": "Liability",
+									"tax_rate": 20.0
+								},
+								"description": "TVA 20%",
+								"tax_rate": 20
+							}
+						]
+					},
+					{
+						"title": "TVA 10% Collecté - Vente",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 10% Collecté",
+									"account_number": "445710",
+									"root_type": "Liability",
+									"tax_rate": 10.0
+								},
+								"description": "TVA 10%",
+								"tax_rate": 10
+							}
+						]
+					},
+					{
+						"title": "TVA 5.5% Collecté - Vente",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 5.5% Collecté",
+									"account_number": "445755",
+									"root_type": "Liability",
+									"tax_rate": 5.5
+								},
+								"description": "TVA 5.5%",
+								"tax_rate": 5.5
+							}
+						]
+					},
+					{
+						"title": "TVA 2.1% Collecté - Vente",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "TVA 2.1% Collecté",
+									"account_number": "445721",
+									"root_type": "Liability",
+									"tax_rate": 2.1
+								},
+								"description": "TVA 2.1%",
+								"tax_rate": 2.1
+							}
+						]
+					}
+				]
+			}
 		}
 	},
 

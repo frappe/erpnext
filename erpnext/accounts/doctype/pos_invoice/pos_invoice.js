@@ -65,7 +65,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		super.refresh();
 
 		if (doc.docstatus == 1 && !doc.is_return) {
-			this.frm.add_custom_button(__("Return"), this.make_sales_return, __("Create"));
+			this.frm.add_custom_button(__("Return"), this.make_sales_return.bind(this), __("Create"));
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 

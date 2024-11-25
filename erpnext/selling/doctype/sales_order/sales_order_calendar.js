@@ -8,6 +8,7 @@ frappe.views.calendar["Sales Order"] = {
 		id: "name",
 		title: "customer_name",
 		allDay: "allDay",
+		convertToUserTz: "convertToUserTz",
 	},
 	gantt: true,
 	filters: [

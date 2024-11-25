@@ -1183,6 +1183,7 @@ class update_entries_after:
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		for d in stock_entry.items:
+			# Update only the row that matches the voucher_detail_no or the row containing the FG/Scrap Item.
 			if d.name == voucher_detail_no or (not d.s_warehouse and d.t_warehouse):
 				d.db_update()
 

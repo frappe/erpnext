@@ -956,6 +956,53 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(flt(expected_party_balance), party_balance)
 		self.assertEqual(flt(expected_party_account_balance, 2), flt(party_account_balance, 2))
 
+	def test_gl_of_multi_currency_payment_transaction(self):
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			save_new_records,
+			test_records,
+		)
+
+		save_new_records(test_records)
+		paid_from = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="_Test Cash USD",
+			company="_Test Company",
+			account_type="Cash",
+			account_currency="USD",
+		)
+		payment_entry = create_payment_entry(
+			party="_Test Supplier USD",
+			paid_from=paid_from,
+			paid_to="_Test Payable USD - _TC",
+			paid_amount=100,
+			save=True,
+		)
+		payment_entry.source_exchange_rate = 84.4
+		payment_entry.target_exchange_rate = 84.4
+		payment_entry.save()
+		payment_entry = payment_entry.submit()
+		gle = qb.DocType("GL Entry")
+		gl_entries = (
+			qb.from_(gle)
+			.select(
+				gle.account,
+				gle.debit,
+				gle.credit,
+				gle.debit_in_account_currency,
+				gle.credit_in_account_currency,
+				gle.debit_in_transaction_currency,
+				gle.credit_in_transaction_currency,
+			)
+			.orderby(gle.account)
+			.where(gle.voucher_no == payment_entry.name)
+			.run()
+		)
+		expected_gl_entries = (
+			(paid_from, 0.0, 8440.0, 0.0, 100.0, 0.0, 100.0),
+			("_Test Payable USD - _TC", 8440.0, 0.0, 100.0, 0.0, 100.0, 0.0),
+		)
+		self.assertEqual(gl_entries, expected_gl_entries)
+
 	def test_multi_currency_payment_entry_with_taxes(self):
 		payment_entry = create_payment_entry(
 			party="_Test Supplier USD", paid_to="_Test Payable USD - _TC", save=True

@@ -71,13 +71,8 @@ class CustomerGroup(NestedSet):
 				)
 
 	def on_update(self):
-		self.validate_name_with_customer()
 		super().on_update()
 		self.validate_one_root()
-
-	def validate_name_with_customer(self):
-		if frappe.db.exists("Customer", self.name):
-			frappe.msgprint(_("A customer with the same name already exists"), raise_exception=1)
 
 
 def get_parent_customer_groups(customer_group):

@@ -715,6 +715,20 @@ class TestQuotation(FrappeTestCase):
 		item_doc.taxes = []
 		item_doc.save()
 
+	def test_grand_total_and_rounded_total_values(self):
+		quotation = make_quotation(qty=6, rate=12.3, do_not_submit=1)
+
+		self.assertEqual(quotation.grand_total, 73.8)
+		self.assertEqual(quotation.rounding_adjustment, 0.2)
+		self.assertEqual(quotation.rounded_total, 74)
+
+		quotation.disable_rounded_total = 1
+		quotation.save()
+
+		self.assertEqual(quotation.grand_total, 73.8)
+		self.assertEqual(quotation.rounding_adjustment, 0)
+		self.assertEqual(quotation.rounded_total, 0)
+
 
 test_records = frappe.get_test_records("Quotation")
 

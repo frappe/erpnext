@@ -415,7 +415,6 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 			stock_ledger_entry.batch_no,
 			Sum(stock_ledger_entry.actual_qty).as_("qty"),
 		)
-		.where((batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull()))
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.where(
 			(stock_ledger_entry.item_code == filters.get("item_code"))
@@ -427,6 +426,9 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		.offset(start)
 		.limit(page_len)
 	)
+
+	if not filters.get("include_expired_batches"):
+		query = query.where((batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull()))
 
 	query = query.select(
 		Concat("MFG-", batch_table.manufacturing_date).as_("manufacturing_date"),
@@ -466,7 +468,6 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 			bundle.batch_no,
 			Sum(bundle.qty).as_("qty"),
 		)
-		.where((batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull()))
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.where(
 			(stock_ledger_entry.item_code == filters.get("item_code"))
@@ -478,6 +479,11 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		.offset(start)
 		.limit(page_len)
 	)
+
+	if not filters.get("include_expired_batches"):
+		bundle_query = bundle_query.where(
+			(batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull())
+		)
 
 	bundle_query = bundle_query.select(
 		Concat("MFG-", batch_table.manufacturing_date),

@@ -568,7 +568,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 		if (cumulative_threshold and supp_credit_amt >= cumulative_threshold) and cint(
 			tax_details.tax_on_excess_amount
 		):
-			supp_credit_amt = net_total - cumulative_threshold
+			supp_credit_amt = net_total + tax_withholding_net_total - cumulative_threshold
 
 		if ldc and is_valid_certificate(ldc, inv.get("posting_date") or inv.get("transaction_date"), 0):
 			tds_amount = get_lower_deduction_amount(

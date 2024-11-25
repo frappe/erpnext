@@ -65,6 +65,7 @@
   "grand_total",
   "rounding_adjustment",
   "rounded_total",
+  "disable_rounded_total",
   "in_words",
   "section_break_44",
   "apply_discount_on",
@@ -661,6 +662,7 @@
    "width": "200px"
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -709,6 +711,7 @@
    "width": "200px"
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -1067,13 +1070,19 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:04:21.567847",
+ "modified": "2024-11-07 18:37:11.715189",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

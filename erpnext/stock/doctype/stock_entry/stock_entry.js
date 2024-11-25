@@ -117,6 +117,10 @@ frappe.ui.form.on("Stock Entry", {
 					filters["is_inward"] = 1;
 				}
 
+				if (["Material Receipt", "Material Transfer", "Material Issue"].includes(doc.purpose)) {
+					filters["include_expired_batches"] = 1;
+				}
+
 				return {
 					query: "erpnext.controllers.queries.get_batch_no",
 					filters: filters,

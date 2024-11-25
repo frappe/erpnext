@@ -49,6 +49,7 @@
   "default_cash_account",
   "default_receivable_account",
   "round_off_account",
+  "round_off_for_opening",
   "round_off_cost_center",
   "write_off_account",
   "exchange_gain_loss_account",
@@ -801,6 +802,12 @@
    "fieldtype": "Link",
    "label": "Default Operating Cost Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "round_off_for_opening",
+   "fieldtype": "Link",
+   "label": "Round Off for Opening",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -808,7 +815,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2024-07-24 18:17:56.413971",
+ "modified": "2024-08-02 11:34:46.785377",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

@@ -27,32 +27,51 @@ def get_data(filters):
 
 
 def get_production_plan_item_details(filters, data, order_details):
-	itemwise_indent = {}
-
 	production_plan_doc = frappe.get_cached_doc("Production Plan", filters.get("production_plan"))
 	for row in production_plan_doc.po_items:
-		work_order = frappe.get_value(
+		work_orders = frappe.get_all(
 			"Work Order",
-			{"production_plan_item": row.name, "bom_no": row.bom_no, "production_item": row.item_code},
-			"name",
+			filters={
+				"production_plan_item": row.name,
+				"bom_no": row.bom_no,
+				"production_item": row.item_code,
+			},
+			pluck="name",
 		)
 
-		if row.item_code not in itemwise_indent:
-			itemwise_indent.setdefault(row.item_code, {})
+		order_qty = row.planned_qty
+		total_produced_qty = 0.0
+		pending_qty = 0.0
+		for work_order in work_orders:
+			produced_qty = flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0))
+			pending_qty = flt(order_qty) - produced_qty
+
+			total_produced_qty += produced_qty
+
+			data.append(
+				{
+					"indent": 0,
+					"item_code": row.item_code,
+					"sales_order": row.get("sales_order"),
+					"item_name": frappe.get_cached_value("Item", row.item_code, "item_name"),
+					"qty": order_qty,
+					"document_type": "Work Order",
+					"document_name": work_order or "",
+					"bom_level": 0,
+					"produced_qty": produced_qty,
+					"pending_qty": pending_qty,
+				}
+			)
+
+			order_qty = pending_qty
 
 		data.append(
 			{
-				"indent": 0,
 				"item_code": row.item_code,
-				"sales_order": row.get("sales_order"),
-				"item_name": frappe.get_cached_value("Item", row.item_code, "item_name"),
+				"indent": 0,
 				"qty": row.planned_qty,
-				"document_type": "Work Order",
-				"document_name": work_order or "",
-				"bom_level": 0,
-				"produced_qty": order_details.get((work_order, row.item_code), {}).get("produced_qty", 0),
-				"pending_qty": flt(row.planned_qty)
-				- flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0)),
+				"produced_qty": total_produced_qty,
+				"pending_qty": pending_qty,
 			}
 		)
 

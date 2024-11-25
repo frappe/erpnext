@@ -438,7 +438,9 @@ def split_invoices(invoices):
 			if not item.serial_no and not item.serial_and_batch_bundle:
 				continue
 
-			return_against_is_added = any(d for d in _invoices if d.pos_invoice == pos_invoice.return_against)
+			return_against_is_added = any(
+				d for d in _invoices if d and d[0].pos_invoice == pos_invoice.return_against
+			)
 			if return_against_is_added:
 				break
 

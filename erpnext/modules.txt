@@ -18,3 +18,4 @@ Communication
 Telephony
 Bulk Transaction
 Subcontracting
+EDI

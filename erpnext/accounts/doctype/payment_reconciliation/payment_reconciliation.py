@@ -211,12 +211,14 @@ class PaymentReconciliation(Document):
 		if self.get("cost_center"):
 			conditions.append(jea.cost_center == self.cost_center)
 
-		dr_or_cr = (
-			"credit_in_account_currency"
-			if erpnext.get_party_account_type(self.party_type) == "Receivable"
-			else "debit_in_account_currency"
-		)
-		conditions.append(jea[dr_or_cr].gt(0))
+		account_type = erpnext.get_party_account_type(self.party_type)
+
+		if account_type == "Receivable":
+			dr_or_cr = jea.credit_in_account_currency - jea.debit_in_account_currency
+		elif account_type == "Payable":
+			dr_or_cr = jea.debit_in_account_currency - jea.credit_in_account_currency
+
+		conditions.append(dr_or_cr.gt(0))
 
 		if self.bank_cash_account:
 			conditions.append(jea.against_account.like(f"%%{self.bank_cash_account}%%"))
@@ -231,7 +233,7 @@ class PaymentReconciliation(Document):
 				je.posting_date,
 				je.remark.as_("remarks"),
 				jea.name.as_("reference_row"),
-				jea[dr_or_cr].as_("amount"),
+				dr_or_cr.as_("amount"),
 				jea.is_advance,
 				jea.exchange_rate,
 				jea.account_currency.as_("currency"),
@@ -370,6 +372,10 @@ class PaymentReconciliation(Document):
 
 		if self.invoice_limit:
 			non_reconciled_invoices = non_reconciled_invoices[: self.invoice_limit]
+
+		non_reconciled_invoices = sorted(
+			non_reconciled_invoices, key=lambda k: k["posting_date"] or getdate(nowdate())
+		)
 
 		self.add_invoice_entries(non_reconciled_invoices)
 

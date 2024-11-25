@@ -7,7 +7,7 @@ import copy
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, flt, formatdate, getdate, now
+from frappe.utils import cint, flt, formatdate, get_link_to_form, getdate, now
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -234,6 +234,10 @@ def merge_similar_entries(gl_map, precision=None):
 	merge_properties = get_merge_properties(accounting_dimensions)
 
 	for entry in gl_map:
+		if entry._skip_merge:
+			merged_gl_map.append(entry)
+			continue
+
 		entry.merge_key = get_merge_key(entry, merge_properties)
 		# if there is already an entry in this account then just add it
 		# to that entry
@@ -492,16 +496,36 @@ def raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_
 	)
 
 
+def has_opening_entries(gl_map: list) -> bool:
+	for x in gl_map:
+		if x.is_opening == "Yes":
+			return True
+	return False
+
+
 def make_round_off_gle(gl_map, debit_credit_diff, precision):
-	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+	round_off_account, round_off_cost_center, round_off_for_opening = get_round_off_account_and_cost_center(
 		gl_map[0].company, gl_map[0].voucher_type, gl_map[0].voucher_no
 	)
 	round_off_gle = frappe._dict()
 	round_off_account_exists = False
+	has_opening_entry = has_opening_entries(gl_map)
+
+	if has_opening_entry:
+		if not round_off_for_opening:
+			frappe.throw(
+				_("Please set '{0}' in Company: {1}").format(
+					frappe.bold("Round Off for Opening"), get_link_to_form("Company", gl_map[0].company)
+				)
+			)
+
+		account = round_off_for_opening
+	else:
+		account = round_off_account
 
 	if gl_map[0].voucher_type != "Period Closing Voucher":
 		for d in gl_map:
-			if d.account == round_off_account:
+			if d.account == account:
 				round_off_gle = d
 				if d.debit:
 					debit_credit_diff -= flt(d.debit) - flt(d.credit)
@@ -519,7 +543,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 
 	round_off_gle.update(
 		{
-			"account": round_off_account,
+			"account": account,
 			"debit_in_account_currency": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
 			"credit_in_account_currency": debit_credit_diff if debit_credit_diff > 0 else 0,
 			"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
@@ -532,6 +556,9 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 			"against_voucher": None,
 		}
 	)
+
+	if has_opening_entry:
+		round_off_gle.update({"is_opening": "Yes"})
 
 	update_accounting_dimensions(round_off_gle)
 	if not round_off_account_exists:
@@ -557,9 +584,9 @@ def update_accounting_dimensions(round_off_gle):
 
 
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use_company_default=False):
-	round_off_account, round_off_cost_center = frappe.get_cached_value(
-		"Company", company, ["round_off_account", "round_off_cost_center"]
-	) or [None, None]
+	round_off_account, round_off_cost_center, round_off_for_opening = frappe.get_cached_value(
+		"Company", company, ["round_off_account", "round_off_cost_center", "round_off_for_opening"]
+	) or [None, None, None]
 
 	# Use expense account as fallback
 	if not round_off_account:
@@ -574,12 +601,20 @@ def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use
 			round_off_cost_center = parent_cost_center
 
 	if not round_off_account:
-		frappe.throw(_("Please mention Round Off Account in Company"))
+		frappe.throw(
+			_("Please mention '{0}' in Company: {1}").format(
+				frappe.bold("Round Off Account"), get_link_to_form("Company", company)
+			)
+		)
 
 	if not round_off_cost_center:
-		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+		frappe.throw(
+			_("Please mention '{0}' in Company: {1}").format(
+				frappe.bold("Round Off Cost Center"), get_link_to_form("Company", company)
+			)
+		)
 
-	return round_off_account, round_off_cost_center
+	return round_off_account, round_off_cost_center, round_off_for_opening
 
 
 def make_reverse_gl_entries(

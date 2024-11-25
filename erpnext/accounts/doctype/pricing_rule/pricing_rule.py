@@ -446,7 +446,20 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			if isinstance(pricing_rule, str):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 				update_pricing_rule_uom(pricing_rule, args)
-				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule) or []
+				fetch_other_item = True if pricing_rule.apply_rule_on_other else False
+				pricing_rule.apply_rule_on_other_items = (
+					get_pricing_rule_items(pricing_rule, other_items=fetch_other_item) or []
+				)
+
+			if pricing_rule.coupon_code_based == 1:
+				if not args.coupon_code:
+					return item_details
+
+				coupon_code = frappe.db.get_value(
+					doctype="Coupon Code", filters={"pricing_rule": pricing_rule.name}, fieldname="name"
+				)
+				if args.coupon_code != coupon_code:
+					continue
 
 			if pricing_rule.get("suggestion"):
 				continue
@@ -472,9 +485,6 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 					item_details["apply_rule_on_other_items"] = json.dumps(
 						pricing_rule.apply_rule_on_other_items
 					)
-
-			if pricing_rule.coupon_code_based == 1 and args.coupon_code is None:
-				return item_details
 
 			if not pricing_rule.validate_applied_rule:
 				if pricing_rule.price_or_product_discount == "Price":

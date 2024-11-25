@@ -417,7 +417,7 @@ class PeriodClosingVoucher(AccountsController):
 			"Period Closing Voucher",
 			{"company": self.company, "docstatus": 1},
 			"name",
-			order_by="period_end_date",
+			order_by="period_end_date asc",
 		)
 
 		if not first_pcv or first_pcv == self.name:

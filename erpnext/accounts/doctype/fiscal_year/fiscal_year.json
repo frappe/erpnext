@@ -72,10 +72,10 @@
   },
   {
    "default": "0",
-   "description": "Less than 12 months.",
+   "description": "More/Less than 12 months.",
    "fieldname": "is_short_year",
    "fieldtype": "Check",
-   "label": "Is Short Year",
+   "label": "Is Short/Long Year",
    "set_only_once": 1
   }
  ],
