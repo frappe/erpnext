@@ -1039,9 +1039,9 @@ class JobCard(Document):
 		current_operation_qty += flt(self.total_completed_qty)
 
 		data = frappe.get_all(
-			"Work Order Operation",
-			fields=["operation", "status", "completed_qty", "sequence_id"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
+			"Job Card",
+			fields=["operation", "status", "total_completed_qty", "sequence_id"],
+			filters={"docstatus":  ("<=", 1), "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
 
