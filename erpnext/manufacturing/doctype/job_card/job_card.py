@@ -1020,9 +1020,9 @@ class JobCard(Document):
 		current_operation_qty += flt(self.total_completed_qty)
 
 		data = frappe.get_all(
-			"Work Order Operation",
-			fields=["operation", "status", "completed_qty", "sequence_id"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
+			"Job Card",
+			fields=["operation", "status", "total_completed_qty", "sequence_id"],
+			filters={"docstatus":  ("<=", 1), "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
 
@@ -1040,10 +1040,10 @@ class JobCard(Document):
 			# 		OperationSequenceError,
 			# 	)
 
-			if row.completed_qty < current_operation_qty:
+			if row.total_completed_qty < current_operation_qty:
 				msg = f"""The completed quantity {bold(current_operation_qty)}
 					of an operation {bold(self.operation)} cannot be greater
-					than the completed quantity {bold(row.completed_qty)}
+					than the completed quantity {bold(row.total_completed_qty)}
 					of a previous operation
 					{bold(row.operation)}.
 				"""
