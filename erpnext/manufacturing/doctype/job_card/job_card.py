@@ -1031,13 +1031,14 @@ class JobCard(Document):
 		)
 
 		for row in data:
-			if row.status != "Completed" and row.completed_qty < current_operation_qty:
-				frappe.throw(
-					_("{0}, complete the operation {1} before the operation {2}.").format(
-						message, bold(row.operation), bold(self.operation)
-					),
-					OperationSequenceError,
-				)
+			
+			# if row.status != "Completed" and row.completed_qty < current_operation_qty:
+			# 	frappe.throw(
+			# 		_("{0}, complete the operation {1} before the operation {2}.").format(
+			# 			message, bold(row.operation), bold(self.operation)
+			# 		),
+			# 		OperationSequenceError,
+			# 	)
 
 			if row.completed_qty < current_operation_qty:
 				msg = f"""The completed quantity {bold(current_operation_qty)}
