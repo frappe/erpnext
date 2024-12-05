@@ -19,6 +19,12 @@ TREE_DOCTYPES = frozenset(
 	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
 )
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
+
 
 class PartyLedgerSummaryReport:
 	def __init__(self, filters=None):
@@ -26,6 +32,18 @@ class PartyLedgerSummaryReport:
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
 
+<<<<<<< HEAD
+=======
+		if self.filters.get("cost_center"):
+			self.filters.cost_center = frappe.parse_json(self.filters.get("cost_center"))
+
+		if self.filters.get("project"):
+			self.filters.project = frappe.parse_json(self.filters.get("project"))
+
+		if not self.filters.get("company"):
+			self.filters["company"] = frappe.db.get_single_value("Global Defaults", "default_company")
+
+>>>>>>> 901bcd5c43 (feat: add accounting dimensions in ledger summary reports)
 	def run(self, args):
 		self.filters.party_type = args.get("party_type")
 
@@ -320,6 +338,7 @@ class PartyLedgerSummaryReport:
 		return out
 
 	def get_gl_entries(self):
+<<<<<<< HEAD
 		gle = qb.DocType("GL Entry")
 		query = (
 			qb.from_(gle)
@@ -341,6 +360,31 @@ class PartyLedgerSummaryReport:
 				& (gle.posting_date <= self.filters.to_date)
 				& (gle.party.isin(self.parties))
 			)
+=======
+		conditions = self.prepare_conditions()
+		join = join_field = ""
+		if self.filters.party_type == "Customer":
+			join_field = ", p.customer_name as party_name"
+			join = "left join `tabCustomer` p on gle.party = p.name"
+		elif self.filters.party_type == "Supplier":
+			join_field = ", p.supplier_name as party_name"
+			join = "left join `tabSupplier` p on gle.party = p.name"
+
+		self.gl_entries = frappe.db.sql(
+			f"""
+			select
+				gle.posting_date, gle.party, gle.voucher_type, gle.voucher_no, gle.against_voucher_type,
+				gle.against_voucher,  gle.cost_center, gle.project, gle.debit, gle.credit, gle.is_opening {join_field}
+			from `tabGL Entry` gle
+			{join}
+			where
+				gle.docstatus < 2 and gle.is_cancelled = 0 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
+				and gle.posting_date <= %(to_date)s {conditions}
+			order by gle.posting_date
+		""",
+			self.filters,
+			as_dict=True,
+>>>>>>> 901bcd5c43 (feat: add accounting dimensions in ledger summary reports)
 		)
 
 		query = self.prepare_conditions(query)
@@ -378,7 +422,68 @@ class PartyLedgerSummaryReport:
 							(gle[dimension.fieldname]).isin(self.filters.get(dimension.fieldname))
 						)
 
+<<<<<<< HEAD
 		return query
+=======
+				conditions.append(
+					f"""party in (select name from tabCustomer
+					where exists(select name from `tabTerritory` where lft >= {lft} and rgt <= {rgt}
+						and name=tabCustomer.territory))"""
+				)
+
+			if self.filters.get("payment_terms_template"):
+				conditions.append(
+					"party in (select name from tabCustomer where payment_terms=%(payment_terms_template)s)"
+				)
+
+			if self.filters.get("sales_partner"):
+				conditions.append(
+					"party in (select name from tabCustomer where default_sales_partner=%(sales_partner)s)"
+				)
+
+			if self.filters.get("sales_person"):
+				lft, rgt = frappe.db.get_value(
+					"Sales Person", self.filters.get("sales_person"), ["lft", "rgt"]
+				)
+
+				conditions.append(
+					"""exists(select name from `tabSales Team` steam where
+					steam.sales_person in (select name from `tabSales Person` where lft >= {} and rgt <= {})
+					and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
+						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
+						or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt)
+				)
+
+		if self.filters.party_type == "Supplier":
+			if self.filters.get("supplier_group"):
+				conditions.append(
+					"""party in (select name from tabSupplier
+					where supplier_group=%(supplier_group)s)"""
+				)
+
+		if self.filters.get("cost_center"):
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
+			conditions.append("gle.cost_center in %(cost_center)s")
+
+		if self.filters.get("project"):
+			conditions.append("gle.project in %(project)s")
+
+		accounting_dimensions = get_accounting_dimensions(as_list=False)
+
+		if accounting_dimensions:
+			for dimension in accounting_dimensions:
+				if not dimension.disabled and dimension.document_type != "Finance Book":
+					if self.filters.get(dimension.fieldname):
+						if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+							self.filters[dimension.fieldname] = get_dimension_with_children(
+								dimension.document_type, self.filters.get(dimension.fieldname)
+							)
+							conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
+						else:
+							conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
+
+		return " and ".join(conditions)
+>>>>>>> 901bcd5c43 (feat: add accounting dimensions in ledger summary reports)
 
 	def get_return_invoices(self):
 		doctype = "Sales Invoice" if self.filters.party_type == "Customer" else "Purchase Invoice"
