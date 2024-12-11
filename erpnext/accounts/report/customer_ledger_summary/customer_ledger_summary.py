@@ -410,11 +410,19 @@ class PartyLedgerSummaryReport:
 		)
 
 		if self.filters.party_type == "Customer":
-			ctr = qb.DocType("Customer")
-			query = query.select(ctr.customer_name.as_("party_name")).left_join(ctr).on(ctr.name == gle.party)
+			customer = qb.DocType("Customer")
+			query = (
+				query.select(customer.customer_name.as_("party_name"))
+				.left_join(customer)
+				.on(customer.name == gle.party)
+			)
 		elif self.filters.party_type == "Supplier":
-			spr = qb.DocType("Supplier")
-			query = query.select(spr.supplier_name.as_("party_name")).left_join(spr).on(spr.name == gle.party)
+			supplier = qb.DocType("Supplier")
+			query = (
+				query.select(supplier.supplier_name.as_("party_name"))
+				.left_join(supplier)
+				.on(supplier.name == gle.party)
+			)
 
 		query = self.prepare_conditions(query)
 >>>>>>> 7614f166d8 (refactor: convert sql queries to qb queries)
@@ -464,29 +472,31 @@ class PartyLedgerSummaryReport:
 			query = query.where(gle.party == self.filters.party)
 
 		if self.filters.party_type == "Customer":
-			ctr = qb.DocType("Customer")
+			customer = qb.DocType("Customer")
 			if self.filters.customer_group:
 				query = query.where(
 					(gle.party).isin(
-						qb.from_(ctr)
-						.select(ctr.name)
-						.where(ctr.customer_group == self.filters.customer_group)
+						qb.from_(customer)
+						.select(customer.name)
+						.where(customer.customer_group == self.filters.customer_group)
 					)
 				)
 
 			if self.filters.territory:
 				query = query.where(
 					(gle.party).isin(
-						qb.from_(ctr).select(ctr.name).where(ctr.territory == self.filters.territory)
+						qb.from_(customer)
+						.select(customer.name)
+						.where(customer.territory == self.filters.territory)
 					)
 				)
 
 			if self.filters.payment_terms_template:
 				query = query.where(
 					(gle.party).isin(
-						qb.from_(ctr)
-						.select(ctr.name)
-						.where(ctr.payment_terms == self.filters.payment_terms_template)
+						qb.from_(customer)
+						.select(customer.name)
+						.where(customer.payment_terms == self.filters.payment_terms_template)
 					)
 >>>>>>> 7614f166d8 (refactor: convert sql queries to qb queries)
 				)
@@ -494,30 +504,30 @@ class PartyLedgerSummaryReport:
 			if self.filters.sales_partner:
 				query = query.where(
 					(gle.party).isin(
-						qb.from_(ctr)
-						.select(ctr.name)
-						.where(ctr.default_sales_partner == self.filters.sales_partner)
+						qb.from_(customer)
+						.select(customer.name)
+						.where(customer.default_sales_partner == self.filters.sales_partner)
 					)
 				)
 
 			if self.filters.sales_person:
-				sl_team = qb.DocType("Sales Team")
+				sales_team = qb.DocType("Sales Team")
 				query = query.where(
 					(gle.party).isin(
-						qb.from_(sl_team)
-						.select(sl_team.parent)
-						.where(sl_team.sales_person == self.filters.sales_person)
+						qb.from_(sales_team)
+						.select(sales_team.parent)
+						.where(sales_team.sales_person == self.filters.sales_person)
 					)
 				)
 
 		if self.filters.party_type == "Supplier":
 			if self.filters.supplier_group:
-				spr = qb.DocType("Supplier")
+				supplier = qb.DocType("Supplier")
 				query = query.where(
 					(gle.party).isin(
-						qb.from_(spr)
-						.select(spr.name)
-						.where(spr.supplier_group == self.filters.supplier_group)
+						qb.from_(supplier)
+						.select(supplier.name)
+						.where(supplier.supplier_group == self.filters.supplier_group)
 					)
 				)
 
