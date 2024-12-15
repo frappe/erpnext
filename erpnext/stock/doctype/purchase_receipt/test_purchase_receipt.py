@@ -3948,6 +3948,105 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(return_pr.per_billed, 100)
 		self.assertEqual(return_pr.status, "Completed")
 
+	def test_do_not_allow_to_inward_same_serial_no_multiple_times(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		frappe.db.set_single_value("Stock Settings", "allow_existing_serial_no", 0)
+
+		item_code = make_item(
+			"Test Do Not Allow INWD Item 123", {"has_serial_no": 1, "serial_no_series": "SN-TDAISN-.#####"}
+		).name
+
+		pr = make_purchase_receipt(item_code=item_code, qty=1, rate=100, use_serial_batch_fields=1)
+		serial_no = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)[0]
+
+		status = frappe.db.get_value("Serial No", serial_no, "status")
+		self.assertTrue(status == "Active")
+
+		make_stock_entry(
+			item_code=item_code,
+			source=pr.items[0].warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+		)
+
+		status = frappe.db.get_value("Serial No", serial_no, "status")
+		self.assertFalse(status == "Active")
+
+		pr = make_purchase_receipt(
+			item_code=item_code, qty=1, rate=100, use_serial_batch_fields=1, do_not_submit=1
+		)
+		pr.items[0].serial_no = serial_no
+		pr.save()
+
+		self.assertRaises(frappe.exceptions.ValidationError, pr.submit)
+
+		frappe.db.set_single_value("Stock Settings", "allow_existing_serial_no", 1)
+
+	def test_seral_no_return_validation(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+		)
+
+		sn_item_code = make_item(
+			"Test Serial No for Validation", {"has_serial_no": 1, "serial_no_series": "SN-TSNFVAL-.#####"}
+		).name
+
+		pr1 = make_purchase_receipt(item_code=sn_item_code, qty=5, rate=100, use_serial_batch_fields=1)
+		pr1_serial_nos = get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle)
+
+		serial_no_pr = make_purchase_receipt(
+			item_code=sn_item_code, qty=5, rate=100, use_serial_batch_fields=1
+		)
+		serial_no_pr_serial_nos = get_serial_nos_from_bundle(serial_no_pr.items[0].serial_and_batch_bundle)
+
+		sn_return = make_purchase_return(serial_no_pr.name)
+		sn_return.items[0].qty = -1
+		sn_return.items[0].received_qty = -1
+		sn_return.items[0].serial_no = pr1_serial_nos[0]
+		sn_return.save()
+		self.assertRaises(frappe.ValidationError, sn_return.submit)
+
+		sn_return = make_purchase_return(serial_no_pr.name)
+		sn_return.items[0].qty = -1
+		sn_return.items[0].received_qty = -1
+		sn_return.items[0].serial_no = serial_no_pr_serial_nos[0]
+		sn_return.save()
+		sn_return.submit()
+
+	def test_batch_no_return_validation(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+		)
+
+		batch_item_code = make_item(
+			"Test Batch No for Validation",
+			{"has_batch_no": 1, "batch_number_series": "BT-TSNFVAL-.#####", "create_new_batch": 1},
+		).name
+
+		pr1 = make_purchase_receipt(item_code=batch_item_code, qty=5, rate=100, use_serial_batch_fields=1)
+		batch_no = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+
+		batch_no_pr = make_purchase_receipt(
+			item_code=batch_item_code, qty=5, rate=100, use_serial_batch_fields=1
+		)
+		original_batch_no = get_batch_from_bundle(batch_no_pr.items[0].serial_and_batch_bundle)
+
+		batch_return = make_purchase_return(batch_no_pr.name)
+		batch_return.items[0].qty = -1
+		batch_return.items[0].received_qty = -1
+		batch_return.items[0].batch_no = batch_no
+		batch_return.save()
+		self.assertRaises(frappe.ValidationError, batch_return.submit)
+
+		batch_return = make_purchase_return(batch_no_pr.name)
+		batch_return.items[0].qty = -1
+		batch_return.items[0].received_qty = -1
+		batch_return.items[0].batch_no = original_batch_no
+		batch_return.save()
+		batch_return.submit()
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

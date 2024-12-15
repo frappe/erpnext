@@ -356,13 +356,13 @@ class BuyingController(SubcontractingController):
 		if not self.is_internal_transfer():
 			return
 
+		self.set_sales_incoming_rate_for_internal_transfer()
+
 		allow_at_arms_length_price = frappe.get_cached_value(
 			"Stock Settings", None, "allow_internal_transfer_at_arms_length_price"
 		)
 		if allow_at_arms_length_price:
 			return
-
-		self.set_sales_incoming_rate_for_internal_transfer()
 
 		for d in self.get("items"):
 			d.discount_percentage = 0.0

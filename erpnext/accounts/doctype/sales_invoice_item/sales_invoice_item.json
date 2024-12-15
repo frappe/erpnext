@@ -89,11 +89,14 @@
   "incoming_rate",
   "item_tax_rate",
   "actual_batch_qty",
-  "actual_qty",
   "section_break_eoec",
   "serial_no",
   "column_break_ytgd",
   "batch_no",
+  "available_quantity_section",
+  "actual_qty",
+  "column_break_ogff",
+  "company_total_stock",
   "edit_references",
   "sales_order",
   "so_detail",
@@ -675,7 +678,8 @@
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "label": "Available Qty at Warehouse",
+   "label": "Qty (Warehouse)",
+   "no_copy": 1,
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -923,12 +927,30 @@
   {
    "fieldname": "column_break_ytgd",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "available_quantity_section",
+   "fieldtype": "Section Break",
+   "label": "Available Quantity"
+  },
+  {
+   "fieldname": "column_break_ogff",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "company_total_stock",
+   "fieldtype": "Float",
+   "label": "Qty (Company)",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-10-28 15:06:40.980995",
+ "modified": "2024-11-25 16:27:33.287341",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

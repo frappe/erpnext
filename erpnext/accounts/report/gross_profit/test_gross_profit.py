@@ -418,12 +418,12 @@ class TestGrossProfit(FrappeTestCase):
 			"item_name": self.item,
 			"warehouse": "Stores - _GP",
 			"qty": 0.0,
-			"avg._selling_rate": 0.0,
+			"avg._selling_rate": 100,
 			"valuation_rate": 0.0,
-			"selling_amount": -100.0,
+			"selling_amount": 0.0,
 			"buying_amount": 0.0,
-			"gross_profit": -100.0,
-			"gross_profit_%": 100.0,
+			"gross_profit": 0.0,
+			"gross_profit_%": 0.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		# Both items of Invoice should have '0' qty

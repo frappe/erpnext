@@ -49,12 +49,13 @@
   "do_not_use_batchwise_valuation",
   "auto_create_serial_and_batch_bundle_for_outward",
   "pick_serial_and_batch_based_on",
+  "naming_series_prefix",
   "column_break_mhzc",
   "disable_serial_no_and_batch_selector",
   "use_naming_series",
-  "naming_series_prefix",
   "use_serial_batch_fields",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
+  "allow_existing_serial_no",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -460,6 +461,12 @@
    "fieldname": "over_picking_allowance",
    "fieldtype": "Percent",
    "label": "Over Picking Allowance"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_existing_serial_no",
+   "fieldtype": "Check",
+   "label": "Allow existing Serial No to be Manufactured/Received again"
   }
  ],
  "icon": "icon-cog",
@@ -467,7 +474,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-29 14:55:19.093508",
+ "modified": "2024-12-09 17:52:36.030456",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

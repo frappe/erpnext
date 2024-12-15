@@ -1013,22 +1013,29 @@ class ReceivablePayableReport:
 
 	def get_columns(self):
 		self.columns = []
-		self.add_column("Posting Date", fieldtype="Date")
+		self.add_column(_("Posting Date"), fieldname="posting_date", fieldtype="Date")
 		self.add_column(
-			label="Party Type",
+			label=_("Party Type"),
 			fieldname="party_type",
 			fieldtype="Data",
 			width=100,
 		)
 		self.add_column(
-			label="Party",
+			label=_("Party"),
 			fieldname="party",
 			fieldtype="Dynamic Link",
 			options="party_type",
 			width=180,
 		)
+		if self.account_type == "Receivable":
+			label = _("Receivable Account")
+		elif self.account_type == "Payable":
+			label = _("Payable Account")
+		else:
+			label = _("Party Account")
+
 		self.add_column(
-			label=self.account_type + " Account",
+			label=label,
 			fieldname="party_account",
 			fieldtype="Link",
 			options="Account",
@@ -1037,10 +1044,10 @@ class ReceivablePayableReport:
 
 		if self.party_naming_by == "Naming Series":
 			if self.account_type == "Payable":
-				label = "Supplier Name"
+				label = _("Supplier Name")
 				fieldname = "supplier_name"
 			else:
-				label = "Customer Name"
+				label = _("Customer Name")
 				fieldname = "customer_name"
 			self.add_column(
 				label=label,
@@ -1066,7 +1073,7 @@ class ReceivablePayableReport:
 			width=180,
 		)
 
-		self.add_column(label="Due Date", fieldtype="Date")
+		self.add_column(label=_("Due Date"), fieldname="due_date", fieldtype="Date")
 
 		if self.account_type == "Payable":
 			self.add_column(label=_("Bill No"), fieldname="bill_no", fieldtype="Data")

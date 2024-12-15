@@ -207,6 +207,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 					posting_time: frm.doc.posting_time,
 					batch_no: d.batch_no,
 					row: d,
+					company: frm.doc.company,
 				},
 				callback: function (r) {
 					const row = frappe.model.get_doc(cdt, cdn);

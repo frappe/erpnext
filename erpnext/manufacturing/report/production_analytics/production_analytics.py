@@ -131,11 +131,11 @@ def get_chart_data(periodic_data, columns):
 		pending.append(periodic_data.get("Pending").get(d))
 		completed.append(periodic_data.get("Completed").get(d))
 
-	datasets.append({"name": "All Work Orders", "values": all_data})
-	datasets.append({"name": "Not Started", "values": not_start})
-	datasets.append({"name": "Overdue", "values": overdue})
-	datasets.append({"name": "Pending", "values": pending})
-	datasets.append({"name": "Completed", "values": completed})
+	datasets.append({"name": _("All Work Orders"), "values": all_data})
+	datasets.append({"name": _("Not Started"), "values": not_start})
+	datasets.append({"name": _("Overdue"), "values": overdue})
+	datasets.append({"name": _("Pending"), "values": pending})
+	datasets.append({"name": _("Completed"), "values": completed})
 
 	chart = {"data": {"labels": labels, "datasets": datasets}}
 	chart["type"] = "line"

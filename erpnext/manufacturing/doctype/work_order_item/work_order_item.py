@@ -25,6 +25,7 @@ class WorkOrderItem(Document):
 		item_code: DF.Link | None
 		item_name: DF.Data | None
 		operation: DF.Link | None
+		operation_row_id: DF.Int
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -32,6 +33,7 @@ class WorkOrderItem(Document):
 		required_qty: DF.Float
 		returned_qty: DF.Float
 		source_warehouse: DF.Link | None
+		stock_uom: DF.Link | None
 		transferred_qty: DF.Float
 	# end: auto-generated types
 

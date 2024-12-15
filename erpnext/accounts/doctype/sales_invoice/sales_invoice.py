@@ -96,6 +96,7 @@ class SalesInvoice(SellingController):
 		company: DF.Link
 		company_address: DF.Link | None
 		company_address_display: DF.SmallText | None
+		company_contact_person: DF.Link | None
 		company_tax_id: DF.Data | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
@@ -1754,6 +1755,9 @@ class SalesInvoice(SellingController):
 
 	def update_project(self):
 		unique_projects = list(set([d.project for d in self.get("items") if d.project]))
+		if self.project and self.project not in unique_projects:
+			unique_projects.append(self.project)
+
 		for p in unique_projects:
 			project = frappe.get_doc("Project", p)
 			project.update_billed_amount()

@@ -966,13 +966,15 @@ erpnext.PointOfSale.ItemCart = class {
 
 				if (!res.length) {
 					transaction_container.html(
-						`<div class="no-transactions-placeholder">No recent transactions found</div>`
+						`<div class="no-transactions-placeholder">${__("No recent transactions found")}</div>`
 					);
 					return;
 				}
 
 				const elapsed_time = moment(res[0].posting_date + " " + res[0].posting_time).fromNow();
-				this.$customer_section.find(".customer-desc").html(`Last transacted ${elapsed_time}`);
+				this.$customer_section
+					.find(".customer-desc")
+					.html(`${__("Last transacted")} ${__(elapsed_time)}`);
 
 				res.forEach((invoice) => {
 					const posting_datetime = moment(invoice.posting_date + " " + invoice.posting_time).format(
@@ -997,7 +999,7 @@ erpnext.PointOfSale.ItemCart = class {
 							</div>
 							<div class="invoice-status">
 								<span class="indicator-pill whitespace-nowrap ${indicator_color[invoice.status]}">
-									<span>${invoice.status}</span>
+									<span>${__(invoice.status)}</span>
 								</span>
 							</div>
 						</div>

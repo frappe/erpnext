@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext.accounts.report.financial_statements import (
+	compute_growth_view_data,
 	get_columns,
 	get_data,
 	get_filtered_list_for_consolidated_report,
@@ -100,6 +101,9 @@ def execute(filters=None):
 	report_summary, primitive_summary = get_report_summary(
 		period_list, asset, liability, equity, provisional_profit_loss, currency, filters
 	)
+
+	if filters.get("selected_view") == "Growth":
+		compute_growth_view_data(data, period_list)
 
 	return columns, data, message, chart, report_summary, primitive_summary
 

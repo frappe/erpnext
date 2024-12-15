@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
 from frappe.utils import get_link_to_form
 
 
@@ -93,14 +94,23 @@ class ProductBundle(Document):
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	product_bundles = frappe.db.get_list("Product Bundle", {"disabled": 0}, pluck="name")
 
+	if not searchfield or searchfield == "name":
+		searchfield = frappe.get_meta("Item").get("search_fields")
+
+	searchfield = searchfield.split(",")
+	searchfield.append("name")
+
 	item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(item)
-		.select(item.item_code, item.item_name)
-		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0) & (item[searchfield].like(f"%{txt}%")))
+		.select(item.name, item.item_name)
+		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0))
 		.limit(page_len)
 		.offset(start)
 	)
+
+	if searchfield:
+		query = query.where(Criterion.any([item[fieldname].like(f"%{txt}%") for fieldname in searchfield]))
 
 	if product_bundles:
 		query = query.where(item.name.notin(product_bundles))

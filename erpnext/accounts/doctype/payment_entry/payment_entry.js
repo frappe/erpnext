@@ -185,6 +185,10 @@ frappe.ui.form.on("Payment Entry", {
 				filters: {
 					reference_doctype: row.reference_doctype,
 					reference_name: row.reference_name,
+					company: doc.company,
+					status: ["!=", "Paid"],
+					outstanding_amount: [">", 0], // for compatibility with old data
+					docstatus: 1,
 				},
 			};
 		});
@@ -319,11 +323,6 @@ frappe.ui.form.on("Payment Entry", {
 		frm.toggle_display(
 			"write_off_difference_amount",
 			frm.doc.difference_amount && frm.doc.party && frm.doc.total_allocated_amount > party_amount
-		);
-
-		frm.toggle_display(
-			"set_exchange_gain_loss",
-			frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount
 		);
 	},
 
@@ -1115,36 +1114,34 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	set_unallocated_amount: function (frm) {
-		var unallocated_amount = 0;
-		var total_deductions = frappe.utils.sum(
-			$.map(frm.doc.deductions || [], function (d) {
-				return flt(d.amount);
-			})
-		);
+		let unallocated_amount = 0;
+		let deductions_to_consider = 0;
+
+		for (const row of frm.doc.deductions || []) {
+			if (!row.is_exchange_gain_loss) deductions_to_consider += flt(row.amount);
+		}
+		const included_taxes = get_included_taxes(frm);
 
 		if (frm.doc.party) {
 			if (
 				frm.doc.payment_type == "Receive" &&
-				frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions &&
-				frm.doc.total_allocated_amount <
-					frm.doc.paid_amount + total_deductions / frm.doc.source_exchange_rate
-			) {
-				unallocated_amount =
-					(frm.doc.base_received_amount +
-						total_deductions -
-						flt(frm.doc.base_total_taxes_and_charges) -
-						frm.doc.base_total_allocated_amount) /
-					frm.doc.source_exchange_rate;
-			} else if (
-				frm.doc.payment_type == "Pay" &&
-				frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions &&
-				frm.doc.total_allocated_amount <
-					frm.doc.received_amount + total_deductions / frm.doc.target_exchange_rate
+				frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount + deductions_to_consider
 			) {
 				unallocated_amount =
 					(frm.doc.base_paid_amount +
-						flt(frm.doc.base_total_taxes_and_charges) -
-						(total_deductions + frm.doc.base_total_allocated_amount)) /
+						deductions_to_consider -
+						frm.doc.base_total_allocated_amount -
+						included_taxes) /
+					frm.doc.source_exchange_rate;
+			} else if (
+				frm.doc.payment_type == "Pay" &&
+				frm.doc.base_total_allocated_amount < frm.doc.base_received_amount - deductions_to_consider
+			) {
+				unallocated_amount =
+					(frm.doc.base_received_amount -
+						deductions_to_consider -
+						frm.doc.base_total_allocated_amount -
+						included_taxes) /
 					frm.doc.target_exchange_rate;
 			}
 		}
@@ -1238,77 +1235,85 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	write_off_difference_amount: function (frm) {
-		frm.events.set_deductions_entry(frm, "write_off_account");
+		frm.events.set_write_off_deduction(frm);
 	},
 
-	set_exchange_gain_loss: function (frm) {
-		frm.events.set_deductions_entry(frm, "exchange_gain_loss_account");
+	base_paid_amount: function (frm) {
+		frm.events.set_exchange_gain_loss_deduction(frm);
 	},
 
-	set_deductions_entry: function (frm, account) {
-		if (frm.doc.difference_amount) {
-			frappe.call({
-				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_company_defaults",
-				args: {
-					company: frm.doc.company,
-				},
-				callback: function (r, rt) {
-					if (r.message) {
-						const write_off_row = $.map(frm.doc["deductions"] || [], function (t) {
-							return t.account == r.message[account] ? t : null;
-						});
+	base_received_amount: function (frm) {
+		frm.events.set_exchange_gain_loss_deduction(frm);
+	},
 
-						const difference_amount = flt(
-							frm.doc.difference_amount,
-							precision("difference_amount")
-						);
+	set_exchange_gain_loss_deduction: async function (frm) {
+		// wait for allocate_party_amount_against_ref_docs to finish
+		await frappe.after_ajax();
+		const base_paid_amount = frm.doc.base_paid_amount || 0;
+		const base_received_amount = frm.doc.base_received_amount || 0;
+		const exchange_gain_loss = flt(
+			base_paid_amount - base_received_amount,
+			get_deduction_amount_precision()
+		);
 
-						const add_deductions = (details) => {
-							let row = null;
-							if (!write_off_row.length && difference_amount) {
-								row = frm.add_child("deductions");
-								row.account = details[account];
-								row.cost_center = details["cost_center"];
-							} else {
-								row = write_off_row[0];
-							}
-
-							if (row) {
-								row.amount = flt(row.amount) + difference_amount;
-							} else {
-								frappe.msgprint(__("No gain or loss in the exchange rate"));
-							}
-							refresh_field("deductions");
-						};
-
-						if (!r.message[account]) {
-							frappe.prompt(
-								{
-									label: __("Please Specify Account"),
-									fieldname: account,
-									fieldtype: "Link",
-									options: "Account",
-									get_query: () => ({
-										filters: {
-											company: frm.doc.company,
-										},
-									}),
-								},
-								(values) => {
-									const details = Object.assign({}, r.message, values);
-									add_deductions(details);
-								},
-								__(frappe.unscrub(account))
-							);
-						} else {
-							add_deductions(r.message);
-						}
-
-						frm.events.set_unallocated_amount(frm);
-					}
-				},
-			});
+		if (!exchange_gain_loss) {
+			frm.events.delete_exchange_gain_loss(frm);
+			return;
 		}
+
+		const account_fieldname = "exchange_gain_loss_account";
+		let row = (frm.doc.deductions || []).find((t) => t.is_exchange_gain_loss);
+
+		if (!row) {
+			const response = await get_company_defaults(frm.doc.company);
+
+			const account =
+				response.message?.[account_fieldname] ||
+				(await prompt_for_missing_account(frm, account_fieldname));
+
+			row = frm.add_child("deductions");
+			row.account = account;
+			row.cost_center = response.message?.cost_center;
+			row.is_exchange_gain_loss = 1;
+		}
+
+		row.amount = exchange_gain_loss;
+		frm.refresh_field("deductions");
+		frm.events.set_unallocated_amount(frm);
+	},
+
+	delete_exchange_gain_loss: function (frm) {
+		const exchange_gain_loss_row = (frm.doc.deductions || []).find((row) => row.is_exchange_gain_loss);
+
+		if (!exchange_gain_loss_row) return;
+
+		exchange_gain_loss_row.amount = 0;
+		frm.get_field("deductions").grid.grid_rows[exchange_gain_loss_row.idx - 1].remove();
+		frm.refresh_field("deductions");
+	},
+
+	set_write_off_deduction: async function (frm) {
+		const difference_amount = flt(frm.doc.difference_amount, get_deduction_amount_precision());
+		if (!difference_amount) return;
+
+		const account_fieldname = "write_off_account";
+		const response = await get_company_defaults(frm.doc.company);
+		const write_off_account =
+			response.message?.[account_fieldname] ||
+			(await prompt_for_missing_account(frm, account_fieldname));
+
+		if (!write_off_account) return;
+
+		let row = (frm.doc["deductions"] || []).find((t) => t.account == write_off_account);
+		if (!row) {
+			row = frm.add_child("deductions");
+			row.account = write_off_account;
+			row.cost_center = response.message?.cost_center;
+		}
+
+		row.amount = flt(row.amount) + difference_amount;
+		frm.refresh_field("deductions");
+		frm.events.set_unallocated_amount(frm);
 	},
 
 	bank_account: function (frm) {
@@ -1774,6 +1779,13 @@ frappe.ui.form.on("Advance Taxes and Charges", {
 });
 
 frappe.ui.form.on("Payment Entry Deduction", {
+	before_deductions_remove: function (doc, cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		if (row.is_exchange_gain_loss && row.amount) {
+			frappe.throw(__("Cannot delete Exchange Gain/Loss row"));
+		}
+	},
+
 	amount: function (frm) {
 		frm.events.set_unallocated_amount(frm);
 	},
@@ -1794,4 +1806,54 @@ function set_default_party_type(frm) {
 	}
 
 	if (party_type) frm.set_value("party_type", party_type);
+}
+
+function get_included_taxes(frm) {
+	let included_taxes = 0;
+	for (const tax of frm.doc.taxes) {
+		if (!tax.included_in_paid_amount) continue;
+
+		if (tax.add_deduct_tax == "Add") {
+			included_taxes += tax.base_tax_amount;
+		} else {
+			included_taxes -= tax.base_tax_amount;
+		}
+	}
+
+	return included_taxes;
+}
+
+function get_company_defaults(company) {
+	return frappe.call({
+		method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_company_defaults",
+		args: {
+			company: company,
+		},
+	});
+}
+
+function prompt_for_missing_account(frm, account) {
+	return new Promise((resolve) => {
+		const dialog = frappe.prompt(
+			{
+				label: __(frappe.unscrub(account)),
+				fieldname: account,
+				fieldtype: "Link",
+				options: "Account",
+				get_query: () => ({
+					filters: {
+						company: frm.doc.company,
+					},
+				}),
+			},
+			(values) => resolve(values?.[account]),
+			__("Please Specify Account")
+		);
+
+		dialog.on_hide = () => resolve("");
+	});
+}
+
+function get_deduction_amount_precision() {
+	return frappe.meta.get_field_precision(frappe.meta.get_field("Payment Entry Deduction", "amount"));
 }

@@ -48,24 +48,30 @@
   "default_bank_account",
   "default_cash_account",
   "default_receivable_account",
-  "round_off_account",
-  "round_off_for_opening",
-  "round_off_cost_center",
+  "default_payable_account",
   "write_off_account",
-  "exchange_gain_loss_account",
-  "unrealized_exchange_gain_loss_account",
   "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
-  "default_payable_account",
   "default_expense_account",
   "default_income_account",
-  "default_deferred_revenue_account",
-  "default_deferred_expense_account",
   "default_discount_account",
   "payment_terms",
   "cost_center",
   "default_finance_book",
+  "exchange_gain__loss_section",
+  "exchange_gain_loss_account",
+  "column_break_sttp",
+  "unrealized_exchange_gain_loss_account",
+  "round_off_section",
+  "round_off_account",
+  "round_off_cost_center",
+  "column_break_jqfo",
+  "round_off_for_opening",
+  "deferred_accounting_section",
+  "default_deferred_revenue_account",
+  "column_break_dcdl",
+  "default_deferred_expense_account",
   "advance_payments_section",
   "book_advance_payments_in_separate_party_account",
   "reconcile_on_advance_payment_date",
@@ -287,7 +293,7 @@
   {
    "fieldname": "default_settings",
    "fieldtype": "Section Break",
-   "label": "Accounts Settings",
+   "label": "Default Accounts",
    "oldfieldtype": "Section Break"
   },
   {
@@ -808,6 +814,33 @@
    "fieldtype": "Link",
    "label": "Round Off for Opening",
    "options": "Account"
+  },
+  {
+   "fieldname": "exchange_gain__loss_section",
+   "fieldtype": "Section Break",
+   "label": "Exchange Gain / Loss"
+  },
+  {
+   "fieldname": "round_off_section",
+   "fieldtype": "Section Break",
+   "label": "Round Off"
+  },
+  {
+   "fieldname": "deferred_accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting"
+  },
+  {
+   "fieldname": "column_break_sttp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jqfo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dcdl",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-building",
@@ -815,7 +848,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2024-08-02 11:34:46.785377",
+ "modified": "2024-12-02 15:37:32.723176",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

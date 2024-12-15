@@ -11,6 +11,7 @@
   "column_break_2",
   "attribute_value",
   "numeric_values",
+  "disabled",
   "section_break_4",
   "from_range",
   "increment",
@@ -74,11 +75,18 @@
    "fieldname": "to_range",
    "fieldtype": "Float",
    "label": "To Range"
+  },
+  {
+   "default": "0",
+   "fetch_from": "attribute.disabled",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-07-14 17:15:19.112119",
+ "modified": "2024-11-26 20:10:49.873339",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Variant Attribute",

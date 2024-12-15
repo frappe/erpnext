@@ -1137,6 +1137,45 @@ class TestPricingRule(FrappeTestCase):
 		so.save()
 		self.assertEqual(len(so.items), 1)
 
+	def test_pricing_rule_for_product_free_item_round_free_qty(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"rate": 0,
+			"min_qty": 100,
+			"max_qty": 0,
+			"price_or_product_discount": "Product",
+			"same_item": 1,
+			"free_qty": 10,
+			"round_free_qty": 1,
+			"is_recursive": 1,
+			"recurse_for": 100,
+			"company": "_Test Company",
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=100)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+		self.assertEqual(so.items[1].qty, 10)
+
+		so = make_sales_order(item_code="_Test Item", qty=150)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+		self.assertEqual(so.items[1].qty, 10)
+
 	def test_apply_multiple_pricing_rules_for_discount_percentage_and_amount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")

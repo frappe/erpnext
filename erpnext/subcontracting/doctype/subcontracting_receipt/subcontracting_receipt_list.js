@@ -4,7 +4,7 @@
 frappe.listview_settings["Subcontracting Receipt"] = {
 	get_indicator: function (doc) {
 		const status_colors = {
-			Draft: "grey",
+			Draft: "red",
 			Return: "gray",
 			"Return Issued": "grey",
 			Completed: "green",

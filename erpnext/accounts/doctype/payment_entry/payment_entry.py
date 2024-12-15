@@ -893,6 +893,7 @@ class PaymentEntry(AccountsController):
 		self.set_amounts_in_company_currency()
 		self.set_total_allocated_amount()
 		self.set_unallocated_amount()
+		self.set_exchange_gain_loss()
 		self.set_difference_amount()
 
 	def validate_amounts(self):
@@ -988,10 +989,10 @@ class PaymentEntry(AccountsController):
 			if d.exchange_rate is None:
 				d.exchange_rate = 1
 
-			allocated_amount_in_pe_exchange_rate = flt(
+			allocated_amount_in_ref_exchange_rate = flt(
 				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
 			)
-			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_pe_exchange_rate
+			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_ref_exchange_rate
 		return base_allocated_amount
 
 	def set_total_allocated_amount(self):
@@ -1009,29 +1010,80 @@ class PaymentEntry(AccountsController):
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
-		if self.party:
-			total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
-			included_taxes = self.get_included_taxes()
-			if (
-				self.payment_type == "Receive"
-				and self.base_total_allocated_amount < self.base_received_amount + total_deductions
-				and self.total_allocated_amount
-				< flt(self.paid_amount) + (total_deductions / self.source_exchange_rate)
-			):
-				self.unallocated_amount = (
-					self.base_received_amount + total_deductions - self.base_total_allocated_amount
-				) / self.source_exchange_rate
-				self.unallocated_amount -= included_taxes
-			elif (
-				self.payment_type == "Pay"
-				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions)
-				and self.total_allocated_amount
-				< flt(self.received_amount) + (total_deductions / self.target_exchange_rate)
-			):
-				self.unallocated_amount = (
-					self.base_paid_amount - (total_deductions + self.base_total_allocated_amount)
-				) / self.target_exchange_rate
-				self.unallocated_amount -= included_taxes
+		if not self.party:
+			return
+
+		deductions_to_consider = sum(
+			flt(d.amount) for d in self.get("deductions") if not d.is_exchange_gain_loss
+		)
+		included_taxes = self.get_included_taxes()
+
+		if self.payment_type == "Receive" and self.base_total_allocated_amount < (
+			self.base_paid_amount + deductions_to_consider
+		):
+			self.unallocated_amount = (
+				self.base_paid_amount
+				+ deductions_to_consider
+				- self.base_total_allocated_amount
+				- included_taxes
+			) / self.source_exchange_rate
+		elif self.payment_type == "Pay" and self.base_total_allocated_amount < (
+			self.base_received_amount - deductions_to_consider
+		):
+			self.unallocated_amount = (
+				self.base_received_amount
+				- deductions_to_consider
+				- self.base_total_allocated_amount
+				- included_taxes
+			) / self.target_exchange_rate
+
+	def set_exchange_gain_loss(self):
+		exchange_gain_loss = flt(
+			self.base_paid_amount - self.base_received_amount,
+			self.precision("amount", "deductions"),
+		)
+
+		exchange_gain_loss_rows = [row for row in self.get("deductions") if row.is_exchange_gain_loss]
+		exchange_gain_loss_row = exchange_gain_loss_rows.pop(0) if exchange_gain_loss_rows else None
+
+		for row in exchange_gain_loss_rows:
+			self.remove(row)
+
+		if not exchange_gain_loss:
+			if exchange_gain_loss_row:
+				self.remove(exchange_gain_loss_row)
+
+			return
+
+		if not exchange_gain_loss_row:
+			values = frappe.get_cached_value(
+				"Company", self.company, ("exchange_gain_loss_account", "cost_center"), as_dict=True
+			)
+
+			for fieldname, value in values.items():
+				if value:
+					continue
+
+				label = _(frappe.get_meta("Company").get_label(fieldname))
+				return frappe.msgprint(
+					_("Please set {0} in Company {1} to account for Exchange Gain / Loss").format(
+						label, get_link_to_form("Company", self.company)
+					),
+					title=_("Missing Default in Company"),
+					indicator="red" if self.docstatus.is_submitted() else "yellow",
+					raise_exception=self.docstatus.is_submitted(),
+				)
+
+			exchange_gain_loss_row = self.append(
+				"deductions",
+				{
+					"account": values.exchange_gain_loss_account,
+					"cost_center": values.cost_center,
+					"is_exchange_gain_loss": 1,
+				},
+			)
+
+		exchange_gain_loss_row.amount = exchange_gain_loss
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (
@@ -1059,11 +1111,13 @@ class PaymentEntry(AccountsController):
 	def get_included_taxes(self):
 		included_taxes = 0
 		for tax in self.get("taxes"):
-			if tax.included_in_paid_amount:
-				if tax.add_deduct_tax == "Add":
-					included_taxes += tax.base_tax_amount
-				else:
-					included_taxes -= tax.base_tax_amount
+			if not tax.included_in_paid_amount:
+				continue
+
+			if tax.add_deduct_tax == "Add":
+				included_taxes += tax.base_tax_amount
+			else:
+				included_taxes -= tax.base_tax_amount
 
 		return included_taxes
 
@@ -1219,11 +1273,19 @@ class PaymentEntry(AccountsController):
 				dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 			gle.update(
-				{
-					dr_or_cr: allocated_amount_in_company_currency,
-					dr_or_cr + "_in_account_currency": d.allocated_amount,
-					"cost_center": cost_center,
-				}
+				self.get_gl_dict(
+					{
+						"account": self.party_account,
+						"party_type": self.party_type,
+						"party": self.party,
+						"against": against_account,
+						"account_currency": self.party_account_currency,
+						"cost_center": cost_center,
+						dr_or_cr + "_in_account_currency": d.allocated_amount,
+						dr_or_cr: allocated_amount_in_company_currency,
+					},
+					item=self,
+				)
 			)
 
 			if self.book_advance_payments_in_separate_party_account:
@@ -1746,7 +1808,7 @@ class PaymentEntry(AccountsController):
 			if paid_amount > total_negative_outstanding:
 				if total_negative_outstanding == 0:
 					frappe.msgprint(
-						_("Cannot {0} from {2} without any negative outstanding invoice").format(
+						_("Cannot {0} from {1} without any negative outstanding invoice").format(
 							self.payment_type,
 							self.party_type,
 						)
@@ -1904,8 +1966,8 @@ class PaymentEntry(AccountsController):
 def get_matched_payment_request_of_references(references=None):
 	"""
 	Get those `Payment Requests` which are matched with `References`.\n
-	    - Amount must be same.
-	    - Only single `Payment Request` available for this amount.
+	        - Amount must be same.
+	        - Only single `Payment Request` available for this amount.
 
 	Example: [(reference_doctype, reference_name, allocated_amount, payment_request), ...]
 	"""
@@ -2007,7 +2069,7 @@ def get_outstanding_of_references_with_payment_term(references=None):
 def get_outstanding_of_references_with_no_payment_term(references):
 	"""
 	Fetch outstanding amount of `References` which have no `Payment Term` set.\n
-	    - Fetch outstanding amount from `References` it self.
+	        - Fetch outstanding amount from `References` it self.
 
 	Note: `None` is used for allocation of `Payment Request`
 	Example: {(reference_doctype, reference_name, None): outstanding_amount, ...}
@@ -2821,9 +2883,6 @@ def get_payment_entry(
 	update_accounting_dimensions(pe, doc)
 
 	if party_account and bank:
-		pe.set_exchange_rate(ref_doc=doc)
-		pe.set_amounts()
-
 		if discount_amount:
 			base_total_discount_loss = 0
 			if frappe.db.get_single_value("Accounts Settings", "book_tax_discount_loss"):
@@ -2833,7 +2892,8 @@ def get_payment_entry(
 				pe, doc, discount_amount, base_total_discount_loss, party_account_currency
 			)
 
-		pe.set_difference_amount()
+		pe.set_exchange_rate(ref_doc=doc)
+		pe.set_amounts()
 
 	# If PE is created from PR directly, then no need to find open PRs for the references
 	if not created_from_payment_request:
@@ -2845,7 +2905,7 @@ def get_payment_entry(
 def get_open_payment_requests_for_references(references=None):
 	"""
 	Fetch all unpaid Payment Requests for the references. \n
-	    - Each reference can have multiple Payment Requests. \n
+	        - Each reference can have multiple Payment Requests. \n
 
 	Example: {("Sales Invoice", "SINV-00001"): {"PREQ-00001": 1000, "PREQ-00002": 2000}}
 	"""
@@ -2869,6 +2929,7 @@ def get_open_payment_requests_for_references(references=None):
 		.where(Tuple(PR.reference_doctype, PR.reference_name).isin(list(refs)))
 		.where(PR.status != "Paid")
 		.where(PR.docstatus == 1)
+		.where(PR.outstanding_amount > 0)  # to avoid old PRs with 0 outstanding amount
 		.orderby(Coalesce(PR.transaction_date, PR.creation), order=frappe.qb.asc)
 	).run(as_dict=True)
 
@@ -3179,13 +3240,14 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 		book_tax_loss = frappe.db.get_single_value("Accounts Settings", "book_tax_discount_loss")
 		account_type = "round_off_account" if book_tax_loss else "default_discount_account"
 
-		pe.set_gain_or_loss(
-			account_details={
+		pe.append(
+			"deductions",
+			{
 				"account": frappe.get_cached_value("Company", pe.company, account_type),
 				"cost_center": pe.cost_center
 				or frappe.get_cached_value("Company", pe.company, "cost_center"),
 				"amount": discount_amount * positive_negative,
-			}
+			},
 		)
 
 

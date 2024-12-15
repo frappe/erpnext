@@ -9,25 +9,20 @@ erpnext.financial_statements = {
 			data &&
 			column.colIndex >= 3
 		) {
-			//Assuming that the first three columns are s.no, account name and the very first year of the accounting values, to calculate the relative percentage values of the successive columns.
-			const lastAnnualValue = row[column.colIndex - 1].content;
-			const currentAnnualvalue = data[column.fieldname];
-			if (currentAnnualvalue == undefined) return "NA"; //making this not applicable for undefined/null values
-			let annualGrowth = 0;
-			if (lastAnnualValue == 0 && currentAnnualvalue > 0) {
-				//If the previous year value is 0 and the current value is greater than 0
-				annualGrowth = 1;
-			} else if (lastAnnualValue > 0) {
-				annualGrowth = (currentAnnualvalue - lastAnnualValue) / lastAnnualValue;
-			}
+			const growthPercent = data[column.fieldname];
 
-			const growthPercent = Math.round(annualGrowth * 10000) / 100; //calculating the rounded off percentage
+			if (growthPercent == undefined) return "NA"; //making this not applicable for undefined/null values
 
-			value = $(`<span>${(growthPercent >= 0 ? "+" : "") + growthPercent + "%"}</span>`);
-			if (growthPercent < 0) {
-				value = $(value).addClass("text-danger");
+			if (column.fieldname === "total") {
+				value = $(`<span>${growthPercent}</span>`);
 			} else {
-				value = $(value).addClass("text-success");
+				value = $(`<span>${(growthPercent >= 0 ? "+" : "") + growthPercent + "%"}</span>`);
+
+				if (growthPercent < 0) {
+					value = $(value).addClass("text-danger");
+				} else {
+					value = $(value).addClass("text-success");
+				}
 			}
 			value = $(value).wrap("<p></p>").parent().html();
 
@@ -38,11 +33,9 @@ erpnext.financial_statements = {
 				this.baseData = row;
 			}
 			if (column.colIndex >= 2) {
-				//Assuming that the first two columns are s.no and account name, to calculate the relative percentage values of the successive columns.
-				const currentAnnualvalue = data[column.fieldname];
-				const baseValue = this.baseData[column.colIndex].content;
-				if (currentAnnualvalue == undefined || baseValue <= 0) return "NA";
-				const marginPercent = Math.round((currentAnnualvalue / baseValue) * 10000) / 100;
+				const marginPercent = data[column.fieldname];
+
+				if (marginPercent == undefined) return "NA"; //making this not applicable for undefined/null values
 
 				value = $(`<span>${marginPercent + "%"}</span>`);
 				if (marginPercent < 0) value = $(value).addClass("text-danger");
@@ -53,7 +46,8 @@ erpnext.financial_statements = {
 		}
 
 		if (data && column.fieldname == "account") {
-			value = data.account_name || value;
+			// first column
+			value = data.section_name || data.account_name || value;
 
 			if (filter && filter?.text && filter?.type == "contains") {
 				if (!value.toLowerCase().includes(filter.text)) {
@@ -61,7 +55,7 @@ erpnext.financial_statements = {
 				}
 			}
 
-			if (data.account) {
+			if (data.account || data.accounts) {
 				column.link_onclick =
 					"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
 			}
@@ -70,7 +64,7 @@ erpnext.financial_statements = {
 
 		value = default_formatter(value, row, column, data);
 
-		if (data && !data.parent_account) {
+		if (data && !data.parent_account && !data.parent_section) {
 			value = $(`<span>${value}</span>`);
 
 			var $value = $(value).css("font-weight", "bold");
@@ -84,13 +78,13 @@ erpnext.financial_statements = {
 		return value;
 	},
 	open_general_ledger: function (data) {
-		if (!data.account) return;
+		if (!data.account && !data.accounts) return;
 		let project = $.grep(frappe.query_report.filters, function (e) {
 			return e.df.fieldname == "project";
 		});
 
 		frappe.route_options = {
-			account: data.account,
+			account: data.account || data.accounts,
 			company: frappe.query_report.get_filter_value("company"),
 			from_date: data.from_date || data.year_start_date,
 			to_date: data.to_date || data.year_end_date,

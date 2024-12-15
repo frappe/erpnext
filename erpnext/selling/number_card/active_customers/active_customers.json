@@ -3,7 +3,6 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Customer",
- "dynamic_filters_json": "",
  "filters_json": "[[\"Customer\",\"disabled\",\"=\",\"0\"]]",
  "function": "Count",
  "idx": 0,

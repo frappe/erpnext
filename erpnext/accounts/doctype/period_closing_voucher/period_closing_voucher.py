@@ -171,9 +171,7 @@ class PeriodClosingVoucher(AccountsController):
 		pl_account_balances = self.get_account_balances_based_on_dimensions(report_type="Profit and Loss")
 		for dimensions, account_balances in pl_account_balances.items():
 			for acc, balances in account_balances.items():
-				balance_in_company_currency = flt(balances.debit_in_account_currency) - flt(
-					balances.credit_in_account_currency
-				)
+				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
 				if balance_in_company_currency and acc != "balances":
 					self.pl_accounts_reverse_gle.append(
 						self.get_gle_for_pl_account(acc, balances, dimensions)

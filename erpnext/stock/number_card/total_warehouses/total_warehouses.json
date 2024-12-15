@@ -3,6 +3,7 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Warehouse",
+ "dynamic_filters_json": "[[\"Warehouse\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
  "filters_json": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
  "function": "Count",
  "idx": 0,

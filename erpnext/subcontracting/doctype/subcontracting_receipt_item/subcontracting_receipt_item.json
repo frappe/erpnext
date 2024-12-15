@@ -207,7 +207,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "print_width": "100px",
    "read_only": 1,
    "width": "100px"
@@ -217,7 +217,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -231,6 +231,7 @@
    "fieldtype": "Currency",
    "label": "Raw Material Cost Per Qty",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -239,6 +240,7 @@
    "fieldname": "service_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Service Cost Per Qty",
+   "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
   },
@@ -248,6 +250,7 @@
    "fieldname": "additional_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Additional Cost Per Qty",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -582,7 +585,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-29 15:42:43.425544",
+ "modified": "2024-12-06 15:23:58.680169",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

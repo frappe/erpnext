@@ -15,6 +15,7 @@
   "include_item_in_manufacturing",
   "qty_section",
   "required_qty",
+  "stock_uom",
   "rate",
   "amount",
   "column_break_11",
@@ -138,11 +139,19 @@
    "in_list_view": 1,
    "label": "Returned Qty ",
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-02-11 15:45:32.318374",
+ "modified": "2024-11-19 15:48:16.823384",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

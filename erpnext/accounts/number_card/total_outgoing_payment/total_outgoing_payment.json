@@ -4,6 +4,7 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Payment Entry",
+ "dynamic_filters_json": "[[\"Payment Entry\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
  "filters_json": "[[\"Payment Entry\",\"docstatus\",\"=\",\"1\",false],[\"Payment Entry\",\"posting_date\",\"Timespan\",\"this year\",false],[\"Payment Entry\",\"payment_type\",\"=\",\"Pay\",false]]",
  "function": "Sum",
  "idx": 0,

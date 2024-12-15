@@ -98,6 +98,7 @@ def _reorder_item():
 						"description": d.description,
 						"stock_uom": d.stock_uom,
 						"purchase_uom": d.purchase_uom,
+						"lead_time_days": d.lead_time_days,
 					}
 				),
 			)
@@ -129,6 +130,7 @@ def get_items_for_reorder() -> dict[str, list]:
 			item_table.brand,
 			item_table.variant_of,
 			item_table.has_variants,
+			item_table.lead_time_days,
 		)
 		.where(
 			(item_table.disabled == 0)

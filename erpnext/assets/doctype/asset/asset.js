@@ -416,7 +416,7 @@ frappe.ui.form.on("Asset", {
 		}
 
 		frm.dashboard.render_graph({
-			title: "Asset Value",
+			title: __("Asset Value"),
 			data: {
 				labels: x_intervals,
 				datasets: [

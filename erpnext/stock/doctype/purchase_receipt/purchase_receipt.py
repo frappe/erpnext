@@ -1085,7 +1085,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 		if adjust_incoming_rate:
 			adjusted_amt = 0.0
-			if item.billed_amt and item.amount:
+			if item.billed_amt is not None and item.amount is not None:
 				adjusted_amt = flt(item.billed_amt) - flt(item.amount)
 
 			adjusted_amt = adjusted_amt * flt(pr_doc.conversion_rate)

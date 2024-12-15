@@ -44,9 +44,7 @@ class ProductionPlan(Document):
 		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import (
 			MaterialRequestPlanItem,
 		)
-		from erpnext.manufacturing.doctype.production_plan_item.production_plan_item import (
-			ProductionPlanItem,
-		)
+		from erpnext.manufacturing.doctype.production_plan_item.production_plan_item import ProductionPlanItem
 		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import (
 			ProductionPlanItemReference,
 		)
@@ -1085,24 +1083,33 @@ def download_raw_materials(doc, warehouses=None):
 	frappe.flags.show_qty_in_stock_uom = 1
 	items = get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True)
 
+	duplicate_item_wh_list = frappe._dict()
+
 	for d in items:
-		item_list.append(
-			[
-				d.get("item_code"),
-				d.get("item_name"),
-				d.get("description"),
-				d.get("stock_uom"),
-				d.get("warehouse"),
-				d.get("required_bom_qty"),
-				d.get("projected_qty"),
-				d.get("actual_qty"),
-				d.get("ordered_qty"),
-				d.get("planned_qty"),
-				d.get("reserved_qty_for_production"),
-				d.get("safety_stock"),
-				d.get("quantity"),
-			]
-		)
+		key = (d.get("item_code"), d.get("warehouse"))
+		if key in duplicate_item_wh_list:
+			rm_data = duplicate_item_wh_list[key]
+			rm_data[12] += d.get("quantity")
+			continue
+
+		rm_data = [
+			d.get("item_code"),
+			d.get("item_name"),
+			d.get("description"),
+			d.get("stock_uom"),
+			d.get("warehouse"),
+			d.get("required_bom_qty"),
+			d.get("projected_qty"),
+			d.get("actual_qty"),
+			d.get("ordered_qty"),
+			d.get("planned_qty"),
+			d.get("reserved_qty_for_production"),
+			d.get("safety_stock"),
+			d.get("quantity"),
+		]
+
+		duplicate_item_wh_list[key] = rm_data
+		item_list.append(rm_data)
 
 		if not doc.get("for_warehouse"):
 			row = {"item_code": d.get("item_code")}

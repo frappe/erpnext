@@ -214,13 +214,10 @@ class InventoryDimension(Document):
 		dimension_fields = []
 		if self.apply_to_all_doctypes:
 			for doctype in get_inventory_documents():
-				if field_exists(doctype[0], self.source_fieldname):
-					continue
-
 				dimension_fields = self.get_dimension_fields(doctype[0])
 				self.add_transfer_field(doctype[0], dimension_fields)
 				custom_fields.setdefault(doctype[0], dimension_fields)
-		elif not field_exists(self.document_type, self.source_fieldname):
+		else:
 			dimension_fields = self.get_dimension_fields()
 
 			self.add_transfer_field(self.document_type, dimension_fields)
@@ -239,8 +236,17 @@ class InventoryDimension(Document):
 			dimension_field["fieldname"] = self.target_fieldname
 			custom_fields["Stock Ledger Entry"] = dimension_field
 
+		filter_custom_fields = {}
 		if custom_fields:
-			create_custom_fields(custom_fields)
+			for doctype, fields in custom_fields.items():
+				if isinstance(fields, dict):
+					fields = [fields]
+
+				for field in fields:
+					if not field_exists(doctype, field["fieldname"]):
+						filter_custom_fields.setdefault(doctype, []).append(field)
+
+		create_custom_fields(filter_custom_fields)
 
 	def add_transfer_field(self, doctype, dimension_fields):
 		if doctype not in [

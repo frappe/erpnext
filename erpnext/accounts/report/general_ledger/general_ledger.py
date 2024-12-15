@@ -35,9 +35,6 @@ def execute(filters=None):
 	if filters.get("party"):
 		filters.party = frappe.parse_json(filters.get("party"))
 
-	if filters.get("voucher_no") and not filters.get("group_by"):
-		filters.group_by = "Group by Voucher (Consolidated)"
-
 	validate_filters(filters, account_details)
 
 	validate_party(filters)
@@ -373,16 +370,21 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 			if acc_dict.entries:
 				# opening
 				data.append({"debit_in_transaction_currency": None, "credit_in_transaction_currency": None})
-				if filters.get("group_by") != "Group by Voucher":
+				if (not filters.get("group_by") and not filters.get("voucher_no")) or (
+					filters.get("group_by") and filters.get("group_by") != "Group by Voucher"
+				):
 					data.append(acc_dict.totals.opening)
 
 				data += acc_dict.entries
 
 				# totals
-				data.append(acc_dict.totals.total)
+				if filters.get("group_by") or not filters.voucher_no:
+					data.append(acc_dict.totals.total)
 
 				# closing
-				if filters.get("group_by") != "Group by Voucher":
+				if (not filters.get("group_by") and not filters.get("voucher_no")) or (
+					filters.get("group_by") and filters.get("group_by") != "Group by Voucher"
+				):
 					data.append(acc_dict.totals.closing)
 
 		data.append({"debit_in_transaction_currency": None, "credit_in_transaction_currency": None})

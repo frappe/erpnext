@@ -16,6 +16,7 @@ class ItemVariantAttribute(Document):
 
 		attribute: DF.Link
 		attribute_value: DF.Data | None
+		disabled: DF.Check
 		from_range: DF.Float
 		increment: DF.Float
 		numeric_values: DF.Check

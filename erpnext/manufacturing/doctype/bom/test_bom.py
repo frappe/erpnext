@@ -755,6 +755,26 @@ class TestBOM(FrappeTestCase):
 		self.assertTrue("_Test RM Item 2 Fixed Asset Item" not in items)
 		self.assertTrue("_Test RM Item 3 Manufacture Item" in items)
 
+	def test_bom_raw_materials_stock_uom(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 1000.0, "stock_uom": "Nos"}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_submit=True)
+		for row in bom.items:
+			self.assertEqual(row.stock_uom, "Nos")
+
+		frappe.db.set_value("Item", rm_item, "stock_uom", "Kg")
+
+		bom.items[0].qty = 2
+		bom.save()
+
+		for row in bom.items:
+			self.assertEqual(row.stock_uom, "Kg")
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

@@ -474,6 +474,7 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 				reference_doctype="Process Statement Of Accounts",
 				reference_name=document_name,
 				attachments=attachments,
+				expose_recipients="header",
 			)
 
 		if doc.enable_auto_email and from_scheduler:

@@ -336,7 +336,7 @@
    "fieldname": "total",
    "fieldtype": "Currency",
    "label": "Total",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -618,6 +618,7 @@
    "fieldname": "total_additional_costs",
    "fieldtype": "Currency",
    "label": "Total Additional Costs",
+   "options": "Company:company:default_currency",
    "print_hide_if_no_value": 1,
    "read_only": 1
   },
@@ -656,27 +657,27 @@
    "fieldtype": "Column Break"
   },
   {
-    "fieldname": "tab_other_info",
-    "fieldtype": "Tab Break",
-    "label": "Other Info"
+   "fieldname": "tab_other_info",
+   "fieldtype": "Tab Break",
+   "label": "Other Info"
   },
   {
-    "collapsible": 1,
-    "fieldname": "order_status_section",
-    "fieldtype": "Section Break",
-    "label": "Order Status"
+   "collapsible": 1,
+   "fieldname": "order_status_section",
+   "fieldtype": "Section Break",
+   "label": "Order Status"
   },
   {
-    "fieldname": "tab_connections",
-    "fieldtype": "Tab Break",
-    "label": "Connections",
-    "show_dashboard": 1
+   "fieldname": "tab_connections",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-28 15:02:13.517969",
+ "modified": "2024-12-06 15:24:38.384232",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",

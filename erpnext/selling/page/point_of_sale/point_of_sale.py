@@ -96,6 +96,8 @@ def search_by_term(search_term, warehouse, price_list):
 def filter_result_items(result, pos_profile):
 	if result and result.get("items"):
 		pos_item_groups = frappe.db.get_all("POS Item Group", {"parent": pos_profile}, pluck="item_group")
+		if not pos_item_groups:
+			return
 		result["items"] = [item for item in result.get("items") if item.get("item_group") in pos_item_groups]
 
 

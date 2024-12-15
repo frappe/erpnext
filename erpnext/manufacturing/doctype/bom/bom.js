@@ -182,25 +182,30 @@ frappe.ui.form.on("BOM", {
 	},
 
 	make_work_order(frm) {
-		frm.events.setup_variant_prompt(frm, "Work Order", (frm, item, data, variant_items) => {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.make_work_order",
-				args: {
-					bom_no: frm.doc.name,
-					item: item,
-					qty: data.qty || 0.0,
-					project: frm.doc.project,
-					variant_items: variant_items,
-				},
-				freeze: true,
-				callback(r) {
-					if (r.message) {
-						let doc = frappe.model.sync(r.message)[0];
-						frappe.set_route("Form", doc.doctype, doc.name);
-					}
-				},
-			});
-		});
+		frm.events.setup_variant_prompt(
+			frm,
+			"Work Order",
+			(frm, item, data, variant_items, use_multi_level_bom) => {
+				frappe.call({
+					method: "erpnext.manufacturing.doctype.work_order.work_order.make_work_order",
+					args: {
+						bom_no: frm.doc.name,
+						item: item,
+						qty: data.qty || 0.0,
+						project: frm.doc.project,
+						variant_items: variant_items,
+						use_multi_level_bom: use_multi_level_bom,
+					},
+					freeze: true,
+					callback(r) {
+						if (r.message) {
+							let doc = frappe.model.sync(r.message)[0];
+							frappe.set_route("Form", doc.doctype, doc.name);
+						}
+					},
+				});
+			}
+		);
 	},
 
 	make_variant_bom(frm) {
@@ -252,6 +257,15 @@ frappe.ui.form.on("BOM", {
 
 		if (!skip_qty_field) {
 			fields.push({
+				fieldtype: "Check",
+				label: __("Use Multi-Level BOM"),
+				fieldname: "use_multi_level_bom",
+				default: 1,
+			});
+		}
+
+		if (!skip_qty_field) {
+			fields.push({
 				fieldtype: "Float",
 				label: __("Qty To Manufacture"),
 				fieldname: "qty",
@@ -277,6 +291,13 @@ frappe.ui.form.on("BOM", {
 					cur_dialog.refresh();
 				},
 			});
+
+			fields.push({
+				fieldtype: "Check",
+				label: __("Use Multi-Level BOM"),
+				fieldname: "use_multi_level_bom",
+				default: frm.doc?.__onload.use_multi_level_bom,
+			});
 		}
 
 		var has_template_rm = frm.doc.items.filter((d) => d.has_variants === 1) || [];
@@ -285,6 +306,7 @@ frappe.ui.form.on("BOM", {
 				fieldname: "items",
 				fieldtype: "Table",
 				label: __("Raw Materials"),
+				depends_on: "eval:!doc.use_multi_level_bom",
 				fields: [
 					{
 						fieldname: "item_code",
@@ -293,6 +315,13 @@ frappe.ui.form.on("BOM", {
 						fieldtype: "Link",
 						in_list_view: 1,
 						reqd: 1,
+						get_query() {
+							return {
+								filters: {
+									has_variants: 1,
+								},
+							};
+						},
 					},
 					{
 						fieldname: "variant_item_code",
@@ -312,6 +341,13 @@ frappe.ui.form.on("BOM", {
 									variant_of: data.item_code,
 								},
 							};
+						},
+						change() {
+							let doc = this.doc;
+							if (!doc.qty) {
+								doc.qty = 1.0;
+								this.grid.set_value("qty", 1.0, doc);
+							}
 						},
 					},
 					{
@@ -347,14 +383,15 @@ frappe.ui.form.on("BOM", {
 			(data) => {
 				let item = data.item || frm.doc.item;
 				let variant_items = data.items || [];
+				let use_multi_level_bom = data.use_multi_level_bom || 0;
 
 				variant_items.forEach((d) => {
-					if (!d.variant_item_code) {
+					if (!d.variant_item_code && !use_multi_level_bom) {
 						frappe.throw(__("Select variant item code for the template item {0}", [d.item_code]));
 					}
 				});
 
-				callback(frm, item, data, variant_items);
+				callback(frm, item, data, variant_items, use_multi_level_bom);
 			},
 			__(title),
 			__("Create")
@@ -364,7 +401,7 @@ frappe.ui.form.on("BOM", {
 			dialog.fields_dict.items.df.data.push({
 				item_code: d.item_code,
 				variant_item_code: "",
-				qty: d.qty,
+				qty: (d.qty / frm.doc.quantity) * (dialog.fields_dict.qty.value || 1),
 				source_warehouse: d.source_warehouse,
 				operation: d.operation,
 			});

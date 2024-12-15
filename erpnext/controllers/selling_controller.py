@@ -21,9 +21,15 @@ class SellingController(StockController):
 
 	def onload(self):
 		super().onload()
-		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
+		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice", "Quotation"):
 			for item in self.get("items") + (self.get("packed_items") or []):
-				item.update(get_bin_details(item.item_code, item.warehouse, include_child_warehouses=True))
+				company = self.company
+
+				item.update(
+					get_bin_details(
+						item.item_code, item.warehouse, company=company, include_child_warehouses=True
+					)
+				)
 
 	def validate(self):
 		super().validate()
@@ -68,19 +74,13 @@ class SellingController(StockController):
 		if customer:
 			from erpnext.accounts.party import _get_party_details
 
-			fetch_payment_terms_template = False
-			if self.get("__islocal") or self.company != frappe.db.get_value(
-				self.doctype, self.name, "company"
-			):
-				fetch_payment_terms_template = True
-
 			party_details = _get_party_details(
 				customer,
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype,
 				company=self.company,
 				posting_date=self.get("posting_date"),
-				fetch_payment_terms_template=fetch_payment_terms_template,
+				fetch_payment_terms_template=self.has_value_changed("company"),
 				party_address=self.customer_address,
 				shipping_address=self.shipping_address_name,
 				company_address=self.get("company_address"),
@@ -375,12 +375,32 @@ class SellingController(StockController):
 		return il
 
 	def has_product_bundle(self, item_code):
-		product_bundle = frappe.qb.DocType("Product Bundle")
-		return (
-			frappe.qb.from_(product_bundle)
-			.select(product_bundle.name)
-			.where((product_bundle.new_item_code == item_code) & (product_bundle.disabled == 0))
-		).run()
+		product_bundle_items = getattr(self, "_product_bundle_items", None)
+		if product_bundle_items is None:
+			self._product_bundle_items = product_bundle_items = {}
+
+		if item_code not in product_bundle_items:
+			self._fetch_product_bundle_items(item_code)
+
+		return product_bundle_items[item_code]
+
+	def _fetch_product_bundle_items(self, item_code):
+		product_bundle_items = self._product_bundle_items
+		items_to_fetch = {row.item_code for row in self.items if row.item_code not in product_bundle_items}
+		# fetch for requisite item_code even if it is not in items
+		items_to_fetch.add(item_code)
+
+		items_with_product_bundle = {
+			row.new_item_code
+			for row in frappe.get_all(
+				"Product Bundle",
+				filters={"new_item_code": ("in", items_to_fetch), "disabled": 0},
+				fields="new_item_code",
+			)
+		}
+
+		for item_code in items_to_fetch:
+			product_bundle_items[item_code] = item_code in items_with_product_bundle
 
 	def get_already_delivered_qty(self, current_docname, so, so_detail):
 		delivered_via_dn = frappe.db.sql(

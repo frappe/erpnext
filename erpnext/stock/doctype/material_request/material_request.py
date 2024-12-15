@@ -378,7 +378,9 @@ def set_missing_values(source, target_doc):
 
 def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
-	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
+
+	qty = obj.received_qty or obj.ordered_qty
+	target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
 	target.stock_qty = target.qty * target.conversion_factor
 	if getdate(target.schedule_date) < getdate(nowdate()):
 		target.schedule_date = None
@@ -430,7 +432,9 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		return d.ordered_qty < d.stock_qty and child_filter
+		qty = d.received_qty or d.ordered_qty
+
+		return qty < d.stock_qty and child_filter
 
 	doclist = get_mapped_doc(
 		"Material Request",

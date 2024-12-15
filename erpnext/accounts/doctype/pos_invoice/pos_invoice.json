@@ -48,6 +48,7 @@
   "shipping_address",
   "company_address",
   "company_address_display",
+  "company_contact_person",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1558,12 +1559,19 @@
    "fieldname": "update_billed_amount_in_delivery_note",
    "fieldtype": "Check",
    "label": "Update Billed Amount in Delivery Note"
+  },
+  {
+   "fieldname": "company_contact_person",
+   "fieldtype": "Link",
+   "label": "Company Contact Person",
+   "options": "Contact",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:00:34.268756",
+ "modified": "2024-11-26 13:10:50.309570",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, get_number_format_info
+from frappe.utils import cint, cstr, flt, get_link_to_form, get_number_format_info
 
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -72,6 +72,27 @@ class QualityInspection(Document):
 
 		if self.readings:
 			self.inspect_and_set_status()
+
+		self.validate_inspection_required()
+
+	def validate_inspection_required(self):
+		if self.reference_type in ["Purchase Receipt", "Purchase Invoice"] and not frappe.get_cached_value(
+			"Item", self.item_code, "inspection_required_before_purchase"
+		):
+			frappe.throw(
+				_(
+					"'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
+				).format(get_link_to_form("Item", self.item_code))
+			)
+
+		if self.reference_type in ["Delivery Note", "Sales Invoice"] and not frappe.get_cached_value(
+			"Item", self.item_code, "inspection_required_before_delivery"
+		):
+			frappe.throw(
+				_(
+					"'Inspection Required before Delivery' has disabled for the item {0}, no need to create the QI"
+				).format(get_link_to_form("Item", self.item_code))
+			)
 
 	def before_submit(self):
 		self.validate_readings_status_mandatory()

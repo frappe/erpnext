@@ -53,6 +53,7 @@ class DeliveryNote(SellingController):
 		company: DF.Link
 		company_address: DF.Link | None
 		company_address_display: DF.SmallText | None
+		company_contact_person: DF.Link | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
 		contact_mobile: DF.SmallText | None
@@ -1045,7 +1046,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 	automatically_fetch_payment_terms = cint(
 		frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
-	if automatically_fetch_payment_terms:
+	if automatically_fetch_payment_terms and not doc.is_return:
 		doc.set_payment_schedule()
 
 	return doc

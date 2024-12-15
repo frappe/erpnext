@@ -87,16 +87,19 @@
   "column_break_rxvc",
   "batch_no",
   "available_qty_section",
-  "actual_batch_qty",
   "actual_qty",
-  "installed_qty",
-  "item_tax_rate",
+  "actual_batch_qty",
   "column_break_atna",
+  "company_total_stock",
+  "section_break_kejd",
+  "installed_qty",
   "packed_qty",
+  "column_break_fguf",
   "received_qty",
   "accounting_details_section",
   "expense_account",
   "column_break_71",
+  "item_tax_rate",
   "internal_transfer_section",
   "material_request",
   "purchase_order",
@@ -519,7 +522,7 @@
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "label": "Available Qty at From Warehouse",
+   "label": "Qty (Warehouse)",
    "no_copy": 1,
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
@@ -907,13 +910,30 @@
   {
    "fieldname": "column_break_rxvc",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "company_total_stock",
+   "fieldtype": "Float",
+   "label": "Qty (Company)",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_kejd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_fguf",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-21 18:15:07.603672",
+ "modified": "2024-11-21 17:37:37.441498",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

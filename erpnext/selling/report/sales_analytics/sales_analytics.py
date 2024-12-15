@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _, scrub
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, add_to_date, flt, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -37,7 +39,26 @@ class Analytics:
 		]
 		self.get_period_date_ranges()
 
+	def update_company_list_for_parent_company(self):
+		company_list = [self.filters.get("company")]
+
+		selected_company = self.filters.get("company")
+		if (
+			selected_company
+			and self.filters.get("show_aggregate_value_from_subsidiary_companies")
+			and frappe.db.get_value("Company", selected_company, "is_group")
+		):
+			lft, rgt = frappe.db.get_value("Company", selected_company, ["lft", "rgt"])
+			child_companies = frappe.db.get_list(
+				"Company", filters={"lft": [">", lft], "rgt": ["<", rgt]}, pluck="name"
+			)
+
+			company_list.extend(child_companies)
+
+		self.filters["company"] = company_list
+
 	def run(self):
+		self.update_company_list_for_parent_company()
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
@@ -123,14 +144,23 @@ class Analytics:
 		else:
 			value_field = "total_qty"
 
-		self.entries = frappe.db.sql(
-			""" select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
-			from `tab{doctype}` s where s.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
-			and ifnull(s.order_type, '') != '' order by s.order_type
-		""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
-			(self.filters.company, self.filters.from_date, self.filters.to_date),
-			as_dict=1,
-		)
+		doctype = DocType(self.filters.doc_type)
+
+		self.entries = (
+			frappe.qb.from_(doctype)
+			.select(
+				doctype.order_type.as_("entity"),
+				doctype[self.date_field],
+				doctype[value_field].as_("value_field"),
+			)
+			.where(
+				(doctype.docstatus == 1)
+				& (doctype.company.isin(self.filters.company))
+				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
+				& (IfNull(doctype.order_type, "") != "")
+			)
+			.orderby(doctype.order_type)
+		).run(as_dict=True)
 
 		self.get_teams()
 
@@ -152,7 +182,7 @@ class Analytics:
 			fields=[entity, entity_name, value_field, self.date_field],
 			filters={
 				"docstatus": 1,
-				"company": self.filters.company,
+				"company": ["in", self.filters.company],
 				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
 			},
 		)
@@ -167,16 +197,26 @@ class Analytics:
 		else:
 			value_field = "stock_qty"
 
-		self.entries = frappe.db.sql(
-			"""
-			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
-			from `tab{doctype} Item` i , `tab{doctype}` s
-			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
-		""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
-			(self.filters.company, self.filters.from_date, self.filters.to_date),
-			as_dict=1,
-		)
+		doctype = DocType(self.filters.doc_type)
+		doctype_item = DocType(f"{self.filters.doc_type} Item")
+
+		self.entries = (
+			frappe.qb.from_(doctype_item)
+			.join(doctype)
+			.on(doctype.name == doctype_item.parent)
+			.select(
+				doctype_item.item_code.as_("entity"),
+				doctype_item.item_name.as_("entity_name"),
+				doctype_item.stock_uom,
+				doctype_item[value_field].as_("value_field"),
+				doctype[self.date_field],
+			)
+			.where(
+				(doctype_item.docstatus == 1)
+				& (doctype.company.isin(self.filters.company))
+				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
+			)
+		).run(as_dict=True)
 
 		self.entity_names = {}
 		for d in self.entries:
@@ -201,7 +241,7 @@ class Analytics:
 			fields=[entity_field, value_field, self.date_field],
 			filters={
 				"docstatus": 1,
-				"company": self.filters.company,
+				"company": ["in", self.filters.company],
 				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
 			},
 		)
@@ -213,16 +253,24 @@ class Analytics:
 		else:
 			value_field = "qty"
 
-		self.entries = frappe.db.sql(
-			f"""
-			select i.item_group as entity, i.{value_field} as value_field, s.{self.date_field}
-			from `tab{self.filters.doc_type} Item` i , `tab{self.filters.doc_type}` s
-			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{self.date_field} between %s and %s
-		""",
-			(self.filters.company, self.filters.from_date, self.filters.to_date),
-			as_dict=1,
-		)
+		doctype = DocType(self.filters.doc_type)
+		doctype_item = DocType(f"{self.filters.doc_type} Item")
+
+		self.entries = (
+			frappe.qb.from_(doctype_item)
+			.join(doctype)
+			.on(doctype.name == doctype_item.parent)
+			.select(
+				doctype_item.item_group.as_("entity"),
+				doctype_item[value_field].as_("value_field"),
+				doctype[self.date_field],
+			)
+			.where(
+				(doctype_item.docstatus == 1)
+				& (doctype.company.isin(self.filters.company))
+				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
+			)
+		).run(as_dict=True)
 
 		self.get_groups()
 
@@ -239,7 +287,7 @@ class Analytics:
 			fields=[entity, value_field, self.date_field],
 			filters={
 				"docstatus": 1,
-				"company": self.filters.company,
+				"company": ["in", self.filters.company],
 				"project": ["!=", ""],
 				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
 			},
@@ -312,7 +360,7 @@ class Analytics:
 				str(((posting_date.month - 1) // 3) + 1), str(posting_date.year)
 			)
 		else:
-			year = get_fiscal_year(posting_date, company=self.filters.company)
+			year = get_fiscal_year(posting_date, company=self.filters.company[0])
 			period = str(year[0])
 		return period
 

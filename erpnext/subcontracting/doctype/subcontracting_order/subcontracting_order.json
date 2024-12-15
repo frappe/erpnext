@@ -294,7 +294,7 @@
    "fieldname": "total",
    "fieldtype": "Currency",
    "label": "Total",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -353,6 +353,7 @@
    "fieldname": "total_additional_costs",
    "fieldtype": "Currency",
    "label": "Total Additional Costs",
+   "options": "Company:company:default_currency",
    "print_hide_if_no_value": 1,
    "read_only": 1
   },
@@ -450,21 +451,21 @@
    "options": "Project"
   },
   {
-    "fieldname": "tab_other_info",
-    "fieldtype": "Tab Break",
-    "label": "Other Info"
+   "fieldname": "tab_other_info",
+   "fieldtype": "Tab Break",
+   "label": "Other Info"
   },
   {
-    "fieldname": "tab_connections",
-    "fieldtype": "Tab Break",
-    "label": "Connections",
-    "show_dashboard": 1
+   "fieldname": "tab_connections",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-03 20:56:04.670380",
+ "modified": "2024-12-06 15:21:49.924146",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",

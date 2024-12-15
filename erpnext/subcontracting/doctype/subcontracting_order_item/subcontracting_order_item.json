@@ -185,7 +185,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
   },
@@ -199,7 +199,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
   },
@@ -269,6 +269,7 @@
    "fieldname": "service_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Service Cost Per Qty",
+   "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
   },
@@ -277,6 +278,7 @@
    "fieldname": "additional_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Additional Cost Per Qty",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -284,6 +286,7 @@
    "fieldtype": "Currency",
    "label": "Raw Material Cost Per Qty",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -384,7 +387,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-30 15:29:43.744618",
+ "modified": "2024-12-06 15:23:05.252346",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Item",

@@ -651,11 +651,20 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 
 	qty = pricing_rule.free_qty or 1
 	if pricing_rule.is_recursive:
-		transaction_qty = (args.get("qty") if args else doc.total_qty) - pricing_rule.apply_recursion_over
-		if transaction_qty:
+		transaction_qty = sum(
+			[
+				row.qty
+				for row in doc.items
+				if not row.is_free_item
+				and row.item_code == args.item_code
+				and row.pricing_rules == args.pricing_rules
+			]
+		)
+		transaction_qty = transaction_qty - pricing_rule.apply_recursion_over
+		if transaction_qty and transaction_qty > 0:
 			qty = flt(transaction_qty) * qty / pricing_rule.recurse_for
 			if pricing_rule.round_free_qty:
-				qty = math.floor(qty)
+				qty = (flt(transaction_qty) // pricing_rule.recurse_for) * (pricing_rule.free_qty or 1)
 
 	if not qty:
 		return

@@ -30,7 +30,7 @@ def execute(filters=None):
 		company=filters.company,
 	)
 
-	cash_flow_accounts = get_cash_flow_accounts()
+	cash_flow_sections = get_cash_flow_accounts()
 
 	# compute net profit / loss
 	income = get_data(
@@ -60,14 +60,14 @@ def execute(filters=None):
 	summary_data = {}
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 
-	for cash_flow_account in cash_flow_accounts:
+	for cash_flow_section in cash_flow_sections:
 		section_data = []
 		data.append(
 			{
-				"account_name": cash_flow_account["section_header"],
-				"parent_account": None,
+				"section_name": "'" + cash_flow_section["section_header"] + "'",
+				"parent_section": None,
 				"indent": 0.0,
-				"account": cash_flow_account["section_header"],
+				"section": cash_flow_section["section_header"],
 			}
 		)
 
@@ -75,31 +75,40 @@ def execute(filters=None):
 			# add first net income in operations section
 			if net_profit_loss:
 				net_profit_loss.update(
-					{"indent": 1, "parent_account": cash_flow_accounts[0]["section_header"]}
+					{"indent": 1, "parent_section": cash_flow_sections[0]["section_header"]}
 				)
 				data.append(net_profit_loss)
 				section_data.append(net_profit_loss)
 
-		for account in cash_flow_account["account_types"]:
-			account_data = get_account_type_based_data(
-				filters.company, account["account_type"], period_list, filters.accumulated_values, filters
+		for row in cash_flow_section["account_types"]:
+			row_data = get_account_type_based_data(
+				filters.company, row["account_type"], period_list, filters.accumulated_values, filters
 			)
-			account_data.update(
+			accounts = frappe.get_all(
+				"Account",
+				filters={
+					"account_type": row["account_type"],
+					"is_group": 0,
+				},
+				pluck="name",
+			)
+			row_data.update(
 				{
-					"account_name": account["label"],
-					"account": account["label"],
+					"section_name": row["label"],
+					"section": row["label"],
 					"indent": 1,
-					"parent_account": cash_flow_account["section_header"],
+					"accounts": accounts,
+					"parent_section": cash_flow_section["section_header"],
 					"currency": company_currency,
 				}
 			)
-			data.append(account_data)
-			section_data.append(account_data)
+			data.append(row_data)
+			section_data.append(row_data)
 
 		add_total_row_account(
 			data,
 			section_data,
-			cash_flow_account["section_footer"],
+			cash_flow_section["section_footer"],
 			period_list,
 			company_currency,
 			summary_data,
@@ -109,7 +118,7 @@ def execute(filters=None):
 	add_total_row_account(
 		data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters
 	)
-	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
+	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company, True)
 
 	chart = get_chart_data(columns, data, company_currency)
 
@@ -217,8 +226,8 @@ def get_start_date(period, accumulated_values, company):
 
 def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
 	total_row = {
-		"account_name": "'" + _("{0}").format(label) + "'",
-		"account": "'" + _("{0}").format(label) + "'",
+		"section_name": "'" + _("{0}").format(label) + "'",
+		"section": "'" + _("{0}").format(label) + "'",
 		"currency": currency,
 	}
 
@@ -229,7 +238,7 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 
 	for row in data:
-		if row.get("parent_account"):
+		if row.get("parent_section"):
 			for period in period_list:
 				key = period if consolidated else period["key"]
 				total_row.setdefault(key, 0.0)
@@ -254,13 +263,14 @@ def get_report_summary(summary_data, currency):
 
 def get_chart_data(columns, data, currency):
 	labels = [d.get("label") for d in columns[2:]]
+	print(data)
 	datasets = [
 		{
-			"name": account.get("account").replace("'", ""),
-			"values": [account.get(d.get("fieldname")) for d in columns[2:]],
+			"name": section.get("section").replace("'", ""),
+			"values": [section.get(d.get("fieldname")) for d in columns[2:]],
 		}
-		for account in data
-		if account.get("parent_account") is None and account.get("currency")
+		for section in data
+		if section.get("parent_section") is None and section.get("currency")
 	]
 	datasets = datasets[:-1]
 

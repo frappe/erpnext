@@ -28,6 +28,7 @@ class SubcontractingReceiptItem(Document):
 		is_scrap_item: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
+		job_card: DF.Link | None
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
 		page_break: DF.Check

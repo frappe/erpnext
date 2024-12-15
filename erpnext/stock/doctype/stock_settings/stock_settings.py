@@ -25,6 +25,7 @@ class StockSettings(Document):
 
 		action_if_quality_inspection_is_not_submitted: DF.Literal["Stop", "Warn"]
 		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
+		allow_existing_serial_no: DF.Check
 		allow_from_dn: DF.Check
 		allow_from_pr: DF.Check
 		allow_internal_transfer_at_arms_length_price: DF.Check

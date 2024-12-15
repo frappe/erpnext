@@ -18,6 +18,7 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 	data = get_data(filters)
+	update_received_amount(data)
 
 	if not data:
 		return [], [], None, []
@@ -40,7 +41,6 @@ def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
-	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
 	query = (
 		frappe.qb.from_(po)
@@ -48,8 +48,6 @@ def get_data(filters):
 		.on(po_item.parent == po.name)
 		.left_join(pi_item)
 		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
-		.left_join(pr_item)
-		.on((pr_item.purchase_order_item == po_item.name) & (pr_item.docstatus == 1))
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -63,7 +61,6 @@ def get_data(filters):
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
 			Sum(IfNull(pi_item.qty, 0)).as_("billed_qty"),
 			po_item.base_amount.as_("amount"),
-			(pr_item.base_amount).as_("received_qty_amount"),
 			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),
 			(po_item.base_amount - (po_item.billed_amt * IfNull(po.conversion_rate, 1))).as_(
 				"pending_amount"
@@ -93,6 +90,39 @@ def get_data(filters):
 	data = query.run(as_dict=True)
 
 	return data
+
+
+def update_received_amount(data):
+	pr_data = get_received_amount_data(data)
+
+	for row in data:
+		row.received_qty_amount = flt(pr_data.get(row.name))
+
+
+def get_received_amount_data(data):
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
+
+	query = (
+		frappe.qb.from_(pr)
+		.inner_join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(
+			pr_item.purchase_order_item,
+			Sum(pr_item.base_amount).as_("received_qty_amount"),
+		)
+		.where((pr_item.parent == pr.name) & (pr.docstatus == 1))
+		.groupby(pr_item.purchase_order_item)
+	)
+
+	query = query.where(pr_item.purchase_order_item.isin([row.name for row in data]))
+
+	data = query.run()
+
+	if not data:
+		return frappe._dict()
+
+	return frappe._dict(data)
 
 
 def prepare_data(data, filters):
@@ -150,7 +180,7 @@ def prepare_data(data, filters):
 
 
 def prepare_chart_data(pending, completed):
-	labels = ["Amount to Bill", "Billed Amount"]
+	labels = [_("Amount to Bill"), _("Billed Amount")]
 
 	return {
 		"data": {"labels": labels, "datasets": [{"values": [pending, completed]}]},

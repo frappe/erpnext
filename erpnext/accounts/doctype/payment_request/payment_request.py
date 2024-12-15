@@ -3,7 +3,7 @@ import json
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
@@ -564,6 +564,8 @@ def make_payment_request(**args):
 	# fetches existing payment request `grand_total` amount
 	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc.doctype, ref_doc.name)
 
+	existing_paid_amount = get_existing_paid_amount(ref_doc.doctype, ref_doc.name)
+
 	def validate_and_calculate_grand_total(grand_total, existing_payment_request_amount):
 		grand_total -= existing_payment_request_amount
 		if not grand_total:
@@ -582,6 +584,15 @@ def make_payment_request(**args):
 				cancel_old_payment_requests(ref_doc.doctype, ref_doc.name)
 		else:
 			grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
+
+	if existing_paid_amount:
+		if ref_doc.party_account_currency == ref_doc.currency:
+			if ref_doc.conversion_rate:
+				grand_total -= flt(existing_paid_amount / ref_doc.conversion_rate)
+			else:
+				grand_total -= flt(existing_paid_amount)
+		else:
+			grand_total -= flt(existing_paid_amount / ref_doc.conversion_rate)
 
 	if draft_payment_request:
 		frappe.db.set_value(
@@ -748,6 +759,29 @@ def get_existing_payment_request_amount(ref_dt, ref_dn, statuses: list | None = 
 	if statuses:
 		query = query.where(PR.status.isin(statuses))
 
+	response = query.run()
+
+	return response[0][0] if response[0] else 0
+
+
+def get_existing_paid_amount(doctype, name):
+	PL = frappe.qb.DocType("Payment Ledger Entry")
+	PER = frappe.qb.DocType("Payment Entry Reference")
+
+	query = (
+		frappe.qb.from_(PL)
+		.left_join(PER)
+		.on(
+			(PER.reference_doctype == PL.against_voucher_type) & (PER.reference_name == PL.against_voucher_no)
+		)
+		.select(Abs(Sum(PL.amount)).as_("total_paid_amount"))
+		.where(PL.against_voucher_type.eq(doctype))
+		.where(PL.against_voucher_no.eq(name))
+		.where(PL.amount < 0)
+		.where(PL.delinked == 0)
+		.where(PER.docstatus == 1)
+		.where(PER.payment_request.isnull())
+	)
 	response = query.run()
 
 	return response[0][0] if response[0] else 0
@@ -955,12 +989,7 @@ def get_open_payment_requests_query(doctype, txt, searchfield, start, page_len, 
 
 	open_payment_requests = frappe.get_list(
 		"Payment Request",
-		filters={
-			**filters,
-			"status": ["!=", "Paid"],
-			"outstanding_amount": ["!=", 0],  # for compatibility with old data
-			"docstatus": 1,
-		},
+		filters=filters,
 		fields=["name", "grand_total", "outstanding_amount"],
 		order_by="transaction_date ASC,creation ASC",
 	)

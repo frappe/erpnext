@@ -92,14 +92,14 @@ class TestUtils(unittest.TestCase):
 		payment_entry.deductions = []
 		payment_entry.save()
 
-		# below is the difference between base_received_amount and base_paid_amount
-		self.assertEqual(payment_entry.difference_amount, -4855.0)
+		# below is the difference between base_paid_amount and base_received_amount (exchange gain)
+		self.assertEqual(payment_entry.deductions[0].amount, -4855.0)
 
 		payment_entry.target_exchange_rate = 62.9
 		payment_entry.save()
 
-		# below is due to change in exchange rate
-		self.assertEqual(payment_entry.references[0].exchange_gain_loss, -4855.0)
+		# after changing the exchange rate, there is no exchange gain / loss
+		self.assertEqual(payment_entry.deductions, [])
 
 		payment_entry.references = []
 		self.assertEqual(payment_entry.difference_amount, 0.0)

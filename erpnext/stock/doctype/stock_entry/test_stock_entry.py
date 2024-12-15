@@ -1645,6 +1645,46 @@ class TestStockEntry(FrappeTestCase):
 			mr.cancel()
 			mr.delete()
 
+	def test_auto_reorder_level_with_lead_time_days(self):
+		from erpnext.stock.reorder_item import reorder_item
+
+		item_doc = make_item(
+			"Test Auto Reorder Item - 002",
+			properties={"stock_uom": "Kg", "purchase_uom": "Nos", "is_stock_item": 1, "lead_time_days": 2},
+			uoms=[{"uom": "Nos", "conversion_factor": 5}],
+		)
+
+		if not frappe.db.exists("Item Reorder", {"parent": item_doc.name}):
+			item_doc.append(
+				"reorder_levels",
+				{
+					"warehouse_reorder_level": 0,
+					"warehouse_reorder_qty": 10,
+					"warehouse": "_Test Warehouse - _TC",
+					"material_request_type": "Purchase",
+				},
+			)
+
+		item_doc.save(ignore_permissions=True)
+
+		frappe.db.set_single_value("Stock Settings", "auto_indent", 1)
+
+		mr_list = reorder_item()
+
+		frappe.db.set_single_value("Stock Settings", "auto_indent", 0)
+		mrs = frappe.get_all(
+			"Material Request Item",
+			fields=["schedule_date"],
+			filters={"item_code": item_doc.name, "uom": "Nos"},
+		)
+
+		for mri in mrs:
+			self.assertEqual(getdate(mri.schedule_date), getdate(add_days(today(), 2)))
+
+		for mr in mr_list:
+			mr.cancel()
+			mr.delete()
+
 	def test_use_serial_and_batch_fields(self):
 		item = make_item(
 			"Test Use Serial and Batch Item SN Item",

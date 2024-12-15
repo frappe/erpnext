@@ -208,13 +208,17 @@ class BankTransaction(Document):
 		if self.party_type and self.party:
 			return
 
-		result = AutoMatchParty(
-			bank_party_account_number=self.bank_party_account_number,
-			bank_party_iban=self.bank_party_iban,
-			bank_party_name=self.bank_party_name,
-			description=self.description,
-			deposit=self.deposit,
-		).match()
+		result = None
+		try:
+			result = AutoMatchParty(
+				bank_party_account_number=self.bank_party_account_number,
+				bank_party_iban=self.bank_party_iban,
+				bank_party_name=self.bank_party_name,
+				description=self.description,
+				deposit=self.deposit,
+			).match()
+		except Exception:
+			frappe.log_error(title=_("Error in party matching for Bank Transaction {0}").format(self.name))
 
 		if not result:
 			return

@@ -807,6 +807,7 @@ class TestAccountsController(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
 	def test_16_internal_transfer_at_arms_length_price(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		prepare_data_for_internal_transfer()
@@ -839,6 +840,31 @@ class TestAccountsController(FrappeTestCase):
 		si.save()
 		# rate should reset to incoming rate
 		self.assertEqual(si.items[0].rate, 100)
+
+		si.update_stock = 0
+		si.save()
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].rate = arms_length_price
+		pi.items[0].warehouse = target_warehouse
+		pi.items[0].from_warehouse = warehouse
+		pi.save()
+
+		self.assertEqual(pi.items[0].rate, 100)
+		self.assertEqual(pi.items[0].valuation_rate, 100)
+
+		frappe.db.set_single_value("Stock Settings", "allow_internal_transfer_at_arms_length_price", 1)
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].rate = arms_length_price
+		pi.items[0].warehouse = target_warehouse
+		pi.items[0].from_warehouse = warehouse
+		pi.save()
+
+		self.assertEqual(pi.items[0].rate, arms_length_price)
+		self.assertEqual(pi.items[0].valuation_rate, 100)
 
 	def test_20_journal_against_sales_invoice(self):
 		# Invoice in Foreign Currency

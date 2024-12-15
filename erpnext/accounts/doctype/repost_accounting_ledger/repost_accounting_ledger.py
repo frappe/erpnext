@@ -45,7 +45,7 @@ class RepostAccountingLedger(Document):
 			latest_pcv = (
 				frappe.db.get_all(
 					"Period Closing Voucher",
-					filters={"company": self.company},
+					filters={"company": self.company, "docstatus": 1},
 					order_by="period_end_date desc",
 					pluck="period_end_date",
 					limit=1,

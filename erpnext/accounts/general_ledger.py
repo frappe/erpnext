@@ -315,64 +315,46 @@ def check_if_in_list(gle, gl_map):
 
 
 def toggle_debit_credit_if_negative(gl_map):
+	debit_credit_field_map = {
+		"debit": "credit",
+		"debit_in_account_currency": "credit_in_account_currency",
+		"debit_in_transaction_currency": "credit_in_transaction_currency",
+	}
+
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
-		if flt(entry.debit) < 0 and flt(entry.credit) < 0 and flt(entry.debit) == flt(entry.credit):
-			entry.credit *= -1
-			entry.debit *= -1
+		for debit_field, credit_field in debit_credit_field_map.items():
+			debit = flt(entry.get(debit_field))
+			credit = flt(entry.get(credit_field))
 
-		if (
-			flt(entry.debit_in_account_currency) < 0
-			and flt(entry.credit_in_account_currency) < 0
-			and flt(entry.debit_in_account_currency) == flt(entry.credit_in_account_currency)
-		):
-			entry.credit_in_account_currency *= -1
-			entry.debit_in_account_currency *= -1
+			if debit < 0 and credit < 0 and debit == credit:
+				debit *= -1
+				credit *= -1
 
-		if flt(entry.debit) < 0:
-			entry.credit = flt(entry.credit) - flt(entry.debit)
-			entry.debit = 0.0
+			if debit < 0:
+				credit = credit - debit
+				debit = 0.0
 
-		if flt(entry.debit_in_account_currency) < 0:
-			entry.credit_in_account_currency = flt(entry.credit_in_account_currency) - flt(
-				entry.debit_in_account_currency
-			)
-			entry.debit_in_account_currency = 0.0
+			if credit < 0:
+				debit = debit - credit
+				credit = 0.0
 
-		if flt(entry.credit) < 0:
-			entry.debit = flt(entry.debit) - flt(entry.credit)
-			entry.credit = 0.0
+			# update net values
+			# In some scenarios net value needs to be shown in the ledger
+			# This method updates net values as debit or credit
+			if entry.post_net_value and debit and credit:
+				if debit > credit:
+					debit = debit - credit
+					credit = 0.0
 
-		if flt(entry.credit_in_account_currency) < 0:
-			entry.debit_in_account_currency = flt(entry.debit_in_account_currency) - flt(
-				entry.credit_in_account_currency
-			)
-			entry.credit_in_account_currency = 0.0
+				else:
+					credit = credit - debit
+					debit = 0.0
 
-		update_net_values(entry)
+			entry[debit_field] = debit
+			entry[credit_field] = credit
 
 	return gl_map
-
-
-def update_net_values(entry):
-	# In some scenarios net value needs to be shown in the ledger
-	# This method updates net values as debit or credit
-	if entry.post_net_value and entry.debit and entry.credit:
-		if entry.debit > entry.credit:
-			entry.debit = entry.debit - entry.credit
-			entry.debit_in_account_currency = (
-				entry.debit_in_account_currency - entry.credit_in_account_currency
-			)
-			entry.credit = 0
-			entry.credit_in_account_currency = 0
-		else:
-			entry.credit = entry.credit - entry.debit
-			entry.credit_in_account_currency = (
-				entry.credit_in_account_currency - entry.debit_in_account_currency
-			)
-
-			entry.debit = 0
-			entry.debit_in_account_currency = 0
 
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):

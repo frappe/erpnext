@@ -486,7 +486,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	setup_sms() {
 		var me = this;
 		let blacklist = ['Purchase Invoice', 'BOM'];
-		if(this.frm.doc.docstatus===1 && !["Lost", "Stopped", "Closed"].includes(this.frm.doc.status)
+		if(frappe.boot.sms_gateway_enabled && this.frm.doc.docstatus===1 && !["Lost", "Stopped", "Closed"].includes(this.frm.doc.status)
 			&& !blacklist.includes(this.frm.doctype)) {
 			this.frm.page.add_menu_item(__('Send SMS'), function() { me.send_sms(); });
 		}
@@ -1124,7 +1124,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	apply_discount_on_item(doc, cdt, cdn, field) {
 		var item = frappe.get_doc(cdt, cdn);
-		if(!item?.price_list_rate) {
+		if(item && !item.price_list_rate) {
 			item[field] = 0.0;
 		} else {
 			this.price_list_rate(doc, cdt, cdn);
@@ -1904,8 +1904,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			callback: function(r) {
 				if (!r.exc) {
 					frappe.run_serially([
-						() => me.frm.set_value("price_list_currency", r.message.parent.price_list_currency),
-						() => me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate),
+						() => {
+							if (r.message.parent.price_list_currency)
+								me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
+						},
+						() => {
+							if (r.message.parent.plc_conversion_rate)
+								me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
+						},
 						() => {
 							if(args.items.length) {
 								me._set_values_for_item_list(r.message.children);

@@ -108,8 +108,9 @@
   "dispatch_address",
   "company_address_section",
   "company_address",
-  "column_break_101",
   "company_address_display",
+  "column_break_101",
+  "company_contact_person",
   "terms_tab",
   "tc_name",
   "terms",
@@ -1391,13 +1392,20 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "fieldname": "company_contact_person",
+   "fieldtype": "Link",
+   "label": "Company Contact Person",
+   "options": "Contact",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:05:02.854990",
+ "modified": "2024-11-26 12:44:28.258215",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

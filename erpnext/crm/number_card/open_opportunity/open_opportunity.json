@@ -3,7 +3,7 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Opportunity",
- "dynamic_filters_json": "[[\"Opportunity\",\"status\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+ "dynamic_filters_json": "[[\"Opportunity\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
  "filters_json": "[[\"Opportunity\",\"company\",\"=\",null,false]]",
  "function": "Count",
  "idx": 0,

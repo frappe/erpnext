@@ -663,39 +663,41 @@ $.extend(erpnext.item, {
 		}
 
 		frm.doc.attributes.forEach(function (d) {
-			let p = new Promise((resolve) => {
-				if (!d.numeric_values) {
-					frappe
-						.call({
-							method: "frappe.client.get_list",
-							args: {
-								doctype: "Item Attribute Value",
-								filters: [["parent", "=", d.attribute]],
-								fields: ["attribute_value"],
-								limit_page_length: 0,
-								parent: "Item Attribute",
-								order_by: "idx",
-							},
-						})
-						.then((r) => {
-							if (r.message) {
-								attr_val_fields[d.attribute] = r.message.map(function (d) {
-									return d.attribute_value;
-								});
-								resolve();
-							}
-						});
-				} else {
-					let values = [];
-					for (var i = d.from_range; i <= d.to_range; i = flt(i + d.increment, 6)) {
-						values.push(i);
+			if (!d.disabled) {
+				let p = new Promise((resolve) => {
+					if (!d.numeric_values) {
+						frappe
+							.call({
+								method: "frappe.client.get_list",
+								args: {
+									doctype: "Item Attribute Value",
+									filters: [["parent", "=", d.attribute]],
+									fields: ["attribute_value"],
+									limit_page_length: 0,
+									parent: "Item Attribute",
+									order_by: "idx",
+								},
+							})
+							.then((r) => {
+								if (r.message) {
+									attr_val_fields[d.attribute] = r.message.map(function (d) {
+										return d.attribute_value;
+									});
+									resolve();
+								}
+							});
+					} else {
+						let values = [];
+						for (var i = d.from_range; i <= d.to_range; i = flt(i + d.increment, 6)) {
+							values.push(i);
+						}
+						attr_val_fields[d.attribute] = values;
+						resolve();
 					}
-					attr_val_fields[d.attribute] = values;
-					resolve();
-				}
-			});
+				});
 
-			promises.push(p);
+				promises.push(p);
+			}
 		}, this);
 
 		Promise.all(promises).then(() => {
@@ -710,26 +712,29 @@ $.extend(erpnext.item, {
 		for (var i = 0; i < frm.doc.attributes.length; i++) {
 			var fieldtype, desc;
 			var row = frm.doc.attributes[i];
-			if (row.numeric_values) {
-				fieldtype = "Float";
-				desc =
-					"Min Value: " +
-					row.from_range +
-					" , Max Value: " +
-					row.to_range +
-					", in Increments of: " +
-					row.increment;
-			} else {
-				fieldtype = "Data";
-				desc = "";
+
+			if (!row.disabled) {
+				if (row.numeric_values) {
+					fieldtype = "Float";
+					desc =
+						"Min Value: " +
+						row.from_range +
+						" , Max Value: " +
+						row.to_range +
+						", in Increments of: " +
+						row.increment;
+				} else {
+					fieldtype = "Data";
+					desc = "";
+				}
+				fields = fields.concat({
+					label: row.attribute,
+					fieldname: row.attribute,
+					fieldtype: fieldtype,
+					reqd: 0,
+					description: desc,
+				});
 			}
-			fields = fields.concat({
-				label: row.attribute,
-				fieldname: row.attribute,
-				fieldtype: fieldtype,
-				reqd: 0,
-				description: desc,
-			});
 		}
 
 		if (frm.doc.image) {

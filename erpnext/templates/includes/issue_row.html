@@ -18,7 +18,7 @@
 					{% if doc.status == "Open" %}
 						{{ doc.priority }}
 					{% else %}
-						{{ doc.status }}
+						{{ _(doc.status) }}
 					{%- endif -%}
 				</span>
 			</div>

@@ -96,8 +96,9 @@
   "shipping_address",
   "company_address_section",
   "company_address",
-  "column_break_87",
   "company_address_display",
+  "column_break_87",
+  "company_contact_person",
   "terms_tab",
   "payment_schedule_section",
   "payment_terms_template",
@@ -1076,13 +1077,20 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "company_contact_person",
+   "fieldtype": "Link",
+   "label": "Company Contact Person",
+   "options": "Contact",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-07 18:37:11.715189",
+ "modified": "2024-11-26 12:43:29.293637",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

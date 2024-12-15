@@ -56,7 +56,6 @@
   "section_break_34",
   "total_allocated_amount",
   "base_total_allocated_amount",
-  "set_exchange_gain_loss",
   "column_break_36",
   "unallocated_amount",
   "difference_amount",
@@ -389,11 +388,6 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "set_exchange_gain_loss",
-   "fieldtype": "Button",
-   "label": "Set Exchange Gain / Loss"
   },
   {
    "fieldname": "column_break_36",
@@ -801,7 +795,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-05-31 17:07:06.197249",
+ "modified": "2024-11-07 11:19:19.320883",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

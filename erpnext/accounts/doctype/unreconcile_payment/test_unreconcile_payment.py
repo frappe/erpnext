@@ -262,6 +262,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		pe1.paid_from = self.debtors_usd
 		pe1.paid_from_account_currency = "USD"
 		pe1.source_exchange_rate = 75
+		pe1.paid_amount = 100
 		pe1.received_amount = 75 * 100
 		pe1.save()
 		# Allocate payment against both invoices
@@ -279,6 +280,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		pe2.paid_from = self.debtors_usd
 		pe2.paid_from_account_currency = "USD"
 		pe2.source_exchange_rate = 75
+		pe2.paid_amount = 100
 		pe2.received_amount = 75 * 100
 		pe2.save()
 		# Allocate payment against both invoices
