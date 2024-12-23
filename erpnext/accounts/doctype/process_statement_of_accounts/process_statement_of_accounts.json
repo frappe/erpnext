@@ -244,9 +244,9 @@
   },
   {
    "fieldname": "cc_to",
-   "fieldtype": "Link",
+   "fieldtype": "Table MultiSelect",
    "label": "CC To",
-   "options": "User"
+   "options": "Process Statement Of Accounts CC"
   },
   {
    "default": "1",
@@ -400,7 +400,7 @@
   }
  ],
  "links": [],
- "modified": "2024-10-18 17:51:39.108481",
+ "modified": "2024-12-11 12:11:13.543134",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

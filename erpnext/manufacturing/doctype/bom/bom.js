@@ -257,15 +257,6 @@ frappe.ui.form.on("BOM", {
 
 		if (!skip_qty_field) {
 			fields.push({
-				fieldtype: "Check",
-				label: __("Use Multi-Level BOM"),
-				fieldname: "use_multi_level_bom",
-				default: 1,
-			});
-		}
-
-		if (!skip_qty_field) {
-			fields.push({
 				fieldtype: "Float",
 				label: __("Qty To Manufacture"),
 				fieldname: "qty",

@@ -415,6 +415,8 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			"parent": args.parent,
 			"parenttype": args.parenttype,
 			"child_docname": args.get("child_docname"),
+			"discount_percentage": 0.0,
+			"discount_amount": 0,
 		}
 	)
 

@@ -385,3 +385,4 @@ erpnext.patches.v15_0.update_sub_voucher_type_in_gl_entries
 erpnext.patches.v14_0.update_stock_uom_in_work_order_item
 erpnext.patches.v15_0.set_is_exchange_gain_loss_in_payment_entry_deductions
 erpnext.patches.v15_0.enable_allow_existing_serial_no
+erpnext.patches.v15_0.update_cc_in_process_statement_of_accounts

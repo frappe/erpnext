@@ -85,7 +85,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				<div class="right-section">
 					<div class="paid-amount">${format_currency(doc.paid_amount, doc.currency)}</div>
 					<div class="invoice-name">${doc.name}</div>
-					<span class="indicator-pill whitespace-nowrap ${indicator_color}"><span>${doc.status}</span></span>
+					<span class="indicator-pill whitespace-nowrap ${indicator_color}"><span>${__(doc.status)}</span></span>
 				</div>`;
 	}
 

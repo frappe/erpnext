@@ -551,9 +551,7 @@ class ReceivablePayableReport:
 			self.append_payment_term(row, d, term)
 
 	def append_payment_term(self, row, d, term):
-		if (
-			self.filters.get("customer") or self.filters.get("supplier")
-		) and d.currency == d.party_account_currency:
+		if d.currency == d.party_account_currency:
 			invoiced = d.payment_amount
 		else:
 			invoiced = d.base_payment_amount

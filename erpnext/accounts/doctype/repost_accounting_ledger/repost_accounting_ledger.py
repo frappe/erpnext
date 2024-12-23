@@ -1,6 +1,8 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import inspect
+
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
@@ -142,6 +144,8 @@ class RepostAccountingLedger(Document):
 
 @frappe.whitelist()
 def start_repost(account_repost_doc=str) -> None:
+	from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
 	frappe.flags.through_repost_accounting_ledger = True
 	if account_repost_doc:
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
@@ -177,6 +181,14 @@ def start_repost(account_repost_doc=str) -> None:
 					if not repost_doc.delete_cancelled_entries:
 						doc.make_gl_entries(1)
 					doc.make_gl_entries()
+				elif doc.doctype in frappe.get_hooks("repost_allowed_doctypes"):
+					if hasattr(doc, "make_gl_entries") and callable(doc.make_gl_entries):
+						if not repost_doc.delete_cancelled_entries:
+							if "cancel" in inspect.getfullargspec(doc.make_gl_entries):
+								doc.make_gl_entries(cancel=1)
+							else:
+								make_reverse_gl_entries(voucher_type=doc.doctype, voucher_no=doc.name)
+						doc.make_gl_entries()
 
 
 def get_allowed_types_from_settings():

@@ -505,9 +505,9 @@ class SerialandBatchBundle(Document):
 			elif (d.incoming_rate == rate) and d.qty and d.stock_value_difference:
 				continue
 
-			d.incoming_rate = rate
+			d.incoming_rate = flt(rate)
 			if d.qty:
-				d.stock_value_difference = d.qty * d.incoming_rate
+				d.stock_value_difference = flt(d.qty) * d.incoming_rate
 
 			if save:
 				d.db_set(
@@ -518,6 +518,8 @@ class SerialandBatchBundle(Document):
 		values_to_set = {}
 		if not self.voucher_no or self.voucher_no != row.parent:
 			values_to_set["voucher_no"] = row.parent
+
+		self.db_set("is_cancelled", 0)
 
 		if self.voucher_type != parent.doctype:
 			values_to_set["voucher_type"] = parent.doctype
