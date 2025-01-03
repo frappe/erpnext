@@ -1137,6 +1137,80 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertEqual(pr_details[0]["total_taxes_and_charges"], 60)
 
+	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		fg_item = "Subcontracted Item SA1"
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_submit=True,
+		)
+		po.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Excise Duty - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Excise Duty",
+				"doctype": "Purchase Taxes and Charges",
+				"rate": 10,
+			},
+		)
+		po.save()
+		po.submit()
+
+		sco = get_subcontracting_order(po_name=po.name)
+		for row in sco.items:
+			row.db_set("purchase_order_item", None)
+
+		sco.reload()
+
+		for row in sco.items:
+			self.assertFalse(row.purchase_order_item)
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		for row in scr.items:
+			self.assertFalse(row.purchase_order_item)
+
+		scr.items[0].qty = 3
+		scr.save()
+		scr.submit()
+
+		pr_details = frappe.get_all(
+			"Purchase Receipt",
+			filters={"subcontracting_receipt": scr.name},
+			fields=["name", "total_taxes_and_charges"],
+		)
+
+		self.assertTrue(pr_details)
+
+		pr_qty = frappe.db.get_value("Purchase Receipt Item", {"parent": pr_details[0]["name"]}, "qty")
+		self.assertEqual(pr_qty, 6)
+
+		self.assertEqual(pr_details[0]["total_taxes_and_charges"], 60)
+
 	def test_use_serial_batch_fields_for_subcontracting_receipt(self):
 		fg_item = make_item(
 			"Test Subcontracted Item With Batch No",

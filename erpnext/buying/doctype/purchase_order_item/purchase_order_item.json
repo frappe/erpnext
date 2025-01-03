@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "hash",
- "creation": "2013-05-24 19:29:06",
+ "creation": "2024-12-09 12:54:24.652161",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -26,6 +26,7 @@
   "quantity_and_rate",
   "qty",
   "stock_uom",
+  "sco_qty",
   "col_break2",
   "uom",
   "conversion_factor",
@@ -909,13 +910,21 @@
   {
    "fieldname": "column_break_fyqr",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sco_qty",
+   "fieldtype": "Float",
+   "label": "Subcontracted Quantity",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-05 11:23:24.859435",
+ "modified": "2024-12-10 12:11:18.536089",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

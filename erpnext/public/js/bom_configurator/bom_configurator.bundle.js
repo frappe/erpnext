@@ -147,10 +147,10 @@ class BOMConfigurator {
 									if (!node.expanded) {
 										view.tree.load_children(node, true);
 										$(node.parent[0]).find(".tree-children").show();
-										node.$toolbar.find(".expand-all-btn").html("Collapse All");
+										node.$toolbar.find(".expand-all-btn").html(__("Collapse All"));
 									} else {
 										node.$tree_link.trigger("click");
-										node.$toolbar.find(".expand-all-btn").html("Expand All");
+										node.$toolbar.find(".expand-all-btn").html(__("Expand All"));
 									}
 								},
 								condition: function (node) {
@@ -190,10 +190,10 @@ class BOMConfigurator {
 									if (!node.expanded) {
 										view.tree.load_children(node, true);
 										$(node.parent[0]).find(".tree-children").show();
-										node.$toolbar.find(".expand-all-btn").html("Collapse All");
+										node.$toolbar.find(".expand-all-btn").html(__("Collapse All"));
 									} else {
 										node.$tree_link.trigger("click");
-										node.$toolbar.find(".expand-all-btn").html("Expand All");
+										node.$toolbar.find(".expand-all-btn").html(__("Expand All"));
 									}
 								},
 								condition: function (node) {

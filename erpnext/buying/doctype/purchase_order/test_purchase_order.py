@@ -1004,7 +1004,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 
 		def update_items(po, qty):
-			trans_items = [po.items[0].as_dict()]
+			trans_items = [po.items[0].as_dict().update({"docname": po.items[0].name})]
 			trans_items[0]["qty"] = qty
 			trans_items[0]["fg_item_qty"] = qty
 			trans_items = json.dumps(trans_items, default=str)
@@ -1058,6 +1058,73 @@ class TestPurchaseOrder(FrappeTestCase):
 		# Test - 3: Items should be updated as the Subcontracting Order is cancelled
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
+
+	def test_new_sc_flow(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
+
+		po = create_po_for_sc_testing()
+		sco = make_subcontracting_order(po.name)
+
+		sco.items[0].qty = 5
+		sco.items.pop(1)
+		sco.items[1].qty = 25
+		sco.save()
+		sco.submit()
+
+		# Test - 1: Quantity of Service Items should change based on change in Quantity of its corresponding Finished Goods Item
+		self.assertEqual(sco.service_items[0].qty, 5)
+
+		# Test - 2: Subcontracted Quantity for the PO Items of each line item should be updated accordingly
+		po.reload()
+		self.assertEqual(po.items[0].sco_qty, 5)
+		self.assertEqual(po.items[1].sco_qty, 0)
+		self.assertEqual(po.items[2].sco_qty, 12.5)
+
+		# Test - 3: Amount for both FG Item and its Service Item should be updated correctly based on change in Quantity
+		self.assertEqual(sco.items[0].amount, 2000)
+		self.assertEqual(sco.service_items[0].amount, 500)
+
+		# Test - 4: Service Items should be removed if its corresponding Finished Good line item is deleted
+		self.assertEqual(len(sco.service_items), 2)
+
+		# Test - 5: Service Item quantity calculation should be based upon conversion factor calculated from its corresponding PO Item
+		self.assertEqual(sco.service_items[1].qty, 12.5)
+
+		sco = make_subcontracting_order(po.name)
+
+		sco.items[0].qty = 6
+
+		# Test - 6: Saving document should not be allowed if Quantity exceeds available Subcontracting Quantity of any Purchase Order Item
+		self.assertRaises(frappe.ValidationError, sco.save)
+
+		sco.items[0].qty = 5
+		sco.items.pop()
+		sco.items.pop()
+		sco.save()
+		sco.submit()
+
+		sco = make_subcontracting_order(po.name)
+
+		# Test - 7: Since line item 1 is now fully subcontracted, new SCO should by default only have the remaining 2 line items
+		self.assertEqual(len(sco.items), 2)
+
+		sco.items.pop(0)
+		sco.save()
+		sco.submit()
+
+		# Test - 8: Subcontracted Quantity for each PO Item should be subtracted if SCO gets cancelled
+		po.reload()
+		self.assertEqual(po.items[2].sco_qty, 25)
+		sco.cancel()
+		po.reload()
+		self.assertEqual(po.items[2].sco_qty, 12.5)
+
+		sco = make_subcontracting_order(po.name)
+		sco.save()
+		sco.submit()
+
+		# Test - 8: Since this PO is now fully subcontracted, creating a new SCO from it should throw error
+		self.assertRaises(frappe.ValidationError, make_subcontracting_order, po.name)
 
 	@change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
 	def test_auto_create_subcontracting_order(self):
@@ -1122,6 +1189,53 @@ class TestPurchaseOrder(FrappeTestCase):
 		# Check if the billed amount stayed the same
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
+
+
+def create_po_for_sc_testing():
+	from erpnext.controllers.tests.test_subcontracting_controller import (
+		make_bom_for_subcontracted_items,
+		make_raw_materials,
+		make_service_items,
+		make_subcontracted_items,
+	)
+
+	make_subcontracted_items()
+	make_raw_materials()
+	make_service_items()
+	make_bom_for_subcontracted_items()
+
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA1",
+			"fg_item_qty": 10,
+		},
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 2",
+			"qty": 20,
+			"rate": 25,
+			"fg_item": "Subcontracted Item SA2",
+			"fg_item_qty": 15,
+		},
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 3",
+			"qty": 25,
+			"rate": 10,
+			"fg_item": "Subcontracted Item SA3",
+			"fg_item_qty": 50,
+		},
+	]
+
+	return create_purchase_order(
+		rm_items=service_items,
+		is_subcontracted=1,
+		supplier_warehouse="_Test Warehouse 1 - _TC",
+	)
 
 
 def prepare_data_for_internal_transfer():

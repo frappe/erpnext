@@ -970,6 +970,80 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, ste.submit)
 
+	def test_quality_check_for_scrap_item(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as _make_stock_entry,
+		)
+
+		scrap_item = "_Test Scrap Item 1"
+		make_item(scrap_item, {"is_stock_item": 1, "is_purchase_item": 0})
+
+		bom_name = frappe.db.get_value("BOM Scrap Item", {"docstatus": 1}, "parent")
+		production_item = frappe.db.get_value("BOM", bom_name, "item")
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.production_item = production_item
+		work_order.update(
+			{
+				"company": "_Test Company",
+				"fg_warehouse": "_Test Warehouse 1 - _TC",
+				"production_item": production_item,
+				"bom_no": bom_name,
+				"qty": 1.0,
+				"stock_uom": frappe.db.get_value("Item", production_item, "stock_uom"),
+				"skip_transfer": 1,
+			}
+		)
+
+		work_order.get_items_and_operations_from_bom()
+		work_order.submit()
+
+		stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 1))
+		for row in stock_entry.items:
+			if row.s_warehouse:
+				make_stock_entry(
+					item_code=row.item_code,
+					target=row.s_warehouse,
+					qty=row.qty,
+					basic_rate=row.basic_rate or 100,
+				)
+
+			if row.is_scrap_item:
+				row.item_code = scrap_item
+				row.uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
+				row.stock_uom = frappe.db.get_value("Item", scrap_item, "stock_uom")
+
+		stock_entry.inspection_required = 1
+		stock_entry.save()
+
+		self.assertTrue([row.item_code for row in stock_entry.items if row.is_scrap_item])
+
+		for row in stock_entry.items:
+			if not row.is_scrap_item:
+				qc = frappe.get_doc(
+					{
+						"doctype": "Quality Inspection",
+						"reference_name": stock_entry.name,
+						"inspected_by": "Administrator",
+						"reference_type": "Stock Entry",
+						"inspection_type": "In Process",
+						"status": "Accepted",
+						"sample_size": 1,
+						"item_code": row.item_code,
+					}
+				)
+
+				qc_name = qc.submit()
+				row.quality_inspection = qc_name
+
+		stock_entry.reload()
+		stock_entry.submit()
+		for row in stock_entry.items:
+			if row.is_scrap_item:
+				self.assertFalse(row.quality_inspection)
+			else:
+				self.assertTrue(row.quality_inspection)
+
 	def test_quality_check(self):
 		item_code = "_Test Item For QC"
 		if not frappe.db.exists("Item", item_code):

@@ -14,7 +14,7 @@
    "fieldname": "rate",
    "fieldtype": "Percent",
    "in_list_view": 1,
-   "label": "Rate",
+   "label": "Tax Rate",
    "read_only": 1
   },
   {

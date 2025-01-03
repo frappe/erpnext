@@ -920,12 +920,17 @@ class PurchaseReceipt(BuyingController):
 				)
 
 	def enable_recalculate_rate_in_sles(self):
+		rejected_warehouses = frappe.get_all(
+			"Purchase Receipt Item", filters={"parent": self.name}, pluck="rejected_warehouse"
+		)
+
 		sle_table = frappe.qb.DocType("Stock Ledger Entry")
 		(
 			frappe.qb.update(sle_table)
 			.set(sle_table.recalculate_rate, 1)
 			.where(sle_table.voucher_no == self.name)
 			.where(sle_table.voucher_type == "Purchase Receipt")
+			.where(sle_table.warehouse.notin(rejected_warehouses))
 		).run()
 
 

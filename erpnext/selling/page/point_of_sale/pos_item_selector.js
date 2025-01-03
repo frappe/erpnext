@@ -118,6 +118,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(uom)}"
 				data-rate="${escape(price_list_rate || 0)}"
+				data-stock-uom="${escape(item.stock_uom)}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -251,17 +252,19 @@ erpnext.PointOfSale.ItemSelector = class {
 			let serial_no = unescape($item.attr("data-serial-no"));
 			let uom = unescape($item.attr("data-uom"));
 			let rate = unescape($item.attr("data-rate"));
+			let stock_uom = unescape($item.attr("data-stock-uom"));
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
+			stock_uom = stock_uom === "undefined" ? undefined : stock_uom;
 
 			me.events.item_selected({
 				field: "qty",
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate },
+				item: { item_code, batch_no, serial_no, uom, rate, stock_uom },
 			});
 			me.search_field.set_focus();
 		});

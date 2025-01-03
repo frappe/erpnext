@@ -134,7 +134,6 @@ class ReceivablePayableReport:
 			paid_in_account_currency=0.0,
 			credit_note_in_account_currency=0.0,
 			outstanding_in_account_currency=0.0,
-			cost_center=ple.cost_center,
 		)
 
 	def init_voucher_balance(self):
@@ -149,6 +148,9 @@ class ReceivablePayableReport:
 
 			if key not in self.voucher_balance:
 				self.voucher_balance[key] = self.build_voucher_dict(ple)
+
+			if ple.voucher_type == ple.against_voucher_type and ple.voucher_no == ple.against_voucher_no:
+				self.voucher_balance[key].cost_center = ple.cost_center
 
 			self.get_invoices(ple)
 
@@ -274,9 +276,6 @@ class ReceivablePayableReport:
 			else:
 				row.paid -= amount
 				row.paid_in_account_currency -= amount_in_account_currency
-
-		if not row.cost_center and ple.cost_center:
-			row.cost_center = str(ple.cost_center)
 
 	def update_sub_total_row(self, row, party):
 		total_row = self.total_row_map.get(party)

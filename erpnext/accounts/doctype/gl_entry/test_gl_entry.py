@@ -79,3 +79,48 @@ class TestGLEntry(unittest.TestCase):
 			"SELECT current from tabSeries where name = %s", naming_series
 		)[0][0]
 		self.assertEqual(old_naming_series_current_value + 2, new_naming_series_current_value)
+
+	def test_validate_account_party_type(self):
+		jv = make_journal_entry(
+			"_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC",
+			100,
+			"_Test Cost Center - _TC",
+			save=False,
+			submit=False,
+		)
+
+		for row in jv.accounts:
+			row.party_type = "Supplier"
+			break
+
+		jv.save()
+		try:
+			jv.submit()
+		except Exception as e:
+			self.assertEqual(
+				str(e),
+				"Party Type and Party can only be set for Receivable / Payable account_Test Account Cost for Goods Sold - _TC",
+			)
+
+		jv1 = make_journal_entry(
+			"_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC",
+			100,
+			"_Test Cost Center - _TC",
+			save=False,
+			submit=False,
+		)
+
+		for row in jv.accounts:
+			row.party_type = "Customer"
+			break
+
+		jv1.save()
+		try:
+			jv1.submit()
+		except Exception as e:
+			self.assertEqual(
+				str(e),
+				"Party Type and Party can only be set for Receivable / Payable account_Test Account Cost for Goods Sold - _TC",
+			)

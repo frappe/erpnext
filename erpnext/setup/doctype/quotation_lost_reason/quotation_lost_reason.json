@@ -32,7 +32,7 @@
    "table_fieldname": "lost_reasons"
   }
  ],
- "modified": "2023-11-23 19:31:02.743353",
+ "modified": "2024-12-10 08:21:38.280627",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Quotation Lost Reason",
@@ -49,6 +49,22 @@
    "role": "Sales Master Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
+  },
+  {
+   "read": 1,
+   "role": "Maintenance User"
+  },
+  {
+   "read": 1,
+   "role": "Maintenance Manager"
   }
  ],
  "quick_entry": 1,

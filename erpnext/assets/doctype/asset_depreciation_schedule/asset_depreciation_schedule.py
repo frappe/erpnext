@@ -344,7 +344,7 @@ class AssetDepreciationSchedule(Document):
 					date_of_disposal,
 					original_schedule_date=schedule_date,
 				)
-
+				depreciation_amount = flt(depreciation_amount, asset_doc.precision("gross_purchase_amount"))
 				if depreciation_amount > 0:
 					self.add_depr_schedule_row(date_of_disposal, depreciation_amount, n)
 
@@ -430,6 +430,7 @@ class AssetDepreciationSchedule(Document):
 
 			if not depreciation_amount:
 				continue
+			depreciation_amount = flt(depreciation_amount, asset_doc.precision("gross_purchase_amount"))
 			value_after_depreciation = flt(
 				value_after_depreciation - flt(depreciation_amount),
 				asset_doc.precision("gross_purchase_amount"),
@@ -443,6 +444,7 @@ class AssetDepreciationSchedule(Document):
 				depreciation_amount += flt(value_after_depreciation) - flt(
 					row.expected_value_after_useful_life
 				)
+				depreciation_amount = flt(depreciation_amount, asset_doc.precision("gross_purchase_amount"))
 				skip_row = True
 
 			if flt(depreciation_amount, asset_doc.precision("gross_purchase_amount")) > 0:
@@ -517,10 +519,13 @@ class AssetDepreciationSchedule(Document):
 						i - 1
 					].accumulated_depreciation_amount
 				else:
-					accumulated_depreciation = flt(self.opening_accumulated_depreciation)
+					accumulated_depreciation = flt(
+						self.opening_accumulated_depreciation,
+						asset_doc.precision("opening_accumulated_depreciation"),
+					)
 
-			depreciation_amount = flt(d.depreciation_amount, d.precision("depreciation_amount"))
-			value_after_depreciation -= flt(depreciation_amount)
+			value_after_depreciation -= flt(d.depreciation_amount)
+			value_after_depreciation = flt(value_after_depreciation, d.precision("depreciation_amount"))
 
 			# for the last row, if depreciation method = Straight Line
 			if (
@@ -530,12 +535,11 @@ class AssetDepreciationSchedule(Document):
 				and not date_of_return
 				and not row.shift_based
 			):
-				depreciation_amount += flt(
+				d.depreciation_amount += flt(
 					value_after_depreciation - flt(row.expected_value_after_useful_life),
 					d.precision("depreciation_amount"),
 				)
 
-			d.depreciation_amount = depreciation_amount
 			accumulated_depreciation += d.depreciation_amount
 			d.accumulated_depreciation_amount = flt(
 				accumulated_depreciation, d.precision("accumulated_depreciation_amount")

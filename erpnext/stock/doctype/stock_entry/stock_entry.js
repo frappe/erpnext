@@ -371,6 +371,7 @@ frappe.ui.form.on("Stock Entry", {
 				function () {
 					frappe.call({
 						method: "erpnext.stock.doctype.stock_entry.stock_entry.get_expired_batch_items",
+						freeze: true,
 						callback: function (r) {
 							if (!r.exc && r.message) {
 								frm.set_value("items", []);

@@ -25,6 +25,14 @@ erpnext.buying = {
 					};
 				});
 
+				this.frm.set_query("project", function (doc) {
+					return {
+						filters: {
+							company: doc.company,
+						},
+					};
+				});
+
 				if (this.frm.doc.__islocal
 					&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
 
@@ -142,6 +150,18 @@ erpnext.buying = {
 				var me = this;
 				erpnext.utils.get_party_details(this.frm, null, null, function(){
 					me.apply_price_list();
+				});
+			}
+
+			company(){
+				if(!frappe.meta.has_field(this.frm.doc.doctype, "billing_address")) return;
+
+				frappe.call({
+					method: "erpnext.setup.doctype.company.company.get_default_company_address",
+					args: { name: this.frm.doc.company, existing_address:this.frm.doc.billing_address },
+					callback: (r) => {
+						this.frm.set_value("billing_address", r.message || "");
+					},
 				});
 			}
 

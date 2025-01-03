@@ -867,27 +867,40 @@ def make_inter_company_sales_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_subcontracting_order(source_name, target_doc=None, save=False, submit=False, notify=False):
-	target_doc = get_mapped_subcontracting_order(source_name, target_doc)
+	if not is_po_fully_subcontracted(source_name):
+		target_doc = get_mapped_subcontracting_order(source_name, target_doc)
 
-	if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
-		target_doc.save()
+		if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
+			target_doc.save()
 
-		if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
-			try:
-				target_doc.submit()
-			except Exception as e:
-				target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+				try:
+					target_doc.submit()
+				except Exception as e:
+					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
 
-		if notify:
-			frappe.msgprint(
-				_("Subcontracting Order {0} created.").format(
-					get_link_to_form(target_doc.doctype, target_doc.name)
-				),
-				indicator="green",
-				alert=True,
-			)
+			if notify:
+				frappe.msgprint(
+					_("Subcontracting Order {0} created.").format(
+						get_link_to_form(target_doc.doctype, target_doc.name)
+					),
+					indicator="green",
+					alert=True,
+				)
 
-	return target_doc
+		return target_doc
+	else:
+		frappe.throw(_("This PO has been fully subcontracted."))
+
+
+def is_po_fully_subcontracted(po_name):
+	table = frappe.qb.DocType("Purchase Order Item")
+	query = (
+		frappe.qb.from_(table)
+		.select(table.name)
+		.where((table.parent == po_name) & (table.qty != table.sco_qty))
+	)
+	return not query.run(as_dict=True)
 
 
 def get_mapped_subcontracting_order(source_name, target_doc=None):
@@ -931,7 +944,8 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 					"material_request": "material_request",
 					"material_request_item": "material_request_item",
 				},
-				"field_no_map": [],
+				"field_no_map": ["qty", "fg_item_qty", "amount"],
+				"condition": lambda item: item.qty != item.sco_qty,
 			},
 		},
 		target_doc,
@@ -939,12 +953,3 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 	)
 
 	return target_doc
-
-
-@frappe.whitelist()
-def is_subcontracting_order_created(po_name) -> bool:
-	return (
-		True
-		if frappe.db.exists("Subcontracting Order", {"purchase_order": po_name, "docstatus": ["=", 1]})
-		else False
-	)

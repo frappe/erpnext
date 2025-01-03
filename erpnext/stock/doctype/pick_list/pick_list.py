@@ -1247,6 +1247,7 @@ def create_stock_entry(pick_list):
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.pick_list = pick_list.get("name")
 	stock_entry.purpose = pick_list.get("purpose")
+	stock_entry.company = pick_list.get("company")
 	stock_entry.set_stock_entry_type()
 
 	if pick_list.get("work_order"):

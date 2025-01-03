@@ -101,7 +101,7 @@
    "fieldname": "rate",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Rate",
+   "label": "Tax Rate",
    "oldfieldname": "rate",
    "oldfieldtype": "Currency"
   },

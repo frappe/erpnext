@@ -350,7 +350,7 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 			gl_entries_by_account,
 			accounts_by_name,
 			accounts,
-			ignore_closing_entries=False,
+			ignore_closing_entries=ignore_closing_entries,
 			root_type=root_type,
 		)
 

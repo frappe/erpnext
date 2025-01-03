@@ -318,7 +318,7 @@ def get_columns(additional_table_columns, filters):
 			"width": 100,
 		},
 		{
-			"label": _("Rate"),
+			"label": _("Tax Rate"),
 			"fieldname": "rate",
 			"fieldtype": "Float",
 			"options": "currency",

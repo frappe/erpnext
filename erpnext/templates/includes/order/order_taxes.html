@@ -12,14 +12,14 @@
 {% endif %}
 
 {% for d in doc.taxes %}
-	{% if d.base_tax_amount %}
+	{% if d.tax_amount %}
 		<div class="order-taxes w-100 mt-5">
 			<div class="col-4 d-flex  border-btm pb-5">
 				<div class="item-grand-total col-8">
 					{{ d.description }}
 				</div>
 				<div class="item-grand-total col-4 text-right pr-0">
-					{{ d.get_formatted("base_tax_amount") }}
+					{{ d.get_formatted("tax_amount") }}
 				</div>
 			</div>
 		</div>

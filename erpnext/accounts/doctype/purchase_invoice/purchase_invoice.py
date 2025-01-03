@@ -1677,7 +1677,12 @@ class PurchaseInvoice(BuyingController):
 
 				if pi:
 					pi = pi[0][0]
-					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}").format(pi))
+
+					frappe.throw(
+						_("Supplier Invoice No exists in Purchase Invoice {0}").format(
+							get_link_to_form("Purchase Invoice", pi)
+						)
+					)
 
 	def update_billing_status_in_pr(self, update_modified=True):
 		if self.is_return and not self.update_billed_amount_in_purchase_receipt:

@@ -222,7 +222,6 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock = allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
-	sle.set_posting_datetime()
 	sle.submit()
 
 	# Added to handle the case when the stock ledger entry is created from the repostig
@@ -938,7 +937,7 @@ class update_entries_after:
 				# else it remains the same as that of previous entry
 				self.wh_data.valuation_rate = new_stock_value / new_stock_qty
 
-		if not self.wh_data.valuation_rate and sle.voucher_detail_no:
+		if self.wh_data.valuation_rate is None and sle.voucher_detail_no:
 			allow_zero_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
 			if not allow_zero_rate:
 				self.wh_data.valuation_rate = self.get_fallback_rate(sle)
@@ -988,18 +987,23 @@ class update_entries_after:
 		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
 			return
 
-		doc = frappe.get_cached_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
-
-		doc.set_incoming_rate(save=True, allow_negative_stock=self.allow_negative_stock)
-		doc.calculate_qty_and_amount(save=True)
+		if self.args.get("sle_id") and sle.actual_qty < 0:
+			doc = frappe.db.get_value(
+				"Serial and Batch Bundle",
+				sle.serial_and_batch_bundle,
+				["total_amount", "total_qty"],
+				as_dict=1,
+			)
+		else:
+			doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
+			doc.set_incoming_rate(save=True, allow_negative_stock=self.allow_negative_stock)
+			doc.calculate_qty_and_amount(save=True)
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
-
-		precision = doc.precision("total_qty")
-		self.wh_data.qty_after_transaction += flt(doc.total_qty, precision)
-		if flt(self.wh_data.qty_after_transaction, precision):
-			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, precision) / flt(
-				self.wh_data.qty_after_transaction, precision
+		self.wh_data.qty_after_transaction += flt(doc.total_qty, self.flt_precision)
+		if flt(self.wh_data.qty_after_transaction, self.flt_precision):
+			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, self.flt_precision) / flt(
+				self.wh_data.qty_after_transaction, self.flt_precision
 			)
 
 	def update_valuation_rate_in_serial_and_batch_bundle(self, sle, valuation_rate):
@@ -1566,7 +1570,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			and (
 				posting_datetime {operator} %(posting_datetime)s
 			)
-		order by posting_date desc, posting_time desc, creation desc
+		order by posting_datetime desc, creation desc
 		limit 1
 		for update""",
 		{
@@ -1660,7 +1664,7 @@ def get_stock_ledger_entries(
 		where item_code = %(item_code)s
 		and is_cancelled = 0
 		{conditions}
-		order by posting_date {order}, posting_time {order}, creation {order}
+		order by posting_datetime {order}, creation {order}
 		{limit} {for_update}""".format(
 			conditions=conditions,
 			limit=limit or "",
@@ -1782,7 +1786,7 @@ def get_valuation_rate(
 			AND valuation_rate >= 0
 			AND is_cancelled = 0
 			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_date desc, posting_time desc, name desc limit 1""",
+		order by posting_datetime desc, creation desc limit 1""",
 		(item_code, warehouse, voucher_no, voucher_type),
 	):
 		return flt(last_valuation_rate[0][0])
@@ -2033,7 +2037,7 @@ def get_future_sle_with_negative_qty(sle_args):
 			and posting_datetime >= %(posting_datetime)s
 			and is_cancelled = 0
 			and qty_after_transaction < 0
-		order by posting_date asc, posting_time asc
+		order by posting_datetime asc, creation asc
 		limit 1
 	""",
 		sle_args,
@@ -2047,14 +2051,14 @@ def get_future_sle_with_negative_batch_qty(sle_args):
 		with batch_ledger as (
 			select
 				posting_date, posting_time, posting_datetime, voucher_type, voucher_no,
-				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
+				sum(actual_qty) over (order by posting_datetime, creation) as cumulative_total
 			from `tabStock Ledger Entry`
 			where
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and batch_no=%(batch_no)s
 				and is_cancelled = 0
-			order by posting_date, posting_time, creation
+			order by posting_datetime, creation
 		)
 		select * from batch_ledger
 		where

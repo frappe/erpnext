@@ -10,6 +10,7 @@ WEBSITE_REPOS = [
 
 DOCUMENTATION_DOMAINS = [
 	"docs.erpnext.com",
+	"docs.frappe.io",
 	"frappeframework.com",
 ]
 

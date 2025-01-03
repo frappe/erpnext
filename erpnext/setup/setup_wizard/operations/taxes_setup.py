@@ -292,7 +292,7 @@ def get_or_create_tax_group(company_name, root_type):
 
 	tax_group_account.flags.ignore_links = True
 	tax_group_account.flags.ignore_validate = True
-	tax_group_account.insert(ignore_permissions=True)
+	tax_group_account.insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 	tax_group_name = tax_group_account.name
 

@@ -592,7 +592,10 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 			if tax.valid_from or tax.maximum_net_rate:
 				# In purchase Invoice first preference will be given to supplier invoice date
 				# if supplier date is not present then posting date
-				validation_date = args.get("bill_date") or args.get("transaction_date")
+
+				validation_date = (
+					args.get("bill_date") or args.get("posting_date") or args.get("transaction_date")
+				)
 
 				if getdate(tax.valid_from) <= getdate(validation_date) and is_within_valid_range(args, tax):
 					taxes_with_validity.append(tax)

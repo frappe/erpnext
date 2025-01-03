@@ -15,6 +15,7 @@
   "inspection_type",
   "reference_type",
   "reference_name",
+  "child_row_reference",
   "section_break_7",
   "item_code",
   "item_serial_no",
@@ -238,6 +239,15 @@
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
    "label": "Manual Inspection"
+  },
+  {
+   "fieldname": "child_row_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Child Row Reference",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-search",
@@ -245,7 +255,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-23 11:56:50.282878",
+ "modified": "2024-12-30 19:08:16.611192",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

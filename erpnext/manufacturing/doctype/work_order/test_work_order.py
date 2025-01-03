@@ -7,6 +7,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings, timeout
 from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry as make_stock_entry_from_jc
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	CapacityError,
@@ -504,6 +505,60 @@ class TestWorkOrder(FrappeTestCase):
 		stock_entries.reverse()
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
+
+	def test_work_order_material_transferred_qty_with_process_loss(self):
+		stock_entries = []
+		bom = frappe.get_doc("BOM", {"docstatus": 1, "with_operations": 1, "company": "_Test Company"})
+
+		work_order = make_wo_order_test_record(
+			item=bom.item,
+			qty=2,
+			bom_no=bom.name,
+			source_warehouse="_Test Warehouse - _TC",
+			transfer_material_against="Job Card",
+		)
+
+		self.assertEqual(work_order.qty, 2)
+
+		for row in work_order.required_items:
+			stock_entry_doc = test_stock_entry.make_stock_entry(
+				item_code=row.item_code, target="_Test Warehouse - _TC", qty=row.required_qty, basic_rate=100
+			)
+			stock_entries.append(stock_entry_doc)
+
+		job_cards = frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, order_by="creation asc"
+		)
+
+		for row in job_cards:
+			transfer_entry_1 = make_stock_entry_from_jc(row.name)
+			transfer_entry_1.submit()
+
+			doc = frappe.get_doc("Job Card", row.name)
+			for row in doc.scheduled_time_logs:
+				doc.append(
+					"time_logs",
+					{
+						"from_time": row.from_time,
+						"to_time": row.to_time,
+						"time_in_mins": row.time_in_mins,
+						"completed_qty": 1,
+					},
+				)
+
+			doc.save()
+			doc.submit()
+
+			self.assertEqual(doc.total_completed_qty, 1)
+			self.assertEqual(doc.process_loss_qty, 1)
+
+		work_order.reload()
+
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 2)
+
+		for row in work_order.operations:
+			self.assertEqual(row.completed_qty, 1)
+			self.assertEqual(row.process_loss_qty, 1)
 
 	def test_capcity_planning(self):
 		frappe.db.set_single_value(
@@ -2342,6 +2397,56 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, manufacture_entry.save)
 		manufacture_entry.reload()
+		manufacture_entry.submit()
+
+		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)
+
+	def test_components_as_per_bom_for_manufacture_entry(self):
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
+
+		fg_item = "Test FG Item For Component Validation 1"
+		source_warehouse = "Stores - _TC"
+		raw_materials = ["Test Component Validation RM Item 11", "Test Component Validation RM Item 12"]
+
+		make_item(fg_item, {"is_stock_item": 1})
+		for item in raw_materials:
+			make_item(item, {"is_stock_item": 1})
+			test_stock_entry.make_stock_entry(
+				item_code=item,
+				target=source_warehouse,
+				qty=10,
+				basic_rate=100,
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=raw_materials)
+
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=10,
+			source_warehouse=source_warehouse,
+		)
+
+		transfer_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		transfer_entry.save()
+		transfer_entry.remove(transfer_entry.items[0])
+
+		self.assertRaises(frappe.ValidationError, transfer_entry.save)
+
+		transfer_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		transfer_entry.save()
+		transfer_entry.submit()
+
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		manufacture_entry.save()
+
+		manufacture_entry.remove(manufacture_entry.items[0])
+
+		self.assertRaises(frappe.ValidationError, manufacture_entry.save)
+		manufacture_entry.delete()
+
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		manufacture_entry.save()
 		manufacture_entry.submit()
 
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)

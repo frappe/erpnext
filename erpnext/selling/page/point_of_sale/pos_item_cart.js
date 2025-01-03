@@ -390,6 +390,14 @@ erpnext.PointOfSale.ItemCart = class {
 				input_class: "input-xs",
 				onchange: function () {
 					this.value = flt(this.value);
+					if (this.value > 100) {
+						frappe.msgprint({
+							title: __("Invalid Discount"),
+							indicator: "red",
+							message: __("Discount cannot be greater than 100%."),
+						});
+						this.value = 0;
+					}
 					frappe.model.set_value(
 						frm.doc.doctype,
 						frm.doc.name,

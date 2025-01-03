@@ -247,14 +247,14 @@ def get_tax_row_for_tds(tax_details, tax_amount):
 	}
 
 
-def get_lower_deduction_certificate(company, tax_details, pan_no):
+def get_lower_deduction_certificate(company, posting_date, tax_details, pan_no):
 	ldc_name = frappe.db.get_value(
 		"Lower Deduction Certificate",
 		{
 			"pan_no": pan_no,
 			"tax_withholding_category": tax_details.tax_withholding_category,
-			"valid_from": (">=", tax_details.from_date),
-			"valid_upto": ("<=", tax_details.to_date),
+			"valid_from": ("<=", posting_date),
+			"valid_upto": (">=", posting_date),
 			"company": company,
 		},
 		"name",
@@ -302,7 +302,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	tax_amount = 0
 
 	if party_type == "Supplier":
-		ldc = get_lower_deduction_certificate(inv.company, tax_details, pan_no)
+		ldc = get_lower_deduction_certificate(inv.company, posting_date, tax_details, pan_no)
 		if tax_deducted:
 			net_total = inv.tax_withholding_net_total
 			if ldc:
@@ -539,7 +539,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 	)
 
 	supp_credit_amt = supp_jv_credit_amt
-	supp_credit_amt += inv.tax_withholding_net_total
+	supp_credit_amt += inv.get("tax_withholding_net_total", 0)
 
 	for type in payment_entry_amounts:
 		if type.payment_type == "Pay":
@@ -551,9 +551,9 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 	cumulative_threshold = tax_details.get("cumulative_threshold", 0)
 
 	if inv.doctype != "Payment Entry":
-		tax_withholding_net_total = inv.base_tax_withholding_net_total
+		tax_withholding_net_total = inv.get("base_tax_withholding_net_total", 0)
 	else:
-		tax_withholding_net_total = inv.tax_withholding_net_total
+		tax_withholding_net_total = inv.get("tax_withholding_net_total", 0)
 
 	if (threshold and tax_withholding_net_total >= threshold) or (
 		cumulative_threshold and (supp_credit_amt + supp_inv_credit_amt) >= cumulative_threshold

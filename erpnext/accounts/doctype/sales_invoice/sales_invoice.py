@@ -507,7 +507,7 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_pos_paid_amount(self):
-		if len(self.payments) == 0 and self.is_pos:
+		if len(self.payments) == 0 and self.is_pos and flt(self.grand_total) > 0:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def check_if_consolidated_invoice(self):
@@ -1002,9 +1002,9 @@ class SalesInvoice(SellingController):
 	def validate_pos(self):
 		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
-			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(invoice_total) > 1.0 / (
-				10.0 ** (self.precision("grand_total") + 1.0)
-			):
+			if abs(flt(self.paid_amount)) + abs(flt(self.write_off_amount)) - abs(
+				flt(invoice_total)
+			) > 1.0 / (10.0 ** (self.precision("grand_total") + 1.0)):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_warehouse(self):

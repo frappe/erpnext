@@ -944,8 +944,9 @@ class JobCard(Document):
 			if doc.transfer_material_against == "Job Card" and not doc.skip_transfer:
 				min_qty = []
 				for d in doc.operations:
-					if d.completed_qty:
-						min_qty.append(d.completed_qty)
+					completed_qty = flt(d.completed_qty) + flt(d.process_loss_qty)
+					if completed_qty:
+						min_qty.append(completed_qty)
 					else:
 						min_qty = []
 						break

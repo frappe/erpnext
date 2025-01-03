@@ -128,7 +128,7 @@
    "description": "Rate at which this tax is applied",
    "fieldname": "tax_rate",
    "fieldtype": "Float",
-   "label": "Rate",
+   "label": "Tax Rate",
    "oldfieldname": "tax_rate",
    "oldfieldtype": "Currency"
   },

@@ -106,7 +106,7 @@ def get_data(filters, columns):
 
 	for label in labels:
 		work = {}
-		work["Status"] = label
+		work["Status"] = _(label)
 		for _dummy, end_date in ranges:
 			period = get_period(end_date, filters)
 			if periodic_data.get(label).get(period):

@@ -154,10 +154,16 @@ class BankTransaction(Document):
 		"""
 		remaining_amount = self.unallocated_amount
 		to_remove = []
+		payment_entry_docs = [(pe.payment_document, pe.payment_entry) for pe in self.payment_entries]
+		pe_bt_allocations = get_total_allocated_amount(payment_entry_docs)
+
 		for payment_entry in self.payment_entries:
 			if payment_entry.allocated_amount == 0.0:
 				unallocated_amount, should_clear, latest_transaction = get_clearance_details(
-					self, payment_entry
+					self,
+					payment_entry,
+					pe_bt_allocations.get((payment_entry.payment_document, payment_entry.payment_entry))
+					or [],
 				)
 
 				if 0.0 == unallocated_amount:
@@ -232,7 +238,7 @@ def get_doctypes_for_bank_reconciliation():
 	return frappe.get_hooks("bank_reconciliation_doctypes")
 
 
-def get_clearance_details(transaction, payment_entry):
+def get_clearance_details(transaction, payment_entry, bt_allocations):
 	"""
 	There should only be one bank gle for a voucher.
 	Could be none for a Bank Transaction.
@@ -241,7 +247,6 @@ def get_clearance_details(transaction, payment_entry):
 	"""
 	gl_bank_account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
 	gles = get_related_bank_gl_entries(payment_entry.payment_document, payment_entry.payment_entry)
-	bt_allocations = get_total_allocated_amount(payment_entry.payment_document, payment_entry.payment_entry)
 
 	unallocated_amount = min(
 		transaction.unallocated_amount,
@@ -294,44 +299,52 @@ def get_related_bank_gl_entries(doctype, docname):
 	)
 
 
-def get_total_allocated_amount(doctype, docname):
+def get_total_allocated_amount(docs):
 	"""
 	Gets the sum of allocations for a voucher on each bank GL account
 	along with the latest bank transaction name & date
 	NOTE: query may also include just saved vouchers/payments but with zero allocated_amount
 	"""
+	if not docs:
+		return {}
+
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-using-db-sql
 	result = frappe.db.sql(
 		"""
-		SELECT total, latest_name, latest_date, gl_account FROM (
+		SELECT total, latest_name, latest_date, gl_account, payment_document, payment_entry FROM (
 			SELECT
 				ROW_NUMBER() OVER w AS rownum,
-				SUM(btp.allocated_amount) OVER(PARTITION BY ba.account) AS total,
+				SUM(btp.allocated_amount) OVER(PARTITION BY ba.account, btp.payment_document, btp.payment_entry) AS total,
 				FIRST_VALUE(bt.name) OVER w AS latest_name,
 				FIRST_VALUE(bt.date) OVER w AS latest_date,
-				ba.account AS gl_account
+				ba.account AS gl_account,
+				btp.payment_document,
+				btp.payment_entry
 			FROM
 				`tabBank Transaction Payments` btp
 			LEFT JOIN `tabBank Transaction` bt ON bt.name=btp.parent
 			LEFT JOIN `tabBank Account` ba ON ba.name=bt.bank_account
 			WHERE
-				btp.payment_document = %(doctype)s
-				AND btp.payment_entry = %(docname)s
+				(btp.payment_document, btp.payment_entry) IN %(docs)s
 				AND bt.docstatus = 1
-			WINDOW w AS (PARTITION BY ba.account ORDER BY bt.date desc)
+			WINDOW w AS (PARTITION BY ba.account, btp.payment_document, btp.payment_entry ORDER BY bt.date DESC)
 		) temp
 		WHERE
 			rownum = 1
 		""",
-		dict(doctype=doctype, docname=docname),
+		dict(docs=docs),
 		as_dict=True,
 	)
+
+	payment_allocation_details = {}
 	for row in result:
 		# Why is this *sometimes* a byte string?
 		if isinstance(row["latest_name"], bytes):
 			row["latest_name"] = row["latest_name"].decode()
 		row["latest_date"] = frappe.utils.getdate(row["latest_date"])
-	return result
+		payment_allocation_details.setdefault((row["payment_document"], row["payment_entry"]), []).append(row)
+
+	return payment_allocation_details
 
 
 def get_paid_amount(payment_entry, currency, gl_bank_account):

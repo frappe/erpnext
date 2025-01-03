@@ -400,11 +400,15 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 									);
 								}
 							} else {
-								cur_frm.add_custom_button(
-									__("Subcontracting Order"),
-									this.make_subcontracting_order,
-									__("Create")
-								);
+								if (!doc.items.every((item) => item.qty == item.sco_qty)) {
+									this.frm.add_custom_button(
+										__("Subcontracting Order"),
+										() => {
+											me.make_subcontracting_order();
+										},
+										__("Create")
+									);
+								}
 							}
 						}
 					}

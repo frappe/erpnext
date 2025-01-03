@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import date_diff, get_datetime, now
 
 
 class BOMUpdateTool(Document):
@@ -50,11 +51,19 @@ def auto_update_latest_price_in_all_boms() -> None:
 	if frappe.db.get_single_value("Manufacturing Settings", "update_bom_costs_automatically"):
 		wip_log = frappe.get_all(
 			"BOM Update Log",
-			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress"]]},
+			fields=["creation", "status"],
+			filters={"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress"]]},
 			limit_page_length=1,
+			order_by="creation desc",
 		)
-		if not wip_log:
+
+		if not wip_log or is_older_log(wip_log[0]):
 			create_bom_update_log(update_type="Update Cost")
+
+
+def is_older_log(log: dict) -> bool:
+	no_of_days = date_diff(get_datetime(now()), get_datetime(log.creation))
+	return no_of_days > 10
 
 
 def create_bom_update_log(

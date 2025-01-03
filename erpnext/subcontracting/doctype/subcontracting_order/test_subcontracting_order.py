@@ -40,12 +40,6 @@ class TestSubcontractingOrder(FrappeTestCase):
 		make_service_items()
 		make_bom_for_subcontracted_items()
 
-	def test_populate_items_table(self):
-		sco = get_subcontracting_order()
-		sco.items = None
-		sco.populate_items_table()
-		self.assertEqual(len(sco.service_items), len(sco.items))
-
 	def test_set_missing_values(self):
 		sco = get_subcontracting_order()
 		before = {sco.total_qty, sco.total, sco.total_additional_costs}

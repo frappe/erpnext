@@ -1838,6 +1838,52 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
+	def test_adjust_incoming_rate_for_rejected_item(self):
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+
+		# Cost of Item is zero in Purchase Receipt
+		pr = make_purchase_receipt(qty=1, rejected_qty=1, rate=0)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 0)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.qty = 1
+			row.rate = 150
+
+		pi.save()
+		pi.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "warehouse": pi.items[0].warehouse},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 150)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"warehouse": pi.items[0].rejected_warehouse,
+			},
+			"stock_value_difference",
+		)
+
+		self.assertFalse(stock_value_difference)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+
 	def test_item_less_defaults(self):
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.supplier = "_Test Supplier"

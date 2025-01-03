@@ -70,10 +70,10 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 
 				rate = tax_rate_map.get(tax_withholding_category)
 			if net_total_map.get((voucher_type, name)):
-				if voucher_type == "Journal Entry":
+				if voucher_type == "Journal Entry" and tax_amount and rate:
 					# back calcalute total amount from rate and tax_amount
-					if rate:
-						total_amount = grand_total = base_total = tax_amount / (rate / 100)
+					base_total = min(tax_amount / (rate / 100), net_total_map.get((voucher_type, name))[0])
+					total_amount = grand_total = base_total
 				elif voucher_type == "Purchase Invoice":
 					total_amount, grand_total, base_total, bill_no, bill_date = net_total_map.get(
 						(voucher_type, name)
@@ -405,7 +405,7 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 			"paid_amount_after_tax",
 			"base_paid_amount",
 		],
-		"Journal Entry": ["total_amount"],
+		"Journal Entry": ["tax_withholding_category", "total_debit"],
 	}
 
 	entries = frappe.get_all(
@@ -427,7 +427,7 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 		elif doctype == "Payment Entry":
 			value = [entry.paid_amount, entry.paid_amount_after_tax, entry.base_paid_amount]
 		else:
-			value = [entry.total_amount] * 3
+			value = [entry.total_debit] * 3
 
 		net_total_map[(doctype, entry.name)] = value
 

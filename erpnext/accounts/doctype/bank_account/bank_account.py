@@ -48,7 +48,7 @@ class BankAccount(Document):
 		self.name = self.account_name + " - " + self.bank
 
 	def on_trash(self):
-		delete_contact_and_address("BankAccount", self.name)
+		delete_contact_and_address("Bank Account", self.name)
 
 	def validate(self):
 		self.validate_company()

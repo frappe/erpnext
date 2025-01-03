@@ -51,7 +51,8 @@
   "project",
   "section_break_34",
   "purchase_order_item",
-  "page_break"
+  "page_break",
+  "sc_conversion_factor"
  ],
  "fields": [
   {
@@ -144,8 +145,8 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity",
+   "non_negative": 1,
    "print_width": "60px",
-   "read_only": 1,
    "reqd": 1,
    "width": "60px"
   },
@@ -381,13 +382,20 @@
    "no_copy": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "sc_conversion_factor",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "SC Conversion Factor",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-12-06 15:23:05.252346",
+ "modified": "2024-12-13 13:35:28.935898",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Item",

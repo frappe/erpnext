@@ -124,6 +124,7 @@
    "options": "DocType",
    "print_width": "150px",
    "read_only": 1,
+   "search_index": 1,
    "width": "150px"
   },
   {
@@ -362,7 +363,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-27 09:28:03.961443",
+ "modified": "2024-12-23 18:03:05.171023",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

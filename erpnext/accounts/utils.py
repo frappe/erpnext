@@ -130,7 +130,9 @@ def get_fiscal_years(
 			else:
 				return ((fy.name, fy.year_start_date, fy.year_end_date),)
 
-	error_msg = _("""{0} {1} is not in any active Fiscal Year""").format(label, formatdate(transaction_date))
+	error_msg = _("""{0} {1} is not in any active Fiscal Year""").format(
+		_(label), formatdate(transaction_date)
+	)
 	if company:
 		error_msg = _("""{0} for {1}""").format(error_msg, frappe.bold(company))
 

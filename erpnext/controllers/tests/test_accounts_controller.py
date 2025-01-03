@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+from datetime import datetime
+
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
@@ -1979,3 +1981,95 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(len(exc_je_for_adv), 0)
 
 		self.remove_advance_accounts_from_party_master()
+
+	def test_difference_posting_date_in_pi_and_si(self):
+		self.setup_advance_accounts_in_party_master()
+
+		# create payment entry for customer
+		adv = self.create_payment_entry(amount=1, source_exc_rate=83)
+		adv.save()
+		self.assertEqual(adv.paid_from, self.advance_received_usd)
+		adv.submit()
+		adv.reload()
+
+		# create sales invoice with advance received
+		si = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1, do_not_submit=True)
+		si.debit_to = self.debtors_usd
+		si.append(
+			"advances",
+			{
+				"reference_type": adv.doctype,
+				"reference_name": adv.name,
+				"remarks": "Amount INR 1 received from _Test MC Customer USD\nTransaction reference no Test001 dated 2024-12-19",
+				"advance_amount": 1.0,
+				"allocated_amount": 1.0,
+				"exchange_gain_loss": 3.0,
+				"ref_exchange_rate": 83.0,
+				"difference_posting_date": add_days(nowdate(), -2),
+			},
+		)
+		si.save().submit()
+
+		# exc Gain/Loss journal should've been creatad
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_adv)
+
+		# check jv created with difference_posting_date in sales invoice
+		jv = frappe.get_doc("Journal Entry", exc_je_for_si[0].parent)
+		sales_invoice = frappe.get_doc("Sales Invoice", si.name)
+		self.assertEqual(sales_invoice.advances[0].difference_posting_date, jv.posting_date)
+
+		# create payment entry for supplier
+		usd_amount = 1
+		inr_amount = 85
+		exc_rate = 85
+		adv = create_payment_entry(
+			company=self.company,
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			paid_from=self.cash,
+			paid_to=self.advance_paid_usd,
+			paid_amount=inr_amount,
+		)
+		adv.source_exchange_rate = 1
+		adv.target_exchange_rate = exc_rate
+		adv.received_amount = usd_amount
+		adv.paid_amount = exc_rate * usd_amount
+		adv.posting_date = nowdate()
+		adv.save()
+		self.assertEqual(adv.paid_to, self.advance_paid_usd)
+		adv.submit()
+
+		# create purchase invoice with advance paid
+		pi = self.create_purchase_invoice(qty=1, conversion_rate=80, rate=1, do_not_submit=True)
+		pi.append(
+			"advances",
+			{
+				"reference_type": adv.doctype,
+				"reference_name": adv.name,
+				"remarks": "Amount INR 1 paid to _Test MC Supplier USD\nTransaction reference no Test001 dated 2024-12-20",
+				"advance_amount": 1.0,
+				"allocated_amount": 1.0,
+				"exchange_gain_loss": 5.0,
+				"ref_exchange_rate": 85.0,
+				"difference_posting_date": add_days(nowdate(), -2),
+			},
+		)
+		pi.save().submit()
+		self.assertEqual(pi.credit_to, self.creditors_usd)
+
+		# exc Gain/Loss journal should've been creatad
+		exc_je_for_pi = self.get_journals_for(pi.doctype, pi.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_pi), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_pi, exc_je_for_adv)
+
+		# check jv created with difference_posting_date in purchase invoice
+		journal_voucher = frappe.get_doc("Journal Entry", exc_je_for_pi[0].parent)
+		purchase_invoice = frappe.get_doc("Purchase Invoice", pi.name)
+		self.assertEqual(purchase_invoice.advances[0].difference_posting_date, journal_voucher.posting_date)

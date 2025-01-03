@@ -80,6 +80,7 @@ class PurchaseOrderItem(Document):
 		sales_order_item: DF.Data | None
 		sales_order_packed_item: DF.Data | None
 		schedule_date: DF.Date
+		sco_qty: DF.Float
 		stock_qty: DF.Float
 		stock_uom: DF.Link
 		stock_uom_rate: DF.Currency

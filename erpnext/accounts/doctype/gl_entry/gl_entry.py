@@ -13,7 +13,11 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.party import validate_party_frozen_disabled, validate_party_gle_currency
+from erpnext.accounts.party import (
+	validate_account_party_type,
+	validate_party_frozen_disabled,
+	validate_party_gle_currency,
+)
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
@@ -268,6 +272,7 @@ class GLEntry(Document):
 
 	def validate_party(self):
 		validate_party_frozen_disabled(self.party_type, self.party)
+		validate_account_party_type(self)
 
 	def validate_currency(self):
 		company_currency = erpnext.get_company_currency(self.company)

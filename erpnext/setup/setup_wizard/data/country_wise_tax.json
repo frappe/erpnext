@@ -4500,9 +4500,200 @@
 	},
 
 	"Sweden": {
-		"Sweden Tax": {
-			"account_name": "VAT",
-			"tax_rate": 25.00
+		"tax_categories": [],
+		"chart_of_accounts": {
+			"*": {
+				"sales_tax_templates": [
+					{
+						"title": "Försäljning Moms 25%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Utgående moms, 25 %",
+									"account_number": "2610",
+									"tax_rate": 25.00
+								},
+								"description": "Moms 25%",
+								"rate": 25.00
+							}
+						]
+					},
+					{
+						"title": "Försäljning Moms 12%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Utgående moms, 12 %",
+									"account_number": "2620",
+									"tax_rate": 12.00
+								},
+								"description": "Moms 12%",
+								"rate": 12.00
+							}
+						]
+					},
+					{
+						"title": "Försäljning Moms 6%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Utgående moms, 6 %",
+									"account_number": "2630",
+									"tax_rate": 6.00
+								},
+								"description": "Moms 6%",
+								"rate": 6.00
+							}
+						]
+					},
+					{
+						"title": "Försäljning Moms 0%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Utgående moms, 6 %",
+									"account_number": "2630",
+									"tax_rate": 0.00
+								},
+								"description": "Moms 0%",
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Inköp Moms 25%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Ingående moms",
+									"account_number": "2640",
+									"root_type": "Liability",
+									"tax_rate": 25.00
+								},
+								"description": "Moms 25%",
+								"rate": 25.00
+							}
+						]
+					},
+					{
+						"title": "Inköp Moms 12%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Ingående moms",
+									"account_number": "2640",
+									"root_type": "Liability",
+									"tax_rate": 12.00
+								},
+								"description": "Moms 12%",
+								"rate": 12.00
+							}
+						]
+					},
+					{
+						"title": "Inköp Moms 6%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Ingående moms",
+									"account_number": "2640",
+									"root_type": "Liability",
+									"tax_rate": 6.00
+								},
+								"description": "Moms 6%",
+								"rate": 6.00
+							}
+						]
+					},
+					{
+						"title": "Inköp Moms 0%",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Ingående moms",
+									"account_number": "2640",
+									"root_type": "Liability",
+									"tax_rate": 0.00
+								},
+								"description": "Moms 0%",
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "Artikel Moms 25%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Utgående moms, 25 %",
+									"account_number": "2610",
+									"root_type": "Liability",
+									"tax_rate": 25.00
+								},
+								"description": "Moms 25%",
+								"tax_rate": 25.00
+							}
+						]
+					},
+					{
+						"title": "Artikel Moms 12%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Utgående moms, 12 %",
+									"account_number": "2620",
+									"root_type": "Liability",
+									"tax_rate": 12.00
+								},
+								"description": "Moms 12%",
+								"tax_rate": 12.00
+							}
+						]
+					},
+					{
+						"title": "Artikel Moms 6%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Utgående moms, 6 %",
+									"account_number": "2630",
+									"root_type": "Liability",
+									"tax_rate": 6.00
+								},
+								"description": "Moms 6%",
+								"tax_rate": 6.00
+							}
+						]
+					},
+					{
+						"title": "Artikel Moms 0%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Utgående moms, 0 %",
+									"account_number": "2611",
+									"root_type": "Liability",
+									"tax_rate": 0.00
+								},
+								"description": "Moms 0%",
+								"tax_rate": 0.00
+							}
+						]
+					}
+				]
+			}
 		}
 	},
 

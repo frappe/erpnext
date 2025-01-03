@@ -65,7 +65,7 @@ class ClosingStockBalance(Document):
 				& (
 					(table.from_date.between(self.from_date, self.to_date))
 					| (table.to_date.between(self.from_date, self.to_date))
-					| ((table.from_date >= self.from_date) & (table.to_date >= self.to_date))
+					| ((self.from_date >= table.from_date) & (table.from_date >= self.to_date))
 				)
 			)
 		)

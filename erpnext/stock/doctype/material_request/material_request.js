@@ -322,7 +322,7 @@ frappe.ui.form.on("Material Request", {
 					default: 1,
 				},
 			],
-			primary_action_label: "Get Items",
+			primary_action_label: __("Get Items"),
 			primary_action(values) {
 				if (!values) return;
 				values["company"] = frm.doc.company;

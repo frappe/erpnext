@@ -17,7 +17,7 @@ frappe.ready(function() {
 
 		if($("#footer-subscribe-email").val() && validate_email($("#footer-subscribe-email").val())) {
 			$("#footer-subscribe-email").attr('disabled', true);
-			$("#footer-subscribe-button").html("Sending...")
+			$("#footer-subscribe-button").html(__("Sending..."))
 				.attr("disabled", true);
 			erpnext.subscribe_to_newsletter({
 				email: $("#footer-subscribe-email").val(),

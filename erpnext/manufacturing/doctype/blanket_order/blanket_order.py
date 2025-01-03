@@ -31,6 +31,8 @@ class BlanketOrder(Document):
 		from_date: DF.Date
 		items: DF.Table[BlanketOrderItem]
 		naming_series: DF.Literal["MFG-BLR-.YYYY.-"]
+		order_date: DF.Date | None
+		order_no: DF.Data | None
 		supplier: DF.Link | None
 		supplier_name: DF.Data | None
 		tc_name: DF.Link | None

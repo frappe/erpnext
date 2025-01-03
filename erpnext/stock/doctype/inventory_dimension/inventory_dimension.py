@@ -237,8 +237,13 @@ class InventoryDimension(Document):
 			custom_fields["Stock Ledger Entry"] = dimension_field
 
 		filter_custom_fields = {}
+		ignore_doctypes = ["Serial and Batch Bundle", "Serial and Batch Entry", "Pick List Item"]
+
 		if custom_fields:
 			for doctype, fields in custom_fields.items():
+				if doctype in ignore_doctypes:
+					continue
+
 				if isinstance(fields, dict):
 					fields = [fields]
 

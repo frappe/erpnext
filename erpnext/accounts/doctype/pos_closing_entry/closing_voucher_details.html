@@ -12,15 +12,15 @@
 								</thead>
 								<tbody>
 									<tr>
-										<td class="text-left font-bold">{{ _('Grand Total') }}</td>
+										<td class="text-left font-bold">{{ _("Grand Total") }}</td>
 										<td class='text-right'> {{ frappe.utils.fmt_money(data.grand_total or '', currency=currency) }}</td>
 									</tr>
 									<tr>
-										<td class="text-left font-bold">{{ _('Net Total') }}</td>
+										<td class="text-left font-bold">{{ _("Net Total") }}</td>
 										<td class='text-right'> {{ frappe.utils.fmt_money(data.net_total or '', currency=currency) }}</td>
 									</tr>
 									<tr>
-										<td class="text-left font-bold">{{ _('Total Quantity') }}</td>
+										<td class="text-left font-bold">{{ _("Total Quantity") }}</td>
 										<td class='text-right'>{{ data.total_quantity or '' }}</td>
 									</tr>
 
@@ -44,7 +44,7 @@
 								<tbody>
 								{% for d in data.payment_reconciliation %}
 									<tr>
-										<td class="text-left">{{ d.mode_of_payment }}</td>
+										<td class="text-left">{{ _(d.mode_of_payment) }}</td>
 										<td class='text-right'> {{ frappe.utils.fmt_money(d.expected_amount - d.opening_amount, currency=currency) }}</td>
 									</tr>
 								{% endfor %}
@@ -63,7 +63,7 @@
 								<thead>
 									<tr>
 										<th class="text-left">{{ _("Account") }}</th>
-										<th class="text-left">{{ _("Rate") }}</th>
+										<th class="text-left">{{ _("Tax Rate") }}</th>
 										<th class="text-right">{{ _("Amount") }}</th>
 									</tr>
 								</thead>
