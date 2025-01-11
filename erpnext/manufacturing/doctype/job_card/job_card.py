@@ -1049,9 +1049,9 @@ class JobCard(Document):
 			order_by="sequence_id, idx",
 		)
 
-		message = "Job Card {}: As per the sequence of the operations in the work order {}".format(
-			bold(self.name), bold(get_link_to_form("Work Order", self.work_order))
-		)
+		# message = "Job Card {}: As per the sequence of the operations in the work order {}".format(
+		# 	bold(self.name), bold(get_link_to_form("Work Order", self.work_order))
+		# )
 
 		for row in data:
 			# if row.status != "Completed" and row.completed_qty < current_operation_qty:
