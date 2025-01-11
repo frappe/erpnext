@@ -1,5 +1,6 @@
 frappe.listview_settings["Asset"] = {
-	add_fields: ["status"],
+	add_fields: ["status", "docstatus"],
+	has_indicator_for_draft: 1,
 	get_indicator: function (doc) {
 		if (doc.status === "Fully Depreciated") {
 			return [__("Fully Depreciated"), "green", "status,=,Fully Depreciated"];
@@ -7,6 +8,8 @@ frappe.listview_settings["Asset"] = {
 			return [__("Partially Depreciated"), "grey", "status,=,Partially Depreciated"];
 		} else if (doc.status === "Sold") {
 			return [__("Sold"), "green", "status,=,Sold"];
+		} else if (doc.status === "Work In Progress") {
+			return [__("Work In Progress"), "orange", "status,=,Work In Progress"];
 		} else if (["Capitalized", "Decapitalized"].includes(doc.status)) {
 			return [__(doc.status), "grey", "status,=," + doc.status];
 		} else if (doc.status === "Scrapped") {
@@ -21,7 +24,7 @@ frappe.listview_settings["Asset"] = {
 			return [__("Receipt"), "green", "status,=,Receipt"];
 		} else if (doc.status === "Submitted") {
 			return [__("Submitted"), "blue", "status,=,Submitted"];
-		} else if (doc.status === "Draft") {
+		} else if (doc.status === "Draft" || doc.docstatus === 0) {
 			return [__("Draft"), "red", "status,=,Draft"];
 		}
 	},

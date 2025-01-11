@@ -638,6 +638,7 @@ class AssetCapitalization(StockController):
 		self.target_fixed_asset_account = get_asset_category_account(
 			"fixed_asset_account", item=self.target_item_code, company=asset_doc.company
 		)
+		asset_doc.set_status("Work In Progress")
 
 		add_asset_activity(
 			asset_doc.name,
@@ -662,8 +663,9 @@ class AssetCapitalization(StockController):
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
 
 		asset_doc = frappe.get_doc("Asset", self.target_asset)
-		asset_doc.gross_purchase_amount = total_target_asset_value
-		asset_doc.purchase_amount = total_target_asset_value
+		asset_doc.gross_purchase_amount += total_target_asset_value
+		asset_doc.purchase_amount += total_target_asset_value
+		asset_doc.set_status("Work In Progress")
 		asset_doc.flags.ignore_validate = True
 		asset_doc.save()
 

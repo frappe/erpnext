@@ -96,6 +96,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_amount, total_amount)
+		self.assertEqual(target_asset.status, "Work In Progress")
 
 		# Test Consumed Asset values
 		self.assertEqual(consumed_asset.db_get("status"), "Capitalized")
@@ -270,6 +271,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_amount, total_amount)
+		self.assertEqual(target_asset.status, "Work In Progress")
 
 		# Test General Ledger Entries
 		expected_gle = {

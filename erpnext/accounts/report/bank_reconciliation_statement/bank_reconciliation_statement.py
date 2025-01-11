@@ -142,7 +142,8 @@ def get_journal_entries(filters):
 		where jvd.parent = jv.name and jv.docstatus=1
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s
 			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s
-			and ifnull(jv.is_opening, 'No') = 'No'""",
+			and ifnull(jv.is_opening, 'No') = 'No'
+			and jv.company = %(company)s """,
 		filters,
 		as_dict=1,
 	)
@@ -163,6 +164,7 @@ def get_payment_entries(filters):
 			(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
 			and posting_date <= %(report_date)s
 			and ifnull(clearance_date, '4000-01-01') > %(report_date)s
+			and company = %(company)s
 	""",
 		filters,
 		as_dict=1,
@@ -181,6 +183,7 @@ def get_pos_entries(filters):
 				sip.account=%(account)s and si.docstatus=1 and sip.parent = si.name
 				and account.name = sip.account and si.posting_date <= %(report_date)s and
 				ifnull(sip.clearance_date, '4000-01-01') > %(report_date)s
+				and si.company = %(company)s
 			order by
 				si.posting_date ASC, si.name DESC
 		""",

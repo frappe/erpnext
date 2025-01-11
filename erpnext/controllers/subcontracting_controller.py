@@ -1257,6 +1257,7 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 			"item_code": row.item_details["rm_item_code"],
 			"subcontracted_item": row.item_details["main_item_code"],
 			"serial_no": "\n".join(row.serial_no) if row.serial_no else "",
+			"use_serial_batch_fields": 1,
 		}
 	)
 
@@ -1297,10 +1298,13 @@ def make_return_stock_entry_for_subcontract(
 		if not value.qty:
 			continue
 
+		if item_details := value.get("item_details"):
+			item_details["serial_and_batch_bundle"] = None
+
 		if value.batch_no:
 			for batch_no, qty in value.batch_no.items():
 				if qty > 0:
-					add_items_in_ste(ste_doc, value, value.qty, rm_details, rm_detail_field, batch_no)
+					add_items_in_ste(ste_doc, value, qty, rm_details, rm_detail_field, batch_no)
 		else:
 			add_items_in_ste(ste_doc, value, value.qty, rm_details, rm_detail_field)
 

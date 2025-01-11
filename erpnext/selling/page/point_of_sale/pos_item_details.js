@@ -210,10 +210,21 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	make_auto_serial_selection_btn(item) {
 		if (item.has_serial_no || item.has_batch_no) {
-			const label = item.has_serial_no ? __("Select Serial No") : __("Select Batch No");
-			this.$form_container.append(
-				`<div class="btn btn-sm btn-secondary auto-fetch-btn">${label}</div>`
-			);
+			if (item.has_serial_no && item.has_batch_no) {
+				this.$form_container.append(
+					`<div class="btn btn-sm btn-secondary auto-fetch-btn" style="margin-top: 6px">${__(
+						"Select Serial No / Batch No"
+					)}</div>`
+				);
+			} else {
+				const classname = item.has_serial_no ? ".serial_no-control" : ".batch_no-control";
+				const label = item.has_serial_no ? __("Select Serial No") : __("Select Batch No");
+				this.$form_container
+					.find(classname)
+					.append(
+						`<div class="btn btn-sm btn-secondary auto-fetch-btn" style="margin-top: 6px">${label}</div>`
+					);
+			}
 			this.$form_container.find(".serial_no-control").find("textarea").css("height", "6rem");
 		}
 	}

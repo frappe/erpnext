@@ -58,7 +58,9 @@
   "payment_account",
   "payment_channel",
   "payment_order",
-  "amended_from"
+  "amended_from",
+  "column_break_iiuv",
+  "phone_number"
  ],
  "fields": [
   {
@@ -376,6 +378,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.payment_channel==\"Phone\"",
    "fetch_from": "payment_gateway_account.payment_channel",
    "fieldname": "payment_channel",
    "fieldtype": "Select",
@@ -429,13 +432,22 @@
    "fieldtype": "Data",
    "label": "Party Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_iiuv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-23 12:23:40.117336",
+ "modified": "2024-12-27 21:29:10.361894",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

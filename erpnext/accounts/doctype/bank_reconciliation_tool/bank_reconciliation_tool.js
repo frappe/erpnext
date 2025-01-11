@@ -120,6 +120,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 				args: {
 					bank_account: frm.doc.bank_account,
 					till_date: frappe.datetime.add_days(frm.doc.bank_statement_from_date, -1),
+					company: frm.doc.company,
 				},
 				callback: (response) => {
 					frm.set_value("account_opening_balance", response.message);
@@ -135,6 +136,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 				args: {
 					bank_account: frm.doc.bank_account,
 					till_date: frm.doc.bank_statement_to_date,
+					company: frm.doc.company,
 				},
 				callback: (response) => {
 					frm.cleared_balance = response.message;

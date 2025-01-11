@@ -275,6 +275,9 @@ class GLEntry(Document):
 		validate_account_party_type(self)
 
 	def validate_currency(self):
+		if self.is_cancelled:
+			return
+
 		company_currency = erpnext.get_company_currency(self.company)
 		account_currency = get_account_currency(self.account)
 

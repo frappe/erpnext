@@ -282,6 +282,79 @@ class TestSubcontractingController(FrappeTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
+	def test_return_non_consumed_batch_materials(self):
+		"""
+		- Set backflush based on Material Transfer.
+		- Create SCO for item Subcontracted Item SA2.
+		- Transfer the batched components from Stores to Supplier warehouse with serial nos.
+		- Transfer extra qty of component for the subcontracted item Subcontracted Item SA2.
+		- Create SCR for full qty against the SCO and change the qty of raw material.
+		- After that return the non consumed material back to the store from supplier's warehouse.
+		"""
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
+		set_backflush_based_on("Material Transferred for Subcontract")
+		service_item = make_item("Subcontracted Service FG Item A", properties={"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item SA2", properties={"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item(
+			"Subcontracted Batch RM Item SA2",
+			properties={
+				"is_stock_item": 1,
+				"create_new_batch": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-RM-IRM-.####",
+			},
+		).name
+
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] += 1
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		for item in rm_items:
+			item["sco_rm_detail"] = sco.items[0].name
+
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.save()
+		scr1.supplied_items[0].consumed_qty = 5
+		scr1.submit()
+
+		for key, value in get_supplied_items(scr1).items():
+			transferred_detais = itemwise_details.get(key)
+			self.assertEqual(value.qty, 5)
+			self.assertEqual(sorted(value.serial_no), sorted(transferred_detais.get("serial_no")[0:5]))
+
+		sco.load_from_db()
+		self.assertEqual(sco.supplied_items[0].consumed_qty, 5)
+		doc = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		doc.save()
+		self.assertEqual(doc.items[0].qty, 1)
+		self.assertEqual(doc.items[0].s_warehouse, "_Test Warehouse 1 - _TC")
+		self.assertEqual(doc.items[0].t_warehouse, "_Test Warehouse - _TC")
+		self.assertTrue(doc.items[0].batch_no)
+		self.assertTrue(doc.items[0].use_serial_batch_fields)
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
 	def test_return_non_consumed_materials(self):
 		"""
 		- Set backflush based on Material Transfer.

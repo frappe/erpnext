@@ -16,7 +16,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 	}
 
 	make_dt() {
-		var me = this;
+		const me = this;
 		frappe.call({
 			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions",
 			args: {
@@ -193,6 +193,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				args: {
 					bank_account: this.bank_account,
 					till_date: this.bank_statement_to_date,
+					company: this.company,
 				},
 				callback: (response) => (this.cleared_balance = response.message),
 			});

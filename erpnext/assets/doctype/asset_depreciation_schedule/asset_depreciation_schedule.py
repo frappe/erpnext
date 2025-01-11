@@ -13,6 +13,7 @@ from frappe.utils import (
 	flt,
 	get_first_day,
 	get_last_day,
+	get_link_to_form,
 	getdate,
 	is_last_day_of_the_month,
 	month_diff,
@@ -1062,7 +1063,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 		if not current_asset_depr_schedule_doc:
 			frappe.throw(
 				_("Asset Depreciation Schedule not found for Asset {0} and Finance Book {1}").format(
-					asset_doc.name, row.finance_book
+					get_link_to_form("Asset", asset_doc.name), row.finance_book
 				)
 			)
 
@@ -1108,7 +1109,7 @@ def get_temp_asset_depr_schedule_doc(
 	if not current_asset_depr_schedule_doc:
 		frappe.throw(
 			_("Asset Depreciation Schedule not found for Asset {0} and Finance Book {1}").format(
-				asset_doc.name, row.finance_book
+				get_link_to_form("Asset", asset_doc.name), row.finance_book
 			)
 		)
 

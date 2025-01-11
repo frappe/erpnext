@@ -490,13 +490,20 @@ def get_actual_expense(args):
 def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_year, annual_budget):
 	distribution = {}
 	if monthly_distribution:
-		for d in frappe.db.sql(
-			"""select mdp.month, mdp.percentage_allocation
-			from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` md
-			where mdp.parent=md.name and md.fiscal_year=%s""",
-			fiscal_year,
-			as_dict=1,
-		):
+		mdp = frappe.qb.DocType("Monthly Distribution Percentage")
+		md = frappe.qb.DocType("Monthly Distribution")
+
+		res = (
+			frappe.qb.from_(mdp)
+			.join(md)
+			.on(mdp.parent == md.name)
+			.select(mdp.month, mdp.percentage_allocation)
+			.where(md.fiscal_year == fiscal_year)
+			.where(md.name == monthly_distribution)
+			.run(as_dict=True)
+		)
+
+		for d in res:
 			distribution.setdefault(d.month, d.percentage_allocation)
 
 	dt = frappe.get_cached_value("Fiscal Year", fiscal_year, "year_start_date")

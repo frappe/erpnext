@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "format:PPR-LOG-{##}",
- "beta": 1,
  "creation": "2023-03-13 15:00:09.149681",
  "default_view": "List",
  "doctype": "DocType",
@@ -110,7 +109,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-02 11:32:12.254018",
+ "modified": "2025-01-08 08:22:19.104975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",

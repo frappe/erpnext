@@ -224,6 +224,7 @@ class PaymentRequest(Document):
 			sender=self.email_to,
 			currency=self.currency,
 			payment_gateway=self.payment_gateway,
+			phone_number=self.phone_number,
 		)
 
 		controller.validate_transaction_currency(self.currency)
@@ -635,6 +636,7 @@ def make_payment_request(**args):
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
 				"party_name": args.get("party_name") or ref_doc.get("customer_name"),
+				"phone_number": args.get("phone_number") if args.get("phone_number") else None,
 			}
 		)
 

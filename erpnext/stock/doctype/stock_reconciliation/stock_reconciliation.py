@@ -1093,6 +1093,7 @@ class StockReconciliation(StockController):
 					posting_date=doc.posting_date,
 					posting_time=doc.posting_time,
 					ignore_voucher_nos=[doc.voucher_no],
+					for_stock_levels=True,
 				)
 				or 0
 			) * -1

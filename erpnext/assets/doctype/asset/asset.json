@@ -378,7 +378,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt\nCapitalized\nDecapitalized",
+   "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt\nCapitalized\nDecapitalized\nWork In Progress",
    "read_only": 1
   },
   {
@@ -595,7 +595,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2024-08-26 23:28:29.095139",
+ "modified": "2024-12-26 14:23:20.968882",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

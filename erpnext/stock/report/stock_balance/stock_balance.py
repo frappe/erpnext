@@ -317,7 +317,6 @@ class StockBalanceReport:
 			.where((sle.docstatus < 2) & (sle.is_cancelled == 0))
 			.orderby(sle.posting_datetime)
 			.orderby(sle.creation)
-			.orderby(sle.actual_qty)
 		)
 
 		query = self.apply_inventory_dimensions_filters(query, sle)

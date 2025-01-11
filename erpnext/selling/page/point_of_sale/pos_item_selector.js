@@ -328,13 +328,16 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	filter_items({ search_term = "" } = {}) {
+		const selling_price_list = this.events.get_frm().doc.selling_price_list;
+
 		if (search_term) {
 			search_term = search_term.toLowerCase();
 
 			// memoize
 			this.search_index = this.search_index || {};
-			if (this.search_index[search_term]) {
-				const items = this.search_index[search_term];
+			this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
+			if (this.search_index[selling_price_list][search_term]) {
+				const items = this.search_index[selling_price_list][search_term];
 				this.items = items;
 				this.render_item_list(items);
 				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
@@ -346,7 +349,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			// eslint-disable-next-line no-unused-vars
 			const { items, serial_no, batch_no, barcode } = message;
 			if (search_term && !barcode) {
-				this.search_index[search_term] = items;
+				this.search_index[selling_price_list][search_term] = items;
 			}
 			this.items = items;
 			this.render_item_list(items);

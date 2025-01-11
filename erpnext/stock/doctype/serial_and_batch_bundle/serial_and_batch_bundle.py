@@ -1557,7 +1557,7 @@ def get_type_of_transaction(parent_doc, child_row):
 	elif parent_doc.get("doctype") == "Stock Reconciliation":
 		type_of_transaction = "Inward"
 
-	if parent_doc.get("is_return"):
+	if parent_doc.get("is_return") and parent_doc.get("doctype") != "Stock Entry":
 		type_of_transaction = "Inward"
 		if (
 			parent_doc.get("doctype") in ["Purchase Receipt", "Purchase Invoice"]

@@ -760,6 +760,9 @@ def validate_party_frozen_disabled(party_type, party_name):
 
 
 def validate_account_party_type(self):
+	if self.is_cancelled:
+		return
+
 	if self.party_type and self.party:
 		account_type = frappe.get_cached_value("Account", self.account, "account_type")
 		if account_type and (account_type not in ["Receivable", "Payable"]):

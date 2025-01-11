@@ -212,7 +212,7 @@ def trigger_reconciliation_for_queued_docs():
 		unique_filters = set()
 		queue_size = 5
 
-		fields = ["company", "party_type", "party", "receivable_payable_account"]
+		fields = ["company", "party_type", "party", "receivable_payable_account", "default_advance_account"]
 
 		def get_filters_as_tuple(fields, doc):
 			filters = ()

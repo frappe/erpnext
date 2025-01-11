@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "format:ACC-PPR-{#####}",
- "beta": 1,
  "creation": "2023-03-30 21:28:39.793927",
  "default_view": "List",
  "doctype": "DocType",
@@ -158,7 +157,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-08-27 14:48:56.715320",
+ "modified": "2025-01-08 08:22:14.798085",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",
