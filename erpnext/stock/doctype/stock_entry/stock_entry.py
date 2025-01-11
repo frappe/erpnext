@@ -727,7 +727,10 @@ class StockEntry(StockController):
 			if flt(total_completed_qty, self.precision("fg_completed_qty")) > flt(
 				completed_qty, self.precision("fg_completed_qty")
 			):
-				job_card, job_card_total_completed_qty = frappe.db.get_value("Job Card", {"operation_id": d.name}, ["name", "total_completed_qty"])
+				job_card, job_card_total_completed_qty = frappe.db.get_value(
+					"Job Card", {"operation_id": d.name}, ["name", "total_completed_qty"]
+				)
+        
 				if not job_card:
 					frappe.throw(
 						_("Work Order {0}: Job Card not found for the operation {1}").format(
