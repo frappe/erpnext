@@ -24,19 +24,11 @@ develop_version = "15.x.x-develop"
 
 app_include_js = [
 	"erpnext.bundle.js",
-    # "https://cdnjs.cloudflare.com/ajax/libs/canvg/3.0.9/umd.js",
-    # "https://sharonchoong.github.io/svg-exportJS/svg-export.min.js",
-    # "https://cdn.jsdelivr.net/npm/pdfkit@0.13.0/js/pdfkit.standalone.js",
-    # "https://cdn.jsdelivr.net/npm/blob-stream-browserify@0.1.3/index.js",
-    # "https://cdn.jsdelivr.net/npm/svg-to-pdfkit@0.1.8/source.js",
 	"https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js",
 	"https://export.dhtmlx.com/gantt/api.js"
 ]
 
-app_include_css = [
-	"erpnext.bundle.css",
-	"https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css"
-]
+app_include_css = ["erpnext.bundle.css", "https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css"]
 web_include_js = "erpnext-web.bundle.js"
 web_include_css = "erpnext-web.bundle.css"
 email_css = "email_erpnext.bundle.css"
