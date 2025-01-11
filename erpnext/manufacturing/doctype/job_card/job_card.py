@@ -1044,7 +1044,7 @@ class JobCard(Document):
 			filters={
 				"docstatus": ("<=", 1),
 				"work_order": self.work_order,
-				"sequence_id": ("<", self.sequence_id)
+				"sequence_id": ("<", self.sequence_id),
 			},
 			order_by="sequence_id, idx",
 		)
@@ -1054,7 +1054,6 @@ class JobCard(Document):
 		)
 
 		for row in data:
-			
 			# if row.status != "Completed" and row.completed_qty < current_operation_qty:
 			# 	frappe.throw(
 			# 		_("{0}, complete the operation {1} before the operation {2}.").format(
