@@ -67,12 +67,4 @@ frappe.listview_settings["Task"] = {
 
 		return `<div class="p-3" style="min-width: 220px">${html}</div>`;
 	},
-	refresh: function (listview) {
-		listview.page.add_inner_button(__("Pdf Download"), () => {
-			const ganttChartSVG = document.querySelector(".gantt");
-			if (ganttChartSVG) {
-				svgExport.downloadPdf(ganttChartSVG, "Gantt Export");
-			}
-		});
-	},
 };
