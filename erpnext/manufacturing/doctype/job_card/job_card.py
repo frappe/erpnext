@@ -1032,29 +1032,33 @@ class JobCard(Document):
 		current_operation_qty += flt(self.total_completed_qty)
 
 		data = frappe.get_all(
-			"Work Order Operation",
-			fields=["operation", "status", "completed_qty", "sequence_id"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
+			"Job Card",
+			fields=["operation", "status", "total_completed_qty", "sequence_id"],
+			filters={
+				"docstatus": ("<=", 1),
+				"work_order": self.work_order,
+				"sequence_id": ("<", self.sequence_id),
+			},
 			order_by="sequence_id, idx",
 		)
 
-		message = "Job Card {}: As per the sequence of the operations in the work order {}".format(
-			bold(self.name), bold(get_link_to_form("Work Order", self.work_order))
-		)
+		# message = "Job Card {}: As per the sequence of the operations in the work order {}".format(
+		# 	bold(self.name), bold(get_link_to_form("Work Order", self.work_order))
+		# )
 
 		for row in data:
-			if row.status != "Completed" and row.completed_qty < current_operation_qty:
-				frappe.throw(
-					_("{0}, complete the operation {1} before the operation {2}.").format(
-						message, bold(row.operation), bold(self.operation)
-					),
-					OperationSequenceError,
-				)
+			# if row.status != "Completed" and row.completed_qty < current_operation_qty:
+			# 	frappe.throw(
+			# 		_("{0}, complete the operation {1} before the operation {2}.").format(
+			# 			message, bold(row.operation), bold(self.operation)
+			# 		),
+			# 		OperationSequenceError,
+			# 	)
 
-			if row.completed_qty < current_operation_qty:
+			if row.total_completed_qty < current_operation_qty:
 				msg = f"""The completed quantity {bold(current_operation_qty)}
 					of an operation {bold(self.operation)} cannot be greater
-					than the completed quantity {bold(row.completed_qty)}
+					than the completed quantity {bold(row.total_completed_qty)}
 					of a previous operation
 					{bold(row.operation)}.
 				"""
