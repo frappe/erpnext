@@ -1042,9 +1042,10 @@ class JobCard(Document):
 			"Job Card",
 			fields=["operation", "status", "total_completed_qty", "sequence_id"],
 			filters={
-				"docstatus":  ("<=", 1),
+				"docstatus": ("<=", 1),
 				"work_order": self.work_order,
-				"sequence_id": ("<", self.sequence_id)},
+				"sequence_id": ("<", self.sequence_id)
+			},
 			order_by="sequence_id, idx",
 		)
 
