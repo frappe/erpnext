@@ -737,7 +737,7 @@ class StockEntry(StockController):
 
 				work_order_link = get_link_to_form("Work Order", self.work_order)
 				job_card_link = get_link_to_form("Job Card", job_card)
-				if(total_completed_qty > job_card_total_completed_qty):
+				if total_completed_qty > job_card_total_completed_qty:
 					frappe.throw(
 						_(
 							"Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."

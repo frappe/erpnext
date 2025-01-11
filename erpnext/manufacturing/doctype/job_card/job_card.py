@@ -1041,7 +1041,10 @@ class JobCard(Document):
 		data = frappe.get_all(
 			"Job Card",
 			fields=["operation", "status", "total_completed_qty", "sequence_id"],
-			filters={"docstatus":  ("<=", 1), "work_order": self.work_order, "sequence_id": ("<", self.sequence_id)},
+			filters={
+					"docstatus":  ("<=", 1),
+					"work_order": self.work_order,
+					"sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
 
