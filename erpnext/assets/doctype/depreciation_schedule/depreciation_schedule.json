@@ -54,7 +54,7 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:(doc.docstatus==1 && !doc.journal_entry && doc.schedule_date <= frappe.datetime.now_date())",
+   "depends_on": "eval:(doc.docstatus==1 && !doc.journal_entry)",
    "fieldname": "make_depreciation_entry",
    "fieldtype": "Button",
    "label": "Make Depreciation Entry"
