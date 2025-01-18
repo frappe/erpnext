@@ -777,7 +777,14 @@ class AccountsController(TransactionBase):
 					ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
-							if item.get(fieldname) is None or fieldname in force_item_fields:
+							if (
+								item.get(fieldname) is None
+								or fieldname in force_item_fields
+								or (
+									fieldname in ["serial_no", "batch_no"]
+									and item.get("use_serial_batch_fields")
+								)
+							):
 								item.set(fieldname, value)
 
 							elif fieldname in ["cost_center", "conversion_factor"] and not item.get(

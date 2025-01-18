@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _
@@ -449,11 +449,14 @@ def get_available_batches(kwargs):
 		get_auto_batch_nos,
 	)
 
-	batchwise_qty = defaultdict(float)
+	batchwise_qty = OrderedDict()
 
 	batches = get_auto_batch_nos(kwargs)
 	for batch in batches:
-		batchwise_qty[batch.get("batch_no")] += batch.get("qty")
+		if batch.get("batch_no") not in batchwise_qty:
+			batchwise_qty[batch.get("batch_no")] = batch.get("qty")
+		else:
+			batchwise_qty[batch.get("batch_no")] += batch.get("qty")
 
 	return batchwise_qty
 

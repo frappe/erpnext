@@ -207,7 +207,7 @@
    "description": "In the case of 'Use Multi-Level BOM' in a work order, if the user wishes to add sub-assembly costs to Finished Goods items without using a job card as well the scrap items, then this option needs to be enable.",
    "fieldname": "set_op_cost_and_scrape_from_sub_assemblies",
    "fieldtype": "Check",
-   "label": "Set Operating Cost / Scrape Items From Sub-assemblies"
+   "label": "Set Operating Cost / Scrap Items From Sub-assemblies"
   },
   {
    "default": "0",
@@ -249,7 +249,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-01-02 12:46:33.520853",
+ "modified": "2025-01-09 16:02:23.326763",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

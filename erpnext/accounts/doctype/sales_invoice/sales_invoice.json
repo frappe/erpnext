@@ -2161,7 +2161,7 @@
   {
    "default": "1",
    "depends_on": "eval: doc.is_return && doc.return_against",
-   "description": "Credit Note will update it's own outstanding amount, even if \"Return Against\" is specified.",
+   "description": "Credit Note will update it's own outstanding amount, even if 'Return Against' is specified.",
    "fieldname": "update_outstanding_for_self",
    "fieldtype": "Check",
    "label": "Update Outstanding for Self",
@@ -2186,7 +2186,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-11-26 12:34:09.110690",
+ "modified": "2025-01-14 11:38:30.446370",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

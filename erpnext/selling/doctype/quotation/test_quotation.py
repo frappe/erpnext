@@ -30,6 +30,38 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertTrue(sales_order.get("payment_schedule"))
 
+	def test_do_not_add_ordered_items_in_new_sales_order(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("_Test Item for Quotation for SO", {"is_stock_item": 1})
+
+		quotation = make_quotation(qty=5, do_not_submit=True)
+		quotation.append(
+			"items",
+			{
+				"item_code": item.name,
+				"qty": 5,
+				"rate": 100,
+				"conversion_factor": 1,
+				"uom": item.stock_uom,
+				"warehouse": "_Test Warehouse - _TC",
+				"stock_uom": item.stock_uom,
+			},
+		)
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+		self.assertEqual(len(sales_order.items), 2)
+		sales_order.remove(sales_order.items[1])
+		sales_order.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		self.assertEqual(len(sales_order.items), 1)
+		self.assertEqual(sales_order.items[0].item_code, item.name)
+		self.assertEqual(sales_order.items[0].qty, 5.0)
+
 	def test_gross_profit(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry

@@ -10,8 +10,8 @@ frappe.listview_settings["Asset"] = {
 			return [__("Sold"), "green", "status,=,Sold"];
 		} else if (doc.status === "Work In Progress") {
 			return [__("Work In Progress"), "orange", "status,=,Work In Progress"];
-		} else if (["Capitalized", "Decapitalized"].includes(doc.status)) {
-			return [__(doc.status), "grey", "status,=," + doc.status];
+		} else if (doc.status === "Capitalized") {
+			return [__("Capitalized"), "grey", "status,=,Capitalized"];
 		} else if (doc.status === "Scrapped") {
 			return [__("Scrapped"), "grey", "status,=,Scrapped"];
 		} else if (doc.status === "In Maintenance") {

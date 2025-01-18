@@ -1401,16 +1401,26 @@ class PaymentEntry(AccountsController):
 			"voucher_detail_no": invoice.name,
 		}
 
-		if self.reconcile_on_advance_payment_date:
-			posting_date = self.posting_date
+		if invoice.reconcile_effect_on:
+			posting_date = invoice.reconcile_effect_on
 		else:
-			date_field = "posting_date"
-			if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
-				date_field = "transaction_date"
-			posting_date = frappe.db.get_value(invoice.reference_doctype, invoice.reference_name, date_field)
-
-			if getdate(posting_date) < getdate(self.posting_date):
+			# For backwards compatibility
+			# Supporting reposting on payment entries reconciled before select field introduction
+			if self.advance_reconciliation_takes_effect_on == "Advance Payment Date":
 				posting_date = self.posting_date
+			elif self.advance_reconciliation_takes_effect_on == "Oldest Of Invoice Or Advance":
+				date_field = "posting_date"
+				if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
+					date_field = "transaction_date"
+				posting_date = frappe.db.get_value(
+					invoice.reference_doctype, invoice.reference_name, date_field
+				)
+
+				if getdate(posting_date) < getdate(self.posting_date):
+					posting_date = self.posting_date
+			elif self.advance_reconciliation_takes_effect_on == "Reconciliation Date":
+				posting_date = nowdate()
+			frappe.db.set_value("Payment Entry Reference", invoice.name, "reconcile_effect_on", posting_date)
 
 		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
 		args_dict["account"] = account

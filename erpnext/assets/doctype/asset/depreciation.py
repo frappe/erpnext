@@ -436,7 +436,7 @@ def scrap_asset(asset_name):
 
 	if asset.docstatus != 1:
 		frappe.throw(_("Asset {0} must be submitted").format(asset.name))
-	elif asset.status in ("Cancelled", "Sold", "Scrapped", "Capitalized", "Decapitalized"):
+	elif asset.status in ("Cancelled", "Sold", "Scrapped", "Capitalized"):
 		frappe.throw(_("Asset {0} cannot be scrapped, as it is already {1}").format(asset.name, asset.status))
 
 	date = today()

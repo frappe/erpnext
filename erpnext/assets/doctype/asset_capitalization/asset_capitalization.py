@@ -41,7 +41,6 @@ force_fields = [
 	"target_is_fixed_asset",
 	"target_has_serial_no",
 	"target_has_batch_no",
-	"target_stock_uom",
 	"stock_uom",
 	"fixed_asset_account",
 	"valuation_rate",
@@ -73,7 +72,6 @@ class AssetCapitalization(StockController):
 		capitalization_method: DF.Literal["", "Create a new composite asset", "Choose a WIP composite asset"]
 		company: DF.Link
 		cost_center: DF.Link | None
-		entry_type: DF.Literal["Capitalization", "Decapitalization"]
 		finance_book: DF.Link | None
 		naming_series: DF.Literal["ACC-ASC-.YYYY.-"]
 		posting_date: DF.Date
@@ -96,8 +94,6 @@ class AssetCapitalization(StockController):
 		target_item_name: DF.Data | None
 		target_qty: DF.Float
 		target_serial_no: DF.SmallText | None
-		target_stock_uom: DF.Link | None
-		target_warehouse: DF.Link | None
 		title: DF.Data | None
 		total_value: DF.Currency
 	# end: auto-generated types
@@ -190,30 +186,17 @@ class AssetCapitalization(StockController):
 	def validate_target_item(self):
 		target_item = frappe.get_cached_doc("Item", self.target_item_code)
 
-		if not target_item.is_fixed_asset and not target_item.is_stock_item:
-			frappe.throw(
-				_("Target Item {0} is neither a Fixed Asset nor a Stock Item").format(target_item.name)
-			)
-
-		if self.entry_type == "Capitalization" and not target_item.is_fixed_asset:
+		if not target_item.is_fixed_asset:
 			frappe.throw(_("Target Item {0} must be a Fixed Asset item").format(target_item.name))
-		elif self.entry_type == "Decapitalization" and not target_item.is_stock_item:
-			frappe.throw(_("Target Item {0} must be a Stock Item").format(target_item.name))
 
 		if target_item.is_fixed_asset:
 			self.target_qty = 1
 		if flt(self.target_qty) <= 0:
 			frappe.throw(_("Target Qty must be a positive number"))
-
-		if not target_item.is_stock_item:
-			self.target_warehouse = None
 		if not target_item.has_batch_no:
 			self.target_batch_no = None
 		if not target_item.has_serial_no:
 			self.target_serial_no = ""
-
-		if target_item.is_stock_item and not self.target_warehouse:
-			frappe.throw(_("Target Warehouse is mandatory for Decapitalization"))
 
 		self.validate_item(target_item)
 
@@ -231,7 +214,7 @@ class AssetCapitalization(StockController):
 					)
 				)
 
-			if target_asset.status in ("Scrapped", "Sold", "Capitalized", "Decapitalized"):
+			if target_asset.status in ("Scrapped", "Sold", "Capitalized"):
 				frappe.throw(
 					_("Target Asset {0} cannot be {1}").format(target_asset.name, target_asset.status)
 				)
@@ -273,7 +256,7 @@ class AssetCapitalization(StockController):
 
 				asset = self.get_asset_for_validation(d.asset)
 
-				if asset.status in ("Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"):
+				if asset.status in ("Draft", "Scrapped", "Sold", "Capitalized"):
 					frappe.throw(
 						_("Row #{0}: Consumed Asset {1} cannot be {2}").format(
 							d.idx, asset.name, asset.status
@@ -314,9 +297,6 @@ class AssetCapitalization(StockController):
 				d.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 
 	def validate_source_mandatory(self):
-		if not self.target_is_fixed_asset and not self.get("asset_items"):
-			frappe.throw(_("Consumed Asset Items is mandatory for Decapitalization"))
-
 		if self.capitalization_method == "Create a new composite asset" and not (
 			self.get("stock_items") or self.get("asset_items")
 		):
@@ -420,18 +400,6 @@ class AssetCapitalization(StockController):
 			)
 			sl_entries.append(sle)
 
-		if self.entry_type == "Decapitalization" and not self.target_is_fixed_asset:
-			sle = self.get_sl_entries(
-				self,
-				{
-					"item_code": self.target_item_code,
-					"warehouse": self.target_warehouse,
-					"actual_qty": flt(self.target_qty),
-					"incoming_rate": flt(self.target_incoming_rate),
-				},
-			)
-			sl_entries.append(sle)
-
 		# reverse sl entries if cancel
 		if self.docstatus == 2:
 			sl_entries.reverse()
@@ -474,21 +442,18 @@ class AssetCapitalization(StockController):
 		return gl_entries
 
 	def get_target_account(self):
-		if self.target_is_fixed_asset:
-			from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
+		from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 
-			asset_category = frappe.get_cached_value("Asset", self.target_asset, "asset_category")
-			if is_cwip_accounting_enabled(asset_category):
-				target_account = get_asset_category_account(
-					"capital_work_in_progress_account",
-					asset_category=asset_category,
-					company=self.company,
-				)
-				return target_account if target_account else self.target_fixed_asset_account
-			else:
-				return self.target_fixed_asset_account
+		asset_category = frappe.get_cached_value("Asset", self.target_asset, "asset_category")
+		if is_cwip_accounting_enabled(asset_category):
+			target_account = get_asset_category_account(
+				"capital_work_in_progress_account",
+				asset_category=asset_category,
+				company=self.company,
+			)
+			return target_account if target_account else self.target_fixed_asset_account
 		else:
-			return self.warehouse_account[self.target_warehouse]["account"]
+			return self.target_fixed_asset_account
 
 	def get_gl_entries_for_consumed_stock_items(self, gl_entries, target_account, target_against, precision):
 		# Consumed Stock Items
@@ -589,33 +554,9 @@ class AssetCapitalization(StockController):
 					item=self,
 				)
 			)
-		else:
-			# Target Stock Item
-			sle_list = self.sle_map.get(self.name)
-			for sle in sle_list:
-				stock_value_difference = flt(sle.stock_value_difference, precision)
-				account = self.warehouse_account[sle.warehouse]["account"]
-
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": account,
-							"against": ", ".join(target_against),
-							"cost_center": self.cost_center,
-							"project": self.get("project"),
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": stock_value_difference,
-						},
-						self.warehouse_account[sle.warehouse]["account_currency"],
-						item=self,
-					)
-				)
 
 	def create_target_asset(self):
-		if (
-			self.entry_type != "Capitalization"
-			or self.capitalization_method != "Create a new composite asset"
-		):
+		if self.capitalization_method != "Create a new composite asset":
 			return
 
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
@@ -654,10 +595,7 @@ class AssetCapitalization(StockController):
 		)
 
 	def update_target_asset(self):
-		if (
-			self.entry_type != "Capitalization"
-			or self.capitalization_method != "Choose a WIP composite asset"
-		):
+		if self.capitalization_method != "Choose a WIP composite asset":
 			return
 
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
@@ -700,14 +638,6 @@ class AssetCapitalization(StockController):
 						get_link_to_form("Asset Capitalization", self.name)
 					),
 				)
-			else:
-				asset.set_status("Decapitalized")
-				add_asset_activity(
-					asset.name,
-					_("Asset decapitalized after Asset Capitalization {0} was submitted").format(
-						get_link_to_form("Asset Capitalization", self.name)
-					),
-				)
 		else:
 			asset.set_status()
 			add_asset_activity(
@@ -729,16 +659,12 @@ def get_target_item_details(item_code=None, company=None):
 
 	# Set Item Details
 	out.target_item_name = item.item_name
-	out.target_stock_uom = item.stock_uom
 	out.target_is_fixed_asset = cint(item.is_fixed_asset)
 	out.target_has_batch_no = cint(item.has_batch_no)
 	out.target_has_serial_no = cint(item.has_serial_no)
 
 	if out.target_is_fixed_asset:
 		out.target_qty = 1
-		out.target_warehouse = None
-	else:
-		out.target_asset = None
 
 	if not out.target_has_batch_no:
 		out.target_batch_no = None

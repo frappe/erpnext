@@ -714,7 +714,12 @@ class TestWorkOrder(FrappeTestCase):
 				self.assertEqual(row.item_code, fg_item)
 
 		work_order = make_wo_order_test_record(
-			item=fg_item, skip_transfer=True, planned_start_date=now(), qty=30, do_not_save=True
+			item=fg_item,
+			skip_transfer=True,
+			planned_start_date=now(),
+			qty=30,
+			do_not_save=True,
+			source_warehouse="_Test Warehouse - _TC",
 		)
 		work_order.batch_size = 10
 		work_order.insert()
@@ -931,11 +936,13 @@ class TestWorkOrder(FrappeTestCase):
 			wip_warehouse=wip_warehouse,
 			qty=qty,
 			skip_transfer=1,
+			source_warehouse=wip_warehouse,
 			stock_uom=fg_item_non_whole.stock_uom,
 		)
 
 		se = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", qty))
 		se.get("items")[0].s_warehouse = "Stores - _TC"
+		se.get("items")[0].t_warehouse = wip_warehouse
 		se.insert()
 		se.submit()
 
@@ -1007,7 +1014,12 @@ class TestWorkOrder(FrappeTestCase):
 			bom.submit()
 
 		wo_order = make_wo_order_test_record(
-			item=item, company=company, planned_start_date=now(), qty=20, skip_transfer=1
+			item=item,
+			company=company,
+			planned_start_date=now(),
+			qty=20,
+			skip_transfer=1,
+			from_wip_warehouse=1,
 		)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name}, "name")
 		update_job_card(job_card)
@@ -1019,7 +1031,12 @@ class TestWorkOrder(FrappeTestCase):
 
 		# Partial Job Card 1 with qty 10
 		wo_order = make_wo_order_test_record(
-			item=item, company=company, planned_start_date=add_days(now(), 60), qty=20, skip_transfer=1
+			item=item,
+			company=company,
+			planned_start_date=add_days(now(), 60),
+			qty=20,
+			skip_transfer=1,
+			from_wip_warehouse=1,
 		)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name}, "name")
 		update_job_card(job_card, 10, 1)
@@ -2045,6 +2062,8 @@ class TestWorkOrder(FrappeTestCase):
 			bom_no=bom_doc.name,
 			qty=1,
 			skip_transfer=1,
+			from_wip_warehouse=1,
+			source_warehouse="_Test Warehouse - _TC",
 		)
 
 		job_cards = frappe.get_all("Job Card", filters={"work_order": wo.name})
@@ -2450,6 +2469,37 @@ class TestWorkOrder(FrappeTestCase):
 		manufacture_entry.submit()
 
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)
+
+	def test_wip_skip(self):
+		wo = make_wo_order_test_record(
+			item="_Test FG Item",
+			qty=10,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Stores - _TC",
+		)
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		self.assertEqual(manufacture_entry.items[0].s_warehouse, "Stores - _TC")
+
+		wo = make_wo_order_test_record(
+			item="_Test FG Item",
+			qty=10,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Stores - _TC",
+			skip_transfer=1,
+		)
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		self.assertEqual(manufacture_entry.items[0].s_warehouse, "_Test Warehouse - _TC")
+
+		wo = make_wo_order_test_record(
+			item="_Test FG Item",
+			qty=10,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Stores - _TC",
+			skip_transfer=1,
+			from_wip_warehouse=1,
+		)
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		self.assertEqual(manufacture_entry.items[0].s_warehouse, "Stores - _TC")
 
 
 def make_operation(**kwargs):

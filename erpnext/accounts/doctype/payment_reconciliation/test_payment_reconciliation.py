@@ -6,6 +6,7 @@ import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_years, flt, getdate, nowdate, today
+from frappe.utils.data import getdate as convert_to_date
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -1671,7 +1672,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 			{
 				"book_advance_payments_in_separate_party_account": 1,
 				"default_advance_paid_account": self.advance_payable_account,
-				"reconcile_on_advance_payment_date": 1,
+				"reconciliation_takes_effect_on": "Advance Payment Date",
 			},
 		)
 
@@ -1720,7 +1721,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 			{
 				"book_advance_payments_in_separate_party_account": 1,
 				"default_advance_received_account": self.advance_receivable_account,
-				"reconcile_on_advance_payment_date": 0,
+				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
 			},
 		)
 		amount = 200.0
@@ -1829,7 +1830,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 			{
 				"book_advance_payments_in_separate_party_account": 1,
 				"default_advance_paid_account": self.advance_payable_account,
-				"reconcile_on_advance_payment_date": 0,
+				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
 			},
 		)
 		amount = 200.0
@@ -2047,6 +2048,102 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# check whether the payment reconciliation is done on the closed period
 		self.assertEqual(pr.get("invoices"), [])
 		self.assertEqual(pr.get("payments"), [])
+
+	def test_advance_reconciliation_effect_on_same_date(self):
+		frappe.db.set_value(
+			"Company",
+			self.company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": self.advance_receivable_account,
+				"reconciliation_takes_effect_on": "Reconciliation Date",
+			},
+		)
+		inv_date = convert_to_date(add_days(nowdate(), -1))
+		adv_date = convert_to_date(add_days(nowdate(), -2))
+
+		si = self.create_sales_invoice(posting_date=inv_date, qty=1, rate=200)
+		pe = self.create_payment_entry(posting_date=adv_date, amount=80).save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.from_invoice_date = add_days(nowdate(), -1)
+		pr.to_invoice_date = nowdate()
+		pr.from_payment_date = add_days(nowdate(), -2)
+		pr.to_payment_date = nowdate()
+		pr.default_advance_account = self.advance_receivable_account
+
+		# reconcile multiple payments against invoice
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Difference amount should not be calculated for base currency accounts
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
+		pr.reconcile()
+
+		si.reload()
+		self.assertEqual(si.status, "Partly Paid")
+		# check PR tool output post reconciliation
+		self.assertEqual(len(pr.get("invoices")), 1)
+		self.assertEqual(pr.get("invoices")[0].get("outstanding_amount"), 120)
+		self.assertEqual(pr.get("payments"), [])
+
+		# Assert Ledger Entries
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name},
+			fields=["account", "posting_date", "voucher_no", "against_voucher", "debit", "credit"],
+			order_by="account, against_voucher, debit",
+		)
+
+		expected_gl = [
+			{
+				"account": self.advance_receivable_account,
+				"posting_date": adv_date,
+				"voucher_no": pe.name,
+				"against_voucher": pe.name,
+				"debit": 0.0,
+				"credit": 80.0,
+			},
+			{
+				"account": self.advance_receivable_account,
+				"posting_date": convert_to_date(nowdate()),
+				"voucher_no": pe.name,
+				"against_voucher": pe.name,
+				"debit": 80.0,
+				"credit": 0.0,
+			},
+			{
+				"account": self.debit_to,
+				"posting_date": convert_to_date(nowdate()),
+				"voucher_no": pe.name,
+				"against_voucher": si.name,
+				"debit": 0.0,
+				"credit": 80.0,
+			},
+			{
+				"account": self.bank,
+				"posting_date": adv_date,
+				"voucher_no": pe.name,
+				"against_voucher": None,
+				"debit": 80.0,
+				"credit": 0.0,
+			},
+		]
+
+		self.assertEqual(expected_gl, gl_entries)
+
+		# cancel PE
+		pe.reload()
+		pe.cancel()
+		pr.get_unreconciled_entries()
+		# check PR tool output
+		self.assertEqual(len(pr.get("invoices")), 1)
+		self.assertEqual(len(pr.get("payments")), 0)
+		self.assertEqual(pr.get("invoices")[0].get("outstanding_amount"), 200)
 
 
 def make_customer(customer_name, currency=None):

@@ -66,12 +66,12 @@ def get_conditions(filters):
 		conditions["cost_center"] = filters.get("cost_center")
 
 	if status:
-		# In Store assets are those that are not sold or scrapped or capitalized or decapitalized
+		# In Store assets are those that are not sold or scrapped or capitalized
 		operand = "not in"
 		if status not in "In Location":
 			operand = "in"
 
-		conditions["status"] = (operand, ["Sold", "Scrapped", "Capitalized", "Decapitalized"])
+		conditions["status"] = (operand, ["Sold", "Scrapped", "Capitalized"])
 
 	return conditions
 
@@ -272,9 +272,9 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		query = query.where(asset.cost_center == filters.cost_center)
 	if filters.status:
 		if filters.status == "In Location":
-			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized", "Decapitalized"]))
+			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
 		else:
-			query = query.where(asset.status.isin(["Sold", "Scrapped", "Capitalized", "Decapitalized"]))
+			query = query.where(asset.status.isin(["Sold", "Scrapped", "Capitalized"]))
 	if finance_book:
 		query = query.where((gle.finance_book.isin([cstr(finance_book), ""])) | (gle.finance_book.isnull()))
 	else:

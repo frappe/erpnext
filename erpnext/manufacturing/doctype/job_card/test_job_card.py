@@ -522,6 +522,7 @@ class TestJobCard(FrappeTestCase):
 			production_item=item_code,
 			bom_no=bom_doc.name,
 			skip_transfer=1,
+			from_wip_warehouse=1,
 			wip_warehouse=warehouse,
 			source_warehouse=warehouse,
 		)

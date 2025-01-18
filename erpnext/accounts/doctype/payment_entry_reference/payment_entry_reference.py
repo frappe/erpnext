@@ -30,6 +30,7 @@ class PaymentEntryReference(Document):
 		payment_term: DF.Link | None
 		payment_term_outstanding: DF.Float
 		payment_type: DF.Data | None
+		reconcile_effect_on: DF.Date | None
 		reference_doctype: DF.Link
 		reference_name: DF.DynamicLink
 		total_amount: DF.Float

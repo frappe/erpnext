@@ -210,7 +210,7 @@ def trigger_reconciliation_for_queued_docs():
 
 		docs_to_trigger = []
 		unique_filters = set()
-		queue_size = 5
+		queue_size = frappe.db.get_single_value("Accounts Settings", "reconciliation_queue_size") or 5
 
 		fields = ["company", "party_type", "party", "receivable_payable_account", "default_advance_account"]
 

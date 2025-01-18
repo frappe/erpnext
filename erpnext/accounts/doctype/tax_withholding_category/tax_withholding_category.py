@@ -555,9 +555,11 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 	else:
 		tax_withholding_net_total = inv.get("tax_withholding_net_total", 0)
 
-	if (threshold and tax_withholding_net_total >= threshold) or (
+	has_cumulative_threshold_breached = (
 		cumulative_threshold and (supp_credit_amt + supp_inv_credit_amt) >= cumulative_threshold
-	):
+	)
+
+	if (threshold and tax_withholding_net_total >= threshold) or (has_cumulative_threshold_breached):
 		# Get net total again as TDS is calculated on net total
 		# Grand is used to just check for threshold breach
 		net_total = (
@@ -565,9 +567,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 		)
 		supp_credit_amt += net_total
 
-		if (cumulative_threshold and supp_credit_amt >= cumulative_threshold) and cint(
-			tax_details.tax_on_excess_amount
-		):
+		if has_cumulative_threshold_breached and cint(tax_details.tax_on_excess_amount):
 			supp_credit_amt = net_total + tax_withholding_net_total - cumulative_threshold
 
 		if ldc and is_valid_certificate(ldc, inv.get("posting_date") or inv.get("transaction_date"), 0):

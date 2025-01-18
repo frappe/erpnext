@@ -1039,13 +1039,21 @@ class update_entries_after:
 
 	def get_dynamic_incoming_outgoing_rate(self, sle):
 		# Get updated incoming/outgoing rate from transaction
-		if sle.recalculate_rate:
+		if sle.recalculate_rate or self.has_landed_cost_based_on_pi(sle):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 
 			if flt(sle.actual_qty) >= 0:
 				sle.incoming_rate = rate
 			else:
 				sle.outgoing_rate = rate
+
+	def has_landed_cost_based_on_pi(self, sle):
+		if sle.voucher_type == "Purchase Receipt" and frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		):
+			return True
+
+		return False
 
 	def get_incoming_outgoing_rate_from_transaction(self, sle):
 		rate = 0

@@ -712,6 +712,23 @@ def update_reference_in_payment_entry(
 	}
 	update_advance_paid = []
 
+	# Update Reconciliation effect date in reference
+	if payment_entry.book_advance_payments_in_separate_party_account:
+		if payment_entry.advance_reconciliation_takes_effect_on == "Advance Payment Date":
+			reconcile_on = payment_entry.posting_date
+		elif payment_entry.advance_reconciliation_takes_effect_on == "Oldest Of Invoice Or Advance":
+			date_field = "posting_date"
+			if d.against_voucher_type in ["Sales Order", "Purchase Order"]:
+				date_field = "transaction_date"
+			reconcile_on = frappe.db.get_value(d.against_voucher_type, d.against_voucher, date_field)
+
+			if getdate(reconcile_on) < getdate(payment_entry.posting_date):
+				reconcile_on = payment_entry.posting_date
+		elif payment_entry.advance_reconciliation_takes_effect_on == "Reconciliation Date":
+			reconcile_on = nowdate()
+
+		reference_details.update({"reconcile_effect_on": reconcile_on})
+
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 
@@ -2233,3 +2250,38 @@ def run_ledger_health_checks():
 					doc.general_and_payment_ledger_mismatch = True
 					doc.checked_on = run_date
 					doc.save()
+
+
+def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
+	auto_reconciliation_job_trigger = auto_reconciliation_job_trigger or frappe.db.get_single_value(
+		"Accounts Settings", "auto_reconciliation_job_trigger"
+	)
+	method = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
+
+	sch_event = frappe.get_doc(
+		"Scheduler Event", {"scheduled_against": "Process Payment Reconciliation", "method": method}
+	)
+	if frappe.db.get_value("Scheduled Job Type", {"method": method}):
+		frappe.get_doc(
+			"Scheduled Job Type",
+			{
+				"method": method,
+			},
+		).update(
+			{
+				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
+				"scheduler_event": sch_event.name,
+			}
+		).save()
+	else:
+		frappe.get_doc(
+			{
+				"doctype": "Scheduled Job Type",
+				"method": method,
+				"scheduler_event": sch_event.name,
+				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
+				"create_log": True,
+				"stopped": False,
+				"frequency": "Cron",
+			}
+		).save()

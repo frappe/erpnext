@@ -1687,13 +1687,13 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		wo.submit()
 		make_stock_entry(
 			item_code="_Test Item",
-			target="Work In Progress - _TC",
+			target="_Test Warehouse - _TC",
 			qty=4,
 			basic_rate=100,  # Stock RM
 		)
 		make_stock_entry(
 			item_code="_Test Item Home Desktop 100",  # Stock RM
-			target="Work In Progress - _TC",
+			target="_Test Warehouse - _TC",
 			qty=4,
 			basic_rate=100,
 		)

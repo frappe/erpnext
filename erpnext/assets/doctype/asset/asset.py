@@ -111,7 +111,6 @@ class Asset(AccountsController):
 			"Issue",
 			"Receipt",
 			"Capitalized",
-			"Decapitalized",
 			"Work In Progress",
 		]
 		supplier: DF.Link | None

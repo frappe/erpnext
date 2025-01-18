@@ -8,30 +8,26 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "company",
   "naming_series",
-  "entry_type",
-  "target_item_name",
-  "target_is_fixed_asset",
-  "target_has_batch_no",
-  "target_has_serial_no",
-  "column_break_9",
   "capitalization_method",
   "target_item_code",
-  "target_asset_location",
+  "target_item_name",
   "target_asset",
   "target_asset_name",
-  "target_warehouse",
   "target_qty",
-  "target_stock_uom",
-  "target_batch_no",
-  "target_serial_no",
-  "column_break_5",
-  "finance_book",
+  "target_asset_location",
+  "column_break_9",
+  "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "finance_book",
+  "target_batch_no",
+  "target_serial_no",
   "amended_from",
+  "target_is_fixed_asset",
+  "target_has_batch_no",
+  "target_has_serial_no",
   "section_break_16",
   "stock_items",
   "stock_items_total",
@@ -58,12 +54,12 @@
    "label": "Title"
   },
   {
-   "depends_on": "eval:(doc.target_item_code && !doc.__islocal && doc.capitalization_method !== 'Choose a WIP composite asset') || ((doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset') || doc.entry_type=='Decapitalization')",
+   "depends_on": "eval:(doc.target_item_code && !doc.__islocal && doc.capitalization_method !== 'Choose a WIP composite asset') || doc.capitalization_method=='Create a new composite asset'",
    "fieldname": "target_item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Target Item Code",
-   "mandatory_depends_on": "eval:(doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset') || doc.entry_type=='Decapitalization'",
+   "mandatory_depends_on": "eval:doc.capitalization_method=='Create a new composite asset'",
    "options": "Item"
   },
   {
@@ -84,22 +80,18 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:(doc.target_asset && !doc.__islocal) || (doc.entry_type=='Capitalization' && doc.capitalization_method=='Choose a WIP composite asset')",
+   "depends_on": "eval:(doc.target_asset && !doc.__islocal) || doc.capitalization_method=='Choose a WIP composite asset'",
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Target Asset",
-   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization' && doc.capitalization_method=='Choose a WIP composite asset'",
+   "mandatory_depends_on": "eval:doc.capitalization_method=='Choose a WIP composite asset'",
    "no_copy": 1,
    "options": "Asset",
-   "read_only_depends_on": "eval:(doc.entry_type=='Decapitalization') || (doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset')"
+   "read_only_depends_on": "eval:doc.capitalization_method=='Create a new composite asset'"
   },
   {
-   "depends_on": "eval:(doc.target_asset_name && !doc.__islocal) || (doc.target_asset && doc.entry_type=='Capitalization' && doc.capitalization_method=='Choose a WIP composite asset')",
+   "depends_on": "eval:(doc.target_asset_name && !doc.__islocal) || (doc.target_asset && doc.capitalization_method=='Choose a WIP composite asset')",
    "fetch_from": "target_asset.asset_name",
    "fieldname": "target_asset_name",
    "fieldtype": "Data",
@@ -162,7 +154,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.entry_type=='Capitalization' && (doc.docstatus == 0 || (doc.stock_items && doc.stock_items.length))",
+   "depends_on": "eval:doc.docstatus == 0 || (doc.stock_items && doc.stock_items.length)",
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
    "label": "Consumed Stock Items"
@@ -174,14 +166,6 @@
    "options": "Asset Capitalization Stock Item"
   },
   {
-   "depends_on": "eval:doc.entry_type=='Decapitalization'",
-   "fieldname": "target_warehouse",
-   "fieldtype": "Link",
-   "label": "Target Warehouse",
-   "mandatory_depends_on": "eval:doc.entry_type=='Decapitalization'",
-   "options": "Warehouse"
-  },
-  {
    "depends_on": "target_has_batch_no",
    "fieldname": "target_batch_no",
    "fieldtype": "Link",
@@ -190,20 +174,9 @@
   },
   {
    "default": "1",
-   "depends_on": "eval:doc.entry_type=='Decapitalization'",
    "fieldname": "target_qty",
    "fieldtype": "Float",
-   "label": "Target Qty",
-   "read_only_depends_on": "eval:doc.entry_type=='Capitalization'"
-  },
-  {
-   "depends_on": "eval:doc.entry_type=='Decapitalization'",
-   "fetch_from": "target_item_code.stock_uom",
-   "fieldname": "target_stock_uom",
-   "fieldtype": "Link",
-   "label": "Stock UOM",
-   "options": "UOM",
-   "read_only": 1
+   "label": "Target Qty"
   },
   {
    "default": "0",
@@ -242,16 +215,6 @@
    "options": "Asset Capitalization Asset Item"
   },
   {
-   "default": "Capitalization",
-   "fieldname": "entry_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Entry Type",
-   "options": "Capitalization\nDecapitalization",
-   "reqd": 1
-  },
-  {
    "fieldname": "stock_items_total",
    "fieldtype": "Currency",
    "label": "Consumed Stock Total Value",
@@ -272,7 +235,7 @@
    "options": "Finance Book"
   },
   {
-   "depends_on": "eval:doc.entry_type=='Capitalization' && (doc.docstatus == 0 || (doc.service_items && doc.service_items.length))",
+   "depends_on": "eval:doc.docstatus == 0 || (doc.service_items && doc.service_items.length)",
    "fieldname": "service_expenses_section",
    "fieldtype": "Section Break",
    "label": "Service Expenses"
@@ -337,26 +300,24 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset'",
+   "depends_on": "eval:doc.capitalization_method=='Create a new composite asset'",
    "fieldname": "target_asset_location",
    "fieldtype": "Link",
    "label": "Target Asset Location",
-   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset'",
+   "mandatory_depends_on": "eval:doc.capitalization_method=='Create a new composite asset'",
    "options": "Location"
   },
   {
-   "depends_on": "eval:doc.entry_type=='Capitalization'",
    "fieldname": "capitalization_method",
    "fieldtype": "Select",
    "label": "Capitalization Method",
-   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization'",
    "options": "\nCreate a new composite asset\nChoose a WIP composite asset"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-03 22:55:59.461456",
+ "modified": "2025-01-08 13:14:33.008458",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",

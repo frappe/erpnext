@@ -152,6 +152,7 @@ class WorkOrder(Document):
 		self.validate_sales_order()
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
+		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_transfer_against()
@@ -250,6 +251,10 @@ class WorkOrder(Document):
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
 			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+
+	def check_wip_warehouse_skip(self):
+		if self.skip_transfer and not self.from_wip_warehouse:
+			self.wip_warehouse = None
 
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
@@ -1421,7 +1426,11 @@ def make_stock_entry(work_order_id, purpose, qty=None, target_warehouse=None):
 		stock_entry.to_warehouse = wip_warehouse
 		stock_entry.project = work_order.project
 	else:
-		stock_entry.from_warehouse = wip_warehouse
+		stock_entry.from_warehouse = (
+			work_order.source_warehouse
+			if work_order.skip_transfer and not work_order.from_wip_warehouse
+			else wip_warehouse
+		)
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
 

@@ -744,9 +744,9 @@ class TestProductionPlan(FrappeTestCase):
 		"""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
-		make_stock_entry(item_code="_Test Item", target="Work In Progress - _TC", qty=2, basic_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		make_stock_entry(
-			item_code="_Test Item Home Desktop 100", target="Work In Progress - _TC", qty=4, basic_rate=100
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=4, basic_rate=100
 		)
 
 		item = "_Test FG Item"
@@ -794,10 +794,10 @@ class TestProductionPlan(FrappeTestCase):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		make_stock_entry(
-			item_code="Raw Material Item 1", target="Work In Progress - _TC", qty=2, basic_rate=100
+			item_code="Raw Material Item 1", target="_Test Warehouse - _TC", qty=2, basic_rate=100
 		)
 		make_stock_entry(
-			item_code="Raw Material Item 2", target="Work In Progress - _TC", qty=2, basic_rate=100
+			item_code="Raw Material Item 2", target="_Test Warehouse - _TC", qty=2, basic_rate=100
 		)
 
 		pln = create_production_plan(item_code="Test Production Item 1", skip_getting_mr_items=True)

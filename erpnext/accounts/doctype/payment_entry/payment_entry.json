@@ -21,6 +21,7 @@
   "party_name",
   "book_advance_payments_in_separate_party_account",
   "reconcile_on_advance_payment_date",
+  "advance_reconciliation_takes_effect_on",
   "column_break_11",
   "bank_account",
   "party_bank_account",
@@ -782,6 +783,16 @@
    "options": "No\nYes",
    "print_hide": 1,
    "search_index": 1
+  },
+  {
+   "default": "Oldest Of Invoice Or Advance",
+   "fetch_from": "company.reconciliation_takes_effect_on",
+   "fieldname": "advance_reconciliation_takes_effect_on",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Advance Reconciliation Takes Effect On",
+   "no_copy": 1,
+   "options": "Advance Payment Date\nOldest Of Invoice Or Advance\nReconciliation Date"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -795,7 +806,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-11-07 11:19:19.320883",
+ "modified": "2025-01-13 16:03:47.169699",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
