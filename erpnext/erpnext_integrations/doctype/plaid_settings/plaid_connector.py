@@ -69,23 +69,7 @@ class PlaidConnector:
 		else:
 			return response["link_token"]
 
-	def auth(self):
-		try:
-			self.client.Auth.get(self.access_token)
-		except ItemError as e:
-			if e.code == "ITEM_LOGIN_REQUIRED":
-				pass
-		except APIError as e:
-			if e.code == "PLANNED_MAINTENANCE":
-				pass
-		except requests.Timeout:
-			pass
-		except Exception as e:
-			frappe.log_error("Plaid: Authentication error")
-			frappe.throw(_(str(e)), title=_("Authentication Failed"))
-
 	def get_transactions(self, start_date, end_date, account_id=None):
-		self.auth()
 		kwargs = dict(access_token=self.access_token, start_date=start_date, end_date=end_date)
 		if account_id:
 			kwargs.update(dict(account_ids=[account_id]))

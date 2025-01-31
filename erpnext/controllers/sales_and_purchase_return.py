@@ -110,7 +110,7 @@ def validate_returned_items(doc):
 	for d in doc.get("items"):
 		key = d.item_code
 		raise_exception = False
-		if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Sales Invoice"]:
+		if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Sales Invoice", "POS Invoice"]:
 			field = frappe.scrub(doc.doctype) + "_item"
 			if d.get(field):
 				key = (d.item_code, d.get(field))
@@ -174,7 +174,11 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	)
 
 	for column in fields:
-		returned_qty = flt(already_returned_data.get(column, 0)) if len(already_returned_data) > 0 else 0
+		returned_qty = (
+			flt(already_returned_data.get(column, 0), stock_qty_precision)
+			if len(already_returned_data) > 0
+			else 0
+		)
 
 		if column == "stock_qty" and not args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get(column)
@@ -186,7 +190,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
 
-		max_returnable_qty = flt(reference_qty, stock_qty_precision) - returned_qty
+		max_returnable_qty = flt(flt(reference_qty, stock_qty_precision) - returned_qty, stock_qty_precision)
 		label = column.replace("_", " ").title()
 
 		if reference_qty:
@@ -259,7 +263,7 @@ def get_already_returned_items(doc):
 	)
 	data = frappe.db.sql(
 		f"""
-		select {column}, {field}
+		select {column}, child.{field}
 		from
 			`tab{doc.doctype} Item` child, `tab{doc.doctype}` par
 		where
@@ -370,6 +374,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		if doc.get("is_return"):
 			if doc.doctype == "Sales Invoice" or doc.doctype == "POS Invoice":
 				doc.consolidated_invoice = ""
+				# no copy enabled for party_account_currency
+				doc.party_account_currency = source.party_account_currency
 				doc.set("payments", [])
 				doc.update_billed_amount_in_delivery_note = True
 				for data in source.payments:
@@ -1020,7 +1026,7 @@ def get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=False
 
 def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field=None):
 	if not qty_field:
-		qty_field = "qty"
+		qty_field = "stock_qty"
 
 	if not warehouse_field:
 		warehouse_field = "warehouse"
@@ -1109,7 +1115,7 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 		warehouse_field = "warehouse"
 
 	if not qty_field:
-		qty_field = "qty"
+		qty_field = "stock_qty"
 
 	warehouse = child_doc.get(warehouse_field)
 	if parent_doc.get("is_internal_customer"):
@@ -1150,3 +1156,9 @@ def get_available_serial_nos(serial_nos, warehouse):
 	return frappe.get_all(
 		"Serial No", filters={"warehouse": warehouse, "name": ("in", serial_nos)}, pluck="name"
 	)
+
+
+@frappe.whitelist()
+def get_payment_data(invoice):
+	payment = frappe.db.get_all("Sales Invoice Payment", {"parent": invoice}, ["mode_of_payment", "amount"])
+	return payment

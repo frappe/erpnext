@@ -74,9 +74,8 @@ class PickList(Document):
 
 	def validate(self):
 		self.validate_for_qty()
-		if self.pick_manually and self.get("locations"):
-			self.validate_stock_qty()
-			self.check_serial_no_status()
+		self.validate_stock_qty()
+		self.check_serial_no_status()
 
 	def before_save(self):
 		self.update_status()
@@ -90,14 +89,24 @@ class PickList(Document):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 		for row in self.get("locations"):
-			if row.batch_no and not row.qty:
+			if not row.picked_qty:
+				continue
+
+			if row.batch_no and row.picked_qty:
 				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
 
-				if row.qty > batch_qty:
+				if row.picked_qty > batch_qty:
 					frappe.throw(
 						_(
-							"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}."
-						).format(row.idx, row.item_code, batch_qty, row.batch_no, bold(row.warehouse)),
+							"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}. Please restock the item."
+						).format(
+							row.idx,
+							row.picked_qty,
+							row.item_code,
+							batch_qty,
+							row.batch_no,
+							bold(row.warehouse),
+						),
 						title=_("Insufficient Stock"),
 					)
 
@@ -109,11 +118,11 @@ class PickList(Document):
 				"actual_qty",
 			)
 
-			if row.qty > flt(bin_qty):
+			if row.picked_qty > flt(bin_qty):
 				frappe.throw(
 					_(
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
-					).format(row.idx, row.qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
+					).format(row.idx, row.picked_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
 					title=_("Insufficient Stock"),
 				)
 
@@ -429,7 +438,14 @@ class PickList(Document):
 		locations_replica = self.get("locations")
 
 		# reset
-		self.delete_key("locations")
+		reset_rows = []
+		for row in self.get("locations"):
+			if not row.picked_qty:
+				reset_rows.append(row)
+
+		for row in reset_rows:
+			self.remove(row)
+
 		updated_locations = frappe._dict()
 		for item_doc in items:
 			item_code = item_doc.item_code
@@ -499,6 +515,9 @@ class PickList(Document):
 		# aggregate qty for same item
 		item_map = OrderedDict()
 		for item in locations:
+			if item.picked_qty:
+				continue
+
 			if not item.item_code:
 				frappe.throw(f"Row #{item.idx}: Item Code is Mandatory")
 			if not cint(

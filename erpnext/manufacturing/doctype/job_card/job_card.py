@@ -309,8 +309,8 @@ class JobCard(Document):
 		return overlap
 
 	def get_time_logs(self, args, doctype, open_job_cards=None):
-		if get_datetime(args.from_time) >= get_datetime(args.to_time):
-			args.to_time = add_to_date(args.from_time, minutes=args.remaining_time_in_mins)
+		if args.get("remaining_time_in_mins") and get_datetime(args.from_time) >= get_datetime(args.to_time):
+			args.to_time = add_to_date(args.from_time, minutes=args.get("remaining_time_in_mins"))
 
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType(doctype)
@@ -650,7 +650,7 @@ class JobCard(Document):
 					)
 				)
 
-			if self.get("operation") == d.operation:
+			if self.get("operation") == d.operation or self.is_corrective_job_card:
 				self.append(
 					"items",
 					{
@@ -791,7 +791,7 @@ class JobCard(Document):
 			fields=["total_time_in_mins", "hour_rate"],
 			filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
 		):
-			wo.corrective_operation_cost += flt(row.total_time_in_mins) * flt(row.hour_rate)
+			wo.corrective_operation_cost += (flt(row.total_time_in_mins) / 60) * flt(row.hour_rate)
 
 		wo.calculate_operating_cost()
 		wo.flags.ignore_validate_update_after_submit = True

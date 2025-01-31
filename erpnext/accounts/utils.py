@@ -1644,7 +1644,7 @@ def get_stock_and_account_balance(account=None, posting_date=None, company=None)
 			if wh_details.account == account and not wh_details.is_group
 		]
 
-	total_stock_value = get_stock_value_on(related_warehouses, posting_date)
+	total_stock_value = get_stock_value_on(related_warehouses, posting_date, company=company)
 
 	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 	return flt(account_balance, precision), flt(total_stock_value, precision), related_warehouses

@@ -30,6 +30,11 @@ class calculate_taxes_and_totals:
 			"Accounts Settings", "round_row_wise_tax"
 		)
 
+		if doc.get("round_off_applicable_accounts_for_tax_withholding"):
+			frappe.flags.round_off_applicable_accounts.append(
+				doc.round_off_applicable_accounts_for_tax_withholding
+			)
+
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
 
 		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)

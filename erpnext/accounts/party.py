@@ -676,7 +676,7 @@ def set_taxes(
 ):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details, get_tax_template
 
-	args = {party_type.lower(): party, "company": company}
+	args = {frappe.scrub(party_type): party, "company": company}
 
 	if tax_category:
 		args["tax_category"] = tax_category
@@ -696,10 +696,10 @@ def set_taxes(
 	else:
 		args.update(get_party_details(party, party_type))
 
-	if party_type in ("Customer", "Lead", "Prospect"):
+	if party_type in ("Customer", "Lead", "Prospect", "CRM Deal"):
 		args.update({"tax_type": "Sales"})
 
-		if party_type in ["Lead", "Prospect"]:
+		if party_type in ["Lead", "Prospect", "CRM Deal"]:
 			args["customer"] = None
 			del args[frappe.scrub(party_type)]
 	else:

@@ -10,6 +10,7 @@ from frappe import _
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import flt
+from frappe.utils.data import get_url_to_list
 from frappe.utils.nestedset import NestedSet, get_root_of
 
 from erpnext import get_default_currency
@@ -42,6 +43,9 @@ class SalesPerson(NestedSet):
 	nsm_parent_field = "parent_sales_person"
 
 	def validate(self):
+		if not self.enabled:
+			self.validate_sales_person()
+
 		if not self.parent_sales_person:
 			self.parent_sales_person = get_root_of("Sales Person")
 
@@ -82,6 +86,25 @@ class SalesPerson(NestedSet):
 	def on_update(self):
 		super().on_update()
 		self.validate_one_root()
+
+	def validate_sales_person(self):
+		sales_team = frappe.qb.DocType("Sales Team")
+
+		query = (
+			frappe.qb.from_(sales_team)
+			.select(sales_team.sales_person)
+			.where((sales_team.sales_person == self.name) & (sales_team.parenttype == "Customer"))
+			.groupby(sales_team.sales_person)
+		).run(as_dict=True)
+
+		if query:
+			frappe.throw(
+				_("The Sales Person is linked with {0}").format(
+					frappe.bold(
+						f"""<a href="{get_url_to_list("Customer")}?sales_person={self.name}">{"Customers"}</a>"""
+					)
+				)
+			)
 
 	def get_email_id(self):
 		if self.employee:

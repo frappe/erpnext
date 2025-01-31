@@ -714,6 +714,16 @@ class SellingController(StockController):
 		if self.doctype == "POS Invoice":
 			return
 
+		items = [item.item_code for item in self.get("items")]
+		item_stock_map = frappe._dict(
+			frappe.get_all(
+				"Item",
+				filters={"item_code": ["in", items]},
+				fields=["item_code", "is_stock_item"],
+				as_list=True,
+			)
+		)
+
 		for d in self.get("items"):
 			if self.doctype == "Sales Invoice":
 				stock_items = [
@@ -747,7 +757,7 @@ class SellingController(StockController):
 				frappe.bold(_("Allow Item to Be Added Multiple Times in a Transaction")),
 				get_link_to_form("Selling Settings", "Selling Settings"),
 			)
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
+			if item_stock_map.get(d.item_code):
 				if stock_items in check_list:
 					frappe.throw(duplicate_items_msg)
 				else:

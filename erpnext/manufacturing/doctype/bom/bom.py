@@ -1371,6 +1371,64 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 				},
 			)
 
+	def get_max_op_qty():
+		from frappe.query_builder.functions import Sum
+
+		table = frappe.qb.DocType("Job Card")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.total_completed_qty).as_("qty"))
+			.where(
+				(table.docstatus == 1)
+				& (table.work_order == work_order.name)
+				& (table.is_corrective_job_card == 0)
+			)
+			.groupby(table.operation)
+		)
+		return min([d.qty for d in query.run(as_dict=True)], default=0)
+
+	def get_utilised_cc():
+		from frappe.query_builder.functions import Sum
+
+		table = frappe.qb.DocType("Stock Entry")
+		subquery = (
+			frappe.qb.from_(table)
+			.select(table.name)
+			.where(
+				(table.docstatus == 1)
+				& (table.work_order == work_order.name)
+				& (table.purpose == "Manufacture")
+			)
+		)
+		table = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.amount).as_("amount"))
+			.where(table.parent.isin(subquery) & (table.has_corrective_cost == 1))
+		)
+		return query.run(as_dict=True)[0].amount or 0
+
+	if (
+		work_order
+		and work_order.corrective_operation_cost
+		and cint(
+			frappe.db.get_single_value(
+				"Manufacturing Settings", "add_corrective_operation_cost_in_finished_good_valuation"
+			)
+		)
+	):
+		max_qty = get_max_op_qty() - work_order.produced_qty
+		remaining_cc = work_order.corrective_operation_cost - get_utilised_cc()
+		stock_entry.append(
+			"additional_costs",
+			{
+				"expense_account": expense_account,
+				"description": "Corrective Operation Cost",
+				"has_corrective_cost": 1,
+				"amount": remaining_cc / max_qty * flt(stock_entry.fg_completed_qty),
+			},
+		)
+
 
 @frappe.whitelist()
 def get_bom_diff(bom1, bom2):
@@ -1549,6 +1607,9 @@ def get_scrap_items_from_sub_assemblies(bom_no, company, qty, scrap_items=None):
 		fields=["bom_no", "qty"],
 		order_by="idx asc",
 	)
+	# fetch Scrap Items for Parent Bom
+	items = get_bom_items_as_dict(bom_no, company, qty=qty, fetch_exploded=0, fetch_scrap_items=1)
+	scrap_items.update(items)
 
 	for row in bom_items:
 		if not row.bom_no:

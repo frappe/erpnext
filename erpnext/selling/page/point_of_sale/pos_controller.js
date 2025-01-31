@@ -155,7 +155,7 @@ erpnext.PointOfSale.Controller = class {
 		this.page.set_title_sub(
 			`<span class="indicator orange">
 				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
-					Opened at ${moment(this.pos_opening_time).format("Do MMMM, h:mma")}
+					Opened at ${frappe.datetime.str_to_user(this.pos_opening_time)}
 				</a>
 			</span>`
 		);
@@ -165,6 +165,7 @@ erpnext.PointOfSale.Controller = class {
 		this.prepare_dom();
 		this.prepare_components();
 		this.prepare_menu();
+		this.prepare_fullscreen_btn();
 		this.make_new_invoice();
 	}
 
@@ -198,6 +199,39 @@ erpnext.PointOfSale.Controller = class {
 		this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, "Ctrl+S");
 
 		this.page.add_menu_item(__("Close the POS"), this.close_pos.bind(this), false, "Shift+Ctrl+C");
+	}
+
+	prepare_fullscreen_btn() {
+		this.page.page_actions.find(".custom-actions").empty();
+
+		this.page.add_button(__("Full Screen"), null, { btn_class: "btn-default fullscreen-btn" });
+
+		this.bind_fullscreen_events();
+	}
+
+	bind_fullscreen_events() {
+		this.$fullscreen_btn = this.page.page_actions.find(".fullscreen-btn");
+
+		this.$fullscreen_btn.on("click", function () {
+			if (!document.fullscreenElement) {
+				document.documentElement.requestFullscreen();
+			} else if (document.exitFullscreen) {
+				document.exitFullscreen();
+			}
+		});
+
+		$(document).on("fullscreenchange", this.handle_fullscreen_change_event.bind(this));
+	}
+
+	handle_fullscreen_change_event() {
+		let enable_fullscreen_label = __("Full Screen");
+		let exit_fullscreen_label = __("Exit Full Screen");
+
+		if (document.fullscreenElement) {
+			this.$fullscreen_btn[0].innerText = exit_fullscreen_label;
+		} else {
+			this.$fullscreen_btn[0].innerText = enable_fullscreen_label;
+		}
 	}
 
 	open_form_view() {

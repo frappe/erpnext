@@ -8,14 +8,14 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "company",
   "report_date",
   "status",
-  "manual_inspection",
+  "child_row_reference",
   "column_break_4",
   "inspection_type",
   "reference_type",
   "reference_name",
-  "child_row_reference",
   "section_break_7",
   "item_code",
   "item_serial_no",
@@ -27,6 +27,7 @@
   "bom_no",
   "specification_details",
   "quality_inspection_template",
+  "manual_inspection",
   "readings",
   "section_break_14",
   "inspected_by",
@@ -248,6 +249,12 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "icon": "fa fa-search",
@@ -255,7 +262,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-30 19:08:16.611192",
+ "modified": "2025-01-16 17:00:48.774532",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

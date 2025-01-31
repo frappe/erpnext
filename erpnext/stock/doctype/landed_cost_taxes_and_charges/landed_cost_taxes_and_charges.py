@@ -20,6 +20,7 @@ class LandedCostTaxesandCharges(Document):
 		description: DF.SmallText
 		exchange_rate: DF.Float
 		expense_account: DF.Link | None
+		has_corrective_cost: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

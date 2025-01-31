@@ -1,6 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # License: MIT. See LICENSE
 
+import itertools
 
 import frappe
 
@@ -10,34 +11,93 @@ from erpnext.accounts.doctype.account_closing_balance.account_closing_balance im
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute():
+	# clear balances, they will be recalculated
 	frappe.db.truncate("Account Closing Balance")
 
-	gle_fields = get_gle_fields()
+	pcv_list = get_period_closing_vouchers()
 
-	for company in frappe.get_all("Company", pluck="name"):
-		i = 0
-		company_wise_order = {}
-		for pcv in get_period_closing_vouchers(company):
-			company_wise_order.setdefault(pcv.company, [])
-			if pcv.period_end_date not in company_wise_order[pcv.company]:
-				pcv_doc = frappe.get_doc("Period Closing Voucher", pcv.name)
-				pcv_doc.pl_accounts_reverse_gle = get_pcv_gl_entries_for_pl_accounts(pcv, gle_fields)
-				pcv_doc.closing_account_gle = get_pcv_gl_entries_for_closing_accounts(pcv, gle_fields)
-				closing_entries = pcv_doc.get_account_closing_balances()
-				make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
+	if pcv_list:
+		gl_entries = get_gl_entries(pcv_list)
 
-				company_wise_order[pcv.company].append(pcv.period_end_date)
-				i += 1
+		for _, pcvs in itertools.groupby(pcv_list, key=lambda pcv: (pcv.company, pcv.period_start_date)):
+			process_grouped_pcvs(list(pcvs), gl_entries)
+
+
+def process_grouped_pcvs(pcvs, gl_entries):
+	pl_account_entries = []
+	closing_account_entries = []
+	first_pcv = pcvs[0]
+
+	for pcv in pcvs:
+		pcv_entries = gl_entries.get(pcv.name) or []
+		for entry in pcv_entries:
+			entry["closing_date"] = first_pcv.period_end_date
+			entry["period_closing_voucher"] = first_pcv.name
+			entry["voucher_no"] = first_pcv.name
+
+			list_to_update = (
+				pl_account_entries if entry.account != pcv.closing_account_head else closing_account_entries
+			)
+			list_to_update.append(entry)
+
+	# hacky!!
+	if to_cancel := pcvs[1:]:
+		to_cancel = [pcv.name for pcv in to_cancel]
+
+		# update voucher number
+		gle_to_update = [entry.name for entry in closing_account_entries + pl_account_entries]
+		frappe.db.set_value(
+			"GL Entry",
+			{
+				"name": ("in", gle_to_update),
+				"voucher_no": ("in", to_cancel),
+			},
+			"voucher_no",
+			first_pcv.name,
+			update_modified=False,
+		)
+
+		# mark as cancelled
+		frappe.db.set_value(
+			"Period Closing Voucher",
+			{"name": ("in", to_cancel)},
+			"docstatus",
+			2,
+			update_modified=False,
+		)
+
+	pcv_doc = frappe.get_doc("Period Closing Voucher", first_pcv.name)
+	pcv_doc.pl_accounts_reverse_gle = pl_account_entries
+	pcv_doc.closing_account_gle = closing_account_entries
+	closing_entries = pcv_doc.get_account_closing_balances()
+	make_closing_entries(closing_entries, pcv_doc.name, pcv_doc.company, pcv_doc.period_end_date)
+
+
+def get_period_closing_vouchers():
+	return frappe.db.get_all(
+		"Period Closing Voucher",
+		fields=["name", "closing_account_head", "period_start_date", "period_end_date", "company"],
+		filters={"docstatus": 1},
+		order_by="period_start_date asc, period_end_date desc",
+	)
+
+
+def get_gl_entries(pcv_list):
+	gl_entries = frappe.get_all(
+		"GL Entry",
+		filters={"voucher_no": ("in", [pcv.name for pcv in pcv_list]), "is_cancelled": 0},
+		fields=get_gle_fields(),
+		update={"is_period_closing_voucher_entry": 1},
+	)
+
+	return {k: list(v) for k, v in itertools.groupby(gl_entries, key=lambda gle: gle.voucher_no)}
 
 
 def get_gle_fields():
-	default_diemnsion_fields = ["cost_center", "finance_book", "project"]
-	accounting_dimension_fields = get_accounting_dimensions()
-	gle_fields = [
+	return [
 		"name",
 		"company",
 		"posting_date",
@@ -47,43 +107,11 @@ def get_gle_fields():
 		"credit",
 		"debit_in_account_currency",
 		"credit_in_account_currency",
-		*default_diemnsion_fields,
-		*accounting_dimension_fields,
+		"voucher_no",
+		# default dimension fields
+		"cost_center",
+		"finance_book",
+		"project",
+		# accounting dimensions
+		*get_accounting_dimensions(),
 	]
-
-	return gle_fields
-
-
-def get_period_closing_vouchers(company):
-	return frappe.db.get_all(
-		"Period Closing Voucher",
-		fields=["name", "closing_account_head", "period_start_date", "period_end_date", "company"],
-		filters={"docstatus": 1, "company": company},
-		order_by="period_end_date",
-	)
-
-
-def get_pcv_gl_entries_for_pl_accounts(pcv, gle_fields):
-	return get_gl_entries(pcv, gle_fields, {"account": ["!=", pcv.closing_account_head]})
-
-
-def get_pcv_gl_entries_for_closing_accounts(pcv, gle_fields):
-	return get_gl_entries(pcv, gle_fields, {"account": pcv.closing_account_head})
-
-
-def get_gl_entries(pcv, gle_fields, accounts_filter=None):
-	filters = {"voucher_no": pcv.name, "is_cancelled": 0}
-	if accounts_filter:
-		filters.update(accounts_filter)
-
-	gl_entries = frappe.db.get_all(
-		"GL Entry",
-		filters=filters,
-		fields=gle_fields,
-	)
-	for entry in gl_entries:
-		entry["is_period_closing_voucher_entry"] = 1
-		entry["closing_date"] = pcv.period_end_date
-		entry["period_closing_voucher"] = pcv.name
-
-	return gl_entries

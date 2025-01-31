@@ -6,6 +6,10 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 		frm.trigger("set_queries");
 	},
 
+	before_submit(frm) {
+		frappe.throw(__("User cannot submitted the Serial and Batch Bundle manually"));
+	},
+
 	refresh(frm) {
 		frm.trigger("toggle_fields");
 		frm.trigger("prepare_serial_batch_prompt");

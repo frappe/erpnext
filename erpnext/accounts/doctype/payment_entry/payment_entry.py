@@ -1576,6 +1576,14 @@ class PaymentEntry(AccountsController):
 		elif self.payment_type in ("Pay", "Internal Transfer"):
 			return self.paid_from
 
+	def get_value_in_transaction_currency(self, account_currency, gl_dict, field):
+		company_currency = erpnext.get_company_currency(self.company)
+		conversion_rate = self.target_exchange_rate
+		if self.paid_from_account_currency != company_currency:
+			conversion_rate = self.source_exchange_rate
+
+		return flt(gl_dict.get(field, 0) / (conversion_rate or 1))
+
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			for d in self.get("references"):
@@ -2826,7 +2834,7 @@ def get_payment_entry(
 
 	if pe.party_type in ["Customer", "Supplier"]:
 		bank_account = get_party_bank_account(pe.party_type, pe.party)
-		pe.set("bank_account", bank_account)
+		pe.set("party_bank_account", bank_account)
 		pe.set_bank_account_data()
 
 	# only Purchase Invoice can be blocked individually

@@ -204,7 +204,7 @@ class BOMCreator(Document):
 
 		for field, label in fields.items():
 			if not self.get(field):
-				frappe.throw(_("Please set {0} in BOM Creator {1}").format(label, self.name))
+				frappe.throw(_("Please set {0} in BOM Creator {1}").format(_(label), self.name))
 
 	def on_submit(self):
 		self.enqueue_create_boms()
@@ -365,12 +365,6 @@ def get_children(doctype=None, parent=None, **kwargs):
 	return frappe.get_all("BOM Creator Item", fields=fields, filters=query_filters, order_by="idx")
 
 
-def get_parent_row_no(doc, name):
-	for row in doc.items:
-		if row.name == name:
-			return row.idx
-
-
 @frappe.whitelist()
 def add_item(**kwargs):
 	if isinstance(kwargs, str):
@@ -418,6 +412,8 @@ def add_sub_assembly(**kwargs):
 	parent_row_no = ""
 	if not kwargs.convert_to_sub_assembly:
 		item_info = get_item_details(bom_item.item_code)
+		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
+
 		item_row = doc.append(
 			"items",
 			{
@@ -426,6 +422,7 @@ def add_sub_assembly(**kwargs):
 				"uom": item_info.stock_uom,
 				"fg_item": kwargs.fg_item,
 				"conversion_factor": 1,
+				"parent_row_no": parent_row_no,
 				"fg_reference_id": name,
 				"stock_qty": bom_item.qty,
 				"do_not_explode": 1,
@@ -437,9 +434,7 @@ def add_sub_assembly(**kwargs):
 		parent_row_no = item_row.idx
 		name = ""
 	else:
-		parent_row_no = [row.idx for row in doc.items if row.name == kwargs.fg_reference_id]
-		if parent_row_no:
-			parent_row_no = parent_row_no[0]
+		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
 
 	for row in bom_item.get("items"):
 		row = frappe._dict(row)
@@ -469,6 +464,14 @@ def get_item_details(item_code):
 	return frappe.get_cached_value(
 		"Item", item_code, ["item_name", "description", "image", "stock_uom", "default_bom"], as_dict=1
 	)
+
+
+def get_parent_row_no(doc, name):
+	for row in doc.items:
+		if row.name == name:
+			return row.idx
+
+	frappe.msgprint(_("Parent Row No not found for {0}").format(name))
 
 
 @frappe.whitelist()

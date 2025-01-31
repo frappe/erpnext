@@ -430,12 +430,6 @@ frappe.ui.form.on("Journal Entry Account", {
 			});
 		}
 	},
-	cost_center: function (frm, dt, dn) {
-		// Don't reset for Gain/Loss type journals, as it will make Debit and Credit values '0'
-		if (frm.doc.voucher_type != "Exchange Gain Or Loss") {
-			erpnext.journal_entry.set_account_details(frm, dt, dn);
-		}
-	},
 
 	account: function (frm, dt, dn) {
 		erpnext.journal_entry.set_account_details(frm, dt, dn);

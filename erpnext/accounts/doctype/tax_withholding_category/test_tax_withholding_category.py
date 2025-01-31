@@ -61,6 +61,49 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 		for d in reversed(invoices):
 			d.cancel()
 
+	def test_tds_with_account_changed(self):
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier", "tax_withholding_category", "Multi Account TDS Category"
+		)
+		invoices = []
+
+		# create invoices for lower than single threshold tax rate
+		for _ in range(2):
+			pi = create_purchase_invoice(supplier="Test TDS Supplier")
+			pi.submit()
+			invoices.append(pi)
+
+		# create another invoice whose total when added to previously created invoice,
+		# surpasses cumulative threshhold
+		pi = create_purchase_invoice(supplier="Test TDS Supplier")
+		pi.submit()
+
+		# assert equal tax deduction on total invoice amount until now
+		self.assertEqual(pi.taxes_and_charges_deducted, 3000)
+		self.assertEqual(pi.grand_total, 7000)
+		invoices.append(pi)
+
+		# account changed
+
+		frappe.db.set_value(
+			"Tax Withholding Account",
+			{"parent": "Multi Account TDS Category"},
+			"account",
+			"_Test Account VAT - _TC",
+		)
+
+		# TDS should be on invoice only even though account is changed
+		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=5000)
+		pi.submit()
+
+		# assert equal tax deduction on total invoice amount until now
+		self.assertEqual(pi.taxes_and_charges_deducted, 500)
+		invoices.append(pi)
+
+		# delete invoices to avoid clashing
+		for d in reversed(invoices):
+			d.cancel()
+
 	def test_single_threshold_tds(self):
 		invoices = []
 		frappe.db.set_value(
@@ -526,6 +569,15 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 		pi1.submit()
 		invoices.append(pi1)
 
+		pe = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier6", paid_amount=1000
+		)
+		pe.apply_tax_withholding_amount = 1
+		pe.tax_withholding_category = "Test Multi Invoice Category"
+		pe.save()
+		pe.submit()
+		invoices.append(pe)
+
 		pi2 = create_purchase_invoice(supplier="Test TDS Supplier6", rate=9000, do_not_save=True)
 		pi2.apply_tds = 1
 		pi2.tax_withholding_category = "Test Multi Invoice Category"
@@ -541,6 +593,8 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 		self.assertTrue(pi2.tax_withheld_vouchers[0].taxable_amount == pi1.net_total)
 		self.assertTrue(pi2.tax_withheld_vouchers[1].voucher_name == pi.name)
 		self.assertTrue(pi2.tax_withheld_vouchers[1].taxable_amount == pi.net_total)
+		self.assertTrue(pi2.tax_withheld_vouchers[2].voucher_name == pe.name)
+		self.assertTrue(pi2.tax_withheld_vouchers[2].taxable_amount == pe.paid_amount)
 
 		# cancel invoices to avoid clashing
 		for d in reversed(invoices):
@@ -1059,6 +1113,16 @@ def create_tax_withholding_category_records():
 		single_threshold=5000,
 		cumulative_threshold=10000,
 		consider_party_ledger_amount=1,
+	)
+
+	create_tax_withholding_category(
+		category_name="Multi Account TDS Category",
+		rate=10,
+		from_date=from_date,
+		to_date=to_date,
+		account="TDS - _TC",
+		single_threshold=0,
+		cumulative_threshold=30000,
 	)
 
 

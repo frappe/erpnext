@@ -835,7 +835,8 @@ class TestPOSInvoice(unittest.TestCase):
 			{
 				"item_code": item.name,
 				"warehouse": pos_inv2.items[0].warehouse,
-				"voucher_type": "Delivery Note",
+				"voucher_type": "POS Invoice",
+				"voucher_no": pos_inv2.name,
 				"qty": 2,
 				"avg_rate": 300,
 				"batches": frappe._dict({"TestBatch 01": 2}),

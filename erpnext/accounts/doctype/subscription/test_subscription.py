@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils.data import (
 	add_days,
 	add_months,
@@ -470,6 +470,28 @@ class TestSubscription(FrappeTestCase):
 		currency = frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "currency")
 		self.assertEqual(currency, "USD")
 
+	@change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1},
+	)
+	def test_multi_currency_subscription_with_default_company_currency(self):
+		party = "Test Subscription Customer Multi Currency"
+		frappe.db.set_value("Customer", party, "default_currency", "USD")
+		subscription = create_subscription(
+			start_date="2018-01-01",
+			generate_invoice_at="Beginning of the current subscription period",
+			plans=[{"plan": "_Test Plan Multicurrency", "qty": 1, "currency": "USD"}],
+			party=party,
+		)
+
+		subscription.process(posting_date="2018-01-01")
+		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, "Unpaid")
+
+		# Check the currency of the created invoice
+		currency = frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "currency")
+		self.assertEqual(currency, "USD")
+
 	def test_subscription_recovery(self):
 		"""Test if Subscription recovers when start/end date run out of sync with created invoices."""
 		subscription = create_subscription(
@@ -579,6 +601,12 @@ def create_parties():
 		customer.customer_name = "_Test Subscription Customer"
 		customer.default_currency = "USD"
 		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable USD - _TC"})
+		customer.insert()
+
+	if not frappe.db.exists("Customer", "_Test Subscription Customer Multi Currency"):
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = "Test Subscription Customer Multi Currency"
+		customer.default_currency = "USD"
 		customer.insert()
 
 	if not frappe.db.exists("Customer", "_Test Subscription Customer John Doe"):

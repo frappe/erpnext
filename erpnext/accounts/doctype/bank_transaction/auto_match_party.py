@@ -45,45 +45,41 @@ class AutoMatchbyAccountIBAN:
 		if not (self.bank_party_account_number or self.bank_party_iban):
 			return None
 
-		result = self.match_account_in_party()
-		return result
+		return self.match_account_in_party()
 
 	def match_account_in_party(self) -> tuple | None:
-		"""Check if there is a IBAN/Account No. match in Customer/Supplier/Employee"""
-		result = None
-		parties = get_parties_in_order(self.deposit)
-		or_filters = self.get_or_filters()
+		"""
+		Returns (Party Type, Party) if a matching account is found in Bank Account or Employee:
+		1. Get party from a matching (iban/account no) Bank Account
+		2. If not found, get party from Employee with matching bank account details (iban/account no)
+		"""
+		if not (self.bank_party_account_number or self.bank_party_iban):
+			# Nothing to match
+			return None
 
-		for party in parties:
-			party_result = frappe.db.get_all(
-				"Bank Account", or_filters=or_filters, pluck="party", limit_page_length=1
-			)
+		# Search for a matching Bank Account that has party set
+		party_result = frappe.db.get_all(
+			"Bank Account",
+			or_filters=self.get_or_filters(),
+			filters={"party_type": ("is", "set"), "party": ("is", "set")},
+			fields=["party", "party_type"],
+			limit_page_length=1,
+		)
+		if result := party_result[0] if party_result else None:
+			return (result["party_type"], result["party"])
 
-			if party == "Employee" and not party_result:
-				# Search in Bank Accounts first for Employee, and then Employee record
-				if "bank_account_no" in or_filters:
-					or_filters["bank_ac_no"] = or_filters.pop("bank_account_no")
+		# If no party is found, search in Employee (since it has bank account details)
+		if employee_result := frappe.db.get_all(
+			"Employee", or_filters=self.get_or_filters("Employee"), pluck="name", limit_page_length=1
+		):
+			return ("Employee", employee_result[0])
 
-				party_result = frappe.db.get_all(
-					party, or_filters=or_filters, pluck="name", limit_page_length=1
-				)
-
-				if "bank_ac_no" in or_filters:
-					or_filters["bank_account_no"] = or_filters.pop("bank_ac_no")
-
-			if party_result:
-				result = (
-					party,
-					party_result[0],
-				)
-				break
-
-		return result
-
-	def get_or_filters(self) -> dict:
+	def get_or_filters(self, party: str | None = None) -> dict:
+		"""Return OR filters for Bank Account and IBAN"""
 		or_filters = {}
 		if self.bank_party_account_number:
-			or_filters["bank_account_no"] = self.bank_party_account_number
+			bank_ac_field = "bank_ac_no" if party == "Employee" else "bank_account_no"
+			or_filters[bank_ac_field] = self.bank_party_account_number
 
 		if self.bank_party_iban:
 			or_filters["iban"] = self.bank_party_iban
@@ -103,8 +99,7 @@ class AutoMatchbyPartyNameDescription:
 		if not (self.bank_party_name or self.description):
 			return None
 
-		result = self.match_party_name_desc_in_party()
-		return result
+		return self.match_party_name_desc_in_party()
 
 	def match_party_name_desc_in_party(self) -> tuple | None:
 		"""Fuzzy search party name and/or description against parties in the system"""
@@ -113,7 +108,8 @@ class AutoMatchbyPartyNameDescription:
 
 		for party in parties:
 			filters = {"status": "Active"} if party == "Employee" else {"disabled": 0}
-			names = frappe.get_all(party, filters=filters, pluck=party.lower() + "_name")
+			field = f"{party.lower()}_name"
+			names = frappe.get_all(party, filters=filters, fields=[f"{field} as party_name", "name"])
 
 			for field in ["bank_party_name", "description"]:
 				if not self.get(field):
@@ -132,16 +128,14 @@ class AutoMatchbyPartyNameDescription:
 
 	def fuzzy_search_and_return_result(self, party, names, field) -> tuple | None:
 		skip = False
-		result = process.extract(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
+		result = process.extract(
+			query=self.get(field),
+			choices={row.get("name"): row.get("party_name") for row in names},
+			scorer=fuzz.token_set_ratio,
+		)
 		party_name, skip = self.process_fuzzy_result(result)
 
-		if not party_name:
-			return None, skip
-
-		return (
-			party,
-			party_name,
-		), skip
+		return ((party, party_name), skip) if party_name else (None, skip)
 
 	def process_fuzzy_result(self, result: list | None):
 		"""
@@ -150,30 +144,30 @@ class AutoMatchbyPartyNameDescription:
 
 		Returns: Result, Skip (whether or not to discontinue matching)
 		"""
-		PARTY, SCORE, CUTOFF = 0, 1, 80
+		SCORE, PARTY_ID, CUTOFF = 1, 2, 80
 
 		if not result or not len(result):
 			return None, False
 
 		first_result = result[0]
 		if len(result) == 1:
-			return (first_result[PARTY] if first_result[SCORE] > CUTOFF else None), True
+			return (first_result[PARTY_ID] if first_result[SCORE] > CUTOFF else None), True
 
-		second_result = result[1]
 		if first_result[SCORE] > CUTOFF:
+			second_result = result[1]
 			# If multiple matches with the same score, return None but discontinue matching
 			# Matches were found but were too close to distinguish between
 			if first_result[SCORE] == second_result[SCORE]:
 				return None, True
 
-			return first_result[PARTY], True
+			return first_result[PARTY_ID], True
 		else:
 			return None, False
 
 
 def get_parties_in_order(deposit: float) -> list:
-	parties = ["Supplier", "Employee", "Customer"]  # most -> least likely to receive
-	if flt(deposit) > 0:
-		parties = ["Customer", "Supplier", "Employee"]  # most -> least likely to pay
-
-	return parties
+	return (
+		["Customer", "Supplier", "Employee"]  # most -> least likely to pay us
+		if flt(deposit) > 0
+		else ["Supplier", "Employee", "Customer"]  # most -> least likely to receive from us
+	)

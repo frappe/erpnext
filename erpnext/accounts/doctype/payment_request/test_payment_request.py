@@ -83,8 +83,7 @@ class TestPaymentRequest(FrappeTestCase):
 
 	def test_payment_entry_against_purchase_invoice(self):
 		si_usd = make_purchase_invoice(
-			customer="_Test Supplier USD",
-			debit_to="_Test Payable USD - _TC",
+			supplier="_Test Supplier USD",
 			currency="USD",
 			conversion_rate=50,
 		)
@@ -108,8 +107,7 @@ class TestPaymentRequest(FrappeTestCase):
 
 	def test_multiple_payment_entry_against_purchase_invoice(self):
 		purchase_invoice = make_purchase_invoice(
-			customer="_Test Supplier USD",
-			debit_to="_Test Payable USD - _TC",
+			supplier="_Test Supplier USD",
 			currency="USD",
 			conversion_rate=50,
 		)

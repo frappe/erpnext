@@ -89,6 +89,10 @@ def get_data(filters):
 	)
 	company_currency = filters.presentation_currency or erpnext.get_company_currency(filters.company)
 
+	ignore_is_opening = frappe.db.get_single_value(
+		"Accounts Settings", "ignore_is_opening_check_for_reporting"
+	)
+
 	if not accounts:
 		return None
 
@@ -96,7 +100,7 @@ def get_data(filters):
 
 	gl_entries_by_account = {}
 
-	opening_balances = get_opening_balances(filters)
+	opening_balances = get_opening_balances(filters, ignore_is_opening)
 
 	# add filter inside list so that the query in financial_statements.py doesn't break
 	if filters.project:
@@ -114,7 +118,13 @@ def get_data(filters):
 		ignore_opening_entries=True,
 	)
 
-	calculate_values(accounts, gl_entries_by_account, opening_balances, filters.get("show_net_values"))
+	calculate_values(
+		accounts,
+		gl_entries_by_account,
+		opening_balances,
+		filters.get("show_net_values"),
+		ignore_is_opening=ignore_is_opening,
+	)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, parent_children_map, company_currency)
@@ -125,15 +135,15 @@ def get_data(filters):
 	return data
 
 
-def get_opening_balances(filters):
-	balance_sheet_opening = get_rootwise_opening_balances(filters, "Balance Sheet")
-	pl_opening = get_rootwise_opening_balances(filters, "Profit and Loss")
+def get_opening_balances(filters, ignore_is_opening):
+	balance_sheet_opening = get_rootwise_opening_balances(filters, "Balance Sheet", ignore_is_opening)
+	pl_opening = get_rootwise_opening_balances(filters, "Profit and Loss", ignore_is_opening)
 
 	balance_sheet_opening.update(pl_opening)
 	return balance_sheet_opening
 
 
-def get_rootwise_opening_balances(filters, report_type):
+def get_rootwise_opening_balances(filters, report_type, ignore_is_opening):
 	gle = []
 
 	last_period_closing_voucher = ""
@@ -159,16 +169,24 @@ def get_rootwise_opening_balances(filters, report_type):
 			report_type,
 			accounting_dimensions,
 			period_closing_voucher=last_period_closing_voucher[0].name,
+			ignore_is_opening=ignore_is_opening,
 		)
 
 		# Report getting generate from the mid of a fiscal year
 		if getdate(last_period_closing_voucher[0].period_end_date) < getdate(add_days(filters.from_date, -1)):
 			start_date = add_days(last_period_closing_voucher[0].period_end_date, 1)
 			gle += get_opening_balance(
-				"GL Entry", filters, report_type, accounting_dimensions, start_date=start_date
+				"GL Entry",
+				filters,
+				report_type,
+				accounting_dimensions,
+				start_date=start_date,
+				ignore_is_opening=ignore_is_opening,
 			)
 	else:
-		gle = get_opening_balance("GL Entry", filters, report_type, accounting_dimensions)
+		gle = get_opening_balance(
+			"GL Entry", filters, report_type, accounting_dimensions, ignore_is_opening=ignore_is_opening
+		)
 
 	opening = frappe._dict()
 	for d in gle:
@@ -187,7 +205,13 @@ def get_rootwise_opening_balances(filters, report_type):
 
 
 def get_opening_balance(
-	doctype, filters, report_type, accounting_dimensions, period_closing_voucher=None, start_date=None
+	doctype,
+	filters,
+	report_type,
+	accounting_dimensions,
+	period_closing_voucher=None,
+	start_date=None,
+	ignore_is_opening=0,
 ):
 	closing_balance = frappe.qb.DocType(doctype)
 	account = frappe.qb.DocType("Account")
@@ -223,11 +247,16 @@ def get_opening_balance(
 				(closing_balance.posting_date >= start_date)
 				& (closing_balance.posting_date < filters.from_date)
 			)
-			opening_balance = opening_balance.where(closing_balance.is_opening == "No")
+
+			if not ignore_is_opening:
+				opening_balance = opening_balance.where(closing_balance.is_opening == "No")
 		else:
-			opening_balance = opening_balance.where(
-				(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes")
-			)
+			if not ignore_is_opening:
+				opening_balance = opening_balance.where(
+					(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes")
+				)
+			else:
+				opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)
 
 	if doctype == "GL Entry":
 		opening_balance = opening_balance.where(closing_balance.is_cancelled == 0)
@@ -298,7 +327,7 @@ def get_opening_balance(
 	return gle
 
 
-def calculate_values(accounts, gl_entries_by_account, opening_balances, show_net_values):
+def calculate_values(accounts, gl_entries_by_account, opening_balances, show_net_values, ignore_is_opening=0):
 	init = {
 		"opening_debit": 0.0,
 		"opening_credit": 0.0,
@@ -316,7 +345,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, show_net
 		d["opening_credit"] = opening_balances.get(d.name, {}).get("opening_credit", 0)
 
 		for entry in gl_entries_by_account.get(d.name, []):
-			if cstr(entry.is_opening) != "Yes":
+			if cstr(entry.is_opening) != "Yes" or ignore_is_opening:
 				d["debit"] += flt(entry.debit)
 				d["credit"] += flt(entry.credit)
 

@@ -58,7 +58,10 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 
 
 def get_stock_value_on(
-	warehouses: list | str | None = None, posting_date: str | None = None, item_code: str | None = None
+	warehouses: list | str | None = None,
+	posting_date: str | None = None,
+	item_code: str | None = None,
+	company: str | None = None,
 ) -> float:
 	if not posting_date:
 		posting_date = nowdate()
@@ -83,6 +86,9 @@ def get_stock_value_on(
 
 	if item_code:
 		query = query.where(sle.item_code == item_code)
+
+	if company:
+		query = query.where(sle.company == company)
 
 	return query.run(as_list=True)[0][0]
 

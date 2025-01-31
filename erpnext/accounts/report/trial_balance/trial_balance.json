@@ -14,14 +14,14 @@
  "owner": "Administrator", 
  "ref_doctype": "GL Entry", 
  "report_name": "Trial Balance", 
- "report_type": "Script Report", 
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "Accounts User"
-  }, 
+  },
   {
    "role": "Accounts Manager"
-  }, 
+  },
   {
    "role": "Auditor"
   }

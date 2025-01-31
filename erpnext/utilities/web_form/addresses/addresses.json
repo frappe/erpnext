@@ -85,6 +85,18 @@
    "show_in_filter": 0
   },
   {
+    "allow_read_on_all_link_options": 0,
+    "fieldname": "pincode",
+    "fieldtype": "Data",
+    "hidden": 0,
+    "label": "Postal Code",
+    "max_length": 0,
+    "max_value": 0,
+    "read_only": 0,
+    "reqd": 0,
+    "show_in_filter": 0
+   },
+  {
    "allow_read_on_all_link_options": 0,
    "fieldname": "city",
    "fieldtype": "Data",
@@ -108,18 +120,7 @@
    "reqd": 0,
    "show_in_filter": 0
   },
-  {
-   "allow_read_on_all_link_options": 0,
-   "fieldname": "pincode",
-   "fieldtype": "Data",
-   "hidden": 0,
-   "label": "Postal Code",
-   "max_length": 0,
-   "max_value": 0,
-   "read_only": 0,
-   "reqd": 0,
-   "show_in_filter": 0
-  },
+  
   {
    "allow_read_on_all_link_options": 1,
    "fieldname": "country",

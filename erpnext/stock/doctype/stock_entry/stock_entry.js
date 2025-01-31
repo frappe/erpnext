@@ -507,18 +507,6 @@ frappe.ui.form.on("Stock Entry", {
 			});
 	},
 
-	company: function (frm) {
-		if (frm.doc.company) {
-			var company_doc = frappe.get_doc(":Company", frm.doc.company);
-			if (company_doc.default_letter_head) {
-				frm.set_value("letter_head", company_doc.default_letter_head);
-			}
-			frm.trigger("toggle_display_account_head");
-
-			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
-		}
-	},
-
 	make_retention_stock_entry: function (frm) {
 		frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.move_sample_to_retention_warehouse",
@@ -918,7 +906,12 @@ frappe.ui.form.on("Stock Entry Detail", {
 						var d = locals[cdt][cdn];
 						$.each(r.message, function (k, v) {
 							if (v) {
-								frappe.model.set_value(cdt, cdn, k, v); // qty and it's subsequent fields weren't triggered
+								// set_value trigger barcode function and barcode set qty to 1 in stock_controller.js, to avoid this set value manually instead of set value.
+								if (k != "barcode") {
+									frappe.model.set_value(cdt, cdn, k, v); // qty and it's subsequent fields weren't triggered
+								} else {
+									d.barcode = v;
+								}
 							}
 						});
 						refresh_field("items");
@@ -1060,11 +1053,9 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 	onload_post_render() {
 		var me = this;
-		this.set_default_account(function () {
-			if (me.frm.doc.__islocal && me.frm.doc.company && !me.frm.doc.amended_from) {
-				me.frm.trigger("company");
-			}
-		});
+		if (me.frm.doc.__islocal && me.frm.doc.company && !me.frm.doc.amended_from) {
+			me.company();
+		}
 
 		this.frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	}
@@ -1143,26 +1134,40 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.clean_up();
 	}
 
-	set_default_account(callback) {
+	company() {
+		if (this.frm.doc.company) {
+			var company_doc = frappe.get_doc(":Company", this.frm.doc.company);
+			if (company_doc.default_letter_head) {
+				this.frm.set_value("letter_head", company_doc.default_letter_head);
+			}
+			this.frm.trigger("toggle_display_account_head");
+
+			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+			if (this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company))
+				this.set_default_account("stock_adjustment_account", "expense_account");
+			this.set_default_account("cost_center", "cost_center");
+
+			this.frm.refresh_fields("items");
+		}
+	}
+
+	set_default_account(company_fieldname, fieldname) {
 		var me = this;
 
-		if (this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
-			return this.frm.call({
-				method: "erpnext.accounts.utils.get_company_default",
-				args: {
-					fieldname: "stock_adjustment_account",
-					company: this.frm.doc.company,
-				},
-				callback: function (r) {
-					if (!r.exc) {
-						$.each(me.frm.doc.items || [], function (i, d) {
-							if (!d.expense_account) d.expense_account = r.message;
-						});
-						if (callback) callback();
-					}
-				},
-			});
-		}
+		return this.frm.call({
+			method: "erpnext.accounts.utils.get_company_default",
+			args: {
+				fieldname: company_fieldname,
+				company: this.frm.doc.company,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					$.each(me.frm.doc.items || [], function (i, d) {
+						d[fieldname] = r.message;
+					});
+				}
+			},
+		});
 	}
 
 	clean_up() {

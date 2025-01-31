@@ -50,7 +50,7 @@ class SerialNo(StockController):
 		purchase_document_no: DF.Data | None
 		purchase_rate: DF.Float
 		serial_no: DF.Data
-		status: DF.Literal["", "Active", "Inactive", "Delivered", "Expired"]
+		status: DF.Literal["", "Active", "Inactive", "Consumed", "Delivered", "Expired"]
 		warehouse: DF.Link | None
 		warranty_expiry_date: DF.Date | None
 		warranty_period: DF.Int

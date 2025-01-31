@@ -23,6 +23,7 @@
   "hide_unavailable_items",
   "auto_add_item_to_cart",
   "validate_stock_on_save",
+  "print_receipt_on_order_complete",
   "column_break_16",
   "update_stock",
   "ignore_pricing_rule",
@@ -375,6 +376,12 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "default": "0",
+   "fieldname": "print_receipt_on_order_complete",
+   "fieldtype": "Check",
+   "label": "Print Receipt on Order Complete"
   }
  ],
  "icon": "icon-cog",
@@ -402,7 +409,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2022-08-10 12:57:06.241439",
+ "modified": "2025-01-01 11:07:03.161950",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

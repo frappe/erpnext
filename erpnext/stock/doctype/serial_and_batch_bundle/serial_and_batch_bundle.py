@@ -350,7 +350,7 @@ class SerialandBatchBundle(Document):
 		for row in bundle_data:
 			if row.serial_no:
 				valuation_details["serial_nos"][row.serial_no] = row.incoming_rate
-			else:
+			if row.batch_no:
 				valuation_details["batches"][row.batch_no] = row.incoming_rate
 
 		return valuation_details

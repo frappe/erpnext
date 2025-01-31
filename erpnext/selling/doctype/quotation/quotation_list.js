@@ -12,13 +12,17 @@ frappe.listview_settings["Quotation"] = {
 			};
 		}
 
-		listview.page.add_action_item(__("Sales Order"), () => {
-			erpnext.bulk_transaction_processing.create(listview, "Quotation", "Sales Order");
-		});
+		if (frappe.model.can_create("Sales Order")) {
+			listview.page.add_action_item(__("Sales Order"), () => {
+				erpnext.bulk_transaction_processing.create(listview, "Quotation", "Sales Order");
+			});
+		}
 
-		listview.page.add_action_item(__("Sales Invoice"), () => {
-			erpnext.bulk_transaction_processing.create(listview, "Quotation", "Sales Invoice");
-		});
+		if (frappe.model.can_create("Sales Invoice")) {
+			listview.page.add_action_item(__("Sales Invoice"), () => {
+				erpnext.bulk_transaction_processing.create(listview, "Quotation", "Sales Invoice");
+			});
+		}
 	},
 
 	get_indicator: function (doc) {

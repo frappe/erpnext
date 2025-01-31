@@ -622,15 +622,12 @@ class update_entries_after:
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
 
-				if self.has_stock_reco_with_serial_batch(sle):
-					break
-
 		if self.exceptions:
 			self.raise_exceptions()
 
 	def has_stock_reco_with_serial_batch(self, sle):
 		if (
-			sle.vocher_type == "Stock Reconciliation"
+			sle.voucher_type == "Stock Reconciliation"
 			and frappe.db.get_value(sle.voucher_type, sle.voucher_no, "set_posting_time") == 1
 		):
 			return not (sle.batch_no or sle.serial_no or sle.serial_and_batch_bundle)

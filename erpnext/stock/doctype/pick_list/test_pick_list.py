@@ -870,7 +870,7 @@ class TestPickList(FrappeTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
-		self.assertFalse(hasattr(pl, "locations"))
+		self.assertFalse(pl.locations)
 
 	def test_pick_list_validation_for_serial_no(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -901,7 +901,7 @@ class TestPickList(FrappeTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
-		self.assertFalse(hasattr(pl, "locations"))
+		self.assertFalse(pl.locations)
 
 	def test_pick_list_validation_for_batch_no(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -937,7 +937,7 @@ class TestPickList(FrappeTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
-		self.assertFalse(hasattr(pl, "locations"))
+		self.assertFalse(pl.locations)
 
 	def test_pick_list_validation_for_batch_no_and_serial_item(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -977,7 +977,7 @@ class TestPickList(FrappeTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
-		self.assertFalse(hasattr(pl, "locations"))
+		self.assertFalse(pl.locations)
 
 	def test_pick_list_validation_for_multiple_batches_and_sales_order(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -1172,6 +1172,7 @@ class TestPickList(FrappeTestCase):
 
 		for row in pl.locations:
 			row.qty = row.qty + 10
+			row.picked_qty = row.qty
 
 		self.assertRaises(frappe.ValidationError, pl.save)
 
@@ -1266,3 +1267,42 @@ class TestPickList(FrappeTestCase):
 		delivery_note = create_delivery_note(pl.name)
 
 		self.assertEqual(len(delivery_note.items), 1)
+
+	def test_pick_list_not_reset_batch(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Do Not Reset Picked Item",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BTH-PICKLT-.######",
+			},
+		).name
+
+		se = make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+		batch1 = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		se = make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+		batch2 = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+
+		for loc in pl.locations:
+			self.assertEqual(loc.batch_no, batch1)
+			loc.batch_no = batch2
+			loc.picked_qty = 0.0
+
+		pl.save()
+
+		for loc in pl.locations:
+			self.assertEqual(loc.batch_no, batch1)
+			loc.batch_no = batch2
+			loc.picked_qty = 10.0
+
+		pl.save()
+
+		for loc in pl.locations:
+			self.assertEqual(loc.batch_no, batch2)

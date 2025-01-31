@@ -35,7 +35,7 @@ def make_gl_entries(
 			make_acc_dimensions_offsetting_entry(gl_map)
 			validate_accounting_period(gl_map)
 			validate_disabled_accounts(gl_map)
-			gl_map = process_gl_map(gl_map, merge_entries)
+			gl_map = process_gl_map(gl_map, merge_entries, from_repost=from_repost)
 			if gl_map and len(gl_map) > 1:
 				if gl_map[0].voucher_type != "Period Closing Voucher":
 					create_payment_ledger_entry(
@@ -163,12 +163,12 @@ def validate_accounting_period(gl_map):
 		)
 
 
-def process_gl_map(gl_map, merge_entries=True, precision=None):
+def process_gl_map(gl_map, merge_entries=True, precision=None, from_repost=False):
 	if not gl_map:
 		return []
 
 	if gl_map[0].voucher_type != "Period Closing Voucher":
-		gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
+		gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision, from_repost)
 
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map, precision)
@@ -178,13 +178,17 @@ def process_gl_map(gl_map, merge_entries=True, precision=None):
 	return gl_map
 
 
-def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None):
+def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_repost=False):
 	new_gl_map = []
 	for d in gl_map:
 		cost_center = d.get("cost_center")
 
 		# Validate budget against main cost center
-		validate_expense_against_budget(d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision))
+		if not from_repost:
+			validate_expense_against_budget(
+				d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision)
+			)
+
 		cost_center_allocation = get_cost_center_allocation_data(
 			gl_map[0]["company"], gl_map[0]["posting_date"], cost_center
 		)

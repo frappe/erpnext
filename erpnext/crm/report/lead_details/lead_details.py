@@ -55,12 +55,13 @@ def get_columns():
 			"options": "Company",
 			"width": 120,
 		},
-		{"fieldname": "address", "label": _("Address"), "fieldtype": "Data", "width": 130},
-		{"fieldname": "state", "label": _("State"), "fieldtype": "Data", "width": 100},
-		{"fieldname": "pincode", "label": _("Postal Code"), "fieldtype": "Data", "width": 90},
+		{"label": _("Address"), "fieldname": "address", "fieldtype": "Data", "width": 130},
+		{"label": _("Postal Code"), "fieldname": "pincode", "fieldtype": "Data", "width": 90},
+		{"label": _("City"), "fieldname": "city", "fieldtype": "Data", "width": 100},
+		{"label": _("State"), "fieldname": "state", "fieldtype": "Data", "width": 100},
 		{
-			"fieldname": "country",
 			"label": _("Country"),
+			"fieldname": "country",
 			"fieldtype": "Link",
 			"options": "Country",
 			"width": 100,
@@ -93,8 +94,9 @@ def get_data(filters):
 			lead.owner,
 			lead.company,
 			(Concat_ws(", ", address.address_line1, address.address_line2)).as_("address"),
-			address.state,
 			address.pincode,
+			address.city,
+			address.state,
 			address.country,
 		)
 		.where(lead.company == filters.company)

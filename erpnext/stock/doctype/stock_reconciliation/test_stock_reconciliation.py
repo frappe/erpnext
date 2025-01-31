@@ -1330,6 +1330,84 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(stock_value_difference, 1500.00 * -1)
 
+	def test_stock_reco_for_negative_batch(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item(
+			"Test Item For Negative Batch",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TEST-BATCH-NB-.###",
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		se = make_stock_entry(
+			posting_date="2024-11-01",
+			posting_time="11:00",
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+		)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		se = make_stock_entry(
+			posting_date="2024-11-01",
+			posting_time="11:00",
+			item_code=item_code,
+			source=warehouse,
+			qty=10,
+			basic_rate=100,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": se.name, "is_cancelled": 0},
+		)
+
+		# intentionally setting negative qty
+		doc = frappe.get_doc("Stock Ledger Entry", sles[0].name)
+		doc.db_set(
+			{
+				"actual_qty": -20,
+				"qty_after_transaction": -10,
+			}
+		)
+
+		sabb_doc = frappe.get_doc("Serial and Batch Bundle", doc.serial_and_batch_bundle)
+		for row in sabb_doc.entries:
+			row.db_set("qty", -20)
+
+		batch_qty = get_batch_qty(batch_no, warehouse, item_code, consider_negative_batches=True)
+		self.assertEqual(batch_qty, -10)
+
+		sr = create_stock_reconciliation(
+			posting_date="2024-11-02",
+			posting_time="11:00",
+			item_code=item_code,
+			warehouse=warehouse,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			qty=0,
+			rate=100,
+			do_not_submit=True,
+		)
+
+		self.assertEqual(sr.items[0].current_qty, -10)
+		sr.submit()
+		sr.reload()
+
+		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
+		self.assertFalse(sr.items[0].serial_and_batch_bundle)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

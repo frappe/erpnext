@@ -43,6 +43,7 @@ class BlanketOrder(Document):
 	def validate(self):
 		self.validate_dates()
 		self.validate_duplicate_items()
+		self.validate_item_qty()
 		self.set_party_item_code()
 
 	def validate_dates(self):
@@ -117,6 +118,11 @@ class BlanketOrder(Document):
 		for d in self.items:
 			d.db_set("ordered_qty", item_ordered_qty.get(d.item_code, 0))
 
+	def validate_item_qty(self):
+		for d in self.items:
+			if d.qty < 0:
+				frappe.throw(_("Row {0}: Quantity cannot be negative.").format(d.idx))
+
 
 @frappe.whitelist()
 def make_order(source_name):
@@ -148,7 +154,7 @@ def make_order(source_name):
 				"doctype": doctype + " Item",
 				"field_map": {"rate": "blanket_order_rate", "parent": "blanket_order"},
 				"postprocess": update_item,
-				"condition": lambda item: (flt(item.qty) - flt(item.ordered_qty)) > 0,
+				"condition": lambda item: not (flt(item.qty)) or (flt(item.qty) - flt(item.ordered_qty)) > 0,
 			},
 		},
 	)
@@ -186,7 +192,7 @@ def validate_against_blanket_order(order_doc):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty
 						allowed_qty = remaining_qty + (remaining_qty * (allowance / 100))
-						if allowed_qty < item_data[item.item_code]:
+						if item.qty and allowed_qty < item_data[item.item_code]:
 							frappe.throw(
 								_(
 									"Item {0} cannot be ordered more than {1} against Blanket Order {2}."

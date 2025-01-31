@@ -28,9 +28,13 @@ $.extend(erpnext.queries, {
 
 	customer_filter: function (doc) {
 		if (!doc.customer) {
-			frappe.throw(
-				__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "customer", doc.name))])
-			);
+			cur_frm.scroll_to_field("customer");
+			frappe.show_alert({
+				message: __("Please set {0} first.", [
+					__(frappe.meta.get_label(doc.doctype, "customer", doc.name)),
+				]),
+				indicator: "orange",
+			});
 		}
 
 		return { filters: { customer: doc.customer } };
@@ -39,11 +43,13 @@ $.extend(erpnext.queries, {
 	contact_query: function (doc) {
 		if (frappe.dynamic_link) {
 			if (!doc[frappe.dynamic_link.fieldname]) {
-				frappe.throw(
-					__("Please set {0}", [
+				cur_frm.scroll_to_field(frappe.dynamic_link.fieldname);
+				frappe.show_alert({
+					message: __("Please set {0} first.", [
 						__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name)),
-					])
-				);
+					]),
+					indicator: "orange",
+				});
 			}
 
 			return {
@@ -70,11 +76,13 @@ $.extend(erpnext.queries, {
 	address_query: function (doc) {
 		if (frappe.dynamic_link) {
 			if (!doc[frappe.dynamic_link.fieldname]) {
-				frappe.throw(
-					__("Please set {0}", [
+				cur_frm.scroll_to_field(frappe.dynamic_link.fieldname);
+				frappe.show_alert({
+					message: __("Please set {0} first.", [
 						__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name)),
-					])
-				);
+					]),
+					indicator: "orange",
+				});
 			}
 
 			return {
@@ -89,7 +97,13 @@ $.extend(erpnext.queries, {
 
 	company_address_query: function (doc) {
 		if (!doc.company) {
-			frappe.throw(__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "company", doc.name))]));
+			cur_frm.scroll_to_field("company");
+			frappe.show_alert({
+				message: __("Please set {0} first.", [
+					__(frappe.meta.get_label(doc.doctype, "company", doc.name)),
+				]),
+				indicator: "orange",
+			});
 		}
 
 		return {
@@ -110,9 +124,13 @@ $.extend(erpnext.queries, {
 
 	supplier_filter: function (doc) {
 		if (!doc.supplier) {
-			frappe.throw(
-				__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "supplier", doc.name))])
-			);
+			cur_frm.scroll_to_field("supplier");
+			frappe.show_alert({
+				message: __("Please set {0} first.", [
+					__(frappe.meta.get_label(doc.doctype, "supplier", doc.name)),
+				]),
+				indicator: "orange",
+			});
 		}
 
 		return { filters: { supplier: doc.supplier } };
@@ -120,9 +138,13 @@ $.extend(erpnext.queries, {
 
 	lead_filter: function (doc) {
 		if (!doc.lead) {
-			frappe.throw(
-				__("Please specify a {0}", [__(frappe.meta.get_label(doc.doctype, "lead", doc.name))])
-			);
+			cur_frm.scroll_to_field("lead");
+			frappe.show_alert({
+				message: __("Please specify a {0} first.", [
+					__(frappe.meta.get_label(doc.doctype, "lead", doc.name)),
+				]),
+				indicator: "orange",
+			});
 		}
 
 		return { filters: { lead: doc.lead } };

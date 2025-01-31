@@ -1658,7 +1658,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function(r) {
 					if (!r.exc && r.message) {
-						me.remove_pricing_rule(r.message, removed_pricing_rule);
+						me.remove_pricing_rule(r.message, removed_pricing_rule, item.name);
 						me.calculate_taxes_and_totals();
 						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
 					}
@@ -1751,7 +1751,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"serial_no": d.serial_no,
 					"batch_no": d.batch_no,
 					"price_list_rate": d.price_list_rate,
-					"conversion_factor": d.conversion_factor || 1.0
+					"conversion_factor": d.conversion_factor || 1.0,
+					"discount_percentage" : d.discount_percentage,
+					"discount_amount" : d.discount_amount,
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
@@ -1935,7 +1937,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 	}
 
-	remove_pricing_rule(item, removed_pricing_rule) {
+	remove_pricing_rule(item, removed_pricing_rule, row_name) {
 		let me = this;
 		const fields = ["discount_percentage",
 			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
@@ -1973,6 +1975,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 
 			me.trigger_price_list_rate();
+		}
+		else if(!item.is_free_item && row_name){
+			me.frm.doc.items.forEach(d => {
+				if (d.name != row_name) return;
+
+				Object.assign(d, item);
+			});
 		}
 	}
 

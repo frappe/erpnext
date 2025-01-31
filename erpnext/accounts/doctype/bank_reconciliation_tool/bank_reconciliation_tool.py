@@ -802,7 +802,6 @@ def get_je_matching_query(
 		.where(je.clearance_date.isnull())
 		.where(jea.account == common_filters.bank_account)
 		.where(amount_equality if exact_match else getattr(jea, amount_field) > 0.0)
-		.where(je.docstatus == 1)
 		.where(filter_by_date)
 		.orderby(je.cheque_date if cint(filter_by_reference_date) else je.posting_date)
 	)

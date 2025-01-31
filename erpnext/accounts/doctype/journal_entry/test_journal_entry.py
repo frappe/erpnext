@@ -146,10 +146,9 @@ class TestJournalEntry(unittest.TestCase):
 				"credit_in_account_currency": 0 if diff > 0 else abs(diff),
 			},
 		)
-		jv.insert()
 
 		if account_bal == stock_bal:
-			self.assertRaises(StockAccountInvalidTransaction, jv.submit)
+			self.assertRaises(StockAccountInvalidTransaction, jv.save)
 			frappe.db.rollback()
 		else:
 			jv.submit()

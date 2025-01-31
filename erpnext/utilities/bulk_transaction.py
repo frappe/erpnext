@@ -8,6 +8,9 @@ from frappe.utils import get_link_to_form, today
 
 @frappe.whitelist()
 def transaction_processing(data, from_doctype, to_doctype):
+	frappe.has_permission(from_doctype, "read", throw=True)
+	frappe.has_permission(to_doctype, "create", throw=True)
+
 	if isinstance(data, str):
 		deserialized_data = json.loads(data)
 	else:

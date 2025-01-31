@@ -11,12 +11,20 @@ frappe.listview_settings["Supplier Quotation"] = {
 	},
 
 	onload: function (listview) {
-		listview.page.add_action_item(__("Purchase Order"), () => {
-			erpnext.bulk_transaction_processing.create(listview, "Supplier Quotation", "Purchase Order");
-		});
+		if (frappe.model.can_create("Purchase Order")) {
+			listview.page.add_action_item(__("Purchase Order"), () => {
+				erpnext.bulk_transaction_processing.create(listview, "Supplier Quotation", "Purchase Order");
+			});
+		}
 
-		listview.page.add_action_item(__("Purchase Invoice"), () => {
-			erpnext.bulk_transaction_processing.create(listview, "Supplier Quotation", "Purchase Invoice");
-		});
+		if (frappe.model.can_create("Purchase Invoice")) {
+			listview.page.add_action_item(__("Purchase Invoice"), () => {
+				erpnext.bulk_transaction_processing.create(
+					listview,
+					"Supplier Quotation",
+					"Purchase Invoice"
+				);
+			});
+		}
 	},
 };

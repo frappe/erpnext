@@ -11,7 +11,8 @@
   "description",
   "col_break3",
   "amount",
-  "base_amount"
+  "base_amount",
+  "has_corrective_cost"
  ],
  "fields": [
   {
@@ -62,12 +63,19 @@
    "label": "Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_corrective_cost",
+   "fieldtype": "Check",
+   "label": "Has Corrective Cost",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-17 13:57:10.807980",
+ "modified": "2025-01-20 12:22:03.455762",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",
