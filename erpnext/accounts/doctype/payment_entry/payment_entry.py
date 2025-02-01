@@ -2930,8 +2930,8 @@ def get_payment_entry(
 	complete_contact_details(pe)
 	pe.ensure_supplier_is_not_blocked()
 
-	pe.paid_from = party_account if payment_type == "Receive" else bank.account
-	pe.paid_to = party_account if payment_type == "Pay" else bank.account
+	# pe.paid_from = party_account if payment_type == "Receive" else bank.account
+	# pe.paid_to = party_account if payment_type == "Pay" else bank.account
 	pe.paid_from_account_currency = (
 		party_account_currency if payment_type == "Receive" else bank.account_currency
 	)
