@@ -87,6 +87,7 @@ function get_filters() {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
+			options: ["Overdue", "Unpaid", "Completed", "Partly Paid"],
 			width: 100,
 			get_data: function (txt) {
 				let status = ["Overdue", "Unpaid", "Completed", "Partly Paid"];

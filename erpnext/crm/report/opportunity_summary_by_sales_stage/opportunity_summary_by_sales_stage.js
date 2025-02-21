@@ -31,6 +31,7 @@ frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
+			options: ["Open", "Converted", "Quotation", "Replied"],
 			get_data: function () {
 				return [
 					{ value: "Open", description: "Status" },

@@ -40,7 +40,7 @@
 					<p>
 						<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
 							class="btn btn-primary btn-sm" id="pay-for-order">
-							{{ _("Pay", null, "Amount") }} {{ pay_amount }}
+							{{ _("Pay", null, "Amount") }} {{doc.get_formatted("grand_total") }}
 						</a>
 					</p>
 				</div>
@@ -72,8 +72,7 @@
 				</span>
 			</div>
 			<div class="text-right col-2">
-				{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase
-				Order'] else doc.customer_name %}
+				{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase Order'] else doc.customer_name %}
 				<b>{{ party_name }}</b>
 
 				{% if doc.contact_display and doc.contact_display != party_name %}

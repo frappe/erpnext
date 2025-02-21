@@ -299,7 +299,8 @@
    "oldfieldname": "project_name",
    "oldfieldtype": "Link",
    "options": "Project",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -2186,7 +2187,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-01-14 11:38:30.446370",
+ "modified": "2025-02-06 15:59:54.636202",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

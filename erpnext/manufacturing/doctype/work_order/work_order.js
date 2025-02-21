@@ -397,7 +397,10 @@ frappe.ui.form.on("Work Order", {
 		message = title;
 		// pending qty
 		if (!frm.doc.skip_transfer) {
-			var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
+			var pending_complete =
+				frm.doc.material_transferred_for_manufacturing -
+				frm.doc.produced_qty -
+				frm.doc.process_loss_qty;
 			if (pending_complete) {
 				var width = (pending_complete / frm.doc.qty) * 100 - added_min;
 				title = __("{0} items in progress", [pending_complete]);
@@ -408,6 +411,16 @@ frappe.ui.form.on("Work Order", {
 				});
 				message = message + ". " + title;
 			}
+		}
+		if (frm.doc.process_loss_qty) {
+			var process_loss_width = (frm.doc.process_loss_qty / frm.doc.qty) * 100;
+			title = __("{0} items lost during process.", [frm.doc.process_loss_qty]);
+			bars.push({
+				title: title,
+				width: process_loss_width + "%",
+				progress_class: "progress-bar-danger",
+			});
+			message = message + ". " + title;
 		}
 		frm.dashboard.add_progress(__("Status"), bars, message);
 	},

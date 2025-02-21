@@ -391,3 +391,6 @@ erpnext.patches.v15_0.rename_manufacturing_settings_field
 erpnext.patches.v15_0.migrate_checkbox_to_select_for_reconciliation_effect
 erpnext.patches.v15_0.sync_auto_reconcile_config
 execute:frappe.db.set_single_value("Accounts Settings", "exchange_gain_loss_posting_date", "Payment")
+erpnext.patches.v14_0.disable_add_row_in_gross_profit
+erpnext.patches.v15_0.set_difference_amount_in_asset_value_adjustment
+erpnext.patches.v14_0.update_posting_datetime

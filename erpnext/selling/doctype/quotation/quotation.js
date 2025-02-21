@@ -353,6 +353,26 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		);
 		dialog.show();
 	}
+
+	currency() {
+		super.currency();
+		let me = this;
+		const company_currency = this.get_company_currency();
+		if (this.frm.doc.currency && this.frm.doc.currency !== company_currency) {
+			this.get_exchange_rate(
+				this.frm.doc.transaction_date,
+				this.frm.doc.currency,
+				company_currency,
+				function (exchange_rate) {
+					if (exchange_rate != me.frm.doc.conversion_rate) {
+						me.set_margin_amount_based_on_currency(exchange_rate);
+						me.set_actual_charges_based_on_currency(exchange_rate);
+						me.frm.set_value("conversion_rate", exchange_rate);
+					}
+				}
+			);
+		}
+	}
 };
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);

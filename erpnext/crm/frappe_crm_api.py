@@ -31,7 +31,6 @@ def create_custom_fields_for_frappe_crm():
 
 @frappe.whitelist()
 def create_prospect_against_crm_deal():
-	frappe.only_for("System Manager")
 	doc = frappe.form_dict
 	prospect = frappe.get_doc(
 		{
@@ -152,7 +151,6 @@ def contact_exists(email, mobile_no):
 
 @frappe.whitelist()
 def create_customer(customer_data=None):
-	frappe.only_for("System Manager")
 	if not customer_data:
 		customer_data = frappe.form_dict
 

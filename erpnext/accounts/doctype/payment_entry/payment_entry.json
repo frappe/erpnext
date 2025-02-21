@@ -224,6 +224,7 @@
    "label": "Accounts"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "party",
    "fieldname": "party_balance",
    "fieldtype": "Currency",
@@ -253,6 +254,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "paid_from",
    "fieldname": "paid_from_account_balance",
    "fieldtype": "Currency",
@@ -286,6 +288,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "paid_to",
    "fieldname": "paid_to_account_balance",
    "fieldtype": "Currency",
@@ -806,7 +809,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2025-01-13 16:03:47.169699",
+ "modified": "2025-01-31 17:27:28.555246",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

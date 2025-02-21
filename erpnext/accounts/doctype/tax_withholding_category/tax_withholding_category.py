@@ -270,7 +270,10 @@ def get_lower_deduction_certificate(company, posting_date, tax_details, pan_no):
 
 def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=None):
 	vouchers, voucher_wise_amount = get_invoice_vouchers(
-		parties, tax_details, inv.company, party_type=party_type
+		parties,
+		tax_details,
+		inv.company,
+		party_type=party_type,
 	)
 
 	payment_entry_vouchers = get_payment_entry_vouchers(
@@ -360,11 +363,23 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	voucher_wise_amount = []
 	vouchers = []
 
+	ldcs = frappe.db.get_all(
+		"Lower Deduction Certificate",
+		filters={
+			"valid_from": [">=", tax_details.from_date],
+			"valid_upto": ["<=", tax_details.to_date],
+			"company": company,
+			"supplier": ["in", parties],
+		},
+		fields=["supplier", "valid_from", "valid_upto", "rate"],
+	)
+
 	doctype = "Purchase Invoice" if party_type == "Supplier" else "Sales Invoice"
 	field = [
 		"base_tax_withholding_net_total as base_net_total" if party_type == "Supplier" else "base_net_total",
 		"name",
 		"grand_total",
+		"posting_date",
 	]
 
 	filters = {
@@ -383,17 +398,22 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	invoices_details = frappe.get_all(doctype, filters=filters, fields=field)
 
 	for d in invoices_details:
-		vouchers.append(d.name)
-		voucher_wise_amount.append(
-			frappe._dict(
-				{
-					"voucher_name": d.name,
-					"voucher_type": doctype,
-					"taxable_amount": d.base_net_total,
-					"grand_total": d.grand_total,
-				}
-			)
+		d = frappe._dict(
+			{
+				"voucher_name": d.name,
+				"voucher_type": doctype,
+				"taxable_amount": d.base_net_total,
+				"grand_total": d.grand_total,
+				"posting_date": d.posting_date,
+			}
 		)
+
+		if ldc := [x for x in ldcs if d.posting_date >= x.valid_from and d.posting_date <= x.valid_upto]:
+			if ldc[0].supplier in parties and ldc[0].rate == 0:
+				d.update({"taxable_amount": 0})
+
+		vouchers.append(d.voucher_name)
+		voucher_wise_amount.append(d)
 
 	journal_entries_details = frappe.db.sql(
 		"""

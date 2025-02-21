@@ -32,6 +32,7 @@ class SalesOrderItem(Document):
 		brand: DF.Link | None
 		company_total_stock: DF.Float
 		conversion_factor: DF.Float
+		cost_center: DF.Link
 		customer_item_code: DF.Data | None
 		delivered_by_supplier: DF.Check
 		delivered_qty: DF.Float
@@ -68,6 +69,7 @@ class SalesOrderItem(Document):
 		pricing_rules: DF.SmallText | None
 		produced_qty: DF.Float
 		production_plan_qty: DF.Float
+		project: DF.Link | None
 		projected_qty: DF.Float
 		purchase_order: DF.Link | None
 		purchase_order_item: DF.Data | None

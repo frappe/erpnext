@@ -41,7 +41,7 @@ frappe.query_reports["Production Planning Report"] = {
 			fieldname: "docnames",
 			label: __("Document Name"),
 			fieldtype: "MultiSelectList",
-			options: "Sales Order",
+			options: "based_on",
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 

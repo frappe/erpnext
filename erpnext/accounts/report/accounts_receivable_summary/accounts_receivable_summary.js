@@ -66,6 +66,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			fieldname: "party",
 			label: __("Party"),
 			fieldtype: "MultiSelectList",
+			options: "party_type",
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 

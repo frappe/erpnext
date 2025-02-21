@@ -634,9 +634,7 @@ class Subscription(Document):
 		"""
 		invoice = frappe.get_all(
 			self.invoice_document_type,
-			{
-				"subscription": self.name,
-			},
+			{"subscription": self.name, "docstatus": ("<", 2)},
 			limit=1,
 			order_by="to_date desc",
 			pluck="name",
@@ -675,6 +673,7 @@ class Subscription(Document):
 			self.invoice_document_type,
 			{
 				"subscription": self.name,
+				"docstatus": 1,
 				"status": ["!=", "Paid"],
 			},
 		)

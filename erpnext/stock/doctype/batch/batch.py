@@ -455,10 +455,14 @@ def get_available_batches(kwargs):
 
 	batches = get_auto_batch_nos(kwargs)
 	for batch in batches:
-		if batch.get("batch_no") not in batchwise_qty:
-			batchwise_qty[batch.get("batch_no")] = batch.get("qty")
+		key = batch.get("batch_no")
+		if kwargs.get("based_on_warehouse"):
+			key = (batch.get("batch_no"), batch.get("warehouse"))
+
+		if key not in batchwise_qty:
+			batchwise_qty[key] = batch.get("qty")
 		else:
-			batchwise_qty[batch.get("batch_no")] += batch.get("qty")
+			batchwise_qty[key] += batch.get("qty")
 
 	return batchwise_qty
 

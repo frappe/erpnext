@@ -37,6 +37,7 @@ class QualityInspection(Document):
 		item_code: DF.Link
 		item_name: DF.Data | None
 		item_serial_no: DF.Link | None
+		letter_head: DF.Link | None
 		manual_inspection: DF.Check
 		naming_series: DF.Literal["MAT-QA-.YYYY.-"]
 		quality_inspection_template: DF.Link | None

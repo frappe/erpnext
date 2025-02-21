@@ -2,6 +2,7 @@
 	display: grid;
 	grid-template-columns: repeat(10, minmax(0, 1fr));
 	gap: var(--margin-md);
+	padding: 1%;
 
 	section {
 		min-height: 45rem;

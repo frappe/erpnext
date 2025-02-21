@@ -113,11 +113,10 @@ class SubcontractingController(StockController):
 					)
 					item.sc_conversion_factor = service_item_qty / item.qty
 
-				if (
-					self.doctype not in "Subcontracting Receipt"
-					and item.qty
-					> flt(get_pending_sco_qty(self.purchase_order).get(item.purchase_order_item))
-					/ item.sc_conversion_factor
+				if self.doctype not in "Subcontracting Receipt" and item.qty > flt(
+					get_pending_sco_qty(self.purchase_order).get(item.purchase_order_item)
+					/ item.sc_conversion_factor,
+					frappe.get_precision("Purchase Order Item", "qty"),
 				):
 					frappe.throw(
 						_(

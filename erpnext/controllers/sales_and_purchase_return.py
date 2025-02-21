@@ -258,7 +258,7 @@ def get_already_returned_items(doc):
 
 	field = (
 		frappe.scrub(doc.doctype) + "_item"
-		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice"]
+		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
 		else "dn_detail"
 	)
 	data = frappe.db.sql(
@@ -770,6 +770,7 @@ def get_return_against_item_fields(voucher_type):
 		"Delivery Note": "dn_detail",
 		"Sales Invoice": "sales_invoice_item",
 		"Subcontracting Receipt": "subcontracting_receipt_item",
+		"POS Invoice": "sales_invoice_item",
 	}
 	return return_against_item_fields[voucher_type]
 

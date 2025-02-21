@@ -29,6 +29,7 @@
   "ignore_pricing_rule",
   "allow_rate_change",
   "allow_discount_change",
+  "disable_grand_total_to_default_mop",
   "section_break_23",
   "item_groups",
   "column_break_25",
@@ -382,6 +383,12 @@
    "fieldname": "print_receipt_on_order_complete",
    "fieldtype": "Check",
    "label": "Print Receipt on Order Complete"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_grand_total_to_default_mop",
+   "fieldtype": "Check",
+   "label": "Disable auto setting Grand Total to default Payment Mode"
   }
  ],
  "icon": "icon-cog",
@@ -409,7 +416,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2025-01-01 11:07:03.161950",
+ "modified": "2025-01-29 13:12:30.796630",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

@@ -773,6 +773,8 @@ def update_reference_in_payment_entry(
 		frappe._dict({"difference_posting_date": d.difference_posting_date}), dimensions_dict
 	)
 
+	# Ledgers will be reposted by Reconciliation tool
+	payment_entry.flags.ignore_reposting_on_reconciliation = True
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
 	return row, update_advance_paid

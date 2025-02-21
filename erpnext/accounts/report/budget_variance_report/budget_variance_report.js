@@ -91,6 +91,7 @@ function get_filters() {
 			fieldname: "budget_against_filter",
 			label: __("Dimension Filter"),
 			fieldtype: "MultiSelectList",
+			options: "budget_against",
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 

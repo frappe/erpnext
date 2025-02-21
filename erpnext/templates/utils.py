@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.utils import escape_html
 
 
 @frappe.whitelist(allow_guest=True)
@@ -10,6 +11,8 @@ def send_message(sender, message, subject="Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
 	website_send_message(sender, message, subject)
+
+	message = escape_html(message)
 
 	lead = customer = None
 	customer = frappe.db.sql(

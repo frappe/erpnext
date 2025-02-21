@@ -516,6 +516,7 @@ class TestJobCard(FrappeTestCase):
 			self.assertEqual(jc.status, status)
 
 		jc = frappe.new_doc("Job Card")
+		jc.process_loss_qty = 0
 		jc.for_quantity = 2
 		jc.transferred_qty = 1
 		jc.total_completed_qty = 0

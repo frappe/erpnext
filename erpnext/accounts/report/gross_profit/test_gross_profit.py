@@ -605,3 +605,33 @@ class TestGrossProfit(FrappeTestCase):
 		item_from_sinv2 = [x for x in data if x.parent_invoice == sinv2.name]
 		self.assertEqual(len(item_from_sinv2), 1)
 		self.assertEqual(1800, item_from_sinv2[0].valuation_rate)
+
+	def test_gross_profit_groupby_invoices(self):
+		create_sales_invoice(
+			qty=1,
+			rate=100,
+			company=self.company,
+			customer=self.customer,
+			item_code=self.item,
+			item_name=self.item,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			parent_cost_center=self.cost_center,
+			update_stock=0,
+			currency="INR",
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+		)
+
+		filters = frappe._dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+		)
+
+		_, data = execute(filters=filters)
+		total = data[-1]
+
+		self.assertEqual(total.selling_amount, 100.0)
+		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.gross_profit, 100.0)
+		self.assertEqual(total.get("gross_profit_%"), 100.0)

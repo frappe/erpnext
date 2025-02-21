@@ -377,7 +377,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "notes_tab",
    "fieldtype": "Tab Break",
-   "label": "Comments"
+   "label": "Notes"
   },
   {
    "collapsible": 1,
@@ -516,7 +516,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2023-12-01 18:46:49.468526",
+ "modified": "2025-01-31 13:40:08.094759",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

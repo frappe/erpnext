@@ -95,9 +95,9 @@ class Asset(AccountsController):
 		purchase_amount: DF.Currency
 		purchase_date: DF.Date | None
 		purchase_invoice: DF.Link | None
-		purchase_invoice_item: DF.Link | None
+		purchase_invoice_item: DF.Data | None
 		purchase_receipt: DF.Link | None
-		purchase_receipt_item: DF.Link | None
+		purchase_receipt_item: DF.Data | None
 		split_from: DF.Link | None
 		status: DF.Literal[
 			"Draft",
@@ -121,6 +121,7 @@ class Asset(AccountsController):
 
 	def validate(self):
 		self.validate_precision()
+		self.set_purchase_doc_row_item()
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
 		self.validate_item()
@@ -198,6 +199,38 @@ class Asset(AccountsController):
 
 	def after_delete(self):
 		add_asset_activity(self.name, _("Asset deleted"))
+
+	def set_purchase_doc_row_item(self):
+		if self.is_existing_asset or self.is_composite_asset:
+			return
+
+		self.purchase_amount = self.gross_purchase_amount
+		purchase_doc_type = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
+		purchase_doc = self.purchase_receipt or self.purchase_invoice
+
+		if not purchase_doc:
+			return
+
+		linked_item = self.get_linked_item(purchase_doc_type, purchase_doc)
+
+		if linked_item:
+			if purchase_doc_type == "Purchase Receipt":
+				self.purchase_receipt_item = linked_item
+			else:
+				self.purchase_invoice_item = linked_item
+
+	def get_linked_item(self, purchase_doc_type, purchase_doc):
+		purchase_doc = frappe.get_doc(purchase_doc_type, purchase_doc)
+
+		for item in purchase_doc.items:
+			if self.asset_quantity > 1:
+				if item.base_net_amount == self.gross_purchase_amount and item.qty == self.asset_quantity:
+					return item.name
+				elif item.qty == self.asset_quantity:
+					return item.name
+			else:
+				if item.base_net_rate == self.gross_purchase_amount and item.qty == self.asset_quantity:
+					return item.name
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -1123,6 +1156,30 @@ def has_active_capitalization(asset):
 		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
 	)
 	return active_capitalizations > 0
+
+
+@frappe.whitelist()
+def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
+	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
+
+	if not matching_items:
+		frappe.throw(_(f"Selected {doctype} does not contain the Item Code {item_code}"))
+
+	first_item = matching_items[0]
+	is_multiple_items = len(matching_items) > 1
+
+	return {
+		"company": purchase_doc.company,
+		"purchase_date": purchase_doc.get("bill_date") or purchase_doc.get("posting_date"),
+		"gross_purchase_amount": flt(first_item.base_net_amount),
+		"asset_quantity": first_item.qty,
+		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
+		"asset_location": first_item.get("asset_location"),
+		"is_multiple_items": is_multiple_items,
+		"purchase_receipt_item": first_item.name if doctype == "Purchase Receipt" else None,
+		"purchase_invoice_item": first_item.name if doctype == "Purchase Invoice" else None,
+	}
 
 
 @frappe.whitelist()

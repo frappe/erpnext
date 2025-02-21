@@ -29,7 +29,6 @@ class ManufacturingSettings(Document):
 		get_rm_cost_from_consumption_entry: DF.Check
 		job_card_excess_transfer: DF.Check
 		make_serial_no_batch_from_work_order: DF.Check
-		manufacture_sub_assembly_in_operation: DF.Check
 		material_consumption: DF.Check
 		mins_between_operations: DF.Int
 		overproduction_percentage_for_sales_order: DF.Percent

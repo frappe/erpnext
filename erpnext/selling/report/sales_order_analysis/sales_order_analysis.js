@@ -53,6 +53,7 @@ frappe.query_reports["Sales Order Analysis"] = {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
+			options: ["To Pay", "To Bill", "To Deliver", "To Deliver and Bill", "Completed"],
 			width: "80",
 			get_data: function (txt) {
 				let status = ["To Bill", "To Deliver", "To Deliver and Bill", "Completed"];

@@ -159,11 +159,10 @@ class PackingSlip(StatusUpdater):
 			self.from_case_no = self.get_recommended_case_no()
 
 		for item in self.items:
-			stock_uom, weight_per_unit, weight_uom = frappe.db.get_value(
-				"Item", item.item_code, ["stock_uom", "weight_per_unit", "weight_uom"]
+			weight_per_unit, weight_uom = frappe.db.get_value(
+				"Item", item.item_code, ["weight_per_unit", "weight_uom"]
 			)
 
-			item.stock_uom = stock_uom
 			if weight_per_unit and not item.net_weight:
 				item.net_weight = weight_per_unit
 			if weight_uom and not item.weight_uom:

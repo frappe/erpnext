@@ -917,6 +917,7 @@
    "fieldtype": "Float",
    "label": "Subcontracted Quantity",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   }
  ],
@@ -924,7 +925,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-12-10 12:11:18.536089",
+ "modified": "2025-02-18 12:35:04.432636",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

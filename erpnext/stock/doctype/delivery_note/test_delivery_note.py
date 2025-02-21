@@ -769,6 +769,48 @@ class TestDeliveryNote(FrappeTestCase):
 			{"warehouse": "_Test Warehouse - _TC"},
 		)
 
+	def test_delivery_note_internal_transfer_serial_no_status(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		item = make_item(
+			"_Test Item for Internal Transfer With Serial No Status",
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "INT-SN-.####"},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+		target = "Stores - _TC"
+		company = "_Test Company"
+		customer = create_internal_customer(represents_company=company)
+		rate = 42
+
+		se = make_stock_entry(target=warehouse, qty=5, basic_rate=rate, item_code=item)
+		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=500,
+			warehouse=warehouse,
+			target_warehouse=target,
+			ignore_pricing_rule=0,
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos),
+		)
+
+		for serial_no in serial_nos:
+			sn = frappe.db.get_value("Serial No", serial_no, ["status", "warehouse"], as_dict=1)
+			self.assertEqual(sn.status, "Active")
+			self.assertEqual(sn.warehouse, target)
+
+		dn.cancel()
+
+		for serial_no in serial_nos:
+			sn = frappe.db.get_value("Serial No", serial_no, ["status", "warehouse"], as_dict=1)
+			self.assertEqual(sn.status, "Active")
+			self.assertEqual(sn.warehouse, warehouse)
+
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 

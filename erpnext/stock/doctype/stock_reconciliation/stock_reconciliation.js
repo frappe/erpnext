@@ -295,6 +295,11 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 	qty: function (frm, cdt, cdn) {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
+
+		let row = locals[cdt][cdn];
+		if (row.use_serial_batch_fields && !row.qty && row.serial_no) {
+			frappe.model.set_value(cdt, cdn, "serial_no", "");
+		}
 	},
 
 	valuation_rate: function (frm, cdt, cdn) {

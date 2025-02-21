@@ -680,11 +680,15 @@ def make_reverse_gl_entries(
 
 			debit_in_account_currency = new_gle.get("debit_in_account_currency", 0)
 			credit_in_account_currency = new_gle.get("credit_in_account_currency", 0)
+			debit_in_transaction_currency = new_gle.get("debit_in_transaction_currency", 0)
+			credit_in_transaction_currency = new_gle.get("credit_in_transaction_currency", 0)
 
 			new_gle["debit"] = credit
 			new_gle["credit"] = debit
 			new_gle["debit_in_account_currency"] = credit_in_account_currency
 			new_gle["credit_in_account_currency"] = debit_in_account_currency
+			new_gle["debit_in_transaction_currency"] = credit_in_transaction_currency
+			new_gle["credit_in_transaction_currency"] = debit_in_transaction_currency
 
 			new_gle["remarks"] = "On cancellation of " + new_gle["voucher_no"]
 			new_gle["is_cancelled"] = 1

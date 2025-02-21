@@ -2367,6 +2367,59 @@ class TestWorkOrder(FrappeTestCase):
 
 		stock_entry.submit()
 
+	def test_components_alternate_item_for_bom_based_manufacture_entry(self):
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
+
+		fg_item = "Test FG Item For Component Validation for alternate item"
+		source_warehouse = "Stores - _TC"
+		raw_materials = ["Test Component Validation RM Item 112", "Test Component Validation RM Item 22"]
+		alternate_item = ["Alternate Test Component Validation RM Item 1"]
+
+		make_item(fg_item, {"is_stock_item": 1})
+		for item in raw_materials + alternate_item:
+			make_item(item, {"is_stock_item": 1, "allow_alternative_item": 1})
+			test_stock_entry.make_stock_entry(
+				item_code=item,
+				target=source_warehouse,
+				qty=10,
+				basic_rate=100,
+			)
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Alternative",
+				"item_code": raw_materials[0],
+				"alternative_item_code": alternate_item[0],
+				"two_way": 1,
+			}
+		).insert()
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=raw_materials)
+
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=10,
+			source_warehouse=source_warehouse,
+		)
+
+		transfer_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		transfer_entry.save()
+		transfer_entry.items[0].item_code = alternate_item[0]
+		transfer_entry.items[0].original_item = raw_materials[0]
+		transfer_entry.submit()
+
+		self.assertTrue(transfer_entry.docstatus == 1)
+
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		manufacture_entry.save()
+		self.assertTrue(manufacture_entry.items[0].item_code == alternate_item[0])
+		self.assertTrue(manufacture_entry.items[0].original_item == raw_materials[0])
+
+		manufacture_entry.submit()
+
+		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)
+
 	def test_components_qty_for_bom_based_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)

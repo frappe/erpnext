@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate
+from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
 
 class OverAllowanceError(frappe.ValidationError):
@@ -543,7 +543,7 @@ class StatusUpdater(Document):
 				)[0][0]
 			)
 
-			per_billed = (min(ref_doc_qty, billed_qty) / ref_doc_qty) * 100
+			per_billed = safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100
 
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 

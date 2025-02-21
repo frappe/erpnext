@@ -8,7 +8,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, get_datetime
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -367,6 +367,9 @@ def get_columns(filters):
 
 
 def get_stock_ledger_entries(filters, items):
+	from_date = get_datetime(filters.from_date + " 00:00:00")
+	to_date = get_datetime(filters.to_date + " 23:59:59")
+
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
@@ -390,12 +393,8 @@ def get_stock_ledger_entries(filters, items):
 			sle.serial_no,
 			sle.project,
 		)
-		.where(
-			(sle.docstatus < 2)
-			& (sle.is_cancelled == 0)
-			& (sle.posting_date[filters.from_date : filters.to_date])
-		)
-		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.where((sle.docstatus < 2) & (sle.is_cancelled == 0) & (sle.posting_datetime[from_date:to_date]))
+		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
 	)
 

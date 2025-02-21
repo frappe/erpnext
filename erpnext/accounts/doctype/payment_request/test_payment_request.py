@@ -542,6 +542,45 @@ class TestPaymentRequest(FrappeTestCase):
 
 		self.assertEqual(pr.grand_total, si.outstanding_amount)
 
+	def test_partial_paid_invoice_with_more_payment_entry(self):
+		pi = make_purchase_invoice(currency="INR", qty=1, rate=500)
+		pi.submit()
+		pi_1 = make_purchase_invoice(currency="INR", qty=1, rate=300)
+		pi_1.submit()
+
+		pr = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, submit_doc=0, return_doc=1)
+		pr.grand_total = 200
+		pr.submit()
+		pr.create_payment_entry()
+		pr_1 = make_payment_request(
+			dt="Purchase Invoice", dn=pi.name, mute_email=1, submit_doc=0, return_doc=1
+		)
+		pr_1.grand_total = 200
+		pr_1.submit()
+		pr_1.create_payment_entry()
+
+		pe = get_payment_entry(dt="Purchase Invoice", dn=pi.name)
+		pe.paid_amount = 200
+		pe.references[0].reference_doctype = pi.doctype
+		pe.references[0].reference_name = pi.name
+		pe.references[0].grand_total = pi.grand_total
+		pe.references[0].outstanding_amount = pi.outstanding_amount
+		pe.references[0].allocated_amount = 100
+		pe.append(
+			"references",
+			{
+				"reference_doctype": pi_1.doctype,
+				"reference_name": pi_1.name,
+				"grand_total": pi_1.grand_total,
+				"outstanding_amount": pi_1.outstanding_amount,
+				"allocated_amount": 100,
+			},
+		)
+
+		pr_2 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1)
+		pi.load_from_db()
+		self.assertEqual(pr_2.grand_total, pi.outstanding_amount)
+
 
 def test_partial_paid_invoice_with_submitted_payment_entry(self):
 	pi = make_purchase_invoice(currency="INR", qty=1, rate=5000)

@@ -394,7 +394,11 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 			},
 			"Request for Quotation Item": {
 				"doctype": "Supplier Quotation Item",
-				"field_map": {"name": "request_for_quotation_item", "parent": "request_for_quotation"},
+				"field_map": {
+					"name": "request_for_quotation_item",
+					"parent": "request_for_quotation",
+					"project_name": "project",
+				},
 			},
 		},
 		target_doc,

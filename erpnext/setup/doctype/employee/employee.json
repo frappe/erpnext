@@ -182,8 +182,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "user_id.user_image",
-   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -824,7 +822,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2024-01-03 17:36:20.984421",
+ "modified": "2025-02-07 13:54:40.122345",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
@@ -871,5 +869,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "employee_name"
+ "title_field": "employee_name",
+ "track_changes": 1
 }

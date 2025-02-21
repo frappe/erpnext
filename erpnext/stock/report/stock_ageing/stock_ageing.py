@@ -7,7 +7,7 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
-from frappe.utils import cint, date_diff, flt
+from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -424,6 +424,7 @@ class FIFOSlots:
 	def __get_stock_ledger_entries(self) -> Iterator[dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self.__get_item_query()  # used as derived table in sle query
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
 
 		sle_query = (
 			frappe.qb.from_(sle)
@@ -450,7 +451,7 @@ class FIFOSlots:
 			.where(
 				(sle.item_code == item.name)
 				& (sle.company == self.filters.get("company"))
-				& (sle.posting_date <= self.filters.get("to_date"))
+				& (sle.posting_datetime <= to_date)
 				& (sle.is_cancelled != 1)
 			)
 		)
@@ -467,7 +468,7 @@ class FIFOSlots:
 			if warehouses:
 				sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
-		sle_query = sle_query.orderby(sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty)
+		sle_query = sle_query.orderby(sle.posting_datetime, sle.creation)
 
 		return sle_query.run(as_dict=True, as_iterator=True)
 

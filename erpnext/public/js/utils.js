@@ -661,7 +661,7 @@ erpnext.utils.update_child_items = function (opts) {
 					method: "erpnext.stock.get_item_details.get_item_details",
 					args: {
 						doc: frm.doc,
-						ctx: {
+						args: {
 							item_code: this.value,
 							set_warehouse: frm.doc.set_warehouse,
 							customer: frm.doc.customer || frm.doc.party_name,

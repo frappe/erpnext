@@ -756,6 +756,7 @@
    "fieldtype": "Currency",
    "label": "Incoming Rate",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "precision": "6",
    "print_hide": 1,
    "read_only": 1
@@ -933,7 +934,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-21 17:37:37.441498",
+ "modified": "2025-02-05 14:28:32.322181",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

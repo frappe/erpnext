@@ -56,6 +56,7 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("Work Orders"),
 			fieldname: "work_order",
 			fieldtype: "MultiSelectList",
+			options: "Work Order",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Work Order", txt);
 			},
@@ -64,6 +65,7 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("Production Item"),
 			fieldname: "production_item",
 			fieldtype: "MultiSelectList",
+			options: "Item",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Item", txt);
 			},

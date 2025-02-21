@@ -1408,6 +1408,44 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
 		self.assertFalse(sr.items[0].serial_and_batch_bundle)
 
+	def test_stock_reco_batch_item_current_valuation(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		# Add new serial nos
+		item_code = "Stock-Reco-batch-Item-1234"
+		warehouse = "_Test Warehouse - _TC"
+		self.make_item(
+			item_code,
+			frappe._dict(
+				{
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"batch_number_series": "JJ-SRI1234-.#####",
+				}
+			),
+		)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=1,
+			basic_rate=100,
+		)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=0, rate=100, do_not_save=1
+		)
+
+		sr.items[0].batch_no = batch_no
+		sr.items[0].use_serial_batch_fields = 1
+		sr.save()
+		self.assertEqual(sr.items[0].current_valuation_rate, 100)
+		self.assertEqual(sr.difference_amount, 100 * -1)
+		self.assertTrue(sr.items[0].qty == 0)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

@@ -64,14 +64,12 @@ class Employee(NestedSet):
 
 	def validate_user_details(self):
 		if self.user_id:
-			data = frappe.db.get_value("User", self.user_id, ["enabled", "user_image"], as_dict=1)
+			data = frappe.db.get_value("User", self.user_id, ["enabled"], as_dict=1)
 
 			if not data:
 				self.user_id = None
 				return
 
-			if data.get("user_image") and self.image == "":
-				self.image = data.get("user_image")
 			self.validate_for_enabled_user_id(data.get("enabled", 0))
 			self.validate_duplicate_user_id()
 

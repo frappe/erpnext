@@ -1519,7 +1519,9 @@ def close_work_order(work_order, status):
 	work_order = frappe.get_doc("Work Order", work_order)
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
-			"Job Card", filters={"work_order": work_order.name, "status": "Work In Progress"}, pluck="name"
+			"Job Card",
+			filters={"work_order": work_order.name, "status": "Work In Progress", "docstatus": 1},
+			pluck="name",
 		)
 
 		if job_cards:
@@ -1618,7 +1620,9 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"project": work_order.project,
 			"company": work_order.company,
 			"sequence_id": row.get("sequence_id"),
-			"wip_warehouse": work_order.wip_warehouse,
+			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse")
+			if not work_order.skip_transfer or work_order.from_wip_warehouse
+			else work_order.source_warehouse or row.get("source_warehouse"),
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
 		}

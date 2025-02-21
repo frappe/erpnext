@@ -1151,7 +1151,8 @@
    "label": "Project",
    "oldfieldname": "project",
    "oldfieldtype": "Link",
-   "options": "Project"
+   "options": "Project",
+   "search_index": 1
   },
   {
    "fieldname": "party_account_currency",
@@ -1654,7 +1655,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-26 12:42:06.872527",
+ "modified": "2025-02-06 16:02:20.320877",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

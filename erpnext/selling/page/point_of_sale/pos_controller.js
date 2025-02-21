@@ -485,6 +485,7 @@ erpnext.PointOfSale.Controller = class {
 					]);
 				},
 			},
+			pos_profile: this.pos_profile,
 		});
 	}
 
@@ -681,7 +682,7 @@ erpnext.PointOfSale.Controller = class {
 					i.item_code === item_code &&
 					(!has_batch_no || (has_batch_no && i.batch_no === batch_no)) &&
 					i.uom === uom &&
-					i.rate === flt(rate)
+					i.price_list_rate === flt(rate)
 			);
 		}
 

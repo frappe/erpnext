@@ -116,7 +116,6 @@ class ClosingStockBalance(Document):
 					"item_group": self.item_group,
 					"warehouse_type": self.warehouse_type,
 					"include_uom": self.include_uom,
-					"ignore_closing_balance": 1,
 					"show_variant_attributes": 1,
 					"show_stock_ageing_data": 1,
 				}
