@@ -803,7 +803,7 @@ class StockEntry(StockController):
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 
-			if not d.basic_rate and not d.allow_zero_valuation_rate:
+			if not d.basic_rate and not d.allow_zero_valuation_rate and not(d.is_finished_item and self.purpose == "Manufacture"):
 				if self.is_new():
 					raise_error_if_no_rate = False
 
