@@ -1054,24 +1054,24 @@ class JobCard(Document):
 		# 	bold(self.name), bold(get_link_to_form("Work Order", self.work_order))
 		# )
 
-		for row in data:
-			# if row.status != "Completed" and row.completed_qty < current_operation_qty:
-			# 	frappe.throw(
-			# 		_("{0}, complete the operation {1} before the operation {2}.").format(
-			# 			message, bold(row.operation), bold(self.operation)
-			# 		),
-			# 		OperationSequenceError,
-			# 	)
+		# for row in data:
+		# 	# if row.status != "Completed" and row.completed_qty < current_operation_qty:
+		# 	# 	frappe.throw(
+		# 	# 		_("{0}, complete the operation {1} before the operation {2}.").format(
+		# 	# 			message, bold(row.operation), bold(self.operation)
+		# 	# 		),
+		# 	# 		OperationSequenceError,
+		# 	# 	)
 
-			if row.total_completed_qty < current_operation_qty:
-				msg = f"""The completed quantity {bold(current_operation_qty)}
-					of an operation {bold(self.operation)} cannot be greater
-					than the completed quantity {bold(row.total_completed_qty)}
-					of a previous operation
-					{bold(row.operation)}.
-				"""
+		# 	if row.total_completed_qty < current_operation_qty:
+		# 		msg = f"""The completed quantity {bold(current_operation_qty)}
+		# 			of an operation {bold(self.operation)} cannot be greater
+		# 			than the completed quantity {bold(row.total_completed_qty)}
+		# 			of a previous operation
+		# 			{bold(row.operation)}.
+		# 		"""
 
-				frappe.throw(_(msg))
+		# 		frappe.throw(_(msg))
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():
