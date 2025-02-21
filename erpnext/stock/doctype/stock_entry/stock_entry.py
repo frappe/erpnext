@@ -753,7 +753,7 @@ class StockEntry(StockController):
 
 	def get_matched_items(self, item_code):
 		for row in self.items:
-			if row.item_code == item_code or row.original_item == item_code:
+			if row.item_code == item_code:
 				return row
 
 		return {}
@@ -803,7 +803,7 @@ class StockEntry(StockController):
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 
-			if not d.basic_rate and not d.allow_zero_valuation_rate and not(d.is_finished_item and self.purpose == "Manufacture"):
+			if not d.basic_rate and not d.allow_zero_valuation_rate:
 				if self.is_new():
 					raise_error_if_no_rate = False
 
@@ -1843,7 +1843,7 @@ class StockEntry(StockController):
 
 						item_wh = frappe._dict(item_wh)
 
-					for original_item, item in item_dict.items():
+					for item in item_dict.values():
 						if self.pro_doc and cint(self.pro_doc.from_wip_warehouse):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 						# Get Reserve Warehouse from Subcontract Order
@@ -1855,9 +1855,6 @@ class StockEntry(StockController):
 						item["to_warehouse"] = (
 							self.to_warehouse if self.purpose == "Send to Subcontractor" else ""
 						)
-
-						if original_item != item.get("item_code"):
-							item["original_item"] = original_item
 
 					self.add_to_stock_entry_detail(item_dict)
 
@@ -2421,7 +2418,7 @@ class StockEntry(StockController):
 			item_row = item_dict[d]
 
 			child_qty = flt(item_row["qty"], precision)
-			if not self.is_return and child_qty <= 0 and not item_row.get("is_scrap_item"):
+			if not self.is_return and child_qty <= 0:
 				continue
 
 			se_child = self.append("items")
