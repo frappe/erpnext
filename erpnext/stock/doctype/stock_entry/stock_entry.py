@@ -957,9 +957,6 @@ class StockEntry(StockController):
 		else:
 			incoming_items_cost = sum(flt(t.basic_amount) for t in self.get("items") if t.t_warehouse)
 
-		if not incoming_items_cost:
-			return
-
 		for d in self.get("items"):
 			if self.purpose in ("Repack", "Manufacture") and not d.is_finished_item:
 				d.additional_cost = 0
@@ -970,7 +967,9 @@ class StockEntry(StockController):
 			elif not d.t_warehouse:
 				d.additional_cost = 0
 				continue
-			d.additional_cost = (flt(d.basic_amount) / incoming_items_cost) * self.total_additional_costs
+
+			if not incoming_items_cost:
+				d.additional_cost = (flt(d.basic_amount) / incoming_items_cost) * self.total_additional_costs
 
 	def update_valuation_rate(self):
 		for d in self.get("items"):
