@@ -964,6 +964,9 @@ class StockEntry(StockController):
 			if self.purpose in ("Repack", "Manufacture") and not d.is_finished_item:
 				d.additional_cost = 0
 				continue
+			if self.purpose = "Manufacture" and d.is_finished_item and not d.basic_amount and d.qty:
+				d.additional_cost = self.total_additional_costs / d.qty
+				continue
 			elif not d.t_warehouse:
 				d.additional_cost = 0
 				continue
