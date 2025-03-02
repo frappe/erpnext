@@ -968,7 +968,7 @@ class StockEntry(StockController):
 				d.additional_cost = 0
 				continue
 
-			if not incoming_items_cost:
+			if not incoming_items_cost and flt(incoming_items_cost) != 0.0:
 				d.additional_cost = (flt(d.basic_amount) / incoming_items_cost) * self.total_additional_costs
 
 	def update_valuation_rate(self):
