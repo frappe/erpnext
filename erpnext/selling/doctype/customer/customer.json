@@ -56,6 +56,8 @@
   "customer_primary_contact",
   "mobile_no",
   "email_id",
+  "first_name",
+  "last_name",
   "tax_tab",
   "taxation_section",
   "tax_id",
@@ -581,6 +583,20 @@
    "no_copy": 1,
    "options": "Prospect",
    "print_hide": 1
+  },
+  {
+   "fetch_from": "customer_primary_contact.first_name",
+   "fieldname": "first_name",
+   "fieldtype": "Read Only",
+   "hidden": 1,
+   "label": "First Name"
+  },
+  {
+   "fetch_from": "customer_primary_contact.last_name",
+   "fieldname": "last_name",
+   "fieldtype": "Read Only",
+   "hidden": 1,
+   "label": "Last Name"
   }
  ],
  "icon": "fa fa-user",
@@ -594,7 +610,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2024-06-17 03:24:59.612974",
+ "modified": "2025-03-05 10:01:47.885574",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -672,6 +688,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
