@@ -70,6 +70,6 @@ docstring-code-format = true
 
 
 [project.urls]
-Homepage = "https://erpnext.com/"
+Homepage = "https://frappe.io/erpnext"
 Repository = "https://github.com/frappe/erpnext.git"
 "Bug Reports" = "https://github.com/frappe/erpnext/issues"

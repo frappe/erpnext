@@ -15,7 +15,9 @@ frappe.ui.form.on("Issue", {
 				}
 			}
 		);
+	},
 
+	refresh: function (frm) {
 		// buttons
 		if (frm.doc.status !== "Closed") {
 			frm.add_custom_button(__("Close"), function () {

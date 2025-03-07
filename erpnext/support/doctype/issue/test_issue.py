@@ -33,48 +33,48 @@ class TestIssue(TestSetUp):
 		issue = make_issue(creation, "_Test Customer", 1)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 15:00"))
 
 		# make issue with customer_group specific SLA
 		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "__Test Customer", 2)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 15:00"))
 
 		# make issue with territory specific SLA
 		create_customer("___Test Customer", "__Test SLA Customer Group", "_Test SLA Territory")
 		issue = make_issue(creation, "___Test Customer", 3)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 15:00"))
 
 		# make issue with default SLA
 		issue = make_issue(creation=creation, index=4)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 16:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 18:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 18:00"))
 
 		# make issue with default SLA before working hours
 		creation = get_datetime("2019-03-04 7:00")
 		issue = make_issue(creation=creation, index=5)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 16:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 16:00"))
 
 		# make issue with default SLA after working hours
 		creation = get_datetime("2019-03-04 20:00")
 		issue = make_issue(creation, index=6)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-06 14:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2019-03-06 16:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-06 16:00"))
 
 		# make issue with default SLA next day
 		creation = get_datetime("2019-03-04 14:00")
 		issue = make_issue(creation=creation, index=7)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 18:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2019-03-06 12:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-06 12:00"))
 
 		frappe.flags.current_time = get_datetime("2019-03-04 15:00")
 		issue.reload()
@@ -98,7 +98,7 @@ class TestIssue(TestSetUp):
 		issue.save()
 
 		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
-		self.assertFalse(issue.resolution_by)
+		self.assertFalse(issue.sla_resolution_by)
 
 		creation = get_datetime("2020-03-04 5:00")
 		frappe.flags.current_time = get_datetime("2020-03-04 5:00")
@@ -106,7 +106,7 @@ class TestIssue(TestSetUp):
 
 		issue.reload()
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
-		self.assertEqual(issue.resolution_by, get_datetime("2020-03-04 16:45"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2020-03-04 16:45"))
 
 		creation = get_datetime("2020-03-04 5:05")
 		create_communication(issue.name, "test@admin.com", "Sent", creation)
@@ -140,8 +140,8 @@ class TestIssue(TestSetUp):
 		issue.status = "Closed"
 		issue.save()
 
-		self.assertEqual(issue.resolution_by, get_datetime("2021-11-22 06:00:00"))
-		self.assertEqual(issue.resolution_date, get_datetime("2021-11-22 01:00:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-22 06:00:00"))
+		self.assertEqual(issue.sla_resolution_date, get_datetime("2021-11-22 01:00:00"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 
 	def test_issue_open_after_closed(self):
@@ -153,7 +153,7 @@ class TestIssue(TestSetUp):
 		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
 		self.assertEqual(issue.agreement_status, "First Response Due")
 		self.assertEqual(issue.response_by, get_datetime("2021-11-01 17:00"))
-		self.assertEqual(issue.resolution_by, get_datetime("2021-11-01 19:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-01 19:00"))
 
 		# Replied on → 2 pm
 		frappe.flags.current_time = get_datetime("2021-11-01 14:00")
@@ -173,7 +173,7 @@ class TestIssue(TestSetUp):
 		# Hold Time + 1 Hrs
 		self.assertEqual(issue.total_hold_time, 3600)
 		# Resolution By should increase by one hrs
-		self.assertEqual(issue.resolution_by, get_datetime("2021-11-01 20:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-01 20:00"))
 
 		# Replied on → 4 pm, Open → 1 hr, Resolution Due → 8 pm
 		frappe.flags.current_time = get_datetime("2021-11-01 16:00")
@@ -190,9 +190,9 @@ class TestIssue(TestSetUp):
 		# Hold Time + 6 Hrs
 		self.assertEqual(issue.total_hold_time, 3600 + 21600)
 		# Resolution By should increase by 6 hrs
-		self.assertEqual(issue.resolution_by, get_datetime("2021-11-02 02:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 02:00"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
-		self.assertEqual(issue.resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 
 		# Customer Open → 3 am i.e after resolution by is crossed
 		frappe.flags.current_time = get_datetime("2021-11-02 03:00")
@@ -201,17 +201,17 @@ class TestIssue(TestSetUp):
 		# Since issue was Resolved, Resolution By should be increased by 5 hrs (3am - 10pm)
 		self.assertEqual(issue.total_hold_time, 3600 + 21600 + 18000)
 		# Resolution By should increase by 5 hrs
-		self.assertEqual(issue.resolution_by, get_datetime("2021-11-02 07:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 07:00"))
 		self.assertEqual(issue.agreement_status, "Resolution Due")
-		self.assertFalse(issue.resolution_date)
+		self.assertFalse(issue.sla_resolution_date)
 
 		# We Closed → 4 am, SLA should be Fulfilled
 		frappe.flags.current_time = get_datetime("2021-11-02 04:00")
 		issue.status = "Closed"
 		issue.save()
-		self.assertEqual(issue.resolution_by, get_datetime("2021-11-02 07:00"))
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 07:00"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
-		self.assertEqual(issue.resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment

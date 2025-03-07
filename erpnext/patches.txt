@@ -261,6 +261,7 @@ erpnext.patches.v14_0.show_loan_management_deprecation_warning
 erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Details", force=True)
 erpnext.patches.v14_0.update_proprietorship_to_individual
+erpnext.patches.v15_0.rename_subcontracting_fields
 
 [post_model_sync]
 erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
@@ -394,3 +395,9 @@ execute:frappe.db.set_single_value("Accounts Settings", "exchange_gain_loss_post
 erpnext.patches.v14_0.disable_add_row_in_gross_profit
 erpnext.patches.v15_0.set_difference_amount_in_asset_value_adjustment
 erpnext.patches.v14_0.update_posting_datetime
+erpnext.stock.doctype.stock_ledger_entry.patches.ensure_sle_indexes
+erpnext.patches.v15_0.rename_sla_fields
+erpnext.patches.v15_0.update_query_report
+erpnext.patches.v15_0.rename_field_from_rate_difference_to_amount_difference
+erpnext.patches.v15_0.recalculate_amount_difference_field
+erpnext.patches.v15_0.set_purchase_receipt_row_item_to_capitalization_stock_item

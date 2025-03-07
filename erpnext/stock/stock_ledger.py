@@ -561,11 +561,27 @@ class update_entries_after:
 		self.new_items_found = False
 		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
 		self.affected_transactions: set[tuple[str, str]] = set()
-		self.reserved_stock = flt(self.args.reserved_stock)
+		self.reserved_stock = self.get_reserved_stock()
 
 		self.data = frappe._dict()
 		self.initialize_previous_data(self.args)
 		self.build()
+
+	def get_reserved_stock(self):
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		posting_datetime = get_combine_datetime(self.args.posting_date, self.args.posting_time)
+		query = (
+			frappe.qb.from_(sre)
+			.select(Sum(sre.reserved_qty) - Sum(sre.delivered_qty))
+			.where(
+				(sre.item_code == self.item_code)
+				& (sre.warehouse == self.args.warehouse)
+				& (sre.docstatus == 1)
+				& (sre.creation <= posting_datetime)
+			)
+		).run()
+
+		return flt(query[0][0]) if query else 0.0
 
 	def set_precision(self):
 		self.flt_precision = cint(frappe.db.get_default("float_precision")) or 2
@@ -883,6 +899,10 @@ class update_entries_after:
 
 		if not sle.is_adjustment_entry:
 			sle.stock_value_difference = stock_value_difference
+		elif sle.is_adjustment_entry and not self.args.get("sle_id"):
+			sle.stock_value_difference = get_stock_value_difference(
+				sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time, sle.voucher_no
+			)
 
 		sle.doctype = "Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()

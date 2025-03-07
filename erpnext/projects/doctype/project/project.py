@@ -322,17 +322,31 @@ class Project(Document):
 		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
 
 	def update_billed_amount(self):
-		# nosemgrep
+		self.total_billed_amount = self.get_billed_amount_from_parent() + self.get_billed_amount_from_child()
+
+	def get_billed_amount_from_parent(self):
 		total_billed_amount = frappe.db.sql(
 			"""select sum(base_net_amount)
-			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
-			where si_item.parent = si.name
-				and if(si_item.project, si_item.project, si.project) = %s
-				and si.docstatus=1""",
+			from `tabSales Invoice` si join `tabSales Invoice Item` si_item on si_item.parent = si.name
+				where si_item.project is null
+				and si.project is not null
+				and si.project = %s
+				and si.docstatus = 1""",
 			self.name,
 		)
 
-		self.total_billed_amount = total_billed_amount and total_billed_amount[0][0] or 0
+		return total_billed_amount and total_billed_amount[0][0] or 0
+
+	def get_billed_amount_from_child(self):
+		total_billed_amount = frappe.db.sql(
+			"""select sum(base_net_amount)
+			from `tabSales Invoice Item`
+				where project = %s
+				and docstatus = 1""",
+			self.name,
+		)
+
+		return total_billed_amount and total_billed_amount[0][0] or 0
 
 	def after_rename(self, old_name, new_name, merge=False):
 		if old_name == self.copied_from:

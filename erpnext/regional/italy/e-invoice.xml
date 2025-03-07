@@ -188,9 +188,9 @@
         <Descrizione>{{ html2text(item.description or '') or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
-        <PrezzoUnitario>{{ format_float(item.price_list_rate or item.rate, item_meta.get_field("rate").precision) }}</PrezzoUnitario>
+        <PrezzoUnitario>{{ format_float(item.net_rate or item.price_list_rate or item.rate, item_meta.get_field("rate").precision) }}</PrezzoUnitario>
         {{ render_discount_or_margin(item) }}
-        <PrezzoTotale>{{ format_float(item.amount, item_meta.get_field("amount").precision) }}</PrezzoTotale>
+        <PrezzoTotale>{{ format_float(item.net_amount, item_meta.get_field("amount").precision) }}</PrezzoTotale>
         <AliquotaIVA>{{ format_float(item.tax_rate, item_meta.get_field("tax_rate").precision) }}</AliquotaIVA>
         {%- if item.tax_exemption_reason %}
         <Natura>{{ item.tax_exemption_reason.split("-")[0] }}</Natura>

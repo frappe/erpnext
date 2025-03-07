@@ -194,6 +194,14 @@ class AccountsController(TransactionBase):
 		self.set_incoming_rate()
 		self.init_internal_values()
 
+		# Need to set taxes based on taxes_and_charges template
+		# before calculating taxes and totals
+		if self.meta.get_field("taxes_and_charges"):
+			self.validate_enabled_taxes_and_charges()
+			self.validate_tax_account_company()
+
+		self.set_taxes_and_charges()
+
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 
@@ -203,10 +211,6 @@ class AccountsController(TransactionBase):
 			validate_return(self)
 
 		self.validate_all_documents_schedule()
-
-		if self.meta.get_field("taxes_and_charges"):
-			self.validate_enabled_taxes_and_charges()
-			self.validate_tax_account_company()
 
 		self.validate_party()
 		self.validate_currency()
@@ -251,8 +255,6 @@ class AccountsController(TransactionBase):
 
 			self.validate_deferred_income_expense_account()
 			self.set_inter_company_account()
-
-		self.set_taxes_and_charges()
 
 		if self.doctype == "Purchase Invoice":
 			self.calculate_paid_amount()
@@ -821,10 +823,14 @@ class AccountsController(TransactionBase):
 									and item.get("use_serial_batch_fields")
 								)
 							):
-								if fieldname == "batch_no" and not item.batch_no and not item.is_free_item:
-									item.set("rate", ret.get("rate"))
-									item.set("price_list_rate", ret.get("price_list_rate"))
 								item.set(fieldname, value)
+
+								if fieldname == "batch_no" and item.batch_no and not item.is_free_item:
+									if ret.get("rate"):
+										item.set("rate", ret.get("rate"))
+
+									if not item.get("price_list_rate") and ret.get("price_list_rate"):
+										item.set("price_list_rate", ret.get("price_list_rate"))
 
 							elif fieldname in ["cost_center", "conversion_factor"] and not item.get(
 								fieldname

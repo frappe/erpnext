@@ -227,7 +227,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		self.assertEqual(lead.service_level_agreement, lead_sla.name)
 		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
-		self.assertEqual(lead.resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
+		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
 
 		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 15, 0)
 		lead.reload()
@@ -268,7 +268,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 		lead.reload()
 		self.assertEqual(flt(lead.total_hold_time, 2), 3000)
-		self.assertEqual(lead.resolution_by, datetime.datetime(2020, 3, 4, 16, 50))
+		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2020, 3, 4, 16, 50))
 
 	def test_failed_sla_for_response_only(self):
 		doctype = "Lead"

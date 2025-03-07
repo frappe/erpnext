@@ -16,14 +16,14 @@ frappe.ui.form.on("Subcontracting Order Item", {
 			service_item.doctype,
 			service_item.name,
 			"qty",
-			row.qty * row.sc_conversion_factor
+			row.qty * row.subcontracting_conversion_factor
 		);
 		frappe.model.set_value(service_item.doctype, service_item.name, "fg_item_qty", row.qty);
 		frappe.model.set_value(
 			service_item.doctype,
 			service_item.name,
 			"amount",
-			row.qty * row.sc_conversion_factor * service_item.rate
+			row.qty * row.subcontracting_conversion_factor * service_item.rate
 		);
 	},
 	before_items_remove(frm, cdt, cdn) {

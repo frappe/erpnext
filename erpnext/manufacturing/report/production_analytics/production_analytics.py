@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate
+from frappe.utils import getdate, today
 
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 
@@ -30,11 +30,12 @@ def get_columns(filters):
 
 def get_periodic_data(filters, entry):
 	periodic_data = {
-		"All Work Orders": {},
 		"Not Started": {},
 		"Overdue": {},
 		"Pending": {},
 		"Completed": {},
+		"Closed": {},
+		"Stopped": {},
 	}
 
 	ranges = get_period_date_ranges(filters)
@@ -42,33 +43,24 @@ def get_periodic_data(filters, entry):
 	for from_date, end_date in ranges:
 		period = get_period(end_date, filters)
 		for d in entry:
-			if getdate(d.creation) <= getdate(from_date) or getdate(d.creation) <= getdate(end_date):
-				periodic_data = update_periodic_data(periodic_data, "All Work Orders", period)
-				if d.status == "Completed":
-					if getdate(d.actual_end_date) < getdate(from_date) or getdate(d.modified) < getdate(
-						from_date
-					):
-						periodic_data = update_periodic_data(periodic_data, "Completed", period)
-					elif getdate(d.actual_start_date) < getdate(from_date):
-						periodic_data = update_periodic_data(periodic_data, "Pending", period)
-					elif getdate(d.planned_start_date) < getdate(from_date):
-						periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-					else:
-						periodic_data = update_periodic_data(periodic_data, "Not Started", period)
+			if getdate(from_date) <= getdate(d.creation) <= getdate(end_date) and d.status not in [
+				"Draft",
+				"Submitted",
+				"Completed",
+				"Cancelled",
+			]:
+				if d.status in ["Not Started", "Closed", "Stopped"]:
+					periodic_data = update_periodic_data(periodic_data, d.status, period)
+				elif today() > getdate(d.planned_end_date):
+					periodic_data = update_periodic_data(periodic_data, "Overdue", period)
+				elif today() < getdate(d.planned_end_date):
+					periodic_data = update_periodic_data(periodic_data, "Pending", period)
 
-				elif d.status == "In Process":
-					if getdate(d.actual_start_date) < getdate(from_date):
-						periodic_data = update_periodic_data(periodic_data, "Pending", period)
-					elif getdate(d.planned_start_date) < getdate(from_date):
-						periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-					else:
-						periodic_data = update_periodic_data(periodic_data, "Not Started", period)
-
-				elif d.status == "Not Started":
-					if getdate(d.planned_start_date) < getdate(from_date):
-						periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-					else:
-						periodic_data = update_periodic_data(periodic_data, "Not Started", period)
+			if (
+				getdate(from_date) <= getdate(d.actual_end_date) <= getdate(end_date)
+				and d.status == "Completed"
+			):
+				periodic_data = update_periodic_data(periodic_data, "Completed", period)
 
 	return periodic_data
 
@@ -88,10 +80,7 @@ def get_data(filters, columns):
 		"Work Order",
 		fields=[
 			"creation",
-			"modified",
-			"actual_start_date",
 			"actual_end_date",
-			"planned_start_date",
 			"planned_end_date",
 			"status",
 		],
@@ -100,7 +89,7 @@ def get_data(filters, columns):
 
 	periodic_data = get_periodic_data(filters, entry)
 
-	labels = ["All Work Orders", "Not Started", "Overdue", "Pending", "Completed"]
+	labels = ["Not Started", "Overdue", "Pending", "Completed", "Closed", "Stopped"]
 	chart_data = get_chart_data(periodic_data, columns)
 	ranges = get_period_date_ranges(filters)
 
@@ -121,21 +110,23 @@ def get_data(filters, columns):
 def get_chart_data(periodic_data, columns):
 	labels = [d.get("label") for d in columns[1:]]
 
-	all_data, not_start, overdue, pending, completed = [], [], [], [], []
+	not_start, overdue, pending, completed, closed, stopped = [], [], [], [], [], []
 	datasets = []
 
 	for d in labels:
-		all_data.append(periodic_data.get("All Work Orders").get(d))
 		not_start.append(periodic_data.get("Not Started").get(d))
 		overdue.append(periodic_data.get("Overdue").get(d))
 		pending.append(periodic_data.get("Pending").get(d))
 		completed.append(periodic_data.get("Completed").get(d))
+		closed.append(periodic_data.get("Closed").get(d))
+		stopped.append(periodic_data.get("Stopped").get(d))
 
-	datasets.append({"name": _("All Work Orders"), "values": all_data})
 	datasets.append({"name": _("Not Started"), "values": not_start})
 	datasets.append({"name": _("Overdue"), "values": overdue})
 	datasets.append({"name": _("Pending"), "values": pending})
 	datasets.append({"name": _("Completed"), "values": completed})
+	datasets.append({"name": _("Closed"), "values": closed})
+	datasets.append({"name": _("Stopped"), "values": stopped})
 
 	chart = {"data": {"labels": labels, "datasets": datasets}}
 	chart["type"] = "line"

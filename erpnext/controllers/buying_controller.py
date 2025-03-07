@@ -333,7 +333,7 @@ class BuyingController(SubcontractingController):
 						net_rate
 						+ item.item_tax_amount
 						+ flt(item.landed_cost_voucher_amount)
-						+ flt(item.get("rate_difference_with_purchase_invoice"))
+						+ flt(item.get("amount_difference_with_purchase_invoice"))
 					) / qty_in_stock_uom
 			else:
 				item.valuation_rate = 0.0

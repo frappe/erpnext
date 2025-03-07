@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2022-01-25 10:29:57.771398",
+ "default_print_format": "Sales Invoice Print",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -2177,6 +2178,7 @@
    "print_hide": 1
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
@@ -2187,7 +2189,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-02-06 15:59:54.636202",
+ "modified": "2025-03-05 17:06:59.720616",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2233,6 +2235,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

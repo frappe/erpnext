@@ -73,6 +73,7 @@ class PickList(Document):
 			self.set_onload("has_reserved_stock", True)
 
 	def validate(self):
+		self.validate_expired_batches()
 		self.validate_for_qty()
 		self.validate_stock_qty()
 		self.check_serial_no_status()
@@ -204,6 +205,33 @@ class PickList(Document):
 		self.update_bundle_picked_qty()
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
+
+	def validate_expired_batches(self):
+		batches = []
+		for row in self.get("locations"):
+			if row.get("batch_no") and row.get("picked_qty"):
+				batches.append(row.batch_no)
+
+		if batches:
+			batch = frappe.qb.DocType("Batch")
+			query = (
+				frappe.qb.from_(batch)
+				.select(batch.name)
+				.where(
+					(batch.name.isin(batches))
+					& (batch.expiry_date <= frappe.utils.nowdate())
+					& (batch.expiry_date.isnotnull())
+				)
+			)
+
+			expired_batches = query.run(as_dict=True)
+			if expired_batches:
+				msg = "<ul>" + "".join(f"<li>{batch.name}</li>" for batch in expired_batches) + "</ul>"
+
+				frappe.throw(
+					_("The following batches are expired, please restock them: <br> {0}").format(msg),
+					title=_("Expired Batches"),
+				)
 
 	def make_bundle_using_old_serial_batch_fields(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -447,6 +475,7 @@ class PickList(Document):
 			self.remove(row)
 
 		updated_locations = frappe._dict()
+		len_idx = len(self.get("locations")) or 0
 		for item_doc in items:
 			item_code = item_doc.item_code
 
@@ -489,6 +518,8 @@ class PickList(Document):
 			if location.picked_qty > location.stock_qty:
 				location.picked_qty = location.stock_qty
 
+			len_idx += 1
+			location.idx = len_idx
 			self.append("locations", location)
 
 		# If table is empty on update after submit, set stock_qty, picked_qty to 0 so that indicator is red
@@ -497,7 +528,11 @@ class PickList(Document):
 			for location in locations_replica:
 				location.stock_qty = 0
 				location.picked_qty = 0
+
+				len_idx += 1
+				location.idx = len_idx
 				self.append("locations", location)
+
 			frappe.msgprint(
 				_(
 					"Please Restock Items and Update the Pick List to continue. To discontinue, cancel the Pick List."
@@ -638,7 +673,30 @@ class PickList(Document):
 			if serial_no:
 				picked_items[item_data.item_code][key]["serial_no"].extend(serial_no)
 
+		self.update_picked_item_from_current_pick_list(picked_items)
 		return picked_items
+
+	def update_picked_item_from_current_pick_list(self, picked_items):
+		for row in self.locations:
+			if flt(row.picked_qty) > 0:
+				key = (row.warehouse, row.batch_no) if row.batch_no else row.warehouse
+				serial_no = [x for x in row.serial_no.split("\n") if x] if row.serial_no else None
+				if row.item_code not in picked_items:
+					picked_items[row.item_code] = {}
+
+				if key not in picked_items[row.item_code]:
+					picked_items[row.item_code][key] = frappe._dict(
+						{
+							"picked_qty": 0,
+							"serial_no": [],
+							"batch_no": row.batch_no or "",
+							"warehouse": row.warehouse,
+						}
+					)
+
+				picked_items[row.item_code][key]["picked_qty"] += flt(row.stock_qty) or flt(row.picked_qty)
+				if serial_no:
+					picked_items[row.item_code][key]["serial_no"].extend(serial_no)
 
 	def _get_pick_list_items(self, items):
 		pi = frappe.qb.DocType("Pick List")
@@ -653,9 +711,11 @@ class PickList(Document):
 				pi_item.batch_no,
 				pi_item.serial_and_batch_bundle,
 				pi_item.serial_no,
-				(Case().when(pi_item.picked_qty > 0, pi_item.picked_qty).else_(pi_item.stock_qty)).as_(
-					"picked_qty"
-				),
+				(
+					Case()
+					.when((pi_item.picked_qty > 0) & (pi_item.docstatus == 1), pi_item.picked_qty)
+					.else_(pi_item.stock_qty)
+				).as_("picked_qty"),
 			)
 			.where(
 				(pi_item.item_code.isin([x.item_code for x in items]))

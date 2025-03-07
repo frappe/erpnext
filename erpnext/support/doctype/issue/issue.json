@@ -27,7 +27,7 @@
   "reset_service_level_agreement",
   "cb",
   "agreement_status",
-  "resolution_by",
+  "sla_resolution_by",
   "service_level_agreement_creation",
   "on_hold_since",
   "total_hold_time",
@@ -41,7 +41,7 @@
   "column_break1",
   "opening_date",
   "opening_time",
-  "resolution_date",
+  "sla_resolution_date",
   "resolution_time",
   "user_resolution_time",
   "additional_info",
@@ -177,13 +177,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.status != 'Replied' && doc.service_level_agreement;",
-   "fieldname": "resolution_by",
-   "fieldtype": "Datetime",
-   "label": "Resolution By",
-   "read_only": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "response",
    "fieldtype": "Section Break",
@@ -288,16 +281,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "resolution_date",
-   "fieldtype": "Datetime",
-   "label": "Resolution Date",
-   "no_copy": 1,
-   "oldfieldname": "resolution_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
-  },
-  {
    "fieldname": "content_type",
    "fieldtype": "Data",
    "hidden": 1,
@@ -386,12 +369,29 @@
    "fieldtype": "Duration",
    "label": "First Response Time",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.status != 'Replied' && doc.service_level_agreement;",
+   "fieldname": "sla_resolution_by",
+   "fieldtype": "Datetime",
+   "label": "Resolution By",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "sla_resolution_date",
+   "fieldtype": "Datetime",
+   "label": "Resolution Date",
+   "no_copy": 1,
+   "oldfieldname": "resolution_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2021-11-24 13:13:10.276630",
+ "modified": "2025-02-18 21:18:52.797745",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

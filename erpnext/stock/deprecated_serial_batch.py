@@ -332,6 +332,8 @@ class DeprecatedBatchNoValuation:
 		if self.sle.voucher_detail_no:
 			query = query.where(sabb.voucher_detail_no != self.sle.voucher_detail_no)
 
+		query = query.where(sabb.voucher_type != "Pick List")
+
 		data = query.run(as_dict=True)
 		if not data:
 			return {}

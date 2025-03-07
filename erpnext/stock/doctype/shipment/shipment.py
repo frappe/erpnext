@@ -65,6 +65,7 @@ class Shipment(Document):
 		shipment_parcel: DF.Table[ShipmentParcel]
 		shipment_type: DF.Literal["Goods", "Documents"]
 		status: DF.Literal["Draft", "Submitted", "Booked", "Cancelled", "Completed"]
+		total_weight: DF.Float
 		tracking_status: DF.Literal["", "In Progress", "Delivered", "Returned", "Lost"]
 		tracking_status_info: DF.Data | None
 		tracking_url: DF.SmallText | None
@@ -75,6 +76,7 @@ class Shipment(Document):
 		self.validate_weight()
 		self.validate_pickup_time()
 		self.set_value_of_goods()
+		self.set_total_weight()
 		if self.docstatus == 0:
 			self.status = "Draft"
 
@@ -92,6 +94,12 @@ class Shipment(Document):
 		for parcel in self.shipment_parcel:
 			if flt(parcel.weight) <= 0:
 				frappe.throw(_("Parcel weight cannot be 0"))
+
+	def set_total_weight(self):
+		self.total_weight = self.get_total_weight()
+
+	def get_total_weight(self):
+		return sum(flt(parcel.weight) * parcel.count for parcel in self.shipment_parcel if parcel.count > 0)
 
 	def validate_pickup_time(self):
 		if self.pickup_from and self.pickup_to and get_time(self.pickup_to) < get_time(self.pickup_from):

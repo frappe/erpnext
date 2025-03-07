@@ -48,13 +48,13 @@ class Issue(Document):
 		priority: DF.Link | None
 		project: DF.Link | None
 		raised_by: DF.Data | None
-		resolution_by: DF.Datetime | None
-		resolution_date: DF.Datetime | None
 		resolution_details: DF.TextEditor | None
 		resolution_time: DF.Duration | None
 		response_by: DF.Datetime | None
 		service_level_agreement: DF.Link | None
 		service_level_agreement_creation: DF.Datetime | None
+		sla_resolution_by: DF.Datetime | None
+		sla_resolution_date: DF.Datetime | None
 		status: DF.Literal["Open", "Replied", "On Hold", "Resolved", "Closed"]
 		subject: DF.Data
 		total_hold_time: DF.Duration | None

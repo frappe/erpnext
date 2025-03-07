@@ -247,7 +247,7 @@ def update_qty(bin_name, args):
 				& (sle.warehouse == args.get("warehouse"))
 				& (sle.is_cancelled == 0)
 			)
-			.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=Order.desc)
+			.orderby(sle.posting_datetime, order=Order.desc)
 			.orderby(sle.creation, order=Order.desc)
 			.limit(1)
 			.run()

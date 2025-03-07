@@ -86,7 +86,7 @@ def get_data(conditions, filters):
 			ON sii.so_detail = soi.name and sii.docstatus = 1
 		WHERE
 			soi.parent = so.name
-			and so.status not in ('Stopped', 'Closed', 'On Hold')
+			and so.status not in ('Stopped', 'On Hold')
 			and so.docstatus = 1
 			{conditions}
 		GROUP BY soi.name

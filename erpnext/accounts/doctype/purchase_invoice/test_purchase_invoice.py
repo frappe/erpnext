@@ -2482,6 +2482,76 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		item.reload()
 		self.assertEqual(item.last_purchase_rate, 0)
 
+	def test_adjust_incoming_rate_from_pi_with_multi_currency_and_partial_billing(self):
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+
+		pr = make_purchase_receipt(
+			qty=10, rate=10, currency="USD", do_not_save=1, supplier="_Test Supplier USD"
+		)
+		pr.conversion_rate = 5300
+		pr.save()
+		pr.submit()
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"incoming_rate",
+		)
+		self.assertEqual(incoming_rate, 53000)  # Asserting to confirm if the default calculation is correct
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.qty = 1
+
+		pi.save()
+		pi.submit()
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"incoming_rate",
+		)
+		# Test 1 : Incoming rate should not change as only the qty has changed and not the rate (this was not the case before)
+		self.assertEqual(incoming_rate, 53000)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.qty = 1
+			row.rate = 9
+
+		pi.save()
+		pi.submit()
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"incoming_rate",
+		)
+		# Test 2 : Rate in new PI is lower than PR, so incoming rate should also be lower
+		self.assertEqual(incoming_rate, 50350)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.qty = 1
+			row.rate = 12
+
+		pi.save()
+		pi.submit()
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"incoming_rate",
+		)
+		# Test 3 : Rate in new PI is higher than PR, so incoming rate should also be higher
+		self.assertEqual(incoming_rate, 54766.667)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+
 	def test_opening_invoice_rounding_adjustment_validation(self):
 		pi = make_purchase_invoice(do_not_save=1)
 		pi.items[0].rate = 99.98

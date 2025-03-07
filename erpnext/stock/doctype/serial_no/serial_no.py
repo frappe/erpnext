@@ -230,15 +230,17 @@ def get_pos_reserved_serial_nos(filters):
 
 	pos_transacted_sr_nos = query.run(as_dict=True)
 
-	reserved_sr_nos = set()
-	returned_sr_nos = set()
+	reserved_sr_nos = list()
+	returned_sr_nos = list()
 	for d in pos_transacted_sr_nos:
 		if d.is_return == 0:
-			[reserved_sr_nos.add(x) for x in get_serial_nos(d.serial_no)]
+			[reserved_sr_nos.append(x) for x in get_serial_nos(d.serial_no)]
 		elif d.is_return == 1:
-			[returned_sr_nos.add(x) for x in get_serial_nos(d.serial_no)]
+			[returned_sr_nos.append(x) for x in get_serial_nos(d.serial_no)]
 
-	reserved_sr_nos = list(reserved_sr_nos - returned_sr_nos)
+	for x in returned_sr_nos:
+		if x in reserved_sr_nos:
+			reserved_sr_nos.remove(x)
 
 	return reserved_sr_nos
 
@@ -254,12 +256,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=None):
 	query = (
 		frappe.qb.from_(serial_no)
 		.select(serial_no.name)
-		.where(
-			(serial_no.item_code == filters["item_code"])
-			& (serial_no.warehouse == filters["warehouse"])
-			& (Coalesce(serial_no.sales_invoice, "") == "")
-			& (Coalesce(serial_no.delivery_document_no, "") == "")
-		)
+		.where((serial_no.item_code == filters["item_code"]) & (serial_no.warehouse == filters["warehouse"]))
 		.orderby(serial_no.creation)
 		.limit(qty or 1)
 	)

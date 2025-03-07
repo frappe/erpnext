@@ -46,18 +46,20 @@
   "auto_reserve_serial_and_batch",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
+  "allow_existing_serial_no",
   "do_not_use_batchwise_valuation",
   "auto_create_serial_and_batch_bundle_for_outward",
   "pick_serial_and_batch_based_on",
-  "naming_series_prefix",
   "column_break_mhzc",
   "disable_serial_no_and_batch_selector",
-  "use_naming_series",
   "use_serial_batch_fields",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
-  "allow_existing_serial_no",
   "serial_and_batch_bundle_section",
   "set_serial_and_batch_bundle_naming_based_on_naming_series",
+  "section_break_gnhq",
+  "use_naming_series",
+  "column_break_wslv",
+  "naming_series_prefix",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -480,6 +482,14 @@
    "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
    "fieldtype": "Check",
    "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
+  },
+  {
+   "fieldname": "section_break_gnhq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wslv",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -487,7 +497,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-17 14:36:36.177743",
+ "modified": "2025-02-28 16:08:35.938840",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

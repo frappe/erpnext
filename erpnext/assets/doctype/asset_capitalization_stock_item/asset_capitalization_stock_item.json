@@ -10,12 +10,13 @@
   "column_break_3",
   "warehouse",
   "section_break_6",
+  "purchase_receipt_item",
   "stock_qty",
-  "stock_uom",
   "actual_qty",
   "column_break_9",
   "valuation_rate",
   "amount",
+  "stock_uom",
   "batch_and_serial_no_section",
   "serial_and_batch_bundle",
   "use_serial_batch_fields",
@@ -53,14 +54,14 @@
   {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break",
-   "label": "Qty and Rate"
+   "label": "Purchase Details"
   },
   {
    "columns": 1,
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty",
+   "label": "Quantity",
    "non_negative": 1
   },
   {
@@ -172,18 +173,26 @@
   {
    "fieldname": "column_break_mbuv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Receipt Item"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-26 17:06:22.564438",
+ "modified": "2025-03-05 12:46:01.074742",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization Stock Item",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "row_format": "Dynamic",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

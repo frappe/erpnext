@@ -2097,6 +2097,45 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "update_existing_price_list_rate", 0)
 		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
 
+	def test_delivery_note_rate_on_change_of_warehouse(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item = make_item(
+			"_Test Batch Item for Delivery Note Rate",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BH-SDDTBIFRM-.#####",
+			},
+		)
+
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 1)
+		so = make_sales_order(
+			item_code=item.name, rate=27648.00, price_list_rate=27648.00, qty=1, do_not_submit=True
+		)
+
+		so.items[0].rate = 90
+		so.save()
+		self.assertTrue(so.items[0].discount_amount == 27558.0)
+		so.submit()
+
+		warehouse = create_warehouse("NW Warehouse FOR Rate", company=so.company)
+
+		make_stock_entry(
+			item_code=item.name,
+			qty=2,
+			target=warehouse,
+			basic_rate=100,
+			company=so.company,
+			use_serial_batch_fields=1,
+		)
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].warehouse = warehouse
+		dn.save()
+
+		self.assertEqual(dn.items[0].rate, 90)
+
 	def test_credit_limit_on_so_reopning(self):
 		# set credit limit
 		company = "_Test Company"

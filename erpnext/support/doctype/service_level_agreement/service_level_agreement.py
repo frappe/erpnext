@@ -514,7 +514,7 @@ def apply(doc, method=None):
 def remove_sla_if_applied(doc):
 	doc.service_level_agreement = None
 	doc.response_by = None
-	doc.resolution_by = None
+	doc.sla_resolution_by = None
 
 
 def process_sla(doc, sla):
@@ -557,7 +557,7 @@ def handle_status_change(doc, apply_sla_for_resolution):
 		# In case issue was closed and after few days it has been opened
 		# The hold time should be calculated from resolution_date
 
-		on_hold_since = doc.resolution_date or doc.on_hold_since
+		on_hold_since = doc.sla_resolution_date or doc.on_hold_since
 		if on_hold_since:
 			current_hold_hours = time_diff_in_seconds(now_time, on_hold_since)
 			doc.total_hold_time = (doc.total_hold_time or 0) + current_hold_hours
@@ -582,7 +582,7 @@ def handle_status_change(doc, apply_sla_for_resolution):
 	# Open to Closed
 	if is_open_status(prev_status) and is_fulfilled_status(doc.status):
 		# Issue is closed -> Set resolution_date
-		doc.resolution_date = now_time
+		doc.sla_resolution_date = now_time
 		set_resolution_time(doc)
 
 	# Closed to Open
@@ -606,7 +606,7 @@ def handle_status_change(doc, apply_sla_for_resolution):
 		calculate_hold_hours()
 		# Issue is closed -> Set resolution_date
 		if apply_sla_for_resolution:
-			doc.resolution_date = now_time
+			doc.sla_resolution_date = now_time
 			set_resolution_time(doc)
 
 
@@ -713,7 +713,7 @@ def get_support_days(service_level):
 def set_resolution_time(doc):
 	start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
 	if doc.meta.has_field("resolution_time"):
-		doc.resolution_time = time_diff_in_seconds(doc.resolution_date, start_date_time)
+		doc.resolution_time = time_diff_in_seconds(doc.sla_resolution_date, start_date_time)
 
 	# total time taken by a user to close the issue apart from wait_time
 	if not doc.meta.has_field("user_resolution_time"):
@@ -737,7 +737,7 @@ def set_resolution_time(doc):
 				pending_time.append(wait_time)
 
 	total_pending_time = sum(pending_time)
-	resolution_time_in_secs = time_diff_in_seconds(doc.resolution_date, start_date_time)
+	resolution_time_in_secs = time_diff_in_seconds(doc.sla_resolution_date, start_date_time)
 	doc.user_resolution_time = resolution_time_in_secs - total_pending_time
 
 
@@ -793,8 +793,8 @@ def reset_service_level_agreement(doctype: str, docname: str, reason, user):
 
 
 def reset_resolution_metrics(doc):
-	if doc.meta.has_field("resolution_date"):
-		doc.resolution_date = None
+	if doc.meta.has_field("sla_resolution_date"):
+		doc.sla_resolution_date = None
 
 	if doc.meta.has_field("resolution_time"):
 		doc.resolution_time = None
@@ -861,8 +861,8 @@ def on_communication_update(doc, status):
 def reset_expected_response_and_resolution(doc):
 	if doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
 		doc.response_by = None
-	if doc.meta.has_field("resolution_by") and not doc.get("resolution_date"):
-		doc.resolution_by = None
+	if doc.meta.has_field("sla_resolution_by") and not doc.get("sla_resolution_date"):
+		doc.sla_resolution_by = None
 
 
 def set_response_by(doc, start_date_time, priority):
@@ -879,12 +879,14 @@ def set_response_by(doc, start_date_time, priority):
 
 
 def set_resolution_by(doc, start_date_time, priority):
-	if doc.meta.has_field("resolution_by"):
-		doc.resolution_by = get_expected_time_for(
+	if doc.meta.has_field("sla_resolution_by"):
+		doc.sla_resolution_by = get_expected_time_for(
 			parameter="resolution", service_level=priority, start_date_time=start_date_time
 		)
 		if doc.meta.has_field("total_hold_time") and doc.get("total_hold_time"):
-			doc.resolution_by = add_to_date(doc.resolution_by, seconds=round(doc.get("total_hold_time")))
+			doc.sla_resolution_by = add_to_date(
+				doc.sla_resolution_by, seconds=round(doc.get("total_hold_time"))
+			)
 
 
 def record_assigned_users_on_failure(doc):
@@ -943,7 +945,7 @@ def get_service_level_agreement_fields():
 			"read_only": 1,
 		},
 		{
-			"fieldname": "resolution_by",
+			"fieldname": "sla_resolution_by",
 			"fieldtype": "Datetime",
 			"label": "Resolution By",
 			"read_only": 1,
@@ -957,7 +959,7 @@ def get_service_level_agreement_fields():
 		},
 		{
 			"depends_on": "eval:!doc.__islocal",
-			"fieldname": "resolution_date",
+			"fieldname": "sla_resolution_date",
 			"fieldtype": "Datetime",
 			"label": "Resolution Date",
 			"no_copy": 1,
@@ -977,9 +979,9 @@ def update_agreement_status(doc, apply_sla_for_resolution):
 		if apply_sla_for_resolution:
 			if doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
 				doc.agreement_status = "First Response Due"
-			elif doc.meta.has_field("resolution_date") and not doc.get("resolution_date"):
+			elif doc.meta.has_field("sla_resolution_date") and not doc.get("sla_resolution_date"):
 				doc.agreement_status = "Resolution Due"
-			elif get_datetime(doc.get("resolution_date")) <= get_datetime(doc.get("resolution_by")):
+			elif get_datetime(doc.get("sla_resolution_date")) <= get_datetime(doc.get("sla_resolution_by")):
 				doc.agreement_status = "Fulfilled"
 			else:
 				doc.agreement_status = "Failed"

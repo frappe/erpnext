@@ -28,6 +28,8 @@ BOM_ITEM_FIELDS = [
 	"stock_uom",
 	"conversion_factor",
 	"do_not_explode",
+	"source_warehouse",
+	"allow_alternative_item",
 ]
 
 
@@ -291,7 +293,6 @@ class BOMCreator(Document):
 				"item": row.item_code,
 				"bom_type": "Production",
 				"quantity": row.qty,
-				"allow_alternative_item": 1,
 				"bom_creator": self.name,
 				"bom_creator_item": bom_creator_item,
 			}
@@ -315,7 +316,6 @@ class BOMCreator(Document):
 			item_args.update(
 				{
 					"bom_no": bom_no,
-					"allow_alternative_item": 1,
 					"allow_scrap_items": 1,
 					"include_item_in_manufacturing": 1,
 				}
@@ -428,6 +428,7 @@ def add_sub_assembly(**kwargs):
 				"do_not_explode": 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
+				"allow_alternative_item": kwargs.allow_alternative_item,
 			},
 		)
 

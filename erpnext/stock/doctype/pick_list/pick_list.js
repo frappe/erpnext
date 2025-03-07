@@ -2,6 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Pick List", {
+	after_save(frm) {
+		setTimeout(() => {
+			// Added to fix the issue of locations table not getting updated after save
+			frm.reload_doc();
+		}, 500);
+	},
+
 	setup: (frm) => {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 

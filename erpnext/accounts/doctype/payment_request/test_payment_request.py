@@ -581,6 +581,34 @@ class TestPaymentRequest(FrappeTestCase):
 		pi.load_from_db()
 		self.assertEqual(pr_2.grand_total, pi.outstanding_amount)
 
+	def test_consider_journal_entry_and_return_invoice(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		si = create_sales_invoice(currency="INR", qty=5, rate=500)
+
+		je = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 500, save=False)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = si.customer
+		je.accounts[1].reference_type = "Sales Invoice"
+		je.accounts[1].reference_name = si.name
+		je.accounts[1].credit_in_account_currency = 500
+		je.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		pe.paid_amount = 500
+		pe.references[0].allocated_amount = 500
+		pe.save()
+		pe.submit()
+
+		cr_note = create_sales_invoice(qty=-1, rate=500, is_return=1, return_against=si.name, do_not_save=1)
+		cr_note.update_outstanding_for_self = 0
+		cr_note.save()
+		cr_note.submit()
+
+		si.load_from_db()
+		pr = make_payment_request(dt="Sales Invoice", dn=si.name, mute_email=1)
+		self.assertEqual(pr.grand_total, si.outstanding_amount)
+
 
 def test_partial_paid_invoice_with_submitted_payment_entry(self):
 	pi = make_purchase_invoice(currency="INR", qty=1, rate=5000)

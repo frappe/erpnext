@@ -42,10 +42,10 @@ class SubcontractingOrderItem(Document):
 		received_qty: DF.Float
 		returned_qty: DF.Float
 		rm_cost_per_qty: DF.Currency
-		sc_conversion_factor: DF.Float
 		schedule_date: DF.Date | None
 		service_cost_per_qty: DF.Currency
 		stock_uom: DF.Link
+		subcontracting_conversion_factor: DF.Float
 		warehouse: DF.Link
 	# end: auto-generated types
 

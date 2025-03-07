@@ -34,6 +34,7 @@
   "shipment_parcel",
   "parcel_template",
   "add_template",
+  "total_weight",
   "column_break_28",
   "shipment_delivery_note",
   "shipment_details_section",
@@ -429,11 +430,17 @@
    "label": "Pickup Contact Person",
    "mandatory_depends_on": "eval:doc.pickup_from_type === 'Company'",
    "options": "User"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight (kg)",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 17:23:27.025802",
+ "modified": "2025-02-20 16:55:20.076418",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",

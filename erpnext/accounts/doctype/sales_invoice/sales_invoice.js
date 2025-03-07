@@ -897,8 +897,16 @@ frappe.ui.form.on("Sales Invoice", {
 
 	project: function (frm) {
 		if (frm.doc.project) {
-			frm.events.add_timesheet_data(frm, {
-				project: frm.doc.project,
+			frappe.call({
+				method: "is_auto_fetch_timesheet_enabled",
+				doc: frm.doc,
+				callback: function (r) {
+					if (cint(r.message)) {
+						frm.events.add_timesheet_data(frm, {
+							project: frm.doc.project,
+						});
+					}
+				},
 			});
 		}
 	},
@@ -914,7 +922,23 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 
 		const timesheets = await frm.events.get_timesheet_data(frm, kwargs);
+
+		if (kwargs.item_code) {
+			frm.events.add_timesheet_item(frm, kwargs.item_code, timesheets);
+		}
+
 		return frm.events.set_timesheet_data(frm, timesheets);
+	},
+
+	add_timesheet_item: function (frm, item_code, timesheets) {
+		const row = frm.add_child("items");
+		frappe.model.set_value(row.doctype, row.name, "item_code", item_code);
+		frappe.model.set_value(
+			row.doctype,
+			row.name,
+			"qty",
+			timesheets.reduce((a, b) => a + (b["billing_hours"] || 0.0), 0.0)
+		);
 	},
 
 	async get_timesheet_data(frm, kwargs) {
@@ -1015,6 +1039,22 @@ frappe.ui.form.on("Sales Invoice", {
 								reqd: 1,
 							},
 							{
+								label: __("Item Code"),
+								fieldname: "item_code",
+								fieldtype: "Link",
+								options: "Item",
+								get_query: () => {
+									return {
+										query: "erpnext.controllers.queries.item_query",
+										filters: {
+											is_sales_item: 1,
+											customer: frm.doc.customer,
+											has_variants: 0,
+										},
+									};
+								},
+							},
+							{
 								fieldtype: "Column Break",
 								fieldname: "col_break_1",
 							},
@@ -1038,6 +1078,7 @@ frappe.ui.form.on("Sales Invoice", {
 								from_time: data.from_time,
 								to_time: data.to_time,
 								project: data.project,
+								item_code: data.item_code,
 							});
 							d.hide();
 						},

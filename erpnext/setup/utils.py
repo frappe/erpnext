@@ -68,9 +68,6 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if not transaction_date:
 		transaction_date = nowdate()
 
-	if rate := get_pegged_rate(from_currency, to_currency, transaction_date):
-		return rate
-
 	currency_settings = frappe.get_doc("Accounts Settings").as_dict()
 	allow_stale_rates = currency_settings.get("allow_stale")
 
@@ -99,6 +96,9 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 	if frappe.get_cached_value("Currency Exchange Settings", "Currency Exchange Settings", "disabled"):
 		return 0.00
+
+	if rate := get_pegged_rate(from_currency, to_currency, transaction_date):
+		return rate
 
 	try:
 		cache = frappe.cache()

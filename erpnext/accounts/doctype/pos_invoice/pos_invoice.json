@@ -1623,6 +1623,5 @@
  "states": [],
  "timeline_field": "customer",
  "title_field": "title",
- "track_changes": 1,
- "track_seen": 1
+ "track_changes": 1
 }

@@ -307,6 +307,7 @@ class Deferred_Revenue_and_Expense_Report:
 			.where(
 				(inv.docstatus == 1)
 				& (deferred_flag_field == 1)
+				& (inv.company == self.filters.company)
 				& (
 					(
 						(self.period_list[0].from_date >= inv_item.service_start_date)

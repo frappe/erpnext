@@ -50,6 +50,7 @@ def get_group_by_asset_category_data(filters):
 			flt(row.accumulated_depreciation_as_on_from_date)
 			+ flt(row.depreciation_amount_during_the_period)
 			- flt(row.depreciation_eliminated_during_the_period)
+			- flt(row.depreciation_eliminated_via_reversal)
 		)
 
 		row.net_asset_value_as_on_from_date = flt(row.value_as_on_from_date) - flt(
@@ -247,6 +248,7 @@ def get_group_by_asset_data(filters):
 			flt(row.accumulated_depreciation_as_on_from_date)
 			+ flt(row.depreciation_amount_during_the_period)
 			- flt(row.depreciation_eliminated_during_the_period)
+			- flt(row.depreciation_eliminated_via_reversal)
 		)
 
 		row.net_asset_value_as_on_from_date = flt(row.value_as_on_from_date) - flt(
@@ -276,6 +278,7 @@ def get_assets_for_grouped_by_category(filters):
 		f"""
 		SELECT results.asset_category,
 			   sum(results.accumulated_depreciation_as_on_from_date) as accumulated_depreciation_as_on_from_date,
+			   sum(results.depreciation_eliminated_via_reversal) as depreciation_eliminated_via_reversal,
 			   sum(results.depreciation_eliminated_during_the_period) as depreciation_eliminated_during_the_period,
 			   sum(results.depreciation_amount_during_the_period) as depreciation_amount_during_the_period
 		from (SELECT a.asset_category,
@@ -284,6 +287,11 @@ def get_assets_for_grouped_by_category(filters):
 							  else
 								   0
 							  end), 0) as accumulated_depreciation_as_on_from_date,
+				   ifnull(sum(case when gle.posting_date <= %(to_date)s and ifnull(a.disposal_date, 0) = 0 then
+								   gle.credit
+							  else
+								   0
+							  end), 0) as depreciation_eliminated_via_reversal,
 				   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0 and a.disposal_date >= %(from_date)s
 										and a.disposal_date <= %(to_date)s and gle.posting_date <= a.disposal_date then
 								   gle.debit
@@ -307,7 +315,6 @@ def get_assets_for_grouped_by_category(filters):
 				a.docstatus=1
 				and a.company=%(company)s
 				and a.purchase_date <= %(to_date)s
-				and gle.debit != 0
 				and gle.is_cancelled = 0
 				and gle.account = ifnull(aca.depreciation_expense_account, company.depreciation_expense_account)
 				{condition} {finance_book_filter}
@@ -319,6 +326,7 @@ def get_assets_for_grouped_by_category(filters):
 							   else
 									a.opening_accumulated_depreciation
 							   end), 0) as accumulated_depreciation_as_on_from_date,
+				0 as depreciation_eliminated_via_reversal,
 				   ifnull(sum(case when a.disposal_date >= %(from_date)s and a.disposal_date <= %(to_date)s then
 								   a.opening_accumulated_depreciation
 							  else
@@ -354,6 +362,7 @@ def get_assets_for_grouped_by_asset(filters):
 		f"""
 		SELECT results.name as asset,
 			   sum(results.accumulated_depreciation_as_on_from_date) as accumulated_depreciation_as_on_from_date,
+			   sum(results.depreciation_eliminated_via_reversal) as depreciation_eliminated_via_reversal,
 			   sum(results.depreciation_eliminated_during_the_period) as depreciation_eliminated_during_the_period,
 			   sum(results.depreciation_amount_during_the_period) as depreciation_amount_during_the_period
 		from (SELECT a.name as name,
@@ -362,6 +371,11 @@ def get_assets_for_grouped_by_asset(filters):
 							  else
 								   0
 							  end), 0) as accumulated_depreciation_as_on_from_date,
+				   ifnull(sum(case when gle.posting_date <= %(to_date)s and ifnull(a.disposal_date, 0) = 0 then
+								   gle.credit
+							  else
+								   0
+							  end), 0) as depreciation_eliminated_via_reversal,
 				   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0 and a.disposal_date >= %(from_date)s
 										and a.disposal_date <= %(to_date)s and gle.posting_date <= a.disposal_date then
 								   gle.debit
@@ -385,7 +399,6 @@ def get_assets_for_grouped_by_asset(filters):
 				a.docstatus=1
 				and a.company=%(company)s
 				and a.purchase_date <= %(to_date)s
-				and gle.debit != 0
 				and gle.is_cancelled = 0
 				and gle.account = ifnull(aca.depreciation_expense_account, company.depreciation_expense_account)
 				{finance_book_filter} {condition}
@@ -397,6 +410,7 @@ def get_assets_for_grouped_by_asset(filters):
 							   else
 									a.opening_accumulated_depreciation
 							   end), 0) as accumulated_depreciation_as_on_from_date,
+				   0 as depreciation_as_on_from_date_credit,
 				   ifnull(sum(case when a.disposal_date >= %(from_date)s and a.disposal_date <= %(to_date)s then
 								   a.opening_accumulated_depreciation
 							  else
@@ -500,6 +514,12 @@ def get_columns(filters):
 		{
 			"label": _("Accumulated Depreciation as on") + " " + formatdate(filters.to_date),
 			"fieldname": "accumulated_depreciation_as_on_to_date",
+			"fieldtype": "Currency",
+			"width": 270,
+		},
+		{
+			"label": _("Depreciation eliminated via reversal"),
+			"fieldname": "depreciation_eliminated_via_reversal",
 			"fieldtype": "Currency",
 			"width": 270,
 		},

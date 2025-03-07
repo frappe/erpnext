@@ -143,14 +143,19 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		}
 	}
 
-	set_consumed_stock_items_tagged_to_wip_composite_asset(asset) {
+	set_consumed_stock_items_tagged_to_wip_composite_asset(target_asset) {
 		var me = this;
 
-		if (asset) {
+		if (target_asset) {
 			return me.frm.call({
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_items_tagged_to_wip_composite_asset",
 				args: {
-					asset: asset,
+					params: {
+						target_asset: target_asset,
+						finance_book: me.frm.doc.finance_book,
+						posting_date: me.frm.doc.posting_date,
+						posting_time: me.frm.doc.posting_time,
+					},
 				},
 				callback: function (r) {
 					if (!r.exc && r.message) {

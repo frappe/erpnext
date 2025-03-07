@@ -204,7 +204,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 
 		expected_data_after_credit_note = [
 			[100.0, 100.0, 40.0, 0.0, 60.0, si.name],
-			[0, 0, 100.0, 0.0, -100.0, cr_note.name],
+			[0, 0, 0, 100.0, -100.0, cr_note.name],
 		]
 		self.assertEqual(len(report[1]), 2)
 		si_row = next(
@@ -478,13 +478,19 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		report = execute(filters)[1]
 		self.assertEqual(len(report), 2)
 
-		expected_data = {sr.name: [10.0, -10.0, 0.0, -10], si.name: [100.0, 100.0, 10.0, 90.0]}
+		expected_data = {sr.name: [0.0, 10.0, -10.0, 0.0, -10], si.name: [100.0, 0.0, 100.0, 10.0, 90.0]}
 
 		rows = report[:2]
 		for row in rows:
 			self.assertEqual(
 				expected_data[row.voucher_no],
-				[row.invoiced or row.paid, row.outstanding, row.remaining_balance, row.future_amount],
+				[
+					row.invoiced or row.paid,
+					row.credit_note,
+					row.outstanding,
+					row.remaining_balance,
+					row.future_amount,
+				],
 			)
 
 		pe.cancel()

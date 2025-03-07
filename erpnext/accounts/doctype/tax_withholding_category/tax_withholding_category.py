@@ -436,6 +436,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 			tax_details.get("tax_withholding_category"),
 			company,
 		),
+		as_dict=1,
 	)
 
 	for d in journal_entries_details:

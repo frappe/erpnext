@@ -225,7 +225,7 @@
   {
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
-   "label": "Gross Purchase Amount",
+   "label": "Net Purchase Amount",
    "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
    "options": "Company:company:default_currency"
   },
@@ -592,7 +592,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-02-11 16:01:56.140904",
+ "modified": "2025-02-20 14:09:05.421913",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

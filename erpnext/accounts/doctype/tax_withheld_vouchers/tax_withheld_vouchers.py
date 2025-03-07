@@ -18,8 +18,8 @@ class TaxWithheldVouchers(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		taxable_amount: DF.Currency
-		voucher_name: DF.DynamicLink | None
-		voucher_type: DF.Link | None
+		voucher_name: DF.Data | None
+		voucher_type: DF.Data | None
 	# end: auto-generated types
 
 	pass

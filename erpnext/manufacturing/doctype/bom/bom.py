@@ -1371,7 +1371,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 				},
 			)
 
-	def get_max_op_qty():
+	def get_max_operation_quantity():
 		from frappe.query_builder.functions import Sum
 
 		table = frappe.qb.DocType("Job Card")
@@ -1387,7 +1387,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 		)
 		return min([d.qty for d in query.run(as_dict=True)], default=0)
 
-	def get_utilised_cc():
+	def get_utilised_corrective_cost():
 		from frappe.query_builder.functions import Sum
 
 		table = frappe.qb.DocType("Stock Entry")
@@ -1417,15 +1417,15 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 			)
 		)
 	):
-		max_qty = get_max_op_qty() - work_order.produced_qty
-		remaining_cc = work_order.corrective_operation_cost - get_utilised_cc()
+		max_qty = get_max_operation_quantity() - work_order.produced_qty
+		remaining_corrective_cost = work_order.corrective_operation_cost - get_utilised_corrective_cost()
 		stock_entry.append(
 			"additional_costs",
 			{
 				"expense_account": expense_account,
 				"description": "Corrective Operation Cost",
 				"has_corrective_cost": 1,
-				"amount": remaining_cc / max_qty * flt(stock_entry.fg_completed_qty),
+				"amount": remaining_corrective_cost / max_qty * flt(stock_entry.fg_completed_qty),
 			},
 		)
 

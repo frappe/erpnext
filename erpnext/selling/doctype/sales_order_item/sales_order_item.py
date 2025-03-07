@@ -32,7 +32,7 @@ class SalesOrderItem(Document):
 		brand: DF.Link | None
 		company_total_stock: DF.Float
 		conversion_factor: DF.Float
-		cost_center: DF.Link
+		cost_center: DF.Link | None
 		customer_item_code: DF.Data | None
 		delivered_by_supplier: DF.Check
 		delivered_qty: DF.Float

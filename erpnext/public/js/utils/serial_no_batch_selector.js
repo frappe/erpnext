@@ -540,6 +540,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					has_batch_no: this.item.has_batch_no,
 					qty: qty,
 					based_on: based_on,
+					posting_date: this.frm.doc.posting_date,
+					posting_time: this.frm.doc.posting_time,
 				},
 				callback: (r) => {
 					if (r.message) {

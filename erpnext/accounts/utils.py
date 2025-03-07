@@ -1417,7 +1417,7 @@ def repost_gle_for_stock_vouchers(
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 
-	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers)
+	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers, company=company)
 	if repost_doc and repost_doc.gl_reposting_index:
 		# Restore progress
 		stock_vouchers = stock_vouchers[cint(repost_doc.gl_reposting_index) :]
@@ -1470,7 +1470,9 @@ def _delete_accounting_ledger_entries(voucher_type, voucher_no):
 	_delete_pl_entries(voucher_type, voucher_no)
 
 
-def sort_stock_vouchers_by_posting_date(stock_vouchers: list[tuple[str, str]]) -> list[tuple[str, str]]:
+def sort_stock_vouchers_by_posting_date(
+	stock_vouchers: list[tuple[str, str]], company=None
+) -> list[tuple[str, str]]:
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	voucher_nos = [v[1] for v in stock_vouchers]
 
@@ -1481,7 +1483,12 @@ def sort_stock_vouchers_by_posting_date(stock_vouchers: list[tuple[str, str]]) -
 		.groupby(sle.voucher_type, sle.voucher_no)
 		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
-	).run(as_dict=True)
+	)
+
+	if company:
+		sles = sles.where(sle.company == company)
+
+	sles = sles.run(as_dict=True)
 	sorted_vouchers = [(sle.voucher_type, sle.voucher_no) for sle in sles]
 
 	unknown_vouchers = set(stock_vouchers) - set(sorted_vouchers)

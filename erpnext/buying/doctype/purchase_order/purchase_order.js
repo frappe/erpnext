@@ -404,7 +404,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 									);
 								}
 							} else {
-								if (!doc.items.every((item) => item.qty == item.sco_qty)) {
+								if (!doc.items.every((item) => item.qty == item.subcontracted_quantity)) {
 									this.frm.add_custom_button(
 										__("Subcontracting Order"),
 										() => {

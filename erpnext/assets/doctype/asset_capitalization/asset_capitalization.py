@@ -856,7 +856,10 @@ def get_service_item_details(args):
 
 
 @frappe.whitelist()
-def get_items_tagged_to_wip_composite_asset(asset):
+def get_items_tagged_to_wip_composite_asset(params):
+	if isinstance(params, str):
+		params = json.loads(params)
+
 	fields = [
 		"item_code",
 		"item_name",
@@ -871,25 +874,66 @@ def get_items_tagged_to_wip_composite_asset(asset):
 		"amount",
 		"is_fixed_asset",
 		"parent",
+		"name",
 	]
 
 	pr_items = frappe.get_all(
-		"Purchase Receipt Item", filters={"wip_composite_asset": asset, "docstatus": 1}, fields=fields
+		"Purchase Receipt Item",
+		filters={"wip_composite_asset": params.get("target_asset"), "docstatus": 1},
+		fields=fields,
 	)
 
 	stock_items = []
 	asset_items = []
+
 	for d in pr_items:
 		if not d.is_fixed_asset:
-			stock_items.append(frappe._dict(d))
+			stock_item = process_stock_item(d)
+			if stock_item:
+				stock_items.append(stock_item)
 		else:
-			asset_details = frappe.db.get_value(
-				"Asset",
-				{"item_code": d.item_code, "purchase_receipt": d.parent},
-				["name as asset", "asset_name"],
-				as_dict=1,
-			)
-			d.update(asset_details)
-			asset_items.append(frappe._dict(d))
+			asset_item = process_fixed_asset(d)
+			if asset_item:
+				asset_items.append(asset_item)
 
 	return stock_items, asset_items
+
+
+def process_stock_item(d):
+	stock_capitalized = frappe.db.exists(
+		"Asset Capitalization Stock Item",
+		{
+			"purchase_receipt_item": d.name,
+			"parentfield": "stock_items",
+			"parenttype": "Asset Capitalization",
+			"docstatus": 1,
+		},
+	)
+
+	if stock_capitalized:
+		return None
+
+	stock_item_data = frappe._dict(d)
+	stock_item_data.purchase_receipt_item = d.name
+	return stock_item_data
+
+
+def process_fixed_asset(d):
+	asset_details = frappe.db.get_value(
+		"Asset",
+		{
+			"item_code": d.item_code,
+			"purchase_receipt": d.parent,
+			"status": ("not in", ["Draft", "Scrapped", "Sold", "Capitalized"]),
+		},
+		["name as asset", "asset_name", "company"],
+		as_dict=1,
+	)
+
+	if asset_details:
+		asset_details.update(d)
+		asset_details.update(get_consumed_asset_details(asset_details))
+		d.update(asset_details)
+
+		return frappe._dict(d)
+	return None

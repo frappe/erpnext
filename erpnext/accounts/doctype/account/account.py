@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _, throw
-from frappe.utils import cint, cstr
+from frappe.utils import add_to_date, cint, cstr, pretty_date
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
 import erpnext
@@ -481,6 +481,7 @@ def get_account_autoname(account_number, account_name, company):
 
 @frappe.whitelist()
 def update_account_number(name, account_name, account_number=None, from_descendant=False):
+	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
 	if not account:
 		return
@@ -542,6 +543,7 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 @frappe.whitelist()
 def merge_account(old, new):
+	_ensure_idle_system()
 	# Validate properties before merging
 	new_account = frappe.get_cached_doc("Account", new)
 	old_account = frappe.get_cached_doc("Account", old)
@@ -595,3 +597,27 @@ def sync_update_account_number_in_child(
 
 	for d in frappe.db.get_values("Account", filters=filters, fieldname=["company", "name"], as_dict=True):
 		update_account_number(d["name"], account_name, account_number, from_descendant=True)
+
+
+def _ensure_idle_system():
+	# Don't allow renaming if accounting entries are actively being updated, there are two main reasons:
+	# 1. Correctness: It's next to impossible to ensure that renamed account is not being used *right now*.
+	# 2. Performance: Renaming requires locking out many tables entirely and severely degrades performance.
+
+	if frappe.flags.in_test:
+		return
+
+	try:
+		# We also lock inserts to GL entry table with for_update here.
+		last_gl_update = frappe.db.get_value("GL Entry", {}, "modified", for_update=True, wait=False)
+	except frappe.QueryTimeoutError:
+		# wait=False fails immediately if there's an active transaction.
+		last_gl_update = add_to_date(None, seconds=-1)
+
+	if last_gl_update > add_to_date(None, minutes=-5):
+		frappe.throw(
+			_(
+				"Last GL Entry update was done {}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
+			).format(pretty_date(last_gl_update)),
+			title=_("System In Use"),
+		)

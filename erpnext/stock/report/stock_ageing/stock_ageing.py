@@ -51,6 +51,10 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
 		range_values = get_range_age(filters, fifo_queue, to_date, item_dict)
 
+		check_and_replace_valuations_if_moving_average(
+			range_values, details.valuation_method, details.valuation_rate
+		)
+
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
 
 		if filters.get("show_warehouse_wise_stock"):
@@ -70,6 +74,15 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		data.append(row)
 
 	return data
+
+
+def check_and_replace_valuations_if_moving_average(range_values, item_valuation_method, valuation_rate):
+	if item_valuation_method == "Moving Average" or (
+		not item_valuation_method
+		and frappe.db.get_single_value("Stock Settings", "valuation_method") == "Moving Average"
+	):
+		for i in range(0, len(range_values), 2):
+			range_values[i + 1] = range_values[i] * valuation_rate
 
 
 def get_average_age(fifo_queue: list, to_date: str) -> float:
@@ -267,7 +280,7 @@ class FIFOSlots:
 
 				self.__update_balances(d, key)
 
-			# Note that stock_ledger_entries is an iterator, you can not reuse it  like a list
+			# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
 			del stock_ledger_entries
 
 		if not self.filters.get("show_warehouse_wise_stock"):
@@ -396,6 +409,7 @@ class FIFOSlots:
 			self.item_details[key]["total_qty"] += row.actual_qty
 
 		self.item_details[key]["has_serial_no"] = row.has_serial_no
+		self.item_details[key]["details"].valuation_rate = row.valuation_rate
 
 	def __aggregate_details_by_item(self, wh_wise_data: dict) -> dict:
 		"Aggregate Item-Wh wise data into single Item entry."
@@ -437,8 +451,10 @@ class FIFOSlots:
 				item.description,
 				item.stock_uom,
 				item.has_serial_no,
+				item.valuation_method,
 				sle.actual_qty,
 				sle.stock_value_difference,
+				sle.valuation_rate,
 				sle.posting_date,
 				sle.voucher_type,
 				sle.voucher_no,
@@ -506,7 +522,14 @@ class FIFOSlots:
 		item_table = frappe.qb.DocType("Item")
 
 		item = frappe.qb.from_("Item").select(
-			"name", "item_name", "description", "stock_uom", "brand", "item_group", "has_serial_no"
+			"name",
+			"item_name",
+			"description",
+			"stock_uom",
+			"brand",
+			"item_group",
+			"has_serial_no",
+			"valuation_method",
 		)
 
 		if self.filters.get("item_code"):

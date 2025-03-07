@@ -70,14 +70,16 @@ def get_data(filters):
 			po.company,
 			po_item.name,
 		)
-		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1))
+		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "On Hold"))) & (po.docstatus == 1))
 		.groupby(po_item.name)
 		.orderby(po.transaction_date)
 	)
 
-	for field in ("company", "name"):
-		if filters.get(field):
-			query = query.where(po[field] == filters.get(field))
+	if filters.get("company"):
+		query = query.where(po.company == filters.get("company"))
+
+	if filters.get("name"):
+		query = query.where(po.name.isin(filters.get("name")))
 
 	if filters.get("from_date") and filters.get("to_date"):
 		query = query.where(po.transaction_date.between(filters.get("from_date"), filters.get("to_date")))

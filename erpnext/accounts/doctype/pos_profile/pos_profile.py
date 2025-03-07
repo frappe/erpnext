@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, msgprint, scrub, unscrub
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
 
@@ -204,15 +205,39 @@ class POSProfile(Document):
 def get_item_groups(pos_profile):
 	item_groups = []
 	pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
+	permitted_item_groups = get_permitted_nodes("Item Group")
 
 	if pos_profile.get("item_groups"):
 		# Get items based on the item groups defined in the POS profile
 		for data in pos_profile.get("item_groups"):
 			item_groups.extend(
-				["%s" % frappe.db.escape(d.name) for d in get_child_nodes("Item Group", data.item_group)]
+				[
+					"%s" % frappe.db.escape(d.name)
+					for d in get_child_nodes("Item Group", data.item_group)
+					if not permitted_item_groups or d.name in permitted_item_groups
+				]
 			)
 
+	if not item_groups and permitted_item_groups:
+		item_groups = ["%s" % frappe.db.escape(d) for d in permitted_item_groups]
+
 	return list(set(item_groups))
+
+
+def get_permitted_nodes(group_type):
+	nodes = []
+	permitted_nodes = get_permitted_documents(group_type)
+
+	if not permitted_nodes:
+		return nodes
+
+	for node in permitted_nodes:
+		if frappe.db.get_value(group_type, node, "is_group"):
+			nodes.extend([d.name for d in get_child_nodes(group_type, node)])
+		else:
+			nodes.append(node)
+
+	return nodes
 
 
 def get_child_nodes(group_type, root):
