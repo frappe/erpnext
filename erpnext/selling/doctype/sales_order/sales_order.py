@@ -1595,7 +1595,7 @@ def make_raw_material_request(items, company, sales_order, project=None, materia
 			doctype="Material Request",
 			transaction_date=nowdate(),
 			company=company,
-			material_request_type="Purchase",
+			material_request_type=material_request_type,
 		)
 	)
 	for item in raw_materials:
