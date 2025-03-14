@@ -692,7 +692,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							__("Create")
 						);
 						this.frm.add_custom_button(
-							__("Request for Raw Materials"),
+							__("Customer Provided Raw Materials"),
+							() => this.make_raw_material_request("Customer Provided"),
+							__("Create")
+						);
+						this.frm.add_custom_button(
+							__("Request for Raw Materials for purchase"),
 							() => this.make_raw_material_request(),
 							__("Create")
 						);
@@ -952,13 +957,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		);
 	}
 
-	make_raw_material_request() {
+	make_raw_material_request(material_request_type="Purchase") {
 		var me = this;
 		this.frm.call({
 			method: "erpnext.selling.doctype.sales_order.sales_order.get_work_order_items",
 			args: {
 				sales_order: this.frm.docname,
-				for_raw_material_request: 1,
+				for_raw_material_request: 1
 			},
 			callback: function (r) {
 				if (!r.message) {
@@ -968,13 +973,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					});
 					return;
 				} else {
-					me.make_raw_material_request_dialog(r);
+					me.make_raw_material_request_dialog(r, material_request_type);
 				}
 			},
 		});
 	}
 
-	make_raw_material_request_dialog(r) {
+	make_raw_material_request_dialog(r, material_request_type) {
 		var me = this;
 		var fields = [
 			{ fieldtype: "Check", fieldname: "include_exploded_items", label: __("Include Exploded Items") },
@@ -1038,6 +1043,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						company: me.frm.doc.company,
 						sales_order: me.frm.docname,
 						project: me.frm.project,
+						material_request_type: material_request_type,
 					},
 					freeze: true,
 					callback: function (r) {

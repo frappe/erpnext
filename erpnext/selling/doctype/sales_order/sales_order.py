@@ -1570,7 +1570,7 @@ def update_status(status, name):
 
 
 @frappe.whitelist()
-def make_raw_material_request(items, company, sales_order, project=None):
+def make_raw_material_request(items, company, sales_order, project=None, material_request_type="Purchase"):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
