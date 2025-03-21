@@ -1,8 +1,8 @@
 erpnext.PointOfSale.PastOrderSummary = class {
-	constructor({ wrapper, events, pos_profile }) {
+	constructor({ wrapper, settings, events }) {
 		this.wrapper = wrapper;
 		this.events = events;
-		this.pos_profile = pos_profile;
+		this.print_receipt_on_order_complete = settings.print_receipt_on_order_complete;
 
 		this.init_component();
 	}
@@ -357,8 +357,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		this.add_summary_btns(condition_btns_map);
 
-		if (after_submission) {
-			this.print_receipt_on_order_complete();
+		if (after_submission && this.print_receipt_on_order_complete) {
+			this.print_receipt();
 		}
 	}
 
@@ -425,17 +425,5 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	toggle_component(show) {
 		show ? this.$component.css("display", "flex") : this.$component.css("display", "none");
-	}
-
-	async print_receipt_on_order_complete() {
-		const res = await frappe.db.get_value(
-			"POS Profile",
-			this.pos_profile,
-			"print_receipt_on_order_complete"
-		);
-
-		if (res.message.print_receipt_on_order_complete) {
-			this.print_receipt();
-		}
 	}
 };

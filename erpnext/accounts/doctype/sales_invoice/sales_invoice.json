@@ -3,7 +3,6 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2022-01-25 10:29:57.771398",
- "default_print_format": "Sales Invoice Print",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -2189,7 +2188,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-03-05 17:06:59.720616",
+ "modified": "2025-03-17 19:32:31.809658",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

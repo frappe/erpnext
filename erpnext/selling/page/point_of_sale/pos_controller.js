@@ -449,6 +449,7 @@ erpnext.PointOfSale.Controller = class {
 	init_order_summary() {
 		this.order_summary = new erpnext.PointOfSale.PastOrderSummary({
 			wrapper: this.$components_wrapper,
+			settings: this.settings,
 			events: {
 				get_frm: () => this.frm,
 
@@ -485,7 +486,6 @@ erpnext.PointOfSale.Controller = class {
 					]);
 				},
 			},
-			pos_profile: this.pos_profile,
 		});
 	}
 

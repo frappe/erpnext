@@ -214,9 +214,12 @@ class StockBalanceReport:
 		elif entry.posting_date >= self.from_date and entry.posting_date <= self.to_date:
 			if flt(qty_diff, self.float_precision) >= 0:
 				qty_dict.in_qty += qty_diff
-				qty_dict.in_val += value_diff
 			else:
 				qty_dict.out_qty += abs(qty_diff)
+
+			if flt(value_diff, self.float_precision) >= 0:
+				qty_dict.in_val += value_diff
+			else:
 				qty_dict.out_val += abs(value_diff)
 
 		qty_dict.val_rate = entry.valuation_rate

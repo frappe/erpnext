@@ -1195,6 +1195,7 @@ def create_delivery_note(source_name, target_doc=None):
 
 def create_dn_wo_so(pick_list):
 	delivery_note = frappe.new_doc("Delivery Note")
+	delivery_note.company = pick_list.company
 
 	item_table_mapper_without_so = {
 		"doctype": "Delivery Note Item",

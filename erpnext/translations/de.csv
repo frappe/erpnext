@@ -12111,3 +12111,20 @@ subscription is already cancelled.,abonnement ist bereits storniert.,
 {0} cannot be zero,{0} kann nicht Null sein,
 {0} is already running for {1},{0} läuft bereits für {1},
 {0} units of Item {1} is not available in any of the warehouses.,{0} Einheiten des Artikels {1} sind in keinem der Lager verfügbar.,
+Cannot {0} from {1} without any negative outstanding invoice,Kann nicht {0} von {1} ohne negative ausstehende Rechnung,
+Common Code,Gemeinsamer Code,
+Event,Ereignis,
+Forecast,Prognose,
+"If <b>Enabled</b> - Reconciliation happens on the <b>Advance Payment posting date</b><br>
+If <b>Disabled</b> - Reconciliation happens on oldest of 2 Dates: <b>Invoice Date</b> or the <b>Advance Payment posting date</b><br>
+","Falls <b>aktiviert</b> - erfolgt der Abgleich am <b>Buchungsdatum der Vorauszahlung</b><br>
+Falls <b>deaktiviert</b> - erfolgt der Abgleich am ältesten von 2 Daten: <b>Rechnungsdatum</b> oder <b>Buchungsdatum der Vorauszahlung</b><br>
+",
+Pay,Zahlen,Amount
+Please set '{0}' in Company: {1},Bitte stellen Sie '{0}' in Unternehmen ein: {1},
+Price is not set for the item.,Für den Artikel ist kein Preis festgelegt.,
+Rate of Depreciation (%),Abschreibungssatz (%),
+Rejected ,Abgelehnt ,
+Row #{0}: Allocated Amount cannot be greater than Outstanding Amount of Payment Request {1},Zeile #{0}: Der zugewiesene Betrag kann nicht größer sein als der ausstehende Betrag der Zahlungsanforderung {1},
+Section,Sektion,
+Sending...,Senden...,

@@ -312,7 +312,7 @@ frappe.ui.form.on("Job Card", {
 							fieldtype: "Float",
 							label: __("Completed Quantity"),
 							fieldname: "qty",
-							default: frm.doc.for_quantity,
+							default: frm.doc.for_quantity - frm.doc.total_completed_qty,
 						},
 						(data) => {
 							frm.events.complete_job(frm, "Complete", data.qty);

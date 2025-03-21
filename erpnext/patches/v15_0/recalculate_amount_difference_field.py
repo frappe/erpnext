@@ -27,11 +27,7 @@ def execute():
 				table.qty,
 				parent.conversion_rate,
 			)
-			.where(
-				(table.amount_difference_with_purchase_invoice != 0)
-				& (table.docstatus == 1)
-				& (parent.company == company)
-			)
+			.where((table.docstatus == 1) & (parent.company == company))
 		)
 
 		posting_date = "2024-04-01"
@@ -62,6 +58,14 @@ def execute():
 		):
 			posting_date = period_closing_voucher[0].period_end_date
 
+		acc_frozen_upto = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
+		if acc_frozen_upto and getdate(acc_frozen_upto) > getdate(posting_date):
+			posting_date = acc_frozen_upto
+
+		stock_frozen_upto = frappe.db.get_single_value("Stock Settings", "stock_frozen_upto")
+		if stock_frozen_upto and getdate(stock_frozen_upto) > getdate(posting_date):
+			posting_date = stock_frozen_upto
+
 		try:
 			fiscal_year = get_fiscal_year(frappe.utils.datetime.date.today())
 		except Exception:
@@ -69,6 +73,7 @@ def execute():
 		else:
 			if fiscal_year and getdate(fiscal_year[1]) > getdate(posting_date):
 				posting_date = fiscal_year[1]
+
 		query = query.where(parent.posting_date > posting_date)
 
 		if result := query.run(as_dict=True):
@@ -112,6 +117,7 @@ def get_billed_qty_against_purchase_receipt(pr_names):
 		frappe.qb.from_(table)
 		.select(table.pr_detail, Sum(table.qty).as_("qty"))
 		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
+		.groupby(table.pr_detail)
 	)
 	invoice_data = query.run(as_list=1)
 

@@ -876,6 +876,7 @@ def make_material_request(source_name, target_doc=None):
 					"name": "sales_order_item",
 					"parent": "sales_order",
 					"delivery_date": "required_by",
+					"bom_no": "bom_no",
 				},
 				"condition": lambda item: not frappe.db.exists(
 					"Product Bundle", {"name": item.item_code, "disabled": 0}

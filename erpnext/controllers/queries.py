@@ -837,6 +837,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 			"posting_date": valid_from,
 			"tax_category": filters.get("tax_category"),
 			"company": company,
+			"base_net_rate": filters.get("base_net_rate"),
 		}
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)

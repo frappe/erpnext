@@ -374,9 +374,36 @@ def auto_reconcile_vouchers(
 	to_reference_date=None,
 ):
 	frappe.flags.auto_reconcile_vouchers = True
-	reconciled, partially_reconciled = set(), set()
 
 	bank_transactions = get_bank_transactions(bank_account)
+
+	if len(bank_transactions) > 10:
+		frappe.enqueue(
+			method="erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.start_auto_reconcile",
+			queue="long",
+			bank_transactions=bank_transactions,
+			from_date=from_date,
+			to_date=to_date,
+			filter_by_reference_date=filter_by_reference_date,
+			from_reference_date=from_reference_date,
+			to_reference_date=to_reference_date,
+		)
+		frappe.msgprint(_("Auto Reconciliation has started in the background"))
+	else:
+		start_auto_reconcile(
+			bank_transactions,
+			from_date,
+			to_date,
+			filter_by_reference_date,
+			from_reference_date,
+			to_reference_date,
+		)
+
+
+def start_auto_reconcile(
+	bank_transactions, from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date
+):
+	reconciled, partially_reconciled = set(), set()
 	for transaction in bank_transactions:
 		linked_payments = get_linked_payments(
 			transaction.name,
@@ -414,7 +441,6 @@ def auto_reconcile_vouchers(
 	frappe.msgprint(title=_("Auto Reconciliation"), msg=alert_message, indicator=indicator)
 
 	frappe.flags.auto_reconcile_vouchers = False
-	return reconciled, partially_reconciled
 
 
 def get_auto_reconcile_message(partially_reconciled, reconciled):

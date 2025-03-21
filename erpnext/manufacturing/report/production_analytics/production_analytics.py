@@ -51,9 +51,9 @@ def get_periodic_data(filters, entry):
 			]:
 				if d.status in ["Not Started", "Closed", "Stopped"]:
 					periodic_data = update_periodic_data(periodic_data, d.status, period)
-				elif today() > getdate(d.planned_end_date):
+				elif getdate(today()) > getdate(d.planned_end_date):
 					periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-				elif today() < getdate(d.planned_end_date):
+				elif getdate(today()) < getdate(d.planned_end_date):
 					periodic_data = update_periodic_data(periodic_data, "Pending", period)
 
 			if (

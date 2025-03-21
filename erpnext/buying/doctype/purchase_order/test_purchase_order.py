@@ -920,6 +920,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		automatically_fetch_payment_terms(enable=0)
 
 	def test_internal_transfer_flow(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 			make_inter_company_purchase_invoice,
 		)
@@ -935,8 +936,16 @@ class TestPurchaseOrder(FrappeTestCase):
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
 
+		create_cost_center(
+			cost_center_name="_Test Cost Center for perpetual inventory Account",
+			company="_Test Company with perpetual inventory",
+		)
+
 		mr = make_material_request(
-			qty=2, company="_Test Company with perpetual inventory", warehouse="Stores - TCP1"
+			qty=2,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			cost_center="_Test Cost Center for perpetual inventory Account - TCP1",
 		)
 
 		po = create_purchase_order(

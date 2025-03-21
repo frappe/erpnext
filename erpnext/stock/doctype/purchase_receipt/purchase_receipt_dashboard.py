@@ -11,12 +11,12 @@ def get_data():
 			"Auto Repeat": "reference_document",
 			"Purchase Receipt": "return_against",
 			"Stock Reservation Entry": "from_voucher_no",
+			"Quality Inspection": "reference_name",
 		},
 		"internal_links": {
 			"Material Request": ["items", "material_request"],
 			"Purchase Order": ["items", "purchase_order"],
 			"Project": ["items", "project"],
-			"Quality Inspection": ["items", "quality_inspection"],
 		},
 		"transactions": [
 			{

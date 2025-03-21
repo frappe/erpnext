@@ -39,11 +39,10 @@ class TestUaeVat201(TestCase):
 		make_item("_Test UAE VAT Zero Rated Item", properties={"is_zero_rated": 1, "is_exempt": 0})
 		make_item("_Test UAE VAT Exempt Item", properties={"is_zero_rated": 0, "is_exempt": 1})
 
+	def test_uae_vat_201_report(self):
 		make_sales_invoices()
-
 		create_purchase_invoices()
 
-	def test_uae_vat_201_report(self):
 		filters = {"company": "_Test Company UAE VAT"}
 		total_emiratewise = get_total_emiratewise(filters)
 		amounts_by_emirate = {}
@@ -63,6 +62,37 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_exempt_total(filters), 100)
 		self.assertEqual(get_standard_rated_expenses_total(filters), 250)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 1)
+
+	def test_uae_vat_201_report_with_foreign_transaction(self):
+		pi = make_purchase_invoice(
+			company="_Test Company UAE VAT",
+			supplier="_Test UAE Supplier",
+			supplier_warehouse="_Test UAE VAT Supplier Warehouse - _TCUV",
+			warehouse="_Test UAE VAT Supplier Warehouse - _TCUV",
+			currency="USD",
+			conversion_rate=3.67,
+			cost_center="Main - _TCUV",
+			expense_account="Cost of Goods Sold - _TCUV",
+			item="_Test UAE VAT Item",
+			do_not_save=1,
+			uom="Nos",
+		)
+		pi.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "VAT 5% - _TCUV",
+				"cost_center": "Main - _TCUV",
+				"description": "VAT 5% @ 5.0",
+				"rate": 5.0,
+			},
+		)
+		pi.recoverable_standard_rated_expenses = 50
+		pi.save().submit()
+
+		filters = {"company": "_Test Company UAE VAT"}
+		self.assertEqual(get_standard_rated_expenses_total(filters), 917.5)
+		self.assertEqual(get_standard_rated_expenses_tax(filters), 50)
 
 
 def make_company(company_name, abbr):

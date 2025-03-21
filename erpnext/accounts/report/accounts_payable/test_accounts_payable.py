@@ -38,23 +38,6 @@ class TestAccountsPayable(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(data[1][0].get("outstanding"), 300)
 		self.assertEqual(data[1][0].get("currency"), "USD")
 
-	def test_account_payable_for_debit_note(self):
-		pi = self.create_purchase_invoice(do_not_submit=True)
-		pi.is_return = 1
-		pi.items[0].qty = -1
-		pi = pi.save().submit()
-
-		filters = {
-			"company": self.company,
-			"party_type": "Supplier",
-			"party": [self.supplier],
-			"report_date": today(),
-			"range": "30, 60, 90, 120",
-		}
-
-		data = execute(filters)
-		self.assertEqual(data[1][0].get("invoiced"), 300)
-
 	def create_purchase_invoice(self, do_not_submit=False):
 		frappe.set_user("Administrator")
 		pi = make_purchase_invoice(

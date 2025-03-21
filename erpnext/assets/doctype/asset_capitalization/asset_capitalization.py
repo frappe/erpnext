@@ -123,6 +123,7 @@ class AssetCapitalization(StockController):
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
 		self.make_gl_entries()
+		self.repost_future_sle_and_gle()
 		self.update_target_asset()
 
 	def on_cancel(self):
@@ -136,6 +137,7 @@ class AssetCapitalization(StockController):
 		)
 		self.update_stock_ledger()
 		self.make_gl_entries()
+		self.repost_future_sle_and_gle()
 		self.restore_consumed_asset_items()
 
 	def set_title(self):

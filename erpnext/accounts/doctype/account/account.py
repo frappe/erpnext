@@ -502,7 +502,7 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 				"name",
 			)
 
-			if old_name:
+			if old_name and not from_descendant:
 				# same account in parent company exists
 				allow_child_account_creation = _("Allow Account Creation Against Child Company")
 
@@ -607,12 +607,16 @@ def _ensure_idle_system():
 	if frappe.flags.in_test:
 		return
 
+	last_gl_update = None
 	try:
 		# We also lock inserts to GL entry table with for_update here.
 		last_gl_update = frappe.db.get_value("GL Entry", {}, "modified", for_update=True, wait=False)
 	except frappe.QueryTimeoutError:
 		# wait=False fails immediately if there's an active transaction.
 		last_gl_update = add_to_date(None, seconds=-1)
+
+	if not last_gl_update:
+		return
 
 	if last_gl_update > add_to_date(None, minutes=-5):
 		frappe.throw(

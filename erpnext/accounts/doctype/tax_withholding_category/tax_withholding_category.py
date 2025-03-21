@@ -36,27 +36,38 @@ class TaxWithholdingCategory(Document):
 
 	def validate(self):
 		self.validate_dates()
-		self.validate_accounts()
+		self.validate_companies_and_accounts()
 		self.validate_thresholds()
 
 	def validate_dates(self):
-		last_date = None
-		for d in self.get("rates"):
+		last_to_date = None
+		rates = sorted(self.get("rates"), key=lambda d: getdate(d.from_date))
+
+		for d in rates:
 			if getdate(d.from_date) >= getdate(d.to_date):
 				frappe.throw(_("Row #{0}: From Date cannot be before To Date").format(d.idx))
 
 			# validate overlapping of dates
-			if last_date and getdate(d.to_date) < getdate(last_date):
+			if last_to_date and getdate(d.from_date) < getdate(last_to_date):
 				frappe.throw(_("Row #{0}: Dates overlapping with other row").format(d.idx))
 
-	def validate_accounts(self):
-		existing_accounts = []
+			last_to_date = d.to_date
+
+	def validate_companies_and_accounts(self):
+		existing_accounts = set()
+		companies = set()
 		for d in self.get("accounts"):
+			# validate duplicate company
+			if d.get("company") in companies:
+				frappe.throw(_("Company {0} added multiple times").format(frappe.bold(d.get("company"))))
+			companies.add(d.get("company"))
+
+			# validate duplicate account
 			if d.get("account") in existing_accounts:
 				frappe.throw(_("Account {0} added multiple times").format(frappe.bold(d.get("account"))))
 
 			validate_account_head(d.idx, d.get("account"), d.get("company"))
-			existing_accounts.append(d.get("account"))
+			existing_accounts.add(d.get("account"))
 
 	def validate_thresholds(self):
 		for d in self.get("rates"):

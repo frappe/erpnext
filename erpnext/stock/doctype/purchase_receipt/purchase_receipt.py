@@ -1083,6 +1083,9 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 	total_amount, total_billed_amount = 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
 
+	if adjust_incoming_rate:
+		item_wise_billed_qty = get_billed_qty_against_purchase_receipt(pr_doc)
+
 	for item in pr_doc.items:
 		returned_qty = flt(item_wise_returned_qty.get(item.name))
 		returned_amount = flt(returned_qty) * flt(item.rate)
@@ -1102,7 +1105,6 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 		if adjust_incoming_rate:
 			adjusted_amt = 0.0
-			item_wise_billed_qty = get_billed_qty_against_purchase_receipt(pr_doc)
 
 			if (
 				item.billed_amt is not None
@@ -1134,6 +1136,7 @@ def get_billed_qty_against_purchase_receipt(pr_doc):
 		frappe.qb.from_(table)
 		.select(table.pr_detail, fn.Sum(table.qty).as_("qty"))
 		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
+		.groupby(table.pr_detail)
 	)
 	invoice_data = query.run(as_list=1)
 

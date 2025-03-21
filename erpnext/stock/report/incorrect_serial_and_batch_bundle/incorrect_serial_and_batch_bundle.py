@@ -59,7 +59,7 @@ def get_data(filters) -> list[list]:
 	The report data is a list of rows, with each row being a list of cell values.
 	"""
 
-	SABB = frappe.qb.DocType("Serial And Batch Bundle")
+	SABB = frappe.qb.DocType("Serial and Batch Bundle")
 	SLE = frappe.qb.DocType("Stock Ledger Entry")
 	ignore_voycher_types = [
 		"Installation Note",

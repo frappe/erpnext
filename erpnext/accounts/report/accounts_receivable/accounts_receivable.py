@@ -267,18 +267,6 @@ class ReceivablePayableReport:
 				row.invoiced_in_account_currency += amount_in_account_currency
 		else:
 			if self.is_invoice(ple):
-				# when invoice has is_return marked
-				if self.invoice_details.get(row.voucher_no, {}).get("is_return"):
-					# for Credit Note
-					if row.voucher_type == "Sales Invoice":
-						row.credit_note -= amount
-						row.credit_note_in_account_currency -= amount_in_account_currency
-					# for Debit Note
-					else:
-						row.invoiced -= amount
-						row.invoiced_in_account_currency -= amount_in_account_currency
-					return
-
 				if row.voucher_no == ple.voucher_no == ple.against_voucher_no:
 					row.paid -= amount
 					row.paid_in_account_currency -= amount_in_account_currency
@@ -433,7 +421,7 @@ class ReceivablePayableReport:
 			# nosemgrep
 			si_list = frappe.db.sql(
 				"""
-				select name, due_date, po_no, is_return
+				select name, due_date, po_no
 				from `tabSales Invoice`
 				where posting_date <= %s
 					and company = %s
@@ -465,7 +453,7 @@ class ReceivablePayableReport:
 			# nosemgrep
 			for pi in frappe.db.sql(
 				"""
-				select name, due_date, bill_no, bill_date, is_return
+				select name, due_date, bill_no, bill_date
 				from `tabPurchase Invoice`
 				where
 					posting_date <= %s
@@ -532,7 +520,7 @@ class ReceivablePayableReport:
 				ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{row.voucher_type}` si, `tabPayment Schedule` ps
 			where
-				si.name = ps.parent and
+				si.name = ps.parent and ps.parenttype = '{row.voucher_type}' and
 				si.name = %s and
 				si.is_return = 0
 			order by ps.paid_amount desc, due_date
@@ -741,11 +729,13 @@ class ReceivablePayableReport:
 			"company": self.filters.company,
 			"update_outstanding_for_self": 0,
 		}
+
 		or_filters = {}
-		for party_type in self.party_type:
+		if party_type := self.filters.party_type:
 			party_field = scrub(party_type)
-			if self.filters.get(party_field):
-				or_filters.update({party_field: self.filters.get(party_field)})
+			if parties := self.filters.get("party"):
+				or_filters.update({party_field: ["in", parties]})
+
 		self.return_entries = frappe._dict(
 			frappe.get_all(
 				doctype, filters=filters, or_filters=or_filters, fields=["name", "return_against"], as_list=1

@@ -27,6 +27,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center,
+			company=company,
 			save=False,
 		)
 		jv1.company = company
@@ -39,6 +40,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			account1="Cost of Goods Sold - TPC",
 			account2="Cash - TPC",
 			cost_center=cost_center,
+			company=company,
 			save=False,
 		)
 		jv2.company = company
@@ -156,6 +158,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			amount=400,
 			cost_center=cost_center,
 			posting_date="2021-03-15",
+			company=company,
 		)
 		jv.company = company
 		jv.finance_book = create_finance_book().name
@@ -198,6 +201,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center,
+			company=company,
 			save=False,
 		)
 		jv1.company = company
@@ -220,6 +224,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center1,
+			company=company,
 			save=False,
 		)
 		jv1.company = company
@@ -232,6 +237,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center2,
+			company=company,
 			save=False,
 		)
 		jv2.company = company
@@ -261,6 +267,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center2,
+			company=company,
 			save=False,
 		)
 

@@ -257,7 +257,9 @@ class SubcontractingOrder(SubcontractingController):
 
 				si.qty = available_qty
 				conversion_factor = po_item.qty / po_item.fg_item_qty
-				si.fg_item_qty = available_qty / conversion_factor
+				si.fg_item_qty = flt(
+					available_qty / conversion_factor, frappe.get_precision("Purchase Order Item", "qty")
+				)
 				si.amount = available_qty * si.rate
 
 				bom = (

@@ -519,7 +519,7 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 		payment = get_payment_entry(order.doctype, order.name)
 		payment.apply_tax_withholding_amount = 1
 		payment.tax_withholding_category = "Cumulative Threshold TDS"
-		payment.submit()
+		payment.save().submit()
 		self.assertEqual(payment.taxes[0].tax_amount, 4000)
 
 	def test_multi_category_single_supplier(self):

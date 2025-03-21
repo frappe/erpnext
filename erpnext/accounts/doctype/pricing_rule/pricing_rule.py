@@ -454,8 +454,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 			if pricing_rule.coupon_code_based == 1:
 				if not args.coupon_code:
-					return item_details
-
+					continue
 				coupon_code = frappe.db.get_value(
 					doctype="Coupon Code", filters={"pricing_rule": pricing_rule.name}, fieldname="name"
 				)
