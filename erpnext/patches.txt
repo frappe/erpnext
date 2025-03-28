@@ -397,7 +397,8 @@ erpnext.patches.v15_0.set_difference_amount_in_asset_value_adjustment
 erpnext.patches.v14_0.update_posting_datetime
 erpnext.stock.doctype.stock_ledger_entry.patches.ensure_sle_indexes
 erpnext.patches.v15_0.update_query_report
-erpnext.patches.v15_0.rename_field_from_rate_difference_to_amount_difference #2025-03-18
-erpnext.patches.v15_0.recalculate_amount_difference_field
+erpnext.patches.v15_0.rename_field_from_rate_difference_to_amount_difference
+erpnext.patches.v15_0.recalculate_amount_difference_field #2025-03-18
 erpnext.patches.v15_0.rename_sla_fields #2025-03-12
 erpnext.patches.v15_0.set_purchase_receipt_row_item_to_capitalization_stock_item
+erpnext.patches.v15_0.update_payment_schedule_fields_in_invoices

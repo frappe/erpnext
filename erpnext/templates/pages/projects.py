@@ -9,7 +9,7 @@ def get_context(context):
 	project_user = frappe.db.get_value(
 		"Project User",
 		{"parent": frappe.form_dict.project, "user": frappe.session.user},
-		["user", "view_attachments"],
+		["user", "view_attachments", "hide_timesheets"],
 		as_dict=True,
 	)
 	if frappe.session.user != "Administrator" and (not project_user or frappe.session.user == "Guest"):
@@ -25,7 +25,8 @@ def get_context(context):
 		project.name, start=0, item_status="open", search=frappe.form_dict.get("search")
 	)
 
-	project.timesheets = get_timesheets(project.name, start=0, search=frappe.form_dict.get("search"))
+	if project_user and not project_user.hide_timesheets:
+		project.timesheets = get_timesheets(project.name, start=0, search=frappe.form_dict.get("search"))
 
 	if project_user and project_user.view_attachments:
 		project.attachments = get_attachments(project.name)

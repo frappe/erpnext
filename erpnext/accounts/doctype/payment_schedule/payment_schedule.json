@@ -24,7 +24,9 @@
   "paid_amount",
   "discounted_amount",
   "column_break_3",
-  "base_payment_amount"
+  "base_payment_amount",
+  "base_outstanding",
+  "base_paid_amount"
  ],
  "fields": [
   {
@@ -155,19 +157,35 @@
    "fieldtype": "Currency",
    "label": "Payment Amount (Company Currency)",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "base_outstanding",
+   "fieldtype": "Currency",
+   "label": "Outstanding (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "base_paid_amount",
+   "fieldname": "base_paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-09-16 13:57:06.382859",
+ "modified": "2025-03-11 11:06:51.792982",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "row_format": "Dynamic",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

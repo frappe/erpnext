@@ -252,7 +252,6 @@ class DeprecatedBatchNoValuation:
 		from erpnext.stock.utils import get_combine_datetime
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		batch = frappe.qb.DocType("Batch")
 
 		posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
 		if not self.sle.creation:
@@ -267,8 +266,6 @@ class DeprecatedBatchNoValuation:
 
 		query = (
 			frappe.qb.from_(sle)
-			.inner_join(batch)
-			.on(sle.batch_no == batch.name)
 			.select(
 				sle.stock_value,
 				sle.qty_after_transaction,
@@ -276,7 +273,6 @@ class DeprecatedBatchNoValuation:
 			.where(
 				(sle.item_code == self.sle.item_code)
 				& (sle.warehouse == self.sle.warehouse)
-				& (sle.batch_no.isnotnull())
 				& (sle.is_cancelled == 0)
 			)
 			.where(timestamp_condition)

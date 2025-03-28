@@ -1026,10 +1026,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			};
 		});
 
-		if (me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
-			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-		}
-
 		this.frm.fields_dict.items.grid.get_field("expense_account").get_query = function () {
 			if (erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 				return {
@@ -1143,8 +1139,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			this.frm.trigger("toggle_display_account_head");
 
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
-			if (this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company))
-				this.set_default_account("stock_adjustment_account", "expense_account");
 			this.set_default_account("cost_center", "cost_center");
 
 			this.frm.refresh_fields("items");

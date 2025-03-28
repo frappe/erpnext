@@ -56,8 +56,8 @@
     {{ empty_state(_("Task")) }}
   {% endif %}
 
-  <h4 class="my-account-header">{{ _("Timesheets") }}</h4>
   {% if doc.timesheets %}
+    <h4 class="my-account-header">{{ _("Timesheets") }}</h4>
     <div class="website-list">
       <div class="result">
         <div class="web-list-item transaction-list-item">
@@ -73,8 +73,6 @@
       {% include "erpnext/templates/includes/projects/project_timesheets.html" %}
       </div>
     </div>
-  {% else %}
-    {{ empty_state(_("Timesheet")) }}
   {% endif %}
 
   {% if doc.attachments %}

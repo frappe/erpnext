@@ -443,21 +443,22 @@ class AccountsController(TransactionBase):
 					)
 
 	def validate_party_address_and_contact(self):
-		party, party_type = None, None
-		if self.get("customer"):
-			party, party_type = self.customer, "Customer"
+		party_type, party = self.get_party()
+
+		if not (party_type and party):
+			return
+
+		if party_type == "Customer":
 			billing_address, shipping_address = (
 				self.get("customer_address"),
 				self.get("shipping_address_name"),
 			)
 			self.validate_party_address(party, party_type, billing_address, shipping_address)
-		elif self.get("supplier"):
-			party, party_type = self.supplier, "Supplier"
+		elif party_type == "Supplier":
 			billing_address = self.get("supplier_address")
 			self.validate_party_address(party, party_type, billing_address)
 
-		if party and party_type:
-			self.validate_party_contact(party, party_type)
+		self.validate_party_contact(party, party_type)
 
 	def validate_party_address(self, party, party_type, billing_address, shipping_address=None):
 		if billing_address or shipping_address:
@@ -2363,6 +2364,9 @@ class AccountsController(TransactionBase):
 						base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
 					)
 					d.outstanding = d.payment_amount
+					d.base_outstanding = flt(
+						d.payment_amount * self.get("conversion_rate"), d.precision("base_outstanding")
+					)
 				elif not d.invoice_portion:
 					d.base_payment_amount = flt(
 						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
@@ -2689,12 +2693,17 @@ class AccountsController(TransactionBase):
 		default_currency = erpnext.get_company_currency(self.company)
 		if not default_currency:
 			throw(_("Please enter default currency in Company Master"))
-		if (
-			(self.currency == default_currency and flt(self.conversion_rate) != 1.00)
-			or not self.conversion_rate
-			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
-		):
-			throw(_("Conversion rate cannot be 0 or 1"))
+
+		if not self.conversion_rate:
+			throw(_("Conversion rate cannot be 0"))
+
+		if self.currency == default_currency and flt(self.conversion_rate) != 1.00:
+			throw(_("Conversion rate must be 1.00 if document currency is same as company currency"))
+
+		if self.currency != default_currency and flt(self.conversion_rate) == 1.00:
+			frappe.msgprint(
+				_("Conversion rate is 1.00, but document currency is different from company currency")
+			)
 
 	def check_finance_books(self, item, asset):
 		if (

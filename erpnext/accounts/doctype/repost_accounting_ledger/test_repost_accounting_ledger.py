@@ -12,6 +12,8 @@ from erpnext.accounts.doctype.payment_request.payment_request import make_paymen
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, make_purchase_receipt
 
 
 class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
@@ -204,9 +206,81 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
 
+	def test_06_repost_purchase_receipt(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		provisional_account = create_account(
+			account_name="Provision Account",
+			parent_account="Current Liabilities - _TC",
+			company=self.company,
+		)
+
+		another_provisional_account = create_account(
+			account_name="Another Provision Account",
+			parent_account="Current Liabilities - _TC",
+			company=self.company,
+		)
+
+		company = frappe.get_doc("Company", self.company)
+		company.enable_provisional_accounting_for_non_stock_items = 1
+		company.default_provisional_account = provisional_account
+		company.save()
+
+		test_cc = company.cost_center
+		default_expense_account = company.default_expense_account
+
+		item = make_item(properties={"is_stock_item": 0})
+
+		pr = make_purchase_receipt(company=self.company, item_code=item.name, rate=1000.0, qty=1.0)
+		pr_gl_entries = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles = [
+			{"account": provisional_account, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+			{"account": default_expense_account, "debit": 1000.0, "credit": 0.0, "cost_center": test_cc},
+		]
+		self.assertEqual(expected_pr_gles, pr_gl_entries)
+
+		# change the provisional account
+		frappe.db.set_value(
+			"Purchase Receipt Item",
+			pr.items[0].name,
+			"provisional_expense_account",
+			another_provisional_account,
+		)
+
+		repost_doc = frappe.new_doc("Repost Accounting Ledger")
+		repost_doc.company = self.company
+		repost_doc.delete_cancelled_entries = True
+		repost_doc.append("vouchers", {"voucher_type": pr.doctype, "voucher_no": pr.name})
+		repost_doc.save().submit()
+
+		pr_gles_after_repost = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles_after_repost = [
+			{"account": default_expense_account, "debit": 1000.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": another_provisional_account, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+		]
+		self.assertEqual(len(pr_gles_after_repost), len(expected_pr_gles_after_repost))
+		self.assertEqual(expected_pr_gles_after_repost, pr_gles_after_repost)
+
+		# teardown
+		repost_doc.cancel()
+		repost_doc.delete()
+
+		pr.reload()
+		pr.cancel()
+
+		company.enable_provisional_accounting_for_non_stock_items = 0
+		company.default_provisional_account = None
+		company.save()
+
 
 def update_repost_settings():
-	allowed_types = ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]
+	allowed_types = [
+		"Sales Invoice",
+		"Purchase Invoice",
+		"Payment Entry",
+		"Journal Entry",
+		"Purchase Receipt",
+	]
 	repost_settings = frappe.get_doc("Repost Accounting Ledger Settings")
 	for x in allowed_types:
 		repost_settings.append("allowed_types", {"document_type": x, "allowed": True})

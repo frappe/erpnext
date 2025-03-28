@@ -116,6 +116,7 @@ def identify_is_group(child):
 	return is_group
 
 
+@frappe.whitelist()
 def get_chart(chart_template, existing_company=None):
 	chart = {}
 	if existing_company:

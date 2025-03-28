@@ -545,7 +545,11 @@ class SubcontractingController(StockController):
 	def __get_batch_nos_for_bundle(self, qty, key):
 		available_batches = defaultdict(float)
 
+		precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "consumed_qty")
 		for batch_no, batch_qty in self.available_materials[key]["batch_no"].items():
+			if flt(batch_qty, precision) <= 0:
+				continue
+
 			qty_to_consumed = 0
 			if qty > 0:
 				if batch_qty >= qty:
