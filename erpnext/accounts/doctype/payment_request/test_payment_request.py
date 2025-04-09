@@ -313,6 +313,16 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.outstanding_amount, 800)
 		self.assertEqual(pr.grand_total, 1000)
 
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"Payment Request is already created"),
+			make_payment_request,
+			dt="Sales Order",
+			dn=so.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
 		# complete payment
 		pe = pr.create_payment_entry()
 
@@ -331,7 +341,7 @@ class TestPaymentRequest(FrappeTestCase):
 		# creating a more payment Request must not allowed
 		self.assertRaisesRegex(
 			frappe.exceptions.ValidationError,
-			re.compile(r"Payment Request is already created"),
+			re.compile(r"Payment Entry is already created"),
 			make_payment_request,
 			dt="Sales Order",
 			dn=so.name,
@@ -361,6 +371,17 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.party_account_currency, "INR")
 		self.assertEqual(pr.status, "Initiated")
 
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"Payment Request is already created"),
+			make_payment_request,
+			dt="Purchase Invoice",
+			dn=pi.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
 		# to make partial payment
 		pe = pr.create_payment_entry(submit=False)
 		pe.paid_amount = 2000
@@ -389,7 +410,7 @@ class TestPaymentRequest(FrappeTestCase):
 		# creating a more payment Request must not allowed
 		self.assertRaisesRegex(
 			frappe.exceptions.ValidationError,
-			re.compile(r"Payment Request is already created"),
+			re.compile(r"Payment Entry is already created"),
 			make_payment_request,
 			dt="Purchase Invoice",
 			dn=pi.name,

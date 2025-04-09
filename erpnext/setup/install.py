@@ -182,7 +182,7 @@ def add_standard_navbar_items():
 		{
 			"item_label": "Frappe School",
 			"item_type": "Route",
-			"route": "https://frappe.school?utm_source=in_app",
+			"route": "https://frappe.io/school?utm_source=in_app",
 			"is_standard": 1,
 		},
 		{

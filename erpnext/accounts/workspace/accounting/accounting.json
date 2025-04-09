@@ -621,7 +621,7 @@
    "doc_view": "List",
    "label": "Learn Accounting",
    "type": "URL",
-   "url": "https://frappe.school/courses/erpnext-accounting?utm_source=in_app"
+   "url": "https://school.frappe.io/lms/courses/erpnext-accounting?utm_source=in_app"
   },
   {
    "label": "Chart of Accounts",

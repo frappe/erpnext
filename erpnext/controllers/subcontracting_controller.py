@@ -743,7 +743,9 @@ class SubcontractingController(StockController):
 			):
 				continue
 
-			if self.doctype == self.subcontract_data.order_doctype or self.backflush_based_on == "BOM":
+			if self.doctype == self.subcontract_data.order_doctype or (
+				self.backflush_based_on == "BOM" or self.is_return
+			):
 				for bom_item in self.__get_materials_from_bom(
 					row.item_code, row.bom, row.get("include_exploded_items")
 				):

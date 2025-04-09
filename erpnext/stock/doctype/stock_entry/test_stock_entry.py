@@ -1907,6 +1907,59 @@ class TestStockEntry(FrappeTestCase):
 			self.assertEqual(sle.stock_value_difference, 100)
 			self.assertEqual(sle.stock_value, 100 * i)
 
+	def test_stock_entry_amount(self):
+		warehouse = "_Test Warehouse - _TC"
+		rm_item_code = "Test Stock Entry Amount 1"
+		make_item(rm_item_code, {"is_stock_item": 1})
+
+		fg_item_code = "Test Repack Stock Entry Amount 1"
+		make_item(fg_item_code, {"is_stock_item": 1})
+
+		make_stock_entry(
+			item_code=rm_item_code,
+			qty=1,
+			to_warehouse=warehouse,
+			basic_rate=200,
+			posting_date=nowdate(),
+		)
+
+		se = make_stock_entry(
+			item_code=rm_item_code,
+			qty=1,
+			purpose="Repack",
+			basic_rate=100,
+			do_not_save=True,
+		)
+
+		se.items[0].s_warehouse = warehouse
+		se.append(
+			"items",
+			{
+				"item_code": fg_item_code,
+				"qty": 1,
+				"t_warehouse": warehouse,
+				"uom": "Nos",
+				"conversion_factor": 1.0,
+			},
+		)
+		se.set_stock_entry_type()
+		se.submit()
+
+		self.assertEqual(se.items[0].amount, 200)
+		self.assertEqual(se.items[0].basic_amount, 200)
+
+		make_stock_entry(
+			item_code=rm_item_code,
+			qty=1,
+			to_warehouse=warehouse,
+			basic_rate=300,
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		se.reload()
+		self.assertEqual(se.items[0].amount, 300)
+		self.assertEqual(se.items[0].basic_amount, 300)
+
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)

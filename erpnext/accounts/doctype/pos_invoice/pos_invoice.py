@@ -196,6 +196,7 @@ class POSInvoice(SalesInvoice):
 
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
+		self.validate_pos_opening_entry()
 		self.validate_auto_set_posting_time()
 		self.validate_mode_of_payment()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -319,6 +320,18 @@ class POSInvoice(SalesInvoice):
 					return frappe.throw(
 						_("Payment related to {0} is not completed").format(pay.mode_of_payment)
 					)
+
+	def validate_pos_opening_entry(self):
+		opening_entries = frappe.get_list(
+			"POS Opening Entry", filters={"pos_profile": self.pos_profile, "status": "Open", "docstatus": 1}
+		)
+		if len(opening_entries) == 0:
+			frappe.throw(
+				title=_("POS Opening Entry Missing"),
+				msg=_("No open POS Opening Entry found for POS Profile {0}.").format(
+					frappe.bold(self.pos_profile)
+				),
+			)
 
 	def validate_stock_availablility(self):
 		if self.is_return:

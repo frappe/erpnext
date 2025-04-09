@@ -224,9 +224,6 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
-	if filters.get("against_voucher_no"):
-		conditions.append("against_voucher=%(against_voucher_no)s")
-
 	if filters.get("ignore_err"):
 		err_journals = frappe.db.get_all(
 			"Journal Entry",
@@ -490,9 +487,6 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, tot
 			data[key][rev_dr_or_cr] = 0
 			data[key][rev_dr_or_cr + "_in_account_currency"] = 0
 
-		if data[key].against_voucher and gle.against_voucher:
-			data[key].against_voucher += ", " + gle.against_voucher
-
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	show_opening_entries = filters.get("show_opening_entries")
 
@@ -695,14 +689,6 @@ def get_columns(filters):
 
 	columns.extend(
 		[
-			{"label": _("Against Voucher Type"), "fieldname": "against_voucher_type", "width": 100},
-			{
-				"label": _("Against Voucher"),
-				"fieldname": "against_voucher",
-				"fieldtype": "Dynamic Link",
-				"options": "against_voucher_type",
-				"width": 100,
-			},
 			{"label": _("Supplier Invoice No"), "fieldname": "bill_no", "fieldtype": "Data", "width": 100},
 		]
 	)

@@ -184,11 +184,16 @@ def validate_serial_no(sle):
 			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransaction)
 
 
-def validate_cancellation(args):
-	if args[0].get("is_cancelled"):
+def validate_cancellation(kargs):
+	if kargs[0].get("is_cancelled"):
 		repost_entry = frappe.db.get_value(
 			"Repost Item Valuation",
-			{"voucher_type": args[0].voucher_type, "voucher_no": args[0].voucher_no, "docstatus": 1},
+			{
+				"voucher_type": kargs[0].voucher_type,
+				"voucher_no": kargs[0].voucher_no,
+				"docstatus": 1,
+				"recreate_stock_ledgers": 0,
+			},
 			["name", "status"],
 			as_dict=1,
 		)
@@ -1212,8 +1217,20 @@ class update_entries_after:
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		if not sle.dependant_sle_voucher_detail_no:
+		if not sle.dependant_sle_voucher_detail_no or self.is_manufacture_entry_with_sabb(sle):
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
+
+	def is_manufacture_entry_with_sabb(self, sle):
+		if (
+			self.args.get("sle_id")
+			and sle.serial_and_batch_bundle
+			and sle.auto_created_serial_and_batch_bundle
+		):
+			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
+			if purpose in ["Manufacture", "Repack"]:
+				return True
+
+		return False
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
 		stock_entry = frappe.get_doc("Stock Entry", voucher_no, for_update=True)
@@ -1221,7 +1238,11 @@ class update_entries_after:
 		stock_entry.db_update()
 		for d in stock_entry.items:
 			# Update only the row that matches the voucher_detail_no or the row containing the FG/Scrap Item.
-			if d.name == voucher_detail_no or (not d.s_warehouse and d.t_warehouse):
+			if (
+				d.name == voucher_detail_no
+				or (not d.s_warehouse and d.t_warehouse)
+				or stock_entry.purpose in ["Manufacture", "Repack"]
+			):
 				d.db_update()
 
 	def update_rate_on_delivery_and_sales_return(self, sle, outgoing_rate):

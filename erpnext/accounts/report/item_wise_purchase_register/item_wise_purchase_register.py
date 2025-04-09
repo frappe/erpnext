@@ -11,7 +11,7 @@ import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
 	add_sub_total_row,
 	add_total_row,
-	apply_group_by_conditions,
+	apply_order_by_conditions,
 	get_grand_total,
 	get_group_by_and_display_fields,
 	get_tax_accounts,
@@ -305,12 +305,6 @@ def apply_conditions(query, pi, pii, filters):
 	if filters.get("item_group"):
 		query = query.where(pii.item_group == filters.get("item_group"))
 
-	if not filters.get("group_by"):
-		query = query.orderby(pi.posting_date, order=Order.desc)
-		query = query.orderby(pii.item_group, order=Order.desc)
-	else:
-		query = apply_group_by_conditions(query, pi, pii, filters)
-
 	return query
 
 
@@ -372,7 +366,17 @@ def get_items(filters, additional_table_columns):
 
 	query = apply_conditions(query, pi, pii, filters)
 
-	return query.run(as_dict=True)
+	from frappe.desk.reportview import build_match_conditions
+
+	query, params = query.walk()
+	match_conditions = build_match_conditions("Sales Invoice")
+
+	if match_conditions:
+		query += " and " + match_conditions
+
+	query = apply_order_by_conditions(query, pi, pii, filters)
+
+	return frappe.db.sql(query, params, as_dict=True)
 
 
 def get_aii_accounts():

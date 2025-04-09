@@ -2094,7 +2094,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			1,
 		)
 		pi = make_pi_from_pr(pr.name)
-		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 1000)
 
 		automatically_fetch_payment_terms(enable=0)
 		frappe.db.set_value(
@@ -2682,6 +2682,78 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		return_doc.items[0].qty = 0
 
 		self.assertRaises(StockOverReturnError, return_doc.save)
+
+	def test_apply_discount_on_grand_total(self):
+		"""
+		To test if after applying discount on grand total,
+		the grand total is calculated correctly without any rounding errors
+		"""
+		invoice = make_purchase_invoice(qty=2, rate=100, do_not_save=True, do_not_submit=True)
+		invoice.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 21.39,
+			},
+		)
+		invoice.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - _TC",
+				"description": "VAT",
+				"rate": 15.5,
+			},
+		)
+
+		# the grand total here will be 255.71
+		invoice.disable_rounded_total = 1
+		# apply discount on grand total to adjust the grand total to 255
+		invoice.discount_amount = 0.71
+		invoice.save()
+
+		# check if grand total is 496 and not something like 254.99 due to rounding errors
+		self.assertEqual(invoice.grand_total, 255)
+
+	def test_apply_discount_on_grand_total_with_previous_row_total_tax(self):
+		"""
+		To test if after applying discount on grand total,
+		where the tax is calculated on previous row total, the grand total is calculated correctly
+		"""
+
+		invoice = make_purchase_invoice(qty=2, rate=100, do_not_save=True, do_not_submit=True)
+		invoice.extend(
+			"taxes",
+			[
+				{
+					"charge_type": "Actual",
+					"account_head": "_Test Account VAT - _TC",
+					"description": "VAT",
+					"tax_amount": 100,
+				},
+				{
+					"charge_type": "On Previous Row Amount",
+					"account_head": "_Test Account VAT - _TC",
+					"description": "VAT",
+					"row_id": 1,
+					"rate": 10,
+				},
+				{
+					"charge_type": "On Previous Row Total",
+					"account_head": "_Test Account VAT - _TC",
+					"description": "VAT",
+					"row_id": 1,
+					"rate": 10,
+				},
+			],
+		)
+
+		# the total here will be 340, so applying 40 discount
+		invoice.discount_amount = 40
+		invoice.save()
+
+		self.assertEqual(invoice.grand_total, 300)
 
 
 def set_advance_flag(company, flag, default_account):

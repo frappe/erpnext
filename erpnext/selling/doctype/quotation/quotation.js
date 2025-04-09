@@ -69,6 +69,8 @@ frappe.ui.form.on("Quotation", {
 erpnext.selling.QuotationController = class QuotationController extends erpnext.selling.SellingController {
 	onload(doc, dt, dn) {
 		super.onload(doc, dt, dn);
+
+		this.frm.trigger("disable_customer_if_creating_from_opportunity");
 	}
 	party_name() {
 		var me = this;
@@ -371,6 +373,12 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 					}
 				}
 			);
+		}
+	}
+
+	disable_customer_if_creating_from_opportunity(doc) {
+		if (doc.opportunity) {
+			this.frm.set_df_property("party_name", "read_only", 1);
 		}
 	}
 };

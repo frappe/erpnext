@@ -875,7 +875,7 @@ def make_material_request(source_name, target_doc=None):
 				"field_map": {
 					"name": "sales_order_item",
 					"parent": "sales_order",
-					"delivery_date": "required_by",
+					"delivery_date": "schedule_date",
 					"bom_no": "bom_no",
 				},
 				"condition": lambda item: not frappe.db.exists(

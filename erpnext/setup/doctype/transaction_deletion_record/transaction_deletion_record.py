@@ -10,6 +10,14 @@ from frappe.model.document import Document
 from frappe.utils import cint, comma_and, create_batch, get_link_to_form
 from frappe.utils.background_jobs import get_job, is_job_enqueued
 
+LEDGER_ENTRY_DOCTYPES = frozenset(
+	(
+		"GL Entry",
+		"Payment Ledger Entry",
+		"Stock Ledger Entry",
+	)
+)
+
 
 class TransactionDeletionRecord(Document):
 	# begin: auto-generated types
@@ -475,31 +483,31 @@ def get_doctypes_to_be_ignored():
 
 @frappe.whitelist()
 def is_deletion_doc_running(company: str | None = None, err_msg: str | None = None):
-	if company:
-		if running_deletion_jobs := frappe.db.get_all(
-			"Transaction Deletion Record",
-			filters={"docstatus": 1, "company": company, "status": "Running"},
-		):
-			if not err_msg:
-				err_msg = ""
-			frappe.throw(
-				title=_("Deletion in Progress!"),
-				msg=_("Transaction Deletion Document: {0} is running for this Company. {1}").format(
-					get_link_to_form("Transaction Deletion Record", running_deletion_jobs[0].name), err_msg
-				),
-			)
+	if not company:
+		return
+
+	running_deletion_job = frappe.db.get_value(
+		"Transaction Deletion Record",
+		{"docstatus": 1, "company": company, "status": "Running"},
+		"name",
+	)
+
+	if not running_deletion_job:
+		return
+
+	frappe.throw(
+		title=_("Deletion in Progress!"),
+		msg=_("Transaction Deletion Document: {0} is running for this Company. {1}").format(
+			get_link_to_form("Transaction Deletion Record", running_deletion_job), err_msg or ""
+		),
+	)
 
 
 def check_for_running_deletion_job(doc, method=None):
 	# Check if DocType has 'company' field
-	if doc.doctype not in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
-		df = qb.DocType("DocField")
-		if (
-			qb.from_(df)
-			.select(df.parent)
-			.where((df.fieldname == "company") & (df.parent == doc.doctype))
-			.run()
-		):
-			is_deletion_doc_running(
-				doc.company, _("Cannot make any transactions until the deletion job is completed")
-			)
+	if doc.doctype in LEDGER_ENTRY_DOCTYPES or not doc.meta.has_field("company"):
+		return
+
+	is_deletion_doc_running(
+		doc.company, _("Cannot make any transactions until the deletion job is completed")
+	)

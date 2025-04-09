@@ -15,7 +15,7 @@ def get_data():
 		"transactions": [
 			{"label": _("Pre Sales"), "items": ["Opportunity", "Quotation"]},
 			{"label": _("Orders"), "items": ["Sales Order", "Delivery Note", "Sales Invoice"]},
-			{"label": _("Payments"), "items": ["Payment Entry", "Bank Account"]},
+			{"label": _("Payments"), "items": ["Payment Entry", "Bank Account", "Dunning"]},
 			{
 				"label": _("Support"),
 				"items": ["Issue", "Maintenance Visit", "Installation Note", "Warranty Claim"],

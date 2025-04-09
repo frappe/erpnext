@@ -1,9 +1,9 @@
 import json
 
 import frappe
-from frappe import _, qb
+from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
@@ -12,7 +12,6 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
-	get_company_defaults,
 	get_payment_entry,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
@@ -120,13 +119,13 @@ class PaymentRequest(Document):
 				title=_("Invalid Amount"),
 			)
 
-		existing_payment_request_amount = flt(
-			get_existing_payment_request_amount(self.reference_doctype, self.reference_name)
-		)
-
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if not hasattr(ref_doc, "order_type") or ref_doc.order_type != "Shopping Cart":
 			ref_amount = get_amount(ref_doc, self.payment_account)
+			if not ref_amount:
+				frappe.throw(_("Payment Entry is already created"))
+
+			existing_payment_request_amount = flt(get_existing_payment_request_amount(ref_doc))
 
 			if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
 				frappe.throw(
@@ -544,6 +543,8 @@ def make_payment_request(**args):
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
+	if not grand_total:
+		frappe.throw(_("Payment Entry is already created"))
 	if args.loyalty_points and args.dt == "Sales Order":
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 
@@ -554,19 +555,8 @@ def make_payment_request(**args):
 		frappe.db.set_value("Sales Order", args.dn, "loyalty_amount", loyalty_amount, update_modified=False)
 		grand_total = grand_total - loyalty_amount
 
-	bank_account = (
-		get_party_bank_account(args.get("party_type"), args.get("party")) if args.get("party_type") else ""
-	)
-
-	draft_payment_request = frappe.db.get_value(
-		"Payment Request",
-		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": 0},
-	)
-
 	# fetches existing payment request `grand_total` amount
-	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc.doctype, ref_doc.name)
-
-	existing_paid_amount = get_existing_paid_amount(ref_doc.doctype, ref_doc.name)
+	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc)
 
 	def validate_and_calculate_grand_total(grand_total, existing_payment_request_amount):
 		grand_total -= existing_payment_request_amount
@@ -578,7 +568,7 @@ def make_payment_request(**args):
 		if args.order_type == "Shopping Cart":
 			# If Payment Request is in an advanced stage, then create for remaining amount.
 			if get_existing_payment_request_amount(
-				ref_doc.doctype, ref_doc.name, ["Initiated", "Partially Paid", "Payment Ordered", "Paid"]
+				ref_doc, ["Initiated", "Partially Paid", "Payment Ordered", "Paid"]
 			):
 				grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
 			else:
@@ -587,14 +577,10 @@ def make_payment_request(**args):
 		else:
 			grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
 
-	if existing_paid_amount:
-		if ref_doc.party_account_currency == ref_doc.currency:
-			if ref_doc.conversion_rate:
-				grand_total -= flt(existing_paid_amount / ref_doc.conversion_rate)
-			else:
-				grand_total -= flt(existing_paid_amount)
-		else:
-			grand_total -= flt(existing_paid_amount / ref_doc.conversion_rate)
+	draft_payment_request = frappe.db.get_value(
+		"Payment Request",
+		{"reference_doctype": ref_doc.doctype, "reference_name": ref_doc.name, "docstatus": 0},
+	)
 
 	if draft_payment_request:
 		frappe.db.set_value(
@@ -602,6 +588,11 @@ def make_payment_request(**args):
 		)
 		pr = frappe.get_doc("Payment Request", draft_payment_request)
 	else:
+		bank_account = (
+			get_party_bank_account(args.get("party_type"), args.get("party"))
+			if args.get("party_type")
+			else ""
+		)
 		pr = frappe.new_doc("Payment Request")
 
 		if not args.get("payment_request_type"):
@@ -675,22 +666,35 @@ def make_payment_request(**args):
 
 def get_amount(ref_doc, payment_account=None):
 	"""get amount based on doctype"""
+	grand_total = 0
+
 	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
-		grand_total = flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)
+		grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - ref_doc.advance_paid
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
-		if not ref_doc.get("is_pos"):
+		if (
+			dt == "Sales Invoice"
+			and ref_doc.is_pos
+			and ref_doc.payments
+			and any(
+				[
+					payment.type == "Phone" and payment.account == payment_account
+					for payment in ref_doc.payments
+				]
+			)
+		):
+			grand_total = sum(
+				[
+					payment.amount
+					for payment in ref_doc.payments
+					if payment.type == "Phone" and payment.account == payment_account
+				]
+			)
+		else:
 			if ref_doc.party_account_currency == ref_doc.currency:
-				grand_total = flt(ref_doc.rounded_total or ref_doc.grand_total)
+				grand_total = flt(ref_doc.outstanding_amount)
 			else:
-				grand_total = flt(
-					flt(ref_doc.base_rounded_total or ref_doc.base_grand_total) / ref_doc.conversion_rate
-				)
-		elif dt == "Sales Invoice":
-			for pay in ref_doc.payments:
-				if pay.type == "Phone" and pay.account == payment_account:
-					grand_total = pay.amount
-					break
+				grand_total = flt(flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate)
 	elif dt == "POS Invoice":
 		for pay in ref_doc.payments:
 			if pay.type == "Phone" and pay.account == payment_account:
@@ -699,10 +703,7 @@ def get_amount(ref_doc, payment_account=None):
 	elif dt == "Fees":
 		grand_total = ref_doc.outstanding_amount
 
-	if grand_total > 0:
-		return flt(grand_total, get_currency_precision())
-	else:
-		frappe.throw(_("Payment Entry is already created"))
+	return flt(grand_total, get_currency_precision()) if grand_total > 0 else 0
 
 
 def get_irequest_status(payment_requests: None | list = None) -> list:
@@ -745,7 +746,7 @@ def cancel_old_payment_requests(ref_dt, ref_dn):
 						frappe.db.set_value("Integration Request", ireq.name, "status", "Cancelled")
 
 
-def get_existing_payment_request_amount(ref_dt, ref_dn, statuses: list | None = None) -> list:
+def get_existing_payment_request_amount(ref_doc, statuses: list | None = None) -> list:
 	"""
 	Return the total amount of Payment Requests against a reference document.
 	"""
@@ -753,9 +754,9 @@ def get_existing_payment_request_amount(ref_dt, ref_dn, statuses: list | None = 
 
 	query = (
 		frappe.qb.from_(PR)
-		.select(Sum(PR.grand_total))
-		.where(PR.reference_doctype == ref_dt)
-		.where(PR.reference_name == ref_dn)
+		.select(Sum(PR.outstanding_amount))
+		.where(PR.reference_doctype == ref_doc.doctype)
+		.where(PR.reference_name == ref_doc.name)
 		.where(PR.docstatus == 1)
 	)
 
@@ -764,43 +765,12 @@ def get_existing_payment_request_amount(ref_dt, ref_dn, statuses: list | None = 
 
 	response = query.run()
 
-	return response[0][0] if response[0] else 0
+	os_amount_in_transaction_currency = flt(response[0][0] if response[0] else 0)
 
+	if ref_doc.currency != ref_doc.party_account_currency:
+		os_amount_in_transaction_currency = flt(os_amount_in_transaction_currency / ref_doc.conversion_rate)
 
-def get_existing_paid_amount(doctype, name):
-	PLE = frappe.qb.DocType("Payment Ledger Entry")
-	PER = frappe.qb.DocType("Payment Entry Reference")
-
-	query = (
-		frappe.qb.from_(PLE)
-		.left_join(PER)
-		.on(
-			(PLE.against_voucher_type == PER.reference_doctype)
-			& (PLE.against_voucher_no == PER.reference_name)
-			& (PLE.voucher_type == PER.parenttype)
-			& (PLE.voucher_no == PER.parent)
-		)
-		.select(
-			Abs(Sum(PLE.amount)).as_("total_amount"),
-			Abs(Sum(frappe.qb.terms.Case().when(PER.payment_request.isnotnull(), PLE.amount).else_(0))).as_(
-				"request_paid_amount"
-			),
-		)
-		.where(
-			(PLE.voucher_type.isin([doctype, "Journal Entry", "Payment Entry"]))
-			& (PLE.against_voucher_type == doctype)
-			& (PLE.against_voucher_no == name)
-			& (PLE.delinked == 0)
-			& (PLE.docstatus == 1)
-			& (PLE.amount < 0)
-		)
-	)
-
-	result = query.run()
-	ledger_amount = flt(result[0][0]) if result else 0
-	request_paid_amount = flt(result[0][1]) if result else 0
-
-	return ledger_amount - request_paid_amount
+	return os_amount_in_transaction_currency
 
 
 def get_gateway_details(args):  # nosemgrep

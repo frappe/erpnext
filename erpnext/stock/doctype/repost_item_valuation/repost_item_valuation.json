@@ -19,6 +19,7 @@
   "allow_negative_stock",
   "via_landed_cost_voucher",
   "allow_zero_rate",
+  "recreate_stock_ledgers",
   "amended_from",
   "error_section",
   "error_log",
@@ -220,12 +221,20 @@
    "label": "Reposting Data File",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.based_on == \"Transaction\"",
+   "fieldname": "recreate_stock_ledgers",
+   "fieldtype": "Check",
+   "label": "Recreate Stock Ledgers"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-27 16:55:23.150146",
+ "modified": "2025-03-31 12:38:20.566196",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
@@ -274,7 +283,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

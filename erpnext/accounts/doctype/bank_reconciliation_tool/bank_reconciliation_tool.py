@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 from erpnext import get_default_cost_center
@@ -373,8 +374,6 @@ def auto_reconcile_vouchers(
 	from_reference_date=None,
 	to_reference_date=None,
 ):
-	frappe.flags.auto_reconcile_vouchers = True
-
 	bank_transactions = get_bank_transactions(bank_account)
 
 	if len(bank_transactions) > 10:
@@ -403,6 +402,8 @@ def auto_reconcile_vouchers(
 def start_auto_reconcile(
 	bank_transactions, from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date
 ):
+	frappe.flags.auto_reconcile_vouchers = True
+
 	reconciled, partially_reconciled = set(), set()
 	for transaction in bank_transactions:
 		linked_payments = get_linked_payments(
@@ -517,14 +518,21 @@ def subtract_allocations(gl_account, vouchers):
 	voucher_allocated_amounts = get_total_allocated_amount(voucher_docs)
 
 	for voucher in vouchers:
-		rows = voucher_allocated_amounts.get((voucher.get("doctype"), voucher.get("name"))) or []
-		filtered_row = list(filter(lambda row: row.get("gl_account") == gl_account, rows))
-
-		if amount := None if not filtered_row else filtered_row[0]["total"]:
+		if amount := get_allocated_amount(voucher_allocated_amounts, voucher, gl_account):
 			voucher["paid_amount"] -= amount
 
 		copied.append(voucher)
 	return copied
+
+
+def get_allocated_amount(voucher_allocated_amounts, voucher, gl_account):
+	if not (voucher_details := voucher_allocated_amounts.get((voucher.get("doctype"), voucher.get("name")))):
+		return
+
+	if not (row := voucher_details.get(gl_account)):
+		return
+
+	return row.get("total")
 
 
 def check_matching(
@@ -796,26 +804,20 @@ def get_je_matching_query(
 	je = frappe.qb.DocType("Journal Entry")
 	jea = frappe.qb.DocType("Journal Entry Account")
 
-	ref_condition = je.cheque_no == transaction.reference_number
-	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
-
 	amount_field = f"{cr_or_dr}_in_account_currency"
-	amount_equality = getattr(jea, amount_field) == transaction.unallocated_amount
-	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
 
 	filter_by_date = je.posting_date.between(from_date, to_date)
 	if cint(filter_by_reference_date):
 		filter_by_date = je.cheque_date.between(from_reference_date, to_reference_date)
 
-	query = (
+	subquery = (
 		frappe.qb.from_(jea)
 		.join(je)
 		.on(jea.parent == je.name)
 		.select(
-			(ref_rank + amount_rank + 1).as_("rank"),
+			Sum(getattr(jea, amount_field)).as_("paid_amount"),
 			ConstantColumn("Journal Entry").as_("doctype"),
 			je.name,
-			getattr(jea, amount_field).as_("paid_amount"),
 			je.cheque_no.as_("reference_no"),
 			je.cheque_date.as_("reference_date"),
 			je.pay_to_recd_from.as_("party"),
@@ -827,13 +829,26 @@ def get_je_matching_query(
 		.where(je.voucher_type != "Opening Entry")
 		.where(je.clearance_date.isnull())
 		.where(jea.account == common_filters.bank_account)
-		.where(amount_equality if exact_match else getattr(jea, amount_field) > 0.0)
 		.where(filter_by_date)
+		.groupby(je.name)
 		.orderby(je.cheque_date if cint(filter_by_reference_date) else je.posting_date)
 	)
 
 	if frappe.flags.auto_reconcile_vouchers is True:
-		query = query.where(ref_condition)
+		subquery = subquery.where(je.cheque_no == transaction.reference_number)
+
+	ref_rank = frappe.qb.terms.Case().when(subquery.reference_no == transaction.reference_number, 1).else_(0)
+	amount_equality = subquery.paid_amount == transaction.unallocated_amount
+	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
+
+	query = (
+		frappe.qb.from_(subquery)
+		.select(
+			"*",
+			(ref_rank + amount_rank + 1).as_("rank"),
+		)
+		.where(amount_equality if exact_match else subquery.paid_amount > 0.0)
+	)
 
 	return query
 

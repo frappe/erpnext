@@ -2103,7 +2103,8 @@ def get_auto_batch_nos(kwargs):
 		filter_zero_near_batches(available_batches, kwargs)
 
 	if not kwargs.consider_negative_batches:
-		available_batches = list(filter(lambda x: x.qty > 0, available_batches))
+		precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
+		available_batches = [d for d in available_batches if flt(d.qty, precision) > 0]
 
 	if not qty:
 		return available_batches

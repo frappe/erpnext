@@ -53,11 +53,6 @@ frappe.query_reports["General Ledger"] = {
 			},
 		},
 		{
-			fieldname: "against_voucher_no",
-			label: __("Against Voucher No"),
-			fieldtype: "Data",
-		},
-		{
 			fieldtype: "Break",
 		},
 		{
@@ -66,7 +61,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Autocomplete",
 			options: Object.keys(frappe.boot.party_account_types),
 			on_change: function () {
-				frappe.query_report.set_filter_value("party", "");
+				frappe.query_report.set_filter_value("party", []);
 			},
 		},
 		{

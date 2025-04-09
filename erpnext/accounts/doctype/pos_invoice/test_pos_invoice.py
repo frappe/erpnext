@@ -26,6 +26,12 @@ class TestPOSInvoice(unittest.TestCase):
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
 		frappe.db.sql("delete from `tabTax Rule`")
 
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+
+		cls.test_user, cls.pos_profile = init_user_and_profile()
+		create_opening_entry(cls.pos_profile, cls.test_user)
+
 	def tearDown(self):
 		if frappe.session.user != "Administrator":
 			frappe.set_user("Administrator")

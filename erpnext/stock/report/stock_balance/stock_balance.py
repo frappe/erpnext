@@ -406,16 +406,17 @@ class StockBalanceReport:
 			},
 		]
 
-		for dimension in get_inventory_dimensions():
-			columns.append(
-				{
-					"label": _(dimension.doctype),
-					"fieldname": dimension.fieldname,
-					"fieldtype": "Link",
-					"options": dimension.doctype,
-					"width": 110,
-				}
-			)
+		if self.filters.get("show_dimension_wise_stock"):
+			for dimension in get_inventory_dimensions():
+				columns.append(
+					{
+						"label": _(dimension.doctype),
+						"fieldname": dimension.fieldname,
+						"fieldtype": "Link",
+						"options": dimension.doctype,
+						"width": 110,
+					}
+				)
 
 		columns.extend(
 			[

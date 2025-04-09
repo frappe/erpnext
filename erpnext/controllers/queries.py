@@ -898,3 +898,32 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 		)
 
 	return query.run(as_dict=False)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_item_uom_query(doctype, txt, searchfield, start, page_len, filters):
+	if frappe.db.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+		query_filters = {"parent": filters.get("item_code")}
+
+		if txt:
+			query_filters["uom"] = ["like", f"%{txt}%"]
+
+		return frappe.get_all(
+			"UOM Conversion Detail",
+			filters=query_filters,
+			fields=["uom", "conversion_factor"],
+			limit_start=start,
+			limit_page_length=page_len,
+			order_by="idx",
+			as_list=1,
+		)
+
+	return frappe.get_all(
+		"UOM",
+		filters={"name": ["like", f"%{txt}%"]},
+		fields=["name"],
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=1,
+	)

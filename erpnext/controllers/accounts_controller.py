@@ -165,6 +165,48 @@ class AccountsController(TransactionBase):
 						raise_exception=1,
 					)
 
+	def validate_against_voucher_outstanding(self):
+		from frappe.model.meta import get_meta
+
+		if not get_meta(self.doctype).has_field("outstanding_amount"):
+			return
+
+		if self.get("is_return") and self.return_against and not self.get("is_pos"):
+			against_voucher_outstanding = frappe.get_value(
+				self.doctype, self.return_against, "outstanding_amount"
+			)
+			document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
+
+			msg = ""
+			if self.get("update_outstanding_for_self"):
+				msg = (
+					"We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, "
+					"uncheck '{2}' checkbox. <br><br>Or"
+				).format(
+					frappe.bold(document_type),
+					get_link_to_form(self.doctype, self.get("return_against")),
+					frappe.bold(_("Update Outstanding for Self")),
+				)
+
+			elif not self.update_outstanding_for_self and (
+				abs(flt(self.rounded_total) or flt(self.grand_total)) > flt(against_voucher_outstanding)
+			):
+				self.update_outstanding_for_self = 1
+				msg = (
+					"The outstanding amount {} in {} is lesser than {}. Updating the outstanding to this invoice. <br><br>And"
+				).format(
+					against_voucher_outstanding,
+					get_link_to_form(self.doctype, self.get("return_against")),
+					flt(abs(self.outstanding_amount)),
+				)
+
+			if msg:
+				msg += " you can use {} tool to reconcile against {} later.".format(
+					get_link_to_form("Payment Reconciliation", "Payment Reconciliation"),
+					get_link_to_form(self.doctype, self.get("return_against")),
+				)
+				frappe.msgprint(_(msg))
+
 	def validate(self):
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
@@ -193,6 +235,7 @@ class AccountsController(TransactionBase):
 		self.disable_tax_included_prices_for_internal_transfer()
 		self.set_incoming_rate()
 		self.init_internal_values()
+		self.validate_against_voucher_outstanding()
 
 		# Need to set taxes based on taxes_and_charges template
 		# before calculating taxes and totals
@@ -227,20 +270,6 @@ class AccountsController(TransactionBase):
 						frappe.bold(_("Advance Payments")),
 					)
 				)
-
-			if self.get("is_return") and self.get("return_against") and not self.get("is_pos"):
-				if self.get("update_outstanding_for_self"):
-					document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
-					frappe.msgprint(
-						_(
-							"We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck '{2}' checkbox. <br><br> Or you can use {3} tool to reconcile against {1} later."
-						).format(
-							frappe.bold(document_type),
-							get_link_to_form(self.doctype, self.get("return_against")),
-							frappe.bold(_("Update Outstanding for Self")),
-							get_link_to_form("Payment Reconciliation", "Payment Reconciliation"),
-						)
-					)
 
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
@@ -2328,7 +2357,9 @@ class AccountsController(TransactionBase):
 				and automatically_fetch_payment_terms
 				and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 			):
-				self.fetch_payment_terms_from_order(po_or_so, doctype)
+				self.fetch_payment_terms_from_order(
+					po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
+				)
 				if self.get("payment_terms_template"):
 					self.ignore_default_payment_terms_template = 1
 			elif self.get("payment_terms_template"):
@@ -2372,7 +2403,9 @@ class AccountsController(TransactionBase):
 						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
 					)
 		else:
-			self.fetch_payment_terms_from_order(po_or_so, doctype)
+			self.fetch_payment_terms_from_order(
+				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
+			)
 			self.ignore_default_payment_terms_template = 1
 
 	def get_order_details(self):
@@ -2410,7 +2443,9 @@ class AccountsController(TransactionBase):
 	def linked_order_has_payment_schedule(self, po_or_so):
 		return frappe.get_all("Payment Schedule", filters={"parent": po_or_so})
 
-	def fetch_payment_terms_from_order(self, po_or_so, po_or_so_doctype):
+	def fetch_payment_terms_from_order(
+		self, po_or_so, po_or_so_doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
+	):
 		"""
 		Fetch Payment Terms from Purchase/Sales Order on creating a new Purchase/Sales Invoice.
 		"""
@@ -2426,11 +2461,24 @@ class AccountsController(TransactionBase):
 				"invoice_portion": schedule.invoice_portion,
 				"mode_of_payment": schedule.mode_of_payment,
 				"description": schedule.description,
-				"payment_amount": schedule.payment_amount,
-				"base_payment_amount": schedule.base_payment_amount,
-				"outstanding": schedule.outstanding,
 				"paid_amount": schedule.paid_amount,
 			}
+
+			if automatically_fetch_payment_terms:
+				payment_schedule["payment_amount"] = flt(
+					grand_total * flt(payment_schedule["invoice_portion"]) / 100,
+					schedule.precision("payment_amount"),
+				)
+				payment_schedule["base_payment_amount"] = flt(
+					base_grand_total * flt(payment_schedule["invoice_portion"]) / 100,
+					schedule.precision("base_payment_amount"),
+				)
+				payment_schedule["outstanding"] = payment_schedule["payment_amount"]
+			else:
+				payment_schedule["base_payment_amount"] = flt(
+					schedule.base_payment_amount * self.get("conversion_rate"),
+					schedule.precision("base_payment_amount"),
+				)
 
 			if schedule.discount_type == "Percentage":
 				payment_schedule["discount_type"] = schedule.discount_type

@@ -33,6 +33,7 @@ class StockSettings(Document):
 		allow_partial_reservation: DF.Check
 		allow_to_edit_stock_uom_qty_for_purchase: DF.Check
 		allow_to_edit_stock_uom_qty_for_sales: DF.Check
+		allow_uom_with_conversion_rate_defined_in_item: DF.Check
 		auto_create_serial_and_batch_bundle_for_outward: DF.Check
 		auto_indent: DF.Check
 		auto_insert_price_list_rate_if_missing: DF.Check

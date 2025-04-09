@@ -22,6 +22,8 @@
   "allow_to_edit_stock_uom_qty_for_sales",
   "column_break_lznj",
   "allow_to_edit_stock_uom_qty_for_purchase",
+  "section_break_ylhd",
+  "allow_uom_with_conversion_rate_defined_in_item",
   "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
@@ -490,6 +492,17 @@
   {
    "fieldname": "column_break_wslv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ylhd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow selecting UOMs in sales and purchase transactions only if the conversion rate is set in the item master.",
+   "fieldname": "allow_uom_with_conversion_rate_defined_in_item",
+   "fieldtype": "Check",
+   "label": "Allow UOM with Conversion Rate Defined in Item"
   }
  ],
  "icon": "icon-cog",
@@ -497,7 +510,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-28 16:08:35.938840",
+ "modified": "2025-03-31 15:34:20.752065",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -518,7 +531,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

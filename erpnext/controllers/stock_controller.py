@@ -774,7 +774,7 @@ class StockController(AccountsController):
 				if row.get("batch_no"):
 					update_values["batch_no"] = None
 
-				if row.serial_and_batch_bundle:
+				if row.get("serial_and_batch_bundle"):
 					update_values["serial_and_batch_bundle"] = None
 					frappe.db.set_value(
 						"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
@@ -1631,6 +1631,8 @@ def is_reposting_pending():
 
 
 def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
+	from erpnext.stock.utils import get_combine_datetime
+
 	if allow_force_reposting and frappe.db.get_single_value(
 		"Stock Reposting Settings", "do_reposting_for_each_stock_transaction"
 	):
@@ -1652,14 +1654,15 @@ def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
 
 	or_conditions = get_conditions_to_validate_future_sle(sl_entries)
 
+	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
+
 	data = frappe.db.sql(
 		"""
 		select item_code, warehouse, count(name) as total_row
-		from `tabStock Ledger Entry` force index (item_warehouse)
+		from `tabStock Ledger Entry`
 		where
 			({})
-			and timestamp(posting_date, posting_time)
-				>= timestamp(%(posting_date)s, %(posting_time)s)
+			and posting_datetime >= %(posting_datetime)s
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		GROUP BY

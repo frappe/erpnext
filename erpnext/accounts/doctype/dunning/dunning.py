@@ -220,6 +220,7 @@ def get_dunning_letter_text(dunning_type: str, doc: str | dict, language: str | 
 	if not language:
 		language = doc.get("language")
 
+	letter_text = None
 	if language:
 		letter_text = frappe.db.get_value(
 			DOCTYPE, {"parent": dunning_type, "language": language}, FIELDS, as_dict=1

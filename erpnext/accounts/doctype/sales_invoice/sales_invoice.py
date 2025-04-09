@@ -267,8 +267,8 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def validate(self):
-		super().validate()
 		self.validate_auto_set_posting_time()
+		super().validate()
 
 		if not (self.is_pos or self.is_debit_note):
 			self.so_dn_required()

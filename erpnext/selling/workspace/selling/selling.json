@@ -639,7 +639,7 @@
    "doc_view": "List",
    "label": "Learn Sales Management",
    "type": "URL",
-   "url": "https://frappe.school/courses/sales-management-course?utm_source=in_app"
+   "url": "https://school.frappe.io/lms/courses/sales-management-course?utm_source=in_app"
   },
   {
    "label": "Point of Sale",
@@ -676,5 +676,6 @@
    "type": "Dashboard"
   }
  ],
- "title": "Selling"
+ "title": "Selling",
+ "type": "Workspace"
 }

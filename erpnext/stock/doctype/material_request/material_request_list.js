@@ -13,7 +13,7 @@ frappe.listview_settings["Material Request"] = {
 				return [__("Completed"), "green"];
 			}
 		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0) {
-			return [__("Pending"), "orange", "per_ordered,=,0"];
+			return [__("Pending"), "orange", "per_ordered,=,0|docstatus,=,1"];
 		} else if (
 			doc.docstatus == 1 &&
 			flt(doc.per_ordered, precision) < 100 &&
