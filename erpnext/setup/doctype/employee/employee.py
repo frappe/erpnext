@@ -254,6 +254,7 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
 
 
+<<<<<<< HEAD
 def update_user_permissions(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("roles")]:
@@ -263,6 +264,8 @@ def update_user_permissions(doc, method):
 		employee.update_user_permissions()
 
 
+=======
+>>>>>>> 08f21c7905 (fix: remove hook that does nothing)
 def get_employee_email(employee_doc):
 	return (
 		employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
