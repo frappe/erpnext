@@ -36,7 +36,11 @@ class CurrencyExchangeSettings(Document):
 
 	def validate(self):
 		self.set_parameters_and_result()
+<<<<<<< HEAD
 		if frappe.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
+=======
+		if frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return
 		response, value = self.validate_parameters()
 		self.validate_result(response, value)
@@ -109,7 +113,11 @@ def get_api_endpoint(service_provider: str | None = None, use_http: bool = False
 		if service_provider == "exchangerate.host":
 			api = "api.exchangerate.host/convert"
 		elif service_provider == "frankfurter.app":
+<<<<<<< HEAD
 			api = "api.frankfurter.app/{transaction_date}"
+=======
+			api = "frankfurter.app/{transaction_date}"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		protocol = "https://"
 		if use_http:

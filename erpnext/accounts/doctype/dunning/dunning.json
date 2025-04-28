@@ -19,6 +19,19 @@
   "currency",
   "column_break_11",
   "conversion_rate",
+<<<<<<< HEAD
+=======
+  "address_and_contact_section",
+  "customer_address",
+  "address_display",
+  "contact_person",
+  "contact_display",
+  "column_break_16",
+  "company_address",
+  "company_address_display",
+  "contact_mobile",
+  "contact_email",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_6",
   "dunning_type",
   "column_break_8",
@@ -46,6 +59,7 @@
   "income_account",
   "column_break_48",
   "cost_center",
+<<<<<<< HEAD
   "amended_from",
   "address_and_contact_tab",
   "address_and_contact_section",
@@ -61,6 +75,9 @@
   "company_address",
   "company_address_display",
   "column_break_lqmf"
+=======
+  "amended_from"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -182,8 +199,15 @@
    "label": "Rate of Interest (%) Yearly"
   },
   {
+<<<<<<< HEAD
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break"
+=======
+   "collapsible": 1,
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "address_display",
@@ -379,6 +403,7 @@
   {
    "fieldname": "column_break_48",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "address_and_contact_tab",
@@ -396,11 +421,17 @@
   {
    "fieldname": "column_break_lqmf",
    "fieldtype": "Column Break"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-11-26 13:46:07.760867",
+=======
+ "modified": "2024-03-27 13:08:19.176146",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",

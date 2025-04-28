@@ -32,12 +32,15 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 			mandatory: 1,
 			options: "Warehouse",
 		},
+<<<<<<< HEAD
 		{
 			fieldname: "show_incorrect_entries",
 			fieldtype: "Check",
 			label: "Show Incorrect Entries",
 			default: 0,
 		},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	],
 
 	formatter(value, row, column, data, default_formatter) {

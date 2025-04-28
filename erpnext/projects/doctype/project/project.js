@@ -45,7 +45,10 @@ frappe.ui.form.on("Project", {
 		frm.set_query("sales_order", function () {
 			var filters = {
 				project: ["in", frm.doc.__islocal ? [""] : [frm.doc.name, ""]],
+<<<<<<< HEAD
 				company: frm.doc.company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			};
 
 			if (frm.doc.customer) {
@@ -88,9 +91,15 @@ frappe.ui.form.on("Project", {
 			);
 
 			frm.add_custom_button(
+<<<<<<< HEAD
 				__("Update Costing and Billing"),
 				() => {
 					frm.events.update_costing_and_billing(frm);
+=======
+				__("Update Total Purchase Cost"),
+				() => {
+					frm.events.update_total_purchase_cost(frm);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 				__("Actions")
 			);
@@ -129,6 +138,7 @@ frappe.ui.form.on("Project", {
 		}
 	},
 
+<<<<<<< HEAD
 	update_costing_and_billing: function (frm) {
 		frappe.call({
 			method: "erpnext.projects.doctype.project.project.update_costing_and_billing",
@@ -138,6 +148,17 @@ frappe.ui.form.on("Project", {
 			callback: function (r) {
 				if (r && !r.exc) {
 					frappe.msgprint(__("Costing and Billing fields has been updated"));
+=======
+	update_total_purchase_cost: function (frm) {
+		frappe.call({
+			method: "erpnext.projects.doctype.project.project.recalculate_project_total_purchase_cost",
+			args: { project: frm.doc.name },
+			freeze: true,
+			freeze_message: __("Recalculating Purchase Cost against this Project..."),
+			callback: function (r) {
+				if (r && !r.exc) {
+					frappe.msgprint(__("Total Purchase Cost has been updated"));
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					frm.refresh();
 				}
 			},
@@ -147,11 +168,34 @@ frappe.ui.form.on("Project", {
 	set_project_status_button: function (frm) {
 		frm.add_custom_button(
 			__("Set Project Status"),
+<<<<<<< HEAD
 			() => frm.events.get_project_status_dialog(frm).show(),
+=======
+			() => {
+				let d = new frappe.ui.Dialog({
+					title: __("Set Project Status"),
+					fields: [
+						{
+							fieldname: "status",
+							fieldtype: "Select",
+							label: "Status",
+							reqd: 1,
+							options: "Completed\nCancelled",
+						},
+					],
+					primary_action: function () {
+						frm.events.set_status(frm, d.get_values().status);
+						d.hide();
+					},
+					primary_action_label: __("Set Project Status"),
+				}).show();
+			},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			__("Actions")
 		);
 	},
 
+<<<<<<< HEAD
 	get_project_status_dialog: function (frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Set Project Status"),
@@ -173,6 +217,8 @@ frappe.ui.form.on("Project", {
 		return dialog;
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	create_duplicate: function (frm) {
 		return new Promise((resolve) => {
 			frappe.prompt("Project Name", (data) => {
@@ -191,7 +237,11 @@ frappe.ui.form.on("Project", {
 	},
 
 	set_status: function (frm, status) {
+<<<<<<< HEAD
 		frappe.confirm(__("Set Project and all Tasks to status {0}?", [__(status).bold()]), () => {
+=======
+		frappe.confirm(__("Set Project and all Tasks to status {0}?", [status.bold()]), () => {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe
 				.xcall("erpnext.projects.doctype.project.project.set_project_status", {
 					project: frm.doc.name,
@@ -202,12 +252,15 @@ frappe.ui.form.on("Project", {
 				});
 		});
 	},
+<<<<<<< HEAD
 
 	collect_progress: function (frm) {
 		if (frm.doc.collect_progress && !frm.doc.subject) {
 			frm.set_value("subject", __("For project {0}, update your status", [frm.doc.name]));
 		}
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });
 
 function open_form(frm, doctype, child_doctype, parentfield) {

@@ -3,6 +3,7 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
 
@@ -16,6 +17,14 @@ class TestTask(ERPNextTestSuite):
 		super().setUpClass()
 		cls.make_projects()
 
+=======
+from frappe.utils import add_days, getdate, nowdate
+
+from erpnext.projects.doctype.task.task import CircularReferenceError
+
+
+class TestTask(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_circular_reference(self):
 		task1 = create_task("_Test Task 1", add_days(nowdate(), -15), add_days(nowdate(), -10))
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
@@ -119,6 +128,7 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
 
+<<<<<<< HEAD
 	def test_parent_task_must_be_group(self):
 		parent_task = create_task(
 			subject="_Test Parent Task Non Group",
@@ -133,6 +143,8 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_task(
 	subject,

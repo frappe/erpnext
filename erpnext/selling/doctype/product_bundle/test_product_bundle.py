@@ -3,6 +3,11 @@
 
 import frappe
 
+<<<<<<< HEAD
+=======
+test_records = frappe.get_test_records("Product Bundle")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_product_bundle(parent, items, qty=None):
 	if frappe.db.exists("Product Bundle", parent):

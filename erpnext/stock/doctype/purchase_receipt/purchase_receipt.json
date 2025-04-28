@@ -40,7 +40,10 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_31",
   "set_warehouse",
   "set_from_warehouse",
@@ -98,7 +101,10 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
+<<<<<<< HEAD
   "item_wise_tax_details",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "pricing_rule_details",
   "pricing_rules",
   "raw_material_details",
@@ -114,10 +120,15 @@
   "contact_mobile",
   "contact_email",
   "section_break_98",
+<<<<<<< HEAD
   "dispatch_address",
   "dispatch_address_display",
   "column_break_100",
   "shipping_address",
+=======
+  "shipping_address",
+  "column_break_100",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "shipping_address_display",
   "billing_address_section",
   "billing_address",
@@ -245,7 +256,10 @@
    "width": "100px"
   },
   {
+<<<<<<< HEAD
    "default": "Now",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -894,7 +908,11 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
+<<<<<<< HEAD
    "options": "\nDraft\nPartly Billed\nTo Bill\nCompleted\nReturn\nReturn Issued\nCancelled\nClosed",
+=======
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1086,8 +1104,12 @@
    "no_copy": 1,
    "options": "Delivery Note",
    "print_hide": 1,
+<<<<<<< HEAD
    "read_only": 1,
    "search_index": 1
+=======
+   "read_only": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "scan_barcode",
@@ -1204,7 +1226,11 @@
   {
    "fieldname": "section_break_98",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Shipping Address"
+=======
+   "label": "Company Shipping Address"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "billing_address_section",
@@ -1273,6 +1299,7 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "dispatch_address",
@@ -1305,11 +1332,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-12 19:53:48.173096",
+=======
+ "modified": "2024-07-04 14:50:10.538472",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1370,7 +1405,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status, posting_date, supplier",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
@@ -1379,5 +1417,9 @@
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
+<<<<<<< HEAD
 }
 
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

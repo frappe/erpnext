@@ -8,6 +8,7 @@ on:
       - '**.md'
       - '**.html'
       - '**.csv'
+<<<<<<< HEAD
       - 'crowdin.yml'
       - '.coderabbit.yml'
       - '.mergify.yml'
@@ -16,6 +17,10 @@ on:
 permissions:
   contents: read
 
+=======
+  workflow_dispatch:
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 concurrency:
   group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
@@ -42,7 +47,11 @@ jobs:
 
       - name: Check for valid Python & Merge Conflicts
         run: |
+<<<<<<< HEAD
           python -m compileall -fq "${GITHUB_WORKSPACE}"
+=======
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
           if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
               then echo "Found merge conflicts"
               exit 1
@@ -85,7 +94,11 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
+<<<<<<< HEAD
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+=======
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
       - uses: actions/cache@v4
         id: yarn-cache
@@ -143,8 +156,12 @@ jobs:
           update_to_version 15
 
           echo "Updating to latest version"
+<<<<<<< HEAD
           git -C "apps/frappe" fetch --depth 1 upstream "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
+=======
+          git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
           pgrep honcho | xargs kill

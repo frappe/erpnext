@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+<<<<<<< HEAD
 from collections import defaultdict
 
 import frappe
@@ -10,6 +11,13 @@ from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, toda
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry as make_stock_entry_from_jc
+=======
+import frappe
+from frappe.tests.utils import FrappeTestCase, change_settings, timeout
+from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, today
+
+from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	CapacityError,
@@ -34,17 +42,27 @@ from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM"]
 
 
 class TestWorkOrder(IntegrationTestCase):
+=======
+test_dependencies = ["BOM"]
+
+
+class TestWorkOrder(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.warehouse = "_Test Warehouse 2 - _TC"
 		self.item = "_Test Item"
 		prepare_data_for_backflush_based_on_materials_transferred()
 
 	def tearDown(self):
+<<<<<<< HEAD
 		frappe.local.future_sle = {}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.rollback()
 
 	def check_planned_qty(self):
@@ -510,6 +528,7 @@ class TestWorkOrder(IntegrationTestCase):
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
 
+<<<<<<< HEAD
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []
 		bom = frappe.get_doc("BOM", {"docstatus": 1, "with_operations": 1, "company": "_Test Company"})
@@ -564,6 +583,8 @@ class TestWorkOrder(IntegrationTestCase):
 			self.assertEqual(row.completed_qty, 1)
 			self.assertEqual(row.process_loss_qty, 1)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_capcity_planning(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings", {"disable_capacity_planning": 0, "capacity_planning_for_days": 1}
@@ -718,12 +739,16 @@ class TestWorkOrder(IntegrationTestCase):
 				self.assertEqual(row.item_code, fg_item)
 
 		work_order = make_wo_order_test_record(
+<<<<<<< HEAD
 			item=fg_item,
 			skip_transfer=True,
 			planned_start_date=now(),
 			qty=30,
 			do_not_save=True,
 			source_warehouse="_Test Warehouse - _TC",
+=======
+			item=fg_item, skip_transfer=True, planned_start_date=now(), qty=30, do_not_save=True
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		work_order.batch_size = 10
 		work_order.insert()
@@ -940,13 +965,19 @@ class TestWorkOrder(IntegrationTestCase):
 			wip_warehouse=wip_warehouse,
 			qty=qty,
 			skip_transfer=1,
+<<<<<<< HEAD
 			source_warehouse=wip_warehouse,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			stock_uom=fg_item_non_whole.stock_uom,
 		)
 
 		se = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", qty))
 		se.get("items")[0].s_warehouse = "Stores - _TC"
+<<<<<<< HEAD
 		se.get("items")[0].t_warehouse = wip_warehouse
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		se.insert()
 		se.submit()
 
@@ -976,9 +1007,14 @@ class TestWorkOrder(IntegrationTestCase):
 
 		job_cards = frappe.get_all(
 			"Job Card Time Log",
+<<<<<<< HEAD
 			fields=["parent as name", "docstatus"],
 			order_by="creation asc",
 			distinct=True,
+=======
+			fields=["distinct parent as name", "docstatus"],
+			order_by="creation asc",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		for job_card in job_cards:
@@ -1208,9 +1244,13 @@ class TestWorkOrder(IntegrationTestCase):
 
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1}
 	)
+=======
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_auto_batch_creation(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -1231,9 +1271,13 @@ class TestWorkOrder(IntegrationTestCase):
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1}
 	)
+=======
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_auto_serial_no_creation(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -1266,9 +1310,13 @@ class TestWorkOrder(IntegrationTestCase):
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1}
 	)
+=======
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_auto_serial_no_batch_creation(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -1320,7 +1368,11 @@ class TestWorkOrder(IntegrationTestCase):
 
 		return serial_nos
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Manufacturing Settings",
 		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
 	)
@@ -1350,7 +1402,11 @@ class TestWorkOrder(IntegrationTestCase):
 		for index, row in enumerate(ste_manu.get("items"), start=1):
 			self.assertEqual(index, row.idx)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Manufacturing Settings",
 		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
 	)
@@ -1604,6 +1660,7 @@ class TestWorkOrder(IntegrationTestCase):
 
 		self.assertFalse(serial_nos)
 
+<<<<<<< HEAD
 	def test_backflushed_batch_raw_materials_based_on_transferred_autosabb(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
@@ -1795,6 +1852,8 @@ class TestWorkOrder(IntegrationTestCase):
 		self.assertEqual(qty, -4.0)
 
 	###
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_non_consumed_material_return_against_work_order(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
@@ -2063,7 +2122,10 @@ class TestWorkOrder(IntegrationTestCase):
 			bom_no=bom_doc.name,
 			qty=1,
 			skip_transfer=1,
+<<<<<<< HEAD
 			source_warehouse="_Test Warehouse - _TC",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		job_cards = frappe.get_all("Job Card", filters={"work_order": wo.name})
@@ -2091,7 +2153,11 @@ class TestWorkOrder(IntegrationTestCase):
 	def test_op_cost_and_scrap_based_on_sub_assemblies(self):
 		# Make Sub Assembly BOM 1
 
+<<<<<<< HEAD
 		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrap_from_sub_assemblies", 1)
+=======
+		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 1)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		items = {
 			"Test Final FG Item": 0,
@@ -2132,9 +2198,15 @@ class TestWorkOrder(IntegrationTestCase):
 		for row in se_doc.additional_costs:
 			self.assertEqual(row.amount, 3000)
 
+<<<<<<< HEAD
 		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrap_from_sub_assemblies", 0)
 
 	@IntegrationTestCase.change_settings(
+=======
+		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 0)
+
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
 	def test_get_rm_cost_from_consumption_entry(self):
@@ -2367,6 +2439,7 @@ class TestWorkOrder(IntegrationTestCase):
 
 		stock_entry.submit()
 
+<<<<<<< HEAD
 	def test_disassembly_order_with_qty_behavior(self):
 		# Create raw material and FG item
 		raw_item = make_item("Test Raw for Disassembly", {"is_stock_item": 1}).name
@@ -2519,6 +2592,8 @@ class TestWorkOrder(IntegrationTestCase):
 
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_components_qty_for_bom_based_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
@@ -2572,6 +2647,7 @@ class TestWorkOrder(IntegrationTestCase):
 
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)
 
+<<<<<<< HEAD
 	def test_components_as_per_bom_for_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
@@ -3369,6 +3445,8 @@ def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehou
 
 	return batches
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_operation(**kwargs):
 	kwargs = frappe._dict(kwargs)
@@ -3549,6 +3627,7 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 
 	make_bom(item=item.name, source_warehouse="Stores - _TC", raw_materials=[batch_item_doc.name])
 
+<<<<<<< HEAD
 	# Make additional items not attached to a BOM
 	make_item(
 		"Test Batch Battery Consumable",
@@ -3572,6 +3651,8 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 		},
 	)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	sn_item_doc = make_item(
 		"Test Serial No BTT Headphone",
 		{
@@ -3694,7 +3775,10 @@ def make_wo_order_test_record(**args):
 		"BOM", {"item": wo_order.production_item, "is_active": 1, "is_default": 1}
 	)
 	wo_order.qty = args.qty or 10
+<<<<<<< HEAD
 	wo_order.reserve_stock = args.reserve_stock or 0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	wo_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"
 	wo_order.fg_warehouse = args.fg_warehouse or "_Test Warehouse 1 - _TC"
 	wo_order.scrap_warehouse = args.fg_warehouse or "_Test Scrap Warehouse - _TC"
@@ -3708,7 +3792,10 @@ def make_wo_order_test_record(**args):
 	wo_order.transfer_material_against = args.transfer_material_against or "Work Order"
 	wo_order.from_wip_warehouse = args.from_wip_warehouse or 0
 	wo_order.batch_size = args.batch_size or 0
+<<<<<<< HEAD
 	wo_order.status = args.status or "Draft"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if args.source_warehouse:
 		wo_order.source_warehouse = args.source_warehouse
@@ -3721,3 +3808,9 @@ def make_wo_order_test_record(**args):
 		if not args.do_not_submit:
 			wo_order.submit()
 	return wo_order
+<<<<<<< HEAD
+=======
+
+
+test_records = frappe.get_test_records("Work Order")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

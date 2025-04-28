@@ -33,7 +33,10 @@ def execute(filters=None):
 				"invoice_or_item",
 				"customer",
 				"customer_group",
+<<<<<<< HEAD
 				"customer_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"posting_date",
 				"item_code",
 				"item_name",
@@ -96,7 +99,10 @@ def execute(filters=None):
 			"customer": [
 				"customer",
 				"customer_group",
+<<<<<<< HEAD
 				"customer_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"qty",
 				"base_rate",
 				"buying_rate",
@@ -178,6 +184,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 	# to display item as Item Code: Item Name
 	columns[0] = "Sales Invoice:Link/Item:300"
 	# removing Item Code and Item Name columns
+<<<<<<< HEAD
 	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
 	if supplier_master_name == "Supplier Name" and customer_master_name == "Customer Name":
@@ -193,6 +200,11 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 			total_base_amount += src.base_amount or 0.0
 			total_buying_amount += src.buying_amount or 0.0
 
+=======
+	del columns[4:6]
+
+	for src in gross_profit_data.si_list:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		row = frappe._dict()
 		row.indent = src.indent
 		row.parent_invoice = src.parent_invoice
@@ -203,6 +215,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 
 		data.append(row)
 
+<<<<<<< HEAD
 	total_gross_profit = total_base_amount - total_buying_amount
 	data.append(
 		frappe._dict(
@@ -270,6 +283,22 @@ def get_columns(group_wise_columns, filters):
 	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
 
+=======
+
+def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_columns, data):
+	for src in gross_profit_data.grouped_data:
+		row = []
+		for col in group_wise_columns.get(scrub(filters.group_by)):
+			row.append(src.get(col))
+
+		row.append(filters.currency)
+
+		data.append(row)
+
+
+def get_columns(group_wise_columns, filters):
+	columns = []
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	column_map = frappe._dict(
 		{
 			"parent": {
@@ -289,7 +318,11 @@ def get_columns(group_wise_columns, filters):
 				"label": _("Posting Date"),
 				"fieldname": "posting_date",
 				"fieldtype": "Date",
+<<<<<<< HEAD
 				"width": 120,
+=======
+				"width": 100,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			"posting_time": {
 				"label": _("Posting Time"),
@@ -415,12 +448,15 @@ def get_columns(group_wise_columns, filters):
 				"options": "Customer Group",
 				"width": 100,
 			},
+<<<<<<< HEAD
 			"customer_name": {
 				"label": _("Customer Name"),
 				"fieldname": "customer_name",
 				"fieldtype": "Data",
 				"width": 150,
 			},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"territory": {
 				"label": _("Territory"),
 				"fieldname": "territory",
@@ -445,10 +481,13 @@ def get_columns(group_wise_columns, filters):
 	)
 
 	for col in group_wise_columns.get(scrub(filters.group_by)):
+<<<<<<< HEAD
 		if col == "customer_name" and (
 			supplier_master_name == "Supplier Name" and customer_master_name == "Customer Name"
 		):
 			continue
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		columns.append(column_map.get(col))
 
 	columns.append(
@@ -470,7 +509,10 @@ def get_column_names():
 			"invoice_or_item": "sales_invoice",
 			"customer": "customer",
 			"customer_group": "customer_group",
+<<<<<<< HEAD
 			"customer_name": "customer_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"posting_date": "posting_date",
 			"item_code": "item_code",
 			"item_name": "item_name",
@@ -499,10 +541,17 @@ class GrossProfitGenerator:
 		self.load_invoice_items()
 		self.get_delivery_notes()
 
+<<<<<<< HEAD
 		self.load_product_bundle()
 		if filters.group_by == "Invoice":
 			self.group_items_by_invoice()
 
+=======
+		if filters.group_by == "Invoice":
+			self.group_items_by_invoice()
+
+		self.load_product_bundle()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.load_non_stock_items()
 		self.get_returned_invoice_items()
 		self.process()
@@ -518,7 +567,10 @@ class GrossProfitGenerator:
 
 		if grouped_by_invoice:
 			buying_amount = 0
+<<<<<<< HEAD
 			base_amount = 0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for row in reversed(self.si_list):
 			if self.filters.get("group_by") == "Monthly":
@@ -559,11 +611,20 @@ class GrossProfitGenerator:
 			else:
 				row.buying_amount = flt(self.get_buying_amount(row, row.item_code), self.currency_precision)
 
+<<<<<<< HEAD
 			if grouped_by_invoice and row.indent == 0.0:
 				row.buying_amount = buying_amount
 				row.base_amount = base_amount
 				buying_amount = 0
 				base_amount = 0
+=======
+			if grouped_by_invoice:
+				if row.indent == 1.0:
+					buying_amount += row.buying_amount
+				elif row.indent == 0.0:
+					row.buying_amount = buying_amount
+					buying_amount = 0
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			# get buying rate
 			if flt(row.qty):
@@ -573,6 +634,7 @@ class GrossProfitGenerator:
 				if self.is_not_invoice_row(row):
 					row.buying_rate, row.base_rate = 0.0, 0.0
 
+<<<<<<< HEAD
 			if self.is_not_invoice_row(row):
 				self.update_return_invoices(row)
 
@@ -580,12 +642,18 @@ class GrossProfitGenerator:
 				buying_amount += row.buying_amount
 				base_amount += row.base_amount
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			# calculate gross profit
 			row.gross_profit = flt(row.base_amount - row.buying_amount, self.currency_precision)
 			if row.base_amount:
 				row.gross_profit_percent = flt(
+<<<<<<< HEAD
 					(row.gross_profit / row.base_amount) * 100.0,
 					self.currency_precision,
+=======
+					(row.gross_profit / row.base_amount) * 100.0, self.currency_precision
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 			else:
 				row.gross_profit_percent = 0.0
@@ -596,6 +664,7 @@ class GrossProfitGenerator:
 		if self.grouped:
 			self.get_average_rate_based_on_group_by()
 
+<<<<<<< HEAD
 	def update_return_invoices(self, row):
 		if row.parent in self.returned_invoices and row.item_code in self.returned_invoices[row.parent]:
 			returned_item_rows = self.returned_invoices[row.parent][row.item_code]
@@ -619,6 +688,35 @@ class GrossProfitGenerator:
 	def get_average_rate_based_on_group_by(self):
 		for key in list(self.grouped):
 			if self.filters.get("group_by") == "Payment Term":
+=======
+	def get_average_rate_based_on_group_by(self):
+		for key in list(self.grouped):
+			if self.filters.get("group_by") == "Invoice":
+				for row in self.grouped[key]:
+					if row.indent == 1.0:
+						if (
+							row.parent in self.returned_invoices
+							and row.item_code in self.returned_invoices[row.parent]
+						):
+							returned_item_rows = self.returned_invoices[row.parent][row.item_code]
+							for returned_item_row in returned_item_rows:
+								# returned_items 'qty' should be stateful
+								if returned_item_row.qty != 0:
+									if row.qty >= abs(returned_item_row.qty):
+										row.qty += returned_item_row.qty
+										returned_item_row.qty = 0
+									else:
+										row.qty = 0
+										returned_item_row.qty += row.qty
+								row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
+							row.buying_amount = flt(
+								flt(row.qty) * flt(row.buying_rate), self.currency_precision
+							)
+						if flt(row.qty) or row.base_amount:
+							row = self.set_average_rate(row)
+							self.grouped_data.append(row)
+			elif self.filters.get("group_by") == "Payment Term":
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				for i, row in enumerate(self.grouped[key]):
 					invoice_portion = 0
 
@@ -638,7 +736,11 @@ class GrossProfitGenerator:
 
 				new_row = self.set_average_rate(new_row)
 				self.grouped_data.append(new_row)
+<<<<<<< HEAD
 			elif self.filters.get("group_by") != "Invoice":
+=======
+			else:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				for i, row in enumerate(self.grouped[key]):
 					if i == 0:
 						new_row = row
@@ -691,9 +793,13 @@ class GrossProfitGenerator:
 				si.name = si_item.parent
 				and si.docstatus = 1
 				and si.is_return = 1
+<<<<<<< HEAD
 				and si.posting_date between %(from_date)s and %(to_date)s
 		""",
 			{"from_date": self.filters.from_date, "to_date": self.filters.to_date},
+=======
+		""",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			as_dict=1,
 		)
 
@@ -716,8 +822,11 @@ class GrossProfitGenerator:
 			if packed_item.get("parent_detail_docname") == row.item_row:
 				packed_item_row = row.copy()
 				packed_item_row.warehouse = packed_item.warehouse
+<<<<<<< HEAD
 				packed_item_row.qty = packed_item.total_qty * -1
 				packed_item_row.serial_and_batch_bundle = packed_item.serial_and_batch_bundle
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				buying_amount += self.get_buying_amount(packed_item_row, packed_item.item_code)
 
 		return flt(buying_amount, self.currency_precision)
@@ -750,9 +859,13 @@ class GrossProfitGenerator:
 		else:
 			my_sle = self.get_stock_ledger_entries(item_code, row.warehouse)
 			if (row.update_stock or row.dn_detail) and my_sle:
+<<<<<<< HEAD
 				parenttype = row.parenttype
 				parent = row.invoice or row.parent
 
+=======
+				parenttype, parent = row.parenttype, row.parent
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				if row.dn_detail:
 					parenttype, parent = "Delivery Note", row.delivery_note
 
@@ -809,7 +922,10 @@ class GrossProfitGenerator:
 					"voucher_no": row.parent,
 					"allow_zero_valuation": True,
 					"company": self.filters.company,
+<<<<<<< HEAD
 					"item_code": item_code,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			)
 
@@ -830,13 +946,20 @@ class GrossProfitGenerator:
 			.inner_join(purchase_invoice)
 			.on(purchase_invoice.name == purchase_invoice_item.parent)
 			.select(
+<<<<<<< HEAD
+=======
+				purchase_invoice.name,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				purchase_invoice_item.base_rate / purchase_invoice_item.conversion_factor,
 			)
 			.where(purchase_invoice.docstatus == 1)
 			.where(purchase_invoice.posting_date <= self.filters.to_date)
 			.where(purchase_invoice_item.item_code == item_code)
+<<<<<<< HEAD
 			.where(purchase_invoice.is_return == 0)
 			.where(purchase_invoice_item.parenttype == "Purchase Invoice")
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		if row.project:
@@ -859,10 +982,14 @@ class GrossProfitGenerator:
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
 
+<<<<<<< HEAD
 		if self.filters.include_returned_invoices:
 			conditions += " and (is_return = 0 or (is_return=1 and return_against is null))"
 		else:
 			conditions += " and is_return = 0"
+=======
+		conditions += " and (is_return = 0 or (is_return=1 and return_against is null))"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if self.filters.item_group:
 			conditions += f" and {get_item_group_condition(self.filters.item_group)}"
@@ -876,10 +1003,14 @@ class GrossProfitGenerator:
 			"""
 
 		if self.filters.group_by == "Sales Person":
+<<<<<<< HEAD
 			sales_person_cols = """, sales.sales_person,
 				sales.allocated_percentage * `tabSales Invoice Item`.base_net_amount / 100 as allocated_amount,
 				sales.incentives
 			"""
+=======
+			sales_person_cols = ", sales.sales_person, sales.allocated_amount, sales.incentives"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			sales_team_table = "left join `tabSales Team` sales on sales.parent = `tabSales Invoice`.name"
 		else:
 			sales_person_cols = ""
@@ -941,9 +1072,14 @@ class GrossProfitGenerator:
 				`tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
 				`tabSales Invoice`.posting_date, `tabSales Invoice`.posting_time,
 				`tabSales Invoice`.project, `tabSales Invoice`.update_stock,
+<<<<<<< HEAD
 				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group, `tabSales Invoice`.customer_name,
 				`tabSales Invoice`.territory, `tabSales Invoice Item`.item_code,
 				`tabSales Invoice`.base_net_total as "invoice_base_net_total",
+=======
+				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group,
+				`tabSales Invoice`.territory, `tabSales Invoice Item`.item_code,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				`tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
 				`tabSales Invoice Item`.warehouse, `tabSales Invoice Item`.item_group,
 				`tabSales Invoice Item`.brand, `tabSales Invoice Item`.so_detail,
@@ -1004,7 +1140,10 @@ class GrossProfitGenerator:
 		"""
 
 		grouped = OrderedDict()
+<<<<<<< HEAD
 		product_bundles = self.product_bundles.get("Sales Invoice", {})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for row in self.si_list:
 			# initialize list with a header row for each new parent
@@ -1015,7 +1154,12 @@ class GrossProfitGenerator:
 			)
 
 			# if item is a bundle, add it's components as seperate rows
+<<<<<<< HEAD
 			if bundled_items := product_bundles.get(row.parent, {}).get(row.item_code):
+=======
+			if frappe.db.exists("Product Bundle", row.item_code):
+				bundled_items = self.get_bundle_items(row)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				for x in bundled_items:
 					bundle_item = self.get_bundle_item_row(row, x)
 					grouped.get(row.parent).append(bundle_item)
@@ -1039,7 +1183,10 @@ class GrossProfitGenerator:
 				"update_stock": row.update_stock,
 				"customer": row.customer,
 				"customer_group": row.customer_group,
+<<<<<<< HEAD
 				"customer_name": row.customer_name,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"item_code": None,
 				"item_name": None,
 				"description": None,
@@ -1052,6 +1199,7 @@ class GrossProfitGenerator:
 				"item_row": None,
 				"is_return": row.is_return,
 				"cost_center": row.cost_center,
+<<<<<<< HEAD
 				"base_net_amount": row.invoice_base_net_total,
 			}
 		)
@@ -1088,6 +1236,49 @@ class GrossProfitGenerator:
 			}
 		)
 
+=======
+				"base_net_amount": frappe.db.get_value("Sales Invoice", row.parent, "base_net_total"),
+			}
+		)
+
+	def get_bundle_items(self, product_bundle):
+		return frappe.get_all(
+			"Product Bundle Item", filters={"parent": product_bundle.item_code}, fields=["item_code", "qty"]
+		)
+
+	def get_bundle_item_row(self, product_bundle, item):
+		item_name, description, item_group, brand = self.get_bundle_item_details(item.item_code)
+
+		return frappe._dict(
+			{
+				"parent_invoice": product_bundle.item_code,
+				"indent": product_bundle.indent + 1,
+				"parent": None,
+				"invoice_or_item": item.item_code,
+				"posting_date": product_bundle.posting_date,
+				"posting_time": product_bundle.posting_time,
+				"project": product_bundle.project,
+				"customer": product_bundle.customer,
+				"customer_group": product_bundle.customer_group,
+				"item_code": item.item_code,
+				"item_name": item_name,
+				"description": description,
+				"warehouse": product_bundle.warehouse,
+				"item_group": item_group,
+				"brand": brand,
+				"dn_detail": product_bundle.dn_detail,
+				"delivery_note": product_bundle.delivery_note,
+				"qty": (flt(product_bundle.qty) * flt(item.qty)),
+				"item_row": None,
+				"is_return": product_bundle.is_return,
+				"cost_center": product_bundle.cost_center,
+			}
+		)
+
+	def get_bundle_item_details(self, item_code):
+		return frappe.db.get_value("Item", item_code, ["item_name", "description", "item_group", "brand"])
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def get_stock_ledger_entries(self, item_code, warehouse):
 		if item_code and warehouse:
 			if (item_code, warehouse) not in self.sle:
@@ -1136,7 +1327,10 @@ class GrossProfitGenerator:
 				pki.rate,
 				(pki.rate * pki.qty).as_("base_amount"),
 				pki.parent_detail_docname,
+<<<<<<< HEAD
 				pki.serial_and_batch_bundle,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 			.where(pki.docstatus == 1)
 		)

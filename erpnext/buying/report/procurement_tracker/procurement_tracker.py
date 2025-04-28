@@ -51,7 +51,11 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Requestor"),
+<<<<<<< HEAD
 			"options": "User",
+=======
+			"options": "Employee",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"fieldname": "requestor",
 			"fieldtype": "Link",
 			"width": 140,
@@ -175,7 +179,11 @@ def get_data(filters):
 				"purchase_order": po.parent,
 				"supplier": po.supplier,
 				"estimated_cost": flt(mr_record.get("amount")),
+<<<<<<< HEAD
 				"actual_cost": flt(pi_records.get(po.name)) or flt(po.amount),
+=======
+				"actual_cost": flt(pi_records.get(po.name)),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"purchase_order_amt": flt(po.amount),
 				"purchase_order_amt_in_company_currency": flt(po.base_amount),
 				"expected_delivery_date": po.schedule_date,

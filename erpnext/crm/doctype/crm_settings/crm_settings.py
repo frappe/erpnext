@@ -20,7 +20,10 @@ class CRMSettings(Document):
 		carry_forward_communication_and_comments: DF.Check
 		close_opportunity_after_days: DF.Int
 		default_valid_till: DF.Data | None
+<<<<<<< HEAD
 		update_timestamp_on_new_communication: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	def validate(self):

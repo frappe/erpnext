@@ -27,6 +27,7 @@ frappe.query_reports["Stock Ledger"] = {
 		},
 		{
 			fieldname: "warehouse",
+<<<<<<< HEAD
 			label: __("Warehouses"),
 			fieldtype: "MultiSelectList",
 			options: "Warehouse",
@@ -36,10 +37,21 @@ frappe.query_reports["Stock Ledger"] = {
 				return frappe.db.get_link_options("Warehouse", txt, {
 					company: company,
 				});
+=======
+			label: __("Warehouse"),
+			fieldtype: "Link",
+			options: "Warehouse",
+			get_query: function () {
+				const company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: { company: company },
+				};
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{
 			fieldname: "item_code",
+<<<<<<< HEAD
 			label: __("Items"),
 			fieldtype: "MultiSelectList",
 			options: "Item",
@@ -64,6 +76,15 @@ frappe.query_reports["Stock Ledger"] = {
 				});
 
 				return data || [];
+=======
+			label: __("Item"),
+			fieldtype: "Link",
+			options: "Item",
+			get_query: function () {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+				};
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{

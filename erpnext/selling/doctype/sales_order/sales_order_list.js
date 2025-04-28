@@ -23,6 +23,7 @@ frappe.listview_settings["Sales Order"] = {
 			return [__("Completed"), "green", "status,=,Completed"];
 		} else if (doc.advance_payment_status === "Requested") {
 			return [__("To Pay"), "gray", "advance_payment_status,=,Requested"];
+<<<<<<< HEAD
 		} else if (!doc.skip_delivery_note && flt(doc.per_delivered) < 100) {
 			if (frappe.datetime.get_diff(doc.delivery_date) < 0) {
 				// not delivered & overdue
@@ -39,6 +40,16 @@ frappe.listview_settings["Sales Order"] = {
 					"per_delivered,<,100|grand_total,=,0|status,!=,Closed|docstatus,=,1",
 				];
 			} else if (flt(doc.per_billed) < 100) {
+=======
+		} else if (!doc.skip_delivery_note && flt(doc.per_delivered, 2) < 100) {
+			if (frappe.datetime.get_diff(doc.delivery_date) < 0) {
+				// not delivered & overdue
+				return [__("Overdue"), "red", "per_delivered,<,100|delivery_date,<,Today|status,!=,Closed"];
+			} else if (flt(doc.grand_total) === 0) {
+				// not delivered (zeroount order)
+				return [__("To Deliver"), "orange", "per_delivered,<,100|grand_total,=,0|status,!=,Closed"];
+			} else if (flt(doc.per_billed, 2) < 100) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				// not delivered & not billed
 				return [
 					__("To Deliver and Bill"),
@@ -50,6 +61,7 @@ frappe.listview_settings["Sales Order"] = {
 				return [__("To Deliver"), "orange", "per_delivered,<,100|per_billed,=,100|status,!=,Closed"];
 			}
 		} else if (
+<<<<<<< HEAD
 			flt(doc.per_delivered) === 100 &&
 			flt(doc.grand_total) !== 0 &&
 			flt(doc.per_billed) < 100
@@ -57,6 +69,15 @@ frappe.listview_settings["Sales Order"] = {
 			// to bill
 			return [__("To Bill"), "orange", "per_delivered,=,100|per_billed,<,100|status,!=,Closed"];
 		} else if (doc.skip_delivery_note && flt(doc.per_billed) < 100) {
+=======
+			flt(doc.per_delivered, 2) === 100 &&
+			flt(doc.grand_total) !== 0 &&
+			flt(doc.per_billed, 2) < 100
+		) {
+			// to bill
+			return [__("To Bill"), "orange", "per_delivered,=,100|per_billed,<,100|status,!=,Closed"];
+		} else if (doc.skip_delivery_note && flt(doc.per_billed, 2) < 100) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return [__("To Bill"), "orange", "per_billed,<,100|status,!=,Closed"];
 		}
 	},
@@ -71,6 +92,7 @@ frappe.listview_settings["Sales Order"] = {
 			listview.call_for_selected_items(method, { status: "Submitted" });
 		});
 
+<<<<<<< HEAD
 		if (frappe.model.can_create("Sales Invoice")) {
 			listview.page.add_action_item(__("Sales Invoice"), () => {
 				erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Sales Invoice");
@@ -123,5 +145,49 @@ frappe.listview_settings["Sales Order"] = {
 				erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Payment Entry");
 			});
 		}
+=======
+		listview.page.add_action_item(__("Sales Invoice"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Sales Invoice");
+		});
+
+		listview.page.add_action_item(__("Delivery Note"), () => {
+			frappe.call({
+				method: "erpnext.selling.doctype.sales_order.sales_order.is_enable_cutoff_date_on_bulk_delivery_note_creation",
+				callback: (r) => {
+					if (r.message) {
+						var dialog = new frappe.ui.Dialog({
+							title: __("Select Items up to Delivery Date"),
+							fields: [
+								{
+									fieldtype: "Date",
+									fieldname: "delivery_date",
+									default: frappe.datetime.add_days(frappe.datetime.nowdate(), 1),
+								},
+							],
+						});
+						dialog.set_primary_action(__("Select"), function (values) {
+							var until_delivery_date = values.delivery_date;
+							erpnext.bulk_transaction_processing.create(
+								listview,
+								"Sales Order",
+								"Delivery Note",
+								{
+									until_delivery_date,
+								}
+							);
+							dialog.hide();
+						});
+						dialog.show();
+					} else {
+						erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Delivery Note");
+					}
+				},
+			});
+		});
+
+		listview.page.add_action_item(__("Advance Payment"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Payment Entry");
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 };

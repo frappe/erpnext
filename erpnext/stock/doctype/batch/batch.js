@@ -22,6 +22,7 @@ frappe.ui.form.on("Batch", {
 				frappe.set_route("query-report", "Stock Ledger");
 			});
 			frm.trigger("make_dashboard");
+<<<<<<< HEAD
 
 			frm.add_custom_button(__("Recalculate Batch Qty"), () => {
 				frm.call({
@@ -33,6 +34,8 @@ frappe.ui.form.on("Batch", {
 					},
 				});
 			});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 	item: (frm) => {
@@ -65,12 +68,16 @@ frappe.ui.form.on("Batch", {
 
 			frappe.call({
 				method: "erpnext.stock.doctype.batch.batch.get_batch_qty",
+<<<<<<< HEAD
 				args: {
 					batch_no: frm.doc.name,
 					item_code: frm.doc.item,
 					for_stock_levels: for_stock_levels,
 					consider_negative_batches: 1,
 				},
+=======
+				args: { batch_no: frm.doc.name, item_code: frm.doc.item, for_stock_levels: for_stock_levels },
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				callback: (r) => {
 					if (!r.message) {
 						return;
@@ -87,7 +94,11 @@ frappe.ui.form.on("Batch", {
 
 					// show
 					(r.message || []).forEach(function (d) {
+<<<<<<< HEAD
 						if (d.qty != 0) {
+=======
+						if (d.qty > 0) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							$(`<div class='row' style='margin-bottom: 10px;'>
 								<div class='col-sm-3 small' style='padding-top: 3px;'>${d.warehouse}</div>
 								<div class='col-sm-3 small text-right' style='padding-top: 3px;'>${d.qty}</div>

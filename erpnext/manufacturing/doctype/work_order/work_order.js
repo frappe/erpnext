@@ -101,6 +101,7 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
+<<<<<<< HEAD
 		frm.set_query("sales_order", function () {
 			if (frm.doc.production_item) {
 				return {
@@ -112,6 +113,8 @@ frappe.ui.form.on("Work Order", {
 			}
 		});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
@@ -130,6 +133,7 @@ frappe.ui.form.on("Work Order", {
 			});
 			erpnext.work_order.set_default_warehouse(frm);
 		}
+<<<<<<< HEAD
 
 		if (frm.doc.docstatus == 0 && frm.doc.bom_no) {
 			frappe.call({
@@ -144,6 +148,8 @@ frappe.ui.form.on("Work Order", {
 				},
 			});
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	source_warehouse: function (frm) {
@@ -155,6 +161,7 @@ frappe.ui.form.on("Work Order", {
 		);
 	},
 
+<<<<<<< HEAD
 	allow_alternative_item: function (frm) {
 		let has_alternative = false;
 		if (frm.doc.required_items) {
@@ -181,13 +188,18 @@ frappe.ui.form.on("Work Order", {
 		}
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	refresh: function (frm) {
 		erpnext.toggle_naming_series();
 		erpnext.work_order.set_custom_buttons(frm);
 		frm.set_intro("");
 
+<<<<<<< HEAD
 		frm.toggle_enable("use_multi_level_bom", !frm.doc.track_semi_finished_goods);
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.set_intro(__("Submit this Work Order for further processing."));
 		} else {
@@ -210,6 +222,29 @@ frappe.ui.form.on("Work Order", {
 			}
 		}
 
+<<<<<<< HEAD
+=======
+		if (frm.doc.required_items && frm.doc.allow_alternative_item) {
+			const has_alternative = frm.doc.required_items.find((i) => i.allow_alternative_item === 1);
+			if (frm.doc.docstatus == 0 && has_alternative) {
+				frm.add_custom_button(__("Alternate Item"), () => {
+					erpnext.utils.select_alternate_items({
+						frm: frm,
+						child_docname: "required_items",
+						warehouse_field: "source_warehouse",
+						child_doctype: "Work Order Item",
+						original_item_field: "original_item",
+						condition: (d) => {
+							if (d.allow_alternative_item) {
+								return true;
+							}
+						},
+					});
+				});
+			}
+		}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (frm.doc.status == "Completed") {
 			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
 				frm.add_custom_button(
@@ -228,7 +263,11 @@ frappe.ui.form.on("Work Order", {
 			frm.doc.produced_qty > 0
 		) {
 			frm.add_custom_button(
+<<<<<<< HEAD
 				__("Disassemble Order"),
+=======
+				__("Disassembly Order"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				() => {
 					frm.trigger("make_disassembly_order");
 				},
@@ -237,6 +276,7 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		frm.trigger("add_custom_button_to_return_components");
+<<<<<<< HEAD
 		frm.trigger("allow_alternative_item");
 		frm.trigger("hide_reserve_stock_button");
 		frm.trigger("toggle_items_editable");
@@ -265,6 +305,8 @@ frappe.ui.form.on("Work Order", {
 		let has_reserved_stock = frm.doc.required_items.some((item) => flt(item.stock_reserved_qty) > 0);
 
 		return has_reserved_stock;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	add_custom_button_to_return_components: function (frm) {
@@ -368,18 +410,26 @@ frappe.ui.form.on("Work Order", {
 					return operations_data;
 				},
 			},
+<<<<<<< HEAD
 			function () {
 				const selected_rows = dialog.fields_dict["operations"].grid.get_selected_children();
 				if (selected_rows.length == 0) {
 					frappe.msgprint(__("Please select atleast one operation to create Job Card"));
 					return;
 				}
+=======
+			function (data) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frappe.call({
 					method: "erpnext.manufacturing.doctype.work_order.work_order.make_job_card",
 					freeze: true,
 					args: {
 						work_order: frm.doc.name,
+<<<<<<< HEAD
 						operations: selected_rows,
+=======
+						operations: data.operations,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					},
 					callback: function () {
 						frm.reload_doc();
@@ -390,7 +440,11 @@ frappe.ui.form.on("Work Order", {
 			__("Create")
 		);
 
+<<<<<<< HEAD
 		dialog.fields_dict["operations"].grid.grid_buttons.hide();
+=======
+		dialog.fields_dict["operations"].grid.wrapper.find(".grid-add-row").hide();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
@@ -464,11 +518,16 @@ frappe.ui.form.on("Work Order", {
 		message = title;
 		// pending qty
 		if (!frm.doc.skip_transfer) {
+<<<<<<< HEAD
 			var pending_complete =
 				frm.doc.material_transferred_for_manufacturing -
 				frm.doc.produced_qty -
 				frm.doc.process_loss_qty;
 			if (pending_complete > 0) {
+=======
+			var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
+			if (pending_complete) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				var width = (pending_complete / frm.doc.qty) * 100 - added_min;
 				title = __("{0} items in progress", [pending_complete]);
 				bars.push({
@@ -479,6 +538,7 @@ frappe.ui.form.on("Work Order", {
 				message = message + ". " + title;
 			}
 		}
+<<<<<<< HEAD
 		if (frm.doc.process_loss_qty) {
 			var process_loss_width = (frm.doc.process_loss_qty / frm.doc.qty) * 100;
 			title = __("{0} items lost during process.", [frm.doc.process_loss_qty]);
@@ -489,6 +549,8 @@ frappe.ui.form.on("Work Order", {
 			});
 			message = message + ". " + title;
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.dashboard.add_progress(__("Status"), bars, message);
 	},
 
@@ -541,6 +603,10 @@ frappe.ui.form.on("Work Order", {
 				callback: function (r) {
 					if (r.message) {
 						frm.set_value("sales_order", "");
+<<<<<<< HEAD
+=======
+						frm.trigger("set_sales_order");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						erpnext.in_production_item_onchange = true;
 
 						$.each(
@@ -602,10 +668,31 @@ frappe.ui.form.on("Work Order", {
 		frm.toggle_reqd("transfer_material_against", frm.doc.operations && frm.doc.operations.length > 0);
 	},
 
+<<<<<<< HEAD
+=======
+	set_sales_order: function (frm) {
+		if (frm.doc.production_item) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
+				args: { production_item: frm.doc.production_item },
+				callback: function (r) {
+					frm.set_query("sales_order", function () {
+						erpnext.in_production_item_onchange = true;
+						return {
+							filters: [["Sales Order", "name", "in", r.message]],
+						};
+					});
+				},
+			});
+		}
+	},
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	additional_operating_cost: function (frm) {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
+<<<<<<< HEAD
 
 	on_submit() {
 		frappe.route_hooks.after_submit = (frm) => {
@@ -618,6 +705,11 @@ frappe.ui.form.on("Work Order Item", {
 	allow_alternative_item(frm) {
 		frm.trigger("allow_alternative_item");
 	},
+=======
+});
+
+frappe.ui.form.on("Work Order Item", {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	source_warehouse: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (!row.item_code) {
@@ -657,11 +749,15 @@ frappe.ui.form.on("Work Order Item", {
 							required_qty: row.required_qty || 1,
 							item_name: r.message.item_name,
 							description: r.message.description,
+<<<<<<< HEAD
 							source_warehouse:
 								r.message.is_customer_provided_item &&
 								frm.doc.subcontracting_inward_order_item
 									? frm.doc.source_warehouse
 									: r.message.default_warehouse,
+=======
+							source_warehouse: r.message.default_warehouse,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							allow_alternative_item: r.message.allow_alternative_item,
 							include_item_in_manufacturing: r.message.include_item_in_manufacturing,
 						});
@@ -700,7 +796,11 @@ erpnext.work_order = {
 	set_custom_buttons: function (frm) {
 		var doc = frm.doc;
 
+<<<<<<< HEAD
 		if (doc.docstatus === 1 && doc.status !== "Closed") {
+=======
+		if (doc.status !== "Closed") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.add_custom_button(
 				__("Close"),
 				function () {
@@ -731,8 +831,11 @@ erpnext.work_order = {
 				);
 			}
 
+<<<<<<< HEAD
 			erpnext.work_order.setup_stock_reservation(frm);
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if (!frm.doc.track_semi_finished_goods) {
 				const show_start_btn =
 					frm.doc.skip_transfer || frm.doc.transfer_material_against == "Job Card" ? 0 : 1;
@@ -741,6 +844,7 @@ erpnext.work_order = {
 					let pending_to_transfer = frm.doc.required_items.some(
 						(item) => flt(item.transferred_qty) < flt(item.required_qty)
 					);
+<<<<<<< HEAD
 
 					let transfer_extra_materials_percentage =
 						frm.doc.__onload?.transfer_extra_materials_percentage;
@@ -754,6 +858,8 @@ erpnext.work_order = {
 						}
 					}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					if (pending_to_transfer && frm.doc.status != "Stopped") {
 						frm.has_start_btn = true;
 						frm.add_custom_button(__("Create Pick List"), function () {
@@ -764,6 +870,7 @@ erpnext.work_order = {
 							erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
 						});
 						start_btn.addClass("btn-primary");
+<<<<<<< HEAD
 					} else if (transfer_extra_materials && allowed_qty) {
 						let qty =
 							allowed_qty -
@@ -798,6 +905,8 @@ erpnext.work_order = {
 								__("Make")
 							);
 						}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					}
 				}
 			}
@@ -828,9 +937,15 @@ erpnext.work_order = {
 										frm,
 										backflush_raw_materials_based_on
 									);
+<<<<<<< HEAD
 								},
 								__("Make")
 							);
+=======
+								}
+							);
+							consumption_btn.addClass("btn-primary");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						}
 					}
 				}
@@ -873,6 +988,7 @@ erpnext.work_order = {
 			}
 		}
 	},
+<<<<<<< HEAD
 
 	setup_stock_reservation(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.reserve_stock) {
@@ -905,6 +1021,8 @@ erpnext.work_order = {
 		}
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	calculate_cost: function (doc) {
 		if (doc.operations) {
 			var op = doc.operations;
@@ -932,9 +1050,12 @@ erpnext.work_order = {
 		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.get_default_warehouse",
+<<<<<<< HEAD
 				args: {
 					company: frm.doc.company,
 				},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				callback: function (r) {
 					if (!r.exe) {
 						frm.set_value("wip_warehouse", r.message.wip_warehouse);
@@ -949,7 +1070,11 @@ erpnext.work_order = {
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
 		if (purpose === "Disassemble") {
+<<<<<<< HEAD
 			return flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
+=======
+			return flt(frm.doc.produced_qty);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		if (frm.doc.skip_transfer) {
@@ -964,8 +1089,13 @@ erpnext.work_order = {
 		return flt(max, precision("qty"));
 	},
 
+<<<<<<< HEAD
 	show_prompt_for_qty_input: function (frm, purpose, qty, additional_transfer_entry) {
 		let max = !additional_transfer_entry ? this.get_max_transferable_qty(frm, purpose) : qty;
+=======
+	show_prompt_for_qty_input: function (frm, purpose) {
+		let max = this.get_max_transferable_qty(frm, purpose);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		let fields = [
 			{
@@ -977,6 +1107,7 @@ erpnext.work_order = {
 			},
 		];
 
+<<<<<<< HEAD
 		if (!additional_transfer_entry) {
 			fields.push({
 				fieldtype: "Check",
@@ -993,6 +1124,8 @@ erpnext.work_order = {
 			});
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (purpose === "Disassemble") {
 			fields.push({
 				fieldtype: "Link",
@@ -1012,7 +1145,11 @@ erpnext.work_order = {
 		}
 
 		return new Promise((resolve, reject) => {
+<<<<<<< HEAD
 			frm.qty_prompt = frappe.prompt(
+=======
+			frappe.prompt(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				fields,
 				(data) => {
 					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
@@ -1030,6 +1167,7 @@ erpnext.work_order = {
 		});
 	},
 
+<<<<<<< HEAD
 	make_se: function (frm, purpose, qty, is_additional_transfer_entry) {
 		if (qty) {
 			frappe
@@ -1060,6 +1198,21 @@ erpnext.work_order = {
 					frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
 				});
 		}
+=======
+	make_se: function (frm, purpose) {
+		this.show_prompt_for_qty_input(frm, purpose)
+			.then((data) => {
+				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+					work_order_id: frm.doc.name,
+					purpose: purpose,
+					qty: data.qty,
+				});
+			})
+			.then((stock_entry) => {
+				frappe.model.sync(stock_entry);
+				frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
+			});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {

@@ -8,7 +8,10 @@
   "section_break_3",
   "do_not_update_variants",
   "allow_rename_attribute_value",
+<<<<<<< HEAD
   "allow_different_uom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "copy_fields_to_variant",
   "fields"
  ],
@@ -41,17 +44,24 @@
    "fieldtype": "Table",
    "label": "Fields",
    "options": "Variant Field"
+<<<<<<< HEAD
   },
   {
    "default": "0",
    "fieldname": "allow_different_uom",
    "fieldtype": "Check",
    "label": "Allow Variant UOM to be different from Template UOM"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-02-10 16:13:47.435148",
+=======
+ "modified": "2024-03-27 13:09:56.095684",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Variant Settings",

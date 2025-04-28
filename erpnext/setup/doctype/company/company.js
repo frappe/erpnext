@@ -17,9 +17,12 @@ frappe.ui.form.on("Company", {
 				frm.toggle_enable("default_currency", !r.message);
 			});
 		}
+<<<<<<< HEAD
 		if (frm.doc.__islocal) {
 			frm.set_value("reporting_currency", "");
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	setup: function (frm) {
 		frm.__rename_queue = "long";
@@ -40,6 +43,7 @@ frappe.ui.form.on("Company", {
 			return { filters: { selling: 1 } };
 		});
 
+<<<<<<< HEAD
 		frm.set_query("default_sales_contact", function (doc) {
 			return {
 				query: "frappe.contacts.doctype.contact.contact.contact_query",
@@ -47,6 +51,8 @@ frappe.ui.form.on("Company", {
 			};
 		});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("default_buying_terms", function () {
 			return { filters: { buying: 1 } };
 		});
@@ -60,6 +66,7 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+<<<<<<< HEAD
 
 		frm.set_query("default_warehouse_for_sales_return", function () {
 			return {
@@ -69,6 +76,8 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	company_name: function (frm) {
@@ -175,10 +184,13 @@ frappe.ui.form.on("Company", {
 			}
 		}
 
+<<<<<<< HEAD
 		if (frm.doc.__islocal) {
 			frm.set_value("reporting_currency", "");
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
 	},
 
@@ -275,7 +287,10 @@ erpnext.company.setup_queries = function (frm) {
 			["default_expense_account", { root_type: "Expense" }],
 			["default_income_account", { root_type: "Income" }],
 			["round_off_account", { root_type: "Expense" }],
+<<<<<<< HEAD
 			["round_off_for_opening", { root_type: "Liability", account_type: "Round Off for Opening" }],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			["write_off_account", { root_type: "Expense" }],
 			["default_deferred_expense_account", {}],
 			["default_deferred_revenue_account", {}],
@@ -294,8 +309,11 @@ erpnext.company.setup_queries = function (frm) {
 			["depreciation_expense_account", { root_type: "Expense", account_type: "Depreciation" }],
 			["disposal_account", { report_type: "Profit and Loss" }],
 			["default_inventory_account", { account_type: "Stock" }],
+<<<<<<< HEAD
 			["purchase_expense_account", { root_type: "Expense" }],
 			["purchase_expense_contra_account", { root_type: "Expense" }],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			["cost_center", {}],
 			["round_off_cost_center", {}],
 			["depreciation_cost_center", {}],
@@ -305,7 +323,10 @@ erpnext.company.setup_queries = function (frm) {
 			["default_provisional_account", { root_type: ["in", ["Liability", "Asset"]] }],
 			["default_advance_received_account", { root_type: "Liability", account_type: "Receivable" }],
 			["default_advance_paid_account", { root_type: "Asset", account_type: "Payable" }],
+<<<<<<< HEAD
 			["service_expense_account", { root_type: "Expense" }],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 		function (i, v) {
 			erpnext.company.set_custom_query(frm, v);

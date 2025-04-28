@@ -8,6 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+<<<<<<< HEAD
   "section_break_xt4m",
   "voucher_type",
   "voucher_no",
@@ -25,14 +26,35 @@
   "stock_uom",
   "has_serial_no",
   "has_batch_no",
+=======
+  "item_code",
+  "warehouse",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_elik",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_7dxj",
   "from_voucher_type",
   "from_voucher_no",
   "from_voucher_detail_no",
+<<<<<<< HEAD
   "production_section",
   "transferred_qty",
   "column_break_qdwj",
   "consumed_qty",
+=======
+  "section_break_xt4m",
+  "stock_uom",
+  "column_break_grdt",
+  "available_qty",
+  "voucher_qty",
+  "column_break_o6ex",
+  "reserved_qty",
+  "delivered_qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "serial_and_batch_reservation_section",
   "reservation_based_on",
   "sb_entries",
@@ -84,7 +106,11 @@
    "no_copy": 1,
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Data",
+<<<<<<< HEAD
    "options": "\nSales Order\nWork Order\nSubcontracting Inward Order\nProduction Plan\nSubcontracting Order",
+=======
+   "options": "\nSales Order",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"
@@ -93,6 +119,10 @@
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
    "in_filter": 1,
+<<<<<<< HEAD
+=======
+   "in_list_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "in_standard_filter": 1,
    "label": "Voucher No",
    "no_copy": 1,
@@ -172,7 +202,11 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nPartially Used\nDelivered\nCancelled\nClosed",
+=======
+   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nDelivered\nCancelled",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -217,16 +251,26 @@
   },
   {
    "fieldname": "section_break_xt4m",
+<<<<<<< HEAD
    "fieldtype": "Section Break",
    "label": "Transaction Information"
+=======
+   "fieldtype": "Section Break"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_o6ex",
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "fieldname": "section_break_3vb3",
    "fieldtype": "Tab Break",
+=======
+   "collapsible": 1,
+   "fieldname": "section_break_3vb3",
+   "fieldtype": "Section Break",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "More Information"
   },
   {
@@ -261,7 +305,11 @@
   },
   {
    "fieldname": "serial_and_batch_reservation_section",
+<<<<<<< HEAD
    "fieldtype": "Tab Break",
+=======
+   "fieldtype": "Section Break",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Serial and Batch Reservation"
   },
   {
@@ -288,7 +336,11 @@
    "fieldtype": "Select",
    "label": "From Voucher Type",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "\nPick List\nPurchase Receipt\nStock Entry\nWork Order\nProduction Plan\nSubcontracting Inward Order",
+=======
+   "options": "\nPick List\nPurchase Receipt",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
@@ -312,6 +364,7 @@
    "read_only": 1,
    "report_hide": 1,
    "search_index": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "production_section",
@@ -338,12 +391,20 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "hide_toolbar": 1,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-10 16:09:10.380024",
+=======
+ "modified": "2024-03-27 13:10:45.186573",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
@@ -449,6 +510,7 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
@@ -456,3 +518,10 @@
  "title_field": "voucher_no",
  "track_changes": 1
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -13,7 +13,10 @@
   "customer",
   "column_break_4",
   "coupon_code",
+<<<<<<< HEAD
   "from_external_ecomm_platform",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "pricing_rule",
   "uses",
   "valid_from",
@@ -62,12 +65,20 @@
    "unique": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval: !doc.from_external_ecomm_platform",
    "fieldname": "pricing_rule",
    "fieldtype": "Link",
    "label": "Pricing Rule",
    "mandatory_depends_on": "eval: !doc.from_external_ecomm_platform",
    "options": "Pricing Rule"
+=======
+   "fieldname": "pricing_rule",
+   "fieldtype": "Link",
+   "label": "Pricing Rule",
+   "options": "Pricing Rule",
+   "reqd": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "uses",
@@ -116,6 +127,7 @@
    "options": "Coupon Code",
    "print_hide": 1,
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -130,6 +142,15 @@
  "module": "Accounts",
  "name": "Coupon Code",
  "naming_rule": "By fieldname",
+=======
+  }
+ ],
+ "links": [],
+ "modified": "2024-03-27 13:06:47.220931",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Coupon Code",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {

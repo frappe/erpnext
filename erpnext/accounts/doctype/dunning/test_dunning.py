@@ -1,10 +1,15 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import json
 
 import frappe
 from frappe.model import mapper
 from frappe.tests import IntegrationTestCase
+=======
+import frappe
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, nowdate, today
 
 from erpnext import get_default_cost_center
@@ -19,10 +24,17 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
 )
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Company", "Cost Center"]
 
 
 class TestDunning(IntegrationTestCase):
+=======
+test_dependencies = ["Company", "Cost Center"]
+
+
+class TestDunning(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -71,6 +83,7 @@ class TestDunning(IntegrationTestCase):
 		dunning.reload()
 		self.assertEqual(dunning.status, "Resolved")
 
+<<<<<<< HEAD
 	def test_fetch_overdue_payments(self):
 		"""
 		Create SI with overdue payment. Check if overdue payment is fetched in Dunning.
@@ -101,6 +114,8 @@ class TestDunning(IntegrationTestCase):
 		self.assertEqual(updated_dunning.overdue_payments[1].sales_invoice, si2.name)
 		self.assertEqual(updated_dunning.overdue_payments[1].outstanding, si2.outstanding_amount)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_dunning_and_payment_against_partially_due_invoice(self):
 		"""
 		Create SI with first installment overdue. Check impact of Dunning and Payment Entry.
@@ -139,6 +154,7 @@ class TestDunning(IntegrationTestCase):
 		self.assertEqual(sales_invoice.status, "Overdue")
 		self.assertEqual(dunning.status, "Unresolved")
 
+<<<<<<< HEAD
 	def test_dunning_resolution_from_credit_note(self):
 		"""
 		Test that dunning is resolved when a credit note is issued against the original invoice.
@@ -197,6 +213,8 @@ class TestDunning(IntegrationTestCase):
 		dunning.reload()
 		self.assertEqual(dunning.status, "Unresolved")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_dunning(overdue_days, dunning_type_name=None):
 	posting_date = add_days(today(), -1 * overdue_days)

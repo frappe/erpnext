@@ -20,7 +20,10 @@ def make_custom_fields():
 		label="Is Zero Rated",
 		fieldtype="Check",
 		fetch_from="item_code.is_zero_rated",
+<<<<<<< HEAD
 		fetch_if_empty=1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		insert_after="description",
 		print_hide=1,
 	)

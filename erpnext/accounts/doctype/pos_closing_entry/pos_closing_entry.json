@@ -20,6 +20,7 @@
   "pos_profile",
   "user",
   "section_break_12",
+<<<<<<< HEAD
   "pos_invoices",
   "sales_invoices",
   "taxes_and_charges_section",
@@ -33,6 +34,19 @@
   "grand_total",
   "section_break_11",
   "payment_reconciliation",
+=======
+  "pos_transactions",
+  "section_break_9",
+  "payment_reconciliation_details",
+  "section_break_11",
+  "payment_reconciliation",
+  "section_break_13",
+  "grand_total",
+  "net_total",
+  "total_quantity",
+  "column_break_16",
+  "taxes",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "failure_description_section",
   "error_message",
   "section_break_14",
@@ -74,13 +88,19 @@
    "label": "User Details"
   },
   {
+<<<<<<< HEAD
    "fetch_from": "pos_opening_entry.company",
    "fetch_if_empty": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
+<<<<<<< HEAD
    "read_only": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -89,13 +109,19 @@
   },
   {
    "fetch_from": "pos_opening_entry.pos_profile",
+<<<<<<< HEAD
    "fetch_if_empty": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "pos_profile",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "POS Profile",
    "options": "POS Profile",
+<<<<<<< HEAD
    "read_only": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -104,10 +130,26 @@
    "fieldtype": "Link",
    "label": "Cashier",
    "options": "User",
+<<<<<<< HEAD
    "read_only": 1,
    "reqd": 1
   },
   {
+=======
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "payment_reconciliation_details",
+   "fieldtype": "HTML"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
    "label": "Modes of Payment"
@@ -119,6 +161,10 @@
    "options": "POS Closing Entry Detail"
   },
   {
+<<<<<<< HEAD
+=======
+   "collapsible": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible_depends_on": "eval:doc.docstatus==0",
    "fieldname": "section_break_13",
    "fieldtype": "Section Break",
@@ -174,11 +220,23 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "pos_transactions",
+   "fieldtype": "Table",
+   "label": "POS Transactions",
+   "options": "POS Invoice Reference"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "pos_opening_entry",
    "fieldtype": "Link",
    "label": "POS Opening Entry",
    "options": "POS Opening Entry",
+<<<<<<< HEAD
    "print_hide": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -219,6 +277,7 @@
    "label": "Posting Time",
    "no_copy": 1,
    "reqd": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "pos_invoices",
@@ -254,6 +313,10 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "is_submittable": 1,
  "links": [
   {
@@ -261,7 +324,11 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-06-14 02:38:14.962291",
+=======
+ "modified": "2024-03-27 13:10:14.073467",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
@@ -310,9 +377,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

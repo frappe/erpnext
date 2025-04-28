@@ -14,8 +14,12 @@
   "advance_amount",
   "allocated_amount",
   "exchange_gain_loss",
+<<<<<<< HEAD
   "ref_exchange_rate",
   "difference_posting_date"
+=======
+  "ref_exchange_rate"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -31,7 +35,11 @@
    "width": "250px"
   },
   {
+<<<<<<< HEAD
    "columns": 2,
+=======
+   "columns": 3,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
@@ -42,7 +50,11 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "columns": 2,
+=======
+   "columns": 3,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "remarks",
    "fieldtype": "Text",
    "in_list_view": 1,
@@ -113,6 +125,7 @@
    "label": "Reference Exchange Rate",
    "non_negative": 1,
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "columns": 2,
@@ -120,13 +133,19 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Difference Posting Date"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-12-20 11:58:28.962370",
+=======
+ "modified": "2024-03-27 13:10:36.003704",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Advance",

@@ -31,7 +31,11 @@ def get(
 
 	warehouses = frappe.get_list(
 		"Bin",
+<<<<<<< HEAD
 		fields=["warehouse", {"SUM": "stock_value", "as": "stock_value"}],
+=======
+		fields=["warehouse", "sum(stock_value) stock_value"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters={"warehouse": ["IN", warehouses], "stock_value": [">", 0]},
 		group_by="warehouse",
 		order_by="stock_value DESC",

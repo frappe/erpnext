@@ -67,7 +67,10 @@ frappe.query_reports["Gross Profit"] = {
 			fieldname: "cost_center",
 			label: __("Cost Center"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Cost Center",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
@@ -78,19 +81,25 @@ frappe.query_reports["Gross Profit"] = {
 			fieldname: "project",
 			label: __("Project"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
 		},
+<<<<<<< HEAD
 		{
 			fieldname: "include_returned_invoices",
 			label: __("Include Returned Invoices (Stand-alone)"),
 			fieldtype: "Check",
 			default: 1,
 		},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	],
 	tree: true,
 	name_field: "parent",

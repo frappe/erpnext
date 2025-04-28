@@ -3,7 +3,10 @@
  "allow_copy": 1,
  "allow_import": 1,
  "creation": "2013-01-30 12:49:46",
+<<<<<<< HEAD
  "default_view": "Tree",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -21,7 +24,10 @@
   "account_currency",
   "column_break1",
   "parent_account",
+<<<<<<< HEAD
   "account_category",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "account_type",
   "tax_rate",
   "freeze_account",
@@ -126,14 +132,22 @@
    "label": "Account Type",
    "oldfieldname": "account_type",
    "oldfieldtype": "Select",
+<<<<<<< HEAD
    "options": "\nAccumulated Depreciation\nAsset Received But Not Billed\nBank\nCash\nChargeable\nCapital Work in Progress\nCost of Goods Sold\nCurrent Asset\nCurrent Liability\nDepreciation\nDirect Expense\nDirect Income\nEquity\nExpense Account\nExpenses Included In Asset Valuation\nExpenses Included In Valuation\nFixed Asset\nIncome Account\nIndirect Expense\nIndirect Income\nLiability\nPayable\nReceivable\nRound Off\nRound Off for Opening\nStock\nStock Adjustment\nStock Received But Not Billed\nService Received But Not Billed\nTax\nTemporary",
+=======
+   "options": "\nAccumulated Depreciation\nAsset Received But Not Billed\nBank\nCash\nChargeable\nCapital Work in Progress\nCost of Goods Sold\nCurrent Asset\nCurrent Liability\nDepreciation\nDirect Expense\nDirect Income\nEquity\nExpense Account\nExpenses Included In Asset Valuation\nExpenses Included In Valuation\nFixed Asset\nIncome Account\nIndirect Expense\nIndirect Income\nLiability\nPayable\nReceivable\nRound Off\nStock\nStock Adjustment\nStock Received But Not Billed\nService Received But Not Billed\nTax\nTemporary",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "search_index": 1
   },
   {
    "description": "Rate at which this tax is applied",
    "fieldname": "tax_rate",
    "fieldtype": "Float",
+<<<<<<< HEAD
    "label": "Tax Rate",
+=======
+   "label": "Rate",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "tax_rate",
    "oldfieldtype": "Currency"
   },
@@ -190,6 +204,7 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disable"
+<<<<<<< HEAD
   },
   {
    "description": "Used with Financial Report Template",
@@ -197,13 +212,19 @@
    "fieldtype": "Link",
    "label": "Account Category",
    "options": "Account Category"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-02 06:26:44.657146",
+=======
+ "modified": "2024-06-27 16:23:04.444354",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -258,7 +279,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "account_number",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
@@ -266,4 +290,8 @@
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

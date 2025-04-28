@@ -14,7 +14,11 @@
   "amount",
   "difference_amount",
   "sec_break1",
+<<<<<<< HEAD
   "remarks",
+=======
+  "remark",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "currency",
   "exchange_rate",
   "cost_center"
@@ -75,6 +79,15 @@
    "fieldtype": "Section Break"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "remark",
+   "fieldtype": "Small Text",
+   "label": "Remark",
+   "read_only": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "currency",
    "fieldtype": "Link",
    "hidden": 1,
@@ -99,18 +112,25 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+<<<<<<< HEAD
   },
   {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks",
    "read_only": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "is_virtual": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-10-29 16:24:43.021230",
+=======
+ "modified": "2024-03-27 13:10:10.980445",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Payment",

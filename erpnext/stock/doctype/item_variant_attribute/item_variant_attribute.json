@@ -11,7 +11,10 @@
   "column_break_2",
   "attribute_value",
   "numeric_values",
+<<<<<<< HEAD
   "disabled",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_4",
   "from_range",
   "increment",
@@ -75,6 +78,7 @@
    "fieldname": "to_range",
    "fieldtype": "Float",
    "label": "To Range"
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -82,11 +86,17 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-11-26 20:10:49.873339",
+=======
+ "modified": "2024-03-27 13:09:55.966900",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Variant Attribute",

@@ -36,7 +36,11 @@ class POSInvoiceItem(SalesInvoiceItem):
 		delivered_by_supplier: DF.Check
 		delivered_qty: DF.Float
 		delivery_note: DF.Link | None
+<<<<<<< HEAD
 		description: DF.TextEditor | None
+=======
+		description: DF.TextEditor
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		discount_amount: DF.Currency
 		discount_percentage: DF.Percent
 		distributed_discount_amount: DF.Currency

@@ -6,26 +6,49 @@ import json
 import frappe
 from frappe import utils
 from frappe.model.docstatus import DocStatus
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	get_linked_payments,
 	reconcile_vouchers,
 )
+<<<<<<< HEAD
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.tests.utils import if_lending_app_installed
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Cost Center"]
 
 
 class TestBankTransaction(IntegrationTestCase):
 	def setUp(self):
+=======
+test_dependencies = ["Item", "Cost Center"]
+
+
+class TestBankTransaction(FrappeTestCase):
+	def setUp(self):
+		for dt in [
+			"Bank Transaction",
+			"Payment Entry",
+			"Payment Entry Reference",
+			"POS Profile",
+		]:
+			frappe.db.delete(dt)
+		clear_loan_transactions()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		make_pos_profile()
 
 		# generate and use a uniq hash identifier for 'Bank Account' and it's linked GL 'Account' to avoid validation error
@@ -217,6 +240,14 @@ class TestBankTransaction(IntegrationTestCase):
 		self.assertEqual(linked_payments[0]["name"], repayment_entry.name)
 
 
+<<<<<<< HEAD
+=======
+@if_lending_app_installed
+def clear_loan_transactions():
+	frappe.db.delete("Loan Repayment")
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def create_bank_account(
 	bank_name="Citi Bank", gl_account="_Test Bank - _TC", bank_account_name="Checking Account"
 ):
@@ -424,6 +455,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 	except frappe.DuplicateEntryError:
 		pass
 
+<<<<<<< HEAD
 	mode_of_payment = frappe.get_doc({"doctype": "Mode of Payment", "name": "Wire Transfer"})
 
 	set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", gl_account)
@@ -431,6 +463,17 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_save=1)
 	si.is_pos = 1
 	si.append("payments", {"mode_of_payment": "Wire Transfer", "amount": 109080})
+=======
+	mode_of_payment = frappe.get_doc({"doctype": "Mode of Payment", "name": "Cash"})
+
+	if not frappe.db.get_value("Mode of Payment Account", {"company": "_Test Company", "parent": "Cash"}):
+		mode_of_payment.append("accounts", {"company": "_Test Company", "default_account": gl_account})
+		mode_of_payment.save()
+
+	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_save=1)
+	si.is_pos = 1
+	si.append("payments", {"mode_of_payment": "Cash", "account": gl_account, "amount": 109080})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	si.insert()
 	si.submit()
 

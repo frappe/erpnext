@@ -1,10 +1,16 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestUtils(IntegrationTestCase):
+=======
+
+
+class TestUtils(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_reset_default_field_value(self):
 		doc = frappe.get_doc(
 			{

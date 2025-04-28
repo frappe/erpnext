@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Routing", {
+<<<<<<< HEAD
 	setup: function (frm) {
 		frm.set_query("bom_no", "operations", function () {
 			return {
@@ -12,6 +13,8 @@ frappe.ui.form.on("Routing", {
 		});
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	refresh: function (frm) {
 		frm.trigger("display_sequence_id_column");
 	},

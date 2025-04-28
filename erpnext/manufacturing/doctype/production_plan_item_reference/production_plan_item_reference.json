@@ -26,7 +26,11 @@
   },
   {
    "fieldname": "qty",
+<<<<<<< HEAD
    "fieldtype": "Float",
+=======
+   "fieldtype": "Data",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "in_list_view": 1,
    "label": "Qty"
   },
@@ -37,19 +41,33 @@
    "label": "Item Reference"
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
  "modified": "2025-05-07 17:47:36.244083",
+=======
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:20.410593",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Item Reference",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

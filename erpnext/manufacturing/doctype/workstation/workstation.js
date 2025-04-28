@@ -190,11 +190,19 @@ class WorkstationDashboard {
 	setup_menu_actions() {
 		let me = this;
 		this.job_cards.forEach((data) => {
+<<<<<<< HEAD
 			me.menu_btns = me.$wrapper.find(`.job-card-link[data-name='${data.name}']`);
 
 			$(me.menu_btns).find(".btn-resume").hide();
 			$(me.menu_btns).find(".btn-pause").hide();
 			$(me.menu_btns).find(".btn-complete .btn").attr("disabled", true);
+=======
+			me.menu_actions = me.$wrapper.find(`.menu-actions[data-job-card='${data.name}']`);
+			$(me.menu_actions).find(".btn-start").hide();
+			$(me.menu_actions).find(".btn-resume").hide();
+			$(me.menu_actions).find(".btn-pause").hide();
+			$(me.menu_actions).find(".btn-complete").hide();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if (
 				data.for_quantity + data.process_loss_qty > data.total_completed_qty &&
@@ -203,6 +211,7 @@ class WorkstationDashboard {
 					!data.finished_good)
 			) {
 				if (!data.time_logs?.length) {
+<<<<<<< HEAD
 					$(me.menu_btns).find(".btn-start").show();
 				} else if (data.is_paused) {
 					$(me.menu_btns).find(".btn-start").hide();
@@ -215,6 +224,17 @@ class WorkstationDashboard {
 
 					$(me.menu_btns).find(".btn-complete").show();
 					$(me.menu_btns).find(".btn-complete .btn").attr("disabled", false);
+=======
+					$(me.menu_actions).find(".btn-start").show();
+				} else if (data.is_paused) {
+					$(me.menu_actions).find(".btn-resume").show();
+				} else if (data.for_quantity - data.manufactured_qty > 0) {
+					if (!data.is_paused) {
+						$(me.menu_actions).find(".btn-pause").show();
+					}
+
+					$(me.menu_actions).find(".btn-complete").show();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			}
 		});
@@ -246,26 +266,42 @@ class WorkstationDashboard {
 		});
 
 		this.$wrapper.find(".btn-start").on("click", (e) => {
+<<<<<<< HEAD
 			let job_card = $(e.currentTarget).closest("div").attr("data-job-card");
+=======
+			let job_card = $(e.currentTarget).closest("ul").attr("data-job-card");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.start_job(job_card);
 		});
 
 		this.$wrapper.find(".btn-pause").on("click", (e) => {
+<<<<<<< HEAD
 			let job_card = $(e.currentTarget).closest("div").attr("data-job-card");
+=======
+			let job_card = $(e.currentTarget).closest("ul").attr("data-job-card");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			me.update_job_card(job_card, "pause_job", {
 				end_time: frappe.datetime.now_datetime(),
 			});
 		});
 
 		this.$wrapper.find(".btn-resume").on("click", (e) => {
+<<<<<<< HEAD
 			let job_card = $(e.currentTarget).closest("div").attr("data-job-card");
+=======
+			let job_card = $(e.currentTarget).closest("ul").attr("data-job-card");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			me.update_job_card(job_card, "resume_job", {
 				start_time: frappe.datetime.now_datetime(),
 			});
 		});
 
 		this.$wrapper.find(".btn-complete").on("click", (e) => {
+<<<<<<< HEAD
 			let job_card = $(e.currentTarget).closest("div").attr("data-job-card");
+=======
+			let job_card = $(e.currentTarget).closest("ul").attr("data-job-card");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			let for_quantity = $(e.currentTarget).attr("data-qty");
 			me.complete_job(job_card, for_quantity);
 		});
@@ -319,12 +355,15 @@ class WorkstationDashboard {
 
 		return [
 			{
+<<<<<<< HEAD
 				label: __("Start Time"),
 				fieldname: "start_time",
 				fieldtype: "Datetime",
 				default: frappe.datetime.now_datetime(),
 			},
 			{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				label: __("Employee"),
 				fieldname: "employee",
 				fieldtype: "Link",
@@ -346,6 +385,15 @@ class WorkstationDashboard {
 					}
 				},
 			},
+<<<<<<< HEAD
+=======
+			{
+				label: __("Start Time"),
+				fieldname: "start_time",
+				fieldtype: "Datetime",
+				default: frappe.datetime.now_datetime(),
+			},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			{ fieldtype: "Section Break" },
 			{
 				label: __("Employees"),

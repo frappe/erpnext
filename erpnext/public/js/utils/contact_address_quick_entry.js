@@ -16,13 +16,20 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 	insert() {
 		/**
 		 * Using alias fieldnames because the doctype definition define "email_id" and "mobile_no" as readonly fields.
+<<<<<<< HEAD
 		 * This results in the fields being "hidden".
+=======
+		 * Therefor, resulting in the fields being "hidden".
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		 */
 		const map_field_names = {
 			email_address: "email_id",
 			mobile_number: "mobile_no",
+<<<<<<< HEAD
 			map_to_first_name: "first_name",
 			map_to_last_name: "last_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		};
 
 		Object.entries(map_field_names).forEach(([fieldname, new_fieldname]) => {
@@ -41,6 +48,7 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				collapsible: 1,
 			},
 			{
+<<<<<<< HEAD
 				label: __("First Name"),
 				fieldname: "map_to_first_name",
 				fieldtype: "Data",
@@ -57,12 +65,20 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				fieldtype: "Column Break",
 			},
 			{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				label: __("Email Id"),
 				fieldname: "email_address",
 				fieldtype: "Data",
 				options: "Email",
 			},
 			{
+<<<<<<< HEAD
+=======
+				fieldtype: "Column Break",
+			},
+			{
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				label: __("Mobile Number"),
 				fieldname: "mobile_number",
 				fieldtype: "Data",
@@ -96,7 +112,11 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				fieldtype: "Data",
 			},
 			{
+<<<<<<< HEAD
 				label: __("State/Province"),
+=======
+				label: __("State"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				fieldname: "state",
 				fieldtype: "Data",
 			},

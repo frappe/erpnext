@@ -11,7 +11,10 @@
  ],
  "fields": [
   {
+<<<<<<< HEAD
    "columns": 3,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "tier_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -19,7 +22,10 @@
    "reqd": 1
   },
   {
+<<<<<<< HEAD
    "columns": 3,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "min_spent",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -30,7 +36,10 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "columns": 3,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "For how much spent = 1 Loyalty Point",
    "fieldname": "collection_factor",
    "fieldtype": "Currency",
@@ -41,7 +50,11 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-09-06 09:26:03.323912",
+=======
+ "modified": "2024-09-05 07:41:25.694041",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Program Collection",

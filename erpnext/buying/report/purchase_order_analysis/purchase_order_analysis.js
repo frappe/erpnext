@@ -10,7 +10,11 @@ frappe.query_reports["Purchase Order Analysis"] = {
 			width: "80",
 			options: "Company",
 			reqd: 1,
+<<<<<<< HEAD
 			default: frappe.defaults.get_user_default("Company"),
+=======
+			default: frappe.defaults.get_default("company"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "from_date",
@@ -19,10 +23,13 @@ frappe.query_reports["Purchase Order Analysis"] = {
 			width: "80",
 			reqd: 1,
 			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+<<<<<<< HEAD
 			on_change: (report) => {
 				report.set_filter_value("name", []);
 				report.refresh();
 			},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "to_date",
@@ -31,10 +38,13 @@ frappe.query_reports["Purchase Order Analysis"] = {
 			width: "80",
 			reqd: 1,
 			default: frappe.datetime.get_today(),
+<<<<<<< HEAD
 			on_change: (report) => {
 				report.set_filter_value("name", []);
 				report.refresh();
 			},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "project",
@@ -46,6 +56,7 @@ frappe.query_reports["Purchase Order Analysis"] = {
 		{
 			fieldname: "name",
 			label: __("Purchase Order"),
+<<<<<<< HEAD
 			fieldtype: "MultiSelectList",
 			width: "80",
 			options: "Purchase Order",
@@ -57,6 +68,15 @@ frappe.query_reports["Purchase Order Analysis"] = {
 				if (from_date && to_date) filters["transaction_date"] = ["between", [from_date, to_date]];
 
 				return frappe.db.get_link_options("Purchase Order", txt, filters);
+=======
+			fieldtype: "Link",
+			width: "80",
+			options: "Purchase Order",
+			get_query: () => {
+				return {
+					filters: { docstatus: 1 },
+				};
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{
@@ -64,6 +84,7 @@ frappe.query_reports["Purchase Order Analysis"] = {
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
 			width: "80",
+<<<<<<< HEAD
 			options: ["To Pay", "To Bill", "To Receive", "To Receive and Bill", "Completed", "Closed"],
 			get_data: function (txt) {
 				let status = [
@@ -74,6 +95,10 @@ frappe.query_reports["Purchase Order Analysis"] = {
 					"Completed",
 					"Closed",
 				];
+=======
+			get_data: function (txt) {
+				let status = ["To Pay", "To Bill", "To Receive", "To Receive and Bill", "Completed"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				let options = [];
 				for (let option of status) {
 					options.push({

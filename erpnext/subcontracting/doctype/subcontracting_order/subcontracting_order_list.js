@@ -4,7 +4,11 @@
 frappe.listview_settings["Subcontracting Order"] = {
 	get_indicator: function (doc) {
 		const status_colors = {
+<<<<<<< HEAD
 			Draft: "red",
+=======
+			Draft: "grey",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			Open: "orange",
 			"Partially Received": "yellow",
 			Completed: "green",

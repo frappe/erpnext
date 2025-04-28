@@ -5,7 +5,12 @@
 from typing import Literal
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now, today
 
@@ -23,6 +28,7 @@ from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_ord
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+<<<<<<< HEAD
 from erpnext.tests.utils import ERPNextTestSuite
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["UOM"]
@@ -37,10 +43,18 @@ class TestJobCard(ERPNextTestSuite):
 
 	def setUp(self):
 		self.make_bom_for_jc_tests()
+=======
+
+
+class TestJobCard(FrappeTestCase):
+	def setUp(self):
+		make_bom_for_jc_tests()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.transfer_material_against: Literal["Work Order", "Job Card"] = "Work Order"
 		self.source_warehouse = None
 		self._work_order = None
 
+<<<<<<< HEAD
 	def make_bom_for_jc_tests(self):
 		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
 		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
@@ -49,6 +63,8 @@ class TestJobCard(ERPNextTestSuite):
 		bom.items[0].conversion_factor = 5
 		bom.insert()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@property
 	def work_order(self) -> WorkOrder:
 		"""Work Order lazily created for tests."""
@@ -222,7 +238,11 @@ class TestJobCard(ERPNextTestSuite):
 		# transfer was made for 2 fg qty in first transfer Stock Entry
 		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
+=======
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
 		self.transfer_material_against = "Job Card"
@@ -265,7 +285,11 @@ class TestJobCard(ERPNextTestSuite):
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+=======
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_job_card_excess_material_transfer_block(self):
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
@@ -288,7 +312,11 @@ class TestJobCard(ERPNextTestSuite):
 		transfer_entry_2.insert()
 		self.assertRaises(JobCardOverTransferError, transfer_entry_2.submit)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+=======
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_job_card_excess_material_transfer_with_no_reference(self):
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
@@ -396,7 +424,11 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
 		self.assertEqual(transfer_entry.items[0].qty, 2)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_corrective_costing(self):
@@ -440,6 +472,7 @@ class TestJobCard(ERPNextTestSuite):
 		cost_after_cancel = self.work_order.total_operating_cost
 		self.assertEqual(cost_after_cancel, original_cost)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
@@ -524,13 +557,18 @@ class TestJobCard(ERPNextTestSuite):
 		stock_entry = make_stock_entry_for_wo(wo.name, "Manufacture", qty=4)
 		self.assertEqual(stock_entry.additional_costs[1].amount, 52.5)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_job_card_statuses(self):
 		def assertStatus(status):
 			jc.set_status()
 			self.assertEqual(jc.status, status)
 
 		jc = frappe.new_doc("Job Card")
+<<<<<<< HEAD
 		jc.process_loss_qty = 0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		jc.for_quantity = 2
 		jc.transferred_qty = 1
 		jc.total_completed_qty = 0
@@ -585,6 +623,11 @@ class TestJobCard(ERPNextTestSuite):
 			{"operation": "Test Operation B1", "workstation": "Test Workstation A", "time_in_mins": 20},
 		]
 
+<<<<<<< HEAD
+=======
+		make_test_records("UOM")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		warehouse = create_warehouse("Test Warehouse 123 for Job Card")
 
 		setup_operations(operations)
@@ -708,6 +751,7 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(wo_doc.process_loss_qty, 2)
 		self.assertEqual(wo_doc.status, "Completed")
 
+<<<<<<< HEAD
 	def test_op_cost_calculation(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import (
 			create_routing,
@@ -821,6 +865,8 @@ class TestJobCard(ERPNextTestSuite):
 		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 6))
 		self.assertEqual(s.additional_costs[0].amount, 8)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
@@ -872,3 +918,16 @@ def make_wo_with_transfer_against_jc():
 	work_order.submit()
 
 	return work_order
+<<<<<<< HEAD
+=======
+
+
+def make_bom_for_jc_tests():
+	test_records = frappe.get_test_records("BOM")
+	bom = frappe.copy_doc(test_records[2])
+	bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+	bom.rm_cost_as_per = "Valuation Rate"
+	bom.items[0].uom = "_Test UOM 1"
+	bom.items[0].conversion_factor = 5
+	bom.insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -1,15 +1,23 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import datetime
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
 from erpnext.setup.doctype.employee.test_employee import make_employee
+<<<<<<< HEAD
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -19,6 +27,11 @@ class TestTimesheet(ERPNextTestSuite):
 		super().setUpClass()
 		cls.make_projects()
 
+=======
+
+
+class TestTimesheet(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		frappe.db.delete("Timesheet")
 
@@ -59,7 +72,10 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(item.qty, 2.00)
 		self.assertEqual(item.rate, 50.00)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Projects Settings", {"fetch_timesheet_in_sales_invoice": 1})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_timesheet_billing_based_on_project(self):
 		emp = make_employee("test_employee_6@salary.com")
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
@@ -69,7 +85,10 @@ class TestTimesheet(ERPNextTestSuite):
 		)
 		sales_invoice = create_sales_invoice(do_not_save=True)
 		sales_invoice.project = project
+<<<<<<< HEAD
 		sales_invoice.add_timesheet_data()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		sales_invoice.submit()
 
 		ts = frappe.get_doc("Timesheet", timesheet.name)

@@ -14,7 +14,10 @@
   "column_break_6",
   "warehouse",
   "qty",
+<<<<<<< HEAD
   "stock_uom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "valuation_rate",
   "amount",
   "allow_zero_valuation_rate",
@@ -89,6 +92,7 @@
   },
   {
    "columns": 2,
+<<<<<<< HEAD
    "fetch_from": "item_code.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
@@ -99,6 +103,8 @@
   },
   {
    "columns": 2,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -121,8 +127,12 @@
    "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "serial_no",
    "fieldtype": "Long Text",
+<<<<<<< HEAD
    "label": "Serial No",
    "no_copy": 1
+=======
+   "label": "Serial No"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_11",
@@ -196,10 +206,19 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
    "print_hide": 1
+=======
+   "depends_on": "allow_zero_valuation_rate",
+   "fieldname": "allow_zero_valuation_rate",
+   "fieldtype": "Check",
+   "label": "Allow Zero Valuation Rate",
+   "print_hide": 1,
+   "read_only": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "depends_on": "barcode",
@@ -263,19 +282,32 @@
    "label": "Reconcile All Serial Nos / Batches"
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "istable": 1,
  "links": [],
  "modified": "2025-11-20 15:27:13.868179",
+=======
+ "istable": 1,
+ "links": [],
+ "modified": "2024-05-30 23:20:00.947243",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

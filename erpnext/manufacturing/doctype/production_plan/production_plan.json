@@ -11,7 +11,10 @@
   "get_items_from",
   "column_break1",
   "posting_date",
+<<<<<<< HEAD
   "reserve_stock",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "filters",
   "item_code",
   "customer",
@@ -24,7 +27,10 @@
   "from_delivery_date",
   "to_delivery_date",
   "sales_orders_detail",
+<<<<<<< HEAD
   "combine_items",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "get_sales_orders",
   "sales_orders",
   "material_request_detail",
@@ -32,14 +38,26 @@
   "material_requests",
   "select_items_to_manufacture_section",
   "get_items",
+<<<<<<< HEAD
+=======
+  "combine_items",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "po_items",
   "section_break_25",
   "prod_plan_references",
   "section_break_24",
+<<<<<<< HEAD
   "sub_assembly_warehouse",
   "column_break_igxl",
   "skip_available_sub_assembly_item",
   "combine_sub_items",
+=======
+  "combine_sub_items",
+  "sub_assembly_warehouse",
+  "section_break_ucc4",
+  "skip_available_sub_assembly_item",
+  "column_break_igxl",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "get_sub_assembly_items",
   "section_break_g4ip",
   "sub_assembly_items",
@@ -199,10 +217,16 @@
   },
   {
    "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
+<<<<<<< HEAD
    "description": "Get Finished Goods for Manufacture",
    "fieldname": "get_items",
    "fieldtype": "Button",
    "label": "Get Finished Goods"
+=======
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Finished Goods for Manufacture"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "po_items",
@@ -215,8 +239,12 @@
   {
    "fieldname": "material_request_planning",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "hide_border": 1,
    "label": "For Raw Materials"
+=======
+   "label": "Material Request Planning"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "1",
@@ -231,11 +259,19 @@
    "label": "Include Subcontracted Items"
   },
   {
+<<<<<<< HEAD
    "default": "1",
    "description": "If enabled, formula for <b>Required Qty</b>: <br>\nRequired Qty (BOM) - <a href=\"https://docs.frappe.io/erpnext/user/manual/en/projected-quantity\">Projected Qty</a>. <br> This helps avoid over-ordering.",
    "fieldname": "ignore_existing_ordered_qty",
    "fieldtype": "Check",
    "label": "Consider Projected Qty in Calculation (RM)"
+=======
+   "default": "0",
+   "description": "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'.",
+   "fieldname": "ignore_existing_ordered_qty",
+   "fieldtype": "Check",
+   "label": "Ignore Available Stock"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_25",
@@ -245,12 +281,20 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "download_materials_required",
    "fieldtype": "Button",
+<<<<<<< HEAD
    "label": "Download Required Materials"
+=======
+   "label": "Download Materials Request Plan"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "get_items_for_mr",
    "fieldtype": "Button",
+<<<<<<< HEAD
    "label": "Get Items for Purchase Only"
+=======
+   "label": "Get Raw Materials for Purchase"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "section_break_27",
@@ -315,7 +359,11 @@
   {
    "fieldname": "for_warehouse",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "For Warehouse",
+=======
+   "label": "Raw Materials Warehouse",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Warehouse"
   },
   {
@@ -376,13 +424,19 @@
    "label": "Get Sub Assembly Items"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "from_delivery_date",
    "fieldtype": "Date",
    "label": "From Delivery Date"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "to_delivery_date",
    "fieldtype": "Date",
    "label": "To Delivery Date"
@@ -394,15 +448,22 @@
    "label": "Consolidate Sub Assembly Items"
   },
   {
+<<<<<<< HEAD
    "description": "If items in stock, proceed with Material Transfer or Purchase.",
    "fieldname": "transfer_materials",
    "fieldtype": "Button",
    "label": "Get Items for Purchase / Transfer"
+=======
+   "fieldname": "transfer_materials",
+   "fieldtype": "Button",
+   "label": "Get Raw Materials for Transfer"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "collapsible": 1,
    "fieldname": "download_materials_request_plan_section_section",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Preview Required Materials"
   },
   {
@@ -411,6 +472,21 @@
    "fieldname": "skip_available_sub_assembly_item",
    "fieldtype": "Check",
    "label": "Consider Projected Qty in Calculation"
+=======
+   "label": "Download Materials Request Plan Section"
+  },
+  {
+   "default": "0",
+   "description": "If this checkbox is enabled, then the system won\u2019t run the MRP for the available sub-assembly items.",
+   "fieldname": "skip_available_sub_assembly_item",
+   "fieldtype": "Check",
+   "label": "Skip Available Sub Assembly Items"
+  },
+  {
+   "fieldname": "section_break_ucc4",
+   "fieldtype": "Column Break",
+   "hide_border": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "section_break_g4ip",
@@ -421,10 +497,18 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "description": "When a parent warehouse is chosen, the system conducts Project Qty checks against the associated child warehouses",
    "fieldname": "sub_assembly_warehouse",
    "fieldtype": "Link",
    "label": "Sub Assembly Warehouse",
+=======
+   "description": "When a parent warehouse is chosen, the system conducts stock checks against the associated child warehouses",
+   "fieldname": "sub_assembly_warehouse",
+   "fieldtype": "Link",
+   "label": "Sub Assembly Warehouse",
+   "mandatory_depends_on": "eval:doc.skip_available_sub_assembly_item === 1",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Warehouse"
   },
   {
@@ -432,6 +516,7 @@
    "fieldname": "consider_minimum_order_qty",
    "fieldtype": "Check",
    "label": "Consider Minimum Order Qty"
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -441,11 +526,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-12 19:48:09.302503",
+=======
+ "modified": "2024-03-27 13:10:19.928403",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
@@ -466,8 +559,15 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -4,7 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:location_name",
  "creation": "2018-05-07 12:49:22.595974",
+<<<<<<< HEAD
  "default_view": "Tree",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -143,7 +146,11 @@
  ],
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-04-29 13:53:13.488906",
+=======
+ "modified": "2024-03-27 13:10:02.572355",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
@@ -198,13 +205,45 @@
    "role": "Stock Manager",
    "share": 1,
    "write": 1
+<<<<<<< HEAD
   }
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
+=======
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Agriculture Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Agriculture User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

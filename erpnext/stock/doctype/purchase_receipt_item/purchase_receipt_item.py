@@ -16,7 +16,10 @@ class PurchaseReceiptItem(Document):
 
 		allow_zero_valuation_rate: DF.Check
 		amount: DF.Currency
+<<<<<<< HEAD
 		amount_difference_with_purchase_invoice: DF.Currency
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		apply_tds: DF.Check
 		asset_category: DF.Link | None
 		asset_location: DF.Link | None
@@ -78,6 +81,10 @@ class PurchaseReceiptItem(Document):
 		qty: DF.Float
 		quality_inspection: DF.Link | None
 		rate: DF.Currency
+<<<<<<< HEAD
+=======
+		rate_difference_with_purchase_invoice: DF.Currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		rate_with_margin: DF.Currency
 		received_qty: DF.Float
 		received_stock_qty: DF.Float

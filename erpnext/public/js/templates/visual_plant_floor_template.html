@@ -1,4 +1,5 @@
 {% $.each(workstations, (idx, row) => { %}
+<<<<<<< HEAD
 	<div class="workstation-wrapper" data-workstation="{{row.name}}">
 		<div class="workstation-status text-left" style="">
 			<span class="indicator-pill no-indicator-dot whitespace-nowrap {{row.color}}" style="margin: 8px 0px 0px 8px;">
@@ -15,6 +16,26 @@
 			</div>
 			<span class="ellipsis" title="{{row.name}}">
 				<div style="font-size:11px; text-align:center;padding-bottom:8px">{{row.workstation_name}}</div>
+=======
+	<div class="workstation-wrapper">
+		<div class="workstation-status text-right">
+			<span class="indicator-pill no-indicator-dot whitespace-nowrap {{row.color}}" style="margin: 3px 4px 0px 0px;"><span style="font-size:13px">{{row.status}}</span></span>
+		</div>
+		<div class="workstation-image">
+			<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+				<a class="workstation-image-link" href="{{row.workstation_link}}">
+					{% if(row.status_image) { %}
+						<img class="workstation-image-cls" src="{{row.status_image}}">
+					{% } else { %}
+						<div class="workstation-image-cls workstation-abbr">{{frappe.get_abbr(row.name, 2)}}</div>
+					{% } %}
+				</a>
+			</div>
+		</div>
+		<div class="workstation-card" style="display: grid;">
+			<span class="ellipsis" title="{{row.name}}">
+				{{row.workstation_name}}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			</span>
 		</div>
 	</div>

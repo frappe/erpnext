@@ -9,7 +9,11 @@ from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp
+<<<<<<< HEAD
 from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, get_url, nowtime, today
+=======
+from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.user import is_website_user
 
 from erpnext import get_default_company
@@ -62,7 +66,10 @@ class Project(Document):
 		sales_order: DF.Link | None
 		second_email: DF.Time | None
 		status: DF.Literal["Open", "Completed", "Cancelled"]
+<<<<<<< HEAD
 		subject: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		to_time: DF.Time | None
 		total_billable_amount: DF.Currency
 		total_billed_amount: DF.Currency
@@ -87,19 +94,32 @@ class Project(Document):
 			),
 		)
 
+<<<<<<< HEAD
+=======
+		self.update_costing()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def before_print(self, settings=None):
 		self.onload()
 
 	def validate(self):
 		if not self.is_new():
+<<<<<<< HEAD
 			self.copy_from_template()  # nosemgrep
+=======
+			self.copy_from_template()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
+<<<<<<< HEAD
 	def copy_from_template(self):  # nosemgrep
+=======
+	def copy_from_template(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"""
 		Copy tasks from template
 		"""
@@ -204,7 +224,11 @@ class Project(Document):
 		self.db_update()
 
 	def after_insert(self):
+<<<<<<< HEAD
 		self.copy_from_template()  # nosemgrep
+=======
+		self.copy_from_template()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
@@ -212,6 +236,7 @@ class Project(Document):
 		frappe.db.set_value("Sales Order", {"project": self.name}, "project", "")
 
 	def update_percent_complete(self):
+<<<<<<< HEAD
 		if self.status == "Completed":
 			if (
 				len(frappe.get_all("Task", dict(project=self.name))) == 0
@@ -219,6 +244,8 @@ class Project(Document):
 				self.percent_complete_method = "Manual"
 				self.percent_complete = 100
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.percent_complete_method == "Manual":
 			if self.status == "Completed":
 				self.percent_complete = 100
@@ -323,6 +350,7 @@ class Project(Document):
 		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
 
 	def update_billed_amount(self):
+<<<<<<< HEAD
 		self.total_billed_amount = self.get_billed_amount_from_parent() + self.get_billed_amount_from_child()
 
 	def get_billed_amount_from_parent(self):
@@ -348,12 +376,22 @@ class Project(Document):
 		)
 
 		return total_billed_amount and total_billed_amount[0][0] or 0
+=======
+		total_billed_amount = frappe.db.sql(
+			"""select sum(base_net_total)
+			from `tabSales Invoice` where project = %s and docstatus=1""",
+			self.name,
+		)
+
+		self.total_billed_amount = total_billed_amount and total_billed_amount[0][0] or 0
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def after_rename(self, old_name, new_name, merge=False):
 		if old_name == self.copied_from:
 			frappe.db.set_value("Project", new_name, "copied_from", new_name)
 
 	def send_welcome_email(self):
+<<<<<<< HEAD
 		label = f"{self.project_name} ({self.name})"
 		url = get_link_to_form(self.doctype, self.name, label)
 
@@ -361,12 +399,30 @@ class Project(Document):
 			_("You have been invited to collaborate on the project {0}.").format(url)
 		)
 
+=======
+		url = get_url(f"/project/?name={self.name}")
+		messages = (
+			_("You have been invited to collaborate on the project: {0}").format(self.name),
+			url,
+			_("Join"),
+		)
+
+		content = """
+		<p>{0}.</p>
+		<p><a href="{1}">{2}</a></p>
+		"""
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		for user in self.users:
 			if user.welcome_email_sent == 0:
 				frappe.sendmail(
 					user.user,
 					subject=_("Project Collaboration Invitation"),
+<<<<<<< HEAD
 					content=content,
+=======
+					content=content.format(*messages),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 				user.welcome_email_sent = 1
 
@@ -401,6 +457,11 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	meta = frappe.get_meta(doctype)
 
+<<<<<<< HEAD
+=======
+	fields = "distinct *"
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	or_filters = []
 
 	if txt:
@@ -422,14 +483,21 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	return frappe.get_list(
 		doctype,
+<<<<<<< HEAD
 		fields="*",
+=======
+		fields=fields,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters=filters,
 		or_filters=or_filters,
 		limit_start=limit_start,
 		limit_page_length=limit_page_length,
 		order_by=order_by,
 		ignore_permissions=ignore_permissions,
+<<<<<<< HEAD
 		distinct=True,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 
@@ -606,6 +674,11 @@ def send_project_update_email_to_users(project):
 		}
 	).insert()
 
+<<<<<<< HEAD
+=======
+	subject = "For project %s, update your status" % (project)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	incoming_email_account = frappe.db.get_value(
 		"Email Account", dict(enable_incoming=1, default_incoming=1), "email_id"
 	)
@@ -613,7 +686,11 @@ def send_project_update_email_to_users(project):
 	frappe.sendmail(
 		recipients=get_users_email(doc),
 		message=doc.message,
+<<<<<<< HEAD
 		subject=doc.subject,
+=======
+		subject=_(subject),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		reference_doctype=project_update.doctype,
 		reference_name=project_update.name,
 		reply_to=incoming_email_account,
@@ -678,15 +755,47 @@ def send_project_status_email_to_users():
 
 
 def update_project_sales_billing():
+<<<<<<< HEAD
 	sales_update_frequency = frappe.get_single_value("Selling Settings", "sales_update_frequency")
+=======
+	sales_update_frequency = frappe.db.get_single_value("Selling Settings", "sales_update_frequency")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if sales_update_frequency == "Each Transaction":
 		return
 	elif sales_update_frequency == "Monthly" and frappe.utils.now_datetime().day != 1:
 		return
 
 	# Else simply fallback to Daily
+<<<<<<< HEAD
 	for project in frappe.get_all("Project", filters={"status": ["!=", "Cancelled"]}):
 		frappe.get_doc("Project", project.name).save()
+=======
+	exists_query = "(SELECT 1 from `tab{doctype}` where docstatus = 1 and project = `tabProject`.name)"
+	project_map = {}
+	for project_details in frappe.db.sql(
+		"""
+			SELECT name, 1 as order_exists, null as invoice_exists from `tabProject` where
+			exists {order_exists}
+			union
+			SELECT name, null as order_exists, 1 as invoice_exists from `tabProject` where
+			exists {invoice_exists}
+		""".format(
+			order_exists=exists_query.format(doctype="Sales Order"),
+			invoice_exists=exists_query.format(doctype="Sales Invoice"),
+		),
+		as_dict=True,
+	):
+		project = project_map.setdefault(
+			project_details.name, frappe.get_doc("Project", project_details.name)
+		)
+		if project_details.order_exists:
+			project.update_sales_amount()
+		if project_details.invoice_exists:
+			project.update_billed_amount()
+
+	for project in project_map.values():
+		project.save()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()
@@ -737,6 +846,10 @@ def get_users_email(doc):
 def calculate_total_purchase_cost(project: str | None = None):
 	if project:
 		pitem = qb.DocType("Purchase Invoice Item")
+<<<<<<< HEAD
+=======
+		frappe.qb.DocType("Purchase Invoice Item")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		total_purchase_cost = (
 			qb.from_(pitem)
 			.select(Sum(pitem.base_net_amount))
@@ -748,7 +861,19 @@ def calculate_total_purchase_cost(project: str | None = None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def update_costing_and_billing(project: str | None = None):
 	project = frappe.get_doc("Project", project)
 	project.update_costing()
 	project.db_update()
+=======
+def recalculate_project_total_purchase_cost(project: str | None = None):
+	if project:
+		total_purchase_cost = calculate_total_purchase_cost(project)
+		frappe.db.set_value(
+			"Project",
+			project,
+			"total_purchase_cost",
+			(total_purchase_cost and total_purchase_cost[0][0] or 0),
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

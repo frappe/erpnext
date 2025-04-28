@@ -86,6 +86,7 @@ def simple_to_detailed(templates):
 
 def from_detailed_data(company_name, data):
 	"""Create Taxes and Charges Templates from detailed data."""
+<<<<<<< HEAD
 	charts_company_name = company_name
 	if (
 		frappe.db.get_value("Company", company_name, "create_chart_of_accounts_based_on")
@@ -93,6 +94,9 @@ def from_detailed_data(company_name, data):
 	):
 		charts_company_name = frappe.db.get_value("Company", company_name, "existing_company")
 	coa_name = frappe.db.get_value("Company", charts_company_name, "chart_of_accounts")
+=======
+	coa_name = frappe.db.get_value("Company", company_name, "chart_of_accounts")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	coa_data = data.get("chart_of_accounts", {})
 	tax_templates = coa_data.get(coa_name) or coa_data.get("*", {})
 	tax_categories = data.get("tax_categories")
@@ -214,12 +218,22 @@ def get_or_create_account(company_name, account):
 	default_root_type = "Liability"
 	root_type = account.get("root_type", default_root_type)
 
+<<<<<<< HEAD
 	or_filters = {"account_name": account.get("account_name")}
 	if account.get("account_number"):
 		or_filters.update({"account_number": account.get("account_number")})
 
 	existing_accounts = frappe.get_all(
 		"Account", filters={"company": company_name, "root_type": root_type}, or_filters=or_filters
+=======
+	existing_accounts = frappe.get_all(
+		"Account",
+		filters={"company": company_name, "root_type": root_type},
+		or_filters={
+			"account_name": account.get("account_name"),
+			"account_number": account.get("account_number"),
+		},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	if existing_accounts:
@@ -291,7 +305,11 @@ def get_or_create_tax_group(company_name, root_type):
 
 	tax_group_account.flags.ignore_links = True
 	tax_group_account.flags.ignore_validate = True
+<<<<<<< HEAD
 	tax_group_account.insert(ignore_permissions=True, ignore_if_duplicate=True)
+=======
+	tax_group_account.insert(ignore_permissions=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	tax_group_name = tax_group_account.name
 

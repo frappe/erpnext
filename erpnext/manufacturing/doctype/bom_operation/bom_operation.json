@@ -43,7 +43,10 @@
  ],
  "fields": [
   {
+<<<<<<< HEAD
    "columns": 2,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "operation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -54,11 +57,17 @@
    "reqd": 1
   },
   {
+<<<<<<< HEAD
    "columns": 2,
    "depends_on": "eval:!doc.workstation_type",
    "fieldname": "workstation",
    "fieldtype": "Link",
    "in_list_view": 1,
+=======
+   "depends_on": "eval:!doc.workstation_type",
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Workstation",
    "oldfieldname": "workstation",
    "oldfieldtype": "Link",
@@ -67,6 +76,10 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
+<<<<<<< HEAD
+=======
+   "in_list_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Description",
    "oldfieldname": "opn_description",
    "oldfieldtype": "Text"
@@ -79,14 +92,21 @@
    "fieldname": "hour_rate",
    "fieldtype": "Currency",
    "label": "Hour Rate",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "hour_rate",
    "oldfieldtype": "Currency",
    "options": "currency",
    "precision": "2"
   },
   {
+<<<<<<< HEAD
    "columns": 3,
+=======
+   "columns": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "In minutes",
    "fetch_from": "operation.total_operation_time",
    "fetch_if_empty": 1,
@@ -94,7 +114,10 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Operation Time",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "time_in_mins",
    "oldfieldtype": "Currency",
    "reqd": 1
@@ -109,6 +132,10 @@
   {
    "fieldname": "operating_cost",
    "fieldtype": "Currency",
+<<<<<<< HEAD
+=======
+   "in_list_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Operating Cost",
    "oldfieldname": "operating_cost",
    "oldfieldtype": "Currency",
@@ -194,7 +221,11 @@
    "label": "Set Operating Cost Based On BOM Quantity"
   },
   {
+<<<<<<< HEAD
    "columns": 3,
+=======
+   "columns": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "workstation_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -202,6 +233,7 @@
    "options": "Workstation Type"
   },
   {
+<<<<<<< HEAD
    "columns": 3,
    "depends_on": "eval:parent.track_semi_finished_goods === 1",
    "fieldname": "finished_good",
@@ -213,6 +245,16 @@
   {
    "columns": 2,
    "depends_on": "eval:parent.track_semi_finished_goods === 1",
+=======
+   "fieldname": "finished_good",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Finished Goods / Semi Finished Goods Item",
+   "options": "Item"
+  },
+  {
+   "columns": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -220,6 +262,7 @@
    "options": "BOM"
   },
   {
+<<<<<<< HEAD
    "columns": 2,
    "default": "1",
    "depends_on": "eval:parent.track_semi_finished_goods === 1",
@@ -227,6 +270,14 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty to Produce"
+=======
+   "columns": 1,
+   "default": "1",
+   "fieldname": "finished_good_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Finished Goods Qty"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "0",
@@ -254,6 +305,10 @@
    "columns": 1,
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
+<<<<<<< HEAD
+=======
+   "in_list_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Finished Goods Warehouse",
    "options": "Warehouse"
   },
@@ -262,6 +317,10 @@
    "depends_on": "eval:doc.skip_material_transfer && !doc.backflush_from_wip_warehouse",
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
+<<<<<<< HEAD
+=======
+   "in_list_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Source Warehouse",
    "options": "Warehouse"
   },
@@ -272,7 +331,11 @@
    "label": "Is Subcontracted"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.bom_no && parent.track_semi_finished_goods === 1",
+=======
+   "depends_on": "eval:!doc.bom_no",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "add_raw_materials",
    "fieldtype": "Button",
    "label": "Add Raw Materials"
@@ -295,13 +358,20 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-12 19:27:20.682797",
+=======
+ "modified": "2024-06-03 15:46:49.404875",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

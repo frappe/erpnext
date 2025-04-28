@@ -1,5 +1,9 @@
 blank_issues_enabled: false
 contact_links:
   - name: Community Forum
+<<<<<<< HEAD
     url: https://discuss.frappe.io/c/erpnext/6
+=======
+    url: https://discuss.erpnext.com/
+>>>>>>> 7c4cf3e834 (Favicon.svg)
     about: For general QnA, discussions and community help.

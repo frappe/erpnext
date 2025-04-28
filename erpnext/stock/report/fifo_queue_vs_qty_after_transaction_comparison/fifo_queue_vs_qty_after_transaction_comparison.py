@@ -66,7 +66,11 @@ def get_stock_ledger_entries(filters):
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
 		filters=sle_filters,
+<<<<<<< HEAD
 		order_by="posting_datetime, creation",
+=======
+		order_by="timestamp(posting_date, posting_time), creation",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 

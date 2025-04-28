@@ -42,7 +42,10 @@
   "language",
   "column_break_45",
   "customer_details",
+<<<<<<< HEAD
   "supplier_numbers",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "dashboard_tab",
   "contact_and_address_tab",
   "address_contacts",
@@ -57,8 +60,11 @@
   "customer_primary_contact",
   "mobile_no",
   "email_id",
+<<<<<<< HEAD
   "first_name",
   "last_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "tax_tab",
   "taxation_section",
   "tax_id",
@@ -584,6 +590,7 @@
    "no_copy": 1,
    "options": "Prospect",
    "print_hide": 1
+<<<<<<< HEAD
   },
   {
    "fetch_from": "customer_primary_contact.first_name",
@@ -605,6 +612,8 @@
    "fieldtype": "Table",
    "label": "Supplier Numbers",
    "options": "Supplier Number At Customer"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-user",
@@ -618,7 +627,11 @@
    "link_fieldname": "party"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-04-27 12:01:29.549008",
+=======
+ "modified": "2024-06-17 03:24:59.612974",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -696,7 +709,10 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

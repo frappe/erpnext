@@ -13,12 +13,20 @@
   "title",
   "voucher_type",
   "naming_series",
+<<<<<<< HEAD
   "process_deferred_accounting",
   "reversal_of",
+=======
+  "finance_book",
+  "process_deferred_accounting",
+  "reversal_of",
+  "tax_withholding_category",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break1",
   "from_template",
   "company",
   "posting_date",
+<<<<<<< HEAD
   "finance_book",
   "apply_tds",
   "tax_withholding_category",
@@ -28,6 +36,9 @@
   "stock_asset_account",
   "periodic_entry_difference_account",
   "get_balance_for_periodic_accounting",
+=======
+  "apply_tds",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
@@ -46,6 +57,10 @@
   "reference",
   "clearance_date",
   "remark",
+<<<<<<< HEAD
+=======
+  "paid_loan",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "inter_company_journal_entry_reference",
   "column_break98",
   "bill_no",
@@ -64,7 +79,10 @@
   "addtional_info",
   "mode_of_payment",
   "payment_order",
+<<<<<<< HEAD
   "party_not_required",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break3",
   "is_opening",
   "stock_entry",
@@ -95,7 +113,11 @@
    "label": "Entry Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
+<<<<<<< HEAD
    "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nAsset Disposal\nPeriodic Accounting Entry\nExchange Rate Revaluation\nExchange Gain Or Loss\nDeferred Revenue\nDeferred Expense",
+=======
+   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation\nExchange Gain Or Loss\nDeferred Revenue\nDeferred Expense",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1,
    "search_index": 1
   },
@@ -311,6 +333,16 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "paid_loan",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Paid Loan",
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "eval:doc.voucher_type== \"Inter Company Journal Entry\"",
    "fieldname": "inter_company_journal_entry_reference",
    "fieldtype": "Link",
@@ -542,6 +574,7 @@
    "label": "Is System Generated",
    "no_copy": 1,
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
@@ -586,6 +619,8 @@
    "hidden": 1,
    "label": "Party Not Required",
    "no_copy": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-file-text",
@@ -600,7 +635,11 @@
    "table_fieldname": "payment_entries"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-09-29 13:05:46.982277",
+=======
+ "modified": "2024-07-18 15:32:29.413598",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -645,11 +684,18 @@
    "role": "Auditor"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

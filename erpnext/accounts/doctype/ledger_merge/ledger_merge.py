@@ -35,7 +35,11 @@ class LedgerMerge(Document):
 		from frappe.utils.background_jobs import enqueue
 		from frappe.utils.scheduler import is_scheduler_inactive
 
+<<<<<<< HEAD
 		if is_scheduler_inactive() and not frappe.in_test:
+=======
+		if is_scheduler_inactive() and not frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.throw(_("Scheduler is inactive. Cannot merge accounts."), title=_("Scheduler Inactive"))
 
 		job_id = f"ledger_merge::{self.name}"
@@ -47,7 +51,11 @@ class LedgerMerge(Document):
 				event="ledger_merge",
 				job_id=job_id,
 				docname=self.name,
+<<<<<<< HEAD
 				now=frappe.conf.developer_mode or frappe.in_test,
+=======
+				now=frappe.conf.developer_mode or frappe.flags.in_test,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 			return True
 

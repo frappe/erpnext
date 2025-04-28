@@ -5,8 +5,11 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 pricing_rule_fields = [
 	"apply_on",
@@ -164,6 +167,7 @@ class PromotionalScheme(Document):
 		if self.is_new():
 			return
 
+<<<<<<< HEAD
 		invalid_pricing_rule = self.get_invalid_pricing_rules()
 
 		if not invalid_pricing_rule:
@@ -208,6 +212,24 @@ class PromotionalScheme(Document):
 			conditions.append(IfNull(pr.applicable_for, "") != "")
 
 		return frappe.qb.from_(pr).select(pr.name).where(Criterion.all(conditions)).run(pluck=True)
+=======
+		transaction_exists = False
+		docnames = []
+
+		# If user has changed applicable for
+		if self.get_doc_before_save() and self.get_doc_before_save().applicable_for == self.applicable_for:
+			return
+
+		docnames = frappe.get_all("Pricing Rule", filters={"promotional_scheme": self.name})
+
+		for docname in docnames:
+			if frappe.db.exists("Pricing Rule Detail", {"pricing_rule": docname.name, "docstatus": ("<", 2)}):
+				raise_for_transaction_exists(self.name)
+
+		if docnames and not transaction_exists:
+			for docname in docnames:
+				frappe.delete_doc("Pricing Rule", docname.name)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def on_update(self):
 		self.validate()

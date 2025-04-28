@@ -17,16 +17,27 @@ class AccountingDimensionFilter(Document):
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.allowed_dimension.allowed_dimension import AllowedDimension
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.applicable_on_account.applicable_on_account import ApplicableOnAccount
 
 		accounting_dimension: DF.Literal[None]
+=======
+		from erpnext.accounts.doctype.applicable_on_account.applicable_on_account import (
+			ApplicableOnAccount,
+		)
+
+		accounting_dimension: DF.Literal
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		accounts: DF.Table[ApplicableOnAccount]
 		allow_or_restrict: DF.Literal["Allow", "Restrict"]
 		apply_restriction_on_values: DF.Check
 		company: DF.Link
 		dimensions: DF.Table[AllowedDimension]
 		disabled: DF.Check
+<<<<<<< HEAD
 		fieldname: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	def before_save(self):
@@ -36,10 +47,13 @@ class AccountingDimensionFilter(Document):
 			self.set("dimensions", [])
 
 	def validate(self):
+<<<<<<< HEAD
 		self.fieldname = frappe.db.get_value(
 			"Accounting Dimension", {"document_type": self.accounting_dimension}, "fieldname"
 		) or frappe.scrub(self.accounting_dimension)  # scrub to handle default accounting dimension
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_applicable_accounts()
 
 	def validate_applicable_accounts(self):
@@ -74,7 +88,11 @@ def get_dimension_filter_map():
 			"""
 			SELECT
 				a.applicable_on_account, d.dimension_value, p.accounting_dimension,
+<<<<<<< HEAD
 				p.allow_or_restrict, p.fieldname, a.is_mandatory
+=======
+				p.allow_or_restrict, a.is_mandatory
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			FROM
 				`tabApplicable On Account` a,
 				`tabAccounting Dimension Filter` p
@@ -89,6 +107,11 @@ def get_dimension_filter_map():
 		dimension_filter_map = {}
 
 		for f in filters:
+<<<<<<< HEAD
+=======
+			f.fieldname = scrub(f.accounting_dimension)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			build_map(
 				dimension_filter_map,
 				f.fieldname,

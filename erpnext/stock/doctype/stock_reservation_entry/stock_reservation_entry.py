@@ -1,15 +1,23 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+<<<<<<< HEAD
 from collections import defaultdict
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from typing import Literal
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, nowdate, nowtime, parse_json
+=======
+from frappe.query_builder.functions import Sum
+from frappe.utils import cint, flt, nowdate, nowtime
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
 
@@ -23,11 +31,18 @@ class StockReservationEntry(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import SerialandBatchEntry
+=======
+		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import (
+			SerialandBatchEntry,
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		amended_from: DF.Link | None
 		available_qty: DF.Float
 		company: DF.Link | None
+<<<<<<< HEAD
 		consumed_qty: DF.Float
 		delivered_qty: DF.Float
 		from_voucher_detail_no: DF.Data | None
@@ -41,6 +56,12 @@ class StockReservationEntry(Document):
 			"Production Plan",
 			"Subcontracting Inward Order",
 		]
+=======
+		delivered_qty: DF.Float
+		from_voucher_detail_no: DF.Data | None
+		from_voucher_no: DF.DynamicLink | None
+		from_voucher_type: DF.Literal["", "Pick List", "Purchase Receipt"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		has_batch_no: DF.Check
 		has_serial_no: DF.Check
 		item_code: DF.Link | None
@@ -49,6 +70,7 @@ class StockReservationEntry(Document):
 		reserved_qty: DF.Float
 		sb_entries: DF.Table[SerialandBatchEntry]
 		status: DF.Literal[
+<<<<<<< HEAD
 			"Draft",
 			"Partially Reserved",
 			"Reserved",
@@ -71,6 +93,15 @@ class StockReservationEntry(Document):
 			"Production Plan",
 			"Subcontracting Order",
 		]
+=======
+			"Draft", "Partially Reserved", "Reserved", "Partially Delivered", "Delivered", "Cancelled"
+		]
+		stock_uom: DF.Link | None
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_qty: DF.Float
+		voucher_type: DF.Literal["", "Sales Order"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
@@ -109,11 +140,15 @@ class StockReservationEntry(Document):
 
 	def on_cancel(self) -> None:
 		self.update_reserved_qty_in_voucher()
+<<<<<<< HEAD
 		self.update_unreserved_qty_in_sre()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.update_reserved_qty_in_pick_list()
 		self.update_status()
 		self.update_reserved_stock_in_bin()
 
+<<<<<<< HEAD
 	def before_cancel(self) -> None:
 		self.validate_reserved_entries()
 
@@ -219,6 +254,8 @@ class StockReservationEntry(Document):
 			},
 		)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_amended_doc(self) -> None:
 		"""Raises an exception if document is amended."""
 
@@ -245,7 +282,11 @@ class StockReservationEntry(Document):
 		]
 		for d in mandatory:
 			if not self.get(d):
+<<<<<<< HEAD
 				msg = _("{0} is required").format(_(self.meta.get_label(d)))
+=======
+				msg = _("{0} is required").format(self.meta.get_label(d))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frappe.throw(msg)
 
 	def validate_group_warehouse(self) -> None:
@@ -280,17 +321,29 @@ class StockReservationEntry(Document):
 	def validate_reservation_based_on_qty(self) -> None:
 		"""Validates `Reserved Qty` when `Reservation Based On` is `Qty`."""
 
+<<<<<<< HEAD
 		if self.reservation_based_on == "Qty" and self.voucher_type != "Subcontracting Inward Order":
+=======
+		if self.reservation_based_on == "Qty":
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.validate_with_allowed_qty(self.reserved_qty)
 
 	def auto_reserve_serial_and_batch(self, based_on: str | None = None) -> None:
 		"""Auto pick Serial and Batch Nos to reserve when `Reservation Based On` is `Serial and Batch`."""
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (
 			not self.from_voucher_type
 			and (self.get("_action") == "submit")
 			and (self.has_serial_no or self.has_batch_no)
+<<<<<<< HEAD
 			and frappe.get_single_value("Stock Settings", "auto_reserve_serial_and_batch")
 			and not self.sb_entries
+=======
+			and cint(frappe.db.get_single_value("Stock Settings", "auto_reserve_serial_and_batch"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		):
 			from erpnext.stock.doctype.batch.batch import get_available_batches
 			from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
@@ -304,7 +357,11 @@ class StockReservationEntry(Document):
 					"warehouse": self.warehouse,
 					"qty": abs(self.reserved_qty) or 0,
 					"based_on": based_on
+<<<<<<< HEAD
 					or frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+=======
+					or frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			)
 
@@ -343,11 +400,19 @@ class StockReservationEntry(Document):
 
 	def validate_reservation_based_on_serial_and_batch(self) -> None:
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
+<<<<<<< HEAD
 		if self.voucher_type in ["Work Order", "Subcontracting Order"]:
 			return
 
 		if self.reservation_based_on == "Serial and Batch":
 			allow_partial_reservation = frappe.get_single_value("Stock Settings", "allow_partial_reservation")
+=======
+
+		if self.reservation_based_on == "Serial and Batch":
+			allow_partial_reservation = frappe.db.get_single_value(
+				"Stock Settings", "allow_partial_reservation"
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			available_serial_nos = []
 			if self.has_serial_no:
@@ -452,8 +517,12 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 			# Should be called after validating Serial and Batch Nos.
+<<<<<<< HEAD
 			if self.voucher_type != "Subcontracting Inward Order":
 				self.validate_with_allowed_qty(qty_to_be_reserved)
+=======
+			self.validate_with_allowed_qty(qty_to_be_reserved)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.db_set("reserved_qty", qty_to_be_reserved)
 
 	def update_reserved_qty_in_voucher(
@@ -461,18 +530,26 @@ class StockReservationEntry(Document):
 	) -> None:
 		"""Updates total reserved qty in the voucher."""
 
+<<<<<<< HEAD
 		item_doctype = {
 			"Sales Order": "Sales Order Item",
 			"Work Order": "Work Order Item",
 			"Production Plan": "Production Plan Sub Assembly Item",
 			"Subcontracting Order": "Subcontracting Order Supplied Item",
 		}.get(self.voucher_type, None)
+=======
+		item_doctype = "Sales Order Item" if self.voucher_type == "Sales Order" else None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if item_doctype:
 			sre = frappe.qb.DocType("Stock Reservation Entry")
 			reserved_qty = (
 				frappe.qb.from_(sre)
+<<<<<<< HEAD
 				.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
+=======
+				.select(Sum(sre.reserved_qty))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				.where(
 					(sre.docstatus == 1)
 					& (sre.voucher_type == self.voucher_type)
@@ -481,11 +558,14 @@ class StockReservationEntry(Document):
 				)
 			).run(as_list=True)[0][0] or 0
 
+<<<<<<< HEAD
 			if self.voucher_type == "Production Plan" and frappe.db.exists(
 				"Material Request Plan Item", self.voucher_detail_no
 			):
 				item_doctype = "Material Request Plan Item"
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.db.set_value(
 				item_doctype,
 				self.voucher_detail_no,
@@ -534,6 +614,7 @@ class StockReservationEntry(Document):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
+<<<<<<< HEAD
 				if self.transferred_qty:
 					status = "Closed"
 					if self.transferred_qty < self.reserved_qty:
@@ -544,6 +625,13 @@ class StockReservationEntry(Document):
 				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
 					status = "Partially Delivered"
 				elif self.reserved_qty >= self.voucher_qty:
+=======
+				if self.reserved_qty == self.delivered_qty:
+					status = "Delivered"
+				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
+					status = "Partially Delivered"
+				elif self.reserved_qty == self.voucher_qty:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					status = "Reserved"
 				else:
 					status = "Partially Reserved"
@@ -579,6 +667,7 @@ class StockReservationEntry(Document):
 			get_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),
 		)
 
+<<<<<<< HEAD
 		from_voucher_detail_no = None
 		if self.from_voucher_type and self.from_voucher_type in ["Stock Entry", "Production Plan"]:
 			from_voucher_detail_no = self.from_voucher_detail_no
@@ -591,6 +680,10 @@ class StockReservationEntry(Document):
 			ignore_sre=self.name,
 			warehouse=self.warehouse,
 			from_voucher_detail_no=from_voucher_detail_no,
+=======
+		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
+			self.voucher_type, self.voucher_no, self.voucher_detail_no, ignore_sre=self.name
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		voucher_delivered_qty = 0
@@ -601,8 +694,11 @@ class StockReservationEntry(Document):
 			voucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)
 
 		allowed_qty = min(self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty))
+<<<<<<< HEAD
 		allowed_qty = flt(allowed_qty, self.precision("reserved_qty"))
 		qty_to_be_reserved = flt(qty_to_be_reserved, self.precision("reserved_qty"))
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if self.get("_action") != "submit" and self.voucher_type == "Sales Order" and allowed_qty <= 0:
 			msg = _("Item {0} is already reserved/delivered against Sales Order {1}.").format(
@@ -649,6 +745,7 @@ class StockReservationEntry(Document):
 			msg = _("Reserved Qty should be greater than Delivered Qty.")
 			frappe.throw(msg)
 
+<<<<<<< HEAD
 	def consume_serial_batch_for_material_transfer(self, row_wise_serial_batch):
 		for entry in self.sb_entries:
 			entry.delivered_qty = 0
@@ -665,11 +762,17 @@ class StockReservationEntry(Document):
 
 			entry.db_update()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def validate_stock_reservation_settings(voucher: object) -> None:
 	"""Raises an exception if `Stock Reservation` is not enabled or `Voucher Type` is not allowed."""
 
+<<<<<<< HEAD
 	if not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+=======
+	if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		msg = _("Please enable {0} in the {1}.").format(
 			frappe.bold(_("Stock Reservation")),
 			frappe.bold(_("Stock Settings")),
@@ -702,12 +805,21 @@ def get_available_qty_to_reserve(
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		query = (
 			frappe.qb.from_(sre)
+<<<<<<< HEAD
 			.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
+=======
+			.select(Sum(sre.reserved_qty - sre.delivered_qty))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			.where(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)
 				& (sre.warehouse == warehouse)
+<<<<<<< HEAD
 				& (sre.delivered_qty < sre.reserved_qty)
+=======
+				& (sre.reserved_qty >= sre.delivered_qty)
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 		)
 
@@ -757,7 +869,12 @@ def get_available_serial_nos_to_reserve(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)
 				& (sre.warehouse == warehouse)
+<<<<<<< HEAD
 				& (sre.delivered_qty < sre.reserved_qty)
+=======
+				& (sre.reserved_qty >= sre.delivered_qty)
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				& (sre.reservation_based_on == "Serial and Batch")
 			)
 		)
@@ -782,12 +899,21 @@ def get_sre_reserved_qty_for_item_and_warehouse(item_code: str, warehouse: str |
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
 		frappe.qb.from_(sre)
+<<<<<<< HEAD
 		.select(
 			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_(
 				"reserved_qty"
 			)
 		)
 		.where((sre.docstatus == 1) & (sre.item_code == item_code) & (sre.delivered_qty < sre.reserved_qty))
+=======
+		.select(Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"))
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == item_code)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.groupby(sre.item_code, sre.warehouse)
 	)
 
@@ -816,7 +942,13 @@ def get_sre_reserved_qty_for_items_and_warehouses(
 			Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
 		)
 		.where(
+<<<<<<< HEAD
 			(sre.docstatus == 1) & sre.item_code.isin(item_code_list) & (sre.delivered_qty < sre.reserved_qty)
+=======
+			(sre.docstatus == 1)
+			& sre.item_code.isin(item_code_list)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		.groupby(sre.item_code, sre.warehouse)
 	)
@@ -843,7 +975,11 @@ def get_sre_reserved_qty_details_for_voucher(voucher_type: str, voucher_no: str)
 			(sre.docstatus == 1)
 			& (sre.voucher_type == voucher_type)
 			& (sre.voucher_no == voucher_no)
+<<<<<<< HEAD
 			& (sre.delivered_qty < sre.reserved_qty)
+=======
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		.groupby(sre.voucher_detail_no)
 	).run(as_list=True)
@@ -865,7 +1001,11 @@ def get_sre_reserved_warehouses_for_voucher(
 			(sre.docstatus == 1)
 			& (sre.voucher_type == voucher_type)
 			& (sre.voucher_no == voucher_no)
+<<<<<<< HEAD
 			& (sre.delivered_qty < sre.reserved_qty)
+=======
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		.orderby(sre.creation)
 	)
@@ -879,6 +1019,7 @@ def get_sre_reserved_warehouses_for_voucher(
 
 
 def get_sre_reserved_qty_for_voucher_detail_no(
+<<<<<<< HEAD
 	item_code: str,
 	voucher_type: str,
 	voucher_no: str,
@@ -886,6 +1027,9 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	ignore_sre=None,
 	warehouse=None,
 	from_voucher_detail_no=None,
+=======
+	voucher_type: str, voucher_no: str, voucher_detail_no: str, ignore_sre=None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ) -> float:
 	"""Returns `Reserved Qty` against the Voucher."""
 
@@ -893,6 +1037,7 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	query = (
 		frappe.qb.from_(sre)
 		.select(
+<<<<<<< HEAD
 			(
 				Sum(sre.reserved_qty)
 				- Sum(sre.delivered_qty)
@@ -907,18 +1052,31 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 			& (sre.voucher_no == voucher_no)
 			& (sre.voucher_detail_no == voucher_detail_no)
 			& (sre.delivered_qty < sre.reserved_qty)
+=======
+			(Sum(sre.reserved_qty) - Sum(sre.delivered_qty)),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_no == voucher_no)
+			& (sre.voucher_detail_no == voucher_detail_no)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 	)
 
 	if ignore_sre:
 		query = query.where(sre.name != ignore_sre)
 
+<<<<<<< HEAD
 	if warehouse:
 		query = query.where(sre.warehouse == warehouse)
 
 	if from_voucher_detail_no:
 		query = query.where(sre.from_voucher_detail_no == from_voucher_detail_no)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	reserved_qty = query.run(as_list=True)
 
 	return flt(reserved_qty[0][0])
@@ -940,7 +1098,12 @@ def get_sre_reserved_serial_nos_details(
 			(sre.docstatus == 1)
 			& (sre.item_code == item_code)
 			& (sre.warehouse == warehouse)
+<<<<<<< HEAD
 			& (sre.delivered_qty < sre.reserved_qty)
+=======
+			& (sre.reserved_qty > sre.delivered_qty)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			& (sre.reservation_based_on == "Serial and Batch")
 		)
 		.orderby(sb_entry.creation)
@@ -970,7 +1133,11 @@ def get_sre_reserved_batch_nos_details(item_code: str, warehouse: str, batch_nos
 			& (sre.item_code == item_code)
 			& (sre.warehouse == warehouse)
 			& ((sre.reserved_qty - sre.delivered_qty) > 0)
+<<<<<<< HEAD
 			& (sre.delivered_qty < sre.reserved_qty)
+=======
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			& (sre.reservation_based_on == "Serial and Batch")
 		)
 		.groupby(sb_entry.batch_no)
@@ -1005,7 +1172,12 @@ def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict
 			(sre.docstatus == 1)
 			& (sre.voucher_type == voucher_type)
 			& (sre.voucher_no == voucher_no)
+<<<<<<< HEAD
 			& (sre.delivered_qty < sre.reserved_qty)
+=======
+			& (sre.reserved_qty > sre.delivered_qty)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		.orderby(sre.creation)
 	).run(as_dict=True)
@@ -1026,7 +1198,11 @@ def get_serial_batch_entries_for_voucher(sre_name: str) -> list[dict]:
 			sb_entry.batch_no,
 			(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
 		)
+<<<<<<< HEAD
 		.where((sre.docstatus == 1) & (sre.name == sre_name) & (sre.delivered_qty < sre.reserved_qty))
+=======
+		.where((sre.docstatus == 1) & (sre.name == sre_name) & (sre.status.notin(["Delivered", "Cancelled"])))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.where(sb_entry.qty > sb_entry.delivered_qty)
 		.orderby(sb_entry.creation)
 	).run(as_dict=True)
@@ -1066,6 +1242,7 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 	return False
 
 
+<<<<<<< HEAD
 class StockReservation:
 	def __init__(self, doc, items=None, kwargs=None, notify=True):
 		if isinstance(doc, str):
@@ -1566,6 +1743,8 @@ class StockReservation:
 		return items
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def create_stock_reservation_entries_for_so_items(
 	sales_order: object,
 	items_details: list[dict] | None = None,
@@ -1589,7 +1768,11 @@ def create_stock_reservation_entries_for_so_items(
 
 	validate_stock_reservation_settings(sales_order)
 
+<<<<<<< HEAD
 	allow_partial_reservation = frappe.get_single_value("Stock Settings", "allow_partial_reservation")
+=======
+	allow_partial_reservation = frappe.db.get_single_value("Stock Settings", "allow_partial_reservation")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	items = []
 	if items_details:
@@ -1801,7 +1984,11 @@ def cancel_stock_reservation_entries(
 					(sre.docstatus == 1)
 					& (sre.from_voucher_type == from_voucher_type)
 					& (sre.from_voucher_no == from_voucher_no)
+<<<<<<< HEAD
 					& (sre.delivered_qty < sre.reserved_qty)
+=======
+					& (sre.status.notin(["Delivered", "Cancelled"]))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 				.orderby(sre.creation)
 			)
@@ -1857,6 +2044,7 @@ def get_stock_reservation_entries_for_voucher(
 		query = query.where(sre.voucher_detail_no == voucher_detail_no)
 
 	if ignore_status:
+<<<<<<< HEAD
 		query = query.where(sre.delivered_qty < sre.reserved_qty)
 
 	return query.run(as_dict=True)
@@ -1883,3 +2071,8 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 			)
 
 		query.run()
+=======
+		query = query.where(sre.status.notin(["Delivered", "Cancelled"]))
+
+	return query.run(as_dict=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

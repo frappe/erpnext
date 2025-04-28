@@ -24,7 +24,10 @@ class InvalidAccountDimensionError(frappe.ValidationError):
 
 class MandatoryAccountDimensionError(frappe.ValidationError):
 	pass
+<<<<<<< HEAD
 
 
 class ReportingCurrencyExchangeNotFoundError(frappe.ValidationError):
 	pass
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

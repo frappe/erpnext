@@ -67,7 +67,11 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+<<<<<<< HEAD
    "options": "supplier_currency",
+=======
+   "options": "currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -76,7 +80,11 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+<<<<<<< HEAD
    "options": "supplier_currency",
+=======
+   "options": "currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1,
    "reqd": 1
   },
@@ -155,7 +163,11 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-13 16:04:45.020225",
+=======
+ "modified": "2024-03-27 13:10:46.534662",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Service Item",
@@ -163,9 +175,16 @@
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "item_name",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

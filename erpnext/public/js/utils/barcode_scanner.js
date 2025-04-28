@@ -12,7 +12,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.batch_no_field = opts.batch_no_field || "batch_no";
 		this.uom_field = opts.uom_field || "uom";
 		this.qty_field = opts.qty_field || "qty";
+<<<<<<< HEAD
 		this.warehouse_field = opts.warehouse_field || "warehouse";
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		// field name on row which defines max quantity to be scanned e.g. picklist
 		this.max_qty_field = opts.max_qty_field;
 		// scanner won't add a new row if this flag is set.
@@ -21,6 +24,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.prompt_qty = opts.prompt_qty;
 
 		this.items_table_name = opts.items_table_name || "items";
+<<<<<<< HEAD
+=======
+		this.items_table = this.frm.doc[this.items_table_name];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		// optional sound name to play when scan either fails or passes.
 		// see https://frappeframework.com/docs/v14/user/en/python-api/hooks#sounds
@@ -34,10 +41,15 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		//     batch_no: "LOT12", // present if batch was scanned
 		//     serial_no: "987XYZ", // present if serial no was scanned
 		//     uom: "Kg", // present if barcode UOM is different from default
+<<<<<<< HEAD
 		//     warehouse: "Store-001", // present if warehouse was found (location-first scanning)
 		// }
 		this.scan_api = opts.scan_api || "erpnext.stock.utils.scan_barcode";
 		this.has_last_scanned_warehouse = frappe.meta.has_field(this.frm.doctype, "last_scanned_warehouse");
+=======
+		// }
+		this.scan_api = opts.scan_api || "erpnext.stock.utils.scan_barcode";
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	process_scan() {
@@ -52,6 +64,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			this.scan_api_call(input, (r) => {
 				const data = r && r.message;
+<<<<<<< HEAD
 				if (
 					!data ||
 					Object.keys(data).length === 0 ||
@@ -63,12 +76,17 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 							: __("Cannot find Item with this Barcode"),
 						"red"
 					);
+=======
+				if (!data || Object.keys(data).length === 0) {
+					this.show_alert(__("Cannot find Item with this Barcode"), "red");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					this.clean_up();
 					this.play_fail_sound();
 					reject();
 					return;
 				}
 
+<<<<<<< HEAD
 				// Handle warehouse scanning
 				if (data.warehouse) {
 					this.handle_warehouse_scan(data);
@@ -77,6 +95,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					return;
 				}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				me.update_table(data)
 					.then((row) => {
 						this.play_success_sound();
@@ -96,10 +116,13 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				method: this.scan_api,
 				args: {
 					search_value: input,
+<<<<<<< HEAD
 					ctx: {
 						set_warehouse: this.frm.doc.set_warehouse,
 						company: this.frm.doc.company,
 					},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			})
 			.then((r) => {
@@ -112,9 +135,17 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 			frappe.flags.trigger_from_barcode_scanner = true;
 
+<<<<<<< HEAD
 			const { item_code, barcode, batch_no, serial_no, uom, default_warehouse } = data;
 			let row = this.get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, default_warehouse);
 			const is_new_row = !row?.item_code;
+=======
+			const { item_code, barcode, batch_no, serial_no, uom } = data;
+
+			let row = this.get_row_to_modify_on_scan(item_code, batch_no, uom, barcode);
+
+			this.is_new_row = false;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if (!row) {
 				if (this.dont_allow_new_row) {
 					this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
@@ -122,6 +153,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					reject();
 					return;
 				}
+<<<<<<< HEAD
+=======
+				this.is_new_row = true;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 				// add new row if new item/batch is scanned
 				row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
@@ -140,13 +175,20 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				() => this.set_selector_trigger_flag(data),
 				() =>
 					this.set_item(row, item_code, barcode, batch_no, serial_no).then((qty) => {
+<<<<<<< HEAD
 						this.show_scan_message(row.idx, !is_new_row, qty);
+=======
+						this.show_scan_message(row.idx, row.item_code, qty);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					}),
 				() => this.set_barcode_uom(row, uom),
 				() => this.set_serial_no(row, serial_no),
 				() => this.set_batch_no(row, batch_no),
 				() => this.set_barcode(row, barcode),
+<<<<<<< HEAD
 				() => this.set_warehouse(row),
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				() => this.clean_up(),
 				() => this.revert_selector_flag(),
 				() => resolve(row),
@@ -407,6 +449,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
+<<<<<<< HEAD
 	async set_warehouse(row) {
 		if (!this.has_last_scanned_warehouse) return;
 
@@ -422,6 +465,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	show_scan_message(idx, is_existing_row = false, qty = 1) {
 		// show new row or qty increase toast
 		if (is_existing_row) {
+=======
+	show_scan_message(idx, exist = null, qty = 1) {
+		// show new row or qty increase toast
+		if (exist) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.show_alert(__("Row #{0}: Qty increased by {1}", [idx, qty]), "green");
 		} else {
 			this.show_alert(__("Row #{0}: Item added", [idx]), "green");
@@ -437,13 +485,18 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return is_duplicate;
 	}
 
+<<<<<<< HEAD
 	get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, default_warehouse) {
+=======
+	get_row_to_modify_on_scan(item_code, batch_no, uom, barcode) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
 		// Check if batch is scanned and table has batch no field
 		let is_batch_no_scan = batch_no && frappe.meta.has_field(cur_grid.doctype, this.batch_no_field);
 		let check_max_qty = this.max_qty_field && frappe.meta.has_field(cur_grid.doctype, this.max_qty_field);
 
+<<<<<<< HEAD
 		const warehouse_field = this.has_last_scanned_warehouse && this.get_warehouse_field();
 		const has_warehouse_field =
 			warehouse_field && frappe.meta.has_field(cur_grid.doctype, warehouse_field);
@@ -451,6 +504,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			? this.frm.doc.last_scanned_warehouse || default_warehouse
 			: null;
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		const matching_row = (row) => {
 			const item_match = row.item_code == item_code;
 			const batch_match = !row[this.batch_no_field] || row[this.batch_no_field] == batch_no;
@@ -458,6 +513,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			const qty_in_limit = flt(row[this.qty_field]) < flt(row[this.max_qty_field]);
 			const item_scanned = row.has_item_scanned;
 
+<<<<<<< HEAD
 			let warehouse_match = true;
 			if (has_warehouse_field && warehouse && row[warehouse_field]) {
 				warehouse_match = row[warehouse_field] === warehouse;
@@ -467,12 +523,18 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				item_match &&
 				uom_match &&
 				warehouse_match &&
+=======
+			return (
+				item_match &&
+				uom_match &&
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				!item_scanned &&
 				(!is_batch_no_scan || batch_match) &&
 				(!check_max_qty || qty_in_limit)
 			);
 		};
 
+<<<<<<< HEAD
 		const items_table = this.frm.doc[this.items_table_name] || [];
 
 		return items_table.find(matching_row) || items_table.find((d) => !d.item_code);
@@ -543,6 +605,13 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			return this.warehouse_field(this.frm.doc);
 		}
 		return this.warehouse_field;
+=======
+		return this.items_table.find(matching_row) || this.get_existing_blank_row();
+	}
+
+	get_existing_blank_row() {
+		return this.items_table.find((d) => !d.item_code);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	play_success_sound() {

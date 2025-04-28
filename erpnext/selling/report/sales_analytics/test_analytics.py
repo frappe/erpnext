@@ -3,13 +3,21 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.sales_analytics.sales_analytics import execute
 
 
+<<<<<<< HEAD
 class TestAnalytics(IntegrationTestCase):
+=======
+class TestAnalytics(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_sales_analytics(self):
 		frappe.db.sql("delete from `tabSales Order` where company='_Test Company 2'")
 

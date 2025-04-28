@@ -199,7 +199,12 @@ class General_Payment_Ledger_Comparison:
 			dict(
 				label=_("Voucher Type"),
 				fieldname="voucher_type",
+<<<<<<< HEAD
 				fieldtype="Data",
+=======
+				fieldtype="Link",
+				options="DocType",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				width="100",
 			)
 		)
@@ -218,7 +223,12 @@ class General_Payment_Ledger_Comparison:
 			dict(
 				label=_("Party Type"),
 				fieldname="party_type",
+<<<<<<< HEAD
 				fieldtype="Data",
+=======
+				fieldtype="Link",
+				options="DocType",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				width="100",
 			)
 		)

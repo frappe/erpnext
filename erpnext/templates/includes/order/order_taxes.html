@@ -12,14 +12,22 @@
 {% endif %}
 
 {% for d in doc.taxes %}
+<<<<<<< HEAD
 	{% if d.tax_amount %}
+=======
+	{% if d.base_tax_amount %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		<div class="order-taxes w-100 mt-5">
 			<div class="col-4 d-flex  border-btm pb-5">
 				<div class="item-grand-total col-8">
 					{{ d.description }}
 				</div>
 				<div class="item-grand-total col-4 text-right pr-0">
+<<<<<<< HEAD
 					{{ d.get_formatted("tax_amount") }}
+=======
+					{{ d.get_formatted("base_tax_amount") }}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				</div>
 			</div>
 		</div>

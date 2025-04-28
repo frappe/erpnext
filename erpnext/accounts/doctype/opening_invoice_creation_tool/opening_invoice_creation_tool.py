@@ -11,7 +11,10 @@ from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+<<<<<<< HEAD
 from erpnext.stock.utils import get_default_stock_uom
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class OpeningInvoiceCreationTool(Document):
@@ -71,8 +74,13 @@ class OpeningInvoiceCreationTool(Document):
 		max_count = {}
 		fields = [
 			"company",
+<<<<<<< HEAD
 			{"COUNT": "*", "as": "total_invoices"},
 			{"SUM": "outstanding_amount", "as": "outstanding_amount"},
+=======
+			"count(name) as total_invoices",
+			"sum(outstanding_amount) as outstanding_amount",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 		companies = frappe.get_all("Company", fields=["name as company", "default_currency as currency"])
 		if not companies:
@@ -173,7 +181,11 @@ class OpeningInvoiceCreationTool(Document):
 			income_expense_account_field = (
 				"income_account" if row.party_type == "Customer" else "expense_account"
 			)
+<<<<<<< HEAD
 			default_uom = get_default_stock_uom()
+=======
+			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or "Nos"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			rate = flt(row.outstanding_amount) / flt(row.qty)
 
 			item_dict = frappe._dict(
@@ -229,7 +241,11 @@ class OpeningInvoiceCreationTool(Document):
 		else:
 			from frappe.utils.scheduler import is_scheduler_inactive
 
+<<<<<<< HEAD
 			if is_scheduler_inactive() and not frappe.in_test:
+=======
+			if is_scheduler_inactive() and not frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
 			job_id = f"opening_invoice::{self.name}"
@@ -242,7 +258,11 @@ class OpeningInvoiceCreationTool(Document):
 					event="opening_invoice_creation",
 					job_id=job_id,
 					invoices=invoices,
+<<<<<<< HEAD
 					now=frappe.conf.developer_mode or frappe.in_test,
+=======
+					now=frappe.conf.developer_mode or frappe.flags.in_test,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 
 

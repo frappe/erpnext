@@ -18,7 +18,10 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+<<<<<<< HEAD
   "project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "fixed_asset_account"
  ],
  "fields": [
@@ -100,6 +103,7 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
     "allow_on_submit": 1,
     "fieldname": "project",
     "fieldtype": "Link",
@@ -107,6 +111,8 @@
     "options": "Project"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "finance_book",
    "fieldtype": "Link",
    "label": "Finance Book",

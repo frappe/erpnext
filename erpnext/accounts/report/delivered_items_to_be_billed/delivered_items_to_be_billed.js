@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Delivered Items To Be Billed"] = {
+<<<<<<< HEAD
 	filters: [
 		{
 			label: __("Company"),
@@ -25,4 +26,7 @@ frappe.query_reports["Delivered Items To Be Billed"] = {
 			options: "Delivery Note",
 		},
 	],
+=======
+	filters: [],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };

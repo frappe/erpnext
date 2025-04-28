@@ -3,6 +3,7 @@
 
 
 import csv
+<<<<<<< HEAD
 import io
 import json
 import re
@@ -10,13 +11,23 @@ from datetime import date, datetime
 
 import frappe
 import mt940
+=======
+import json
+import re
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import openpyxl
 from frappe import _
 from frappe.core.doctype.data_import.data_import import DataImport
 from frappe.core.doctype.data_import.importer import Importer, ImportFile
+<<<<<<< HEAD
 from frappe.query_builder.functions import Count
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.file_manager import get_file, save_file
+=======
+from frappe.utils.background_jobs import enqueue
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
@@ -40,7 +51,10 @@ class BankStatementImport(DataImport):
 		delimiter_options: DF.Data | None
 		google_sheets_url: DF.Data | None
 		import_file: DF.Attach | None
+<<<<<<< HEAD
 		import_mt940_fromat: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		import_type: DF.Literal["", "Insert New Records", "Update Existing Records"]
 		mute_emails: DF.Check
 		reference_doctype: DF.Link
@@ -49,7 +63,10 @@ class BankStatementImport(DataImport):
 		submit_after_import: DF.Check
 		template_options: DF.Code | None
 		template_warnings: DF.Code | None
+<<<<<<< HEAD
 		use_csv_sniffer: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -72,9 +89,14 @@ class BankStatementImport(DataImport):
 
 			self.template_warnings = ""
 
+<<<<<<< HEAD
 		if self.import_file and not self.import_file.lower().endswith(".txt"):
 			self.validate_import_file()
 			self.validate_google_sheets_url()
+=======
+		self.validate_import_file()
+		self.validate_google_sheets_url()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def start_import(self):
 		preview = frappe.get_doc("Bank Statement Import", self.name).get_preview_from_template(
@@ -87,7 +109,11 @@ class BankStatementImport(DataImport):
 		from frappe.utils.background_jobs import is_job_enqueued
 		from frappe.utils.scheduler import is_scheduler_inactive
 
+<<<<<<< HEAD
 		run_now = frappe.in_test or frappe.conf.developer_mode
+=======
+		run_now = frappe.flags.in_test or frappe.conf.developer_mode
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if is_scheduler_inactive() and not run_now:
 			frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
@@ -107,6 +133,7 @@ class BankStatementImport(DataImport):
 				template_options=self.template_options,
 				now=run_now,
 			)
+<<<<<<< HEAD
 			return job_id
 
 		return None
@@ -206,6 +233,11 @@ def convert_mt940_to_csv(data_import, mt940_file_path):
 	saved_file = save_file(filename, csv_content, doc.doctype, doc.name, is_private=True, df="import_file")
 
 	return saved_file.file_url
+=======
+			return True
+
+		return False
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()
@@ -217,8 +249,12 @@ def get_preview_from_template(data_import, import_file=None, google_sheets_url=N
 
 @frappe.whitelist()
 def form_start_import(data_import):
+<<<<<<< HEAD
 	job_id = frappe.get_doc("Bank Statement Import", data_import).start_import()
 	return job_id is not None
+=======
+	return frappe.get_doc("Bank Statement Import", data_import).start_import()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()
@@ -232,12 +268,15 @@ def download_import_log(data_import_name):
 	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
 
 
+<<<<<<< HEAD
 def is_mt940_format(content: str) -> bool:
 	"""Check if the content has key MT940 tags"""
 	required_tags = [":20:", ":25:", ":28C:", ":61:"]
 	return all(tag in content for tag in required_tags)
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def parse_data_from_template(raw_data):
 	data = []
 
@@ -284,7 +323,10 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 
 
 def update_mapping_db(bank, template_options):
+<<<<<<< HEAD
 	"""Update bank transaction mapping database with template options."""
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	bank = frappe.get_doc("Bank", bank)
 	for d in bank.bank_transaction_mapping:
 		d.delete()
@@ -296,7 +338,10 @@ def update_mapping_db(bank, template_options):
 
 
 def add_bank_account(data, bank_account):
+<<<<<<< HEAD
 	"""Add bank account information to data rows."""
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	bank_account_loc = None
 	if "Bank Account" not in data[0]:
 		data[0].append("Bank Account")
@@ -313,7 +358,10 @@ def add_bank_account(data, bank_account):
 
 
 def write_files(import_file, data):
+<<<<<<< HEAD
 	"""Write processed data to CSV or Excel files."""
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	full_file_path = import_file.file_doc.get_full_path()
 	parts = import_file.file_doc.get_extension()
 	extension = parts[1]
@@ -323,12 +371,19 @@ def write_files(import_file, data):
 		with open(full_file_path, "w", newline="") as file:
 			writer = csv.writer(file)
 			writer.writerows(data)
+<<<<<<< HEAD
 	elif extension in ("xlsx", "xls"):
+=======
+	elif extension == "xlsx" or "xls":
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		write_xlsx(data, "trans", file_path=full_file_path)
 
 
 def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
+<<<<<<< HEAD
 	"""Write data to Excel file with formatting."""
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# from xlsx utils with changes
 	column_widths = column_widths or []
 	if wb is None:
@@ -372,7 +427,11 @@ def get_import_status(docname):
 
 	logs = frappe.get_all(
 		"Data Import Log",
+<<<<<<< HEAD
 		fields=[{"COUNT": "*", "as": "count"}, "success"],
+=======
+		fields=["count(*) as count", "success"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters={"data_import": docname},
 		group_by="success",
 	)
@@ -393,7 +452,11 @@ def get_import_status(docname):
 
 @frappe.whitelist()
 def get_import_logs(docname: str):
+<<<<<<< HEAD
 	frappe.has_permission("Bank Statement Import", throw=True)
+=======
+	frappe.has_permission("Bank Statement Import")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return frappe.get_all(
 		"Data Import Log",

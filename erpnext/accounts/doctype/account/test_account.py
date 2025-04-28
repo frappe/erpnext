@@ -1,9 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+
+import unittest
+
+import frappe
+from frappe.test_runner import make_test_records
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.account import (
@@ -13,10 +22,17 @@ from erpnext.accounts.doctype.account.account import (
 )
 from erpnext.stock import get_company_default_inventory_account, get_warehouse_account
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Company"]
 
 
 class TestAccount(IntegrationTestCase):
+=======
+test_dependencies = ["Company"]
+
+
+class TestAccount(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_rename_account(self):
 		if not frappe.db.exists("Account", "1210 - Debtors - _TC"):
 			acc = frappe.new_doc("Account")
@@ -201,6 +217,11 @@ class TestAccount(IntegrationTestCase):
 		In a parent->child company setup, child should inherit parent account currency if explicitly specified.
 		"""
 
+<<<<<<< HEAD
+=======
+		make_test_records("Company")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
 		def create_bank_account():
@@ -324,7 +345,11 @@ class TestAccount(IntegrationTestCase):
 
 
 def _make_test_records(verbose=None):
+<<<<<<< HEAD
 	from frappe.tests.utils import make_test_objects
+=======
+	from frappe.test_runner import make_test_objects
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	accounts = [
 		# [account_name, parent_account, is_group]

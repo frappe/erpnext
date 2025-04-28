@@ -19,6 +19,10 @@
   "lead_name",
   "job_title",
   "gender",
+<<<<<<< HEAD
+=======
+  "source",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "col_break123",
   "lead_owner",
   "status",
@@ -52,6 +56,7 @@
   "country",
   "column_break2",
   "contact_html",
+<<<<<<< HEAD
   "section_break_analytics",
   "utm_source",
   "utm_content",
@@ -59,12 +64,18 @@
   "utm_campaign",
   "column_break_gqka",
   "utm_medium",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "qualification_tab",
   "qualification_status",
   "column_break_64",
   "qualified_by",
   "qualified_on",
   "other_info_tab",
+<<<<<<< HEAD
+=======
+  "campaign_name",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "company",
   "column_break_22",
   "language",
@@ -166,6 +177,17 @@
    "options": "Gender"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "source",
+   "fieldtype": "Link",
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "Lead Source"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "eval:doc.source == 'Existing Customer'",
    "fieldname": "customer",
    "fieldtype": "Link",
@@ -176,6 +198,17 @@
    "options": "Customer"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "campaign_name",
+   "fieldtype": "Link",
+   "label": "Campaign Name",
+   "oldfieldname": "campaign_name",
+   "oldfieldtype": "Link",
+   "options": "Campaign"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -366,7 +399,11 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "notes_tab",
    "fieldtype": "Tab Break",
+<<<<<<< HEAD
    "label": "Notes"
+=======
+   "label": "Comments"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "collapsible": 1,
@@ -486,7 +523,11 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
+<<<<<<< HEAD
    "label": "State/Province"
+=======
+   "label": "State"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "country",
@@ -499,6 +540,7 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_gkxo",
@@ -543,11 +585,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-06-26 11:02:01.158901",
+=======
+ "modified": "2024-03-27 13:09:59.818450",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -606,7 +656,10 @@
    "role": "Sales User"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "lead_name,lead_owner,status",
  "sender_field": "email_id",
  "sender_name_field": "lead_name",
@@ -616,4 +669,8 @@
  "states": [],
  "subject_field": "title",
  "title_field": "title"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

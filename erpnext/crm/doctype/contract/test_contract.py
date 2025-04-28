@@ -1,5 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -8,6 +9,16 @@ from frappe.utils import add_days, nowdate
 
 
 class TestContract(IntegrationTestCase):
+=======
+
+import unittest
+
+import frappe
+from frappe.utils import add_days, nowdate
+
+
+class TestContract(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		frappe.db.sql("delete from `tabContract`")
 		self.contract_doc = get_contract()

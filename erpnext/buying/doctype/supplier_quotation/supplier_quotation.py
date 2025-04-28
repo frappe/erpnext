@@ -2,8 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 
+<<<<<<< HEAD
 import json
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -24,7 +27,10 @@ class SupplierQuotation(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
@@ -63,12 +69,18 @@ class SupplierQuotation(BuyingController):
 		discount_amount: DF.Currency
 		grand_total: DF.Currency
 		group_same_items: DF.Check
+<<<<<<< HEAD
 		has_unit_price_items: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		is_subcontracted: DF.Check
+<<<<<<< HEAD
 		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items: DF.Table[SupplierQuotationItem]
 		language: DF.Data | None
 		letter_head: DF.Link | None
@@ -108,10 +120,13 @@ class SupplierQuotation(BuyingController):
 		valid_till: DF.Date | None
 	# end: auto-generated types
 
+<<<<<<< HEAD
 	def before_validate(self):
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate(self):
 		super().validate()
 
@@ -138,6 +153,7 @@ class SupplierQuotation(BuyingController):
 	def on_trash(self):
 		pass
 
+<<<<<<< HEAD
 	def set_has_unit_price_items(self):
 		"""
 		If permitted in settings and any item has 0 qty, the SQ has unit price items.
@@ -149,6 +165,8 @@ class SupplierQuotation(BuyingController):
 			not row.qty for row in self.get("items") if (row.item_code and not row.qty)
 		)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
 			{
@@ -239,12 +257,16 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def make_purchase_order(source_name, target_doc=None, args=None):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
 		args = json.loads(args)
 
+=======
+def make_purchase_order(source_name, target_doc=None):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
@@ -253,18 +275,24 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
+<<<<<<< HEAD
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 		return child_filter
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	doclist = get_mapped_doc(
 		"Supplier Quotation",
 		source_name,
 		{
 			"Supplier Quotation": {
 				"doctype": "Purchase Order",
+<<<<<<< HEAD
 				"field_no_map": ["transaction_date"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"validation": {
 					"docstatus": ["=", 1],
 				},
@@ -279,7 +307,10 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 					["sales_order", "sales_order"],
 				],
 				"postprocess": update_item,
+<<<<<<< HEAD
 				"condition": select_item,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",

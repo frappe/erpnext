@@ -47,7 +47,11 @@ frappe.ui.form.on("Event", {
 		frm.add_custom_button(
 			__("Add Sales Partners"),
 			function () {
+<<<<<<< HEAD
 				new frappe.desk.eventParticipants(frm, "Sales Partner");
+=======
+				new frappe.desk.eventParticipants(frm, "Sales Partners");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			__("Add Participants")
 		);

@@ -1,20 +1,34 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import cint
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.pos_profile.pos_profile import (
 	get_child_nodes,
 )
 from erpnext.stock.get_item_details import get_pos_profile
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 class TestPOSProfile(IntegrationTestCase):
+=======
+test_dependencies = ["Item"]
+
+
+class TestPOSProfile(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_pos_profile(self):
 		make_pos_profile()
 
@@ -39,6 +53,7 @@ class TestPOSProfile(IntegrationTestCase):
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
+<<<<<<< HEAD
 	def test_disabled_pos_profile_creation(self):
 		make_pos_profile(name="_Test POS Profile 001", disabled=1)
 
@@ -83,6 +98,8 @@ class TestPOSProfile(IntegrationTestCase):
 
 			self.assertEqual(pos_profile.disabled, 1)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def get_customers_list(pos_profile=None):
 	if pos_profile is None:
@@ -95,7 +112,11 @@ def get_customers_list(pos_profile=None):
 			customer_groups.extend(
 				[d.get("name") for d in get_child_nodes("Customer Group", d.get("customer_group"))]
 			)
+<<<<<<< HEAD
 		cond = "customer_group in ({})".format(", ".join(["%s"] * len(customer_groups)))
+=======
+		cond = "customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return (
 		frappe.db.sql(
@@ -117,7 +138,11 @@ def get_items_list(pos_profile, company):
 		for d in pos_profile.get("item_groups"):
 			args_list.extend([d.name for d in get_child_nodes("Item Group", d.item_group)])
 		if args_list:
+<<<<<<< HEAD
 			cond = "and i.item_group in ({})".format(", ".join(["%s"] * len(args_list)))
+=======
+			cond = "and i.item_group in (%s)" % (", ".join(["%s"] * len(args_list)))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return frappe.db.sql(
 		f"""
@@ -162,7 +187,10 @@ def make_pos_profile(**args):
 			"write_off_account": args.write_off_account or "_Test Write Off - _TC",
 			"write_off_cost_center": args.write_off_cost_center or "_Test Write Off Cost Center - _TC",
 			"location": "Block 1" if not args.do_not_set_accounting_dimension else None,
+<<<<<<< HEAD
 			"disabled": cint(args.disabled) or 0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	)
 

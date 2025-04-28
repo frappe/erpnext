@@ -21,7 +21,10 @@
   "section_break_13",
   "required_qty",
   "supplied_qty",
+<<<<<<< HEAD
   "stock_reserved_qty",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_16",
   "consumed_qty",
   "returned_qty",
@@ -53,7 +56,11 @@
   {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Stock UOM",
+=======
+   "label": "Stock Uom",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "UOM",
    "read_only": 1
   },
@@ -161,6 +168,7 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -171,19 +179,32 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "hide_toolbar": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-30 16:00:43.379828",
+=======
+ "modified": "2024-03-27 13:10:46.680164",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Supplied Item",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

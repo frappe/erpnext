@@ -6,12 +6,18 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
+<<<<<<< HEAD
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
 	has_reserved_stock,
 )
+=======
+from erpnext.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
+from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.subcontracting_controller import SubcontractingController
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.stock_balance import update_bin_qty
 from erpnext.stock.utils import get_bin
 
@@ -54,10 +60,15 @@ class SubcontractingOrder(SubcontractingController):
 		letter_head: DF.Link | None
 		naming_series: DF.Literal["SC-ORD-.YYYY.-"]
 		per_received: DF.Percent
+<<<<<<< HEAD
 		production_plan: DF.Data | None
 		project: DF.Link | None
 		purchase_order: DF.Link
 		reserve_stock: DF.Check
+=======
+		project: DF.Link | None
+		purchase_order: DF.Link
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		schedule_date: DF.Date | None
 		select_print_heading: DF.Link | None
 		service_items: DF.Table[SubcontractingOrderServiceItem]
@@ -78,7 +89,10 @@ class SubcontractingOrder(SubcontractingController):
 		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
+<<<<<<< HEAD
 		supplier_currency: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		supplier_name: DF.Data
 		supplier_warehouse: DF.Link
 		title: DF.Data | None
@@ -111,6 +125,7 @@ class SubcontractingOrder(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "over_transfer_allowance"),
 		)
 
+<<<<<<< HEAD
 		if self.reserve_stock:
 			if self.has_unreserved_stock():
 				self.set_onload("has_unreserved_stock", True)
@@ -118,6 +133,8 @@ class SubcontractingOrder(SubcontractingController):
 			if has_reserved_stock(self.doctype, self.name):
 				self.set_onload("has_reserved_stock", True)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def before_validate(self):
 		super().before_validate()
 
@@ -133,16 +150,32 @@ class SubcontractingOrder(SubcontractingController):
 	def on_submit(self):
 		self.update_prevdoc_status()
 		self.update_status()
+<<<<<<< HEAD
 		self.update_subcontracted_quantity_in_po()
 		self.reserve_raw_materials()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def on_cancel(self):
 		self.update_prevdoc_status()
 		self.update_status()
+<<<<<<< HEAD
 		self.update_subcontracted_quantity_in_po(cancel=True)
 
 	def validate_purchase_order_for_subcontracting(self):
 		if self.purchase_order:
+=======
+
+	def validate_purchase_order_for_subcontracting(self):
+		if self.purchase_order:
+			if is_subcontracting_order_created(self.purchase_order):
+				frappe.throw(
+					_(
+						"Only one Subcontracting Order can be created against a Purchase Order, cancel the existing Subcontracting Order to create a new one."
+					)
+				)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			po = frappe.get_doc("Purchase Order", self.purchase_order)
 
 			if not po.is_subcontracted:
@@ -163,6 +196,7 @@ class SubcontractingOrder(SubcontractingController):
 			frappe.throw(_("Please select a Subcontracting Purchase Order."))
 
 	def validate_service_items(self):
+<<<<<<< HEAD
 		purchase_order_items = [item.purchase_order_item for item in self.items]
 		self.service_items = [
 			service_item
@@ -180,6 +214,12 @@ class SubcontractingOrder(SubcontractingController):
 			service_item.qty = item.qty * item.subcontracting_conversion_factor
 			service_item.fg_item_qty = item.qty
 			service_item.amount = service_item.qty * service_item.rate
+=======
+		for item in self.service_items:
+			if frappe.get_value("Item", item.item_code, "is_stock_item"):
+				msg = f"Service Item {item.item_name} must be a non-stock item."
+				frappe.throw(_(msg))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_supplied_items(self):
 		if self.supplier_warehouse:
@@ -251,11 +291,16 @@ class SubcontractingOrder(SubcontractingController):
 
 		return flt(query[0][0]) if query else 0
 
+<<<<<<< HEAD
 	def update_reserved_qty_for_subcontracting(self, sco_item_rows=None):
 		for item in self.supplied_items:
 			if sco_item_rows and item.reference_name not in sco_item_rows:
 				continue
 
+=======
+	def update_reserved_qty_for_subcontracting(self):
+		for item in self.supplied_items:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if item.rm_item_code:
 				stock_bin = get_bin(item.rm_item_code, item.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
@@ -266,6 +311,7 @@ class SubcontractingOrder(SubcontractingController):
 		for si in self.service_items:
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
+<<<<<<< HEAD
 
 				qty, subcontracted_qty, fg_item_qty, production_plan_sub_assembly_item = frappe.db.get_value(
 					"Purchase Order Item",
@@ -288,6 +334,12 @@ class SubcontractingOrder(SubcontractingController):
 					frappe.db.get_value(
 						"Subcontracting BOM",
 						{"finished_good": item.name, "is_active": 1},
+=======
+				bom = (
+					frappe.db.get_value(
+						"Subcontracting BOM",
+						{"finished_good": item.item_code, "is_active": 1},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"finished_good_bom",
 					)
 					or item.default_bom
@@ -295,18 +347,28 @@ class SubcontractingOrder(SubcontractingController):
 
 				items.append(
 					{
+<<<<<<< HEAD
 						"item_code": item.name,
+=======
+						"item_code": item.item_code,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"item_name": item.item_name,
 						"schedule_date": self.schedule_date,
 						"description": item.description,
 						"qty": si.fg_item_qty,
+<<<<<<< HEAD
 						"subcontracting_conversion_factor": conversion_factor,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"stock_uom": item.stock_uom,
 						"bom": bom,
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
+<<<<<<< HEAD
 						"production_plan_sub_assembly_item": production_plan_sub_assembly_item,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					}
 				)
 			else:
@@ -322,7 +384,11 @@ class SubcontractingOrder(SubcontractingController):
 
 		self.set_missing_values()
 
+<<<<<<< HEAD
 	def update_status(self, status=None, update_modified=True, update_bin=True):
+=======
+	def update_status(self, status=None, update_modified=True):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Purchase Order", self.purchase_order)
 
@@ -352,6 +418,7 @@ class SubcontractingOrder(SubcontractingController):
 			self.db_set("status", status, update_modified=update_modified)
 
 		self.update_requested_qty()
+<<<<<<< HEAD
 		if update_bin:
 			self.update_ordered_qty_for_subcontracting()
 			self.update_reserved_qty_for_subcontracting()
@@ -460,6 +527,10 @@ class SubcontractingOrder(SubcontractingController):
 		cancel_stock_reservation_entries(
 			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
 		)
+=======
+		self.update_ordered_qty_for_subcontracting()
+		self.update_reserved_qty_for_subcontracting()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()

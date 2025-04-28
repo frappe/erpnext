@@ -18,15 +18,24 @@ frappe.ui.form.on("Rename Tool", {
 				allowed_file_types: [".csv"],
 			},
 		};
+<<<<<<< HEAD
 
 		frm.trigger("render_overview");
 
 		frm.page.set_primary_action(__("Rename"), function () {
+=======
+		if (!frm.doc.file_to_rename) {
+			frm.get_field("rename_log").$wrapper.html("");
+		}
+		frm.page.set_primary_action(__("Rename"), function () {
+			frm.get_field("rename_log").$wrapper.html("<p>Renaming...</p>");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.call({
 				method: "erpnext.utilities.doctype.rename_tool.rename_tool.upload",
 				args: {
 					select_doctype: frm.doc.select_doctype,
 				},
+<<<<<<< HEAD
 				freeze: true,
 				freeze_message: __("Scheduling..."),
 				callback: function () {
@@ -52,10 +61,24 @@ frappe.ui.form.on("Rename Tool", {
 					});
 
 					frm.trigger("render_overview");
+=======
+				callback: function (r) {
+					let html = r.message.join("<br>");
+
+					if (r.exc) {
+						r.exc = frappe.utils.parse_json(r.exc);
+						if (Array.isArray(r.exc)) {
+							html += "<br>" + r.exc.join("<br>");
+						}
+					}
+
+					frm.get_field("rename_log").$wrapper.html(html);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			});
 		});
 	},
+<<<<<<< HEAD
 	render_overview: function (frm) {
 		frappe.db
 			.get_list("RQ Job", { filters: { status: ["in", ["started", "queued", "finished", "failed"]] } })
@@ -84,4 +107,6 @@ frappe.ui.form.on("Rename Tool", {
 				`);
 			});
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

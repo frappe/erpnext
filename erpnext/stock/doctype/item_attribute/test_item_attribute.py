@@ -3,12 +3,23 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+
+test_records = frappe.get_test_records("Item Attribute")
+
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
 
 
+<<<<<<< HEAD
 class TestItemAttribute(IntegrationTestCase):
+=======
+class TestItemAttribute(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		super().setUp()
 		if frappe.db.exists("Item Attribute", "_Test_Length"):

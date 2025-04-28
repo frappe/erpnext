@@ -1,9 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_months, nowdate
 
 from erpnext.accounts.doctype.accounting_period.accounting_period import (
@@ -12,10 +19,17 @@ from erpnext.accounts.doctype.accounting_period.accounting_period import (
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 class TestAccountingPeriod(IntegrationTestCase):
+=======
+test_dependencies = ["Item"]
+
+
+class TestAccountingPeriod(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_overlap(self):
 		ap1 = create_accounting_period(
 			start_date="2018-04-01", end_date="2018-06-30", company="Wind Power LLC"

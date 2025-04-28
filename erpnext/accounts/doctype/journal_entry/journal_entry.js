@@ -20,6 +20,7 @@ frappe.ui.form.on("Journal Entry", {
 			"Unreconcile Payment Entries",
 			"Bank Transaction",
 		];
+<<<<<<< HEAD
 
 		frm.trigger("set_queries");
 	},
@@ -53,6 +54,8 @@ frappe.ui.form.on("Journal Entry", {
 				refresh_field("accounts");
 			},
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	refresh: function (frm) {
@@ -68,7 +71,11 @@ frappe.ui.form.on("Journal Entry", {
 						to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
 						company: frm.doc.company,
 						finance_book: frm.doc.finance_book,
+<<<<<<< HEAD
 						categorize_by: "",
+=======
+						group_by: "",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						show_cancelled_entries: frm.doc.docstatus === 2,
 					};
 					frappe.set_route("query-report", "General Ledger");
@@ -111,10 +118,13 @@ frappe.ui.form.on("Journal Entry", {
 		}
 
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
+<<<<<<< HEAD
 
 		$.each(frm.doc.accounts || [], function (i, row) {
 			erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	before_save: function (frm) {
 		if (frm.doc.docstatus == 0 && !frm.doc.is_system_generated) {
@@ -200,7 +210,10 @@ frappe.ui.form.on("Journal Entry", {
 		});
 
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+<<<<<<< HEAD
 		erpnext.utils.set_letter_head(frm);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	voucher_type: function (frm) {
@@ -398,23 +411,36 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 
 	accounts_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
+<<<<<<< HEAD
 		row.exchange_rate = 1;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		$.each(doc.accounts, function (i, d) {
 			if (d.account && d.party && d.party_type) {
 				row.account = d.account;
 				row.party = d.party;
 				row.party_type = d.party_type;
+<<<<<<< HEAD
 				row.exchange_rate = d.exchange_rate;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		});
 
 		// set difference
 		if (doc.difference) {
 			if (doc.difference > 0) {
+<<<<<<< HEAD
 				row.credit_in_account_currency = doc.difference / row.exchange_rate;
 				row.credit = doc.difference;
 			} else {
 				row.debit_in_account_currency = -doc.difference / row.exchange_rate;
+=======
+				row.credit_in_account_currency = doc.difference;
+				row.credit = doc.difference;
+			} else {
+				row.debit_in_account_currency = -doc.difference;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				row.debit = -doc.difference;
 			}
 		}
@@ -468,6 +494,15 @@ frappe.ui.form.on("Journal Entry Account", {
 			});
 		}
 	},
+<<<<<<< HEAD
+=======
+	cost_center: function (frm, dt, dn) {
+		// Don't reset for Gain/Loss type journals, as it will make Debit and Credit values '0'
+		if (frm.doc.voucher_type != "Exchange Gain Or Loss") {
+			erpnext.journal_entry.set_account_details(frm, dt, dn);
+		}
+	},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	account: function (frm, dt, dn) {
 		erpnext.journal_entry.set_account_details(frm, dt, dn);
@@ -714,7 +749,10 @@ $.extend(erpnext.journal_entry, {
 				callback: function (r) {
 					if (r.message) {
 						$.extend(d, r.message);
+<<<<<<< HEAD
 						erpnext.journal_entry.set_amount_on_last_row(frm, dt, dn);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						erpnext.journal_entry.set_debit_credit_in_company_currency(frm, dt, dn);
 						refresh_field("accounts");
 					}
@@ -722,6 +760,7 @@ $.extend(erpnext.journal_entry, {
 			});
 		}
 	},
+<<<<<<< HEAD
 	set_amount_on_last_row: function (frm, dt, dn) {
 		let row = locals[dt][dn];
 		let length = frm.doc.accounts.length;
@@ -744,4 +783,6 @@ $.extend(erpnext.journal_entry, {
 		}
 		refresh_field("accounts");
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

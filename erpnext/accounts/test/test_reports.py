@@ -1,7 +1,10 @@
 import unittest
 
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report
 
 DEFAULT_FILTERS = {
@@ -14,10 +17,17 @@ DEFAULT_FILTERS = {
 
 
 REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
+<<<<<<< HEAD
 	("General Ledger", {"categorize_by": "Categorize by Voucher (Consolidated)"}),
 	("General Ledger", {"categorize_by": "Categorize by Voucher (Consolidated)", "include_dimensions": 1}),
 	("Accounts Payable", {"range": "30, 60, 90, 120"}),
 	("Accounts Receivable", {"range": "30, 60, 90, 120"}),
+=======
+	("General Ledger", {"group_by": "Group by Voucher (Consolidated)"}),
+	("General Ledger", {"group_by": "Group by Voucher (Consolidated)", "include_dimensions": 1}),
+	("Accounts Payable", {"range1": 30, "range2": 60, "range3": 90, "range4": 120}),
+	("Accounts Receivable", {"range1": 30, "range2": 60, "range3": 90, "range4": 120}),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	("Consolidated Financial Statement", {"report": "Balance Sheet"}),
 	("Consolidated Financial Statement", {"report": "Profit and Loss Statement"}),
 	("Consolidated Financial Statement", {"report": "Cash Flow"}),
@@ -36,7 +46,11 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 OPTIONAL_FILTERS = {}
 
 
+<<<<<<< HEAD
 class TestReports(IntegrationTestCase):
+=======
+class TestReports(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_execute_all_accounts_reports(self):
 		"""Test that all script report in stock modules are executable with supported filters"""
 		for report, filter in REPORT_FILTER_TEST_CASES:

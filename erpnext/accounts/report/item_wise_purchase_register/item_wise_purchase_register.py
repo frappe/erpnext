@@ -11,12 +11,20 @@ import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
 	add_sub_total_row,
 	add_total_row,
+<<<<<<< HEAD
 	apply_order_by_conditions,
+=======
+	apply_group_by_conditions,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	get_grand_total,
 	get_group_by_and_display_fields,
 	get_tax_accounts,
 )
+<<<<<<< HEAD
 from erpnext.accounts.report.utils import get_values_for_columns
+=======
+from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def execute(filters=None):
@@ -96,6 +104,7 @@ def _execute(filters=None, additional_table_columns=None):
 		}
 
 		total_tax = 0
+<<<<<<< HEAD
 		total_other_charges = 0
 		for tax, details in itemised_tax.get(d.name, {}).items():
 			row.update(
@@ -108,6 +117,17 @@ def _execute(filters=None, additional_table_columns=None):
 				total_other_charges += flt(details.get("tax_amount"))
 			else:
 				total_tax += flt(details.get("tax_amount"))
+=======
+		for tax in tax_columns:
+			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
+			row.update(
+				{
+					scrubbed_tax_fields[tax + " Rate"]: item_tax.get("tax_rate", 0),
+					scrubbed_tax_fields[tax + " Amount"]: item_tax.get("tax_amount", 0),
+				}
+			)
+			total_tax += flt(item_tax.get("tax_amount"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		row.update(
 			{"total_tax": total_tax, "total": d.base_net_amount + total_tax, "currency": company_currency}
@@ -181,7 +201,11 @@ def get_columns(additional_table_columns, filters):
 				"fieldname": "invoice",
 				"fieldtype": "Link",
 				"options": "Purchase Invoice",
+<<<<<<< HEAD
 				"width": 150,
+=======
+				"width": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		]
@@ -308,13 +332,27 @@ def apply_conditions(query, pi, pii, filters):
 	if filters.get("item_group"):
 		query = query.where(pii.item_group == filters.get("item_group"))
 
+<<<<<<< HEAD
+=======
+	if not filters.get("group_by"):
+		query = query.orderby(pi.posting_date, order=Order.desc)
+		query = query.orderby(pii.item_group, order=Order.desc)
+	else:
+		query = apply_group_by_conditions(query, pi, pii, filters)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return query
 
 
 def get_items(filters, additional_table_columns):
 	doctype = "Purchase Invoice"
+<<<<<<< HEAD
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pii = frappe.qb.DocType("Purchase Invoice Item")
+=======
+	pi = frappe.qb.DocType(doctype)
+	pii = frappe.qb.DocType(f"{doctype} Item")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	Item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(pi)
@@ -334,7 +372,10 @@ def get_items(filters, additional_table_columns):
 			pi.unrealized_profit_loss_account,
 			pii.item_code,
 			pii.description,
+<<<<<<< HEAD
 			pii.item_name,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			pii.item_group,
 			pii.item_name.as_("pi_item_name"),
 			pii.item_group.as_("pi_item_group"),
@@ -370,6 +411,7 @@ def get_items(filters, additional_table_columns):
 
 	query = apply_conditions(query, pi, pii, filters)
 
+<<<<<<< HEAD
 	from frappe.desk.reportview import build_match_conditions
 
 	query, params = query.walk()
@@ -381,6 +423,9 @@ def get_items(filters, additional_table_columns):
 	query = apply_order_by_conditions(doctype, query, filters)
 
 	return frappe.db.sql(query, params, as_dict=True)
+=======
+	return query.run(as_dict=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_aii_accounts():

@@ -61,6 +61,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 			};
 		});
+<<<<<<< HEAD
 		this.frm.set_query("cost_center", "payments", () => {
 			return {
 				filters: {
@@ -77,6 +78,8 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 			};
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	refresh() {
@@ -401,6 +404,7 @@ frappe.ui.form.on("Payment Reconciliation Allocation", {
 		// filter payment
 		let payment = frm.doc.payments.filter((x) => x.reference_name == row.reference_name);
 
+<<<<<<< HEAD
 		let amount = payment[0].amount;
 		for (const d of frm.doc.allocation) {
 			if (row.reference_name == d.reference_name && amount) {
@@ -411,6 +415,8 @@ frappe.ui.form.on("Payment Reconciliation Allocation", {
 			}
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.call({
 			doc: frm.doc,
 			method: "calculate_difference_on_allocation_change",

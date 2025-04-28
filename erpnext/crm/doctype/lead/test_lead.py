@@ -1,13 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_opportunity
 from erpnext.crm.utils import get_linked_prospect
+<<<<<<< HEAD
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -17,14 +26,27 @@ class TestLead(ERPNextTestSuite):
 		super().setUpClass()
 		cls.make_leads()
 
+=======
+
+test_records = frappe.get_test_records("Lead")
+
+
+class TestLead(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_make_customer(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 
 		frappe.delete_doc_if_exists("Customer", "_Test Lead")
 
+<<<<<<< HEAD
 		customer = make_customer(self.leads[0].name)
 		self.assertEqual(customer.doctype, "Customer")
 		self.assertEqual(customer.lead_name, self.leads[0].name)
+=======
+		customer = make_customer("_T-Lead-00001")
+		self.assertEqual(customer.doctype, "Customer")
+		self.assertEqual(customer.lead_name, "_T-Lead-00001")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		customer.company = "_Test Company"
 		customer.customer_group = "_Test Customer Group"
@@ -48,9 +70,15 @@ class TestLead(ERPNextTestSuite):
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 
+<<<<<<< HEAD
 		customer = make_customer(self.leads[1].name)
 		self.assertEqual(customer.doctype, "Customer")
 		self.assertEqual(customer.lead_name, self.leads[1].name)
+=======
+		customer = make_customer("_T-Lead-00002")
+		self.assertEqual(customer.doctype, "Customer")
+		self.assertEqual(customer.lead_name, "_T-Lead-00002")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		customer.company = "_Test Company"
 		customer.customer_group = "_Test Customer Group"

@@ -48,7 +48,10 @@ def execute():
 		dunning.validate()
 
 		dunning.flags.ignore_validate_update_after_submit = True
+<<<<<<< HEAD
 		dunning.flags.ignore_links = True
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		dunning.save()
 
 		# Reverse entries only if dunning is submitted and not resolved
@@ -67,7 +70,11 @@ def get_accounts_closing_date():
 	)  # always returns datetime.date
 
 	period_closing_date = frappe.db.get_value(
+<<<<<<< HEAD
 		"Period Closing Voucher", {"docstatus": 1}, "period_end_date", order_by="period_end_date desc"
+=======
+		"Period Closing Voucher", {"docstatus": 1}, "posting_date", order_by="posting_date desc"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	# Set most recent frozen/closing date as filter

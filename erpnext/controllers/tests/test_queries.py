@@ -2,18 +2,24 @@ import unittest
 from functools import partial
 
 import frappe
+<<<<<<< HEAD
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
 from erpnext.tests.utils import ERPNextTestSuite
+=======
+
+from erpnext.controllers import queries
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def add_default_params(func, doctype):
 	return partial(func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None)
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "BOM", "Account"]
 
 
@@ -26,6 +32,10 @@ class TestQueries(ERPNextTestSuite):
 		cls.make_employees()
 		cls.make_leads()
 		cls.make_projects()
+=======
+class TestQueries(unittest.TestCase):
+	# All tests are based on doctype/test_records.json
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def assert_nested_in(self, item, container):
 		self.assertIn(item, [vals for tuples in container for vals in tuples])
@@ -95,6 +105,7 @@ class TestQueries(ERPNextTestSuite):
 
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
+<<<<<<< HEAD
 
 	def test_employee_query_with_user_permissions(self):
 		# party field is a dynamic link field in Payment Entry doctype with ignore_user_permissions=0
@@ -139,3 +150,5 @@ class TestQueries(ERPNextTestSuite):
 			# only one employee should be returned even though ignore_user_permissions is passed as 1
 			result = queries.employee_query(**params)
 			self.assertEqual(len(result), 1)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

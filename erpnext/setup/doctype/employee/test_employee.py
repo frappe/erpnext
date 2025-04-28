@@ -1,9 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import unittest
 
 import frappe
 import frappe.utils
+<<<<<<< HEAD
 from frappe.query_builder import Criterion
 from frappe.tests import IntegrationTestCase
 
@@ -13,6 +18,16 @@ from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
 
 
 class TestEmployee(IntegrationTestCase):
+=======
+
+import erpnext
+from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
+
+test_records = frappe.get_test_records("Employee")
+
+
+class TestEmployee(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_employee_status_left(self):
 		employee1 = make_employee("test_employee_1@company.com")
 		employee2 = make_employee("test_employee_2@company.com")
@@ -34,6 +49,7 @@ class TestEmployee(IntegrationTestCase):
 		employee_doc.save()
 		self.assertTrue("Employee" not in frappe.get_roles(user))
 
+<<<<<<< HEAD
 	def test_employee_user_permission(self):
 		employee1 = make_employee("employee_1_test@company.com", create_user_permission=1)
 		employee2 = make_employee("employee_2_test@company.com", create_user_permission=1)
@@ -60,6 +76,8 @@ class TestEmployee(IntegrationTestCase):
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		frappe.db.rollback()
 

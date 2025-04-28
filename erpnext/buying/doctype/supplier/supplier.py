@@ -32,9 +32,12 @@ class Supplier(TransactionBase):
 			AllowedToTransactWith,
 		)
 		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
+<<<<<<< HEAD
 		from erpnext.buying.doctype.customer_number_at_supplier.customer_number_at_supplier import (
 			CustomerNumberAtSupplier,
 		)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		accounts: DF.Table[PartyAccount]
@@ -42,7 +45,10 @@ class Supplier(TransactionBase):
 		allow_purchase_invoice_creation_without_purchase_receipt: DF.Check
 		companies: DF.Table[AllowedToTransactWith]
 		country: DF.Link | None
+<<<<<<< HEAD
 		customer_numbers: DF.Table[CustomerNumberAtSupplier]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		default_bank_account: DF.Link | None
 		default_currency: DF.Link | None
 		default_price_list: DF.Link | None

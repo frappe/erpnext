@@ -1,10 +1,17 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.query_builder.functions import Sum
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -18,15 +25,24 @@ from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation impo
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 
+<<<<<<< HEAD
 class TestCostCenterAllocation(IntegrationTestCase):
+=======
+class TestCostCenterAllocation(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		cost_centers = [
 			"Main Cost Center 1",
 			"Main Cost Center 2",
+<<<<<<< HEAD
 			"Main Cost Center 3",
 			"Sub Cost Center 1",
 			"Sub Cost Center 2",
 			"Sub Cost Center 3",
+=======
+			"Sub Cost Center 1",
+			"Sub Cost Center 2",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 		for cc in cost_centers:
 			create_cost_center(cost_center_name=cc, company="_Test Company")
@@ -39,7 +55,11 @@ class TestCostCenterAllocation(IntegrationTestCase):
 		)
 
 		jv = make_journal_entry(
+<<<<<<< HEAD
 			"Cash - _TC", "Sales - _TC", 100, cost_center="Main Cost Center 1 - _TC", submit=True
+=======
+			"_Test Cash - _TC", "Sales - _TC", 100, cost_center="Main Cost Center 1 - _TC", submit=True
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		expected_values = [["Sub Cost Center 1 - _TC", 0.0, 60], ["Sub Cost Center 2 - _TC", 0.0, 40]]
@@ -123,7 +143,11 @@ class TestCostCenterAllocation(IntegrationTestCase):
 	def test_valid_from_based_on_existing_gle(self):
 		# GLE posted against Sub Cost Center 1 on today
 		jv = make_journal_entry(
+<<<<<<< HEAD
 			"Cash - _TC",
+=======
+			"_Test Cash - _TC",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"Sales - _TC",
 			100,
 			cost_center="Main Cost Center 1 - _TC",
@@ -144,6 +168,7 @@ class TestCostCenterAllocation(IntegrationTestCase):
 
 		jv.cancel()
 
+<<<<<<< HEAD
 	def test_multiple_cost_center_allocation_on_same_main_cost_center(self):
 		coa1 = create_cost_center_allocation(
 			"_Test Company",
@@ -216,6 +241,8 @@ class TestCostCenterAllocation(IntegrationTestCase):
 		si.cancel()
 		cca.cancel()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_cost_center_allocation(
 	company,

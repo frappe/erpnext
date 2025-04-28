@@ -30,7 +30,10 @@ class ItemAttribute(Document):
 		from erpnext.stock.doctype.item_attribute_value.item_attribute_value import ItemAttributeValue
 
 		attribute_name: DF.Data
+<<<<<<< HEAD
 		disabled: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from_range: DF.Float
 		increment: DF.Float
 		item_attribute_values: DF.Table[ItemAttributeValue]
@@ -38,6 +41,12 @@ class ItemAttribute(Document):
 		to_range: DF.Float
 	# end: auto-generated types
 
+<<<<<<< HEAD
+=======
+	def __setup__(self):
+		self.flags.ignore_these_exceptions_in_test = [InvalidItemAttributeValueError]
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate(self):
 		frappe.flags.attribute_values = None
 		self.validate_numeric()
@@ -45,6 +54,7 @@ class ItemAttribute(Document):
 
 	def on_update(self):
 		self.validate_exising_items()
+<<<<<<< HEAD
 		self.set_enabled_disabled_in_items()
 
 	def set_enabled_disabled_in_items(self):
@@ -58,6 +68,8 @@ class ItemAttribute(Document):
 			)
 
 			query.run()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_exising_items(self):
 		"""Validate that if there are existing items with attributes, they are valid"""

@@ -78,6 +78,7 @@ erpnext.accounts.dimensions = {
 	},
 
 	update_dimension(frm, doctype) {
+<<<<<<< HEAD
 		if (
 			!this.accounting_dimensions ||
 			!frm.is_new() ||
@@ -106,6 +107,37 @@ erpnext.accounts.dimensions = {
 				frappe.model.set_value(row.doctype, row.name, dimension["fieldname"], default_dimension);
 			});
 		});
+=======
+		if (this.accounting_dimensions) {
+			this.accounting_dimensions.forEach((dimension) => {
+				if (frm.is_new()) {
+					if (
+						frm.doc.company &&
+						Object.keys(this.default_dimensions || {}).length > 0 &&
+						this.default_dimensions[frm.doc.company]
+					) {
+						let default_dimension =
+							this.default_dimensions[frm.doc.company][dimension["fieldname"]];
+
+						if (default_dimension) {
+							if (frappe.meta.has_field(doctype, dimension["fieldname"])) {
+								frm.set_value(dimension["fieldname"], default_dimension);
+							}
+
+							$.each(frm.doc.items || frm.doc.accounts || [], function (i, row) {
+								frappe.model.set_value(
+									row.doctype,
+									row.name,
+									dimension["fieldname"],
+									default_dimension
+								);
+							});
+						}
+					}
+				}
+			});
+		}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	copy_dimension_from_first_row(frm, cdt, cdn, fieldname) {

@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+<<<<<<< HEAD
   "naming_series",
   "asset",
   "asset_name",
@@ -27,10 +28,23 @@
   "column_break_ajbh",
   "column_break_hkem",
   "repair_cost",
+=======
+  "asset",
+  "company",
+  "column_break_2",
+  "asset_name",
+  "naming_series",
+  "section_break_5",
+  "failure_date",
+  "repair_status",
+  "column_break_6",
+  "completion_date",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "accounting_dimensions_section",
   "cost_center",
   "column_break_14",
   "project",
+<<<<<<< HEAD
   "stock_consumption_details_section",
   "stock_items",
   "section_break_ltbb",
@@ -43,6 +57,27 @@
   "increase_in_asset_life",
   "column_break_xebe",
   "total_repair_cost"
+=======
+  "accounting_details",
+  "purchase_invoice",
+  "capitalize_repair_cost",
+  "stock_consumption",
+  "column_break_8",
+  "repair_cost",
+  "stock_consumption_details_section",
+  "stock_items",
+  "total_repair_cost",
+  "asset_depreciation_details_section",
+  "increase_in_asset_life",
+  "section_break_9",
+  "description",
+  "column_break_9",
+  "actions_performed",
+  "section_break_23",
+  "downtime",
+  "column_break_19",
+  "amended_from"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -57,6 +92,14 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Repair Details"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "columns": 1,
    "fieldname": "failure_date",
    "fieldtype": "Datetime",
@@ -64,15 +107,30 @@
    "reqd": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:doc.repair_status==\"Completed\"",
    "fieldname": "completion_date",
    "fieldtype": "Datetime",
    "label": "Completion Date",
    "mandatory_depends_on": "eval:doc.repair_status==\"Completed\"",
+=======
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "completion_date",
+   "fieldtype": "Datetime",
+   "label": "Completion Date",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "no_copy": 1
   },
   {
    "default": "Pending",
+<<<<<<< HEAD
+=======
+   "depends_on": "eval:!doc.__islocal",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "repair_status",
    "fieldtype": "Select",
    "label": "Repair Status",
@@ -107,6 +165,13 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "default": "0",
    "fieldname": "repair_cost",
    "fieldtype": "Currency",
@@ -128,7 +193,10 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
+<<<<<<< HEAD
    "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Fully Depreciated\",\"Sold\",\"Scrapped\",\"Cancelled\",null]]]",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Asset",
    "reqd": 1
   },
@@ -139,6 +207,13 @@
    "label": "Asset Name"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "default": "0",
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "capitalize_repair_cost",
@@ -148,8 +223,12 @@
   {
    "fieldname": "accounting_details",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "hide_border": 1,
    "label": "Repair Purchase Invoices"
+=======
+   "label": "Accounting Details"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "stock_items",
@@ -159,7 +238,20 @@
    "options": "Asset Repair Consumed Item"
   },
   {
+<<<<<<< HEAD
    "fetch_from": "company.cost_center",
+=======
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -176,6 +268,7 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "collapsible_depends_on": "stock_items",
    "fieldname": "stock_consumption_details_section",
    "fieldtype": "Section Break",
@@ -183,6 +276,23 @@
    "label": "Consumed Stock Items"
   },
   {
+=======
+   "default": "0",
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "stock_consumption",
+   "fieldtype": "Check",
+   "label": "Stock Consumed During Repair"
+  },
+  {
+   "depends_on": "stock_consumption",
+   "fieldname": "stock_consumption_details_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Consumption Details"
+  },
+  {
+   "depends_on": "eval: doc.stock_consumption && doc.total_repair_cost > 0",
+   "description": "Sum of Repair Cost and Value of Consumed Stock Items.",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "total_repair_cost",
    "fieldtype": "Currency",
    "label": "Total Repair Cost",
@@ -190,17 +300,37 @@
   },
   {
    "depends_on": "capitalize_repair_cost",
+<<<<<<< HEAD
+=======
+   "fieldname": "asset_depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Depreciation Details"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "increase_in_asset_life",
    "fieldtype": "Int",
    "label": "Increase In Asset Life(Months)",
    "no_copy": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "mandatory_depends_on": "eval: doc.repair_status == 'Completed' && doc.repair_cost > 0",
+   "no_copy": 1,
+   "options": "Purchase Invoice"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fetch_from": "asset.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+<<<<<<< HEAD
   },
   {
    "fieldname": "invoices",
@@ -256,12 +386,18 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-04 23:06:43.644846",
+=======
+ "modified": "2024-06-13 16:14:14.398356",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
@@ -299,11 +435,18 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "asset_name",
  "track_changes": 1,
  "track_seen": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -50,7 +50,10 @@ function get_filters() {
 			fieldname: "party",
 			label: __("Party"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "party_type",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 

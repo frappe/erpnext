@@ -13,6 +13,7 @@
  "fields": [
   {
    "fieldname": "voucher_type",
+<<<<<<< HEAD
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Voucher Type"
@@ -22,6 +23,19 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Voucher Name"
+=======
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "voucher_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher Name",
+   "options": "voucher_type"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "taxable_amount",
@@ -34,7 +48,11 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-02-05 16:39:14.863698",
+=======
+ "modified": "2024-03-27 13:10:52.307012",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withheld Vouchers",

@@ -21,7 +21,10 @@ class ProductionPlanSalesOrder(Document):
 		parenttype: DF.Data
 		sales_order: DF.Link
 		sales_order_date: DF.Date | None
+<<<<<<< HEAD
 		status: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	pass

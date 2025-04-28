@@ -42,7 +42,11 @@ def get_data(filters):
 
 
 def get_chart_data(periodic_data, columns):
+<<<<<<< HEAD
 	labels = [_("Rejected"), _("Accepted")]
+=======
+	labels = ["Rejected", "Accepted"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	status_wise_data = {"Accepted": 0, "Rejected": 0}
 
@@ -53,7 +57,11 @@ def get_chart_data(periodic_data, columns):
 
 	datasets.append(
 		{
+<<<<<<< HEAD
 			"name": _("Qty Wise Chart"),
+=======
+			"name": "Qty Wise Chart",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"values": [status_wise_data.get("Rejected"), status_wise_data.get("Accepted")],
 		}
 	)

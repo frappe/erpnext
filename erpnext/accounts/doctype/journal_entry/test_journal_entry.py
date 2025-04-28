@@ -1,13 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+<<<<<<< HEAD
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+from frappe.tests.utils import change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
+<<<<<<< HEAD
 from erpnext.selling.doctype.customer.test_customer import make_customer, set_credit_limit
 
 
@@ -18,20 +27,37 @@ class TestJournalEntry(IntegrationTestCase):
 	def test_journal_entry_with_against_jv(self):
 		jv_invoice = frappe.copy_doc(self.globalTestRecords["Journal Entry"][2])
 		base_jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
+=======
+
+
+class TestJournalEntry(unittest.TestCase):
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	def test_journal_entry_with_against_jv(self):
+		jv_invoice = frappe.copy_doc(test_records[2])
+		base_jv = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.jv_against_voucher_testcase(base_jv, jv_invoice)
 
 	def test_jv_against_sales_order(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		sales_order = make_sales_order(do_not_save=True)
+<<<<<<< HEAD
 		base_jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
+=======
+		base_jv = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.jv_against_voucher_testcase(base_jv, sales_order)
 
 	def test_jv_against_purchase_order(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		purchase_order = create_purchase_order(do_not_save=True)
+<<<<<<< HEAD
 		base_jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][1])
+=======
+		base_jv = frappe.copy_doc(test_records[1])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.jv_against_voucher_testcase(base_jv, purchase_order)
 
 	def jv_against_voucher_testcase(self, base_jv, test_voucher):
@@ -146,9 +172,16 @@ class TestJournalEntry(IntegrationTestCase):
 				"credit_in_account_currency": 0 if diff > 0 else abs(diff),
 			},
 		)
+<<<<<<< HEAD
 
 		if account_bal == stock_bal:
 			self.assertRaises(StockAccountInvalidTransaction, jv.save)
+=======
+		jv.insert()
+
+		if account_bal == stock_bal:
+			self.assertRaises(StockAccountInvalidTransaction, jv.submit)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.db.rollback()
 		else:
 			jv.submit()
@@ -514,6 +547,7 @@ class TestJournalEntry(IntegrationTestCase):
 				self.assertEqual(row.debit_in_account_currency, 100)
 				self.assertEqual(row.credit_in_account_currency, 100)
 
+<<<<<<< HEAD
 	def test_toggle_debit_credit_if_negative(self):
 		from erpnext.accounts.general_ledger import process_gl_map
 
@@ -601,6 +635,8 @@ class TestJournalEntry(IntegrationTestCase):
 		jv.save()
 		self.assertRaises(frappe.ValidationError, jv.submit)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_journal_entry(
 	account1,
@@ -612,14 +648,21 @@ def make_journal_entry(
 	save=True,
 	submit=False,
 	project=None,
+<<<<<<< HEAD
 	company=None,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ):
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
 
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = posting_date or nowdate()
+<<<<<<< HEAD
 	jv.company = company or "_Test Company"
+=======
+	jv.company = "_Test Company"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	jv.user_remark = "test"
 	jv.multi_currency = 1
 	jv.set(
@@ -650,3 +693,9 @@ def make_journal_entry(
 			jv.submit()
 
 	return jv
+<<<<<<< HEAD
+=======
+
+
+test_records = frappe.get_test_records("Journal Entry")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

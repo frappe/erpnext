@@ -14,7 +14,10 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 	}
 
 	company() {
+<<<<<<< HEAD
 		erpnext.utils.set_letter_head(this.frm);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 		this.frm.set_value("set_warehouse", "");
 		this.frm.set_value("taxes_and_charges", "");
@@ -41,6 +44,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			};
 		});
 
+<<<<<<< HEAD
 		this.frm.set_query("item_code", "items", function (doc) {
 			return {
 				query: "erpnext.accounts.doctype.pos_invoice.pos_invoice.item_query",
@@ -69,6 +73,12 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 
 	onload_post_render(frm) {
 		super.onload_post_render();
+=======
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
+	}
+
+	onload_post_render(frm) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.pos_profile(frm);
 	}
 
@@ -76,6 +86,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		super.refresh();
 
 		if (doc.docstatus == 1 && !doc.is_return) {
+<<<<<<< HEAD
 			this.frm.add_custom_button(__("Return"), this.make_sales_return.bind(this), __("Create"));
 			if (["Partly Paid", "Overdue", "Unpaid"].includes(doc.status)) {
 				this.frm.add_custom_button(
@@ -84,6 +95,9 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 					__("Create")
 				);
 			}
+=======
+			this.frm.add_custom_button(__("Return"), this.make_sales_return, __("Create"));
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
@@ -130,7 +144,10 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.doc.campaign = r.message.campaign;
 						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
+<<<<<<< HEAD
 						this.frm.set_default_payment = r.message.set_default_payment;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					}
 					this.frm.script_manager.trigger("update_stock");
 					this.calculate_taxes_and_totals();
@@ -229,6 +246,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			frm: this.frm,
 		});
 	}
+<<<<<<< HEAD
 
 	async collect_outstanding_payment() {
 		const total_amount = flt(this.frm.doc.rounded_total) | flt(this.frm.doc.grand_total);
@@ -361,6 +379,8 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		});
 		return data;
 	}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.selling.POSInvoiceController({ frm: cur_frm }));
@@ -474,6 +494,7 @@ frappe.ui.form.on("POS Invoice", {
 		});
 	},
 });
+<<<<<<< HEAD
 
 frappe.ui.form.on("Sales Invoice Payment", {
 	mode_of_payment: function (frm) {
@@ -486,3 +507,5 @@ frappe.ui.form.on("Sales Invoice Payment", {
 		});
 	},
 });
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

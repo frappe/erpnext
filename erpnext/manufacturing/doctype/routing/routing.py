@@ -53,6 +53,7 @@ class Routing(Document):
 				)
 
 			sequence_id = row.sequence_id
+<<<<<<< HEAD
 
 
 @frappe.whitelist()
@@ -74,3 +75,5 @@ def get_operations(doctype, txt, searchfield, start, page_len, filters):
 		page_length=page_len,
 		as_list=1,
 	)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

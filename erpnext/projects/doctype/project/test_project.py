@@ -2,13 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.sales_order import make_project as make_project_from_so
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+<<<<<<< HEAD
 from erpnext.tests.utils import ERPNextTestSuite
 
 IGNORE_TEST_RECORD_DEPENDENCIES = ["Sales Order"]
@@ -20,6 +25,14 @@ class TestProject(ERPNextTestSuite):
 		super().setUpClass()
 		cls.make_projects()
 
+=======
+
+test_records = frappe.get_test_records("Project")
+test_ignore = ["Sales Order"]
+
+
+class TestProject(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"
 		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
@@ -204,6 +217,7 @@ class TestProject(ERPNextTestSuite):
 			if not pt.is_group:
 				self.assertIsNotNone(pt.parent_task)
 
+<<<<<<< HEAD
 	def test_project_having_no_tasks_complete(self):
 		project_name = "Test Project - No Tasks Completion"
 		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
@@ -232,6 +246,8 @@ class TestProject(ERPNextTestSuite):
 		project.save()
 		self.assertEqual(project.status, "Completed")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def get_project(name, template):
 	project = frappe.get_doc(

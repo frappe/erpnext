@@ -44,12 +44,40 @@ class UnreconcilePayment(Document):
 
 	@frappe.whitelist()
 	def get_allocations_from_payment(self):
+<<<<<<< HEAD
 		return get_linked_payments_for_doc(
 			company=self.company,
 			doctype=self.voucher_type,
 			docname=self.voucher_no,
 		)
 
+=======
+		allocated_references = []
+		ple = qb.DocType("Payment Ledger Entry")
+		allocated_references = (
+			qb.from_(ple)
+			.select(
+				ple.account,
+				ple.party_type,
+				ple.party,
+				ple.against_voucher_type.as_("reference_doctype"),
+				ple.against_voucher_no.as_("reference_name"),
+				Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
+				ple.account_currency,
+			)
+			.where(
+				(ple.docstatus == 1)
+				& (ple.voucher_type == self.voucher_type)
+				& (ple.voucher_no == self.voucher_no)
+				& (ple.voucher_no != ple.against_voucher_no)
+			)
+			.groupby(ple.against_voucher_type, ple.against_voucher_no)
+			.run(as_dict=True)
+		)
+
+		return allocated_references
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def add_references(self):
 		allocations = self.get_allocations_from_payment()
 
@@ -62,6 +90,7 @@ class UnreconcilePayment(Document):
 			doc = frappe.get_doc(alloc.reference_doctype, alloc.reference_name)
 			unlink_ref_doc_from_payment_entries(doc, self.voucher_no)
 			cancel_exchange_gain_loss_journal(doc, self.voucher_type, self.voucher_no)
+<<<<<<< HEAD
 
 			# update outstanding amounts
 			update_voucher_outstanding(
@@ -71,19 +100,34 @@ class UnreconcilePayment(Document):
 				alloc.party_type,
 				alloc.party,
 			)
+=======
+			update_voucher_outstanding(
+				alloc.reference_doctype, alloc.reference_name, alloc.account, alloc.party_type, alloc.party
+			)
+			if doc.doctype in frappe.get_hooks("advance_payment_payable_doctypes") + frappe.get_hooks(
+				"advance_payment_receivable_doctypes"
+			):
+				doc.set_total_advance_paid()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", True)
 
 
 @frappe.whitelist()
 def doc_has_references(doctype: str | None = None, docname: str | None = None):
+<<<<<<< HEAD
 	count = 0
 	if doctype in ["Sales Invoice", "Purchase Invoice"]:
 		count = frappe.db.count(
+=======
+	if doctype in ["Sales Invoice", "Purchase Invoice"]:
+		return frappe.db.count(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"Payment Ledger Entry",
 			filters={"delinked": 0, "against_voucher_no": docname, "amount": ["<", 0]},
 		)
 	else:
+<<<<<<< HEAD
 		count = frappe.db.count(
 			"Payment Ledger Entry",
 			filters={"delinked": 0, "voucher_no": docname, "against_voucher_no": ["!=", docname]},
@@ -99,6 +143,12 @@ def doc_has_references(doctype: str | None = None, docname: str | None = None):
 		)
 
 	return count
+=======
+		return frappe.db.count(
+			"Payment Ledger Entry",
+			filters={"delinked": 0, "voucher_no": docname, "against_voucher_no": ["!=", docname]},
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()
@@ -120,12 +170,18 @@ def get_linked_payments_for_doc(
 			res = (
 				qb.from_(ple)
 				.select(
+<<<<<<< HEAD
 					ple.account,
 					ple.party_type,
 					ple.party,
 					ple.company,
 					ple.voucher_type.as_("reference_doctype"),
 					ple.voucher_no.as_("reference_name"),
+=======
+					ple.company,
+					ple.voucher_type,
+					ple.voucher_no,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
 					ple.account_currency,
 				)
@@ -147,17 +203,23 @@ def get_linked_payments_for_doc(
 				qb.from_(ple)
 				.select(
 					ple.company,
+<<<<<<< HEAD
 					ple.account,
 					ple.party_type,
 					ple.party,
 					ple.against_voucher_type.as_("reference_doctype"),
 					ple.against_voucher_no.as_("reference_name"),
+=======
+					ple.against_voucher_type.as_("voucher_type"),
+					ple.against_voucher_no.as_("voucher_no"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
 					ple.account_currency,
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.against_voucher_no)
 			)
+<<<<<<< HEAD
 
 			res = query.run(as_dict=True)
 
@@ -193,6 +255,13 @@ def get_linked_advances(company, docname):
 	)
 
 
+=======
+			res = query.run(as_dict=True)
+			return res
+	return []
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 @frappe.whitelist()
 def create_unreconcile_doc_for_selection(selections=None):
 	if selections:

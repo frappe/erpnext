@@ -47,7 +47,11 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter, filter) {
+<<<<<<< HEAD
 		if (column.fieldname == "payment_entry" && value == __("Cheques and Deposits incorrectly cleared")) {
+=======
+		if (column.fieldname == "payment_entry" && value == "Cheques and Deposits incorrectly cleared") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			column.link_onclick =
 				"frappe.query_reports['Bank Reconciliation Statement'].open_utility_report()";
 		}

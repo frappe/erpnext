@@ -11,19 +11,28 @@
   "customer_group",
   "column_break_4",
   "territory",
+<<<<<<< HEAD
   "item_price_tab",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "item_price_settings_section",
   "selling_price_list",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
   "column_break_15",
   "maintain_same_sales_rate",
+<<<<<<< HEAD
   "fallback_to_default_price_list",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "editable_price_list_rate",
   "validate_selling_price",
   "editable_bundle_item_rates",
   "allow_negative_rates_for_items",
+<<<<<<< HEAD
   "transaction_tab",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
@@ -36,6 +45,7 @@
   "dont_reserve_sales_order_qty_on_sales_return",
   "hide_tax_id",
   "enable_discount_accounting",
+<<<<<<< HEAD
   "enable_cutoff_date_on_bulk_delivery_note_creation",
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
@@ -46,6 +56,9 @@
   "allow_delivery_of_overproduced_qty",
   "column_break_mla9",
   "deliver_scrap_items"
+=======
+  "enable_cutoff_date_on_bulk_delivery_note_creation"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -219,6 +232,7 @@
    "fieldname": "enable_cutoff_date_on_bulk_delivery_note_creation",
    "fieldtype": "Check",
    "label": "Enable Cut-Off Date on Bulk Delivery Note Creation"
+<<<<<<< HEAD
   },
   {
    "fieldname": "experimental_section",
@@ -291,12 +305,20 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-12 16:08:48.865885",
+=======
+ "modified": "2024-03-27 13:10:38.633352",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -321,9 +343,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

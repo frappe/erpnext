@@ -27,7 +27,11 @@ class PaymentReconciliationPayment(Document):
 		reference_name: DF.DynamicLink | None
 		reference_row: DF.Data | None
 		reference_type: DF.Link | None
+<<<<<<< HEAD
 		remarks: DF.SmallText | None
+=======
+		remark: DF.SmallText | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	@staticmethod

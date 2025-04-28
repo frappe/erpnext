@@ -94,6 +94,12 @@
     </script>
 
  </head>
+<<<<<<< HEAD
+=======
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.item %} </h4>
 
@@ -121,7 +127,16 @@
 	</tbody>
 </table>
 
+<<<<<<< HEAD
 <h4 class="text-center">{%= __("Analysis Chart") %}</h4>
 <div id="chart_div"></div>
 
 <p class="text-right text-muted">{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}</p>
+=======
+<h4 class="text-center"> Analysis Chart </h4>
+<div id="chart_div"></div>
+
+
+
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+>>>>>>> 7c4cf3e834 (Favicon.svg)

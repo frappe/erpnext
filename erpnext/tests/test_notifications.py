@@ -1,13 +1,24 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import unittest
 
 import frappe
 from frappe.desk import notifications
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestNotifications(IntegrationTestCase):
+=======
+
+
+class TestNotifications(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_get_notifications_for_targets(self):
 		"""
 		Test notification config entries for targets as percentages

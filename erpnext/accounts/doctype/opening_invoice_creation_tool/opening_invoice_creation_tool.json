@@ -14,7 +14,10 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+<<<<<<< HEAD
   "project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_4",
   "invoices"
  ],
@@ -65,12 +68,15 @@
    "options": "Cost Center"
   },
   {
+<<<<<<< HEAD
     "fieldname": "project",
     "fieldtype": "Link",
     "label": "Project",
     "options": "Project"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",

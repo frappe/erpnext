@@ -49,7 +49,11 @@ frappe.query_reports["General Ledger"] = {
 			label: __("Voucher No"),
 			fieldtype: "Data",
 			on_change: function () {
+<<<<<<< HEAD
 				frappe.query_report.set_filter_value("categorize_by", "Categorize by Voucher (Consolidated)");
+=======
+				frappe.query_report.set_filter_value("group_by", "Group by Voucher (Consolidated)");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{
@@ -66,14 +70,21 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Autocomplete",
 			options: Object.keys(frappe.boot.party_account_types),
 			on_change: function () {
+<<<<<<< HEAD
 				frappe.query_report.set_filter_value("party", []);
+=======
+				frappe.query_report.set_filter_value("party", "");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{
 			fieldname: "party",
 			label: __("Party"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "party_type",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 
@@ -112,12 +123,18 @@ frappe.query_reports["General Ledger"] = {
 			hidden: 1,
 		},
 		{
+<<<<<<< HEAD
 			fieldname: "categorize_by",
 			label: __("Categorize by"),
+=======
+			fieldname: "group_by",
+			label: __("Group by"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fieldtype: "Select",
 			options: [
 				"",
 				{
+<<<<<<< HEAD
 					label: __("Categorize by Voucher"),
 					value: "Categorize by Voucher",
 				},
@@ -135,6 +152,25 @@ frappe.query_reports["General Ledger"] = {
 				},
 			],
 			default: "Categorize by Voucher (Consolidated)",
+=======
+					label: __("Group by Voucher"),
+					value: "Group by Voucher",
+				},
+				{
+					label: __("Group by Voucher (Consolidated)"),
+					value: "Group by Voucher (Consolidated)",
+				},
+				{
+					label: __("Group by Account"),
+					value: "Group by Account",
+				},
+				{
+					label: __("Group by Party"),
+					value: "Group by Party",
+				},
+			],
+			default: "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "tax_id",
@@ -152,7 +188,10 @@ frappe.query_reports["General Ledger"] = {
 			fieldname: "cost_center",
 			label: __("Cost Center"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Cost Center",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
@@ -163,7 +202,10 @@ frappe.query_reports["General Ledger"] = {
 			fieldname: "project",
 			label: __("Project"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
@@ -198,11 +240,14 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Check",
 		},
 		{
+<<<<<<< HEAD
 			fieldname: "show_amount_in_company_currency",
 			label: __("Show Credit / Debit in Company Currency"),
 			fieldtype: "Check",
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fieldname: "add_values_in_transaction_currency",
 			label: __("Add Columns in Transaction Currency"),
 			fieldtype: "Check",
@@ -214,7 +259,11 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			fieldname: "ignore_err",
+<<<<<<< HEAD
 			label: __("Ignore Exchange Rate Revaluation and Gain / Loss Journals"),
+=======
+			label: __("Ignore Exchange Rate Revaluation Journals"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fieldtype: "Check",
 		},
 		{
@@ -223,8 +272,11 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Check",
 		},
 	],
+<<<<<<< HEAD
 	collapsible_filters: true,
 	seperate_check_filters: true,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };
 
 erpnext.utils.add_dimensions("General Ledger", 15);

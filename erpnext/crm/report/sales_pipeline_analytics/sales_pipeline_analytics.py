@@ -8,7 +8,10 @@ from itertools import groupby
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
+<<<<<<< HEAD
 from frappe.query_builder.custom import Month, MonthName, Quarter
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import cint, flt, getdate
 
 from erpnext.setup.utils import get_exchange_rate
@@ -75,7 +78,11 @@ class SalesPipelineAnalytics:
 		]
 
 		self.data_based_on = {
+<<<<<<< HEAD
 			"Number": {"COUNT": "*", "as": "count"},
+=======
+			"Number": "count(name) as count",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"Amount": "opportunity_amount as amount",
 		}[self.filters.get("based_on")]
 
@@ -83,6 +90,7 @@ class SalesPipelineAnalytics:
 			self.filters.get("pipeline_by")
 		]
 
+<<<<<<< HEAD
 		opp = frappe.qb.DocType("Opportunity")
 
 		if self.filters.get("range") == "Monthly":
@@ -91,16 +99,31 @@ class SalesPipelineAnalytics:
 		else:
 			self.group_by_period = Quarter(opp.expected_closing)
 			self.duration = Quarter(opp.expected_closing).as_("quarter")
+=======
+		self.group_by_period = {
+			"Monthly": "month(expected_closing)",
+			"Quarterly": "QUARTER(expected_closing)",
+		}[self.filters.get("range")]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.pipeline_by = {"Owner": "opportunity_owner", "Sales Stage": "sales_stage"}[
 			self.filters.get("pipeline_by")
 		]
 
+<<<<<<< HEAD
+=======
+		self.duration = {
+			"Monthly": "monthname(expected_closing) as month",
+			"Quarterly": "QUARTER(expected_closing) as quarter",
+		}[self.filters.get("range")]
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.period_by = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
 
 	def get_data(self):
 		self.get_fields()
 
+<<<<<<< HEAD
 		opp = frappe.qb.DocType("Opportunity")
 		query = frappe.qb.get_query(
 			"Opportunity",
@@ -129,6 +152,23 @@ class SalesPipelineAnalytics:
 				self.duration,
 				opp.currency,
 			).run(as_dict=True)
+=======
+		if self.filters.get("based_on") == "Number":
+			self.query_result = frappe.db.get_list(
+				"Opportunity",
+				filters=self.get_conditions(),
+				fields=[self.based_on, self.data_based_on, self.duration],
+				group_by=f"{self.group_by_based_on},{self.group_by_period}",
+				order_by=self.group_by_period,
+			)
+
+		if self.filters.get("based_on") == "Amount":
+			self.query_result = frappe.db.get_list(
+				"Opportunity",
+				filters=self.get_conditions(),
+				fields=[self.based_on, self.data_based_on, self.duration, "currency"],
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			self.convert_to_base_currency()
 
@@ -155,7 +195,11 @@ class SalesPipelineAnalytics:
 		conditions = []
 
 		if self.filters.get("opportunity_source"):
+<<<<<<< HEAD
 			conditions.append({"utm_source": self.filters.get("opportunity_source")})
+=======
+			conditions.append({"source": self.filters.get("opportunity_source")})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if self.filters.get("opportunity_type"):
 			conditions.append({"opportunity_type": self.filters.get("opportunity_type")})

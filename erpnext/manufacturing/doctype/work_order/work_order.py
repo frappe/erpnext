@@ -2,7 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+<<<<<<< HEAD
 from collections import defaultdict
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 import frappe
 from dateutil.relativedelta import relativedelta
@@ -10,7 +13,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
+<<<<<<< HEAD
 from frappe.query_builder.functions import IfNull, Sum
+=======
+from frappe.query_builder.functions import Sum
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -20,7 +27,10 @@ from frappe.utils import (
 	getdate,
 	now,
 	nowdate,
+<<<<<<< HEAD
 	parse_json,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	time_diff_in_hours,
 )
 from pypika import functions as fn
@@ -36,7 +46,10 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
+<<<<<<< HEAD
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -76,13 +89,22 @@ class WorkOrder(Document):
 		from frappe.types import DF
 
 		from erpnext.manufacturing.doctype.work_order_item.work_order_item import WorkOrderItem
+<<<<<<< HEAD
 		from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import WorkOrderOperation
+=======
+		from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import (
+			WorkOrderOperation,
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		actual_end_date: DF.Datetime | None
 		actual_operating_cost: DF.Currency
 		actual_start_date: DF.Datetime | None
 		additional_operating_cost: DF.Currency
+<<<<<<< HEAD
 		additional_transferred_qty: DF.Float
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
 		batch_size: DF.Float
@@ -90,9 +112,14 @@ class WorkOrder(Document):
 		company: DF.Link
 		corrective_operation_cost: DF.Currency
 		description: DF.SmallText | None
+<<<<<<< HEAD
 		disassembled_qty: DF.Float
 		expected_delivery_date: DF.Date | None
 		fg_warehouse: DF.Link | None
+=======
+		expected_delivery_date: DF.Date | None
+		fg_warehouse: DF.Link
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from_wip_warehouse: DF.Check
 		has_batch_no: DF.Check
 		has_serial_no: DF.Check
@@ -102,8 +129,11 @@ class WorkOrder(Document):
 		material_request: DF.Link | None
 		material_request_item: DF.Data | None
 		material_transferred_for_manufacturing: DF.Float
+<<<<<<< HEAD
 		max_producible_qty: DF.Float
 		mps: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		naming_series: DF.Literal["MFG-WO-.YYYY.-"]
 		operations: DF.Table[WorkOrderOperation]
 		planned_end_date: DF.Datetime | None
@@ -119,7 +149,10 @@ class WorkOrder(Document):
 		project: DF.Link | None
 		qty: DF.Float
 		required_items: DF.Table[WorkOrderItem]
+<<<<<<< HEAD
 		reserve_stock: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
 		scrap_warehouse: DF.Link | None
@@ -131,18 +164,25 @@ class WorkOrder(Document):
 			"Submitted",
 			"Not Started",
 			"In Process",
+<<<<<<< HEAD
 			"Stock Reserved",
 			"Stock Partially Reserved",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"Completed",
 			"Stopped",
 			"Closed",
 			"Cancelled",
 		]
 		stock_uom: DF.Link | None
+<<<<<<< HEAD
 		subcontracting_inward_order: DF.Link | None
 		subcontracting_inward_order_item: DF.Data | None
 		total_operating_cost: DF.Currency
 		track_semi_finished_goods: DF.Check
+=======
+		total_operating_cost: DF.Currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
 		update_consumed_material_cost_in_project: DF.Check
 		use_multi_level_bom: DF.Check
@@ -151,6 +191,7 @@ class WorkOrder(Document):
 
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
+<<<<<<< HEAD
 		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
@@ -161,15 +202,27 @@ class WorkOrder(Document):
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
+=======
+		self.set_onload("material_consumption", ms.material_consumption)
+		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
+		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
+		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def show_create_job_card_button(self):
 		operation_details = frappe._dict(
 			frappe.get_all(
 				"Job Card",
+<<<<<<< HEAD
 				fields=["operation", {"SUM": "for_quantity"}],
 				filters={"docstatus": ("<", 2), "work_order": self.name},
 				as_list=1,
 				group_by="operation_id",
+=======
+				fields=["operation", "for_quantity"],
+				filters={"docstatus": ("<", 2), "work_order": self.name},
+				as_list=1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 		)
 
@@ -185,18 +238,25 @@ class WorkOrder(Document):
 		if self.bom_no:
 			validate_bom_no(self.production_item, self.bom_no)
 
+<<<<<<< HEAD
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
 
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
+=======
+		self.validate_sales_order()
+		self.set_default_warehouse()
+		self.validate_warehouse_belongs_to_company()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_transfer_against()
 		self.validate_operation_time()
 		self.status = self.get_status()
 		self.validate_workstation_type()
+<<<<<<< HEAD
 		self.reset_use_multi_level_bom()
 		self.set_reserve_stock()
 		self.validate_fg_warehouse_for_reservation()
@@ -398,6 +458,18 @@ class WorkOrder(Document):
 						row.idx, row.operation
 					)
 				)
+=======
+
+		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
+
+		self.set_required_items(reset_only_qty=len(self.get("required_items")))
+
+	def validate_workstation_type(self):
+		for row in self.operations:
+			if not row.workstation and not row.workstation_type:
+				msg = f"Row {row.idx}: Workstation or Workstation Type is mandatory for an operation {row.operation}"
+				frappe.throw(_(msg))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -454,6 +526,7 @@ class WorkOrder(Document):
 
 	def set_default_warehouse(self):
 		if not self.wip_warehouse and not self.skip_transfer:
+<<<<<<< HEAD
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 		if not self.fg_warehouse:
 			self.fg_warehouse = frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
@@ -461,6 +534,11 @@ class WorkOrder(Document):
 	def check_wip_warehouse_skip(self):
 		if self.skip_transfer and not self.from_wip_warehouse:
 			self.wip_warehouse = None
+=======
+			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+		if not self.fg_warehouse:
+			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
@@ -474,10 +552,13 @@ class WorkOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
+<<<<<<< HEAD
 			if not d.hour_rate:
 				if d.workstation:
 					d.hour_rate = get_hour_rate(d.workstation)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			d.planned_operating_cost = flt(
 				flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
 			)
@@ -558,9 +639,14 @@ class WorkOrder(Document):
 				if flt(self.material_transferred_for_manufacturing) > 0:
 					status = "In Process"
 
+<<<<<<< HEAD
 				precision = frappe.get_precision("Work Order", "produced_qty")
 				total_qty = flt(self.produced_qty, precision) + flt(self.process_loss_qty, precision)
 				if flt(total_qty, precision) >= flt(self.qty, precision):
+=======
+				total_qty = flt(self.produced_qty) + flt(self.process_loss_qty)
+				if flt(total_qty) >= flt(self.qty):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					status = "Completed"
 		else:
 			status = "Cancelled"
@@ -572,6 +658,7 @@ class WorkOrder(Document):
 		):
 			status = "In Process"
 
+<<<<<<< HEAD
 		if self.track_semi_finished_goods and status != "Completed":
 			if op_status := self.get_status_based_on_operation():
 				status = op_status
@@ -594,13 +681,20 @@ class WorkOrder(Document):
 			if row.status != "Completed":
 				return "In Process"
 
+=======
+		return status
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 		based on Stock Entry"""
 
+<<<<<<< HEAD
 		if self.track_semi_finished_goods:
 			return
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
@@ -608,7 +702,10 @@ class WorkOrder(Document):
 		for purpose, fieldname in (
 			("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing"),
+<<<<<<< HEAD
 			("Material Transfer for Manufacture", "additional_transferred_qty"),
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		):
 			if (
 				purpose == "Material Transfer for Manufacture"
@@ -617,6 +714,7 @@ class WorkOrder(Document):
 			):
 				continue
 
+<<<<<<< HEAD
 			qty = self.get_transferred_or_manufactured_qty(purpose, fieldname)
 
 			if not allowance_percentage and purpose == "Material Transfer for Manufacture":
@@ -625,12 +723,19 @@ class WorkOrder(Document):
 						"Manufacturing Settings", "transfer_extra_materials_percentage"
 					)
 				)
+=======
+			qty = self.get_transferred_or_manufactured_qty(purpose)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			completed_qty = self.qty + (allowance_percentage / 100 * self.qty)
 			if qty > completed_qty:
 				frappe.throw(
 					_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
+<<<<<<< HEAD
 						_(self.meta.get_label(fieldname)), qty, completed_qty, self.name
+=======
+						self.meta.get_label(fieldname), qty, completed_qty, self.name
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					),
 					StockOverProductionError,
 				)
@@ -647,6 +752,7 @@ class WorkOrder(Document):
 			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
 
+<<<<<<< HEAD
 		if self.additional_transferred_qty:
 			self.validate_additional_transferred_qty()
 
@@ -684,6 +790,9 @@ class WorkOrder(Document):
 		self.db_set("disassembled_qty", self.disassembled_qty)
 
 	def get_transferred_or_manufactured_qty(self, purpose, fieldname):
+=======
+	def get_transferred_or_manufactured_qty(self, purpose):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		table = frappe.qb.DocType("Stock Entry")
 		query = frappe.qb.from_(table).where(
 			(table.work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose)
@@ -694,10 +803,13 @@ class WorkOrder(Document):
 		else:
 			query = query.select(Sum(table.fg_completed_qty))
 
+<<<<<<< HEAD
 		query = query.where(
 			table.is_additional_transfer_entry == cint(fieldname == "additional_transferred_qty")
 		)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		return flt(query.run()[0][0])
 
 	def set_process_loss_qty(self):
@@ -718,7 +830,11 @@ class WorkOrder(Document):
 		if self.production_plan_item:
 			total_qty = frappe.get_all(
 				"Work Order",
+<<<<<<< HEAD
 				fields=[{"SUM": "produced_qty", "as": "produced_qty"}],
+=======
+				fields="sum(produced_qty) as produced_qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				filters={
 					"docstatus": 1,
 					"production_plan": self.production_plan,
@@ -759,11 +875,14 @@ class WorkOrder(Document):
 		self.update_planned_qty()
 		self.create_job_card()
 
+<<<<<<< HEAD
 		if self.reserve_stock:
 			self.update_stock_reservation()
 
 		self.update_subcontracting_inward_order_received_items()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def on_cancel(self):
 		self.validate_cancel()
 		self.db_set("status", "Cancelled")
@@ -782,6 +901,7 @@ class WorkOrder(Document):
 		self.update_reserved_qty_for_production()
 		self.delete_auto_created_batch_and_serial_no()
 
+<<<<<<< HEAD
 		if self.reserve_stock:
 			self.update_stock_reservation()
 
@@ -854,6 +974,8 @@ class WorkOrder(Document):
 				(table.name.isin([d.name for d in scio_rm_data])) & (table.docstatus == 1)
 			).run()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def create_serial_no_batch_no(self):
 		if not (self.has_serial_no or self.has_batch_no):
 			return
@@ -912,6 +1034,10 @@ class WorkOrder(Document):
 	def delete_auto_created_batch_and_serial_no(self):
 		for row in frappe.get_all("Serial No", filters={"work_order": self.name}):
 			frappe.delete_doc("Serial No", row.name)
+<<<<<<< HEAD
+=======
+			self.db_set("serial_no", "")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for row in frappe.get_all("Batch", filters={"reference_name": self.name}):
 			frappe.delete_doc("Batch", row.name)
@@ -987,19 +1113,32 @@ class WorkOrder(Document):
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
 
+<<<<<<< HEAD
 		for idx, row in enumerate(self.operations):
+=======
+		for index, row in enumerate(self.operations):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			qty = self.qty
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self, row, qty)
 				if row.job_card_qty > 0:
+<<<<<<< HEAD
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
+=======
+					self.prepare_data_for_job_card(row, index, plan_days, enable_capacity_planning)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		planned_end_date = self.operations and self.operations[-1].planned_end_time
 		if planned_end_date:
 			self.db_set("planned_end_date", planned_end_date)
 
+<<<<<<< HEAD
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
+=======
+	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning):
+		self.set_operation_start_end_time(index, row)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		job_card_doc = create_job_card(
 			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
@@ -1024,12 +1163,17 @@ class WorkOrder(Document):
 
 			row.db_update()
 
+<<<<<<< HEAD
 	def set_operation_start_end_time(self, row, idx):
+=======
+	def set_operation_start_end_time(self, idx, row):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"""Set start and end time for given operation. If first operation, set start as
 		`planned_start_date`, else add time diff to end time of earlier operation."""
 		if idx == 0:
 			# first operation at planned_start date
 			row.planned_start_time = self.planned_start_date
+<<<<<<< HEAD
 		elif self.operations[idx - 1].sequence_id:
 			if self.operations[idx - 1].sequence_id == row.sequence_id:
 				row.planned_start_time = self.operations[idx - 1].planned_start_time
@@ -1042,6 +1186,8 @@ class WorkOrder(Document):
 					get_datetime(last_ops_with_same_sequence_ids[-1].planned_end_time)
 					+ get_mins_between_operations()
 				)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		else:
 			row.planned_start_time = (
 				get_datetime(self.operations[idx - 1].planned_end_time) + get_mins_between_operations()
@@ -1117,12 +1263,17 @@ class WorkOrder(Document):
 		)
 
 	def update_ordered_qty(self):
+<<<<<<< HEAD
 		if self.production_plan and (self.production_plan_item or self.production_plan_sub_assembly_item):
+=======
+		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			table = frappe.qb.DocType("Work Order")
 
 			query = (
 				frappe.qb.from_(table)
 				.select(Sum(table.qty))
+<<<<<<< HEAD
 				.where((table.production_plan == self.production_plan) & (table.docstatus == 1))
 			)
 
@@ -1145,6 +1296,18 @@ class WorkOrder(Document):
 					"ordered_qty",
 					qty,
 				)
+=======
+				.where(
+					(table.production_plan == self.production_plan)
+					& (table.production_plan_item == self.production_plan_item)
+					& (table.docstatus == 1)
+				)
+			).run()
+
+			qty = flt(query[0][0]) if query else 0
+
+			frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			doc = frappe.get_doc("Production Plan", self.production_plan)
 			doc.set_status()
@@ -1244,18 +1407,25 @@ class WorkOrder(Document):
 					"fixed_time",
 					"skip_material_transfer",
 					"backflush_from_wip_warehouse",
+<<<<<<< HEAD
 					"set_cost_based_on_bom_qty",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				],
 				order_by="idx",
 			)
 
 			for d in data:
 				if not d.fixed_time:
+<<<<<<< HEAD
 					if d.set_cost_based_on_bom_qty:
 						d.time_in_mins = flt(d.time_in_mins) * flt(flt(qty) / flt(d.batch_size or 1))
 					else:
 						d.time_in_mins = flt(d.time_in_mins) * flt(qty)
 
+=======
+					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				d.status = "Pending"
 
 				if self.track_semi_finished_goods and not d.sequence_id:
@@ -1278,7 +1448,11 @@ class WorkOrder(Document):
 					operations.extend(_get_operations(node.name, qty=node.exploded_qty / node.bom_qty))
 
 		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
+<<<<<<< HEAD
 		operations.extend(_get_operations(self.bom_no, qty=bom_qty))
+=======
+		operations.extend(_get_operations(self.bom_no, qty=1.0 / bom_qty))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for correct_index, operation in enumerate(operations, start=1):
 			operation.idx = correct_index
@@ -1347,7 +1521,11 @@ class WorkOrder(Document):
 		else:
 			data = frappe.get_all(
 				"Stock Entry",
+<<<<<<< HEAD
 				fields=[{"TIMESTAMP": ["posting_date", "posting_time"], "as": "posting_datetime"}],
+=======
+				fields=["timestamp(posting_date, posting_time) as posting_datetime"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				filters={
 					"work_order": self.name,
 					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
@@ -1427,6 +1605,7 @@ class WorkOrder(Document):
 					OverProductionError,
 				)
 
+<<<<<<< HEAD
 		if self.subcontracting_inward_order and self.qty > self.max_producible_qty:
 			frappe.msgprint(
 				_(
@@ -1436,6 +1615,8 @@ class WorkOrder(Document):
 				indicator="orange",
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_transfer_against(self):
 		if self.docstatus != 1:
 			# let user configure operations until they're ready to submit
@@ -1444,7 +1625,11 @@ class WorkOrder(Document):
 			self.transfer_material_against = "Work Order"
 		if not self.transfer_material_against:
 			frappe.throw(
+<<<<<<< HEAD
 				_("Setting {0} is required").format(_(self.meta.get_label("transfer_material_against"))),
+=======
+				_("Setting {} is required").format(self.meta.get_label("transfer_material_against")),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				title=_("Missing value"),
 			)
 
@@ -1469,8 +1654,11 @@ class WorkOrder(Document):
 			# update in bin
 			self.update_reserved_qty_for_production()
 
+<<<<<<< HEAD
 		self.validate_reserved_qty()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def update_reserved_qty_for_production(self, items=None):
 		"""update reserved_qty_for_production in bins"""
 		for d in self.required_items:
@@ -1493,7 +1681,11 @@ class WorkOrder(Document):
 			if self.wip_warehouse:
 				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
 
+<<<<<<< HEAD
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
+=======
+	def set_required_items(self, reset_only_qty=False):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"""set required_items for production to keep track of reserved qty"""
 		if not reset_only_qty:
 			self.required_items = []
@@ -1527,30 +1719,40 @@ class WorkOrder(Document):
 							"description": item.description,
 							"allow_alternative_item": item.allow_alternative_item,
 							"required_qty": item.qty,
+<<<<<<< HEAD
 							"source_warehouse": (
 								self.source_warehouse or item.source_warehouse or item.default_warehouse
 							)
 							if not reset_source_warehouse
 							else self.source_warehouse,
+=======
+							"source_warehouse": item.source_warehouse or item.default_warehouse,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							"include_item_in_manufacturing": item.include_item_in_manufacturing,
 							"operation_row_id": item.operation_row_id,
 						},
 					)
 
+<<<<<<< HEAD
 					if self.subcontracting_inward_order and not frappe.get_cached_value(
 						"Item", item.item_code, "is_customer_provided_item"
 					):
 						self.required_items[-1].source_warehouse = item.default_warehouse
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					if not self.project:
 						self.project = item.get("project")
 
 			self.set_available_qty()
 
 	def update_transferred_qty_for_required_items(self):
+<<<<<<< HEAD
 		if self.skip_transfer:
 			return
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 
@@ -1575,6 +1777,7 @@ class WorkOrder(Document):
 		data = query.run(as_dict=1) or []
 		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
+<<<<<<< HEAD
 		row_wise_serial_batch = frappe._dict({})
 		if self.reserve_stock:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
@@ -1621,6 +1824,12 @@ class WorkOrder(Document):
 
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
+=======
+		for row in self.required_items:
+			row.db_set(
+				"transferred_qty", (transferred_items.get(row.item_code) or 0.0), update_modified=False
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def update_returned_qty(self):
 		ste = frappe.qb.DocType("Stock Entry")
@@ -1655,6 +1864,7 @@ class WorkOrder(Document):
 		Update consumed qty from submitted stock entries
 		against a work order for each stock item
 		"""
+<<<<<<< HEAD
 		wip_warehouse = self.wip_warehouse
 		if self.skip_transfer and not self.from_wip_warehouse:
 			wip_warehouse = None
@@ -1713,6 +1923,32 @@ class WorkOrder(Document):
 						)
 					)
 
+=======
+
+		for item in self.required_items:
+			consumed_qty = frappe.db.sql(
+				"""
+				SELECT
+					SUM(detail.qty)
+				FROM
+					`tabStock Entry` entry,
+					`tabStock Entry Detail` detail
+				WHERE
+					entry.work_order = %(name)s
+						AND (entry.purpose = "Material Consumption for Manufacture"
+							OR entry.purpose = "Manufacture")
+						AND entry.docstatus = 1
+						AND detail.parent = entry.name
+						AND detail.s_warehouse IS NOT null
+						AND (detail.item_code = %(item)s
+							OR detail.original_item = %(item)s)
+				""",
+				{"name": self.name, "item": item.item_code},
+			)[0][0]
+
+			item.db_set("consumed_qty", flt(consumed_qty), update_modified=False)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@frappe.whitelist()
 	def make_bom(self):
 		data = frappe.db.sql(
@@ -1739,6 +1975,7 @@ class WorkOrder(Document):
 		bom.set_bom_material_details()
 		return bom
 
+<<<<<<< HEAD
 	def set_reserved_qty_for_wip_and_fg(self, stock_entry):
 		items = frappe._dict()
 
@@ -2097,6 +2334,8 @@ def get_consumed_qty(work_order, item_code):
 
 	return flt(result[0][0]) if result else 0
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -2169,7 +2408,11 @@ def get_item_details(item, project=None, skip_bom_info=False, throw=True):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def make_work_order(bom_no, item, qty=0, project=None, variant_items=None, use_multi_level_bom=None):
+=======
+def make_work_order(bom_no, item, qty=0, project=None, variant_items=None):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -2180,13 +2423,20 @@ def make_work_order(bom_no, item, qty=0, project=None, variant_items=None, use_m
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
 	wo_doc.bom_no = bom_no
+<<<<<<< HEAD
 	wo_doc.use_multi_level_bom = cint(use_multi_level_bom)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if flt(qty) > 0:
 		wo_doc.qty = flt(qty)
 		wo_doc.get_items_and_operations_from_bom()
 
+<<<<<<< HEAD
 	if variant_items and not wo_doc.use_multi_level_bom:
+=======
+	if variant_items:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		add_variant_item(variant_items, wo_doc, bom_no, "required_items")
 
 	return wo_doc
@@ -2230,6 +2480,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 
 		args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))
 		args["uom"] = item_data.stock_uom
+<<<<<<< HEAD
 
 		existing_row = (
 			get_template_rm_item(wo_doc, item.get("item_code")) if table_name == "required_items" else None
@@ -2244,6 +2495,9 @@ def get_template_rm_item(wo_doc, item_code):
 	for row in wo_doc.required_items:
 		if row.item_code == item_code:
 			return row
+=======
+		wo_doc.append(table_name, args)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()
@@ -2266,9 +2520,13 @@ def set_work_order_ops(name):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def make_stock_entry(
 	work_order_id, purpose, qty=None, target_warehouse=None, is_additional_transfer_entry=False
 ):
+=======
+def make_stock_entry(work_order_id, purpose, qty=None, target_warehouse=None):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	work_order = frappe.get_doc("Work Order", work_order_id)
 	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 		wip_warehouse = work_order.wip_warehouse
@@ -2282,8 +2540,11 @@ def make_stock_entry(
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
+<<<<<<< HEAD
 	if purpose in ["Material Transfer for Manufacture", "Manufacture"]:
 		stock_entry.subcontracting_inward_order = work_order.subcontracting_inward_order
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# accept 0 qty as well
 	stock_entry.fg_completed_qty = (
 		qty if qty is not None else (flt(work_order.qty) - flt(work_order.produced_qty))
@@ -2296,11 +2557,15 @@ def make_stock_entry(
 		stock_entry.to_warehouse = wip_warehouse
 		stock_entry.project = work_order.project
 	else:
+<<<<<<< HEAD
 		stock_entry.from_warehouse = (
 			work_order.source_warehouse
 			if work_order.skip_transfer and not work_order.from_wip_warehouse
 			else wip_warehouse
 		)
+=======
+		stock_entry.from_warehouse = wip_warehouse
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
 
@@ -2309,8 +2574,12 @@ def make_stock_entry(
 		stock_entry.to_warehouse = target_warehouse or work_order.source_warehouse
 
 	stock_entry.set_stock_entry_type()
+<<<<<<< HEAD
 	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
 	stock_entry.get_items(qty, work_order.production_item)
+=======
+	stock_entry.get_items()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if purpose != "Disassemble":
 		stock_entry.set_serial_no_batch_for_finished_good()
@@ -2319,6 +2588,7 @@ def make_stock_entry(
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_default_warehouse(company):
 	wip, fg, scrap = frappe.get_cached_value(
 		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
@@ -2327,6 +2597,15 @@ def get_default_warehouse(company):
 		"wip_warehouse": wip,
 		"fg_warehouse": fg,
 		"scrap_warehouse": scrap,
+=======
+def get_default_warehouse():
+	doc = frappe.get_cached_doc("Manufacturing Settings")
+
+	return {
+		"wip_warehouse": doc.default_wip_warehouse,
+		"fg_warehouse": doc.default_fg_warehouse,
+		"scrap_warehouse": doc.default_scrap_warehouse,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 
@@ -2351,6 +2630,7 @@ def stop_unstop(work_order, status):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 @frappe.validate_and_sanitize_search_inputs
 def query_sales_order(doctype, txt, searchfield, start, page_len, filters) -> list[str]:
 	return frappe.get_list(
@@ -2367,6 +2647,22 @@ def query_sales_order(doctype, txt, searchfield, start, page_len, filters) -> li
 		distinct=True,
 	)
 
+=======
+def query_sales_order(production_item):
+	out = frappe.db.sql_list(
+		"""
+		select distinct so.name from `tabSales Order` so, `tabSales Order Item` so_item
+		where so_item.parent=so.name and so_item.item_code=%s and so.docstatus=1
+	union
+		select distinct so.name from `tabSales Order` so, `tabPacked Item` pi_item
+		where pi_item.parent=so.name and pi_item.item_code=%s and so.docstatus=1
+	""",
+		(production_item, production_item),
+	)
+
+	return out
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 @frappe.whitelist()
 def make_job_card(work_order, operations):
@@ -2409,9 +2705,13 @@ def close_work_order(work_order, status):
 	work_order = frappe.get_doc("Work Order", work_order)
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
+<<<<<<< HEAD
 			"Job Card",
 			filters={"work_order": work_order.name, "status": "Work In Progress", "docstatus": 1},
 			pluck="name",
+=======
+			"Job Card", filters={"work_order": work_order.name, "status": "Work In Progress"}, pluck="name"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		if job_cards:
@@ -2513,12 +2813,18 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"sequence_id": row.get("sequence_id"),
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
+<<<<<<< HEAD
 			"time_required": row.get("time_in_mins"),
 			"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 			"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse")
 			if not work_order.skip_transfer or work_order.from_wip_warehouse
 			else work_order.source_warehouse or row.get("source_warehouse"),
+=======
+			"source_warehouse": row.get("source_warehouse"),
+			"target_warehouse": row.get("fg_warehouse"),
+			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"skip_material_transfer": row.get("skip_material_transfer"),
 			"backflush_from_wip_warehouse": row.get("backflush_from_wip_warehouse"),
 			"finished_good": row.get("finished_good"),
@@ -2664,6 +2970,7 @@ def make_stock_return_entry(work_order):
 	stock_entry.set_stock_entry_type()
 
 	return stock_entry
+<<<<<<< HEAD
 
 
 def get_row_wise_serial_batch(work_order, purpose=None):
@@ -2723,3 +3030,5 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 @frappe.request_cache
 def get_hour_rate(workstation):
 	return frappe.get_cached_value("Workstation", workstation, "hour_rate") or 0.0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

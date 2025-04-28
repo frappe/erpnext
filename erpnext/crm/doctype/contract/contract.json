@@ -2,7 +2,10 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
+<<<<<<< HEAD
  "autoname": "CON-.YYYY.-.#####",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "creation": "2018-04-12 06:32:04.582486",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -15,7 +18,10 @@
   "party_user",
   "status",
   "fulfilment_status",
+<<<<<<< HEAD
   "party_full_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "sb_terms",
   "start_date",
   "cb_date",
@@ -246,6 +252,7 @@
    "fieldname": "authorised_by_section",
    "fieldtype": "Section Break",
    "label": "Authorised By"
+<<<<<<< HEAD
   },
   {
    "fieldname": "party_full_name",
@@ -262,6 +269,16 @@
  "module": "CRM",
  "name": "Contract",
  "naming_rule": "Expression (old style)",
+=======
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:46.177457",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Contract",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {
@@ -325,13 +342,22 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "search_fields": "party_type, party_name, contract_template",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
+<<<<<<< HEAD
  "title_field": "party_name",
  "track_changes": 1,
  "track_seen": 1
 }
+=======
+ "track_changes": 1,
+ "track_seen": 1
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

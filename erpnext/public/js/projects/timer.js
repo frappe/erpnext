@@ -18,6 +18,10 @@ erpnext.timesheet.timer = function (frm, row, timestamp = 0) {
 			{ fieldtype: "HTML", fieldname: "timer_html" },
 		],
 	});
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if (row) {
 		dialog.set_values({
 			activity_type: row.activity_type,
@@ -25,10 +29,13 @@ erpnext.timesheet.timer = function (frm, row, timestamp = 0) {
 			task: row.task,
 			expected_hours: row.expected_hours,
 		});
+<<<<<<< HEAD
 	} else {
 		dialog.set_values({
 			project: frm.doc.parent_project,
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 	dialog.get_field("timer_html").$wrapper.append(get_timer_html());
 	function get_timer_html() {
@@ -92,7 +99,11 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
 			let d = moment(row.from_time);
 			if (row.expected_hours) {
 				d.add(row.expected_hours, "hours");
+<<<<<<< HEAD
 				row.to_time = frappe.datetime.get_datetime_as_string(d);
+=======
+				row.to_time = d.format(frappe.defaultDatetimeFormat);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 			frm.refresh_field("time_logs");
 			frm.save();
@@ -120,7 +131,12 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
 		grid_row.doc.project = args.project;
 		grid_row.doc.task = args.task;
 		grid_row.doc.expected_hours = args.expected_hours;
+<<<<<<< HEAD
 		grid_row.doc.to_time = frappe.datetime.get_datetime_as_string();
+=======
+		grid_row.doc.hours = currentIncrement / 3600;
+		grid_row.doc.to_time = frappe.datetime.now_datetime();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		grid_row.refresh();
 		frm.dirty();
 		frm.save();

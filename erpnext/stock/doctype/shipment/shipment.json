@@ -34,7 +34,10 @@
   "shipment_parcel",
   "parcel_template",
   "add_template",
+<<<<<<< HEAD
   "total_weight",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_28",
   "shipment_delivery_note",
   "shipment_details_section",
@@ -430,17 +433,24 @@
    "label": "Pickup Contact Person",
    "mandatory_depends_on": "eval:doc.pickup_from_type === 'Company'",
    "options": "User"
+<<<<<<< HEAD
   },
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight (kg)",
    "read_only": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-02-20 16:55:20.076418",
+=======
+ "modified": "2024-03-27 13:10:41.030764",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",

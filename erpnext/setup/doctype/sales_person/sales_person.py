@@ -10,7 +10,10 @@ from frappe import _
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import flt
+<<<<<<< HEAD
 from frappe.utils.data import get_url_to_list
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.nestedset import NestedSet, get_root_of
 
 from erpnext import get_default_currency
@@ -43,9 +46,12 @@ class SalesPerson(NestedSet):
 	nsm_parent_field = "parent_sales_person"
 
 	def validate(self):
+<<<<<<< HEAD
 		if not self.enabled:
 			self.validate_sales_person()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not self.parent_sales_person:
 			self.parent_sales_person = get_root_of("Sales Person")
 
@@ -64,7 +70,11 @@ class SalesPerson(NestedSet):
 			frappe.db.get_value(
 				"Sales Team",
 				{"docstatus": 1, "parenttype": "Sales Order", "sales_person": self.sales_person_name},
+<<<<<<< HEAD
 				[{"SUM": "allocated_amount"}],
+=======
+				"sum(allocated_amount)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 		)
 
@@ -72,7 +82,11 @@ class SalesPerson(NestedSet):
 			frappe.db.get_value(
 				"Sales Team",
 				{"docstatus": 1, "parenttype": "Sales Invoice", "sales_person": self.sales_person_name},
+<<<<<<< HEAD
 				[{"SUM": "allocated_amount"}],
+=======
+				"sum(allocated_amount)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 		)
 
@@ -87,6 +101,7 @@ class SalesPerson(NestedSet):
 		super().on_update()
 		self.validate_one_root()
 
+<<<<<<< HEAD
 	def validate_sales_person(self):
 		sales_team = frappe.qb.DocType("Sales Team")
 
@@ -106,6 +121,8 @@ class SalesPerson(NestedSet):
 				)
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def get_email_id(self):
 		if self.employee:
 			user = frappe.db.get_value("Employee", self.employee, "user_id")

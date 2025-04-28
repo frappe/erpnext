@@ -56,7 +56,10 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("Work Orders"),
 			fieldname: "work_order",
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Work Order",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Work Order", txt);
 			},
@@ -65,7 +68,10 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("Production Item"),
 			fieldname: "production_item",
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Item",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Item", txt);
 			},

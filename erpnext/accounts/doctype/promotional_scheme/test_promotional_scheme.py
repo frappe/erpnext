@@ -1,15 +1,26 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.promotional_scheme.promotional_scheme import TransactionExists
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
+<<<<<<< HEAD
 class TestPromotionalScheme(IntegrationTestCase):
+=======
+class TestPromotionalScheme(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		if frappe.db.exists("Promotional Scheme", "_Test Scheme"):
 			frappe.delete_doc("Promotional Scheme", "_Test Scheme")
@@ -90,6 +101,7 @@ class TestPromotionalScheme(IntegrationTestCase):
 		price_rules = frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})
 		self.assertEqual(price_rules, [])
 
+<<<<<<< HEAD
 	def test_change_applicable_for_values_in_promotional_scheme(self):
 		ps = make_promotional_scheme(applicable_for="Customer", customer="_Test Customer")
 		ps.append("customer", {"customer": "_Test Customer 2"})
@@ -115,6 +127,8 @@ class TestPromotionalScheme(IntegrationTestCase):
 		self.assertEqual(price_rules, [])
 		frappe.delete_doc("Promotional Scheme", ps.name)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_min_max_amount_configuration(self):
 		ps = make_promotional_scheme()
 		ps.price_discount_slabs[0].min_amount = 10

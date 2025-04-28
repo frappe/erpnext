@@ -9,6 +9,16 @@ cur_frm.add_fetch("bank", "swift_number", "swift_number");
 
 frappe.ui.form.on("Bank Guarantee", {
 	setup: function (frm) {
+<<<<<<< HEAD
+=======
+		frm.set_query("bank", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("bank_account", function () {
 			return {
 				filters: {

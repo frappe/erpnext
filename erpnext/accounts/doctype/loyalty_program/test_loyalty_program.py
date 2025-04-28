@@ -1,9 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import cint, flt, getdate, today
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
@@ -13,10 +20,16 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 from erpnext.accounts.party import get_dashboard_info
 
 
+<<<<<<< HEAD
 class TestLoyaltyProgram(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
+=======
+class TestLoyaltyProgram(unittest.TestCase):
+	@classmethod
+	def setUpClass(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		# create relevant item, customer, loyalty program, etc
 		create_records()
 

@@ -182,6 +182,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 							company: me.frm.doc.company,
 							project: me.frm.doc.project || undefined,
 						},
+<<<<<<< HEAD
 						allow_child_item_selection: true,
 						child_fieldname: "items",
 						child_columns: ["item_code", "item_name", "qty", "delivered_qty"],
@@ -237,6 +238,8 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 						allow_child_item_selection: true,
 						child_fieldname: "locations",
 						child_columns: ["item_code", "item_name", "stock_qty", "delivered_qty"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					});
 				},
 				__("Get Items From")
@@ -334,7 +337,10 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 		if (
 			doc.docstatus == 1 &&
 			!doc.is_return &&
+<<<<<<< HEAD
 			doc.per_returned != 100 &&
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			doc.status != "Closed" &&
 			flt(doc.per_billed) < 100 &&
 			frappe.model.can_create("Sales Invoice")

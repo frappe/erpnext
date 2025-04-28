@@ -3,12 +3,19 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.data import (
 	add_days,
 	add_months,
 	add_to_date,
+<<<<<<< HEAD
 	add_years,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	cint,
 	date_diff,
 	flt,
@@ -19,10 +26,17 @@ from frappe.utils.data import (
 
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ("UOM", "Item Group", "Item")
 
 
 class TestSubscription(IntegrationTestCase):
+=======
+test_dependencies = ("UOM", "Item Group", "Item")
+
+
+class TestSubscription(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		make_plans()
 		create_parties()
@@ -471,6 +485,7 @@ class TestSubscription(IntegrationTestCase):
 		currency = frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "currency")
 		self.assertEqual(currency, "USD")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1},
@@ -493,6 +508,8 @@ class TestSubscription(IntegrationTestCase):
 		currency = frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "currency")
 		self.assertEqual(currency, "USD")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_subscription_recovery(self):
 		"""Test if Subscription recovers when start/end date run out of sync with created invoices."""
 		subscription = create_subscription(
@@ -556,6 +573,7 @@ class TestSubscription(IntegrationTestCase):
 		subscription.reload()
 		self.assertEqual(len(subscription.invoices), 0)
 
+<<<<<<< HEAD
 	def test_invoice_generation_days_before_subscription_period_with_prorate(self):
 		settings = frappe.get_single("Subscription Settings")
 		settings.prorate = 1
@@ -583,6 +601,8 @@ class TestSubscription(IntegrationTestCase):
 		subscription.process(nowdate())
 		self.assertEqual(len(subscription.invoices), 1)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_plans():
 	create_plan(plan_name="_Test Plan Name", cost=900, currency="INR")
@@ -631,12 +651,15 @@ def create_parties():
 		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable USD - _TC"})
 		customer.insert()
 
+<<<<<<< HEAD
 	if not frappe.db.exists("Customer", "_Test Subscription Customer Multi Currency"):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = "Test Subscription Customer Multi Currency"
 		customer.default_currency = "USD"
 		customer.insert()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if not frappe.db.exists("Customer", "_Test Subscription Customer John Doe"):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = "_Test Subscription Customer John Doe"

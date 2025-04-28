@@ -16,10 +16,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	setup(doc) {
 		this.setup_posting_date_time_check();
 		super.setup(doc);
+<<<<<<< HEAD
 		this.frm.make_methods = {
 			Dunning: this.make_dunning.bind(this),
 			"Invoice Discounting": this.make_invoice_discounting.bind(this),
 		};
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 	company() {
 		super.company();
@@ -58,6 +61,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
+<<<<<<< HEAD
 			frappe.db
 				.get_value("POS Profile", this.frm.doc.pos_profile, "set_grand_total_to_default_mop")
 				.then((r) => {
@@ -65,6 +69,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						me.frm.set_default_payment = r.message.set_grand_total_to_default_mop;
 					}
 				});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
 	}
@@ -72,7 +78,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	refresh(doc, dt, dn) {
 		const me = this;
 		super.refresh();
+<<<<<<< HEAD
 		if (this.frm?.msgbox && this.frm.msgbox.$wrapper.is(":visible")) {
+=======
+		if (this.frm.msgbox && this.frm.msgbox.$wrapper.is(":visible")) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			// hide new msgbox
 			this.frm.msgbox.hide();
 		}
@@ -136,9 +146,18 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					},
 					__("Create")
 				);
+<<<<<<< HEAD
 				this.frm.add_custom_button(
 					__("Invoice Discounting"),
 					this.make_invoice_discounting.bind(this),
+=======
+
+				this.frm.add_custom_button(
+					__("Invoice Discounting"),
+					function () {
+						this.frm.events.create_invoice_discounting(this.frm);
+					},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					__("Create")
 				);
 
@@ -147,14 +166,30 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					.reduce((prev, current) => prev || current, false);
 
 				if (payment_is_overdue) {
+<<<<<<< HEAD
 					this.frm.add_custom_button(__("Dunning"), this.make_dunning.bind(this), __("Create"));
+=======
+					this.frm.add_custom_button(
+						__("Dunning"),
+						() => {
+							this.frm.events.create_dunning(this.frm);
+						},
+						__("Create")
+					);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			}
 
 			if (doc.docstatus === 1) {
 				this.frm.add_custom_button(
 					__("Maintenance Schedule"),
+<<<<<<< HEAD
 					this.make_maintenance_schedule.bind(this),
+=======
+					function () {
+						this.frm.cscript.make_maintenance_schedule();
+					},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					__("Create")
 				);
 			}
@@ -187,6 +222,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		}
 
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
+<<<<<<< HEAD
 
 		if (this.frm.doc.is_created_using_pos && !this.frm.doc.is_return) {
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
@@ -205,6 +241,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 			frm: this.frm,
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	make_maintenance_schedule() {
@@ -256,6 +294,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	sales_order_btn() {
 		var me = this;
+<<<<<<< HEAD
 
 		let filters = {
 			docstatus: 1,
@@ -268,6 +307,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			filters.is_subcontracted = 1;
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.$sales_order_btn = this.frm.add_custom_button(
 			__("Sales Order"),
 			function () {
@@ -278,10 +319,19 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					setters: {
 						customer: me.frm.doc.customer || undefined,
 					},
+<<<<<<< HEAD
 					get_query_filters: filters,
 					allow_child_item_selection: true,
 					child_fieldname: "items",
 					child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
+=======
+					get_query_filters: {
+						docstatus: 1,
+						status: ["not in", ["Closed", "On Hold"]],
+						per_billed: ["<", 99.99],
+						company: me.frm.doc.company,
+					},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				});
 			},
 			__("Get Items From")
@@ -311,9 +361,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						status: ["!=", "Lost"],
 						company: me.frm.doc.company,
 					},
+<<<<<<< HEAD
 					allow_child_item_selection: true,
 					child_fieldname: "items",
 					child_columns: ["item_code", "item_name", "qty", "rate", "amount"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				});
 			},
 			__("Get Items From")
@@ -345,9 +398,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							filters: filters,
 						};
 					},
+<<<<<<< HEAD
 					allow_child_item_selection: true,
 					child_fieldname: "items",
 					child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				});
 			},
 			__("Get Items From")
@@ -376,9 +432,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				account: this.frm.doc.debit_to,
 				price_list: this.frm.doc.selling_price_list,
 				pos_profile: pos_profile,
+<<<<<<< HEAD
 				fetch_payment_terms_template: cint(
 					(this.frm.doc.is_return == 0) & !this.frm.doc.ignore_default_payment_terms_template
 				),
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			function () {
 				me.apply_pricing_rule();
@@ -526,9 +585,14 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					},
 					callback: function (r) {
 						if (!r.exc) {
+<<<<<<< HEAD
 							if (r.message) {
 								me.frm.pos_print_format = r.message.print_format;
 								me.frm.set_default_payment = r.message.set_default_payment;
+=======
+							if (r.message && r.message.print_format) {
+								me.frm.pos_print_format = r.message.print_format;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							}
 							me.frm.trigger("update_stock");
 							if (me.frm.doc.taxes_and_charges) {
@@ -775,6 +839,23 @@ frappe.ui.form.on("Sales Invoice", {
 			};
 		});
 
+<<<<<<< HEAD
+=======
+		frm.set_query("company_address", function (doc) {
+			if (!doc.company) {
+				frappe.throw(__("Please set Company"));
+			}
+
+			return {
+				query: "frappe.contacts.doctype.address.address.address_query",
+				filters: {
+					link_doctype: "Company",
+					link_name: doc.company,
+				},
+			};
+		});
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("pos_profile", function (doc) {
 			if (!doc.company) {
 				frappe.throw(__("Please set Company"));
@@ -805,6 +886,7 @@ frappe.ui.form.on("Sales Invoice", {
 				},
 			};
 		});
+<<<<<<< HEAD
 
 		frm.set_query("sales_person", "sales_team", function () {
 			return {
@@ -815,6 +897,27 @@ frappe.ui.form.on("Sales Invoice", {
 			};
 		});
 	},
+=======
+	},
+	// When multiple companies are set up. in case company name is changed set default company address
+	company: function (frm) {
+		if (frm.doc.company) {
+			frappe.call({
+				method: "erpnext.setup.doctype.company.company.get_default_company_address",
+				args: { name: frm.doc.company, existing_address: frm.doc.company_address || "" },
+				debounce: 2000,
+				callback: function (r) {
+					if (r.message) {
+						frm.set_value("company_address", r.message);
+					} else {
+						frm.set_value("company_address", "");
+					}
+				},
+			});
+		}
+	},
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	onload: function (frm) {
 		frm.redemption_conversion_factor = null;
 	},
@@ -853,9 +956,13 @@ frappe.ui.form.on("Sales Invoice", {
 			"project",
 			"due_date",
 			"is_opening",
+<<<<<<< HEAD
 			"utm_source",
 			"utm_campaign",
 			"utm_medium",
+=======
+			"source",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"total_advance",
 			"get_advances",
 			"advances",
@@ -914,6 +1021,7 @@ frappe.ui.form.on("Sales Invoice", {
 
 	project: function (frm) {
 		if (frm.doc.project) {
+<<<<<<< HEAD
 			frappe.call({
 				method: "is_auto_fetch_timesheet_enabled",
 				doc: frm.doc,
@@ -924,6 +1032,10 @@ frappe.ui.form.on("Sales Invoice", {
 						});
 					}
 				},
+=======
+			frm.events.add_timesheet_data(frm, {
+				project: frm.doc.project,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			});
 		}
 	},
@@ -939,6 +1051,7 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 
 		const timesheets = await frm.events.get_timesheet_data(frm, kwargs);
+<<<<<<< HEAD
 
 		if (kwargs.item_code) {
 			frm.events.add_timesheet_item(frm, kwargs.item_code, timesheets);
@@ -958,6 +1071,11 @@ frappe.ui.form.on("Sales Invoice", {
 		);
 	},
 
+=======
+		return frm.events.set_timesheet_data(frm, timesheets);
+	},
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	async get_timesheet_data(frm, kwargs) {
 		return frappe
 			.call({
@@ -1043,6 +1161,7 @@ frappe.ui.form.on("Sales Invoice", {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus === 0 && !frm.doc.is_return) {
+<<<<<<< HEAD
 			frm.add_custom_button(
 				__("Timesheet"),
 				function () {
@@ -1105,14 +1224,74 @@ frappe.ui.form.on("Sales Invoice", {
 				},
 				__("Get Items From")
 			);
+=======
+			frm.add_custom_button(__("Fetch Timesheet"), function () {
+				let d = new frappe.ui.Dialog({
+					title: __("Fetch Timesheet"),
+					fields: [
+						{
+							label: __("From"),
+							fieldname: "from_time",
+							fieldtype: "Date",
+							reqd: 1,
+						},
+						{
+							fieldtype: "Column Break",
+							fieldname: "col_break_1",
+						},
+						{
+							label: __("To"),
+							fieldname: "to_time",
+							fieldtype: "Date",
+							reqd: 1,
+						},
+						{
+							label: __("Project"),
+							fieldname: "project",
+							fieldtype: "Link",
+							options: "Project",
+							default: frm.doc.project,
+						},
+					],
+					primary_action: function () {
+						const data = d.get_values();
+						frm.events.add_timesheet_data(frm, {
+							from_time: data.from_time,
+							to_time: data.to_time,
+							project: data.project,
+						});
+						d.hide();
+					},
+					primary_action_label: __("Get Timesheets"),
+				});
+				d.show();
+			});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
+<<<<<<< HEAD
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
 		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
+=======
+	},
+
+	create_invoice_discounting: function (frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_invoice_discounting",
+			frm: frm,
+		});
+	},
+
+	create_dunning: function (frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
+			frm: frm,
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 });
 
@@ -1122,6 +1301,7 @@ frappe.ui.form.on("Sales Invoice Timesheet", {
 	},
 });
 
+<<<<<<< HEAD
 frappe.ui.form.on("Sales Invoice Payment", {
 	mode_of_payment: function (frm) {
 		frappe.call({
@@ -1134,6 +1314,8 @@ frappe.ui.form.on("Sales Invoice Payment", {
 	},
 });
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 var set_timesheet_detail_rate = function (cdt, cdn, currency, timelog) {
 	frappe.call({
 		method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_detail_rate",

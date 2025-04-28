@@ -1,6 +1,9 @@
 {
  "actions": [],
+<<<<<<< HEAD
  "allow_rename": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "autoname": "Prompt",
  "creation": "2019-02-18 17:23:11.708371",
  "doctype": "DocType",
@@ -8,7 +11,10 @@
  "engine": "InnoDB",
  "field_order": [
   "project_type",
+<<<<<<< HEAD
   "disabled",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "tasks"
  ],
  "fields": [
@@ -25,6 +31,7 @@
    "label": "Tasks",
    "options": "Project Template Task",
    "reqd": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -39,6 +46,15 @@
  "module": "Projects",
  "name": "Project Template",
  "naming_rule": "Set by user",
+=======
+  }
+ ],
+ "links": [],
+ "modified": "2024-03-27 13:10:21.325199",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project Template",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {
@@ -55,7 +71,10 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

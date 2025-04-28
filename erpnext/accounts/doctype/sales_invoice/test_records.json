@@ -55,6 +55,23 @@
   ],
   "plc_conversion_rate": 1.0,
   "price_list_currency": "INR",
+<<<<<<< HEAD
+=======
+  "sales_team": [
+   {
+    "allocated_percentage": 65.5,
+    "doctype": "Sales Team",
+    "parentfield": "sales_team",
+    "sales_person": "_Test Sales Person 1"
+   },
+   {
+    "allocated_percentage": 34.5,
+    "doctype": "Sales Team",
+    "parentfield": "sales_team",
+    "sales_person": "_Test Sales Person 2"
+   }
+  ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"
  },

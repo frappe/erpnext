@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+<<<<<<< HEAD
 from datetime import datetime
 
 import frappe
@@ -10,6 +11,13 @@ from frappe.query_builder.functions import Sum
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
 from frappe.utils.data import getdate as convert_to_date
+=======
+import frappe
+from frappe import qb
+from frappe.query_builder.functions import Sum
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, getdate, nowdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -17,7 +25,10 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.buying.doctype.purchase_order.test_purchase_order import prepare_data_for_internal_transfer
+<<<<<<< HEAD
 from erpnext.projects.doctype.project.test_project import make_project
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -50,7 +61,11 @@ def make_supplier(supplier_name, currency=None):
 		return supplier_name
 
 
+<<<<<<< HEAD
 class TestAccountsController(IntegrationTestCase):
+=======
+class TestAccountsController(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	"""
 	Test Exchange Gain/Loss booking on various scenarios.
 	Test Cases are numbered for better organization
@@ -809,11 +824,16 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1}
 	)
 	def test_16_internal_transfer_at_arms_length_price(self):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
+=======
+	@change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
+	def test_16_internal_transfer_at_arms_length_price(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		prepare_data_for_internal_transfer()
@@ -847,6 +867,7 @@ class TestAccountsController(IntegrationTestCase):
 		# rate should reset to incoming rate
 		self.assertEqual(si.items[0].rate, 100)
 
+<<<<<<< HEAD
 		si.update_stock = 0
 		si.save()
 		si.submit()
@@ -991,6 +1012,8 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(sinv.taxes[0].account_head, "_Test Account Excise Duty - _TC")
 		self.assertEqual(sinv.total_taxes_and_charges, 5)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_20_journal_against_sales_invoice(self):
 		# Invoice in Foreign Currency
 		si = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1)
@@ -1593,32 +1616,56 @@ class TestAccountsController(IntegrationTestCase):
 
 		# Invoices
 		si1 = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_submit=True)
+<<<<<<< HEAD
 		si1.department = "Management - _TC"
 		si1.save().submit()
 
 		si2 = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_submit=True)
 		si2.department = "Operations - _TC"
+=======
+		si1.department = "Management"
+		si1.save().submit()
+
+		si2 = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_submit=True)
+		si2.department = "Operations"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		si2.save().submit()
 
 		# Payments
 		cr_note1 = self.create_sales_invoice(qty=-1, conversion_rate=75, rate=1, do_not_save=True)
+<<<<<<< HEAD
 		cr_note1.department = "Management - _TC"
+=======
+		cr_note1.department = "Management"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		cr_note1.is_return = 1
 		cr_note1.save().submit()
 
 		cr_note2 = self.create_sales_invoice(qty=-1, conversion_rate=75, rate=1, do_not_save=True)
+<<<<<<< HEAD
 		cr_note2.department = "Legal - _TC"
+=======
+		cr_note2.department = "Legal"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		cr_note2.is_return = 1
 		cr_note2.save().submit()
 
 		pe1 = get_payment_entry(si1.doctype, si1.name)
 		pe1.references = []
+<<<<<<< HEAD
 		pe1.department = "Research & Development - _TC"
+=======
+		pe1.department = "Research & Development"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pe1.save().submit()
 
 		pe2 = get_payment_entry(si1.doctype, si1.name)
 		pe2.references = []
+<<<<<<< HEAD
 		pe2.department = "Management - _TC"
+=======
+		pe2.department = "Management"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pe2.save().submit()
 
 		je1 = self.create_journal_entry(
@@ -1631,7 +1678,11 @@ class TestAccountsController(IntegrationTestCase):
 		)
 		je1.accounts[0].party_type = "Customer"
 		je1.accounts[0].party = self.customer
+<<<<<<< HEAD
 		je1.accounts[0].department = "Management - _TC"
+=======
+		je1.accounts[0].department = "Management"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		je1.save().submit()
 
 		# assert dimension filter's result
@@ -1640,17 +1691,29 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(len(pr.invoices), 2)
 		self.assertEqual(len(pr.payments), 5)
 
+<<<<<<< HEAD
 		pr.department = "Legal - _TC"
+=======
+		pr.department = "Legal"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 1)
 
+<<<<<<< HEAD
 		pr.department = "Management - _TC"
+=======
+		pr.department = "Management"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 1)
 		self.assertEqual(len(pr.payments), 3)
 
+<<<<<<< HEAD
 		pr.department = "Research & Development - _TC"
+=======
+		pr.department = "Research & Development"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 1)
@@ -1661,17 +1724,29 @@ class TestAccountsController(IntegrationTestCase):
 
 		# Invoice
 		si = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_submit=True)
+<<<<<<< HEAD
 		si.department = "Management - _TC"
+=======
+		si.department = "Management"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		si.save().submit()
 
 		# Payment
 		cr_note = self.create_sales_invoice(qty=-1, conversion_rate=75, rate=1, do_not_save=True)
+<<<<<<< HEAD
 		cr_note.department = "Management - _TC"
+=======
+		cr_note.department = "Management"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		cr_note.is_return = 1
 		cr_note.save().submit()
 
 		pr = self.create_payment_reconciliation()
+<<<<<<< HEAD
 		pr.department = "Management - _TC"
+=======
+		pr.department = "Management"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 1)
 		self.assertEqual(len(pr.payments), 1)
@@ -1703,7 +1778,11 @@ class TestAccountsController(IntegrationTestCase):
 		# Sales Invoice in Foreign Currency
 		self.setup_dimensions()
 		rate_in_account_currency = 1
+<<<<<<< HEAD
 		dpt = "Research & Development - _TC"
+=======
+		dpt = "Research & Development"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		si = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_save=True)
 		si.department = dpt
@@ -1738,7 +1817,11 @@ class TestAccountsController(IntegrationTestCase):
 
 	def test_93_dimension_inheritance_on_advance(self):
 		self.setup_dimensions()
+<<<<<<< HEAD
 		dpt = "Research & Development - _TC"
+=======
+		dpt = "Research & Development"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		adv = self.create_payment_entry(amount=1, source_exc_rate=85)
 		adv.department = dpt
@@ -2104,6 +2187,7 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(len(exc_je_for_adv), 0)
 
 		self.remove_advance_accounts_from_party_master()
+<<<<<<< HEAD
 
 	def test_difference_posting_date_in_pi_and_si(self):
 		self.setup_advance_accounts_in_party_master()
@@ -2432,3 +2516,5 @@ class TestAccountsController(IntegrationTestCase):
 
 		# Second return should only get remaining discount (100 - 60 = 40)
 		self.assertEqual(return_si_2.discount_amount, -40)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

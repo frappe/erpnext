@@ -24,7 +24,10 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Conversion Factor",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "conversion_factor",
    "oldfieldtype": "Float"
   }
@@ -32,14 +35,25 @@
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-19 21:27:13.968771",
+=======
+ "modified": "2024-03-27 13:10:57.645955",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "UOM Conversion Detail",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

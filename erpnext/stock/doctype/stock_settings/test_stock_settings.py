@@ -3,10 +3,17 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestStockSettings(IntegrationTestCase):
+=======
+from frappe.tests.utils import FrappeTestCase
+
+
+class TestStockSettings(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		super().setUp()
 		frappe.db.set_single_value("Stock Settings", "clean_description_html", 0)

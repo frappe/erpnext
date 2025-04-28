@@ -15,7 +15,11 @@ def execute():
 
 def find_broken_stock_entries() -> list[StockEntryCode]:
 	period_closing_date = frappe.db.get_value(
+<<<<<<< HEAD
 		"Period Closing Voucher", {"docstatus": 1}, "period_end_date", order_by="period_end_date desc"
+=======
+		"Period Closing Voucher", {"docstatus": 1}, "posting_date", order_by="posting_date desc"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	stock_entries_to_patch = frappe.db.sql(

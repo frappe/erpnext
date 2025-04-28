@@ -3,14 +3,23 @@
 
 import frappe
 from frappe import _dict
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+=======
+from frappe.tests.utils import FrappeTestCase
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+<<<<<<< HEAD
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note, create_dn_for_pick_lists
+=======
+from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
@@ -22,10 +31,17 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
 
 class TestPickList(IntegrationTestCase):
+=======
+test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
+
+
+class TestPickList(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:
@@ -399,6 +415,7 @@ class TestPickList(IntegrationTestCase):
 		self.assertEqual(pick_list.locations[1].sales_order_item, sales_order.items[0].name)
 
 	def test_pick_list_for_items_with_multiple_UOM(self):
+<<<<<<< HEAD
 		item_code = make_item(
 			uoms=[
 				{"uom": "Nos", "conversion_factor": 1},
@@ -406,6 +423,9 @@ class TestPickList(IntegrationTestCase):
 				{"uom": "Unit", "conversion_factor": 0.5},
 			]
 		).name
+=======
+		item_code = make_item().name
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		purchase_receipt = make_purchase_receipt(item_code=item_code, qty=10)
 		purchase_receipt.submit()
 
@@ -418,7 +438,12 @@ class TestPickList(IntegrationTestCase):
 					{
 						"item_code": item_code,
 						"qty": 1,
+<<<<<<< HEAD
 						"uom": "Hand",
+=======
+						"conversion_factor": 5,
+						"stock_qty": 5,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"delivery_date": frappe.utils.today(),
 						"warehouse": "_Test Warehouse - _TC",
 					},
@@ -432,7 +457,10 @@ class TestPickList(IntegrationTestCase):
 				],
 			}
 		).insert()
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		sales_order.submit()
 
 		pick_list = frappe.get_doc(
@@ -447,7 +475,10 @@ class TestPickList(IntegrationTestCase):
 						"item_code": item_code,
 						"qty": 2,
 						"stock_qty": 1,
+<<<<<<< HEAD
 						"uom": "Unit",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"conversion_factor": 0.5,
 						"sales_order": sales_order.name,
 						"sales_order_item": sales_order.items[0].name,
@@ -469,11 +500,15 @@ class TestPickList(IntegrationTestCase):
 		delivery_note = create_delivery_note(pick_list.name)
 		pick_list.load_from_db()
 
+<<<<<<< HEAD
 		#  pick list stk_qty / dn conversion_factor = dn qty (1/5 = 0.2)
 		self.assertEqual(
 			pick_list.locations[0].picked_qty,
 			delivery_note.items[0].qty * delivery_note.items[0].conversion_factor,
 		)
+=======
+		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
 		self.assertEqual(sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor)
 
@@ -566,10 +601,17 @@ class TestPickList(IntegrationTestCase):
 				"company": "_Test Company",
 				"items_based_on": "Sales Order",
 				"purpose": "Delivery",
+<<<<<<< HEAD
 				"customer": "_Test Customer",
 				"locations": [
 					{
 						"item_code": "_Test Item",
+=======
+				"picker": "P001",
+				"locations": [
+					{
+						"item_code": "_Test Item ",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"qty": 1,
 						"stock_qty": 1,
 						"conversion_factor": 1,
@@ -592,12 +634,18 @@ class TestPickList(IntegrationTestCase):
 		create_delivery_note(pick_list.name)
 		for dn in frappe.get_all(
 			"Delivery Note",
+<<<<<<< HEAD
 			filters={"against_pick_list": pick_list.name, "customer": "_Test Customer"},
 			fields=["name"],
+=======
+			filters={"pick_list": pick_list.name, "customer": "_Test Customer"},
+			fields={"name"},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				self.assertEqual(dn_item.item_code, "_Test Item")
 				self.assertEqual(dn_item.against_sales_order, sales_order_1.name)
+<<<<<<< HEAD
 				self.assertEqual(dn_item.against_pick_list, pick_list.name)
 				self.assertEqual(dn_item.pick_list_item, pick_list.locations[0].name)
 
@@ -605,21 +653,39 @@ class TestPickList(IntegrationTestCase):
 			"Delivery Note",
 			filters={"against_pick_list": pick_list.name, "customer": "_Test Customer 1"},
 			fields=["name"],
+=======
+				self.assertEqual(dn_item.pick_list_item, pick_list.locations[dn_item.idx - 1].name)
+
+		for dn in frappe.get_all(
+			"Delivery Note",
+			filters={"pick_list": pick_list.name, "customer": "_Test Customer 1"},
+			fields={"name"},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				self.assertEqual(dn_item.item_code, "_Test Item 2")
 				self.assertEqual(dn_item.against_sales_order, sales_order_2.name)
+<<<<<<< HEAD
 				self.assertEqual(dn_item.against_pick_list, pick_list.name)
 				self.assertEqual(dn_item.pick_list_item, pick_list.locations[1].name)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		# test DN creation without so
 		pick_list_1 = frappe.get_doc(
 			{
 				"doctype": "Pick List",
 				"company": "_Test Company",
 				"purpose": "Delivery",
+<<<<<<< HEAD
 				"locations": [
 					{
 						"item_code": "_Test Item",
+=======
+				"picker": "P001",
+				"locations": [
+					{
+						"item_code": "_Test Item ",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"qty": 1,
 						"stock_qty": 1,
 						"conversion_factor": 1,
@@ -636,9 +702,13 @@ class TestPickList(IntegrationTestCase):
 		pick_list_1.set_item_locations()
 		pick_list_1.submit()
 		create_delivery_note(pick_list_1.name)
+<<<<<<< HEAD
 		for dn in frappe.get_all(
 			"Delivery Note", filters={"against_pick_list": pick_list_1.name}, fields=["name"]
 		):
+=======
+		for dn in frappe.get_all("Delivery Note", filters={"pick_list": pick_list_1.name}, fields={"name"}):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				if dn_item.item_code == "_Test Item":
 					self.assertEqual(dn_item.qty, 1)
@@ -775,6 +845,10 @@ class TestPickList(IntegrationTestCase):
 		quantities = [5, 2]
 		bundle, components = create_product_bundle(quantities, warehouse=warehouse)
 		bundle_items = dict(zip(components, quantities, strict=False))
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		so = make_sales_order(item_code=bundle, qty=3, rate=42)
 
 		pl = create_pick_list(so.name)
@@ -796,7 +870,11 @@ class TestPickList(IntegrationTestCase):
 		self.assertEqual(so.per_delivered, 100)
 
 	def test_picklist_with_partial_bundles(self):
+<<<<<<< HEAD
 		# from self.globalTestRecords
+=======
+		# from test_records.json
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		warehouse = "_Test Warehouse - _TC"
 
 		quantities = [5, 2]
@@ -885,7 +963,11 @@ class TestPickList(IntegrationTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
+<<<<<<< HEAD
 		self.assertFalse(pl.locations)
+=======
+		self.assertFalse(hasattr(pl, "locations"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_pick_list_validation_for_serial_no(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -916,7 +998,11 @@ class TestPickList(IntegrationTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
+<<<<<<< HEAD
 		self.assertFalse(pl.locations)
+=======
+		self.assertFalse(hasattr(pl, "locations"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_pick_list_validation_for_batch_no(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -952,7 +1038,11 @@ class TestPickList(IntegrationTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
+<<<<<<< HEAD
 		self.assertFalse(pl.locations)
+=======
+		self.assertFalse(hasattr(pl, "locations"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_pick_list_validation_for_batch_no_and_serial_item(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -992,7 +1082,11 @@ class TestPickList(IntegrationTestCase):
 
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
+<<<<<<< HEAD
 		self.assertFalse(pl.locations)
+=======
+		self.assertFalse(hasattr(pl, "locations"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_pick_list_validation_for_multiple_batches_and_sales_order(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -1187,7 +1281,10 @@ class TestPickList(IntegrationTestCase):
 
 		for row in pl.locations:
 			row.qty = row.qty + 10
+<<<<<<< HEAD
 			row.picked_qty = row.qty
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertRaises(frappe.ValidationError, pl.save)
 
@@ -1257,7 +1354,10 @@ class TestPickList(IntegrationTestCase):
 				"is_recursive": 1,
 				"recurse_for": 2,
 				"free_qty": 1,
+<<<<<<< HEAD
 				"dont_enforce_free_item_qty": 0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"company": "_Test Company",
 				"customer": "_Test Customer",
 			}
@@ -1283,6 +1383,7 @@ class TestPickList(IntegrationTestCase):
 		delivery_note = create_delivery_note(pl.name)
 
 		self.assertEqual(len(delivery_note.items), 1)
+<<<<<<< HEAD
 
 	def test_pick_list_not_reset_batch(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -1485,3 +1586,5 @@ class TestPickList(IntegrationTestCase):
 		pick_list.cancel()
 		sales_order.cancel()
 		stock_entry.cancel()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

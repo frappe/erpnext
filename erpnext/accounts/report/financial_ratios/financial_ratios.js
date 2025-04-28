@@ -52,7 +52,11 @@ frappe.query_reports["Financial Ratios"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
+<<<<<<< HEAD
 		let heading_ratios = [__("Liquidity Ratios"), __("Solvency Ratios"), __("Turnover Ratios")];
+=======
+		let heading_ratios = ["Liquidity Ratios", "Solvency Ratios", "Turnover Ratios"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if (heading_ratios.includes(value)) {
 			value = $(`<span>${value}</span>`);
@@ -60,7 +64,11 @@ frappe.query_reports["Financial Ratios"] = {
 			value = $value.wrap("<p></p>").parent().html();
 		}
 
+<<<<<<< HEAD
 		if (heading_ratios.includes(row[1]?.content) && column.fieldtype == "Float") {
+=======
+		if (heading_ratios.includes(row[1].content) && column.fieldtype == "Float") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			column.fieldtype = "Data";
 		}
 

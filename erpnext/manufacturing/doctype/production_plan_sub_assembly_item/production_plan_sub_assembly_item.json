@@ -9,6 +9,7 @@
   "item_name",
   "fg_warehouse",
   "parent_item_code",
+<<<<<<< HEAD
   "column_break_3",
   "bom_no",
   "bom_level",
@@ -36,6 +37,31 @@
   "actual_qty",
   "column_break_22",
   "description"
+=======
+  "schedule_date",
+  "column_break_3",
+  "qty",
+  "bom_no",
+  "bom_level",
+  "type_of_manufacturing",
+  "supplier",
+  "work_order_details_section",
+  "wo_produced_qty",
+  "purchase_order",
+  "production_plan_item",
+  "column_break_7",
+  "received_qty",
+  "indent",
+  "section_break_19",
+  "uom",
+  "stock_uom",
+  "column_break_22",
+  "description",
+  "section_break_4rxf",
+  "actual_qty",
+  "column_break_xfhm",
+  "projected_qty"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -53,18 +79,30 @@
    "depends_on": "eval:doc.type_of_manufacturing == \"In House\"",
    "fieldname": "work_order_details_section",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Manufacturing"
+=======
+   "label": "Reference"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "columns": 2,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty to Order",
+=======
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Required Qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -75,18 +113,28 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "allow_on_submit": 1,
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Qty",
    "no_copy": 1,
+=======
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_list_view": 1,
+<<<<<<< HEAD
    "label": "BOM No",
+=======
+   "label": "Bom No",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "BOM"
   },
   {
@@ -157,6 +205,10 @@
    "columns": 2,
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
+<<<<<<< HEAD
+=======
+   "in_list_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Target Warehouse",
    "options": "Warehouse"
   },
@@ -171,6 +223,7 @@
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "in_list_view": 1,
    "label": "Supplier",
    "mandatory_depends_on": "eval:doc.type_of_manufacturing == 'Subcontract' && doc.qty > 0",
@@ -180,15 +233,32 @@
    "columns": 2,
    "fieldname": "schedule_date",
    "fieldtype": "Datetime",
+=======
+   "label": "Supplier",
+   "mandatory_depends_on": "eval:doc.type_of_manufacturing == 'Subcontract'",
+   "options": "Supplier"
+  },
+  {
+   "columns": 1,
+   "fieldname": "schedule_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Schedule Date"
   },
   {
    "fieldname": "section_break_4rxf",
+<<<<<<< HEAD
    "fieldtype": "Section Break",
    "label": "Quantity"
   },
   {
    "columns": 2,
+=======
+   "fieldtype": "Section Break"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "actual_qty",
    "fieldtype": "Float",
    "label": "Actual Qty",
@@ -200,10 +270,15 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "columns": 2,
    "fieldname": "projected_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
+=======
+   "fieldname": "projected_qty",
+   "fieldtype": "Float",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Projected Qty",
    "no_copy": 1,
    "read_only": 1
@@ -213,6 +288,7 @@
    "fieldtype": "Float",
    "label": "Produced Qty",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "columns": 2,
@@ -247,15 +323,30 @@
  "istable": 1,
  "links": [],
  "modified": "2025-11-03 14:33:50.677717",
+=======
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:20.876695",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

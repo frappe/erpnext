@@ -2,7 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -10,8 +15,20 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
 
+<<<<<<< HEAD
 
 class TestWarehouse(IntegrationTestCase):
+=======
+test_records = frappe.get_test_records("Warehouse")
+
+
+class TestWarehouse(FrappeTestCase):
+	def setUp(self):
+		super().setUp()
+		if not frappe.get_value("Item", "_Test Item"):
+			make_test_records("Item")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_parent_warehouse(self):
 		parent_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
 		self.assertEqual(parent_warehouse.is_group, 1)

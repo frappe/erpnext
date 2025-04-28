@@ -10,23 +10,32 @@
   "column_break_3",
   "default_price_list",
   "default_discount_account",
+<<<<<<< HEAD
   "default_inventory_account",
   "inventory_account_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "purchase_defaults",
   "buying_cost_center",
   "default_supplier",
   "column_break_8",
   "expense_account",
   "default_provisional_account",
+<<<<<<< HEAD
   "column_break_cpif",
   "purchase_expense_account",
   "purchase_expense_contra_account",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "selling_defaults",
   "selling_cost_center",
   "column_break_12",
   "income_account",
+<<<<<<< HEAD
   "cost_of_good_sold_section",
   "default_cogs_account",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "deferred_accounting_defaults_section",
   "deferred_expense_account",
   "column_break_kwad",
@@ -47,8 +56,12 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Default Warehouse",
+<<<<<<< HEAD
    "options": "Warehouse",
    "search_index": 1
+=======
+   "options": "Warehouse"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_3",
@@ -118,7 +131,11 @@
   {
    "fieldname": "default_provisional_account",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Default Provisional Account (Service)",
+=======
+   "label": "Default Provisional Account",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Account"
   },
   {
@@ -143,6 +160,7 @@
   {
    "fieldname": "column_break_kwad",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_cpif",
@@ -184,20 +202,33 @@
    "label": "Inventory Account Currency",
    "options": "Currency",
    "read_only": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-21 10:50:46.144721",
+=======
+ "modified": "2024-03-27 13:09:54.445015",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -17,7 +17,11 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Purpose",
+<<<<<<< HEAD
    "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble\nReceive from Customer\nReturn Raw Material to Customer\nSubcontracting Delivery\nSubcontracting Return",
+=======
+   "options": "\nMaterial Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1,
    "set_only_once": 1
   },
@@ -36,9 +40,14 @@
    "read_only": 1
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "links": [],
  "modified": "2025-09-04 13:03:31.283348",
+=======
+ "links": [],
+ "modified": "2024-08-23 16:00:22.696958",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
@@ -87,10 +96,17 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1,
  "translated_doctype": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

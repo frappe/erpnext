@@ -16,7 +16,10 @@ class PurchaseInvoiceAdvance(Document):
 
 		advance_amount: DF.Currency
 		allocated_amount: DF.Currency
+<<<<<<< HEAD
 		difference_posting_date: DF.Date | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		exchange_gain_loss: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data

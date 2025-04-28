@@ -6,13 +6,21 @@
  "docstatus": 0,
  "doctype": "Dashboard Chart",
  "document_type": "Work Order Operation",
+<<<<<<< HEAD
  "filters_json": "[[\"Work Order Operation\",\"docstatus\",\"=\",1]]",
+=======
+ "filters_json": "[[\"Work Order Operation\",\"docstatus\",\"=\",1,false]]",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "group_by_type": "Count",
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
  "last_synced_on": "2020-07-21 16:57:09.767009",
+<<<<<<< HEAD
  "modified": "2024-12-05 12:00:00.000000",
+=======
+ "modified": "2024-01-10 12:21:25.134075",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Completed Operation",

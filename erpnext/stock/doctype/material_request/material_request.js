@@ -42,6 +42,7 @@ frappe.ui.form.on("Material Request", {
 				},
 			};
 		});
+<<<<<<< HEAD
 
 		frm.set_query("buying_price_list", () => {
 			return {
@@ -59,6 +60,8 @@ frappe.ui.form.on("Material Request", {
 				frappe.model.set_value(d.doctype, d.name, "schedule_date", frm.doc.schedule_date);
 			});
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	onload: function (frm) {
@@ -87,14 +90,20 @@ frappe.ui.form.on("Material Request", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+<<<<<<< HEAD
 		if (!frm.doc.buying_price_list) {
 			frm.doc.buying_price_list = frappe.defaults.get_default("buying_price_list");
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	company: function (frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+<<<<<<< HEAD
 		erpnext.utils.set_letter_head(frm);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	onload_post_render: function (frm) {
@@ -104,12 +113,15 @@ frappe.ui.form.on("Material Request", {
 	refresh: function (frm) {
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd("customer", frm.doc.material_request_type == "Customer Provided");
+<<<<<<< HEAD
 		prevent_past_schedule_dates(frm);
 	},
 
 	transaction_date(frm) {
 		prevent_past_schedule_dates(frm);
 		frm.set_value("schedule_date", "");
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	set_from_warehouse: function (frm) {
@@ -182,13 +194,25 @@ frappe.ui.form.on("Material Request", {
 						() => frm.events.make_purchase_order(frm),
 						__("Create")
 					);
+<<<<<<< HEAD
 
+=======
+				}
+
+				if (frm.doc.material_request_type === "Purchase") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					frm.add_custom_button(
 						__("Request for Quotation"),
 						() => frm.events.make_request_for_quotation(frm),
 						__("Create")
 					);
+<<<<<<< HEAD
 
+=======
+				}
+
+				if (frm.doc.material_request_type === "Purchase") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					frm.add_custom_button(
 						__("Supplier Quotation"),
 						() => frm.events.make_supplier_quotation(frm),
@@ -204,6 +228,7 @@ frappe.ui.form.on("Material Request", {
 					);
 				}
 
+<<<<<<< HEAD
 				if (frm.doc.material_request_type === "Subcontracting") {
 					frm.add_custom_button(
 						__("Subcontracted Purchase Order"),
@@ -212,6 +237,8 @@ frappe.ui.form.on("Material Request", {
 					);
 				}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 		}
@@ -267,14 +294,22 @@ frappe.ui.form.on("Material Request", {
 		frappe.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			args: {
+<<<<<<< HEAD
 				ctx: {
+=======
+				args: {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					item_code: item.item_code,
 					from_warehouse: item.from_warehouse,
 					warehouse: item.warehouse,
 					doctype: frm.doc.doctype,
+<<<<<<< HEAD
 					buying_price_list: frm.doc.buying_price_list
 						? frm.doc.buying_price_list
 						: frappe.defaults.get_default("buying_price_list"),
+=======
+					buying_price_list: frappe.defaults.get_default("buying_price_list"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					currency: frappe.defaults.get_default("Currency"),
 					name: frm.doc.name,
 					qty: item.qty || 1,
@@ -292,21 +327,32 @@ frappe.ui.form.on("Material Request", {
 			},
 			callback: function (r) {
 				const d = item;
+<<<<<<< HEAD
 				let allow_to_change_fields = [
+=======
+				const allow_to_change_fields = [
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"actual_qty",
 					"projected_qty",
 					"min_order_qty",
 					"item_name",
+<<<<<<< HEAD
+=======
+					"description",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"stock_uom",
 					"uom",
 					"conversion_factor",
 					"stock_qty",
 				];
 
+<<<<<<< HEAD
 				if (overwrite_warehouse) {
 					allow_to_change_fields.push("description");
 				}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				if (!r.exc) {
 					$.each(r.message, function (key, value) {
 						if (!d[key] || allow_to_change_fields.includes(key)) {
@@ -346,9 +392,12 @@ frappe.ui.form.on("Material Request", {
 					label: __("For Warehouse"),
 					options: "Warehouse",
 					reqd: 1,
+<<<<<<< HEAD
 					get_query: function () {
 						return { filters: { company: frm.doc.company } };
 					},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 				{ fieldname: "qty", fieldtype: "Float", label: __("Quantity"), reqd: 1, default: 1 },
 				{
@@ -358,7 +407,11 @@ frappe.ui.form.on("Material Request", {
 					default: 1,
 				},
 			],
+<<<<<<< HEAD
 			primary_action_label: __("Get Items"),
+=======
+			primary_action_label: "Get Items",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			primary_action(values) {
 				if (!values) return;
 				values["company"] = frm.doc.company;
@@ -498,7 +551,10 @@ frappe.ui.form.on("Material Request", {
 			method: "erpnext.stock.doctype.material_request.material_request.raise_work_orders",
 			args: {
 				material_request: frm.doc.name,
+<<<<<<< HEAD
 				company: frm.doc.company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			freeze: true,
 			callback: function (r) {
@@ -593,6 +649,7 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 
 	onload() {
 		this.frm.set_query("item_code", "items", function (doc, cdt, cdn) {
+<<<<<<< HEAD
 			let filters = { is_stock_item: 1 };
 
 			if (doc.material_request_type == "Customer Provided") {
@@ -610,6 +667,27 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 				query: "erpnext.controllers.queries.item_query",
 				filters: filters,
 			};
+=======
+			if (doc.material_request_type == "Customer Provided") {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {
+						customer: doc.customer,
+						is_stock_item: 1,
+					},
+				};
+			} else if (doc.material_request_type == "Purchase") {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: { is_purchase_item: 1 },
+				};
+			} else {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: { is_stock_item: 1 },
+				};
+			}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 	}
 
@@ -627,6 +705,13 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 		set_schedule_date(this.frm);
 	}
 
+<<<<<<< HEAD
+=======
+	schedule_date() {
+		set_schedule_date(this.frm);
+	}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	qty(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		row.amount = flt(row.qty) * flt(row.rate);
@@ -649,6 +734,7 @@ function set_schedule_date(frm) {
 		);
 	}
 }
+<<<<<<< HEAD
 
 function prevent_past_schedule_dates(frm) {
 	if (frm.doc.transaction_date) {
@@ -657,3 +743,5 @@ function prevent_past_schedule_dates(frm) {
 		});
 	}
 }
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

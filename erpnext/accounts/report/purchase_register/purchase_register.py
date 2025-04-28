@@ -311,7 +311,10 @@ def get_account_columns(invoice_list, include_payments):
 			"""select distinct expense_account
 			from `tabPurchase Invoice Item` where docstatus = 1
 			and (expense_account is not null and expense_account != '')
+<<<<<<< HEAD
 			and parenttype='Purchase Invoice'
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			and parent in (%s) order by expense_account"""
 			% ", ".join(["%s"] * len(invoice_list)),
 			tuple([inv.name for inv in invoice_list]),
@@ -397,6 +400,10 @@ def get_invoices(filters, additional_query_columns):
 			pi.mode_of_payment,
 		)
 		.where(pi.docstatus == 1)
+<<<<<<< HEAD
+=======
+		.orderby(pi.posting_date, pi.name, order=Order.desc)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	if additional_query_columns:
@@ -420,6 +427,7 @@ def get_invoices(filters, additional_query_columns):
 		)
 		query = query.where(pi.credit_to.isin(party_account))
 
+<<<<<<< HEAD
 	from frappe.desk.reportview import build_match_conditions
 
 	query, params = query.walk()
@@ -431,6 +439,10 @@ def get_invoices(filters, additional_query_columns):
 	query += " order by posting_date desc, name desc"
 
 	return frappe.db.sql(query, params, as_dict=True)
+=======
+	invoices = query.run(as_dict=True)
+	return invoices
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_conditions(filters, query, doctype):
@@ -460,7 +472,11 @@ def get_invoice_expense_map(invoice_list):
 		"""
 		select parent, expense_account, sum(base_net_amount) as amount
 		from `tabPurchase Invoice Item`
+<<<<<<< HEAD
 		where parent in (%s) and parenttype='Purchase Invoice'
+=======
+		where parent in (%s)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		group by parent, expense_account
 	"""
 		% ", ".join(["%s"] * len(invoice_list)),
@@ -531,7 +547,11 @@ def get_invoice_po_pr_map(invoice_list):
 		"""
 		select parent, purchase_order, purchase_receipt, po_detail, project
 		from `tabPurchase Invoice Item`
+<<<<<<< HEAD
 		where parent in (%s) and parenttype='Purchase Invoice'
+=======
+		where parent in (%s)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	"""
 		% ", ".join(["%s"] * len(invoice_list)),
 		tuple(inv.name for inv in invoice_list),

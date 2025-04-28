@@ -31,10 +31,16 @@ frappe.ui.form.on("Depreciation Schedule", {
 			frappe.call({
 				method: "erpnext.assets.doctype.asset.depreciation.make_depreciation_entry",
 				args: {
+<<<<<<< HEAD
 					depr_schedule_name: frm.doc.name,
 					date: row.schedule_date,
 				},
 				debounce: 1000,
+=======
+					asset_depr_schedule_name: frm.doc.name,
+					date: row.schedule_date,
+				},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				callback: function (r) {
 					frappe.model.sync(r.message);
 					frm.refresh();

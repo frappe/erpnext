@@ -5,7 +5,11 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import cstr, flt, formatdate, get_link_to_form, getdate
+=======
+from frappe.utils import flt, formatdate, get_link_to_form, getdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -14,7 +18,11 @@ from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciatio
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+<<<<<<< HEAD
 	reschedule_depreciation,
+=======
+	make_new_active_asset_depr_schedules_and_cancel_current_ones,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 )
 
 
@@ -46,6 +54,7 @@ class AssetValueAdjustment(Document):
 		self.set_current_asset_value()
 		self.set_difference_amount()
 
+<<<<<<< HEAD
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")
 		if getdate(self.date) < getdate(asset_purchase_date):
@@ -66,6 +75,12 @@ class AssetValueAdjustment(Document):
 	def on_submit(self):
 		self.make_asset_revaluation_entry()
 		self.update_asset()
+=======
+	def on_submit(self):
+		self.make_depreciation_entry()
+		self.set_value_after_depreciation()
+		self.update_asset(self.new_asset_value)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		add_asset_activity(
 			self.asset,
 			_("Asset's value adjusted after submission of Asset Value Adjustment {0}").format(
@@ -83,7 +98,31 @@ class AssetValueAdjustment(Document):
 			),
 		)
 
+<<<<<<< HEAD
 	def make_asset_revaluation_entry(self):
+=======
+	def validate_date(self):
+		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")
+		if getdate(self.date) < getdate(asset_purchase_date):
+			frappe.throw(
+				_("Asset Value Adjustment cannot be posted before Asset's purchase date <b>{0}</b>.").format(
+					formatdate(asset_purchase_date)
+				),
+				title=_("Incorrect Date"),
+			)
+
+	def set_difference_amount(self):
+		self.difference_amount = flt(self.new_asset_value - self.current_asset_value)
+
+	def set_value_after_depreciation(self):
+		frappe.db.set_value("Asset", self.asset, "value_after_depreciation", self.new_asset_value)
+
+	def set_current_asset_value(self):
+		if not self.current_asset_value and self.asset:
+			self.current_asset_value = get_asset_value_after_depreciation(self.asset, self.finance_book)
+
+	def make_depreciation_entry(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		asset = frappe.get_doc("Asset", self.asset)
 		(
 			fixed_asset_account,
@@ -110,6 +149,7 @@ class AssetValueAdjustment(Document):
 		}
 
 		if self.difference_amount < 0:
+<<<<<<< HEAD
 			credit_entry, debit_entry = self.get_entry_for_asset_value_decrease(
 				fixed_asset_account, entry_template
 			)
@@ -119,6 +159,48 @@ class AssetValueAdjustment(Document):
 			)
 
 		self.update_accounting_dimensions(credit_entry, debit_entry)
+=======
+			credit_entry = {
+				"account": fixed_asset_account,
+				"credit_in_account_currency": -self.difference_amount,
+				**entry_template,
+			}
+			debit_entry = {
+				"account": self.difference_account,
+				"debit_in_account_currency": -self.difference_amount,
+				**entry_template,
+			}
+		elif self.difference_amount > 0:
+			credit_entry = {
+				"account": self.difference_account,
+				"credit_in_account_currency": self.difference_amount,
+				**entry_template,
+			}
+			debit_entry = {
+				"account": fixed_asset_account,
+				"debit_in_account_currency": self.difference_amount,
+				**entry_template,
+			}
+
+		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
+
+		for dimension in accounting_dimensions:
+			if dimension.get("mandatory_for_bs"):
+				credit_entry.update(
+					{
+						dimension["fieldname"]: self.get(dimension["fieldname"])
+						or dimension.get("default_dimension")
+					}
+				)
+
+			if dimension.get("mandatory_for_pl"):
+				debit_entry.update(
+					{
+						dimension["fieldname"]: self.get(dimension["fieldname"])
+						or dimension.get("default_dimension")
+					}
+				)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		je.append("accounts", credit_entry)
 		je.append("accounts", debit_entry)
@@ -128,6 +210,7 @@ class AssetValueAdjustment(Document):
 
 		self.db_set("journal_entry", je.name)
 
+<<<<<<< HEAD
 	def get_entry_for_asset_value_decrease(self, fixed_asset_account, entry_template):
 		credit_entry = {
 			"account": fixed_asset_account,
@@ -197,22 +280,54 @@ class AssetValueAdjustment(Document):
 			return flt(salvage_value_adjustment if self.docstatus == 1 else -1 * salvage_value_adjustment)
 
 	def get_adjustment_note(self):
+=======
+	def update_asset(self, asset_value=None):
+		asset = frappe.get_doc("Asset", self.asset)
+
+		if not asset.calculate_depreciation:
+			asset.value_after_depreciation = asset_value
+			asset.save()
+			return
+
+		asset.flags.decrease_in_asset_value_due_to_value_adjustment = True
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.docstatus == 1:
 			notes = _(
 				"This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
 			).format(
+<<<<<<< HEAD
 				get_link_to_form("Asset", self.asset),
+=======
+				get_link_to_form("Asset", asset.name),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				get_link_to_form(self.get("doctype"), self.get("name")),
 			)
 		elif self.docstatus == 2:
 			notes = _(
 				"This schedule was created when Asset {0}'s Asset Value Adjustment {1} was cancelled."
 			).format(
+<<<<<<< HEAD
 				get_link_to_form("Asset", self.asset),
 				get_link_to_form(self.get("doctype"), self.get("name")),
 			)
 
 		return notes
+=======
+				get_link_to_form("Asset", asset.name),
+				get_link_to_form(self.get("doctype"), self.get("name")),
+			)
+
+		make_new_active_asset_depr_schedules_and_cancel_current_ones(
+			asset,
+			notes,
+			value_after_depreciation=asset_value,
+			ignore_booked_entry=True,
+			difference_amount=self.difference_amount,
+		)
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.save()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()

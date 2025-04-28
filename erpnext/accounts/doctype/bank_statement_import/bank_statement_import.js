@@ -70,7 +70,11 @@ frappe.ui.form.on("Bank Statement Import", {
 
 		frm.get_field("import_file").df.options = {
 			restrictions: {
+<<<<<<< HEAD
 				allowed_file_types: [".csv", ".xls", ".xlsx", ".TXT", ".txt"],
+=======
+				allowed_file_types: [".csv", ".xls", ".xlsx"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		};
 
@@ -81,7 +85,10 @@ frappe.ui.form.on("Bank Statement Import", {
 
 	refresh(frm) {
 		frm.page.hide_icon_group();
+<<<<<<< HEAD
 		frm.trigger("toggle_mt940_note");
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.trigger("update_indicators");
 		frm.trigger("import_file");
 		frm.trigger("show_import_log");
@@ -193,6 +200,7 @@ frappe.ui.form.on("Bank Statement Import", {
 		});
 	},
 
+<<<<<<< HEAD
 	import_mt940_fromat(frm) {
 		frm.trigger("toggle_mt940_note");
 		frm.save();
@@ -211,6 +219,8 @@ frappe.ui.form.on("Bank Statement Import", {
 		frm.set_value("import_mt940_fromat", frm.doc.import_mt940_fromat);
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	show_report_error_button(frm) {
 		if (frm.doc.status === "Error") {
 			frappe.db
@@ -252,7 +262,11 @@ frappe.ui.form.on("Bank Statement Import", {
 
 		open_url_post(method, {
 			doctype: "Bank Transaction",
+<<<<<<< HEAD
 			export_records: "blank_template",
+=======
+			export_records: "5_records",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			export_fields: {
 				"Bank Transaction": [
 					"date",
@@ -309,6 +323,7 @@ frappe.ui.form.on("Bank Statement Import", {
 			.html(__("Loading import file..."))
 			.appendTo(frm.get_field("import_preview").$wrapper);
 
+<<<<<<< HEAD
 		frappe.run_serially([
 			// Convert MT940 to CSV if .txt file
 			() => {
@@ -348,6 +363,25 @@ frappe.ui.form.on("Bank Statement Import", {
 				});
 			},
 		]);
+=======
+		frm.call({
+			method: "get_preview_from_template",
+			args: {
+				data_import: frm.doc.name,
+				import_file: frm.doc.import_file,
+				google_sheets_url: frm.doc.google_sheets_url,
+			},
+			error_handlers: {
+				TimestampMismatchError() {
+					// ignore this error
+				},
+			},
+		}).then((r) => {
+			let preview_data = r.message;
+			frm.events.show_import_preview(frm, preview_data);
+			frm.events.show_import_warnings(frm, preview_data);
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	// method: 'frappe.core.doctype.data_import.data_import.get_preview_from_template',
 

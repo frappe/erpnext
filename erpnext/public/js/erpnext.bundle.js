@@ -1,6 +1,9 @@
 import "./conf";
 import "./utils";
+<<<<<<< HEAD
 import "./stock_reservation";
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import "./queries";
 import "./sms_manager";
 import "./utils/party";

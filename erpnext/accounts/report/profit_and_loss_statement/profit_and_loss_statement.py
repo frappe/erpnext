@@ -6,12 +6,16 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+<<<<<<< HEAD
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
 )
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
 	compute_margin_view_data,
+=======
+from erpnext.accounts.report.financial_statements import (
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	get_columns,
 	get_data,
 	get_filtered_list_for_consolidated_report,
@@ -20,9 +24,12 @@ from erpnext.accounts.report.financial_statements import (
 
 
 def execute(filters=None):
+<<<<<<< HEAD
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,
@@ -41,6 +48,10 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
+<<<<<<< HEAD
+=======
+		ignore_accumulated_values_for_fy=True,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	expense = get_data(
@@ -51,6 +62,10 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
+<<<<<<< HEAD
+=======
+		ignore_accumulated_values_for_fy=True,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	net_profit_loss = get_net_profit_loss(
@@ -65,21 +80,32 @@ def execute(filters=None):
 
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
+<<<<<<< HEAD
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
 	chart = get_chart_data(filters, columns, income, expense, net_profit_loss, currency)
 
+=======
+	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
+
+	currency = filters.presentation_currency or frappe.get_cached_value(
+		"Company", filters.company, "default_currency"
+	)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	report_summary, primitive_summary = get_report_summary(
 		period_list, filters.periodicity, income, expense, net_profit_loss, currency, filters
 	)
 
+<<<<<<< HEAD
 	if filters.get("selected_view") == "Growth":
 		compute_growth_view_data(data, period_list)
 
 	if filters.get("selected_view") == "Margin":
 		compute_margin_view_data(data, period_list, filters.accumulated_values)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return columns, data, None, chart, report_summary, primitive_summary
 
 
@@ -164,7 +190,11 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 		return net_profit_loss
 
 
+<<<<<<< HEAD
 def get_chart_data(filters, columns, income, expense, net_profit_loss, currency):
+=======
+def get_chart_data(filters, columns, income, expense, net_profit_loss):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	labels = [d.get("label") for d in columns[2:]]
 
 	income_data, expense_data, net_profit = [], [], []
@@ -193,7 +223,10 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss, currency)
 		chart["type"] = "line"
 
 	chart["fieldtype"] = "Currency"
+<<<<<<< HEAD
 	chart["options"] = "currency"
 	chart["currency"] = currency
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return chart

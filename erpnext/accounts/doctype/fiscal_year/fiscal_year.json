@@ -72,10 +72,17 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "description": "More/Less than 12 months.",
    "fieldname": "is_short_year",
    "fieldtype": "Check",
    "label": "Is Short/Long Year",
+=======
+   "description": "Less than 12 months.",
+   "fieldname": "is_short_year",
+   "fieldtype": "Check",
+   "label": "Is Short Year",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "set_only_once": 1
   }
  ],

@@ -5,7 +5,12 @@
 import json
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt
 
 from erpnext.accounts.party import get_due_date
@@ -17,11 +22,24 @@ from erpnext.selling.doctype.customer.customer import (
 )
 from erpnext.tests.utils import create_test_contact_and_address
 
+<<<<<<< HEAD
 IGNORE_TEST_RECORD_DEPENDENCIES = ["Price List"]
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
 
 
 class TestCustomer(IntegrationTestCase):
+=======
+test_ignore = ["Price List"]
+test_dependencies = ["Payment Term", "Payment Terms Template"]
+test_records = frappe.get_test_records("Customer")
+
+
+class TestCustomer(FrappeTestCase):
+	def setUp(self):
+		if not frappe.get_value("Item", "_Test Item"):
+			make_test_records("Item")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		set_credit_limit("_Test Customer", "_Test Company", 0)
 
@@ -191,6 +209,11 @@ class TestCustomer(IntegrationTestCase):
 		frappe.db.rollback()
 
 	def test_freezed_customer(self):
+<<<<<<< HEAD
+=======
+		make_test_records("Item")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 1)
 
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -214,6 +237,11 @@ class TestCustomer(IntegrationTestCase):
 		frappe.delete_doc("Customer", customer.name)
 
 	def test_disabled_customer(self):
+<<<<<<< HEAD
+=======
+		make_test_records("Item")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
 
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -433,6 +461,7 @@ def create_internal_customer(customer_name=None, represents_company=None, allowe
 		customer_name = frappe.db.get_value("Customer", customer_name)
 
 	return customer_name
+<<<<<<< HEAD
 
 
 def make_customer(customer_name):
@@ -444,3 +473,5 @@ def make_customer(customer_name):
 		return customer.name
 	else:
 		return customer_name
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -16,6 +16,7 @@ frappe.treeview_settings["BOM"] = {
 	show_expand_all: false,
 	get_label: function (node) {
 		if (node.data.qty) {
+<<<<<<< HEAD
 			const escape = frappe.utils.escape_html;
 			let label = escape(node.data.item_code);
 			if (node.data.item_name && node.data.item_code !== node.data.item_name) {
@@ -24,6 +25,9 @@ frappe.treeview_settings["BOM"] = {
 			return `${label} <span class="badge badge-pill badge-light">${node.data.qty} ${escape(
 				__(node.data.stock_uom)
 			)}</span>`;
+=======
+			return node.data.qty + " x " + node.data.item_code;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		} else {
 			return node.data.item_code || node.data.value;
 		}
@@ -70,7 +74,11 @@ frappe.treeview_settings["BOM"] = {
 		if (node.is_root && node.data.value != "BOM") {
 			frappe.model.with_doc("BOM", node.data.value, function () {
 				var bom = frappe.model.get_doc("BOM", node.data.value);
+<<<<<<< HEAD
 				node.data.image = bom.image || "";
+=======
+				node.data.image = escape(bom.image) || "";
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				node.data.description = bom.description || "";
 				node.data.item_code = bom.item || "";
 			});

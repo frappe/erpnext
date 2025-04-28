@@ -8,7 +8,11 @@ import frappe
 from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import add_days, add_months, add_to_date, format_date, getdate, today
+=======
+from frappe.utils import add_days, add_months, format_date, getdate, today
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.jinja import validate_template
 from frappe.utils.pdf import get_pdf
 from frappe.www.printview import get_print_style
@@ -31,9 +35,12 @@ class ProcessStatementOfAccounts(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.process_statement_of_accounts_cc.process_statement_of_accounts_cc import (
 			ProcessStatementOfAccountsCC,
 		)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.accounts.doctype.process_statement_of_accounts_customer.process_statement_of_accounts_customer import (
 			ProcessStatementOfAccountsCustomer,
 		)
@@ -44,8 +51,12 @@ class ProcessStatementOfAccounts(Document):
 		ageing_based_on: DF.Literal["Due Date", "Posting Date"]
 		based_on_payment_terms: DF.Check
 		body: DF.TextEditor | None
+<<<<<<< HEAD
 		categorize_by: DF.Literal["", "Categorize by Voucher", "Categorize by Voucher (Consolidated)"]
 		cc_to: DF.TableMultiSelect[ProcessStatementOfAccountsCC]
+=======
+		cc_to: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		collection_name: DF.DynamicLink | None
 		company: DF.Link
 		cost_center: DF.TableMultiSelect[PSOACostCenter]
@@ -55,8 +66,14 @@ class ProcessStatementOfAccounts(Document):
 		enable_auto_email: DF.Check
 		filter_duration: DF.Int
 		finance_book: DF.Link | None
+<<<<<<< HEAD
 		frequency: DF.Literal["Daily", "Weekly", "Biweekly", "Monthly", "Quarterly"]
 		from_date: DF.Date | None
+=======
+		frequency: DF.Literal["Weekly", "Monthly", "Quarterly"]
+		from_date: DF.Date | None
+		group_by: DF.Literal["", "Group by Voucher", "Group by Voucher (Consolidated)"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		ignore_cr_dr_notes: DF.Check
 		ignore_exchange_rate_revaluation_journals: DF.Check
 		include_ageing: DF.Check
@@ -67,15 +84,22 @@ class ProcessStatementOfAccounts(Document):
 		pdf_name: DF.Data | None
 		posting_date: DF.Date | None
 		primary_mandatory: DF.Check
+<<<<<<< HEAD
 		print_format: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		project: DF.TableMultiSelect[PSOAProject]
 		report: DF.Literal["General Ledger", "Accounts Receivable"]
 		sales_partner: DF.Link | None
 		sales_person: DF.Link | None
 		sender: DF.Link | None
+<<<<<<< HEAD
 		show_future_payments: DF.Check
 		show_net_values_in_party_account: DF.Check
 		show_remarks: DF.Check
+=======
+		show_net_values_in_party_account: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		start_date: DF.Date | None
 		subject: DF.Data | None
 		terms_and_conditions: DF.Link | None
@@ -84,10 +108,13 @@ class ProcessStatementOfAccounts(Document):
 	# end: auto-generated types
 
 	def validate(self):
+<<<<<<< HEAD
 		self.validate_account()
 		self.validate_company_for_table("Cost Center")
 		self.validate_company_for_table("Project")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not self.subject:
 			self.subject = "Statement Of Accounts for {{ customer.customer_name }}"
 		if not self.body:
@@ -110,6 +137,7 @@ class ProcessStatementOfAccounts(Document):
 				self.to_date = self.start_date
 				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
 
+<<<<<<< HEAD
 		if self.print_format:
 			pf = frappe.db.get_value(
 				"Print Format",
@@ -166,6 +194,8 @@ class ProcessStatementOfAccounts(Document):
 
 			frappe.throw(_(msg))
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def get_report_pdf(doc, consolidated=True):
 	statement_dict = get_statement_dict(doc)
@@ -191,8 +221,13 @@ def get_statement_dict(doc, get_statement_dict=False):
 
 		tax_id = frappe.get_doc("Customer", entry.customer).tax_id
 		presentation_currency = (
+<<<<<<< HEAD
 			doc.currency
 			or get_party_account_currency("Customer", entry.customer, doc.company)
+=======
+			get_party_account_currency("Customer", entry.customer, doc.company)
+			or doc.currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			or get_company_currency(doc.company)
 		)
 
@@ -253,7 +288,10 @@ def get_common_filters(doc):
 			"finance_book": doc.finance_book if doc.finance_book else None,
 			"account": [doc.account] if doc.account else None,
 			"cost_center": [cc.cost_center_name for cc in doc.cost_center],
+<<<<<<< HEAD
 			"show_remarks": doc.show_remarks,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	)
 
@@ -266,7 +304,11 @@ def get_gl_filters(doc, entry, tax_id, presentation_currency):
 		"party": [entry.customer],
 		"party_name": [entry.customer_name] if entry.customer_name else None,
 		"presentation_currency": presentation_currency,
+<<<<<<< HEAD
 		"categorize_by": doc.categorize_by,
+=======
+		"group_by": doc.group_by,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"currency": doc.currency,
 		"project": [p.project_name for p in doc.project],
 		"show_opening_entries": 0,
@@ -287,7 +329,10 @@ def get_ar_filters(doc, entry):
 		"sales_person": doc.sales_person if doc.sales_person else None,
 		"territory": doc.territory if doc.territory else None,
 		"based_on_payment_terms": doc.based_on_payment_terms,
+<<<<<<< HEAD
 		"show_future_payments": doc.show_future_payments,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"report_name": "Accounts Receivable",
 		"ageing_based_on": doc.ageing_based_on,
 		"range1": 30,
@@ -299,6 +344,7 @@ def get_ar_filters(doc, entry):
 
 def get_html(doc, filters, entry, col, res, ageing):
 	base_template_path = "frappe/www/printview.html"
+<<<<<<< HEAD
 	template_path = "erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html"
 	if doc.report == "General Ledger":
 		template_path = (
@@ -313,11 +359,22 @@ def get_html(doc, filters, entry, col, res, ageing):
 	if doc.print_format:
 		custom_html, custom_css = frappe.db.get_value("Print Format", doc.print_format, ["html", "css"])
 		template_path = f"<style>{custom_css}</style> {custom_html}"
+=======
+	template_path = (
+		"erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html"
+		if doc.report == "General Ledger"
+		else "erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html"
+	)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if doc.letter_head:
 		from frappe.www.printview import get_letter_head
 
 		letter_head = get_letter_head(doc, 0)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	html = frappe.render_template(
 		template_path,
 		{
@@ -333,6 +390,10 @@ def get_html(doc, filters, entry, col, res, ageing):
 			else None,
 		},
 	)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	html = frappe.render_template(
 		base_template_path,
 		{"body": html, "css": get_print_style(), "title": "Statement For " + entry.customer},
@@ -391,6 +452,7 @@ def get_recipients_and_cc(customer, doc):
 	recipients = []
 	for clist in doc.customers:
 		if clist.customer == customer:
+<<<<<<< HEAD
 			if clist.billing_email:
 				for email in clist.billing_email.split(","):
 					recipients.append(email.strip())
@@ -401,6 +463,15 @@ def get_recipients_and_cc(customer, doc):
 	if doc.cc_to != "":
 		try:
 			cc = [frappe.get_value("User", user.cc, "email") for user in doc.cc_to]
+=======
+			recipients.append(clist.billing_email)
+			if doc.primary_mandatory and clist.primary_email:
+				recipients.append(clist.primary_email)
+	cc = []
+	if doc.cc_to != "":
+		try:
+			cc = [frappe.get_value("User", doc.cc_to, "email")]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		except Exception:
 			pass
 
@@ -550,14 +621,22 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 				reference_doctype="Process Statement Of Accounts",
 				reference_name=document_name,
 				attachments=attachments,
+<<<<<<< HEAD
 				expose_recipients="header",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 
 		if doc.enable_auto_email and from_scheduler:
 			new_to_date = getdate(posting_date or today())
+<<<<<<< HEAD
 			if doc.frequency in ("Daily", "Weekly", "Biweekly"):
 				frequency = {"Daily": 1, "Weekly": 7, "Biweekly": 14}
 				new_to_date = add_days(new_to_date, frequency[doc.frequency])
+=======
+			if doc.frequency == "Weekly":
+				new_to_date = add_days(new_to_date, 7)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			else:
 				new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
 			new_from_date = add_months(new_to_date, -1 * doc.filter_duration)
@@ -577,7 +656,11 @@ def send_auto_email():
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
 		filters={"enable_auto_email": 1},
+<<<<<<< HEAD
 		or_filters={"to_date": today(), "posting_date": today()},
+=======
+		or_filters={"to_date": format_date(today()), "posting_date": format_date(today())},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 	for entry in selected:
 		send_emails(entry.name, from_scheduler=True)

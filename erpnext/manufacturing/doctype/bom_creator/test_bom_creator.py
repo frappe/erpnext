@@ -4,7 +4,11 @@
 import random
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
 	add_item,
@@ -13,7 +17,11 @@ from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
 from erpnext.stock.doctype.item.test_item import make_item
 
 
+<<<<<<< HEAD
 class TestBOMCreator(IntegrationTestCase):
+=======
+class TestBOMCreator(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self) -> None:
 		create_items()
 

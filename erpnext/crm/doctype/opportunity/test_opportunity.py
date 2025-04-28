@@ -1,15 +1,23 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.utils import get_linked_communication_list
+<<<<<<< HEAD
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -44,6 +52,13 @@ class TestOpportunity(ERPNextTestSuite):
 			else:
 				cls.opportunities.append(frappe.get_doc("Opportunity", {"party_name": x.get("party_name")}))
 
+=======
+
+test_records = frappe.get_test_records("Opportunity")
+
+
+class TestOpportunity(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_opportunity_status(self):
 		doc = make_opportunity(with_items=0)
 		quotation = make_quotation(doc.name)

@@ -39,6 +39,7 @@ class ItemTaxTemplate(Document):
 		check_list = []
 		for d in self.get("taxes"):
 			if d.tax_type:
+<<<<<<< HEAD
 				account_type, account_company = frappe.get_cached_value(
 					"Account", d.tax_type, ["account_type", "company"]
 				)
@@ -49,6 +50,9 @@ class ItemTaxTemplate(Document):
 							d.idx, frappe.bold(self.company)
 						)
 					)
+=======
+				account_type = frappe.get_cached_value("Account", d.tax_type, "account_type")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 				if account_type not in [
 					"Tax",

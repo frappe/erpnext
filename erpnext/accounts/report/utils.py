@@ -86,7 +86,11 @@ def get_rate_as_at(date, from_currency, to_currency):
 	return rate
 
 
+<<<<<<< HEAD
 def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
+=======
+def convert_to_presentation_currency(gl_entries, currency_info):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	"""
 	Take a list of GL Entries and change the 'debit' and 'credit' values to currencies
 	in `currency_info`.
@@ -99,6 +103,7 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 	company_currency = currency_info["company_currency"]
 
 	account_currencies = list(set(entry["account_currency"] for entry in gl_entries))
+<<<<<<< HEAD
 	exchange_gain_or_loss = False
 
 	if filters and isinstance(filters.get("account"), list):
@@ -106,6 +111,8 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 		gain_loss_account = frappe.db.get_value("Company", filters.company, "exchange_gain_loss_account")
 
 		exchange_gain_or_loss = len(account_filter) == 1 and account_filter[0] == gain_loss_account
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	for entry in gl_entries:
 		debit = flt(entry["debit"])
@@ -114,11 +121,15 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 		credit_in_account_currency = flt(entry["credit_in_account_currency"])
 		account_currency = entry["account_currency"]
 
+<<<<<<< HEAD
 		if (
 			len(account_currencies) == 1
 			and account_currency == presentation_currency
 			and not exchange_gain_or_loss
 		) and not (filters and filters.get("show_amount_in_company_currency")):
+=======
+		if len(account_currencies) == 1 and account_currency == presentation_currency:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			entry["debit"] = debit_in_account_currency
 			entry["credit"] = credit_in_account_currency
 		else:
@@ -266,9 +277,13 @@ def get_journal_entries(filters, args):
 		)
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
+<<<<<<< HEAD
 	query = apply_common_conditions(
 		filters, query, doctype="Journal Entry", child_doctype="Journal Entry Account", payments=True
 	)
+=======
+	query = apply_common_conditions(filters, query, doctype="Journal Entry", payments=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	journal_entries = query.run(as_dict=True)
 	return journal_entries
@@ -319,9 +334,13 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 		query = query.where(parent_doc.posting_date <= filters.to_date)
 
 	if payments:
+<<<<<<< HEAD
 		if doctype == "Journal Entry" and filters.get("cost_center"):
 			query = query.where(child_doc.cost_center == filters.cost_center)
 		elif filters.get("cost_center"):
+=======
+		if filters.get("cost_center"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			query = query.where(parent_doc.cost_center == filters.cost_center)
 	else:
 		if filters.get("cost_center"):
@@ -341,7 +360,10 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 
 	if join_required:
 		query = query.inner_join(child_doc).on(parent_doc.name == child_doc.parent)
+<<<<<<< HEAD
 		query = query.where(child_doc.parenttype == doctype)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		query = query.distinct()
 
 	if parent_doc.get_table_name() != "tabJournal Entry":

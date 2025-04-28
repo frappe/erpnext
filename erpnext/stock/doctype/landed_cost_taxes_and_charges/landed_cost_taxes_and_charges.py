@@ -20,8 +20,11 @@ class LandedCostTaxesandCharges(Document):
 		description: DF.SmallText
 		exchange_rate: DF.Float
 		expense_account: DF.Link | None
+<<<<<<< HEAD
 		has_corrective_cost: DF.Check
 		has_operating_cost: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

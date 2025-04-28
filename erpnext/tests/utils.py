@@ -5,7 +5,10 @@ from typing import Any, NewType
 
 import frappe
 from frappe.core.doctype.report.report import get_report_module_dotted_path
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 ReportFilters = dict[str, Any]
 ReportName = NewType("ReportName", str)
@@ -115,6 +118,7 @@ def if_lending_app_not_installed(function):
 		return
 
 	return wrapper
+<<<<<<< HEAD
 
 
 class ERPNextTestSuite(IntegrationTestCase):
@@ -300,3 +304,5 @@ class ERPNextTestSuite(IntegrationTestCase):
 				cls.leads.append(frappe.get_doc(x).insert())
 			else:
 				cls.leads.append(frappe.get_doc("Lead", {"email_id": x.get("email_id")}))
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

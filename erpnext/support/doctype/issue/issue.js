@@ -15,9 +15,13 @@ frappe.ui.form.on("Issue", {
 				}
 			}
 		);
+<<<<<<< HEAD
 	},
 
 	refresh: function (frm) {
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		// buttons
 		if (frm.doc.status !== "Closed") {
 			frm.add_custom_button(__("Close"), function () {

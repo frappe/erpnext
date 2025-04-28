@@ -25,7 +25,10 @@ class StockSettings(Document):
 
 		action_if_quality_inspection_is_not_submitted: DF.Literal["Stop", "Warn"]
 		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
+<<<<<<< HEAD
 		allow_existing_serial_no: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		allow_from_dn: DF.Check
 		allow_from_pr: DF.Check
 		allow_internal_transfer_at_arms_length_price: DF.Check
@@ -33,13 +36,19 @@ class StockSettings(Document):
 		allow_partial_reservation: DF.Check
 		allow_to_edit_stock_uom_qty_for_purchase: DF.Check
 		allow_to_edit_stock_uom_qty_for_sales: DF.Check
+<<<<<<< HEAD
 		allow_to_make_quality_inspection_after_purchase_or_delivery: DF.Check
 		allow_uom_with_conversion_rate_defined_in_item: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		auto_create_serial_and_batch_bundle_for_outward: DF.Check
 		auto_indent: DF.Check
 		auto_insert_price_list_rate_if_missing: DF.Check
 		auto_reserve_serial_and_batch: DF.Check
+<<<<<<< HEAD
 		auto_reserve_stock: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		auto_reserve_stock_for_sales_order_on_purchase: DF.Check
 		clean_description_html: DF.Check
 		default_warehouse: DF.Link | None
@@ -58,17 +67,25 @@ class StockSettings(Document):
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
 		role_allowed_to_over_deliver_receive: DF.Link | None
 		sample_retention_warehouse: DF.Link | None
+<<<<<<< HEAD
 		set_serial_and_batch_bundle_naming_based_on_naming_series: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		show_barcode_field: DF.Check
 		stock_auth_role: DF.Link | None
 		stock_frozen_upto: DF.Date | None
 		stock_frozen_upto_days: DF.Int
 		stock_uom: DF.Link | None
 		update_existing_price_list_rate: DF.Check
+<<<<<<< HEAD
 		update_price_list_based_on: DF.Literal["Rate", "Price List Rate"]
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
 		validate_material_transfer_warehouses: DF.Check
+=======
+		use_naming_series: DF.Check
+		use_serial_batch_fields: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 	# end: auto-generated types
 
@@ -81,7 +98,10 @@ class StockSettings(Document):
 			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
+<<<<<<< HEAD
 			"set_serial_and_batch_bundle_naming_based_on_naming_series",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 
@@ -107,9 +127,30 @@ class StockSettings(Document):
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
 		self.validate_stock_reservation()
+<<<<<<< HEAD
 		self.validate_auto_insert_price_list_rate_if_missing()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
+=======
+		self.change_precision_for_for_sales()
+		self.change_precision_for_purchase()
+		self.validate_use_batch_wise_valuation()
+
+	def validate_use_batch_wise_valuation(self):
+		if not self.do_not_use_batchwise_valuation:
+			return
+
+		if self.valuation_method == "FIFO":
+			frappe.throw(_("Cannot disable batch wise valuation for FIFO valuation method."))
+
+		if frappe.get_all(
+			"Item", filters={"valuation_method": "FIFO", "is_stock_item": 1, "has_batch_no": 1}, limit=1
+		):
+			frappe.throw(_("Can't disable batch wise valuation for items with FIFO valuation method."))
+
+		if frappe.get_all("Batch", filters={"use_batchwise_valuation": 1}, limit=1):
+			frappe.throw(_("Can't disable batch wise valuation for active batches."))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -123,11 +164,15 @@ class StockSettings(Document):
 				)
 
 	def cant_change_valuation_method(self):
+<<<<<<< HEAD
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
 			return
 
 		previous_valuation_method = doc_before_save.get("valuation_method")
+=======
+		previous_valuation_method = self.get_doc_before_save().get("valuation_method")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
@@ -151,7 +196,11 @@ class StockSettings(Document):
 			# changed to text
 			frappe.enqueue(
 				"erpnext.stock.doctype.stock_settings.stock_settings.clean_all_descriptions",
+<<<<<<< HEAD
 				now=frappe.in_test,
+=======
+				now=frappe.flags.in_test,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				enqueue_after_commit=True,
 			)
 
@@ -162,11 +211,16 @@ class StockSettings(Document):
 	def validate_stock_reservation(self):
 		"""Raises an exception if the user tries to enable/disable `Stock Reservation` with `Negative Stock` or `Open Stock Reservation Entries`."""
 
+<<<<<<< HEAD
 		if not self.enable_stock_reservation and self.auto_reserve_stock:
 			self.auto_reserve_stock = 0
 
 		# Skip validation for tests
 		if frappe.in_test:
+=======
+		# Skip validation for tests
+		if frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return
 
 		# Change in value of `Allow Negative Stock`
@@ -191,6 +245,29 @@ class StockSettings(Document):
 						)
 					)
 
+<<<<<<< HEAD
+=======
+				else:
+					# Don't allow if there are negative stock
+					from frappe.query_builder.functions import Round
+
+					precision = frappe.db.get_single_value("System Settings", "float_precision") or 3
+					bin = frappe.qb.DocType("Bin")
+					bin_with_negative_stock = (
+						frappe.qb.from_(bin)
+						.select(bin.name)
+						.where(Round(bin.actual_qty, precision) < 0)
+						.limit(1)
+					).run()
+
+					if bin_with_negative_stock:
+						frappe.throw(
+							_("As there are negative stock, you can not enable {0}.").format(
+								frappe.bold(_("Stock Reservation"))
+							)
+						)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			# Enable -> Disable
 			else:
 				# Don't allow if there are open Stock Reservation Entries
@@ -205,6 +282,7 @@ class StockSettings(Document):
 						)
 					)
 
+<<<<<<< HEAD
 	def validate_auto_insert_price_list_rate_if_missing(self):
 		if (
 			self.auto_insert_price_list_rate_if_missing
@@ -222,6 +300,8 @@ class StockSettings(Document):
 				)
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()
 

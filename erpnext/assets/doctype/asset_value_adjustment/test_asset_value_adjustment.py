@@ -1,9 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
@@ -16,7 +23,11 @@ from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_r
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
+<<<<<<< HEAD
 class TestAssetValueAdjustment(IntegrationTestCase):
+=======
+class TestAssetValueAdjustment(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		create_asset_data()
 		frappe.db.set_value(
@@ -114,12 +125,21 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
+<<<<<<< HEAD
 			["2023-08-31", 9070.36, 74445.07],
 			["2023-09-30", 9070.36, 83515.43],
 			["2023-10-31", 9070.36, 92585.79],
 			["2023-11-30", 9070.36, 101656.15],
 			["2023-12-31", 9070.36, 110726.51],
 			["2024-01-15", 4448.2, 115174.71],
+=======
+			["2023-08-31", 8300.0, 73674.71],
+			["2023-09-30", 8300.0, 81974.71],
+			["2023-10-31", 8300.0, 90274.71],
+			["2023-11-30", 8300.0, 98574.71],
+			["2023-12-31", 8300.0, 106874.71],
+			["2024-01-15", 8300.0, 115174.71],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 
 		schedules = [
@@ -153,6 +173,7 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 		post_depreciation_entries(getdate("2023-08-21"))
 
 		# create asset repair
+<<<<<<< HEAD
 		asset_repair = create_asset_repair(
 			asset=asset_doc,
 			capitalize_repair_cost=1,
@@ -160,6 +181,9 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			submit=1,
 			increase_in_asset_life=1,
 		)
+=======
+		asset_repair = create_asset_repair(asset=asset_doc, capitalize_repair_cost=1, submit=1)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
 		self.assertEqual(first_asset_depr_schedule.status, "Active")
@@ -183,8 +207,13 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 
 		# Test gl entry creted from asset value adjustemnet
 		expected_gle = (
+<<<<<<< HEAD
 			("_Test Difference Account - _TC", 5175.29, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 5175.29),
+=======
+			("_Test Difference Account - _TC", 5625.29, 0.0),
+			("_Test Fixed Asset - _TC", 0.0, 5625.29),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		gle = frappe.db.sql(
@@ -205,6 +234,7 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
+<<<<<<< HEAD
 			["2023-08-31", 2847.27, 68221.98],
 			["2023-09-30", 2847.27, 71069.25],
 			["2023-10-31", 2847.27, 73916.52],
@@ -223,6 +253,26 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			["2024-11-30", 2847.27, 110931.03],
 			["2024-12-31", 2847.27, 113778.3],
 			["2025-01-31", 1396.41, 115174.71],
+=======
+			["2023-08-31", 2766.67, 68141.38],
+			["2023-09-30", 2766.67, 70908.05],
+			["2023-10-31", 2766.67, 73674.72],
+			["2023-11-30", 2766.67, 76441.39],
+			["2023-12-31", 2766.67, 79208.06],
+			["2024-01-31", 2766.67, 81974.73],
+			["2024-02-29", 2766.67, 84741.4],
+			["2024-03-31", 2766.67, 87508.07],
+			["2024-04-30", 2766.67, 90274.74],
+			["2024-05-31", 2766.67, 93041.41],
+			["2024-06-30", 2766.67, 95808.08],
+			["2024-07-31", 2766.67, 98574.75],
+			["2024-08-31", 2766.67, 101341.42],
+			["2024-09-30", 2766.67, 104108.09],
+			["2024-10-31", 2766.67, 106874.76],
+			["2024-11-30", 2766.67, 109641.43],
+			["2024-12-31", 2766.67, 112408.1],
+			["2025-01-15", 2766.61, 115174.71],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 
 		schedules = [
@@ -250,12 +300,21 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
+<<<<<<< HEAD
 			["2023-08-31", 8970.18, 74344.89],
 			["2023-09-30", 8970.18, 83315.07],
 			["2023-10-31", 8970.18, 92285.25],
 			["2023-11-30", 8970.18, 101255.43],
 			["2023-12-31", 8970.18, 110225.61],
 			["2024-01-15", 4399.1, 114624.71],
+=======
+			["2023-08-31", 8133.33, 73508.04],
+			["2023-09-30", 8133.33, 81641.37],
+			["2023-10-31", 8133.33, 89774.7],
+			["2023-11-30", 8133.33, 97908.03],
+			["2023-12-31", 8133.33, 106041.36],
+			["2024-01-15", 8133.35, 114174.71],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 
 		schedules = [
@@ -266,7 +325,11 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 		self.assertEqual(schedules, expected_schedules)
 
 	def test_difference_amount(self):
+<<<<<<< HEAD
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
+=======
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -286,15 +349,23 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 		)
 		asset_doc.submit()
 
+<<<<<<< HEAD
 		current_asset_value = get_asset_value_after_depreciation(asset_doc.name)
 		adj_doc = make_asset_value_adjustment(
 			asset=asset_doc.name,
 			current_asset_value=current_asset_value,
 			new_asset_value=40000,
+=======
+		adj_doc = make_asset_value_adjustment(
+			asset=asset_doc.name,
+			current_asset_value=54000,
+			new_asset_value=50000.0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			date="2023-08-21",
 		)
 		adj_doc.submit()
 		difference_amount = adj_doc.new_asset_value - adj_doc.current_asset_value
+<<<<<<< HEAD
 		self.assertEqual(difference_amount, -60000)
 		asset_doc.load_from_db()
 		self.assertEqual(asset_doc.finance_books[0].value_after_depreciation, 40000.0)
@@ -335,6 +406,11 @@ class TestAssetValueAdjustment(IntegrationTestCase):
 		asset_doc.load_from_db()
 		self.assertEqual(asset_doc.finance_books[0].value_after_depreciation, 40000.0)
 		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 2000.0)
+=======
+		self.assertEqual(difference_amount, -4000)
+		asset_doc.load_from_db()
+		self.assertEqual(asset_doc.value_after_depreciation, 50000.0)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def make_asset_value_adjustment(**args):

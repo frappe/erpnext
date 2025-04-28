@@ -69,7 +69,11 @@ def valdiate_taxes_and_charges_template(doc):
 
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)
+<<<<<<< HEAD
 		validate_account_head(tax.idx, tax.account_head, doc.company, _("Taxes and Charges"))
+=======
+		validate_account_head(tax.idx, tax.account_head, doc.company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		validate_cost_center(tax, doc)
 		validate_inclusive_tax(tax, doc)
 

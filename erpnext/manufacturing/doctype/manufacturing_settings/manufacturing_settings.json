@@ -15,17 +15,31 @@
   "bom_section",
   "update_bom_costs_automatically",
   "column_break_lhyt",
+<<<<<<< HEAD
   "allow_editing_of_items_and_quantities_in_work_order",
+=======
+  "manufacture_sub_assembly_in_operation",
+  "section_break_6",
+  "default_wip_warehouse",
+  "default_fg_warehouse",
+  "column_break_11",
+  "default_scrap_warehouse",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "over_production_for_sales_and_work_order_section",
   "overproduction_percentage_for_sales_order",
   "column_break_16",
   "overproduction_percentage_for_work_order",
+<<<<<<< HEAD
   "section_break_xhtl",
   "transfer_extra_materials_percentage",
   "column_break_kemp",
   "job_card_section",
   "add_corrective_operation_cost_in_finished_good_valuation",
   "enforce_time_logs",
+=======
+  "job_card_section",
+  "add_corrective_operation_cost_in_finished_good_valuation",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_24",
   "job_card_excess_transfer",
   "capacity_planning",
@@ -36,7 +50,11 @@
   "capacity_planning_for_days",
   "mins_between_operations",
   "other_settings_section",
+<<<<<<< HEAD
   "set_op_cost_and_scrap_from_sub_assemblies",
+=======
+  "set_op_cost_and_scrape_from_sub_assemblies",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_23",
   "make_serial_no_batch_from_work_order"
  ],
@@ -82,6 +100,14 @@
    "label": "Time Between Operations (Mins)"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Default Warehouses for Production"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "overproduction_percentage_for_sales_order",
    "fieldtype": "Percent",
    "label": "Overproduction Percentage For Sales Order"
@@ -113,12 +139,40 @@
    "label": "Update BOM Cost Automatically"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_wip_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Work In Progress Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Finished Goods Warehouse",
+   "options": "Warehouse"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "default": "0",
    "fieldname": "disable_capacity_planning",
    "fieldtype": "Check",
    "label": "Disable Capacity Planning"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "default_scrap_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Scrap Warehouse",
+   "options": "Warehouse"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "over_production_for_sales_and_work_order_section",
    "fieldtype": "Section Break",
    "label": "Overproduction for Sales and Work Order"
@@ -126,7 +180,11 @@
   {
    "fieldname": "raw_materials_consumption_section",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Raw Materials Consumption"
+=======
+   "label": "Raw Materials Consumption "
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_16",
@@ -176,6 +234,16 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
+=======
+   "description": "In the case of 'Use Multi-Level BOM' in a work order, if the user wishes to add sub-assembly costs to Finished Goods items without using a job card as well the scrap items, then this option needs to be enable.",
+   "fieldname": "set_op_cost_and_scrape_from_sub_assemblies",
+   "fieldtype": "Check",
+   "label": "Set Operating Cost / Scrape Items From Sub-assemblies"
+  },
+  {
+   "default": "0",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "eval: doc.material_consumption",
    "fieldname": "get_rm_cost_from_consumption_entry",
    "fieldtype": "Check",
@@ -197,6 +265,7 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "depends_on": "eval:doc.backflush_raw_materials_based_on == \"BOM\"",
    "fieldname": "validate_components_quantities_per_bom",
    "fieldtype": "Check",
@@ -237,13 +306,30 @@
    "fieldname": "allow_editing_of_items_and_quantities_in_work_order",
    "fieldtype": "Check",
    "label": "Allow Editing of Items and Quantities in Work Order"
+=======
+   "description": "If enabled then system will manufacture Sub-assembly against the Job Card (operation).",
+   "fieldname": "manufacture_sub_assembly_in_operation",
+   "fieldtype": "Check",
+   "label": "Manufacture Sub-assembly in Operation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.backflush_raw_materials_based_on == \"BOM\"",
+   "fieldname": "validate_components_quantities_per_bom",
+   "fieldtype": "Check",
+   "label": "Validate Components Quantities Per BOM"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-13 12:30:29.006822",
+=======
+ "modified": "2024-09-02 12:12:03.132567",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
@@ -257,9 +343,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

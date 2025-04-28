@@ -73,7 +73,10 @@
   "status",
   "operation_row_id",
   "is_paused",
+<<<<<<< HEAD
   "track_semi_finished_goods",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_20",
   "operation_row_number",
   "operation_id",
@@ -182,7 +185,10 @@
    "fieldtype": "Float",
    "in_preview": 1,
    "label": "Total Completed Qty",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -527,16 +533,27 @@
    "fieldname": "finished_good",
    "fieldtype": "Link",
    "in_preview": 1,
+<<<<<<< HEAD
    "label": "Item to Manufacture",
+=======
+   "label": "Finished Good",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Item",
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:doc.track_semi_finished_goods",
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
    "mandatory_depends_on": "eval:doc.track_semi_finished_goods",
+=======
+   "fieldname": "target_warehouse",
+   "fieldtype": "Link",
+   "label": "Target Warehouse",
+   "mandatory_depends_on": "eval:doc.finished_good",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Warehouse"
   },
   {
@@ -558,7 +575,11 @@
   {
    "fieldname": "semi_fg_bom",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Manufacturing BOM",
+=======
+   "label": "Semi Finished Goods BOM",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "BOM",
    "read_only": 1
   },
@@ -613,6 +634,7 @@
    "fieldtype": "Check",
    "label": "Is Paused",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -626,6 +648,13 @@
  "is_submittable": 1,
  "links": [],
  "modified": "2025-08-04 15:47:54.514290",
+=======
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-06-03 17:44:18.324743",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
@@ -678,11 +707,18 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_preview_popup": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "operation",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

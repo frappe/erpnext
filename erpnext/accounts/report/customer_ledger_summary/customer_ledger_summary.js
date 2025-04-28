@@ -9,7 +9,10 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
+<<<<<<< HEAD
 			reqd: 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "from_date",
@@ -93,6 +96,7 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			fieldtype: "Data",
 			hidden: 1,
 		},
+<<<<<<< HEAD
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
@@ -124,3 +128,7 @@ frappe.query_reports["Customer Ledger Summary"] = {
 };
 
 erpnext.utils.add_dimensions("Customer Ledger Summary", 14);
+=======
+	],
+};
+>>>>>>> 7c4cf3e834 (Favicon.svg)

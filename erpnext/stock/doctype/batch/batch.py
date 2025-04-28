@@ -2,7 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 
+<<<<<<< HEAD
 from collections import OrderedDict, defaultdict
+=======
+from collections import defaultdict
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 import frappe
 from frappe import _
@@ -37,7 +41,11 @@ def batch_uses_naming_series():
 	Verify if the Batch is to be named using a naming series
 	:return: bool
 	"""
+<<<<<<< HEAD
 	use_naming_series = cint(frappe.get_single_value("Stock Settings", "use_naming_series"))
+=======
+	use_naming_series = cint(frappe.db.get_single_value("Stock Settings", "use_naming_series"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return bool(use_naming_series)
 
 
@@ -49,7 +57,11 @@ def _get_batch_prefix():
 	is set to use naming series.
 	:return: The naming series.
 	"""
+<<<<<<< HEAD
 	naming_series_prefix = frappe.get_single_value("Stock Settings", "naming_series_prefix")
+=======
+	naming_series_prefix = frappe.db.get_single_value("Stock Settings", "naming_series_prefix")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if not naming_series_prefix:
 		naming_series_prefix = "BATCH-"
 
@@ -156,6 +168,7 @@ class Batch(Document):
 		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
 			frappe.throw(_("The selected item cannot have Batch"))
 
+<<<<<<< HEAD
 	@frappe.whitelist()
 	def recalculate_batch_qty(self):
 		batches = get_batch_qty(
@@ -176,6 +189,11 @@ class Batch(Document):
 			if get_valuation_method(self.item) == "Moving Average" and frappe.get_single_value(
 				"Stock Settings", "do_not_use_batchwise_valuation"
 			):
+=======
+	def set_batchwise_valuation(self):
+		if self.is_new():
+			if frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				self.use_batchwise_valuation = 0
 				return
 
@@ -231,14 +249,20 @@ def get_batch_qty(
 	batch_no=None,
 	warehouse=None,
 	item_code=None,
+<<<<<<< HEAD
 	creation=None,
 	posting_datetime=None,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	posting_date=None,
 	posting_time=None,
 	ignore_voucher_nos=None,
 	for_stock_levels=False,
+<<<<<<< HEAD
 	consider_negative_batches=False,
 	do_not_check_future_batches=False,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -251,7 +275,10 @@ def get_batch_qty(
 	:param for_stock_levels: True consider expired batches"""
 
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+<<<<<<< HEAD
 		combine_datetime,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		get_auto_batch_nos,
 	)
 
@@ -260,6 +287,7 @@ def get_batch_qty(
 		{
 			"item_code": item_code,
 			"warehouse": warehouse,
+<<<<<<< HEAD
 			"creation": creation,
 			"batch_no": batch_no,
 			"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
@@ -274,6 +302,16 @@ def get_batch_qty(
 	if not kwargs.get("posting_datetime") and posting_date:
 		kwargs["posting_datetime"] = combine_datetime(posting_date, posting_time)
 
+=======
+			"posting_date": posting_date,
+			"posting_time": posting_time,
+			"batch_no": batch_no,
+			"ignore_voucher_nos": ignore_voucher_nos,
+			"for_stock_levels": for_stock_levels,
+		}
+	)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	batches = get_auto_batch_nos(kwargs)
 
 	if not (batch_no and warehouse):
@@ -355,7 +393,10 @@ def make_batch_bundle(
 ):
 	from frappe.utils import nowtime, today
 
+<<<<<<< HEAD
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 	return (
@@ -363,7 +404,12 @@ def make_batch_bundle(
 			{
 				"item_code": item_code,
 				"warehouse": warehouse,
+<<<<<<< HEAD
 				"posting_datetime": combine_datetime(today(), nowtime()),
+=======
+				"posting_date": today(),
+				"posting_time": nowtime(),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"voucher_type": "Stock Entry",
 				"qty": qty,
 				"type_of_transaction": type_of_transaction,
@@ -405,9 +451,14 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 		serial_nos = get_serial_nos(serial_no)
 		batches = frappe.get_all(
 			"Serial No",
+<<<<<<< HEAD
 			fields=["batch_no"],
 			filters={"item_code": item_code, "warehouse": warehouse, "name": ("in", serial_nos)},
 			distinct=True,
+=======
+			fields=["distinct batch_no"],
+			filters={"item_code": item_code, "warehouse": warehouse, "name": ("in", serial_nos)},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		if not batches:
@@ -475,6 +526,7 @@ def get_pos_reserved_batch_qty(filters):
 
 def get_available_batches(kwargs):
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+<<<<<<< HEAD
 		combine_datetime,
 		get_auto_batch_nos,
 	)
@@ -494,6 +546,16 @@ def get_available_batches(kwargs):
 			batchwise_qty[key] = batch.get("qty")
 		else:
 			batchwise_qty[key] += batch.get("qty")
+=======
+		get_auto_batch_nos,
+	)
+
+	batchwise_qty = defaultdict(float)
+
+	batches = get_auto_batch_nos(kwargs)
+	for batch in batches:
+		batchwise_qty[batch.get("batch_no")] += batch.get("qty")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return batchwise_qty
 

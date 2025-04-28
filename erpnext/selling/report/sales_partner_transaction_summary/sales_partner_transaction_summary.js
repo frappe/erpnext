@@ -13,7 +13,11 @@ frappe.query_reports["Sales Partner Transaction Summary"] = {
 			fieldname: "doctype",
 			label: __("Document Type"),
 			fieldtype: "Select",
+<<<<<<< HEAD
 			options: "Sales Order\nDelivery Note\nSales Invoice\nPOS Invoice",
+=======
+			options: "Sales Order\nDelivery Note\nSales Invoice",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			default: "Sales Order",
 		},
 		{

@@ -1,17 +1,23 @@
 name: Server (Mariadb)
 
 on:
+<<<<<<< HEAD
   repository_dispatch:
     types: [frappe-framework-change]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   pull_request:
     paths-ignore:
       - '**.js'
       - '**.css'
       - '**.md'
       - '**.html'
+<<<<<<< HEAD
       - 'crowdin.yml'
       - '.coderabbit.yml'
       - '.mergify.yml'
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   schedule:
     # Run everday at midnight UTC / 5:30 IST
     - cron: "0 0 * * *"
@@ -28,9 +34,12 @@ on:
         required: false
         type: string
 
+<<<<<<< HEAD
 permissions:
   contents: read
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 concurrency:
   group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
@@ -71,7 +80,11 @@ jobs:
 
       - name: Check for valid Python & Merge Conflicts
         run: |
+<<<<<<< HEAD
           python -m compileall -fq "${GITHUB_WORKSPACE}"
+=======
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
           if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
               then echo "Found merge conflicts"
               exit 1
@@ -109,7 +122,11 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
+<<<<<<< HEAD
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+=======
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
       - uses: actions/cache@v4
         id: yarn-cache
@@ -125,10 +142,17 @@ jobs:
           DB: mariadb
           TYPE: server
           FRAPPE_USER: ${{ github.event.inputs.user }}
+<<<<<<< HEAD
           FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
 
       - name: Run Tests
         run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --total-builds ${{ strategy.job-total }} --build-number ${{ matrix.container }}'
+=======
+          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
+
+      - name: Run Tests
+        run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --total-builds 4 --build-number ${{ matrix.container }}'
+>>>>>>> 7c4cf3e834 (Favicon.svg)
         env:
           TYPE: server
           CAPTURE_COVERAGE: ${{ github.event_name != 'pull_request' }}
@@ -139,7 +163,11 @@ jobs:
         run: cat ~/frappe-bench/bench_start.log || true
 
       - name: Upload coverage data
+<<<<<<< HEAD
         uses: actions/upload-artifact@v4
+=======
+        uses: actions/upload-artifact@v3
+>>>>>>> 7c4cf3e834 (Favicon.svg)
         if: github.event_name != 'pull_request'
         with:
           name: coverage-${{ matrix.container }}
@@ -155,7 +183,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download artifacts
+<<<<<<< HEAD
         uses: actions/download-artifact@v4
+=======
+        uses: actions/download-artifact@v3
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
       - name: Upload coverage data
         uses: codecov/codecov-action@v4

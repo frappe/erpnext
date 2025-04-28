@@ -2,10 +2,13 @@
 # To add/remove versions just modify the matrix.
 
 name: Create weekly release pull requests
+<<<<<<< HEAD
 
 permissions:
   contents: read
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 on:
   schedule:
     # 9:30 UTC => 3 PM IST Tuesday

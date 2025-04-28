@@ -19,7 +19,11 @@ class ProductionPlanItemReference(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+<<<<<<< HEAD
 		qty: DF.Float
+=======
+		qty: DF.Data | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
 	# end: auto-generated types

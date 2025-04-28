@@ -3,6 +3,7 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe import _
 
 field_map = {
@@ -14,6 +15,17 @@ field_map = {
 		"pincode",
 		"city",
 		"state",
+=======
+
+field_map = {
+	"Contact": ["first_name", "last_name", "phone", "mobile_no", "email_id", "is_primary_contact"],
+	"Address": [
+		"address_line1",
+		"address_line2",
+		"city",
+		"state",
+		"pincode",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"country",
 		"is_primary_address",
 	],
@@ -31,6 +43,7 @@ def get_columns(filters):
 	columns = [
 		f"{party_type}:Link/{party_type}",
 		f"{frappe.unscrub(str(party_type_value))}::150",
+<<<<<<< HEAD
 		{
 			"label": _("Address"),
 			"fieldtype": "Link",
@@ -45,6 +58,15 @@ def get_columns(filters):
 		"Country",
 		"Is Primary Address:Check",
 		{"label": _("Contact"), "fieldtype": "Link", "options": "Contact", "hidden": 1},
+=======
+		"Address Line 1",
+		"Address Line 2",
+		"City",
+		"State",
+		"Postal Code",
+		"Country",
+		"Is Primary Address:Check",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"First Name",
 		"Last Name",
 		"Phone",
@@ -52,10 +74,21 @@ def get_columns(filters):
 		"Email Id",
 		"Is Primary Contact:Check",
 	]
+<<<<<<< HEAD
 
 	if should_add_party_name(party_type):
 		columns.insert(2, f"{party_type} Name:Data:150")
 
+=======
+	if filters.get("party_type") == "Supplier" and frappe.db.get_single_value(
+		"Buying Settings", "supp_master_name"
+	) == ["Naming Series", "Auto Name"]:
+		columns.insert(1, "Supplier Name:Data:150")
+	if filters.get("party_type") == "Customer" and frappe.db.get_single_value(
+		"Selling Settings", "cust_master_name"
+	) == ["Naming Series", "Auto Name"]:
+		columns.insert(1, "Customer Name:Data:150")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return columns
 
 
@@ -77,7 +110,10 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 
 	if party:
 		query_filters = {"name": party}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if filters.get("party_type") in ["Customer", "Supplier"]:
 		field = filters.get("party_type").lower() + "_name"
 	else:
@@ -99,18 +135,26 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 	party_details = get_party_details(party_type, party_list, "Address", party_details)
 	party_details = get_party_details(party_type, party_list, "Contact", party_details)
 
+<<<<<<< HEAD
 	add_party_name = should_add_party_name(party_type)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	for party, details in party_details.items():
 		addresses = details.get("address", [])
 		contacts = details.get("contact", [])
 		if not any([addresses, contacts]):
 			result = [party]
 			result.append(party_groups[party])
+<<<<<<< HEAD
 
 			if add_party_name:
 				result.append(party_name_map[party])
 
+=======
+			if filters.get("party_type") in ["Customer", "Supplier"]:
+				result.append(party_name_map[party])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			result.extend(add_blank_columns_for("Contact"))
 			result.extend(add_blank_columns_for("Address"))
 			data.append(result)
@@ -122,10 +166,15 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 			for idx in range(0, max_length):
 				result = [party]
 				result.append(party_groups[party])
+<<<<<<< HEAD
 
 				if add_party_name:
 					result.append(party_name_map[party])
 
+=======
+				if filters.get("party_type") in ["Customer", "Supplier"]:
+					result.append(party_name_map[party])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				address = addresses[idx] if idx < len(addresses) else add_blank_columns_for("Address")
 				contact = contacts[idx] if idx < len(contacts) else add_blank_columns_for("Contact")
 				result.extend(address)
@@ -142,11 +191,17 @@ def get_party_details(party_type, party_list, doctype, party_details):
 	fields = ["`tabDynamic Link`.link_name", *field_map.get(doctype, [])]
 
 	records = frappe.get_list(doctype, filters=filters, fields=fields, as_list=True)
+<<<<<<< HEAD
 
 	for d in records:
 		details = party_details.get(d[0])
 		details.setdefault(frappe.scrub(doctype), []).append(d[1:])
 
+=======
+	for d in records:
+		details = party_details.get(d[0])
+		details.setdefault(frappe.scrub(doctype), []).append(d[1:])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return party_details
 
 
@@ -165,6 +220,7 @@ def get_party_group(party_type):
 	}
 
 	return group[party_type]
+<<<<<<< HEAD
 
 
 def should_add_party_name(party_type):
@@ -178,3 +234,5 @@ def should_add_party_name(party_type):
 		return frappe.db.get_single_value(doctype, fieldname) in ["Naming Series", "Auto Name"]
 
 	return False
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

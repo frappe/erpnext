@@ -38,7 +38,11 @@
    "table_fieldname": "competitors"
   }
  ],
+<<<<<<< HEAD
  "modified": "2024-12-10 08:26:38.496003",
+=======
+ "modified": "2024-03-27 13:06:45.911065",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Competitor",
@@ -53,11 +57,16 @@
    "print": 1,
    "read": 1,
    "report": 1,
+<<<<<<< HEAD
    "role": "Sales Master Manager",
+=======
+   "role": "System Manager",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "share": 1,
    "write": 1
   },
   {
+<<<<<<< HEAD
    "read": 1,
    "role": "Sales User"
   },
@@ -72,6 +81,17 @@
   {
    "read": 1,
    "role": "Maintenance User"
+=======
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "quick_entry": 1,

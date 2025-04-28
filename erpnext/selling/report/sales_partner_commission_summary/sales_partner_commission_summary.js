@@ -4,6 +4,7 @@
 frappe.query_reports["Sales Partner Commission Summary"] = {
 	filters: [
 		{
+<<<<<<< HEAD
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
@@ -12,6 +13,8 @@ frappe.query_reports["Sales Partner Commission Summary"] = {
 			reqd: 1,
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fieldname: "sales_partner",
 			label: __("Sales Partner"),
 			fieldtype: "Link",
@@ -21,7 +24,11 @@ frappe.query_reports["Sales Partner Commission Summary"] = {
 			fieldname: "doctype",
 			label: __("Document Type"),
 			fieldtype: "Select",
+<<<<<<< HEAD
 			options: "Sales Order\nDelivery Note\nSales Invoice\nPOS Invoice",
+=======
+			options: "Sales Order\nDelivery Note\nSales Invoice",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			default: "Sales Order",
 		},
 		{
@@ -37,6 +44,16 @@ frappe.query_reports["Sales Partner Commission Summary"] = {
 			default: frappe.datetime.get_today(),
 		},
 		{
+<<<<<<< HEAD
+=======
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+		},
+		{
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fieldname: "customer",
 			label: __("Customer"),
 			fieldtype: "Link",

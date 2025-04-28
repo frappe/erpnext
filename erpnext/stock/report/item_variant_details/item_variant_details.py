@@ -143,9 +143,15 @@ def get_stock_details_map(variant_list):
 	stock_details = frappe.db.get_all(
 		"Bin",
 		fields=[
+<<<<<<< HEAD
 			{"SUM": "planned_qty", "as": "planned_qty"},
 			{"SUM": "actual_qty", "as": "actual_qty"},
 			{"SUM": "projected_qty", "as": "projected_qty"},
+=======
+			"sum(planned_qty) as planned_qty",
+			"sum(actual_qty) as actual_qty",
+			"sum(projected_qty) as projected_qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"item_code",
 		],
 		filters={"item_code": ["in", variant_list]},
@@ -167,7 +173,11 @@ def get_buying_price_map(variant_list):
 	buying = frappe.db.get_all(
 		"Item Price",
 		fields=[
+<<<<<<< HEAD
 			{"AVG": "price_list_rate", "as": "avg_rate"},
+=======
+			"avg(price_list_rate) as avg_rate",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"item_code",
 		],
 		filters={"item_code": ["in", variant_list], "buying": 1},
@@ -185,7 +195,11 @@ def get_selling_price_map(variant_list):
 	selling = frappe.db.get_all(
 		"Item Price",
 		fields=[
+<<<<<<< HEAD
 			{"AVG": "price_list_rate", "as": "avg_rate"},
+=======
+			"avg(price_list_rate) as avg_rate",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"item_code",
 		],
 		filters={"item_code": ["in", variant_list], "selling": 1},

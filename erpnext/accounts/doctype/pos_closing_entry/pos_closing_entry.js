@@ -2,8 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("POS Closing Entry", {
+<<<<<<< HEAD
 	onload: async function (frm) {
 		frm.ignore_doctypes_on_cancel_all = ["POS Invoice Merge Log", "Sales Invoice"];
+=======
+	onload: function (frm) {
+		frm.ignore_doctypes_on_cancel_all = ["POS Invoice Merge Log"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("pos_profile", function (doc) {
 			return {
 				filters: { user: doc.user },
@@ -36,6 +41,11 @@ frappe.ui.form.on("POS Closing Entry", {
 			}
 		});
 
+<<<<<<< HEAD
+=======
+		set_html_data(frm);
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (frm.doc.docstatus == 1) {
 			if (!frm.doc.posting_date) {
 				frm.set_value("posting_date", frappe.datetime.nowdate());
@@ -78,10 +88,15 @@ frappe.ui.form.on("POS Closing Entry", {
 		) {
 			reset_values(frm);
 			frappe.run_serially([
+<<<<<<< HEAD
 				() => frappe.dom.freeze(__("Loading Invoices! Please Wait...")),
 				() => frm.trigger("set_opening_amounts"),
 				() => frm.trigger("get_invoices"),
 				() => frappe.dom.unfreeze(),
+=======
+				() => frm.trigger("set_opening_amounts"),
+				() => frm.trigger("get_pos_invoices"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			]);
 		}
 	},
@@ -100,9 +115,15 @@ frappe.ui.form.on("POS Closing Entry", {
 			});
 	},
 
+<<<<<<< HEAD
 	get_invoices(frm) {
 		return frappe.call({
 			method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_invoices",
+=======
+	get_pos_invoices(frm) {
+		return frappe.call({
+			method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			args: {
 				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
 				end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
@@ -110,6 +131,7 @@ frappe.ui.form.on("POS Closing Entry", {
 				user: frm.doc.user,
 			},
 			callback: (r) => {
+<<<<<<< HEAD
 				let inv_docs = r.message.invoices;
 				set_transaction_form_data(inv_docs, frm);
 				refresh_payments(r.message.payments, frm);
@@ -118,6 +140,53 @@ frappe.ui.form.on("POS Closing Entry", {
 			},
 		});
 	},
+=======
+				let pos_docs = r.message;
+				set_form_data(pos_docs, frm);
+				refresh_fields(frm);
+				set_html_data(frm);
+			},
+		});
+	},
+
+	before_save: async function (frm) {
+		frappe.dom.freeze(__("Processing Sales! Please Wait..."));
+
+		frm.set_value("grand_total", 0);
+		frm.set_value("net_total", 0);
+		frm.set_value("total_quantity", 0);
+		frm.set_value("taxes", []);
+
+		for (let row of frm.doc.payment_reconciliation) {
+			row.expected_amount = row.opening_amount;
+		}
+
+		await Promise.all([
+			frappe.call({
+				method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
+				args: {
+					start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
+					end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
+					pos_profile: frm.doc.pos_profile,
+					user: frm.doc.user,
+				},
+				callback: (r) => {
+					let pos_invoices = r.message;
+					for (let doc of pos_invoices) {
+						frm.doc.grand_total += flt(doc.grand_total);
+						frm.doc.net_total += flt(doc.net_total);
+						frm.doc.total_quantity += flt(doc.total_qty);
+						refresh_payments(doc, frm);
+						refresh_taxes(doc, frm);
+						refresh_fields(frm);
+						set_html_data(frm);
+					}
+				},
+			}),
+		]);
+		frappe.dom.unfreeze();
+	},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });
 
 frappe.ui.form.on("POS Closing Entry Detail", {
@@ -127,6 +196,7 @@ frappe.ui.form.on("POS Closing Entry Detail", {
 	},
 });
 
+<<<<<<< HEAD
 function set_transaction_form_data(data, frm) {
 	data.forEach((d) => {
 		add_to_transaction(d, frm);
@@ -155,6 +225,36 @@ function refresh_payments(payments, frm) {
 		const payment = frm.doc.payment_reconciliation.find(
 			(pay) => pay.mode_of_payment === p.mode_of_payment
 		);
+=======
+function set_form_data(data, frm) {
+	data.forEach((d) => {
+		add_to_pos_transaction(d, frm);
+		frm.doc.grand_total += flt(d.grand_total);
+		frm.doc.net_total += flt(d.net_total);
+		frm.doc.total_quantity += flt(d.total_qty);
+		refresh_payments(d, frm);
+		refresh_taxes(d, frm);
+	});
+}
+
+function add_to_pos_transaction(d, frm) {
+	frm.add_child("pos_transactions", {
+		pos_invoice: d.name,
+		posting_date: d.posting_date,
+		grand_total: d.grand_total,
+		customer: d.customer,
+	});
+}
+
+function refresh_payments(d, frm) {
+	d.payments.forEach((p) => {
+		const payment = frm.doc.payment_reconciliation.find(
+			(pay) => pay.mode_of_payment === p.mode_of_payment
+		);
+		if (p.account == d.account_for_change_amount) {
+			p.amount -= flt(d.change_amount);
+		}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (payment) {
 			payment.expected_amount += flt(p.amount);
 			payment.closing_amount = payment.expected_amount;
@@ -170,33 +270,76 @@ function refresh_payments(payments, frm) {
 	});
 }
 
+<<<<<<< HEAD
 function add_taxes(taxes, frm) {
 	taxes.forEach((t) => {
 		frm.add_child("taxes", {
 			account_head: t.account_head,
 			amount: t.tax_amount,
 		});
+=======
+function refresh_taxes(d, frm) {
+	d.taxes.forEach((t) => {
+		const tax = frm.doc.taxes.find((tx) => tx.account_head === t.account_head && tx.rate === t.rate);
+		if (tax) {
+			tax.amount += flt(t.tax_amount);
+		} else {
+			frm.add_child("taxes", {
+				account_head: t.account_head,
+				rate: t.rate,
+				amount: t.tax_amount,
+			});
+		}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	});
 }
 
 function reset_values(frm) {
+<<<<<<< HEAD
 	frm.set_value("pos_invoices", []);
 	frm.set_value("sales_invoices", []);
+=======
+	frm.set_value("pos_transactions", []);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	frm.set_value("payment_reconciliation", []);
 	frm.set_value("taxes", []);
 	frm.set_value("grand_total", 0);
 	frm.set_value("net_total", 0);
+<<<<<<< HEAD
 	frm.set_value("total_taxes_and_charges", 0);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	frm.set_value("total_quantity", 0);
 }
 
 function refresh_fields(frm) {
+<<<<<<< HEAD
 	frm.refresh_field("pos_invoices");
 	frm.refresh_field("sales_invoices");
+=======
+	frm.refresh_field("pos_transactions");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	frm.refresh_field("payment_reconciliation");
 	frm.refresh_field("taxes");
 	frm.refresh_field("grand_total");
 	frm.refresh_field("net_total");
+<<<<<<< HEAD
 	frm.refresh_field("total_taxes_and_charges");
 	frm.refresh_field("total_quantity");
 }
+=======
+	frm.refresh_field("total_quantity");
+}
+
+function set_html_data(frm) {
+	if (frm.doc.docstatus === 1 && frm.doc.status == "Submitted") {
+		frappe.call({
+			method: "get_payment_reconciliation_details",
+			doc: frm.doc,
+			callback: (r) => {
+				frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
+			},
+		});
+	}
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

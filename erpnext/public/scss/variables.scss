@@ -1,0 +1,249 @@
+/* Global */
+:root {
+  --sidebar-hover-color: #f3f3f3;
+  --sidebar-active-color: rgba(255, 255, 255, 1);
+  --sidebar-border-color: #ededed;
+  --surface-modal: rgba(255, 255, 255, 1);
+  --divider-color: rgba(237, 237, 237, 1);
+  --main-color: #691551;
+  --second-color: #af3d8f;
+  --third-color: #a5488a;
+  --widget-bg: #e8eafcad;
+}
+
+[data-theme="dark"] {
+  --sidebar-hover-color: rgba(43, 43, 43, 1);
+  --sidebar-active-color: rgba(66, 66, 66, 1);
+  --sidebar-border-color: #232323;
+  --surface-modal: rgb(0, 0, 0);
+  --divider-color: rgba(52, 52, 52, 1);
+}
+
+[data-theme="watermelon"] {
+  --primary: var(--main-color);
+  --dt-primary-color: var(--main-color);
+  --blue-avatar-bg: var(--main-color);
+  --blue-avatar-color: var(--main-color);
+  --blue: var(--main-color);
+}
+
+[data-theme=watermelon] .page-container,
+[data-theme=watermelon] .layout-main-section {
+    background-color: var(--widget-bg);
+}
+[data-theme=watermelon] ul li a:hover {
+    background-color: var(--second-color);
+    color: #fff;
+}
+/* Main */
+[data-theme=watermelon] body {
+	font-size: 14px;
+	background-color: #f3f6f9;
+}
+[data-theme=watermelon]a {
+    color: #666;
+	font-weight: 500;
+}
+[data-theme=watermelon] .small, small {
+    font-size: 95%;
+}
+[data-theme=watermelon] .h6.uppercase, h6.uppercase {
+    font-weight: 600;
+	font-size: 11.5px;
+}
+
+/* Navigation Bar */
+/*[data-theme=watermelon] .standard-sidebar-item.selected{
+    background: linear-gradient(to right, var(--main-color), var(--second-color));
+}
+[data-theme=watermelon] .standard-sidebar-item.selected a{
+    color: #fff;
+}
+[data-theme=watermelon] .standard-sidebar-item.selected a svg{
+    fill: #fff;
+}
+[data-theme=watermelon] .standard-sidebar-item:hover{
+    background-color: var(--second-color);
+}
+[data-theme=watermelon] .standard-sidebar-item:hover a,
+[data-theme=watermelon] .standard-sidebar-item:hover svg{
+    color: #fff;
+    fill: #fff;
+}
+*/
+
+
+[data-theme=watermelon] .navbar {
+    background: linear-gradient(to right, var(--main-color), var(--second-color)) !important;
+    border: none !important;
+}
+[data-theme=watermelon] .navbar-nav>li>a{
+	color:#fff !important;
+}
+[data-theme=watermelon] .navbar-nav>li>a:hover{
+	color:#ddd !important;
+}
+[data-theme=watermelon] .navbar-brand:hover {
+	color:#ddd !important;
+}
+
+/* Widgets */
+[data-theme=watermelon] .widget {
+    background-color: var(--widget-bg);
+	border: none;
+	box-shadow: 0px 3px 12px 0px var(--widget-bg), 0 3px 3px -2px #461a7714;
+}
+[data-theme=watermelon] .widget.shortcut-widget-box .widget-head .widget-title i {
+    color: var(--third-color);
+}
+[data-theme=watermelon] .widget.shortcut-widget-box .widget-head .widget-title:hover span{
+    color: var(--main-color);
+}
+[data-theme=watermelon] .widget-body .link-item:hover{
+    color: #fff;
+    background: var(--third-color);
+}
+/* Sidebar */
+[data-theme=watermelon] .desk-sidebar .desk-sidebar-item {
+    font-size: 13px;
+    font-weight: 600;
+	color: var(--widget-bg);
+}
+[data-theme=watermelon] .layout-side-section {
+    font-size: 14px;
+}
+[data-theme=watermelon] .uppercase {
+    color:var(--third-color);
+}
+
+/* Dropdowns */
+[data-theme=watermelon] .dropdown-menu>li>a {
+    font-size: 13px;
+	color:#666;
+	font-weight: 500;
+}
+[data-theme=watermelon] .awesomplete > ul > li[aria-selected=true]{
+    background-color: transparent;
+}
+[data-theme=watermelon] .awesomplete > ul > li:hover{
+    background: linear-gradient(to right, var(--main-color), var(--second-color));
+}
+[data-theme=watermelon] .awesomplete > ul > li:hover a{
+    color: #fff;
+}
+/* Page Heading */
+[data-theme=watermelon] .page-head {
+    border-bottom: none !important;
+    box-shadow: 0 1px 10px 1px rgba(115, 108, 203, 0.1);
+}
+[data-theme=watermelon] .page-title .title-text {
+	color: var(--third-color);
+	font-size: 22px;
+}
+[data-theme=watermelon] .widget .widget-head .widget-title,
+[data-theme=watermelon] .section-head,
+[data-theme=watermelon] .comment-input-header {
+    font-size: 14px;
+	color: var(--third-color);
+}
+
+/*Main Section */
+[data-theme=watermelon] .list-row-head {
+    background-color: #f3f6f9;
+    border-bottom: 1px solid #e4e4e4 !important;
+}
+
+/* Buttons */
+[data-theme=watermelon] .btn-primary {
+    background-color: var(--main-color);
+    border-color: var(--main-color);
+}
+[data-theme=watermelon] .control-label, .grid-heading-row {
+    font-size:13px;
+}
+[data-theme=watermelon] .btn-default:hover,
+[data-theme=watermelon] .btn-default:focus, .btn-default.focus,
+[data-theme=watermelon] .btn-default:active, .btn-default.active,
+[data-theme=watermelon] .open > .dropdown-toggle.btn-default {
+    background-color: var(--third-color) !important;
+    color: #fff !important;
+}
+[data-theme=watermelon] .btn-default:hover svg{
+    stroke: #fff !important;
+    fill: #fff !important;
+    color: #fff !important;
+}
+[data-theme=watermelon] .btn-primary:hover,
+[data-theme=watermelon] .btn-primary:focus, .btn-primary.focus,
+[data-theme=watermelon] .btn-primary:active, .btn-primary.active,
+[data-theme=watermelon] .open > .dropdown-toggle.btn-primary {
+    background-color: var(--main-color) !important;
+    border-color: var(--main-color) !important;
+}
+[data-theme=watermelon] .btn-secondary,
+[data-theme=watermelon] .btn-secondary:focus, .btn-secondary.focus,
+[data-theme=watermelon] .btn-secondary:active, .btn-secondary.active,
+[data-theme=watermelon] .open > .dropdown-toggle.btn-secondary {
+    background-color: var(--third-color);
+    color: #fff;
+}
+
+[data-theme=watermelon] .btn-secondary:hover{
+    background-color: var(--main-color);
+    color: #fff;
+}
+[data-theme=watermelon] .indicator-right.blue:after, .indicator.blue:before {
+    background: var(--third-color);
+}
+
+/*Other Components*/
+[data-theme=watermelon] input[type=checkbox]:checked:before {
+    color: var(--third-color);
+}
+[data-theme=watermelon] input[type=checkbox]:checked{
+    background: var(--main-color);
+}
+[data-theme=watermelon] .frappe-control .ql-editor:not(.read-mode){
+    background: var(--widget-bg);
+}
+[data-theme=watermelon] .input-with-feedback,
+[data-theme=watermelon] .like-disabled-input{
+    background-color: #e8eafcad;
+}
+[data-theme=watermelon] .document-link-badge span{
+    background-color: var(--main-color) !important;
+    color: #fff;
+}
+
+[data-theme=watermelon] .document-link-badge{
+    background-color: var(--widget-bg)!important;
+}
+[data-theme=watermelon] .document-link button{
+    background: var(--third-color) !important;
+    color: #fff !important;
+}
+
+[data-theme=watermelon] .document-link button svg{
+    fill: white;
+    stroke: white;
+}
+[data-theme=watermelon] .indicator-pill.gray,
+[data-theme=watermelon] .indicator-pill-right.gray,
+[data-theme=watermelon] .indicator-pill-round.gray {
+    background: var(--third-color);
+    color: #fff;
+}
+[data-theme=watermelon] .indicator-pill.green,
+[data-theme=watermelon] .indicator-pill-right.green,
+[data-theme=watermelon] .indicator-pill-round.green {
+    color: var(--main-color);
+}
+
+[data-theme=watermelon] .notifications-icon svg{
+    stroke: #fff;
+    fill: #fff;
+}
+
+[data-theme=watermelon] #page-Workspaces .page-head{
+    background: var(--widget-bg);
+}

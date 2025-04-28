@@ -4,7 +4,14 @@
 frappe.ui.form.on("Fiscal Year", {
 	onload: function (frm) {
 		if (frm.doc.__islocal) {
+<<<<<<< HEAD
 			frm.set_value("year_start_date", frappe.datetime.year_start());
+=======
+			frm.set_value(
+				"year_start_date",
+				frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)
+			);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 	year_start_date: function (frm) {

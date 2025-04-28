@@ -11,6 +11,10 @@
  "field_order": [
   "customer_section",
   "column_break0",
+<<<<<<< HEAD
+=======
+  "title",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "naming_series",
   "customer",
   "customer_name",
@@ -24,8 +28,11 @@
   "po_date",
   "company",
   "skip_delivery_note",
+<<<<<<< HEAD
   "has_unit_price_items",
   "is_subcontracted",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -41,7 +48,10 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_28",
   "set_warehouse",
   "reserve_stock",
@@ -91,7 +101,10 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
+<<<<<<< HEAD
   "item_wise_tax_details",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "packing_list",
   "packed_items",
   "pricing_rule_details",
@@ -116,9 +129,14 @@
   "dispatch_address",
   "col_break46",
   "company_address",
+<<<<<<< HEAD
   "company_address_display",
   "column_break_92",
   "company_contact_person",
+=======
+  "column_break_92",
+  "company_address_display",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "payment_schedule_section",
   "payment_terms_section",
   "payment_terms_template",
@@ -163,6 +181,7 @@
   "additional_info_section",
   "is_internal_customer",
   "represents_company",
+<<<<<<< HEAD
   "column_break_yvzv",
   "utm_source",
   "utm_campaign",
@@ -170,6 +189,12 @@
   "utm_content",
   "column_break_152",
   "inter_company_order_reference",
+=======
+  "column_break_152",
+  "source",
+  "inter_company_order_reference",
+  "campaign",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "party_account_currency",
   "connections_tab"
  ],
@@ -190,6 +215,21 @@
    "width": "50%"
   },
   {
+<<<<<<< HEAD
+=======
+   "allow_on_submit": 1,
+   "default": "{customer_name}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hide_days": 1,
@@ -352,6 +392,10 @@
    "options": "fa fa-bullhorn"
   },
   {
+<<<<<<< HEAD
+=======
+   "allow_on_submit": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -432,6 +476,10 @@
    "width": "50%"
   },
   {
+<<<<<<< HEAD
+=======
+   "allow_on_submit": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1037,8 +1085,13 @@
   },
   {
    "collapsible": 1,
+<<<<<<< HEAD
    "collapsible_depends_on": "eval:!doc.is_subcontracted && doc.packed_items",
    "depends_on": "eval:!doc.is_subcontracted && doc.packed_items",
+=======
+   "collapsible_depends_on": "packed_items",
+   "depends_on": "packed_items",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1144,8 +1197,12 @@
    "label": "Project",
    "oldfieldname": "project",
    "oldfieldtype": "Link",
+<<<<<<< HEAD
    "options": "Project",
    "search_index": 1
+=======
+   "options": "Project"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "party_account_currency",
@@ -1160,6 +1217,31 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "source",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "Lead Source",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "campaign",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Campaign",
+   "oldfieldname": "campaign",
+   "oldfieldtype": "Link",
+   "options": "Campaign",
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible": 1,
    "fieldname": "printing_details",
    "fieldtype": "Section Break",
@@ -1435,7 +1517,10 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Auto Repeat",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Auto Repeat"
   },
   {
@@ -1609,7 +1694,11 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "depends_on": "eval: ((doc.docstatus == 0 || doc.reserve_stock) && !doc.is_subcontracted)",
+=======
+   "depends_on": "eval: (doc.docstatus == 0 || doc.reserve_stock)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "If checked, Stock will be reserved on <b>Submit</b>",
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
@@ -1629,6 +1718,7 @@
    "no_copy": 1,
    "options": "Not Requested\nRequested\nPartially Paid\nFully Paid",
    "print_hide": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_yvzv",
@@ -1708,11 +1798,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-12 12:14:29.760988",
+=======
+ "modified": "2024-05-27 18:51:54.905804",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1781,7 +1879,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
@@ -1791,4 +1892,8 @@
  "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -7,7 +7,10 @@
  "field_order": [
   "payment_gateway",
   "payment_channel",
+<<<<<<< HEAD
   "company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "is_default",
   "column_break_4",
   "payment_account",
@@ -72,6 +75,7 @@
    "fieldtype": "Select",
    "label": "Payment Channel",
    "options": "\nEmail\nPhone\nOther"
+<<<<<<< HEAD
   },
   {
    "fieldname": "company",
@@ -82,11 +86,17 @@
    "print_hide": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-14 16:49:55.210352",
+=======
+ "modified": "2024-03-29 18:53:09.836254",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Gateway Account",
@@ -105,7 +115,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

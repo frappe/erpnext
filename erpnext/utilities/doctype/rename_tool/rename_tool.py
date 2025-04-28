@@ -19,7 +19,11 @@ class RenameTool(Document):
 		from frappe.types import DF
 
 		file_to_rename: DF.Attach | None
+<<<<<<< HEAD
 		select_doctype: DF.Literal[None]
+=======
+		select_doctype: DF.Literal
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	pass
@@ -45,6 +49,7 @@ def upload(select_doctype=None, rows=None):
 
 	rows = read_csv_content_from_attached_file(frappe.get_doc("Rename Tool", "Rename Tool"))
 
+<<<<<<< HEAD
 	# bulk rename allows only 500 rows at a time, so we created one job per 500 rows
 	for i in range(0, len(rows), 500):
 		frappe.enqueue(
@@ -53,3 +58,6 @@ def upload(select_doctype=None, rows=None):
 			doctype=select_doctype,
 			rows=rows[i : i + 500],
 		)
+=======
+	return bulk_rename(select_doctype, rows=rows)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

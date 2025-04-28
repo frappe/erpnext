@@ -22,12 +22,18 @@ class WorkOrderItem(Document):
 		consumed_qty: DF.Float
 		description: DF.Text | None
 		include_item_in_manufacturing: DF.Check
+<<<<<<< HEAD
 		is_additional_item: DF.Check
 		is_customer_provided_item: DF.Check
 		item_code: DF.Link | None
 		item_name: DF.Data | None
 		operation: DF.Link | None
 		operation_row_id: DF.Int
+=======
+		item_code: DF.Link | None
+		item_name: DF.Data | None
+		operation: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -35,10 +41,14 @@ class WorkOrderItem(Document):
 		required_qty: DF.Float
 		returned_qty: DF.Float
 		source_warehouse: DF.Link | None
+<<<<<<< HEAD
 		stock_reserved_qty: DF.Float
 		stock_uom: DF.Link | None
 		transferred_qty: DF.Float
 		voucher_detail_reference: DF.Data | None
+=======
+		transferred_qty: DF.Float
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	pass

@@ -8,7 +8,11 @@ from frappe.model.document import Document
 from frappe.utils.data import cint
 
 from erpnext.assets.doctype.asset.depreciation import get_disposal_account_and_cost_center
+<<<<<<< HEAD
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+=======
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class SalesInvoiceItem(Document):
@@ -34,7 +38,10 @@ class SalesInvoiceItem(Document):
 		base_rate_with_margin: DF.Currency
 		batch_no: DF.Link | None
 		brand: DF.Data | None
+<<<<<<< HEAD
 		company_total_stock: DF.Float
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		conversion_factor: DF.Float
 		cost_center: DF.Link
 		customer_item_code: DF.Data | None
@@ -71,8 +78,11 @@ class SalesInvoiceItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+<<<<<<< HEAD
 		pos_invoice: DF.Link | None
 		pos_invoice_item: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		price_list_rate: DF.Currency
 		pricing_rules: DF.SmallText | None
 		project: DF.Link | None
@@ -84,7 +94,10 @@ class SalesInvoiceItem(Document):
 		rate_with_margin: DF.Currency
 		sales_invoice_item: DF.Data | None
 		sales_order: DF.Link | None
+<<<<<<< HEAD
 		scio_detail: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		service_end_date: DF.Date | None
@@ -131,3 +144,42 @@ class SalesInvoiceItem(Document):
 		self.income_account = disposal_account
 		if not self.cost_center:
 			self.cost_center = depreciation_cost_center
+<<<<<<< HEAD
+=======
+
+	def set_serial_no_against_delivery_note(self):
+		"""Set serial no based on delivery note."""
+		if self.serial_no and self.delivery_note and self.qty != len(get_serial_nos(self.serial_no)):
+			self.serial_no = get_delivery_note_serial_no(self.item_code, self.qty, self.delivery_note)
+
+	def validate_serial_against_delivery_note(self):
+		"""Ensure the serial numbers in this Sales Invoice Item are same as in the linked Delivery Note."""
+		if not self.delivery_note or not self.dn_detail:
+			return
+
+		serial_nos = frappe.db.get_value("Delivery Note Item", self.dn_detail, "serial_no") or ""
+		dn_serial_nos = set(get_serial_nos(serial_nos))
+
+		serial_nos = self.serial_no or ""
+		si_serial_nos = set(get_serial_nos(serial_nos))
+		serial_no_diff = si_serial_nos - dn_serial_nos
+
+		if serial_no_diff:
+			dn_link = frappe.utils.get_link_to_form("Delivery Note", self.delivery_note)
+			msg = (
+				_("Row #{0}: The following serial numbers are not present in Delivery Note {1}:").format(
+					self.idx, dn_link
+				)
+				+ " "
+				+ ", ".join(frappe.bold(d) for d in serial_no_diff)
+			)
+
+			frappe.throw(msg=msg, title=_("Serial Nos Mismatch"))
+
+		if self.serial_no and cint(self.qty) != len(si_serial_nos):
+			frappe.throw(
+				_(
+					"Row #{0}: {1} serial numbers are required for Item {2}. You have provided {3} serial numbers."
+				).format(self.idx, self.qty, self.item_code, len(si_serial_nos))
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

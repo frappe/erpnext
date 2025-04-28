@@ -17,7 +17,10 @@
   "is_fixed_asset",
   "applicable_charges",
   "purchase_receipt_item",
+<<<<<<< HEAD
   "stock_entry_item",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
@@ -42,6 +45,10 @@
    "oldfieldtype": "Data",
    "print_width": "300px",
    "read_only": 1,
+<<<<<<< HEAD
+=======
+   "reqd": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "width": "120px"
   },
   {
@@ -49,7 +56,11 @@
    "fieldtype": "Select",
    "label": "Receipt Document Type",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "Purchase Invoice\nPurchase Receipt\nStock Entry\nSubcontracting Receipt",
+=======
+   "options": "Purchase Invoice\nPurchase Receipt",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide": 1,
    "read_only": 1
   },
@@ -131,6 +142,7 @@
    "hidden": 1,
    "label": "Is Fixed Asset",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "stock_entry_item",
@@ -145,13 +157,28 @@
  "istable": 1,
  "links": [],
  "modified": "2025-11-12 18:12:47.107898",
+=======
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:09:59.220459",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

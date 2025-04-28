@@ -14,7 +14,10 @@ from frappe.contacts.address_and_contact import (
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
+<<<<<<< HEAD
 from frappe.query_builder import Field, functions
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -36,11 +39,18 @@ class Customer(TransactionBase):
 			AllowedToTransactWith,
 		)
 		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
+<<<<<<< HEAD
 		from erpnext.selling.doctype.customer_credit_limit.customer_credit_limit import CustomerCreditLimit
 		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
 		from erpnext.selling.doctype.supplier_number_at_customer.supplier_number_at_customer import (
 			SupplierNumberAtCustomer,
 		)
+=======
+		from erpnext.selling.doctype.customer_credit_limit.customer_credit_limit import (
+			CustomerCreditLimit,
+		)
+		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		account_manager: DF.Link | None
@@ -62,14 +72,20 @@ class Customer(TransactionBase):
 		disabled: DF.Check
 		dn_required: DF.Check
 		email_id: DF.ReadOnly | None
+<<<<<<< HEAD
 		first_name: DF.ReadOnly | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		gender: DF.Link | None
 		image: DF.AttachImage | None
 		industry: DF.Link | None
 		is_frozen: DF.Check
 		is_internal_customer: DF.Check
 		language: DF.Link | None
+<<<<<<< HEAD
 		last_name: DF.ReadOnly | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		lead_name: DF.Link | None
 		loyalty_program: DF.Link | None
 		loyalty_program_tier: DF.Data | None
@@ -85,7 +101,10 @@ class Customer(TransactionBase):
 		sales_team: DF.Table[SalesTeam]
 		salutation: DF.Link | None
 		so_required: DF.Check
+<<<<<<< HEAD
 		supplier_numbers: DF.Table[SupplierNumberAtCustomer]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		tax_withholding_category: DF.Link | None
@@ -153,7 +172,12 @@ class Customer(TransactionBase):
 		self.validate_currency_for_receivable_payable_and_advance_account()
 
 		# set loyalty program tier
+<<<<<<< HEAD
 		if not self.is_new() and (customer := self.get_doc_before_save()):
+=======
+		if frappe.db.exists("Customer", self.name):
+			customer = frappe.get_doc("Customer", self.name)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if self.loyalty_program == customer.loyalty_program and not self.loyalty_program_tier:
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
@@ -207,7 +231,10 @@ class Customer(TransactionBase):
 	def validate_internal_customer(self):
 		if not self.is_internal_customer:
 			self.represents_company = ""
+<<<<<<< HEAD
 			return
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		internal_customer = frappe.db.get_value(
 			"Customer",
@@ -235,7 +262,11 @@ class Customer(TransactionBase):
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
+<<<<<<< HEAD
 			self.link_address_and_contact()
+=======
+			self.link_lead_address_and_contact()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.copy_communication()
 
 		self.update_customer_groups()
@@ -253,7 +284,11 @@ class Customer(TransactionBase):
 
 	def create_primary_contact(self):
 		if not self.customer_primary_contact and not self.lead_name:
+<<<<<<< HEAD
 			if self.mobile_no or self.email_id or self.first_name or self.last_name:
+=======
+			if self.mobile_no or self.email_id:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				contact = make_contact(self)
 				self.db_set("customer_primary_contact", contact.name)
 				self.db_set("mobile_no", self.mobile_no)
@@ -279,6 +314,7 @@ class Customer(TransactionBase):
 		if self.lead_name:
 			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
 
+<<<<<<< HEAD
 	def link_address_and_contact(self):
 		linked_documents = {
 			"Lead": self.lead_name,
@@ -290,12 +326,22 @@ class Customer(TransactionBase):
 			if not docname:
 				continue
 
+=======
+	def link_lead_address_and_contact(self):
+		if self.lead_name:
+			# assign lead address and contact to customer (if already not set)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			linked_contacts_and_addresses = frappe.get_all(
 				"Dynamic Link",
 				filters=[
 					["parenttype", "in", ["Contact", "Address"]],
+<<<<<<< HEAD
 					["link_doctype", "=", doctype],
 					["link_name", "=", docname],
+=======
+					["link_doctype", "=", "Lead"],
+					["link_name", "=", self.lead_name],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				],
 				fields=["parent as name", "parenttype as doctype"],
 			)
@@ -449,6 +495,7 @@ def make_opportunity(source_name, target_doc=None):
 	return target_doc
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def make_payment_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
@@ -474,6 +521,8 @@ def make_payment_entry(source_name, target_doc=None):
 	return target_doc
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def _set_missing_values(source, target):
 	address = frappe.get_all(
 		"Dynamic Link",
@@ -512,11 +561,19 @@ def get_loyalty_programs(doc):
 	loyalty_programs = frappe.get_all(
 		"Loyalty Program",
 		fields=["name", "customer_group", "customer_territory"],
+<<<<<<< HEAD
 		filters=[
 			["auto_opt_in", "=", 1],
 			["from_date", "<=", today()],
 			[functions.IfNull(Field("to_date"), "2500-01-01"), ">=", today()],
 		],
+=======
+		filters={
+			"auto_opt_in": 1,
+			"from_date": ["<=", today()],
+			"ifnull(to_date, '2500-01-01')": [">=", today()],
+		},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	for loyalty_program in loyalty_programs:
@@ -563,7 +620,11 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 		message += "<br><br>"
 
 		# If not authorized person raise exception
+<<<<<<< HEAD
 		credit_controller_role = frappe.get_single_value("Accounts Settings", "credit_controller")
+=======
+		credit_controller_role = frappe.db.get_single_value("Accounts Settings", "credit_controller")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not credit_controller_role or credit_controller_role not in frappe.get_roles():
 			# form a list of emails for the credit controller users
 			credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
@@ -761,10 +822,13 @@ def make_contact(args, is_primary_contact=1):
 		contact.add_email(args.get("email_id"), is_primary=True)
 	if args.get("mobile_no"):
 		contact.add_phone(args.get("mobile_no"), is_primary_mobile_no=True)
+<<<<<<< HEAD
 	if args.get("first_name"):
 		contact.first_name = args.get("first_name")
 	if args.get("last_name"):
 		contact.last_name = args.get("last_name")
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if flags := args.get("flags"):
 		contact.insert(ignore_permissions=flags.get("ignore_permissions"))

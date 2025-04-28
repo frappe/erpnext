@@ -59,7 +59,11 @@ def get_data(filters):
 	job_card_time_details = {}
 	for job_card_data in frappe.get_all(
 		"Job Card Time Log",
+<<<<<<< HEAD
 		fields=[{"MIN": "from_time", "as": "from_time"}, {"MAX": "to_time", "as": "to_time"}, "parent"],
+=======
+		fields=["min(from_time) as from_time", "max(to_time) as to_time", "parent"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters=job_card_time_filter,
 		group_by="parent",
 	):

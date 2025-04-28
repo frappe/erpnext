@@ -1,6 +1,9 @@
 {
  "actions": [],
+<<<<<<< HEAD
  "allow_import": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "autoname": "hash",
  "creation": "2022-01-11 15:03:38.273179",
  "doctype": "DocType",
@@ -17,12 +20,18 @@
   "column_break_5",
   "status",
   "company",
+<<<<<<< HEAD
   "reposting_reference",
   "repost_only_accounting_ledgers",
   "allow_negative_stock",
   "via_landed_cost_voucher",
   "allow_zero_rate",
   "recreate_stock_ledgers",
+=======
+  "allow_negative_stock",
+  "via_landed_cost_voucher",
+  "allow_zero_rate",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "amended_from",
   "error_section",
   "error_log",
@@ -224,6 +233,7 @@
    "label": "Reposting Data File",
    "no_copy": 1,
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -253,6 +263,14 @@
  "is_submittable": 1,
  "links": [],
  "modified": "2025-11-20 18:24:48.808526",
+=======
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-06-27 16:55:23.150146",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
@@ -301,8 +319,15 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

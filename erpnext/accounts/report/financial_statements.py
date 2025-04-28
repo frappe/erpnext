@@ -2,23 +2,34 @@
 # License: GNU General Public License v3. See license.txt
 
 
+<<<<<<< HEAD
 import copy
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import functools
 import math
 import re
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
 from pypika.terms import ExistsCriterion
+=======
+from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+<<<<<<< HEAD
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
+=======
+from erpnext.accounts.utils import get_fiscal_year
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_period_list(
@@ -109,6 +120,7 @@ def get_period_list(
 
 
 def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
+<<<<<<< HEAD
 	from_year_start_date = frappe.get_cached_value("Fiscal Year", from_fiscal_year, "year_start_date")
 	to_year_end_date = frappe.get_cached_value("Fiscal Year", to_fiscal_year, "year_end_date")
 
@@ -122,6 +134,16 @@ def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
 	)
 
 	fiscal_year = query.run(as_dict=True)
+=======
+	fiscal_year = frappe.db.sql(
+		"""select min(year_start_date) as year_start_date,
+		max(year_end_date) as year_end_date from `tabFiscal Year` where
+		name between %(from_fiscal_year)s and %(to_fiscal_year)s""",
+		{"from_fiscal_year": from_fiscal_year, "to_fiscal_year": to_fiscal_year},
+		as_dict=1,
+	)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return fiscal_year[0] if fiscal_year else {}
 
 
@@ -189,12 +211,21 @@ def get_data(
 			company,
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
 			period_list[-1]["to_date"],
+<<<<<<< HEAD
 			filters,
 			gl_entries_by_account,
 			root.lft,
 			root.rgt,
 			root_type=root_type,
 			ignore_closing_entries=ignore_closing_entries,
+=======
+			root.lft,
+			root.rgt,
+			filters,
+			gl_entries_by_account,
+			ignore_closing_entries=ignore_closing_entries,
+			root_type=root_type,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 	calculate_values(
@@ -212,7 +243,11 @@ def get_data(
 		company_currency,
 		accumulated_values=filters.accumulated_values,
 	)
+<<<<<<< HEAD
 	out = filter_out_zero_value_rows(out, parent_children_map, filters.show_zero_values)
+=======
+	out = filter_out_zero_value_rows(out, parent_children_map)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if out and total:
 		add_total_row(out, root_type, balance_must_be, period_list, company_currency)
@@ -295,8 +330,11 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 				"account_name": (
 					f"{_(d.account_number)} - {_(d.account_name)}" if d.account_number else _(d.account_name)
 				),
+<<<<<<< HEAD
 				"acc_name": d.account_name,
 				"acc_number": d.account_number,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		)
 		for period in period_list:
@@ -306,7 +344,11 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 
 			row[period.key] = flt(d.get(period.key, 0.0), 3)
 
+<<<<<<< HEAD
 			if abs(row[period.key]) >= get_zero_cutoff(company_currency):
+=======
+			if abs(row[period.key]) >= 0.005:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				# ignore zero values
 				has_value = True
 				total += flt(row[period.key])
@@ -325,6 +367,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 
 
 def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False):
+<<<<<<< HEAD
 	def get_all_parents(account, parent_children_map):
 		for parent, children in parent_children_map.items():
 			for child in children:
@@ -343,6 +386,20 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 	for d in data:
 		if d.get("account") in accounts_to_show:
 			data_with_value.append(d)
+=======
+	data_with_value = []
+	for d in data:
+		if show_zero_values or d.get("has_value"):
+			data_with_value.append(d)
+		else:
+			# show group with zero balance, if there are balances against child
+			children = [child.name for child in parent_children_map.get(d.get("account")) or []]
+			if children:
+				for row in data:
+					if row.get("account") in children and row.get("has_value"):
+						data_with_value.append(d)
+						break
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return data_with_value
 
@@ -435,6 +492,7 @@ def set_gl_entries_by_account(
 	company,
 	from_date,
 	to_date,
+<<<<<<< HEAD
 	filters,
 	gl_entries_by_account,
 	root_lft=None,
@@ -444,10 +502,20 @@ def set_gl_entries_by_account(
 	ignore_opening_entries=False,
 	group_by_account=False,
 	ignore_reporting_currency=True,
+=======
+	root_lft,
+	root_rgt,
+	filters,
+	gl_entries_by_account,
+	ignore_closing_entries=False,
+	ignore_opening_entries=False,
+	root_type=None,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
+<<<<<<< HEAD
 	# For balance sheet
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
 	if not from_date and not ignore_closing_balances:
@@ -500,12 +568,82 @@ def set_gl_entries_by_account(
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
 	return gl_entries_by_account
+=======
+	account_filters = {
+		"company": company,
+		"is_group": 0,
+		"lft": (">=", root_lft),
+		"rgt": ("<=", root_rgt),
+	}
+
+	if root_type:
+		account_filters.update(
+			{
+				"root_type": root_type,
+			}
+		)
+
+	accounts_list = frappe.db.get_all(
+		"Account",
+		filters=account_filters,
+		pluck="name",
+	)
+
+	if accounts_list:
+		# For balance sheet
+		ignore_closing_balances = frappe.db.get_single_value(
+			"Accounts Settings", "ignore_account_closing_balance"
+		)
+		if not from_date and not ignore_closing_balances:
+			last_period_closing_voucher = frappe.db.get_all(
+				"Period Closing Voucher",
+				filters={
+					"docstatus": 1,
+					"company": filters.company,
+					"posting_date": ("<", filters["period_start_date"]),
+				},
+				fields=["posting_date", "name"],
+				order_by="posting_date desc",
+				limit=1,
+			)
+			if last_period_closing_voucher:
+				gl_entries += get_accounting_entries(
+					"Account Closing Balance",
+					from_date,
+					to_date,
+					accounts_list,
+					filters,
+					ignore_closing_entries,
+					last_period_closing_voucher[0].name,
+				)
+				from_date = add_days(last_period_closing_voucher[0].posting_date, 1)
+				ignore_opening_entries = True
+
+		gl_entries += get_accounting_entries(
+			"GL Entry",
+			from_date,
+			to_date,
+			accounts_list,
+			filters,
+			ignore_closing_entries,
+			ignore_opening_entries=ignore_opening_entries,
+		)
+
+		if filters and filters.get("presentation_currency"):
+			convert_to_presentation_currency(gl_entries, get_currency(filters))
+
+		for entry in gl_entries:
+			gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
+		return gl_entries_by_account
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_accounting_entries(
 	doctype,
 	from_date,
 	to_date,
+<<<<<<< HEAD
 	filters,
 	root_lft=None,
 	root_rgt=None,
@@ -515,12 +653,20 @@ def get_accounting_entries(
 	ignore_opening_entries=False,
 	group_by_account=False,
 	ignore_reporting_currency=True,
+=======
+	accounts,
+	filters,
+	ignore_closing_entries,
+	period_closing_voucher=None,
+	ignore_opening_entries=False,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ):
 	gl_entry = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(gl_entry)
 		.select(
 			gl_entry.account,
+<<<<<<< HEAD
 			gl_entry.debit if not group_by_account else Sum(gl_entry.debit).as_("debit"),
 			gl_entry.credit if not group_by_account else Sum(gl_entry.credit).as_("credit"),
 			gl_entry.debit_in_account_currency
@@ -529,11 +675,18 @@ def get_accounting_entries(
 			gl_entry.credit_in_account_currency
 			if not group_by_account
 			else Sum(gl_entry.credit_in_account_currency).as_("credit_in_account_currency"),
+=======
+			gl_entry.debit,
+			gl_entry.credit,
+			gl_entry.debit_in_account_currency,
+			gl_entry.credit_in_account_currency,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			gl_entry.account_currency,
 		)
 		.where(gl_entry.company == filters.company)
 	)
 
+<<<<<<< HEAD
 	if not ignore_reporting_currency:
 		query = query.select(
 			gl_entry.debit_in_reporting_currency
@@ -546,19 +699,27 @@ def get_accounting_entries(
 
 	ignore_is_opening = frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if doctype == "GL Entry":
 		query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
 		query = query.where(gl_entry.posting_date <= to_date)
+<<<<<<< HEAD
 		query = query.force_index("posting_date_company_index")
 
 		if ignore_opening_entries and not ignore_is_opening:
+=======
+
+		if ignore_opening_entries:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			query = query.where(gl_entry.is_opening == "No")
 	else:
 		query = query.select(gl_entry.closing_date.as_("posting_date"))
 		query = query.where(gl_entry.period_closing_voucher == period_closing_voucher)
 
 	query = apply_additional_conditions(doctype, query, from_date, ignore_closing_entries, filters)
+<<<<<<< HEAD
 
 	if (root_lft and root_rgt) or root_type:
 		account_filter_query = get_account_filter_query(root_lft, root_rgt, root_type, gl_entry)
@@ -590,6 +751,13 @@ def get_account_filter_query(root_lft, root_rgt, root_type, gl_entry):
 		exists_query = exists_query.where(acc.root_type == root_type)
 
 	return exists_query
+=======
+	query = query.where(gl_entry.account.isin(accounts))
+
+	entries = query.run(as_dict=True)
+
+	return entries
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def apply_additional_conditions(doctype, query, from_date, ignore_closing_entries, filters):
@@ -666,13 +834,18 @@ def get_cost_centers_with_children(cost_centers):
 def get_columns(periodicity, period_list, accumulated_values=1, company=None, cash_flow=False):
 	columns = [
 		{
+<<<<<<< HEAD
 			"fieldname": "account" if not cash_flow else "section",
+=======
+			"fieldname": "stub",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"label": _("Account") if not cash_flow else _("Section"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"width": 300,
 		}
 	]
+<<<<<<< HEAD
 	if not cash_flow:
 		columns.extend(
 			[
@@ -692,6 +865,8 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 				},
 			]
 		)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if company:
 		columns.append(
 			{
@@ -734,6 +909,7 @@ def get_filtered_list_for_consolidated_report(filters, period_list):
 			filtered_summary_list.append(period)
 
 	return filtered_summary_list
+<<<<<<< HEAD
 
 
 def compute_growth_view_data(data, columns):
@@ -798,3 +974,5 @@ def compute_margin_view_data(data, columns, accumulated_values):
 			margin_percent = round((curr_value / base_value) * 100, 2)
 
 			data[row_idx][curr_period] = margin_percent
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -7,12 +7,18 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+<<<<<<< HEAD
   "item_name",
   "customer_item_code",
   "col_break1",
   "is_free_item",
   "is_alternative",
   "has_alternative_item",
+=======
+  "customer_item_code",
+  "col_break1",
+  "item_name",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_5",
   "description",
   "item_group",
@@ -27,10 +33,13 @@
   "uom",
   "conversion_factor",
   "stock_qty",
+<<<<<<< HEAD
   "available_quantity_section",
   "actual_qty",
   "column_break_ylrv",
   "company_total_stock",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_16",
   "price_list_rate",
   "base_price_list_rate",
@@ -56,6 +65,12 @@
   "base_net_amount",
   "pricing_rules",
   "stock_uom_rate",
+<<<<<<< HEAD
+=======
+  "is_free_item",
+  "is_alternative",
+  "has_alternative_item",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_43",
   "valuation_rate",
   "column_break_45",
@@ -75,6 +90,10 @@
   "prevdoc_docname",
   "item_balance",
   "projected_qty",
+<<<<<<< HEAD
+=======
+  "actual_qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "col_break4",
   "stock_balance",
   "item_tax_rate",
@@ -365,7 +384,10 @@
    "fieldname": "base_net_rate",
    "fieldtype": "Currency",
    "label": "Net Rate (Company Currency)",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide": 1,
    "read_only": 1
   },
@@ -457,7 +479,10 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "allow_on_submit": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "projected_qty",
    "fieldtype": "Float",
    "label": "Projected Qty",
@@ -466,10 +491,16 @@
    "report_hide": 1
   },
   {
+<<<<<<< HEAD
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
    "label": "Qty (Warehouse)",
+=======
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "label": "Actual Qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1,
@@ -675,6 +706,7 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
+<<<<<<< HEAD
   },
   {
    "fieldname": "available_quantity_section",
@@ -694,12 +726,18 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-26 20:31:47.775890",
+=======
+ "modified": "2024-06-02 06:21:09.508680",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

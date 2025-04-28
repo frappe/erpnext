@@ -1,5 +1,9 @@
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -13,7 +17,11 @@ from erpnext.selling.report.sales_person_target_variance_based_on_item_group.tes
 )
 
 
+<<<<<<< HEAD
 class TestSalesPartnerTargetVarianceBasedOnItemGroup(IntegrationTestCase):
+=======
+class TestSalesPartnerTargetVarianceBasedOnItemGroup(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.fiscal_year = get_fiscal_year(nowdate())[0]
 
@@ -35,7 +43,11 @@ class TestSalesPartnerTargetVarianceBasedOnItemGroup(IntegrationTestCase):
 			qty=20,
 			do_not_submit=True,
 		)
+<<<<<<< HEAD
 		si.sales_partner = sales_partner.name
+=======
+		si.sales_partner = sales_partner
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		si.commission_rate = 5
 		si.submit()
 

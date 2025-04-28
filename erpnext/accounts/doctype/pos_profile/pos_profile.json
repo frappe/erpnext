@@ -12,9 +12,13 @@
   "disabled",
   "column_break_9",
   "warehouse",
+<<<<<<< HEAD
   "utm_source",
   "utm_campaign",
   "utm_medium",
+=======
+  "campaign",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "company_address",
   "section_break_15",
   "applicable_for_users",
@@ -25,15 +29,21 @@
   "hide_unavailable_items",
   "auto_add_item_to_cart",
   "validate_stock_on_save",
+<<<<<<< HEAD
   "print_receipt_on_order_complete",
   "action_on_new_invoice",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_16",
   "update_stock",
   "ignore_pricing_rule",
   "allow_rate_change",
   "allow_discount_change",
+<<<<<<< HEAD
   "set_grand_total_to_default_mop",
   "allow_partial_payment",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_23",
   "item_groups",
   "column_break_25",
@@ -60,8 +70,12 @@
   "apply_discount_on",
   "accounting_dimensions_section",
   "cost_center",
+<<<<<<< HEAD
   "dimension_col_break",
   "project"
+=======
+  "dimension_col_break"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -96,6 +110,15 @@
    "label": "Country"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "campaign",
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "options": "Campaign"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "company_address",
    "fieldtype": "Link",
    "label": "Company Address",
@@ -376,6 +399,7 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+<<<<<<< HEAD
   },
   {
    "fieldname": "utm_campaign",
@@ -433,6 +457,10 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
@@ -458,7 +486,11 @@
    "link_fieldname": "pos_profile"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-06-24 11:19:19.834905",
+=======
+ "modified": "2024-03-27 13:10:16.476972",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
@@ -484,8 +516,15 @@
    "role": "Accounts User"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

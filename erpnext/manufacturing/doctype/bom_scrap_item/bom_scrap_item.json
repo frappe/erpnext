@@ -42,7 +42,10 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -50,7 +53,10 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "currency"
   },
   {
@@ -94,16 +100,27 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-31 16:21:44.047007",
+=======
+ "modified": "2024-03-27 13:06:41.395036",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Scrap Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

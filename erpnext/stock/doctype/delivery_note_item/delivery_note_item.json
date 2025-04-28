@@ -77,7 +77,10 @@
   "against_sales_invoice",
   "si_detail",
   "dn_detail",
+<<<<<<< HEAD
   "against_pick_list",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "pick_list_item",
   "section_break_40",
   "pick_serial_and_batch",
@@ -89,6 +92,7 @@
   "column_break_rxvc",
   "batch_no",
   "available_qty_section",
+<<<<<<< HEAD
   "actual_qty",
   "actual_batch_qty",
   "column_break_atna",
@@ -97,11 +101,22 @@
   "installed_qty",
   "packed_qty",
   "column_break_fguf",
+=======
+  "actual_batch_qty",
+  "actual_qty",
+  "installed_qty",
+  "item_tax_rate",
+  "column_break_atna",
+  "packed_qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "received_qty",
   "accounting_details_section",
   "expense_account",
   "column_break_71",
+<<<<<<< HEAD
   "item_tax_rate",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "internal_transfer_section",
   "material_request",
   "purchase_order",
@@ -524,7 +539,11 @@
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
+<<<<<<< HEAD
    "label": "Qty (Warehouse)",
+=======
+   "label": "Available Qty at From Warehouse",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "no_copy": 1,
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
@@ -758,7 +777,10 @@
    "fieldtype": "Currency",
    "label": "Incoming Rate",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "precision": "6",
    "print_hide": 1,
    "read_only": 1
@@ -919,6 +941,7 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
+<<<<<<< HEAD
   },
   {
    "allow_on_submit": 1,
@@ -949,19 +972,34 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-05-31 19:51:32.651562",
+=======
+ "modified": "2024-06-02 06:18:38.491763",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

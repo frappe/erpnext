@@ -3,7 +3,10 @@
 
 
 from frappe import _
+<<<<<<< HEAD
 from pypika import Order
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.report.non_billed_report import get_ordered_to_be_billed_data
 
@@ -11,7 +14,11 @@ from erpnext.accounts.report.non_billed_report import get_ordered_to_be_billed_d
 def execute(filters=None):
 	columns = get_column()
 	args = get_args()
+<<<<<<< HEAD
 	data = get_ordered_to_be_billed_data(args, filters)
+=======
+	data = get_ordered_to_be_billed_data(args)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return columns, data
 
 
@@ -77,6 +84,16 @@ def get_column():
 			"options": "Project",
 			"width": 120,
 		},
+<<<<<<< HEAD
+=======
+		{
+			"label": _("Company"),
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": 120,
+		},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	]
 
 
@@ -86,6 +103,10 @@ def get_args():
 		"party": "customer",
 		"date": "posting_date",
 		"order": "name",
+<<<<<<< HEAD
 		"order_by": Order.desc,
 		"reference_field": "delivery_note",
+=======
+		"order_by": "desc",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}

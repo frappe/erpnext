@@ -1,5 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -8,6 +9,16 @@ from frappe.tests import IntegrationTestCase
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
+=======
+
+import unittest
+
+import frappe
+
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+test_dependencies = ["Item"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def test_create_test_data():
@@ -110,7 +121,11 @@ def test_create_test_data():
 		coupon_code.insert()
 
 
+<<<<<<< HEAD
 class TestCouponCode(IntegrationTestCase):
+=======
+class TestCouponCode(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		test_create_test_data()
 
@@ -128,7 +143,11 @@ class TestCouponCode(IntegrationTestCase):
 			item_code="_Test Tesla Car",
 			rate=5000,
 			qty=1,
+<<<<<<< HEAD
 			do_not_save=True,
+=======
+			do_not_submit=True,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		self.assertEqual(so.items[0].rate, 5000)
@@ -142,6 +161,7 @@ class TestCouponCode(IntegrationTestCase):
 
 		so.submit()
 		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+<<<<<<< HEAD
 
 	def test_coupon_without_max_use(self):
 		from erpnext.accounts.doctype.pricing_rule.utils import (
@@ -178,3 +198,5 @@ class TestCouponCode(IntegrationTestCase):
 
 		# Clean up
 		coupon.delete()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

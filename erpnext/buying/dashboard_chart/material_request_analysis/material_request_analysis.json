@@ -7,14 +7,22 @@
  "doctype": "Dashboard Chart",
  "document_type": "Material Request",
  "dynamic_filters_json": "[[\"Material Request\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+<<<<<<< HEAD
  "filters_json": "[[\"Material Request\",\"status\",\"not in\",[\"Draft\",\"Cancelled\",\"Stopped\",null]],[\"Material Request\",\"material_request_type\",\"=\",\"Purchase\"],[\"Material Request\",\"docstatus\",\"=\",\"1\"],[\"Material Request\",\"transaction_date\",\"Timespan\",\"last quarter\"]]",
+=======
+ "filters_json": "[[\"Material Request\",\"status\",\"not in\",[\"Draft\",\"Cancelled\",\"Stopped\",null],false],[\"Material Request\",\"material_request_type\",\"=\",\"Purchase\",false],[\"Material Request\",\"docstatus\",\"=\",\"1\",false],[\"Material Request\",\"transaction_date\",\"Timespan\",\"last quarter\",false]]",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "group_by_based_on": "status",
  "group_by_type": "Count",
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
  "last_synced_on": "2020-07-22 12:43:56.961250",
+<<<<<<< HEAD
  "modified": "2024-12-05 12:00:00.000000",
+=======
+ "modified": "2020-07-22 21:20:51.840194",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Material Request Analysis",

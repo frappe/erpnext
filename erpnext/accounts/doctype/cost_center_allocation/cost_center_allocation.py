@@ -154,7 +154,10 @@ class CostCenterAllocation(Document):
 					).format(d.cost_center),
 					InvalidChildCostCenter,
 				)
+<<<<<<< HEAD
 
 	def clear_cache(self):
 		frappe.clear_cache(doctype="Cost Center")
 		return super().clear_cache()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

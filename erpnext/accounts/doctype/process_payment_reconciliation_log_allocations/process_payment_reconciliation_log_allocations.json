@@ -20,7 +20,10 @@
   "is_advance",
   "section_break_5",
   "difference_amount",
+<<<<<<< HEAD
   "gain_loss_posting_date",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_7",
   "difference_account",
   "exchange_rate",
@@ -154,16 +157,23 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Reconciled"
+<<<<<<< HEAD
   },
   {
    "fieldname": "gain_loss_posting_date",
    "fieldtype": "Date",
    "label": "Difference Posting Date"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-01-23 16:09:01.058574",
+=======
+ "modified": "2024-03-27 13:10:18.933928",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log Allocations",

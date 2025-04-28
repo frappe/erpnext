@@ -14,6 +14,7 @@ def get_data():
 			"Material Request": ["items", "material_request"],
 			"Supplier Quotation": ["items", "supplier_quotation"],
 			"Project": ["items", "project"],
+<<<<<<< HEAD
 			"Sales Order": ["items", "sales_order"],
 			"BOM": ["items", "bom"],
 			"Production Plan": ["items", "production_plan"],
@@ -29,10 +30,23 @@ def get_data():
 			{
 				"label": _("Manufacturing"),
 				"items": ["Material Request", "BOM", "Production Plan", "Blanket Order"],
+=======
+		},
+		"transactions": [
+			{"label": _("Related"), "items": ["Purchase Receipt", "Purchase Invoice"]},
+			{"label": _("Payment"), "items": ["Payment Entry", "Journal Entry", "Payment Request"]},
+			{
+				"label": _("Reference"),
+				"items": ["Material Request", "Supplier Quotation", "Project", "Auto Repeat"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			{
 				"label": _("Sub-contracting"),
 				"items": ["Subcontracting Order", "Subcontracting Receipt", "Stock Entry"],
 			},
+<<<<<<< HEAD
+=======
+			{"label": _("Internal"), "items": ["Sales Order"]},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 	}

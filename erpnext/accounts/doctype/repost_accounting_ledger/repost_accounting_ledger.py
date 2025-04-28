@@ -1,6 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+<<<<<<< HEAD
 import inspect
 
 import frappe
@@ -11,6 +12,13 @@ from frappe.utils.data import comma_and
 
 from erpnext.stock import get_warehouse_account_map
 
+=======
+import frappe
+from frappe import _, qb
+from frappe.model.document import Document
+from frappe.utils.data import comma_and
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 class RepostAccountingLedger(Document):
 	# begin: auto-generated types
@@ -50,9 +58,15 @@ class RepostAccountingLedger(Document):
 			latest_pcv = (
 				frappe.db.get_all(
 					"Period Closing Voucher",
+<<<<<<< HEAD
 					filters={"company": self.company, "docstatus": 1},
 					order_by="period_end_date desc",
 					pluck="period_end_date",
+=======
+					filters={"company": self.company},
+					order_by="posting_date desc",
+					pluck="posting_date",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					limit=1,
 				)
 				or None
@@ -100,9 +114,12 @@ class RepostAccountingLedger(Document):
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 			if doc.doctype in ["Payment Entry", "Journal Entry"]:
 				gle_map = doc.build_gl_map()
+<<<<<<< HEAD
 			elif doc.doctype == "Purchase Receipt":
 				inventory_account_map = doc.get_inventory_account_map()
 				gle_map = doc.get_gl_entries(inventory_account_map)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			else:
 				gle_map = doc.get_gl_entries()
 
@@ -150,8 +167,11 @@ class RepostAccountingLedger(Document):
 
 @frappe.whitelist()
 def start_repost(account_repost_doc=str) -> None:
+<<<<<<< HEAD
 	from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	frappe.flags.through_repost_accounting_ledger = True
 	if account_repost_doc:
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
@@ -170,15 +190,22 @@ def start_repost(account_repost_doc=str) -> None:
 					frappe.db.delete(
 						"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
 					)
+<<<<<<< HEAD
 					frappe.db.delete(
 						"Advance Payment Ledger Entry",
 						filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
 					)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 				if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 					if not repost_doc.delete_cancelled_entries:
 						doc.docstatus = 2
+<<<<<<< HEAD
 						doc.make_gl_entries_on_cancel(from_repost=True)
+=======
+						doc.make_gl_entries_on_cancel()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 					doc.docstatus = 1
 					if doc.doctype == "Sales Invoice":
@@ -187,6 +214,7 @@ def start_repost(account_repost_doc=str) -> None:
 						doc.force_set_against_expense_account()
 					doc.make_gl_entries()
 
+<<<<<<< HEAD
 				elif doc.doctype == "Purchase Receipt":
 					if not repost_doc.delete_cancelled_entries:
 						doc.docstatus = 2
@@ -195,10 +223,13 @@ def start_repost(account_repost_doc=str) -> None:
 					doc.docstatus = 1
 					doc.make_gl_entries(from_repost=True)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
 					if not repost_doc.delete_cancelled_entries:
 						doc.make_gl_entries(1)
 					doc.make_gl_entries()
+<<<<<<< HEAD
 				elif doc.doctype in frappe.get_hooks("repost_allowed_doctypes"):
 					if hasattr(doc, "make_gl_entries") and callable(doc.make_gl_entries):
 						if not repost_doc.delete_cancelled_entries:
@@ -235,6 +266,17 @@ def get_child_docs(doc: list) -> list:
 			if child.get("child_table"):
 				child_doc.append(child["child_table"])
 	return child_doc
+=======
+
+
+def get_allowed_types_from_settings():
+	return [
+		x.document_type
+		for x in frappe.db.get_all(
+			"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
+		)
+	]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
@@ -290,11 +332,15 @@ def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters
 		filters.update({"document_type": ("like", f"%{txt}%")})
 
 	if allowed_types := frappe.db.get_all(
+<<<<<<< HEAD
 		"Repost Allowed Types",
 		filters=filters,
 		fields=["document_type"],
 		as_list=1,
 		distinct=True,
+=======
+		"Repost Allowed Types", filters=filters, fields=["distinct(document_type)"], as_list=1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	):
 		return allowed_types
 	return []

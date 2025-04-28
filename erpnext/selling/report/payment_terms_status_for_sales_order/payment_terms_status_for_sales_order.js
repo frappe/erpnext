@@ -87,7 +87,10 @@ function get_filters() {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: ["Overdue", "Unpaid", "Completed", "Partly Paid"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			width: 100,
 			get_data: function (txt) {
 				let status = ["Overdue", "Unpaid", "Completed", "Partly Paid"];

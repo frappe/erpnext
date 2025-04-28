@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, msgprint, scrub, unscrub
+<<<<<<< HEAD
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
@@ -12,6 +13,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
 
+=======
+from frappe.model.document import Document
+from frappe.utils import get_link_to_form, now
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 class POSProfile(Document):
 	# begin: auto-generated types
@@ -28,15 +34,23 @@ class POSProfile(Document):
 		from erpnext.accounts.doctype.pos_profile_user.pos_profile_user import POSProfileUser
 
 		account_for_change_amount: DF.Link | None
+<<<<<<< HEAD
 		action_on_new_invoice: DF.Literal[
 			"Always Ask", "Save Changes and Load New Invoice", "Discard Changes and Load New Invoice"
 		]
 		allow_discount_change: DF.Check
 		allow_partial_payment: DF.Check
+=======
+		allow_discount_change: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		allow_rate_change: DF.Check
 		applicable_for_users: DF.Table[POSProfileUser]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		auto_add_item_to_cart: DF.Check
+<<<<<<< HEAD
+=======
+		campaign: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		company: DF.Link
 		company_address: DF.Link | None
 		cost_center: DF.Link | None
@@ -55,18 +69,26 @@ class POSProfile(Document):
 		letter_head: DF.Link | None
 		payments: DF.Table[POSPaymentMethod]
 		print_format: DF.Link | None
+<<<<<<< HEAD
 		print_receipt_on_order_complete: DF.Check
 		project: DF.Link | None
 		select_print_heading: DF.Link | None
 		selling_price_list: DF.Link | None
 		set_grand_total_to_default_mop: DF.Check
+=======
+		select_print_heading: DF.Link | None
+		selling_price_list: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		tax_category: DF.Link | None
 		taxes_and_charges: DF.Link | None
 		tc_name: DF.Link | None
 		update_stock: DF.Check
+<<<<<<< HEAD
 		utm_campaign: DF.Link | None
 		utm_medium: DF.Link | None
 		utm_source: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		validate_stock_on_save: DF.Check
 		warehouse: DF.Link
 		write_off_account: DF.Link
@@ -75,7 +97,10 @@ class POSProfile(Document):
 	# end: auto-generated types
 
 	def validate(self):
+<<<<<<< HEAD
 		self.validate_disabled()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_default_profile()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
@@ -83,6 +108,7 @@ class POSProfile(Document):
 		self.validate_accounting_dimensions()
 
 	def validate_accounting_dimensions(self):
+<<<<<<< HEAD
 		acc_dims = get_checks_for_pl_and_bs_accounts()
 		for acc_dim in acc_dims:
 			if (
@@ -90,16 +116,26 @@ class POSProfile(Document):
 				and not self.get(acc_dim.fieldname)
 				and (acc_dim.mandatory_for_pl or acc_dim.mandatory_for_bs)
 			):
+=======
+		acc_dim_names = required_accounting_dimensions()
+		for acc_dim in acc_dim_names:
+			if not self.get(acc_dim):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frappe.throw(
 					_(
 						"{0} is a mandatory Accounting Dimension. <br>"
 						"Please set a value for {0} in Accounting Dimensions section."
 					).format(
+<<<<<<< HEAD
 						frappe.bold(acc_dim.label),
+=======
+						unscrub(frappe.bold(acc_dim)),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					),
 					title=_("Mandatory Accounting Dimension"),
 				)
 
+<<<<<<< HEAD
 	def validate_disabled(self):
 		old_doc = self.get_doc_before_save()
 
@@ -115,6 +151,8 @@ class POSProfile(Document):
 				)
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
 			res = frappe.db.sql(
@@ -228,12 +266,16 @@ class POSProfile(Document):
 def get_item_groups(pos_profile):
 	item_groups = []
 	pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
+<<<<<<< HEAD
 	permitted_item_groups = get_permitted_nodes("Item Group")
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if pos_profile.get("item_groups"):
 		# Get items based on the item groups defined in the POS profile
 		for data in pos_profile.get("item_groups"):
 			item_groups.extend(
+<<<<<<< HEAD
 				[
 					"%s" % frappe.db.escape(d.name)
 					for d in get_child_nodes("Item Group", data.item_group)
@@ -263,6 +305,14 @@ def get_permitted_nodes(group_type):
 	return nodes
 
 
+=======
+				["%s" % frappe.db.escape(d.name) for d in get_child_nodes("Item Group", data.item_group)]
+			)
+
+	return list(set(item_groups))
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_child_nodes(group_type, root):
 	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
 	return frappe.db.sql(
@@ -272,6 +322,26 @@ def get_child_nodes(group_type, root):
 	)
 
 
+<<<<<<< HEAD
+=======
+def required_accounting_dimensions():
+	p = frappe.qb.DocType("Accounting Dimension")
+	c = frappe.qb.DocType("Accounting Dimension Detail")
+
+	acc_dim_doc = (
+		frappe.qb.from_(p)
+		.inner_join(c)
+		.on(p.name == c.parent)
+		.select(c.parent)
+		.where((c.mandatory_for_bs == 1) | (c.mandatory_for_pl == 1))
+		.where(p.disabled == 0)
+	).run(as_dict=1)
+
+	acc_dim_names = [scrub(d.parent) for d in acc_dim_doc]
+	return acc_dim_names
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):

@@ -1,9 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -12,10 +19,17 @@ from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension imp
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
 	make_closing_entry_from_opening,
 )
+<<<<<<< HEAD
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+=======
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.selling.page.point_of_sale.point_of_sale import get_items
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -24,6 +38,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 
+<<<<<<< HEAD
 class TestPOSClosingEntry(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
@@ -37,6 +52,11 @@ class TestPOSClosingEntry(IntegrationTestCase):
 	def setUp(self):
 		# Make stock available for POS Sales
 		frappe.db.sql("delete from `tabPOS Opening Entry`")
+=======
+class TestPOSClosingEntry(unittest.TestCase):
+	def setUp(self):
+		# Make stock available for POS Sales
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 
 	def tearDown(self):
@@ -49,12 +69,18 @@ class TestPOSClosingEntry(IntegrationTestCase):
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+<<<<<<< HEAD
 		pos_inv1.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv1.submit()
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
+<<<<<<< HEAD
 		pos_inv2.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
@@ -80,7 +106,10 @@ class TestPOSClosingEntry(IntegrationTestCase):
 
 		pos_inv = create_pos_invoice(rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+<<<<<<< HEAD
 		pos_inv.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
@@ -92,8 +121,11 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		"""
 		Test if quantity is calculated correctly for an item in POS Closing Entry
 		"""
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
@@ -101,12 +133,18 @@ class TestPOSClosingEntry(IntegrationTestCase):
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+<<<<<<< HEAD
 		pos_inv1.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv1.submit()
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
+<<<<<<< HEAD
 		pos_inv2.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.submit()
 
 		# make return entry of pos_inv2
@@ -128,12 +166,18 @@ class TestPOSClosingEntry(IntegrationTestCase):
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+<<<<<<< HEAD
 		pos_inv1.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv1.submit()
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
+<<<<<<< HEAD
 		pos_inv2.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
@@ -171,10 +215,13 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		"""
 
 		create_dimension()
+<<<<<<< HEAD
 		location = frappe.get_doc("Accounting Dimension", "Location")
 		location.dimension_defaults[0].mandatory_for_bs = True
 		location.save()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_profile = make_pos_profile(do_not_insert=1, do_not_set_accounting_dimension=1)
 
 		self.assertRaises(frappe.ValidationError, pos_profile.insert)
@@ -188,7 +235,10 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 		pos_inv1 = create_pos_invoice(rate=350, do_not_submit=1, pos_profile=pos_profile.name)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+<<<<<<< HEAD
 		pos_inv1.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv1.submit()
 
 		# if in between a mandatory accounting dimension is added to the POS Profile then
@@ -212,6 +262,12 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
 			init_user_and_profile,
 		)
+<<<<<<< HEAD
+=======
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+			consolidate_pos_invoices,
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 		frappe.db.sql("delete from `tabPOS Invoice`")
@@ -239,6 +295,7 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv = create_pos_invoice(
+<<<<<<< HEAD
 			item_code=item_code,
 			qty=5,
 			rate=300,
@@ -260,6 +317,16 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		pos_inv2.payments[0].amount = pos_inv2.grand_total
 		pos_inv2.save()
 		pos_inv2.submit()
+=======
+			item_code=item_code, qty=5, rate=300, use_serial_batch_fields=1, batch_no=batch_no
+		)
+		pos_inv2 = create_pos_invoice(
+			item_code=item_code, qty=5, rate=300, use_serial_batch_fields=1, batch_no=batch_no
+		)
+
+		batch_qty = frappe.db.get_value("Batch", batch_no, "batch_qty")
+		self.assertEqual(batch_qty, 10)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
 		self.assertEqual(batch_qty_with_pos, 0.0)
@@ -290,6 +357,12 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		pcv_doc.reload()
 		pcv_doc.cancel()
 
+<<<<<<< HEAD
+=======
+		batch_qty = frappe.db.get_value("Batch", batch_no, "batch_qty")
+		self.assertEqual(batch_qty, 10)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
 		self.assertEqual(batch_qty_with_pos, 0.0)
 
@@ -302,6 +375,7 @@ class TestPOSClosingEntry(IntegrationTestCase):
 		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
 		self.assertEqual(batch_qty_with_pos, 10.0)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("POS Settings", {"invoice_type": "Sales Invoice"})
 	def test_closing_entries_with_sales_invoice(self):
 		test_user, pos_profile = init_user_and_profile()
@@ -468,6 +542,8 @@ class TestPOSClosingEntry(IntegrationTestCase):
 			self.assertEqual(pos_si2.pos_closing_entry, pcv_doc2.name)
 			self.assertEqual(pos_rinv2_si.pos_closing_entry, pcv_doc2.name)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def init_user_and_profile(**args):
 	user = "test@example.com"
@@ -502,6 +578,7 @@ def get_test_item_qty(pos_profile):
 		"actual_qty"
 	)
 	return test_item_qty
+<<<<<<< HEAD
 
 
 def create_multiple_sales_invoices(pos_profile):
@@ -530,3 +607,5 @@ def create_multiple_pos_invoices(pos_profile):
 	pos_inv2.submit()
 
 	return pos_inv1, pos_inv2
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -6,6 +6,10 @@ import re
 from datetime import datetime
 
 import frappe
+<<<<<<< HEAD
+=======
+import pytz
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
@@ -76,8 +80,11 @@ def get_frequency(value):
 
 
 def update_youtube_data():
+<<<<<<< HEAD
 	from zoneinfo import ZoneInfo
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# Called every 30 minutes via hooks
 	video_settings = frappe.get_cached_doc("Video Settings")
 	if not video_settings.enable_youtube_tracking:
@@ -85,7 +92,11 @@ def update_youtube_data():
 
 	frequency = get_frequency(video_settings.frequency)
 	time = datetime.now()
+<<<<<<< HEAD
 	timezone = ZoneInfo(get_system_timezone())
+=======
+	timezone = pytz.timezone(get_system_timezone())
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	site_time = time.astimezone(timezone)
 
 	if frequency == 30:

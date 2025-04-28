@@ -16,7 +16,11 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse_account
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Territory", "Customer Group", "Supplier Group", "Item"]
+=======
+test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class TestUaeVat201(TestCase):
@@ -39,10 +43,18 @@ class TestUaeVat201(TestCase):
 		make_item("_Test UAE VAT Zero Rated Item", properties={"is_zero_rated": 1, "is_exempt": 0})
 		make_item("_Test UAE VAT Exempt Item", properties={"is_zero_rated": 0, "is_exempt": 1})
 
+<<<<<<< HEAD
 	def test_uae_vat_201_report(self):
 		make_sales_invoices()
 		create_purchase_invoices()
 
+=======
+		make_sales_invoices()
+
+		create_purchase_invoices()
+
+	def test_uae_vat_201_report(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters = {"company": "_Test Company UAE VAT"}
 		total_emiratewise = get_total_emiratewise(filters)
 		amounts_by_emirate = {}
@@ -63,6 +75,7 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_standard_rated_expenses_total(filters), 250)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 1)
 
+<<<<<<< HEAD
 	def test_uae_vat_201_report_with_foreign_transaction(self):
 		pi = make_purchase_invoice(
 			company="_Test Company UAE VAT",
@@ -94,6 +107,8 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_standard_rated_expenses_total(filters), 917.5)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 50)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):

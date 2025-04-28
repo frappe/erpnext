@@ -270,11 +270,19 @@ def prepare_chart(s_orders):
 				"labels": [term.payment_term for term in s_orders],
 				"datasets": [
 					{
+<<<<<<< HEAD
 						"name": _("Payment Amount"),
 						"values": [x.base_payment_amount for x in s_orders],
 					},
 					{
 						"name": _("Paid Amount"),
+=======
+						"name": "Payment Amount",
+						"values": [x.base_payment_amount for x in s_orders],
+					},
+					{
+						"name": "Paid Amount",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"values": [x.paid_amount for x in s_orders],
 					},
 				],

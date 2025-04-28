@@ -38,7 +38,11 @@ def execute():
 	data = frappe.db.sql(
 		"""
 		SELECT
+<<<<<<< HEAD
 			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company, creation
+=======
+			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		FROM
 			`tabStock Ledger Entry`
 		WHERE
@@ -67,7 +71,10 @@ def execute():
 				"voucher_type": d.voucher_type,
 				"voucher_no": d.voucher_no,
 				"sle_id": d.name,
+<<<<<<< HEAD
 				"creation": d.creation,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			allow_negative_stock=True,
 		)

@@ -23,6 +23,7 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+<<<<<<< HEAD
 		frm.set_query("item_code", "scrap_items", () => {
 			return {
 				filters: {
@@ -51,6 +52,8 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_indicator_formatter("sub_operation", function (doc) {
 			if (doc.status == "Pending") {
 				return "red";
@@ -58,6 +61,7 @@ frappe.ui.form.on("Job Card", {
 				return doc.status === "Complete" ? "green" : "orange";
 			}
 		});
+<<<<<<< HEAD
 
 		frm.set_query("employee", () => {
 			return {
@@ -77,6 +81,8 @@ frappe.ui.form.on("Job Card", {
 				},
 			};
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	make_fields_read_only(frm) {
@@ -92,6 +98,7 @@ frappe.ui.form.on("Job Card", {
 
 	setup_stock_entry(frm) {
 		if (
+<<<<<<< HEAD
 			frm.doc.track_semi_finished_goods &&
 			frm.doc.docstatus === 1 &&
 			!frm.doc.is_subcontracted &&
@@ -108,10 +115,30 @@ frappe.ui.form.on("Job Card", {
 						frm.events.make_manufacture_stock_entry(frm, 0);
 					}
 				);
+=======
+			frm.doc.finished_good &&
+			frm.doc.docstatus === 1 &&
+			!frm.doc.is_subcontracted &&
+			flt(frm.doc.for_quantity) + flt(frm.doc.process_loss_qty) > flt(frm.doc.manufactured_qty)
+		) {
+			frm.add_custom_button(__("Make Stock Entry"), () => {
+				frm.call({
+					method: "make_stock_entry_for_semi_fg_item",
+					args: {
+						auto_submit: 1,
+					},
+					doc: frm.doc,
+					freeze: true,
+					callback() {
+						frm.reload_doc();
+					},
+				});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}).addClass("btn-primary");
 		}
 	},
 
+<<<<<<< HEAD
 	make_manufacture_stock_entry(frm, submit_entry) {
 		frm.call({
 			method: "make_stock_entry_for_semi_fg_item",
@@ -126,13 +153,19 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	refresh: function (frm) {
 		frm.trigger("setup_stock_entry");
 
 		let has_items = frm.doc.items && frm.doc.items.length;
 		frm.trigger("make_fields_read_only");
 
+<<<<<<< HEAD
 		if (!frm.is_new() && frm.doc.__onload?.work_order_closed) {
+=======
+		if (!frm.is_new() && frm.doc.__onload.work_order_closed) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.disable_save();
 			return;
 		}
@@ -146,6 +179,7 @@ frappe.ui.form.on("Job Card", {
 
 		frm.toggle_enable("for_quantity", !has_stock_entry);
 
+<<<<<<< HEAD
 		if (frm.doc.docstatus != 0) {
 			frm.fields_dict["time_logs"].grid.update_docfield_property("completed_qty", "read_only", 1);
 			frm.fields_dict["time_logs"].grid.update_docfield_property("time_in_mins", "read_only", 1);
@@ -163,12 +197,23 @@ frappe.ui.form.on("Job Card", {
 					},
 					__("Create")
 				);
+=======
+		if (!frm.is_new() && !frm.doc.skip_material_transfer && has_items && frm.doc.docstatus < 2) {
+			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
+			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
+
+			if (to_request || excess_transfer_allowed) {
+				frm.add_custom_button(__("Material Request"), () => {
+					frm.trigger("make_material_request");
+				});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 
 			// check if any row has untransferred materials
 			// in case of multiple items in JC
 			let to_transfer = frm.doc.items.some((row) => row.transferred_qty < row.required_qty);
 
+<<<<<<< HEAD
 			if (has_items && (to_transfer || excess_transfer_allowed)) {
 				frm.add_custom_button(
 					__("Material Transfer"),
@@ -177,6 +222,12 @@ frappe.ui.form.on("Job Card", {
 					},
 					__("Create")
 				);
+=======
+			if (to_transfer || excess_transfer_allowed) {
+				frm.add_custom_button(__("Material Transfer"), () => {
+					frm.trigger("make_stock_entry");
+				});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		}
 
@@ -200,6 +251,7 @@ frappe.ui.form.on("Job Card", {
 			frm.doc.for_quantity + frm.doc.process_loss_qty > frm.doc.total_completed_qty &&
 			(frm.doc.skip_material_transfer ||
 				frm.doc.transferred_qty >= frm.doc.for_quantity + frm.doc.process_loss_qty ||
+<<<<<<< HEAD
 				!frm.doc.finished_good ||
 				!has_items?.length)
 		) {
@@ -212,6 +264,11 @@ frappe.ui.form.on("Job Card", {
 				(!frm.doc.time_logs?.length || (frm.doc.sub_operations?.length && last_row?.to_time)) &&
 				!frm.doc.is_paused
 			) {
+=======
+				!frm.doc.finished_good)
+		) {
+			if (!frm.doc.time_logs?.length) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frm.add_custom_button(__("Start Job"), () => {
 					let from_time = frappe.datetime.now_datetime();
 					if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
@@ -245,8 +302,12 @@ frappe.ui.form.on("Job Card", {
 					});
 				});
 			} else {
+<<<<<<< HEAD
 				let manufactured_qty = frm.doc.manufactured_qty || frm.doc.total_completed_qty;
 				if (frm.doc.for_quantity - (manufactured_qty + frm.doc.process_loss_qty) > 0) {
+=======
+				if (frm.doc.for_quantity - frm.doc.manufactured_qty > 0) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					if (!frm.doc.is_paused) {
 						frm.add_custom_button(__("Pause Job"), () => {
 							frm.call({
@@ -293,6 +354,7 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
+<<<<<<< HEAD
 	complete_job_card(frm) {
 		let fields = [
 			{
@@ -401,6 +463,8 @@ frappe.ui.form.on("Job Card", {
 		);
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	make_subcontracting_po(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
 			frm.add_custom_button(__("Make Subcontracting PO"), () => {
@@ -635,7 +699,10 @@ frappe.ui.form.on("Job Card", {
 
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
+<<<<<<< HEAD
 		var section = "";
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		function setCurrentIncrement() {
 			currentIncrement += 1;
@@ -645,7 +712,11 @@ frappe.ui.form.on("Job Card", {
 		function updateStopwatch(increment) {
 			var hours = Math.floor(increment / 3600);
 			var minutes = Math.floor((increment - hours * 3600) / 60);
+<<<<<<< HEAD
 			var seconds = Math.floor(flt(increment - hours * 3600 - minutes * 60, 2));
+=======
+			var seconds = flt(increment - hours * 3600 - minutes * 60, 2);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			$(section)
 				.find(".hours")
@@ -676,6 +747,7 @@ frappe.ui.form.on("Job Card", {
 				<span class="seconds">00</span>
 			</div>`;
 
+<<<<<<< HEAD
 		if (frappe.utils.is_xs()) {
 			frm.dashboard.add_comment(timer, "white", true);
 			section = frm.layout.wrapper.find(".form-message-container");
@@ -683,6 +755,9 @@ frappe.ui.form.on("Job Card", {
 			section = frm.toolbar.page.add_inner_message(timer);
 		}
 
+=======
+		var section = frm.toolbar.page.add_inner_message(timer);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		let currentIncrement = frm.events.get_current_time(frm);
 		if (frm.doc.time_logs?.length && frm.doc.time_logs[cint(frm.doc.time_logs.length) - 1].to_time) {
 			updateStopwatch(currentIncrement);
@@ -775,6 +850,7 @@ frappe.ui.form.on("Job Card", {
 });
 
 frappe.ui.form.on("Job Card Time Log", {
+<<<<<<< HEAD
 	completed_qty: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (!row.completed_qty) {
@@ -784,12 +860,16 @@ frappe.ui.form.on("Job Card Time Log", {
 			});
 		}
 
+=======
+	completed_qty: function (frm) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.events.set_total_completed_qty(frm);
 	},
 
 	to_time: function (frm) {
 		frm.set_value("started_time", "");
 	},
+<<<<<<< HEAD
 
 	time_in_mins(frm, cdt, cdn) {
 		let d = locals[cdt][cdn];
@@ -798,11 +878,14 @@ frappe.ui.form.on("Job Card Time Log", {
 			frappe.model.set_value(cdt, cdn, "to_time", d.to_time);
 		}
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });
 
 function get_seconds_diff(d1, d2) {
 	return moment(d1).diff(d2, "seconds");
 }
+<<<<<<< HEAD
 
 function add_mins_to_time(datetime, mins) {
 	let new_date = moment(datetime).add(mins, "minutes");
@@ -822,3 +905,5 @@ function get_last_completed_row(time_logs) {
 function get_last_row(time_logs) {
 	return time_logs[time_logs.length - 1] || {};
 }
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

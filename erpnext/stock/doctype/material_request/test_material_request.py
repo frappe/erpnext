@@ -6,26 +6,41 @@
 
 
 import frappe
+<<<<<<< HEAD
 import frappe.model
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.material_request.material_request import (
+<<<<<<< HEAD
 	create_pick_list,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	make_in_transit_stock_entry,
 	make_purchase_order,
 	make_stock_entry,
 	make_supplier_quotation,
 	raise_work_orders,
 )
+<<<<<<< HEAD
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
 class TestMaterialRequest(IntegrationTestCase):
 	def test_material_request_qty(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+
+
+class TestMaterialRequest(FrappeTestCase):
+	def test_material_request_qty(self):
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.items[0].qty = 0
 		with self.assertRaises(InvalidQtyError):
 			mr.insert()
@@ -36,7 +51,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(mr.items[0].qty, 1)
 
 	def test_make_purchase_order(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+=======
+		mr = frappe.copy_doc(test_records[0]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, mr.name)
 
@@ -47,6 +66,7 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(po.doctype, "Purchase Order")
 		self.assertEqual(len(po.get("items")), len(mr.get("items")))
 
+<<<<<<< HEAD
 	def test_make_subcontracted_purchase_order(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.stock.doctype.item.test_item import create_item, make_item
@@ -98,6 +118,10 @@ class TestMaterialRequest(IntegrationTestCase):
 
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+=======
+	def test_make_supplier_quotation(self):
+		mr = frappe.copy_doc(test_records[0]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertRaises(frappe.ValidationError, make_supplier_quotation, mr.name)
 
@@ -109,7 +133,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(len(sq.get("items")), len(mr.get("items")))
 
 	def test_make_stock_entry(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+=======
+		mr = frappe.copy_doc(test_records[0]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry, mr.name)
 
@@ -123,6 +151,7 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(se.doctype, "Stock Entry")
 		self.assertEqual(len(se.get("items")), len(mr.get("items")))
 
+<<<<<<< HEAD
 	def test_partial_make_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as _make_stock_entry
 
@@ -162,6 +191,10 @@ class TestMaterialRequest(IntegrationTestCase):
 
 	def test_in_transit_make_stock_entry(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+=======
+	def test_in_transit_make_stock_entry(self):
+		mr = frappe.copy_doc(test_records[0]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry, mr.name)
 
@@ -222,7 +255,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		se.submit()
 
 	def test_cannot_stop_cancelled_material_request(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 
@@ -231,7 +268,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, mr.update_status, "Stopped")
 
 	def test_mr_changes_from_stopped_to_pending_after_reopen(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 		self.assertEqual("Pending", mr.status)
@@ -243,7 +284,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual("Pending", mr.status)
 
 	def test_cannot_submit_cancelled_mr(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 		mr.load_from_db()
@@ -251,14 +296,22 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, mr.submit)
 
 	def test_mr_changes_from_pending_to_cancelled_after_cancel(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 		mr.cancel()
 		self.assertEqual("Cancelled", mr.status)
 
 	def test_cannot_change_cancelled_mr(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 		mr.load_from_db()
@@ -272,21 +325,33 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertRaises(frappe.InvalidStatusError, mr.update_status, "Pending")
 
 	def test_cannot_submit_deleted_material_request(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.delete()
 
 		self.assertRaises(frappe.ValidationError, mr.submit)
 
 	def test_cannot_delete_submitted_mr(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 
 		self.assertRaises(frappe.ValidationError, mr.delete)
 
 	def test_stopped_mr_changes_to_pending_after_reopen(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 		mr.load_from_db()
@@ -296,7 +361,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(mr.status, "Pending")
 
 	def test_pending_mr_changes_to_stopped_after_stop(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 		mr.load_from_db()
@@ -305,7 +374,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(mr.status, "Stopped")
 
 	def test_cannot_stop_unsubmitted_mr(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		self.assertRaises(frappe.InvalidStatusError, mr.update_status, "Stopped")
 
@@ -318,7 +391,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		)
 
 		# submit material request of type Purchase
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.insert()
 		mr.submit()
 
@@ -390,7 +467,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		)
 
 		# submit material request of type Purchase
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.material_request_type = "Material Transfer"
 		mr.insert()
 		mr.submit()
@@ -552,7 +633,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		)
 
 		# submit material request of type Purchase
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.material_request_type = "Material Transfer"
 		mr.insert()
 		mr.submit()
@@ -627,7 +712,11 @@ class TestMaterialRequest(IntegrationTestCase):
 
 	def test_incorrect_mapping_of_stock_entry(self):
 		# submit material request of type Transfer
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.material_request_type = "Material Transfer"
 		mr.insert()
 		mr.submit()
@@ -664,7 +753,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertRaises(frappe.MappingMismatchError, se.insert)
 
 		# submit material request of type Transfer
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.material_request_type = "Material Issue"
 		mr.insert()
 		mr.submit()
@@ -675,7 +768,11 @@ class TestMaterialRequest(IntegrationTestCase):
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
 
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.company = "_Test Company 1"
 		self.assertRaises(InvalidWarehouseCompany, mr.insert)
 
@@ -685,7 +782,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		)
 
 	def test_make_stock_entry_for_material_issue(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+=======
+		mr = frappe.copy_doc(test_records[0]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry, mr.name)
 
@@ -709,10 +810,17 @@ class TestMaterialRequest(IntegrationTestCase):
 
 		existing_requested_qty = _get_requested_qty()
 
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
 		mr.material_request_type = "Material Issue"
 		mr.submit()
 		frappe.db.value_cache.clear()
+=======
+		mr = frappe.copy_doc(test_records[0])
+		mr.material_request_type = "Material Issue"
+		mr.submit()
+		frappe.db.value_cache = {}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# testing bin value after material request is submitted
 		self.assertEqual(_get_requested_qty(), existing_requested_qty - 54.0)
@@ -737,7 +845,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(_get_requested_qty(), existing_requested_qty)
 
 	def test_material_request_type_manufacture(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][1]).insert()
+=======
+		mr = frappe.copy_doc(test_records[1]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
 		completed_qty = mr.items[0].ordered_qty
@@ -747,7 +859,11 @@ class TestMaterialRequest(IntegrationTestCase):
 			(mr.items[0].item_code, mr.items[0].warehouse),
 		)[0][0]
 
+<<<<<<< HEAD
 		prod_order = raise_work_orders(mr.name, mr.company)
+=======
+		prod_order = raise_work_orders(mr.name)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		po = frappe.get_doc("Work Order", prod_order[0])
 		po.wip_warehouse = "_Test Warehouse 1 - _TC"
 		po.submit()
@@ -789,7 +905,11 @@ class TestMaterialRequest(IntegrationTestCase):
 
 		self.assertEqual(requested_qty, existing_requested_qty + 120)
 
+<<<<<<< HEAD
 		work_order = raise_work_orders(mr.name, mr.company)
+=======
+		work_order = raise_work_orders(mr.name)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		wo = frappe.get_doc("Work Order", work_order[0])
 		wo.qty = 50
 		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
@@ -809,7 +929,11 @@ class TestMaterialRequest(IntegrationTestCase):
 		self.assertEqual(requested_qty, existing_requested_qty)
 
 	def test_multi_uom_for_purchase(self):
+<<<<<<< HEAD
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+=======
+		mr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		mr.material_request_type = "Purchase"
 		item = mr.items[0]
 		mr.schedule_date = today()
@@ -917,6 +1041,7 @@ class TestMaterialRequest(IntegrationTestCase):
 		for perm in permissions:
 			perm.delete()
 
+<<<<<<< HEAD
 	def test_manufacture_type_status_over_wo(self):
 		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
 
@@ -976,6 +1101,8 @@ class TestMaterialRequest(IntegrationTestCase):
 		pl_for_pending = create_pick_list(mr.name)
 		self.assertEqual(pl_for_pending.locations[0].qty, 5)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
@@ -1029,4 +1156,9 @@ def make_material_request(**args):
 	return mr
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange", "BOM"]
+=======
+test_dependencies = ["Currency Exchange", "BOM"]
+test_records = frappe.get_test_records("Material Request")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

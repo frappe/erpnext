@@ -27,7 +27,11 @@
   "reset_service_level_agreement",
   "cb",
   "agreement_status",
+<<<<<<< HEAD
   "sla_resolution_by",
+=======
+  "resolution_by",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "service_level_agreement_creation",
   "on_hold_since",
   "total_hold_time",
@@ -41,7 +45,11 @@
   "column_break1",
   "opening_date",
   "opening_time",
+<<<<<<< HEAD
   "sla_resolution_date",
+=======
+  "resolution_date",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "resolution_time",
   "user_resolution_time",
   "additional_info",
@@ -177,6 +185,16 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "depends_on": "eval: doc.status != 'Replied' && doc.service_level_agreement;",
+   "fieldname": "resolution_by",
+   "fieldtype": "Datetime",
+   "label": "Resolution By",
+   "read_only": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible": 1,
    "fieldname": "response",
    "fieldtype": "Section Break",
@@ -233,8 +251,11 @@
    "options": "Project"
   },
   {
+<<<<<<< HEAD
    "fetch_from": "email_account.company",
    "fetch_if_empty": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -283,6 +304,19 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "resolution_date",
+   "fieldtype": "Datetime",
+   "label": "Resolution Date",
+   "no_copy": 1,
+   "oldfieldname": "resolution_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "content_type",
    "fieldtype": "Data",
    "hidden": 1,
@@ -371,6 +405,7 @@
    "fieldtype": "Duration",
    "label": "First Response Time",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "depends_on": "eval: doc.status != 'Replied' && doc.service_level_agreement;",
@@ -388,12 +423,18 @@
    "oldfieldname": "resolution_date",
    "oldfieldtype": "Date",
    "read_only": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-09-25 11:10:53.556731",
+=======
+ "modified": "2024-03-27 13:09:52.921791",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -423,4 +464,8 @@
  "title_field": "subject",
  "track_changes": 1,
  "track_seen": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

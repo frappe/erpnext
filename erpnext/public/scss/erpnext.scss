@@ -507,6 +507,7 @@ body[data-route="pos"] {
 	position: relative;
 }
 
+<<<<<<< HEAD
 .ring-container {
 	position: relative;
 }
@@ -548,10 +549,13 @@ body[data-route="pos"] {
 	opacity: 0;
 }
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 .plant-floor {
 	padding-bottom: 25px;
 }
 
+<<<<<<< HEAD
 .workstation-image {
 	cursor: pointer;
 }
@@ -562,6 +566,10 @@ body[data-route="pos"] {
 
 .workstation-image-cls {
 	padding-top: 2px;
+=======
+.workstation-image-cls {
+	height: 9rem;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 }
 
 .plant-floor-filter {
@@ -573,11 +581,15 @@ body[data-route="pos"] {
 .plant-floor-container {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
+<<<<<<< HEAD
 	gap: 6px;
 }
 
 .workstation-off {
 	opacity: 0.6;
+=======
+	gap: var(--margin-lg);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 }
 
 @media screen and (max-width: 620px) {
@@ -610,7 +622,10 @@ body[data-route="pos"] {
 .frappe-control[data-fieldname="address_display"] .ql-editor,
 .frappe-control[data-fieldname="shipping_address_display"] .ql-editor,
 .frappe-control[data-fieldname="shipping_address"] .ql-editor,
+<<<<<<< HEAD
 .frappe-control[data-fieldname="dispatch_address_display"] .ql-editor,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 .frappe-control[data-fieldname="dispatch_address"] .ql-editor,
 .frappe-control[data-fieldname="source_address_display"] .ql-editor,
 .frappe-control[data-fieldname="target_address_display"] .ql-editor,
@@ -618,6 +633,7 @@ body[data-route="pos"] {
 .frappe-control[data-fieldname="company_address_display"] .ql-editor {
 	white-space: normal;
 }
+<<<<<<< HEAD
 
 .btn-clear-last-scanned-warehouse {
 	position: absolute;
@@ -626,3 +642,5 @@ body[data-route="pos"] {
 	transform: translateY(-50%);
 	z-index: 1;
 }
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

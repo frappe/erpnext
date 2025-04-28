@@ -1,6 +1,10 @@
 {
  "actions": [],
  "autoname": "format:PPR-LOG-{##}",
+<<<<<<< HEAD
+=======
+ "beta": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "creation": "2023-03-13 15:00:09.149681",
  "default_view": "List",
  "doctype": "DocType",
@@ -109,7 +113,11 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-01-08 08:22:19.104975",
+=======
+ "modified": "2024-03-27 13:10:18.769659",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",

@@ -4,14 +4,23 @@
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.core.doctype.installed_applications.installed_applications import get_setup_wizard_completed_apps
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 import erpnext
 
 
+<<<<<<< HEAD
 def get_level(site_info):
 	activation_level = site_info.get("activation", {}).get("activation_level", 0)
 	sales_data = site_info.get("activation", {}).get("sales_data", [])
+=======
+def get_level():
+	activation_level = 0
+	sales_data = []
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	min_count = 0
 	doctypes = {
 		"Asset": 5,
@@ -46,7 +55,11 @@ def get_level(site_info):
 			activation_level += 1
 		sales_data.append({doctype: count})
 
+<<<<<<< HEAD
 	if "erpnext" in get_setup_wizard_completed_apps():
+=======
+	if frappe.db.get_single_value("System Settings", "setup_complete"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		activation_level += 1
 
 	communication_number = frappe.db.count("Communication", dict(communication_medium="Email"))

@@ -22,7 +22,10 @@
   "domain",
   "date_of_establishment",
   "parent_company",
+<<<<<<< HEAD
   "reporting_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "company_info",
   "company_logo",
   "date_of_incorporation",
@@ -49,6 +52,7 @@
   "default_bank_account",
   "default_cash_account",
   "default_receivable_account",
+<<<<<<< HEAD
   "default_payable_account",
   "write_off_account",
   "unrealized_profit_loss_account",
@@ -56,10 +60,26 @@
   "allow_account_creation_against_child_company",
   "default_expense_account",
   "default_income_account",
+=======
+  "round_off_account",
+  "round_off_cost_center",
+  "write_off_account",
+  "exchange_gain_loss_account",
+  "unrealized_exchange_gain_loss_account",
+  "unrealized_profit_loss_account",
+  "column_break0",
+  "allow_account_creation_against_child_company",
+  "default_payable_account",
+  "default_expense_account",
+  "default_income_account",
+  "default_deferred_revenue_account",
+  "default_deferred_expense_account",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "default_discount_account",
   "payment_terms",
   "cost_center",
   "default_finance_book",
+<<<<<<< HEAD
   "exchange_gain__loss_section",
   "exchange_gain_loss_account",
   "column_break_sttp",
@@ -77,6 +97,11 @@
   "book_advance_payments_in_separate_party_account",
   "reconcile_on_advance_payment_date",
   "reconciliation_takes_effect_on",
+=======
+  "advance_payments_section",
+  "book_advance_payments_in_separate_party_account",
+  "reconcile_on_advance_payment_date",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_fwcf",
   "default_advance_received_account",
   "default_advance_paid_account",
@@ -103,6 +128,7 @@
   "total_monthly_sales",
   "column_break_goals",
   "default_selling_terms",
+<<<<<<< HEAD
   "default_sales_contact",
   "default_warehouse_for_sales_return",
   "credit_limit",
@@ -121,15 +147,30 @@
   "valuation_method",
   "column_break_32",
   "stock_adjustment_account",
+=======
+  "default_warehouse_for_sales_return",
+  "credit_limit",
+  "transactions_annual_history",
+  "stock_tab",
+  "auto_accounting_for_stock_settings",
+  "enable_perpetual_inventory",
+  "enable_provisional_accounting_for_non_stock_items",
+  "default_inventory_account",
+  "stock_adjustment_account",
+  "column_break_32",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "stock_received_but_not_billed",
   "default_provisional_account",
   "default_in_transit_warehouse",
   "manufacturing_section",
   "default_operating_cost_account",
+<<<<<<< HEAD
   "column_break_9prc",
   "default_wip_warehouse",
   "default_fg_warehouse",
   "default_scrap_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "dashboard_tab"
  ],
  "fields": [
@@ -305,7 +346,11 @@
   {
    "fieldname": "default_settings",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Default Accounts",
+=======
+   "label": "Accounts Settings",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldtype": "Section Break"
   },
   {
@@ -763,7 +808,10 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "description": "Upon enabling this, the JV will be submitted for a different exchange rate.",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "submit_err_jv",
    "fieldtype": "Check",
    "label": "Submit ERR Journals?"
@@ -795,7 +843,10 @@
    "description": "If <b>Enabled</b> - Reconciliation happens on the <b>Advance Payment posting date</b><br>\nIf <b>Disabled</b> - Reconciliation happens on oldest of 2 Dates: <b>Invoice Date</b> or the <b>Advance Payment posting date</b><br>\n",
    "fieldname": "reconcile_on_advance_payment_date",
    "fieldtype": "Check",
+<<<<<<< HEAD
    "hidden": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Reconcile on Advance Payment Date"
   },
   {
@@ -808,6 +859,7 @@
    "fieldtype": "Link",
    "label": "Default Operating Cost Account",
    "options": "Account"
+<<<<<<< HEAD
   },
   {
    "fieldname": "round_off_for_opening",
@@ -930,6 +982,8 @@
    "fieldtype": "Link",
    "label": "Default Sales Contact",
    "options": "Contact"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-building",
@@ -937,7 +991,11 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-16 16:51:27.624096",
+=======
+ "modified": "2024-07-24 18:17:56.413971",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -999,10 +1057,17 @@
    "select": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

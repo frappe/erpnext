@@ -1,7 +1,11 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_months, today
 
 from erpnext import get_company_currency
@@ -10,7 +14,11 @@ from erpnext.stock.doctype.item.test_item import make_item
 from .blanket_order import make_order
 
 
+<<<<<<< HEAD
 class TestBlanketOrder(IntegrationTestCase):
+=======
+class TestBlanketOrder(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		frappe.flags.args = frappe._dict()
 

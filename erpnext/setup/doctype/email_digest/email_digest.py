@@ -395,7 +395,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"General Ledger",
+<<<<<<< HEAD
 			_(self.meta.get_label("income")),
+=======
+			self.meta.get_label("income"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters={
 				"from_date": self.future_from_date,
 				"to_date": self.future_to_date,
@@ -427,7 +431,11 @@ class EmailDigest(Document):
 			filters = {"currency": self.currency}
 			label = get_link_to_report(
 				"Profit and Loss Statement",
+<<<<<<< HEAD
 				label=_(self.meta.get_label(root_type + "_year_to_date")),
+=======
+				label=self.meta.get_label(root_type + "_year_to_date"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				filters=filters,
 			)
 
@@ -435,7 +443,11 @@ class EmailDigest(Document):
 			filters = {"currency": self.currency}
 			label = get_link_to_report(
 				"Profit and Loss Statement",
+<<<<<<< HEAD
 				label=_(self.meta.get_label(root_type + "_year_to_date")),
+=======
+				label=self.meta.get_label(root_type + "_year_to_date"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				filters=filters,
 			)
 
@@ -466,7 +478,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"General Ledger",
+<<<<<<< HEAD
 			_(self.meta.get_label("expenses_booked")),
+=======
+			self.meta.get_label("expenses_booked"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters={
 				"company": self.company,
 				"from_date": self.future_from_date,
@@ -500,7 +516,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"Sales Order",
+<<<<<<< HEAD
 			label=_(self.meta.get_label("sales_orders_to_bill")),
+=======
+			label=self.meta.get_label("sales_orders_to_bill"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			report_type="Report Builder",
 			doctype="Sales Order",
 			filters={
@@ -526,7 +546,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"Sales Order",
+<<<<<<< HEAD
 			label=_(self.meta.get_label("sales_orders_to_deliver")),
+=======
+			label=self.meta.get_label("sales_orders_to_deliver"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			report_type="Report Builder",
 			doctype="Sales Order",
 			filters={
@@ -552,7 +576,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"Purchase Order",
+<<<<<<< HEAD
 			label=_(self.meta.get_label("purchase_orders_to_receive")),
+=======
+			label=self.meta.get_label("purchase_orders_to_receive"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			report_type="Report Builder",
 			doctype="Purchase Order",
 			filters={
@@ -578,7 +606,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"Purchase Order",
+<<<<<<< HEAD
 			label=_(self.meta.get_label("purchase_orders_to_bill")),
+=======
+			label=self.meta.get_label("purchase_orders_to_bill"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			report_type="Report Builder",
 			doctype="Purchase Order",
 			filters={
@@ -630,7 +662,11 @@ class EmailDigest(Document):
 					"company": self.company,
 				}
 				label = get_link_to_report(
+<<<<<<< HEAD
 					"Account Balance", label=_(self.meta.get_label(fieldname)), filters=filters
+=======
+					"Account Balance", label=self.meta.get_label(fieldname), filters=filters
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 			else:
 				filters = {
@@ -640,7 +676,11 @@ class EmailDigest(Document):
 					"company": self.company,
 				}
 				label = get_link_to_report(
+<<<<<<< HEAD
 					"Account Balance", label=_(self.meta.get_label(fieldname)), filters=filters
+=======
+					"Account Balance", label=self.meta.get_label(fieldname), filters=filters
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 
 			return {"label": label, "value": balance, "last_value": prev_balance}
@@ -648,17 +688,29 @@ class EmailDigest(Document):
 			if account_type == "Payable":
 				label = get_link_to_report(
 					"Accounts Payable",
+<<<<<<< HEAD
 					label=_(self.meta.get_label(fieldname)),
+=======
+					label=self.meta.get_label(fieldname),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					filters={"report_date": self.future_to_date, "company": self.company},
 				)
 			elif account_type == "Receivable":
 				label = get_link_to_report(
 					"Accounts Receivable",
+<<<<<<< HEAD
 					label=_(self.meta.get_label(fieldname)),
 					filters={"report_date": self.future_to_date, "company": self.company},
 				)
 			else:
 				label = _(self.meta.get_label(fieldname))
+=======
+					label=self.meta.get_label(fieldname),
+					filters={"report_date": self.future_to_date, "company": self.company},
+				)
+			else:
+				label = self.meta.get_label(fieldname)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			return {"label": label, "value": balance, "last_value": prev_balance, "count": count}
 
@@ -748,7 +800,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"Quotation",
+<<<<<<< HEAD
 			label=_(self.meta.get_label(fieldname)),
+=======
+			label=self.meta.get_label(fieldname),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			report_type="Report Builder",
 			doctype="Quotation",
 			filters={
@@ -779,7 +835,11 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			doc_type,
+<<<<<<< HEAD
 			label=_(self.meta.get_label(fieldname)),
+=======
+			label=self.meta.get_label(fieldname),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			report_type="Report Builder",
 			filters=filters,
 			doctype=doc_type,
@@ -799,7 +859,11 @@ class EmailDigest(Document):
 				"status": ["not in", ("Cancelled")],
 				"company": self.company,
 			},
+<<<<<<< HEAD
 			fields=[{"COUNT": "*", "as": "count"}, {"SUM": "grand_total", "as": "grand_total"}],
+=======
+			fields=["count(*) as count", "sum(grand_total) as grand_total"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 	def get_from_to_date(self):

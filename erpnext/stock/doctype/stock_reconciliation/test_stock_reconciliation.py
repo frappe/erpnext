@@ -7,7 +7,11 @@
 import json
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime
 
 from erpnext.accounts.utils import get_stock_and_account_balance
@@ -25,6 +29,7 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
+<<<<<<< HEAD
 from erpnext.stock.utils import (
 	get_combine_datetime,
 	get_incoming_rate,
@@ -34,6 +39,12 @@ from erpnext.stock.utils import (
 
 
 class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
+=======
+from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
+
+
+class TestStockReconciliation(FrappeTestCase, StockTestMixin):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@classmethod
 	def setUpClass(cls):
 		create_batch_or_serial_no_items()
@@ -50,7 +61,10 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 	def test_reco_for_moving_average(self):
 		self._test_reco_sle_gle("Moving Average")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 1})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def _test_reco_sle_gle(self, valuation_method):
 		item_code = self.make_item(properties={"valuation_method": valuation_method}).name
 
@@ -423,7 +437,11 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 		assertBalance(pr2, 11)
 		assertBalance(sr4, 6)  # check if future stock reco is unaffected
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+=======
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_backdated_stock_reco_future_negative_stock(self):
 		"""
 		Test if a backdated stock reco causes future negative stock and is blocked.
@@ -472,7 +490,11 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 		dn2.cancel()
 		pr1.cancel()
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+=======
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_backdated_stock_reco_cancellation_future_negative_stock(self):
 		"""
 		Test if a backdated stock reco cancellation that causes future negative stock is blocked.
@@ -678,7 +700,11 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 		self.assertEqual(flt(sl_entry.actual_qty), 1.0)
 		self.assertEqual(flt(sl_entry.qty_after_transaction), 1.0)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+=======
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_backdated_stock_reco_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
@@ -702,7 +728,11 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
 
 		# Removed 50 Qty, Balace Qty 50
+<<<<<<< HEAD
 		make_stock_entry(
+=======
+		se2 = make_stock_entry(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			item_code=item_code,
 			batch_no=batch_no,
 			posting_time="10:00:00",
@@ -721,6 +751,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			rate=100,
 		)
 
+<<<<<<< HEAD
 		stock_reco.reload()
 		stock_reco_sabb = stock_reco.items[0].serial_and_batch_bundle
 		posting_datetime = frappe.db.get_value("Serial and Batch Bundle", stock_reco_sabb, "posting_datetime")
@@ -728,6 +759,8 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			posting_datetime, get_combine_datetime(stock_reco.posting_date, stock_reco.posting_time)
 		)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		sle = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"is_cancelled": 0, "voucher_no": stock_reco.name, "actual_qty": ("<", 0)},
@@ -742,13 +775,41 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			batch_no=batch_no,
 			posting_time="12:00:00",
 			source=warehouse,
+<<<<<<< HEAD
 			qty=52,
+=======
+			qty=50,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			basic_rate=700,
 		)
 
 		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": stock_reco.name}))
 
+<<<<<<< HEAD
 		self.assertRaises(frappe.ValidationError, stock_reco.cancel)
+=======
+		# Cancel the backdated Stock Entry se2,
+		# Since Stock Reco entry in the future the Balace Qty should remain as it's (50)
+
+		se2.cancel()
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0},
+			fields=["qty_after_transaction", "actual_qty", "voucher_type", "voucher_no"],
+			order_by="posting_time desc, creation desc",
+		)
+
+		self.assertEqual(flt(sle[0].qty_after_transaction), flt(50.0))
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"is_cancelled": 0, "voucher_no": stock_reco.name, "actual_qty": ("<", 0)},
+			fields=["actual_qty"],
+		)
+
+		self.assertEqual(flt(sle[0].actual_qty), flt(-100.0))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_update_stock_reconciliation_while_reposting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -898,6 +959,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 				self.assertAlmostEqual(d.stock_value_difference, 500.0)
 
 		# Step - 3: Create a Purchase Receipt before the first Purchase Receipt
+<<<<<<< HEAD
 		pr = make_purchase_receipt(
 			item_code=item_code,
 			warehouse=warehouse,
@@ -908,6 +970,29 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 		)
 
 		self.assertRaises(frappe.ValidationError, pr.submit)
+=======
+		make_purchase_receipt(
+			item_code=item_code, warehouse=warehouse, qty=10, rate=200, posting_date=add_days(nowdate(), -5)
+		)
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["serial_no", "actual_qty", "stock_value_difference"],
+			filters={"voucher_no": sr1.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for d in data:
+			if d.actual_qty < 0:
+				self.assertEqual(d.actual_qty, -20.0)
+				self.assertAlmostEqual(d.stock_value_difference, -3000.0)
+			else:
+				self.assertEqual(d.actual_qty, 5.0)
+				self.assertAlmostEqual(d.stock_value_difference, 500.0)
+
+		active_serial_no = frappe.get_all("Serial No", filters={"status": "Active", "item_code": item_code})
+		self.assertEqual(len(active_serial_no), 5)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_balance_qty_for_batch_with_backdated_stock_reco_and_future_entries(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -1051,7 +1136,11 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 
 		sr.reload()
 		self.assertTrue(sr.items[0].serial_and_batch_bundle)
+<<<<<<< HEAD
 		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
+=======
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1224,7 +1313,10 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 				}
 			)
 
+<<<<<<< HEAD
 			doc.set_posting_datetime()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
 			doc.flags.ignore_links = True
@@ -1258,6 +1350,7 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 		qty = get_batch_qty(batch_id, warehouse, batch_item_code)
 		self.assertEqual(qty, 110)
 
+<<<<<<< HEAD
 	def test_skip_reposting_for_entries_after_stock_reco(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
@@ -1569,6 +1662,8 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 
 		self.assertFalse(status == "Active")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
@@ -1739,4 +1834,8 @@ def set_valuation_method(item_code, valuation_method):
 			)
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Warehouse"]
+=======
+test_dependencies = ["Item", "Warehouse"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)

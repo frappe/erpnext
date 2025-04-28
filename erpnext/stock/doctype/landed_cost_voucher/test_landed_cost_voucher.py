@@ -2,10 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 
+<<<<<<< HEAD
 import copy
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+import frappe
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -22,10 +27,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange"]
 
 
 class TestLandedCostVoucher(IntegrationTestCase):
+=======
+
+class TestLandedCostVoucher(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
@@ -503,9 +513,18 @@ class TestLandedCostVoucher(IntegrationTestCase):
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 	def test_multi_currency_lcv(self):
+<<<<<<< HEAD
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
 
 		save_new_records(self.globalTestRecords["Currency Exchange"])
+=======
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			save_new_records,
+			test_records,
+		)
+
+		save_new_records(test_records)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		## Create USD Shipping charges_account
 		usd_shipping = create_account(
@@ -562,7 +581,11 @@ class TestLandedCostVoucher(IntegrationTestCase):
 			self.assertEqual(entry.credit_in_account_currency, amounts[1])
 
 	def test_asset_lcv(self):
+<<<<<<< HEAD
 		"Check if LCV for an Asset updates the Assets Net Purchase Amount correctly."
+=======
+		"Check if LCV for an Asset updates the Assets Gross Purchase Amount correctly."
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.set_value(
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
 		)
@@ -591,7 +614,11 @@ class TestLandedCostVoucher(IntegrationTestCase):
 		lcv.submit()
 
 		# lcv updates amount in draft asset
+<<<<<<< HEAD
 		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "net_purchase_amount"), 50080)
+=======
+		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "gross_purchase_amount"), 50080)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# tear down
 		lcv.cancel()
@@ -1069,6 +1096,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
 			)
 
+<<<<<<< HEAD
 	def test_lcv_for_work_order_scr(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			get_rm_items,
@@ -1252,6 +1280,8 @@ class TestLandedCostVoucher(IntegrationTestCase):
 
 			self.assertFalse(gl_entries)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_landed_cost_voucher(**args):
 	args = frappe._dict(args)
@@ -1267,13 +1297,20 @@ def make_landed_cost_voucher(**args):
 			{
 				"receipt_document_type": args.receipt_document_type,
 				"receipt_document": args.receipt_document,
+<<<<<<< HEAD
 				"supplier": ref_doc.get("supplier"),
 				"posting_date": ref_doc.get("posting_date"),
 				"grand_total": ref_doc.get("grand_total"),
+=======
+				"supplier": ref_doc.supplier,
+				"posting_date": ref_doc.posting_date,
+				"grand_total": ref_doc.grand_total,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		],
 	)
 
+<<<<<<< HEAD
 	if args.charges:
 		lcv.set(
 			"taxes",
@@ -1285,6 +1322,18 @@ def make_landed_cost_voucher(**args):
 				}
 			],
 		)
+=======
+	lcv.set(
+		"taxes",
+		[
+			{
+				"description": "Shipping Charges",
+				"expense_account": args.expense_account or "Expenses Included In Valuation - TCP1",
+				"amount": args.charges,
+			}
+		],
+	)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if not args.do_not_save:
 		lcv.insert()
@@ -1341,3 +1390,9 @@ def distribute_landed_cost_on_items(lcv):
 	for item in lcv.get("items"):
 		item.applicable_charges = flt(item.get(based_on)) * flt(lcv.total_taxes_and_charges) / flt(total)
 		item.applicable_charges = flt(item.applicable_charges, lcv.precision("applicable_charges", item))
+<<<<<<< HEAD
+=======
+
+
+test_records = frappe.get_test_records("Landed Cost Voucher")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -71,7 +71,10 @@ def get_data(
 		item.update(
 			{
 				"item_name": frappe.get_cached_value("Item", item.item_code, "item_name"),
+<<<<<<< HEAD
 				"stock_uom": frappe.get_cached_value("Item", item.item_code, "stock_uom"),
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"disable_quick_entry": frappe.get_cached_value("Item", item.item_code, "has_batch_no")
 				or frappe.get_cached_value("Item", item.item_code, "has_serial_no"),
 				"projected_qty": flt(item.projected_qty, precision),

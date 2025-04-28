@@ -4,12 +4,15 @@
 frappe.query_reports["Delayed Tasks Summary"] = {
 	filters: [
 		{
+<<<<<<< HEAD
 			fieldname: "project",
 			label: __("Project"),
 			fieldtype: "Link",
 			options: "Project",
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",

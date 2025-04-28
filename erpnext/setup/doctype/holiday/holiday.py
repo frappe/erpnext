@@ -16,7 +16,10 @@ class Holiday(Document):
 
 		description: DF.TextEditor
 		holiday_date: DF.Date
+<<<<<<< HEAD
 		is_half_day: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

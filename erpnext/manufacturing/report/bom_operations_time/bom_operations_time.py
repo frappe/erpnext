@@ -80,7 +80,11 @@ def get_filtered_data(filters):
 def get_bom_count(bom_data):
 	data = frappe.get_all(
 		"BOM Item",
+<<<<<<< HEAD
 		fields=[{"COUNT": "*", "as": "count"}, "bom_no"],
+=======
+		fields=["count(name) as count", "bom_no"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters={"bom_no": ("in", bom_data)},
 		group_by="bom_no",
 	)

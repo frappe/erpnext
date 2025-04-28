@@ -1,7 +1,11 @@
 {
  "actions": [],
  "autoname": "hash",
+<<<<<<< HEAD
  "creation": "2024-12-09 12:54:24.652161",
+=======
+ "creation": "2013-05-24 19:29:06",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -26,7 +30,10 @@
   "quantity_and_rate",
   "qty",
   "stock_uom",
+<<<<<<< HEAD
   "subcontracted_qty",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "col_break2",
   "uom",
   "conversion_factor",
@@ -830,7 +837,10 @@
    "fieldname": "production_plan",
    "fieldtype": "Link",
    "label": "Production Plan",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Production Plan",
    "print_hide": 1,
    "read_only": 1
@@ -931,6 +941,7 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
+<<<<<<< HEAD
   },
   {
    "allow_on_submit": 1,
@@ -945,11 +956,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-30 16:51:56.761673",
+=======
+ "modified": "2024-06-02 06:20:10.508290",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
@@ -957,10 +976,17 @@
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "item_name",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

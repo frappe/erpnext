@@ -5,7 +5,11 @@
 import json
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase, change_settings
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, flt, getdate, nowdate
 from frappe.utils.data import today
 
@@ -28,7 +32,11 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 )
 
 
+<<<<<<< HEAD
 class TestPurchaseOrder(IntegrationTestCase):
+=======
+class TestPurchaseOrder(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_purchase_order_qty(self):
 		po = create_purchase_order(qty=1, do_not_save=True)
 
@@ -52,6 +60,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		po.save()
 		self.assertEqual(po.items[1].qty, 1)
 
+<<<<<<< HEAD
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
@@ -59,6 +68,8 @@ class TestPurchaseOrder(IntegrationTestCase):
 			po.save()
 			self.assertEqual(po.items[0].qty, 0)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
@@ -295,6 +306,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		user = "test@example.com"
 		test_user = frappe.get_doc("User", user)
 		test_user.add_roles("Accounts User")
+<<<<<<< HEAD
 
 		with self.set_user(user):
 			# update qty
@@ -310,6 +322,24 @@ class TestPurchaseOrder(IntegrationTestCase):
 			self.assertRaises(
 				frappe.ValidationError, update_child_qty_rate, "Purchase Order", trans_item, po.name
 			)
+=======
+		frappe.set_user(user)
+
+		# update qty
+		trans_item = json.dumps(
+			[{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": po.items[0].name}]
+		)
+		self.assertRaises(
+			frappe.ValidationError, update_child_qty_rate, "Purchase Order", trans_item, po.name
+		)
+
+		# add new item
+		trans_item = json.dumps([{"item_code": "_Test Item", "rate": 100, "qty": 2}])
+		self.assertRaises(
+			frappe.ValidationError, update_child_qty_rate, "Purchase Order", trans_item, po.name
+		)
+		frappe.set_user("Administrator")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_update_child_with_tax_template(self):
 		"""
@@ -540,8 +570,17 @@ class TestPurchaseOrder(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, pr.submit)
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_make_purchase_invoice_with_terms(self):
+=======
+	def test_make_purchase_invoice_with_terms(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+		)
+
+		automatically_fetch_payment_terms()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		po = create_purchase_order(do_not_save=True)
 
 		self.assertRaises(frappe.ValidationError, make_pi_from_po, po.name)
@@ -565,6 +604,10 @@ class TestPurchaseOrder(IntegrationTestCase):
 		self.assertEqual(getdate(pi.payment_schedule[0].due_date), getdate(po.transaction_date))
 		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
 		self.assertEqual(getdate(pi.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30))
+<<<<<<< HEAD
+=======
+		automatically_fetch_payment_terms(enable=0)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -712,7 +755,10 @@ class TestPurchaseOrder(IntegrationTestCase):
 		)
 		self.assertEqual(due_date, "2023-03-31")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 0})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
 		po = create_purchase_order(do_not_save=1)
 		po.payment_terms_template = "_Test Payment Term Template"
@@ -737,9 +783,13 @@ class TestPurchaseOrder(IntegrationTestCase):
 		pi.insert()
 		self.assertTrue(pi.get("payment_schedule"))
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1}
 	)
+=======
+	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -810,9 +860,13 @@ class TestPurchaseOrder(IntegrationTestCase):
 		company_doc.book_advance_payments_in_separate_party_account = False
 		company_doc.save()
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1}
 	)
+=======
+	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_advance_paid_upon_payment_entry_cancellation(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -906,16 +960,28 @@ class TestPurchaseOrder(IntegrationTestCase):
 		bo.load_from_db()
 		self.assertEqual(bo.items[0].ordered_qty, 5)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
 		)
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import (
+<<<<<<< HEAD
 			compare_payment_schedules,
 		)
 
+=======
+			automatically_fetch_payment_terms,
+			compare_payment_schedules,
+		)
+
+		automatically_fetch_payment_terms()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
 		po.payment_terms_template = "Test Receivable Template"
@@ -929,8 +995,14 @@ class TestPurchaseOrder(IntegrationTestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+<<<<<<< HEAD
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+=======
+		automatically_fetch_payment_terms(enable=0)
+
+	def test_internal_transfer_flow(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 			make_inter_company_purchase_invoice,
 		)
@@ -946,6 +1018,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
 
+<<<<<<< HEAD
 		create_cost_center(
 			cost_center_name="_Test Cost Center for perpetual inventory Account",
 			company="_Test Company with perpetual inventory",
@@ -956,6 +1029,10 @@ class TestPurchaseOrder(IntegrationTestCase):
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
 			cost_center="_Test Cost Center for perpetual inventory Account - TCP1",
+=======
+		mr = make_material_request(
+			qty=2, company="_Test Company with perpetual inventory", warehouse="Stores - TCP1"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		po = create_purchase_order(
@@ -1023,7 +1100,11 @@ class TestPurchaseOrder(IntegrationTestCase):
 		)
 
 		def update_items(po, qty):
+<<<<<<< HEAD
 			trans_items = [po.items[0].as_dict().update({"docname": po.items[0].name})]
+=======
+			trans_items = [po.items[0].as_dict()]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			trans_items[0]["qty"] = qty
 			trans_items[0]["fg_item_qty"] = qty
 			trans_items = json.dumps(trans_items, default=str)
@@ -1078,6 +1159,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
+<<<<<<< HEAD
 	def test_new_sc_flow(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
 
@@ -1146,6 +1228,9 @@ class TestPurchaseOrder(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, make_subcontracting_order, po.name)
 
 	@IntegrationTestCase.change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
+=======
+	@change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_auto_create_subcontracting_order(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			make_bom_for_subcontracted_items,
@@ -1237,6 +1322,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1})
 	def test_receive_zero_qty_purchase_order(self):
 		"""
@@ -1377,6 +1463,8 @@ def create_po_for_sc_testing():
 		supplier_warehouse="_Test Warehouse 1 - _TC",
 	)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1513,4 +1601,10 @@ def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC")
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM", "Item Price", "Warehouse"]
+=======
+test_dependencies = ["BOM", "Item Price"]
+
+test_records = frappe.get_test_records("Purchase Order")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -23,7 +23,10 @@ class ProcessPaymentReconciliation(Document):
 		bank_cash_account: DF.Link | None
 		company: DF.Link
 		cost_center: DF.Link | None
+<<<<<<< HEAD
 		default_advance_account: DF.Link
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		error_log: DF.LongText | None
 		from_invoice_date: DF.Date | None
 		from_payment_date: DF.Date | None
@@ -102,7 +105,10 @@ def get_pr_instance(doc: str):
 		"party_type",
 		"party",
 		"receivable_payable_account",
+<<<<<<< HEAD
 		"default_advance_account",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"from_invoice_date",
 		"to_invoice_date",
 		"from_payment_date",
@@ -142,7 +148,11 @@ def trigger_job_for_doc(docname: str | None = None):
 	if not docname:
 		return
 
+<<<<<<< HEAD
 	if not frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
+=======
+	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.throw(
 			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
 				get_link_to_form("Accounts Settings", "Accounts Settings")
@@ -190,7 +200,11 @@ def trigger_reconciliation_for_queued_docs():
 	Will be called from Cron Job
 	Fetch queued docs and start reconciliation process for each one
 	"""
+<<<<<<< HEAD
 	if not frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
+=======
+	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.msgprint(
 			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
 				get_link_to_form("Accounts Settings", "Accounts Settings")
@@ -210,9 +224,15 @@ def trigger_reconciliation_for_queued_docs():
 
 		docs_to_trigger = []
 		unique_filters = set()
+<<<<<<< HEAD
 		queue_size = frappe.get_single_value("Accounts Settings", "reconciliation_queue_size") or 5
 
 		fields = ["company", "party_type", "party", "receivable_payable_account", "default_advance_account"]
+=======
+		queue_size = 5
+
+		fields = ["company", "party_type", "party", "receivable_payable_account"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		def get_filters_as_tuple(fields, doc):
 			filters = ()

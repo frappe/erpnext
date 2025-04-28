@@ -8,7 +8,10 @@ frappe.ui.form.on("Customer", {
 			Quotation: "Quotation",
 			"Sales Order": "Sales Order",
 			"Pricing Rule": "Pricing Rule",
+<<<<<<< HEAD
 			"Payment Entry": "Payment Entry",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		};
 		frm.make_methods = {
 			Quotation: () =>
@@ -27,6 +30,7 @@ frappe.ui.form.on("Customer", {
 					method: "erpnext.selling.doctype.customer.customer.make_opportunity",
 					frm: frm,
 				}),
+<<<<<<< HEAD
 			"Payment Entry": () =>
 				frappe.model.open_mapped_doc({
 					method: "erpnext.selling.doctype.customer.customer.make_payment_entry",
@@ -34,10 +38,17 @@ frappe.ui.form.on("Customer", {
 				}),
 			"Pricing Rule": () => frm.trigger("make_pricing_rule"),
 			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
+=======
+			"Pricing Rule": () => erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		};
 
 		frm.add_fetch("lead_name", "company_name", "customer_name");
 		frm.add_fetch("default_sales_partner", "commission_rate", "default_commission_rate");
+<<<<<<< HEAD
+=======
+		frm.set_query("customer_group", { is_group: 0 });
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("default_price_list", { selling: 1 });
 		frm.set_query("account", "accounts", function (doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
@@ -190,10 +201,14 @@ frappe.ui.form.on("Customer", {
 				__("Actions")
 			);
 
+<<<<<<< HEAD
 			if (
 				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
 				frappe.model.can_create("Party Link")
 			) {
+=======
+			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frm.add_custom_button(
 					__("Link with Supplier"),
 					function () {
@@ -267,6 +282,7 @@ frappe.ui.form.on("Customer", {
 		});
 		dialog.show();
 	},
+<<<<<<< HEAD
 	make_pricing_rule: function (frm) {
 		frappe.new_doc("Pricing Rule", {
 			applicable_for: "Customer",
@@ -274,4 +290,6 @@ frappe.ui.form.on("Customer", {
 			selling: 1,
 		});
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

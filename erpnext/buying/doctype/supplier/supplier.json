@@ -33,7 +33,10 @@
   "column_break_30",
   "website",
   "language",
+<<<<<<< HEAD
   "customer_numbers",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "dashboard_tab",
   "tax_tab",
   "tax_id",
@@ -474,6 +477,7 @@
   {
    "fieldname": "column_break_mglr",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "customer_numbers",
@@ -483,6 +487,10 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
@@ -493,7 +501,11 @@
    "link_fieldname": "party"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-04-27 12:07:10.859758",
+=======
+ "modified": "2024-05-08 18:02:57.342931",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -552,7 +564,10 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "supplier_group",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
@@ -560,4 +575,8 @@
  "states": [],
  "title_field": "supplier_name",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

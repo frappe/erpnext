@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+<<<<<<< HEAD
 import os
 
 import frappe
@@ -10,11 +11,25 @@ from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 from erpnext.setup.utils import identity as _
+=======
+import frappe
+from frappe import _
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+from frappe.utils import cint
+
+from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from .default_success_action import get_default_success_action
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
+<<<<<<< HEAD
 	<a style="color: #888" href="http://frappe.io/erpnext">ERPNext</a></div>"""
+=======
+	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def after_install():
@@ -23,10 +38,16 @@ def after_install():
 
 	set_single_defaults()
 	create_print_setting_custom_fields()
+<<<<<<< HEAD
 	create_marketgin_campagin_custom_fields()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
+=======
+	add_all_roles_to("Administrator")
+	create_default_success_action()
+	create_default_energy_point_rules()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	create_incoterms()
 	create_default_role_profiles()
 	add_company_to_session_defaults()
@@ -34,11 +55,24 @@ def after_install():
 	add_app_name()
 	update_roles()
 	make_default_operations()
+<<<<<<< HEAD
 	update_pegged_currencies()
 	create_letter_head()
 	frappe.db.commit()
 
 
+=======
+	frappe.db.commit()
+
+
+def check_setup_wizard_not_completed():
+	if cint(frappe.db.get_single_value("System Settings", "setup_complete") or 0):
+		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed.
+You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"""
+		frappe.throw(message)  # nosemgrep
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def make_default_operations():
 	for operation in ["Assembly"]:
 		if not frappe.db.exists("Operation", operation):
@@ -79,7 +113,11 @@ def setup_currency_exchange():
 		ces.set("result_key", [])
 		ces.set("req_params", [])
 
+<<<<<<< HEAD
 		ces.api_endpoint = "https://api.frankfurter.app/{transaction_date}"
+=======
+		ces.api_endpoint = "https://frankfurter.app/{transaction_date}"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		ces.append("result_key", {"key": "rates"})
 		ces.append("result_key", {"key": "{to_currency}"})
 		ces.append("req_params", {"key": "base", "value": "{from_currency}"})
@@ -119,6 +157,7 @@ def create_print_setting_custom_fields():
 	)
 
 
+<<<<<<< HEAD
 def create_marketgin_campagin_custom_fields():
 	create_custom_fields(
 		{
@@ -135,6 +174,8 @@ def create_marketgin_campagin_custom_fields():
 	)
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def create_default_success_action():
 	for success_action in get_default_success_action():
 		if not frappe.db.exists("Success Action", success_action.get("ref_doctype")):
@@ -142,6 +183,7 @@ def create_default_success_action():
 			doc.insert(ignore_permissions=True)
 
 
+<<<<<<< HEAD
 def create_custom_company_links():
 	"""Add link fields to Company in Email Account and Communication.
 
@@ -173,6 +215,18 @@ def create_custom_company_links():
 			],
 		},
 	)
+=======
+def create_default_energy_point_rules():
+	for rule in get_default_energy_point_rules():
+		# check if any rule for ref. doctype exists
+		rule_exists = frappe.db.exists(
+			"Energy Point Rule", {"reference_doctype": rule.get("reference_doctype")}
+		)
+		if rule_exists:
+			continue
+		doc = frappe.get_doc(rule)
+		doc.insert(ignore_permissions=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def add_company_to_session_defaults():
@@ -183,20 +237,37 @@ def add_company_to_session_defaults():
 
 def add_standard_navbar_items():
 	navbar_settings = frappe.get_single("Navbar Settings")
+<<<<<<< HEAD
 	erpnext_navbar_items = [
 		{
 			"item_label": _("Documentation"),
+=======
+
+	# Translatable strings for below navbar items
+	__ = _("Documentation")
+	__ = _("User Forum")
+	__ = _("Report an Issue")
+
+	erpnext_navbar_items = [
+		{
+			"item_label": "Documentation",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"item_type": "Route",
 			"route": "https://docs.erpnext.com/",
 			"is_standard": 1,
 		},
 		{
+<<<<<<< HEAD
 			"item_label": _("User Forum"),
+=======
+			"item_label": "User Forum",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"item_type": "Route",
 			"route": "https://discuss.frappe.io",
 			"is_standard": 1,
 		},
 		{
+<<<<<<< HEAD
 			"item_label": _("Frappe School"),
 			"item_type": "Route",
 			"route": "https://frappe.io/school?utm_source=in_app",
@@ -204,6 +275,15 @@ def add_standard_navbar_items():
 		},
 		{
 			"item_label": _("Report an Issue"),
+=======
+			"item_label": "Frappe School",
+			"item_type": "Route",
+			"route": "https://frappe.school?utm_source=in_app",
+			"is_standard": 1,
+		},
+		{
+			"item_label": "Report an Issue",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"item_type": "Route",
 			"route": "https://github.com/frappe/erpnext/issues",
 			"is_standard": 1,
@@ -246,6 +326,7 @@ def update_roles():
 
 def create_default_role_profiles():
 	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+<<<<<<< HEAD
 		if frappe.db.exists("Role Profile", role_profile_name):
 			role_profile = frappe.get_doc("Role Profile", role_profile_name)
 			existing_roles = [row.role for row in role_profile.roles]
@@ -260,6 +341,8 @@ def create_default_role_profiles():
 
 			continue
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		role_profile = frappe.new_doc("Role Profile")
 		role_profile.role_profile = role_profile_name
 		for role in roles:
@@ -268,6 +351,7 @@ def create_default_role_profiles():
 		role_profile.insert(ignore_permissions=True)
 
 
+<<<<<<< HEAD
 def update_pegged_currencies():
 	doc = frappe.get_doc("Pegged Currencies", "Pegged Currencies")
 
@@ -313,25 +397,45 @@ def create_letter_head():
 
 DEFAULT_ROLE_PROFILES = {
 	_("Inventory"): [
+=======
+DEFAULT_ROLE_PROFILES = {
+	"Inventory": [
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Stock User",
 		"Stock Manager",
 		"Item Manager",
 	],
+<<<<<<< HEAD
 	_("Manufacturing"): [
+=======
+	"Manufacturing": [
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Stock User",
 		"Manufacturing User",
 		"Manufacturing Manager",
 	],
+<<<<<<< HEAD
 	_("Accounts"): [
 		"Accounts User",
 		"Accounts Manager",
 	],
 	_("Sales"): [
+=======
+	"Accounts": [
+		"Accounts User",
+		"Accounts Manager",
+	],
+	"Sales": [
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Sales User",
 		"Stock User",
 		"Sales Manager",
 	],
+<<<<<<< HEAD
 	_("Purchase"): [
+=======
+	"Purchase": [
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Item Manager",
 		"Stock User",
 		"Purchase User",

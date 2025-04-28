@@ -19,7 +19,10 @@
   "transaction_date",
   "valid_till",
   "quotation_number",
+<<<<<<< HEAD
   "has_unit_price_items",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -81,7 +84,10 @@
   "disable_rounded_total",
   "tax_breakup",
   "other_charges_calculation",
+<<<<<<< HEAD
   "item_wise_tax_details",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "pricing_rule_details",
   "pricing_rules",
   "address_and_contact_tab",
@@ -923,6 +929,7 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -942,12 +949,20 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-23 02:22:43.526822",
+=======
+ "modified": "2024-03-28 10:20:30.231915",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
@@ -1008,7 +1023,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status, transaction_date, supplier,grand_total",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
@@ -1016,4 +1034,8 @@
  "states": [],
  "timeline_field": "supplier",
  "title_field": "title"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

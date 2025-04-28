@@ -21,12 +21,15 @@ erpnext.setup.EmployeeController = class EmployeeController extends frappe.ui.fo
 };
 
 frappe.ui.form.on("Employee", {
+<<<<<<< HEAD
 	setup: function (frm) {
 		frm.make_methods = {
 			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
 		};
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	onload: function (frm) {
 		frm.set_query("department", function () {
 			return {
@@ -36,11 +39,14 @@ frappe.ui.form.on("Employee", {
 			};
 		});
 	},
+<<<<<<< HEAD
 
 	refresh: function (frm) {
 		frm.fields_dict.date_of_birth.datepicker.update({ maxDate: new Date() });
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	prefered_contact_email: function (frm) {
 		frm.events.update_contact(frm);
 	},

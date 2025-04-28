@@ -4,6 +4,19 @@ frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Budget", {
 	onload: function (frm) {
+<<<<<<< HEAD
+=======
+		frm.set_query("account", "accounts", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					report_type: "Profit and Loss",
+					is_group: 0,
+				},
+			};
+		});
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("monthly_distribution", function () {
 			return {
 				filters: {
@@ -13,6 +26,7 @@ frappe.ui.form.on("Budget", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+<<<<<<< HEAD
 		frappe.db.get_single_value("Accounts Settings", "use_legacy_budget_controller").then((value) => {
 			if (value) {
 				frm.get_field("control_action_for_cumulative_expense_section").hide();
@@ -42,6 +56,12 @@ frappe.ui.form.on("Budget", {
 				);
 			}
 		}
+=======
+	},
+
+	refresh: function (frm) {
+		frm.trigger("toggle_reqd_fields");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	budget_against: function (frm) {
@@ -49,6 +69,7 @@ frappe.ui.form.on("Budget", {
 		frm.trigger("toggle_reqd_fields");
 	},
 
+<<<<<<< HEAD
 	budget_amount(frm) {
 		if (frm.doc.budget_distribution?.length) {
 			frm.doc.budget_distribution.forEach((row) => {
@@ -58,6 +79,8 @@ frappe.ui.form.on("Budget", {
 		}
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	set_null_value: function (frm) {
 		if (frm.doc.budget_against == "Cost Center") {
 			frm.set_value("project", null);
@@ -70,6 +93,7 @@ frappe.ui.form.on("Budget", {
 		frm.toggle_reqd("cost_center", frm.doc.budget_against == "Cost Center");
 		frm.toggle_reqd("project", frm.doc.budget_against == "Project");
 	},
+<<<<<<< HEAD
 
 	revise_budget_action: function (frm) {
 		frappe.confirm(
@@ -110,4 +134,6 @@ frappe.ui.form.on("Budget Distribution", {
 			frm.refresh_field("budget_distribution");
 		}
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

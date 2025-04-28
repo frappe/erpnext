@@ -32,6 +32,10 @@ class Lead(SellingController, CRMNote):
 
 		annual_revenue: DF.Currency
 		blog_subscriber: DF.Check
+<<<<<<< HEAD
+=======
+		campaign_name: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		city: DF.Data | None
 		company: DF.Link | None
 		company_name: DF.Data | None
@@ -62,6 +66,10 @@ class Lead(SellingController, CRMNote):
 		qualified_on: DF.Date | None
 		request_type: DF.Literal["", "Product Enquiry", "Request for Information", "Suggestions", "Other"]
 		salutation: DF.Link | None
+<<<<<<< HEAD
+=======
+		source: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		state: DF.Data | None
 		status: DF.Literal[
 			"Lead",
@@ -78,10 +86,13 @@ class Lead(SellingController, CRMNote):
 		title: DF.Data | None
 		type: DF.Literal["", "Client", "Channel Partner", "Consultant"]
 		unsubscribed: DF.Check
+<<<<<<< HEAD
 		utm_campaign: DF.Link | None
 		utm_content: DF.Data | None
 		utm_medium: DF.Link | None
 		utm_source: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		website: DF.Data | None
 		whatsapp_no: DF.Data | None
 	# end: auto-generated types
@@ -103,7 +114,11 @@ class Lead(SellingController, CRMNote):
 	def before_insert(self):
 		self.contact_doc = None
 		if frappe.db.get_single_value("CRM Settings", "auto_creation_of_contact"):
+<<<<<<< HEAD
 			if self.utm_source == "Existing Customer" and self.customer:
+=======
+			if self.source == "Existing Customer" and self.customer:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				contact = frappe.db.get_value(
 					"Dynamic Link",
 					{"link_doctype": "Customer", "parenttype": "Contact", "link_name": self.customer},
@@ -327,8 +342,12 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			target.customer_type = "Individual"
 			target.customer_name = source.lead_name
 
+<<<<<<< HEAD
 		if not target.customer_group:
 			target.customer_group = frappe.db.get_default("Customer Group")
+=======
+		target.customer_group = frappe.db.get_default("Customer Group")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		address = get_default_address("Lead", source.name)
 		contact = get_default_contact("Lead", source.name)
@@ -372,6 +391,10 @@ def make_opportunity(source_name, target_doc=None):
 			"Lead": {
 				"doctype": "Opportunity",
 				"field_map": {
+<<<<<<< HEAD
+=======
+					"campaign_name": "campaign",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"doctype": "opportunity_from",
 					"name": "party_name",
 					"lead_name": "contact_display",
@@ -442,7 +465,11 @@ def _set_missing_values(source, target):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_lead_details(lead, posting_date=None, company=None, doctype=None):
+=======
+def get_lead_details(lead, posting_date=None, company=None):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if not lead:
 		return {}
 
@@ -464,7 +491,11 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 		}
 	)
 
+<<<<<<< HEAD
 	set_address_details(out, lead, "Lead", doctype=doctype, company=company)
+=======
+	set_address_details(out, lead, "Lead", company=company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	taxes_and_charges = set_taxes(
 		None,

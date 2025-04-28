@@ -22,8 +22,11 @@ frappe.listview_settings["Work Order"] = {
 					"Not Started": "red",
 					"In Process": "orange",
 					Completed: "green",
+<<<<<<< HEAD
 					"Stock Reserved": "blue",
 					"Stock Partially Reserved": "orange",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					Cancelled: "gray",
 				}[doc.status],
 				"status,=," + doc.status,

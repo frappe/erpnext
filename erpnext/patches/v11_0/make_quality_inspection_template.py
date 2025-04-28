@@ -10,7 +10,11 @@ def execute():
 	frappe.reload_doc("stock", "doctype", "item")
 
 	for data in frappe.get_all(
+<<<<<<< HEAD
 		"Item Quality Inspection Parameter", fields=["parent"], filters={"parenttype": "Item"}, distinct=True
+=======
+		"Item Quality Inspection Parameter", fields=["distinct parent"], filters={"parenttype": "Item"}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	):
 		qc_doc = frappe.new_doc("Quality Inspection Template")
 		qc_doc.quality_inspection_template_name = "QIT/%s" % data.parent

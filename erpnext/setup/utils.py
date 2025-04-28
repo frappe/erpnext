@@ -4,7 +4,11 @@
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
+<<<<<<< HEAD
 from frappe.utils.data import getdate, now_datetime
+=======
+from frappe.utils.data import now_datetime
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.nestedset import get_root_of
 
 from erpnext import get_default_company
@@ -36,6 +40,11 @@ def before_tests():
 			}
 		)
 
+<<<<<<< HEAD
+=======
+	frappe.db.sql("delete from `tabItem Price`")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	_enable_all_roles_for_admin()
 
 	set_defaults_for_tests()
@@ -43,6 +52,7 @@ def before_tests():
 	frappe.db.commit()
 
 
+<<<<<<< HEAD
 def get_pegged_currencies():
 	pegged_currencies = frappe.get_all(
 		"Pegged Currency Details",
@@ -91,6 +101,8 @@ def get_pegged_rate(pegged_map, from_currency, to_currency, transaction_date=Non
 	return None
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 @frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=None):
 	if not (from_currency and to_currency):
@@ -101,8 +113,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 	if not transaction_date:
 		transaction_date = nowdate()
+<<<<<<< HEAD
 
 	currency_settings = frappe.get_cached_doc("Accounts Settings")
+=======
+	currency_settings = frappe.get_doc("Accounts Settings").as_dict()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	allow_stale_rates = currency_settings.get("allow_stale")
 
 	filters = [
@@ -131,6 +147,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if frappe.get_cached_value("Currency Exchange Settings", "Currency Exchange Settings", "disabled"):
 		return 0.00
 
+<<<<<<< HEAD
 	pegged_currencies = {}
 
 	if currency_settings.allow_pegged_currencies_exchange_rates:
@@ -138,6 +155,8 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		if rate := get_pegged_rate(pegged_currencies, from_currency, to_currency, transaction_date):
 			return rate
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	try:
 		cache = frappe.cache()
 		key = f"currency_exchange_rate_{transaction_date}:{from_currency}:{to_currency}"
@@ -149,12 +168,17 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
 			req_params = {
 				"transaction_date": transaction_date,
+<<<<<<< HEAD
 				"from_currency": from_currency
 				if from_currency not in pegged_currencies
 				else pegged_currencies[from_currency]["pegged_against"],
 				"to_currency": to_currency
 				if to_currency not in pegged_currencies
 				else pegged_currencies[to_currency]["pegged_against"],
+=======
+				"from_currency": from_currency,
+				"to_currency": to_currency,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 			params = {}
 			for row in settings.req_params:
@@ -166,6 +190,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			for res_key in settings.result_key:
 				value = value[format_ces_api(str(res_key.key), req_params)]
 			cache.setex(name=key, time=21600, value=flt(value))
+<<<<<<< HEAD
 
 		# Support multiple pegged currencies
 		value = flt(value)
@@ -175,6 +200,8 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		if currency_settings.allow_pegged_currencies_exchange_rates and from_currency in pegged_currencies:
 			value /= flt(pegged_currencies[from_currency]["ratio"])
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		return flt(value)
 	except Exception:
 		frappe.log_error("Unable to fetch exchange rate")
@@ -232,6 +259,7 @@ def welcome_email():
 	site_name = get_default_company() or "ERPNext"
 	title = _("Welcome to {0}").format(site_name)
 	return title
+<<<<<<< HEAD
 
 
 def identity(x, *args, **kwargs):
@@ -244,3 +272,5 @@ def identity(x, *args, **kwargs):
 	Use like this: `from erpnext.setup.utils import identity as _`
 	"""
 	return x
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

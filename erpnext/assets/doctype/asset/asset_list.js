@@ -1,6 +1,10 @@
 frappe.listview_settings["Asset"] = {
+<<<<<<< HEAD
 	add_fields: ["status", "docstatus"],
 	has_indicator_for_draft: 1,
+=======
+	add_fields: ["status"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	get_indicator: function (doc) {
 		if (doc.status === "Fully Depreciated") {
 			return [__("Fully Depreciated"), "green", "status,=,Fully Depreciated"];
@@ -8,10 +12,15 @@ frappe.listview_settings["Asset"] = {
 			return [__("Partially Depreciated"), "grey", "status,=,Partially Depreciated"];
 		} else if (doc.status === "Sold") {
 			return [__("Sold"), "green", "status,=,Sold"];
+<<<<<<< HEAD
 		} else if (doc.status === "Work In Progress") {
 			return [__("Work In Progress"), "orange", "status,=,Work In Progress"];
 		} else if (doc.status === "Capitalized") {
 			return [__("Capitalized"), "grey", "status,=,Capitalized"];
+=======
+		} else if (["Capitalized", "Decapitalized"].includes(doc.status)) {
+			return [__(doc.status), "grey", "status,=," + doc.status];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		} else if (doc.status === "Scrapped") {
 			return [__("Scrapped"), "grey", "status,=,Scrapped"];
 		} else if (doc.status === "In Maintenance") {
@@ -24,7 +33,11 @@ frappe.listview_settings["Asset"] = {
 			return [__("Receipt"), "green", "status,=,Receipt"];
 		} else if (doc.status === "Submitted") {
 			return [__("Submitted"), "blue", "status,=,Submitted"];
+<<<<<<< HEAD
 		} else if (doc.status === "Draft" || doc.docstatus === 0) {
+=======
+		} else if (doc.status === "Draft") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return [__("Draft"), "red", "status,=,Draft"];
 		}
 	},

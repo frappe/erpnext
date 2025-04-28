@@ -10,7 +10,10 @@ frappe.treeview_settings["Account"] = {
 			fieldtype: "Select",
 			options: erpnext.utils.get_tree_options("company"),
 			label: __("Company"),
+<<<<<<< HEAD
 			render_on_toolbar: true,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			default: erpnext.utils.get_tree_default("company"),
 			on_change: function () {
 				var me = frappe.treeview_settings["Account"].treeview;
@@ -139,11 +142,14 @@ frappe.treeview_settings["Account"] = {
 			description: __(
 				"Further accounts can be made under Groups, but entries can be made against non-Groups"
 			),
+<<<<<<< HEAD
 			onchange: function () {
 				if (!this.value) {
 					this.layout.set_value("root_type", "");
 				}
 			},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldtype: "Select",
@@ -188,9 +194,13 @@ frappe.treeview_settings["Account"] = {
 			function () {
 				frappe.set_route("Tree", "Cost Center", { company: get_company() });
 			},
+<<<<<<< HEAD
 			__("View"),
 			"default",
 			true
+=======
+			__("View")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		);
 
 		treeview.page.add_inner_button(
@@ -198,12 +208,40 @@ frappe.treeview_settings["Account"] = {
 			function () {
 				frappe.set_route("Form", "Opening Invoice Creation Tool", { company: get_company() });
 			},
+<<<<<<< HEAD
 			__("View"),
 			"default",
 			true
 		);
 
 		treeview.page.add_divider_to_button_group(__("View"));
+=======
+			__("View")
+		);
+
+		treeview.page.add_inner_button(
+			__("Period Closing Voucher"),
+			function () {
+				frappe.set_route("List", "Period Closing Voucher", { company: get_company() });
+			},
+			__("View")
+		);
+
+		treeview.page.add_inner_button(
+			__("Journal Entry"),
+			function () {
+				frappe.new_doc("Journal Entry", { company: get_company() });
+			},
+			__("Create")
+		);
+		treeview.page.add_inner_button(
+			__("Company"),
+			function () {
+				frappe.new_doc("Company");
+			},
+			__("Create")
+		);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		// financial statements
 		for (let report of [
@@ -220,12 +258,17 @@ frappe.treeview_settings["Account"] = {
 				function () {
 					frappe.set_route("query-report", report, { company: get_company() });
 				},
+<<<<<<< HEAD
 				__("View")
+=======
+				__("Financial Statements")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			);
 		}
 	},
 	post_render: function (treeview) {
 		frappe.treeview_settings["Account"].treeview["tree"] = treeview.tree;
+<<<<<<< HEAD
 		if (treeview.can_create) {
 			treeview.page.set_primary_action(
 				__("New"),
@@ -242,6 +285,21 @@ frappe.treeview_settings["Account"] = {
 				"add"
 			);
 		}
+=======
+		treeview.page.set_primary_action(
+			__("New"),
+			function () {
+				let root_company = treeview.page.fields_dict.root_company.get_value();
+
+				if (root_company) {
+					frappe.throw(__("Please add the account to root level Company - {0}"), [root_company]);
+				} else {
+					treeview.new_node();
+				}
+			},
+			"add"
+		);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	toolbar: [
 		{
@@ -270,14 +328,21 @@ frappe.treeview_settings["Account"] = {
 			label: __("View Ledger"),
 			click: function (node, btn) {
 				frappe.route_options = {
+<<<<<<< HEAD
+=======
+					account: node.label,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					from_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 					to_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 					company:
 						frappe.treeview_settings["Account"].treeview.page.fields_dict.company.get_value(),
 				};
+<<<<<<< HEAD
 				if (node.parent_label) {
 					frappe.route_options["account"] = node.label;
 				}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frappe.set_route("query-report", "General Ledger");
 			},
 			btnClass: "hidden-xs",

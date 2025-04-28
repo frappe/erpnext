@@ -6,12 +6,17 @@ cd ~ || exit
 
 sudo apt update
 sudo apt remove mysql-server mysql-client
+<<<<<<< HEAD
 sudo apt install libcups2-dev redis-server mariadb-client libmariadb-dev
+=======
+sudo apt install libcups2-dev redis-server mariadb-client-10.6
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 pip install frappe-bench
 
 githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
 frappeuser=${FRAPPE_USER:-"frappe"}
+<<<<<<< HEAD
 frappecommitish=${FRAPPE_BRANCH:-$githubbranch}
 
 mkdir frappe
@@ -22,6 +27,11 @@ git fetch origin "${frappecommitish}" --depth 1
 git checkout FETCH_HEAD
 popd
 
+=======
+frappebranch=${FRAPPE_BRANCH:-$githubbranch}
+
+git clone "https://github.com/${frappeuser}/frappe" --branch "${frappebranch}" --depth 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
 
 mkdir ~/frappe-bench/sites/test_site
@@ -51,9 +61,19 @@ fi
 
 
 install_whktml() {
+<<<<<<< HEAD
     wget -O /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
     sudo apt install /tmp/wkhtmltox.deb
 
+=======
+    if [ "$(lsb_release -rs)" = "22.04" ]; then
+        wget -O /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+        sudo apt install /tmp/wkhtmltox.deb
+    else
+        echo "Please update this script to support wkhtmltopdf for $(lsb_release -ds)"
+        exit 1
+    fi
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 }
 install_whktml &
 wkpid=$!
@@ -66,7 +86,11 @@ sed -i 's/schedule:/# schedule:/g' Procfile
 sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
+<<<<<<< HEAD
 bench get-app payments --branch develop
+=======
+bench get-app payments --branch ${githubbranch%"-hotfix"}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 bench get-app erpnext "${GITHUB_WORKSPACE}"
 
 if [ "$TYPE" == "server" ]; then bench setup requirements --dev; fi

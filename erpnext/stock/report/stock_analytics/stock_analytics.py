@@ -5,8 +5,13 @@ import datetime
 import frappe
 from frappe import _, scrub
 from frappe.query_builder.functions import CombineDatetime
+<<<<<<< HEAD
 from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
 from frappe.utils import get_first_day as get_first_day_of_month
+=======
+from frappe.utils import get_first_day as get_first_day_of_month
+from frappe.utils import get_first_day_of_week, get_quarter_start, getdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -294,8 +299,14 @@ def get_stock_ledger_entries(filters, items):
 			sle.batch_no,
 		)
 		.where((sle.docstatus < 2) & (sle.is_cancelled == 0))
+<<<<<<< HEAD
 		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
+=======
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.orderby(sle.creation)
+		.orderby(sle.actual_qty)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	if items:
@@ -313,8 +324,12 @@ def apply_conditions(query, filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if to_date := filters.get("to_date"):
+<<<<<<< HEAD
 		to_date = get_datetime(str(to_date) + " 23:59:59")
 		query = query.where(sle.posting_datetime <= to_date)
+=======
+		query = query.where(sle.posting_date <= to_date)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	else:
 		frappe.throw(_("'To Date' is required"))
 

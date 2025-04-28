@@ -213,9 +213,23 @@ $.extend(erpnext.utils, {
 	},
 
 	make_bank_account: function (doctype, docname) {
+<<<<<<< HEAD
 		frappe.new_doc("Bank Account", {
 			party_type: doctype,
 			party: docname,
+=======
+		frappe.call({
+			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
+			args: {
+				doctype: doctype,
+				docname: docname,
+			},
+			freeze: true,
+			callback: function (r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 	},
 
@@ -259,10 +273,13 @@ $.extend(erpnext.utils, {
 								fieldname: dimension["fieldname"],
 								label: __(dimension["doctype"]),
 								fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 								depends_on:
 									report_name === "Stock Balance"
 										? "eval:doc.show_dimension_wise_stock === 1"
 										: "",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 								get_data: function (txt) {
 									return frappe.db.get_link_options(dimension["doctype"], txt);
 								},
@@ -293,6 +310,23 @@ $.extend(erpnext.utils, {
 		});
 	},
 
+<<<<<<< HEAD
+=======
+	make_pricing_rule: function (doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.make_pricing_rule",
+			args: {
+				doctype: doctype,
+				docname: docname,
+			},
+			callback: function (r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+		});
+	},
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	/**
 	 * Checks if the first row of a given child table is empty
 	 * @param child_table - Child table Doctype
@@ -410,9 +444,14 @@ $.extend(erpnext.utils, {
 		if (!frappe.boot.setup_complete) {
 			return;
 		}
+<<<<<<< HEAD
 		const today = frappe.datetime.get_today();
 		if (!date) {
 			date = today;
+=======
+		if (!date) {
+			date = frappe.datetime.get_today();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		let fiscal_year = "";
@@ -423,7 +462,11 @@ $.extend(erpnext.utils, {
 		) {
 			if (with_dates) fiscal_year = frappe.boot.current_fiscal_year;
 			else fiscal_year = frappe.boot.current_fiscal_year[0];
+<<<<<<< HEAD
 		} else if (today != date) {
+=======
+		} else {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.call({
 				method: "erpnext.accounts.utils.get_fiscal_year",
 				type: "GET", // make it cacheable
@@ -442,6 +485,7 @@ $.extend(erpnext.utils, {
 		}
 		return fiscal_year;
 	},
+<<<<<<< HEAD
 
 	set_letter_head: function (frm) {
 		if (frm.fields_dict.letter_head) {
@@ -452,6 +496,8 @@ $.extend(erpnext.utils, {
 			});
 		}
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });
 
 erpnext.utils.select_alternate_items = function (opts) {
@@ -615,7 +661,10 @@ erpnext.utils.update_child_items = function (opts) {
 			docname: d.name,
 			name: d.name,
 			item_code: d.item_code,
+<<<<<<< HEAD
 			item_name: d.item_name,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			delivery_date: d.delivery_date,
 			schedule_date: d.schedule_date,
 			conversion_factor: d.conversion_factor,
@@ -645,7 +694,11 @@ erpnext.utils.update_child_items = function (opts) {
 			get_query: function () {
 				let filters;
 				if (frm.doc.doctype == "Sales Order") {
+<<<<<<< HEAD
 					filters = { is_sales_item: 1, is_stock_item: !frm.doc.is_subcontracted };
+=======
+					filters = { is_sales_item: 1 };
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				} else if (frm.doc.doctype == "Purchase Order") {
 					if (frm.doc.is_subcontracted) {
 						if (frm.doc.is_old_subcontracting_flow) {
@@ -662,6 +715,7 @@ erpnext.utils.update_child_items = function (opts) {
 					filters: filters,
 				};
 			},
+<<<<<<< HEAD
 			onchange: function () {
 				const me = this;
 
@@ -733,6 +787,8 @@ erpnext.utils.update_child_items = function (opts) {
 			fieldname: "item_name",
 			label: __("Item Name"),
 			read_only: 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldtype: "Link",
@@ -801,7 +857,11 @@ erpnext.utils.update_child_items = function (opts) {
 	}
 
 	if (
+<<<<<<< HEAD
 		["Purchase Order", "Sales Order"].includes(frm.doc.doctype) &&
+=======
+		frm.doc.doctype == "Purchase Order" &&
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.doc.is_subcontracted &&
 		!frm.doc.is_old_subcontracting_flow
 	) {
@@ -857,7 +917,11 @@ erpnext.utils.update_child_items = function (opts) {
 			},
 		],
 		primary_action: function () {
+<<<<<<< HEAD
 			if (frm.doctype == "Sales Order" && has_reserved_stock && frm.doc.is_subcontracted == 0) {
+=======
+			if (frm.doctype == "Sales Order" && has_reserved_stock) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				this.hide();
 				frappe.confirm(
 					__(
@@ -1000,7 +1064,10 @@ erpnext.utils.map_current_doc = function (opts) {
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
+<<<<<<< HEAD
 			read_only_setters: opts.read_only_setters,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			data_fields: data_fields,
 			get_query: opts.get_query,
 			add_filters_group: 1,
@@ -1015,11 +1082,23 @@ erpnext.utils.map_current_doc = function (opts) {
 					return;
 				}
 
+<<<<<<< HEAD
 				opts.source_name = Array.isArray(values) ? [...new Set(values)] : values;
 
 				if (
 					opts.allow_child_item_selection ||
 					["Purchase Receipt", "Delivery Note", "Pick List"].includes(opts.source_doctype)
+=======
+				if (values.constructor === Array) {
+					opts.source_name = [...new Set(values)];
+				} else {
+					opts.source_name = values;
+				}
+
+				if (
+					opts.allow_child_item_selection ||
+					["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				) {
 					// args contains filtered child docnames
 					opts.args = args;
@@ -1038,6 +1117,7 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
+<<<<<<< HEAD
 frappe.form.link_formatters["Item"] = function (value, doc, df) {
 	return add_link_title(value, doc, df, "item_name");
 };
@@ -1068,6 +1148,43 @@ function add_link_title(value, doc, df, title_field) {
 		return value;
 	}
 }
+=======
+frappe.form.link_formatters["Item"] = function (value, doc) {
+	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
+		return value + ": " + doc.item_name;
+	} else if (!value && doc.doctype && doc.item_name) {
+		// format blank value in child table
+		return doc.item_name;
+	} else {
+		// if value is blank in report view or item code and name are the same, return as is
+		return value;
+	}
+};
+
+frappe.form.link_formatters["Employee"] = function (value, doc) {
+	if (doc && value && doc.employee_name && doc.employee_name !== value && doc.employee === value) {
+		return value + ": " + doc.employee_name;
+	} else if (!value && doc.doctype && doc.employee_name) {
+		// format blank value in child table
+		return doc.employee;
+	} else {
+		// if value is blank in report view or project name and name are the same, return as is
+		return value;
+	}
+};
+
+frappe.form.link_formatters["Project"] = function (value, doc) {
+	if (doc && value && doc.project_name && doc.project_name !== value && doc.project === value) {
+		return value + ": " + doc.project_name;
+	} else if (!value && doc.doctype && doc.project_name) {
+		// format blank value in child table
+		return doc.project;
+	} else {
+		// if value is blank in report view or project name and name are the same, return as is
+		return value;
+	}
+};
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 // add description on posting time
 $(document).on("app_ready", function () {
@@ -1213,9 +1330,15 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 	if (apply_sla_for_resolution) {
 		let time_to_resolve;
 		if (!frm.doc.resolution_date) {
+<<<<<<< HEAD
 			time_to_resolve = get_time_left(frm.doc.sla_resolution_by, frm.doc.agreement_status);
 		} else {
 			time_to_resolve = get_status(frm.doc.sla_resolution_by, frm.doc.sla_resolution_date);
+=======
+			time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+		} else {
+			time_to_resolve = get_status(frm.doc.resolution_by, frm.doc.resolution_date);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		alert += `

@@ -6,6 +6,7 @@ frappe.ui.form.on("Plant Floor", {
 		frm.trigger("setup_queries");
 	},
 
+<<<<<<< HEAD
 	add_workstation(frm) {
 		frm.add_custom_button(__("Create Workstation"), () => {
 			var doc = frappe.model.get_new_doc("Workstation");
@@ -22,6 +23,8 @@ frappe.ui.form.on("Plant Floor", {
 		}).addClass("btn-primary");
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	setup_queries(frm) {
 		frm.set_query("warehouse", (doc) => {
 			if (!doc.company) {
@@ -40,12 +43,15 @@ frappe.ui.form.on("Plant Floor", {
 	refresh(frm) {
 		frm.trigger("prepare_stock_dashboard");
 		frm.trigger("prepare_workstation_dashboard");
+<<<<<<< HEAD
 		frm.trigger("update_realtime_status");
 
 		if (!frm.is_new()) {
 			frm.trigger("add_workstation");
 			frm.disable_save();
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	prepare_workstation_dashboard(frm) {
@@ -59,12 +65,15 @@ frappe.ui.form.on("Plant Floor", {
 		});
 	},
 
+<<<<<<< HEAD
 	update_realtime_status(frm) {
 		frappe.realtime.on("update_workstation_status", (data) => {
 			frappe.visual_plant_floor.update_status(data);
 		});
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	prepare_stock_dashboard(frm) {
 		if (!frm.doc.warehouse) {
 			return;

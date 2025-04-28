@@ -12,7 +12,10 @@
   "finance_book",
   "amended_from",
   "depreciation_schedule_section",
+<<<<<<< HEAD
   "column_break_jomc",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "depreciation_schedule"
  ],
  "fields": [
@@ -58,9 +61,13 @@
    "fieldname": "depreciation_schedule",
    "fieldtype": "Table",
    "label": "Depreciation Schedule",
+<<<<<<< HEAD
    "no_copy": 1,
    "options": "Depreciation Schedule",
    "read_only": 1
+=======
+   "options": "Depreciation Schedule"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "naming_series",
@@ -68,16 +75,23 @@
    "label": "Naming Series",
    "options": "ACC-ASA-.YYYY.-",
    "reqd": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_jomc",
    "fieldtype": "Column Break"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-01-10 16:25:31.397325",
+=======
+ "modified": "2024-03-27 13:06:35.732191",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Shift Allocation",

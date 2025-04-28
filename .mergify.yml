@@ -2,6 +2,7 @@ pull_request_rules:
   - name: Auto-close PRs on stable branch
     conditions:
       - and:
+<<<<<<< HEAD
           - and:
               - author!=surajshetty3416
               - author!=gavindsouza
@@ -23,6 +24,31 @@ pull_request_rules:
         message: |
           @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
           https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
+=======
+        - and:
+          - author!=surajshetty3416
+          - author!=gavindsouza
+          - author!=rohitwaghchaure
+          - author!=nabinhait
+          - author!=ankush
+          - author!=deepeshgarg007
+          - author!=frappe-pr-bot
+          - author!=mergify[bot]
+
+        - or:
+          - base=version-13
+          - base=version-12
+          - base=version-14
+          - base=version-15
+          - base=version-16
+    actions:
+      close:
+      comment:
+          message: |
+            @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
+            https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   - name: backport to develop
     conditions:
       - label="backport develop"
@@ -32,6 +58,10 @@ pull_request_rules:
           - develop
         assignees:
           - "{{ author }}"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   - name: backport to version-14-hotfix
     conditions:
       - label="backport version-14-hotfix"
@@ -41,6 +71,10 @@ pull_request_rules:
           - version-14-hotfix
         assignees:
           - "{{ author }}"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   - name: backport to version-15-hotfix
     conditions:
       - label="backport version-15-hotfix"
@@ -50,6 +84,7 @@ pull_request_rules:
           - version-15-hotfix
         assignees:
           - "{{ author }}"
+<<<<<<< HEAD
   - name: backport to version-16-beta
     conditions:
       - label="backport version-16-beta"
@@ -59,6 +94,20 @@ pull_request_rules:
           - version-16-beta
         assignees:
           - "{{ author }}"
+=======
+
+  - name: backport to version-13-hotfix
+    conditions:
+      - label="backport version-13-hotfix"
+    actions:
+      backport:
+        branches:
+          - version-13-hotfix
+        assignees:
+          - "{{ author }}"
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   - name: Automatic merge on CI success and review
     conditions:
       - status-success=linters
@@ -89,6 +138,12 @@ pull_request_rules:
       merge:
         method: squash
         commit_message_template: |
+<<<<<<< HEAD
           {{ title }} (#{{ number }})
 
           {{ body }}
+=======
+            {{ title }} (#{{ number }})
+
+            {{ body }}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -72,12 +72,15 @@ frappe.ui.form.on("Asset", {
 				filters: { item_code: doc.item_code },
 			};
 		});
+<<<<<<< HEAD
 
 		if (frm.doc.docstatus == 1) {
 			frm.custom_make_buttons = {
 				"Asset Capitalization": "Asset Capitalization",
 			};
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	refresh: function (frm) {
@@ -109,6 +112,7 @@ frappe.ui.form.on("Asset", {
 					},
 					__("Manage")
 				);
+<<<<<<< HEAD
 
 				frm.add_custom_button(
 					__("Repair Asset"),
@@ -129,6 +133,16 @@ frappe.ui.form.on("Asset", {
 				frm.add_custom_button(__("Restore Asset"), function () {
 					erpnext.asset.restore_asset(frm);
 				}).addClass("btn-primary");
+=======
+			} else if (frm.doc.status == "Scrapped") {
+				frm.add_custom_button(
+					__("Restore Asset"),
+					function () {
+						erpnext.asset.restore_asset(frm);
+					},
+					__("Manage")
+				);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 
 			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
@@ -141,7 +155,27 @@ frappe.ui.form.on("Asset", {
 				);
 			}
 
+<<<<<<< HEAD
 			if (["Submitted", "Partially Depreciated"].includes(frm.doc.status)) {
+=======
+			frm.add_custom_button(
+				__("Repair Asset"),
+				function () {
+					frm.trigger("create_asset_repair");
+				},
+				__("Manage")
+			);
+
+			frm.add_custom_button(
+				__("Split Asset"),
+				function () {
+					frm.trigger("split_asset");
+				},
+				__("Manage")
+			);
+
+			if (frm.doc.status != "Fully Depreciated") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frm.add_custom_button(
 					__("Adjust Asset Value"),
 					function () {
@@ -215,7 +249,11 @@ frappe.ui.form.on("Asset", {
 			<div class="row">
 				<div class="col-xs-12 col-sm-6">
 					<span class="indicator whitespace-nowrap red">
+<<<<<<< HEAD
 						<span>${__("Failed to post depreciation entries")}</span>
+=======
+						<span>Failed to post depreciation entries</span>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					</span>
 				</div>
 			</div>`;
@@ -340,7 +378,11 @@ frappe.ui.form.on("Asset", {
 		}
 
 		var x_intervals = [frappe.format(frm.doc.purchase_date, { fieldtype: "Date" })];
+<<<<<<< HEAD
 		var asset_values = [frm.doc.net_purchase_amount];
+=======
+		var asset_values = [frm.doc.gross_purchase_amount];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if (frm.doc.calculate_depreciation) {
 			if (frm.doc.opening_accumulated_depreciation) {
@@ -351,8 +393,13 @@ frappe.ui.form.on("Asset", {
 				x_intervals.push(frappe.format(depreciation_date, { fieldtype: "Date" }));
 				asset_values.push(
 					flt(
+<<<<<<< HEAD
 						frm.doc.net_purchase_amount - frm.doc.opening_accumulated_depreciation,
 						precision("net_purchase_amount")
+=======
+						frm.doc.gross_purchase_amount - frm.doc.opening_accumulated_depreciation,
+						precision("gross_purchase_amount")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					)
 				);
 			}
@@ -371,8 +418,13 @@ frappe.ui.form.on("Asset", {
 			$.each(asset_depr_schedule_doc.depreciation_schedule || [], function (i, v) {
 				x_intervals.push(frappe.format(v.schedule_date, { fieldtype: "Date" }));
 				var asset_value = flt(
+<<<<<<< HEAD
 					frm.doc.net_purchase_amount - v.accumulated_depreciation_amount,
 					precision("net_purchase_amount")
+=======
+					frm.doc.gross_purchase_amount - v.accumulated_depreciation_amount,
+					precision("gross_purchase_amount")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				);
 				if (v.journal_entry) {
 					asset_values.push(asset_value);
@@ -392,8 +444,13 @@ frappe.ui.form.on("Asset", {
 				x_intervals.push(frappe.format(frm.doc.creation.split(" ")[0], { fieldtype: "Date" }));
 				asset_values.push(
 					flt(
+<<<<<<< HEAD
 						frm.doc.net_purchase_amount - frm.doc.opening_accumulated_depreciation,
 						precision("net_purchase_amount")
+=======
+						frm.doc.gross_purchase_amount - frm.doc.opening_accumulated_depreciation,
+						precision("gross_purchase_amount")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					)
 				);
 			}
@@ -408,7 +465,11 @@ frappe.ui.form.on("Asset", {
 			$.each(depr_entries || [], function (i, v) {
 				x_intervals.push(frappe.format(v.posting_date, { fieldtype: "Date" }));
 				let last_asset_value = asset_values[asset_values.length - 1];
+<<<<<<< HEAD
 				asset_values.push(flt(last_asset_value - v.value, precision("net_purchase_amount")));
+=======
+				asset_values.push(flt(last_asset_value - v.value, precision("gross_purchase_amount")));
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			});
 		}
 
@@ -418,7 +479,11 @@ frappe.ui.form.on("Asset", {
 		}
 
 		frm.dashboard.render_graph({
+<<<<<<< HEAD
 			title: __("Asset Value"),
+=======
+			title: "Asset Value",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			data: {
 				labels: x_intervals,
 				datasets: [
@@ -434,7 +499,11 @@ frappe.ui.form.on("Asset", {
 	},
 
 	item_code: function (frm) {
+<<<<<<< HEAD
 		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
+=======
+		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.gross_purchase_amount) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.trigger("set_finance_book");
 		} else {
 			frm.set_value("finance_books", []);
@@ -447,7 +516,11 @@ frappe.ui.form.on("Asset", {
 			args: {
 				item_code: frm.doc.item_code,
 				asset_category: frm.doc.asset_category,
+<<<<<<< HEAD
 				net_purchase_amount: frm.doc.net_purchase_amount,
+=======
+				gross_purchase_amount: frm.doc.gross_purchase_amount,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			callback: function (r, rt) {
 				if (r.message) {
@@ -463,10 +536,17 @@ frappe.ui.form.on("Asset", {
 
 	is_composite_asset: function (frm) {
 		if (frm.doc.is_composite_asset) {
+<<<<<<< HEAD
 			frm.set_value("net_purchase_amount", 0);
 			frm.set_df_property("net_purchase_amount", "read_only", 1);
 		} else {
 			frm.set_df_property("net_purchase_amount", "read_only", 0);
+=======
+			frm.set_value("gross_purchase_amount", 0);
+			frm.set_df_property("gross_purchase_amount", "read_only", 1);
+		} else {
+			frm.set_df_property("gross_purchase_amount", "read_only", 0);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		frm.trigger("toggle_reference_doc");
@@ -508,7 +588,10 @@ frappe.ui.form.on("Asset", {
 	create_asset_repair: function (frm) {
 		frappe.call({
 			args: {
+<<<<<<< HEAD
 				company: frm.doc.company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				asset: frm.doc.name,
 				asset_name: frm.doc.asset_name,
 			},
@@ -523,7 +606,10 @@ frappe.ui.form.on("Asset", {
 	create_asset_capitalization: function (frm) {
 		frappe.call({
 			args: {
+<<<<<<< HEAD
 				company: frm.doc.company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				asset: frm.doc.name,
 				asset_name: frm.doc.asset_name,
 				item_code: frm.doc.item_code,
@@ -532,7 +618,10 @@ frappe.ui.form.on("Asset", {
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+<<<<<<< HEAD
 				$(".primary-action").prop("hidden", false);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		});
 	},
@@ -592,14 +681,22 @@ frappe.ui.form.on("Asset", {
 
 	calculate_depreciation: function (frm) {
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
+<<<<<<< HEAD
 		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
+=======
+		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.gross_purchase_amount) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.trigger("set_finance_book");
 		} else {
 			frm.set_value("finance_books", []);
 		}
 	},
 
+<<<<<<< HEAD
 	net_purchase_amount: function (frm) {
+=======
+	gross_purchase_amount: function (frm) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (frm.doc.finance_books) {
 			frm.doc.finance_books.forEach((d) => {
 				frm.events.set_depreciation_rate(frm, d);
@@ -611,7 +708,13 @@ frappe.ui.form.on("Asset", {
 		frm.trigger("toggle_reference_doc");
 		if (frm.doc.purchase_receipt) {
 			if (frm.doc.item_code) {
+<<<<<<< HEAD
 				frm.events.set_values_from_purchase_doc(frm, "Purchase Receipt");
+=======
+				frappe.db.get_doc("Purchase Receipt", frm.doc.purchase_receipt).then((pr_doc) => {
+					frm.events.set_values_from_purchase_doc(frm, "Purchase Receipt", pr_doc);
+				});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			} else {
 				frm.set_value("purchase_receipt", "");
 				frappe.msgprint({
@@ -626,7 +729,13 @@ frappe.ui.form.on("Asset", {
 		frm.trigger("toggle_reference_doc");
 		if (frm.doc.purchase_invoice) {
 			if (frm.doc.item_code) {
+<<<<<<< HEAD
 				frm.events.set_values_from_purchase_doc(frm, "Purchase Invoice");
+=======
+				frappe.db.get_doc("Purchase Invoice", frm.doc.purchase_invoice).then((pi_doc) => {
+					frm.events.set_values_from_purchase_doc(frm, "Purchase Invoice", pi_doc);
+				});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			} else {
 				frm.set_value("purchase_invoice", "");
 				frappe.msgprint({
@@ -637,6 +746,7 @@ frappe.ui.form.on("Asset", {
 		}
 	},
 
+<<<<<<< HEAD
 	set_values_from_purchase_doc: (frm, doctype) => {
 		frappe.call({
 			method: "erpnext.assets.doctype.asset.asset.get_values_from_purchase_doc",
@@ -665,6 +775,47 @@ frappe.ui.form.on("Asset", {
 					}
 				}
 			},
+=======
+	set_values_from_purchase_doc: function (frm, doctype, purchase_doc) {
+		frm.set_value("company", purchase_doc.company);
+		if (purchase_doc.bill_date) {
+			frm.set_value("purchase_date", purchase_doc.bill_date);
+		} else {
+			frm.set_value("purchase_date", purchase_doc.posting_date);
+		}
+		if (!frm.doc.is_existing_asset && !frm.doc.available_for_use_date) {
+			frm.set_value("available_for_use_date", frm.doc.purchase_date);
+		}
+		const item = purchase_doc.items.find((item) => item.item_code === frm.doc.item_code);
+		if (!item) {
+			let doctype_field = frappe.scrub(doctype);
+			frm.set_value(doctype_field, "");
+			frappe.msgprint({
+				title: __("Invalid {0}", [__(doctype)]),
+				message: __("The selected {0} does not contain the selected Asset Item.", [__(doctype)]),
+				indicator: "red",
+			});
+		}
+		frappe.db.get_value("Item", item.item_code, "is_grouped_asset", (r) => {
+			var asset_quantity = r.is_grouped_asset ? item.qty : 1;
+			var purchase_amount = flt(
+				item.valuation_rate * asset_quantity,
+				precision("gross_purchase_amount")
+			);
+
+			frm.set_value("gross_purchase_amount", purchase_amount);
+			frm.set_value("purchase_amount", purchase_amount);
+			frm.set_value("asset_quantity", asset_quantity);
+			frm.set_value("cost_center", item.cost_center || purchase_doc.cost_center);
+			if (item.asset_location) {
+				frm.set_value("location", item.asset_location);
+			}
+			if (doctype === "Purchase Receipt") {
+				frm.set_value("purchase_receipt_item", item.name);
+			} else if (doctype === "Purchase Invoice") {
+				frm.set_value("purchase_invoice_item", item.name);
+			}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 	},
 
@@ -702,7 +853,11 @@ frappe.ui.form.on("Asset", {
 		if (expected_value_after_useful_life_changed) {
 			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = true;
 			const new_salvage_value_percentage = flt(
+<<<<<<< HEAD
 				(row.expected_value_after_useful_life * 100) / frm.doc.net_purchase_amount,
+=======
+				(row.expected_value_after_useful_life * 100) / frm.doc.gross_purchase_amount,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				precision("salvage_value_percentage", row)
 			);
 			frappe.model.set_value(
@@ -715,8 +870,13 @@ frappe.ui.form.on("Asset", {
 		} else if (salvage_value_percentage_changed) {
 			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = true;
 			const new_expected_value_after_useful_life = flt(
+<<<<<<< HEAD
 				frm.doc.net_purchase_amount * (row.salvage_value_percentage / 100),
 				precision("net_purchase_amount")
+=======
+				frm.doc.gross_purchase_amount * (row.salvage_value_percentage / 100),
+				precision("gross_purchase_amount")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			);
 			frappe.model.set_value(
 				row.doctype,
@@ -789,6 +949,7 @@ frappe.ui.form.on("Asset Finance Book", {
 });
 
 erpnext.asset.scrap_asset = function (frm) {
+<<<<<<< HEAD
 	var scrap_dialog = new frappe.ui.Dialog({
 		title: __("Enter date to scrap asset"),
 		fields: [
@@ -816,6 +977,17 @@ erpnext.asset.scrap_asset = function (frm) {
 		},
 	});
 	scrap_dialog.show();
+=======
+	frappe.confirm(__("Do you really want to scrap this asset?"), function () {
+		frappe.call({
+			args: {
+				asset_name: frm.doc.name,
+			},
+			method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
+			callback: (r) => frm.reload_doc(),
+		});
+	});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };
 
 erpnext.asset.restore_asset = function (frm) {

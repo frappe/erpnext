@@ -4,8 +4,12 @@ erpnext.accounts.unreconcile_payment = {
 	add_unreconcile_btn(frm) {
 		if (frm.doc.docstatus == 1) {
 			if (
+<<<<<<< HEAD
 				(frm.doc.doctype == "Journal Entry" &&
 					!["Journal Entry", "Bank Entry", "Cash Entry"].includes(frm.doc.voucher_type)) ||
+=======
+				(frm.doc.doctype == "Journal Entry" && frm.doc.voucher_type != "Journal Entry") ||
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				!["Purchase Invoice", "Sales Invoice", "Journal Entry", "Payment Entry"].includes(
 					frm.doc.doctype
 				)
@@ -42,8 +46,13 @@ erpnext.accounts.unreconcile_payment = {
 			selection_map = selections.map(function (elem) {
 				return {
 					company: elem.company,
+<<<<<<< HEAD
 					voucher_type: elem.reference_doctype,
 					voucher_no: elem.reference_name,
+=======
+					voucher_type: elem.voucher_type,
+					voucher_no: elem.voucher_no,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					against_voucher_type: frm.doc.doctype,
 					against_voucher_no: frm.doc.name,
 				};
@@ -54,8 +63,13 @@ erpnext.accounts.unreconcile_payment = {
 					company: elem.company,
 					voucher_type: frm.doc.doctype,
 					voucher_no: frm.doc.name,
+<<<<<<< HEAD
 					against_voucher_type: elem.reference_doctype,
 					against_voucher_no: elem.reference_name,
+=======
+					against_voucher_type: elem.voucher_type,
+					against_voucher_no: elem.voucher_no,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				};
 			});
 		}
@@ -69,17 +83,28 @@ erpnext.accounts.unreconcile_payment = {
 			let child_table_fields = [
 				{
 					label: __("Voucher Type"),
+<<<<<<< HEAD
 					fieldname: "reference_doctype",
 					fieldtype: "Link",
+=======
+					fieldname: "voucher_type",
+					fieldtype: "Dynamic Link",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					options: "DocType",
 					in_list_view: 1,
 					read_only: 1,
 				},
 				{
 					label: __("Voucher No"),
+<<<<<<< HEAD
 					fieldname: "reference_name",
 					fieldtype: "Dynamic Link",
 					options: "reference_doctype",
+=======
+					fieldname: "voucher_no",
+					fieldtype: "Link",
+					options: "voucher_type",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					in_list_view: 1,
 					read_only: 1,
 				},
@@ -91,6 +116,7 @@ erpnext.accounts.unreconcile_payment = {
 					read_only: 1,
 					options: "account_currency",
 				},
+<<<<<<< HEAD
 				{
 					label: __("Currency"),
 					fieldname: "account_currency",
@@ -98,6 +124,9 @@ erpnext.accounts.unreconcile_payment = {
 					options: "Currency",
 					read_only: 1,
 				},
+=======
+				{ label: __("Currency"), fieldname: "account_currency", fieldtype: "Currency", read_only: 1 },
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			];
 			let unreconcile_dialog_fields = [
 				{
@@ -106,7 +135,10 @@ erpnext.accounts.unreconcile_payment = {
 					fieldtype: "Table",
 					read_only: 1,
 					fields: child_table_fields,
+<<<<<<< HEAD
 					cannot_add_rows: true,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			];
 
@@ -127,10 +159,18 @@ erpnext.accounts.unreconcile_payment = {
 						};
 
 						let d = new frappe.ui.Dialog({
+<<<<<<< HEAD
 							title: __("UnReconcile Allocations"),
 							fields: unreconcile_dialog_fields,
 							size: "large",
 							primary_action_label: __("UnReconcile"),
+=======
+							title: "UnReconcile Allocations",
+							fields: unreconcile_dialog_fields,
+							size: "large",
+							cannot_add_rows: true,
+							primary_action_label: "UnReconcile",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							primary_action(values) {
 								let selected_allocations = values.allocations.filter((x) => x.__checked);
 								if (selected_allocations.length > 0) {
@@ -144,7 +184,11 @@ erpnext.accounts.unreconcile_payment = {
 									);
 									d.hide();
 								} else {
+<<<<<<< HEAD
 									frappe.msgprint(__("No Selection"));
+=======
+									frappe.msgprint("No Selection");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 								}
 							},
 						});

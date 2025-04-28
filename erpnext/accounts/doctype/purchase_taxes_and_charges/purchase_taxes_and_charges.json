@@ -17,24 +17,39 @@
   "account_head",
   "description",
   "is_tax_withholding_account",
+<<<<<<< HEAD
   "set_by_item_tax_template",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_10",
   "rate",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+<<<<<<< HEAD
   "project",
   "section_break_9",
   "account_currency",
   "net_amount",
+=======
+  "section_break_9",
+  "account_currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "tax_amount",
   "tax_amount_after_discount_amount",
   "total",
   "column_break_14",
+<<<<<<< HEAD
   "base_net_amount",
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount"
+=======
+  "base_tax_amount",
+  "base_total",
+  "base_tax_amount_after_discount_amount",
+  "item_wise_tax_detail"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -196,6 +211,19 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "item_wise_tax_detail",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Item Wise Tax Detail ",
+   "oldfieldname": "item_wise_tax_detail",
+   "oldfieldtype": "Small Text",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -205,6 +233,7 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
     "allow_on_submit": 1,
     "fieldname": "project",
     "fieldtype": "Link",
@@ -212,6 +241,8 @@
     "options": "Project"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "default": "0",
    "depends_on": "eval:['Purchase Taxes and Charges Template', 'Payment Entry'].includes(parent.doctype)",
    "description": "If checked, the tax amount will be considered as already included in the Paid Amount in Payment Entry",
@@ -233,6 +264,7 @@
    "fieldtype": "Check",
    "label": "Is Tax Withholding Account",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "columns": 2,
@@ -269,15 +301,30 @@
  "istable": 1,
  "links": [],
  "modified": "2025-07-24 15:08:44.433022",
+=======
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-04-08 19:51:36.678551",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

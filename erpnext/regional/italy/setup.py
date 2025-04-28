@@ -378,7 +378,10 @@ def make_custom_fields(update=True):
 			),
 		],
 		"Purchase Invoice Item": invoice_item_fields,
+<<<<<<< HEAD
 		"POS Invoice Item": invoice_item_fields,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Sales Order Item": invoice_item_fields,
 		"Delivery Note Item": invoice_item_fields,
 		"Sales Invoice Item": invoice_item_fields + customer_po_fields,

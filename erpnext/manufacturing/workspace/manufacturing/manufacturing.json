@@ -1,7 +1,12 @@
 {
+<<<<<<< HEAD
  "app": "erpnext",
  "charts": [],
  "content": "[{\"id\":\"csBCiDglCE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"YHCQG3wAGv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Creator\",\"col\":3}},{\"id\":\"xit0dg7KvY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"id\":\"LRhGV9GAov\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"id\":\"69KKosI6Hg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"id\":\"PwndxuIpB3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Card\",\"col\":3}},{\"id\":\"Ubj6zXcmIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Plant Floor\",\"col\":3}},{\"id\":\"OtMcArFRa5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"id\":\"76yYsI5imF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"id\":\"PIQJYZOMnD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Learn Manufacturing\",\"col\":3}},{\"id\":\"OaiDqTT03Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"id\":\"bN_6tHS-Ct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yVEFZMqVwd\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"rwrmsTI58-\",\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"id\":\"6dnsyX-siZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"id\":\"m5puAHoHWB\",\"type\":\"card\",\"data\":{\"card_name\":\"Subcontracting\",\"col\":4}},{\"id\":\"CIq-v5f5KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"8RRiQeYr0G\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"Pu8z7-82rT\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+=======
+ "charts": [],
+ "content": "[{\"id\":\"csBCiDglCE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"YHCQG3wAGv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Creator\",\"col\":3}},{\"id\":\"xit0dg7KvY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"id\":\"LRhGV9GAov\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"id\":\"69KKosI6Hg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"id\":\"PwndxuIpB3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Card\",\"col\":3}},{\"id\":\"Ubj6zXcmIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Plant Floor\",\"col\":3}},{\"id\":\"OtMcArFRa5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"id\":\"76yYsI5imF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"id\":\"PIQJYZOMnD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Learn Manufacturing\",\"col\":3}},{\"id\":\"OaiDqTT03Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"id\":\"bN_6tHS-Ct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yVEFZMqVwd\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"rwrmsTI58-\",\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"id\":\"6dnsyX-siZ\",\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"id\":\"CIq-v5f5KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"8RRiQeYr0G\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"Pu8z7-82rT\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "creation": "2020-03-02 17:11:37.032604",
  "custom_blocks": [],
  "docstatus": 0,
@@ -16,6 +21,72 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+<<<<<<< HEAD
+=======
+   "label": "Production",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Item, BOM",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Work Order",
+   "link_count": 0,
+   "link_to": "Work Order",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item, BOM",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Production Plan",
+   "link_count": 0,
+   "link_to": "Production Plan",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Entry",
+   "link_count": 0,
+   "link_to": "Stock Entry",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Job Card",
+   "link_count": 0,
+   "link_to": "Job Card",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Downtime Entry",
+   "link_count": 0,
+   "link_to": "Downtime Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Tools",
    "link_count": 0,
    "onboard": 0,
@@ -65,6 +136,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+<<<<<<< HEAD
    "label": "Bill of Materials",
    "link_count": 6,
    "onboard": 0,
@@ -221,6 +293,10 @@
    "label": "Reports",
    "link_count": 11,
    "link_type": "DocType",
+=======
+   "label": "Reports",
+   "link_count": 10,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "onboard": 0,
    "type": "Card Break"
   },
@@ -236,6 +312,7 @@
    "type": "Link"
   },
   {
+<<<<<<< HEAD
    "hidden": 0,
    "is_query_report": 1,
    "label": "Material Requirements Planning",
@@ -246,6 +323,8 @@
    "type": "Link"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "dependencies": "Work Order",
    "hidden": 0,
    "is_query_report": 1,
@@ -335,7 +414,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Work Order Consumed Materials",
    "link_count": 0,
    "link_to": "Work Order Consumed Materials",
@@ -346,13 +429,19 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+<<<<<<< HEAD
    "label": "Production",
    "link_count": 8,
    "link_type": "DocType",
+=======
+   "label": "Bill of Materials",
+   "link_count": 6,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "onboard": 0,
    "type": "Card Break"
   },
   {
+<<<<<<< HEAD
    "dependencies": "Item, BOM",
    "hidden": 0,
    "is_query_report": 0,
@@ -370,6 +459,14 @@
    "label": "Production Plan",
    "link_count": 0,
    "link_to": "Production Plan",
+=======
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_count": 0,
+   "link_to": "Item",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -378,9 +475,15 @@
    "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
+<<<<<<< HEAD
    "label": "Stock Entry",
    "link_count": 0,
    "link_to": "Stock Entry",
+=======
+   "label": "Bill of Materials",
+   "link_count": 0,
+   "link_to": "BOM",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -389,6 +492,7 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
+<<<<<<< HEAD
    "label": "Job Card",
    "link_count": 0,
    "link_to": "Job Card",
@@ -412,6 +516,11 @@
    "label": "Master Production Schedule",
    "link_count": 0,
    "link_to": "Master Production Schedule",
+=======
+   "label": "Workstation Type",
+   "link_count": 0,
+   "link_to": "Workstation Type",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -420,25 +529,55 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
+<<<<<<< HEAD
    "label": "Downtime Entry",
    "link_count": 0,
    "link_to": "Downtime Entry",
+=======
+   "label": "Workstation",
+   "link_count": 0,
+   "link_to": "Workstation",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
   {
+<<<<<<< HEAD
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Forecast",
    "link_count": 0,
    "link_to": "Sales Forecast",
+=======
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Operation",
+   "link_count": 0,
+   "link_to": "Operation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Work Order",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Routing",
+   "link_count": 0,
+   "link_to": "Routing",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-11-03 17:02:26.882516",
+=======
+ "modified": "2024-01-30 21:49:58.577218",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -454,6 +593,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+<<<<<<< HEAD
    "label": "Learn Manufacturing",
    "type": "URL",
    "url": "https://school.frappe.io/lms/courses/manufacturing?utm_source=in_app"
@@ -461,6 +601,8 @@
   {
    "color": "Grey",
    "doc_view": "List",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Plant Floor",
    "link_to": "Plant Floor",
    "type": "DocType"
@@ -507,18 +649,25 @@
   {
    "label": "Forecasting",
    "link_to": "Exponential Smoothing Forecasting",
+<<<<<<< HEAD
    "report_ref_doctype": "Sales Order",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "type": "Report"
   },
   {
    "label": "BOM Stock Report",
    "link_to": "BOM Stock Report",
+<<<<<<< HEAD
    "report_ref_doctype": "BOM",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "type": "Report"
   },
   {
    "label": "Production Planning Report",
    "link_to": "Production Planning Report",
+<<<<<<< HEAD
    "report_ref_doctype": "Work Order",
    "type": "Report"
   }
@@ -526,3 +675,10 @@
  "title": "Manufacturing",
  "type": "Workspace"
 }
+=======
+   "type": "Report"
+  }
+ ],
+ "title": "Manufacturing"
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

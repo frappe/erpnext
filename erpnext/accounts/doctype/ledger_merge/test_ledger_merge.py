@@ -1,14 +1,25 @@
 # Copyright (c) 2021, Wahni Green Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.ledger_merge.ledger_merge import start_merge
 
 
+<<<<<<< HEAD
 class TestLedgerMerge(IntegrationTestCase):
+=======
+class TestLedgerMerge(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_merge_success(self):
 		if not frappe.db.exists("Account", "Indirect Expenses - _TC"):
 			acc = frappe.new_doc("Account")

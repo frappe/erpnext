@@ -4,9 +4,14 @@
 
 import frappe
 from frappe import qb
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_years, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, flt, nowdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -14,6 +19,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
+<<<<<<< HEAD
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.stock.doctype.item.test_item import create_item
@@ -22,6 +28,15 @@ EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 class TestPaymentReconciliation(IntegrationTestCase):
+=======
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.stock.doctype.item.test_item import create_item
+
+test_dependencies = ["Item"]
+
+
+class TestPaymentReconciliation(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_item()
@@ -633,6 +648,7 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
 
+<<<<<<< HEAD
 	def test_negative_debit_or_credit_journal_against_invoice(self):
 		transaction_date = nowdate()
 		amount = 100
@@ -669,6 +685,8 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_journal_against_journal(self):
 		transaction_date = nowdate()
 		sales = "Sales - _PR"
@@ -975,6 +993,7 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		total_credit_amount = frappe.db.get_all(
 			"Journal Entry Account",
 			{"account": self.debtors_eur, "docstatus": 1, "reference_name": si.name},
+<<<<<<< HEAD
 			[{"SUM": "credit", "as": "amount"}],
 			group_by="reference_name",
 		)[0].amount
@@ -1070,6 +1089,9 @@ class TestPaymentReconciliation(IntegrationTestCase):
 			"Journal Entry Account",
 			{"account": self.debtors_eur, "docstatus": 1, "reference_name": si.name},
 			[{"SUM": "credit", "as": "amount"}],
+=======
+			"sum(credit) as amount",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			group_by="reference_name",
 		)[0].amount
 
@@ -1235,7 +1257,11 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		payment_vouchers = [x.get("reference_name") for x in pr.get("payments")]
 		self.assertCountEqual(payment_vouchers, [je2.name, pe2.name])
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Accounts Settings",
 		{
 			"allow_multi_currency_invoices_against_single_party_account": 1,
@@ -1672,7 +1698,11 @@ class TestPaymentReconciliation(IntegrationTestCase):
 			{
 				"book_advance_payments_in_separate_party_account": 1,
 				"default_advance_paid_account": self.advance_payable_account,
+<<<<<<< HEAD
 				"reconciliation_takes_effect_on": "Advance Payment Date",
+=======
+				"reconcile_on_advance_payment_date": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		)
 
@@ -1714,6 +1744,7 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		)
 		self.assertEqual(len(pl_entries), 3)
 
+<<<<<<< HEAD
 	def test_advance_payment_reconciliation_date_for_older_date(self):
 		old_settings = frappe.db.get_value(
 			"Company",
@@ -1775,6 +1806,8 @@ class TestPaymentReconciliation(IntegrationTestCase):
 
 		frappe.db.set_value("Company", self.company, old_settings)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_advance_payment_reconciliation_against_journal_for_customer(self):
 		frappe.db.set_value(
 			"Company",
@@ -1782,7 +1815,11 @@ class TestPaymentReconciliation(IntegrationTestCase):
 			{
 				"book_advance_payments_in_separate_party_account": 1,
 				"default_advance_received_account": self.advance_receivable_account,
+<<<<<<< HEAD
 				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
+=======
+				"reconcile_on_advance_payment_date": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		)
 		amount = 200.0
@@ -1891,7 +1928,11 @@ class TestPaymentReconciliation(IntegrationTestCase):
 			{
 				"book_advance_payments_in_separate_party_account": 1,
 				"default_advance_paid_account": self.advance_payable_account,
+<<<<<<< HEAD
 				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
+=======
+				"reconcile_on_advance_payment_date": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		)
 		amount = 200.0
@@ -2038,6 +2079,7 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		self.assertEqual(len(pr.invoices), 1)
 		self.assertEqual(len(pr.payments), 1)
 
+<<<<<<< HEAD
 	def test_reconciliation_on_closed_period_payment(self):
 		# create backdated fiscal year
 		first_fy_start_date = frappe.db.get_value(
@@ -2340,6 +2382,8 @@ class TestPaymentReconciliation(IntegrationTestCase):
 
 		frappe.db.set_value("Company", self.company, default_settings)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
@@ -2367,6 +2411,7 @@ def make_supplier(supplier_name, currency=None):
 		return supplier.name
 	else:
 		return supplier_name
+<<<<<<< HEAD
 
 
 def create_fiscal_year(company, year_start_date, year_end_date):
@@ -2427,3 +2472,5 @@ def make_period_closing_voucher(company, cost_center, posting_date=None, submit=
 		pcv.submit()
 
 	return pcv
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

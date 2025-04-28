@@ -2,9 +2,14 @@
 # MIT License. See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.desk.query_report import export_query
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, today
+=======
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import getdate, today
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.financial_statements import get_period_list
@@ -12,7 +17,11 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
+<<<<<<< HEAD
 class TestProfitAndLossStatement(AccountsTestMixin, IntegrationTestCase):
+=======
+class TestProfitAndLossStatement(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -58,7 +67,11 @@ class TestProfitAndLossStatement(AccountsTestMixin, IntegrationTestCase):
 			period_end_date=fy.year_end_date,
 			filter_based_on="Fiscal Year",
 			periodicity="Monthly",
+<<<<<<< HEAD
 			accumulated_values=False,
+=======
+			accumulated_vallues=True,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 	def test_profit_and_loss_output_and_summary(self):
@@ -91,6 +104,7 @@ class TestProfitAndLossStatement(AccountsTestMixin, IntegrationTestCase):
 				with self.subTest(current_period_key=current_period_key):
 					self.assertEqual(acc[current_period_key], 150)
 					self.assertEqual(acc["total"], 150)
+<<<<<<< HEAD
 
 	def test_p_and_l_export(self):
 		self.create_sales_invoice(qty=1, rate=150)
@@ -170,3 +184,5 @@ class TestProfitAndLossStatement(AccountsTestMixin, IntegrationTestCase):
 		for key in expected.keys():
 			with self.subTest(key=key):
 				self.assertEqual(expected.get(key), actual.get(key))
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -21,11 +21,14 @@
   "uom",
   "conversion_factor",
   "stock_uom",
+<<<<<<< HEAD
   "delivered_qty",
   "available_quantity_section",
   "actual_qty",
   "column_break_kyek",
   "company_total_stock",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "serial_no_and_batch_section",
   "pick_serial_and_batch",
   "serial_and_batch_bundle",
@@ -128,7 +131,11 @@
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
+<<<<<<< HEAD
    "label": "Qty (in Stock UOM)",
+=======
+   "label": "Stock Qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -242,6 +249,7 @@
   {
    "fieldname": "column_break_belw",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -279,20 +287,33 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-09-23 00:02:57.817040",
+=======
+ "modified": "2024-05-07 15:32:42.905446",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

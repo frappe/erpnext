@@ -1,5 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -10,6 +11,19 @@ IGNORE_TEST_RECORD_DEPENDENCIES = ["Company"]
 
 
 class TestFiscalYear(IntegrationTestCase):
+=======
+
+
+import unittest
+
+import frappe
+from frappe.utils import now_datetime
+
+test_ignore = ["Company"]
+
+
+class TestFiscalYear(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_extra_year(self):
 		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 2000"):
 			frappe.delete_doc("Fiscal Year", "_Test Fiscal Year 2000")
@@ -25,6 +39,7 @@ class TestFiscalYear(IntegrationTestCase):
 
 		self.assertRaises(frappe.exceptions.InvalidDates, fy.insert)
 
+<<<<<<< HEAD
 	def test_company_fiscal_year_overlap(self):
 		for name in ["_Test Global FY 2001", "_Test Company FY 2001"]:
 			if frappe.db.exists("Fiscal Year", name):
@@ -46,6 +61,8 @@ class TestFiscalYear(IntegrationTestCase):
 		self.assertTrue(frappe.db.exists("Fiscal Year", global_fy.name))
 		self.assertTrue(frappe.db.exists("Fiscal Year", company_fy.name))
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def test_record_generator():
 	test_records = [
@@ -59,6 +76,7 @@ def test_record_generator():
 	]
 
 	start = 2012
+<<<<<<< HEAD
 	this_year = now_datetime().year
 	end = now_datetime().year + 25
 	# The current year fails to load with the following error:
@@ -74,6 +92,10 @@ def test_record_generator():
 			}
 		)
 	for year in range(this_year + 1, end):
+=======
+	end = now_datetime().year + 25
+	for year in range(start, end):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		test_records.append(
 			{
 				"doctype": "Fiscal Year",

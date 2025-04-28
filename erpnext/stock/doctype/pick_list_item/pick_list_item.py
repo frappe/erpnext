@@ -15,11 +15,16 @@ class PickListItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		actual_qty: DF.Float
 		batch_no: DF.Link | None
 		company_total_stock: DF.Float
 		conversion_factor: DF.Float
 		delivered_qty: DF.Float
+=======
+		batch_no: DF.Link | None
+		conversion_factor: DF.Float
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		description: DF.Text | None
 		item_code: DF.Link
 		item_group: DF.Data | None

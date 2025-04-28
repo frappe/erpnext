@@ -1,8 +1,11 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils.make_random import get_random
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report
 
@@ -13,11 +16,16 @@ DEFAULT_FILTERS = {
 }
 
 
+<<<<<<< HEAD
 batch = get_random("Batch")
+=======
+batch = frappe.db.get_value("Batch", fieldname=["name"], as_dict=True, order_by="creation desc")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Stock Ledger", {"_optional": True}),
 	("Stock Ledger", {"batch_no": batch}),
+<<<<<<< HEAD
 	("Stock Ledger", {"item_code": ["_Test Item"], "warehouse": ["_Test Warehouse - _TC"]}),
 	(
 		"Stock Balance",
@@ -27,6 +35,10 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 			"item_group": "_Test Item Group",
 		},
 	),
+=======
+	("Stock Ledger", {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}),
+	("Stock Balance", {"_optional": True}),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	("Stock Projected Qty", {"_optional": True}),
 	("Batch-Wise Balance History", {}),
 	("Itemwise Recommended Reorder Level", {"item_group": "All Item Groups"}),
@@ -71,7 +83,11 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Item Prices", {"items": "Enabled Items only"}),
 	("Delayed Item Report", {"based_on": "Sales Invoice"}),
 	("Delayed Item Report", {"based_on": "Delivery Note"}),
+<<<<<<< HEAD
 	("Stock Ageing", {"range": "30, 60, 90", "_optional": True}),
+=======
+	("Stock Ageing", {"range1": 30, "range2": 60, "range3": 90, "_optional": True}),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	("Stock Ledger Invariant Check", {"warehouse": "_Test Warehouse - _TC", "item": "_Test Item"}),
 	("FIFO Queue vs Qty After Transaction Comparison", {"warehouse": "_Test Warehouse - _TC"}),
 	("FIFO Queue vs Qty After Transaction Comparison", {"item_group": "All Item Groups"}),
@@ -84,7 +100,11 @@ OPTIONAL_FILTERS = {
 }
 
 
+<<<<<<< HEAD
 class TestReports(IntegrationTestCase):
+=======
+class TestReports(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_execute_all_stock_reports(self):
 		"""Test that all script report in stock modules are executable with supported filters"""
 		for report, filter in REPORT_FILTER_TEST_CASES:

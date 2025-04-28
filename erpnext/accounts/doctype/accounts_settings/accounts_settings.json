@@ -19,7 +19,10 @@
   "column_break_17",
   "enable_common_party_accounting",
   "allow_multi_currency_invoices_against_single_party_account",
+<<<<<<< HEAD
   "confirm_before_resetting_posting_date",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "journals_section",
   "merge_similar_account_heads",
   "deferred_accounting_settings_section",
@@ -32,7 +35,10 @@
   "determine_address_tax_category_from",
   "column_break_19",
   "add_taxes_from_item_tax_template",
+<<<<<<< HEAD
   "add_taxes_from_taxes_and_charges_template",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "book_tax_discount_loss",
   "round_row_wise_tax",
   "print_settings",
@@ -40,6 +46,7 @@
   "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
+<<<<<<< HEAD
   "item_price_settings_section",
   "maintain_same_internal_transaction_rate",
   "fetch_valuation_rate_for_internal_transaction",
@@ -57,6 +64,13 @@
   "reconciliation_queue_size",
   "column_break_resa",
   "exchange_gain_loss_posting_date",
+=======
+  "currency_exchange_section",
+  "allow_stale",
+  "section_break_jpd0",
+  "auto_reconcile_payments",
+  "stale_days",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -67,7 +81,10 @@
   "pos_tab",
   "pos_setting_section",
   "post_change_gl_entries",
+<<<<<<< HEAD
   "column_break_xrnd",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "assets_tab",
   "asset_settings_section",
   "calculate_depr_using_total_days",
@@ -77,7 +94,10 @@
   "period_closing_settings_section",
   "acc_frozen_upto",
   "ignore_account_closing_balance",
+<<<<<<< HEAD
   "use_legacy_controller_for_pcv",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_25",
   "frozen_accounts_modifier",
   "tab_break_dpet",
@@ -90,6 +110,7 @@
   "general_ledger_remarks_length",
   "column_break_lvjk",
   "receivable_payable_remarks_length",
+<<<<<<< HEAD
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
   "column_break_ntmi",
@@ -100,6 +121,10 @@
   "create_pr_in_draft_status",
   "budget_settings",
   "use_legacy_budget_controller"
+=======
+  "payment_request_settings",
+  "create_pr_in_draft_status"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -408,7 +433,11 @@
   {
    "fieldname": "section_break_jpd0",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Payment Reconciliation Settings"
+=======
+   "label": "Payment Reconciliations"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "0",
@@ -513,6 +542,7 @@
    "fieldname": "create_pr_in_draft_status",
    "fieldtype": "Check",
    "label": "Create in Draft Status"
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_yuug",
@@ -661,12 +691,20 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-20 14:06:08.870427",
+=======
+ "modified": "2024-07-26 06:48:52.714630",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
@@ -691,9 +729,16 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

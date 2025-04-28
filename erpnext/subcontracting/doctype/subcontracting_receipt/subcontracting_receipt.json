@@ -152,7 +152,10 @@
    "width": "100px"
   },
   {
+<<<<<<< HEAD
    "default": "Now",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "Time at which materials were received",
    "fieldname": "posting_time",
    "fieldtype": "Time",
@@ -337,7 +340,11 @@
    "fieldname": "total",
    "fieldtype": "Currency",
    "label": "Total",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+   "options": "currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -619,7 +626,10 @@
    "fieldname": "total_additional_costs",
    "fieldtype": "Currency",
    "label": "Total Additional Costs",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide_if_no_value": 1,
    "read_only": 1
   },
@@ -649,7 +659,10 @@
    "label": "Raw Materials Actions"
   },
   {
+<<<<<<< HEAD
    "description": "Click this button if you encounter a negative stock error for a serial or batch item. The system will fetch the available serials or batches automatically.",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "reset_raw_materials_table",
    "fieldtype": "Button",
    "label": "Reset Raw Materials Table"
@@ -659,6 +672,7 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "fieldname": "tab_other_info",
    "fieldtype": "Tab Break",
    "label": "Other Info"
@@ -674,12 +688,33 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+=======
+    "fieldname": "tab_other_info",
+    "fieldtype": "Tab Break",
+    "label": "Other Info"
+  },
+  {
+    "collapsible": 1,
+    "fieldname": "order_status_section",
+    "fieldtype": "Section Break",
+    "label": "Order Status"
+  },
+  {
+    "fieldname": "tab_connections",
+    "fieldtype": "Tab Break",
+    "label": "Connections",
+    "show_dashboard": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-08 21:43:27.065640",
+=======
+ "modified": "2024-05-27 15:02:13.517969",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
@@ -740,7 +775,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status, posting_date, supplier",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
@@ -749,4 +787,8 @@
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

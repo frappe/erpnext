@@ -8,6 +8,7 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+<<<<<<< HEAD
   "naming_series",
   "item_code",
   "item_name",
@@ -18,11 +19,35 @@
   "column_break_3",
   "status",
   "company",
+=======
+  "company",
+  "item_code",
+  "item_name",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "asset_owner",
   "asset_owner_company",
   "is_existing_asset",
   "is_composite_asset",
+<<<<<<< HEAD
   "is_composite_component",
+=======
+  "supplier",
+  "customer",
+  "image",
+  "journal_entry_for_scrap",
+  "column_break_3",
+  "naming_series",
+  "asset_name",
+  "asset_category",
+  "location",
+  "split_from",
+  "custodian",
+  "department",
+  "disposal_date",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "purchase_details_section",
   "purchase_receipt",
   "purchase_receipt_item",
@@ -31,6 +56,7 @@
   "purchase_date",
   "available_for_use_date",
   "column_break_23",
+<<<<<<< HEAD
   "net_purchase_amount",
   "purchase_amount",
   "asset_quantity",
@@ -38,6 +64,13 @@
   "total_asset_cost",
   "disposal_date",
   "depreciation_tab",
+=======
+  "gross_purchase_amount",
+  "asset_quantity",
+  "additional_asset_cost",
+  "total_asset_cost",
+  "section_break_23",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "calculate_depreciation",
   "column_break_33",
   "opening_accumulated_depreciation",
@@ -54,7 +87,11 @@
   "next_depreciation_date",
   "depreciation_schedule_sb",
   "depreciation_schedule_view",
+<<<<<<< HEAD
   "insurance_details_tab",
+=======
+  "insurance_details",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "policy_number",
   "insurer",
   "insured_value",
@@ -62,6 +99,7 @@
   "insurance_start_date",
   "insurance_end_date",
   "comprehensive_insurance",
+<<<<<<< HEAD
   "other_info_tab",
   "accounting_dimensions_section",
   "cost_center",
@@ -79,16 +117,35 @@
   "amended_from",
   "maintenance_required",
   "connections_tab"
+=======
+  "section_break_31",
+  "maintenance_required",
+  "other_details",
+  "status",
+  "booked_fixed_asset",
+  "column_break_51",
+  "purchase_amount",
+  "default_finance_book",
+  "depr_entry_posting_status",
+  "amended_from"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+<<<<<<< HEAD
    "label": "Series",
    "options": "ACC-ASS-.YYYY.-"
   },
   {
    "allow_on_submit": 1,
+=======
+   "label": "Naming Series",
+   "options": "ACC-ASS-.YYYY.-"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "item_code",
    "fetch_from": "item_code.item_name",
    "fetch_if_empty": 1,
@@ -126,7 +183,10 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "default": "Company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "asset_owner",
    "fieldtype": "Select",
    "label": "Asset Owner",
@@ -156,7 +216,10 @@
   {
    "allow_on_submit": 1,
    "fetch_from": "item_code.image",
+<<<<<<< HEAD
    "fetch_if_empty": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -207,8 +270,13 @@
    "fieldname": "purchase_date",
    "fieldtype": "Date",
    "label": "Purchase Date",
+<<<<<<< HEAD
    "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
    "reqd": 1
+=======
+   "mandatory_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "disposal_date",
@@ -227,21 +295,44 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
    "label": "Available-for-use Date",
    "mandatory_depends_on": "eval:(!(doc.is_composite_component || doc.is_composite_asset) || doc.docstatus==1)"
+=======
+   "fieldname": "gross_purchase_amount",
+   "fieldtype": "Currency",
+   "label": "Gross Purchase Amount",
+   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
+   "options": "Company:company:default_currency",
+   "read_only_depends_on": "eval:!doc.is_existing_asset"
+  },
+  {
+   "fieldname": "available_for_use_date",
+   "fieldtype": "Date",
+   "label": "Available-for-use Date",
+   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "0",
    "fieldname": "calculate_depreciation",
    "fieldtype": "Check",
    "label": "Calculate Depreciation",
+<<<<<<< HEAD
    "read_only_depends_on": "eval:(doc.is_composite_asset && !doc.net_purchase_amount) || doc.is_composite_component"
   },
   {
    "default": "0",
    "depends_on": "eval:(!doc.is_composite_asset && !doc.is_composite_component)",
+=======
+   "read_only_depends_on": "eval:doc.is_composite_asset && !doc.gross_purchase_amount"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.is_composite_asset",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "is_existing_asset",
    "fieldtype": "Check",
    "label": "Is Existing Asset"
@@ -254,9 +345,23 @@
    "options": "Company:company:default_currency"
   },
   {
+<<<<<<< HEAD
    "columns": 10,
    "fieldname": "finance_books",
    "fieldtype": "Table",
+=======
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.calculate_depreciation || doc.is_existing_asset",
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break",
+   "label": "Depreciation"
+  },
+  {
+   "columns": 10,
+   "fieldname": "finance_books",
+   "fieldtype": "Table",
+   "label": "Finance Books",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Asset Finance Book"
   },
   {
@@ -299,6 +404,15 @@
    "no_copy": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "collapsible": 1,
+   "fieldname": "insurance_details",
+   "fieldtype": "Section Break",
+   "label": "Insurance details"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "policy_number",
    "fieldtype": "Data",
    "label": "Policy number"
@@ -333,13 +447,34 @@
    "label": "Comprehensive Insurance"
   },
   {
+<<<<<<< HEAD
    "allow_on_submit": 1,
    "default": "0",
+=======
+   "fieldname": "section_break_31",
+   "fieldtype": "Section Break",
+   "label": "Maintenance"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "description": "Check if Asset requires Preventive Maintenance or Calibration",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "maintenance_required",
    "fieldtype": "Check",
    "label": "Maintenance Required"
   },
   {
+<<<<<<< HEAD
+=======
+   "collapsible": 1,
+   "fieldname": "other_details",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "allow_on_submit": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -347,14 +482,21 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "Draft\nSubmitted\nCancelled\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt\nCapitalized\nWork In Progress",
+=======
+   "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt\nCapitalized\nDecapitalized",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "booked_fixed_asset",
    "fieldtype": "Check",
+<<<<<<< HEAD
    "hidden": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Booked Fixed Asset",
    "no_copy": 1,
    "read_only": 1
@@ -399,6 +541,20 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible_depends_on": "is_existing_asset",
    "fieldname": "purchase_details_section",
    "fieldtype": "Section Break",
@@ -422,7 +578,10 @@
    "fieldname": "split_from",
    "fieldtype": "Link",
    "label": "Split From",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Asset",
    "read_only": 1
   },
@@ -430,7 +589,12 @@
    "default": "1",
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
+<<<<<<< HEAD
    "label": "Asset Quantity"
+=======
+   "label": "Asset Quantity",
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "depr_entry_posting_status",
@@ -462,7 +626,11 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "depends_on": "eval:(!doc.is_existing_asset && !doc.is_composite_component)",
+=======
+   "depends_on": "eval:!doc.is_existing_asset",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "is_composite_asset",
    "fieldtype": "Check",
    "label": "Is Composite Asset"
@@ -472,17 +640,26 @@
    "fieldname": "total_asset_cost",
    "fieldtype": "Currency",
    "label": "Total Asset Cost",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "default": "0",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "eval:doc.docstatus > 0",
    "fieldname": "additional_asset_cost",
    "fieldtype": "Currency",
    "label": "Additional Asset Cost",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -503,6 +680,7 @@
   },
   {
    "fieldname": "purchase_receipt_item",
+<<<<<<< HEAD
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Purchase Receipt Item"
@@ -557,6 +735,19 @@
    "label": "Net Purchase Amount",
    "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
    "options": "Company:company:default_currency"
+=======
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Receipt Item",
+   "options": "Purchase Receipt Item"
+  },
+  {
+   "fieldname": "purchase_invoice_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Invoice Item",
+   "options": "Purchase Invoice Item"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "idx": 72,
@@ -600,7 +791,11 @@
    "link_fieldname": "target_asset"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-11-04 22:39:00.817405",
+=======
+ "modified": "2024-08-26 23:28:29.095139",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -638,11 +833,18 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "title_field": "asset_name",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

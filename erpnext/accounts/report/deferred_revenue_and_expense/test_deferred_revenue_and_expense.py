@@ -1,6 +1,10 @@
 import frappe
 from frappe import qb
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -13,8 +17,15 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 
 
+<<<<<<< HEAD
 class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 	maxDiff = None
+=======
+class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
+	@classmethod
+	def setUpClass(self):
+		self.maxDiff = None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def clear_old_entries(self):
 		sinv = qb.DocType("Sales Invoice")
@@ -70,7 +81,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 	def tearDown(self):
 		frappe.db.rollback()
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+=======
+	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_deferred_revenue(self):
 		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -114,7 +129,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		pda.submit()
 
 		# execute report
+<<<<<<< HEAD
 		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01")[0])
+=======
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.filters = frappe._dict(
 			{
 				"company": self.company,
@@ -139,7 +158,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+=======
+	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_deferred_expense(self):
 		self.create_item("_Test Office Desk", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -186,7 +209,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		pda.submit()
 
 		# execute report
+<<<<<<< HEAD
 		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01")[0])
+=======
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.filters = frappe._dict(
 			{
 				"company": self.company,
@@ -211,7 +238,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+=======
+	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_zero_months(self):
 		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -253,7 +284,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		pda.submit()
 
 		# execute report
+<<<<<<< HEAD
 		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01")[0])
+=======
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.filters = frappe._dict(
 			{
 				"company": self.company,
@@ -278,7 +313,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Months", "book_deferred_entries_via_journal_entry": 0},
 	)
@@ -326,7 +365,11 @@ class TestDeferredRevenueAndExpense(IntegrationTestCase, AccountsTestMixin):
 		pda.submit()
 
 		# execute report
+<<<<<<< HEAD
 		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2022-01-31")[0])
+=======
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2022-01-31"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.filters = frappe._dict(
 			{
 				"company": self.company,

@@ -52,7 +52,10 @@ class PurchaseOrderItem(Document):
 		item_name: DF.Data
 		item_tax_rate: DF.Code | None
 		item_tax_template: DF.Link | None
+<<<<<<< HEAD
 		job_card: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		last_purchase_rate: DF.Currency
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
@@ -85,7 +88,10 @@ class PurchaseOrderItem(Document):
 		stock_qty: DF.Float
 		stock_uom: DF.Link
 		stock_uom_rate: DF.Currency
+<<<<<<< HEAD
 		subcontracted_qty: DF.Float
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		supplier_part_no: DF.Data | None
 		supplier_quotation: DF.Link | None
 		supplier_quotation_item: DF.Link | None

@@ -7,7 +7,11 @@
 
 import frappe
 from frappe import _dict
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
@@ -21,10 +25,18 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item"]
 
 
 class TestSerialNo(IntegrationTestCase):
+=======
+test_dependencies = ["Item"]
+test_records = frappe.get_test_records("Serial No")
+
+
+class TestSerialNo(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		frappe.db.rollback()
 
@@ -46,7 +58,11 @@ class TestSerialNo(IntegrationTestCase):
 		self.assertTrue(SerialNoCannotCannotChangeError, sr.save)
 
 	def test_inter_company_transfer(self):
+<<<<<<< HEAD
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
+=======
+		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 
 		create_delivery_note(item_code="_Test Serialized Item With Series", qty=1, serial_no=[serial_nos[0]])
@@ -76,7 +92,11 @@ class TestSerialNo(IntegrationTestCase):
 		Then Receive into and Deliver from second company.
 		Try to cancel intermediate receipts/deliveries to test if it is blocked.
 		"""
+<<<<<<< HEAD
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
+=======
+		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 
 		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
@@ -118,7 +138,10 @@ class TestSerialNo(IntegrationTestCase):
 			serial_no=[serial_nos[0]],
 			company="_Test Company 1",
 			warehouse=wh,
+<<<<<<< HEAD
 			cost_center="_Test Company 1 - _TC1",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		sn_doc.reload()
 
@@ -137,7 +160,11 @@ class TestSerialNo(IntegrationTestCase):
 		If Receipt is cancelled, it should be Inactive in the same company.
 		"""
 		# Receipt in **first** company
+<<<<<<< HEAD
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
+=======
+		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
 
@@ -154,7 +181,10 @@ class TestSerialNo(IntegrationTestCase):
 			serial_no=[serial_nos[0]],
 			company="_Test Company 1",
 			warehouse=wh,
+<<<<<<< HEAD
 			cost_center="_Test Company 1 - _TC1",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		# Delivery from second company
@@ -164,7 +194,10 @@ class TestSerialNo(IntegrationTestCase):
 			serial_no=[serial_nos[0]],
 			company="_Test Company 1",
 			warehouse=wh,
+<<<<<<< HEAD
 			cost_center="_Test Company 1 - _TC1",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		sn_doc.reload()
 

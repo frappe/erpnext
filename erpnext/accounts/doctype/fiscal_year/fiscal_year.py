@@ -99,7 +99,11 @@ class FiscalYear(Document):
 				)
 
 				overlap = False
+<<<<<<< HEAD
 				if not self.get("companies") and not company_for_existing:
+=======
+				if not self.get("companies") or not company_for_existing:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					overlap = True
 
 				for d in self.get("companies"):
@@ -123,7 +127,11 @@ def check_duplicate_fiscal_year(doc):
 	)
 	for fiscal_year, ysd, yed in year_start_end_dates:
 		if (getdate(doc.year_start_date) == ysd and getdate(doc.year_end_date) == yed) and (
+<<<<<<< HEAD
 			not frappe.in_test
+=======
+			not frappe.flags.in_test
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		):
 			frappe.throw(
 				_(

@@ -8,7 +8,11 @@ import frappe
 def execute():
 	warehouse_perm = frappe.get_all(
 		"User Permission",
+<<<<<<< HEAD
 		fields=[{"COUNT": "*", "as": "p_count"}, "is_default", "user"],
+=======
+		fields=["count(*) as p_count", "is_default", "user"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters={"allow": "Warehouse"},
 		group_by="user",
 	)

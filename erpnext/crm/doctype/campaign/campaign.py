@@ -25,6 +25,7 @@ class Campaign(Document):
 		naming_series: DF.Literal["SAL-CAM-.YYYY.-"]
 	# end: auto-generated types
 
+<<<<<<< HEAD
 	def after_insert(self):
 		try:
 			mc = frappe.get_doc("UTM Campaign", self.campaign_name)
@@ -45,6 +46,8 @@ class Campaign(Document):
 		mc.crm_campaign = self.campaign_name
 		mc.save(ignore_permissions=True)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def autoname(self):
 		if frappe.defaults.get_global_default("campaign_naming_by") != "Naming Series":
 			self.name = self.campaign_name

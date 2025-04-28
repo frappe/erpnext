@@ -11,7 +11,10 @@
   "bank_account",
   "bank",
   "column_break_4",
+<<<<<<< HEAD
   "import_mt940_fromat",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "custom_delimiters",
   "delimiter_options",
   "google_sheets_url",
@@ -21,7 +24,10 @@
   "download_template",
   "status",
   "template_options",
+<<<<<<< HEAD
   "use_csv_sniffer",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "import_warnings_section",
   "template_warnings",
   "import_warnings",
@@ -209,6 +215,7 @@
    "fieldname": "delimiter_options",
    "fieldtype": "Data",
    "label": "Delimiter options"
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -222,15 +229,24 @@
    "fieldname": "import_mt940_fromat",
    "fieldtype": "Check",
    "label": "Import MT940 Fromat"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "hide_toolbar": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-06-11 02:23:22.159961",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import",
  "naming_rule": "Expression",
+=======
+ "modified": "2024-06-25 17:32:07.658250",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Statement Import",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {
@@ -246,9 +262,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

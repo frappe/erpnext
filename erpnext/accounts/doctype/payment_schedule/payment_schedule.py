@@ -14,15 +14,20 @@ class PaymentSchedule(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		base_outstanding: DF.Currency
 		base_paid_amount: DF.Currency
 		base_payment_amount: DF.Currency
 		credit_days: DF.Int
 		credit_months: DF.Int
+=======
+		base_payment_amount: DF.Currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		description: DF.SmallText | None
 		discount: DF.Float
 		discount_date: DF.Date | None
 		discount_type: DF.Literal["Percentage", "Amount"]
+<<<<<<< HEAD
 		discount_validity: DF.Int
 		discount_validity_based_on: DF.Literal[
 			"",
@@ -38,6 +43,10 @@ class PaymentSchedule(Document):
 			"Day(s) after the end of the invoice month",
 			"Month(s) after the end of the invoice month",
 		]
+=======
+		discounted_amount: DF.Currency
+		due_date: DF.Date
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		invoice_portion: DF.Percent
 		mode_of_payment: DF.Link | None
 		outstanding: DF.Currency

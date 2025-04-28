@@ -84,6 +84,7 @@ def link_communications_with_prospect(communication, method):
 			row.db_update()
 
 
+<<<<<<< HEAD
 def update_modified_timestamp(communication, method):
 	if communication.reference_doctype and communication.reference_name:
 		if communication.sent_or_received == "Received" and frappe.db.get_single_value(
@@ -98,6 +99,8 @@ def update_modified_timestamp(communication, method):
 			)
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_linked_prospect(reference_doctype, reference_name):
 	prospect = None
 	if reference_doctype == "Lead":
@@ -147,6 +150,7 @@ def link_open_events(ref_doctype, ref_docname, doc):
 def get_open_activities(ref_doctype, ref_docname):
 	tasks = get_open_todos(ref_doctype, ref_docname)
 	events = get_open_events(ref_doctype, ref_docname)
+<<<<<<< HEAD
 	tasks_history = get_closed_todos(ref_doctype, ref_docname)
 	events_history = get_closed_events(ref_doctype, ref_docname)
 
@@ -178,6 +182,16 @@ def get_filtered_todos(ref_doctype, ref_docname, status: str | tuple[str, str]):
 	return frappe.get_all(
 		"ToDo",
 		filters={"reference_type": ref_doctype, "reference_name": ref_docname, "status": status},
+=======
+
+	return {"tasks": tasks, "events": events}
+
+
+def get_open_todos(ref_doctype, ref_docname):
+	return frappe.get_all(
+		"ToDo",
+		filters={"reference_type": ref_doctype, "reference_name": ref_docname, "status": "Open"},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		fields=[
 			"name",
 			"description",
@@ -187,6 +201,7 @@ def get_filtered_todos(ref_doctype, ref_docname, status: str | tuple[str, str]):
 	)
 
 
+<<<<<<< HEAD
 def get_filtered_events(ref_doctype, ref_docname, open: bool):
 	event = frappe.qb.DocType("Event")
 	event_link = frappe.qb.DocType("Event Participants")
@@ -196,6 +211,12 @@ def get_filtered_events(ref_doctype, ref_docname, open: bool):
 	else:
 		event_status_filter = event.status != "Open"
 
+=======
+def get_open_events(ref_doctype, ref_docname):
+	event = frappe.qb.DocType("Event")
+	event_link = frappe.qb.DocType("Event Participants")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	query = (
 		frappe.qb.from_(event)
 		.join(event_link)
@@ -211,7 +232,11 @@ def get_filtered_events(ref_doctype, ref_docname, open: bool):
 		.where(
 			(event_link.reference_doctype == ref_doctype)
 			& (event_link.reference_docname == ref_docname)
+<<<<<<< HEAD
 			& (event_status_filter)
+=======
+			& (event.status == "Open")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 	)
 	data = query.run(as_dict=True)

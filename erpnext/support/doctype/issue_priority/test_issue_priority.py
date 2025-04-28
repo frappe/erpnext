@@ -1,5 +1,6 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -7,6 +8,15 @@ from frappe.tests import IntegrationTestCase
 
 
 class TestIssuePriority(IntegrationTestCase):
+=======
+
+import unittest
+
+import frappe
+
+
+class TestIssuePriority(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_priorities(self):
 		make_priorities()
 		priorities = frappe.get_list("Issue Priority")

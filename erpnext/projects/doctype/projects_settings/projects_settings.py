@@ -14,7 +14,10 @@ class ProjectsSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		fetch_timesheet_in_sales_invoice: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		ignore_employee_time_overlap: DF.Check
 		ignore_user_time_overlap: DF.Check
 		ignore_workstation_time_overlap: DF.Check

@@ -8,6 +8,10 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+<<<<<<< HEAD
+=======
+  "title",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "naming_series",
   "customer",
   "tax_id",
@@ -37,7 +41,11 @@
   "ignore_pricing_rule",
   "items_section",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+  "pick_list",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "col_break_warehouse",
   "set_warehouse",
   "set_target_warehouse",
@@ -85,7 +93,10 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
+<<<<<<< HEAD
   "item_wise_tax_details",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "packing_list",
   "packed_items",
   "product_bundle_help",
@@ -108,9 +119,14 @@
   "dispatch_address",
   "company_address_section",
   "company_address",
+<<<<<<< HEAD
   "company_address_display",
   "column_break_101",
   "company_contact_person",
+=======
+  "column_break_101",
+  "company_address_display",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "terms_tab",
   "tc_name",
   "terms",
@@ -160,11 +176,16 @@
   "inter_company_reference",
   "customer_group",
   "territory",
+<<<<<<< HEAD
   "column_break_pxls",
   "utm_source",
   "utm_campaign",
   "utm_medium",
   "utm_content",
+=======
+  "source",
+  "campaign",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break5",
   "excise_page",
   "instructions",
@@ -172,6 +193,19 @@
  ],
  "fields": [
   {
+<<<<<<< HEAD
+=======
+   "allow_on_submit": 1,
+   "default": "{customer_name}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
@@ -253,7 +287,10 @@
    "width": "100px"
   },
   {
+<<<<<<< HEAD
    "default": "Now",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -965,6 +1002,27 @@
    "options": "Project"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "campaign",
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "oldfieldname": "campaign",
+   "oldfieldtype": "Link",
+   "options": "Campaign",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Link",
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "Lead Source",
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "column_break5",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -1199,6 +1257,18 @@
    "print_hide": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "pick_list",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Pick List",
+   "options": "Pick List",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "default": "0",
    "fetch_from": "customer.is_internal_customer",
    "fieldname": "is_internal_customer",
@@ -1370,6 +1440,7 @@
    "label": "Delivery Trip",
    "options": "Delivery Trip",
    "print_hide": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_pxls",
@@ -1427,13 +1498,19 @@
    "label": "Item Wise Tax Details",
    "no_copy": 1,
    "options": "Item Wise Tax Detail"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-04 19:20:47.724218",
+=======
+ "modified": "2024-05-23 14:18:20.679692",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
@@ -1524,14 +1601,24 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status,customer,customer_name, territory,base_grand_total",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
+<<<<<<< HEAD
  "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1
 }
+=======
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

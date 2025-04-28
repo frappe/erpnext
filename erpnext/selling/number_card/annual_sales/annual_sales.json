@@ -5,13 +5,21 @@
  "doctype": "Number Card",
  "document_type": "Sales Order",
  "dynamic_filters_json": "[[\"Sales Order\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+<<<<<<< HEAD
  "filters_json": "[[\"Sales Order\",\"status\",\"not in\",[\"Draft\",\"Cancelled\",\"Closed\",null]],[\"Sales Order\",\"docstatus\",\"=\",\"1\"],[\"Sales Order\",\"modified\",\"Timespan\",\"this year\"]]",
+=======
+ "filters_json": "[[\"Sales Order\",\"status\",\"not in\",[\"Draft\",\"Cancelled\",\"Closed\",null],false],[\"Sales Order\",\"docstatus\",\"=\",\"1\",false],[\"Sales Order\",\"modified\",\"Timespan\",\"this year\",false]]",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "function": "Sum",
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
  "label": "Annual Sales",
+<<<<<<< HEAD
  "modified": "2024-12-05 12:00:00.000000",
+=======
+ "modified": "2020-07-22 16:56:33.747156",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Annual Sales",

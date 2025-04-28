@@ -5,7 +5,10 @@
  "creation": "2013-05-21 16:16:39",
  "doctype": "DocType",
  "document_type": "Document",
+<<<<<<< HEAD
  "email_append_to": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "engine": "InnoDB",
  "field_order": [
   "title",
@@ -48,7 +51,10 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "col_break_warehouse",
   "update_stock",
   "set_warehouse",
@@ -64,7 +70,10 @@
   "column_break_50",
   "base_total",
   "base_net_total",
+<<<<<<< HEAD
   "claimed_landed_cost_amount",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_28",
   "total",
   "net_total",
@@ -112,7 +121,10 @@
   "tax_withheld_vouchers",
   "sec_tax_breakup",
   "other_charges_calculation",
+<<<<<<< HEAD
   "item_wise_tax_details",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "pricing_rule_details",
   "pricing_rules",
   "raw_materials_supplied",
@@ -147,10 +159,15 @@
   "contact_mobile",
   "contact_email",
   "company_shipping_address_section",
+<<<<<<< HEAD
   "dispatch_address",
   "dispatch_address_display",
   "column_break_126",
   "shipping_address",
+=======
+  "shipping_address",
+  "column_break_126",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "shipping_address_display",
   "company_billing_address_section",
   "billing_address",
@@ -198,7 +215,10 @@
   "is_internal_supplier",
   "represents_company",
   "supplier_group",
+<<<<<<< HEAD
   "sender",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_147",
   "inter_company_invoice_reference",
   "is_old_subcontracting_flow",
@@ -324,7 +344,10 @@
    "search_index": 1
   },
   {
+<<<<<<< HEAD
    "default": "Now",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1142,14 +1165,20 @@
    "label": "Payment Terms"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:(!doc.is_paid && !doc.is_return)",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "payment_terms_template",
    "fieldtype": "Link",
    "label": "Payment Terms Template",
    "options": "Payment Terms Template"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:(!doc.is_paid && !doc.is_return)",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "payment_schedule",
    "fieldtype": "Table",
    "label": "Payment Schedule",
@@ -1554,7 +1583,11 @@
   {
    "fieldname": "company_shipping_address_section",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Shipping Address"
+=======
+   "label": "Company Shipping Address"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_126",
@@ -1631,6 +1664,7 @@
   {
    "default": "1",
    "depends_on": "eval: doc.is_return && doc.return_against",
+<<<<<<< HEAD
    "description": "Debit Note will update it's own outstanding amount, even if 'Return Against' is specified.",
    "fieldname": "update_outstanding_for_self",
    "fieldtype": "Check",
@@ -1682,11 +1716,23 @@
   }
  ],
  "grid_page_length": 50,
+=======
+   "description": "Debit Note will update it's own outstanding amount, even if \"Return Against\" is specified.",
+   "fieldname": "update_outstanding_for_self",
+   "fieldtype": "Check",
+   "label": "Update Outstanding for Self"
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-04 19:19:11.380664",
+=======
+ "modified": "2024-07-25 19:42:36.931278",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1741,9 +1787,13 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "search_fields": "posting_date, supplier, bill_no, base_grand_total, outstanding_amount",
  "sender_field": "sender",
+=======
+ "search_fields": "posting_date, supplier, bill_no, base_grand_total, outstanding_amount",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
@@ -1751,4 +1801,8 @@
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

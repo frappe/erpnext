@@ -3,8 +3,11 @@
 
 frappe.ui.form.on("Asset Repair", {
 	setup: function (frm) {
+<<<<<<< HEAD
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.fields_dict.cost_center.get_query = function (doc) {
 			return {
 				filters: {
@@ -31,6 +34,7 @@ frappe.ui.form.on("Asset Repair", {
 			};
 		});
 
+<<<<<<< HEAD
 		frm.set_query("purchase_invoice", "invoices", function () {
 			return {
 				query: "erpnext.assets.doctype.asset_repair.asset_repair.get_purchase_invoice",
@@ -46,6 +50,13 @@ frappe.ui.form.on("Asset Repair", {
 				query: "erpnext.assets.doctype.asset_repair.asset_repair.get_expense_accounts",
 				filters: {
 					purchase_invoice: row.purchase_invoice,
+=======
+		frm.set_query("purchase_invoice", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					docstatus: 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			};
 		});
@@ -179,6 +190,7 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 		var row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "total_value", row.consumed_quantity * row.valuation_rate);
 	},
+<<<<<<< HEAD
 
 	pick_serial_and_batch(frm, cdt, cdn) {
 		let item = locals[cdt][cdn];
@@ -212,4 +224,6 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 			}
 		});
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

@@ -9,7 +9,11 @@ def execute():
 			frappe.db.get_value(
 				"Stock Ledger Entry",
 				{"docstatus": 1, "batch_no": batch.batch_id, "is_cancelled": 0},
+<<<<<<< HEAD
 				[{"SUM": "actual_qty"}],
+=======
+				"sum(actual_qty)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 			or 0.0
 		)

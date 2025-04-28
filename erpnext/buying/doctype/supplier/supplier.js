@@ -64,11 +64,14 @@ frappe.ui.form.on("Supplier", {
 				},
 			};
 		});
+<<<<<<< HEAD
 
 		frm.make_methods = {
 			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
 			"Pricing Rule": () => frm.trigger("make_pricing_rule"),
 		};
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	refresh: function (frm) {
@@ -110,6 +113,25 @@ frappe.ui.form.on("Supplier", {
 			);
 
 			frm.add_custom_button(
+<<<<<<< HEAD
+=======
+				__("Bank Account"),
+				function () {
+					erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name);
+				},
+				__("Create")
+			);
+
+			frm.add_custom_button(
+				__("Pricing Rule"),
+				function () {
+					erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
+				},
+				__("Create")
+			);
+
+			frm.add_custom_button(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				__("Get Supplier Group Details"),
 				function () {
 					frm.trigger("get_supplier_group_details");
@@ -117,10 +139,14 @@ frappe.ui.form.on("Supplier", {
 				__("Actions")
 			);
 
+<<<<<<< HEAD
 			if (
 				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
 				frappe.model.can_create("Party Link")
 			) {
+=======
+			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frm.add_custom_button(
 					__("Link with Customer"),
 					function () {
@@ -152,7 +178,11 @@ frappe.ui.form.on("Supplier", {
 					address_dict: frm.doc.supplier_primary_address,
 				},
 				callback: function (r) {
+<<<<<<< HEAD
 					frm.set_value("primary_address", frappe.utils.html2text(r.message));
+=======
+					frm.set_value("primary_address", r.message);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			});
 		}
@@ -217,6 +247,7 @@ frappe.ui.form.on("Supplier", {
 		});
 		dialog.show();
 	},
+<<<<<<< HEAD
 	make_pricing_rule: function (frm) {
 		frappe.new_doc("Pricing Rule", {
 			applicable_for: "Supplier",
@@ -224,4 +255,6 @@ frappe.ui.form.on("Supplier", {
 			buying: 1,
 		});
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

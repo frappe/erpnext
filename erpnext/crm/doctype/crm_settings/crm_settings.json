@@ -17,9 +17,13 @@
   "quotation_section",
   "default_valid_till",
   "section_break_13",
+<<<<<<< HEAD
   "carry_forward_communication_and_comments",
   "column_break_junk",
   "update_timestamp_on_new_communication"
+=======
+  "carry_forward_communication_and_comments"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -79,7 +83,11 @@
   {
    "fieldname": "section_break_13",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Activity"
+=======
+   "label": "Other Settings"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "0",
@@ -87,6 +95,7 @@
    "fieldname": "carry_forward_communication_and_comments",
    "fieldtype": "Check",
    "label": "Carry Forward Communication and Comments"
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_junk",
@@ -98,13 +107,19 @@
    "fieldname": "update_timestamp_on_new_communication",
    "fieldtype": "Check",
    "label": "Update timestamp on new communication"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-01-16 16:12:14.889455",
+=======
+ "modified": "2024-03-27 13:06:47.508534",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",

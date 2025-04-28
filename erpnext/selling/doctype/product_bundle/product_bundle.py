@@ -5,7 +5,10 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.query_builder import Criterion
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import get_link_to_form
 
 
@@ -32,7 +35,10 @@ class ProductBundle(Document):
 	def validate(self):
 		self.validate_main_item()
 		self.validate_child_items()
+<<<<<<< HEAD
 		self.validate_child_items_qty_non_zero()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 		validate_uom_is_integer(self, "uom", "qty")
@@ -89,6 +95,7 @@ class ProductBundle(Document):
 					).format(item.idx, frappe.bold(item.item_code))
 				)
 
+<<<<<<< HEAD
 	def validate_child_items_qty_non_zero(self):
 		for item in self.items:
 			if item.qty <= 0:
@@ -98,12 +105,15 @@ class ProductBundle(Document):
 					).format(item.idx, frappe.bold(item.item_code))
 				)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	product_bundles = frappe.db.get_list("Product Bundle", {"disabled": 0}, pluck="name")
 
+<<<<<<< HEAD
 	if not searchfield or searchfield == "name":
 		searchfield = frappe.get_meta("Item").get("search_fields")
 
@@ -115,13 +125,23 @@ def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 		frappe.qb.from_(item)
 		.select(item.name, item.item_name)
 		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0))
+=======
+	item = frappe.qb.DocType("Item")
+	query = (
+		frappe.qb.from_(item)
+		.select(item.item_code, item.item_name)
+		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0) & (item[searchfield].like(f"%{txt}%")))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.limit(page_len)
 		.offset(start)
 	)
 
+<<<<<<< HEAD
 	if searchfield:
 		query = query.where(Criterion.any([item[fieldname].like(f"%{txt}%") for fieldname in searchfield]))
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if product_bundles:
 		query = query.where(item.name.notin(product_bundles))
 

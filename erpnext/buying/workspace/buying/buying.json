@@ -15,7 +15,11 @@
  "icon": "buying",
  "idx": 0,
  "is_hidden": 0,
+<<<<<<< HEAD
  "label": "Buying",
+=======
+ "label": "Purchases",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "links": [
   {
    "hidden": 0,
@@ -533,6 +537,7 @@
    "type": "DocType"
   },
   {
+<<<<<<< HEAD
    "color": "Grey",
    "doc_view": "List",
    "label": "Learn Procurement",
@@ -540,6 +545,8 @@
    "url": "https://school.frappe.io/lms/courses/procurement?utm_source=in_app"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "color": "Yellow",
    "format": "{} Pending",
    "label": "Material Request",
@@ -571,5 +578,10 @@
    "type": "Dashboard"
   }
  ],
+<<<<<<< HEAD
  "title": "Buying"
 }
+=======
+ "title": "Purchase"
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

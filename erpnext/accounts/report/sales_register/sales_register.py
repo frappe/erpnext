@@ -439,6 +439,10 @@ def get_invoices(filters, additional_query_columns):
 			si.company,
 		)
 		.where(si.docstatus == 1)
+<<<<<<< HEAD
+=======
+		.orderby(si.posting_date, si.name, order=Order.desc)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	if additional_query_columns:
@@ -456,6 +460,7 @@ def get_invoices(filters, additional_query_columns):
 		filters, query, doctype="Sales Invoice", child_doctype="Sales Invoice Item"
 	)
 
+<<<<<<< HEAD
 	from frappe.desk.reportview import build_match_conditions
 
 	query, params = query.walk()
@@ -467,6 +472,10 @@ def get_invoices(filters, additional_query_columns):
 	query += " order by posting_date desc, name desc"
 
 	return frappe.db.sql(query, params, as_dict=True)
+=======
+	invoices = query.run(as_dict=True)
+	return invoices
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_conditions(filters, query, doctype):
@@ -534,8 +543,12 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts, inclu
 	tax_details = frappe.db.sql(
 		"""select parent, account_head,
 		sum(base_tax_amount_after_discount_amount) as tax_amount
+<<<<<<< HEAD
 		from `tabSales Taxes and Charges` where parent in (%s) and parenttype = 'Sales Invoice'
 		group by parent, account_head"""
+=======
+		from `tabSales Taxes and Charges` where parent in (%s) group by parent, account_head"""
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		% ", ".join(["%s"] * len(invoice_list)),
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,

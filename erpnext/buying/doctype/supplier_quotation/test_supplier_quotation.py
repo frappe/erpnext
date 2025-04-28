@@ -3,6 +3,7 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase, change_settings
 from frappe.utils import add_days, today
 
@@ -13,6 +14,16 @@ from erpnext.controllers.accounts_controller import InvalidQtyError
 class TestPurchaseOrder(IntegrationTestCase):
 	def test_supplier_quotation_qty(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+=======
+from frappe.tests.utils import FrappeTestCase
+
+from erpnext.controllers.accounts_controller import InvalidQtyError
+
+
+class TestPurchaseOrder(FrappeTestCase):
+	def test_supplier_quotation_qty(self):
+		sq = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		sq.items[0].qty = 0
 		with self.assertRaises(InvalidQtyError):
 			sq.save()
@@ -22,6 +33,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 		sq.save()
 		self.assertEqual(sq.items[0].qty, 1)
 
+<<<<<<< HEAD
 	def test_supplier_quotation_zero_qty(self):
 		"""
 		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
@@ -35,6 +47,12 @@ class TestPurchaseOrder(IntegrationTestCase):
 
 	def test_make_purchase_order(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0]).insert()
+=======
+	def test_make_purchase_order(self):
+		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
+
+		sq = frappe.copy_doc(test_records[0]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, sq.name)
 
@@ -49,6 +67,7 @@ class TestPurchaseOrder(IntegrationTestCase):
 
 		for doc in po.get("items"):
 			if doc.get("item_code"):
+<<<<<<< HEAD
 				doc.set("schedule_date", add_days(today(), 1))
 
 		po.insert()
@@ -63,3 +82,11 @@ class TestPurchaseOrder(IntegrationTestCase):
 		self.assertEqual(len(po.get("items")), 1)
 		self.assertEqual(po.get("items")[0].qty, 0)
 		self.assertEqual(po.get("items")[0].item_code, sq.get("items")[0].item_code)
+=======
+				doc.set("schedule_date", "2013-04-12")
+
+		po.insert()
+
+
+test_records = frappe.get_test_records("Supplier Quotation")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

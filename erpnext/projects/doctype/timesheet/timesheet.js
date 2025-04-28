@@ -21,7 +21,10 @@ frappe.ui.form.on("Timesheet", {
 				filters: {
 					project: child.project,
 					status: ["!=", "Cancelled"],
+<<<<<<< HEAD
 					is_group: 0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			};
 		};
@@ -59,10 +62,17 @@ frappe.ui.form.on("Timesheet", {
 		}
 
 		if (frm.doc.docstatus < 1) {
+<<<<<<< HEAD
 			let button = __("Start Timer");
 			$.each(frm.doc.time_logs || [], function (i, row) {
 				if (row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
 					button = __("Resume Timer");
+=======
+			let button = "Start Timer";
+			$.each(frm.doc.time_logs || [], function (i, row) {
+				if (row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
+					button = "Resume Timer";
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			});
 
@@ -357,7 +367,11 @@ var calculate_end_time = function (frm, cdt, cdn) {
 	if (child.hours) {
 		d.add(child.hours, "hours");
 		frm._setting_hours = true;
+<<<<<<< HEAD
 		frappe.model.set_value(cdt, cdn, "to_time", frappe.datetime.get_datetime_as_string(d)).then(() => {
+=======
+		frappe.model.set_value(cdt, cdn, "to_time", d.format(frappe.defaultDatetimeFormat)).then(() => {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm._setting_hours = false;
 		});
 	}

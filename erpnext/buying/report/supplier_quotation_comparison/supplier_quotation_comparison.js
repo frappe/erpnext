@@ -50,7 +50,10 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			fieldname: "supplier",
 			label: __("Supplier"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Supplier",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Supplier", txt);
 			},
@@ -59,7 +62,10 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			fieldtype: "MultiSelectList",
 			label: __("Supplier Quotation"),
 			fieldname: "supplier_quotation",
+<<<<<<< HEAD
 			options: "Supplier Quotation",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			default: "",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Supplier Quotation", txt, { docstatus: ["<", 2] });
@@ -76,6 +82,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			},
 		},
 		{
+<<<<<<< HEAD
 			fieldname: "categorize_by",
 			label: __("Categorize by"),
 			fieldtype: "Select",
@@ -84,6 +91,16 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 				{ label: __("Categorize by Item"), value: "Categorize by Item" },
 			],
 			default: __("Categorize by Supplier"),
+=======
+			fieldname: "group_by",
+			label: __("Group by"),
+			fieldtype: "Select",
+			options: [
+				{ label: __("Group by Supplier"), value: "Group by Supplier" },
+				{ label: __("Group by Item"), value: "Group by Item" },
+			],
+			default: __("Group by Supplier"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldtype: "Check",

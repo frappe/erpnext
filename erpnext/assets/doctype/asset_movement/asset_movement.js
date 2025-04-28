@@ -62,8 +62,13 @@ frappe.ui.form.on("Asset Movement", {
 			fieldnames_to_be_altered = {
 				target_location: { read_only: 0, reqd: 1 },
 				source_location: { read_only: 1, reqd: 0 },
+<<<<<<< HEAD
 				from_employee: { read_only: 1, reqd: 0 },
 				to_employee: { read_only: 0, reqd: 0 },
+=======
+				from_employee: { read_only: 0, reqd: 0 },
+				to_employee: { read_only: 1, reqd: 0 },
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			};
 		} else if (frm.doc.purpose === "Issue") {
 			fieldnames_to_be_altered = {
@@ -72,6 +77,7 @@ frappe.ui.form.on("Asset Movement", {
 				from_employee: { read_only: 1, reqd: 0 },
 				to_employee: { read_only: 0, reqd: 1 },
 			};
+<<<<<<< HEAD
 		} else if (frm.doc.purpose === "Transfer and Issue") {
 			fieldnames_to_be_altered = {
 				target_location: { read_only: 0, reqd: 1 },
@@ -79,6 +85,8 @@ frappe.ui.form.on("Asset Movement", {
 				from_employee: { read_only: 0, reqd: 1 },
 				to_employee: { read_only: 0, reqd: 1 },
 			};
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 		if (fieldnames_to_be_altered) {
 			Object.keys(fieldnames_to_be_altered).forEach((fieldname) => {

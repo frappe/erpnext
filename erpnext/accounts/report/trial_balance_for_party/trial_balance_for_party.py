@@ -4,10 +4,15 @@
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_accounts_with_children
+=======
+from frappe.utils import cint, flt
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
 
@@ -37,6 +42,7 @@ def get_data(filters, show_party_name):
 		filters=party_filters,
 		order_by="name",
 	)
+<<<<<<< HEAD
 
 	account_filter = []
 	if filters.get("account"):
@@ -45,6 +51,11 @@ def get_data(filters, show_party_name):
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 	opening_balances = get_opening_balances(filters, account_filter)
 	balances_within_period = get_balances_within_period(filters, account_filter)
+=======
+	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+	opening_balances = get_opening_balances(filters)
+	balances_within_period = get_balances_within_period(filters)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	data = []
 	# total_debit, total_credit = 0, 0
@@ -96,6 +107,7 @@ def get_data(filters, show_party_name):
 	return data
 
 
+<<<<<<< HEAD
 def get_opening_balances(filters, account_filter=None):
 	GL_Entry = frappe.qb.DocType("GL Entry")
 
@@ -124,6 +136,32 @@ def get_opening_balances(filters, account_filter=None):
 
 	gle = query.run(as_dict=True)
 
+=======
+def get_opening_balances(filters):
+	account_filter = ""
+	if filters.get("account"):
+		account_filter = "and account = %s" % (frappe.db.escape(filters.get("account")))
+
+	gle = frappe.db.sql(
+		f"""
+		select party, sum(debit) as opening_debit, sum(credit) as opening_credit
+		from `tabGL Entry`
+		where company=%(company)s
+			and is_cancelled=0
+			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+			and (posting_date < %(from_date)s or (ifnull(is_opening, 'No') = 'Yes' and posting_date <= %(to_date)s))
+			{account_filter}
+		group by party""",
+		{
+			"company": filters.company,
+			"from_date": filters.from_date,
+			"to_date": filters.to_date,
+			"party_type": filters.party_type,
+		},
+		as_dict=True,
+	)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	opening = frappe._dict()
 	for d in gle:
 		opening_debit, opening_credit = toggle_debit_credit(d.opening_debit, d.opening_credit)
@@ -132,6 +170,7 @@ def get_opening_balances(filters, account_filter=None):
 	return opening
 
 
+<<<<<<< HEAD
 def get_balances_within_period(filters, account_filter=None):
 	GL_Entry = frappe.qb.DocType("GL Entry")
 
@@ -159,6 +198,33 @@ def get_balances_within_period(filters, account_filter=None):
 
 	gle = query.run(as_dict=True)
 
+=======
+def get_balances_within_period(filters):
+	account_filter = ""
+	if filters.get("account"):
+		account_filter = "and account = %s" % (frappe.db.escape(filters.get("account")))
+
+	gle = frappe.db.sql(
+		f"""
+		select party, sum(debit) as debit, sum(credit) as credit
+		from `tabGL Entry`
+		where company=%(company)s
+			and is_cancelled = 0
+			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+			and posting_date >= %(from_date)s and posting_date <= %(to_date)s
+			and ifnull(is_opening, 'No') = 'No'
+			{account_filter}
+		group by party""",
+		{
+			"company": filters.company,
+			"from_date": filters.from_date,
+			"to_date": filters.to_date,
+			"party_type": filters.party_type,
+		},
+		as_dict=True,
+	)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	balances_within_period = frappe._dict()
 	for d in gle:
 		balances_within_period.setdefault(d.party, [d.debit, d.credit])
@@ -256,7 +322,11 @@ def is_party_name_visible(filters):
 
 	if filters.get("party_type") in ["Customer", "Supplier"]:
 		if filters.get("party_type") == "Customer":
+<<<<<<< HEAD
 			party_naming_by = frappe.get_single_value("Selling Settings", "cust_master_name")
+=======
+			party_naming_by = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		else:
 			party_naming_by = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 

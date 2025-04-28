@@ -93,14 +93,20 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "depends_on": "eval:doc.apply_on != 'Transaction'",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "mixed_conditions",
    "fieldtype": "Check",
    "label": "Mixed Conditions"
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "depends_on": "eval:doc.apply_on != 'Transaction'",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "is_cumulative",
    "fieldtype": "Check",
    "label": "Is Cumulative"
@@ -280,7 +286,11 @@
   }
  ],
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-20 11:48:23.231081",
+=======
+ "modified": "2024-03-27 13:10:22.103686",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme",

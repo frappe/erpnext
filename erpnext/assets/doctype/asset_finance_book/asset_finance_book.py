@@ -22,7 +22,10 @@ class AssetFinanceBook(Document):
 		expected_value_after_useful_life: DF.Currency
 		finance_book: DF.Link | None
 		frequency_of_depreciation: DF.Int
+<<<<<<< HEAD
 		increase_in_asset_life: DF.Int
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

@@ -6,7 +6,11 @@ from collections import OrderedDict
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import cint, flt, sbool
+=======
+from frappe.utils import cint, flt
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 
@@ -28,8 +32,11 @@ BOM_ITEM_FIELDS = [
 	"stock_uom",
 	"conversion_factor",
 	"do_not_explode",
+<<<<<<< HEAD
 	"operation",
 	"is_phantom_item",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ]
 
 
@@ -45,16 +52,29 @@ class BOMCreator(Document):
 		from erpnext.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
 
 		amended_from: DF.Link | None
+<<<<<<< HEAD
+=======
+		backflush_from_wip_warehouse: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		buying_price_list: DF.Link | None
 		company: DF.Link
 		conversion_rate: DF.Float
 		currency: DF.Link
 		default_warehouse: DF.Link | None
 		error_log: DF.Text | None
+<<<<<<< HEAD
+=======
+		fg_warehouse: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
 		items: DF.Table[BOMCreatorItem]
+<<<<<<< HEAD
+=======
+		operation: DF.Link | None
+		operation_time: DF.Float
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		project: DF.Link | None
@@ -62,10 +82,23 @@ class BOMCreator(Document):
 		raw_material_cost: DF.Currency
 		remarks: DF.TextEditor | None
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
+<<<<<<< HEAD
 		routing: DF.Link | None
 		set_rate_based_on_warehouse: DF.Check
 		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
 		uom: DF.Link | None
+=======
+		set_rate_based_on_warehouse: DF.Check
+		skip_material_transfer: DF.Check
+		source_warehouse: DF.Link | None
+		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
+		track_operations: DF.Check
+		track_semi_finished_goods: DF.Check
+		uom: DF.Link | None
+		wip_warehouse: DF.Link | None
+		workstation: DF.Link | None
+		workstation_type: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	def before_save(self):
@@ -207,7 +240,11 @@ class BOMCreator(Document):
 
 		for field, label in fields.items():
 			if not self.get(field):
+<<<<<<< HEAD
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(_(label), self.name))
+=======
+				frappe.throw(_("Please set {0} in BOM Creator {1}").format(label, self.name))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def on_submit(self):
 		self.enqueue_create_boms()
@@ -256,6 +293,7 @@ class BOMCreator(Document):
 			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
 				frappe.throw(_("Please set Parent Row No for item {0}").format(row.fg_item))
 
+<<<<<<< HEAD
 			key = (row.fg_item, row.fg_reference_id)
 			if key not in production_item_wise_rm:
 				production_item_wise_rm.setdefault(
@@ -263,15 +301,29 @@ class BOMCreator(Document):
 					frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
 				)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			production_item_wise_rm[(row.fg_item, row.fg_reference_id)]["items"].append(row)
 
 		reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))
 
 		try:
 			for d in reverse_tree:
+<<<<<<< HEAD
 				fg_item_data = production_item_wise_rm.get(d).fg_item_data
 				self.create_bom(fg_item_data, production_item_wise_rm)
 
+=======
+				if self.track_operations and self.track_semi_finished_goods and final_product == d:
+					continue
+
+				fg_item_data = production_item_wise_rm.get(d).fg_item_data
+				self.create_bom(fg_item_data, production_item_wise_rm)
+
+			if self.track_operations and self.track_semi_finished_goods:
+				self.make_bom_for_final_product(production_item_wise_rm)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.msgprint(_("BOMs created successfully"))
 		except Exception:
 			traceback = frappe.get_traceback(with_context=True)
@@ -284,6 +336,84 @@ class BOMCreator(Document):
 
 			frappe.msgprint(_("BOMs creation failed"))
 
+<<<<<<< HEAD
+=======
+	def make_bom_for_final_product(self, production_item_wise_rm):
+		bom = frappe.new_doc("BOM")
+		bom.update(
+			{
+				"item": self.item_code,
+				"bom_type": "Production",
+				"quantity": self.qty,
+				"allow_alternative_item": 1,
+				"bom_creator": self.name,
+				"bom_creator_item": self.name,
+				"rm_cost_as_per": "Manual",
+				"with_operations": 1,
+				"track_semi_finished_goods": 1,
+			}
+		)
+
+		for field in BOM_FIELDS:
+			if self.get(field):
+				bom.set(field, self.get(field))
+
+		for item in self.items:
+			if not item.is_expandable or not item.operation:
+				continue
+
+			bom.append(
+				"operations",
+				{
+					"operation": item.operation,
+					"workstation": item.workstation,
+					"source_warehouse": item.source_warehouse,
+					"wip_warehouse": item.wip_warehouse,
+					"fg_warehouse": item.fg_warehouse,
+					"finished_good": item.item_code,
+					"finished_good_qty": item.qty,
+					"bom_no": production_item_wise_rm[(item.item_code, item.name)].bom_no,
+					"workstation_type": item.workstation_type,
+					"time_in_mins": item.operation_time,
+					"is_subcontracted": item.is_subcontracted,
+					"skip_material_transfer": item.skip_material_transfer,
+					"backflush_from_wip_warehouse": item.backflush_from_wip_warehouse,
+				},
+			)
+
+		operation_row = bom.append(
+			"operations",
+			{
+				"operation": self.operation,
+				"time_in_mins": self.operation_time,
+				"workstation": self.workstation,
+				"workstation_type": self.workstation_type,
+				"finished_good": self.item_code,
+				"finished_good_qty": self.qty,
+				"source_warehouse": self.source_warehouse,
+				"wip_warehouse": self.wip_warehouse,
+				"fg_warehouse": self.fg_warehouse,
+				"skip_material_transfer": self.skip_material_transfer,
+				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
+			},
+		)
+
+		final_product = (self.item_code, self.name)
+		items = production_item_wise_rm.get(final_product).get("items")
+
+		bom.set_materials_based_on_operation_bom()
+
+		for item in items:
+			item_args = {"operation_row_id": operation_row.idx}
+			for field in BOM_ITEM_FIELDS:
+				item_args[field] = item.get(field)
+
+			bom.append("items", item_args)
+
+		bom.save(ignore_permissions=True)
+		bom.submit()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def create_bom(self, row, production_item_wise_rm):
 		bom_creator_item = row.name if row.name != self.name else ""
 		if frappe.db.exists(
@@ -306,6 +436,7 @@ class BOMCreator(Document):
 				"allow_alternative_item": 1,
 				"bom_creator": self.name,
 				"bom_creator_item": bom_creator_item,
+<<<<<<< HEAD
 				"is_phantom_bom": row.get("is_phantom_item"),
 			}
 		)
@@ -314,6 +445,28 @@ class BOMCreator(Document):
 			bom.routing = self.routing
 			bom.with_operations = 1
 			bom.transfer_material_against = "Work Order"
+=======
+			}
+		)
+
+		if self.track_operations and not self.track_semi_finished_goods:
+			if row.item_code == self.item_code:
+				bom.with_operations = 1
+				bom.transfer_material_against = "Work Order"
+				for item in self.items:
+					if not item.operation:
+						continue
+
+					bom.append(
+						"operations",
+						{
+							"operation": item.operation,
+							"workstation_type": item.workstation_type,
+							"workstation": item.workstation,
+							"time_in_mins": item.operation_time,
+						},
+					)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for field in BOM_FIELDS:
 			if self.get(field):
@@ -334,7 +487,11 @@ class BOMCreator(Document):
 				{
 					"bom_no": bom_no,
 					"allow_alternative_item": 1,
+<<<<<<< HEAD
 					"allow_scrap_items": not item.get("is_phantom_item"),
+=======
+					"allow_scrap_items": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"include_item_in_manufacturing": 1,
 				}
 			)
@@ -346,6 +503,7 @@ class BOMCreator(Document):
 
 		production_item_wise_rm[(row.item_code, row.name)].bom_no = bom.name
 
+<<<<<<< HEAD
 	def has_operations(self):
 		for row in self.items:
 			if row.operation:
@@ -353,6 +511,8 @@ class BOMCreator(Document):
 
 		return False
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@frappe.whitelist()
 	def get_default_bom(self, item_code) -> str:
 		return frappe.get_cached_value("Item", item_code, "default_bom")
@@ -368,7 +528,10 @@ def get_children(doctype=None, parent=None, **kwargs):
 
 	fields = [
 		"item_code as value",
+<<<<<<< HEAD
 		"item_name as title",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"is_expandable as expandable",
 		"parent as parent_id",
 		"qty",
@@ -378,8 +541,21 @@ def get_children(doctype=None, parent=None, **kwargs):
 		"uom",
 		"rate",
 		"amount",
+<<<<<<< HEAD
 		"operation",
 		"is_subcontracted",
+=======
+		"workstation_type",
+		"operation",
+		"operation_time",
+		"is_subcontracted",
+		"workstation",
+		"source_warehouse",
+		"wip_warehouse",
+		"fg_warehouse",
+		"skip_material_transfer",
+		"backflush_from_wip_warehouse",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	]
 
 	query_filters = {
@@ -393,6 +569,15 @@ def get_children(doctype=None, parent=None, **kwargs):
 	return frappe.get_all("BOM Creator Item", fields=fields, filters=query_filters, order_by="idx")
 
 
+<<<<<<< HEAD
+=======
+def get_parent_row_no(doc, name):
+	for row in doc.items:
+		if row.name == name:
+			return row.idx
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 @frappe.whitelist()
 def add_item(**kwargs):
 	if isinstance(kwargs, str):
@@ -441,8 +626,11 @@ def add_sub_assembly(**kwargs):
 
 	if not kwargs.convert_to_sub_assembly:
 		item_info = get_item_details(bom_item.item_code)
+<<<<<<< HEAD
 		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		item_row = doc.append(
 			"items",
 			{
@@ -451,24 +639,58 @@ def add_sub_assembly(**kwargs):
 				"uom": item_info.stock_uom,
 				"fg_item": kwargs.fg_item,
 				"conversion_factor": 1,
+<<<<<<< HEAD
 				"parent_row_no": parent_row_no,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"fg_reference_id": name,
 				"stock_qty": bom_item.qty,
 				"do_not_explode": 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
 				"operation": bom_item.operation,
+<<<<<<< HEAD
 				"is_phantom_item": sbool(kwargs.phantom),
+=======
+				"workstation_type": bom_item.workstation_type,
+				"operation_time": bom_item.operation_time,
+				"is_subcontracted": bom_item.is_subcontracted,
+				"workstation": bom_item.workstation,
+				"source_warehouse": bom_item.source_warehouse,
+				"wip_warehouse": bom_item.wip_warehouse,
+				"fg_warehouse": bom_item.fg_warehouse,
+				"skip_material_transfer": bom_item.skip_material_transfer,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		)
 
 		parent_row_no = item_row.idx
 		name = ""
 	else:
+<<<<<<< HEAD
 		if sbool(kwargs.phantom):
 			parent_row = next(item for item in doc.items if item.name == kwargs.fg_reference_id)
 			parent_row.db_set("is_phantom_item", 1)
 		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
+=======
+		parent_row_no = [row.idx for row in doc.items if row.name == kwargs.fg_reference_id]
+		if parent_row_no:
+			parent_row_no = parent_row_no[0]
+			doc.items[parent_row_no - 1].update(
+				{
+					"operation": bom_item.operation,
+					"workstation_type": bom_item.workstation_type,
+					"operation_time": bom_item.operation_time,
+					"is_subcontracted": bom_item.is_subcontracted,
+					"workstation": bom_item.workstation,
+					"source_warehouse": bom_item.source_warehouse,
+					"wip_warehouse": bom_item.wip_warehouse,
+					"fg_warehouse": bom_item.fg_warehouse,
+					"skip_material_transfer": bom_item.skip_material_transfer,
+					"backflush_from_wip_warehouse": bom_item.backflush_from_wip_warehouse,
+				}
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	for row in bom_item.get("items"):
 		row = frappe._dict(row)
@@ -478,7 +700,10 @@ def add_sub_assembly(**kwargs):
 			{
 				"item_code": row.item_code,
 				"qty": row.qty,
+<<<<<<< HEAD
 				"operation": row.operation,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"fg_item": bom_item.item_code,
 				"uom": item_info.stock_uom,
 				"fg_reference_id": name,
@@ -501,6 +726,7 @@ def get_item_details(item_code):
 	)
 
 
+<<<<<<< HEAD
 def get_parent_row_no(doc, name):
 	for row in doc.items:
 		if row.name == name:
@@ -514,6 +740,8 @@ def get_parent_row_no(doc, name):
 	return None
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 @frappe.whitelist()
 def delete_node(**kwargs):
 	if isinstance(kwargs, str):

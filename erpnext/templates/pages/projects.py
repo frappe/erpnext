@@ -9,7 +9,11 @@ def get_context(context):
 	project_user = frappe.db.get_value(
 		"Project User",
 		{"parent": frappe.form_dict.project, "user": frappe.session.user},
+<<<<<<< HEAD
 		["user", "view_attachments", "hide_timesheets"],
+=======
+		["user", "view_attachments"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		as_dict=True,
 	)
 	if frappe.session.user != "Administrator" and (not project_user or frappe.session.user == "Guest"):
@@ -25,8 +29,12 @@ def get_context(context):
 		project.name, start=0, item_status="open", search=frappe.form_dict.get("search")
 	)
 
+<<<<<<< HEAD
 	if project_user and not project_user.hide_timesheets:
 		project.timesheets = get_timesheets(project.name, start=0, search=frappe.form_dict.get("search"))
+=======
+	project.timesheets = get_timesheets(project.name, start=0, search=frappe.form_dict.get("search"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if project_user and project_user.view_attachments:
 		project.attachments = get_attachments(project.name)
@@ -52,7 +60,11 @@ def get_tasks(project, start=0, search=None, item_status=None):
 			"parent_task",
 		],
 		limit_start=start,
+<<<<<<< HEAD
 		limit_page_length=100,
+=======
+		limit_page_length=10,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 	task_nest = []
 	for task in tasks:

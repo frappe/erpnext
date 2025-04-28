@@ -16,7 +16,11 @@
    "label": "Select DocType"
   },
   {
+<<<<<<< HEAD
    "description": "Attach a comma separated .csv file with two columns, one for the old name and one for the new name.",
+=======
+   "description": "Attach .csv file with two columns, one for the old name and one for the new name",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "file_to_rename",
    "fieldtype": "Attach",
    "label": "File to Rename"
@@ -33,7 +37,11 @@
  "issingle": 1,
  "links": [],
  "max_attachments": 1,
+<<<<<<< HEAD
  "modified": "2025-10-07 10:24:36.632780",
+=======
+ "modified": "2024-03-27 13:10:31.899697",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Rename Tool",
@@ -47,8 +55,15 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

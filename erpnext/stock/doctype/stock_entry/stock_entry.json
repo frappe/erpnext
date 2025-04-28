@@ -17,7 +17,10 @@
   "job_card",
   "purchase_order",
   "subcontracting_order",
+<<<<<<< HEAD
   "subcontracting_inward_order",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "delivery_note_no",
   "sales_invoice_no",
   "pick_list",
@@ -31,7 +34,10 @@
   "set_posting_time",
   "inspection_required",
   "apply_putaway_rule",
+<<<<<<< HEAD
   "is_additional_transfer_entry",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "bom_info_section",
   "from_bom",
   "use_multi_level_bom",
@@ -53,7 +59,10 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "items_section",
   "items",
   "get_stock_and_rate",
@@ -130,7 +139,11 @@
    "label": "Purpose",
    "oldfieldname": "purpose",
    "oldfieldtype": "Select",
+<<<<<<< HEAD
    "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble\nReceive from Customer\nReturn Raw Material to Customer\nSubcontracting Delivery\nSubcontracting Return",
+=======
+   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1,
    "search_index": 1
   },
@@ -157,14 +170,22 @@
    "search_index": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+=======
+   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
    "options": "Purchase Order"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+=======
+   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "subcontracting_order",
    "fieldtype": "Link",
    "label": "Subcontracting Order",
@@ -221,7 +242,10 @@
    "search_index": 1
   },
   {
+<<<<<<< HEAD
    "default": "Now",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -431,13 +455,21 @@
   },
   {
    "collapsible": 1,
+<<<<<<< HEAD
    "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+=======
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
    "label": "Supplier Details"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+=======
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -449,7 +481,11 @@
   },
   {
    "bold": 1,
+<<<<<<< HEAD
    "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+=======
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "label": "Supplier Name",
@@ -459,7 +495,11 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+=======
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",
@@ -694,6 +734,7 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+<<<<<<< HEAD
   },
   {
    "depends_on": "eval: doc.last_scanned_warehouse",
@@ -720,12 +761,20 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-file-text",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-13 15:09:23.905118",
+=======
+ "modified": "2024-08-13 19:05:42.386955",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -791,7 +840,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
@@ -799,4 +851,8 @@
  "states": [],
  "title_field": "stock_entry_type",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

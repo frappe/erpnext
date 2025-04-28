@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+<<<<<<< HEAD
 from datetime import timedelta
 
 import frappe
@@ -13,13 +14,22 @@ from pypika import Order
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
 )
+=======
+import frappe
+from frappe import _
+from frappe.utils import cstr
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
 	get_cost_centers_with_children,
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
+<<<<<<< HEAD
 	set_gl_entries_by_account,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_net_profit_loss,
@@ -28,9 +38,12 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+<<<<<<< HEAD
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,
@@ -86,11 +99,15 @@ def execute(filters=None):
 			# add first net income in operations section
 			if net_profit_loss:
 				net_profit_loss.update(
+<<<<<<< HEAD
 					{
 						"indent": 1,
 						"parent_section": cash_flow_sections[0]["section_header"],
 						"section": net_profit_loss["account"],
 					}
+=======
+					{"indent": 1, "parent_section": cash_flow_sections[0]["section_header"]}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 				data.append(net_profit_loss)
 				section_data.append(net_profit_loss)
@@ -130,6 +147,7 @@ def execute(filters=None):
 			filters,
 		)
 
+<<<<<<< HEAD
 	net_change_in_cash = add_total_row_account(
 		data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters
 	)
@@ -146,6 +164,14 @@ def execute(filters=None):
 	)
 
 	chart = get_chart_data(columns, data, company_currency)
+=======
+	add_total_row_account(
+		data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters
+	)
+	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company, True)
+
+	chart = get_chart_data(columns, data)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	report_summary = get_report_summary(summary_data, company_currency)
 
@@ -276,6 +302,7 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 	out.append(total_row)
 	out.append({})
 
+<<<<<<< HEAD
 	return total_row
 
 
@@ -407,6 +434,8 @@ def get_opening_range_using_fiscal_year(company, period_list):
 	company_start_date = earliest_fy[0]["year_start_date"]
 	return company_start_date, previous_day
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def get_report_summary(summary_data, currency):
 	report_summary = []
@@ -417,8 +446,14 @@ def get_report_summary(summary_data, currency):
 	return report_summary
 
 
+<<<<<<< HEAD
 def get_chart_data(columns, data, currency):
 	labels = [d.get("label") for d in columns[2:]]
+=======
+def get_chart_data(columns, data):
+	labels = [d.get("label") for d in columns[2:]]
+	print(data)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	datasets = [
 		{
 			"name": section.get("section").replace("'", ""),
@@ -427,12 +462,19 @@ def get_chart_data(columns, data, currency):
 		for section in data
 		if section.get("parent_section") is None and section.get("currency")
 	]
+<<<<<<< HEAD
 	datasets = datasets[:-2]
+=======
+	datasets = datasets[:-1]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	chart = {"data": {"labels": labels, "datasets": datasets}, "type": "bar"}
 
 	chart["fieldtype"] = "Currency"
+<<<<<<< HEAD
 	chart["options"] = "currency"
 	chart["currency"] = currency
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return chart

@@ -18,4 +18,7 @@ Communication
 Telephony
 Bulk Transaction
 Subcontracting
+<<<<<<< HEAD
 EDI
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -25,7 +25,12 @@
    "default": "0",
    "fieldname": "is_custom",
    "fieldtype": "Check",
+<<<<<<< HEAD
    "label": "Custom?"
+=======
+   "label": "Custom?",
+   "reqd": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "param_name",

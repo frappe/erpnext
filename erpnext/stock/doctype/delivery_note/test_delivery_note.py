@@ -3,6 +3,7 @@
 
 
 import json
+<<<<<<< HEAD
 from collections import defaultdict
 
 import frappe
@@ -11,10 +12,22 @@ from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+=======
+
+import frappe
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
+
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.utils import get_balance_on
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
+<<<<<<< HEAD
+=======
+	automatically_fetch_payment_terms,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	compare_payment_schedules,
 	create_dn_against_so,
 	make_sales_order,
@@ -44,7 +57,11 @@ from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
 
 
+<<<<<<< HEAD
 class TestDeliveryNote(IntegrationTestCase):
+=======
+class TestDeliveryNote(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_delivery_note_qty(self):
 		dn = create_delivery_note(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):
@@ -748,7 +765,11 @@ class TestDeliveryNote(IntegrationTestCase):
 		self.assertEqual(flt(bin_details.ordered_qty), flt(packed_item.ordered_qty))
 
 	def test_return_for_serialized_items(self):
+<<<<<<< HEAD
 		se = make_serialized_item(self)
+=======
+		se = make_serialized_item()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		serial_no = [get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]]
 
@@ -781,6 +802,7 @@ class TestDeliveryNote(IntegrationTestCase):
 			{"warehouse": "_Test Warehouse - _TC"},
 		)
 
+<<<<<<< HEAD
 	def test_delivery_note_internal_transfer_serial_no_status(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
@@ -823,6 +845,8 @@ class TestDeliveryNote(IntegrationTestCase):
 			self.assertEqual(sn.status, "Active")
 			self.assertEqual(sn.warehouse, warehouse)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
@@ -1022,6 +1046,7 @@ class TestDeliveryNote(IntegrationTestCase):
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
 
+<<<<<<< HEAD
 	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
 	def test_sales_invoice_qty_after_return(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
@@ -1053,6 +1078,8 @@ class TestDeliveryNote(IntegrationTestCase):
 		dnr1.reload().cancel().delete()
 		dn.reload().cancel().delete()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_dn_billing_status_case3(self):
 		# SO -> DN1 -> SI and SO -> SI and SO -> DN2
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -1126,6 +1153,7 @@ class TestDeliveryNote(IntegrationTestCase):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+<<<<<<< HEAD
 	def test_dn_billing_status_case5(self):
 		# SO -> SI(with update stock partial invoice)
 		# SO -> DN
@@ -1148,6 +1176,8 @@ class TestDeliveryNote(IntegrationTestCase):
 		self.assertEqual(dn.per_billed, 0)
 		self.assertEqual(dn.status, "To Bill")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_delivery_trip(self):
 		dn = create_delivery_note()
 		dt = make_delivery_trip(dn.name)
@@ -1161,7 +1191,11 @@ class TestDeliveryNote(IntegrationTestCase):
 		dn = create_delivery_note(do_not_submit=True)
 		dt = make_delivery_trip(dn.name)
 		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
+<<<<<<< HEAD
 		dt.driver = create_driver().name
+=======
+		dt.driver = create_driver()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertRaisesRegex(
 			frappe.exceptions.ValidationError,
 			r"^Delivery Notes should not be in draft state when submitting a Delivery Trip.*",
@@ -1322,13 +1356,21 @@ class TestDeliveryNote(IntegrationTestCase):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 0)
 
+<<<<<<< HEAD
 	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
+<<<<<<< HEAD
+=======
+		automatically_fetch_payment_terms()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		so = make_sales_order(uom="Nos", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
@@ -1348,6 +1390,11 @@ class TestDeliveryNote(IntegrationTestCase):
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
 
+<<<<<<< HEAD
+=======
+		automatically_fetch_payment_terms(enable=0)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_returned_qty_in_return_dn(self):
 		# SO ---> SI ---> DN
 		#                 |
@@ -1477,7 +1524,10 @@ class TestDeliveryNote(IntegrationTestCase):
 		warehouse = "Stores - TCP1"
 		target = "Finished Goods - TCP1"
 		customer = create_internal_customer(represents_company=company)
+<<<<<<< HEAD
 		create_cost_center(cost_center_name="_Test Cost Center", company=company)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# average rate = 128.015
 		rates = [101.45, 150.46, 138.25, 121.9]
@@ -1492,7 +1542,10 @@ class TestDeliveryNote(IntegrationTestCase):
 			qty=4,
 			warehouse=warehouse,
 			target_warehouse=target,
+<<<<<<< HEAD
 			cost_center="_Test Cost Center - TCP1",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": dn.name, "voucher_type": dn.doctype}))
 
@@ -2161,6 +2214,7 @@ class TestDeliveryNote(IntegrationTestCase):
 			self.assertEqual(sn.status, "Delivered")
 			self.assertEqual(sn.warranty_period, 100)
 
+<<<<<<< HEAD
 	def test_batch_return_dn(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
@@ -2787,6 +2841,8 @@ class TestDeliveryNote(IntegrationTestCase):
 						serial_batch_map[row.item_code].batch_no_valuation[entry.batch_no],
 					)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
@@ -2814,9 +2870,12 @@ def create_delivery_note(**args):
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
 
+<<<<<<< HEAD
 		if args.get("batches"):
 			batches = frappe._dict(args.batches)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		bundle_id = make_serial_batch_bundle(
 			frappe._dict(
 				{
@@ -2863,4 +2922,8 @@ def create_delivery_note(**args):
 	return dn
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Product Bundle"]
+=======
+test_dependencies = ["Product Bundle"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)

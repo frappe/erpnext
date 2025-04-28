@@ -3,10 +3,13 @@ on:
   pull_request_target:
     types: [opened, reopened]
 
+<<<<<<< HEAD
 permissions:
   issues: write
   pull-requests: write
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 jobs:
   triage:
     runs-on: ubuntu-latest

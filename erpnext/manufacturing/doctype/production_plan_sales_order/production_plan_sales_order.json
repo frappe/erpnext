@@ -10,8 +10,12 @@
   "sales_order_date",
   "col_break1",
   "customer",
+<<<<<<< HEAD
   "grand_total",
   "status"
+=======
+  "grand_total"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -59,17 +63,21 @@
    "print_width": "120px",
    "read_only": 1,
    "width": "120px"
+<<<<<<< HEAD
   },
   {
    "fieldname": "status",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Status"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-21 15:16:13.828240",
  "modified_by": "Administrator",
  "module": "Manufacturing",
@@ -82,3 +90,15 @@
  "sort_order": "ASC",
  "states": []
 }
+=======
+ "modified": "2024-03-27 13:10:20.746852",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Plan Sales Order",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -1,21 +1,30 @@
 {
  "chart_name": "Warehouse wise Stock Value",
  "chart_type": "Custom",
+<<<<<<< HEAD
  "creation": "2022-03-30 00:58:02.018824",
  "custom_options": "{\n    \"fieldtype\": \"Currency\"\n}",
+=======
+ "creation": "2020-07-20 21:01:04.296157",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "docstatus": 0,
  "doctype": "Dashboard Chart",
  "filters_json": "{}",
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
+<<<<<<< HEAD
  "last_synced_on": "2025-04-25 11:38:43.644402",
  "modified": "2025-04-25 11:39:12.585542",
+=======
+ "modified": "2020-07-22 13:01:01.815123",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse wise Stock Value",
  "number_of_groups": 0,
  "owner": "Administrator",
+<<<<<<< HEAD
  "roles": [
   {
    "role": "Sales Manager"
@@ -33,6 +42,8 @@
    "role": "Accounts User"
   }
  ],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "source": "Warehouse wise Stock Value",
  "timeseries": 0,
  "type": "Bar",

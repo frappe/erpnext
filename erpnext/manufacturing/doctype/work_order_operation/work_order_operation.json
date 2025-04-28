@@ -1,6 +1,10 @@
 {
  "actions": [],
+<<<<<<< HEAD
  "creation": "2025-04-09 12:12:19.824560",
+=======
+ "creation": "2014-10-16 14:35:41.950175",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -110,15 +114,23 @@
    "fieldname": "planned_start_time",
    "fieldtype": "Datetime",
    "label": "Planned Start Time",
+<<<<<<< HEAD
    "no_copy": 1,
    "read_only": 1
+=======
+   "no_copy": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "planned_end_time",
    "fieldtype": "Datetime",
    "label": "Planned End Time",
+<<<<<<< HEAD
    "no_copy": 1,
    "read_only": 1
+=======
+   "no_copy": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_10",
@@ -201,8 +213,13 @@
   {
    "fieldname": "sequence_id",
    "fieldtype": "Int",
+<<<<<<< HEAD
    "label": "Sequence ID",
    "non_negative": 1,
+=======
+   "hidden": 1,
+   "label": "Sequence ID",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide": 1
   },
   {
@@ -296,19 +313,33 @@
    "read_only": 1
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
  "modified": "2025-05-15 15:10:06.885440",
+=======
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-06-03 15:57:17.958543",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

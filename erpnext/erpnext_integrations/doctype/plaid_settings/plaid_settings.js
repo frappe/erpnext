@@ -25,12 +25,16 @@ frappe.ui.form.on("Plaid Settings", {
 					method: "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.enqueue_synchronization",
 					freeze: true,
 					callback: () => {
+<<<<<<< HEAD
 						let bank_transaction_link = frappe.utils.get_form_link(
 							"Bank Transaction",
 							"",
 							true,
 							__("Bank Transaction")
 						);
+=======
+						let bank_transaction_link = '<a href="#List/Bank Transaction">Bank Transaction</a>';
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 						frappe.msgprint({
 							title: __("Sync Started"),

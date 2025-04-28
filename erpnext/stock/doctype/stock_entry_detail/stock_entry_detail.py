@@ -16,7 +16,10 @@ class StockEntryDetail(Document):
 
 		actual_qty: DF.Float
 		additional_cost: DF.Currency
+<<<<<<< HEAD
 		against_fg: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		against_stock_entry: DF.Link | None
 		allow_alternative_item: DF.Check
 		allow_zero_valuation_rate: DF.Check
@@ -28,7 +31,10 @@ class StockEntryDetail(Document):
 		bom_no: DF.Link | None
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
+<<<<<<< HEAD
 		customer_provided_item_cost: DF.Currency
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		description: DF.TextEditor | None
 		expense_account: DF.Link | None
 		has_item_scanned: DF.Check
@@ -39,7 +45,10 @@ class StockEntryDetail(Document):
 		item_group: DF.Data | None
 		item_name: DF.Data | None
 		job_card_item: DF.Data | None
+<<<<<<< HEAD
 		landed_cost_voucher_amount: DF.Currency
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		material_request: DF.Link | None
 		material_request_item: DF.Link | None
 		original_item: DF.Link | None
@@ -55,7 +64,10 @@ class StockEntryDetail(Document):
 		retain_sample: DF.Check
 		s_warehouse: DF.Link | None
 		sample_quantity: DF.Int
+<<<<<<< HEAD
 		scio_detail: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		sco_rm_detail: DF.Data | None
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None

@@ -1,5 +1,6 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -7,6 +8,15 @@ from frappe.tests import IntegrationTestCase
 
 
 class TestPaymentTermsTemplate(IntegrationTestCase):
+=======
+
+import unittest
+
+import frappe
+
+
+class TestPaymentTermsTemplate(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		frappe.delete_doc("Payment Terms Template", "_Test Payment Terms Template For Test", force=1)
 

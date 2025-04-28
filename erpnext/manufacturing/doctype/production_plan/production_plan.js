@@ -9,6 +9,7 @@ frappe.ui.form.on("Production Plan", {
 		});
 	},
 
+<<<<<<< HEAD
 	hide_reserve_stock_button(frm) {
 		frm.toggle_display("reserve_stock", false);
 		if (frm.doc.__onload?.enable_stock_reservation) {
@@ -16,6 +17,8 @@ frappe.ui.form.on("Production Plan", {
 		}
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	setup(frm) {
 		frm.trigger("setup_queries");
 
@@ -23,9 +26,12 @@ frappe.ui.form.on("Production Plan", {
 			"Work Order": "Work Order / Subcontract PO",
 			"Material Request": "Material Request",
 		};
+<<<<<<< HEAD
 
 		frm.set_df_property("sub_assembly_items", "cannot_delete_rows", true);
 		frm.set_df_property("mr_items", "cannot_delete_rows", true);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	setup_queries(frm) {
@@ -34,7 +40,10 @@ frappe.ui.form.on("Production Plan", {
 				query: "erpnext.manufacturing.doctype.production_plan.production_plan.sales_order_query",
 				filters: {
 					company: frm.doc.company,
+<<<<<<< HEAD
 					item_code: frm.doc.item_code,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			};
 		});
@@ -48,6 +57,7 @@ frappe.ui.form.on("Production Plan", {
 			};
 		});
 
+<<<<<<< HEAD
 		frm.set_query("sub_assembly_warehouse", function (doc) {
 			return {
 				filters: {
@@ -56,6 +66,8 @@ frappe.ui.form.on("Production Plan", {
 			};
 		});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("material_request", "material_requests", function () {
 			return {
 				filters: {
@@ -106,6 +118,7 @@ frappe.ui.form.on("Production Plan", {
 		if (frm.doc.docstatus === 1) {
 			frm.trigger("show_progress");
 
+<<<<<<< HEAD
 			frm.add_custom_button(
 				__("Production Plan Summary"),
 				() => {
@@ -119,6 +132,19 @@ frappe.ui.form.on("Production Plan", {
 			let has_create_buttons = false;
 
 			if (frm.doc.status !== "Completed") {
+=======
+			if (frm.doc.status !== "Completed") {
+				frm.add_custom_button(
+					__("Production Plan Summary"),
+					() => {
+						frappe.set_route("query-report", "Production Plan Summary", {
+							production_plan: frm.doc.name,
+						});
+					},
+					__("View")
+				);
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				if (frm.doc.status === "Closed") {
 					frm.add_custom_button(
 						__("Re-open"),
@@ -137,9 +163,13 @@ frappe.ui.form.on("Production Plan", {
 					);
 				}
 
+<<<<<<< HEAD
 				let items = frm.events.get_items_for_work_order(frm);
 
 				if (items?.length && frm.doc.status !== "Closed") {
+=======
+				if (frm.doc.po_items && frm.doc.status !== "Closed") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					frm.add_custom_button(
 						__("Work Order / Subcontract PO"),
 						() => {
@@ -147,7 +177,10 @@ frappe.ui.form.on("Production Plan", {
 						},
 						__("Create")
 					);
+<<<<<<< HEAD
 					has_create_buttons = true;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 
 				if (
@@ -162,6 +195,7 @@ frappe.ui.form.on("Production Plan", {
 						},
 						__("Create")
 					);
+<<<<<<< HEAD
 					has_create_buttons = true;
 				}
 			}
@@ -175,6 +209,16 @@ frappe.ui.form.on("Production Plan", {
 		frm.trigger("hide_reserve_stock_button");
 		frm.trigger("setup_stock_reservation_for_sub_assembly");
 		frm.trigger("setup_stock_reservation_for_raw_materials");
+=======
+				}
+			}
+		}
+
+		if (frm.doc.status !== "Closed") {
+			frm.page.set_inner_btn_group_as_primary(__("Create"));
+		}
+		frm.trigger("material_requirement");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 			<tr><td style="padding-left:25px">
@@ -222,6 +266,7 @@ frappe.ui.form.on("Production Plan", {
 		set_field_options("projected_qty_formula", projected_qty_formula);
 	},
 
+<<<<<<< HEAD
 	get_items_for_work_order(frm) {
 		let items = frm.doc.po_items;
 		if (frm.doc.sub_assembly_items?.length) {
@@ -306,6 +351,8 @@ frappe.ui.form.on("Production Plan", {
 		}
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	close_open_production_plan(frm, close = false) {
 		frappe.call({
 			method: "set_status",
@@ -390,7 +437,11 @@ frappe.ui.form.on("Production Plan", {
 		frm.clear_table("prod_plan_references");
 
 		frappe.call({
+<<<<<<< HEAD
 			method: "combine_so_items",
+=======
+			method: "get_items",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			freeze: true,
 			doc: frm.doc,
 			callback: function () {
@@ -447,7 +498,11 @@ frappe.ui.form.on("Production Plan", {
 
 		frm.set_value("consider_minimum_order_qty", 0);
 
+<<<<<<< HEAD
 		if (!frm.doc.ignore_existing_ordered_qty) {
+=======
+		if (frm.doc.ignore_existing_ordered_qty) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.events.get_items_for_material_requests(frm);
 		} else {
 			const title = __("Transfer Materials For Warehouse {0}", [frm.doc.for_warehouse]);
@@ -675,6 +730,7 @@ frappe.ui.form.on("Production Plan Sales Order", {
 frappe.ui.form.on("Production Plan Sub Assembly Item", {
 	fg_warehouse(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "sub_assembly_items", "fg_warehouse");
+<<<<<<< HEAD
 
 		let row = locals[cdt][cdn];
 		if (row.fg_warehouse && row.production_item) {
@@ -697,6 +753,8 @@ frappe.ui.form.on("Production Plan Sub Assembly Item", {
 				},
 			});
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 });
 

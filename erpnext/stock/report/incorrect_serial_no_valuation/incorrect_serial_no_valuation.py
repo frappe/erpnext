@@ -18,13 +18,18 @@ def execute(filters=None):
 
 def get_data(filters):
 	data = get_stock_ledger_entries(filters)
+<<<<<<< HEAD
 	bundles = get_bundles(data)
 	serial_nos_data = prepare_serial_nos(data, bundles)
+=======
+	serial_nos_data = prepare_serial_nos(data)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	data = get_incorrect_serial_nos(serial_nos_data)
 
 	return data
 
 
+<<<<<<< HEAD
 def get_bundles(data):
 	bundles = [d.serial_and_batch_bundle for d in data if d.serial_and_batch_bundle]
 	bundle_dict = frappe._dict()
@@ -53,6 +58,12 @@ def prepare_serial_nos(data, bundles):
 				sle.qty = bundle.qty
 				sle.valuation_rate = bundle.incoming_rate * (1 if sle.qty > 0 else -1)
 				serial_no_wise_data.setdefault(bundle.serial_no, []).append(sle)
+=======
+def prepare_serial_nos(data):
+	serial_no_wise_data = {}
+	for row in data:
+		if not row.serial_nos:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			continue
 
 		for serial_no in get_serial_nos(row.serial_nos):
@@ -79,9 +90,12 @@ def get_incorrect_serial_nos(serial_nos_data):
 			total_value.qty += total_dict.qty
 			total_value.valuation_rate += total_dict.valuation_rate
 
+<<<<<<< HEAD
 			if total_dict.qty == 0 and abs(total_dict.valuation_rate) == 0:
 				continue
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			result.append(total_dict)
 			result.append({})
 
@@ -109,17 +123,27 @@ def get_stock_ledger_entries(report_filters):
 		"voucher_no",
 		"item_code",
 		"serial_no as serial_nos",
+<<<<<<< HEAD
 		"serial_and_batch_bundle",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"actual_qty",
 		"posting_date",
 		"posting_time",
 		"company",
 		"warehouse",
+<<<<<<< HEAD
 		{"DIV": ["stock_value_difference", "actual_qty"], "as": "valuation_rate"},
 	]
 
 	filters = {"is_cancelled": 0}
 	or_filters = {"serial_no": ("is", "set"), "serial_and_batch_bundle": ("is", "set")}
+=======
+		"(stock_value_difference / actual_qty) as valuation_rate",
+	]
+
+	filters = {"serial_no": ("is", "set"), "is_cancelled": 0}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if report_filters.get("item_code"):
 		filters["item_code"] = report_filters.get("item_code")
@@ -134,7 +158,10 @@ def get_stock_ledger_entries(report_filters):
 		"Stock Ledger Entry",
 		fields=fields,
 		filters=filters,
+<<<<<<< HEAD
 		or_filters=or_filters,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		order_by="posting_date asc, posting_time asc, creation asc",
 	)
 

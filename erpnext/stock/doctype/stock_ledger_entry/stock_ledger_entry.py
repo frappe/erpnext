@@ -8,7 +8,10 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.query_builder.functions import Sum
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -26,10 +29,13 @@ class BackDatedStockTransaction(frappe.ValidationError):
 	pass
 
 
+<<<<<<< HEAD
 class InventoryDimensionNegativeStockError(frappe.ValidationError):
 	pass
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 exclude_from_linked_with = True
 
 
@@ -88,7 +94,10 @@ class StockLedgerEntry(Document):
 		self.flags.ignore_submit_comment = True
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
+<<<<<<< HEAD
 		self.set_posting_datetime()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_mandatory()
 		self.validate_batch()
 		validate_disabled_warehouse(self.warehouse)
@@ -99,6 +108,7 @@ class StockLedgerEntry(Document):
 		self.validate_with_last_transaction_posting_time()
 		self.validate_inventory_dimension_negative_stock()
 
+<<<<<<< HEAD
 	def set_posting_datetime(self):
 		from erpnext.stock.utils import get_combine_datetime
 
@@ -108,10 +118,30 @@ class StockLedgerEntry(Document):
 		if self.is_cancelled or self.actual_qty >= 0:
 			return
 
+=======
+	def set_posting_datetime(self, save=False):
+		from erpnext.stock.utils import get_combine_datetime
+
+		if save:
+			posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+			if not self.posting_datetime or self.posting_datetime != posting_datetime:
+				self.db_set("posting_datetime", posting_datetime)
+		else:
+			self.posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+
+	def validate_inventory_dimension_negative_stock(self):
+		if self.is_cancelled:
+			return
+
+		extra_cond = ""
+		kwargs = {}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		dimensions = self._get_inventory_dimensions()
 		if not dimensions:
 			return
 
+<<<<<<< HEAD
 		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
 		for dimension, values in dimensions.items():
 			dimension_value = values.get("value")
@@ -141,20 +171,64 @@ class StockLedgerEntry(Document):
 	def throw_validation_error(self, diff, dimension, dimension_value):
 		msg = _(
 			"{0} units of {1} are required in {2} with the inventory dimension: {3} ({4}) on {5} {6} for {7} to complete the transaction."
+=======
+		for dimension, values in dimensions.items():
+			kwargs[dimension] = values.get("value")
+			extra_cond += f" and {dimension} = %({dimension})s"
+
+		kwargs.update(
+			{
+				"item_code": self.item_code,
+				"warehouse": self.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"company": self.company,
+				"sle": self.name,
+			}
+		)
+
+		sle = get_previous_sle(kwargs, extra_cond=extra_cond)
+		qty_after_transaction = 0.0
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		if sle:
+			qty_after_transaction = sle.qty_after_transaction
+
+		diff = qty_after_transaction + flt(self.actual_qty)
+		diff = flt(diff, flt_precision)
+		if diff < 0 and abs(diff) > 0.0001:
+			self.throw_validation_error(diff, dimensions)
+
+	def throw_validation_error(self, diff, dimensions):
+		dimension_msg = _(", with the inventory {0}: {1}").format(
+			"dimensions" if len(dimensions) > 1 else "dimension",
+			", ".join(f"{bold(d.doctype)} ({d.value})" for k, d in dimensions.items()),
+		)
+
+		msg = _(
+			"{0} units of {1} are required in {2}{3}, on {4} {5} for {6} to complete the transaction."
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		).format(
 			abs(diff),
 			frappe.get_desk_link("Item", self.item_code),
 			frappe.get_desk_link("Warehouse", self.warehouse),
+<<<<<<< HEAD
 			frappe.bold(dimension),
 			frappe.bold(dimension_value),
+=======
+			dimension_msg,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.posting_date,
 			self.posting_time,
 			frappe.get_desk_link(self.voucher_type, self.voucher_no),
 		)
 
+<<<<<<< HEAD
 		frappe.throw(
 			msg, title=_("Inventory Dimension Negative Stock"), exc=InventoryDimensionNegativeStockError
 		)
+=======
+		frappe.throw(msg, title=_("Inventory Dimension Negative Stock"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def _get_inventory_dimensions(self):
 		inv_dimensions = get_inventory_dimensions()
@@ -169,6 +243,7 @@ class StockLedgerEntry(Document):
 		return inv_dimension_dict
 
 	def on_submit(self):
+<<<<<<< HEAD
 		self.check_stock_frozen_date()
 
 		# Added to handle few test cases where serial_and_batch_bundles are not required
@@ -176,6 +251,13 @@ class StockLedgerEntry(Document):
 			return
 
 		if self.is_adjustment_entry:
+=======
+		self.set_posting_datetime(save=True)
+		self.check_stock_frozen_date()
+
+		# Added to handle few test cases where serial_and_batch_bundles are not required
+		if frappe.flags.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return
 
 		if not self.get("via_landed_cost_voucher"):
@@ -192,7 +274,11 @@ class StockLedgerEntry(Document):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
+<<<<<<< HEAD
 				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
+=======
+				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
 			frappe.throw(_("Actual Qty is mandatory"))
@@ -302,7 +388,11 @@ class StockLedgerEntry(Document):
 		is_group_warehouse(self.warehouse)
 
 	def validate_with_last_transaction_posting_time(self):
+<<<<<<< HEAD
 		authorized_role = frappe.get_single_value(
+=======
+		authorized_role = frappe.db.get_single_value(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"Stock Settings", "role_allowed_to_create_edit_back_dated_transactions"
 		)
 		if authorized_role:
@@ -347,4 +437,10 @@ class StockLedgerEntry(Document):
 
 def on_doctype_update():
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
+<<<<<<< HEAD
 	frappe.db.add_index("Stock Ledger Entry", ["item_code", "warehouse", "posting_datetime", "creation"])
+=======
+	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
+	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Stock Ledger Entry", ["posting_datetime", "creation"])
+>>>>>>> 7c4cf3e834 (Favicon.svg)

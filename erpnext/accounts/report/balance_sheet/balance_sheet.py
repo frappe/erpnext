@@ -6,11 +6,15 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+<<<<<<< HEAD
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
 )
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
+=======
+from erpnext.accounts.report.financial_statements import (
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	get_columns,
 	get_data,
 	get_filtered_list_for_consolidated_report,
@@ -19,9 +23,12 @@ from erpnext.accounts.report.financial_statements import (
 
 
 def execute(filters=None):
+<<<<<<< HEAD
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,
@@ -102,15 +109,22 @@ def execute(filters=None):
 		filters.periodicity, period_list, filters.accumulated_values, company=filters.company
 	)
 
+<<<<<<< HEAD
 	chart = get_chart_data(filters, columns, asset, liability, equity, currency)
+=======
+	chart = get_chart_data(filters, columns, asset, liability, equity)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	report_summary, primitive_summary = get_report_summary(
 		period_list, asset, liability, equity, provisional_profit_loss, currency, filters
 	)
 
+<<<<<<< HEAD
 	if filters.get("selected_view") == "Growth":
 		compute_growth_view_data(data, period_list)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return columns, data, message, chart, report_summary, primitive_summary
 
 
@@ -132,6 +146,7 @@ def get_provisional_profit_loss(
 
 		for period in period_list:
 			key = period if consolidated else period.key
+<<<<<<< HEAD
 			total_assets = flt(asset[-2].get(key))
 			effective_liability = 0.00
 
@@ -139,6 +154,15 @@ def get_provisional_profit_loss(
 				effective_liability += flt(liability[-2].get(key))
 			if equity and equity[-1] == {}:
 				effective_liability += flt(equity[-2].get(key))
+=======
+			total_assets = flt(asset[0].get(key))
+			effective_liability = 0.00
+
+			if liability:
+				effective_liability += flt(liability[0].get(key))
+			if equity:
+				effective_liability += flt(equity[0].get(key))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			provisional_profit_loss[key] = total_assets - effective_liability
 			total_row[key] = provisional_profit_loss[key] + effective_liability
@@ -204,11 +228,19 @@ def get_report_summary(
 	for period in period_list:
 		key = period if consolidated else period.key
 		if asset:
+<<<<<<< HEAD
 			net_asset += asset[-2].get(key)
 		if liability and liability[-1] == {}:
 			net_liability += liability[-2].get(key)
 		if equity and equity[-1] == {}:
 			net_equity += equity[-2].get(key)
+=======
+			net_asset += asset[0].get(key)
+		if liability:
+			net_liability += liability[0].get(key)
+		if equity:
+			net_equity += equity[0].get(key)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if provisional_profit_loss:
 			net_provisional_profit_loss += provisional_profit_loss.get(key)
 
@@ -231,7 +263,11 @@ def get_report_summary(
 	], (net_asset - net_liability + net_equity)
 
 
+<<<<<<< HEAD
 def get_chart_data(filters, columns, asset, liability, equity, currency):
+=======
+def get_chart_data(filters, columns, asset, liability, equity):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	labels = [d.get("label") for d in columns[2:]]
 
 	asset_data, liability_data, equity_data = [], [], []
@@ -259,8 +295,11 @@ def get_chart_data(filters, columns, asset, liability, equity, currency):
 	else:
 		chart["type"] = "line"
 
+<<<<<<< HEAD
 	chart["fieldtype"] = "Currency"
 	chart["options"] = "currency"
 	chart["currency"] = currency
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return chart

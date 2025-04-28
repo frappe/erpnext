@@ -3,7 +3,10 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.utils import escape_html
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -12,8 +15,11 @@ def send_message(sender, message, subject="Website Query"):
 
 	website_send_message(sender, message, subject)
 
+<<<<<<< HEAD
 	message = escape_html(message)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	lead = customer = None
 	customer = frappe.db.sql(
 		"""select distinct dl.link_name from `tabDynamic Link` dl

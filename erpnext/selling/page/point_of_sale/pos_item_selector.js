@@ -34,13 +34,17 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		this.$component = this.wrapper.find(".items-selector");
 		this.$items_container = this.$component.find(".items-container");
+<<<<<<< HEAD
 
 		const show_hide_images = this.hide_images ? "hide-item-image" : "show-item-image";
 		this.$items_container.addClass(show_hide_images);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	async load_items_data() {
 		if (!this.item_group) {
+<<<<<<< HEAD
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_parent_item_group",
 				async: false,
@@ -48,6 +52,10 @@ erpnext.PointOfSale.ItemSelector = class {
 					if (r.message) this.parent_item_group = r.message;
 				},
 			});
+=======
+			const res = await frappe.db.get_value("Item Group", { lft: 1, is_group: 1 }, "name");
+			this.parent_item_group = res.message.name;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
@@ -76,16 +84,20 @@ erpnext.PointOfSale.ItemSelector = class {
 	render_item_list(items) {
 		this.$items_container.html("");
 
+<<<<<<< HEAD
 		if (this.hide_images) {
 			this.$items_container.append(this.render_item_list_column_header());
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items.forEach((item) => {
 			const item_html = this.get_item_html(item);
 			this.$items_container.append(item_html);
 		});
 	}
 
+<<<<<<< HEAD
 	render_item_list_column_header() {
 		return `<div class="list-column">
 			<div class="column-name">Name</div>
@@ -95,6 +107,8 @@ erpnext.PointOfSale.ItemSelector = class {
 		</div>`;
 	}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
@@ -116,6 +130,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		}
 
 		function get_item_image_html() {
+<<<<<<< HEAD
 			if (me.hide_images) return "";
 			if (item_image) {
 				return `<div class="item-qty-pill">
@@ -126,6 +141,17 @@ erpnext.PointOfSale.ItemSelector = class {
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
 								class="item-img" src="${item_image}"
 								alt="${item.item_name}"
+=======
+			if (!me.hide_images && item_image) {
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
+						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+							<img
+								onerror="cur_pos.item_selector.handle_broken_image(this)"
+								class="h-full item-img" src="${item_image}"
+								alt="${frappe.get_abbr(item.item_name)}"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							>
 						</div>`;
 			} else {
@@ -140,13 +166,17 @@ erpnext.PointOfSale.ItemSelector = class {
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(uom)}"
 				data-rate="${escape(price_list_rate || 0)}"
+<<<<<<< HEAD
 				data-stock-uom="${escape(item.stock_uom)}"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				title="${item.item_name}">
 
 				${get_item_image_html()}
 
 				<div class="item-detail">
 					<div class="item-name">
+<<<<<<< HEAD
 						${!me.hide_images ? frappe.ellipsis(item.item_name, 18) : item.item_name}
 					</div>
 					${
@@ -160,6 +190,11 @@ erpnext.PointOfSale.ItemSelector = class {
 							<div class="item-qty-available">${qty_to_display || "Non stock item"}</div>
 							`
 					}
+=======
+						${frappe.ellipsis(item.item_name, 18)}
+					</div>
+					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}</div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				</div>
 			</div>`;
 	}
@@ -171,6 +206,10 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	make_search_bar() {
 		const me = this;
+<<<<<<< HEAD
+=======
+		const doc = me.events.get_frm().doc;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.$component.find(".search-field").html("");
 		this.$component.find(".item-group-field").html("");
 
@@ -195,7 +234,10 @@ erpnext.PointOfSale.ItemSelector = class {
 					me.filter_items();
 				},
 				get_query: function () {
+<<<<<<< HEAD
 					const doc = me.events.get_frm().doc;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					return {
 						query: "erpnext.selling.page.point_of_sale.point_of_sale.item_group_query",
 						filters: {
@@ -215,7 +257,11 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	attach_clear_btn() {
 		this.search_field.$wrapper.find(".control-input").append(
+<<<<<<< HEAD
 			`<span class="link-btn">
+=======
+			`<span class="link-btn" style="top: 2px;">
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				<a class="btn-open no-decoration" title="${__("Clear")}">
 					${frappe.utils.icon("close", "sm")}
 				</a>
@@ -284,19 +330,29 @@ erpnext.PointOfSale.ItemSelector = class {
 			let serial_no = unescape($item.attr("data-serial-no"));
 			let uom = unescape($item.attr("data-uom"));
 			let rate = unescape($item.attr("data-rate"));
+<<<<<<< HEAD
 			let stock_uom = unescape($item.attr("data-stock-uom"));
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
+<<<<<<< HEAD
 			stock_uom = stock_uom === "undefined" ? undefined : stock_uom;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			me.events.item_selected({
 				field: "qty",
 				value: "+1",
+<<<<<<< HEAD
 				item: { item_code, batch_no, serial_no, uom, rate, stock_uom },
+=======
+				item: { item_code, batch_no, serial_no, uom, rate },
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			});
 			me.search_field.set_focus();
 		});
@@ -360,13 +416,17 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	filter_items({ search_term = "" } = {}) {
+<<<<<<< HEAD
 		const selling_price_list = this.events.get_frm().doc.selling_price_list;
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (search_term) {
 			search_term = search_term.toLowerCase();
 
 			// memoize
 			this.search_index = this.search_index || {};
+<<<<<<< HEAD
 			this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
 			if (this.search_index[selling_price_list][search_term]) {
 				const items = this.search_index[selling_price_list][search_term];
@@ -376,6 +436,13 @@ erpnext.PointOfSale.ItemSelector = class {
 					this.search_field.$input[0].value &&
 					this.items.length == 1 &&
 					this.add_filtered_item_to_cart();
+=======
+			if (this.search_index[search_term]) {
+				const items = this.search_index[search_term];
+				this.items = items;
+				this.render_item_list(items);
+				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				return;
 			}
 		}
@@ -384,6 +451,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			// eslint-disable-next-line no-unused-vars
 			const { items, serial_no, batch_no, barcode } = message;
 			if (search_term && !barcode) {
+<<<<<<< HEAD
 				this.search_index[selling_price_list][search_term] = items;
 			}
 			this.items = items;
@@ -392,6 +460,13 @@ erpnext.PointOfSale.ItemSelector = class {
 				this.search_field.$input[0].value &&
 				this.items.length == 1 &&
 				this.add_filtered_item_to_cart();
+=======
+				this.search_index[search_term] = items;
+			}
+			this.items = items;
+			this.render_item_list(items);
+			this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 	}
 
@@ -400,6 +475,31 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.set_search_value("");
 	}
 
+<<<<<<< HEAD
+=======
+	resize_selector(minimize) {
+		minimize
+			? this.$component
+					.find(".filter-section")
+					.css("grid-template-columns", "repeat(1, minmax(0, 1fr))")
+			: this.$component
+					.find(".filter-section")
+					.css("grid-template-columns", "repeat(12, minmax(0, 1fr))");
+
+		minimize
+			? this.$component.find(".search-field").css("margin", "var(--margin-sm) 0px")
+			: this.$component.find(".search-field").css("margin", "0px var(--margin-sm)");
+
+		minimize
+			? this.$component.css("grid-column", "span 2 / span 2")
+			: this.$component.css("grid-column", "span 6 / span 6");
+
+		minimize
+			? this.$items_container.css("grid-template-columns", "repeat(1, minmax(0, 1fr))")
+			: this.$items_container.css("grid-template-columns", "repeat(4, minmax(0, 1fr))");
+	}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	toggle_component(show) {
 		this.set_search_value("");
 		this.$component.css("display", show ? "flex" : "none");

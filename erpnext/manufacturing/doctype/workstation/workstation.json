@@ -15,7 +15,10 @@
   "workstation_name",
   "workstation_type",
   "plant_floor",
+<<<<<<< HEAD
   "disabled",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_3",
   "production_capacity",
   "warehouse",
@@ -27,8 +30,16 @@
   "column_break_etmc",
   "off_status_image",
   "over_heads",
+<<<<<<< HEAD
   "section_break_auzm",
   "workstation_costs",
+=======
+  "hour_rate_electricity",
+  "hour_rate_consumable",
+  "column_break_11",
+  "hour_rate_rent",
+  "hour_rate_labour",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_11",
   "hour_rate",
   "workstaion_description",
@@ -66,6 +77,49 @@
    "oldfieldtype": "Section Break"
   },
   {
+<<<<<<< HEAD
+=======
+   "bold": 1,
+   "description": "per hour",
+   "fieldname": "hour_rate_electricity",
+   "fieldtype": "Currency",
+   "label": "Electricity Cost",
+   "oldfieldname": "hour_rate_electricity",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "bold": 1,
+   "description": "per hour",
+   "fieldname": "hour_rate_consumable",
+   "fieldtype": "Currency",
+   "label": "Consumable Cost",
+   "oldfieldname": "hour_rate_consumable",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "description": "per hour",
+   "fieldname": "hour_rate_rent",
+   "fieldtype": "Currency",
+   "label": "Rent Cost",
+   "oldfieldname": "hour_rate_rent",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "bold": 1,
+   "description": "Wages per hour",
+   "fieldname": "hour_rate_labour",
+   "fieldtype": "Currency",
+   "label": "Wages",
+   "oldfieldname": "hour_rate_labour",
+   "oldfieldtype": "Currency"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "per hour",
    "fieldname": "hour_rate",
    "fieldtype": "Currency",
@@ -97,7 +151,10 @@
    "fieldname": "production_capacity",
    "fieldtype": "Int",
    "label": "Job Capacity",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -199,6 +256,7 @@
    "fieldname": "section_break_mqqv",
    "fieldtype": "Section Break",
    "hide_border": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -219,11 +277,19 @@
   }
  ],
  "hide_toolbar": 1,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "icon-wrench",
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-19 12:07:05.374386",
+=======
+ "modified": "2024-06-20 14:17:13.806609",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
@@ -243,10 +309,17 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

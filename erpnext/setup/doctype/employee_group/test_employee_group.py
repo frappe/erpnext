@@ -1,14 +1,25 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
+<<<<<<< HEAD
 class TestEmployeeGroup(IntegrationTestCase):
+=======
+class TestEmployeeGroup(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	pass
 
 

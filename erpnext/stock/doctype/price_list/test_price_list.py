@@ -3,3 +3,10 @@
 
 
 import frappe
+<<<<<<< HEAD
+=======
+
+# test_ignore = ["Item"]
+
+test_records = frappe.get_test_records("Price List")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

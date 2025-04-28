@@ -18,7 +18,10 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+<<<<<<< HEAD
   "project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "shipping_amount_section",
   "calculate_based_on",
   "column_break_8",
@@ -139,12 +142,15 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
     "fieldname": "project",
     "fieldtype": "Link",
     "label": "Project",
     "options": "Project"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-truck",

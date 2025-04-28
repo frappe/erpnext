@@ -14,6 +14,9 @@ def get_data():
 			{"label": _("Material"), "items": ["Material Request", "BOM", "Stock Entry"]},
 			{"label": _("Sales"), "items": ["Sales Order", "Delivery Note", "Sales Invoice"]},
 			{"label": _("Purchase"), "items": ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]},
+<<<<<<< HEAD
 			{"label": _("Manufacture"), "items": ["Work Order"]},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 	}

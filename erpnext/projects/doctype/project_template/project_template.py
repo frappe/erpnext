@@ -21,7 +21,10 @@ class ProjectTemplate(Document):
 			ProjectTemplateTask,
 		)
 
+<<<<<<< HEAD
 		disabled: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		project_type: DF.Link | None
 		tasks: DF.Table[ProjectTemplateTask]
 	# end: auto-generated types

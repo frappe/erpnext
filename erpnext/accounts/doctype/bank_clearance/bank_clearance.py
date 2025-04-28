@@ -6,7 +6,11 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
+<<<<<<< HEAD
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate
+=======
+from frappe.utils import flt, fmt_money, get_link_to_form, getdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from pypika import Order
 
 import erpnext
@@ -48,7 +52,10 @@ class BankClearance(Document):
 		entries = []
 
 		# get entries from all the apps
+<<<<<<< HEAD
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		for method_name in frappe.get_hooks("get_payment_entries_for_bank_clearance"):
 			entries += (
 				frappe.get_attr(method_name)(
@@ -78,7 +85,11 @@ class BankClearance(Document):
 			if not d.get("account_currency"):
 				d.account_currency = default_currency
 
+<<<<<<< HEAD
 			formatted_amount = fmt_money(abs(amount), precision, d.account_currency)
+=======
+			formatted_amount = fmt_money(abs(amount), 2, d.account_currency)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			d.amount = formatted_amount + " " + (_("Dr") if amount > 0 else _("Cr"))
 			d.posting_date = getdate(d.posting_date)
 
@@ -89,6 +100,7 @@ class BankClearance(Document):
 
 	@frappe.whitelist()
 	def update_clearance_date(self):
+<<<<<<< HEAD
 		invalid_document = []
 		invalid_cheque_date = []
 		entries_to_update = []
@@ -147,6 +159,38 @@ class BankClearance(Document):
 
 		self.get_payment_entries()
 		msgprint(_("Clearance Date updated"))
+=======
+		clearance_date_updated = False
+		for d in self.get("payment_entries"):
+			if d.clearance_date:
+				if not d.payment_document:
+					frappe.throw(_("Row #{0}: Payment document is required to complete the transaction"))
+
+				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
+					frappe.throw(
+						_("Row #{0}: For {1} Clearance date {2} cannot be before Cheque Date {3}").format(
+							d.idx,
+							get_link_to_form(d.payment_document, d.payment_entry),
+							d.clearance_date,
+							d.cheque_date,
+						)
+					)
+
+			if d.clearance_date or self.include_reconciled_entries:
+				if not d.clearance_date:
+					d.clearance_date = None
+
+				payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
+				payment_entry.db_set("clearance_date", d.clearance_date)
+
+				clearance_date_updated = True
+
+		if clearance_date_updated:
+			self.get_payment_entries()
+			msgprint(_("Clearance Date updated"))
+		else:
+			msgprint(_("Clearance Date not mentioned"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_payment_entries_for_bank_clearance(
@@ -155,10 +199,15 @@ def get_payment_entries_for_bank_clearance(
 	entries = []
 
 	condition = ""
+<<<<<<< HEAD
 	pe_condition = ""
 	if not include_reconciled_entries:
 		condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
 		pe_condition = "and (pe.clearance_date IS NULL or pe.clearance_date='0000-00-00')"
+=======
+	if not include_reconciled_entries:
+		condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	journal_entries = frappe.db.sql(
 		f"""
@@ -180,6 +229,7 @@ def get_payment_entries_for_bank_clearance(
 		as_dict=1,
 	)
 
+<<<<<<< HEAD
 	payment_entries = frappe.db.sql(
 		f"""
 			select
@@ -197,11 +247,36 @@ def get_payment_entries_for_bank_clearance(
 				{pe_condition}
 			order by
 				pe.posting_date ASC, pe.name DESC
+=======
+	if bank_account:
+		condition += "and bank_account = %(bank_account)s"
+
+	payment_entries = frappe.db.sql(
+		f"""
+			select
+				"Payment Entry" as payment_document, name as payment_entry,
+				reference_no as cheque_number, reference_date as cheque_date,
+				if(paid_from=%(account)s, paid_amount + total_taxes_and_charges, 0) as credit,
+				if(paid_from=%(account)s, 0, received_amount) as debit,
+				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
+				if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
+			from `tabPayment Entry`
+			where
+				(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
+				and posting_date >= %(from)s and posting_date <= %(to)s
+				{condition}
+			order by
+				posting_date ASC, name DESC
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		""",
 		{
 			"account": account,
 			"from": from_date,
 			"to": to_date,
+<<<<<<< HEAD
+=======
+			"bank_account": bank_account,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		as_dict=1,
 	)

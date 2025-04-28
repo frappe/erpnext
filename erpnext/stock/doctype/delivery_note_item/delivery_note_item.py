@@ -16,7 +16,10 @@ class DeliveryNoteItem(Document):
 
 		actual_batch_qty: DF.Float
 		actual_qty: DF.Float
+<<<<<<< HEAD
 		against_pick_list: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		against_sales_invoice: DF.Link | None
 		against_sales_order: DF.Link | None
 		allow_zero_valuation_rate: DF.Check
@@ -31,7 +34,10 @@ class DeliveryNoteItem(Document):
 		batch_no: DF.Link | None
 		billed_amt: DF.Currency
 		brand: DF.Link | None
+<<<<<<< HEAD
 		company_total_stock: DF.Float
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
 		customer_item_code: DF.Data | None

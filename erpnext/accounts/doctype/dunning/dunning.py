@@ -11,7 +11,10 @@
 
 		-> Resolves dunning automatically
 """
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import json
 
 import frappe
@@ -164,6 +167,7 @@ class Dunning(AccountsController):
 		]
 
 
+<<<<<<< HEAD
 def update_linked_dunnings(doc, previous_outstanding_amount):
 	if (
 		doc.doctype != "Sales Invoice"
@@ -224,6 +228,45 @@ def update_linked_dunnings(doc, previous_outstanding_amount):
 		if dunning.status != new_status:
 			dunning.status = new_status
 			dunning.save()
+=======
+def resolve_dunning(doc, state):
+	"""
+	Check if all payments have been made and resolve dunning, if yes. Called
+	when a Payment Entry is submitted.
+	"""
+	for reference in doc.references:
+		# Consider partial and full payments:
+		# Submitting full payment: outstanding_amount will be 0
+		# Submitting 1st partial payment: outstanding_amount will be the pending installment
+		# Cancelling full payment: outstanding_amount will revert to total amount
+		# Cancelling last partial payment: outstanding_amount will revert to pending amount
+		submit_condition = reference.outstanding_amount < reference.total_amount
+		cancel_condition = reference.outstanding_amount <= reference.total_amount
+
+		if reference.reference_doctype == "Sales Invoice" and (
+			submit_condition if doc.docstatus == 1 else cancel_condition
+		):
+			state = "Resolved" if doc.docstatus == 2 else "Unresolved"
+			dunnings = get_linked_dunnings_as_per_state(reference.reference_name, state)
+
+			for dunning in dunnings:
+				resolve = True
+				dunning = frappe.get_doc("Dunning", dunning.get("name"))
+				for overdue_payment in dunning.overdue_payments:
+					outstanding_inv = frappe.get_value(
+						"Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount"
+					)
+					outstanding_ps = frappe.get_value(
+						"Payment Schedule", overdue_payment.payment_schedule, "outstanding"
+					)
+					resolve = resolve and (False if (outstanding_ps > 0 and outstanding_inv > 0) else True)
+
+				new_status = "Resolved" if resolve else "Unresolved"
+
+				if dunning.status != new_status:
+					dunning.status = new_status
+					dunning.save()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_linked_dunnings_as_per_state(sales_invoice, state):
@@ -244,6 +287,7 @@ def get_linked_dunnings_as_per_state(sales_invoice, state):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_dunning_letter_text(dunning_type: str, doc: str | dict, language: str | None = None) -> dict:
 	DOCTYPE = "Dunning Letter Text"
 	FIELDS = ["body_text", "closing_text", "language"]
@@ -273,3 +317,21 @@ def get_dunning_letter_text(dunning_type: str, doc: str | dict, language: str | 
 		"closing_text": frappe.render_template(letter_text.closing_text, doc),
 		"language": letter_text.language,
 	}
+=======
+def get_dunning_letter_text(dunning_type, doc, language=None):
+	if isinstance(doc, str):
+		doc = json.loads(doc)
+	if language:
+		filters = {"parent": dunning_type, "language": language}
+	else:
+		filters = {"parent": dunning_type, "is_default_language": 1}
+	letter_text = frappe.db.get_value(
+		"Dunning Letter Text", filters, ["body_text", "closing_text", "language"], as_dict=1
+	)
+	if letter_text:
+		return {
+			"body_text": frappe.render_template(letter_text.body_text, doc),
+			"closing_text": frappe.render_template(letter_text.closing_text, doc),
+			"language": letter_text.language,
+		}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

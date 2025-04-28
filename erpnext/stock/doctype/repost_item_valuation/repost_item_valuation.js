@@ -41,9 +41,13 @@ frappe.ui.form.on("Repost Item Valuation", {
 			});
 		}
 
+<<<<<<< HEAD
 		if (frm.doc.status !== "Completed") {
 			frm.trigger("setup_realtime_progress");
 		}
+=======
+		frm.trigger("setup_realtime_progress");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	based_on: function (frm) {
@@ -86,9 +90,13 @@ frappe.ui.form.on("Repost Item Valuation", {
 			}).addClass("btn-primary");
 		}
 
+<<<<<<< HEAD
 		if (frm.doc.status !== "Completed") {
 			frm.trigger("show_reposting_progress");
 		}
+=======
+		frm.trigger("show_reposting_progress");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if (frm.doc.status === "Queued" && frm.doc.docstatus === 1) {
 			frm.trigger("execute_reposting");
@@ -136,6 +144,7 @@ frappe.ui.form.on("Repost Item Valuation", {
 			},
 		});
 	},
+<<<<<<< HEAD
 
 	voucher_type: function (frm) {
 		frm.trigger("set_company_on_transaction");
@@ -150,4 +159,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 			frm.call("set_company");
 		}
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

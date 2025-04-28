@@ -17,9 +17,14 @@ class JournalEntryAccount(Document):
 		account: DF.Link
 		account_currency: DF.Link | None
 		account_type: DF.Data | None
+<<<<<<< HEAD
 		advance_voucher_no: DF.DynamicLink | None
 		advance_voucher_type: DF.Link | None
 		against_account: DF.Text | None
+=======
+		against_account: DF.Text | None
+		balance: DF.Currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		bank_account: DF.Link | None
 		cost_center: DF.Link | None
 		credit: DF.Currency
@@ -32,6 +37,10 @@ class JournalEntryAccount(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		party: DF.DynamicLink | None
+<<<<<<< HEAD
+=======
+		party_balance: DF.Currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		party_type: DF.Link | None
 		project: DF.Link | None
 		reference_detail_no: DF.Data | None

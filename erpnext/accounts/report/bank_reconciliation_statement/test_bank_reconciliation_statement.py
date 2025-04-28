@@ -2,7 +2,11 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	execute,
@@ -10,7 +14,20 @@ from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_s
 from erpnext.tests.utils import if_lending_app_installed
 
 
+<<<<<<< HEAD
 class TestBankReconciliationStatement(IntegrationTestCase):
+=======
+class TestBankReconciliationStatement(FrappeTestCase):
+	def setUp(self):
+		for dt in [
+			"Journal Entry",
+			"Journal Entry Account",
+			"Payment Entry",
+		]:
+			frappe.db.delete(dt)
+		clear_loan_transactions()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@if_lending_app_installed
 	def test_loan_entries_in_bank_reco_statement(self):
 		from lending.loan_management.doctype.loan.test_loan import create_loan_accounts
@@ -33,3 +50,15 @@ class TestBankReconciliationStatement(IntegrationTestCase):
 		result = execute(filters)
 
 		self.assertEqual(result[1][0].payment_entry, repayment_entry.name)
+<<<<<<< HEAD
+=======
+
+
+@if_lending_app_installed
+def clear_loan_transactions():
+	for dt in [
+		"Loan Disbursement",
+		"Loan Repayment",
+	]:
+		frappe.db.delete(dt)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

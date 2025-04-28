@@ -22,7 +22,10 @@ from frappe.utils import (
 	strip_html,
 )
 from frappe.utils.html_utils import clean_html
+<<<<<<< HEAD
 from pypika import Order
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 import erpnext
 from erpnext.controllers.item_variant import (
@@ -33,7 +36,10 @@ from erpnext.controllers.item_variant import (
 	validate_item_variant_attributes,
 )
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
+<<<<<<< HEAD
 from erpnext.stock.utils import get_valuation_method
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class DuplicateReorderRows(frappe.ValidationError):
@@ -127,7 +133,10 @@ class Item(Document):
 		opening_stock: DF.Float
 		over_billing_allowance: DF.Float
 		over_delivery_receipt_allowance: DF.Float
+<<<<<<< HEAD
 		production_capacity: DF.Int
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
@@ -155,7 +164,10 @@ class Item(Document):
 	def onload(self):
 		self.set_onload("stock_exists", self.stock_ledger_created())
 		self.set_onload("asset_naming_series", get_asset_naming_series())
+<<<<<<< HEAD
 		self.set_onload("current_valuation_method", get_valuation_method(self.name))
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by") == "Naming Series":
@@ -185,6 +197,12 @@ class Item(Document):
 		if not self.item_name:
 			self.item_name = self.item_code
 
+<<<<<<< HEAD
+=======
+		if not strip_html(cstr(self.description)).strip():
+			self.description = self.item_name
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_uom()
 		self.validate_description()
 		self.add_default_uom_in_conversion_factor_table()
@@ -224,10 +242,14 @@ class Item(Document):
 
 	def validate_description(self):
 		"""Clean HTML description if set"""
+<<<<<<< HEAD
 		if (
 			cint(frappe.get_single_value("Stock Settings", "clean_description_html"))
 			and self.description != self.item_name  # perf: Avoid cleaning up a fallback
 		):
+=======
+		if cint(frappe.db.get_single_value("Stock Settings", "clean_description_html")):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.description = clean_html(self.description)
 
 	def validate_customer_provided_part(self):
@@ -241,7 +263,11 @@ class Item(Document):
 	def add_price(self, price_list=None):
 		"""Add a new price"""
 		if not price_list:
+<<<<<<< HEAD
 			price_list = frappe.get_single_value(
+=======
+			price_list = frappe.db.get_single_value(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"Selling Settings", "selling_price_list"
 			) or frappe.db.get_value("Price List", _("Standard Selling"))
 		if price_list:
@@ -272,7 +298,11 @@ class Item(Document):
 		for default in self.item_defaults or [
 			frappe._dict({"company": frappe.defaults.get_defaults().company})
 		]:
+<<<<<<< HEAD
 			default_warehouse = default.default_warehouse or frappe.get_single_value(
+=======
+			default_warehouse = default.default_warehouse or frappe.db.get_single_value(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"Stock Settings", "default_warehouse"
 			)
 			if default_warehouse:
@@ -307,7 +337,11 @@ class Item(Document):
 			if self.stock_ledger_created():
 				frappe.throw(_("Cannot be a fixed asset item as Stock Ledger is created."))
 
+<<<<<<< HEAD
 		if not self.is_fixed_asset and not self.is_new():
+=======
+		if not self.is_fixed_asset:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 			if asset:
 				frappe.throw(
@@ -315,7 +349,13 @@ class Item(Document):
 				)
 
 	def validate_retain_sample(self):
+<<<<<<< HEAD
 		if self.retain_sample and not frappe.get_single_value("Stock Settings", "sample_retention_warehouse"):
+=======
+		if self.retain_sample and not frappe.db.get_single_value(
+			"Stock Settings", "sample_retention_warehouse"
+		):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.throw(_("Please select Sample Retention Warehouse in Stock Settings first"))
 		if self.retain_sample and not self.has_batch_no:
 			frappe.throw(
@@ -525,9 +565,12 @@ class Item(Document):
 		return self._stock_ledger_created
 
 	def update_item_price(self):
+<<<<<<< HEAD
 		if self.is_new():
 			return
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.sql(
 			"""
 				UPDATE `tabItem Price`
@@ -575,6 +618,28 @@ class Item(Document):
 			self.set_last_purchase_rate(new_name)
 			self.recalculate_bin_qty(new_name)
 
+<<<<<<< HEAD
+=======
+		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
+			for d in frappe.db.sql(
+				f"""select name, item_wise_tax_detail from `tab{dt}`
+					where ifnull(item_wise_tax_detail, '') != ''""",
+				as_dict=1,
+			):
+				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
+				if isinstance(item_wise_tax_detail, dict) and old_name in item_wise_tax_detail:
+					item_wise_tax_detail[new_name] = item_wise_tax_detail[old_name]
+					item_wise_tax_detail.pop(old_name)
+
+					frappe.db.set_value(
+						dt,
+						d.name,
+						"item_wise_tax_detail",
+						json.dumps(item_wise_tax_detail),
+						update_modified=False,
+					)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def delete_old_bins(self, old_name):
 		frappe.db.delete("Bin", {"item_code": old_name})
 
@@ -617,7 +682,11 @@ class Item(Document):
 
 		if new_properties != [cstr(self.get(field)) for field in field_list]:
 			msg = _("To merge, following properties must be same for both items")
+<<<<<<< HEAD
 			msg += ": \n" + ", ".join([_(self.meta.get_label(fld)) for fld in field_list])
+=======
+			msg += ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
@@ -641,7 +710,11 @@ class Item(Document):
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
 
+<<<<<<< HEAD
 		existing_allow_negative_stock = frappe.get_single_value("Stock Settings", "allow_negative_stock")
+=======
+		existing_allow_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 		repost_stock_for_warehouses = frappe.get_all(
@@ -705,9 +778,29 @@ class Item(Document):
 		if self.item_defaults or not self.item_group:
 			return
 
+<<<<<<< HEAD
 		item_group = frappe.get_cached_doc("Item Group", self.item_group)
 		if item_group.item_group_defaults:
 			for item in item_group.item_group_defaults:
+=======
+		item_defaults = frappe.db.get_values(
+			"Item Default",
+			{"parent": self.item_group},
+			[
+				"company",
+				"default_warehouse",
+				"default_price_list",
+				"buying_cost_center",
+				"default_supplier",
+				"expense_account",
+				"selling_cost_center",
+				"income_account",
+			],
+			as_dict=1,
+		)
+		if item_defaults:
+			for item in item_defaults:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				self.append(
 					"item_defaults",
 					{
@@ -728,8 +821,14 @@ class Item(Document):
 			if (
 				defaults.get("default_warehouse")
 				and defaults.company
+<<<<<<< HEAD
 				and defaults.company
 				== frappe.get_cached_value("Warehouse", defaults.default_warehouse, "company")
+=======
+				and frappe.db.exists(
+					"Warehouse", {"name": defaults.default_warehouse, "company": defaults.company}
+				)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			):
 				self.append(
 					"item_defaults",
@@ -752,16 +851,24 @@ class Item(Document):
 						"erpnext.stock.doctype.item.item.update_variants",
 						variants=variants,
 						template=self,
+<<<<<<< HEAD
 						now=frappe.in_test,
+=======
+						now=frappe.flags.in_test,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						timeout=600,
 						enqueue_after_commit=True,
 					)
 
 	def validate_has_variants(self):
+<<<<<<< HEAD
 		if self.is_new():
 			return
 
 		if not self.has_variants and self.has_value_changed("has_variants"):
+=======
+		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if frappe.db.exists("Item", {"variant_of": self.name}):
 				frappe.throw(_("Item has variants."))
 
@@ -869,6 +976,7 @@ class Item(Document):
 			for d in frappe.db.get_all("Item", filters={"variant_of": self.name}):
 				check_stock_uom_with_bin(d.name, self.stock_uom)
 		if self.variant_of:
+<<<<<<< HEAD
 			allow_different_uom = frappe.get_cached_value(
 				"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
 			)
@@ -880,6 +988,15 @@ class Item(Document):
 							"Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'"
 						).format(self.stock_uom, template_uom)
 					)
+=======
+			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
+			if template_uom != self.stock_uom:
+				frappe.throw(
+					_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'").format(
+						self.stock_uom, template_uom
+					)
+				)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_uom_conversion_factor(self):
 		if self.uoms:
@@ -933,12 +1050,16 @@ class Item(Document):
 		if self.is_new():
 			return
 
+<<<<<<< HEAD
 		restricted_fields = (
 			"has_serial_no",
 			"is_stock_item",
 			"valuation_method",
 			"has_batch_no",
 		)
+=======
+		restricted_fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		values = frappe.db.get_value("Item", self.name, restricted_fields, as_dict=True)
 		if not values:
@@ -946,22 +1067,33 @@ class Item(Document):
 
 		if not values.get("valuation_method") and self.get("valuation_method"):
 			values["valuation_method"] = (
+<<<<<<< HEAD
 				frappe.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+=======
+				frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 
 		changed_fields = [
 			field for field in restricted_fields if cstr(self.get(field)) != cstr(values.get(field))
 		]
+<<<<<<< HEAD
 
 		# Allow to change valuation method from FIFO to Moving Average not vice versa
 		if self.valuation_method == "Moving Average" and "valuation_method" in changed_fields:
 			changed_fields.remove("valuation_method")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not changed_fields:
 			return
 
 		if linked_doc := self._get_linked_submitted_documents(changed_fields):
+<<<<<<< HEAD
 			changed_field_labels = [frappe.bold(_(self.meta.get_label(f))) for f in changed_fields]
+=======
+			changed_field_labels = [frappe.bold(self.meta.get_label(f)) for f in changed_fields]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			msg = _(
 				"As there are existing submitted transactions against item {0}, you can not change the value of {1}."
 			).format(self.name, ", ".join(changed_field_labels))
@@ -1033,7 +1165,11 @@ class Item(Document):
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):
 		if self.reorder_levels:
+<<<<<<< HEAD
 			enabled = frappe.get_single_value("Stock Settings", "auto_indent")
+=======
+			enabled = frappe.db.get_single_value("Stock Settings", "auto_indent")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if not enabled:
 				frappe.msgprint(
 					msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."),
@@ -1127,10 +1263,41 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
 
+<<<<<<< HEAD
 	last_purchase_order = get_purchase_voucher_details("Purchase Order", item_code, doc_name)
 
 	# get last purchase receipt item details
 	last_purchase_receipt = get_purchase_voucher_details("Purchase Receipt", item_code, doc_name)
+=======
+	last_purchase_order = frappe.db.sql(
+		"""\
+		select po.name, po.transaction_date, po.conversion_rate,
+			po_item.conversion_factor, po_item.base_price_list_rate,
+			po_item.discount_percentage, po_item.base_rate, po_item.base_net_rate
+		from `tabPurchase Order` po, `tabPurchase Order Item` po_item
+		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and
+			po.name = po_item.parent
+		order by po.transaction_date desc, po.name desc
+		limit 1""",
+		(item_code, cstr(doc_name)),
+		as_dict=1,
+	)
+
+	# get last purchase receipt item details
+	last_purchase_receipt = frappe.db.sql(
+		"""\
+		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
+			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
+			pr_item.base_rate, pr_item.base_net_rate
+		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
+		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
+			pr.name = pr_item.parent
+		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
+		limit 1""",
+		(item_code, cstr(doc_name)),
+		as_dict=1,
+	)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	purchase_order_date = getdate(
 		last_purchase_order and last_purchase_order[0].transaction_date or "1900-01-01"
@@ -1151,6 +1318,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		purchase_date = purchase_receipt_date
 
 	else:
+<<<<<<< HEAD
 		last_purchase_invoice = get_purchase_voucher_details("Purchase Invoice", item_code, doc_name)
 
 		if last_purchase_invoice:
@@ -1158,6 +1326,9 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 			purchase_date = getdate(last_purchase.posting_date)
 		else:
 			return frappe._dict()
+=======
+		return frappe._dict()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	conversion_factor = flt(last_purchase.conversion_factor)
 	out = frappe._dict(
@@ -1183,6 +1354,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	return out
 
 
+<<<<<<< HEAD
 def get_purchase_voucher_details(doctype, item_code, document_name=None):
 	parent_doc = frappe.qb.DocType(doctype)
 	child_doc = frappe.qb.DocType(doctype + " Item")
@@ -1219,6 +1391,8 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 	return query.run(as_dict=1)
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):
 		return
@@ -1261,7 +1435,11 @@ def get_item_defaults(item_code, company):
 
 	for d in item.item_defaults:
 		if d.company == company:
+<<<<<<< HEAD
 			row = d.as_dict(no_private_properties=True)
+=======
+			row = copy.deepcopy(d.as_dict())
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			row.pop("name")
 			out.update(row)
 	return out

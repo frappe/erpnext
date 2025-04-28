@@ -2,7 +2,11 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -12,12 +16,21 @@ from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_crea
 	get_temporary_opening_account,
 )
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Supplier", "Accounting Dimension"]
 
 
 class TestOpeningInvoiceCreationTool(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
+=======
+test_dependencies = ["Customer", "Supplier", "Accounting Dimension"]
+
+
+class TestOpeningInvoiceCreationTool(FrappeTestCase):
+	@classmethod
+	def setUpClass(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
 			make_company()
 		create_dimension()

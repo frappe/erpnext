@@ -11,9 +11,12 @@
   "cost_center",
   "debit",
   "credit",
+<<<<<<< HEAD
   "reporting_currency_exchange_rate",
   "debit_in_reporting_currency",
   "credit_in_reporting_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "account_currency",
   "debit_in_account_currency",
   "credit_in_account_currency",
@@ -127,6 +130,7 @@
    "fieldname": "is_period_closing_voucher_entry",
    "fieldtype": "Check",
    "label": "Is Period Closing Voucher Entry"
+<<<<<<< HEAD
   },
   {
    "fieldname": "debit_in_reporting_currency",
@@ -145,12 +149,18 @@
    "fieldtype": "Float",
    "label": "Reporting Currency Exchange Rate",
    "precision": "9"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-list",
  "in_create": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-22 19:13:50.400404",
+=======
+ "modified": "2024-03-27 13:05:56.710541",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Closing Balance",
@@ -179,8 +189,15 @@
    "role": "Auditor"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -51,6 +51,7 @@ frappe.ui.form.on("Stock Settings", {
 			}
 		);
 	},
+<<<<<<< HEAD
 	auto_insert_price_list_rate_if_missing(frm) {
 		if (!frm.doc.auto_insert_price_list_rate_if_missing) return;
 
@@ -77,4 +78,6 @@ frappe.ui.form.on("Stock Settings", {
 			return;
 		}
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

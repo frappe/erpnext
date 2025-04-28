@@ -18,7 +18,10 @@
   "set_warehouse",
   "section_break_22",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_12",
   "scan_mode",
   "sb9",
@@ -73,7 +76,10 @@
    "reqd": 1
   },
   {
+<<<<<<< HEAD
    "default": "Now",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "in_list_view": 1,
@@ -179,6 +185,7 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "depends_on": "eval: doc.last_scanned_warehouse",
@@ -186,13 +193,19 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-04 19:21:20.179658",
+=======
+ "modified": "2024-03-27 13:10:44.699413",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
@@ -212,10 +225,17 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "posting_date",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

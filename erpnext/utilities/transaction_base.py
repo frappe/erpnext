@@ -7,10 +7,14 @@ import frappe.share
 from frappe import _
 from frappe.utils import cint, flt, get_time, now_datetime
 
+<<<<<<< HEAD
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.stock.utils import get_incoming_rate
+=======
+from erpnext.controllers.status_updater import StatusUpdater
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class UOMMustBeIntegerError(frappe.ValidationError):
@@ -68,7 +72,11 @@ class TransactionBase(StatusUpdater):
 					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
 
 				for field, condition in fields:
+<<<<<<< HEAD
 					if prevdoc_values[field] not in [None, ""] and field not in self.exclude_fields:
+=======
+					if prevdoc_values[field] is not None and field not in self.exclude_fields:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 	def get_prev_doc_reference_details(self, reference_names, reference_doctype, fields):
@@ -166,9 +174,12 @@ class TransactionBase(StatusUpdater):
 		child_table_values = set()
 
 		for row in self.get(child_table):
+<<<<<<< HEAD
 			if default_field == "set_warehouse" and row.get("delivered_by_supplier"):
 				continue
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			child_table_values.add(row.get(child_table_field))
 
 		if len(child_table_values) > 1:
@@ -237,6 +248,7 @@ class TransactionBase(StatusUpdater):
 						)
 					)
 
+<<<<<<< HEAD
 	def fetch_item_details(self, item: dict) -> dict:
 		return get_item_details(
 			frappe._dict(
@@ -510,6 +522,8 @@ class TransactionBase(StatusUpdater):
 		# TODO: test method call impact on document
 		apply_price_list(cts=args, as_doc=True, doc=self)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def delete_events(ref_type, ref_name):
 	events = (
@@ -536,11 +550,19 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, str):
 		qty_fields = [qty_fields]
 
+<<<<<<< HEAD
 	distinct_uoms = tuple(set(uom for uom in (d.get(uom_field) for d in doc.get_all_children()) if uom))
 	integer_uoms = set(
 		d[0]
 		for d in frappe.db.get_values(
 			"UOM", (("name", "in", distinct_uoms), ("must_be_whole_number", "=", 1)), cache=True
+=======
+	distinct_uoms = list(set(d.get(uom_field) for d in doc.get_all_children()))
+	integer_uoms = list(
+		filter(
+			lambda uom: frappe.db.get_value("UOM", uom, "must_be_whole_number", cache=True) or None,
+			distinct_uoms,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 	)
 

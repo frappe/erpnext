@@ -12,7 +12,10 @@
   "make",
   "column_break_3",
   "model",
+<<<<<<< HEAD
   "company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "vehicle_details",
   "last_odometer",
   "acquisition_date",
@@ -49,7 +52,11 @@
   {
    "fieldname": "make",
    "fieldtype": "Data",
+<<<<<<< HEAD
    "label": "Make",
+=======
+   "label": "Manufacturer",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -194,6 +201,7 @@
    "options": "Vehicle",
    "print_hide": 1,
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "company",
@@ -209,6 +217,15 @@
  "module": "Setup",
  "name": "Vehicle",
  "naming_rule": "By fieldname",
+=======
+  }
+ ],
+ "links": [],
+ "modified": "2024-05-31 06:38:15.399283",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Vehicle",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {
@@ -242,8 +259,16 @@
  ],
  "quick_entry": 1,
  "search_fields": "license_plate,location,model",
+<<<<<<< HEAD
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

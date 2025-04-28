@@ -19,6 +19,21 @@ frappe.tour["Manufacturing Settings"] = [
 		),
 	},
 	{
+<<<<<<< HEAD
+=======
+		fieldname: "default_wip_warehouse",
+		title: __("Work In Progress Warehouse"),
+		description: __(
+			"This Warehouse will be auto-updated in the Work In Progress Warehouse field of Work Orders."
+		),
+	},
+	{
+		fieldname: "default_fg_warehouse",
+		title: __("Finished Goods Warehouse"),
+		description: __("This Warehouse will be auto-updated in the Target Warehouse field of Work Order."),
+	},
+	{
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		fieldname: "update_bom_costs_automatically",
 		title: __("Update BOM Cost Automatically"),
 		description: __(

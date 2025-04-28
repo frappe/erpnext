@@ -19,6 +19,10 @@ class POSClosingEntryTaxes(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+<<<<<<< HEAD
+=======
+		rate: DF.Percent
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	pass

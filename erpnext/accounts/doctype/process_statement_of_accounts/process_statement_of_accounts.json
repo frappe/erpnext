@@ -1,6 +1,9 @@
 {
  "actions": [],
+<<<<<<< HEAD
  "allow_rename": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
@@ -13,7 +16,11 @@
   "posting_date",
   "company",
   "account",
+<<<<<<< HEAD
   "categorize_by",
+=======
+  "group_by",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "cost_center",
   "territory",
   "ignore_exchange_rate_revaluation_journals",
@@ -26,9 +33,13 @@
   "payment_terms_template",
   "sales_partner",
   "sales_person",
+<<<<<<< HEAD
   "show_remarks",
   "based_on_payment_terms",
   "show_future_payments",
+=======
+  "based_on_payment_terms",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_3",
   "customer_collection",
   "collection_name",
@@ -39,7 +50,10 @@
   "column_break_17",
   "customers",
   "preferences",
+<<<<<<< HEAD
   "print_format",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "orientation",
   "include_break",
   "include_ageing",
@@ -70,7 +84,11 @@
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",
+<<<<<<< HEAD
    "options": "Daily\nWeekly\nBiweekly\nMonthly\nQuarterly"
+=======
+   "options": "Weekly\nMonthly\nQuarterly"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "company",
@@ -81,6 +99,7 @@
    "reqd": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:(!doc.enable_auto_email && doc.report == 'General Ledger');",
    "fieldname": "from_date",
    "fieldtype": "Date",
@@ -93,6 +112,20 @@
    "fieldtype": "Date",
    "label": "To Date",
    "mandatory_depends_on": "eval:(!doc.enable_auto_email && doc.report == \"General Ledger\") "
+=======
+   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory_depends_on": "eval:doc.frequency == '';"
+  },
+  {
+   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory_depends_on": "eval:doc.frequency == '';"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "cost_center",
@@ -178,6 +211,17 @@
    "label": "Start Date"
   },
   {
+<<<<<<< HEAD
+=======
+   "default": "Group by Voucher (Consolidated)",
+   "depends_on": "eval:(doc.report == 'General Ledger');",
+   "fieldname": "group_by",
+   "fieldtype": "Select",
+   "label": "Group By",
+   "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "eval: (doc.report == 'General Ledger');",
    "fieldname": "currency",
    "fieldtype": "Link",
@@ -239,9 +283,15 @@
   },
   {
    "fieldname": "cc_to",
+<<<<<<< HEAD
    "fieldtype": "Table MultiSelect",
    "label": "CC To",
    "options": "Process Statement Of Accounts CC"
+=======
+   "fieldtype": "Link",
+   "label": "CC To",
+   "options": "User"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "1",
@@ -333,8 +383,12 @@
    "depends_on": "eval:(doc.report == 'Accounts Receivable');",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+<<<<<<< HEAD
    "label": "Posting Date",
    "mandatory_depends_on": "eval:(doc.report == 'Accounts Receivable');"
+=======
+   "label": "Posting Date"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "depends_on": "eval: (doc.report == 'Accounts Receivable');",
@@ -380,13 +434,18 @@
    "default": "0",
    "fieldname": "ignore_exchange_rate_revaluation_journals",
    "fieldtype": "Check",
+<<<<<<< HEAD
    "label": "Ignore Exchange Rate Revaluation and Gain / Loss Journals"
+=======
+   "label": "Ignore Exchange Rate Revaluation Journals"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "0",
    "fieldname": "ignore_cr_dr_notes",
    "fieldtype": "Check",
    "label": "Ignore System Generated Credit / Debit Notes"
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -418,6 +477,12 @@
  ],
  "links": [],
  "modified": "2025-10-07 12:19:20.719898",
+=======
+  }
+ ],
+ "links": [],
+ "modified": "2024-08-13 10:41:18.381165",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
@@ -449,9 +514,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

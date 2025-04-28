@@ -5,7 +5,11 @@
     "type": "git",
     "url": "git+https://github.com/frappe/erpnext.git"
   },
+<<<<<<< HEAD
   "homepage": "https://frappe.io/erpnext",
+=======
+  "homepage": "https://erpnext.com",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "GPL-3.0",
   "bugs": {

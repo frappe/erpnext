@@ -2,6 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 
+<<<<<<< HEAD
+=======
+import copy
+from collections import OrderedDict
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import frappe
 from frappe import _, _dict
 from frappe.query_builder import Criterion
@@ -16,6 +22,7 @@ from erpnext.accounts.report.financial_statements import get_cost_centers_with_c
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_account_currency
 
+<<<<<<< HEAD
 DEBIT_CREDIT_DICT = {
 	"debit": 0.0,
 	"credit": 0.0,
@@ -25,6 +32,8 @@ DEBIT_CREDIT_DICT = {
 	"credit_in_transaction_currency": None,
 }
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def execute(filters=None):
 	if not filters:
@@ -69,17 +78,25 @@ def validate_filters(filters, account_details):
 			if not account_details.get(account):
 				frappe.throw(_("Account {0} does not exists").format(account))
 
+<<<<<<< HEAD
 	if not filters.get("categorize_by") and filters.get("group_by"):
 		filters["categorize_by"] = filters["group_by"]
 		filters["categorize_by"] = filters["categorize_by"].replace("Group by", "Categorize by")
 
 	if filters.get("account") and filters.get("categorize_by") == "Categorize by Account":
+=======
+	if filters.get("account") and filters.get("group_by") == "Group by Account":
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters.account = frappe.parse_json(filters.get("account"))
 		for account in filters.account:
 			if account_details[account].is_group == 0:
 				frappe.throw(_("Can not filter based on Child Account, if grouped by Account"))
 
+<<<<<<< HEAD
 	if filters.get("voucher_no") and filters.get("categorize_by") in ["Categorize by Voucher"]:
+=======
+	if filters.get("voucher_no") and filters.get("group_by") in ["Group by Voucher"]:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
 	if filters.from_date > filters.to_date:
@@ -163,7 +180,11 @@ def get_gl_entries(filters, accounting_dimensions):
 		credit_in_account_currency """
 
 	if filters.get("show_remarks"):
+<<<<<<< HEAD
 		if remarks_length := frappe.get_single_value("Accounts Settings", "general_ledger_remarks_length"):
+=======
+		if remarks_length := frappe.db.get_single_value("Accounts Settings", "general_ledger_remarks_length"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			select_fields += f",substr(remarks, 1, {remarks_length}) as 'remarks'"
 		else:
 			select_fields += """,remarks"""
@@ -173,9 +194,15 @@ def get_gl_entries(filters, accounting_dimensions):
 	if filters.get("include_dimensions"):
 		order_by_statement = "order by posting_date, creation"
 
+<<<<<<< HEAD
 	if filters.get("categorize_by") == "Categorize by Voucher":
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 	if filters.get("categorize_by") == "Categorize by Account":
+=======
+	if filters.get("group_by") == "Group by Voucher":
+		order_by_statement = "order by posting_date, voucher_type, voucher_no"
+	if filters.get("group_by") == "Group by Account":
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		order_by_statement = "order by account, posting_date, creation"
 
 	if filters.get("include_default_book_entries"):
@@ -209,6 +236,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		as_dict=1,
 	)
 
+<<<<<<< HEAD
 	party_name_map = get_party_name_map()
 
 	for gl_entry in gl_entries:
@@ -217,6 +245,10 @@ def get_gl_entries(filters, accounting_dimensions):
 
 	if filters.get("presentation_currency"):
 		return convert_to_presentation_currency(gl_entries, currency_map, filters)
+=======
+	if filters.get("presentation_currency"):
+		return convert_to_presentation_currency(gl_entries, currency_map)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	else:
 		return gl_entries
 
@@ -224,8 +256,11 @@ def get_gl_entries(filters, accounting_dimensions):
 def get_conditions(filters):
 	conditions = []
 
+<<<<<<< HEAD
 	ignore_is_opening = frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if filters.get("account"):
 		filters.account = get_accounts_with_children(filters.account)
 		if filters.account:
@@ -274,7 +309,11 @@ def get_conditions(filters):
 	if filters.get("voucher_no_not_in"):
 		conditions.append("voucher_no not in %(voucher_no_not_in)s")
 
+<<<<<<< HEAD
 	if filters.get("categorize_by") == "Categorize by Party" and not filters.get("party_type"):
+=======
+	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
 	if filters.get("party_type"):
@@ -286,6 +325,7 @@ def get_conditions(filters):
 	if not (
 		filters.get("account")
 		or filters.get("party")
+<<<<<<< HEAD
 		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
 	):
 		if not ignore_is_opening:
@@ -297,6 +337,13 @@ def get_conditions(filters):
 		conditions.append("(posting_date <=%(to_date)s or is_opening = 'Yes')")
 	else:
 		conditions.append("posting_date <=%(to_date)s")
+=======
+		or filters.get("group_by") in ["Group by Account", "Group by Party"]
+	):
+		conditions.append("(posting_date >=%(from_date)s or is_opening = 'Yes')")
+
+	conditions.append("(posting_date <=%(to_date)s or is_opening = 'Yes')")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
@@ -347,6 +394,7 @@ def get_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
+<<<<<<< HEAD
 def get_party_name_map():
 	party_map = {}
 
@@ -361,6 +409,8 @@ def get_party_name_map():
 	return party_map
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_accounts_with_children(accounts):
 	if not isinstance(accounts, list):
 		accounts = [d.strip() for d in accounts.strip().split(",") if d]
@@ -383,6 +433,7 @@ def get_accounts_with_children(accounts):
 	return frappe.qb.from_(doctype).select(doctype.name).where(Criterion.any(conditions)).run(pluck=True)
 
 
+<<<<<<< HEAD
 def set_bill_no(gl_entries):
 	inv_details = get_supplier_invoice_details()
 	for gl in gl_entries:
@@ -443,21 +494,59 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 			# closing
 			if set_opening_closing:
 				add_total_to_data(acc_dict.totals, "closing")
+=======
+def get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries):
+	data = []
+	totals_dict = get_totals_dict()
+
+	gle_map = initialize_gle_map(gl_entries, filters, totals_dict)
+
+	totals, entries = get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, totals_dict)
+
+	# Opening for filtered account
+	data.append(totals.opening)
+
+	if filters.get("group_by") != "Group by Voucher (Consolidated)":
+		for _acc, acc_dict in gle_map.items():
+			# acc
+			if acc_dict.entries:
+				# opening
+				data.append({"debit_in_transaction_currency": None, "credit_in_transaction_currency": None})
+				if filters.get("group_by") != "Group by Voucher":
+					data.append(acc_dict.totals.opening)
+
+				data += acc_dict.entries
+
+				# totals
+				data.append(acc_dict.totals.total)
+
+				# closing
+				if filters.get("group_by") != "Group by Voucher":
+					data.append(acc_dict.totals.closing)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		data.append({"debit_in_transaction_currency": None, "credit_in_transaction_currency": None})
 	else:
 		data += entries
 
 	# totals
+<<<<<<< HEAD
 	add_total_to_data(totals, "total")
 
 	# closing
 	add_total_to_data(totals, "closing")
+=======
+	data.append(totals.total)
+
+	# closing
+	data.append(totals.closing)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return data
 
 
 def get_totals_dict():
+<<<<<<< HEAD
 	return _dict(
 		opening=_dict(DEBIT_CREDIT_DICT),
 		total=_dict(DEBIT_CREDIT_DICT),
@@ -469,11 +558,36 @@ def get_group_by_field(group_by):
 	if group_by == "Categorize by Party":
 		return "party"
 	elif group_by in ["Categorize by Voucher (Consolidated)", "Categorize by Account"]:
+=======
+	def _get_debit_credit_dict(label):
+		return _dict(
+			account=f"'{label}'",
+			debit=0.0,
+			credit=0.0,
+			debit_in_account_currency=0.0,
+			credit_in_account_currency=0.0,
+			debit_in_transaction_currency=None,
+			credit_in_transaction_currency=None,
+		)
+
+	return _dict(
+		opening=_get_debit_credit_dict(_("Opening")),
+		total=_get_debit_credit_dict(_("Total")),
+		closing=_get_debit_credit_dict(_("Closing (Opening + Total)")),
+	)
+
+
+def group_by_field(group_by):
+	if group_by == "Group by Party":
+		return "party"
+	elif group_by in ["Group by Voucher (Consolidated)", "Group by Account"]:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		return "account"
 	else:
 		return "voucher_no"
 
 
+<<<<<<< HEAD
 def initialize_gle_map(gl_entries, filters):
 	gle_map = {}
 	group_by = get_group_by_field(filters.get("categorize_by"))
@@ -494,11 +608,31 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	consolidated_gle = {}
 	group_by = get_group_by_field(filters.get("categorize_by"))
 	group_by_voucher_consolidated = filters.get("categorize_by") == "Categorize by Voucher (Consolidated)"
+=======
+def initialize_gle_map(gl_entries, filters, totals_dict):
+	gle_map = OrderedDict()
+	group_by = group_by_field(filters.get("group_by"))
+
+	for gle in gl_entries:
+		gle_map.setdefault(gle.get(group_by), _dict(totals=copy.deepcopy(totals_dict), entries=[]))
+	return gle_map
+
+
+def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, totals):
+	entries = []
+	consolidated_gle = OrderedDict()
+	group_by = group_by_field(filters.get("group_by"))
+	group_by_voucher_consolidated = filters.get("group_by") == "Group by Voucher (Consolidated)"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if filters.get("show_net_values_in_party_account"):
 		account_type_map = get_account_type_map(filters.get("company"))
 
+<<<<<<< HEAD
 	immutable_ledger = frappe.get_single_value("Accounts Settings", "enable_immutable_ledger")
+=======
+	immutable_ledger = frappe.db.get_single_value("Accounts Settings", "enable_immutable_ledger")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def update_value_in_dict(data, key, gle):
 		data[key].debit += gle.debit
@@ -538,7 +672,10 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	show_opening_entries = filters.get("show_opening_entries")
 
+<<<<<<< HEAD
 	totals = get_totals_dict()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	for gle in gl_entries:
 		group_by_value = gle.get(group_by)
 		gle.voucher_subtype = _(gle.voucher_subtype)
@@ -580,7 +717,10 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 					for dim in accounting_dimensions:
 						keylist.append(gle.get(dim))
 					keylist.append(gle.get("cost_center"))
+<<<<<<< HEAD
 					keylist.append(gle.get("project"))
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 				key = tuple(keylist)
 				if key not in consolidated_gle:
@@ -588,6 +728,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				else:
 					update_value_in_dict(consolidated_gle, key, gle)
 
+<<<<<<< HEAD
 		if filters.get("include_dimensions"):
 			dimensions = [*accounting_dimensions, "cost_center", "project"]
 
@@ -595,6 +736,8 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				if val := gle.get(dimension):
 					gle[dimension] = _(val)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	for value in consolidated_gle.values():
 		update_value_in_dict(totals, "total", value)
 		update_value_in_dict(totals, "closing", value)
@@ -612,6 +755,7 @@ def get_account_type_map(company):
 
 
 def get_result_as_list(data, filters):
+<<<<<<< HEAD
 	balance = 0
 
 	for d in data:
@@ -625,6 +769,20 @@ def get_result_as_list(data, filters):
 		d["account_currency"] = filters.account_currency
 
 		d["presentation_currency"] = filters.presentation_currency
+=======
+	balance, _balance_in_account_currency = 0, 0
+	inv_details = get_supplier_invoice_details()
+
+	for d in data:
+		if not d.get("posting_date"):
+			balance, _balance_in_account_currency = 0, 0
+
+		balance = get_balance(d, balance, "debit", "credit")
+		d["balance"] = balance
+
+		d["account_currency"] = filters.account_currency
+		d["bill_no"] = inv_details.get(d.get("against_voucher"), "")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return data
 
@@ -651,6 +809,7 @@ def get_columns(filters):
 	if filters.get("presentation_currency"):
 		currency = filters["presentation_currency"]
 	else:
+<<<<<<< HEAD
 		company = filters.get("company") or get_default_company()
 		filters["presentation_currency"] = currency = get_company_currency(company)
 
@@ -665,6 +824,13 @@ def get_columns(filters):
 				f'Presentation Currency cannot be {frappe.bold(filters["presentation_currency"])} , When {frappe.bold("Show Credit / Debit in Company Currency")} is enabled.'
 			)
 		)
+=======
+		if filters.get("company"):
+			currency = get_company_currency(filters["company"])
+		else:
+			company = get_default_company()
+			currency = get_company_currency(company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	columns = [
 		{
@@ -674,7 +840,11 @@ def get_columns(filters):
 			"options": "GL Entry",
 			"hidden": 1,
 		},
+<<<<<<< HEAD
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
+=======
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		{
 			"label": _("Account"),
 			"fieldname": "account",
@@ -685,22 +855,34 @@ def get_columns(filters):
 		{
 			"label": _("Debit ({0})").format(currency),
 			"fieldname": "debit",
+<<<<<<< HEAD
 			"fieldtype": "Currency",
 			"options": "presentation_currency",
+=======
+			"fieldtype": "Float",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"width": 130,
 		},
 		{
 			"label": _("Credit ({0})").format(currency),
 			"fieldname": "credit",
+<<<<<<< HEAD
 			"fieldtype": "Currency",
 			"options": "presentation_currency",
+=======
+			"fieldtype": "Float",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"width": 130,
 		},
 		{
 			"label": _("Balance ({0})").format(currency),
 			"fieldname": "balance",
+<<<<<<< HEAD
 			"fieldtype": "Currency",
 			"options": "presentation_currency",
+=======
+			"fieldtype": "Float",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"width": 130,
 		},
 	]
@@ -748,6 +930,7 @@ def get_columns(filters):
 		{"label": _("Against Account"), "fieldname": "against", "width": 120},
 		{"label": _("Party Type"), "fieldname": "party_type", "width": 100},
 		{"label": _("Party"), "fieldname": "party", "width": 100},
+<<<<<<< HEAD
 	]
 
 	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
@@ -766,6 +949,12 @@ def get_columns(filters):
 	if filters.get("include_dimensions"):
 		columns.append({"label": _("Project"), "options": "Project", "fieldname": "project", "width": 100})
 
+=======
+		{"label": _("Project"), "options": "Project", "fieldname": "project", "width": 100},
+	]
+
+	if filters.get("include_dimensions"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		for dim in get_accounting_dimensions(as_list=False):
 			columns.append(
 				{"label": _(dim.label), "options": dim.label, "fieldname": dim.fieldname, "width": 100}

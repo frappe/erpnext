@@ -5,9 +5,13 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 
 class AccountsTestMixin:
+<<<<<<< HEAD
 	def create_customer(
 		self, customer_name="_Test Customer", currency=None, default_account=None, company=None
 	):
+=======
+	def create_customer(self, customer_name="_Test Customer", currency=None):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not frappe.db.exists("Customer", customer_name):
 			customer = frappe.new_doc("Customer")
 			customer.customer_name = customer_name
@@ -15,6 +19,7 @@ class AccountsTestMixin:
 
 			if currency:
 				customer.default_currency = currency
+<<<<<<< HEAD
 			if company and default_account:
 				customer.append(
 					"accounts",
@@ -37,6 +42,11 @@ class AccountsTestMixin:
 					},
 				)
 				customer.save()
+=======
+			customer.save()
+			self.customer = customer.name
+		else:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.customer = customer_name
 
 	def create_supplier(self, supplier_name="_Test Supplier", currency=None):
@@ -53,6 +63,7 @@ class AccountsTestMixin:
 		else:
 			self.supplier = supplier_name
 
+<<<<<<< HEAD
 	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None, valuation_rate=0):
 		item = create_item(
 			item_name,
@@ -61,6 +72,10 @@ class AccountsTestMixin:
 			company=company,
 			valuation_rate=valuation_rate,
 		)
+=======
+	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None):
+		item = create_item(item_name, is_stock_item=is_stock, warehouse=warehouse, company=company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.item = item.name
 
 	def create_company(self, company_name="_Test Company", abbr="_TC"):
@@ -112,6 +127,7 @@ class AccountsTestMixin:
 					"attribute_name": "bank",
 					"account_name": "HDFC",
 					"parent_account": "Bank Accounts - " + abbr,
+<<<<<<< HEAD
 					"account_type": "Bank",
 				}
 			),
@@ -129,6 +145,8 @@ class AccountsTestMixin:
 					"account_name": "Advance Paid",
 					"parent_account": "Current Assets - " + abbr,
 					"account_type": "Payable",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			),
 		]
@@ -145,6 +163,7 @@ class AccountsTestMixin:
 						"company": self.company,
 					}
 				)
+<<<<<<< HEAD
 				new_acc.account_type = acc.get("account_type", None)
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
@@ -170,6 +189,11 @@ class AccountsTestMixin:
 		):
 			setattr(self, "warehouse_" + w.warehouse_name.lower().strip().replace(" ", "_"), w.name)
 
+=======
+				new_acc.save()
+				setattr(self, acc.attribute_name, new_acc.name)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def create_usd_receivable_account(self):
 		account_name = "Debtors USD"
 		if not frappe.db.get_value(
@@ -229,6 +253,7 @@ class AccountsTestMixin:
 		]
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
+<<<<<<< HEAD
 
 	def create_price_list(self):
 		pl_name = "Mixin Price List"
@@ -249,3 +274,5 @@ class AccountsTestMixin:
 			)
 		else:
 			self.price_list = frappe.get_doc("Price List", pl_name).name
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

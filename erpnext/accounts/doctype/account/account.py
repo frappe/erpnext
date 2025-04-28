@@ -4,7 +4,11 @@
 
 import frappe
 from frappe import _, throw
+<<<<<<< HEAD
 from frappe.utils import add_to_date, cint, cstr, pretty_date
+=======
+from frappe.utils import cint, cstr
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
 import erpnext
@@ -31,7 +35,10 @@ class Account(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		account_category: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		account_currency: DF.Link | None
 		account_name: DF.Data
 		account_number: DF.Data | None
@@ -61,7 +68,10 @@ class Account(NestedSet):
 			"Payable",
 			"Receivable",
 			"Round Off",
+<<<<<<< HEAD
 			"Round Off for Opening",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"Stock",
 			"Stock Adjustment",
 			"Stock Received But Not Billed",
@@ -93,7 +103,11 @@ class Account(NestedSet):
 			super().on_update()
 
 	def onload(self):
+<<<<<<< HEAD
 		frozen_accounts_modifier = frappe.get_single_value("Accounts Settings", "frozen_accounts_modifier")
+=======
+		frozen_accounts_modifier = frappe.db.get_single_value("Accounts Settings", "frozen_accounts_modifier")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.get_roles():
 			self.set_onload("can_freeze_account", True)
 
@@ -103,13 +117,22 @@ class Account(NestedSet):
 		self.name = get_autoname_with_number(self.account_number, self.account_name, self.company)
 
 	def validate(self):
+<<<<<<< HEAD
+=======
+		from erpnext.accounts.utils import validate_field_number
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
 		self.validate_parent_child_account_type()
 		self.validate_root_details()
+<<<<<<< HEAD
 		self.validate_account_number()
 		self.validate_disabled()
+=======
+		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
@@ -169,7 +192,11 @@ class Account(NestedSet):
 			if par.root_type:
 				self.root_type = par.root_type
 
+<<<<<<< HEAD
 		if cint(self.is_group):
+=======
+		if self.is_group:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			db_value = self.get_doc_before_save()
 			if db_value:
 				if self.report_type != db_value.report_type:
@@ -212,7 +239,11 @@ class Account(NestedSet):
 		if doc_before_save and not doc_before_save.parent_account:
 			throw(_("Root cannot be edited."), RootNotEditable)
 
+<<<<<<< HEAD
 		if not self.parent_account and not cint(self.is_group):
+=======
+		if not self.parent_account and not self.is_group:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			throw(_("The root account {0} must be a group").format(frappe.bold(self.name)))
 
 	def validate_root_company_and_sync_account_to_children(self):
@@ -254,6 +285,7 @@ class Account(NestedSet):
 
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
 
+<<<<<<< HEAD
 	def validate_disabled(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save or cint(doc_before_save.disabled) == cint(self.disabled):
@@ -262,6 +294,8 @@ class Account(NestedSet):
 		if cint(self.disabled):
 			self.validate_default_accounts_in_company()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_group_or_ledger(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save or cint(doc_before_save.is_group) == cint(self.is_group):
@@ -269,6 +303,7 @@ class Account(NestedSet):
 
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction cannot be converted to ledger"))
+<<<<<<< HEAD
 		elif cint(self.is_group):
 			if self.account_type and not self.flags.exclude_account_type_check:
 				throw(_("Cannot covert to Group because Account Type is selected."))
@@ -298,6 +333,14 @@ class Account(NestedSet):
 					)
 				)
 
+=======
+		elif self.is_group:
+			if self.account_type and not self.flags.exclude_account_type_check:
+				throw(_("Cannot covert to Group because Account Type is selected."))
+		elif self.check_if_child_exists():
+			throw(_("Account with child nodes cannot be set as ledger"))
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_frozen_accounts_modifier(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save or doc_before_save.freeze_account == self.freeze_account:
@@ -335,14 +378,19 @@ class Account(NestedSet):
 			self.account_currency = frappe.get_cached_value("Company", self.company, "default_currency")
 			self.currency_explicitly_specified = False
 
+<<<<<<< HEAD
 		gl_currency = frappe.db.get_value(
 			"GL Entry", {"account": self.name, "is_cancelled": 0}, "account_currency"
 		)
+=======
+		gl_currency = frappe.db.get_value("GL Entry", {"account": self.name}, "account_currency")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if gl_currency and self.account_currency != gl_currency:
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
 				frappe.throw(_("Currency can not be changed after making entries using some other currency"))
 
+<<<<<<< HEAD
 	def validate_account_number(self, account_number=None):
 		if not account_number:
 			account_number = self.account_number
@@ -359,6 +407,8 @@ class Account(NestedSet):
 					)
 				)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def create_account_for_child_company(self, parent_acc_name_map, descendants, parent_acc_name):
 		for company in descendants:
 			company_bold = frappe.bold(company)
@@ -512,9 +562,27 @@ def get_account_autoname(account_number, account_name, company):
 	return " - ".join(parts)
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def update_account_number(name, account_name, account_number=None, from_descendant=False):
 	_ensure_idle_system()
+=======
+def validate_account_number(name, account_number, company):
+	if account_number:
+		account_with_same_number = frappe.db.get_value(
+			"Account", {"account_number": account_number, "company": company, "name": ["!=", name]}
+		)
+		if account_with_same_number:
+			frappe.throw(
+				_("Account Number {0} already used in account {1}").format(
+					account_number, account_with_same_number
+				)
+			)
+
+
+@frappe.whitelist()
+def update_account_number(name, account_name, account_number=None, from_descendant=False):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	account = frappe.get_cached_doc("Account", name)
 	if not account:
 		return
@@ -535,7 +603,11 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 				"name",
 			)
 
+<<<<<<< HEAD
 			if old_name and not from_descendant:
+=======
+			if old_name:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				# same account in parent company exists
 				allow_child_account_creation = _("Allow Account Creation Against Child Company")
 
@@ -553,7 +625,11 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 				frappe.throw(message, title=_("Rename Not Allowed"))
 
+<<<<<<< HEAD
 	account.validate_account_number(account_number)
+=======
+	validate_account_number(name, account_number, account.company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if account_number:
 		frappe.db.set_value("Account", name, "account_number", account_number.strip())
 	else:
@@ -576,7 +652,10 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 @frappe.whitelist()
 def merge_account(old, new):
+<<<<<<< HEAD
 	_ensure_idle_system()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# Validate properties before merging
 	new_account = frappe.get_cached_doc("Account", new)
 	old_account = frappe.get_cached_doc("Account", old)
@@ -630,6 +709,7 @@ def sync_update_account_number_in_child(
 
 	for d in frappe.db.get_values("Account", filters=filters, fieldname=["company", "name"], as_dict=True):
 		update_account_number(d["name"], account_name, account_number, from_descendant=True)
+<<<<<<< HEAD
 
 
 def _ensure_idle_system():
@@ -682,3 +762,5 @@ def get_company_default_account_fields():
 		"depreciation_expense_account": "Depreciation Expense Account",
 		"disposal_account": "Gain/Loss Account on Asset Disposal",
 	}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

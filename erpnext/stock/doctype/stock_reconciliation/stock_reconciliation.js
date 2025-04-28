@@ -7,10 +7,13 @@ frappe.provide("erpnext.accounts.dimensions");
 frappe.ui.form.on("Stock Reconciliation", {
 	setup(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+<<<<<<< HEAD
 		frm.barcode_scanner = new erpnext.utils.BarcodeScanner({
 			frm: frm,
 			uom_field: "stock_uom",
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	onload: function (frm) {
@@ -100,7 +103,12 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	scan_barcode: function (frm) {
+<<<<<<< HEAD
 		frm.barcode_scanner.process_scan();
+=======
+		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: frm });
+		barcode_scanner.process_scan();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	scan_mode: function (frm) {
@@ -210,7 +218,10 @@ frappe.ui.form.on("Stock Reconciliation", {
 					posting_time: frm.doc.posting_time,
 					batch_no: d.batch_no,
 					row: d,
+<<<<<<< HEAD
 					company: frm.doc.company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 				callback: function (r) {
 					const row = frappe.model.get_doc(cdt, cdn);
@@ -292,6 +303,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
 
+<<<<<<< HEAD
 	batch_no(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.batch_no) {
@@ -302,15 +314,22 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 			frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 		}
+=======
+	batch_no: function (frm, cdt, cdn) {
+		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	qty: function (frm, cdt, cdn) {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
+<<<<<<< HEAD
 
 		let row = locals[cdt][cdn];
 		if (row.use_serial_batch_fields && !row.qty && row.serial_no) {
 			frappe.model.set_value(cdt, cdn, "serial_no", "");
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	valuation_rate: function (frm, cdt, cdn) {
@@ -321,11 +340,14 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		var child = locals[cdt][cdn];
 
 		if (child.serial_no) {
+<<<<<<< HEAD
 			frappe.model.set_value(cdt, cdn, {
 				use_serial_batch_fields: 1,
 				serial_and_batch_bundle: "",
 			});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			const serial_nos = child.serial_no.trim().split("\n");
 			frappe.model.set_value(cdt, cdn, "qty", serial_nos.length);
 		}

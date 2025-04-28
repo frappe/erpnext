@@ -8,9 +8,12 @@ from frappe.utils import get_link_to_form, today
 
 @frappe.whitelist()
 def transaction_processing(data, from_doctype, to_doctype, args=None):
+<<<<<<< HEAD
 	frappe.has_permission(from_doctype, "read", throw=True)
 	frappe.has_permission(to_doctype, "create", throw=True)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if isinstance(data, str):
 		deserialized_data = json.loads(data)
 	else:
@@ -149,11 +152,14 @@ def task(doc_name, from_doctype, to_doctype):
 		},
 		"Purchase Receipt": {"Purchase Invoice": purchase_receipt.make_purchase_invoice},
 	}
+<<<<<<< HEAD
 
 	hooks = frappe.get_hooks("bulk_transaction_task_mapper")
 	for hook in hooks:
 		mapper.update(frappe.get_attr(hook)())
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	frappe.flags.bulk_transaction = True
 	if to_doctype in ["Payment Entry"]:
 		obj = mapper[from_doctype][to_doctype](from_doctype, doc_name)

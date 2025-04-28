@@ -2,7 +2,10 @@
  "actions": [],
  "allow_import": 1,
  "creation": "2023-05-29 13:02:17.121296",
+<<<<<<< HEAD
  "default_view": "Tree",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "description": "A logical Warehouse against which stock entries are made.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -18,7 +21,10 @@
   "column_break_4",
   "account",
   "company",
+<<<<<<< HEAD
   "customer",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -176,7 +182,11 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
+<<<<<<< HEAD
    "label": "State/Province",
+=======
+   "label": "State",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "state",
    "oldfieldtype": "Select"
   },
@@ -259,6 +269,7 @@
    "fieldname": "is_rejected_warehouse",
    "fieldtype": "Check",
    "label": "Is Rejected Warehouse"
+<<<<<<< HEAD
   },
   {
    "allow_in_quick_entry": 1,
@@ -271,11 +282,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-09-05 14:47:17.140099",
+=======
+ "modified": "2024-08-14 16:08:15.733597",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -328,7 +347,10 @@
    "role": "Manufacturing User"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

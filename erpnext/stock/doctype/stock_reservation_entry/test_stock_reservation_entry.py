@@ -4,8 +4,13 @@
 from random import randint
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils import cint, today
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import today
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -21,13 +26,21 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 from erpnext.stock.utils import get_stock_balance
 
 
+<<<<<<< HEAD
 class TestStockReservationEntry(IntegrationTestCase):
+=======
+class TestStockReservationEntry(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self) -> None:
 		self.warehouse = "_Test Warehouse - _TC"
 		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
+=======
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_validate_stock_reservation_settings(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			validate_stock_reservation_settings,
@@ -40,10 +53,17 @@ class TestStockReservationEntry(IntegrationTestCase):
 		)
 
 		# Case - 1: When `Stock Reservation` is disabled in `Stock Settings`, throw `ValidationError`
+<<<<<<< HEAD
 		with self.change_settings("Stock Settings", {"enable_stock_reservation": 0}):
 			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
 
 		with self.change_settings("Stock Settings", {"enable_stock_reservation": 1}):
+=======
+		with change_settings("Stock Settings", {"enable_stock_reservation": 0}):
+			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
+
+		with change_settings("Stock Settings", {"enable_stock_reservation": 1}):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			# Case - 2: When `Voucher Type` is not allowed for `Stock Reservation`, throw `ValidationError`
 			voucher.doctype = "NOT ALLOWED"
 			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
@@ -120,9 +140,13 @@ class TestStockReservationEntry(IntegrationTestCase):
 		sre.load_from_db()
 		self.assertEqual(sre.status, "Cancelled")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
 	)
+=======
+	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_update_reserved_qty_in_voucher(self) -> None:
 		# Step - 1: Create a `Sales Order`
 		so = make_sales_order(
@@ -189,9 +213,13 @@ class TestStockReservationEntry(IntegrationTestCase):
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, 0)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
 		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
 	)
+=======
+	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_cant_consume_reserved_stock(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
@@ -239,7 +267,11 @@ class TestStockReservationEntry(IntegrationTestCase):
 		se.submit()
 		se.cancel()
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -250,8 +282,11 @@ class TestStockReservationEntry(IntegrationTestCase):
 		},
 	)
 	def test_stock_reservation_against_sales_order(self) -> None:
+<<<<<<< HEAD
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items_details = create_items()
 		se = create_material_receipt(items_details, self.warehouse, qty=10)
 
@@ -273,12 +308,20 @@ class TestStockReservationEntry(IntegrationTestCase):
 		)
 
 		# Test - 1: Stock should not be reserved if the Available Qty to Reserve is less than the Ordered Qty and Partial Reservation is disabled in Stock Settings.
+<<<<<<< HEAD
 		with self.change_settings("Stock Settings", {"allow_partial_reservation": 0}):
+=======
+		with change_settings("Stock Settings", {"allow_partial_reservation": 0}):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			so.create_stock_reservation_entries()
 			self.assertFalse(has_reserved_stock("Sales Order", so.name))
 
 		# Test - 2: Stock should be Partially Reserved if the Partial Reservation is enabled in Stock Settings.
+<<<<<<< HEAD
 		with self.change_settings("Stock Settings", {"allow_partial_reservation": 1}):
+=======
+		with change_settings("Stock Settings", {"allow_partial_reservation": 1}):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			so.create_stock_reservation_entries()
 			so.load_from_db()
 			self.assertTrue(has_reserved_stock("Sales Order", so.name))
@@ -328,6 +371,7 @@ class TestStockReservationEntry(IntegrationTestCase):
 			so = make_sales_order(
 				item_list=item_list,
 				warehouse=self.warehouse,
+<<<<<<< HEAD
 				do_not_submit=True,
 			)
 
@@ -336,11 +380,15 @@ class TestStockReservationEntry(IntegrationTestCase):
 
 			so.save()
 			so.submit()
+=======
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			so.create_stock_reservation_entries()
 
 			# Test - 7: Partial Delivery against Sales Order.
 			dn1 = make_delivery_note(so.name)
 
+<<<<<<< HEAD
 			item_wise_serial_nos = {}
 
 			for item in dn1.items:
@@ -351,6 +399,12 @@ class TestStockReservationEntry(IntegrationTestCase):
 				if row.serial_no:
 					item_wise_serial_nos.setdefault(row.item_code, []).extend(get_serial_nos(row.serial_no))
 
+=======
+			for item in dn1.items:
+				item.qty = randint(1, 10)
+
+			dn1.save()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			dn1.submit()
 
 			for item in so.items:
@@ -361,11 +415,19 @@ class TestStockReservationEntry(IntegrationTestCase):
 				self.assertEqual(sre_details.status, "Partially Delivered")
 
 			# Test - 8: Over Delivery against Sales Order, SRE Delivered Qty should not be greater than the SRE Reserved Qty.
+<<<<<<< HEAD
 			with self.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 100}):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
 					item.qty = 70
+=======
+			with change_settings("Stock Settings", {"over_delivery_receipt_allowance": 100}):
+				dn2 = make_delivery_note(so.name)
+
+				for item in dn2.items:
+					item.qty += randint(1, 10)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 				dn2.save()
 				dn2.submit()
@@ -382,7 +444,11 @@ class TestStockReservationEntry(IntegrationTestCase):
 				for sre_detail in sre_details:
 					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -502,7 +568,11 @@ class TestStockReservationEntry(IntegrationTestCase):
 					# Test - 9: After Delivery Note cancellation, SB Entry Delivered Qty should be `0`.
 					self.assertEqual(sb_entry.delivered_qty, 0)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -583,7 +653,11 @@ class TestStockReservationEntry(IntegrationTestCase):
 				# Test - 3: Reserved Serial/Batch Nos should be equal to Picked Serial/Batch Nos.
 				self.assertSetEqual(picked_sb_details, reserved_sb_details)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -663,7 +737,11 @@ class TestStockReservationEntry(IntegrationTestCase):
 				# Test - 3: Reserved Serial/Batch Nos should be equal to PR Item Serial/Batch Nos.
 				self.assertEqual(set(sb_details), set(reserved_sb_details))
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,

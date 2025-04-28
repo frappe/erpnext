@@ -69,10 +69,16 @@
    "options": "Company"
   }
  ],
+<<<<<<< HEAD
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-09-25 10:27:41.139634",
+=======
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:13.805390",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",

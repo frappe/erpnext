@@ -10,7 +10,10 @@ frappe.ui.form.on("Tax Withholding Category", {
 					filters: {
 						company: child.company,
 						root_type: ["in", ["Asset", "Liability"]],
+<<<<<<< HEAD
 						is_group: 0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					},
 				};
 			}

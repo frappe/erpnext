@@ -60,6 +60,7 @@
 	},
 
 	"Australia": {
+<<<<<<< HEAD
 		"tax_categories" :[ 
 			{
 				"title" : "Domestic GST Supplier"
@@ -209,6 +210,12 @@
 					}
 				]
 			}
+=======
+		"Australia GST": {
+			"account_name": "GST 10%",
+			"tax_rate": 10.00,
+			"default": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 
@@ -594,6 +601,7 @@
 	},
 
 	"France": {
+<<<<<<< HEAD
 		"chart_of_accounts": {
 			"France - Plan Comptable General avec code": {
 				"sales_tax_templates": [
@@ -943,6 +951,20 @@
 					}
 				]
 			}
+=======
+		"France VAT 20%": {
+			"account_name": "VAT 20%",
+			"tax_rate": 20,
+			"default": 1
+		},
+		"France VAT 10%": {
+			"account_name": "VAT 10%",
+			"tax_rate": 10
+		},
+		"France VAT 5.5%": {
+			"account_name": "VAT 5.5%",
+			"tax_rate": 5.5
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 
@@ -4045,6 +4067,7 @@
 	},
 
 	"Indonesia": {
+<<<<<<< HEAD
 		"Sales Tax": {
 			"account_name": "PPN Keluaran",
 			"tax_rate": 11.00
@@ -4052,6 +4075,11 @@
 		"Purchase Tax": {
 			"account_name": "PPN Masukan",
 			"tax_rate": 11.00
+=======
+		"Indonesia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 
@@ -4649,6 +4677,7 @@
 	},
 
 	"Sweden": {
+<<<<<<< HEAD
 		"tax_categories": [],
 		"chart_of_accounts": {
 			"*": {
@@ -4843,11 +4872,17 @@
 					}
 				]
 			}
+=======
+		"Sweden Tax": {
+			"account_name": "VAT",
+			"tax_rate": 25.00
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 
 	"Switzerland": {
 		"Switzerland normal VAT": {
+<<<<<<< HEAD
 			"account_name": "VAT 8.1%",
 			"tax_rate": 8.10,
 			"default": 1
@@ -4859,6 +4894,19 @@
 		"Switzerland lodging VAT": {
 			"account_name": "VAT 3.8%",
 			"tax_rate": 3.80
+=======
+			"account_name": "VAT 7.7%",
+			"tax_rate": 7.70,
+			"default": 1
+		},
+		"Switzerland reduced VAT": {
+			"account_name": "VAT 2.5%",
+			"tax_rate": 2.50
+		},
+		"Switzerland lodging VAT": {
+			"account_name": "VAT 3.7%",
+			"tax_rate": 3.70
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 

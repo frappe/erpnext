@@ -15,17 +15,26 @@
   "party_details",
   "party_type",
   "party",
+<<<<<<< HEAD
   "party_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_4",
   "reference_doctype",
   "reference_name",
   "transaction_details",
   "grand_total",
+<<<<<<< HEAD
   "currency",
   "is_a_subscription",
   "column_break_18",
   "outstanding_amount",
   "party_account_currency",
+=======
+  "is_a_subscription",
+  "column_break_18",
+  "currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "subscription_section",
   "subscription_plans",
   "bank_account_details",
@@ -53,16 +62,24 @@
   "message",
   "message_examples",
   "mute_email",
+<<<<<<< HEAD
+=======
+  "payment_url",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_7",
   "payment_gateway",
   "payment_account",
   "payment_channel",
   "payment_order",
+<<<<<<< HEAD
   "amended_from",
   "column_break_pnyv",
   "payment_url",
   "column_break_iiuv",
   "phone_number"
+=======
+  "amended_from"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -76,7 +93,10 @@
   {
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+<<<<<<< HEAD
    "in_preview": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Transaction Date"
   },
   {
@@ -141,8 +161,12 @@
    "no_copy": 1,
    "options": "reference_doctype",
    "print_hide": 1,
+<<<<<<< HEAD
    "read_only": 1,
    "search_index": 1
+=======
+   "read_only": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "transaction_details",
@@ -150,6 +174,7 @@
    "label": "Transaction Details"
   },
   {
+<<<<<<< HEAD
    "description": "Amount in transaction currency",
    "fieldname": "grand_total",
    "fieldtype": "Currency",
@@ -158,6 +183,14 @@
    "non_negative": 1,
    "options": "currency",
    "reqd": 1
+=======
+   "description": "Amount in customer's currency",
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "non_negative": 1,
+   "options": "currency"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "0",
@@ -228,8 +261,12 @@
    "fetch_from": "bank_account.iban",
    "fieldname": "iban",
    "fieldtype": "Read Only",
+<<<<<<< HEAD
    "label": "IBAN",
    "options": "IBAN"
+=======
+   "label": "IBAN"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fetch_from": "bank_account.branch_code",
@@ -354,7 +391,11 @@
   {
    "fieldname": "payment_url",
    "fieldtype": "Data",
+<<<<<<< HEAD
    "label": "Payment URL",
+=======
+   "hidden": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "length": 500,
    "options": "URL",
    "read_only": 1
@@ -381,7 +422,10 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval: doc.payment_channel==\"Phone\"",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fetch_from": "payment_gateway_account.payment_channel",
    "fieldname": "payment_channel",
    "fieldtype": "Select",
@@ -415,6 +459,7 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval: doc.docstatus === 1",
    "description": "Amount in party's bank account currency",
    "fieldname": "outstanding_amount",
@@ -426,11 +471,14 @@
    "read_only": 1
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_pnyv",
@@ -460,11 +508,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-29 11:52:48.555415",
+=======
+ "modified": "2024-08-07 16:39:54.288002",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
@@ -499,8 +555,11 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "show_preview_popup": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

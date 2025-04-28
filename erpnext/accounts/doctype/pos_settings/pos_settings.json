@@ -5,8 +5,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+<<<<<<< HEAD
   "invoice_type",
   "section_break_gyos",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "invoice_fields",
   "pos_search_fields"
  ],
@@ -14,7 +17,11 @@
   {
    "fieldname": "invoice_fields",
    "fieldtype": "Table",
+<<<<<<< HEAD
    "label": "POS Additional Fields",
+=======
+   "label": "POS Field",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "POS Field"
   },
   {
@@ -22,6 +29,7 @@
    "fieldtype": "Table",
    "label": "POS Search Fields",
    "options": "POS Search Fields"
+<<<<<<< HEAD
   },
   {
    "default": "Sales Invoice",
@@ -34,11 +42,17 @@
   {
    "fieldname": "section_break_gyos",
    "fieldtype": "Section Break"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-06-06 11:36:44.885353",
+=======
+ "modified": "2024-03-27 13:10:17.083132",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",
@@ -70,9 +84,16 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

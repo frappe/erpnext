@@ -1,4 +1,5 @@
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 from erpnext.stock.get_item_details import get_item_details
@@ -7,6 +8,22 @@ EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Supplier", "Item", "Price List", 
 
 
 class TestGetItemDetail(IntegrationTestCase):
+=======
+from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase
+
+from erpnext.stock.get_item_details import get_item_details
+
+test_ignore = ["BOM"]
+test_dependencies = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
+
+
+class TestGetItemDetail(FrappeTestCase):
+	def setUp(self):
+		make_test_records("Price List")
+		super().setUp()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_get_item_detail_purchase_order(self):
 		args = frappe._dict(
 			{
@@ -28,6 +45,7 @@ class TestGetItemDetail(IntegrationTestCase):
 		)
 		details = get_item_details(args)
 		self.assertEqual(details.get("price_list_rate"), 100)
+<<<<<<< HEAD
 
 	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):
@@ -91,3 +109,5 @@ class TestGetItemDetail(IntegrationTestCase):
 		dn.save()
 		self.assertEqual(dn.items[0].batch_no, "BATCH01")
 		self.assertEqual(dn.items[0].rate, 50)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -2,10 +2,17 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestSubcontractingBOM(IntegrationTestCase):
+=======
+from frappe.tests.utils import FrappeTestCase
+
+
+class TestSubcontractingBOM(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	pass
 
 

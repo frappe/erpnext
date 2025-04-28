@@ -3,7 +3,11 @@
 
 import frappe
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import create_batch, getdate
+=======
+from frappe.utils import getdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.subscription.subscription import DateTimeLikeObject, process_all
 
@@ -23,6 +27,7 @@ class ProcessSubscription(Document):
 	# end: auto-generated types
 
 	def on_submit(self):
+<<<<<<< HEAD
 		self.process_all_subscription()
 
 	def process_all_subscription(self):
@@ -40,6 +45,9 @@ class ProcessSubscription(Document):
 				subscription=subscription,
 				posting_date=self.posting_date,
 			)
+=======
+		process_all(subscription=self.subscription, posting_date=self.posting_date)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def create_subscription_process(

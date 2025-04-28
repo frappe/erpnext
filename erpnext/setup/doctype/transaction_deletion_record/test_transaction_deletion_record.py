@@ -3,10 +3,17 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestTransactionDeletionRecord(IntegrationTestCase):
+=======
+from frappe.tests.utils import FrappeTestCase
+
+
+class TestTransactionDeletionRecord(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		create_company("Dunder Mifflin Paper Co")
 

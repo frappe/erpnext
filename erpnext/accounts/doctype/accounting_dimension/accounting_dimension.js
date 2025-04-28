@@ -58,7 +58,11 @@ frappe.ui.form.on("Accounting Dimension", {
 	},
 
 	label: function (frm) {
+<<<<<<< HEAD
 		frm.set_value("fieldname", frm.doc.label.replace(/ /g, "_").replace(/-/g, "_").toLowerCase());
+=======
+		frm.set_value("fieldname", frappe.model.scrub(frm.doc.label));
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	document_type: function (frm) {

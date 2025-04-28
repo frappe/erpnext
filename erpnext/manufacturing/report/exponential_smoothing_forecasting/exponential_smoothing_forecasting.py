@@ -230,8 +230,13 @@ class ForecastingReport(ExponentialSmoothingForecast):
 			"data": {
 				"labels": labels,
 				"datasets": [
+<<<<<<< HEAD
 					{"name": _("Demand"), "values": self.total_demand},
 					{"name": _("Forecast"), "values": self.total_forecast},
+=======
+					{"name": "Demand", "values": self.total_demand},
+					{"name": "Forecast", "values": self.total_forecast},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				],
 			},
 			"type": "line",

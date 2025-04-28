@@ -5,7 +5,11 @@
 from unittest.mock import MagicMock, call
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, add_to_date, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -21,7 +25,11 @@ from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError
 
 
+<<<<<<< HEAD
 class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
+=======
+class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		frappe.flags.dont_execute_stock_reposts = False
 
@@ -195,7 +203,11 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 
 		riv.set_status("Skipped")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+=======
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
 
@@ -373,7 +385,11 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+=======
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_create_repost_entry_for_cancelled_document(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -391,18 +407,29 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
 	def test_repost_item_valuation_for_closing_stock_balance(self):
+<<<<<<< HEAD
 		from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
 			prepare_closing_stock_balance,
 		)
 
 		doc = frappe.new_doc("Stock Closing Entry")
+=======
+		from erpnext.stock.doctype.closing_stock_balance.closing_stock_balance import (
+			prepare_closing_stock_balance,
+		)
+
+		doc = frappe.new_doc("Closing Stock Balance")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		doc.company = "_Test Company"
 		doc.from_date = today()
 		doc.to_date = today()
 		doc.submit()
 
 		prepare_closing_stock_balance(doc.name)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		doc.load_from_db()
 		self.assertEqual(doc.docstatus, 1)
 		self.assertEqual(doc.status, "Completed")
@@ -425,13 +452,21 @@ class TestRepostItemValuation(IntegrationTestCase, StockTestMixin):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
 
 		make_purchase_receipt(
+<<<<<<< HEAD
 			item_code=item_code.name,
+=======
+			item_code=item_code,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			qty=1,
 			rate=100,
 		)
 
 		pr1 = make_purchase_receipt(
+<<<<<<< HEAD
 			item_code=item_code.name,
+=======
+			item_code=item_code,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			qty=1,
 			rate=100,
 			posting_date=add_days(today(), days=-1),

@@ -12,6 +12,10 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function (frm) {
+<<<<<<< HEAD
+=======
+		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (frm.doc.is_old_subcontracting_flow) {
 			frm.set_query("reserve_warehouse", "supplied_items", function () {
 				return {
@@ -25,6 +29,7 @@ frappe.ui.form.on("Purchase Order", {
 		}
 
 		frm.set_indicator_formatter("item_code", function (doc) {
+<<<<<<< HEAD
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
@@ -34,6 +39,9 @@ frappe.ui.form.on("Purchase Order", {
 				color = "orange";
 			}
 			return color;
+=======
+			return doc.qty <= doc.received_qty ? "green" : "orange";
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 
 		frm.set_query("expense_account", "items", function () {
@@ -58,6 +66,7 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
+<<<<<<< HEAD
 	schedule_date(frm) {
 		if (frm.doc.schedule_date) {
 			frm.doc.items.forEach((d) => {
@@ -71,6 +80,8 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_value("schedule_date", "");
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	refresh: function (frm) {
 		if (frm.doc.is_old_subcontracting_flow) {
 			frm.trigger("get_materials_from_supplier");
@@ -83,6 +94,7 @@ frappe.ui.form.on("Purchase Order", {
 				}
 			});
 		}
+<<<<<<< HEAD
 
 		if (frm.doc.docstatus == 0) {
 			erpnext.set_unit_price_items_note(frm);
@@ -113,12 +125,18 @@ frappe.ui.form.on("Purchase Order", {
 				frm.set_df_property("tax_withholding_category", "hidden", frm.supplier_tds ? 0 : 1);
 			}
 		);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	get_materials_from_supplier: function (frm) {
 		let po_details = [];
 
+<<<<<<< HEAD
 		if (frm.doc.supplied_items && (flt(frm.doc.per_received) == 100 || frm.doc.status === "Closed")) {
+=======
+		if (frm.doc.supplied_items && (flt(frm.doc.per_received, 2) == 100 || frm.doc.status === "Closed")) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.doc.supplied_items.forEach((d) => {
 				if (d.total_supplied_qty && d.total_supplied_qty != d.consumed_qty) {
 					po_details.push(d.name);
@@ -153,15 +171,19 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	onload: function (frm) {
+<<<<<<< HEAD
 		var ignore_list = ["Unreconcile Payment", "Unreconcile Payment Entries"];
 		frm.ignore_doctypes_on_cancel_all = Object.hasOwn(frm, "ignore_doctypes_on_cancel_all")
 			? frm.ignore_doctypes_on_cancel_all.concat(ignore_list)
 			: ignore_list;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		set_schedule_date(frm);
 		if (!frm.doc.transaction_date) {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
 		}
 
+<<<<<<< HEAD
 		if (frm.doc.__onload && frm.doc.supplier) {
 			if (frm.is_new()) {
 				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
@@ -171,6 +193,8 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
 			return erpnext.queries.warehouse(frm.doc);
 		});
@@ -358,8 +382,13 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 			if (!["Closed", "Delivered"].includes(doc.status)) {
 				if (
 					this.frm.doc.status !== "Closed" &&
+<<<<<<< HEAD
 					flt(this.frm.doc.per_received) < 100 &&
 					flt(this.frm.doc.per_billed) < 100
+=======
+					flt(this.frm.doc.per_received, 2) < 100 &&
+					flt(this.frm.doc.per_billed, 2) < 100
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				) {
 					if (!this.frm.doc.__onload || this.frm.doc.__onload.can_update_items) {
 						this.frm.add_custom_button(__("Update Items"), () => {
@@ -373,7 +402,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					}
 				}
 				if (this.frm.has_perm("submit")) {
+<<<<<<< HEAD
 					if (flt(doc.per_billed) < 100 || flt(doc.per_received) < 100) {
+=======
+					if (flt(doc.per_billed, 2) < 100 || flt(doc.per_received, 2) < 100) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						if (doc.status != "On Hold") {
 							this.frm.add_custom_button(
 								__("Hold"),
@@ -396,11 +429,15 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 				}
 
 				if (is_drop_ship && doc.status != "Delivered") {
+<<<<<<< HEAD
 					this.frm.add_custom_button(
 						__("Delivered"),
 						this.delivered_by_supplier.bind(this),
 						__("Status")
 					);
+=======
+					this.frm.add_custom_button(__("Delivered"), this.delivered_by_supplier, __("Status"));
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Status"));
 				}
@@ -415,7 +452,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 			}
 			if (doc.status != "Closed") {
 				if (doc.status != "On Hold") {
+<<<<<<< HEAD
 					if (flt(doc.per_received) < 100 && allow_receipt) {
+=======
+					if (flt(doc.per_received, 2) < 100 && allow_receipt) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						this.frm.add_custom_button(
 							__("Purchase Receipt"),
 							() => {
@@ -435,6 +476,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 									);
 								}
 							} else {
+<<<<<<< HEAD
 								if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
 									this.frm.add_custom_button(
 										__("Subcontracting Order"),
@@ -449,6 +491,19 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					}
 					// Please do not add precision in the below flt function
 					if (flt(doc.per_billed) < 100)
+=======
+								this.frm.add_custom_button(
+									__("Subcontracting Order"),
+									() => {
+										me.make_subcontracting_order();
+									},
+									__("Create")
+								);
+							}
+						}
+					}
+					if (flt(doc.per_billed, 2) < 100)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						this.frm.add_custom_button(
 							__("Purchase Invoice"),
 							() => {
@@ -457,7 +512,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 							__("Create")
 						);
 
+<<<<<<< HEAD
 					if (flt(doc.per_billed) < 100 && doc.status != "Delivered") {
+=======
+					if (flt(doc.per_billed, 2) < 100 && doc.status != "Delivered") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						this.frm.add_custom_button(
 							__("Payment"),
 							() => this.make_payment_entry(),
@@ -465,7 +524,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						);
 					}
 
+<<<<<<< HEAD
 					if (flt(doc.per_billed) < 100) {
+=======
+					if (flt(doc.per_billed, 2) < 100) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						this.frm.add_custom_button(
 							__("Payment Request"),
 							function () {
@@ -481,8 +544,13 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						if (internal) {
 							let button_label =
 								me.frm.doc.company === me.frm.doc.represents_company
+<<<<<<< HEAD
 									? __("Internal Sales Order")
 									: __("Inter Company Sales Order");
+=======
+									? "Internal Sales Order"
+									: "Inter Company Sales Order";
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 							me.frm.add_custom_button(
 								button_label,
@@ -596,7 +664,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					},
 					allow_child_item_selection: true,
 					child_fieldname: "items",
+<<<<<<< HEAD
 					child_columns: ["item_code", "item_name", "qty", "ordered_qty"],
+=======
+					child_columns: ["item_code", "qty", "ordered_qty"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				});
 			},
 			__("Get Items From")
@@ -617,9 +689,12 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						docstatus: 1,
 						status: ["not in", ["Stopped", "Expired"]],
 					},
+<<<<<<< HEAD
 					allow_child_item_selection: true,
 					child_fieldname: "items",
 					child_columns: ["item_code", "item_name", "qty", "rate", "amount"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				});
 			},
 			__("Get Items From")
@@ -786,6 +861,13 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	items_on_form_rendered() {
 		set_schedule_date(this.frm);
 	}
+<<<<<<< HEAD
+=======
+
+	schedule_date() {
+		set_schedule_date(this.frm);
+	}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };
 
 // for backward compatibility: combine new and previous states
@@ -841,6 +923,7 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function (frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });
+<<<<<<< HEAD
 
 function prevent_past_schedule_dates(frm) {
 	if (frm.doc.transaction_date) {
@@ -849,3 +932,5 @@ function prevent_past_schedule_dates(frm) {
 		});
 	}
 }
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

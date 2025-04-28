@@ -31,8 +31,12 @@
    "label": "Reference Document Type",
    "options": "DocType",
    "read_only_depends_on": "eval:!doc.__islocal",
+<<<<<<< HEAD
    "reqd": 1,
    "search_index": 1
+=======
+   "reqd": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "0",

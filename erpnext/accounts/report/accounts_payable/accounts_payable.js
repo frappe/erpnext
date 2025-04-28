@@ -26,6 +26,7 @@ frappe.query_reports["Accounts Payable"] = {
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
+<<<<<<< HEAD
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Cost Center", txt, {
@@ -33,6 +34,18 @@ frappe.query_reports["Accounts Payable"] = {
 				});
 			},
 			options: "Cost Center",
+=======
+			fieldtype: "Link",
+			options: "Cost Center",
+			get_query: () => {
+				var company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: {
+						company: company,
+					},
+				};
+			},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "party_account",
@@ -58,6 +71,7 @@ frappe.query_reports["Accounts Payable"] = {
 			default: "Due Date",
 		},
 		{
+<<<<<<< HEAD
 			fieldname: "calculate_ageing_with",
 			label: __("Calculate Ageing With"),
 			fieldtype: "Select",
@@ -69,6 +83,34 @@ frappe.query_reports["Accounts Payable"] = {
 			label: __("Ageing Range"),
 			fieldtype: "Data",
 			default: "30, 60, 90, 120",
+=======
+			fieldname: "range1",
+			label: __("Ageing Range 1"),
+			fieldtype: "Int",
+			default: "30",
+			reqd: 1,
+		},
+		{
+			fieldname: "range2",
+			label: __("Ageing Range 2"),
+			fieldtype: "Int",
+			default: "60",
+			reqd: 1,
+		},
+		{
+			fieldname: "range3",
+			label: __("Ageing Range 3"),
+			fieldtype: "Int",
+			default: "90",
+			reqd: 1,
+		},
+		{
+			fieldname: "range4",
+			label: __("Ageing Range 4"),
+			fieldtype: "Int",
+			default: "120",
+			reqd: 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "payment_terms_template",
@@ -93,7 +135,10 @@ frappe.query_reports["Accounts Payable"] = {
 			fieldname: "party",
 			label: __("Party"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "party_type",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 
@@ -168,7 +213,11 @@ frappe.query_reports["Accounts Payable"] = {
 	},
 };
 
+<<<<<<< HEAD
 erpnext.utils.add_dimensions("Accounts Payable", 10);
+=======
+erpnext.utils.add_dimensions("Accounts Payable", 9);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 function get_party_type_options() {
 	let options = [];

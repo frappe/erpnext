@@ -1,5 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -8,6 +9,21 @@ from frappe.tests import IntegrationTestCase
 
 class TestCostCenter(IntegrationTestCase):
 	def test_cost_center_creation_against_child_node(self):
+=======
+
+import unittest
+
+import frappe
+
+test_records = frappe.get_test_records("Cost Center")
+
+
+class TestCostCenter(unittest.TestCase):
+	def test_cost_center_creation_against_child_node(self):
+		if not frappe.db.get_value("Cost Center", {"name": "_Test Cost Center 2 - _TC"}):
+			frappe.get_doc(test_records[1]).insert()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		cost_center = frappe.get_doc(
 			{
 				"doctype": "Cost Center",

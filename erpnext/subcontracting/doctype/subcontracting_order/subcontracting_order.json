@@ -14,7 +14,10 @@
   "supplier",
   "supplier_name",
   "supplier_warehouse",
+<<<<<<< HEAD
   "supplier_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_7",
   "company",
   "transaction_date",
@@ -36,7 +39,10 @@
   "service_items",
   "raw_materials_supplied_section",
   "set_reserve_warehouse",
+<<<<<<< HEAD
   "reserve_stock",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "supplied_items",
   "tab_address_and_contact",
   "supplier_address",
@@ -63,8 +69,12 @@
   "select_print_heading",
   "column_break_43",
   "letter_head",
+<<<<<<< HEAD
   "tab_connections",
   "production_plan"
+=======
+  "tab_connections"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -297,7 +307,11 @@
    "fieldname": "total",
    "fieldtype": "Currency",
    "label": "Total",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+   "options": "currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -356,7 +370,10 @@
    "fieldname": "total_additional_costs",
    "fieldtype": "Currency",
    "label": "Total Additional Costs",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide_if_no_value": 1,
    "read_only": 1
   },
@@ -454,6 +471,7 @@
    "options": "Project"
   },
   {
+<<<<<<< HEAD
    "fieldname": "tab_other_info",
    "fieldtype": "Tab Break",
    "label": "Other Info"
@@ -489,12 +507,27 @@
    "label": "Production Plan",
    "no_copy": 1,
    "read_only": 1
+=======
+    "fieldname": "tab_other_info",
+    "fieldtype": "Tab Break",
+    "label": "Other Info"
+  },
+  {
+    "fieldname": "tab_connections",
+    "fieldtype": "Tab Break",
+    "label": "Connections",
+    "show_dashboard": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-14 10:31:40.682892",
+=======
+ "modified": "2024-03-27 13:10:46.060843",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
@@ -541,7 +574,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status, transaction_date, supplier",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
@@ -550,4 +586,8 @@
  "timeline_field": "supplier",
  "title_field": "supplier_name",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

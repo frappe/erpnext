@@ -17,6 +17,7 @@ class MaterialRequestPlanItem(Document):
 		actual_qty: DF.Float
 		conversion_factor: DF.Float
 		description: DF.TextEditor | None
+<<<<<<< HEAD
 		from_bom: DF.Link | None
 		from_warehouse: DF.Link | None
 		item_code: DF.Link
@@ -30,6 +31,13 @@ class MaterialRequestPlanItem(Document):
 			"Manufacture",
 			"Subcontracting",
 			"Customer Provided",
+=======
+		from_warehouse: DF.Link | None
+		item_code: DF.Link
+		item_name: DF.Data | None
+		material_request_type: DF.Literal[
+			"", "Purchase", "Material Transfer", "Material Issue", "Manufacture", "Customer Provided"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 		min_order_qty: DF.Float
 		ordered_qty: DF.Float
@@ -44,8 +52,11 @@ class MaterialRequestPlanItem(Document):
 		safety_stock: DF.Float
 		sales_order: DF.Link | None
 		schedule_date: DF.Date | None
+<<<<<<< HEAD
 		stock_reserved_qty: DF.Float
 		sub_assembly_item_reference: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		uom: DF.Link | None
 		warehouse: DF.Link
 	# end: auto-generated types

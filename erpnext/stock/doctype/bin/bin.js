@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Bin", {
+<<<<<<< HEAD
 	refresh(frm) {
 		frm.trigger("recalculate_bin_quantity");
 	},
@@ -18,4 +19,7 @@ frappe.ui.form.on("Bin", {
 			});
 		});
 	},
+=======
+	refresh: function (frm) {},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

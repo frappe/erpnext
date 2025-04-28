@@ -13,7 +13,11 @@ def execute(filters=None):
 	if not filters:
 		filters = {}
 	# Check if customer id is according to naming series or customer name
+<<<<<<< HEAD
 	customer_naming_type = frappe.get_single_value("Selling Settings", "cust_master_name")
+=======
+	customer_naming_type = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	columns = get_columns(customer_naming_type)
 
 	data = []

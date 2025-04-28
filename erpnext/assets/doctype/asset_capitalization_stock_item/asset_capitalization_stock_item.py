@@ -23,7 +23,10 @@ class AssetCapitalizationStockItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+<<<<<<< HEAD
 		purchase_receipt_item: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		stock_qty: DF.Float

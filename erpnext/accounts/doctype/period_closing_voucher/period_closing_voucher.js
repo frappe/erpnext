@@ -4,8 +4,11 @@
 frappe.ui.form.on("Period Closing Voucher", {
 	onload: function (frm) {
 		if (!frm.doc.transaction_date) frm.doc.transaction_date = frappe.datetime.obj_to_str(new Date());
+<<<<<<< HEAD
 
 		frm.ignore_doctypes_on_cancel_all = ["Process Period Closing Voucher"];
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	setup: function (frm) {
@@ -21,6 +24,7 @@ frappe.ui.form.on("Period Closing Voucher", {
 		});
 	},
 
+<<<<<<< HEAD
 	fiscal_year: function (frm) {
 		if (frm.doc.fiscal_year) {
 			frappe.call({
@@ -39,6 +43,8 @@ frappe.ui.form.on("Period Closing Voucher", {
 		}
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	refresh: function (frm) {
 		if (frm.doc.docstatus > 0) {
 			frm.add_custom_button(
@@ -49,7 +55,11 @@ frappe.ui.form.on("Period Closing Voucher", {
 						from_date: frm.doc.posting_date,
 						to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
 						company: frm.doc.company,
+<<<<<<< HEAD
 						categorize_by: "",
+=======
+						group_by: "",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						show_cancelled_entries: frm.doc.docstatus === 2,
 					};
 					frappe.set_route("query-report", "General Ledger");

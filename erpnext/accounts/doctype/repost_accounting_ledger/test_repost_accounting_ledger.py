@@ -4,7 +4,11 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, nowdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -12,6 +16,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import make_paymen
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
+<<<<<<< HEAD
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, make_purchase_receipt
 
@@ -22,6 +27,11 @@ class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
 		super().setUpClass()
 		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
 
+=======
+
+
+class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -121,7 +131,11 @@ class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+=======
+	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_04_pcv_validation(self):
 		# Clear old GL entries so PCV can be submitted.
 		gl = frappe.qb.DocType("GL Entry")
@@ -136,15 +150,24 @@ class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
 			cost_center=self.cost_center,
 			rate=100,
 		)
+<<<<<<< HEAD
 		fy = get_fiscal_year(today(), company=self.company)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pcv = frappe.get_doc(
 			{
 				"doctype": "Period Closing Voucher",
 				"transaction_date": today(),
+<<<<<<< HEAD
 				"period_start_date": fy[1],
 				"period_end_date": today(),
 				"company": self.company,
 				"fiscal_year": fy[0],
+=======
+				"posting_date": today(),
+				"company": self.company,
+				"fiscal_year": get_fiscal_year(today(), company=self.company)[0],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"cost_center": self.cost_center,
 				"closing_account_head": self.retained_earnings,
 				"remarks": "test",
@@ -211,6 +234,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, IntegrationTestCase):
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
 
+<<<<<<< HEAD
 	def test_06_repost_purchase_receipt(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 
@@ -286,6 +310,11 @@ def update_repost_settings():
 		"Journal Entry",
 		"Purchase Receipt",
 	]
+=======
+
+def update_repost_settings():
+	allowed_types = ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	repost_settings = frappe.get_doc("Repost Accounting Ledger Settings")
 	for x in allowed_types:
 		repost_settings.append("allowed_types", {"document_type": x, "allowed": True})

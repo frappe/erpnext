@@ -30,11 +30,15 @@
   "amended_from",
   "print_settings_section",
   "group_same_items",
+<<<<<<< HEAD
   "status_section",
   "status",
   "column_break_qyam",
   "delivery_status",
   "per_delivered"
+=======
+  "status"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -77,6 +81,10 @@
    "options": "Work Order"
   },
   {
+<<<<<<< HEAD
+=======
+   "allow_on_submit": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "locations",
    "fieldtype": "Table",
    "label": "Item Locations",
@@ -184,7 +192,11 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "Draft\nOpen\nPartly Delivered\nCompleted\nCancelled",
+=======
+   "options": "Draft\nOpen\nCompleted\nCancelled",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1,
@@ -200,7 +212,11 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "description": "If enabled then system won't override the picked qty / batches / serial numbers / warehouse.",
+=======
+   "description": "If enabled then system won't override the picked qty / batches / serial numbers.",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "pick_manually",
    "fieldtype": "Check",
    "label": "Pick Manually"
@@ -211,6 +227,7 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule"
+<<<<<<< HEAD
   },
   {
    "collapsible": 1,
@@ -242,11 +259,17 @@
   {
    "fieldname": "column_break_qyam",
    "fieldtype": "Column Break"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-03 18:36:52.282355",
+=======
+ "modified": "2024-08-14 13:20:42.168827",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
@@ -314,9 +337,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

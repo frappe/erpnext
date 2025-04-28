@@ -19,14 +19,22 @@
    "fieldname": "field",
    "fieldtype": "Select",
    "in_list_view": 1,
+<<<<<<< HEAD
    "label": "Field",
    "reqd": 1
+=======
+   "label": "Field"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-29 18:08:40.323579",
+=======
+ "modified": "2024-03-27 13:10:16.969895",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Search Fields",
@@ -36,4 +44,8 @@
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -2,8 +2,13 @@
 # MIT License. See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_to_date, today
+=======
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import today
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -16,7 +21,11 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 
 
+<<<<<<< HEAD
 class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
+=======
+class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.clear_old_entries()
@@ -60,6 +69,7 @@ class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
 		]
 		self.check_expected_values(result, expected_values)
 
+<<<<<<< HEAD
 	def test_date_filters_in_multiple_tax_withholding_rules(self):
 		create_tax_category("TDS - 3", rate=10, account="TDS - _TC", cumulative_threshold=1)
 		# insert new rate in same fiscal year
@@ -112,6 +122,8 @@ class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
 		]
 		self.check_expected_values(result, expected_values)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def check_expected_values(self, result, expected_values):
 		for i in range(len(result)):
 			voucher = frappe._dict(result[i])

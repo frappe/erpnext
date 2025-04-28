@@ -15,8 +15,11 @@ def execute(filters=None):
 	if not filters:
 		return [], []
 
+<<<<<<< HEAD
 	validate_filters(filters)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	columns = get_columns(filters)
 	supplier_quotation_data = get_data(filters)
 
@@ -26,12 +29,15 @@ def execute(filters=None):
 	return columns, data, message, chart_data
 
 
+<<<<<<< HEAD
 def validate_filters(filters):
 	if not filters.get("categorize_by") and filters.get("group_by"):
 		filters["categorize_by"] = filters["group_by"]
 		filters["categorize_by"] = filters["categorize_by"].replace("Group by", "Categorize by")
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_data(filters):
 	sq = frappe.qb.DocType("Supplier Quotation")
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
@@ -90,14 +96,29 @@ def prepare_data(supplier_quotation_data, filters):
 	group_wise_map = defaultdict(list)
 	supplier_qty_price_map = {}
 
+<<<<<<< HEAD
 	group_by_field = (
 		"supplier_name" if filters.get("categorize_by") == "Categorize by Supplier" else "item_code"
 	)
+=======
+	group_by_field = "supplier_name" if filters.get("group_by") == "Group by Supplier" else "item_code"
+	company_currency = frappe.db.get_default("currency")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 	for data in supplier_quotation_data:
 		group = data.get(group_by_field)  # get item or supplier value for this row
 
+<<<<<<< HEAD
+=======
+		supplier_currency = frappe.db.get_value("Supplier", data.get("supplier_name"), "default_currency")
+
+		if supplier_currency:
+			exchange_rate = get_exchange_rate(supplier_currency, company_currency)
+		else:
+			exchange_rate = 1
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		row = {
 			"item_code": ""
 			if group_by_field == "item_code"
@@ -105,7 +126,11 @@ def prepare_data(supplier_quotation_data, filters):
 			"supplier_name": "" if group_by_field == "supplier_name" else data.get("supplier_name"),
 			"quotation": data.get("parent"),
 			"qty": data.get("qty"),
+<<<<<<< HEAD
 			"price": flt(data.get("amount"), float_precision),
+=======
+			"price": flt(data.get("amount") * exchange_rate, float_precision),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"uom": data.get("uom"),
 			"price_list_currency": data.get("price_list_currency"),
 			"currency": data.get("currency"),
@@ -212,6 +237,7 @@ def get_columns(filters):
 		{"fieldname": "uom", "label": _("UOM"), "fieldtype": "Link", "options": "UOM", "width": 90},
 		{"fieldname": "qty", "label": _("Quantity"), "fieldtype": "Float", "width": 80},
 		{
+<<<<<<< HEAD
 			"fieldname": "stock_uom",
 			"label": _("Stock UOM"),
 			"fieldtype": "Link",
@@ -219,6 +245,8 @@ def get_columns(filters):
 			"width": 90,
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"fieldname": "currency",
 			"label": _("Currency"),
 			"fieldtype": "Link",
@@ -233,6 +261,16 @@ def get_columns(filters):
 			"width": 110,
 		},
 		{
+<<<<<<< HEAD
+=======
+			"fieldname": "stock_uom",
+			"label": _("Stock UOM"),
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 90,
+		},
+		{
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"fieldname": "price_per_unit",
 			"label": _("Price per Unit (Stock UOM)"),
 			"fieldtype": "Currency",
@@ -276,7 +314,11 @@ def get_columns(filters):
 		},
 	]
 
+<<<<<<< HEAD
 	if filters.get("categorize_by") == "Categorize by Item":
+=======
+	if filters.get("group_by") == "Group by Item":
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		group_by_columns.reverse()
 
 	columns[0:0] = group_by_columns  # add positioned group by columns to the report
@@ -284,6 +326,7 @@ def get_columns(filters):
 
 
 def get_message():
+<<<<<<< HEAD
 	return f"""<span class="indicator">
 		{_("Valid Till")}:&nbsp;&nbsp;
 		</span>
@@ -293,6 +336,17 @@ def get_message():
 		&nbsp;&nbsp;
 		<span class="indicator red">
 		{_("Expires today or already expired")}
+=======
+	return """<span class="indicator">
+		Valid till : &nbsp;&nbsp;
+		</span>
+		<span class="indicator orange">
+		Expires in a week or less
+		</span>
+		&nbsp;&nbsp;
+		<span class="indicator red">
+		Expires today / Already Expired
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		</span>"""
 
 

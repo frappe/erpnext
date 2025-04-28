@@ -60,7 +60,10 @@ class PricingRule(Document):
 		disable: DF.Check
 		discount_amount: DF.Currency
 		discount_percentage: DF.Float
+<<<<<<< HEAD
 		dont_enforce_free_item_qty: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		for_price_list: DF.Link | None
 		free_item: DF.Link | None
 		free_item_rate: DF.Currency
@@ -169,7 +172,11 @@ class PricingRule(Document):
 
 		tocheck = frappe.scrub(self.get("applicable_for", ""))
 		if tocheck and not self.get(tocheck):
+<<<<<<< HEAD
 			throw(_("{0} is required").format(_(self.meta.get_label(tocheck))), frappe.MandatoryError)
+=======
+			throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if self.apply_rule_on_other:
 			o_field = "other_" + frappe.scrub(self.apply_rule_on_other)
@@ -447,6 +454,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			if isinstance(pricing_rule, str):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 				update_pricing_rule_uom(pricing_rule, args)
+<<<<<<< HEAD
 				fetch_other_item = True if pricing_rule.apply_rule_on_other else False
 				pricing_rule.apply_rule_on_other_items = (
 					get_pricing_rule_items(pricing_rule, other_items=fetch_other_item) or []
@@ -460,6 +468,9 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 				)
 				if args.coupon_code != coupon_code:
 					continue
+=======
+				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule) or []
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if pricing_rule.get("suggestion"):
 				continue
@@ -486,6 +497,12 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 						pricing_rule.apply_rule_on_other_items
 					)
 
+<<<<<<< HEAD
+=======
+			if pricing_rule.coupon_code_based == 1 and args.coupon_code is None:
+				return item_details
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if not pricing_rule.validate_applied_rule:
 				if pricing_rule.price_or_product_discount == "Price":
 					apply_price_discount_rule(pricing_rule, item_details, args)
@@ -645,7 +662,11 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 			if pricing_rule.margin_type in ["Percentage", "Amount"]:
 				item_details.margin_rate_or_amount = 0.0
 				item_details.margin_type = None
+<<<<<<< HEAD
 		elif pricing_rule.get("free_item") and not pricing_rule.get("dont_enforce_free_item_qty"):
+=======
+		elif pricing_rule.get("free_item"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			item_details.remove_free_item = (
 				item_code if pricing_rule.get("same_item") else pricing_rule.get("free_item")
 			)
@@ -703,6 +724,20 @@ def set_transaction_type(args):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
+=======
+def make_pricing_rule(doctype, docname):
+	doc = frappe.new_doc("Pricing Rule")
+	doc.applicable_for = doctype
+	doc.set(frappe.scrub(doctype), docname)
+	doc.selling = 1 if doctype == "Customer" else 0
+	doc.buying = 1 if doctype == "Supplier" else 0
+
+	return doc
+
+
+@frappe.whitelist()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 @frappe.validate_and_sanitize_search_inputs
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	items = [filters.get("value")]
@@ -713,7 +748,12 @@ def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_all(
 		"UOM Conversion Detail",
 		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
+<<<<<<< HEAD
 		fields=["uom"],
 		as_list=1,
 		distinct=True,
+=======
+		fields=["distinct uom"],
+		as_list=1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)

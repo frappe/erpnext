@@ -14,10 +14,13 @@ erpnext.landed_cost_taxes_and_charges = {
 									"Income Account",
 									"Expenses Included In Valuation",
 									"Expenses Included In Asset Valuation",
+<<<<<<< HEAD
 									"Expense Account",
 									"Direct Expense",
 									"Indirect Expense",
 									"Stock Received But Not Billed",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 								],
 							],
 							company: frm.doc.company,

@@ -1,5 +1,9 @@
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import today
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -7,7 +11,11 @@ from erpnext.accounts.report.accounts_payable.accounts_payable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
+<<<<<<< HEAD
 class TestAccountsPayable(AccountsTestMixin, IntegrationTestCase):
+=======
+class TestAccountsPayable(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -30,7 +38,14 @@ class TestAccountsPayable(AccountsTestMixin, IntegrationTestCase):
 			"party_type": "Supplier",
 			"party": [self.supplier],
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"in_party_currency": 1,
 		}
 

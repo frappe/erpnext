@@ -1,7 +1,10 @@
 {
  "actions": [],
  "allow_events_in_timeline": 1,
+<<<<<<< HEAD
  "allow_rename": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "autoname": "field:company_name",
  "creation": "2021-08-19 00:21:06.995448",
  "doctype": "DocType",
@@ -217,10 +220,16 @@
    "options": "CRM Note"
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2025-03-06 11:31:49.083983",
+=======
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:22.771484",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",
@@ -260,7 +269,10 @@
    "share": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

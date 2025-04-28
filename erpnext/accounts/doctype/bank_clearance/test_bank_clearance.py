@@ -1,5 +1,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -30,6 +31,24 @@ class TestBankClearance(IntegrationTestCase):
 		create_item("_Test Item")
 		create_cost_center(cost_center_name="_Test Cost Center", company="_Test Company")
 
+=======
+
+import unittest
+
+import frappe
+from frappe.utils import add_months, getdate
+
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.tests.utils import if_lending_app_installed, if_lending_app_not_installed
+
+
+class TestBankClearance(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		clear_payment_entries()
+		clear_loan_transactions()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		make_bank_account()
 		add_transactions()
 
@@ -97,6 +116,7 @@ class TestBankClearance(IntegrationTestCase):
 		bank_clearance.get_payment_entries()
 		self.assertEqual(len(bank_clearance.payment_entries), 3)
 
+<<<<<<< HEAD
 	def test_update_clearance_date_on_si(self):
 		sales_invoice = make_pos_sales_invoice()
 
@@ -122,6 +142,20 @@ class TestBankClearance(IntegrationTestCase):
 		)
 
 		self.assertEqual(si_clearance_date, date)
+=======
+
+def clear_payment_entries():
+	frappe.db.delete("Payment Entry")
+
+
+@if_lending_app_installed
+def clear_loan_transactions():
+	for dt in [
+		"Loan Disbursement",
+		"Loan Repayment",
+	]:
+		frappe.db.delete(dt)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def make_bank_account():
@@ -142,6 +176,7 @@ def add_transactions():
 
 
 def make_payment_entry():
+<<<<<<< HEAD
 	from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 	supplier = create_supplier(supplier_name="_Test Supplier")
@@ -153,11 +188,15 @@ def make_payment_entry():
 		qty=1,
 		rate=690,
 	)
+=======
+	pi = make_purchase_invoice(supplier="_Test Supplier", qty=1, rate=690)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank Clearance - _TC")
 	pe.reference_no = "Conrad Oct 18"
 	pe.reference_date = "2018-10-24"
 	pe.insert()
 	pe.submit()
+<<<<<<< HEAD
 
 
 def make_pos_sales_invoice():
@@ -186,3 +225,5 @@ def make_pos_sales_invoice():
 	si.submit()
 
 	return si
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

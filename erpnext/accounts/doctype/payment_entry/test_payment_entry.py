@@ -4,7 +4,11 @@
 
 import frappe
 from frappe import qb
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -25,10 +29,17 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Currency Exchange"]
 
 
 class TestPaymentEntry(IntegrationTestCase):
+=======
+test_dependencies = ["Item"]
+
+
+class TestPaymentEntry(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		frappe.db.rollback()
 
@@ -49,10 +60,15 @@ class TestPaymentEntry(IntegrationTestCase):
 		pe.insert()
 		pe.submit()
 
+<<<<<<< HEAD
 		self.assertEqual(pe.paid_to_account_type, "Cash")
 
 		expected_gle = dict(
 			(d[0], d) for d in [["Debtors - _TC", 0, 1000, pe.name], ["_Test Cash - _TC", 1000.0, 0, None]]
+=======
+		expected_gle = dict(
+			(d[0], d) for d in [["Debtors - _TC", 0, 1000, so.name], ["_Test Cash - _TC", 1000.0, 0, None]]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -84,7 +100,11 @@ class TestPaymentEntry(IntegrationTestCase):
 
 		expected_gle = dict(
 			(d[0], d)
+<<<<<<< HEAD
 			for d in [["_Test Receivable USD - _TC", 0, 5500, pe.name], [pe.paid_to, 5500.0, 0, None]]
+=======
+			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], [pe.paid_to, 5500.0, 0, None]]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -284,6 +304,7 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 200.0)
 		self.assertEqual(si.payment_schedule[1].paid_amount, 36.0)
 
+<<<<<<< HEAD
 	def test_payment_entry_against_payment_terms_with_discount_on_pi(self):
 		pi = make_purchase_invoice(do_not_save=1)
 		create_payment_terms_template_with_discount()
@@ -326,6 +347,8 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(pe.deductions[0].amount, -29.5)
 		self.assertEqual(pe.difference_amount, 0)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_payment_entry_against_payment_terms_with_discount(self):
 		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
 		create_payment_terms_template_with_discount()
@@ -427,7 +450,11 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 50)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Accounts Settings",
 		{
 			"allow_multi_currency_invoices_against_single_party_account": 1,
@@ -523,9 +550,22 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(pe.deductions[0].account, "Write Off - _TC")
 
 		# Exchange loss
+<<<<<<< HEAD
 		self.assertEqual(pe.deductions[-1].amount, 300.0)
 		pe.deductions[-1].account = "_Test Exchange Gain/Loss - _TC"
 		pe.deductions[-1].cost_center = "_Test Cost Center - _TC"
+=======
+		self.assertEqual(pe.difference_amount, 300.0)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "_Test Exchange Gain/Loss - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 300.0,
+			},
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pe.insert()
 		pe.submit()
@@ -562,8 +602,11 @@ class TestPaymentEntry(IntegrationTestCase):
 		pe.insert()
 		pe.submit()
 
+<<<<<<< HEAD
 		self.assertEqual(pe.paid_from_account_type, "Bank")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		outstanding_amount, status = frappe.db.get_value(
 			"Purchase Invoice", pi.name, ["outstanding_amount", "status"]
 		)
@@ -591,10 +634,23 @@ class TestPaymentEntry(IntegrationTestCase):
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 
+<<<<<<< HEAD
 		self.assertEqual(pe.deductions[0].amount, 100)
 		pe.deductions[0].account = "_Test Exchange Gain/Loss - _TC"
 		pe.deductions[0].cost_center = "_Test Cost Center - _TC"
 
+=======
+		self.assertEqual(pe.difference_amount, 100)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "_Test Exchange Gain/Loss - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 100,
+			},
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pe.insert()
 		pe.submit()
 
@@ -643,9 +699,18 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(flt(pe.references[0].exchange_gain_loss, 2), -94.74)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
+<<<<<<< HEAD
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
 
 		save_new_records(self.globalTestRecords["Currency Exchange"])
+=======
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			save_new_records,
+			test_records,
+		)
+
+		save_new_records(test_records)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Pay"
@@ -684,9 +749,22 @@ class TestPaymentEntry(IntegrationTestCase):
 		pe.set_exchange_rate()
 		pe.set_amounts()
 
+<<<<<<< HEAD
 		self.assertEqual(pe.deductions[0].amount, 500)
 		pe.deductions[0].account = "_Test Exchange Gain/Loss - _TC"
 		pe.deductions[0].cost_center = "_Test Cost Center - _TC"
+=======
+		self.assertEqual(pe.difference_amount, 500)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "_Test Exchange Gain/Loss - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 500,
+			},
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pe.insert()
 		pe.submit()
@@ -979,6 +1057,7 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(flt(expected_party_balance), party_balance)
 		self.assertEqual(flt(expected_party_account_balance, 2), flt(party_account_balance, 2))
 
+<<<<<<< HEAD
 	def test_gl_of_multi_currency_payment_transaction(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
 
@@ -1023,6 +1102,8 @@ class TestPaymentEntry(IntegrationTestCase):
 		)
 		self.assertEqual(gl_entries, expected_gl_entries)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_multi_currency_payment_entry_with_taxes(self):
 		payment_entry = create_payment_entry(
 			party="_Test Supplier USD", paid_to="_Test Payable USD - _TC", save=True
@@ -1157,7 +1238,11 @@ class TestPaymentEntry(IntegrationTestCase):
 		}
 		self.assertDictEqual(ref_details, expected_response)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Accounts Settings",
 		{
 			"unlink_payment_on_cancellation_of_invoice": 1,
@@ -1252,7 +1337,11 @@ class TestPaymentEntry(IntegrationTestCase):
 		si3.cancel()
 		si3.delete()
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Accounts Settings",
 		{
 			"unlink_payment_on_cancellation_of_invoice": 1,
@@ -1556,7 +1645,11 @@ class TestPaymentEntry(IntegrationTestCase):
 			parent_account="Current Liabilities - _TC",
 			account_name="Advances Paid",
 			company=company,
+<<<<<<< HEAD
 			account_type="Payable",
+=======
+			account_type="Liability",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		frappe.db.set_value(
@@ -1858,6 +1951,7 @@ class TestPaymentEntry(IntegrationTestCase):
 		# 'Is Opening' should always be 'No' for normal advance payments
 		self.assertEqual(gl_with_opening_set, [])
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_delete_linked_exchange_gain_loss_journal(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
@@ -1931,6 +2025,8 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, pe.doctype, pe.name)
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, "Journal Entry", jv[0])
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")

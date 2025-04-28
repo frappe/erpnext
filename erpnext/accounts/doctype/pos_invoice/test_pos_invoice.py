@@ -1,10 +1,15 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import copy
 import unittest
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
@@ -13,6 +18,11 @@ from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import PartialPaymentValidationError
+=======
+
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -24,6 +34,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
+<<<<<<< HEAD
 class TestPOSInvoice(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
@@ -47,6 +58,14 @@ class TestPOSInvoice(IntegrationTestCase):
 		opening_entry_doc = frappe.get_doc("POS Opening Entry", cls.opening_entry.name)
 		opening_entry_doc.cancel()
 
+=======
+class TestPOSInvoice(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
+		frappe.db.sql("delete from `tabTax Rule`")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		if frappe.session.user != "Administrator":
 			frappe.set_user("Administrator")
@@ -248,8 +267,17 @@ class TestPOSInvoice(IntegrationTestCase):
 		pos = create_pos_invoice(qty=10, do_not_save=True)
 
 		pos.set("payments", [])
+<<<<<<< HEAD
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 500})
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 500, "default": 1})
+=======
+		pos.append(
+			"payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - _TC", "amount": 500}
+		)
+		pos.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 500, "default": 1}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos.insert()
 		pos.submit()
 
@@ -265,7 +293,10 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+<<<<<<< HEAD
 			self,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -288,7 +319,13 @@ class TestPOSInvoice(IntegrationTestCase):
 			do_not_save=1,
 		)
 
+<<<<<<< HEAD
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000, "default": 1})
+=======
+		pos.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000, "default": 1}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pos.insert()
 		pos.submit()
@@ -305,7 +342,10 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+<<<<<<< HEAD
 			self,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -329,7 +369,13 @@ class TestPOSInvoice(IntegrationTestCase):
 			do_not_save=1,
 		)
 
+<<<<<<< HEAD
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 2000, "default": 1})
+=======
+		pos.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000, "default": 1}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pos.insert()
 		pos.submit()
@@ -339,9 +385,12 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		# partial return 1
 		pos_return1.get("items")[0].qty = -1
+<<<<<<< HEAD
 		pos_return1.set("payments", [])
 		pos_return1.append("payments", {"mode_of_payment": "Cash", "amount": -1000, "default": 1})
 		pos_return1.paid_amount = -1000
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_return1.submit()
 		pos_return1.reload()
 
@@ -356,9 +405,12 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		# partial return 2
 		pos_return2 = make_sales_return(pos.name)
+<<<<<<< HEAD
 		pos_return2.set("payments", [])
 		pos_return2.append("payments", {"mode_of_payment": "Cash", "amount": -1000, "default": 1})
 		pos_return2.paid_amount = -1000
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_return2.submit()
 
 		self.assertEqual(pos_return2.get("items")[0].qty, -1)
@@ -377,8 +429,15 @@ class TestPOSInvoice(IntegrationTestCase):
 		)
 
 		pos.set("payments", [])
+<<<<<<< HEAD
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 50})
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 60, "default": 1})
+=======
+		pos.append("payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - _TC", "amount": 50})
+		pos.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 60, "default": 1}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pos.insert()
 		pos.submit()
@@ -392,6 +451,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		inv.payments = []
 		self.assertRaises(frappe.ValidationError, inv.insert)
 
+<<<<<<< HEAD
 	def test_partial_payment(self):
 		pos_inv = create_pos_invoice(rate=10000, do_not_save=1)
 		pos_inv.append(
@@ -445,11 +505,16 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		set_allow_partial_payment(self.pos_profile, 0)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_serialized_item_transaction(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+<<<<<<< HEAD
 			self,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -472,7 +537,13 @@ class TestPOSInvoice(IntegrationTestCase):
 			do_not_save=1,
 		)
 
+<<<<<<< HEAD
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 1000})
+=======
+		pos.append(
+			"payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - _TC", "amount": 1000}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pos.insert()
 		pos.submit()
@@ -491,7 +562,13 @@ class TestPOSInvoice(IntegrationTestCase):
 			do_not_save=1,
 		)
 
+<<<<<<< HEAD
 		pos2.append("payments", {"mode_of_payment": "Bank Draft", "amount": 1000})
+=======
+		pos2.append(
+			"payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - _TC", "amount": 1000}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pos2.insert()
 		self.assertRaises(frappe.ValidationError, pos2.submit)
@@ -500,7 +577,10 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+<<<<<<< HEAD
 			self,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -541,7 +621,13 @@ class TestPOSInvoice(IntegrationTestCase):
 			do_not_save=1,
 		)
 
+<<<<<<< HEAD
 		pos2.append("payments", {"mode_of_payment": "Bank Draft", "amount": 1000})
+=======
+		pos2.append(
+			"payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - _TC", "amount": 1000}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pos2.insert()
 		self.assertRaises(frappe.ValidationError, pos2.submit)
@@ -550,7 +636,10 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+<<<<<<< HEAD
 			self,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -581,7 +670,10 @@ class TestPOSInvoice(IntegrationTestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(
+<<<<<<< HEAD
 			self,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			company="_Test Company",
 			target_warehouse="Stores - _TC",
 			cost_center="Main - _TC",
@@ -606,7 +698,13 @@ class TestPOSInvoice(IntegrationTestCase):
 		)
 		pos.get("items")[0].has_serial_no = 1
 		pos.set("payments", [])
+<<<<<<< HEAD
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000, "default": 1})
+=======
+		pos.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000, "default": 1}
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos = pos.save().submit()
 
 		# make a return
@@ -649,6 +747,7 @@ class TestPOSInvoice(IntegrationTestCase):
 			"Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty"
 		)
 
+<<<<<<< HEAD
 		inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000, do_not_save=1)
 		inv.append(
 			"payments",
@@ -656,6 +755,9 @@ class TestPOSInvoice(IntegrationTestCase):
 		)
 		inv.insert()
 		inv.submit()
+=======
+		inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		lpe = frappe.get_doc(
 			"Loyalty Point Entry",
@@ -681,6 +783,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		)
 
 		# add 10 loyalty points
+<<<<<<< HEAD
 		pos_inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000, do_not_save=1)
 		pos_inv.append(
 			"payments",
@@ -688,6 +791,9 @@ class TestPOSInvoice(IntegrationTestCase):
 		)
 		pos_inv.paid_amount = 10000
 		pos_inv.submit()
+=======
+		create_pos_invoice(customer="Test Loyalty Customer", rate=10000)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		before_lp_details = get_loyalty_program_details_with_points(
 			"Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty"
@@ -699,7 +805,11 @@ class TestPOSInvoice(IntegrationTestCase):
 		inv.loyalty_amount = inv.loyalty_points * before_lp_details.conversion_factor
 		inv.append(
 			"payments",
+<<<<<<< HEAD
 			{"mode_of_payment": "Cash", "amount": 10000 - inv.loyalty_amount},
+=======
+			{"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 10000 - inv.loyalty_amount},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		inv.paid_amount = 10000
 		inv.submit()
@@ -720,6 +830,7 @@ class TestPOSInvoice(IntegrationTestCase):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, additional_discount_percentage=10, do_not_submit=1)
+<<<<<<< HEAD
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 270})
 		pos_inv.save()
 		pos_inv.submit()
@@ -727,6 +838,13 @@ class TestPOSInvoice(IntegrationTestCase):
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "amount": 3200})
 		pos_inv2.save()
+=======
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 270})
+		pos_inv.submit()
+
+		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.submit()
 
 		consolidate_pos_invoices()
@@ -746,7 +864,11 @@ class TestPOSInvoice(IntegrationTestCase):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+<<<<<<< HEAD
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 300})
+=======
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv.append(
 			"taxes",
 			{
@@ -758,12 +880,19 @@ class TestPOSInvoice(IntegrationTestCase):
 				"included_in_print_rate": 1,
 			},
 		)
+<<<<<<< HEAD
 		pos_inv.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv.submit()
 
 		pos_inv2 = create_pos_invoice(rate=300, qty=2, do_not_submit=1)
 		pos_inv2.additional_discount_percentage = 10
+<<<<<<< HEAD
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "amount": 540})
+=======
+		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 540})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.append(
 			"taxes",
 			{
@@ -775,7 +904,10 @@ class TestPOSInvoice(IntegrationTestCase):
 				"included_in_print_rate": 1,
 			},
 		)
+<<<<<<< HEAD
 		pos_inv2.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.submit()
 
 		consolidate_pos_invoices()
@@ -801,7 +933,11 @@ class TestPOSInvoice(IntegrationTestCase):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(item=item, rate=300, do_not_submit=1)
+<<<<<<< HEAD
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 300})
+=======
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv.append(
 			"taxes",
 			{
@@ -816,7 +952,11 @@ class TestPOSInvoice(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, pos_inv.submit)
 
 		pos_inv2 = create_pos_invoice(item=item, rate=400, do_not_submit=1)
+<<<<<<< HEAD
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "amount": 400})
+=======
+		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 400})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.append(
 			"taxes",
 			{
@@ -828,7 +968,10 @@ class TestPOSInvoice(IntegrationTestCase):
 				"included_in_print_rate": 1,
 			},
 		)
+<<<<<<< HEAD
 		pos_inv2.save()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.submit()
 
 		consolidate_pos_invoices()
@@ -859,10 +1002,14 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		# POS Invoice 1, for the batch without bundle
 		pos_inv1 = create_pos_invoice(item="_BATCH ITEM Test For Reserve", rate=300, qty=15, do_not_save=1)
+<<<<<<< HEAD
 		pos_inv1.append(
 			"payments",
 			{"mode_of_payment": "Cash", "amount": 4500},
 		)
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv1.items[0].batch_no = batch_no
 		pos_inv1.save()
 		pos_inv1.submit()
@@ -878,6 +1025,7 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		# POS Invoice 2, for the batch with bundle
 		pos_inv2 = create_pos_invoice(
+<<<<<<< HEAD
 			item="_BATCH ITEM Test For Reserve", rate=300, qty=10, batch_no=batch_no, do_not_save=1
 		)
 		pos_inv2.append(
@@ -886,6 +1034,10 @@ class TestPOSInvoice(IntegrationTestCase):
 		)
 		pos_inv2.save()
 		pos_inv2.submit()
+=======
+			item="_BATCH ITEM Test For Reserve", rate=300, qty=10, batch_no=batch_no
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv2.reload()
 		self.assertTrue(pos_inv2.items[0].serial_and_batch_bundle)
 
@@ -920,10 +1072,13 @@ class TestPOSInvoice(IntegrationTestCase):
 		pos_inv1 = create_pos_invoice(
 			item=item.name, rate=300, qty=1, do_not_submit=1, batch_no="TestBatch 01"
 		)
+<<<<<<< HEAD
 		pos_inv1.append(
 			"payments",
 			{"mode_of_payment": "Cash", "amount": 300},
 		)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_inv1.save()
 		pos_inv1.submit()
 
@@ -933,8 +1088,12 @@ class TestPOSInvoice(IntegrationTestCase):
 			{
 				"item_code": item.name,
 				"warehouse": pos_inv2.items[0].warehouse,
+<<<<<<< HEAD
 				"voucher_type": "POS Invoice",
 				"voucher_no": pos_inv2.name,
+=======
+				"voucher_type": "Delivery Note",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"qty": 2,
 				"avg_rate": 300,
 				"batches": frappe._dict({"TestBatch 01": 2}),
@@ -1000,7 +1159,11 @@ class TestPOSInvoice(IntegrationTestCase):
 
 		frappe.db.savepoint("before_test_delivered_serial_no_case")
 		try:
+<<<<<<< HEAD
 			se = make_serialized_item(self)
+=======
+			se = make_serialized_item()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
 
 			dn = create_delivery_note(item_code="_Test Serialized Item With Series", serial_no=[serial_no])
@@ -1133,7 +1296,15 @@ def create_pos_invoice(**args):
 	return pos_inv
 
 
+<<<<<<< HEAD
 def set_allow_partial_payment(pos_profile, value):
 	pos_profile.reload()
 	pos_profile.allow_partial_payment = value
 	pos_profile.save()
+=======
+def make_batch_item(item_name):
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	if not frappe.db.exists(item_name):
+		return make_item(item_name, dict(has_batch_no=1, create_new_batch=1, is_stock_item=1))
+>>>>>>> 7c4cf3e834 (Favicon.svg)

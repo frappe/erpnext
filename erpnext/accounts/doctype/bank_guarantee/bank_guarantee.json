@@ -146,7 +146,10 @@
    "fieldname": "iban",
    "fieldtype": "Data",
    "label": "IBAN",
+<<<<<<< HEAD
    "options": "IBAN",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -215,10 +218,16 @@
    "read_only": 1
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
  "modified": "2025-08-29 11:52:33.550847",
+=======
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:37.731207",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Guarantee",
@@ -252,10 +261,17 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "customer",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "customer"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

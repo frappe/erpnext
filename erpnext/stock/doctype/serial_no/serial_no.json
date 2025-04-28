@@ -15,7 +15,10 @@
   "batch_no",
   "warehouse",
   "purchase_rate",
+<<<<<<< HEAD
   "customer",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break1",
   "status",
   "item_name",
@@ -39,11 +42,15 @@
   "company",
   "column_break_2cmm",
   "work_order",
+<<<<<<< HEAD
   "source_document_section",
   "reference_doctype",
   "posting_date",
   "column_break_ctcx",
   "reference_name"
+=======
+  "purchase_document_no"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -259,7 +266,11 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
+<<<<<<< HEAD
    "options": "\nActive\nInactive\nConsumed\nDelivered\nExpired",
+=======
+   "options": "\nActive\nInactive\nDelivered\nExpired",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -267,6 +278,7 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -305,6 +317,11 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date",
+=======
+   "fieldname": "purchase_document_no",
+   "fieldtype": "Data",
+   "label": "Creation Document No",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "no_copy": 1,
    "read_only": 1
   }
@@ -312,7 +329,11 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-05 17:17:11.328682",
+=======
+ "modified": "2024-03-27 13:10:39.196284",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -350,11 +371,18 @@
    "role": "Stock User"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "item_code",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -90,14 +90,21 @@
   "incoming_rate",
   "item_tax_rate",
   "actual_batch_qty",
+<<<<<<< HEAD
+=======
+  "actual_qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_eoec",
   "serial_no",
   "column_break_ytgd",
   "batch_no",
+<<<<<<< HEAD
   "available_quantity_section",
   "actual_qty",
   "column_break_ogff",
   "company_total_stock",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "edit_references",
   "sales_order",
   "so_detail",
@@ -106,10 +113,13 @@
   "delivery_note",
   "dn_detail",
   "delivered_qty",
+<<<<<<< HEAD
   "column_break_vwhb",
   "pos_invoice",
   "pos_invoice_item",
   "scio_detail",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "internal_transfer_section",
   "purchase_order",
   "column_break_92",
@@ -635,7 +645,10 @@
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "label": "Serial No",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "serial_no",
    "oldfieldtype": "Small Text"
   },
@@ -684,8 +697,12 @@
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
+<<<<<<< HEAD
    "label": "Qty (Warehouse)",
    "no_copy": 1,
+=======
+   "label": "Available Qty at Warehouse",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -822,8 +839,12 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
+<<<<<<< HEAD
    "options": "Project",
    "search_index": 1
+=======
+   "options": "Project"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "depends_on": "eval:parent.update_stock == 1",
@@ -939,6 +960,7 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
+<<<<<<< HEAD
   },
   {
    "fieldname": "available_quantity_section",
@@ -993,14 +1015,29 @@
  "istable": 1,
  "links": [],
  "modified": "2025-09-04 11:08:25.583561",
+=======
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-06-02 06:14:40.009020",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -5,12 +5,20 @@
 import json
 
 import frappe
+<<<<<<< HEAD
 from frappe.utils import cint, get_datetime
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_item_group, get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
 from erpnext.stock.get_item_details import get_conversion_factor
+=======
+from frappe.utils import cint
+from frappe.utils.nestedset import get_root_of
+
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
+from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.utils import scan_barcode
 
 
@@ -36,7 +44,10 @@ def search_by_term(search_term, warehouse, price_list):
 		"description": item_doc.description,
 		"is_stock_item": item_doc.is_stock_item,
 		"item_code": item_doc.name,
+<<<<<<< HEAD
 		"item_group": item_doc.item_group,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"item_image": item_doc.image,
 		"item_name": item_doc.item_name,
 		"serial_no": serial_no,
@@ -55,6 +66,7 @@ def search_by_term(search_term, warehouse, price_list):
 				}
 			)
 
+<<<<<<< HEAD
 	item_stock_qty, is_stock_item, is_negative_stock_allowed = get_stock_availability(item_code, warehouse)
 	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
 	item.update({"actual_qty": item_stock_qty})
@@ -73,11 +85,25 @@ def search_by_term(search_term, warehouse, price_list):
 	price = frappe.get_list(
 		doctype="Item Price",
 		filters=price_filters,
+=======
+	item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
+	item.update({"actual_qty": item_stock_qty})
+
+	price = frappe.get_list(
+		doctype="Item Price",
+		filters={
+			"price_list": price_list,
+			"item_code": item_code,
+			"batch_no": batch_no,
+		},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		fields=["uom", "currency", "price_list_rate", "batch_no"],
 	)
 
 	def __sort(p):
 		p_uom = p.get("uom")
+<<<<<<< HEAD
 		p_batch = p.get("batch_no")
 		batch_no = item.get("batch_no")
 
@@ -97,6 +123,17 @@ def search_by_term(search_term, warehouse, price_list):
 			return 5
 
 	# sort by fallback preference. always pick exact uom and batch number match if available
+=======
+
+		if p_uom == item.get("uom"):
+			return 0
+		elif p_uom == item.get("stock_uom"):
+			return 1
+		else:
+			return 2
+
+	# sort by fallback preference. always pick exact uom match if available
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	price = sorted(price, key=__sort)
 
 	if len(price) > 0:
@@ -111,6 +148,7 @@ def search_by_term(search_term, warehouse, price_list):
 	return {"items": [item]}
 
 
+<<<<<<< HEAD
 def filter_result_items(result, pos_profile):
 	if result and result.get("items"):
 		pos_profile_doc = frappe.get_cached_doc("POS Profile", pos_profile)
@@ -128,6 +166,8 @@ def get_parent_item_group():
 		return item_group[0]
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, pos_profile, search_term=""):
 	warehouse, hide_unavailable_items = frappe.db.get_value(
@@ -138,7 +178,10 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 	if search_term:
 		result = search_by_term(search_term, warehouse, price_list) or []
+<<<<<<< HEAD
 		filter_result_items(result, pos_profile)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if result:
 			return result
 
@@ -152,8 +195,15 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 	bin_join_selection, bin_join_condition = "", ""
 	if hide_unavailable_items:
+<<<<<<< HEAD
 		bin_join_selection = "LEFT JOIN `tabBin` bin ON bin.item_code = item.name"
 		bin_join_condition = "AND (item.is_stock_item = 0 OR (item.is_stock_item = 1 AND bin.warehouse = %(warehouse)s AND bin.actual_qty > 0))"
+=======
+		bin_join_selection = ", `tabBin` bin"
+		bin_join_condition = (
+			"AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	items_data = frappe.db.sql(
 		"""
@@ -163,8 +213,12 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			item.description,
 			item.stock_uom,
 			item.image AS item_image,
+<<<<<<< HEAD
 			item.is_stock_item,
 			item.sales_uom
+=======
+			item.is_stock_item
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		FROM
 			`tabItem` item {bin_join_selection}
 		WHERE
@@ -195,6 +249,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	if not items_data:
 		return result
 
+<<<<<<< HEAD
 	current_date = frappe.utils.today()
 
 	for item in items_data:
@@ -203,10 +258,22 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		item_prices = frappe.get_all(
 			"Item Price",
 			fields=["price_list_rate", "currency", "uom", "batch_no", "valid_from", "valid_upto"],
+=======
+	for item in items_data:
+		uoms = frappe.get_doc("Item", item.item_code).get("uoms", [])
+
+		item.actual_qty, _ = get_stock_availability(item.item_code, warehouse)
+		item.uom = item.stock_uom
+
+		item_price = frappe.get_all(
+			"Item Price",
+			fields=["price_list_rate", "currency", "uom", "batch_no"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters={
 				"price_list": price_list,
 				"item_code": item.item_code,
 				"selling": True,
+<<<<<<< HEAD
 				"valid_from": ["<=", current_date],
 				"valid_upto": ["in", [None, "", current_date]],
 			},
@@ -245,6 +312,29 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			}
 		)
 
+=======
+			},
+		)
+
+		if not item_price:
+			result.append(item)
+
+		for price in item_price:
+			uom = next(filter(lambda x: x.uom == price.uom, uoms), {})
+
+			if price.uom != item.stock_uom and uom and uom.conversion_factor:
+				item.actual_qty = item.actual_qty // uom.conversion_factor
+
+			result.append(
+				{
+					**item,
+					"price_list_rate": price.get("price_list_rate"),
+					"currency": price.get("currency"),
+					"uom": price.uom or item.uom,
+					"batch_no": price.batch_no,
+				}
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return {"items": result}
 
 
@@ -268,8 +358,11 @@ def add_search_fields_condition(search_term):
 	search_fields = frappe.get_all("POS Search Fields", fields=["fieldname"])
 	if search_fields:
 		for field in search_fields:
+<<<<<<< HEAD
 			if not field.get("fieldname"):
 				continue
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			condition += " or item.`{}` like {}".format(
 				field["fieldname"], frappe.db.escape("%" + search_term + "%")
 			)
@@ -340,6 +433,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
 
 @frappe.whitelist()
 def get_past_order_list(search_term, status, limit=20):
+<<<<<<< HEAD
 	fields = ["name", "grand_total", "currency", "customer", "customer_name", "posting_time", "posting_date"]
 	invoice_list = []
 
@@ -358,10 +452,26 @@ def get_past_order_list(search_term, status, limit=20):
 		pos_invoices_by_name = frappe.db.get_list(
 			"POS Invoice",
 			filters=get_invoice_filters("POS Invoice", status, name=search_term),
+=======
+	fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
+	invoice_list = []
+
+	if search_term and status:
+		invoices_by_customer = frappe.db.get_all(
+			"POS Invoice",
+			filters={"customer": ["like", f"%{search_term}%"], "status": status},
+			fields=fields,
+			page_length=limit,
+		)
+		invoices_by_name = frappe.db.get_all(
+			"POS Invoice",
+			filters={"name": ["like", f"%{search_term}%"], "status": status},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fields=fields,
 			page_length=limit,
 		)
 
+<<<<<<< HEAD
 		pos_invoice_list = add_doctype_to_results(
 			"POS Invoice", pos_invoices_by_customer + pos_invoices_by_name
 		)
@@ -405,6 +515,13 @@ def get_past_order_list(search_term, status, limit=20):
 		sales_invoice_list = add_doctype_to_results("Sales Invoice", sales_invoice_list)
 
 	invoice_list = order_results_by_posting_date([*pos_invoice_list, *sales_invoice_list])
+=======
+		invoice_list = invoices_by_customer + invoices_by_name
+	elif status:
+		invoice_list = frappe.db.get_all(
+			"POS Invoice", filters={"status": status}, fields=fields, page_length=limit
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return invoice_list
 
@@ -461,6 +578,7 @@ def get_pos_profile_data(pos_profile):
 
 	pos_profile.customer_groups = _customer_groups_with_children
 	return pos_profile
+<<<<<<< HEAD
 
 
 def add_doctype_to_results(doctype, results):
@@ -535,3 +653,5 @@ def get_customer_recent_transactions(customer):
 
 	invoices = order_results_by_posting_date(sales_invoices + pos_invoices)
 	return invoices
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

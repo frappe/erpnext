@@ -12,6 +12,7 @@
   "column_break_4",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
+<<<<<<< HEAD
   "section_break_xmlt",
   "po_required",
   "blanket_order_allowance",
@@ -32,6 +33,21 @@
   "disable_last_purchase_rate",
   "show_pay_button",
   "allow_zero_qty_in_purchase_order",
+=======
+  "transaction_settings_section",
+  "po_required",
+  "pr_required",
+  "blanket_order_allowance",
+  "project_update_frequency",
+  "column_break_12",
+  "maintain_same_rate",
+  "set_landed_cost_based_on_purchase_invoice_rate",
+  "allow_multiple_items",
+  "bill_for_rejected_quantity_in_purchase_invoice",
+  "disable_last_purchase_rate",
+  "show_pay_button",
+  "use_transaction_date_exchange_rate",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -39,9 +55,13 @@
   "section_break_xcug",
   "auto_create_subcontracting_order",
   "column_break_izrr",
+<<<<<<< HEAD
   "auto_create_purchase_receipt",
   "request_for_quotation_tab",
   "fixed_email"
+=======
+  "auto_create_purchase_receipt"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -216,6 +236,7 @@
    "fieldtype": "Select",
    "label": "Update frequency of Project",
    "options": "Each Transaction\nManual"
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -273,12 +294,20 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-20 22:13:38.506889",
+=======
+ "modified": "2024-03-27 13:06:43.375495",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -324,9 +353,16 @@
    "role": "Purchase User"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

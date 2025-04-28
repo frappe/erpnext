@@ -9,7 +9,11 @@ from frappe import _
 def execute(filters=None):
 	validate_warehouse(filters)
 	columns = get_columns()
+<<<<<<< HEAD
 	data = get_data(filters.warehouse, filters.show_disabled_items)
+=======
+	data = get_data(filters.warehouse)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return columns, data
 
 
@@ -38,6 +42,7 @@ def get_columns():
 	return columns
 
 
+<<<<<<< HEAD
 def get_data(warehouse, show_disabled_items):
 	filters = {"has_serial_no": True}
 	if not show_disabled_items:
@@ -45,6 +50,14 @@ def get_data(warehouse, show_disabled_items):
 	serial_item_list = frappe.get_all(
 		"Item",
 		filters=filters,
+=======
+def get_data(warehouse):
+	serial_item_list = frappe.get_all(
+		"Item",
+		filters={
+			"has_serial_no": True,
+		},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		fields=["item_code", "item_name"],
 	)
 

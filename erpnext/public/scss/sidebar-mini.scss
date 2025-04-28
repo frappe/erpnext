@@ -1,0 +1,57 @@
+
+:root {
+    --sidebar-hover-color: var(--third-color);
+    --sidebar-active-color: var(--second-color);
+    --sidebar-border-color: var(--main-color);
+    --surface-modal: var(--widget-bg);
+    --divider-color: var(--second-color);
+}
+
+[data-theme="dark"] {
+    --sidebar-hover-color: rgba(43, 43, 43, 1);
+    --sidebar-active-color: rgba(66, 66, 66, 1);
+    --sidebar-border-color: #232323;
+    --surface-modal: rgb(0, 0, 0);
+    --divider-color: rgba(52, 52, 52, 1);
+}
+
+[data-theme="light"] {
+    --sidebar-hover-color: var(--third-color);
+    --sidebar-active-color: var(--second-color);
+    --sidebar-border-color: var(--main-color);
+    --surface-modal: var(--widget-bg);
+    --divider-color: var(--second-color);
+}
+
+/* Sidebar Styling */
+.body-sidebar {
+    background: var(--surface-modal) !important;
+    border-right: 2px solid var(--sidebar-border-color);
+}
+
+/*.body-sidebar {
+	background: var(--surface-modal) !important;
+}*/
+
+.sidebar-item {
+    color: #333;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    font-weight: 600;
+}
+
+.sidebar-item:hover {
+    background: var(--sidebar-hover-color);
+    color: white;
+}
+
+.sidebar-item.active {
+    background: var(--sidebar-active-color);
+    color: white;
+}
+
+.sidebar-divider {
+    border-top: 2px solid var(--divider-color);
+    margin: 12px 0;
+}

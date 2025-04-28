@@ -1,10 +1,17 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import datetime
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 LEAD_EMAIL = "test_appointment_lead@example.com"
 
@@ -26,10 +33,15 @@ def create_test_appointment():
 	return test_appointment
 
 
+<<<<<<< HEAD
 class TestAppointment(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
+=======
+class TestAppointment(unittest.TestCase):
+	def setUpClass():
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
 
 	def setUp(self):

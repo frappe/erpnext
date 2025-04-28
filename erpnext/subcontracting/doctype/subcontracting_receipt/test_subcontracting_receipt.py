@@ -5,7 +5,11 @@
 import copy
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
@@ -40,7 +44,11 @@ from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order im
 )
 
 
+<<<<<<< HEAD
 class TestSubcontractingReceipt(IntegrationTestCase):
+=======
+class TestSubcontractingReceipt(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
@@ -372,6 +380,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
+<<<<<<< HEAD
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
@@ -495,6 +504,9 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 	@IntegrationTestCase.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+=======
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
 		service_items = [
@@ -812,6 +824,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		for row in scr.supplied_items:
 			self.assertEqual(row.rate, 300.00)
 			self.assertTrue(row.serial_and_batch_bundle)
+<<<<<<< HEAD
 			serial_and_batch_bundle = frappe.db.get_value(
 				"Stock Ledger Entry",
 				{"voucher_no": scr.name, "voucher_detail_no": row.name},
@@ -819,6 +832,15 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 			)
 
 			self.assertTrue(serial_and_batch_bundle)
+=======
+			auto_created_serial_batch = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": scr.name, "voucher_detail_no": row.name},
+				"auto_created_serial_and_batch_bundle",
+			)
+
+			self.assertTrue(auto_created_serial_batch)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 900)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
@@ -1195,6 +1217,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		scr.cancel()
 		self.assertTrue(scr.docstatus == 2)
 
+<<<<<<< HEAD
 	def test_subcontract_return_from_rejected_warehouse(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
@@ -1329,17 +1352,26 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
+=======
+	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	def test_auto_create_purchase_receipt(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		fg_item = "Subcontracted Item SA1"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
 				"item_code": "Subcontracted Service Item 1",
+<<<<<<< HEAD
 				"qty": 10,
+=======
+				"qty": 5,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"rate": 100,
 				"fg_item": fg_item,
 				"fg_item_qty": 5,
 			},
 		]
+<<<<<<< HEAD
 
 		po = create_purchase_order(
 			rm_items=service_items,
@@ -1363,6 +1395,9 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		sco = get_subcontracting_order(po_name=po.name)
 
+=======
+		sco = get_subcontracting_order(service_items=service_items)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		rm_items = get_rm_items(sco.supplied_items)
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
 		make_stock_transfer_entry(
@@ -1370,6 +1405,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 			rm_items=rm_items,
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
+<<<<<<< HEAD
 
 		scr = make_subcontracting_receipt(sco.name)
 		scr.items[0].qty = 3
@@ -1462,6 +1498,13 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		self.assertEqual(pr_qty, 6)
 
 		self.assertEqual(pr_details[0]["total_taxes_and_charges"], 60)
+=======
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+
+		self.assertTrue(frappe.db.get_value("Purchase Receipt", {"subcontracting_receipt": scr.name}))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_use_serial_batch_fields_for_subcontracting_receipt(self):
 		fg_item = make_item(
@@ -1724,6 +1767,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
+<<<<<<< HEAD
 	def test_change_batch_for_raw_materials(self):
 		set_backflush_based_on("BOM")
 
@@ -1784,6 +1828,8 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)

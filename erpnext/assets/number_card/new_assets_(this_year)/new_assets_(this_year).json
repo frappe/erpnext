@@ -3,14 +3,22 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Asset",
+<<<<<<< HEAD
  "dynamic_filters_json": "[[\"Asset\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
  "filters_json": "[[\"Asset\",\"creation\",\"Timespan\",\"this year\"]]",
+=======
+ "filters_json": "[[\"Asset\",\"creation\",\"Timespan\",\"this year\",false]]",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "function": "Count",
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
  "label": "New Assets (This Year)",
+<<<<<<< HEAD
  "modified": "2024-12-05 12:00:00.000000",
+=======
+ "modified": "2020-07-23 13:45:20.418766",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "New Assets (This Year)",

@@ -2,11 +2,19 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 from erpnext.controllers.queries import item_query
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Item", "Customer", "Supplier"]
+=======
+from frappe.tests.utils import FrappeTestCase
+
+from erpnext.controllers.queries import item_query
+
+test_dependencies = ["Item", "Customer", "Supplier"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def create_party_specific_item(**args):
@@ -18,7 +26,11 @@ def create_party_specific_item(**args):
 	psi.insert()
 
 
+<<<<<<< HEAD
 class TestPartySpecificItem(IntegrationTestCase):
+=======
+class TestPartySpecificItem(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.customer = frappe.get_last_doc("Customer")
 		self.supplier = frappe.get_last_doc("Supplier")

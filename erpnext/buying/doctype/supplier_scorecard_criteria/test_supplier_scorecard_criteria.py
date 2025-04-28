@@ -3,10 +3,17 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestSupplierScorecardCriteria(IntegrationTestCase):
+=======
+from frappe.tests.utils import FrappeTestCase
+
+
+class TestSupplierScorecardCriteria(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_variables_exist(self):
 		delete_test_scorecards()
 		for d in test_good_criteria:

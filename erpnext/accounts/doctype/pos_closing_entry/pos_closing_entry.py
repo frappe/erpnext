@@ -4,10 +4,14 @@
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.query_builder import DocType
 from frappe.query_builder import functions as fn
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
+=======
+from frappe.utils import flt, get_datetime
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
@@ -31,9 +35,14 @@ class POSClosingEntry(StatusUpdater):
 		from erpnext.accounts.doctype.pos_closing_entry_taxes.pos_closing_entry_taxes import (
 			POSClosingEntryTaxes,
 		)
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import POSInvoiceReference
 		from erpnext.accounts.doctype.sales_invoice_reference.sales_invoice_reference import (
 			SalesInvoiceReference,
+=======
+		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
+			POSInvoiceReference,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		amended_from: DF.Link | None
@@ -44,6 +53,7 @@ class POSClosingEntry(StatusUpdater):
 		payment_reconciliation: DF.Table[POSClosingEntryDetail]
 		period_end_date: DF.Datetime
 		period_start_date: DF.Datetime
+<<<<<<< HEAD
 		pos_invoices: DF.Table[POSInvoiceReference]
 		pos_opening_entry: DF.Link
 		pos_profile: DF.Link
@@ -54,10 +64,21 @@ class POSClosingEntry(StatusUpdater):
 		taxes: DF.Table[POSClosingEntryTaxes]
 		total_quantity: DF.Float
 		total_taxes_and_charges: DF.Currency
+=======
+		pos_opening_entry: DF.Link
+		pos_profile: DF.Link
+		pos_transactions: DF.Table[POSInvoiceReference]
+		posting_date: DF.Date
+		posting_time: DF.Time
+		status: DF.Literal["Draft", "Submitted", "Queued", "Failed", "Cancelled"]
+		taxes: DF.Table[POSClosingEntryTaxes]
+		total_quantity: DF.Float
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		user: DF.Link
 	# end: auto-generated types
 
 	def validate(self):
+<<<<<<< HEAD
 		self.set_posting_date_and_time()
 		self.fetch_invoice_type()
 		self.validate_pos_opening_entry()
@@ -91,6 +112,20 @@ class POSClosingEntry(StatusUpdater):
 	def validate_duplicate_pos_invoices(self):
 		pos_occurences = {}
 		for idx, inv in enumerate(self.pos_invoices, 1):
+=======
+		self.posting_date = self.posting_date or frappe.utils.nowdate()
+		self.posting_time = self.posting_time or frappe.utils.nowtime()
+
+		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
+			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
+
+		self.validate_duplicate_pos_invoices()
+		self.validate_pos_invoices()
+
+	def validate_duplicate_pos_invoices(self):
+		pos_occurences = {}
+		for idx, inv in enumerate(self.pos_transactions, 1):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			pos_occurences.setdefault(inv.pos_invoice, []).append(idx)
 
 		error_list = []
@@ -105,7 +140,11 @@ class POSClosingEntry(StatusUpdater):
 
 	def validate_pos_invoices(self):
 		invalid_rows = []
+<<<<<<< HEAD
 		for d in self.pos_invoices:
+=======
+		for d in self.pos_transactions:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			invalid_row = {"idx": d.idx}
 			pos_invoice = frappe.db.get_values(
 				"POS Invoice",
@@ -141,6 +180,7 @@ class POSClosingEntry(StatusUpdater):
 
 		frappe.throw(error_list, title=_("Invalid POS Invoices"), as_list=True)
 
+<<<<<<< HEAD
 	def validate_duplicate_sales_invoices(self):
 		sales_invoice_occurrences = {}
 		for idx, inv in enumerate(self.sales_invoices, 1):
@@ -218,12 +258,27 @@ class POSClosingEntry(StatusUpdater):
 
 	def before_cancel(self):
 		self.check_pce_is_cancellable()
+=======
+	@frappe.whitelist()
+	def get_payment_reconciliation_details(self):
+		currency = frappe.get_cached_value("Company", self.company, "default_currency")
+		return frappe.render_template(
+			"erpnext/accounts/doctype/pos_closing_entry/closing_voucher_details.html",
+			{"data": self, "currency": currency},
+		)
+
+	def on_submit(self):
+		consolidate_pos_invoices(closing_entry=self)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def on_cancel(self):
 		unconsolidate_pos_invoices(closing_entry=self)
 
+<<<<<<< HEAD
 		self.update_sales_invoices_closing_entry(cancel=True)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@frappe.whitelist()
 	def retry(self):
 		consolidate_pos_invoices(closing_entry=self)
@@ -234,6 +289,7 @@ class POSClosingEntry(StatusUpdater):
 		opening_entry.set_status()
 		opening_entry.save()
 
+<<<<<<< HEAD
 	def update_sales_invoices_closing_entry(self, cancel=False):
 		for d in self.sales_invoices:
 			frappe.db.set_value(
@@ -249,6 +305,8 @@ class POSClosingEntry(StatusUpdater):
 				).format(frappe.bold(self.pos_profile)),
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -258,6 +316,7 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_invoices(start, end, pos_profile, user):
 	invoice_doctype = frappe.db.get_single_value("POS Settings", "invoice_type")
 
@@ -331,6 +390,25 @@ def get_taxes(invoices):
 		)
 	)
 	data = query.run(as_dict=1)
+=======
+def get_pos_invoices(start, end, pos_profile, user):
+	data = frappe.db.sql(
+		"""
+	select
+		name, timestamp(posting_date, posting_time) as "timestamp"
+	from
+		`tabPOS Invoice`
+	where
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
+	""",
+		(user, pos_profile),
+		as_dict=1,
+	)
+
+	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
+	# need to get taxes and payments so can't avoid get_doc
+	data = [frappe.get_doc("POS Invoice", d.name).as_dict() for d in data]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return data
 
@@ -346,15 +424,21 @@ def make_closing_entry_from_opening(opening_entry):
 	closing_entry.grand_total = 0
 	closing_entry.net_total = 0
 	closing_entry.total_quantity = 0
+<<<<<<< HEAD
 	closing_entry.total_taxes_and_charges = 0
 
 	data = get_invoices(
+=======
+
+	invoices = get_pos_invoices(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		closing_entry.period_start_date,
 		closing_entry.period_end_date,
 		closing_entry.pos_profile,
 		closing_entry.user,
 	)
 
+<<<<<<< HEAD
 	pos_invoices = []
 	sales_invoices = []
 	taxes = [
@@ -395,10 +479,67 @@ def make_closing_entry_from_opening(opening_entry):
 
 	closing_entry.set("pos_invoices", pos_invoices)
 	closing_entry.set("sales_invoices", sales_invoices)
+=======
+	pos_transactions = []
+	taxes = []
+	payments = []
+	for detail in opening_entry.balance_details:
+		payments.append(
+			frappe._dict(
+				{
+					"mode_of_payment": detail.mode_of_payment,
+					"opening_amount": detail.opening_amount,
+					"expected_amount": detail.opening_amount,
+				}
+			)
+		)
+
+	for d in invoices:
+		pos_transactions.append(
+			frappe._dict(
+				{
+					"pos_invoice": d.name,
+					"posting_date": d.posting_date,
+					"grand_total": d.grand_total,
+					"customer": d.customer,
+				}
+			)
+		)
+		closing_entry.grand_total += flt(d.grand_total)
+		closing_entry.net_total += flt(d.net_total)
+		closing_entry.total_quantity += flt(d.total_qty)
+
+		for t in d.taxes:
+			existing_tax = [tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate]
+			if existing_tax:
+				existing_tax[0].amount += flt(t.tax_amount)
+			else:
+				taxes.append(
+					frappe._dict({"account_head": t.account_head, "rate": t.rate, "amount": t.tax_amount})
+				)
+
+		for p in d.payments:
+			existing_pay = [pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
+			if existing_pay:
+				existing_pay[0].expected_amount += flt(p.amount)
+			else:
+				payments.append(
+					frappe._dict(
+						{
+							"mode_of_payment": p.mode_of_payment,
+							"opening_amount": 0,
+							"expected_amount": p.amount,
+						}
+					)
+				)
+
+	closing_entry.set("pos_transactions", pos_transactions)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	closing_entry.set("payment_reconciliation", payments)
 	closing_entry.set("taxes", taxes)
 
 	return closing_entry
+<<<<<<< HEAD
 
 
 def build_invoice_query(invoice_doctype, user, pos_profile, start, end):
@@ -441,3 +582,5 @@ def build_invoice_query(invoice_doctype, user, pos_profile, start, end):
 		)
 
 	return query
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

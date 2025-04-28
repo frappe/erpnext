@@ -4,6 +4,7 @@
 frappe.query_reports["Warehouse wise Item Balance Age and Value"] = {
 	filters: [
 		{
+<<<<<<< HEAD
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
@@ -13,6 +14,8 @@ frappe.query_reports["Warehouse wise Item Balance Age and Value"] = {
 			default: frappe.defaults.get_user_default("Company"),
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
@@ -48,12 +51,15 @@ frappe.query_reports["Warehouse wise Item Balance Age and Value"] = {
 			fieldtype: "Link",
 			width: "80",
 			options: "Warehouse",
+<<<<<<< HEAD
 			get_query: function () {
 				const company = frappe.query_report.get_filter_value("company");
 				return {
 					filters: { company: company },
 				};
 			},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "filter_total_zero_qty",

@@ -1,5 +1,9 @@
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -7,7 +11,11 @@ from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register i
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
+<<<<<<< HEAD
 class TestItemWiseSalesRegister(AccountsTestMixin, IntegrationTestCase):
+=======
+class TestItemWiseSalesRegister(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_customer()

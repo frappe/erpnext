@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
+<<<<<<< HEAD
   "naming_series",
   "target_asset",
   "target_asset_name",
@@ -25,6 +26,32 @@
   "target_is_fixed_asset",
   "target_has_batch_no",
   "target_has_serial_no",
+=======
+  "company",
+  "naming_series",
+  "entry_type",
+  "target_item_name",
+  "target_is_fixed_asset",
+  "target_has_batch_no",
+  "target_has_serial_no",
+  "column_break_9",
+  "capitalization_method",
+  "target_item_code",
+  "target_asset_location",
+  "target_asset",
+  "target_asset_name",
+  "target_warehouse",
+  "target_qty",
+  "target_stock_uom",
+  "target_batch_no",
+  "target_serial_no",
+  "column_break_5",
+  "finance_book",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
+  "amended_from",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_16",
   "stock_items",
   "stock_items_total",
@@ -41,7 +68,10 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+<<<<<<< HEAD
   "project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "target_fixed_asset_account"
  ],
  "fields": [
@@ -52,12 +82,28 @@
    "label": "Title"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:(doc.target_item_code && !doc.__islocal)",
+=======
+   "depends_on": "eval:(doc.target_item_code && !doc.__islocal && doc.capitalization_method !== 'Choose a WIP composite asset') || ((doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset') || doc.entry_type=='Decapitalization')",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "target_item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Target Item Code",
+<<<<<<< HEAD
    "options": "Item",
+=======
+   "mandatory_depends_on": "eval:(doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset') || doc.entry_type=='Decapitalization'",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.target_item_code && doc.target_item_name != doc.target_item_code",
+   "fetch_from": "target_item_code.item_name",
+   "fieldname": "target_item_name",
+   "fieldtype": "Data",
+   "label": "Target Item Name",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -70,14 +116,32 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:(doc.target_asset && !doc.__islocal) || (doc.entry_type=='Capitalization' && doc.capitalization_method=='Choose a WIP composite asset')",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Target Asset",
+<<<<<<< HEAD
    "no_copy": 1,
    "options": "Asset"
   },
   {
+=======
+   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization' && doc.capitalization_method=='Choose a WIP composite asset'",
+   "no_copy": 1,
+   "options": "Asset",
+   "read_only_depends_on": "eval:(doc.entry_type=='Decapitalization') || (doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset')"
+  },
+  {
+   "depends_on": "eval:(doc.target_asset_name && !doc.__islocal) || (doc.target_asset && doc.entry_type=='Capitalization' && doc.capitalization_method=='Choose a WIP composite asset')",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fetch_from": "target_asset.asset_name",
    "fieldname": "target_asset_name",
    "fieldtype": "Data",
@@ -140,7 +204,11 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:doc.docstatus == 0 || (doc.stock_items && doc.stock_items.length)",
+=======
+   "depends_on": "eval:doc.entry_type=='Capitalization' && (doc.docstatus == 0 || (doc.stock_items && doc.stock_items.length))",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
    "label": "Consumed Stock Items"
@@ -152,6 +220,17 @@
    "options": "Asset Capitalization Stock Item"
   },
   {
+<<<<<<< HEAD
+=======
+   "depends_on": "eval:doc.entry_type=='Decapitalization'",
+   "fieldname": "target_warehouse",
+   "fieldtype": "Link",
+   "label": "Target Warehouse",
+   "mandatory_depends_on": "eval:doc.entry_type=='Decapitalization'",
+   "options": "Warehouse"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "target_has_batch_no",
    "fieldname": "target_batch_no",
    "fieldtype": "Link",
@@ -160,10 +239,26 @@
   },
   {
    "default": "1",
+<<<<<<< HEAD
    "fieldname": "target_qty",
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Target Qty",
+=======
+   "depends_on": "eval:doc.entry_type=='Decapitalization'",
+   "fieldname": "target_qty",
+   "fieldtype": "Float",
+   "label": "Target Qty",
+   "read_only_depends_on": "eval:doc.entry_type=='Capitalization'"
+  },
+  {
+   "depends_on": "eval:doc.entry_type=='Decapitalization'",
+   "fetch_from": "target_item_code.stock_uom",
+   "fieldname": "target_stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -203,6 +298,19 @@
    "options": "Asset Capitalization Asset Item"
   },
   {
+<<<<<<< HEAD
+=======
+   "default": "Capitalization",
+   "fieldname": "entry_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Entry Type",
+   "options": "Capitalization\nDecapitalization",
+   "reqd": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "stock_items_total",
    "fieldtype": "Currency",
    "label": "Consumed Stock Total Value",
@@ -223,7 +331,11 @@
    "options": "Finance Book"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:doc.docstatus == 0 || (doc.service_items && doc.service_items.length)",
+=======
+   "depends_on": "eval:doc.entry_type=='Capitalization' && (doc.docstatus == 0 || (doc.service_items && doc.service_items.length))",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "service_expenses_section",
    "fieldtype": "Section Break",
    "label": "Service Expenses"
@@ -277,12 +389,15 @@
    "options": "Cost Center"
   },
   {
+<<<<<<< HEAD
     "fieldname": "project",
     "fieldtype": "Link",
     "label": "Project",
     "options": "Project"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
@@ -292,12 +407,35 @@
    "label": "Target Fixed Asset Account",
    "options": "Account",
    "read_only": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "depends_on": "eval:doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset'",
+   "fieldname": "target_asset_location",
+   "fieldtype": "Link",
+   "label": "Target Asset Location",
+   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization' && doc.capitalization_method=='Create a new composite asset'",
+   "options": "Location"
+  },
+  {
+   "depends_on": "eval:doc.entry_type=='Capitalization'",
+   "fieldname": "capitalization_method",
+   "fieldtype": "Select",
+   "label": "Capitalization Method",
+   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization'",
+   "options": "\nCreate a new composite asset\nChoose a WIP composite asset"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-05-20 15:15:12.110035",
+=======
+ "modified": "2024-03-27 13:06:33.080441",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
@@ -335,11 +473,18 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

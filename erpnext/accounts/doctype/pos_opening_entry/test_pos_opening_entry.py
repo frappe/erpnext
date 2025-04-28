@@ -1,5 +1,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -110,6 +111,19 @@ class TestPOSOpeningEntry(IntegrationTestCase):
 
 
 def create_opening_entry(pos_profile, user, get_obj=False):
+=======
+
+import unittest
+
+import frappe
+
+
+class TestPOSOpeningEntry(unittest.TestCase):
+	pass
+
+
+def create_opening_entry(pos_profile, user):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	entry = frappe.new_doc("POS Opening Entry")
 	entry.pos_profile = pos_profile.name
 	entry.user = user
@@ -123,7 +137,10 @@ def create_opening_entry(pos_profile, user, get_obj=False):
 	entry.set("balance_details", balance_details)
 	entry.submit()
 
+<<<<<<< HEAD
 	if get_obj:
 		return entry
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return entry.as_dict()

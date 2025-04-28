@@ -2,12 +2,19 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
+<<<<<<< HEAD
 from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
 from frappe.query_builder import Case
 from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now, nowtime, today
 from pypika import Order
 from pypika.terms import ExistsCriterion
+=======
+from frappe.model.naming import make_autoname
+from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, now, nowtime, today
+from pypika import Order
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -101,7 +108,12 @@ class SerialBatchBundle:
 			{
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
+<<<<<<< HEAD
 				"posting_datetime": self.sle.posting_datetime,
+=======
+				"posting_date": self.sle.posting_date,
+				"posting_time": self.sle.posting_time,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"voucher_type": self.sle.voucher_type,
 				"voucher_no": self.sle.voucher_no,
 				"voucher_detail_no": self.sle.voucher_detail_no,
@@ -111,9 +123,13 @@ class SerialBatchBundle:
 				"type_of_transaction": "Inward" if self.sle.actual_qty > 0 else "Outward",
 				"company": self.company,
 				"is_rejected": self.is_rejected_entry(),
+<<<<<<< HEAD
 				"is_packed": self.is_packed_entry(),
 				"make_bundle_from_sle": 1,
 				"sle": self.sle,
+=======
+				"make_bundle_from_sle": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		).make_serial_and_batch_bundle()
 
@@ -127,7 +143,11 @@ class SerialBatchBundle:
 			"Outward": self.sle.actual_qty < 0,
 		}.get(sn_doc.type_of_transaction)
 
+<<<<<<< HEAD
 		if not condition and self.sle.actual_qty:
+=======
+		if not condition:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			correct_type = "Inward"
 			if sn_doc.type_of_transaction == "Inward":
 				correct_type = "Outward"
@@ -136,7 +156,11 @@ class SerialBatchBundle:
 			frappe.throw(_(msg), title=_("Incorrect Type of Transaction"))
 
 		precision = sn_doc.precision("total_qty")
+<<<<<<< HEAD
 		if self.sle.actual_qty and flt(sn_doc.total_qty, precision) != flt(self.sle.actual_qty, precision):
+=======
+		if flt(sn_doc.total_qty, precision) != flt(self.sle.actual_qty, precision):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			msg = f"Total qty {flt(sn_doc.total_qty, precision)} of Serial and Batch Bundle {link} is not equal to Actual Qty {flt(self.sle.actual_qty, precision)} in the {self.sle.voucher_type} {self.sle.voucher_no}"
 			frappe.throw(_(msg))
 
@@ -152,12 +176,20 @@ class SerialBatchBundle:
 			if (
 				self.item_details.has_batch_no
 				and not self.item_details.batch_number_series
+<<<<<<< HEAD
 				and not frappe.get_single_value("Stock Settings", "naming_series_prefix")
+=======
+				and not frappe.db.get_single_value("Stock Settings", "naming_series_prefix")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			):
 				msg += f". If you want auto pick batch bundle, then kindly set Batch Number Series in Item {self.item_code}"
 
 		elif self.sle.actual_qty < 0:
+<<<<<<< HEAD
 			if not frappe.get_single_value(
+=======
+			if not frappe.db.get_single_value(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
 			):
 				msg += ". If you want auto pick serial/batch bundle, then kindly enable 'Auto Create Serial and Batch Bundle' in Stock Settings."
@@ -186,6 +218,7 @@ class SerialBatchBundle:
 			}
 
 			if self.sle.actual_qty < 0 and self.is_material_transfer():
+<<<<<<< HEAD
 				basic_rate = flt(sn_doc.avg_rate)
 				ste_detail = frappe.db.get_value(
 					"Stock Entry Detail",
@@ -205,6 +238,11 @@ class SerialBatchBundle:
 				values_to_update["valuation_rate"] = basic_rate + additional_cost
 
 			if not frappe.get_single_value(
+=======
+				values_to_update["valuation_rate"] = flt(sn_doc.avg_rate)
+
+			if not frappe.db.get_single_value(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle"
 			):
 				if sn_doc.has_serial_no:
@@ -212,6 +250,7 @@ class SerialBatchBundle:
 				elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
 					values_to_update["batch_no"] = sn_doc.entries[0].batch_no
 
+<<<<<<< HEAD
 			doctype = self.child_doctype
 			name = self.sle.voucher_detail_no
 			if sn_doc.is_packed:
@@ -227,6 +266,9 @@ class SerialBatchBundle:
 				)
 
 			frappe.db.set_value(doctype, name, values_to_update)
+=======
+			frappe.db.set_value(self.child_doctype, self.sle.voucher_detail_no, values_to_update)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	@property
 	def child_doctype(self):
@@ -249,6 +291,7 @@ class SerialBatchBundle:
 	def is_rejected_entry(self):
 		return is_rejected(self.sle.voucher_type, self.sle.voucher_detail_no, self.sle.warehouse)
 
+<<<<<<< HEAD
 	def is_packed_entry(self):
 		if self.sle.voucher_type in ["Delivery Note", "Sales Invoice"]:
 			item_code = frappe.db.get_value(
@@ -262,15 +305,23 @@ class SerialBatchBundle:
 
 		return False
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def process_batch_no(self):
 		if (
 			not self.sle.is_cancelled
 			and not self.sle.serial_and_batch_bundle
 			and self.item_details.has_batch_no == 1
 			and (
+<<<<<<< HEAD
 				(self.item_details.create_new_batch and self.sle.actual_qty > 0)
 				or (
 					frappe.get_single_value(
+=======
+				self.item_details.create_new_batch
+				or (
+					frappe.db.get_single_value(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
 					)
 					and self.sle.actual_qty < 0
@@ -302,7 +353,11 @@ class SerialBatchBundle:
 			frappe.throw(_(msg))
 
 	def delink_serial_and_batch_bundle(self):
+<<<<<<< HEAD
 		if self.is_pos_or_asset_repair_transaction():
+=======
+		if self.is_pos_transaction():
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return
 
 		update_values = {
@@ -313,10 +368,13 @@ class SerialBatchBundle:
 			update_values["rejected_serial_and_batch_bundle"] = ""
 
 		frappe.db.set_value(self.child_doctype, self.sle.voucher_detail_no, update_values)
+<<<<<<< HEAD
 		if self.child_doctype == "Delivery Note":
 			frappe.db.set_value(
 				"Packed Item", {"parent_detail_docname": self.sle.voucher_detail_no}, update_values
 			)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		frappe.db.set_value(
 			"Serial and Batch Bundle",
@@ -338,6 +396,7 @@ class SerialBatchBundle:
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "docstatus"
 			)
 
+<<<<<<< HEAD
 			if docstatus == 0:
 				self.submit_serial_and_batch_bundle()
 
@@ -353,6 +412,11 @@ class SerialBatchBundle:
 					)
 				)
 
+=======
+			if docstatus != 1:
+				self.submit_serial_and_batch_bundle()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.item_details.has_serial_no == 1:
 			self.set_warehouse_and_status_in_serial_nos()
 
@@ -363,10 +427,17 @@ class SerialBatchBundle:
 		):
 			self.set_batch_no_in_serial_nos()
 
+<<<<<<< HEAD
+=======
+		if self.item_details.has_batch_no == 1:
+			self.update_batch_qty()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.sle.is_cancelled and self.sle.serial_and_batch_bundle:
 			self.cancel_serial_and_batch_bundle()
 
 	def cancel_serial_and_batch_bundle(self):
+<<<<<<< HEAD
 		if self.is_pos_or_asset_repair_transaction():
 			return
 
@@ -390,6 +461,21 @@ class SerialBatchBundle:
 			self.sle.voucher_type == "Stock Entry"
 			and self.sle.serial_and_batch_bundle
 			and voucher_type == "Asset Repair"
+=======
+		if self.is_pos_transaction():
+			return
+
+		frappe.get_cached_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle).cancel()
+
+	def is_pos_transaction(self):
+		if (
+			self.sle.voucher_type == "Sales Invoice"
+			and self.sle.serial_and_batch_bundle
+			and frappe.get_cached_value(
+				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "voucher_type"
+			)
+			== "POS Invoice"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		):
 			return True
 
@@ -410,6 +496,7 @@ class SerialBatchBundle:
 		if not self.sle.serial_and_batch_bundle and self.sle.serial_no:
 			serial_nos = get_parsed_serial_nos(self.sle.serial_no)
 
+<<<<<<< HEAD
 		if not serial_nos:
 			return
 
@@ -453,6 +540,16 @@ class SerialBatchBundle:
 		customer = None
 		if sle.voucher_type in ["Sales Invoice", "Delivery Note"] and sle.actual_qty < 0:
 			customer = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "customer")
+=======
+		warehouse = self.warehouse if self.sle.actual_qty > 0 else None
+
+		if not serial_nos:
+			return
+
+		status = "Inactive"
+		if self.sle.actual_qty < 0:
+			status = "Delivered"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		sn_table = frappe.qb.DocType("Serial No")
 
@@ -464,18 +561,31 @@ class SerialBatchBundle:
 				"Active"
 				if warehouse
 				else status
+<<<<<<< HEAD
 				if (sn_table.reference_name != sle.voucher_no or sle.is_cancelled != 1)
 				else "Inactive",
 			)
 			.set(sn_table.company, sle.company)
 			.set(sn_table.customer, customer)
+=======
+				if (sn_table.purchase_document_no != self.sle.voucher_no and self.sle.is_cancelled != 1)
+				else "Inactive",
+			)
+			.set(sn_table.company, self.sle.company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			.where(sn_table.name.isin(serial_nos))
 		)
 
 		if status == "Delivered":
+<<<<<<< HEAD
 			warranty_period = frappe.get_cached_value("Item", sle.item_code, "warranty_period")
 			if warranty_period:
 				warranty_expiry_date = add_days(getdate(sle.posting_datetime), cint(warranty_period))
+=======
+			warranty_period = frappe.get_cached_value("Item", self.sle.item_code, "warranty_period")
+			if warranty_period:
+				warranty_expiry_date = add_days(self.sle.posting_date, cint(warranty_period))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				query = query.set(sn_table.warranty_expiry_date, warranty_expiry_date)
 				query = query.set(sn_table.warranty_period, warranty_period)
 		else:
@@ -484,6 +594,7 @@ class SerialBatchBundle:
 
 		query.run()
 
+<<<<<<< HEAD
 	def update_serial_no_status_for_stock_reco(self, serial_nos):
 		for serial_no in serial_nos:
 			sle_doctype = frappe.qb.DocType("Stock Ledger Entry")
@@ -517,6 +628,8 @@ class SerialBatchBundle:
 			if sle:
 				self.update_serial_no_status_warehouse(sle[0], serial_no)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def set_batch_no_in_serial_nos(self):
 		entries = frappe.get_all(
 			"Serial and Batch Entry",
@@ -536,6 +649,23 @@ class SerialBatchBundle:
 				.where(sn_table.name.isin(serial_nos))
 			).run()
 
+<<<<<<< HEAD
+=======
+	def update_batch_qty(self):
+		from erpnext.stock.doctype.batch.batch import get_available_batches
+
+		batches = get_batch_nos(self.sle.serial_and_batch_bundle)
+		if not self.sle.serial_and_batch_bundle and self.sle.batch_no:
+			batches = frappe._dict({self.sle.batch_no: self.sle.actual_qty})
+
+		batches_qty = get_available_batches(
+			frappe._dict({"item_code": self.item_code, "batch_no": list(batches.keys())})
+		)
+
+		for batch_no in batches:
+			frappe.db.set_value("Batch", batch_no, "batch_qty", batches_qty.get(batch_no, 0))
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
 	if not serial_and_batch_bundle:
@@ -600,7 +730,11 @@ def get_serial_or_batch_nos(bundle):
 		html = "<table class= 'table table-borderless' style='margin-top: 0px;margin-bottom: 0px;'>"
 		for d in data:
 			if d.serial_no:
+<<<<<<< HEAD
 				html += f"<tr><td>{d.batch_no}</td><td>{d.serial_no}</td><td>{abs(d.qty)}</td></tr>"
+=======
+				html += f"<tr><td>{d.batch_no}</th><th>{d.serial_no}</th	><th>{abs(d.qty)}</th></tr>"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			else:
 				html += f"<tr><td>{d.batch_no}</td><td>{abs(d.qty)}</td></tr>"
 
@@ -626,13 +760,20 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		else:
 			self.serial_no_incoming_rate = defaultdict(float)
 			self.stock_value_change = 0.0
+<<<<<<< HEAD
 			self.old_serial_nos = []
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			serial_nos = self.get_serial_nos()
 			for serial_no in serial_nos:
 				incoming_rate = self.get_incoming_rate_from_bundle(serial_no)
+<<<<<<< HEAD
 				if incoming_rate is None:
 					self.old_serial_nos.append(serial_no)
+=======
+				if not incoming_rate:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					continue
 
 				self.stock_value_change += incoming_rate
@@ -658,7 +799,11 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 				& (bundle.item_code == self.sle.item_code)
 				& (bundle_child.warehouse == self.sle.warehouse)
 			)
+<<<<<<< HEAD
 			.orderby(bundle.posting_datetime, order=Order.desc)
+=======
+			.orderby(Timestamp(bundle.posting_date, bundle.posting_time), order=Order.desc)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			.limit(1)
 		)
 
@@ -666,13 +811,27 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		if self.sle.voucher_no:
 			query = query.where(bundle.voucher_no != self.sle.voucher_no)
 
+<<<<<<< HEAD
 		if self.sle.posting_datetime:
 			timestamp_condition = bundle.posting_datetime <= self.sle.posting_datetime
+=======
+		if self.sle.posting_date:
+			if self.sle.posting_time is None:
+				self.sle.posting_time = nowtime()
+
+			timestamp_condition = CombineDatetime(
+				bundle.posting_date, bundle.posting_time
+			) <= CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			query = query.where(timestamp_condition)
 
 		incoming_rate = query.run()
+<<<<<<< HEAD
 		return flt(incoming_rate[0][0]) if incoming_rate else None
+=======
+		return flt(incoming_rate[0][0]) if incoming_rate else 0.0
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def get_serial_nos(self):
 		if self.sle.get("serial_nos"):
@@ -729,8 +888,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		for key, value in kwargs.items():
 			setattr(self, key, value)
 
+<<<<<<< HEAD
 		self.total_qty = defaultdict(float)
 		self.stock_queue = []
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.batch_nos = self.get_batch_nos()
 		self.prepare_batches()
 		self.calculate_avg_rate()
@@ -742,7 +904,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "total_amount"
 			)
 		else:
+<<<<<<< HEAD
 			entries = self.get_batch_stock_before_date()
+=======
+			entries = self.get_batch_no_ledgers()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.stock_value_change = 0.0
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
@@ -751,16 +917,20 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			for ledger in entries:
 				self.stock_value_differece[ledger.batch_no] += flt(ledger.incoming_rate)
 				self.available_qty[ledger.batch_no] += flt(ledger.qty)
+<<<<<<< HEAD
 				self.total_qty[ledger.batch_no] += flt(ledger.qty)
 
 			entries = self.get_batch_stock_after_date()
 			for row in entries:
 				self.total_qty[row.batch_no] += flt(row.total_qty)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			self.calculate_avg_rate_from_deprecarated_ledgers()
 			self.calculate_avg_rate_for_non_batchwise_valuation()
 			self.set_stock_value_difference()
 
+<<<<<<< HEAD
 	def get_batch_stock_after_date(self) -> list[dict]:
 		# Get total qty of each batch no from Serial and Batch Bundle without checking time condition
 		if not self.batchwise_valuation_batches:
@@ -824,36 +994,82 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		query = (
 			frappe.qb.from_(child)
+=======
+	def get_batch_no_ledgers(self) -> list[dict]:
+		if not self.batchwise_valuation_batches:
+			return []
+
+		parent = frappe.qb.DocType("Serial and Batch Bundle")
+		child = frappe.qb.DocType("Serial and Batch Entry")
+
+		timestamp_condition = ""
+		if self.sle.posting_date and self.sle.posting_time:
+			timestamp_condition = CombineDatetime(parent.posting_date, parent.posting_time) < CombineDatetime(
+				self.sle.posting_date, self.sle.posting_time
+			)
+
+			if self.sle.creation:
+				timestamp_condition |= (
+					CombineDatetime(parent.posting_date, parent.posting_time)
+					== CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+				) & (parent.creation < self.sle.creation)
+
+		query = (
+			frappe.qb.from_(parent)
+			.inner_join(child)
+			.on(parent.name == child.parent)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			.select(
 				child.batch_no,
 				Sum(child.stock_value_difference).as_("incoming_rate"),
 				Sum(child.qty).as_("qty"),
 			)
 			.where(
+<<<<<<< HEAD
 				(child.warehouse == self.sle.warehouse)
 				& (child.batch_no.isin(self.batchwise_valuation_batches))
 				& (child.docstatus == 1)
 				& (child.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.for_update()
+=======
+				(child.batch_no.isin(self.batchwise_valuation_batches))
+				& (parent.warehouse == self.sle.warehouse)
+				& (parent.item_code == self.sle.item_code)
+				& (parent.docstatus == 1)
+				& (parent.is_cancelled == 0)
+				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			.groupby(child.batch_no)
 		)
 
 		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
 		if self.sle.voucher_detail_no:
+<<<<<<< HEAD
 			query = query.where(child.voucher_detail_no != self.sle.voucher_detail_no)
 		elif self.sle.voucher_no:
 			query = query.where(child.voucher_no != self.sle.voucher_no)
 
 		query = query.where(child.voucher_type != "Pick List")
+=======
+			query = query.where(parent.voucher_detail_no != self.sle.voucher_detail_no)
+		elif self.sle.voucher_no:
+			query = query.where(parent.voucher_no != self.sle.voucher_no)
+
+		query = query.where(parent.voucher_type != "Pick List")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if timestamp_condition:
 			query = query.where(timestamp_condition)
 
 		return query.run(as_dict=True)
 
 	def prepare_batches(self):
+<<<<<<< HEAD
 		from erpnext.stock.utils import get_valuation_method
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.batches = self.batch_nos
 		if isinstance(self.batch_nos, dict):
 			self.batches = list(self.batch_nos.keys())
@@ -861,12 +1077,15 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		self.batchwise_valuation_batches = []
 		self.non_batchwise_valuation_batches = []
 
+<<<<<<< HEAD
 		if get_valuation_method(
 			self.sle.item_code, self.sle.company
 		) == "Moving Average" and frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation"):
 			self.non_batchwise_valuation_batches = self.batches
 			return
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		batches = frappe.get_all(
 			"Batch", filters={"name": ("in", self.batches), "use_batchwise_valuation": 1}, fields=["name"]
 		)
@@ -898,6 +1117,18 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
 
+<<<<<<< HEAD
+=======
+			frappe.db.set_value(
+				"Serial and Batch Entry",
+				ledger.name,
+				{
+					"stock_value_difference": stock_value_change,
+					"incoming_rate": self.batch_avg_rate[batch_no],
+				},
+			)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def calculate_valuation_rate(self):
 		if not hasattr(self, "wh_data"):
 			return
@@ -912,9 +1143,12 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		if not self.sle.actual_qty:
 			self.sle.actual_qty = self.get_actual_qty()
 
+<<<<<<< HEAD
 		if not self.sle.actual_qty:
 			return 0.0
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		return abs(flt(self.stock_value_change) / flt(self.sle.actual_qty))
 
 	def get_actual_qty(self):
@@ -1039,9 +1273,15 @@ class SerialBatchCreation:
 		self.__dict__.update(item_details)
 
 	def set_other_details(self):
+<<<<<<< HEAD
 		if not self.get("posting_datetime"):
 			self.posting_datetime = now()
 			self.__dict__["posting_datetime"] = self.posting_datetime
+=======
+		if not self.get("posting_date"):
+			self.posting_date = today()
+			self.__dict__["posting_date"] = self.posting_date
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if not self.get("actual_qty"):
 			qty = self.get("qty") or self.get("total_qty")
@@ -1066,7 +1306,12 @@ class SerialBatchCreation:
 		new_package.docstatus = 0
 		new_package.warehouse = self.warehouse
 		new_package.voucher_no = ""
+<<<<<<< HEAD
 		new_package.posting_datetime = self.posting_datetime if hasattr(self, "posting_datetime") else now()
+=======
+		new_package.posting_date = self.posting_date if hasattr(self, "posting_date") else today()
+		new_package.posting_time = self.posting_time if hasattr(self, "posting_time") else nowtime()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		new_package.type_of_transaction = self.type_of_transaction
 		new_package.returned_against = self.get("returned_against")
 
@@ -1086,23 +1331,30 @@ class SerialBatchCreation:
 		for d in remove_list:
 			package.remove(d)
 
+<<<<<<< HEAD
 	def make_serial_and_batch_bundle(
 		self, serial_nos=None, batch_nos=None
 	):  # passing None instead of [] due to ruff linter error B006
 		serial_nos = serial_nos or []
 		batch_nos = batch_nos or []
 
+=======
+	def make_serial_and_batch_bundle(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		valid_columns = doc.meta.get_valid_columns()
 		for key, value in self.__dict__.items():
 			if key in valid_columns:
 				doc.set(key, value)
 
+<<<<<<< HEAD
 		if serial_nos:
 			self.serial_nos = serial_nos
 		if batch_nos:
 			self.batches = batch_nos
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.type_of_transaction == "Outward":
 			self.set_auto_serial_batch_entries_for_outward()
 		elif self.type_of_transaction == "Inward":
@@ -1123,6 +1375,7 @@ class SerialBatchCreation:
 		if self.get("make_bundle_from_sle") and self.type_of_transaction == "Inward":
 			doc.flags.ignore_validate_serial_batch = True
 
+<<<<<<< HEAD
 		if not hasattr(self, "do_not_submit") or not self.do_not_submit:
 			doc.flags.ignore_voucher_validation = True
 			if self.get("sle"):
@@ -1138,6 +1391,14 @@ class SerialBatchCreation:
 			doc.save()
 
 		self.validate_qty(doc)
+=======
+		doc.save()
+		self.validate_qty(doc)
+
+		if not hasattr(self, "do_not_submit") or not self.do_not_submit:
+			doc.flags.ignore_voucher_validation = True
+			doc.submit()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		return doc
 
@@ -1151,6 +1412,7 @@ class SerialBatchCreation:
 				self.batch_no = batches[0]
 				self.serial_nos = self.get_auto_created_serial_nos()
 
+<<<<<<< HEAD
 	def update_serial_and_batch_entries(
 		self, serial_nos=None, batch_nos=None
 	):  # passing None instead of [] due to ruff linter error B006
@@ -1166,6 +1428,12 @@ class SerialBatchCreation:
 		if batch_nos:
 			self.batch_nos = batch_nos
 
+=======
+	def update_serial_and_batch_entries(self):
+		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
+		doc.type_of_transaction = self.type_of_transaction
+		doc.set("entries", [])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.set_auto_serial_batch_entries_for_outward()
 		self.set_serial_batch_entries(doc)
 		if not doc.get("entries"):
@@ -1182,7 +1450,11 @@ class SerialBatchCreation:
 			required_qty = flt(abs(self.actual_qty), precision)
 
 			if required_qty - total_qty > 0:
+<<<<<<< HEAD
 				msg = f"For the item {bold(doc.item_code)}, the Available qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."
+=======
+				msg = f"For the item {bold(doc.item_code)}, the Avaliable qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frappe.throw(msg, title=_("Insufficient Stock"))
 
 	def set_auto_serial_batch_entries_for_outward(self):
@@ -1194,7 +1466,11 @@ class SerialBatchCreation:
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
 				"qty": abs(self.actual_qty) if self.actual_qty else 0,
+<<<<<<< HEAD
 				"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+=======
+				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		)
 
@@ -1214,9 +1490,12 @@ class SerialBatchCreation:
 		elif self.has_serial_no and not self.get("serial_nos"):
 			self.serial_nos = get_serial_nos_for_outward(kwargs)
 		elif not self.has_serial_no and self.has_batch_no and not self.get("batches"):
+<<<<<<< HEAD
 			if self.get("posting_datetime"):
 				kwargs["posting_datetime"] = self.get("posting_datetime")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.batches = get_available_batches(kwargs)
 
 	def set_auto_serial_batch_entries_for_inward(self):
@@ -1289,9 +1568,12 @@ class SerialBatchCreation:
 			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	def set_serial_batch_entries(self, doc):
+<<<<<<< HEAD
 		incoming_rate = self.get("incoming_rate")
 
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.get("serial_nos"):
 			serial_no_wise_batch = frappe._dict({})
 			if self.has_batch_no:
@@ -1299,37 +1581,53 @@ class SerialBatchCreation:
 
 			qty = -1 if self.type_of_transaction == "Outward" else 1
 			for serial_no in self.serial_nos:
+<<<<<<< HEAD
 				if self.get("serial_nos_valuation"):
 					incoming_rate = self.get("serial_nos_valuation").get(serial_no)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				doc.append(
 					"entries",
 					{
 						"serial_no": serial_no,
 						"qty": qty,
 						"batch_no": serial_no_wise_batch.get(serial_no) or self.get("batch_no"),
+<<<<<<< HEAD
 						"incoming_rate": incoming_rate,
+=======
+						"incoming_rate": self.get("incoming_rate"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					},
 				)
 
 		elif self.get("batches"):
 			for batch_no, batch_qty in self.batches.items():
+<<<<<<< HEAD
 				if self.get("batches_valuation"):
 					incoming_rate = self.get("batches_valuation").get(batch_no)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				doc.append(
 					"entries",
 					{
 						"batch_no": batch_no,
+<<<<<<< HEAD
 						"qty": flt(batch_qty, precision)
 						* (-1 if self.type_of_transaction == "Outward" else 1),
 						"incoming_rate": incoming_rate,
+=======
+						"qty": batch_qty * (-1 if self.type_of_transaction == "Outward" else 1),
+						"incoming_rate": self.get("incoming_rate"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					},
 				)
 
 	def create_batch(self):
 		from erpnext.stock.doctype.batch.batch import make_batch
 
+<<<<<<< HEAD
 		if hasattr(self, "is_rejected") and self.is_rejected:
 			bundle = frappe.db.get_value(
 				"Serial and Batch Bundle",
@@ -1348,6 +1646,8 @@ class SerialBatchCreation:
 				if batch_no := frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "batch_no"):
 					return batch_no
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		return make_batch(
 			frappe._dict(
 				{
@@ -1370,6 +1670,7 @@ class SerialBatchCreation:
 		if self.get("voucher_no"):
 			voucher_no = self.get("voucher_no")
 
+<<<<<<< HEAD
 		voucher_type = ""
 		if self.get("voucher_type"):
 			voucher_type = self.get("voucher_type")
@@ -1390,6 +1691,10 @@ class SerialBatchCreation:
 			current_value += 1
 			serial_no = parse_naming_series(self.serial_no_series, number_generator=get_series)
 
+=======
+		for _i in range(abs(cint(self.actual_qty))):
+			serial_no = make_autoname(self.serial_no_series, "Serial No")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			sr_nos.append(serial_no)
 			serial_nos_details.append(
 				(
@@ -1405,9 +1710,13 @@ class SerialBatchCreation:
 					self.item_name,
 					self.description,
 					"Active",
+<<<<<<< HEAD
 					voucher_type,
 					voucher_no,
 					posting_date,
+=======
+					voucher_no,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					self.batch_no,
 				)
 			)
@@ -1426,16 +1735,23 @@ class SerialBatchCreation:
 				"item_name",
 				"description",
 				"status",
+<<<<<<< HEAD
 				"reference_doctype",
 				"reference_name",
 				"posting_date",
+=======
+				"purchase_document_no",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"batch_no",
 			]
 
 			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
+<<<<<<< HEAD
 		obj.update_counter(current_value)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		return sr_nos
 
 
@@ -1463,6 +1779,7 @@ def get_serial_nos_batch(serial_nos):
 			as_list=1,
 		)
 	)
+<<<<<<< HEAD
 
 
 def update_batch_qty(voucher_type, voucher_no, docstatus, via_landed_cost_voucher=False):
@@ -1545,3 +1862,5 @@ def get_serial_batch_list_from_item(item):
 		batch_list = [item.batch_no] if item.batch_no else []
 
 	return serial_list, batch_list
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -8,10 +8,16 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+<<<<<<< HEAD
   "company",
   "report_date",
   "status",
   "child_row_reference",
+=======
+  "report_date",
+  "status",
+  "manual_inspection",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_4",
   "inspection_type",
   "reference_type",
@@ -27,16 +33,23 @@
   "bom_no",
   "specification_details",
   "quality_inspection_template",
+<<<<<<< HEAD
   "manual_inspection",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "readings",
   "section_break_14",
   "inspected_by",
   "verified_by",
   "column_break_17",
   "remarks",
+<<<<<<< HEAD
   "amended_from",
   "print_settings_section",
   "letter_head"
+=======
+  "amended_from"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -242,6 +255,7 @@
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
    "label": "Manual Inspection"
+<<<<<<< HEAD
   },
   {
    "fieldname": "child_row_reference",
@@ -271,6 +285,8 @@
    "fieldtype": "Link",
    "label": "Letter Head",
    "options": "Letter Head"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-search",
@@ -278,7 +294,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-02-17 13:20:17.583094",
+=======
+ "modified": "2024-03-27 13:10:28.680815",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

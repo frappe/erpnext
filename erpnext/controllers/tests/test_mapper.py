@@ -4,6 +4,7 @@ import unittest
 import frappe
 import frappe.utils
 from frappe.model import mapper
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_months, nowdate
 
@@ -14,6 +15,17 @@ class TestMapper(IntegrationTestCase):
 	def test_map_docs(self):
 		"""Test mapping of multiple source docs on a single target doc"""
 
+=======
+from frappe.test_runner import make_test_records
+from frappe.utils import add_months, nowdate
+
+
+class TestMapper(unittest.TestCase):
+	def test_map_docs(self):
+		"""Test mapping of multiple source docs on a single target doc"""
+
+		make_test_records("Item")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items = ["_Test Item", "_Test Item 2", "_Test FG Item"]
 
 		# Make source docs (quotations) and a target doc (sales order)

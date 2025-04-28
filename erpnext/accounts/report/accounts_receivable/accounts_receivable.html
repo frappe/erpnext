@@ -164,12 +164,15 @@
 				{% } %}
 			</tr>
 		</thead>
+<<<<<<< HEAD
 		<div class="show-filters">
 			{% if subtitle %}
 				{{ subtitle }}
 				<hr>
 			{% endif %}
 		</div>
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		<tbody>
 			{% for(var i=0, l=data.length; i<l; i++) { %}
 				<tr>
@@ -191,7 +194,11 @@
 
 						{% if(!filters.show_future_payments) { %}
 						<td>
+<<<<<<< HEAD
 							{% if(!filters.party?.length) { %}
+=======
+							{% if(!(filters.party)) { %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 								{%= data[i]["party"] %}
 								{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 									<br> {%= data[i]["customer_name"] %}
@@ -264,7 +271,11 @@
 					{% if(data[i]["party"]|| "&nbsp;") { %}
 						{% if(!data[i]["is_total_row"]) { %}
 							<td>
+<<<<<<< HEAD
 								{% if(!filters.party?.length) { %}
+=======
+								{% if(!(filters.party)) { %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 									{%= data[i]["party"] %}
 									{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 										<br> {%= data[i]["customer_name"] %}
@@ -288,4 +299,8 @@
 			{% } %}
 		</tbody>
 	</table>
+<<<<<<< HEAD
 	<p class="text-right text-muted">{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}</p>
+=======
+	<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+>>>>>>> 7c4cf3e834 (Favicon.svg)

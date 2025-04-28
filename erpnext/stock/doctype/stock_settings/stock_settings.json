@@ -16,15 +16,21 @@
   "stock_uom",
   "price_list_defaults_section",
   "auto_insert_price_list_rate_if_missing",
+<<<<<<< HEAD
   "update_price_list_based_on",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_12",
   "update_existing_price_list_rate",
   "conversion_factor_section",
   "allow_to_edit_stock_uom_qty_for_sales",
   "column_break_lznj",
   "allow_to_edit_stock_uom_qty_for_purchase",
+<<<<<<< HEAD
   "section_break_ylhd",
   "allow_uom_with_conversion_rate_defined_in_item",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
@@ -36,6 +42,7 @@
   "show_barcode_field",
   "clean_description_html",
   "allow_internal_transfer_at_arms_length_price",
+<<<<<<< HEAD
   "validate_material_transfer_warehouses",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
@@ -56,11 +63,20 @@
   "stock_reservation_tab",
   "enable_stock_reservation",
   "auto_reserve_stock",
+=======
+  "quality_inspection_settings_section",
+  "action_if_quality_inspection_is_not_submitted",
+  "column_break_23",
+  "action_if_quality_inspection_is_rejected",
+  "stock_reservation_tab",
+  "enable_stock_reservation",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break_rx3e",
   "allow_partial_reservation",
   "auto_reserve_stock_for_sales_order_on_purchase",
   "serial_and_batch_reservation_section",
   "auto_reserve_serial_and_batch",
+<<<<<<< HEAD
   "quality_tab",
   "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
@@ -68,6 +84,19 @@
   "action_if_quality_inspection_is_rejected",
   "section_break_uiau",
   "allow_to_make_quality_inspection_after_purchase_or_delivery",
+=======
+  "serial_and_batch_item_settings_tab",
+  "section_break_7",
+  "do_not_use_batchwise_valuation",
+  "auto_create_serial_and_batch_bundle_for_outward",
+  "pick_serial_and_batch_based_on",
+  "column_break_mhzc",
+  "disable_serial_no_and_batch_selector",
+  "use_naming_series",
+  "naming_series_prefix",
+  "use_serial_batch_fields",
+  "do_not_update_serial_batch_on_creation_of_auto_bundle",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -462,6 +491,10 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
+=======
+   "depends_on": "eval:doc.valuation_method === \"Moving Average\"",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate.",
    "fieldname": "do_not_use_batchwise_valuation",
    "fieldtype": "Check",
@@ -472,6 +505,7 @@
    "fieldname": "over_picking_allowance",
    "fieldtype": "Percent",
    "label": "Over Picking Allowance"
+<<<<<<< HEAD
   },
   {
    "default": "1",
@@ -546,6 +580,8 @@
    "fieldname": "validate_material_transfer_warehouses",
    "fieldtype": "Check",
    "label": "Validate Material Transfer Warehouses"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "icon-cog",
@@ -553,7 +589,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-11 11:35:39.864923",
+=======
+ "modified": "2024-07-29 14:55:19.093508",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -574,9 +614,16 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

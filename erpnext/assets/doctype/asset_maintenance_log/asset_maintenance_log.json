@@ -23,7 +23,10 @@
   "column_break_6",
   "maintenance_status",
   "assign_to_name",
+<<<<<<< HEAD
   "task_assignee_email",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "due_date",
   "completion_date",
   "description",
@@ -169,22 +172,32 @@
    "in_preview": 1,
    "label": "Task Name",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "task_assignee_email",
    "fieldtype": "Data",
    "label": "Task Assignee Email",
    "read_only": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-09-24 15:12:37.497853",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Log",
  "naming_rule": "By \"Naming Series\" field",
+=======
+ "modified": "2024-03-27 13:06:34.654633",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Maintenance Log",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {

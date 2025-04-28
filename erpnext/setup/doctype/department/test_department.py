@@ -1,5 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -9,6 +10,17 @@ IGNORE_TEST_RECORD_DEPENDENCIES = ["Leave Block List"]
 
 
 class TestDepartment(IntegrationTestCase):
+=======
+
+import unittest
+
+import frappe
+
+test_ignore = ["Leave Block List"]
+
+
+class TestDepartment(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_remove_department_data(self):
 		doc = create_department("Test Department")
 		frappe.delete_doc("Department", doc.name)
@@ -26,3 +38,9 @@ def create_department(department_name, parent_department=None):
 	).insert()
 
 	return doc
+<<<<<<< HEAD
+=======
+
+
+test_records = frappe.get_test_records("Department")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

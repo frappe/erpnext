@@ -1,5 +1,9 @@
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -8,7 +12,11 @@ from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_sum
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
+<<<<<<< HEAD
 class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
+=======
+class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.maxDiff = None
 		self.create_company()
@@ -27,7 +35,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			"company": self.company,
 			"customer": self.customer,
 			"posting_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		si = create_sales_invoice(
@@ -112,13 +127,24 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(len(rpt_output), 1)
 		self.assertDictEqual(rpt_output[0], expected_data)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Selling Settings", {"cust_master_name": "Naming Series"})
+=======
+	@change_settings("Selling Settings", {"cust_master_name": "Naming Series"})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_02_various_filters_and_output(self):
 		filters = {
 			"company": self.company,
 			"customer": self.customer,
 			"posting_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		si = create_sales_invoice(

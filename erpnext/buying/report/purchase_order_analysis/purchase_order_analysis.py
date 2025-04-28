@@ -22,8 +22,11 @@ def execute(filters=None):
 	if not data:
 		return [], [], None, []
 
+<<<<<<< HEAD
 	update_received_amount(data)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	data, chart_data = prepare_data(data, filters)
 
 	return columns, data, None, chart_data
@@ -42,6 +45,10 @@ def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+<<<<<<< HEAD
+=======
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	query = (
 		frappe.qb.from_(po)
@@ -49,6 +56,11 @@ def get_data(filters):
 		.on(po_item.parent == po.name)
 		.left_join(pi_item)
 		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
+<<<<<<< HEAD
+=======
+		.left_join(pr_item)
+		.on((pr_item.purchase_order_item == po_item.name) & (pr_item.docstatus == 1))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -62,6 +74,10 @@ def get_data(filters):
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
 			Sum(IfNull(pi_item.qty, 0)).as_("billed_qty"),
 			po_item.base_amount.as_("amount"),
+<<<<<<< HEAD
+=======
+			(pr_item.base_amount).as_("received_qty_amount"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),
 			(po_item.base_amount - (po_item.billed_amt * IfNull(po.conversion_rate, 1))).as_(
 				"pending_amount"
@@ -70,16 +86,26 @@ def get_data(filters):
 			po.company,
 			po_item.name,
 		)
+<<<<<<< HEAD
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "On Hold"))) & (po.docstatus == 1))
+=======
+		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.groupby(po_item.name)
 		.orderby(po.transaction_date)
 	)
 
+<<<<<<< HEAD
 	if filters.get("company"):
 		query = query.where(po.company == filters.get("company"))
 
 	if filters.get("name"):
 		query = query.where(po.name.isin(filters.get("name")))
+=======
+	for field in ("company", "name"):
+		if filters.get(field):
+			query = query.where(po[field] == filters.get(field))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if filters.get("from_date") and filters.get("to_date"):
 		query = query.where(po.transaction_date.between(filters.get("from_date"), filters.get("to_date")))
@@ -95,6 +121,7 @@ def get_data(filters):
 	return data
 
 
+<<<<<<< HEAD
 def update_received_amount(data):
 	pr_data = get_received_amount_data(data)
 
@@ -131,6 +158,8 @@ def get_received_amount_data(data):
 	return frappe._dict(data)
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def prepare_data(data, filters):
 	completed, pending = 0, 0
 	pending_field = "pending_amount"
@@ -186,7 +215,11 @@ def prepare_data(data, filters):
 
 
 def prepare_chart_data(pending, completed):
+<<<<<<< HEAD
 	labels = [_("Amount to Bill"), _("Billed Amount")]
+=======
+	labels = ["Amount to Bill", "Billed Amount"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return {
 		"data": {"labels": labels, "datasets": [{"values": [pending, completed]}]},

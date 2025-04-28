@@ -23,7 +23,10 @@ def get_data(filters):
 		fields=[
 			"name",
 			"subject",
+<<<<<<< HEAD
 			"project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"exp_start_date",
 			"exp_end_date",
 			"status",
@@ -57,7 +60,11 @@ def get_data(filters):
 
 def get_conditions(filters):
 	conditions = frappe._dict()
+<<<<<<< HEAD
 	keys = ["priority", "status", "project"]
+=======
+	keys = ["priority", "status"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	for key in keys:
 		if filters.get(key):
 			conditions[key] = filters.get(key)
@@ -78,7 +85,11 @@ def get_chart_data(data):
 	charts = {
 		"data": {
 			"labels": [_("On Track"), _("Delayed")],
+<<<<<<< HEAD
 			"datasets": [{"name": _("Delayed"), "values": [on_track, delay]}],
+=======
+			"datasets": [{"name": "Delayed", "values": [on_track, delay]}],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		"type": "percentage",
 		"colors": ["#84D5BA", "#CB4B5F"],
@@ -90,6 +101,7 @@ def get_columns():
 	columns = [
 		{"fieldname": "name", "fieldtype": "Link", "label": _("Task"), "options": "Task", "width": 150},
 		{"fieldname": "subject", "fieldtype": "Data", "label": _("Subject"), "width": 200},
+<<<<<<< HEAD
 		{
 			"fieldname": "project",
 			"fieldtype": "Link",
@@ -97,6 +109,8 @@ def get_columns():
 			"options": "Project",
 			"width": 150,
 		},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		{"fieldname": "status", "fieldtype": "Data", "label": _("Status"), "width": 100},
 		{"fieldname": "priority", "fieldtype": "Data", "label": _("Priority"), "width": 80},
 		{"fieldname": "progress", "fieldtype": "Data", "label": _("Progress (%)"), "width": 120},

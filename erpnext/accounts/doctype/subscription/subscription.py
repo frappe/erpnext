@@ -114,10 +114,17 @@ class Subscription(Document):
 
 		if self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start_date):
 			_current_invoice_start = add_days(self.trial_period_end, 1)
+<<<<<<< HEAD
 		elif date:
 			_current_invoice_start = date
 		elif self.trial_period_start and self.is_trialling():
 			_current_invoice_start = self.trial_period_start
+=======
+		elif self.trial_period_start and self.is_trialling():
+			_current_invoice_start = self.trial_period_start
+		elif date:
+			_current_invoice_start = date
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		else:
 			_current_invoice_start = nowdate()
 
@@ -414,8 +421,13 @@ class Subscription(Document):
 			if frappe.db.get_value("Supplier", self.party, "tax_withholding_category"):
 				invoice.apply_tds = 1
 
+<<<<<<< HEAD
 		# Add currency to invoice
 		invoice.currency = frappe.db.get_value("Subscription Plan", {"name": self.plans[0].plan}, "currency")
+=======
+		# Add party currency to invoice
+		invoice.currency = get_party_account_currency(self.party_type, self.party, self.company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# Add dimensions in invoice for subscription:
 		accounting_dimensions = get_accounting_dimensions()
@@ -483,16 +495,27 @@ class Subscription(Document):
 
 		return invoice
 
+<<<<<<< HEAD
 	def get_items_from_plans(self, plans: list[dict[str, str]], prorate: int = 0) -> list[dict]:
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
 
 		prorate_factor = 1
+=======
+	def get_items_from_plans(self, plans: list[dict[str, str]], prorate: bool | None = None) -> list[dict]:
+		"""
+		Returns the `Item`s linked to `Subscription Plan`
+		"""
+		if prorate is None:
+			prorate = False
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if prorate:
 			prorate_factor = get_prorata_factor(
 				self.current_invoice_end,
 				self.current_invoice_start,
+<<<<<<< HEAD
 				cint(
 					self.generate_invoice_at
 					in [
@@ -500,6 +523,9 @@ class Subscription(Document):
 						"Days before the current subscription period",
 					]
 				),
+=======
+				cint(self.generate_invoice_at == "Beginning of the current subscription period"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 
 		items = []
@@ -516,6 +542,7 @@ class Subscription(Document):
 
 			deferred = frappe.db.get_value("Item", item_code, deferred_field)
 
+<<<<<<< HEAD
 			item = {
 				"item_code": item_code,
 				"qty": plan.qty,
@@ -529,6 +556,35 @@ class Subscription(Document):
 				),
 				"cost_center": plan_doc.cost_center,
 			}
+=======
+			if not prorate:
+				item = {
+					"item_code": item_code,
+					"qty": plan.qty,
+					"rate": get_plan_rate(
+						plan.plan,
+						plan.qty,
+						party,
+						self.current_invoice_start,
+						self.current_invoice_end,
+					),
+					"cost_center": plan_doc.cost_center,
+				}
+			else:
+				item = {
+					"item_code": item_code,
+					"qty": plan.qty,
+					"rate": get_plan_rate(
+						plan.plan,
+						plan.qty,
+						party,
+						self.current_invoice_start,
+						self.current_invoice_end,
+						prorate_factor,
+					),
+					"cost_center": plan_doc.cost_center,
+				}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if deferred:
 				item.update(
@@ -625,7 +681,13 @@ class Subscription(Document):
 		"""
 		invoice = frappe.get_all(
 			self.invoice_document_type,
+<<<<<<< HEAD
 			{"subscription": self.name, "docstatus": ("<", 2)},
+=======
+			{
+				"subscription": self.name,
+			},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			limit=1,
 			order_by="to_date desc",
 			pluck="name",
@@ -664,7 +726,10 @@ class Subscription(Document):
 			self.invoice_document_type,
 			{
 				"subscription": self.name,
+<<<<<<< HEAD
 				"docstatus": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"status": ["!=", "Paid"],
 			},
 		)
@@ -687,7 +752,11 @@ class Subscription(Document):
 		self.status = "Cancelled"
 		self.cancelation_date = nowdate()
 
+<<<<<<< HEAD
 		if to_generate_invoice and self.cancelation_date >= self.current_invoice_start:
+=======
+		if to_generate_invoice:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.generate_invoice(self.current_invoice_start, self.cancelation_date)
 
 		self.save()
@@ -747,6 +816,7 @@ def get_prorata_factor(
 	return diff / plan_days
 
 
+<<<<<<< HEAD
 def process_all(subscription: list, posting_date: DateTimeLikeObject | None = None) -> None:
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
@@ -755,6 +825,20 @@ def process_all(subscription: list, posting_date: DateTimeLikeObject | None = No
 	for subscription_name in subscription:
 		try:
 			subscription = frappe.get_doc("Subscription", subscription_name)
+=======
+def process_all(subscription: str | None = None, posting_date: DateTimeLikeObject | None = None) -> None:
+	"""
+	Task to updates the status of all `Subscription` apart from those that are cancelled
+	"""
+	filters = {"status": ("!=", "Cancelled")}
+
+	if subscription:
+		filters["name"] = subscription
+
+	for subscription in frappe.get_all("Subscription", filters, pluck="name"):
+		try:
+			subscription = frappe.get_doc("Subscription", subscription)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			subscription.process(posting_date)
 			frappe.db.commit()
 		except frappe.ValidationError:

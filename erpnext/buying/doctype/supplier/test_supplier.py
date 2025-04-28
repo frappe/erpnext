@@ -3,11 +3,16 @@
 
 
 import frappe
+<<<<<<< HEAD
+=======
+from frappe.test_runner import make_test_records
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.party import get_due_date
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.exceptions import PartyDisabled
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Payment Term", "Payment Terms Template"]
 
 
@@ -15,6 +20,15 @@ from frappe.tests import IntegrationTestCase
 
 
 class TestSupplier(IntegrationTestCase):
+=======
+test_dependencies = ["Payment Term", "Payment Terms Template"]
+test_records = frappe.get_test_records("Supplier")
+
+from frappe.tests.utils import FrappeTestCase
+
+
+class TestSupplier(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_get_supplier_group_details(self):
 		doc = frappe.new_doc("Supplier Group")
 		doc.supplier_group_name = "_Testing Supplier Group"
@@ -95,6 +109,11 @@ class TestSupplier(IntegrationTestCase):
 		self.assertEqual(due_date, "2017-01-22")
 
 	def test_supplier_disabled(self):
+<<<<<<< HEAD
+=======
+		make_test_records("Item")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 1)
 
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -177,7 +196,11 @@ def create_supplier(**args):
 	return doc
 
 
+<<<<<<< HEAD
 class TestSupplierPortal(IntegrationTestCase):
+=======
+class TestSupplierPortal(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_portal_user_can_access_supplier_data(self):
 		supplier = create_supplier()
 
@@ -192,7 +215,14 @@ class TestSupplierPortal(IntegrationTestCase):
 		supplier.append("portal_users", {"user": user})
 		supplier.save()
 
+<<<<<<< HEAD
 		with self.set_user(user):
 			_, suppliers = get_customers_suppliers("Purchase Order", user)
 
 			self.assertIn(supplier.name, suppliers)
+=======
+		frappe.set_user(user)
+		_, suppliers = get_customers_suppliers("Purchase Order", user)
+
+		self.assertIn(supplier.name, suppliers)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

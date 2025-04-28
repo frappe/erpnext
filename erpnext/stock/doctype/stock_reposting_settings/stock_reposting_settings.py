@@ -16,6 +16,10 @@ class StockRepostingSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
+=======
+		do_reposting_for_each_stock_transaction: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		end_time: DF.Time | None
 		item_based_reposting: DF.Check
 		limit_reposting_timeslot: DF.Check
@@ -29,6 +33,13 @@ class StockRepostingSettings(Document):
 	def validate(self):
 		self.set_minimum_reposting_time_slot()
 
+<<<<<<< HEAD
+=======
+	def before_save(self):
+		if self.do_reposting_for_each_stock_transaction:
+			self.item_based_reposting = 1
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def set_minimum_reposting_time_slot(self):
 		"""Ensure that timeslot for reposting is at least 12 hours."""
 		if not self.limit_reposting_timeslot:
@@ -84,7 +95,11 @@ def get_reposting_entries():
 def get_stock_ledgers(vouchers):
 	return frappe.get_all(
 		"Stock Ledger Entry",
+<<<<<<< HEAD
 		fields=["item_code", "warehouse", "posting_date", "posting_time", "posting_datetime"],
+=======
+		fields=["item_code", "warehouse", "posting_date"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters={"voucher_no": ("in", vouchers)},
 	)
 

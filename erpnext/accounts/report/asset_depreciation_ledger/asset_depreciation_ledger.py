@@ -89,9 +89,13 @@ def get_data(filters):
 						& (DepreciationSchedule.schedule_date == d.posting_date)
 					)
 				).run(as_dict=True)
+<<<<<<< HEAD
 				asset_data.accumulated_depreciation_amount = (
 					query[0]["accumulated_depreciation_amount"] if query else 0
 				)
+=======
+				asset_data.accumulated_depreciation_amount = query[0]["accumulated_depreciation_amount"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			else:
 				asset_data.accumulated_depreciation_amount += d.debit
@@ -103,7 +107,11 @@ def get_data(filters):
 					"depreciation_amount": d.debit,
 					"depreciation_date": d.posting_date,
 					"value_after_depreciation": (
+<<<<<<< HEAD
 						flt(row.net_purchase_amount) - flt(row.accumulated_depreciation_amount)
+=======
+						flt(row.gross_purchase_amount) - flt(row.accumulated_depreciation_amount)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					),
 					"depreciation_entry": d.voucher_no,
 				}
@@ -119,8 +127,12 @@ def get_assets_details(assets):
 
 	fields = [
 		"name as asset",
+<<<<<<< HEAD
 		"asset_name",
 		"net_purchase_amount",
+=======
+		"gross_purchase_amount",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"opening_accumulated_depreciation",
 		"asset_category",
 		"status",
@@ -145,12 +157,15 @@ def get_columns():
 			"width": 120,
 		},
 		{
+<<<<<<< HEAD
 			"label": _("Asset Name"),
 			"fieldname": "asset_name",
 			"fieldtype": "Data",
 			"width": 140,
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"label": _("Depreciation Date"),
 			"fieldname": "depreciation_date",
 			"fieldtype": "Date",
@@ -158,7 +173,11 @@ def get_columns():
 		},
 		{
 			"label": _("Purchase Amount"),
+<<<<<<< HEAD
 			"fieldname": "net_purchase_amount",
+=======
+			"fieldname": "gross_purchase_amount",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"fieldtype": "Currency",
 			"width": 120,
 		},

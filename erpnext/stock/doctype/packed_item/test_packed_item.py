@@ -3,7 +3,11 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_to_date, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -40,7 +44,11 @@ def create_product_bundle(
 	return bundle, components
 
 
+<<<<<<< HEAD
 class TestPackedItem(IntegrationTestCase):
+=======
+class TestPackedItem(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	"Test impact on Packed Items table in various scenarios."
 
 	@classmethod
@@ -116,7 +124,11 @@ class TestPackedItem(IntegrationTestCase):
 		self.assertEqual(so.packed_items[1].qty, 4)
 		self.assertEqual(so.packed_items[3].qty, 12)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
+=======
+	@change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_bundle_item_cumulative_price(self):
 		"Test if Bundle Item rate is cumulative from packed items."
 		so = make_sales_order(item_code=self.bundle, qty=2, do_not_submit=True)

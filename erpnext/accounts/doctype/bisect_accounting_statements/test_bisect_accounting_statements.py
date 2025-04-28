@@ -2,8 +2,15 @@
 # See license.txt
 
 # import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestBisectAccountingStatements(IntegrationTestCase):
+=======
+from frappe.tests.utils import FrappeTestCase
+
+
+class TestBisectAccountingStatements(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	pass

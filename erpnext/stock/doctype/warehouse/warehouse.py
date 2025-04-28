@@ -7,10 +7,14 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
+<<<<<<< HEAD
 from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull
 from frappe.utils import cint
 from frappe.utils.caching import request_cache
+=======
+from frappe.utils import cint
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.nestedset import NestedSet
 from pypika.terms import ExistsCriterion
 
@@ -31,12 +35,18 @@ class Warehouse(NestedSet):
 		address_line_2: DF.Data | None
 		city: DF.Data | None
 		company: DF.Link
+<<<<<<< HEAD
 		customer: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		default_in_transit_warehouse: DF.Link | None
 		disabled: DF.Check
 		email_id: DF.Data | None
 		is_group: DF.Check
+<<<<<<< HEAD
 		is_rejected_warehouse: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		lft: DF.Int
 		mobile_no: DF.Data | None
 		old_parent: DF.Link | None
@@ -61,13 +71,20 @@ class Warehouse(NestedSet):
 		self.name = self.warehouse_name
 
 	def onload(self):
+<<<<<<< HEAD
+=======
+		"""load account name for General Ledger Report"""
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
 			account = self.account or get_warehouse_account(self)
 
 			if account:
 				self.set_onload("account", account)
 		load_address_and_contact(self)
+<<<<<<< HEAD
 		self.set_onload("stock_exists", self.check_if_sle_exists(non_cancelled_only=True))
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate(self):
 		self.warn_about_multiple_warehouse_account()
@@ -153,11 +170,16 @@ class Warehouse(NestedSet):
 				indicator="orange",
 			)
 
+<<<<<<< HEAD
 	def check_if_sle_exists(self, non_cancelled_only=False):
 		filters = {"warehouse": self.name}
 		if non_cancelled_only:
 			filters["is_cancelled"] = 0
 		return frappe.db.exists("Stock Ledger Entry", filters)
+=======
+	def check_if_sle_exists(self):
+		return frappe.db.exists("Stock Ledger Entry", {"warehouse": self.name})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def check_if_child_exists(self):
 		return frappe.db.exists("Warehouse", {"parent_warehouse": self.name})
@@ -199,12 +221,19 @@ def get_children(doctype, parent=None, company=None, is_root=False, include_disa
 		include_disabled = json.loads(include_disabled)
 
 	fields = ["name as value", "is_group as expandable"]
+<<<<<<< HEAD
 
 	filters = [
 		[IfNull(Field("parent_warehouse"), ""), "=", parent],
 		["company", "in", (company, None, "")],
 	]
 
+=======
+	filters = [
+		["ifnull(`parent_warehouse`, '')", "=", parent],
+		["company", "in", (company, None, "")],
+	]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
 		filters.append(["disabled", "=", False])
 
@@ -230,7 +259,10 @@ def convert_to_group_or_ledger(docname=None):
 	return frappe.get_doc("Warehouse", docname).convert_to_group_or_ledger()
 
 
+<<<<<<< HEAD
 @request_cache
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_child_warehouses(warehouse):
 	from frappe.utils.nestedset import get_descendants_of
 
@@ -240,9 +272,13 @@ def get_child_warehouses(warehouse):
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []
+<<<<<<< HEAD
 	for d in frappe.get_all(
 		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
 	):
+=======
+	for d in frappe.get_all("Warehouse", fields=["name", "is_group"], filters={"account": account}):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if d.is_group:
 			warehouses.extend(get_child_warehouses(d.name))
 		else:
@@ -263,6 +299,7 @@ def get_warehouses_based_on_account(account, company=None):
 
 # Will be use for frappe.qb
 def apply_warehouse_filter(query, sle, filters):
+<<<<<<< HEAD
 	if not (warehouses := filters.get("warehouse")):
 		return query
 
@@ -293,5 +330,21 @@ def apply_warehouse_filter(query, sle, filters):
 	child_query = child_query.where(combined_condition).where(warehouse_table.name == sle.warehouse)
 
 	query = query.where(ExistsCriterion(child_query))
+=======
+	if warehouse := filters.get("warehouse"):
+		warehouse_table = frappe.qb.DocType("Warehouse")
+
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+		chilren_subquery = (
+			frappe.qb.from_(warehouse_table)
+			.select(warehouse_table.name)
+			.where(
+				(warehouse_table.lft >= lft)
+				& (warehouse_table.rgt <= rgt)
+				& (warehouse_table.name == sle.warehouse)
+			)
+		)
+		query = query.where(ExistsCriterion(chilren_subquery))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return query

@@ -1,5 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -7,6 +8,17 @@ from frappe.tests import IntegrationTestCase
 
 
 class TestOperation(IntegrationTestCase):
+=======
+
+import unittest
+
+import frappe
+
+test_records = frappe.get_test_records("Operation")
+
+
+class TestOperation(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	pass
 
 

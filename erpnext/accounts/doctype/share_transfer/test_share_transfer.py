@@ -1,5 +1,6 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -11,6 +12,19 @@ EXTRA_TEST_RECORD_DEPENDENCIES = ["Share Type", "Shareholder"]
 
 
 class TestShareTransfer(IntegrationTestCase):
+=======
+
+import unittest
+
+import frappe
+
+from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists
+
+test_dependencies = ["Share Type", "Shareholder"]
+
+
+class TestShareTransfer(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		frappe.db.sql("delete from `tabShare Transfer`")
 		frappe.db.sql("delete from `tabShare Balance`")

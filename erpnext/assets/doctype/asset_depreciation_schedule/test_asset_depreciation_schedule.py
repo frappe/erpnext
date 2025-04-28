@@ -2,10 +2,16 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils import cstr, date_diff, flt, getdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+=======
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import cstr, flt
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 )
@@ -14,6 +20,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
 )
+<<<<<<< HEAD
 from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_repair
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
 	make_asset_value_adjustment,
@@ -21,6 +28,11 @@ from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment i
 
 
 class TestAssetDepreciationSchedule(IntegrationTestCase):
+=======
+
+
+class TestAssetDepreciationSchedule(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		create_asset_data()
 
@@ -37,7 +49,10 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, second_asset_depr_schedule.insert)
 
 	def test_daily_prorata_based_depr_on_sl_method(self):
+<<<<<<< HEAD
 		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 0)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		asset = create_asset(
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
@@ -93,7 +108,11 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			depreciation_start_date="2024-07-31",
 			total_number_of_depreciations=24,
 			frequency_of_depreciation=1,
+<<<<<<< HEAD
 			net_purchase_amount=731,
+=======
+			gross_purchase_amount=731,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			daily_prorata_based=1,
 		)
 
@@ -133,7 +152,11 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			depreciation_start_date="2024-07-31",
 			total_number_of_depreciations=24,
 			frequency_of_depreciation=1,
+<<<<<<< HEAD
 			net_purchase_amount=731,
+=======
+			gross_purchase_amount=731,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		expected_schedules = [
@@ -171,6 +194,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			depreciation_start_date="2024-12-31",
 			total_number_of_depreciations=12,
 			frequency_of_depreciation=3,
+<<<<<<< HEAD
 			net_purchase_amount=731,
 		)
 
@@ -184,6 +208,21 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			["2026-06-30", 60.98, 650.01],
 			["2026-09-30", 60.98, 710.99],
 			["2026-11-01", 20.01, 731.0],
+=======
+			gross_purchase_amount=731,
+		)
+
+		expected_schedules = [
+			["2024-12-31", 60.92, 284.07],
+			["2025-03-31", 60.92, 344.99],
+			["2025-06-30", 60.92, 405.91],
+			["2025-09-30", 60.92, 466.83],
+			["2025-12-31", 60.92, 527.75],
+			["2026-03-31", 60.92, 588.67],
+			["2026-06-30", 60.92, 649.59],
+			["2026-09-30", 60.92, 710.51],
+			["2026-11-01", 20.49, 731.0],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 		schedules = [
 			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
@@ -199,7 +238,11 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
 			daily_prorata_based=1,
+<<<<<<< HEAD
 			net_purchase_amount=1096,
+=======
+			gross_purchase_amount=1096,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			available_for_use_date="2020-01-15",
 			depreciation_start_date="2020-01-31",
 			frequency_of_depreciation=1,
@@ -270,12 +313,21 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 
 		expected_schedules = [
 			["2021-03-31", 4383.56, 4383.56],
+<<<<<<< HEAD
 			["2021-06-30", 9972.6, 14356.16],
 			["2021-09-30", 10082.19, 24438.35],
 			["2021-12-31", 10082.19, 34520.54],
 			["2022-03-31", 6458.25, 40978.79],
 			["2022-06-30", 6530.01, 47508.8],
 			["2022-08-20", 52491.2, 100000.0],
+=======
+			["2021-06-30", 9535.45, 13919.01],
+			["2021-09-30", 9640.23, 23559.24],
+			["2021-12-31", 9640.23, 33199.47],
+			["2022-03-31", 9430.66, 42630.13],
+			["2022-06-30", 5721.27, 48351.4],
+			["2022-08-20", 51648.6, 100000.0],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 
 		schedules = [
@@ -299,6 +351,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 		)
 
 		expected_schedules = [
+<<<<<<< HEAD
 			["2020-02-29", 1092.9, 1092.9],
 			["2020-08-31", 20109.29, 21202.19],
 			["2021-02-28", 15630.03, 36832.22],
@@ -306,6 +359,15 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			["2022-02-28", 9378.02, 62099.33],
 			["2022-08-31", 9533.46, 71632.79],
 			["2023-02-20", 28367.21, 100000.0],
+=======
+			["2020-02-29", 1092.90, 1092.90],
+			["2020-08-31", 19944.01, 21036.91],
+			["2021-02-28", 19618.83, 40655.74],
+			["2021-08-31", 11966.4, 52622.14],
+			["2022-02-28", 11771.3, 64393.44],
+			["2022-08-31", 7179.84, 71573.28],
+			["2023-02-20", 28426.72, 100000.0],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 
 		schedules = [
@@ -374,6 +436,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 
 		self.assertEqual(asset.finance_books[0].total_number_of_booked_depreciations, 14)
 
+<<<<<<< HEAD
 	def test_depreciation_schedule_after_cancelling_asset_repair(self):
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -1161,3 +1224,38 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 			for d in get_depr_schedule(asset.name, "Active")
 		]
 		self.assertEqual(schedules, expected_depreciation_after_repair)
+=======
+	def test_schedule_for_wdv_method_for_existing_asset(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			depreciation_method="Written Down Value",
+			available_for_use_date="2020-07-17",
+			is_existing_asset=1,
+			opening_number_of_booked_depreciations=2,
+			opening_accumulated_depreciation=11666.67,
+			depreciation_start_date="2021-04-30",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=3,
+			gross_purchase_amount=50000,
+			rate_of_depreciation=40,
+		)
+
+		self.assertEqual(asset.status, "Draft")
+		expected_schedules = [
+			["2021-04-30", 3833.33, 15500.0],
+			["2021-07-31", 3833.33, 19333.33],
+			["2021-10-31", 3833.33, 23166.66],
+			["2022-01-31", 3833.33, 26999.99],
+			["2022-04-30", 2300.0, 29299.99],
+			["2022-07-31", 2300.0, 31599.99],
+			["2022-10-31", 2300.0, 33899.99],
+			["2023-01-31", 2300.0, 36199.99],
+			["2023-04-30", 1380.0, 37579.99],
+			["2023-07-31", 12420.01, 50000.0],
+		]
+		schedules = [
+			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
+			for d in get_depr_schedule(asset.name, "Draft")
+		]
+		self.assertEqual(schedules, expected_schedules)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -40,7 +40,11 @@
 					<p>
 						<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
 							class="btn btn-primary btn-sm" id="pay-for-order">
+<<<<<<< HEAD
 							{{ _("Pay", null, "Amount") }} {{ pay_amount }}
+=======
+							{{ _("Pay") }} {{ pay_amount }}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						</a>
 					</p>
 				</div>
@@ -72,7 +76,12 @@
 				</span>
 			</div>
 			<div class="text-right col-2">
+<<<<<<< HEAD
 				{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase Order'] else doc.customer_name %}
+=======
+				{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase
+				Order'] else doc.customer_name %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				<b>{{ party_name }}</b>
 
 				{% if doc.contact_display and doc.contact_display != party_name %}
@@ -172,11 +181,19 @@
 		<div class="col-xs-8 col-sm-10">
 			{{ d.item_code }}
 			<div class="text-muted small item-description">
+<<<<<<< HEAD
 				{{ html2text(d.description or  "") | truncate(140) }}
+=======
+				{{ html2text(d.description) | truncate(140) }}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			</div>
 			<span class="text-muted mt-2 d-l-n order-qty">
 				{{ _("Qty ") }}({{ d.get_formatted("qty") }})
 			</span>
 		</div>
 	</div>
+<<<<<<< HEAD
 {% endmacro %}
+=======
+{% endmacro %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

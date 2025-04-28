@@ -1,6 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+<<<<<<< HEAD
 import frappe
 from frappe.model.document import Document
 
@@ -9,6 +10,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import get_child_docs
 
+=======
+# import frappe
+from frappe.model.document import Document
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 class RepostAccountingLedgerSettings(Document):
 	# begin: auto-generated types
@@ -22,6 +28,7 @@ class RepostAccountingLedgerSettings(Document):
 		from erpnext.accounts.doctype.repost_allowed_types.repost_allowed_types import RepostAllowedTypes
 
 		allowed_types: DF.Table[RepostAllowedTypes]
+<<<<<<< HEAD
 
 	# end: auto-generated types
 	def validate(self):
@@ -43,3 +50,8 @@ def set_allow_on_submit_for_dimension_fields(doctypes):
 			df = meta.get_field(dimension)
 			if df and not df.allow_on_submit:
 				frappe.db.set_value("Custom Field", dt + "-" + dimension, "allow_on_submit", 1)
+=======
+	# end: auto-generated types
+
+	pass
+>>>>>>> 7c4cf3e834 (Favicon.svg)

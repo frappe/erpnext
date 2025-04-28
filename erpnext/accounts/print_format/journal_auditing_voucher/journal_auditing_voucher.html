@@ -44,7 +44,11 @@
             {% endfor %}
             <tr>
                     <td class="right" colspan="3" ><strong>Total (debit) </strong></td>
+<<<<<<< HEAD
                     <td class="left" >{{ gl | sum(attribute='debit') | round(2) }}</td>
+=======
+                    <td class="left" >{{ gl | sum(attribute='debit') }}</td>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
             </tr>
             <tr>
                     <td class="top-bottom" colspan="5"><strong>Credit</strong></td>
@@ -61,7 +65,11 @@
             {% endfor %}
             <tr>
                 <td class="right" colspan="3"><strong>Total (credit) </strong></td>
+<<<<<<< HEAD
                 <td class="left" >{{ gl | sum(attribute='credit') | round(2) }}</td>
+=======
+                <td class="left" >{{ gl | sum(attribute='credit') }}</td>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
             </tr>
             <tr>
                 <td class="top-bottom" colspan="5"><b>Narration: </b>{{ gl[0].remarks }}</td>

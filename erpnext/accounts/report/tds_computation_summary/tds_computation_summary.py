@@ -10,7 +10,11 @@ from erpnext.accounts.utils import get_fiscal_year
 
 def execute(filters=None):
 	if filters.get("party_type") == "Customer":
+<<<<<<< HEAD
 		party_naming_by = frappe.get_single_value("Selling Settings", "cust_master_name")
+=======
+		party_naming_by = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	else:
 		party_naming_by = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 

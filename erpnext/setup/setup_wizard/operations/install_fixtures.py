@@ -15,7 +15,18 @@ from frappe.utils import cstr, getdate
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
+<<<<<<< HEAD
 from erpnext.setup.utils import identity as _
+=======
+
+
+def _(x, *args, **kwargs):
+	"""Redefine the translation function to return the string as is.
+
+	We want to create english records but still mark the strings as translatable.
+	The respective DocTypes have 'Translate Link Fields' enabled."""
+	return x
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def read_lines(filename: str) -> list[str]:
@@ -115,6 +126,7 @@ def install(country=None):
 			"purpose": "Material Consumption for Manufacture",
 			"is_standard": 1,
 		},
+<<<<<<< HEAD
 		{
 			"doctype": "Stock Entry Type",
 			"name": _("Receive from Customer"),
@@ -139,6 +151,8 @@ def install(country=None):
 			"purpose": "Subcontracting Return",
 			"is_standard": 1,
 		},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		# territory: with two default territories, one for home country and one named Rest of the World
 		{
 			"doctype": "Territory",
@@ -290,6 +304,11 @@ def install(country=None):
 		{"doctype": "Issue Priority", "name": _("Low")},
 		{"doctype": "Issue Priority", "name": _("Medium")},
 		{"doctype": "Issue Priority", "name": _("High")},
+<<<<<<< HEAD
+=======
+		{"doctype": "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
+		{"doctype": "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		{"doctype": "Party Type", "party_type": "Customer", "account_type": "Receivable"},
 		{"doctype": "Party Type", "party_type": "Supplier", "account_type": "Payable"},
 		{"doctype": "Party Type", "party_type": "Employee", "account_type": "Payable"},
@@ -311,17 +330,24 @@ def install(country=None):
 		{"doctype": "Market Segment", "market_segment": _("Upper Income")},
 		# Warehouse Type
 		{"doctype": "Warehouse Type", "name": "Transit"},
+<<<<<<< HEAD
 		{"doctype": "Workstation Operating Component", "component_name": _("Electricity")},
 		{"doctype": "Workstation Operating Component", "component_name": _("Consumables")},
 		{"doctype": "Workstation Operating Component", "component_name": _("Rent")},
 		{"doctype": "Workstation Operating Component", "component_name": _("Wages")},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	]
 
 	for doctype, title_field, filename in (
 		("Designation", "designation_name", "designation.txt"),
 		("Sales Stage", "stage_name", "sales_stage.txt"),
 		("Industry Type", "industry", "industry_type.txt"),
+<<<<<<< HEAD
 		("UTM Source", "name", "marketing_source.txt"),
+=======
+		("Lead Source", "source_name", "lead_source.txt"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		("Sales Partner Type", "sales_partner_type", "sales_partner_type.txt"),
 	):
 		records += [{"doctype": doctype, title_field: title} for title in read_lines(filename)]
@@ -388,7 +414,11 @@ def add_uom_data():
 		if not frappe.db.exists("UOM", d.get("uom_name")):
 			doc = frappe.new_doc("UOM")
 			doc.update(d)
+<<<<<<< HEAD
 			doc.insert(ignore_permissions=True)
+=======
+			doc.save()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(
@@ -502,6 +532,7 @@ def install_defaults(args=None):  # nosemgrep
 	create_bank_account(args)
 
 
+<<<<<<< HEAD
 def set_global_defaults(kwargs):
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
 	company = frappe.db.get_value(
@@ -515,6 +546,16 @@ def set_global_defaults(kwargs):
 			"default_currency": kwargs.get("currency"),
 			"default_company": company,
 			"country": kwargs.get("country"),
+=======
+def set_global_defaults(args):
+	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
+
+	global_defaults.update(
+		{
+			"default_currency": args.get("currency"),
+			"default_company": args.get("company_name"),
+			"country": args.get("country"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	)
 
@@ -529,6 +570,7 @@ def update_stock_settings():
 	stock_settings.stock_uom = "Nos"
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
+<<<<<<< HEAD
 	stock_settings.update_price_list_based_on = "Rate"
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
 	stock_settings.flags.ignore_permissions = True
@@ -540,6 +582,15 @@ def create_bank_account(args, demo=False):
 		if not demo:
 			return
 		args["bank_account"] = _("Demo Bank Account")
+=======
+	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
+	stock_settings.save()
+
+
+def create_bank_account(args):
+	if not args.get("bank_account"):
+		args["bank_account"] = _("Bank Account")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	company_name = args.get("company_name")
 	bank_account_group = frappe.db.get_value(
@@ -572,7 +623,11 @@ def create_bank_account(args, demo=False):
 			return doc
 
 		except RootNotEditable:
+<<<<<<< HEAD
 			frappe.throw(frappe._("Bank account cannot be named as {0}").format(args.get("bank_account")))
+=======
+			frappe.throw(_("Bank account cannot be named as {0}").format(args.get("bank_account")))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		except frappe.DuplicateEntryError:
 			# bank account same as a CoA entry
 			pass

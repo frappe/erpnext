@@ -4,7 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:item_group_name",
  "creation": "2013-03-28 10:35:29",
+<<<<<<< HEAD
  "default_view": "Tree",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "description": "An Item Group is a way to classify items based on types.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -136,7 +139,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
+<<<<<<< HEAD
  "modified": "2025-01-22 10:46:09.450137",
+=======
+ "modified": "2024-08-16 19:20:36.401913",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

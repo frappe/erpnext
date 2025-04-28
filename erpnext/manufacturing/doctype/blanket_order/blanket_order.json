@@ -13,8 +13,11 @@
   "supplier",
   "supplier_name",
   "column_break_8",
+<<<<<<< HEAD
   "order_no",
   "order_date",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "from_date",
   "to_date",
   "company",
@@ -131,6 +134,7 @@
    "fieldname": "terms",
    "fieldtype": "Text Editor",
    "label": "Terms and Conditions Details"
+<<<<<<< HEAD
   },
   {
    "fieldname": "order_no",
@@ -142,16 +146,25 @@
    "fieldname": "order_date",
    "fieldtype": "Date",
    "label": "Order Date"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-12-05 15:44:21.520093",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order",
  "naming_rule": "By \"Naming Series\" field",
+=======
+ "modified": "2024-03-27 13:06:39.907810",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Blanket Order",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {

@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+<<<<<<< HEAD
   "naming_series",
   "budget_against",
   "company",
@@ -25,6 +26,17 @@
   "distribute_equally",
   "section_break_fpdt",
   "budget_distribution",
+=======
+  "budget_against",
+  "company",
+  "cost_center",
+  "naming_series",
+  "project",
+  "fiscal_year",
+  "column_break_3",
+  "monthly_distribution",
+  "amended_from",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_6",
   "applicable_on_material_request",
   "action_if_annual_budget_exceeded_on_mr",
@@ -37,12 +49,17 @@
   "applicable_on_booking_actual_expenses",
   "action_if_annual_budget_exceeded",
   "action_if_accumulated_monthly_budget_exceeded",
+<<<<<<< HEAD
   "control_action_for_cumulative_expense_section",
   "applicable_on_cumulative_expense",
   "action_if_annual_exceeded_on_cumulative_expense",
   "action_if_accumulated_monthly_exceeded_on_cumulative_expense",
   "section_break_kkan",
   "revision_of"
+=======
+  "section_break_21",
+  "accounts"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -53,7 +70,10 @@
    "in_standard_filter": 1,
    "label": "Budget Against",
    "options": "\nCost Center\nProject",
+<<<<<<< HEAD
    "read_only_depends_on": "eval: doc.revision_of",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -63,7 +83,10 @@
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
+<<<<<<< HEAD
    "read_only_depends_on": "eval: doc.revision_of",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -73,8 +96,12 @@
    "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Cost Center",
+<<<<<<< HEAD
    "options": "Cost Center",
    "read_only_depends_on": "eval: doc.revision_of"
+=======
+   "options": "Cost Center"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "depends_on": "eval:doc.budget_against == 'Project'",
@@ -82,14 +109,37 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Project",
+<<<<<<< HEAD
    "options": "Project",
    "read_only_depends_on": "eval: doc.revision_of"
+=======
+   "options": "Project"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fiscal Year",
+   "options": "Fiscal Year",
+   "reqd": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
+=======
+   "depends_on": "eval:in_list([\"Stop\", \"Warn\"], doc.action_if_accumulated_monthly_budget_exceeded_on_po || doc.action_if_accumulated_monthly_budget_exceeded_on_mr || doc.action_if_accumulated_monthly_budget_exceeded_on_actual)",
+   "fieldname": "monthly_distribution",
+   "fieldtype": "Link",
+   "label": "Monthly Distribution",
+   "options": "Monthly Distribution"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -184,6 +234,7 @@
    "options": "\nStop\nWarn\nIgnore"
   },
   {
+<<<<<<< HEAD
    "default": "BUDGET-.########",
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -310,6 +361,33 @@
  "is_submittable": 1,
  "links": [],
  "modified": "2025-11-19 17:00:00.648224",
+=======
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Budget Accounts",
+   "options": "Budget Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Series",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "set_only_once": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:42.675933",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",
@@ -333,9 +411,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

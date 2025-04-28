@@ -11,7 +11,10 @@ frappe.listview_settings["Purchase Order"] = {
 		"advance_payment_status",
 	],
 	get_indicator: function (doc) {
+<<<<<<< HEAD
 		// Please do not add precision in the flt function
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
 		} else if (doc.status === "On Hold") {
@@ -20,6 +23,7 @@ frappe.listview_settings["Purchase Order"] = {
 			return [__("Delivered"), "green", "status,=,Closed"];
 		} else if (doc.advance_payment_status == "Initiated") {
 			return [__("To Pay"), "gray", "advance_payment_status,=,Initiated"];
+<<<<<<< HEAD
 		} else if (flt(doc.per_received) < 100 && doc.status !== "Closed") {
 			if (flt(doc.per_billed) < 100) {
 				return [
@@ -46,6 +50,30 @@ frappe.listview_settings["Purchase Order"] = {
 				"green",
 				"per_received,=,100|per_billed,=,100|status,!=,Closed|docstatus,=,1",
 			];
+=======
+		} else if (flt(doc.per_received, 2) < 100 && doc.status !== "Closed") {
+			if (flt(doc.per_billed, 2) < 100) {
+				return [
+					__("To Receive and Bill"),
+					"orange",
+					"per_received,<,100|per_billed,<,100|status,!=,Closed",
+				];
+			} else {
+				return [__("To Receive"), "orange", "per_received,<,100|per_billed,=,100|status,!=,Closed"];
+			}
+		} else if (
+			flt(doc.per_received, 2) >= 100 &&
+			flt(doc.per_billed, 2) < 100 &&
+			doc.status !== "Closed"
+		) {
+			return [__("To Bill"), "orange", "per_received,=,100|per_billed,<,100|status,!=,Closed"];
+		} else if (
+			flt(doc.per_received, 2) >= 100 &&
+			flt(doc.per_billed, 2) == 100 &&
+			doc.status !== "Closed"
+		) {
+			return [__("Completed"), "green", "per_received,=,100|per_billed,=,100|status,!=,Closed"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	},
 	onload: function (listview) {
@@ -59,6 +87,7 @@ frappe.listview_settings["Purchase Order"] = {
 			listview.call_for_selected_items(method, { status: "Submitted" });
 		});
 
+<<<<<<< HEAD
 		if (frappe.model.can_create("Purchase Invoice")) {
 			listview.page.add_action_item(__("Purchase Invoice"), () => {
 				erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Purchase Invoice");
@@ -76,5 +105,18 @@ frappe.listview_settings["Purchase Order"] = {
 				erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Payment Entry");
 			});
 		}
+=======
+		listview.page.add_action_item(__("Purchase Invoice"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Purchase Invoice");
+		});
+
+		listview.page.add_action_item(__("Purchase Receipt"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Purchase Receipt");
+		});
+
+		listview.page.add_action_item(__("Advance Payment"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Payment Entry");
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 };

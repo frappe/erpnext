@@ -12,7 +12,11 @@ frappe.ui.form.on("Accounts Settings", {
 		msg += " ";
 		msg += __("Please enable only if the understand the effects of enabling this.");
 		msg += "<br>";
+<<<<<<< HEAD
 		msg += __("Do you still want to enable immutable ledger?");
+=======
+		msg += "Do you still want to enable immutable ledger?";
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		frappe.confirm(
 			msg,
@@ -22,6 +26,7 @@ frappe.ui.form.on("Accounts Settings", {
 			}
 		);
 	},
+<<<<<<< HEAD
 
 	add_taxes_from_taxes_and_charges_template(frm) {
 		toggle_tax_settings(frm, "add_taxes_from_taxes_and_charges_template");
@@ -51,3 +56,6 @@ function toggle_tax_settings(frm, field_name) {
 		frm.set_value(other_field, 0);
 	}
 }
+=======
+});
+>>>>>>> 7c4cf3e834 (Favicon.svg)

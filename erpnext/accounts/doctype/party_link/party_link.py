@@ -74,6 +74,10 @@ def create_party_link(primary_role, primary_party, secondary_party):
 	party_link.secondary_role = "Customer" if primary_role == "Supplier" else "Supplier"
 	party_link.secondary_party = secondary_party
 
+<<<<<<< HEAD
 	party_link.save()
+=======
+	party_link.save(ignore_permissions=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return party_link

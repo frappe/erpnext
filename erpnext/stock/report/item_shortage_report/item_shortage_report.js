@@ -16,7 +16,10 @@ frappe.query_reports["Item Shortage Report"] = {
 			fieldname: "warehouse",
 			label: __("Warehouse"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: "Warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			width: "100",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Warehouse", txt);

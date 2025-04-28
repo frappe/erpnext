@@ -5,10 +5,16 @@
 from typing import TYPE_CHECKING, overload
 
 import frappe
+<<<<<<< HEAD
 from frappe.utils import cint, flt, today
 
 import erpnext
 from erpnext.stock.utils import get_combine_datetime
+=======
+from frappe.utils import cint, flt
+
+import erpnext
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -77,9 +83,12 @@ def make_stock_entry(**args):
 	if args.inspection_required:
 		s.inspection_required = args.inspection_required
 
+<<<<<<< HEAD
 	if not args.posting_date:
 		s.posting_date = today()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# map names
 	if args.from_warehouse:
 		args.source = args.from_warehouse
@@ -115,7 +124,11 @@ def make_stock_entry(**args):
 			args.company = frappe.db.get_value("Warehouse", args.target, "company")
 
 	# set vales from test
+<<<<<<< HEAD
 	if frappe.in_test:
+=======
+	if frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not args.company:
 			args.company = "_Test Company"
 		if not args.item:
@@ -144,10 +157,13 @@ def make_stock_entry(**args):
 		elif args.batches:
 			batches = args.batches
 
+<<<<<<< HEAD
 		posting_datetime = None
 		if s.posting_date and s.posting_time:
 			posting_datetime = get_combine_datetime(s.posting_date, s.posting_time)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		bundle_id = (
 			SerialBatchCreation(
 				{
@@ -159,7 +175,12 @@ def make_stock_entry(**args):
 					"serial_nos": args.serial_no,
 					"type_of_transaction": "Outward" if args.source else "Inward",
 					"company": s.company,
+<<<<<<< HEAD
 					"posting_datetime": posting_datetime,
+=======
+					"posting_date": s.posting_date,
+					"posting_time": s.posting_time,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"rate": args.rate or args.basic_rate,
 					"do_not_submit": True,
 				}

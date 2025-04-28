@@ -28,10 +28,13 @@ frappe.ui.form.on("Request for Quotation", {
 				is_group: 0,
 			},
 		}));
+<<<<<<< HEAD
 
 		frm.set_indicator_formatter("item_code", function (doc) {
 			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	onload: function (frm) {
@@ -150,14 +153,20 @@ frappe.ui.form.on("Request for Quotation", {
 								return;
 							}
 						},
+<<<<<<< HEAD
 						__("Download PDF for Supplier"),
 						__("Download")
+=======
+						"Download PDF for Supplier",
+						"Download"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					);
 				},
 				__("Tools")
 			);
 
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
+<<<<<<< HEAD
 
 			frm.add_custom_button(
 				__("Supplier Quotation Comparison"),
@@ -185,6 +194,9 @@ frappe.ui.form.on("Request for Quotation", {
 			request_for_quotation: frm.doc.name,
 		};
 		frappe.set_route("query-report", "Supplier Quotation Comparison");
+=======
+		}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	make_supplier_quotation: function (frm) {
@@ -302,10 +314,16 @@ frappe.ui.form.on("Request for Quotation", {
 			});
 		};
 
+<<<<<<< HEAD
 		const msg = __(
 			"This is a preview of the email to be sent. A PDF of the document will automatically be attached with the email."
 		);
 		dialog.fields_dict.note.$wrapper.append(`<p class="small text-muted">${msg}</p>`);
+=======
+		dialog.fields_dict.note.$wrapper
+			.append(`<p class="small text-muted">This is a preview of the email to be sent. A PDF of the document will
+			automatically be attached with the email.</p>`);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		dialog.show();
 	},

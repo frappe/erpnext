@@ -10,12 +10,15 @@ on:
       - "**.md"
       - "**.html"
       - "**.csv"
+<<<<<<< HEAD
       - 'crowdin.yml'
       - '.coderabbit.yml'
       - '.mergify.yml'
 
 permissions:
   contents: read
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 jobs:
   test:

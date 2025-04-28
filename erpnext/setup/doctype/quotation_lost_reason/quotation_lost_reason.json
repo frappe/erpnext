@@ -32,7 +32,11 @@
    "table_fieldname": "lost_reasons"
   }
  ],
+<<<<<<< HEAD
  "modified": "2024-12-10 08:21:38.280627",
+=======
+ "modified": "2024-03-27 13:10:31.419151",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Quotation Lost Reason",
@@ -49,6 +53,7 @@
    "role": "Sales Master Manager",
    "share": 1,
    "write": 1
+<<<<<<< HEAD
   },
   {
    "read": 1,
@@ -65,6 +70,8 @@
   {
    "read": 1,
    "role": "Maintenance Manager"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "quick_entry": 1,

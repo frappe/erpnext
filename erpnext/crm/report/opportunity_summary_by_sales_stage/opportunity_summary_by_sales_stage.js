@@ -31,7 +31,10 @@ frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: ["Open", "Converted", "Quotation", "Replied"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			get_data: function () {
 				return [
 					{ value: "Open", description: "Status" },
@@ -45,7 +48,11 @@ frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 			fieldname: "opportunity_source",
 			label: __("Opportunity Source"),
 			fieldtype: "Link",
+<<<<<<< HEAD
 			options: "UTM Source",
+=======
+			options: "Lead Source",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "opportunity_type",

@@ -263,7 +263,10 @@ def get_actual_details(name, filters):
 				and ba.account=gl.account
 				and b.{budget_against} = gl.{budget_against}
 				and gl.fiscal_year between %s and %s
+<<<<<<< HEAD
 				and gl.is_cancelled = 0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				and b.{budget_against} = %s
 				and exists(
 					select

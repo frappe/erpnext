@@ -6,9 +6,15 @@
  "engine": "InnoDB",
  "field_order": [
   "sub_operation",
+<<<<<<< HEAD
   "completed_qty",
   "completed_time",
   "status"
+=======
+  "completed_time",
+  "status",
+  "completed_qty"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -39,7 +45,10 @@
   {
    "fieldname": "completed_qty",
    "fieldtype": "Float",
+<<<<<<< HEAD
    "in_list_view": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Completed Qty",
    "read_only": 1
   }
@@ -47,16 +56,27 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-20 21:44:43.941434",
+=======
+ "modified": "2024-03-27 13:09:57.090298",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Operation",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -44,7 +44,11 @@ class SalesPartner(WebsiteGenerator):
 		load_address_and_contact(self)
 
 	def autoname(self):
+<<<<<<< HEAD
 		pass
+=======
+		self.name = self.partner_name
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate(self):
 		if not self.route:

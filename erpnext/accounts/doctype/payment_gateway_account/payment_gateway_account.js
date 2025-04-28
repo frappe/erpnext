@@ -8,6 +8,7 @@ frappe.ui.form.on("Payment Gateway Account", {
 			frm.set_df_property("payment_gateway", "read_only", 1);
 		}
 	},
+<<<<<<< HEAD
 
 	setup(frm) {
 		frm.set_query("payment_account", function () {
@@ -18,4 +19,6 @@ frappe.ui.form.on("Payment Gateway Account", {
 			};
 		});
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

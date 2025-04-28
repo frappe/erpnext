@@ -3,7 +3,11 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
 import erpnext
@@ -14,7 +18,11 @@ from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 from erpnext.tests.utils import create_test_contact_and_address
 
 
+<<<<<<< HEAD
 class TestDeliveryTrip(IntegrationTestCase):
+=======
+class TestDeliveryTrip(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		super().setUp()
 		driver = create_driver()

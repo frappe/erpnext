@@ -7,6 +7,13 @@ from erpnext.controllers.taxes_and_totals import get_itemised_tax
 
 
 def update_itemised_tax_data(doc):
+<<<<<<< HEAD
+=======
+	# maybe this should be a standard function rather than a regional one
+	if not doc.taxes:
+		return
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if not doc.items:
 		return
 
@@ -14,6 +21,7 @@ def update_itemised_tax_data(doc):
 	if not meta.has_field("tax_rate"):
 		return
 
+<<<<<<< HEAD
 	itemised_tax = get_itemised_tax(doc)
 
 	def determine_if_export(doc):
@@ -38,6 +46,9 @@ def update_itemised_tax_data(doc):
 		return False
 
 	is_export = determine_if_export(doc)
+=======
+	itemised_tax = get_itemised_tax(doc.taxes)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	for row in doc.items:
 		tax_rate, tax_amount = 0.0, 0.0
@@ -49,9 +60,12 @@ def update_itemised_tax_data(doc):
 				tax_amount += flt((row.net_amount * _tax_rate) / 100, row.precision("tax_amount"))
 				tax_rate += _tax_rate
 
+<<<<<<< HEAD
 		if not tax_rate or row.get("is_zero_rated"):
 			row.is_zero_rated = is_export or frappe.get_cached_value("Item", row.item_code, "is_zero_rated")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
 		row.tax_amount = flt(tax_amount, row.precision("tax_amount"))
 		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
@@ -79,7 +93,11 @@ def get_tax_accounts(company):
 	tax_accounts_dict = frappe._dict()
 	tax_accounts_list = frappe.get_all("UAE VAT Account", filters={"parent": company}, fields=["Account"])
 
+<<<<<<< HEAD
 	if not tax_accounts_list and not frappe.in_test:
+=======
+	if not tax_accounts_list and not frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.throw(_('Please set Vat Accounts for Company: "{0}" in UAE VAT Settings').format(company))
 	for tax_account in tax_accounts_list:
 		for _account, name in tax_account.items():

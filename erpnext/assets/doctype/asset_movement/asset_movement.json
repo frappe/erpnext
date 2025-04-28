@@ -33,7 +33,11 @@
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
+<<<<<<< HEAD
    "options": "\nIssue\nReceipt\nTransfer\nTransfer and Issue",
+=======
+   "options": "\nIssue\nReceipt\nTransfer",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -93,11 +97,18 @@
    "fieldtype": "Column Break"
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
  "modified": "2025-05-30 17:01:55.864353",
+=======
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:35.116228",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
@@ -150,8 +161,15 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

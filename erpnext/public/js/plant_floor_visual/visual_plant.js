@@ -152,6 +152,7 @@ class VisualPlantFloor {
 			this.render_plant_visualization();
 		});
 	}
+<<<<<<< HEAD
 
 	update_status(data) {
 		let workstation_card$ = this.wrapper.find(`.workstation-wrapper[data-workstation="${data.name}"]`);
@@ -182,6 +183,8 @@ class VisualPlantFloor {
 		workstation_card$.find(".indicator-pill").addClass(data.color);
 		workstation_card$.find(".workstation-status-title").text(data.status);
 	}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 }
 
 frappe.ui.VisualPlantFloor = VisualPlantFloor;

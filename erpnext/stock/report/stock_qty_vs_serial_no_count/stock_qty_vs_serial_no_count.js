@@ -24,11 +24,14 @@ frappe.query_reports["Stock Qty vs Serial No Count"] = {
 			},
 			reqd: 1,
 		},
+<<<<<<< HEAD
 		{
 			fieldname: "show_disabled_items",
 			label: __("Show Disabled Items"),
 			fieldtype: "Check",
 		},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	],
 
 	formatter: function (value, row, column, data, default_formatter) {

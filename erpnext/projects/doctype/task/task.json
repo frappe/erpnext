@@ -245,7 +245,10 @@
    "fieldname": "act_start_date",
    "fieldtype": "Date",
    "label": "Actual Start Date (via Timesheet)",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "act_start_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -254,7 +257,10 @@
    "fieldname": "actual_time",
    "fieldtype": "Float",
    "label": "Actual Time in Hours (via Timesheet)",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -265,7 +271,10 @@
    "fieldname": "act_end_date",
    "fieldtype": "Date",
    "label": "Actual End Date (via Timesheet)",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "act_end_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -280,7 +289,10 @@
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
    "label": "Total Costing Amount (via Timesheet)",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "actual_budget",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -294,7 +306,10 @@
    "fieldname": "total_billing_amount",
    "fieldtype": "Currency",
    "label": "Total Billable Amount (via Timesheet)",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -404,7 +419,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
+<<<<<<< HEAD
  "modified": "2025-10-16 08:39:12.214577",
+=======
+ "modified": "2024-05-24 12:36:12.214577",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

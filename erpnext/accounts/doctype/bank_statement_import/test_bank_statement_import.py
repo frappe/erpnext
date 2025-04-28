@@ -1,6 +1,7 @@
 # Copyright (c) 2020, Frappe Technologies and Contributors
 # See license.txt
 
+<<<<<<< HEAD
 import unittest
 
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
@@ -207,3 +208,11 @@ class TestBankStatementImport(unittest.TestCase):
 		mt940_content = "   :28C:167619/1\n"
 		result = preprocess_mt940_content(mt940_content)
 		self.assertEqual(result, mt940_content)  # Should remain unchanged
+=======
+# import frappe
+import unittest
+
+
+class TestBankStatementImport(unittest.TestCase):
+	pass
+>>>>>>> 7c4cf3e834 (Favicon.svg)

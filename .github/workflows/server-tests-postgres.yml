@@ -6,18 +6,24 @@ on:
       - '**.js'
       - '**.md'
       - '**.html'
+<<<<<<< HEAD
       - 'crowdin.yml'
       - '.coderabbit.yml'
       - '.mergify.yml'
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
     types: [opened, labelled, synchronize, reopened]
 
 concurrency:
   group: server-postgres-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
+<<<<<<< HEAD
 permissions:
   contents: read
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 jobs:
   test:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'postgres') }}
@@ -56,7 +62,11 @@ jobs:
 
       - name: Check for valid Python & Merge Conflicts
         run: |
+<<<<<<< HEAD
           python -m compileall -fq "${GITHUB_WORKSPACE}"
+=======
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
           if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
               then echo "Found merge conflicts"
               exit 1
@@ -94,7 +104,11 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
+<<<<<<< HEAD
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+=======
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
       - uses: actions/cache@v4
         id: yarn-cache

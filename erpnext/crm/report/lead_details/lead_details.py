@@ -37,7 +37,11 @@ def get_columns():
 			"options": "Territory",
 			"width": 100,
 		},
+<<<<<<< HEAD
 		{"label": _("Source"), "fieldname": "utm_source", "fieldtype": "Data", "width": 120},
+=======
+		{"label": _("Source"), "fieldname": "source", "fieldtype": "Data", "width": 120},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		{"label": _("Email"), "fieldname": "email_id", "fieldtype": "Data", "width": 120},
 		{"label": _("Mobile"), "fieldname": "mobile_no", "fieldtype": "Data", "width": 120},
 		{"label": _("Phone"), "fieldname": "phone", "fieldtype": "Data", "width": 120},
@@ -55,6 +59,7 @@ def get_columns():
 			"options": "Company",
 			"width": 120,
 		},
+<<<<<<< HEAD
 		{"label": _("Address"), "fieldname": "address", "fieldtype": "Data", "width": 130},
 		{"label": _("Postal Code"), "fieldname": "pincode", "fieldtype": "Data", "width": 90},
 		{"label": _("City"), "fieldname": "city", "fieldtype": "Data", "width": 100},
@@ -62,6 +67,14 @@ def get_columns():
 		{
 			"label": _("Country"),
 			"fieldname": "country",
+=======
+		{"fieldname": "address", "label": _("Address"), "fieldtype": "Data", "width": 130},
+		{"fieldname": "state", "label": _("State"), "fieldtype": "Data", "width": 100},
+		{"fieldname": "pincode", "label": _("Postal Code"), "fieldtype": "Data", "width": 90},
+		{
+			"fieldname": "country",
+			"label": _("Country"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"fieldtype": "Link",
 			"options": "Country",
 			"width": 100,
@@ -87,16 +100,25 @@ def get_data(filters):
 			lead.status,
 			lead.lead_owner,
 			lead.territory,
+<<<<<<< HEAD
 			lead.utm_source,
+=======
+			lead.source,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			lead.email_id,
 			lead.mobile_no,
 			lead.phone,
 			lead.owner,
 			lead.company,
 			(Concat_ws(", ", address.address_line1, address.address_line2)).as_("address"),
+<<<<<<< HEAD
 			address.pincode,
 			address.city,
 			address.state,
+=======
+			address.state,
+			address.pincode,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			address.country,
 		)
 		.where(lead.company == filters.company)

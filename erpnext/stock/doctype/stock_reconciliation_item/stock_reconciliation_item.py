@@ -36,7 +36,10 @@ class StockReconciliationItem(Document):
 		reconcile_all_serial_batch: DF.Check
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.LongText | None
+<<<<<<< HEAD
 		stock_uom: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency
 		warehouse: DF.Link

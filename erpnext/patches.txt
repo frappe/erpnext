@@ -107,6 +107,10 @@ erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
 erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
 erpnext.patches.v12_0.rename_bank_account_field_in_journal_entry_account
+<<<<<<< HEAD
+=======
+erpnext.patches.v12_0.create_default_energy_point_rules
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 erpnext.patches.v12_0.set_produced_qty_field_in_sales_order_for_work_order
 erpnext.patches.v12_0.set_cwip_and_delete_asset_settings
 erpnext.patches.v12_0.set_expense_account_in_landed_cost_voucher_taxes
@@ -259,12 +263,17 @@ erpnext.patches.v14_0.show_loan_management_deprecation_warning
 erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Details", force=True)
 erpnext.patches.v14_0.update_proprietorship_to_individual
+<<<<<<< HEAD
 erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
 erpnext.patches.v16_0.create_company_custom_fields
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
+=======
+
+[post_model_sync]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
 erpnext.patches.v14_0.update_posting_datetime_and_dropped_indexes #22-02-2024
@@ -316,11 +325,18 @@ erpnext.patches.v13_0.update_docs_link
 erpnext.patches.v15_0.update_asset_value_for_manual_depr_entries
 erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
+<<<<<<< HEAD
 erpnext.patches.v14_0.set_period_start_end_date_in_pcv
 erpnext.patches.v14_0.update_closing_balances #20-12-2024
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
 erpnext.patches.v14_0.update_subscription_details # 23-07-2025
+=======
+erpnext.patches.v14_0.update_closing_balances #14-07-2023
+execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
+erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
+erpnext.patches.v14_0.update_subscription_details
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 execute:frappe.delete_doc("Report", "Tax Detail", force=True)
 erpnext.patches.v15_0.enable_all_leads
 erpnext.patches.v14_0.update_company_in_ldc
@@ -359,12 +375,19 @@ execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency"
 execute:frappe.db.set_default("date_format", frappe.db.get_single_value("System Settings", "date_format"))
 erpnext.patches.v14_0.update_total_asset_cost_field
 erpnext.patches.v15_0.create_advance_payment_status
+<<<<<<< HEAD
 erpnext.patches.v15_0.allow_on_submit_dimensions_for_repostable_doctypes #2025-06-19
+=======
+erpnext.patches.v15_0.allow_on_submit_dimensions_for_repostable_doctypes
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 erpnext.patches.v14_0.create_accounting_dimensions_in_reconciliation_tool
 erpnext.patches.v14_0.update_flag_for_return_invoices #2024-03-22
 erpnext.patches.v15_0.create_accounting_dimensions_in_payment_request
 erpnext.patches.v14_0.update_pos_return_ledger_entries #2024-08-16
+<<<<<<< HEAD
 erpnext.patches.v15_0.create_advance_payment_ledger_records #2025-07-08
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20
@@ -380,13 +403,17 @@ erpnext.patches.v15_0.update_warehouse_field_in_asset_repair_consumed_item_docty
 erpnext.patches.v15_0.update_asset_repair_field_in_stock_entry
 erpnext.patches.v15_0.update_total_number_of_booked_depreciations
 erpnext.patches.v15_0.do_not_use_batchwise_valuation
+<<<<<<< HEAD
 erpnext.patches.v15_0.update_invoice_remarks
 erpnext.patches.v14_0.update_reports_with_range
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 erpnext.patches.v15_0.drop_index_posting_datetime_from_sle
 erpnext.patches.v15_0.add_disassembly_order_stock_entry_type #1
 erpnext.patches.v15_0.set_standard_stock_entry_type
 erpnext.patches.v15_0.set_difference_amount_in_asset_value_adjustment
 erpnext.patches.v15_0.link_purchase_item_to_asset_doc
+<<<<<<< HEAD
 erpnext.patches.v15_0.migrate_to_utm_analytics
 erpnext.patches.v15_0.update_sub_voucher_type_in_gl_entries
 erpnext.patches.v15_0.update_task_assignee_email_field_in_asset_maintenance_log
@@ -449,3 +476,5 @@ erpnext.patches.v16_0.set_company_wise_warehouses
 erpnext.patches.v16_0.set_valuation_method_on_companies
 erpnext.patches.v15_0.migrate_old_item_wise_tax_detail_data_to_table
 erpnext.patches.v16_0.migrate_budget_records_to_new_structure
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

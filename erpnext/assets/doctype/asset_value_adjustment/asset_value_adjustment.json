@@ -54,8 +54,13 @@
    "fieldname": "journal_entry",
    "fieldtype": "Link",
    "label": "Journal Entry",
+<<<<<<< HEAD
    "no_copy": 1,
    "options": "Journal Entry",
+=======
+   "options": "Journal Entry",
+   "no_copy": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -125,18 +130,31 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "fieldname": "difference_account",
    "fieldtype": "Link",
    "label": "Difference Account",
    "no_copy": 1,
    "options": "Account",
    "reqd": 1
+=======
+    "fieldname": "difference_account",
+    "fieldtype": "Link",
+    "label": "Difference Account",
+    "no_copy": 1,
+    "options": "Account",
+    "reqd": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-12-18 15:04:18.726505",
+=======
+ "modified": "2024-08-13 16:21:18.639208",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Value Adjustment",
@@ -188,6 +206,10 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
+=======
+ "quick_entry": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

@@ -1,9 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import now
 
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
@@ -11,7 +18,11 @@ from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
+<<<<<<< HEAD
 class TestAssetMovement(IntegrationTestCase):
+=======
+class TestAssetMovement(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		frappe.db.set_value(
 			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
@@ -88,7 +99,11 @@ class TestAssetMovement(IntegrationTestCase):
 		)
 
 		# after issuing, asset should belong to an employee not at a location
+<<<<<<< HEAD
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
+=======
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), None)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "custodian"), employee)
 
 		create_asset_movement(

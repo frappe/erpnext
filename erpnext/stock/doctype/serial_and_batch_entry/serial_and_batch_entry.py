@@ -1,7 +1,11 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+<<<<<<< HEAD
 import frappe
+=======
+# import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.model.document import Document
 
 
@@ -22,6 +26,7 @@ class SerialandBatchEntry(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+<<<<<<< HEAD
 		posting_datetime: DF.Datetime | None
 		qty: DF.Float
 		reference_for_reservation: DF.Data | None
@@ -32,11 +37,20 @@ class SerialandBatchEntry(Document):
 		voucher_detail_no: DF.Data | None
 		voucher_no: DF.Data | None
 		voucher_type: DF.Data | None
+=======
+		qty: DF.Float
+		serial_no: DF.Link | None
+		stock_queue: DF.SmallText | None
+		stock_value_difference: DF.Float
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
 	pass
+<<<<<<< HEAD
 
 
 def on_doctype_update():
 	frappe.db.add_index("Serial and Batch Entry", ["warehouse", "batch_no", "posting_datetime"])
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

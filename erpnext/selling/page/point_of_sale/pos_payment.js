@@ -1,11 +1,17 @@
 /* eslint-disable no-unused-vars */
 erpnext.PointOfSale.Payment = class {
+<<<<<<< HEAD
 	constructor({ events, wrapper, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.set_gt_to_default_mop = settings.set_grand_total_to_default_mop;
 		this.invoice_fields = settings.invoice_fields;
 		this.allow_partial_payment = settings.allow_partial_payment;
+=======
+	constructor({ events, wrapper }) {
+		this.wrapper = wrapper;
+		this.events = events;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		this.init_component();
 	}
@@ -20,6 +26,7 @@ erpnext.PointOfSale.Payment = class {
 	prepare_dom() {
 		this.wrapper.append(
 			`<section class="payment-container">
+<<<<<<< HEAD
 				<div class="payment-split-container">
 					<div class="payment-container-left">
 						<div class="section-label payment-section">${__("Payment Method")}</div>
@@ -37,6 +44,16 @@ erpnext.PointOfSale.Payment = class {
 							<div class="number-pad"></div>
 						</div>
 					</div>
+=======
+				<div class="section-label payment-section">${__("Payment Method")}</div>
+				<div class="payment-modes"></div>
+				<div class="fields-numpad-container">
+					<div class="fields-section">
+						<div class="section-label">${__("Additional Information")}</div>
+						<div class="invoice-fields"></div>
+					</div>
+					<div class="number-pad"></div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				</div>
 				<div class="totals-section">
 					<div class="totals"></div>
@@ -52,6 +69,7 @@ erpnext.PointOfSale.Payment = class {
 		this.$invoice_fields_section = this.$component.find(".fields-section");
 	}
 
+<<<<<<< HEAD
 	make_invoice_field_dialog() {
 		const me = this;
 		if (!me.invoice_fields.length) return;
@@ -113,6 +131,46 @@ erpnext.PointOfSale.Payment = class {
 		this.$invoice_fields_section.find(".addl-fields").removeClass("hidden");
 		this.$invoice_fields_section.find(".addl-fields").on("click", () => {
 			this.addl_dlg.show();
+=======
+	make_invoice_fields_control() {
+		frappe.db.get_doc("POS Settings", undefined).then((doc) => {
+			const fields = doc.invoice_fields;
+			if (!fields.length) return;
+
+			this.$invoice_fields = this.$invoice_fields_section.find(".invoice-fields");
+			this.$invoice_fields.html("");
+			const frm = this.events.get_frm();
+
+			fields.forEach((df) => {
+				this.$invoice_fields.append(
+					`<div class="invoice_detail_field ${df.fieldname}-field" data-fieldname="${df.fieldname}"></div>`
+				);
+				let df_events = {
+					onchange: function () {
+						frm.set_value(this.df.fieldname, this.get_value());
+					},
+				};
+				if (df.fieldtype == "Button") {
+					df_events = {
+						click: function () {
+							if (frm.script_manager.has_handlers(df.fieldname, frm.doc.doctype)) {
+								frm.script_manager.trigger(df.fieldname, frm.doc.doctype, frm.doc.docname);
+							}
+						},
+					};
+				}
+
+				this[`${df.fieldname}_field`] = frappe.ui.form.make_control({
+					df: {
+						...df,
+						...df_events,
+					},
+					parent: this.$invoice_fields.find(`.${df.fieldname}-field`),
+					render_input: true,
+				});
+				this[`${df.fieldname}_field`].set_value(frm.doc[df.fieldname]);
+			});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 	}
 
@@ -130,13 +188,18 @@ erpnext.PointOfSale.Payment = class {
 				[1, 2, 3],
 				[4, 5, 6],
 				[7, 8, 9],
+<<<<<<< HEAD
 				["+/-", 0, "Delete"],
+=======
+				[".", 0, "Delete"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			],
 		});
 
 		this.numpad_value = "";
 	}
 
+<<<<<<< HEAD
 	on_numpad_clicked($btn, from_numpad = true) {
 		const button_value = from_numpad ? $btn.attr("data-button-value") : $btn;
 
@@ -175,6 +238,16 @@ erpnext.PointOfSale.Payment = class {
 		valid_input && frappe.utils.play_sound("numpad-touch");
 
 		this.selected_mode.set_value(this.numpad_value / 10 ** precision);
+=======
+	on_numpad_clicked($btn) {
+		const button_value = $btn.attr("data-button-value");
+
+		highlight_numpad_btn($btn);
+		this.numpad_value =
+			button_value === "delete" ? this.numpad_value.slice(0, -1) : this.numpad_value + button_value;
+		this.selected_mode.$input.get(0).focus();
+		this.selected_mode.set_value(this.numpad_value);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		function highlight_numpad_btn($btn) {
 			$btn.addClass("shadow-base-inner bg-selected");
@@ -192,35 +265,61 @@ erpnext.PointOfSale.Payment = class {
 			// if clicked element doesn't have .mode-of-payment class then return
 			if (!$(e.target).is(mode_clicked)) return;
 
+<<<<<<< HEAD
+=======
+			const scrollLeft =
+				mode_clicked.offset().left - me.$payment_modes.offset().left + me.$payment_modes.scrollLeft();
+			me.$payment_modes.animate({ scrollLeft });
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			const mode = mode_clicked.attr("data-mode");
 
 			// hide all control fields and shortcuts
 			$(`.mode-of-payment-control`).css("display", "none");
+<<<<<<< HEAD
+=======
+			$(`.cash-shortcuts`).css("display", "none");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			me.$payment_modes.find(`.pay-amount`).css("display", "inline");
 			me.$payment_modes.find(`.loyalty-amount-name`).css("display", "none");
 
 			// remove highlight from all mode-of-payments
 			$(".mode-of-payment").removeClass("border-primary");
 
+<<<<<<< HEAD
 			me.hide_zero_amount();
 
 			if (me.selected_mode?._label === me[`${mode}_control`]?._label) {
+=======
+			if (mode_clicked.hasClass("border-primary")) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				// clicked one is selected then unselect it
 				mode_clicked.removeClass("border-primary");
 				me.selected_mode = "";
 			} else {
 				// clicked one is not selected then select it
 				mode_clicked.addClass("border-primary");
+<<<<<<< HEAD
 
 				me.selected_mode = me[`${mode}_control`];
 				const mode_clicked_amount = mode_clicked.find(`.${mode}-amount`).get(0);
 				if (!mode_clicked_amount.innerHTML) {
 					mode_clicked_amount.innerHTML = format_currency(0, me.events.get_frm().doc.currency);
 				}
+=======
+				mode_clicked.find(".mode-of-payment-control").css("display", "flex");
+				mode_clicked.find(".cash-shortcuts").css("display", "grid");
+				me.$payment_modes.find(`.${mode}-amount`).css("display", "none");
+				me.$payment_modes.find(`.${mode}-name`).css("display", "inline");
+
+				me.selected_mode = me[`${mode}_control`];
+				me.selected_mode && me.selected_mode.$input.get(0).focus();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				me.auto_set_remaining_amount();
 			}
 		});
 
+<<<<<<< HEAD
 		// change payment amount for selected mode on key press from keyboard
 		$(document).on("keydown", function (e) {
 			if (me.selected_mode) {
@@ -240,6 +339,8 @@ erpnext.PointOfSale.Payment = class {
 			}
 		});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.ui.form.on("POS Invoice", "contact_mobile", (frm) => {
 			const contact = frm.doc.contact_mobile;
 			const request_button = $(this.request_for_payment_field?.$input[0]);
@@ -251,11 +352,33 @@ erpnext.PointOfSale.Payment = class {
 		});
 
 		frappe.ui.form.on("POS Invoice", "coupon_code", (frm) => {
+<<<<<<< HEAD
 			this.bind_coupon_code_event(frm);
 		});
 
 		frappe.ui.form.on("Sales Invoice", "coupon_code", (frm) => {
 			this.bind_coupon_code_event(frm);
+=======
+			if (frm.doc.coupon_code && !frm.applying_pos_coupon_code) {
+				if (!frm.doc.ignore_pricing_rule) {
+					frm.applying_pos_coupon_code = true;
+					frappe.run_serially([
+						() => (frm.doc.ignore_pricing_rule = 1),
+						() => frm.trigger("ignore_pricing_rule"),
+						() => (frm.doc.ignore_pricing_rule = 0),
+						() => frm.trigger("apply_pricing_rule"),
+						() => frm.save(),
+						() => this.update_totals_section(frm.doc),
+						() => (frm.applying_pos_coupon_code = false),
+					]);
+				} else if (frm.doc.ignore_pricing_rule) {
+					frappe.show_alert({
+						message: __("Ignore Pricing Rule is enabled. Cannot apply coupon code."),
+						indicator: "orange",
+					});
+				}
+			}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 
 		this.setup_listener_for_payments();
@@ -270,12 +393,16 @@ erpnext.PointOfSale.Payment = class {
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
 
+<<<<<<< HEAD
 			if (
 				!items.length ||
 				(paid_amount == 0 &&
 					doc.additional_discount_percentage != 100 &&
 					this.allow_partial_payment === 0)
 			) {
+=======
+			if (!items.length || (paid_amount == 0 && doc.additional_discount_percentage != 100)) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				const message = items.length
 					? __("You cannot submit the order without payment.")
 					: __("You cannot submit empty order.");
@@ -284,14 +411,18 @@ erpnext.PointOfSale.Payment = class {
 				return;
 			}
 
+<<<<<<< HEAD
 			if (!this.validate_reqd_invoice_fields()) {
 				return;
 			}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.events.submit_invoice();
 		});
 
 		frappe.ui.form.on("POS Invoice", "paid_amount", (frm) => {
+<<<<<<< HEAD
 			this.bind_paid_amount_event(frm);
 		});
 
@@ -305,18 +436,38 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.ui.form.on("Sales Invoice", "loyalty_amount", (frm) => {
 			this.bind_loyalty_amount_event(frm);
+=======
+			this.update_totals_section(frm.doc);
+
+			// need to re calculate cash shortcuts after discount is applied
+			const is_cash_shortcuts_invisible = !this.$payment_modes.find(".cash-shortcuts").is(":visible");
+			this.attach_cash_shortcuts(frm.doc);
+			!is_cash_shortcuts_invisible &&
+				this.$payment_modes.find(".cash-shortcuts").css("display", "grid");
+			this.render_payment_mode_dom();
+		});
+
+		frappe.ui.form.on("POS Invoice", "loyalty_amount", (frm) => {
+			const formatted_currency = format_currency(frm.doc.loyalty_amount, frm.doc.currency);
+			this.$payment_modes.find(`.loyalty-amount-amount`).html(formatted_currency);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 
 		frappe.ui.form.on("Sales Invoice Payment", "amount", (frm, cdt, cdn) => {
 			// for setting correct amount after loyalty points are redeemed
 			const default_mop = locals[cdt][cdn];
+<<<<<<< HEAD
 			const mode = this.sanitize_mode_of_payment(default_mop.mode_of_payment);
+=======
+			const mode = default_mop.mode_of_payment.replace(/ +/g, "_").toLowerCase();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if (this[`${mode}_control`] && this[`${mode}_control`].get_value() != default_mop.amount) {
 				this[`${mode}_control`].set_value(default_mop.amount);
 			}
 		});
 	}
 
+<<<<<<< HEAD
 	bind_coupon_code_event(frm) {
 		if (frm.doc.coupon_code && !frm.applying_pos_coupon_code) {
 			if (!frm.doc.ignore_pricing_rule) {
@@ -349,6 +500,8 @@ erpnext.PointOfSale.Payment = class {
 		this.$payment_modes.find(`.loyalty-amount-amount`).html(formatted_currency);
 	}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	setup_listener_for_payments() {
 		frappe.realtime.on("process_phone_payment", (data) => {
 			const doc = this.events.get_frm().doc;
@@ -382,6 +535,7 @@ erpnext.PointOfSale.Payment = class {
 		});
 	}
 
+<<<<<<< HEAD
 	hide_zero_amount() {
 		const payment_methods = this.$payment_modes.find(`.mode-of-payment`);
 		for (let i = 0; i < payment_methods.length; i++) {
@@ -392,6 +546,8 @@ erpnext.PointOfSale.Payment = class {
 		}
 	}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	auto_set_remaining_amount() {
 		const doc = this.events.get_frm().doc;
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total)
@@ -451,7 +607,11 @@ erpnext.PointOfSale.Payment = class {
 
 	render_payment_section() {
 		this.render_payment_mode_dom();
+<<<<<<< HEAD
 		this.make_invoice_field_dialog();
+=======
+		this.make_invoice_fields_control();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.update_totals_section();
 		this.focus_on_default_mop();
 	}
@@ -467,11 +627,14 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	checkout() {
+<<<<<<< HEAD
 		const frm = this.events.get_frm();
 		frm.cscript.calculate_outstanding_amount();
 		frm.refresh_field("outstanding_amount");
 		frm.refresh_field("paid_amount");
 		frm.refresh_field("base_paid_amount");
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.events.toggle_other_sections(true);
 		this.toggle_component(true);
 
@@ -502,6 +665,7 @@ erpnext.PointOfSale.Payment = class {
 		const payments = doc.payments;
 		const currency = doc.currency;
 
+<<<<<<< HEAD
 		if (!this.$payment_modes.is(":visible")) {
 			return;
 		}
@@ -515,6 +679,15 @@ erpnext.PointOfSale.Payment = class {
 						p.mode_of_payment === this.selected_mode?._label || p.amount !== 0
 							? format_currency(p.amount, currency)
 							: "";
+=======
+		this.$payment_modes.html(
+			`${payments
+				.map((p, i) => {
+					const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
+					const payment_type = p.type;
+					const margin = i % 2 === 0 ? "pr-2" : "pl-2";
+					const amount = p.amount > 0 ? format_currency(p.amount, currency) : "";
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 					return `
 					<div class="payment-mode-wrapper">
@@ -530,7 +703,11 @@ erpnext.PointOfSale.Payment = class {
 		);
 
 		payments.forEach((p) => {
+<<<<<<< HEAD
 			const mode = this.sanitize_mode_of_payment(p.mode_of_payment);
+=======
+			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			const me = this;
 			this[`${mode}_control`] = frappe.ui.form.make_control({
 				df: {
@@ -555,6 +732,7 @@ erpnext.PointOfSale.Payment = class {
 			this[`${mode}_control`].toggle_label(false);
 			this[`${mode}_control`].set_value(p.amount);
 		});
+<<<<<<< HEAD
 		this.highlight_selected_mode();
 
 		this.render_loyalty_points_payment_mode();
@@ -566,6 +744,19 @@ erpnext.PointOfSale.Payment = class {
 		const payments = doc.payments;
 		payments.forEach((p) => {
 			const mode = this.sanitize_mode_of_payment(p.mode_of_payment);
+=======
+
+		this.render_loyalty_points_payment_mode();
+
+		this.attach_cash_shortcuts(doc);
+	}
+
+	focus_on_default_mop() {
+		const doc = this.events.get_frm().doc;
+		const payments = doc.payments;
+		payments.forEach((p) => {
+			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if (p.default) {
 				setTimeout(() => {
 					this.$payment_modes.find(`.${mode}.mode-of-payment-control`).parent().click();
@@ -574,6 +765,48 @@ erpnext.PointOfSale.Payment = class {
 		});
 	}
 
+<<<<<<< HEAD
+=======
+	attach_cash_shortcuts(doc) {
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total)
+			? doc.grand_total
+			: doc.rounded_total;
+		const currency = doc.currency;
+
+		const shortcuts = this.get_cash_shortcuts(flt(grand_total));
+
+		this.$payment_modes.find(".cash-shortcuts").remove();
+		let shortcuts_html = shortcuts
+			.map((s) => {
+				return `<div class="shortcut" data-value="${s}">${format_currency(s, currency, 0)}</div>`;
+			})
+			.join("");
+
+		this.$payment_modes
+			.find('[data-payment-type="Cash"]')
+			.find(".mode-of-payment-control")
+			.after(`<div class="cash-shortcuts">${shortcuts_html}</div>`);
+	}
+
+	get_cash_shortcuts(grand_total) {
+		let steps = [1, 5, 10];
+		const digits = String(Math.round(grand_total)).length;
+
+		steps = steps.map((x) => x * 10 ** (digits - 2));
+
+		const get_nearest = (amount, x) => {
+			let nearest_x = Math.ceil(amount / x) * x;
+			return nearest_x === amount ? nearest_x + x : nearest_x;
+		};
+
+		return steps.reduce((finalArr, x) => {
+			let nearest_x = get_nearest(grand_total, x);
+			nearest_x = finalArr.indexOf(nearest_x) != -1 ? nearest_x + x : nearest_x;
+			return [...finalArr, nearest_x];
+		}, []);
+	}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	render_loyalty_points_payment_mode() {
 		const me = this;
 		const doc = this.events.get_frm().doc;
@@ -651,6 +884,7 @@ erpnext.PointOfSale.Payment = class {
 		});
 		this["loyalty-amount_control"].toggle_label(false);
 
+<<<<<<< HEAD
 		this.highlight_selected_mode();
 		// this.render_add_payment_method_dom();
 	}
@@ -662,6 +896,11 @@ erpnext.PointOfSale.Payment = class {
 		}
 	}
 
+=======
+		// this.render_add_payment_method_dom();
+	}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	render_add_payment_method_dom() {
 		const docstatus = this.events.get_frm().doc.docstatus;
 		if (docstatus === 0)
@@ -681,11 +920,15 @@ erpnext.PointOfSale.Payment = class {
 		const remaining = grand_total - doc.paid_amount;
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
 		const currency = doc.currency;
+<<<<<<< HEAD
 		const label = doc.paid_amount > grand_total ? __("Change Amount") : __("Remaining Amount");
 
 		if (!this.$totals.is(":visible")) {
 			return;
 		}
+=======
+		const label = change ? __("Change") : __("To Be Paid");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		this.$totals.html(
 			`<div class="col">
@@ -700,10 +943,14 @@ erpnext.PointOfSale.Payment = class {
 			<div class="seperator-y"></div>
 			<div class="col">
 				<div class="total-label">${label}</div>
+<<<<<<< HEAD
 				<div class="value ${doc.paid_amount < grand_total ? "text-danger" : "text-success"}">${format_currency(
 				change || remaining,
 				currency
 			)}</div>
+=======
+				<div class="value">${format_currency(change || remaining, currency)}</div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			</div>`
 		);
 	}
@@ -711,6 +958,7 @@ erpnext.PointOfSale.Payment = class {
 	toggle_component(show) {
 		show ? this.$component.css("display", "flex") : this.$component.css("display", "none");
 	}
+<<<<<<< HEAD
 
 	sanitize_mode_of_payment(mode_of_payment) {
 		return mode_of_payment
@@ -734,4 +982,6 @@ erpnext.PointOfSale.Payment = class {
 		}
 		return true;
 	}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };

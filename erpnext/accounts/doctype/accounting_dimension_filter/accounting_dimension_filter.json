@@ -7,7 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "accounting_dimension",
+<<<<<<< HEAD
   "fieldname",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "disabled",
   "column_break_2",
   "company",
@@ -91,17 +94,24 @@
    "fieldname": "apply_restriction_on_values",
    "fieldtype": "Check",
    "label": "Apply restriction on dimension values"
+<<<<<<< HEAD
   },
   {
    "fieldname": "fieldname",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Fieldname"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-08 14:13:22.203011",
+=======
+ "modified": "2024-03-27 13:05:57.199186",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Filter",
@@ -146,9 +156,16 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

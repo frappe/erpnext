@@ -46,7 +46,10 @@ class PaymentLedger:
 						against_voucher_no=ple.against_voucher_no,
 						amount=ple.amount,
 						currency=ple.account_currency,
+<<<<<<< HEAD
 						company=ple.company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					)
 
 					if self.filters.include_account_currency:
@@ -78,7 +81,10 @@ class PaymentLedger:
 					against_voucher_no="Outstanding:",
 					amount=total,
 					currency=voucher_data[0].currency,
+<<<<<<< HEAD
 					company=voucher_data[0].company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 
 				if self.filters.include_account_currency:
@@ -87,12 +93,16 @@ class PaymentLedger:
 				voucher_data.append(entry)
 
 				# empty row
+<<<<<<< HEAD
 				voucher_data.append(
 					frappe._dict(
 						currency=voucher_data[0].currency,
 						company=voucher_data[0].company,
 					)
 				)
+=======
+				voucher_data.append(frappe._dict())
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				self.data.extend(voucher_data)
 
 	def build_conditions(self):
@@ -137,6 +147,10 @@ class PaymentLedger:
 		)
 
 	def get_columns(self):
+<<<<<<< HEAD
+=======
+		company_currency = frappe.get_cached_value("Company", self.filters.get("company"), "default_currency")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		options = None
 		self.columns.append(
 			dict(
@@ -201,7 +215,11 @@ class PaymentLedger:
 				label=_("Amount"),
 				fieldname="amount",
 				fieldtype="Currency",
+<<<<<<< HEAD
 				options="Company:company:default_currency",
+=======
+				options=company_currency,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				width="100",
 			)
 		)
@@ -217,7 +235,11 @@ class PaymentLedger:
 				)
 			)
 		self.columns.append(
+<<<<<<< HEAD
 			dict(label=_("Currency"), fieldname="currency", fieldtype="Link", options="Currency", hidden=True)
+=======
+			dict(label=_("Currency"), fieldname="currency", fieldtype="Currency", hidden=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 	def run(self):

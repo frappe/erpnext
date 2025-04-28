@@ -9,6 +9,7 @@ from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
 from frappe.utils import cint, comma_and, create_batch, get_link_to_form
 from frappe.utils.background_jobs import get_job, is_job_enqueued
+<<<<<<< HEAD
 from frappe.utils.caching import request_cache
 
 LEDGER_ENTRY_DOCTYPES = frozenset(
@@ -18,6 +19,8 @@ LEDGER_ENTRY_DOCTYPES = frozenset(
 		"Stock Ledger Entry",
 	)
 )
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class TransactionDeletionRecord(Document):
@@ -229,6 +232,7 @@ class TransactionDeletionRecord(Document):
 		"""Delete addresses to which leads are linked"""
 		self.validate_doc_status()
 		if not self.delete_leads_and_addresses:
+<<<<<<< HEAD
 			leads = frappe.db.get_all("Lead", filters={"company": self.company}, pluck="name")
 			addresses = []
 			if leads:
@@ -265,6 +269,37 @@ class TransactionDeletionRecord(Document):
 				customer = qb.DocType("Customer")
 				qb.update(customer).set(customer.lead_name, None).where(customer.lead_name.isin(leads)).run()
 
+=======
+			leads = frappe.get_all("Lead", filters={"company": self.company})
+			leads = ["'%s'" % row.get("name") for row in leads]
+			addresses = []
+			if leads:
+				addresses = frappe.db.sql_list(
+					"""select parent from `tabDynamic Link` where link_name
+					in ({leads})""".format(leads=",".join(leads))
+				)
+
+				if addresses:
+					addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
+
+					frappe.db.sql(
+						"""delete from `tabAddress` where name in ({addresses}) and
+						name not in (select distinct dl1.parent from `tabDynamic Link` dl1
+						inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent
+						and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses))
+					)
+
+					frappe.db.sql(
+						"""delete from `tabDynamic Link` where link_doctype='Lead'
+						and parenttype='Address' and link_name in ({leads})""".format(leads=",".join(leads))
+					)
+
+				frappe.db.sql(
+					"""update `tabCustomer` set lead_name=NULL where lead_name in ({leads})""".format(
+						leads=",".join(leads)
+					)
+				)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.db_set("delete_leads_and_addresses", 1)
 		self.enqueue_task(task="Reset Company Values")
 
@@ -475,7 +510,10 @@ def get_doctypes_to_be_ignored():
 		"Item Default",
 		"Customer",
 		"Supplier",
+<<<<<<< HEAD
 		"Department",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	]
 
 	doctypes_to_be_ignored.extend(frappe.get_hooks("company_data_to_be_ignored") or [])
@@ -484,6 +522,7 @@ def get_doctypes_to_be_ignored():
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 @request_cache
 def is_deletion_doc_running(company: str | None = None, err_msg: str | None = None):
 	if not company:
@@ -504,13 +543,37 @@ def is_deletion_doc_running(company: str | None = None, err_msg: str | None = No
 			get_link_to_form("Transaction Deletion Record", running_deletion_job), err_msg or ""
 		),
 	)
+=======
+def is_deletion_doc_running(company: str | None = None, err_msg: str | None = None):
+	if company:
+		if running_deletion_jobs := frappe.db.get_all(
+			"Transaction Deletion Record",
+			filters={"docstatus": 1, "company": company, "status": "Running"},
+		):
+			if not err_msg:
+				err_msg = ""
+			frappe.throw(
+				title=_("Deletion in Progress!"),
+				msg=_("Transaction Deletion Document: {0} is running for this Company. {1}").format(
+					get_link_to_form("Transaction Deletion Record", running_deletion_jobs[0].name), err_msg
+				),
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def check_for_running_deletion_job(doc, method=None):
 	# Check if DocType has 'company' field
+<<<<<<< HEAD
 	if doc.doctype in LEDGER_ENTRY_DOCTYPES or not doc.meta.has_field("company"):
 		return
 
 	is_deletion_doc_running(
 		doc.company, _("Cannot make any transactions until the deletion job is completed")
 	)
+=======
+	df = qb.DocType("DocField")
+	if qb.from_(df).select(df.parent).where((df.fieldname == "company") & (df.parent == doc.doctype)).run():
+		is_deletion_doc_running(
+			doc.company, _("Cannot make any transactions until the deletion job is completed")
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

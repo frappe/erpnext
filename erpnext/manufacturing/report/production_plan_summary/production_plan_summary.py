@@ -27,6 +27,7 @@ def get_data(filters):
 
 
 def get_production_plan_item_details(filters, data, order_details):
+<<<<<<< HEAD
 	production_plan_doc = frappe.get_cached_doc("Production Plan", filters.get("production_plan"))
 	for row in production_plan_doc.po_items:
 		work_orders = frappe.get_all(
@@ -73,6 +74,34 @@ def get_production_plan_item_details(filters, data, order_details):
 				"qty": row.planned_qty,
 				"produced_qty": total_produced_qty,
 				"pending_qty": pending_qty,
+=======
+	itemwise_indent = {}
+
+	production_plan_doc = frappe.get_cached_doc("Production Plan", filters.get("production_plan"))
+	for row in production_plan_doc.po_items:
+		work_order = frappe.get_value(
+			"Work Order",
+			{"production_plan_item": row.name, "bom_no": row.bom_no, "production_item": row.item_code},
+			"name",
+		)
+
+		if row.item_code not in itemwise_indent:
+			itemwise_indent.setdefault(row.item_code, {})
+
+		data.append(
+			{
+				"indent": 0,
+				"item_code": row.item_code,
+				"sales_order": row.get("sales_order"),
+				"item_name": frappe.get_cached_value("Item", row.item_code, "item_name"),
+				"qty": row.planned_qty,
+				"document_type": "Work Order",
+				"document_name": work_order or "",
+				"bom_level": 0,
+				"produced_qty": order_details.get((work_order, row.item_code), {}).get("produced_qty", 0),
+				"pending_qty": flt(row.planned_qty)
+				- flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0)),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		)
 
@@ -85,6 +114,7 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 			subcontracted_item = item.type_of_manufacturing == "Subcontract"
 
 			if subcontracted_item:
+<<<<<<< HEAD
 				docnames = frappe.get_all(
 					"Purchase Order Item",
 					filters={"production_plan_sub_assembly_item": item.name, "docstatus": 1},
@@ -103,6 +133,22 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 
 			for docname in docnames:
 				data_to_append = {
+=======
+				docname = frappe.get_value(
+					"Purchase Order Item",
+					{"production_plan_sub_assembly_item": item.name, "docstatus": ("<", 2)},
+					"parent",
+				)
+			else:
+				docname = frappe.get_value(
+					"Work Order",
+					{"production_plan_sub_assembly_item": item.name, "docstatus": ("<", 2)},
+					"name",
+				)
+
+			data.append(
+				{
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"indent": 1 + item.indent,
 					"item_code": item.production_item,
 					"item_name": item.item_name,
@@ -116,15 +162,23 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 					"pending_qty": flt(item.qty)
 					- flt(order_details.get((docname, item.production_item), {}).get("produced_qty", 0)),
 				}
+<<<<<<< HEAD
 				if data[-1] and data[-1]["item_code"] == item.production_item:
 					data_to_append["pending_qty"] = data[-1]["pending_qty"] - data_to_append["produced_qty"]
 				data.append(data_to_append)
+=======
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_work_order_details(filters, order_details):
 	for row in frappe.get_all(
 		"Work Order",
+<<<<<<< HEAD
 		filters={"production_plan": filters.get("production_plan"), "docstatus": 1},
+=======
+		filters={"production_plan": filters.get("production_plan")},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		fields=["name", "produced_qty", "production_plan", "production_item", "sales_order"],
 	):
 		order_details.setdefault((row.name, row.production_item), row)
@@ -133,12 +187,19 @@ def get_work_order_details(filters, order_details):
 def get_purchase_order_details(filters, order_details):
 	for row in frappe.get_all(
 		"Purchase Order Item",
+<<<<<<< HEAD
 		filters={"production_plan": filters.get("production_plan"), "docstatus": 1},
 		fields=["parent", "qty", "received_qty as produced_qty", "item_code", "fg_item", "fg_item_qty"],
 	):
 		if row.fg_item:
 			row.produced_qty /= row.qty / row.fg_item_qty or 1
 		order_details.setdefault((row.parent, row.fg_item or row.item_code), row)
+=======
+		filters={"production_plan": filters.get("production_plan")},
+		fields=["parent", "received_qty as produced_qty", "item_code"],
+	):
+		order_details.setdefault((row.parent, row.item_code), row)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_column(filters):
@@ -160,9 +221,16 @@ def get_column(filters):
 		},
 		{
 			"label": _("Document Type"),
+<<<<<<< HEAD
 			"fieldtype": "Data",
 			"fieldname": "document_type",
 			"width": 150,
+=======
+			"fieldtype": "Link",
+			"fieldname": "document_type",
+			"width": 150,
+			"options": "DocType",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			"label": _("Document Name"),

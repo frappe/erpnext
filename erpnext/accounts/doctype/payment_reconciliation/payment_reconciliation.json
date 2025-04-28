@@ -28,7 +28,10 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+<<<<<<< HEAD
   "project",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "sec_break1",
   "invoice_name",
   "invoices",
@@ -196,12 +199,15 @@
    "options": "Cost Center"
   },
   {
+<<<<<<< HEAD
     "fieldname": "project",
     "fieldtype": "Link",
     "label": "Project",
     "options": "Project"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "depends_on": "eval:doc.party",
    "description": "Only 'Payment Entries' made against this advance account are supported.",
    "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",

@@ -1,10 +1,16 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestAccountsSettings(IntegrationTestCase):
+=======
+
+
+class TestAccountsSettings(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def tearDown(self):
 		# Just in case `save` method succeeds, we need to take things back to default so that other tests
 		# don't break

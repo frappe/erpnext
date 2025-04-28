@@ -2,8 +2,15 @@
 # See license.txt
 
 # import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 
 class TestAccountClosingBalance(IntegrationTestCase):
+=======
+from frappe.tests.utils import FrappeTestCase
+
+
+class TestAccountClosingBalance(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	pass

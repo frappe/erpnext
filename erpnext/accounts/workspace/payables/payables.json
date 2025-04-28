@@ -93,7 +93,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Accounts Payable",
    "link_count": 0,
    "link_to": "Accounts Payable",
@@ -103,7 +107,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Accounts Payable Summary",
    "link_count": 0,
    "link_to": "Accounts Payable Summary",
@@ -113,7 +121,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Purchase Register",
    "link_count": 0,
    "link_to": "Purchase Register",
@@ -123,7 +135,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Item-wise Purchase Register",
    "link_count": 0,
    "link_to": "Item-wise Purchase Register",
@@ -133,7 +149,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Purchase Order Analysis",
    "link_count": 0,
    "link_to": "Purchase Order Analysis",
@@ -143,7 +163,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Received Items To Be Billed",
    "link_count": 0,
    "link_to": "Received Items To Be Billed",
@@ -153,7 +177,11 @@
   },
   {
    "hidden": 0,
+<<<<<<< HEAD
    "is_query_report": 1,
+=======
+   "is_query_report": 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "label": "Supplier Ledger Summary",
    "link_count": 0,
    "link_to": "Supplier Ledger Summary",

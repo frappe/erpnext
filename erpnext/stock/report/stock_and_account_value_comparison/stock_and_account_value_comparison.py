@@ -4,11 +4,18 @@
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.utils import get_datetime, get_link_to_form, parse_json
 
 import erpnext
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
 from erpnext.stock.doctype.stock_reposting_settings.stock_reposting_settings import get_stock_ledgers
+=======
+from frappe.utils import get_link_to_form, parse_json
+
+import erpnext
+from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
 
 
@@ -61,7 +68,11 @@ def get_stock_ledger_data(report_filters, filters):
 			"name",
 			"voucher_type",
 			"voucher_no",
+<<<<<<< HEAD
 			{"SUM": "stock_value_difference", "as": "stock_value"},
+=======
+			"sum(stock_value_difference) as stock_value",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"posting_date",
 			"posting_time",
 		],
@@ -88,10 +99,14 @@ def get_gl_data(report_filters, filters):
 			"name",
 			"voucher_type",
 			"voucher_no",
+<<<<<<< HEAD
 			{
 				"SUB": [{"SUM": "debit_in_account_currency"}, {"SUM": "credit_in_account_currency"}],
 				"as": "account_value",
 			},
+=======
+			"sum(debit_in_account_currency) - sum(credit_in_account_currency) as account_value",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 		group_by="voucher_type, voucher_no",
 	)
@@ -145,6 +160,7 @@ def create_reposting_entries(rows, company):
 		rows = parse_json(rows)
 
 	entries = []
+<<<<<<< HEAD
 
 	item_wh = frappe._dict()
 	vouchers = [row.get("voucher_no") for row in rows]
@@ -158,16 +174,29 @@ def create_reposting_entries(rows, company):
 
 	for key, sle in item_wh.items():
 		item_code, warehouse = key
+=======
+	for row in rows:
+		row = frappe._dict(row)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		try:
 			doc = frappe.get_doc(
 				{
 					"doctype": "Repost Item Valuation",
+<<<<<<< HEAD
 					"based_on": "Item and Warehouse",
 					"status": "Queued",
 					"item_code": item_code,
 					"warehouse": warehouse,
 					"posting_date": sle.posting_date,
 					"posting_time": sle.posting_time,
+=======
+					"based_on": "Transaction",
+					"status": "Queued",
+					"voucher_type": row.voucher_type,
+					"voucher_no": row.voucher_no,
+					"posting_date": row.posting_date,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"company": company,
 					"allow_nagative_stock": 1,
 				}

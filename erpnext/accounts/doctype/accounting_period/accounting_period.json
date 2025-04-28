@@ -11,7 +11,10 @@
   "end_date",
   "column_break_4",
   "company",
+<<<<<<< HEAD
   "disabled",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_7",
   "closed_documents"
  ],
@@ -51,6 +54,7 @@
    "reqd": 1
   },
   {
+<<<<<<< HEAD
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
@@ -58,6 +62,8 @@
    "label": "Disabled"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
   },
@@ -70,11 +76,18 @@
   }
  ],
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-06 15:00:15.568067",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Period",
  "naming_rule": "By fieldname",
+=======
+ "modified": "2024-03-27 13:05:57.388109",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounting Period",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "owner": "Administrator",
  "permissions": [
   {
@@ -114,9 +127,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

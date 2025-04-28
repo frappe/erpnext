@@ -3,6 +3,11 @@
 
 import frappe
 
+<<<<<<< HEAD
+=======
+# test_records = frappe.get_test_records('Designation')
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_designation(**args):
 	args = frappe._dict(args)

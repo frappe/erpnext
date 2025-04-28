@@ -143,6 +143,10 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
+=======
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "Set fieldname from which you want to fetch the data from the parent form.",
    "fieldname": "fetch_from_parent",
    "fieldtype": "Select",
@@ -188,7 +192,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-07 15:51:29.329064",
+=======
+ "modified": "2024-07-08 08:58:50.228211",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",
@@ -224,8 +232,15 @@
    "role": "Stock User"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

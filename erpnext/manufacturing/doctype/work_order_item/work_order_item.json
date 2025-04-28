@@ -16,13 +16,17 @@
   "include_item_in_manufacturing",
   "qty_section",
   "required_qty",
+<<<<<<< HEAD
   "stock_uom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "rate",
   "amount",
   "column_break_11",
   "transferred_qty",
   "consumed_qty",
   "returned_qty",
+<<<<<<< HEAD
   "section_break_idhr",
   "available_qty_at_source_warehouse",
   "available_qty_at_wip_warehouse",
@@ -31,6 +35,10 @@
   "is_additional_item",
   "is_customer_provided_item",
   "voucher_detail_reference"
+=======
+  "available_qty_at_source_warehouse",
+  "available_qty_at_wip_warehouse"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -53,8 +61,12 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Source Warehouse",
+<<<<<<< HEAD
    "options": "Warehouse",
    "read_only_depends_on": "eval:parent.subcontracting_inward_order && doc.is_customer_provided_item"
+=======
+   "options": "Warehouse"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_3",
@@ -93,7 +105,10 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "depends_on": "eval:!parent.subcontracting_inward_order",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow Alternative Item"
@@ -154,6 +169,7 @@
    "fieldtype": "Int",
    "label": "Operation Row Id",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "fetch_from": "item_code.stock_uom",
@@ -207,15 +223,29 @@
  "istable": 1,
  "links": [],
  "modified": "2025-10-12 14:27:16.721532",
+=======
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:12:00.429838",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

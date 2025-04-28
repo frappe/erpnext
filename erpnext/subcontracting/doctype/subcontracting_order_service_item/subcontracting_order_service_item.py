@@ -19,8 +19,11 @@ class SubcontractingOrderServiceItem(Document):
 		fg_item_qty: DF.Float
 		item_code: DF.Link
 		item_name: DF.Data
+<<<<<<< HEAD
 		material_request: DF.Link | None
 		material_request_item: DF.Data | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

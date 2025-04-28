@@ -36,7 +36,15 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		me.setup_warehouse_query();
 
 		me.frm.set_query("target_item_code", function () {
+<<<<<<< HEAD
 			return erpnext.queries.item({ is_stock_item: 0, is_fixed_asset: 1 });
+=======
+			if (me.frm.doc.entry_type == "Capitalization") {
+				return erpnext.queries.item({ is_stock_item: 0, is_fixed_asset: 1 });
+			} else {
+				return erpnext.queries.item({ is_stock_item: 1, is_fixed_asset: 0 });
+			}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 
 		me.frm.set_query("target_asset", function () {
@@ -47,7 +55,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 		me.frm.set_query("asset", "asset_items", function () {
 			var filters = {
+<<<<<<< HEAD
 				status: ["not in", ["Draft", "Scrapped", "Sold", "Capitalized"]],
+=======
+				status: ["not in", ["Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"]],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				docstatus: 1,
 			};
 
@@ -134,12 +146,20 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 
 	target_asset() {
+<<<<<<< HEAD
 		if (this.frm.doc.target_asset) {
+=======
+		if (
+			this.frm.doc.target_asset &&
+			this.frm.doc.capitalization_method === "Choose a WIP composite asset"
+		) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.set_consumed_stock_items_tagged_to_wip_composite_asset(this.frm.doc.target_asset);
 			this.get_target_asset_details();
 		}
 	}
 
+<<<<<<< HEAD
 	set_consumed_stock_items_tagged_to_wip_composite_asset(target_asset) {
 		var me = this;
 
@@ -153,6 +173,16 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 						posting_date: me.frm.doc.posting_date,
 						posting_time: me.frm.doc.posting_time,
 					},
+=======
+	set_consumed_stock_items_tagged_to_wip_composite_asset(asset) {
+		var me = this;
+
+		if (asset) {
+			return me.frm.call({
+				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_items_tagged_to_wip_composite_asset",
+				args: {
+					asset: asset,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 				callback: function (r) {
 					if (!r.exc && r.message) {
@@ -278,6 +308,10 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		if (me.frm.doc.target_item_code) {
 			return me.frm.call({
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_target_item_details",
+<<<<<<< HEAD
+=======
+				child: me.frm.doc,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				args: {
 					item_code: me.frm.doc.target_item_code,
 					company: me.frm.doc.company,
@@ -297,6 +331,10 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		if (me.frm.doc.target_asset) {
 			return me.frm.call({
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_target_asset_details",
+<<<<<<< HEAD
+=======
+				child: me.frm.doc,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				args: {
 					asset: me.frm.doc.target_asset,
 					company: me.frm.doc.company,
@@ -318,7 +356,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_consumed_stock_item_details",
 				child: row,
 				args: {
+<<<<<<< HEAD
 					ctx: {
+=======
+					args: {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						item_code: row.item_code,
 						warehouse: row.warehouse,
 						stock_qty: flt(row.stock_qty),
@@ -346,7 +388,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_consumed_asset_details",
 				child: row,
 				args: {
+<<<<<<< HEAD
 					ctx: {
+=======
+					args: {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						asset: row.asset,
 						doctype: me.frm.doc.doctype,
 						name: me.frm.doc.name,
@@ -373,7 +419,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_service_item_details",
 				child: row,
 				args: {
+<<<<<<< HEAD
 					ctx: {
+=======
+					args: {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						item_code: row.item_code,
 						qty: flt(row.qty),
 						expense_account: row.expense_account,
@@ -399,7 +449,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 					args: {
 						item_code: item.item_code,
 						warehouse: cstr(item.warehouse),
+<<<<<<< HEAD
 						qty: -1 * flt(item.stock_qty),
+=======
+						qty: flt(item.stock_qty),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						serial_no: item.serial_no,
 						posting_date: me.frm.doc.posting_date,
 						posting_time: me.frm.doc.posting_time,

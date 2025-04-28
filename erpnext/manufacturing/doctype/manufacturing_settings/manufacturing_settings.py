@@ -18,22 +18,40 @@ class ManufacturingSettings(Document):
 		from frappe.types import DF
 
 		add_corrective_operation_cost_in_finished_good_valuation: DF.Check
+<<<<<<< HEAD
 		allow_editing_of_items_and_quantities_in_work_order: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		allow_overtime: DF.Check
 		allow_production_on_holidays: DF.Check
 		backflush_raw_materials_based_on: DF.Literal["BOM", "Material Transferred for Manufacture"]
 		capacity_planning_for_days: DF.Int
+<<<<<<< HEAD
 		disable_capacity_planning: DF.Check
 		enforce_time_logs: DF.Check
 		get_rm_cost_from_consumption_entry: DF.Check
 		job_card_excess_transfer: DF.Check
 		make_serial_no_batch_from_work_order: DF.Check
+=======
+		default_fg_warehouse: DF.Link | None
+		default_scrap_warehouse: DF.Link | None
+		default_wip_warehouse: DF.Link | None
+		disable_capacity_planning: DF.Check
+		get_rm_cost_from_consumption_entry: DF.Check
+		job_card_excess_transfer: DF.Check
+		make_serial_no_batch_from_work_order: DF.Check
+		manufacture_sub_assembly_in_operation: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		material_consumption: DF.Check
 		mins_between_operations: DF.Int
 		overproduction_percentage_for_sales_order: DF.Percent
 		overproduction_percentage_for_work_order: DF.Percent
+<<<<<<< HEAD
 		set_op_cost_and_scrap_from_sub_assemblies: DF.Check
 		transfer_extra_materials_percentage: DF.Percent
+=======
+		set_op_cost_and_scrape_from_sub_assemblies: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		update_bom_costs_automatically: DF.Check
 		validate_components_quantities_per_bom: DF.Check
 	# end: auto-generated types

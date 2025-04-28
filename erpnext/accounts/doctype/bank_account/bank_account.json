@@ -132,8 +132,12 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "IBAN",
+<<<<<<< HEAD
    "length": 34,
    "options": "IBAN"
+=======
+   "length": 30
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "column_break_12",
@@ -209,6 +213,7 @@
    "label": "Disabled"
   }
  ],
+<<<<<<< HEAD
  "grid_page_length": 50,
  "links": [
   {
@@ -253,6 +258,10 @@
   }
  ],
  "modified": "2025-08-29 12:32:01.081687",
+=======
+ "links": [],
+ "modified": "2024-03-27 13:06:37.049542",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
@@ -284,10 +293,17 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "bank,account",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

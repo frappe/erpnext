@@ -54,7 +54,11 @@
    "label": "Status",
    "max_length": 0,
    "max_value": 0,
+<<<<<<< HEAD
    "options": "Open\nReplied\nOn Hold\nClosed",
+=======
+   "options": "Open\nReplied\nHold\nClosed",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1,
    "reqd": 0,
    "show_in_filter": 1

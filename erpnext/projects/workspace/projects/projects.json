@@ -206,6 +206,7 @@
  "sequence_id": 11.0,
  "shortcuts": [
   {
+<<<<<<< HEAD
    "color": "Grey",
    "doc_view": "List",
    "label": "Learn Project Management",
@@ -213,6 +214,8 @@
    "url": "https://school.frappe.io/lms/courses/project-management?utm_source=in_app"
   },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "color": "Blue",
    "format": "{} Assigned",
    "label": "Task",
@@ -245,4 +248,8 @@
   }
  ],
  "title": "Projects"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

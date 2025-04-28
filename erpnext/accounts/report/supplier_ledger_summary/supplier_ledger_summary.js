@@ -74,6 +74,7 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 			fieldtype: "Data",
 			hidden: 1,
 		},
+<<<<<<< HEAD
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
@@ -100,3 +101,7 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 };
 
 erpnext.utils.add_dimensions("Supplier Ledger Summary", 11);
+=======
+	],
+};
+>>>>>>> 7c4cf3e834 (Favicon.svg)

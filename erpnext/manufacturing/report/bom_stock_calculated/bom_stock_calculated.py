@@ -32,7 +32,10 @@ def get_report_data(last_purchase_rate, required_qty, row, manufacture_details):
 	return [
 		row.item_code,
 		row.description,
+<<<<<<< HEAD
 		row.from_bom_no,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		comma_and(manufacture_details.get(row.item_code, {}).get("manufacturer", []), add_quotes=False),
 		comma_and(manufacture_details.get(row.item_code, {}).get("manufacturer_part", []), add_quotes=False),
 		qty_per_unit,
@@ -59,6 +62,7 @@ def get_columns():
 			"width": 150,
 		},
 		{
+<<<<<<< HEAD
 			"fieldname": "from_bom_no",
 			"label": _("From BOM No"),
 			"fieldtype": "Link",
@@ -66,6 +70,8 @@ def get_columns():
 			"width": 150,
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"fieldname": "manufacturer",
 			"label": _("Manufacturer"),
 			"fieldtype": "Data",
@@ -111,7 +117,14 @@ def get_columns():
 
 
 def get_bom_data(filters):
+<<<<<<< HEAD
 	bom_item_table = "BOM Explosion Item" if filters.get("show_exploded_view") else "BOM Item"
+=======
+	if filters.get("show_exploded_view"):
+		bom_item_table = "BOM Explosion Item"
+	else:
+		bom_item_table = "BOM Item"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	bom_item = frappe.qb.DocType(bom_item_table)
 	bin = frappe.qb.DocType("Bin")
@@ -123,13 +136,19 @@ def get_bom_data(filters):
 		.select(
 			bom_item.item_code,
 			bom_item.description,
+<<<<<<< HEAD
 			bom_item.parent.as_("from_bom_no"),
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			bom_item.qty_consumed_per_unit.as_("qty_per_unit"),
 			IfNull(Sum(bin.actual_qty), 0).as_("actual_qty"),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
 		.groupby(bom_item.item_code)
+<<<<<<< HEAD
 		.orderby(bom_item.idx)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	if filters.get("warehouse"):
@@ -153,6 +172,7 @@ def get_bom_data(filters):
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
 
+<<<<<<< HEAD
 	if bom_item_table == "BOM Item":
 		query = query.select(bom_item.bom_no, bom_item.is_phantom_item)
 
@@ -183,6 +203,9 @@ def explode_phantom_boms(data, filters):
 
 	filters["bom"] = original_bom
 	return data
+=======
+	return query.run(as_dict=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_manufacturer_records():

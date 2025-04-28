@@ -2,11 +2,16 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+<<<<<<< HEAD
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -19,6 +24,16 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 		self.create_company()
 		self.create_customer()
 		self.create_supplier()
+=======
+from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+
+class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
+	def setUp(self):
+		self.create_company()
+		self.create_customer()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.create_usd_receivable_account()
 		self.create_item()
 		self.clear_old_entries()
@@ -264,7 +279,10 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 		pe1.paid_from = self.debtors_usd
 		pe1.paid_from_account_currency = "USD"
 		pe1.source_exchange_rate = 75
+<<<<<<< HEAD
 		pe1.paid_amount = 100
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pe1.received_amount = 75 * 100
 		pe1.save()
 		# Allocate payment against both invoices
@@ -282,7 +300,10 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 		pe2.paid_from = self.debtors_usd
 		pe2.paid_from_account_currency = "USD"
 		pe2.source_exchange_rate = 75
+<<<<<<< HEAD
 		pe2.paid_amount = 100
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pe2.received_amount = 75 * 100
 		pe2.save()
 		# Allocate payment against both invoices
@@ -369,6 +390,7 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(so.advance_paid, 0)
 		self.assertEqual(len(pe.references), 0)
 		self.assertEqual(pe.unallocated_amount, 100)
+<<<<<<< HEAD
 
 		pe.cancel()
 		so.reload()
@@ -539,3 +561,5 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

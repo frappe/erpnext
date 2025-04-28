@@ -2,15 +2,23 @@
 # For license information, please see license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, flt
+=======
+from frappe.model.document import Document
+from frappe.utils import cint, cstr
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+<<<<<<< HEAD
 from erpnext.exceptions import ReportingCurrencyExchangeNotFoundError
 from erpnext.setup.utils import get_exchange_rate
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class AccountClosingBalance(Document):
@@ -29,15 +37,23 @@ class AccountClosingBalance(Document):
 		cost_center: DF.Link | None
 		credit: DF.Currency
 		credit_in_account_currency: DF.Currency
+<<<<<<< HEAD
 		credit_in_reporting_currency: DF.Currency
 		debit: DF.Currency
 		debit_in_account_currency: DF.Currency
 		debit_in_reporting_currency: DF.Currency
+=======
+		debit: DF.Currency
+		debit_in_account_currency: DF.Currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		finance_book: DF.Link | None
 		is_period_closing_voucher_entry: DF.Check
 		period_closing_voucher: DF.Link | None
 		project: DF.Link | None
+<<<<<<< HEAD
 		reporting_currency_exchange_rate: DF.Float
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# end: auto-generated types
 
 	pass
@@ -61,7 +77,10 @@ def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 				"closing_date": closing_date,
 			}
 		)
+<<<<<<< HEAD
 		set_amount_in_reporting_currency(cle, company, closing_date)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		cle.flags.ignore_permissions = True
 		cle.flags.ignore_links = True
 		cle.submit()
@@ -120,9 +139,15 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 	entries = []
 	last_period_closing_voucher = frappe.db.get_all(
 		"Period Closing Voucher",
+<<<<<<< HEAD
 		filters={"docstatus": 1, "company": company, "period_end_date": ("<", closing_date)},
 		fields=["name"],
 		order_by="period_end_date desc",
+=======
+		filters={"docstatus": 1, "company": company, "posting_date": ("<", closing_date)},
+		fields=["name"],
+		order_by="posting_date desc",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		limit=1,
 	)
 
@@ -151,6 +176,7 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 		entries = query.run(as_dict=1)
 
 	return entries
+<<<<<<< HEAD
 
 
 def set_amount_in_reporting_currency(cle, company, closing_date):
@@ -177,3 +203,5 @@ def set_amount_in_reporting_currency(cle, company, closing_date):
 			"credit_in_reporting_currency": credit_in_reporting_currency,
 		}
 	)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

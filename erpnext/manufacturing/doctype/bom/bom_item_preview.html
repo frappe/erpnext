@@ -1,9 +1,15 @@
 <div style="padding: 15px;">
 	<div class="row mb-5">
 		<div class="col-md-5" style="max-height: 500px">
+<<<<<<< HEAD
 			{% if data.image && (data.image).replace("''", "").length %}
 				<div class="border image-field " style="overflow: hidden;border-color:#e6e6e6">
 					<img class="responsive" style="width: 100%;" src={{ data.image }}>
+=======
+			{% if data.image %}
+				<div class="border image-field " style="overflow: hidden;border-color:#e6e6e6">
+					<img class="responsive" src={{ data.image }}>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				</div>
 			{% endif %}
 		</div>
@@ -12,10 +18,14 @@
 				{{ __("Description") }}
 			</h4>
 			<div style="padding-top: 10px;">
+<<<<<<< HEAD
 				{% if data.is_phantom_item %}
 					<p><b>{{ __("Phantom Item") }}</b></p>
 				{% endif %}
 				<p>{{ data.description }}</p>
+=======
+				{{ data.description }}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			</div>
 			<hr style="margin: 15px -15px;">
 			<p>

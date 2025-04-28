@@ -1,8 +1,11 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+<<<<<<< HEAD
 import json
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import frappe
 from frappe import _
 from frappe.utils import cint, flt
@@ -201,7 +204,11 @@ def get_columns():
 def get_data(filters=None):
 	filters = frappe._dict(filters or {})
 	item_warehouse_map = get_item_warehouse_combinations(filters)
+<<<<<<< HEAD
 	valuation_method = frappe.get_cached_value("Company", filters.get("company"), "valuation_method")
+=======
+	valuation_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	data = []
 	if item_warehouse_map:
@@ -272,6 +279,7 @@ def has_difference(row, precision, difference_in, valuation_method):
 		value_diff = flt(row.diff_value_diff, precision)
 		valuation_diff = flt(row.valuation_diff, precision)
 	else:
+<<<<<<< HEAD
 		qty_diff = flt(row.difference_in_qty, precision)
 		value_diff = flt(row.diff_value_diff, precision)
 
@@ -282,6 +290,14 @@ def has_difference(row, precision, difference_in, valuation_method):
 
 			qty_diff = qty_diff or flt(row.fifo_qty_diff, precision)
 
+=======
+		qty_diff = flt(row.difference_in_qty, precision) or flt(row.fifo_qty_diff, precision)
+		value_diff = (
+			flt(row.diff_value_diff, precision)
+			or flt(row.fifo_value_diff, precision)
+			or flt(row.fifo_difference_diff, precision)
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		valuation_diff = flt(row.valuation_diff, precision) or flt(row.fifo_valuation_diff, precision)
 
 	if difference_in == "Qty" and qty_diff:

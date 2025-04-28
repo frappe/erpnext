@@ -11,15 +11,22 @@ def get_data():
 			"Auto Repeat": "reference_document",
 			"Purchase Receipt": "return_against",
 			"Stock Reservation Entry": "from_voucher_no",
+<<<<<<< HEAD
 			"Quality Inspection": "reference_name",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		"internal_links": {
 			"Material Request": ["items", "material_request"],
 			"Purchase Order": ["items", "purchase_order"],
 			"Project": ["items", "project"],
+<<<<<<< HEAD
 		},
 		"internal_and_external_links": {
 			"Purchase Invoice": ["items", "purchase_invoice"],
+=======
+			"Quality Inspection": ["items", "quality_inspection"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		"transactions": [
 			{

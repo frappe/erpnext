@@ -1,6 +1,10 @@
 import frappe
+<<<<<<< HEAD
 
 from erpnext.deprecation_dumpster import deprecated
+=======
+from frappe.utils.deprecations import deprecated
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_leaderboards():
@@ -63,7 +67,11 @@ def get_all_customers(date_range, company, field, limit=None):
 
 		return frappe.get_list(
 			"Sales Invoice",
+<<<<<<< HEAD
 			fields=["customer as name", {"SUM": "outstanding_amount", "as": "value"}],
+=======
+			fields=["customer as name", "sum(outstanding_amount) as value"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters=filters,
 			group_by="customer",
 			order_by="value desc",
@@ -80,7 +88,11 @@ def get_all_customers(date_range, company, field, limit=None):
 
 		return frappe.get_list(
 			"Sales Order",
+<<<<<<< HEAD
 			fields=["customer as name", {"SUM": select_field, "as": "value"}],
+=======
+			fields=["customer as name", f"sum({select_field}) as value"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters=filters,
 			group_by="customer",
 			order_by="value desc",
@@ -91,10 +103,17 @@ def get_all_customers(date_range, company, field, limit=None):
 @frappe.whitelist()
 def get_all_items(date_range, company, field, limit=None):
 	if field in ("available_stock_qty", "available_stock_value"):
+<<<<<<< HEAD
 		sum_field = "actual_qty" if field == "available_stock_qty" else "stock_value"
 		results = frappe.db.get_all(
 			"Bin",
 			fields=["item_code as name", {"SUM": sum_field, "as": "value"}],
+=======
+		select_field = "sum(actual_qty)" if field == "available_stock_qty" else "sum(stock_value)"
+		results = frappe.db.get_all(
+			"Bin",
+			fields=["item_code as name", f"{select_field} as value"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			group_by="item_code",
 			order_by="value desc",
 			limit=limit,
@@ -125,7 +144,11 @@ def get_all_items(date_range, company, field, limit=None):
 			select_doctype,
 			fields=[
 				f"`tab{child_doctype}`.item_code as name",
+<<<<<<< HEAD
 				{"SUM": f"`tab{child_doctype}`.{select_field}", "as": "value"},
+=======
+				f"sum(`tab{child_doctype}`.{select_field}) as value",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			],
 			filters=filters,
 			order_by="value desc",
@@ -145,7 +168,11 @@ def get_all_suppliers(date_range, company, field, limit=None):
 
 		return frappe.get_list(
 			"Purchase Invoice",
+<<<<<<< HEAD
 			fields=["supplier as name", {"SUM": "outstanding_amount", "as": "value"}],
+=======
+			fields=["supplier as name", "sum(outstanding_amount) as value"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters=filters,
 			group_by="supplier",
 			order_by="value desc",
@@ -162,7 +189,11 @@ def get_all_suppliers(date_range, company, field, limit=None):
 
 		return frappe.get_list(
 			"Purchase Order",
+<<<<<<< HEAD
 			fields=["supplier as name", {"SUM": select_field, "as": "value"}],
+=======
+			fields=["supplier as name", f"sum({select_field}) as value"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters=filters,
 			group_by="supplier",
 			order_by="value desc",
@@ -186,7 +217,11 @@ def get_all_sales_partner(date_range, company, field, limit=None):
 		"Sales Order",
 		fields=[
 			"sales_partner as name",
+<<<<<<< HEAD
 			{"SUM": select_field, "as": "value"},
+=======
+			f"sum({select_field}) as value",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 		filters=filters,
 		group_by="sales_partner",
@@ -210,7 +245,11 @@ def get_all_sales_person(date_range, company, field=None, limit=0):
 		"Sales Order",
 		fields=[
 			"`tabSales Team`.sales_person as name",
+<<<<<<< HEAD
 			{"SUM": "`tabSales Team`.allocated_amount", "as": "value"},
+=======
+			"sum(`tabSales Team`.allocated_amount) as value",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 		filters=filters,
 		group_by="`tabSales Team`.sales_person",
@@ -219,7 +258,11 @@ def get_all_sales_person(date_range, company, field=None, limit=0):
 	)
 
 
+<<<<<<< HEAD
 @deprecated(f"{__name__}.get_date_condition", "unknown", "v16", "No known instructions.")
+=======
+@deprecated
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_date_condition(date_range, field):
 	date_condition = ""
 	if date_range:

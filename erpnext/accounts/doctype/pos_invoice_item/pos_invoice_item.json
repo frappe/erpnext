@@ -160,6 +160,10 @@
    "oldfieldname": "description",
    "oldfieldtype": "Text",
    "print_width": "200px",
+<<<<<<< HEAD
+=======
+   "reqd": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "width": "200px"
   },
   {
@@ -857,15 +861,26 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-12 18:11:11.818015",
+=======
+ "modified": "2024-05-07 15:56:53.343317",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

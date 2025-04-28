@@ -2,10 +2,13 @@ name: Trigger Docker build on release
 on:
   release:
     types: [released]
+<<<<<<< HEAD
 
 permissions:
   contents: read
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 jobs:
   curl:
     runs-on: ubuntu-latest

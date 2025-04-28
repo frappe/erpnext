@@ -4,7 +4,11 @@
 # Decompiled by https://python-decompiler.com
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.buying.report.subcontracted_raw_materials_to_be_transferred.subcontracted_raw_materials_to_be_transferred import (
 	execute,
@@ -17,7 +21,11 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 
+<<<<<<< HEAD
 class TestSubcontractedItemToBeTransferred(IntegrationTestCase):
+=======
+class TestSubcontractedItemToBeTransferred(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_pending_and_transferred_qty(self):
 		make_service_item("Subcontracted Service Item 1")
 		service_items = [

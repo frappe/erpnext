@@ -3,7 +3,10 @@
  "allow_copy": 1,
  "allow_import": 1,
  "creation": "2013-01-23 19:57:17",
+<<<<<<< HEAD
  "default_view": "Tree",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "description": "Track separate Income and Expense for product verticals or divisions.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -126,7 +129,11 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-01-22 10:46:42.904001",
+=======
+ "modified": "2024-04-24 10:55:54.083042",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",

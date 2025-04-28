@@ -4,14 +4,21 @@
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.utils import flt, getdate
 
 from erpnext.accounts.utils import get_currency_precision
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def execute(filters=None):
 	if filters.get("party_type") == "Customer":
+<<<<<<< HEAD
 		party_naming_by = frappe.get_single_value("Selling Settings", "cust_master_name")
+=======
+		party_naming_by = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	else:
 		party_naming_by = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 
@@ -36,7 +43,10 @@ def execute(filters=None):
 
 def validate_filters(filters):
 	"""Validate if dates are properly set"""
+<<<<<<< HEAD
 	filters = frappe._dict(filters or {})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
@@ -45,10 +55,15 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 	party_map = get_party_pan_map(filters.get("party_type"))
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
+<<<<<<< HEAD
 	precision = get_currency_precision()
 
 	out = []
 	entries = {}
+=======
+
+	out = []
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	for name, details in gle_map.items():
 		for entry in details:
 			tax_amount, total_amount, grand_total, base_total = 0, 0, 0, 0
@@ -74,6 +89,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 				if not tax_withholding_category:
 					tax_withholding_category = party_map.get(party, {}).get("tax_withholding_category")
 
+<<<<<<< HEAD
 				rate = get_tax_withholding_rates(tax_rate_map.get(tax_withholding_category, []), posting_date)
 
 			values = net_total_map.get((voucher_type, name))
@@ -97,6 +113,20 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 					if voucher_type == "Purchase Invoice":
 						bill_no = values[3]
 						bill_date = values[4]
+=======
+				rate = tax_rate_map.get(tax_withholding_category)
+			if net_total_map.get((voucher_type, name)):
+				if voucher_type == "Journal Entry" and tax_amount and rate:
+					# back calcalute total amount from rate and tax_amount
+					if rate:
+						total_amount = grand_total = base_total = tax_amount / (rate / 100)
+				elif voucher_type == "Purchase Invoice":
+					total_amount, grand_total, base_total, bill_no, bill_date = net_total_map.get(
+						(voucher_type, name)
+					)
+				else:
+					total_amount, grand_total, base_total = net_total_map.get((voucher_type, name))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			else:
 				total_amount += entry.credit
 
@@ -134,6 +164,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 						"supplier_invoice_date": bill_date,
 					}
 				)
+<<<<<<< HEAD
 
 				key = entry.voucher_no
 				if key in entries:
@@ -142,6 +173,11 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 					entries[key] = row
 	out = list(entries.values())
 	out.sort(key=lambda x: (x["section_code"], x["transaction_date"]))
+=======
+				out.append(row)
+
+	out.sort(key=lambda x: x["section_code"])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return out
 
@@ -431,7 +467,11 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 			"paid_amount_after_tax",
 			"base_paid_amount",
 		],
+<<<<<<< HEAD
 		"Journal Entry": ["tax_withholding_category", "total_debit"],
+=======
+		"Journal Entry": ["total_amount"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	entries = frappe.get_all(
@@ -453,7 +493,11 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 		elif doctype == "Payment Entry":
 			value = [entry.paid_amount, entry.paid_amount_after_tax, entry.base_paid_amount]
 		else:
+<<<<<<< HEAD
 			value = [entry.total_debit] * 3
+=======
+			value = [entry.total_amount] * 3
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		net_total_map[(doctype, entry.name)] = value
 
@@ -461,6 +505,7 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 def get_tax_rate_map(filters):
 	rate_map = frappe.get_all(
 		"Tax Withholding Rate",
+<<<<<<< HEAD
 		filters={"from_date": ("<=", filters.to_date), "to_date": (">=", filters.from_date)},
 		fields=["parent", "tax_withholding_rate", "from_date", "to_date"],
 	)
@@ -480,3 +525,14 @@ def get_tax_withholding_rates(tax_withholding, posting_date):
 			return rate.tax_withholding_rate
 
 	return 0
+=======
+		filters={
+			"from_date": ("<=", filters.get("from_date")),
+			"to_date": (">=", filters.get("to_date")),
+		},
+		fields=["parent", "tax_withholding_rate"],
+		as_list=1,
+	)
+
+	return frappe._dict(rate_map)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

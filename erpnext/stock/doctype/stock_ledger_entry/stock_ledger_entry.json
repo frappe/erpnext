@@ -57,6 +57,10 @@
    "options": "Item",
    "print_width": "100px",
    "read_only": 1,
+<<<<<<< HEAD
+=======
+   "search_index": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "width": "100px"
   },
   {
@@ -73,8 +77,12 @@
    "label": "Batch No",
    "oldfieldname": "batch_no",
    "oldfieldtype": "Data",
+<<<<<<< HEAD
    "read_only": 1,
    "search_index": 1
+=======
+   "read_only": 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "warehouse",
@@ -88,6 +96,10 @@
    "options": "Warehouse",
    "print_width": "100px",
    "read_only": 1,
+<<<<<<< HEAD
+=======
+   "search_index": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "width": "100px"
   },
   {
@@ -100,6 +112,10 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "read_only": 1,
+<<<<<<< HEAD
+=======
+   "search_index": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "width": "100px"
   },
   {
@@ -122,7 +138,10 @@
    "options": "DocType",
    "print_width": "150px",
    "read_only": 1,
+<<<<<<< HEAD
    "search_index": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "width": "150px"
   },
   {
@@ -351,17 +370,28 @@
   {
    "fieldname": "posting_datetime",
    "fieldtype": "Datetime",
+<<<<<<< HEAD
    "label": "Posting Datetime"
   }
  ],
  "grid_page_length": 50,
+=======
+   "label": "Posting Datetime",
+   "search_index": 1
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "hide_toolbar": 1,
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-10-04 09:59:15.546556",
+=======
+ "modified": "2024-08-27 09:28:03.961443",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
@@ -382,8 +412,15 @@
    "role": "Accounts Manager"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

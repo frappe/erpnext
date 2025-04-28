@@ -16,7 +16,10 @@
   "transaction_date",
   "schedule_date",
   "status",
+<<<<<<< HEAD
   "has_unit_price_items",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "amended_from",
   "suppliers_section",
   "suppliers",
@@ -307,6 +310,7 @@
    "fieldtype": "Text Editor",
    "label": "Billing Address Details",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -318,11 +322,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-03-03 16:48:39.856779",
+=======
+ "modified": "2024-03-27 13:10:33.030915",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -387,7 +399,10 @@
    "role": "All"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status, transaction_date",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

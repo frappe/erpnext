@@ -1,4 +1,13 @@
 {{ address_line1 }}<br>
 {% if address_line2 %}{{ address_line2 }}<br>{% endif -%}
+<<<<<<< HEAD
 {{ pincode }} {{ city | upper }}<br>
 {{ country | upper }}
+=======
+{% if country in ["Germany", "Deutschland"] %}
+    {{ pincode }} {{ city }}
+{% else %}
+    {{ pincode }} {{ city | upper }}<br>
+    {{ country | upper }}
+{% endif %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

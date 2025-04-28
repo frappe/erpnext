@@ -17,10 +17,13 @@ class CircularReferenceError(frappe.ValidationError):
 	pass
 
 
+<<<<<<< HEAD
 class ParentIsGroupError(frappe.ValidationError):
 	pass
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 class Task(NestedSet):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -88,7 +91,10 @@ class Task(NestedSet):
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
+<<<<<<< HEAD
 		self.validate_parent_is_group()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -117,7 +123,11 @@ class Task(NestedSet):
 			)
 
 	def validate_parent_project_dates(self):
+<<<<<<< HEAD
 		if not self.project or frappe.in_test:
+=======
+		if not self.project or frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return
 
 		if project_end_date := frappe.db.get_value("Project", self.project, "expected_end_date"):
@@ -163,26 +173,37 @@ class Task(NestedSet):
 	def validate_parent_template_task(self):
 		if self.parent_task:
 			if not frappe.db.get_value("Task", self.parent_task, "is_template"):
+<<<<<<< HEAD
 				frappe.throw(
 					_("Parent Task {0} is not a Template Task").format(
 						get_link_to_form("Task", self.parent_task)
 					)
 				)
+=======
+				parent_task_format = f"""<a href="#Form/Task/{self.parent_task}">{self.parent_task}</a>"""
+				frappe.throw(_("Parent Task {0} is not a Template Task").format(parent_task_format))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_depends_on_tasks(self):
 		if self.depends_on:
 			for task in self.depends_on:
 				if not frappe.db.get_value("Task", task.task, "is_template"):
+<<<<<<< HEAD
 					frappe.throw(
 						_("Dependent Task {0} is not a Template Task").format(
 							get_link_to_form("Task", task.task)
 						)
 					)
+=======
+					dependent_task_format = f"""<a href="#Form/Task/{task.task}">{task.task}</a>"""
+					frappe.throw(_("Dependent Task {0} is not a Template Task").format(dependent_task_format))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_completed_on(self):
 		if self.completed_on and getdate(self.completed_on) > getdate():
 			frappe.throw(_("Completed On cannot be greater than Today"))
 
+<<<<<<< HEAD
 	def validate_parent_is_group(self):
 		if self.parent_task:
 			if not frappe.db.get_value("Task", self.parent_task, "is_group"):
@@ -193,6 +214,8 @@ class Task(NestedSet):
 					ParentIsGroupError,
 				)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def update_depends_on(self):
 		depends_on_tasks = ""
 		for d in self.depends_on:
@@ -409,9 +432,13 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 		# via expand child
 		filters.append(["parent_task", "=", parent])
 	else:
+<<<<<<< HEAD
 		from frappe.query_builder import Field, functions
 
 		filters.append(functions.IfNull(Field("parent_task"), "") == "")
+=======
+		filters.append(['ifnull(`parent_task`, "")', "=", ""])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if project:
 		filters.append(["project", "=", project])

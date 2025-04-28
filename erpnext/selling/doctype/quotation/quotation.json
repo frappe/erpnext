@@ -10,6 +10,10 @@
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
+<<<<<<< HEAD
+=======
+  "title",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "naming_series",
   "quotation_to",
   "party_name",
@@ -20,7 +24,10 @@
   "column_break1",
   "order_type",
   "company",
+<<<<<<< HEAD
   "has_unit_price_items",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "amended_from",
   "currency_and_price_list",
   "currency",
@@ -32,7 +39,10 @@
   "ignore_pricing_rule",
   "items_section",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "items",
   "sec_break23",
   "total_qty",
@@ -66,7 +76,10 @@
   "grand_total",
   "rounding_adjustment",
   "rounded_total",
+<<<<<<< HEAD
   "disable_rounded_total",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "in_words",
   "section_break_44",
   "apply_discount_on",
@@ -78,7 +91,10 @@
   "referral_sales_partner",
   "sec_tax_breakup",
   "other_charges_calculation",
+<<<<<<< HEAD
   "item_wise_tax_details",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "bundle_items_section",
   "packed_items",
   "pricing_rule_details",
@@ -98,9 +114,14 @@
   "shipping_address",
   "company_address_section",
   "company_address",
+<<<<<<< HEAD
   "company_address_display",
   "column_break_87",
   "company_contact_person",
+=======
+  "column_break_87",
+  "company_address_display",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "terms_tab",
   "payment_schedule_section",
   "payment_terms_template",
@@ -128,10 +149,15 @@
   "customer_group",
   "territory",
   "column_break_108",
+<<<<<<< HEAD
   "utm_source",
   "utm_campaign",
   "utm_medium",
   "utm_content",
+=======
+  "campaign",
+  "source",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break4",
   "opportunity",
   "supplier_quotation",
@@ -145,6 +171,19 @@
    "options": "fa fa-user"
   },
   {
+<<<<<<< HEAD
+=======
+   "allow_on_submit": 1,
+   "default": "{customer_name}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
@@ -657,7 +696,10 @@
    "width": "200px"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.disable_rounded_total",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -706,7 +748,10 @@
    "width": "200px"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.disable_rounded_total",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -852,6 +897,27 @@
    "label": "Update Auto Repeat Reference"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "campaign",
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "oldfieldname": "campaign",
+   "oldfieldtype": "Link",
+   "options": "Campaign",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Link",
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "Lead Source",
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "allow_on_submit": 1,
    "depends_on": "eval:doc.status=='Lost'",
    "fieldname": "order_lost_reason",
@@ -912,7 +978,10 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "Quotation Lost Reason Detail",
    "read_only": 1
   },
@@ -1049,6 +1118,7 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+<<<<<<< HEAD
   },
   {
    "fieldname": "utm_campaign",
@@ -1116,13 +1186,19 @@
    "label": "Item Wise Tax Details",
    "no_copy": 1,
    "options": "Item Wise Tax Detail"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-31 17:23:48.875382",
+=======
+ "modified": "2024-04-20 01:15:19.171383",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
@@ -1213,12 +1289,20 @@
    "role": "Maintenance User"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status,transaction_date,party_name,order_type",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "party_name",
+<<<<<<< HEAD
  "title_field": "customer_name"
 }
+=======
+ "title_field": "title"
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

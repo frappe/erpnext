@@ -1,9 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.nestedset import (
 	NestedSetChildExistsError,
 	NestedSetInvalidMergeError,
@@ -13,14 +21,25 @@ from frappe.utils.nestedset import (
 	rebuild_tree,
 )
 
+<<<<<<< HEAD
 
 class TestItem(IntegrationTestCase):
+=======
+test_records = frappe.get_test_records("Item Group")
+
+
+class TestItem(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_basic_tree(self, records=None):
 		min_lft = 1
 		max_rgt = frappe.db.sql("select max(rgt) from `tabItem Group`")[0][0]
 
 		if not records:
+<<<<<<< HEAD
 			records = self.globalTestRecords["Item Group"][2:]
+=======
+			records = test_records[2:]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for item_group in records:
 			lft, rgt, parent_item_group = frappe.db.get_value(
@@ -34,6 +53,7 @@ class TestItem(IntegrationTestCase):
 				parent_lft = min_lft - 1
 				parent_rgt = max_rgt + 1
 
+<<<<<<< HEAD
 			self.assertTrue(lft, "has no lft")
 			self.assertTrue(rgt, "has no rgt")
 			self.assertTrue(lft < rgt, "lft >= rgt")
@@ -50,6 +70,39 @@ class TestItem(IntegrationTestCase):
 			self.assertTrue(
 				parent_rgt == (parent_lft + 1 + (2 * no_of_children)), "parent_rgs is not 1 + (2 * #children)"
 			)
+=======
+			self.assertTrue(lft)
+			self.assertTrue(rgt)
+			self.assertTrue(lft < rgt)
+			self.assertTrue(parent_lft < parent_rgt)
+			self.assertTrue(lft > parent_lft)
+			self.assertTrue(rgt < parent_rgt)
+			self.assertTrue(lft >= min_lft)
+			self.assertTrue(rgt <= max_rgt)
+
+			no_of_children = self.get_no_of_children(item_group["item_group_name"])
+			self.assertTrue(rgt == (lft + 1 + (2 * no_of_children)))
+
+			no_of_children = self.get_no_of_children(parent_item_group)
+			self.assertTrue(parent_rgt == (parent_lft + 1 + (2 * no_of_children)))
+
+	def get_no_of_children(self, item_group):
+		def get_no_of_children(item_groups, no_of_children):
+			children = []
+			for ig in item_groups:
+				children += frappe.db.sql_list(
+					"""select name from `tabItem Group`
+				where ifnull(parent_item_group, '')=%s""",
+					ig or "",
+				)
+
+			if len(children):
+				return get_no_of_children(children, no_of_children + len(children))
+			else:
+				return no_of_children
+
+		return get_no_of_children([item_group], 0)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_recursion(self):
 		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
@@ -64,6 +117,15 @@ class TestItem(IntegrationTestCase):
 		rebuild_tree("Item Group")
 		self.test_basic_tree()
 
+<<<<<<< HEAD
+=======
+	def move_it_back(self):
+		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
+		group_b.parent_item_group = "All Item Groups"
+		group_b.save()
+		self.test_basic_tree()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_move_group_into_another(self):
 		# before move
 		old_lft, old_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
@@ -85,7 +147,11 @@ class TestItem(IntegrationTestCase):
 		# adjacent siblings, hence rgt diff will be 0
 		self.assertEqual(new_rgt - old_rgt, 0)
 
+<<<<<<< HEAD
 		self._move_it_back()
+=======
+		self.move_it_back()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_move_group_into_root(self):
 		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
@@ -95,7 +161,16 @@ class TestItem(IntegrationTestCase):
 		# trick! works because it hasn't been rolled back :D
 		self.test_basic_tree()
 
+<<<<<<< HEAD
 		self._move_it_back()
+=======
+		self.move_it_back()
+
+	def print_tree(self):
+		import json
+
+		print(json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_move_leaf_into_another_group(self):
 		# before move
@@ -137,7 +212,11 @@ class TestItem(IntegrationTestCase):
 		)
 
 		frappe.delete_doc("Item Group", "_Test Item Group B - 3")
+<<<<<<< HEAD
 		records_to_test = self.globalTestRecords["Item Group"][2:]
+=======
+		records_to_test = test_records[2:]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		del records_to_test[4]
 		self.test_basic_tree(records=records_to_test)
 
@@ -147,7 +226,11 @@ class TestItem(IntegrationTestCase):
 			self.assertEqual(new_rgt, item_group.rgt - 2)
 
 		# insert it back
+<<<<<<< HEAD
 		frappe.copy_doc(self.globalTestRecords["Item Group"][6]).insert()
+=======
+		frappe.copy_doc(test_records[6]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.test_basic_tree()
 
@@ -157,12 +240,20 @@ class TestItem(IntegrationTestCase):
 
 	def test_merge_groups(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
+<<<<<<< HEAD
 		records_to_test = self.globalTestRecords["Item Group"][2:]
+=======
+		records_to_test = test_records[2:]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		del records_to_test[1]
 		self.test_basic_tree(records=records_to_test)
 
 		# insert Group B back
+<<<<<<< HEAD
 		frappe.copy_doc(self.globalTestRecords["Item Group"][3]).insert()
+=======
+		frappe.copy_doc(test_records[3]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.test_basic_tree()
 
 		# move its children back
@@ -178,12 +269,20 @@ class TestItem(IntegrationTestCase):
 
 	def test_merge_leaves(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B - 2", "_Test Item Group B - 1", merge=True)
+<<<<<<< HEAD
 		records_to_test = self.globalTestRecords["Item Group"][2:]
+=======
+		records_to_test = test_records[2:]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		del records_to_test[3]
 		self.test_basic_tree(records=records_to_test)
 
 		# insert Group B - 2back
+<<<<<<< HEAD
 		frappe.copy_doc(self.globalTestRecords["Item Group"][5]).insert()
+=======
+		frappe.copy_doc(test_records[5]).insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.test_basic_tree()
 
 	def test_merge_leaf_into_group(self):
@@ -205,6 +304,7 @@ class TestItem(IntegrationTestCase):
 			"_Test Item Group B - 3",
 			merge=True,
 		)
+<<<<<<< HEAD
 
 	def _move_it_back(self):
 		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
@@ -233,3 +333,5 @@ class TestItem(IntegrationTestCase):
 		import json
 
 		print(json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1))
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

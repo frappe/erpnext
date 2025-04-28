@@ -111,6 +111,7 @@ frappe.ui.form.on("Opportunity", {
 				},
 				__("Create")
 			);
+<<<<<<< HEAD
 
 			let company_currency = erpnext.get_currency(frm.doc.company);
 			if (company_currency != frm.doc.currency) {
@@ -118,6 +119,8 @@ frappe.ui.form.on("Opportunity", {
 					frm.trigger("currency");
 				});
 			}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		if (!frm.doc.__islocal && frm.perm[0].write && frm.doc.docstatus == 0) {
@@ -159,7 +162,11 @@ frappe.ui.form.on("Opportunity", {
 
 	currency: function (frm) {
 		let company_currency = erpnext.get_currency(frm.doc.company);
+<<<<<<< HEAD
 		if (company_currency != frm.doc.currency) {
+=======
+		if (company_currency != frm.doc.company) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frappe.call({
 				method: "erpnext.setup.utils.get_exchange_rate",
 				args: {
@@ -284,10 +291,15 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			this.frm.set_value("currency", frappe.defaults.get_user_default("Currency"));
 		}
 
+<<<<<<< HEAD
 		if (this.frm.is_new() && this.frm.doc.opportunity_type === undefined) {
 			this.frm.doc.opportunity_type = __("Sales");
 		}
 		this.setup_queries();
+=======
+		this.setup_queries();
+		this.frm.trigger("currency");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	refresh() {

@@ -1,7 +1,11 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
@@ -16,18 +20,27 @@ from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
+<<<<<<< HEAD
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 )
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+<<<<<<< HEAD
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 
 
 class TestProductionPlan(IntegrationTestCase):
+=======
+
+
+class TestProductionPlan(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		for item in [
 			"Test Production Item 1",
@@ -73,10 +86,16 @@ class TestProductionPlan(IntegrationTestCase):
 
 		material_requests = frappe.get_all(
 			"Material Request Item",
+<<<<<<< HEAD
 			fields=["parent"],
 			filters={"production_plan": pln.name},
 			as_list=1,
 			distinct=True,
+=======
+			fields=["distinct parent"],
+			filters={"production_plan": pln.name},
+			as_list=1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		self.assertTrue(len(material_requests), 2)
@@ -143,7 +162,11 @@ class TestProductionPlan(IntegrationTestCase):
 			item_code="Raw Material Item 2", target="_Test Warehouse - _TC", qty=1, rate=120
 		)
 
+<<<<<<< HEAD
 		pln = create_production_plan(item_code="Test Production Item 1", ignore_existing_ordered_qty=0)
+=======
+		pln = create_production_plan(item_code="Test Production Item 1", ignore_existing_ordered_qty=1)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertTrue(len(pln.mr_items))
 		self.assertTrue(flt(pln.mr_items[0].quantity), 1.0)
 
@@ -177,6 +200,7 @@ class TestProductionPlan(IntegrationTestCase):
 		)
 
 		pln = create_production_plan(
+<<<<<<< HEAD
 			item_code="Test Production Item 1", use_multi_level_bom=0, ignore_existing_ordered_qty=1
 		)
 
@@ -190,6 +214,15 @@ class TestProductionPlan(IntegrationTestCase):
 		pln.cancel()
 		sr1.cancel()
 		sr2.cancel()
+=======
+			item_code="Test Production Item 1", use_multi_level_bom=0, ignore_existing_ordered_qty=0
+		)
+		self.assertFalse(len(pln.mr_items))
+
+		sr1.cancel()
+		sr2.cancel()
+		pln.cancel()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_production_plan_sales_orders(self):
 		"Test if previously fulfilled SO (with WO) is pulled into Prod Plan."
@@ -452,12 +485,16 @@ class TestProductionPlan(IntegrationTestCase):
 		self.assertEqual(plan.sub_assembly_items[0].supplier, "_Test Supplier")
 
 	def test_production_plan_for_subcontracting_po(self):
+<<<<<<< HEAD
 		from erpnext.controllers.status_updater import OverAllowanceError
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
 			create_subcontracting_bom,
 		)
 
+<<<<<<< HEAD
 		def make_purchase_receipt_from_po(po_doc):
 			from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
 			from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
@@ -484,6 +521,8 @@ class TestProductionPlan(IntegrationTestCase):
 			scr.submit()
 			scr_make_purchase_receipt(scr.name).submit()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		fg_item = "Test Motherboard 1"
 		bom_tree_1 = {"Test Laptop 1": {fg_item: {"Test Motherboard Wires 1": {}}}}
 		create_nested_bom(bom_tree_1, prefix="")
@@ -508,12 +547,16 @@ class TestProductionPlan(IntegrationTestCase):
 		)
 
 		plan = create_production_plan(
+<<<<<<< HEAD
 			item_code="Test Laptop 1",
 			planned_qty=10,
 			use_multi_level_bom=1,
 			do_not_submit=True,
 			company="_Test Company 1",
 			skip_getting_mr_items=True,
+=======
+			item_code="Test Laptop 1", planned_qty=10, use_multi_level_bom=1, do_not_submit=True
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		plan.get_sub_assembly_items()
 		plan.set_default_supplier_for_subcontracting_order()
@@ -527,6 +570,7 @@ class TestProductionPlan(IntegrationTestCase):
 		self.assertEqual(po_doc.supplier, "_Test Supplier")
 		self.assertEqual(po_doc.items[0].qty, 10.0)
 		self.assertEqual(po_doc.items[0].fg_item_qty, 10.0)
+<<<<<<< HEAD
 		self.assertEqual(po_doc.items[0].fg_item, fg_item)
 		self.assertEqual(po_doc.items[0].item_code, service_item)
 
@@ -630,6 +674,12 @@ class TestProductionPlan(IntegrationTestCase):
 		# Test 5 : Quantity of item cannot exceed available quantity from Production Plan
 		self.assertRaises(frappe.ValidationError, mr_doc.submit)
 
+=======
+		self.assertEqual(po_doc.items[0].fg_item_qty, 10.0)
+		self.assertEqual(po_doc.items[0].fg_item, fg_item)
+		self.assertEqual(po_doc.items[0].item_code, service_item)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
@@ -693,6 +743,10 @@ class TestProductionPlan(IntegrationTestCase):
 		mr = frappe.get_doc("Material Request", material_request)
 
 		self.assertTrue(mr.material_request_type, "Customer Provided")
+<<<<<<< HEAD
+=======
+		self.assertTrue(mr.customer, "_Test Customer")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_production_plan_with_multi_level_bom(self):
 		"""
@@ -727,7 +781,10 @@ class TestProductionPlan(IntegrationTestCase):
 			},
 		)
 
+<<<<<<< HEAD
 		pln.skip_available_sub_assembly_item = 0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pln.get_sub_assembly_items("In House")
 		pln.submit()
 		pln.make_work_order()
@@ -887,9 +944,15 @@ class TestProductionPlan(IntegrationTestCase):
 		"""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
+<<<<<<< HEAD
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		make_stock_entry(
 			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=4, basic_rate=100
+=======
+		make_stock_entry(item_code="_Test Item", target="Work In Progress - _TC", qty=2, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Work In Progress - _TC", qty=4, basic_rate=100
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		item = "_Test FG Item"
@@ -937,10 +1000,17 @@ class TestProductionPlan(IntegrationTestCase):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		make_stock_entry(
+<<<<<<< HEAD
 			item_code="Raw Material Item 1", target="_Test Warehouse - _TC", qty=2, basic_rate=100
 		)
 		make_stock_entry(
 			item_code="Raw Material Item 2", target="_Test Warehouse - _TC", qty=2, basic_rate=100
+=======
+			item_code="Raw Material Item 1", target="Work In Progress - _TC", qty=2, basic_rate=100
+		)
+		make_stock_entry(
+			item_code="Raw Material Item 2", target="Work In Progress - _TC", qty=2, basic_rate=100
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		pln = create_production_plan(item_code="Test Production Item 1", skip_getting_mr_items=True)
@@ -1256,6 +1326,10 @@ class TestProductionPlan(IntegrationTestCase):
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty, before_qty)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		completed_plans = get_non_completed_production_plans()
 		for plan in plans:
 			self.assertFalse(plan in completed_plans)
@@ -1405,12 +1479,17 @@ class TestProductionPlan(IntegrationTestCase):
 			do_not_submit=1,
 			skip_available_sub_assembly_item=1,
 			warehouse="_Test Warehouse - _TC",
+<<<<<<< HEAD
 			sub_assembly_warehouse="_Test Warehouse - _TC",
 		)
 
 		plan.get_sub_assembly_items()
 		plan.save()
 
+=======
+		)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items = get_items_for_material_requests(
 			plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
 		)
@@ -1460,7 +1539,10 @@ class TestProductionPlan(IntegrationTestCase):
 		)
 
 		plan.for_warehouse = mrp_warhouse
+<<<<<<< HEAD
 		plan.ignore_existing_ordered_qty = 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		items = get_items_for_material_requests(
 			plan.as_dict(), warehouses=[{"warehouse": wh1}, {"warehouse": wh2}]
@@ -1697,7 +1779,10 @@ class TestProductionPlan(IntegrationTestCase):
 		)
 
 		pln.for_warehouse = rm_warehouse
+<<<<<<< HEAD
 		pln.ignore_existing_ordered_qty = 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items = get_items_for_material_requests(pln.as_dict(), warehouses=[{"warehouse": store_warehouse}])
 
 		for row in items:
@@ -1856,6 +1941,7 @@ class TestProductionPlan(IntegrationTestCase):
 			self.assertEqual(row.production_item, sf_item)
 			self.assertEqual(row.qty, 5.0)
 
+<<<<<<< HEAD
 	def test_calculation_of_sub_assembly_items(self):
 		make_item("Sub Assembly Item ", properties={"is_stock_item": 1})
 		make_item("Sub Assembly Item 2", properties={"is_stock_item": 1})
@@ -2445,6 +2531,8 @@ class TestProductionPlan(IntegrationTestCase):
 		self.assertEqual(plan.sub_assembly_items[0].production_item, "Sub Assembly Level 1-1")
 		self.assertEqual([item.item_code for item in plan.mr_items], ["Item Level 1-3", "Item Level 2-3"])
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_production_plan(**args):
 	"""
@@ -2466,8 +2554,11 @@ def create_production_plan(**args):
 			"get_items_from": "Sales Order",
 			"skip_available_sub_assembly_item": args.skip_available_sub_assembly_item or 0,
 			"sub_assembly_warehouse": args.sub_assembly_warehouse,
+<<<<<<< HEAD
 			"reserve_stock": args.reserve_stock or 0,
 			"for_warehouse": args.for_warehouse or None,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	)
 
@@ -2551,7 +2642,10 @@ def make_bom(**args):
 		if not args.do_not_submit:
 			bom.submit()
 
+<<<<<<< HEAD
 	if args.set_as_default_bom and not args.do_not_save and not args.do_not_submit:
 		frappe.set_value("Item", args.item, "default_bom", bom.name)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return bom

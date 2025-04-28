@@ -8,8 +8,11 @@ import frappe
 from frappe import _
 from frappe.utils import formatdate, get_link_to_form
 
+<<<<<<< HEAD
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_details_query
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def execute(filters=None):
 	return VATAuditReport(filters).run()
@@ -49,7 +52,11 @@ class VATAuditReport:
 		self.sa_vat_accounts = frappe.get_all(
 			"South Africa VAT Account", filters={"parent": self.filters.company}, pluck="account"
 		)
+<<<<<<< HEAD
 		if not self.sa_vat_accounts and not frappe.in_test and not frappe.flags.in_migrate:
+=======
+		if not self.sa_vat_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			link_to_settings = get_link_to_form(
 				"South Africa VAT Settings", "", label="South Africa VAT Settings"
 			)
@@ -80,6 +87,7 @@ class VATAuditReport:
 
 	def get_invoice_items(self, doctype):
 		self.invoice_items = frappe._dict()
+<<<<<<< HEAD
 		item_doctype = frappe.qb.DocType(doctype + " Item")
 		self.invoice_items = frappe._dict(
 			frappe.qb.from_(item_doctype)
@@ -93,10 +101,34 @@ class VATAuditReport:
 
 	def get_items_based_on_tax_rate(self, doctype):
 		self.items_based_on_tax_rate = frappe._dict()
+=======
+
+		items = frappe.db.sql(
+			"""
+			SELECT
+				item_code, parent, base_net_amount, is_zero_rated
+			FROM
+				`tab{} Item`
+			WHERE
+				parent in ({})
+			""".format(doctype, ", ".join(["%s"] * len(self.invoices))),
+			tuple(self.invoices),
+			as_dict=1,
+		)
+		for d in items:
+			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {"net_amount": 0.0})
+			self.invoice_items[d.parent][d.item_code]["net_amount"] += d.get("base_net_amount", 0)
+			self.invoice_items[d.parent][d.item_code]["is_zero_rated"] = d.is_zero_rated
+
+	def get_items_based_on_tax_rate(self, doctype):
+		self.items_based_on_tax_rate = frappe._dict()
+		self.item_tax_rate = frappe._dict()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.tax_doctype = (
 			"Purchase Taxes and Charges" if doctype == "Purchase Invoice" else "Sales Taxes and Charges"
 		)
 
+<<<<<<< HEAD
 		taxes_and_charges = frappe.qb.DocType(self.tax_doctype)
 		item_wise_tax = frappe.qb.DocType("Item Wise Tax Detail")
 		invoice_names = list(self.invoices.keys())
@@ -128,6 +160,67 @@ class VATAuditReport:
 			self.items_based_on_tax_rate[parent][row.rate]["tax_amount"] += row.amount
 			self.items_based_on_tax_rate[parent][row.rate]["net_amount"] += row.taxable_amount
 			self.items_based_on_tax_rate[parent][row.rate]["gross_amount"] += row.amount + row.taxable_amount
+=======
+		self.tax_details = frappe.db.sql(
+			"""
+			SELECT
+				parent, account_head, item_wise_tax_detail
+			FROM
+				`tab{}`
+			WHERE
+				parenttype = {} and docstatus = 1
+				and parent in ({})
+			ORDER BY
+				account_head
+			""".format(self.tax_doctype, "%s", ", ".join(["%s"] * len(self.invoices.keys()))),
+			tuple([doctype, *list(self.invoices.keys())]),
+		)
+
+		for parent, account, item_wise_tax_detail in self.tax_details:
+			if item_wise_tax_detail:
+				try:
+					if account in self.sa_vat_accounts:
+						item_wise_tax_detail = json.loads(item_wise_tax_detail)
+					else:
+						continue
+					for item_code, taxes in item_wise_tax_detail.items():
+						is_zero_rated = self.invoice_items.get(parent).get(item_code).get("is_zero_rated")
+						# to skip items with non-zero tax rate in multiple rows
+						if taxes[0] == 0 and not is_zero_rated:
+							continue
+						tax_rate = self.get_item_amount_map(parent, item_code, taxes)
+
+						if tax_rate is not None:
+							rate_based_dict = self.items_based_on_tax_rate.setdefault(parent, {}).setdefault(
+								tax_rate, []
+							)
+							if item_code not in rate_based_dict:
+								rate_based_dict.append(item_code)
+				except ValueError:
+					continue
+
+	def get_item_amount_map(self, parent, item_code, taxes):
+		net_amount = self.invoice_items.get(parent).get(item_code).get("net_amount")
+		tax_rate = taxes[0]
+		tax_amount = taxes[1]
+		gross_amount = net_amount + tax_amount
+
+		self.item_tax_rate.setdefault(parent, {}).setdefault(
+			item_code,
+			{
+				"tax_rate": tax_rate,
+				"gross_amount": 0.0,
+				"tax_amount": 0.0,
+				"net_amount": 0.0,
+			},
+		)
+
+		self.item_tax_rate[parent][item_code]["net_amount"] += net_amount
+		self.item_tax_rate[parent][item_code]["tax_amount"] += tax_amount
+		self.item_tax_rate[parent][item_code]["gross_amount"] += gross_amount
+
+		return tax_rate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def get_conditions(self):
 		conditions = ""
@@ -170,6 +263,7 @@ class VATAuditReport:
 	def get_consolidated_data(self, doctype):
 		consolidated_data_map = {}
 		for inv, inv_data in self.invoices.items():
+<<<<<<< HEAD
 			rate_details = self.items_based_on_tax_rate.get(inv, {})
 			if not rate_details:
 				continue
@@ -194,6 +288,27 @@ class VATAuditReport:
 
 				consolidated_data_map.setdefault(rate, {"data": []})
 				consolidated_data_map[rate]["data"].append(row)
+=======
+			if self.items_based_on_tax_rate.get(inv):
+				for rate, items in self.items_based_on_tax_rate.get(inv).items():
+					row = {"tax_amount": 0.0, "gross_amount": 0.0, "net_amount": 0.0}
+
+					consolidated_data_map.setdefault(rate, {"data": []})
+					for item in items:
+						item_details = self.item_tax_rate.get(inv).get(item)
+						row["account"] = inv_data.get("account")
+						row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
+						row["voucher_type"] = doctype
+						row["voucher_no"] = inv
+						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
+						row["party"] = inv_data.get("party")
+						row["remarks"] = inv_data.get("remarks")
+						row["gross_amount"] += item_details.get("gross_amount")
+						row["tax_amount"] += item_details.get("tax_amount")
+						row["net_amount"] += item_details.get("net_amount")
+
+					consolidated_data_map[rate]["data"].append(row)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		return consolidated_data_map
 

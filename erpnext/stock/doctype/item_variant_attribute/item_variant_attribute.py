@@ -16,7 +16,10 @@ class ItemVariantAttribute(Document):
 
 		attribute: DF.Link
 		attribute_value: DF.Data | None
+<<<<<<< HEAD
 		disabled: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from_range: DF.Float
 		increment: DF.Float
 		numeric_values: DF.Check

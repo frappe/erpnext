@@ -11,8 +11,11 @@
   "consumed_quantity",
   "total_value",
   "serial_no",
+<<<<<<< HEAD
   "column_break_xzfr",
   "pick_serial_and_batch",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "serial_and_batch_bundle"
  ],
  "fields": [
@@ -63,6 +66,7 @@
    "label": "Warehouse",
    "options": "Warehouse",
    "reqd": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "pick_serial_and_batch",
@@ -72,20 +76,33 @@
   {
    "fieldname": "column_break_xzfr",
    "fieldtype": "Column Break"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-06-27 14:52:56.311166",
+=======
+ "modified": "2024-06-13 12:01:47.147333",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair Consumed Item",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -22,7 +22,10 @@ class ProductionPlanSubAssemblyItem(Document):
 		fg_warehouse: DF.Link | None
 		indent: DF.Int
 		item_name: DF.Data | None
+<<<<<<< HEAD
 		ordered_qty: DF.Float
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		parent: DF.Data
 		parent_item_code: DF.Link | None
 		parentfield: DF.Data
@@ -33,9 +36,13 @@ class ProductionPlanSubAssemblyItem(Document):
 		purchase_order: DF.Link | None
 		qty: DF.Float
 		received_qty: DF.Float
+<<<<<<< HEAD
 		required_qty: DF.Float
 		schedule_date: DF.Datetime | None
 		stock_reserved_qty: DF.Float
+=======
+		schedule_date: DF.Datetime | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		stock_uom: DF.Link | None
 		supplier: DF.Link | None
 		type_of_manufacturing: DF.Literal["In House", "Subcontract", "Material Request"]

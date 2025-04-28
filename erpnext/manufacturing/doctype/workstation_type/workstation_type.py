@@ -2,7 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe import _, bold
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -16,6 +19,7 @@ class WorkstationType(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		from erpnext.manufacturing.doctype.workstation_cost.workstation_cost import WorkstationCost
 
 		description: DF.SmallText | None
@@ -39,15 +43,35 @@ class WorkstationType(Document):
 					)
 				)
 
+=======
+		description: DF.SmallText | None
+		hour_rate: DF.Currency
+		hour_rate_consumable: DF.Currency
+		hour_rate_electricity: DF.Currency
+		hour_rate_labour: DF.Currency
+		hour_rate_rent: DF.Currency
+		workstation_type: DF.Data
+	# end: auto-generated types
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def before_save(self):
 		self.set_hour_rate()
 
 	def set_hour_rate(self):
+<<<<<<< HEAD
 		self.hour_rate = 0.0
 
 		for row in self.workstation_costs:
 			if row.operating_cost:
 				self.hour_rate += flt(row.operating_cost)
+=======
+		self.hour_rate = (
+			flt(self.hour_rate_labour)
+			+ flt(self.hour_rate_electricity)
+			+ flt(self.hour_rate_consumable)
+			+ flt(self.hour_rate_rent)
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_workstations(workstation_type):

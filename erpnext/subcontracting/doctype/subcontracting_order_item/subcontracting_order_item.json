@@ -54,9 +54,13 @@
   "column_break_nfod",
   "section_break_34",
   "purchase_order_item",
+<<<<<<< HEAD
   "page_break",
   "subcontracting_conversion_factor",
   "production_plan_sub_assembly_item"
+=======
+  "page_break"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -115,6 +119,10 @@
    "fieldtype": "Text Editor",
    "label": "Description",
    "print_width": "300px",
+<<<<<<< HEAD
+=======
+   "reqd": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "width": "300px"
   },
   {
@@ -148,8 +156,13 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity",
+<<<<<<< HEAD
    "non_negative": 1,
    "print_width": "60px",
+=======
+   "print_width": "60px",
+   "read_only": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1,
    "width": "60px"
   },
@@ -189,7 +202,11 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+   "options": "currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1,
    "reqd": 1
   },
@@ -203,7 +220,11 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+   "options": "currency",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1,
    "reqd": 1
   },
@@ -273,7 +294,10 @@
    "fieldname": "service_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Service Cost Per Qty",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1,
    "reqd": 1
   },
@@ -282,7 +306,10 @@
    "fieldname": "additional_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Additional Cost Per Qty",
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -290,7 +317,10 @@
    "fieldtype": "Currency",
    "label": "Raw Material Cost Per Qty",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "Company:company:default_currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -401,6 +431,7 @@
   {
    "fieldname": "column_break_nfod",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "subcontracting_conversion_factor",
@@ -421,11 +452,19 @@
   }
  ],
  "grid_page_length": 50,
+=======
+  }
+ ],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-03 12:29:45.156101",
+=======
+ "modified": "2024-03-27 13:12:46.343298",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Item",
@@ -433,10 +472,17 @@
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "item_name",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

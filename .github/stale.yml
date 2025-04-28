@@ -12,6 +12,7 @@ exemptProjects: true
 # Set to true to ignore issues in a milestone (defaults to false)
 exemptMilestones: true
 
+<<<<<<< HEAD
 # Skip the stale action for draft PRs
 exemptDraftPr: true
 
@@ -20,6 +21,8 @@ exemptLabels:
   - hotfix
   - no-stale
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 pulls:
   daysUntilStale: 15
   daysUntilClose: 3

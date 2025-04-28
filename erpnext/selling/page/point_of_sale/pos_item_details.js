@@ -6,7 +6,10 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.allow_rate_change = settings.allow_rate_change;
 		this.allow_discount_change = settings.allow_discount_change;
 		this.current_item = {};
+<<<<<<< HEAD
 		this.frm_doctype = settings.frm_doctype;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		this.init_component();
 	}
@@ -188,7 +191,10 @@ erpnext.PointOfSale.ItemDetails = class {
 			this[`${fieldname}_control`].set_value(item[fieldname]);
 		});
 
+<<<<<<< HEAD
 		this.resize_serial_control(item);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.make_auto_serial_selection_btn(item);
 
 		this.bind_custom_control_change_event();
@@ -205,6 +211,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			"actual_qty",
 			"price_list_rate",
 		];
+<<<<<<< HEAD
 		if (item.has_serial_no || item.serial_no) fields.push("serial_no");
 		if (item.has_batch_no || item.batch_no) fields.push("batch_no");
 		return fields;
@@ -223,6 +230,16 @@ erpnext.PointOfSale.ItemDetails = class {
 				this.$form_container.append(`<div class="grid-filler no-select"></div>`);
 			}
 			const label = __("Auto Fetch Serial Numbers");
+=======
+		if (item.has_serial_no) fields.push("serial_no");
+		if (item.has_batch_no) fields.push("batch_no");
+		return fields;
+	}
+
+	make_auto_serial_selection_btn(item) {
+		if (item.has_serial_no || item.has_batch_no) {
+			const label = item.has_serial_no ? __("Select Serial No") : __("Select Batch No");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.$form_container.append(
 				`<div class="btn btn-sm btn-secondary auto-fetch-btn">${label}</div>`
 			);
@@ -284,7 +301,11 @@ erpnext.PointOfSale.ItemDetails = class {
 			};
 			this.warehouse_control.df.get_query = () => {
 				return {
+<<<<<<< HEAD
 					filters: { company: this.events.get_frm().doc.company, is_group: 0 },
+=======
+					filters: { company: this.events.get_frm().doc.company },
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				};
 			};
 			this.warehouse_control.refresh();
@@ -322,6 +343,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				me.conversion_factor_control.df.read_only = item_row.stock_uom == this.value;
 				me.conversion_factor_control.refresh();
 			};
+<<<<<<< HEAD
 			this.uom_control.df.get_query = () => {
 				return {
 					query: "erpnext.controllers.queries.get_item_uom_query",
@@ -344,6 +366,15 @@ erpnext.PointOfSale.ItemDetails = class {
 				field_control.get_value() !== value &&
 				value == item_row[fieldname]
 			) {
+=======
+		}
+
+		frappe.model.on("POS Invoice Item", "*", (fieldname, value, item_row) => {
+			const field_control = this[`${fieldname}_control`];
+			const item_row_is_being_edited = this.compare_with_current_item(item_row);
+
+			if (item_row_is_being_edited && field_control && field_control.get_value() !== value) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				field_control.set_value(value);
 				cur_pos.update_cart_html(item_row);
 			}
@@ -422,6 +453,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	bind_auto_serial_fetch_event() {
 		this.$form_container.on("click", ".auto-fetch-btn", () => {
+<<<<<<< HEAD
 			this.batch_no_control && this.batch_no_control.set_value("");
 			let qty = this.qty_control.get_value();
 			let conversion_factor = this.conversion_factor_control.get_value();
@@ -457,6 +489,20 @@ erpnext.PointOfSale.ItemDetails = class {
 				}
 				numbers = auto_fetched_serial_numbers.join(`\n`);
 				this.serial_no_control.set_value(numbers);
+=======
+			let frm = this.events.get_frm();
+			let item_row = this.item_row;
+			item_row.type_of_transaction = "Outward";
+
+			new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+				if (r) {
+					frappe.model.set_value(item_row.doctype, item_row.name, {
+						serial_and_batch_bundle: r.name,
+						qty: Math.abs(r.total_qty),
+						use_serial_batch_fields: 0,
+					});
+				}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			});
 		});
 	}

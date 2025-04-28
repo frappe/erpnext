@@ -1,11 +1,19 @@
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
+<<<<<<< HEAD
 class TestTaxesAndTotals(AccountsTestMixin, IntegrationTestCase):
+=======
+class TestTaxesAndTotals(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_distributed_discount_amount(self):
 		so = make_sales_order(do_not_save=1)
 		so.apply_discount_on = "Net Total"

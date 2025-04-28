@@ -1,5 +1,9 @@
 {
  "actions": [],
+<<<<<<< HEAD
+=======
+ "allow_guest_to_view": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_code",
@@ -16,22 +20,35 @@
   "item_name",
   "item_group",
   "stock_uom",
+<<<<<<< HEAD
   "opening_stock",
   "valuation_rate",
   "standard_rate",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break0",
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
   "has_variants",
+<<<<<<< HEAD
+=======
+  "opening_stock",
+  "valuation_rate",
+  "standard_rate",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "is_fixed_asset",
   "auto_create_assets",
   "is_grouped_asset",
   "asset_category",
   "asset_naming_series",
+<<<<<<< HEAD
   "section_break_znra",
   "over_delivery_receipt_allowance",
   "column_break_wugd",
+=======
+  "over_delivery_receipt_allowance",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "over_billing_allowance",
   "image",
   "section_break_11",
@@ -65,8 +82,11 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+<<<<<<< HEAD
   "defaults_tab",
   "item_defaults",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -78,6 +98,11 @@
   "column_break_9s9o",
   "enable_deferred_revenue",
   "no_of_months",
+<<<<<<< HEAD
+=======
+  "section_break_avcp",
+  "item_defaults",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "purchasing_tab",
   "purchase_uom",
   "min_order_qty",
@@ -118,9 +143,13 @@
   "customer_code",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
+<<<<<<< HEAD
   "total_projected_qty",
   "capacity_in_days_section",
   "production_capacity"
+=======
+  "total_projected_qty"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -322,8 +351,12 @@
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
    "label": "Shelf Life In Days",
+<<<<<<< HEAD
    "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date",
    "non_negative": 1
+=======
+   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "default": "2099-12-31",
@@ -367,8 +400,12 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
+<<<<<<< HEAD
    "label": "Weight Per Unit",
    "non_negative": 1
+=======
+   "label": "Weight Per Unit"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "depends_on": "eval:doc.is_stock_item",
@@ -540,15 +577,22 @@
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
    "label": "Minimum Order Qty",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "min_order_qty",
    "oldfieldtype": "Currency"
   },
   {
    "fieldname": "safety_stock",
    "fieldtype": "Float",
+<<<<<<< HEAD
    "label": "Safety Stock",
    "non_negative": 1
+=======
+   "label": "Safety Stock"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "purchase_details_cb",
@@ -559,7 +603,10 @@
    "fieldname": "lead_time_days",
    "fieldtype": "Int",
    "label": "Lead Time in days",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "lead_time_days",
    "oldfieldtype": "Int"
   },
@@ -568,7 +615,10 @@
    "fieldtype": "Float",
    "label": "Last Purchase Rate",
    "no_copy": 1,
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "last_purchase_rate",
    "oldfieldtype": "Currency",
    "read_only": 1
@@ -580,7 +630,11 @@
    "label": "Is Customer Provided Item"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:doc.is_customer_provided_item",
+=======
+   "depends_on": "eval:doc.is_customer_provided_item==1",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -765,9 +819,16 @@
   },
   {
    "default": "0",
+<<<<<<< HEAD
    "fieldname": "is_sub_contracted_item",
    "fieldtype": "Check",
    "label": "Is Subcontracted Item",
+=======
+   "description": "If subcontracted to a vendor",
+   "fieldname": "is_sub_contracted_item",
+   "fieldtype": "Check",
+   "label": "Supply Raw Materials for Purchase",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "is_sub_contracted_item",
    "oldfieldtype": "Select"
   },
@@ -883,10 +944,18 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "section_break_avcp",
+   "fieldtype": "Section Break"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible": 1,
    "fieldname": "deferred_accounting_section",
    "fieldtype": "Section Break",
    "label": "Deferred Accounting"
+<<<<<<< HEAD
   },
   {
    "fieldname": "capacity_in_days_section",
@@ -910,14 +979,23 @@
   {
    "fieldname": "column_break_wugd",
    "fieldtype": "Column Break"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
+<<<<<<< HEAD
  "links": [],
  "make_attachments_public": 1,
  "modified": "2025-11-03 17:01:24.555003",
+=======
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "make_attachments_public": 1,
+ "modified": "2024-04-30 13:46:39.098753",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -982,7 +1060,10 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
@@ -991,4 +1072,8 @@
  "states": [],
  "title_field": "item_name",
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

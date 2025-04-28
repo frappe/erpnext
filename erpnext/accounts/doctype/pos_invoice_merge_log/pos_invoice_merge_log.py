@@ -2,7 +2,10 @@
 # For license information, please see license.txt
 
 
+<<<<<<< HEAD
 import hashlib
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import json
 
 import frappe
@@ -13,10 +16,14 @@ from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 
+<<<<<<< HEAD
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
+=======
+from erpnext.accounts.doctype.pos_profile.pos_profile import required_accounting_dimensions
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class POSInvoiceMergeLog(Document):
@@ -28,10 +35,18 @@ class POSInvoiceMergeLog(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import POSInvoiceReference
 
 		amended_from: DF.Link | None
 		company: DF.Link
+=======
+		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
+			POSInvoiceReference,
+		)
+
+		amended_from: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		consolidated_credit_note: DF.Link | None
 		consolidated_invoice: DF.Link | None
 		customer: DF.Link
@@ -119,6 +134,7 @@ class POSInvoiceMergeLog(Document):
 		returns = [d for d in pos_invoice_docs if d.get("is_return") == 1]
 		sales = [d for d in pos_invoice_docs if d.get("is_return") == 0]
 
+<<<<<<< HEAD
 		sales_invoice, credit_notes = "", {}
 		sales_invoice_doc = None
 		if sales:
@@ -131,6 +147,17 @@ class POSInvoiceMergeLog(Document):
 
 		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_notes)
+=======
+		sales_invoice, credit_note = "", ""
+		if returns:
+			credit_note = self.process_merging_into_credit_note(returns)
+
+		if sales:
+			sales_invoice = self.process_merging_into_sales_invoice(sales)
+
+		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
+		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def on_cancel(self):
 		pos_invoice_docs = [frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
@@ -138,7 +165,10 @@ class POSInvoiceMergeLog(Document):
 		self.update_pos_invoices(pos_invoice_docs)
 		self.serial_and_batch_bundle_reference_for_pos_invoice()
 		self.cancel_linked_invoices()
+<<<<<<< HEAD
 		self.delink_serial_and_batch_bundle()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
@@ -146,6 +176,7 @@ class POSInvoiceMergeLog(Document):
 
 		sales_invoice.is_consolidated = 1
 		sales_invoice.set_posting_time = 1
+<<<<<<< HEAD
 
 		if not sales_invoice.posting_date:
 			sales_invoice.posting_date = getdate(self.posting_date)
@@ -206,6 +237,38 @@ class POSInvoiceMergeLog(Document):
 
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes, item_tax_details = [], [], [], []
+=======
+		sales_invoice.posting_date = getdate(self.posting_date)
+		sales_invoice.posting_time = get_time(self.posting_time)
+		sales_invoice.save()
+		sales_invoice.submit()
+
+		self.consolidated_invoice = sales_invoice.name
+
+		return sales_invoice.name
+
+	def process_merging_into_credit_note(self, data):
+		credit_note = self.get_new_sales_invoice()
+		credit_note.is_return = 1
+
+		credit_note = self.merge_pos_invoice_into(credit_note, data)
+
+		credit_note.is_consolidated = 1
+		credit_note.set_posting_time = 1
+		credit_note.posting_date = getdate(self.posting_date)
+		credit_note.posting_time = get_time(self.posting_time)
+		# TODO: return could be against multiple sales invoice which could also have been consolidated?
+		# credit_note.return_against = self.consolidated_invoice
+		credit_note.save()
+		credit_note.submit()
+
+		self.consolidated_credit_note = credit_note.name
+
+		return credit_note.name
+
+	def merge_pos_invoice_into(self, invoice, data):
+		items, payments, taxes = [], [], []
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
 
@@ -215,6 +278,7 @@ class POSInvoiceMergeLog(Document):
 		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
 
 		for doc in data:
+<<<<<<< HEAD
 			old_new_item_map = frappe._dict()
 			old_new_tax_map = frappe._dict()
 			map_doc(doc, invoice, table_map={"doctype": invoice.doctype})
@@ -223,6 +287,10 @@ class POSInvoiceMergeLog(Document):
 				invoice.posting_date = getdate(doc.posting_date)
 				invoice.posting_time = get_time(doc.posting_time)
 
+=======
+			map_doc(doc, invoice, table_map={"doctype": invoice.doctype})
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if doc.redeem_loyalty_points:
 				invoice.loyalty_redemption_account = doc.loyalty_redemption_account
 				invoice.loyalty_redemption_cost_center = doc.loyalty_redemption_cost_center
@@ -230,6 +298,7 @@ class POSInvoiceMergeLog(Document):
 				loyalty_amount_sum += doc.loyalty_amount
 
 			for item in doc.get("items"):
+<<<<<<< HEAD
 				item.rate = item.net_rate
 				item.amount = item.net_amount
 				item.base_amount = item.base_net_amount
@@ -245,6 +314,35 @@ class POSInvoiceMergeLog(Document):
 					si_item.serial_and_batch_bundle = item.serial_and_batch_bundle
 				items.append(si_item)
 				old_new_item_map[item.name] = si_item
+=======
+				found = False
+				for i in items:
+					if (
+						i.item_code == item.item_code
+						and not i.serial_and_batch_bundle
+						and not i.serial_no
+						and not i.batch_no
+						and i.uom == item.uom
+						and i.net_rate == item.net_rate
+						and i.warehouse == item.warehouse
+					):
+						found = True
+						i.qty = i.qty + item.qty
+						i.amount = i.amount + item.net_amount
+						i.net_amount = i.amount
+						i.base_amount = i.base_amount + item.base_net_amount
+						i.base_net_amount = i.base_amount
+
+				if not found:
+					item.rate = item.net_rate
+					item.amount = item.net_amount
+					item.base_amount = item.base_net_amount
+					item.price_list_rate = 0
+					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
+					if item.serial_and_batch_bundle:
+						si_item.serial_and_batch_bundle = item.serial_and_batch_bundle
+					items.append(si_item)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			for tax in doc.get("taxes"):
 				found = False
@@ -254,19 +352,31 @@ class POSInvoiceMergeLog(Document):
 						t.base_tax_amount = flt(t.base_tax_amount) + flt(
 							tax.base_tax_amount_after_discount_amount
 						)
+<<<<<<< HEAD
 						old_new_tax_map[tax.name] = t
+=======
+						update_item_wise_tax_detail(t, tax)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						found = True
 				if not found:
 					tax.charge_type = "Actual"
 					tax.idx = idx
+<<<<<<< HEAD
 					tax.row_id = None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					idx += 1
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
+<<<<<<< HEAD
 					tax.dont_recompute_tax = 1
 					taxes.append(tax)
 					old_new_tax_map[tax.name] = tax
+=======
+					tax.item_wise_tax_detail = tax.item_wise_tax_detail
+					taxes.append(tax)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			for payment in doc.get("payments"):
 				found = False
@@ -283,6 +393,7 @@ class POSInvoiceMergeLog(Document):
 			base_rounding_adjustment += doc.base_rounding_adjustment
 			base_rounded_total += doc.base_rounded_total
 
+<<<<<<< HEAD
 			for d in doc.get("item_wise_tax_details"):
 				row = frappe._dict(
 					item=old_new_item_map[d.item_row],
@@ -293,6 +404,8 @@ class POSInvoiceMergeLog(Document):
 				)
 				item_tax_details.append(row)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
 			invoice.loyalty_points = loyalty_points_sum
@@ -313,6 +426,7 @@ class POSInvoiceMergeLog(Document):
 		invoice.disable_rounded_total = cint(
 			frappe.db.get_value("POS Profile", invoice.pos_profile, "disable_rounded_total")
 		)
+<<<<<<< HEAD
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 		accounting_dimensions_fields = [d.fieldname for d in accounting_dimensions]
 		dimension_values = frappe.db.get_value(
@@ -332,10 +446,24 @@ class POSInvoiceMergeLog(Document):
 				frappe.throw(
 					_("Please set Accounting Dimension {} in {}").format(
 						frappe.bold(dimension.label),
+=======
+		accounting_dimensions = required_accounting_dimensions()
+		dimension_values = frappe.db.get_value(
+			"POS Profile", {"name": invoice.pos_profile}, accounting_dimensions, as_dict=1
+		)
+		for dimension in accounting_dimensions:
+			dimension_value = dimension_values.get(dimension)
+
+			if not dimension_value:
+				frappe.throw(
+					_("Please set Accounting Dimension {} in {}").format(
+						frappe.bold(frappe.unscrub(dimension)),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						frappe.get_desk_link("POS Profile", invoice.pos_profile),
 					)
 				)
 
+<<<<<<< HEAD
 			invoice.set(dimension.fieldname, dimension_value)
 
 		invoice.set(
@@ -345,23 +473,30 @@ class POSInvoiceMergeLog(Document):
 		invoice.set(
 			"project", data[0].get("project") if data[0].get("project") else dimension_values.get("project")
 		)
+=======
+			invoice.set(dimension, dimension_value)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if self.merge_invoices_based_on == "Customer Group":
 			invoice.flags.ignore_pos_profile = True
 			invoice.pos_profile = ""
 
+<<<<<<< HEAD
 		# Unset Commission Section
 		invoice.set("sales_partner", None)
 		invoice.set("commission_rate", 0)
 		invoice.set("total_commission", 0)
 		invoice._item_wise_tax_details = item_tax_details
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		return invoice
 
 	def get_new_sales_invoice(self):
 		sales_invoice = frappe.new_doc("Sales Invoice")
 		sales_invoice.customer = self.customer
 		sales_invoice.is_pos = 1
+<<<<<<< HEAD
 		sales_invoice.posting_date = None
 		sales_invoice.posting_time = None
 
@@ -377,6 +512,21 @@ class POSInvoiceMergeLog(Document):
 						inv = key
 						break
 			doc.update({"consolidated_invoice": None if self.docstatus == 2 else inv})
+=======
+
+		return sales_invoice
+
+	def update_pos_invoices(self, invoice_docs, sales_invoice="", credit_note=""):
+		for doc in invoice_docs:
+			doc.load_from_db()
+			doc.update(
+				{
+					"consolidated_invoice": None
+					if self.docstatus == 2
+					else (credit_note if doc.is_return else sales_invoice)
+				}
+			)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			doc.set_status(update=True)
 			doc.save()
 
@@ -386,6 +536,7 @@ class POSInvoiceMergeLog(Document):
 			for table_name in ["items", "packed_items"]:
 				pos_invoice.set_serial_and_batch_bundle(table_name)
 
+<<<<<<< HEAD
 	def delink_serial_and_batch_bundle(self):
 		bundles = self.get_serial_and_batch_bundles()
 		if not bundles:
@@ -425,6 +576,10 @@ class POSInvoiceMergeLog(Document):
 
 		invoices.reverse()
 		for si_name in invoices:
+=======
+	def cancel_linked_invoices(self):
+		for si_name in [self.consolidated_invoice, self.consolidated_credit_note]:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if not si_name:
 				continue
 			si = frappe.get_doc("Sales Invoice", si_name)
@@ -432,6 +587,28 @@ class POSInvoiceMergeLog(Document):
 			si.cancel()
 
 
+<<<<<<< HEAD
+=======
+def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
+	consolidated_tax_detail = json.loads(consolidate_tax_row.item_wise_tax_detail)
+	tax_row_detail = json.loads(tax_row.item_wise_tax_detail)
+
+	if not consolidated_tax_detail:
+		consolidated_tax_detail = {}
+
+	for item_code, tax_data in tax_row_detail.items():
+		if consolidated_tax_detail.get(item_code):
+			consolidated_tax_data = consolidated_tax_detail.get(item_code)
+			consolidated_tax_detail.update(
+				{item_code: [consolidated_tax_data[0], consolidated_tax_data[1] + tax_data[1]]}
+			)
+		else:
+			consolidated_tax_detail.update({item_code: [tax_data[0], tax_data[1]]})
+
+	consolidate_tax_row.item_wise_tax_detail = json.dumps(consolidated_tax_detail, separators=(",", ":"))
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_all_unconsolidated_invoices():
 	filters = {
 		"consolidated_invoice": ["in", ["", None]],
@@ -462,6 +639,7 @@ def get_invoice_customer_map(pos_invoices):
 		pos_invoice_customer_map.setdefault(customer, [])
 		pos_invoice_customer_map[customer].append(invoice)
 
+<<<<<<< HEAD
 	for customer, invoices in pos_invoice_customer_map.items():
 		pos_invoice_customer_map[customer] = split_invoices_by_accounting_dimension(invoices)
 
@@ -493,6 +671,14 @@ def split_invoices_by_accounting_dimension(pos_invoices):
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
 	invoices = pos_invoices or (closing_entry and closing_entry.get("pos_invoices"))
 	if frappe.in_test and not invoices:
+=======
+	return pos_invoice_customer_map
+
+
+def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
+	invoices = pos_invoices or (closing_entry and closing_entry.get("pos_transactions"))
+	if frappe.flags.in_test and not invoices:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		invoices = get_all_unconsolidated_invoices()
 
 	invoice_by_customer = get_invoice_customer_map(invoices)
@@ -509,7 +695,11 @@ def unconsolidate_pos_invoices(closing_entry):
 		"POS Invoice Merge Log", filters={"pos_closing_entry": closing_entry.name}, pluck="name"
 	)
 
+<<<<<<< HEAD
 	if len(closing_entry.pos_invoices) >= 10:
+=======
+	if len(closing_entry.pos_transactions) >= 10:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		closing_entry.set_status(update=True, status="Queued")
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
@@ -548,9 +738,13 @@ def split_invoices(invoices):
 			if not item.serial_no and not item.serial_and_batch_bundle:
 				continue
 
+<<<<<<< HEAD
 			return_against_is_added = any(
 				d for d in _invoices if d and d[0].pos_invoice == pos_invoice.return_against
 			)
+=======
+			return_against_is_added = any(d for d in _invoices if d.pos_invoice == pos_invoice.return_against)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if return_against_is_added:
 				break
 
@@ -573,6 +767,7 @@ def split_invoices(invoices):
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	try:
+<<<<<<< HEAD
 		for customer, invoices_acc_dim in invoice_by_customer.items():
 			for invoices in invoices_acc_dim.values():
 				for _invoices in split_invoices(invoices):
@@ -589,6 +784,22 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 					merge_log.set("pos_invoices", _invoices)
 					merge_log.save(ignore_permissions=True)
 					merge_log.submit()
+=======
+		for customer, invoices in invoice_by_customer.items():
+			for _invoices in split_invoices(invoices):
+				merge_log = frappe.new_doc("POS Invoice Merge Log")
+				merge_log.posting_date = (
+					getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
+				)
+				merge_log.posting_time = (
+					get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
+				)
+				merge_log.customer = customer
+				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
+				merge_log.set("pos_invoices", _invoices)
+				merge_log.save(ignore_permissions=True)
+				merge_log.submit()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Submitted")
 			closing_entry.db_set("error_message", "")
@@ -615,9 +826,12 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 	try:
 		for log in merge_logs:
 			merge_log = frappe.get_doc("POS Invoice Merge Log", log)
+<<<<<<< HEAD
 			if merge_log.docstatus == 2:
 				continue
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			merge_log.flags.ignore_permissions = True
 			merge_log.cancel()
 
@@ -655,7 +869,11 @@ def enqueue_job(job, **kwargs):
 			timeout=10000,
 			event="processing_merge_logs",
 			job_id=job_id,
+<<<<<<< HEAD
 			now=frappe.conf.developer_mode or frappe.in_test,
+=======
+			now=frappe.conf.developer_mode or frappe.flags.in_test,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		if job == create_merge_logs:
@@ -667,7 +885,11 @@ def enqueue_job(job, **kwargs):
 
 
 def check_scheduler_status():
+<<<<<<< HEAD
 	if is_scheduler_inactive() and not frappe.in_test:
+=======
+	if is_scheduler_inactive() and not frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
 
 

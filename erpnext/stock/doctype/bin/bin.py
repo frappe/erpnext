@@ -35,6 +35,7 @@ class Bin(Document):
 		warehouse: DF.Link
 	# end: auto-generated types
 
+<<<<<<< HEAD
 	@frappe.whitelist()
 	def recalculate_qty(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
@@ -57,6 +58,8 @@ class Bin(Document):
 		self.set_projected_qty()
 		self.save()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
 			self.stock_uom = frappe.get_cached_value("Item", self.item_code, "stock_uom")
@@ -74,7 +77,11 @@ class Bin(Document):
 			- flt(self.reserved_qty_for_production_plan)
 		)
 
+<<<<<<< HEAD
 	def update_reserved_qty_for_production_plan(self, skip_project_qty_update=False, update_qty=True):
+=======
+	def update_reserved_qty_for_production_plan(self, skip_project_qty_update=False):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"""Update qty reserved for production from Production Plan tables
 		in open production plan"""
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -90,12 +97,20 @@ class Bin(Document):
 
 		self.reserved_qty_for_production_plan = flt(reserved_qty_for_production_plan)
 
+<<<<<<< HEAD
 		if update_qty:
 			self.db_set(
 				"reserved_qty_for_production_plan",
 				flt(self.reserved_qty_for_production_plan),
 				update_modified=True,
 			)
+=======
+		self.db_set(
+			"reserved_qty_for_production_plan",
+			flt(self.reserved_qty_for_production_plan),
+			update_modified=True,
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if not skip_project_qty_update:
 			self.set_projected_qty()
@@ -138,9 +153,13 @@ class Bin(Document):
 		self.set_projected_qty()
 		self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
+<<<<<<< HEAD
 	def update_reserved_qty_for_sub_contracting(
 		self, subcontract_doctype="Subcontracting Order", update_qty=True
 	):
+=======
+	def update_reserved_qty_for_sub_contracting(self, subcontract_doctype="Subcontracting Order"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		# reserved qty
 
 		subcontract_order = frappe.qb.DocType(subcontract_doctype)
@@ -216,11 +235,17 @@ class Bin(Document):
 		else:
 			reserved_qty_for_sub_contract = 0
 
+<<<<<<< HEAD
 		self.reserved_qty_for_sub_contract = reserved_qty_for_sub_contract
 		if update_qty:
 			self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract, update_modified=True)
 			self.set_projected_qty()
 			self.db_set("projected_qty", self.projected_qty, update_modified=True)
+=======
+		self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract, update_modified=True)
+		self.set_projected_qty()
+		self.db_set("projected_qty", self.projected_qty, update_modified=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def update_reserved_stock(self):
 		"""Update `Reserved Stock` on change in Reserved Qty of Stock Reservation Entry"""
@@ -262,10 +287,34 @@ def update_qty(bin_name, args):
 	bin_details = get_bin_details(bin_name)
 	# actual qty is already updated by processing current voucher
 	actual_qty = bin_details.actual_qty or 0.0
+<<<<<<< HEAD
 
 	# actual qty is not up to date in case of backdated transaction
 	if future_sle_exists(args):
 		actual_qty = get_actual_qty(args.get("item_code"), args.get("warehouse"))
+=======
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	# actual qty is not up to date in case of backdated transaction
+	if future_sle_exists(args, allow_force_reposting=False):
+		last_sle_qty = (
+			frappe.qb.from_(sle)
+			.select(sle.qty_after_transaction)
+			.where(
+				(sle.item_code == args.get("item_code"))
+				& (sle.warehouse == args.get("warehouse"))
+				& (sle.is_cancelled == 0)
+			)
+			.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=Order.desc)
+			.orderby(sle.creation, order=Order.desc)
+			.limit(1)
+			.run()
+		)
+
+		actual_qty = 0.0
+		if last_sle_qty:
+			actual_qty = last_sle_qty[0][0]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))
@@ -297,6 +346,7 @@ def update_qty(bin_name, args):
 		},
 		update_modified=True,
 	)
+<<<<<<< HEAD
 
 
 def get_actual_qty(item_code, warehouse):
@@ -317,3 +367,5 @@ def get_actual_qty(item_code, warehouse):
 		actual_qty = last_sle_qty[0][0]
 
 	return actual_qty
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

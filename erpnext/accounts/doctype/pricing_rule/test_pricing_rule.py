@@ -5,7 +5,10 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -15,11 +18,18 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_item_details
 
 
+<<<<<<< HEAD
 class TestPricingRule(IntegrationTestCase):
 	def setUp(self):
 		delete_existing_pricing_rules()
 		setup_pricing_rule_data()
 		self.enterClassContext(self.change_settings("Selling Settings", validate_selling_price=0))
+=======
+class TestPricingRule(unittest.TestCase):
+	def setUp(self):
+		delete_existing_pricing_rules()
+		setup_pricing_rule_data()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def tearDown(self):
 		delete_existing_pricing_rules()
@@ -206,6 +216,7 @@ class TestPricingRule(IntegrationTestCase):
 		details = get_item_details(args)
 		self.assertEqual(details.get("discount_percentage"), 10)
 
+<<<<<<< HEAD
 	def test_unset_group_condition(self):
 		"""
 		If args are not set for group condition, then pricing rule should not be applied.
@@ -256,6 +267,8 @@ class TestPricingRule(IntegrationTestCase):
 		customer.territory = territory
 		customer.save()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_pricing_rule_for_variants(self):
 		from erpnext.stock.get_item_details import get_item_details
 
@@ -479,6 +492,7 @@ class TestPricingRule(IntegrationTestCase):
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item 2")
 
+<<<<<<< HEAD
 	def test_dont_enforce_free_item_qty(self):
 		# this test is only for testing non-enforcement as all other tests in this file already test with enforcement
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -527,6 +541,8 @@ class TestPricingRule(IntegrationTestCase):
 		so.reload()
 		self.assertEqual(len(so.items), 1)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_cumulative_pricing_rule(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Cumulative Pricing Rule")
 		test_record = {
@@ -1230,6 +1246,7 @@ class TestPricingRule(IntegrationTestCase):
 		self.assertEqual(so.items[1].item_code, "_Test Item")
 		self.assertEqual(so.items[1].qty, 3)
 
+<<<<<<< HEAD
 		so = make_sales_order(item_code="_Test Item", qty=5, do_not_submit=1)
 		so.items[0].qty = 1
 		del so.items[-1]
@@ -1275,6 +1292,8 @@ class TestPricingRule(IntegrationTestCase):
 		self.assertEqual(so.items[1].item_code, "_Test Item")
 		self.assertEqual(so.items[1].qty, 10)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_apply_multiple_pricing_rules_for_discount_percentage_and_amount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
@@ -1522,7 +1541,11 @@ class TestPricingRule(IntegrationTestCase):
 		pi.cancel()
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["UTM Campaign"]
+=======
+test_dependencies = ["Campaign"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def make_pricing_rule(**args):
@@ -1550,7 +1573,10 @@ def make_pricing_rule(**args):
 			"discount_amount": args.discount_amount or 0.0,
 			"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0,
 			"has_priority": args.has_priority or 0,
+<<<<<<< HEAD
 			"enforce_free_item_qty": args.dont_enforce_free_item_qty or 0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	)
 
@@ -1583,9 +1609,15 @@ def make_pricing_rule(**args):
 
 
 def setup_pricing_rule_data():
+<<<<<<< HEAD
 	if not frappe.db.exists("UTM Campaign", "_Test Campaign"):
 		frappe.get_doc(
 			{"doctype": "UTM Campaign", "description": "_Test Campaign", "name": "_Test Campaign"}
+=======
+	if not frappe.db.exists("Campaign", "_Test Campaign"):
+		frappe.get_doc(
+			{"doctype": "Campaign", "campaign_name": "_Test Campaign", "name": "_Test Campaign"}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		).insert()
 
 

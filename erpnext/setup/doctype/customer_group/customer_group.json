@@ -4,7 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:customer_group_name",
  "creation": "2013-01-10 16:34:23",
+<<<<<<< HEAD
  "default_view": "Tree",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -140,7 +143,11 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-01-22 10:48:10.186637",
+=======
+ "modified": "2024-08-16 19:21:41.880111",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",

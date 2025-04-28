@@ -29,6 +29,10 @@ frappe.ui.form.on("BOM", {
 					item: row.finished_good,
 					is_active: 1,
 					docstatus: 1,
+<<<<<<< HEAD
+=======
+					track_semi_finished_goods: 0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			};
 		});
@@ -45,7 +49,11 @@ frappe.ui.form.on("BOM", {
 			return {
 				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
 				filters: {
+<<<<<<< HEAD
 					is_stock_item: !frm.doc.is_phantom_bom,
+=======
+					is_stock_item: 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 			};
 		});
@@ -76,8 +84,11 @@ frappe.ui.form.on("BOM", {
 				},
 			};
 		});
+<<<<<<< HEAD
 
 		frm.trigger("toggle_fields_for_semi_finished_goods");
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	validate: function (frm) {
@@ -89,6 +100,7 @@ frappe.ui.form.on("BOM", {
 		}
 	},
 
+<<<<<<< HEAD
 	track_semi_finished_goods(frm) {
 		frm.trigger("toggle_fields_for_semi_finished_goods");
 	},
@@ -110,6 +122,10 @@ frappe.ui.form.on("BOM", {
 	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
 		frm.trigger("toggle_fields_for_semi_finished_goods");
+=======
+	with_operations: function (frm) {
+		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	fg_based_operating_cost: function (frm) {
@@ -183,7 +199,11 @@ frappe.ui.form.on("BOM", {
 			);
 		}
 
+<<<<<<< HEAD
 		if (frm.doc.docstatus == 1 && !frm.doc.is_phantom_bom) {
+=======
+		if (frm.doc.docstatus == 1) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.add_custom_button(
 				__("Work Order"),
 				function () {
@@ -251,6 +271,7 @@ frappe.ui.form.on("BOM", {
 	},
 
 	make_work_order(frm) {
+<<<<<<< HEAD
 		frm.events.setup_variant_prompt(
 			frm,
 			"Work Order",
@@ -275,6 +296,27 @@ frappe.ui.form.on("BOM", {
 				});
 			}
 		);
+=======
+		frm.events.setup_variant_prompt(frm, "Work Order", (frm, item, data, variant_items) => {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.work_order.work_order.make_work_order",
+				args: {
+					bom_no: frm.doc.name,
+					item: item,
+					qty: data.qty || 0.0,
+					project: frm.doc.project,
+					variant_items: variant_items,
+				},
+				freeze: true,
+				callback(r) {
+					if (r.message) {
+						let doc = frappe.model.sync(r.message)[0];
+						frappe.set_route("Form", doc.doctype, doc.name);
+					}
+				},
+			});
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	make_variant_bom(frm) {
@@ -351,6 +393,7 @@ frappe.ui.form.on("BOM", {
 					cur_dialog.refresh();
 				},
 			});
+<<<<<<< HEAD
 
 			if (!frm.doc.track_semi_finished_goods) {
 				fields.push({
@@ -360,6 +403,8 @@ frappe.ui.form.on("BOM", {
 					default: frm.doc?.__onload.use_multi_level_bom,
 				});
 			}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		var has_template_rm = frm.doc.items.filter((d) => d.has_variants === 1) || [];
@@ -368,7 +413,10 @@ frappe.ui.form.on("BOM", {
 				fieldname: "items",
 				fieldtype: "Table",
 				label: __("Raw Materials"),
+<<<<<<< HEAD
 				depends_on: "eval:!doc.use_multi_level_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				fields: [
 					{
 						fieldname: "item_code",
@@ -377,6 +425,7 @@ frappe.ui.form.on("BOM", {
 						fieldtype: "Link",
 						in_list_view: 1,
 						reqd: 1,
+<<<<<<< HEAD
 						get_query() {
 							return {
 								filters: {
@@ -384,6 +433,8 @@ frappe.ui.form.on("BOM", {
 								},
 							};
 						},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					},
 					{
 						fieldname: "variant_item_code",
@@ -404,6 +455,7 @@ frappe.ui.form.on("BOM", {
 								},
 							};
 						},
+<<<<<<< HEAD
 						change() {
 							let doc = this.doc;
 							if (!doc.qty) {
@@ -411,6 +463,8 @@ frappe.ui.form.on("BOM", {
 								this.grid.set_value("qty", 1.0, doc);
 							}
 						},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					},
 					{
 						fieldname: "qty",
@@ -445,15 +499,25 @@ frappe.ui.form.on("BOM", {
 			(data) => {
 				let item = data.item || frm.doc.item;
 				let variant_items = data.items || [];
+<<<<<<< HEAD
 				let use_multi_level_bom = data.use_multi_level_bom || 0;
 
 				variant_items.forEach((d) => {
 					if (!d.variant_item_code && !use_multi_level_bom) {
+=======
+
+				variant_items.forEach((d) => {
+					if (!d.variant_item_code) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						frappe.throw(__("Select variant item code for the template item {0}", [d.item_code]));
 					}
 				});
 
+<<<<<<< HEAD
 				callback(frm, item, data, variant_items, use_multi_level_bom);
+=======
+				callback(frm, item, data, variant_items);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			__(title),
 			__("Create")
@@ -463,7 +527,11 @@ frappe.ui.form.on("BOM", {
 			dialog.fields_dict.items.df.data.push({
 				item_code: d.item_code,
 				variant_item_code: "",
+<<<<<<< HEAD
 				qty: (d.qty / frm.doc.quantity) * (dialog.fields_dict.qty.value || 1),
+=======
+				qty: d.qty,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				source_warehouse: d.source_warehouse,
 				operation: d.operation,
 			});
@@ -529,6 +597,7 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_value("process_loss_qty", qty);
 	},
+<<<<<<< HEAD
 
 	is_phantom_bom(frm) {
 		frm.doc.item = "";
@@ -547,6 +616,11 @@ frappe.ui.form.on("BOM Operation", {
 		}
 	},
 
+=======
+});
+
+frappe.ui.form.on("BOM Operation", {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	bom_no(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
@@ -588,10 +662,13 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			child.bom_no = "";
 		}
 
+<<<<<<< HEAD
 		if (doc.item == child.item_code) {
 			child.do_not_explode = 1;
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	}
 
@@ -841,6 +918,7 @@ frappe.ui.form.on("BOM Operation", "workstation", function (frm, cdt, cdn) {
 	});
 });
 
+<<<<<<< HEAD
 frappe.ui.form.on("BOM Operation", "workstation_type", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (!d.workstation_type) return;
@@ -866,6 +944,8 @@ frappe.ui.form.on("BOM Operation", "workstation_type", function (frm, cdt, cdn) 
 	});
 });
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 frappe.ui.form.on("BOM Item", {
 	do_not_explode: function (frm, cdt, cdn) {
 		get_bom_material_detail(frm.doc, cdt, cdn, false);
@@ -990,6 +1070,7 @@ frappe.ui.form.on("BOM", {
 			},
 		});
 
+<<<<<<< HEAD
 		let items = frm.doc.items.filter((item) => cint(item.operation_row_id) === cint(row.idx));
 		if (items?.length) {
 			items.forEach((item) => {
@@ -1003,6 +1084,8 @@ frappe.ui.form.on("BOM", {
 			frm._bom_rm_dialog.fields_dict.items.grid.refresh();
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm._bom_rm_dialog.show();
 	},
 
@@ -1012,7 +1095,10 @@ frappe.ui.form.on("BOM", {
 				label: __("Raw Materials"),
 				fieldname: "items",
 				fieldtype: "Table",
+<<<<<<< HEAD
 				data: [],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				reqd: 1,
 				fields: [
 					{

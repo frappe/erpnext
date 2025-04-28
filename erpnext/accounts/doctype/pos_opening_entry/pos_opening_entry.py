@@ -37,12 +37,16 @@ class POSOpeningEntry(StatusUpdater):
 
 	def validate(self):
 		self.validate_pos_profile_and_cashier()
+<<<<<<< HEAD
 		self.check_open_pos_exists()
 		self.check_user_already_assigned()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_payment_method_account()
 		self.set_status()
 
 	def validate_pos_profile_and_cashier(self):
+<<<<<<< HEAD
 		if not frappe.db.exists("POS Profile", self.pos_profile):
 			frappe.throw(_("POS Profile {} does not exist.").format(self.pos_profile))
 
@@ -56,11 +60,17 @@ class POSOpeningEntry(StatusUpdater):
 		if self.company != pos_profile_company:
 			frappe.throw(
 				_("POS Profile {} does not belong to company {}").format(self.pos_profile, self.company)
+=======
+		if self.company != frappe.db.get_value("POS Profile", self.pos_profile, "company"):
+			frappe.throw(
+				_("POS Profile {} does not belongs to company {}").format(self.pos_profile, self.company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
 			frappe.throw(_("User {} is disabled. Please select valid user/cashier").format(self.user))
 
+<<<<<<< HEAD
 	def check_open_pos_exists(self):
 		if frappe.db.exists("POS Opening Entry", {"pos_profile": self.pos_profile, "status": "Open"}):
 			frappe.throw(
@@ -77,6 +87,8 @@ class POSOpeningEntry(StatusUpdater):
 				msg=_("Cashier is currently assigned to another POS."),
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_payment_method_account(self):
 		invalid_modes = []
 		for d in self.balance_details:
@@ -98,6 +110,7 @@ class POSOpeningEntry(StatusUpdater):
 
 	def on_submit(self):
 		self.set_status(update=True)
+<<<<<<< HEAD
 
 	def before_cancel(self):
 		self.check_poe_is_cancellable()
@@ -121,3 +134,5 @@ class POSOpeningEntry(StatusUpdater):
 				title=_("POS Opening Entry Cancellation Error"),
 				msg=_("POS Opening Entry cannot be cancelled as unconsolidated Invoices exists."),
 			)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

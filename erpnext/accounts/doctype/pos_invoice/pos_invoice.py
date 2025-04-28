@@ -4,10 +4,15 @@
 
 import frappe
 from frappe import _, bold
+<<<<<<< HEAD
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
+=======
+from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -17,8 +22,11 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
+<<<<<<< HEAD
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
@@ -31,12 +39,24 @@ class POSInvoice(SalesInvoice):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.item_wise_tax_detail.item_wise_tax_detail import ItemWiseTaxDetail
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pos_invoice_item.pos_invoice_item import POSInvoiceItem
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.sales_invoice_advance.sales_invoice_advance import SalesInvoiceAdvance
 		from erpnext.accounts.doctype.sales_invoice_payment.sales_invoice_payment import SalesInvoicePayment
+=======
+		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
+		from erpnext.accounts.doctype.pos_invoice_item.pos_invoice_item import POSInvoiceItem
+		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
+		from erpnext.accounts.doctype.sales_invoice_advance.sales_invoice_advance import (
+			SalesInvoiceAdvance,
+		)
+		from erpnext.accounts.doctype.sales_invoice_payment.sales_invoice_payment import (
+			SalesInvoicePayment,
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.accounts.doctype.sales_invoice_timesheet.sales_invoice_timesheet import (
 			SalesInvoiceTimesheet,
 		)
@@ -67,13 +87,20 @@ class POSInvoice(SalesInvoice):
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		base_write_off_amount: DF.Currency
+<<<<<<< HEAD
+=======
+		campaign: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		cash_bank_account: DF.Link | None
 		change_amount: DF.Currency
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
 		company_address_display: DF.TextEditor | None
+<<<<<<< HEAD
 		company_contact_person: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		consolidated_invoice: DF.Link | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
@@ -100,7 +127,10 @@ class POSInvoice(SalesInvoice):
 		is_opening: DF.Literal["No", "Yes"]
 		is_pos: DF.Check
 		is_return: DF.Check
+<<<<<<< HEAD
 		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items: DF.Table[POSInvoiceItem]
 		language: DF.Data | None
 		letter_head: DF.Link | None
@@ -143,6 +173,10 @@ class POSInvoice(SalesInvoice):
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
+<<<<<<< HEAD
+=======
+		source: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		status: DF.Literal[
 			"",
 			"Draft",
@@ -151,9 +185,13 @@ class POSInvoice(SalesInvoice):
 			"Consolidated",
 			"Submitted",
 			"Paid",
+<<<<<<< HEAD
 			"Partly Paid",
 			"Unpaid",
 			"Partly Paid and Discounted",
+=======
+			"Unpaid",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"Unpaid and Discounted",
 			"Overdue and Discounted",
 			"Overdue",
@@ -167,6 +205,10 @@ class POSInvoice(SalesInvoice):
 		terms: DF.TextEditor | None
 		territory: DF.Link | None
 		timesheets: DF.Table[SalesInvoiceTimesheet]
+<<<<<<< HEAD
+=======
+		title: DF.Data | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_advance: DF.Currency
@@ -178,9 +220,12 @@ class POSInvoice(SalesInvoice):
 		update_billed_amount_in_delivery_note: DF.Check
 		update_billed_amount_in_sales_order: DF.Check
 		update_stock: DF.Check
+<<<<<<< HEAD
 		utm_campaign: DF.Link | None
 		utm_medium: DF.Link | None
 		utm_source: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		write_off_account: DF.Link | None
 		write_off_amount: DF.Currency
 		write_off_cost_center: DF.Link | None
@@ -191,9 +236,12 @@ class POSInvoice(SalesInvoice):
 		super().__init__(*args, **kwargs)
 
 	def validate(self):
+<<<<<<< HEAD
 		if not self.customer:
 			frappe.throw(_("Please select Customer first"))
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not cint(self.is_pos):
 			frappe.throw(
 				_("POS Invoice should have the field {0} checked.").format(frappe.bold(_("Include Payment")))
@@ -201,8 +249,11 @@ class POSInvoice(SalesInvoice):
 
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
+<<<<<<< HEAD
 		self.validate_pos_opening_entry()
 		self.validate_is_pos_using_sales_invoice()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_auto_set_posting_time()
 		self.validate_mode_of_payment()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -221,16 +272,22 @@ class POSInvoice(SalesInvoice):
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
 		self.validate_company_with_pos_company()
+<<<<<<< HEAD
 		self.validate_full_payment()
 		self.update_packing_list()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
 
+<<<<<<< HEAD
 	def before_submit(self):
 		self.set_outstanding_amount()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if not self.is_return and self.loyalty_program:
@@ -252,10 +309,13 @@ class POSInvoice(SalesInvoice):
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "used")
+<<<<<<< HEAD
 		self.clear_unallocated_mode_of_payments()
 
 		if self.is_return and self.invoice_type_in_pos == "Sales Invoice":
 			self.create_and_add_consolidated_sales_invoice()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def before_cancel(self):
 		if (
@@ -287,8 +347,11 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
 
+<<<<<<< HEAD
 		self.db_set("status", "Cancelled")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
@@ -296,6 +359,7 @@ class POSInvoice(SalesInvoice):
 
 		self.delink_serial_and_batch_bundle()
 
+<<<<<<< HEAD
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
 
@@ -343,6 +407,8 @@ class POSInvoice(SalesInvoice):
 
 		return return_sales_invoice
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def delink_serial_and_batch_bundle(self):
 		for row in self.items:
 			if row.serial_and_batch_bundle:
@@ -393,6 +459,7 @@ class POSInvoice(SalesInvoice):
 		):
 			return
 
+<<<<<<< HEAD
 		for d in self.get("items"):
 			if not d.serial_and_batch_bundle:
 				available_stock, is_stock_item, is_negative_stock_allowed = get_stock_availability(
@@ -401,6 +468,16 @@ class POSInvoice(SalesInvoice):
 
 				if is_negative_stock_allowed:
 					continue
+=======
+		from erpnext.stock.stock_ledger import is_negative_stock_allowed
+
+		for d in self.get("items"):
+			if not d.serial_and_batch_bundle:
+				if is_negative_stock_allowed(item_code=d.item_code):
+					return
+
+				available_stock, is_stock_item = get_stock_availability(d.item_code, d.warehouse)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 				item_code, warehouse, _qty = (
 					frappe.bold(d.item_code),
@@ -416,6 +493,7 @@ class POSInvoice(SalesInvoice):
 					)
 				elif is_stock_item and flt(available_stock) < flt(d.stock_qty):
 					frappe.throw(
+<<<<<<< HEAD
 						_("Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}.").format(
 							d.idx, item_code, warehouse
 						),
@@ -427,6 +505,14 @@ class POSInvoice(SalesInvoice):
 		if self.invoice_type_in_pos == "Sales Invoice" and not self.is_return:
 			frappe.throw(_("Sales Invoice mode is activated in POS. Please create Sales Invoice instead."))
 
+=======
+						_(
+							"Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}."
+						).format(d.idx, item_code, warehouse, available_stock),
+						title=_("Item Unavailable"),
+					)
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_serialised_or_batched_item(self):
 		error_msg = []
 		for d in self.get("items"):
@@ -522,7 +608,11 @@ class POSInvoice(SalesInvoice):
 			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
+<<<<<<< HEAD
 		if self.is_return and self.docstatus != 0:
+=======
+		if self.is_return:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			invoice_total = self.rounded_total or self.grand_total
 			total_amount_in_payments = flt(total_amount_in_payments, self.precision("grand_total"))
 			if total_amount_in_payments and total_amount_in_payments < invoice_total:
@@ -536,10 +626,13 @@ class POSInvoice(SalesInvoice):
 				)
 			)
 
+<<<<<<< HEAD
 	def set_outstanding_amount(self):
 		total = flt(self.rounded_total) or flt(self.grand_total)
 		self.outstanding_amount = total - flt(self.paid_amount) if total > flt(self.paid_amount) else 0
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
 			not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center
@@ -561,8 +654,11 @@ class POSInvoice(SalesInvoice):
 				self.status = "Draft"
 			return
 
+<<<<<<< HEAD
 		total = flt(self.rounded_total) or flt(self.grand_total)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
@@ -579,6 +675,7 @@ class POSInvoice(SalesInvoice):
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
 					self.status = "Overdue"
 				elif (
+<<<<<<< HEAD
 					0 < flt(self.outstanding_amount) < total
 					and self.is_discounted
 					and self.get_discounting_status() == "Disbursed"
@@ -587,6 +684,8 @@ class POSInvoice(SalesInvoice):
 				elif 0 < flt(self.outstanding_amount) < total:
 					self.status = "Partly Paid"
 				elif (
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
 					and self.is_discounted
@@ -617,11 +716,15 @@ class POSInvoice(SalesInvoice):
 
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
+<<<<<<< HEAD
 		from erpnext.stock.get_item_details import (
 			ItemDetailsCtx,
 			get_pos_profile,
 			get_pos_profile_item_details_,
 		)
+=======
+		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
@@ -690,8 +793,13 @@ class POSInvoice(SalesInvoice):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get("item_code"):
+<<<<<<< HEAD
 					profile_details = get_pos_profile_item_details_(
 						ItemDetailsCtx(item.as_dict()), profile.get("company"), profile
+=======
+					profile_details = get_pos_profile_item_details(
+						profile.get("company"), frappe._dict(item.as_dict()), profile
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					)
 					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
@@ -722,6 +830,7 @@ class POSInvoice(SalesInvoice):
 				"Account", self.debit_to, "account_currency"
 			)
 		if not self.due_date and self.customer:
+<<<<<<< HEAD
 			self.due_date = get_due_date(
 				self.posting_date,
 				"Customer",
@@ -729,6 +838,9 @@ class POSInvoice(SalesInvoice):
 				self.company,
 				template_name=self.payment_terms_template,
 			)
+=======
+			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
@@ -739,11 +851,16 @@ class POSInvoice(SalesInvoice):
 		if profile:
 			return {
 				"print_format": print_format,
+<<<<<<< HEAD
 				"utm_source": profile.get("utm_source"),
 				"utm_campaign": profile.get("utm_campaign"),
 				"utm_medium": profile.get("utm_medium"),
 				"allow_print_before_pay": profile.get("allow_print_before_pay"),
 				"set_default_payment": profile.get("set_grand_total_to_default_mop"),
+=======
+				"campaign": profile.get("campaign"),
+				"allow_print_before_pay": profile.get("allow_print_before_pay"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 
 	@frappe.whitelist()
@@ -813,6 +930,7 @@ class POSInvoice(SalesInvoice):
 		if pr:
 			return frappe.get_doc("Payment Request", pr)
 
+<<<<<<< HEAD
 	@frappe.whitelist()
 	def update_payments(self, payments):
 		if self.status == "Consolidated":
@@ -860,11 +978,17 @@ class POSInvoice(SalesInvoice):
 def get_stock_availability(item_code, warehouse):
 	from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
+=======
+
+@frappe.whitelist()
+def get_stock_availability(item_code, warehouse):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 
+<<<<<<< HEAD
 		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock_allowed(item_code=item_code)
 	else:
 		is_stock_item = True
@@ -874,6 +998,17 @@ def get_stock_availability(item_code, warehouse):
 			is_stock_item = False
 			# Is a service item or non_stock item
 			return 0, is_stock_item, False
+=======
+		return bin_qty - pos_sales_qty, is_stock_item
+	else:
+		is_stock_item = True
+		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
+			return get_bundle_availability(item_code, warehouse), is_stock_item
+		else:
+			is_stock_item = False
+			# Is a service item or non_stock item
+			return 0, is_stock_item
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_bundle_availability(bundle_item_code, warehouse):
@@ -882,8 +1017,15 @@ def get_bundle_availability(bundle_item_code, warehouse):
 	bundle_bin_qty = 1000000
 	for item in product_bundle.items:
 		item_bin_qty = get_bin_qty(item.item_code, warehouse)
+<<<<<<< HEAD
 
 		max_available_bundles = item_bin_qty / item.qty
+=======
+		item_pos_reserved_qty = get_pos_reserved_qty(item.item_code, warehouse)
+		available_qty = item_bin_qty - item_pos_reserved_qty
+
+		max_available_bundles = available_qty / item.qty
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if bundle_bin_qty > max_available_bundles and frappe.get_value(
 			"Item", item.item_code, "is_stock_item"
 		):
@@ -906,6 +1048,7 @@ def get_bin_qty(item_code, warehouse):
 
 
 def get_pos_reserved_qty(item_code, warehouse):
+<<<<<<< HEAD
 	"""
 	Calculate total quantity reserved for the given item and warehouse.
 
@@ -944,11 +1087,19 @@ def get_pos_reserved_qty_from_table(child_table, item_code, warehouse):
 	p_item = frappe.qb.DocType(child_table)
 
 	qty_column = "qty" if child_table == "Packed Item" else "stock_qty"
+=======
+	p_inv = frappe.qb.DocType("POS Invoice")
+	p_item = frappe.qb.DocType("POS Invoice Item")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	reserved_qty = (
 		frappe.qb.from_(p_inv)
 		.from_(p_item)
+<<<<<<< HEAD
 		.select(Sum(p_item[qty_column]).as_("stock_qty"))
+=======
+		.select(Sum(p_item.stock_qty).as_("stock_qty"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.where(
 			(p_inv.name == p_item.parent)
 			& (IfNull(p_inv.consolidated_invoice, "") == "")
@@ -1015,6 +1166,7 @@ def add_return_modes(doc, pos_profile):
 		]:
 			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
 			append_payment(payment_mode[0])
+<<<<<<< HEAD
 
 
 @frappe.whitelist()
@@ -1058,3 +1210,5 @@ def create_payments_on_invoice(doc, idx, payment_details):
 	payment.account = get_bank_cash_account(payment.mode_of_payment, doc.company).get("account")
 
 	return payment
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

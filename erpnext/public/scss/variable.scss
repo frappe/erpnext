@@ -1,0 +1,238 @@
+/* Global */
+:root {
+    --main-color: #FFA500; /* Orange */
+    --second-color: #40E0D0; /* Turquoise */
+    --third-color: #ff7f50; /* Coral (blends well with orange and turquoise) */
+    --widget-bg: #e8f9f9; /* Light turquoise for a fresh look */
+}
+
+[data-theme=light]{
+    --primary: var(--main-color);
+    --dt-primary-color: var(--main-color);
+    --blue-avatar-bg: var(--main-color);
+    --blue-avatar-color: var(--main-color);
+    --blue: var(--main-color)
+}
+
+[data-theme=light] .page-container,
+[data-theme=light] .layout-main-section {
+    background-color: var(--widget-bg);
+}
+[data-theme=light] ul li a:hover {
+    background-color: var(--second-color);
+    color: #fff;
+}
+/* Main */
+[data-theme=light] body {
+    font-size: 14px;
+    background-color: #f3f6f9;
+}
+[data-theme=light]a {
+    color: #666;
+    font-weight: 500;
+}
+[data-theme=light] .small, small {
+    font-size: 95%;
+}
+[data-theme=light] .h6.uppercase, h6.uppercase {
+    font-weight: 600;
+    font-size: 11.5px;
+}
+
+/* Navigation Bar */
+[data-theme=light] .standard-sidebar-item.selected{
+    background: linear-gradient(to right, var(--main-color), var(--second-color));
+}
+[data-theme=light] .standard-sidebar-item.selected a{
+    color: #fff;
+}
+ [data-theme=light] .active-sidebar.sidebar-item-label {
+    color: white;
+ }
+[data-theme=light] .standard-sidebar-item.selected a svg{
+    fill: #fff;
+}
+[data-theme=light] .standard-sidebar-item:hover{
+    background-color: var(--second-color);
+}
+[data-theme=light] .standard-sidebar-item:hover a,
+[data-theme=light] .standard-sidebar-item:hover svg{
+    color: #fff;
+    fill: #fff;
+}
+
+
+[data-theme=light] .navbar {
+    background: linear-gradient(to right, var(--main-color), var(--second-color)) !important;
+    border: none !important;
+}
+[data-theme=light] .navbar-nav>li>a{
+    color:#fff !important;
+}
+[data-theme=light] .navbar-nav>li>a:hover{
+    color:#ddd !important;
+}
+[data-theme=light] .navbar-brand:hover {
+    color:#ddd !important;
+}
+
+/* Widgets */
+[data-theme=light] .widget {
+    background-color: var(--widget-bg);
+    border: none;
+    box-shadow: 0px 3px 12px 0px var(--widget-bg), 0 3px 3px -2px #461a7714;
+}
+[data-theme=light] .widget.shortcut-widget-box .widget-head .widget-title i {
+    color: var(--third-color);
+}
+[data-theme=light] .widget.shortcut-widget-box .widget-head .widget-title:hover span{
+    color: var(--main-color);
+}
+[data-theme=light] .widget-body .link-item:hover{
+    color: #fff;
+    background: var(--third-color);
+}
+/* Sidebar */
+[data-theme=light] .desk-sidebar .desk-sidebar-item {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--widget-bg);
+}
+[data-theme=light] .layout-side-section {
+    font-size: 14px;
+}
+[data-theme=light] .uppercase {
+    color:var(--third-color);
+}
+
+/* Dropdowns */
+[data-theme=light] .dropdown-menu>li>a {
+    font-size: 13px;
+    color:#666;
+    font-weight: 500;
+}
+[data-theme=light] .awesomplete > ul > li[aria-selected=true]{
+    background-color: transparent;
+}
+[data-theme=light] .awesomplete > ul > li:hover{
+    background: linear-gradient(to right, var(--main-color), var(--second-color));
+}
+[data-theme=light] .awesomplete > ul > li:hover a{
+    color: #fff;
+}
+/* Page Heading */
+[data-theme=light] .page-head {
+    border-bottom: none !important;
+    box-shadow: 0 1px 10px 1px rgba(115, 108, 203, 0.1);
+}
+[data-theme=light] .page-title .title-text {
+    color: var(--third-color);
+    font-size: 22px;
+}
+[data-theme=light] .widget .widget-head .widget-title,
+[data-theme=light] .section-head,
+[data-theme=light] .comment-input-header {
+    font-size: 14px;
+    color: var(--third-color);
+}
+
+/*Main Section */
+[data-theme=light] .list-row-head {
+    background-color: #f3f6f9;
+    border-bottom: 1px solid #e4e4e4 !important;
+}
+
+/* Buttons */
+[data-theme=light] .btn-primary {
+    background-color: var(--main-color);
+    border-color: var(--main-color);
+}
+[data-theme=light] .control-label, .grid-heading-row {
+    font-size:13px;
+}
+[data-theme=light] .btn-default:hover,
+[data-theme=light] .btn-default:focus, .btn-default.focus,
+[data-theme=light] .btn-default:active, .btn-default.active,
+[data-theme=light] .open > .dropdown-toggle.btn-default {
+    background-color: var(--third-color) !important;
+    color: #fff !important;
+}
+[data-theme=light] .btn-default:hover svg{
+    stroke: #fff !important;
+    fill: #fff !important;
+    color: #fff !important;
+}
+[data-theme=light] .btn-primary:hover,
+[data-theme=light] .btn-primary:focus, .btn-primary.focus,
+[data-theme=light] .btn-primary:active, .btn-primary.active,
+[data-theme=light] .open > .dropdown-toggle.btn-primary {
+    background-color: var(--main-color) !important;
+    border-color: var(--main-color) !important;
+}
+[data-theme=light] .btn-secondary,
+[data-theme=light] .btn-secondary:focus, .btn-secondary.focus,
+[data-theme=light] .btn-secondary:active, .btn-secondary.active,
+[data-theme=light] .open > .dropdown-toggle.btn-secondary {
+    background-color: var(--third-color);
+    color: #fff;
+}
+
+[data-theme=light] .btn-secondary:hover{
+    background-color: var(--main-color);
+    color: #fff;
+}
+[data-theme=light] .indicator-right.blue:after, .indicator.blue:before {
+    background: var(--third-color);
+}
+
+/*Other Components*/
+[data-theme=light] input[type=checkbox]:checked:before {
+    color: var(--third-color);
+}
+[data-theme=light] input[type=checkbox]:checked{
+    background: var(--main-color);
+}
+[data-theme=light] .frappe-control .ql-editor:not(.read-mode){
+    background: var(--widget-bg);
+}
+[data-theme=light] .input-with-feedback,
+[data-theme=light] .like-disabled-input{
+    background-color: #e8eafcad;
+}
+[data-theme=light] .document-link-badge span{
+    background-color: var(--main-color) !important;
+    color: #fff;
+}
+
+[data-theme=light] .document-link-badge{
+    background-color: var(--widget-bg)!important;
+}
+[data-theme=light] .document-link button{
+    background: var(--third-color) !important;
+    color: #fff !important;
+}
+
+[data-theme=light] .document-link button svg{
+    fill: white;
+    stroke: white;
+}
+[data-theme=light] .indicator-pill.gray,
+[data-theme=light] .indicator-pill-right.gray,
+[data-theme=light] .indicator-pill-round.gray {
+    background: var(--third-color);
+    color: #fff;
+}
+[data-theme=light] .indicator-pill.green,
+[data-theme=light] .indicator-pill-right.green,
+[data-theme=light] .indicator-pill-round.green {
+    color: var(--main-color);
+}
+
+[data-theme=light] .notifications-icon svg{
+    stroke: #fff;
+    fill: #fff;
+}
+
+[data-theme=light] #page-Workspaces .page-head{
+    background: var(--widget-bg);
+}

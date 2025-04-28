@@ -1,10 +1,14 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+<<<<<<< HEAD
 from collections import Counter
 
 import frappe
 from frappe import _
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.model.document import Document
 
 
@@ -21,11 +25,15 @@ class POSSettings(Document):
 		from erpnext.accounts.doctype.pos_search_fields.pos_search_fields import POSSearchFields
 
 		invoice_fields: DF.Table[POSField]
+<<<<<<< HEAD
 		invoice_type: DF.Literal["Sales Invoice", "POS Invoice"]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pos_search_fields: DF.Table[POSSearchFields]
 	# end: auto-generated types
 
 	def validate(self):
+<<<<<<< HEAD
 		old_doc = self.get_doc_before_save()
 
 		if old_doc.invoice_type != self.invoice_type:
@@ -54,3 +62,6 @@ class POSSettings(Document):
 				),
 				title=_("Invoice Document Type Selection Error"),
 			)
+=======
+		pass
+>>>>>>> 7c4cf3e834 (Favicon.svg)

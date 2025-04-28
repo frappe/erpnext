@@ -98,7 +98,10 @@ def _reorder_item():
 						"description": d.description,
 						"stock_uom": d.stock_uom,
 						"purchase_uom": d.purchase_uom,
+<<<<<<< HEAD
 						"lead_time_days": d.lead_time_days,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					}
 				),
 			)
@@ -130,7 +133,10 @@ def get_items_for_reorder() -> dict[str, list]:
 			item_table.brand,
 			item_table.variant_of,
 			item_table.has_variants,
+<<<<<<< HEAD
 			item_table.lead_time_days,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		.where(
 			(item_table.disabled == 0)

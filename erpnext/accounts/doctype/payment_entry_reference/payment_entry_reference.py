@@ -1,7 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+<<<<<<< HEAD
 import frappe
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.model.document import Document
 
 
@@ -16,8 +20,11 @@ class PaymentEntryReference(Document):
 
 		account: DF.Link | None
 		account_type: DF.Data | None
+<<<<<<< HEAD
 		advance_voucher_no: DF.DynamicLink | None
 		advance_voucher_type: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		allocated_amount: DF.Float
 		bill_no: DF.Data | None
 		due_date: DF.Date | None
@@ -27,19 +34,28 @@ class PaymentEntryReference(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+<<<<<<< HEAD
 		payment_request: DF.Link | None
 		payment_term: DF.Link | None
 		payment_term_outstanding: DF.Float
 		payment_type: DF.Data | None
 		reconcile_effect_on: DF.Date | None
+=======
+		payment_term: DF.Link | None
+		payment_type: DF.Data | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		reference_doctype: DF.Link
 		reference_name: DF.DynamicLink
 		total_amount: DF.Float
 	# end: auto-generated types
 
+<<<<<<< HEAD
 	@property
 	def payment_request_outstanding(self):
 		if not self.payment_request:
 			return
 
 		return frappe.db.get_value("Payment Request", self.payment_request, "outstanding_amount")
+=======
+	pass
+>>>>>>> 7c4cf3e834 (Favicon.svg)

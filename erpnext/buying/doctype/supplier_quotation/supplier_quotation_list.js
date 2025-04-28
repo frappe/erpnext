@@ -11,6 +11,7 @@ frappe.listview_settings["Supplier Quotation"] = {
 	},
 
 	onload: function (listview) {
+<<<<<<< HEAD
 		if (frappe.model.can_create("Purchase Order")) {
 			listview.page.add_action_item(__("Purchase Order"), () => {
 				erpnext.bulk_transaction_processing.create(listview, "Supplier Quotation", "Purchase Order");
@@ -26,5 +27,14 @@ frappe.listview_settings["Supplier Quotation"] = {
 				);
 			});
 		}
+=======
+		listview.page.add_action_item(__("Purchase Order"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Supplier Quotation", "Purchase Order");
+		});
+
+		listview.page.add_action_item(__("Purchase Invoice"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Supplier Quotation", "Purchase Invoice");
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 };

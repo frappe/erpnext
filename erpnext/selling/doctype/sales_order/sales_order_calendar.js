@@ -8,7 +8,10 @@ frappe.views.calendar["Sales Order"] = {
 		id: "name",
 		title: "customer_name",
 		allDay: "allDay",
+<<<<<<< HEAD
 		convertToUserTz: "convertToUserTz",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	gantt: true,
 	filters: [

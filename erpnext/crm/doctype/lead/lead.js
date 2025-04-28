@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext");
+<<<<<<< HEAD
 if (this.frm) {
 	this.frm.email_field = "email_id";
 }
@@ -11,6 +12,16 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			Customer: this.make_customer.bind(this),
 			Quotation: this.make_quotation.bind(this),
 			Opportunity: this.make_opportunity.bind(this),
+=======
+cur_frm.email_field = "email_id";
+
+erpnext.LeadController = class LeadController extends frappe.ui.form.Controller {
+	setup() {
+		this.frm.make_methods = {
+			Customer: this.make_customer,
+			Quotation: this.make_quotation,
+			Opportunity: this.make_opportunity,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		};
 
 		// For avoiding integration issues.
@@ -128,8 +139,13 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 					fieldname: "prospect_name",
 					fieldtype: "Data",
 					default: frm.doc.company_name,
+<<<<<<< HEAD
 					depends_on: "create_prospect",
 					mandatory_depends_on: "create_prospect",
+=======
+					reqd: 1,
+					depends_on: "create_prospect",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			);
 		}
@@ -240,6 +256,10 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	}
 };
 
+<<<<<<< HEAD
 if (cur_frm) {
 	extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
 }
+=======
+extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
+>>>>>>> 7c4cf3e834 (Favicon.svg)

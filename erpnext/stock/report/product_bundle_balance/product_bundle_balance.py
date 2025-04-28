@@ -4,7 +4,11 @@
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.query_builder.functions import IfNull, Max
+=======
+from frappe.query_builder.functions import IfNull
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt
 from pypika.terms import ExistsCriterion
 
@@ -208,6 +212,7 @@ def get_stock_ledger_entries(filters, items):
 	if not items:
 		return []
 
+<<<<<<< HEAD
 	max_posting_datetime_query = get_item_wise_max_posting_datetime(filters, items)
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -223,6 +228,32 @@ def get_stock_ledger_entries(filters, items):
 		.where(sle.is_cancelled == 0)
 	)
 
+=======
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	sle2 = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(sle)
+		.left_join(sle2)
+		.on(
+			(sle.item_code == sle2.item_code)
+			& (sle.warehouse == sle2.warehouse)
+			& (sle.posting_datetime < sle2.posting_datetime)
+			& (sle.name < sle2.name)
+		)
+		.select(sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company)
+		.where((sle2.name.isnull()) & (sle.docstatus < 2) & (sle.item_code.isin(items)))
+	)
+
+	if filters.get("company"):
+		query = query.where(sle.company == filters.get("company"))
+
+	if date := filters.get("date"):
+		query = query.where(sle.posting_date <= date)
+	else:
+		frappe.throw(_("'Date' is required"))
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value(
 			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
@@ -238,6 +269,7 @@ def get_stock_ledger_entries(filters, items):
 				)
 			)
 
+<<<<<<< HEAD
 	if filters.get("company"):
 		query = query.where(sle.company == filters.get("company"))
 
@@ -279,3 +311,6 @@ def get_item_wise_max_posting_datetime(filters, items):
 		query = query.where(sle.posting_date <= filters.get("data"))
 
 	return query
+=======
+	return query.run(as_dict=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

@@ -24,6 +24,23 @@ frappe.ui.form.on("Quotation", {
 		frm.set_df_property("packed_items", "cannot_add_rows", true);
 		frm.set_df_property("packed_items", "cannot_delete_rows", true);
 
+<<<<<<< HEAD
+=======
+		frm.set_query("company_address", function (doc) {
+			if (!doc.company) {
+				frappe.throw(__("Please set Company"));
+			}
+
+			return {
+				query: "frappe.contacts.doctype.address.address.address_query",
+				filters: {
+					link_doctype: "Company",
+					link_name: doc.company,
+				},
+			};
+		});
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_query("serial_and_batch_bundle", "packed_items", (doc, cdt, cdn) => {
 			let row = locals[cdt][cdn];
 			return {
@@ -35,20 +52,26 @@ frappe.ui.form.on("Quotation", {
 				},
 			};
 		});
+<<<<<<< HEAD
 
 		frm.set_indicator_formatter("item_code", function (doc) {
 			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	refresh: function (frm) {
 		frm.trigger("set_label");
 		frm.trigger("set_dynamic_field_label");
 
+<<<<<<< HEAD
 		if (frm.doc.docstatus === 0) {
 			erpnext.set_unit_price_items_note(frm);
 		}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		let sbb_field = frm.get_docfield("packed_items", "serial_and_batch_bundle");
 		if (sbb_field) {
 			sbb_field.get_route_options_for_new_doc = (row) => {
@@ -65,7 +88,11 @@ frappe.ui.form.on("Quotation", {
 		frm.trigger("set_label");
 		frm.trigger("toggle_reqd_lead_customer");
 		frm.trigger("set_dynamic_field_label");
+<<<<<<< HEAD
 		// frm.set_value("party_name", ""); // removed to set party_name from url for crm integration
+=======
+		frm.set_value("party_name", "");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.set_value("customer_name", "");
 	},
 
@@ -77,9 +104,12 @@ frappe.ui.form.on("Quotation", {
 erpnext.selling.QuotationController = class QuotationController extends erpnext.selling.SellingController {
 	onload(doc, dt, dn) {
 		super.onload(doc, dt, dn);
+<<<<<<< HEAD
 
 		// TODO: think of better way to do this
 		// this.frm.trigger("disable_customer_if_creating_from_opportunity");
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 	party_name() {
 		var me = this;
@@ -117,15 +147,25 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
 			if (
+<<<<<<< HEAD
 				frappe.model.can_create("Sales Order") &&
 				(frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
 					!doc.valid_till ||
 					frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0)
+=======
+				frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
+				!doc.valid_till ||
+				frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			) {
 				this.frm.add_custom_button(__("Sales Order"), () => this.make_sales_order(), __("Create"));
 			}
 
+<<<<<<< HEAD
 			if (doc.status !== "Ordered" && this.frm.has_perm("write")) {
+=======
+			if (doc.status !== "Ordered") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				this.frm.add_custom_button(__("Set as Lost"), () => {
 					this.frm.trigger("set_as_lost_dialog");
 				});
@@ -134,7 +174,11 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
+<<<<<<< HEAD
 		if (this.frm.doc.docstatus === 0 && frappe.model.can_read("Opportunity")) {
+=======
+		if (this.frm.doc.docstatus === 0) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.frm.add_custom_button(
 				__("Opportunity"),
 				function () {
@@ -252,7 +296,10 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				lead: this.frm.doc.party_name,
 				posting_date: this.frm.doc.transaction_date,
 				company: this.frm.doc.company,
+<<<<<<< HEAD
 				doctype: this.frm.doc.doctype,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			callback: function (r) {
 				if (r.message) {
@@ -288,7 +335,11 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				},
 			},
 			{
+<<<<<<< HEAD
 				fieldtype: "Text Editor",
+=======
+				fieldtype: "Data",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				fieldname: "description",
 				label: __("Description"),
 				in_list_view: 1,
@@ -366,6 +417,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		);
 		dialog.show();
 	}
+<<<<<<< HEAD
 
 	currency() {
 		super.currency();
@@ -392,6 +444,8 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			this.frm.set_df_property("party_name", "read_only", 1);
 		}
 	}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);

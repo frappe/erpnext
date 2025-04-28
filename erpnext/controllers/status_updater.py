@@ -5,7 +5,11 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
+=======
+from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class OverAllowanceError(frappe.ValidationError):
@@ -92,8 +96,13 @@ status_map = {
 	"Delivery Note": [
 		["Draft", None],
 		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
+<<<<<<< HEAD
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
+=======
+		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
@@ -101,11 +110,18 @@ status_map = {
 		["Draft", None],
 		["To Bill", "eval:self.per_billed == 0 and self.docstatus == 1"],
 		["Partly Billed", "eval:self.per_billed > 0 and self.per_billed < 100 and self.docstatus == 1"],
+<<<<<<< HEAD
 		["Return", "eval:self.is_return == 1 and self.per_billed == 0 and self.docstatus == 1"],
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		[
 			"Completed",
 			"eval:(self.per_billed >= 100 and self.docstatus == 1) or (self.docstatus == 1 and self.grand_total == 0 and self.per_returned != 100 and self.is_return == 0)",
+=======
+		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
+		[
+			"Completed",
+			"eval:(self.per_billed == 100 and self.docstatus == 1) or (self.docstatus == 1 and self.grand_total == 0 and self.per_returned != 100 and self.is_return == 0)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
@@ -117,7 +133,11 @@ status_map = {
 		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
 		[
 			"Ordered",
+<<<<<<< HEAD
 			"eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type in ['Purchase', 'Manufacture']",
+=======
+			"eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 		[
 			"Transferred",
@@ -136,12 +156,21 @@ status_map = {
 			"eval:self.status != 'Stopped' and self.per_received > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'",
 		],
 		[
+<<<<<<< HEAD
 			"Partially Received",
 			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'",
 		],
 		[
 			"Partially Ordered",
 			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type != 'Material Transfer'",
+=======
+			"Partially Ordered",
+			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1",
+		],
+		[
+			"Manufactured",
+			"eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Manufacture'",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 	],
 	"POS Opening Entry": [
@@ -161,6 +190,7 @@ status_map = {
 		["Draft", None],
 		["Completed", "eval:self.docstatus == 1"],
 	],
+<<<<<<< HEAD
 	"Pick List": [
 		["Draft", None],
 		["Open", "eval:self.docstatus == 1"],
@@ -172,6 +202,8 @@ status_map = {
 		["Completed", "eval:self.purpose == 'Delivery' and self.delivery_status == 'Fully Delivered'"],
 		["Cancelled", "eval:self.docstatus == 2"],
 	],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 }
 
 
@@ -213,6 +245,7 @@ class StatusUpdater(Document):
 		Get the status of the document.
 
 		Returns:
+<<<<<<< HEAD
 		dict: A dictionary containing the status. This allows callers to receive
 		a dictionary for efficient bulk updates, for example when `per_billed`
 		and other status fields also need to be updated.
@@ -231,6 +264,24 @@ class StatusUpdater(Document):
 			return {
 				"status": self.get("status")
 			}  # sometimes status field is not present on certain DocTypes such as Stock Entry
+=======
+		        dict: A dictionary containing the status. This allows callers to receive
+		        a dictionary for efficient bulk updates, for example when `per_billed`
+		        and other status fields also need to be updated.
+
+		Note:
+		        Can be overriden on a doctype to implement more localized status updater logic.
+
+		Example:
+		        {
+		                "status": "Draft",
+		                "per_billed": 50,
+		                "billing_status": "Partly Billed"
+		        }
+		"""
+		if self.doctype not in status_map:
+			return {"status": self.status}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		sl = status_map[self.doctype][:]
 		sl.reverse()
@@ -266,8 +317,11 @@ class StatusUpdater(Document):
 				# if target_ref_field is not specified, the programmer does not want to validate qty / amount
 				continue
 
+<<<<<<< HEAD
 			items_to_validate = []
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			# get unique transactions to update
 			for d in self.get_all_children():
 				if hasattr(d, "qty") and d.qty < 0 and not self.get("is_return"):
@@ -276,7 +330,11 @@ class StatusUpdater(Document):
 				if hasattr(d, "qty") and d.qty > 0 and self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 
+<<<<<<< HEAD
 				if not frappe.get_single_value("Selling Settings", "allow_negative_rates_for_items"):
+=======
+				if not frappe.db.get_single_value("Selling Settings", "allow_negative_rates_for_items"):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					if hasattr(d, "item_code") and hasattr(d, "rate") and flt(d.rate) < 0:
 						frappe.throw(
 							_(
@@ -289,6 +347,7 @@ class StatusUpdater(Document):
 						)
 
 				if d.doctype == args["source_dt"] and d.get(args["join_field"]):
+<<<<<<< HEAD
 					items_to_validate.append(
 						frappe._dict(
 							{
@@ -346,6 +405,22 @@ class StatusUpdater(Document):
 
 					if item:
 						item["idx"] = child_item.idx
+=======
+					args["name"] = d.get(args["join_field"])
+
+					# get all qty where qty > target_field
+					item = frappe.db.sql(
+						"""select item_code, `{target_ref_field}`,
+						`{target_field}`, parenttype, parent from `tab{target_dt}`
+						where `{target_ref_field}` < `{target_field}`
+						and name=%s and docstatus=1""".format(**args),
+						args["name"],
+						as_dict=1,
+					)
+					if item:
+						item = item[0]
+						item["idx"] = d.idx
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						item["target_ref_field"] = args["target_ref_field"].replace("_", " ")
 
 						# if not item[args['target_ref_field']]:
@@ -358,6 +433,7 @@ class StatusUpdater(Document):
 						elif item[args["target_ref_field"]]:
 							self.check_overflow_with_allowance(item, args)
 
+<<<<<<< HEAD
 	def fetch_items_with_pending_qty(self, args, item_field, items):
 		doctype = frappe.qb.DocType(args["target_dt"])
 		item_field = doctype[item_field]
@@ -380,6 +456,8 @@ class StatusUpdater(Document):
 			.run(as_dict=True)
 		)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def check_overflow_with_allowance(self, item, args):
 		"""
 		Checks if there is overflow condering a relaxation allowance
@@ -400,10 +478,19 @@ class StatusUpdater(Document):
 			qty_or_amount,
 		)
 
+<<<<<<< HEAD
 		role_allowed_to_over_deliver_receive = frappe.get_single_value(
 			"Stock Settings", "role_allowed_to_over_deliver_receive"
 		)
 		role_allowed_to_over_bill = frappe.get_single_value("Accounts Settings", "role_allowed_to_over_bill")
+=======
+		role_allowed_to_over_deliver_receive = frappe.db.get_single_value(
+			"Stock Settings", "role_allowed_to_over_deliver_receive"
+		)
+		role_allowed_to_over_bill = frappe.db.get_single_value(
+			"Accounts Settings", "role_allowed_to_over_bill"
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		role = role_allowed_to_over_deliver_receive if qty_or_amount == "qty" else role_allowed_to_over_bill
 
 		overflow_percent = (
@@ -500,6 +587,7 @@ class StatusUpdater(Document):
 			if d.doctype != args["source_dt"]:
 				continue
 
+<<<<<<< HEAD
 			if (
 				d.get("material_request")
 				and frappe.db.get_value("Material Request", d.material_request, "material_request_type")
@@ -507,6 +595,8 @@ class StatusUpdater(Document):
 			):
 				args.update({"source_field": "fg_item_qty"})
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self._update_modified(args, update_modified)
 
 			# updates qty in the child table
@@ -563,6 +653,7 @@ class StatusUpdater(Document):
 			fields=[target_ref_field, target_field],
 		)
 
+<<<<<<< HEAD
 		# For operator dicts, the alias is in the "as" key; for strings, use the field name directly
 		ref_key = target_ref_field.get("as") if isinstance(target_ref_field, dict) else target_ref_field
 
@@ -571,6 +662,13 @@ class StatusUpdater(Document):
 		if sum_ref > 0:
 			percentage = round(
 				sum(min(abs(record[target_field]), abs(record[ref_key])) for record in child_records)
+=======
+		sum_ref = sum(abs(record[target_ref_field]) for record in child_records)
+
+		if sum_ref > 0:
+			percentage = round(
+				sum(min(abs(record[target_field]), abs(record[target_ref_field])) for record in child_records)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				/ sum_ref
 				* 100,
 				6,
@@ -626,11 +724,18 @@ class StatusUpdater(Document):
 				)
 
 		if update_data:
+<<<<<<< HEAD
 			target = frappe.get_lazy_doc(args["target_parent_dt"], args["name"])
 			target.update(update_data)  # status calculus might depend on it
 			status = target.get_status()
 			if status.get("status"):
 				update_data.update(status)
+=======
+			target = frappe.get_doc(args["target_parent_dt"], args["name"])
+			target.update(update_data)  # status calculus might depend on it
+			status = target.get_status()
+			update_data.update(status)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			target.db_set(update_data, update_modified=update_modified, notify=True)
 
 	def _update_modified(self, args, update_modified):
@@ -684,9 +789,15 @@ class StatusUpdater(Document):
 				)[0][0]
 			)
 
+<<<<<<< HEAD
 			per_billed = safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100
 
 			ref_doc = frappe.get_lazy_doc(ref_dt, ref_dn)
+=======
+			per_billed = (min(ref_doc_qty, billed_qty) / ref_doc_qty) * 100
+
+			ref_doc = frappe.get_doc(ref_dt, ref_dn)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			ref_doc.db_set("per_billed", per_billed)
 

@@ -2,7 +2,11 @@
 # For license information, please see license.txt
 
 
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_months, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_material_request
@@ -12,7 +16,11 @@ from erpnext.selling.report.pending_so_items_for_purchase_request.pending_so_ite
 )
 
 
+<<<<<<< HEAD
 class TestPendingSOItemsForPurchaseRequest(IntegrationTestCase):
+=======
+class TestPendingSOItemsForPurchaseRequest(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_result_for_partial_material_request(self):
 		so = make_sales_order()
 		mr = make_material_request(so.name)

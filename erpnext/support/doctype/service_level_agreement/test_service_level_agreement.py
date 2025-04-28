@@ -1,10 +1,17 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import datetime
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt
 
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
@@ -13,7 +20,11 @@ from erpnext.support.doctype.service_level_agreement.service_level_agreement imp
 )
 
 
+<<<<<<< HEAD
 class TestServiceLevelAgreement(IntegrationTestCase):
+=======
+class TestServiceLevelAgreement(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
@@ -227,7 +238,11 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 
 		self.assertEqual(lead.service_level_agreement, lead_sla.name)
 		self.assertEqual(lead.response_by, datetime.datetime(2019, 3, 4, 16, 0))
+<<<<<<< HEAD
 		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
+=======
+		self.assertEqual(lead.resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		frappe.flags.current_time = datetime.datetime(2019, 3, 4, 15, 0)
 		lead.reload()
@@ -268,7 +283,11 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 
 		lead.reload()
 		self.assertEqual(flt(lead.total_hold_time, 2), 3000)
+<<<<<<< HEAD
 		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2020, 3, 4, 16, 50))
+=======
+		self.assertEqual(lead.resolution_by, datetime.datetime(2020, 3, 4, 16, 50))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_failed_sla_for_response_only(self):
 		doctype = "Lead"
@@ -333,7 +352,11 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 			holiday_list="__Test Holiday List",
 			entity_type=None,
 			entity=None,
+<<<<<<< HEAD
 			condition='doc.utm_source == "Test Source"',
+=======
+			condition='doc.source == "Test Source"',
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			response_time=14400,
 			sla_fulfilled_on=[{"status": "Replied"}],
 			apply_sla_for_resolution=0,
@@ -343,18 +366,28 @@ class TestServiceLevelAgreement(IntegrationTestCase):
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
 
+<<<<<<< HEAD
 		source = frappe.new_doc(doctype="UTM Source")
 		source.name = "Test Source"
 		source.flags.name_set = True
 		source.insert(ignore_if_duplicate=True)
 		lead.utm_source = "Test Source"
+=======
+		source = frappe.get_doc(doctype="Lead Source", source_name="Test Source")
+		source.insert(ignore_if_duplicate=True)
+		lead.source = "Test Source"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertEqual(applied_sla, lead_sla.name)
 
 		# check if SLA is removed if condition fails
 		lead.reload()
+<<<<<<< HEAD
 		lead.utm_source = None
+=======
+		lead.source = None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)

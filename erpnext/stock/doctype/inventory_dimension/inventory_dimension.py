@@ -5,7 +5,10 @@ import frappe
 from frappe import _, bold, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils.caching import request_cache
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class DoNotChangeError(frappe.ValidationError):
@@ -65,11 +68,22 @@ class InventoryDimension(Document):
 		self.reset_value()
 		self.set_source_and_target_fieldname()
 		self.set_type_of_transaction()
+<<<<<<< HEAD
+=======
+		self.set_fetch_value_from()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def set_type_of_transaction(self):
 		if self.apply_to_all_doctypes:
 			self.type_of_transaction = "Both"
 
+<<<<<<< HEAD
+=======
+	def set_fetch_value_from(self):
+		if self.apply_to_all_doctypes:
+			self.fetch_from_parent = self.reference_document
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def do_not_update_document(self):
 		if self.is_new() or not self.has_stock_ledger():
 			return
@@ -103,7 +117,10 @@ class InventoryDimension(Document):
 					self.source_fieldname,
 					f"to_{self.source_fieldname}",
 					f"from_{self.source_fieldname}",
+<<<<<<< HEAD
 					f"rejected_{self.source_fieldname}",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				],
 			)
 		}
@@ -168,12 +185,20 @@ class InventoryDimension(Document):
 		if label_start_with:
 			label = f"{label_start_with} {self.dimension_name}"
 
+<<<<<<< HEAD
 		dimension_fields = [
+=======
+		return [
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			dict(
 				fieldname="inventory_dimension",
 				fieldtype="Section Break",
 				insert_after=self.get_insert_after_fieldname(doctype),
+<<<<<<< HEAD
 				label=_("Inventory Dimension"),
+=======
+				label="Inventory Dimension",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				collapsible=1,
 			),
 			dict(
@@ -181,13 +206,18 @@ class InventoryDimension(Document):
 				fieldtype="Link",
 				insert_after="inventory_dimension",
 				options=self.reference_document,
+<<<<<<< HEAD
 				label=_(label),
+=======
+				label=label,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				search_index=1,
 				reqd=self.reqd,
 				mandatory_depends_on=self.mandatory_depends_on,
 			),
 		]
 
+<<<<<<< HEAD
 		if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
 			dimension_fields.append(
 				dict(
@@ -204,21 +234,34 @@ class InventoryDimension(Document):
 
 		return dimension_fields
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def add_custom_fields(self):
 		custom_fields = {}
 
 		dimension_fields = []
 		if self.apply_to_all_doctypes:
 			for doctype in get_inventory_documents():
+<<<<<<< HEAD
 				dimension_fields = self.get_dimension_fields(doctype[0])
 				self.add_transfer_field(doctype[0], dimension_fields)
 				custom_fields.setdefault(doctype[0], dimension_fields)
 		else:
+=======
+				if field_exists(doctype[0], self.source_fieldname):
+					continue
+
+				dimension_fields = self.get_dimension_fields(doctype[0])
+				self.add_transfer_field(doctype[0], dimension_fields)
+				custom_fields.setdefault(doctype[0], dimension_fields)
+		elif not field_exists(self.document_type, self.source_fieldname):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			dimension_fields = self.get_dimension_fields()
 
 			self.add_transfer_field(self.document_type, dimension_fields)
 			custom_fields.setdefault(self.document_type, dimension_fields)
 
+<<<<<<< HEAD
 		for dt in ["Stock Ledger Entry", "Stock Closing Balance"]:
 			if (
 				dimension_fields
@@ -252,6 +295,23 @@ class InventoryDimension(Document):
 						filter_custom_fields.setdefault(doctype, []).append(field)
 
 		create_custom_fields(filter_custom_fields)
+=======
+		if (
+			dimension_fields
+			and not frappe.db.get_value(
+				"Custom Field", {"dt": "Stock Ledger Entry", "fieldname": self.target_fieldname}
+			)
+			and not field_exists("Stock Ledger Entry", self.target_fieldname)
+		):
+			dimension_field = dimension_fields[1]
+			dimension_field["mandatory_depends_on"] = ""
+			dimension_field["reqd"] = 0
+			dimension_field["fieldname"] = self.target_fieldname
+			custom_fields["Stock Ledger Entry"] = dimension_field
+
+		if custom_fields:
+			create_custom_fields(custom_fields)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def add_transfer_field(self, doctype, dimension_fields):
 		if doctype not in [
@@ -320,13 +380,20 @@ def get_inventory_documents(
 
 	return frappe.get_all(
 		"DocField",
+<<<<<<< HEAD
 		fields=["parent"],
+=======
+		fields=["distinct parent"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters=and_filters,
 		or_filters=or_filters,
 		start=start,
 		page_length=page_len,
 		as_list=1,
+<<<<<<< HEAD
 		distinct=True,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 
@@ -360,6 +427,7 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 	return filter_dimensions
 
 
+<<<<<<< HEAD
 @request_cache
 def get_document_wise_inventory_dimensions(doctype) -> dict:
 	return frappe.get_all(
@@ -393,6 +461,51 @@ def get_inventory_dimensions():
 		order_by="creation",
 		distinct=True,
 	)
+=======
+def get_document_wise_inventory_dimensions(doctype) -> dict:
+	if not hasattr(frappe.local, "document_wise_inventory_dimensions"):
+		frappe.local.document_wise_inventory_dimensions = {}
+
+	if not frappe.local.document_wise_inventory_dimensions.get(doctype):
+		dimensions = frappe.get_all(
+			"Inventory Dimension",
+			fields=[
+				"name",
+				"source_fieldname",
+				"condition",
+				"target_fieldname",
+				"type_of_transaction",
+				"fetch_from_parent",
+			],
+			filters={"disabled": 0},
+			or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
+		)
+
+		frappe.local.document_wise_inventory_dimensions[doctype] = dimensions
+
+	return frappe.local.document_wise_inventory_dimensions[doctype]
+
+
+@frappe.whitelist()
+def get_inventory_dimensions():
+	if not hasattr(frappe.local, "inventory_dimensions"):
+		frappe.local.inventory_dimensions = {}
+
+	if not frappe.local.inventory_dimensions:
+		dimensions = frappe.get_all(
+			"Inventory Dimension",
+			fields=[
+				"distinct target_fieldname as fieldname",
+				"reference_document as doctype",
+				"validate_negative_stock",
+			],
+			filters={"disabled": 0},
+		)
+
+		frappe.local.inventory_dimensions = dimensions
+
+	return frappe.local.inventory_dimensions
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()

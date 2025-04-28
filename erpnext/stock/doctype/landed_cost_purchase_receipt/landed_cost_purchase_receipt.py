@@ -20,9 +20,13 @@ class LandedCostPurchaseReceipt(Document):
 		parenttype: DF.Data
 		posting_date: DF.Date | None
 		receipt_document: DF.DynamicLink
+<<<<<<< HEAD
 		receipt_document_type: DF.Literal[
 			"", "Purchase Invoice", "Purchase Receipt", "Stock Entry", "Subcontracting Receipt"
 		]
+=======
+		receipt_document_type: DF.Literal["", "Purchase Invoice", "Purchase Receipt"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		supplier: DF.Link | None
 	# end: auto-generated types
 

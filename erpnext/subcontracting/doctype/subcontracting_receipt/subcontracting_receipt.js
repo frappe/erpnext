@@ -54,7 +54,11 @@ frappe.ui.form.on("Subcontracting Receipt", {
 						from_date: frm.doc.posting_date,
 						to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
 						company: frm.doc.company,
+<<<<<<< HEAD
 						categorize_by: "Categorize by Voucher (Consolidated)",
+=======
+						group_by: "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						show_cancelled_entries: frm.doc.docstatus === 2,
 					};
 					frappe.set_route("query-report", "General Ledger");
@@ -82,6 +86,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			frm.add_custom_button(
 				__("Subcontract Return"),
 				() => {
+<<<<<<< HEAD
 					const make_standard_return = () => {
 						frappe.model.open_mapped_doc({
 							method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return",
@@ -129,6 +134,12 @@ frappe.ui.form.on("Subcontracting Receipt", {
 					} else {
 						make_standard_return();
 					}
+=======
+					frappe.model.open_mapped_doc({
+						method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return",
+						frm: frm,
+					});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 				__("Create")
 			);
@@ -292,6 +303,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 		});
 
 		frm.set_query("batch_no", "supplied_items", (doc, cdt, cdn) => {
+<<<<<<< HEAD
 			let row = locals[cdt][cdn];
 			let filters = {
 				item_code: row.rm_item_code,
@@ -301,6 +313,13 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			return {
 				query: "erpnext.controllers.queries.get_batch_no",
 				filters: filters,
+=======
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					item: row.rm_item_code,
+				},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			};
 		});
 
@@ -379,10 +398,13 @@ frappe.ui.form.on("Subcontracting Receipt", {
 
 	reset_raw_materials_table: (frm) => {
 		frm.clear_table("supplied_items");
+<<<<<<< HEAD
 		frm.doc.__unsaved = true;
 		if (!frm.doc.set_posting_time) {
 			frm.set_value("posting_time", frappe.datetime.now_time());
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		frm.call({
 			method: "reset_raw_materials",

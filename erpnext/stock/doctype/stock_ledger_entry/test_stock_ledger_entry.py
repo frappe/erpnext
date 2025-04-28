@@ -8,8 +8,12 @@ from uuid import uuid4
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+<<<<<<< HEAD
 from frappe.query_builder.functions import Timestamp
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
@@ -31,7 +35,11 @@ from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.tests.test_utils import StockTestMixin
 
 
+<<<<<<< HEAD
 class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
+=======
+class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		items = create_items()
 		reset("Stock Entry")
@@ -424,6 +432,7 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 			user.add_roles("Stock User")
 			user.remove_roles("Stock Manager")
 
+<<<<<<< HEAD
 			with self.set_user(user.name):
 				stock_entry_on_today = make_stock_entry(
 					target="_Test Warehouse - _TC", qty=10, basic_rate=100
@@ -448,11 +457,39 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 
 				back_dated_se_2.cancel()
 				stock_entry_on_today.cancel()
+=======
+			frappe.set_user(user.name)
+
+			stock_entry_on_today = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+			back_dated_se_1 = make_stock_entry(
+				target="_Test Warehouse - _TC",
+				qty=10,
+				basic_rate=100,
+				posting_date=add_days(today(), -1),
+				do_not_submit=True,
+			)
+
+			# Block back-dated entry
+			self.assertRaises(BackDatedStockTransaction, back_dated_se_1.submit)
+
+			frappe.set_user("Administrator")
+			user.add_roles("Stock Manager")
+			frappe.set_user(user.name)
+
+			# Back dated entry allowed to Stock Manager
+			back_dated_se_2 = make_stock_entry(
+				target="_Test Warehouse - _TC", qty=10, basic_rate=100, posting_date=add_days(today(), -1)
+			)
+
+			back_dated_se_2.cancel()
+			stock_entry_on_today.cancel()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		finally:
 			frappe.db.set_single_value(
 				"Stock Settings", "role_allowed_to_create_edit_back_dated_transactions", None
 			)
+<<<<<<< HEAD
 			user.remove_roles("Stock Manager")
 
 	def test_batchwise_item_valuation_fifo(self):
@@ -494,6 +531,11 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 
 		frappe.flags.use_serial_and_batch_fields = False
 
+=======
+			frappe.set_user("Administrator")
+			user.remove_roles("Stock Manager")
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_batchwise_item_valuation_moving_average(self):
 		item, warehouses, batches = setup_item_valuation_test(valuation_method="Moving Average")
 
@@ -1038,7 +1080,11 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 					"is_cancelled": 0,
 					"account": "Stock In Hand - TCP1",
 				},
+<<<<<<< HEAD
 				[{"SUM": "credit"}],
+=======
+				"sum(credit)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 
 		def _day(days):
@@ -1256,7 +1302,11 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 		self.assertEqual(sle[0].qty_after_transaction, 105)
 		self.assertEqual(sle[0].actual_qty, 100)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+=======
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_transfer_invariants(self):
 		"""Extact stock value should be transferred."""
 
@@ -1282,6 +1332,7 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 			item=item, from_warehouse=source_warehouse, to_warehouse=target_warehouse, qty=1_728.0
 		)
 
+<<<<<<< HEAD
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		sles = (
 			frappe.qb.from_(sle)
@@ -1296,6 +1347,18 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
 	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 4})
+=======
+		filters = {"voucher_no": transfer.name, "voucher_type": transfer.doctype, "is_cancelled": 0}
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["*"],
+			filters=filters,
+			order_by="timestamp(posting_date, posting_time), creation",
+		)
+		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
+
+	@change_settings("System Settings", {"float_precision": 4})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_negative_qty_with_precision(self):
 		"Test if system precision is respected while validating negative qty."
 		from erpnext.stock.doctype.item.test_item import create_item
@@ -1317,7 +1380,11 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 		# To deliver 100 qty we fall short of 11.0073 qty (11.007 with precision 3)
 		# Stock up with 11.007 (balance in db becomes 99.9997, on UI it will show as 100)
 		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+<<<<<<< HEAD
 		self.assertEqual(get_stock_balance(item_code, warehouse), 100.0)
+=======
+		self.assertEqual(get_stock_balance(item_code, warehouse), 99.9997)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# See if delivery note goes through
 		# Negative qty error should not be raised as 99.9997 is 100 with precision 3 (system precision)
@@ -1335,7 +1402,11 @@ class TestStockLedgerEntry(IntegrationTestCase, StockTestMixin):
 
 		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("System Settings", {"float_precision": 4})
+=======
+	@change_settings("System Settings", {"float_precision": 4})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_future_negative_qty_with_precision(self):
 		"""
 		Ledger:
@@ -1593,7 +1664,11 @@ def get_unique_suffix():
 	return str(uuid4())[:8].upper()
 
 
+<<<<<<< HEAD
 class TestDeferredNaming(IntegrationTestCase):
+=======
+class TestDeferredNaming(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	@classmethod
 	def setUpClass(cls) -> None:
 		super().setUpClass()

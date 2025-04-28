@@ -8,7 +8,11 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 
+<<<<<<< HEAD
 from erpnext.accounts.utils import _delete_adv_pl_entries, _delete_pl_entries, create_payment_ledger_entry
+=======
+from erpnext.accounts.utils import _delete_pl_entries, create_payment_ledger_entry
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 VOUCHER_TYPES = ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]
 
@@ -16,7 +20,10 @@ VOUCHER_TYPES = ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal 
 def repost_ple_for_voucher(voucher_type, voucher_no, gle_map=None):
 	if voucher_type and voucher_no and gle_map:
 		_delete_pl_entries(voucher_type, voucher_no)
+<<<<<<< HEAD
 		_delete_adv_pl_entries(voucher_type, voucher_no)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		create_payment_ledger_entry(gle_map, cancel=0)
 
 

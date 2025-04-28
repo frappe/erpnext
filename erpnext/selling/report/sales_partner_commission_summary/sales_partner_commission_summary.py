@@ -36,12 +36,15 @@ def get_columns(filters):
 			"width": 140,
 		},
 		{
+<<<<<<< HEAD
 			"label": _("Currency"),
 			"fieldname": "currency",
 			"fieldtype": "Data",
 			"width": 80,
 		},
 		{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"label": _("Territory"),
 			"options": "Territory",
 			"fieldname": "territory",
@@ -49,6 +52,7 @@ def get_columns(filters):
 			"width": 100,
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
+<<<<<<< HEAD
 		{
 			"label": _("Amount"),
 			"fieldname": "amount",
@@ -56,6 +60,9 @@ def get_columns(filters):
 			"options": "currency",
 			"width": 120,
 		},
+=======
+		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 120},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		{
 			"label": _("Sales Partner"),
 			"options": "Sales Partner",
@@ -73,7 +80,10 @@ def get_columns(filters):
 			"label": _("Total Commission"),
 			"fieldname": "total_commission",
 			"fieldtype": "Currency",
+<<<<<<< HEAD
 			"options": "currency",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"width": 120,
 		},
 	]
@@ -83,19 +93,31 @@ def get_columns(filters):
 
 def get_entries(filters):
 	date_field = "transaction_date" if filters.get("doctype") == "Sales Order" else "posting_date"
+<<<<<<< HEAD
 	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	conditions = get_conditions(filters, date_field)
 	entries = frappe.db.sql(
 		"""
 		SELECT
 			name, customer, territory, {} as posting_date, base_net_total as amount,
+<<<<<<< HEAD
 			sales_partner, commission_rate, total_commission, '{}' as currency
+=======
+			sales_partner, commission_rate, total_commission
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		FROM
 			`tab{}`
 		WHERE
 			{} and docstatus = 1 and sales_partner is not null
 			and sales_partner != '' order by name desc, sales_partner
+<<<<<<< HEAD
 		""".format(date_field, company_currency, filters.get("doctype"), conditions),
+=======
+		""".format(date_field, filters.get("doctype"), conditions),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters,
 		as_dict=1,
 	)

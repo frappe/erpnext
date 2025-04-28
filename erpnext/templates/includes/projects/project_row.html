@@ -20,7 +20,11 @@
           </div>
         {% else %}
           <span class="indicator-pill {{ " red" if doc.status=="Open" else "darkgrey" }}">
+<<<<<<< HEAD
             {{ _(doc.status) }}</span>
+=======
+            {{ doc.status }}</span>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
         {% endif %}
       </div>
       {% if doc["_assign"] %}

@@ -27,7 +27,10 @@ def get_report_filters(report_filters):
 		["Purchase Invoice", "docstatus", "=", 1],
 		["Purchase Invoice", "per_received", "<", 100],
 		["Purchase Invoice", "update_stock", "=", 0],
+<<<<<<< HEAD
 		["Purchase Invoice", "is_opening", "!=", "Yes"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	]
 
 	if report_filters.get("purchase_invoice"):

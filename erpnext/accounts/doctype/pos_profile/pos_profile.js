@@ -135,7 +135,10 @@ frappe.ui.form.on("POS Profile", {
 	company: function (frm) {
 		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+<<<<<<< HEAD
 		erpnext.utils.set_letter_head(frm);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	toggle_display_account_head: function (frm) {

@@ -23,6 +23,7 @@ class PartySpecificItem(Document):
 
 	def validate(self):
 		exists = frappe.db.exists(
+<<<<<<< HEAD
 			"Party Specific Item",
 			{
 				"party_type": self.party_type,
@@ -30,6 +31,15 @@ class PartySpecificItem(Document):
 				"restrict_based_on": self.restrict_based_on,
 				"based_on_value": self.based_on_value,
 			},
+=======
+			{
+				"doctype": "Party Specific Item",
+				"party_type": self.party_type,
+				"party": self.party,
+				"restrict_based_on": self.restrict_based_on,
+				"based_on": self.based_on_value,
+			}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		if exists:
 			frappe.throw(_("This item filter has already been applied for the {0}").format(self.party_type))

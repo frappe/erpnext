@@ -29,10 +29,13 @@ frappe.ui.form.on("Contract", {
 			});
 		}
 	},
+<<<<<<< HEAD
 	party_name: function (frm) {
 		let field = frm.doc.party_type.toLowerCase() + "_name";
 		frappe.db.get_value(frm.doc.party_type, frm.doc.party_name, field, (r) => {
 			frm.set_value("party_full_name", r[field]);
 		});
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 });

@@ -1,6 +1,10 @@
 import frappe
 from frappe import qb
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -10,7 +14,11 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
+<<<<<<< HEAD
 class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
+=======
+class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -21,7 +29,11 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
+<<<<<<< HEAD
 	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False, **args):
+=======
+	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.set_user("Administrator")
 		si = create_sales_invoice(
 			item=self.item,
@@ -34,7 +46,10 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			rate=100,
 			price_list_rate=100,
 			do_not_save=1,
+<<<<<<< HEAD
 			**args,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		if not no_payment_schedule:
 			si.append(
@@ -84,7 +99,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			"party": [self.customer],
 			"report_date": add_days(today(), 2),
 			"based_on_payment_terms": 0,
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"show_remarks": False,
 		}
 
@@ -109,12 +131,23 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(expected_data[0], [row.invoiced, row.paid, row.credit_note])
 		pos_inv.cancel()
 
+<<<<<<< HEAD
 	def test_accounts_receivable_with_payment(self):
+=======
+	def test_accounts_receivable(self):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters = {
 			"company": self.company,
 			"based_on_payment_terms": 1,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"show_remarks": True,
 		}
 
@@ -146,6 +179,7 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		cr_note = self.create_credit_note(si.name, do_not_submit=True)
 		cr_note.update_outstanding_for_self = False
 		cr_note.save().submit()
+<<<<<<< HEAD
 
 		# as the invoice partially paid and returning the full amount so the outstanding amount should be True
 		self.assertEqual(cr_note.update_outstanding_for_self, True)
@@ -155,6 +189,13 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		expected_data_after_credit_note = [0, 0, 100, 0, -100, self.debit_to]
 
 		row = report[1][-1]
+=======
+		report = execute(filters)
+
+		expected_data_after_credit_note = [100, 0, 0, 40, -40, self.debit_to]
+
+		row = report[1][0]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(
 			expected_data_after_credit_note,
 			[
@@ -167,6 +208,7 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			],
 		)
 
+<<<<<<< HEAD
 	def test_accounts_receivable_without_payment(self):
 		filters = {
 			"company": self.company,
@@ -335,11 +377,20 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 				],
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_cr_note_flag_to_update_self(self):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"show_remarks": True,
 		}
 
@@ -430,7 +481,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			"company": self.company,
 			"based_on_payment_terms": 0,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		report = execute(filters)
@@ -448,7 +506,11 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			],
 		)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings(
+=======
+	@change_settings(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
@@ -489,7 +551,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 		report = execute(filters)
 
@@ -555,7 +624,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 		report = execute(filters)
 		self.assertEqual(report[1], [])
@@ -571,7 +647,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"group_by_party": True,
 		}
 		report = execute(filters)[1]
@@ -645,7 +728,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"show_future_payments": True,
 		}
 		report = execute(filters)[1]
@@ -704,7 +794,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"sales_person": sales_person.name,
 			"show_sales_person": True,
 		}
@@ -721,7 +818,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"cost_center": self.cost_center,
 		}
 		report = execute(filters)[1]
@@ -736,7 +840,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"customer_group": cus_group,
 		}
 		report = execute(filters)[1]
@@ -758,7 +869,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"customer_group": cus_groups_list,  # Use the list of customer groups
 		}
 		report = execute(filters)[1]
@@ -787,7 +905,11 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 
 		si2 = self.create_sales_invoice(do_not_submit=True)
 		si2.posting_date = add_days(today(), -1)
+<<<<<<< HEAD
 		si2.customer = self.customer2.name
+=======
+		si2.customer = self.customer2
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		si2.currency = "USD"
 		si2.conversion_rate = 80
 		si2.debit_to = self.debtors_usd
@@ -797,7 +919,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"party_account": self.debit_to,
 		}
 		report = execute(filters)[1]
@@ -845,7 +974,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			"party_type": "Customer",
 			"party": [self.customer],
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"in_party_currency": 1,
 		}
 
@@ -885,7 +1021,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			"party_type": "Customer",
 			"party": [self.customer1, self.customer3],
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		si1 = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
@@ -965,7 +1108,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		report_ouput = execute(filters)[1]
@@ -1010,7 +1160,11 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.posting_date = add_days(today(), -1)
+<<<<<<< HEAD
 		si.customer = self.customer2.name
+=======
+		si.customer = self.customer2
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		si.currency = "USD"
 		si.conversion_rate = 80
 		si.debit_to = self.debtors_usd
@@ -1028,7 +1182,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 			{
 				"company": self.company,
 				"report_date": today(),
+<<<<<<< HEAD
 				"range": "30, 60, 90, 120",
+=======
+				"range1": 30,
+				"range2": 60,
+				"range3": 90,
+				"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"show_future_payments": True,
 				"in_party_currency": False,
 			}
@@ -1087,7 +1248,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		# check invoice grand total and invoiced column's value for 3 payment terms
@@ -1110,7 +1278,14 @@ class TestAccountsReceivable(AccountsTestMixin, IntegrationTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
+<<<<<<< HEAD
 			"range": "30, 60, 90, 120",
+=======
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		# check invoice grand total and invoiced column's value for 3 payment terms

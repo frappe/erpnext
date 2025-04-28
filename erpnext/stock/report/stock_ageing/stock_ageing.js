@@ -54,10 +54,32 @@ frappe.query_reports["Stock Ageing"] = {
 			options: "Brand",
 		},
 		{
+<<<<<<< HEAD
 			fieldname: "range",
 			label: __("Ageing Range"),
 			fieldtype: "Data",
 			default: "30, 60, 90",
+=======
+			fieldname: "range1",
+			label: __("Ageing Range 1"),
+			fieldtype: "Int",
+			default: "30",
+			reqd: 1,
+		},
+		{
+			fieldname: "range2",
+			label: __("Ageing Range 2"),
+			fieldtype: "Int",
+			default: "60",
+			reqd: 1,
+		},
+		{
+			fieldname: "range3",
+			label: __("Ageing Range 3"),
+			fieldtype: "Int",
+			default: "90",
+			reqd: 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "show_warehouse_wise_stock",

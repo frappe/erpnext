@@ -25,9 +25,13 @@ class BOMItem(Document):
 		has_variants: DF.Check
 		image: DF.Attach | None
 		include_item_in_manufacturing: DF.Check
+<<<<<<< HEAD
 		is_phantom_item: DF.Check
 		is_stock_item: DF.Check
 		is_sub_assembly_item: DF.Check
+=======
+		is_stock_item: DF.Check
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		item_code: DF.Link
 		item_name: DF.Data | None
 		operation: DF.Link | None

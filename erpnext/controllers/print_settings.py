@@ -11,6 +11,7 @@ def set_print_templates_for_item_table(doc, settings):
 		"items": {
 			"qty": "templates/print_formats/includes/item_table_qty.html",
 			"serial_and_batch_bundle": "templates/print_formats/includes/serial_and_batch_bundle.html",
+<<<<<<< HEAD
 		},
 		"packed_items": {
 			"serial_and_batch_bundle": "templates/print_formats/includes/serial_and_batch_bundle.html",
@@ -18,6 +19,9 @@ def set_print_templates_for_item_table(doc, settings):
 		"supplied_items": {
 			"serial_and_batch_bundle": "templates/print_formats/includes/serial_and_batch_bundle.html",
 		},
+=======
+		}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	doc.flags.compact_item_fields = ["description", "qty", "rate", "amount"]

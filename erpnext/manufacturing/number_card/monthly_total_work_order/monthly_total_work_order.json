@@ -3,7 +3,10 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Work Order",
+<<<<<<< HEAD
  "dynamic_filters_json": "[[\"Work Order\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "filters_json": "[[\"Work Order\",\"docstatus\",\"=\",1],[\"Work Order\",\"creation\",\"between\",[\"2020-06-08\",\"2020-07-08\"]]]",
  "function": "Count",
  "idx": 0,

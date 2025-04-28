@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 frappe.ui.form.on("Asset Shift Allocation", {
 	onload: function (frm) {
+<<<<<<< HEAD
 		frm.set_query("asset", function () {
 			return {
 				filters: {
@@ -11,6 +12,8 @@ frappe.ui.form.on("Asset Shift Allocation", {
 			};
 		});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.events.make_schedules_editable(frm);
 	},
 

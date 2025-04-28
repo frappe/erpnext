@@ -20,7 +20,10 @@ class ProcessPaymentReconciliationLogAllocations(Document):
 		difference_account: DF.Link | None
 		difference_amount: DF.Currency
 		exchange_rate: DF.Float
+<<<<<<< HEAD
 		gain_loss_posting_date: DF.Date | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		invoice_number: DF.DynamicLink
 		invoice_type: DF.Link
 		is_advance: DF.Data | None

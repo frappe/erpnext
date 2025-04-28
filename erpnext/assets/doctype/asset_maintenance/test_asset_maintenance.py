@@ -1,16 +1,27 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, get_last_day, nowdate
 
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
+<<<<<<< HEAD
 class TestAssetMaintenance(IntegrationTestCase):
+=======
+class TestAssetMaintenance(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		self.pr = make_purchase_receipt(

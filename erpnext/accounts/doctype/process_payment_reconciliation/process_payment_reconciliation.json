@@ -1,6 +1,10 @@
 {
  "actions": [],
  "autoname": "format:ACC-PPR-{#####}",
+<<<<<<< HEAD
+=======
+ "beta": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "creation": "2023-03-30 21:28:39.793927",
  "default_view": "List",
  "doctype": "DocType",
@@ -12,7 +16,10 @@
   "column_break_io6c",
   "party",
   "receivable_payable_account",
+<<<<<<< HEAD
   "default_advance_account",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "filter_section",
   "from_invoice_date",
   "to_invoice_date",
@@ -141,6 +148,7 @@
   {
    "fieldname": "section_break_a8yx",
    "fieldtype": "Section Break"
+<<<<<<< HEAD
   },
   {
    "depends_on": "eval:doc.party",
@@ -152,12 +160,18 @@
    "mandatory_depends_on": "doc.party_type",
    "options": "Account",
    "reqd": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-01-08 08:22:14.798085",
+=======
+ "modified": "2024-03-27 13:10:18.601732",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",

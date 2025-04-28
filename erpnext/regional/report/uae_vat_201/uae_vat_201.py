@@ -143,7 +143,11 @@ def get_total_emiratewise(filters):
 			on
 				i.parent = s.name
 			where
+<<<<<<< HEAD
 				s.docstatus = 1 and i.is_exempt != 1 and i.is_zero_rated != 1
+=======
+				s.docstatus = 1 and  i.is_exempt != 1 and i.is_zero_rated != 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				{conditions}
 			group by
 				s.vat_emirate;
@@ -179,11 +183,15 @@ def get_reverse_charge_total(filters):
 	try:
 		return (
 			frappe.db.get_all(
+<<<<<<< HEAD
 				"Purchase Invoice",
 				filters=query_filters,
 				fields=[{"SUM": "base_total"}],
 				as_list=True,
 				limit=1,
+=======
+				"Purchase Invoice", filters=query_filters, fields=["sum(total)"], as_list=True, limit=1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)[0][0]
 			or 0
 		)
@@ -223,11 +231,15 @@ def get_reverse_charge_recoverable_total(filters):
 	try:
 		return (
 			frappe.db.get_all(
+<<<<<<< HEAD
 				"Purchase Invoice",
 				filters=query_filters,
 				fields=[{"SUM": "base_total"}],
 				as_list=True,
 				limit=1,
+=======
+				"Purchase Invoice", filters=query_filters, fields=["sum(total)"], as_list=True, limit=1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)[0][0]
 			or 0
 		)
@@ -282,11 +294,15 @@ def get_standard_rated_expenses_total(filters):
 	try:
 		return (
 			frappe.db.get_all(
+<<<<<<< HEAD
 				"Purchase Invoice",
 				filters=query_filters,
 				fields=[{"SUM": "base_total"}],
 				as_list=True,
 				limit=1,
+=======
+				"Purchase Invoice", filters=query_filters, fields=["sum(total)"], as_list=True, limit=1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)[0][0]
 			or 0
 		)
@@ -304,7 +320,11 @@ def get_standard_rated_expenses_tax(filters):
 			frappe.db.get_all(
 				"Purchase Invoice",
 				filters=query_filters,
+<<<<<<< HEAD
 				fields=[{"SUM": "recoverable_standard_rated_expenses"}],
+=======
+				fields=["sum(recoverable_standard_rated_expenses)"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				as_list=True,
 				limit=1,
 			)[0][0]
@@ -322,7 +342,11 @@ def get_tourist_tax_return_total(filters):
 	try:
 		return (
 			frappe.db.get_all(
+<<<<<<< HEAD
 				"Sales Invoice", filters=query_filters, fields=[{"SUM": "base_total"}], as_list=True, limit=1
+=======
+				"Sales Invoice", filters=query_filters, fields=["sum(total)"], as_list=True, limit=1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)[0][0]
 			or 0
 		)
@@ -340,7 +364,11 @@ def get_tourist_tax_return_tax(filters):
 			frappe.db.get_all(
 				"Sales Invoice",
 				filters=query_filters,
+<<<<<<< HEAD
 				fields=[{"SUM": "tourist_tax_return"}],
+=======
+				fields=["sum(tourist_tax_return)"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				as_list=True,
 				limit=1,
 			)[0][0]

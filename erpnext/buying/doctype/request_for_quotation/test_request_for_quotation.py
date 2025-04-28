@@ -5,7 +5,11 @@
 from urllib.parse import urlparse
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase, change_settings
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
@@ -21,7 +25,11 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
+<<<<<<< HEAD
 class TestRequestforQuotation(IntegrationTestCase):
+=======
+class TestRequestforQuotation(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_rfq_qty(self):
 		rfq = make_request_for_quotation(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):
@@ -32,6 +40,7 @@ class TestRequestforQuotation(IntegrationTestCase):
 		rfq.save()
 		self.assertEqual(rfq.items[0].qty, 1)
 
+<<<<<<< HEAD
 	def test_rfq_zero_qty(self):
 		"""
 		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
@@ -42,6 +51,8 @@ class TestRequestforQuotation(IntegrationTestCase):
 			rfq.save()
 			self.assertEqual(rfq.items[0].qty, 0)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()
 
@@ -76,6 +87,7 @@ class TestRequestforQuotation(IntegrationTestCase):
 		self.assertEqual(sq1.get("items")[0].item_code, "_Test Item")
 		self.assertEqual(sq1.get("items")[0].qty, 5)
 
+<<<<<<< HEAD
 	def test_make_supplier_quotation_with_taxes(self):
 		"""Test automatic tax addition when supplier quotation is created from RFQ taxes_and_charges are set"""
 
@@ -116,6 +128,8 @@ class TestRequestforQuotation(IntegrationTestCase):
 		tax_rule.delete()
 		tax_template.delete()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_make_supplier_quotation_with_special_characters(self):
 		frappe.delete_doc_if_exists("Supplier", "_Test Supplier '1", force=1)
 		supplier = frappe.new_doc("Supplier")
@@ -222,6 +236,7 @@ class TestRequestforQuotation(IntegrationTestCase):
 		supplier_doc.reload()
 		self.assertTrue(supplier_doc.portal_users[0].user)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1})
 	def test_supplier_quotation_from_zero_qty_rfq(self):
 		rfq = make_request_for_quotation(qty=0)
@@ -248,6 +263,8 @@ class TestRequestforQuotation(IntegrationTestCase):
 		self.assertEqual(sq.items[0].qty, 0)
 		self.assertEqual(sq.items[0].item_code, rfq.items[0].item_code)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def make_request_for_quotation(**args) -> "RequestforQuotation":
 	"""

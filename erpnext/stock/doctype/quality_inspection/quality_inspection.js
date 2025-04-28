@@ -4,6 +4,7 @@
 cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 
 frappe.ui.form.on("Quality Inspection", {
+<<<<<<< HEAD
 	onload(frm) {
 		frm.trigger("set_default_company");
 	},
@@ -24,6 +25,14 @@ frappe.ui.form.on("Quality Inspection", {
 
 			return {
 				filters: filters,
+=======
+	setup: function (frm) {
+		frm.set_query("reference_name", function () {
+			return {
+				filters: {
+					docstatus: ["!=", 2],
+				},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			};
 		});
 
@@ -74,7 +83,11 @@ frappe.ui.form.on("Quality Inspection", {
 
 	refresh: function (frm) {
 		// Ignore cancellation of reference doctype on cancel all.
+<<<<<<< HEAD
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
+=======
+		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	item_code: function (frm) {

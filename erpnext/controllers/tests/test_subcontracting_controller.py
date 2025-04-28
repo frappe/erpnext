@@ -5,7 +5,11 @@ import copy
 from collections import defaultdict
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import cint
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -25,7 +29,11 @@ from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order im
 )
 
 
+<<<<<<< HEAD
 class TestSubcontractingController(IntegrationTestCase):
+=======
+class TestSubcontractingController(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
@@ -72,7 +80,11 @@ class TestSubcontractingController(IntegrationTestCase):
 	def test_create_raw_materials_supplied(self):
 		sco = get_subcontracting_order()
 		sco.supplied_items = None
+<<<<<<< HEAD
 		sco.create_raw_materials_supplied_or_received()
+=======
+		sco.create_raw_materials_supplied()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertIsNotNone(sco.supplied_items)
 
 	def test_sco_with_bom(self):
@@ -282,6 +294,7 @@ class TestSubcontractingController(IntegrationTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
+<<<<<<< HEAD
 	def test_return_non_consumed_batch_materials(self):
 		"""
 		- Set backflush based on Material Transfer.
@@ -355,6 +368,8 @@ class TestSubcontractingController(IntegrationTestCase):
 		self.assertTrue(doc.items[0].use_serial_batch_fields)
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_return_non_consumed_materials(self):
 		"""
 		- Set backflush based on Material Transfer.
@@ -1141,6 +1156,7 @@ class TestSubcontractingController(IntegrationTestCase):
 			itemwise_details.get(doc.items[0].item_code)["serial_no"][5:6],
 		)
 
+<<<<<<< HEAD
 	def test_phantom_bom_explosion(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
 
@@ -1163,6 +1179,8 @@ class TestSubcontractingController(IntegrationTestCase):
 
 		self.assertEqual([item.rm_item_code for item in sco.supplied_items], expected)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
@@ -1329,6 +1347,7 @@ def make_subcontracted_items():
 		"Subcontracted Item SA6": {},
 		"Subcontracted Item SA7": {},
 		"Subcontracted Item SA8": {},
+<<<<<<< HEAD
 		"Subcontracted Item SA9": {"stock_uom": "Litre"},
 		"Subcontracted Item SA10": {
 			"has_batch_no": 1,
@@ -1336,6 +1355,8 @@ def make_subcontracted_items():
 			"batch_number_series": "SBAT.####",
 		},
 		"Top Level Parent": {},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	for item, properties in sub_contracted_items.items():
@@ -1356,14 +1377,20 @@ def make_raw_materials():
 		"Subcontracted SRM Item 4": {"has_serial_no": 1, "serial_no_series": "SRII.####"},
 		"Subcontracted SRM Item 5": {"has_serial_no": 1, "serial_no_series": "SRIID.####"},
 		"Subcontracted SRM Item 8": {},
+<<<<<<< HEAD
 		"Subcontracted SRM Item 9": {"stock_uom": "Litre"},
 		"Subcontracted SRM Item 10": {},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	for item, properties in raw_materials.items():
 		if not frappe.db.exists("Item", item):
 			properties.update({"is_stock_item": 1})
+<<<<<<< HEAD
 			properties.update({"valuation_rate": 100})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			make_item(item, properties)
 
 
@@ -1385,9 +1412,12 @@ def make_service_items():
 		"Subcontracted Service Item 6": {},
 		"Subcontracted Service Item 7": {},
 		"Subcontracted Service Item 8": {},
+<<<<<<< HEAD
 		"Subcontracted Service Item 9": {},
 		"Subcontracted Service Item 10": {},
 		"Subcontracted Service Item 11": {},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	for item, properties in service_items.items():
@@ -1412,13 +1442,20 @@ def make_bom_for_subcontracted_items():
 		"Subcontracted Item SA6": ["Subcontracted SRM Item 3"],
 		"Subcontracted Item SA7": ["Subcontracted SRM Item 1"],
 		"Subcontracted Item SA8": ["Subcontracted SRM Item 8"],
+<<<<<<< HEAD
 		"Subcontracted Item SA10": ["Subcontracted SRM Item 10"],
 		"Subcontracted Service Item 11": ["Top Level Parent"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	for item_code, raw_materials in boms.items():
 		if not frappe.db.exists("BOM", {"item": item_code}):
+<<<<<<< HEAD
 			make_bom(item=item_code, raw_materials=raw_materials, rate=100, currency="INR")
+=======
+			make_bom(item=item_code, raw_materials=raw_materials, rate=100)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def set_backflush_based_on(based_on):

@@ -2,7 +2,11 @@ from typing import Any
 
 import frappe
 from frappe import _dict
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -15,7 +19,11 @@ def stock_balance(filters):
 	return [_dict(row) for row in execute(filters)[1]]
 
 
+<<<<<<< HEAD
 class TestStockBalance(IntegrationTestCase):
+=======
+class TestStockBalance(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# ----------- utils
 
 	def setUp(self):
@@ -23,7 +31,11 @@ class TestStockBalance(IntegrationTestCase):
 		self.filters = _dict(
 			{
 				"company": "_Test Company",
+<<<<<<< HEAD
 				"item_code": [self.item.name],
+=======
+				"item_code": self.item.name,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"from_date": "2020-01-01",
 				"to_date": str(today()),
 			}
@@ -165,6 +177,10 @@ class TestStockBalance(IntegrationTestCase):
 		variant.save()
 
 		self.generate_stock_ledger(variant.name, [_dict(qty=5, rate=10)])
+<<<<<<< HEAD
 		rows = stock_balance(self.filters.update({"show_variant_attributes": 1, "item_code": [variant.name]}))
+=======
+		rows = stock_balance(self.filters.update({"show_variant_attributes": 1, "item_code": variant.name}))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)

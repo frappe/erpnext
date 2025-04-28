@@ -10,8 +10,17 @@
  "engine": "InnoDB",
  "field_order": [
   "workstation_type",
+<<<<<<< HEAD
   "section_break_auzm",
   "workstation_costs",
+=======
+  "over_heads",
+  "hour_rate_electricity",
+  "hour_rate_consumable",
+  "column_break_5",
+  "hour_rate_rent",
+  "hour_rate_labour",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_8",
   "hour_rate",
   "description_tab",
@@ -29,6 +38,47 @@
    "unique": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "over_heads",
+   "fieldtype": "Section Break",
+   "label": "Operating Costs",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "description": "per hour",
+   "fieldname": "hour_rate_electricity",
+   "fieldtype": "Currency",
+   "label": "Electricity Cost",
+   "oldfieldname": "hour_rate_electricity",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "description": "per hour",
+   "fieldname": "hour_rate_consumable",
+   "fieldtype": "Currency",
+   "label": "Consumable Cost",
+   "oldfieldname": "hour_rate_consumable",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "description": "per hour",
+   "fieldname": "hour_rate_rent",
+   "fieldtype": "Currency",
+   "label": "Rent Cost",
+   "oldfieldname": "hour_rate_rent",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "description": "Wages per hour",
+   "fieldname": "hour_rate_labour",
+   "fieldtype": "Currency",
+   "label": "Wages",
+   "oldfieldname": "hour_rate_labour",
+   "oldfieldtype": "Currency"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "description": "per hour",
    "fieldname": "hour_rate",
    "fieldtype": "Currency",
@@ -47,6 +97,13 @@
    "width": "300px"
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible": 1,
    "fieldname": "description_tab",
    "fieldtype": "Tab Break",
@@ -55,6 +112,7 @@
   {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "section_break_auzm",
@@ -66,11 +124,17 @@
    "fieldtype": "Table",
    "label": "Operating Components Cost",
    "options": "Workstation Cost"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "icon-wrench",
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-19 12:06:56.683558",
+=======
+ "modified": "2024-03-27 13:11:00.946367",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation Type",
@@ -90,10 +154,17 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

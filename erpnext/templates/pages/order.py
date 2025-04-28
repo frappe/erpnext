@@ -4,10 +4,14 @@
 import frappe
 from frappe import _
 
+<<<<<<< HEAD
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST,
 	get_amount,
 )
+=======
+from erpnext.accounts.doctype.payment_request.payment_request import get_amount
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_context(context):
@@ -71,12 +75,18 @@ def get_payment_details(doc):
 		(
 			"payments" in frappe.get_installed_apps()
 			and frappe.db.get_single_value("Buying Settings", "show_pay_button")
+<<<<<<< HEAD
 			and doc.doctype in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		),
 		0,
 	)
 	if not show_pay_button:
 		return show_pay_button, amount
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	amount = get_amount(doc)
 	return bool(amount), amount

@@ -54,15 +54,19 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 			};
 		});
 		frm.set_query("account", function () {
+<<<<<<< HEAD
 			if (!frm.doc.company) {
 				frappe.throw(__("Please set Company"));
 			}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return {
 				filters: {
 					company: frm.doc.company,
 				},
 			};
 		});
+<<<<<<< HEAD
 		frm.set_query("cost_center", function () {
 			if (!frm.doc.company) {
 				frappe.throw(__("Please set Company"));
@@ -93,17 +97,22 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 				},
 			};
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (frm.doc.__islocal) {
 			frm.set_value("from_date", frappe.datetime.add_months(frappe.datetime.get_today(), -1));
 			frm.set_value("to_date", frappe.datetime.get_today());
 		}
 	},
+<<<<<<< HEAD
 	company: function (frm) {
 		frm.set_value("account", "");
 		frm.set_value("cost_center", "");
 		frm.set_value("project", "");
 		erpnext.utils.set_letter_head(frm);
 	},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	report: function (frm) {
 		let filters = {
 			company: frm.doc.company,
@@ -116,6 +125,7 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 				filters: filters,
 			};
 		});
+<<<<<<< HEAD
 		frm.set_query("print_format", function () {
 			return {
 				filters: {
@@ -126,6 +136,8 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 				},
 			};
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	customer_collection: function (frm) {
 		frm.set_value("collection_name", "");

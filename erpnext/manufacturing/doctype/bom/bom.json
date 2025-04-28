@@ -16,7 +16,10 @@
   "is_default",
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
+<<<<<<< HEAD
   "is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "project",
   "image",
   "currency_detail",
@@ -135,7 +138,10 @@
    "fieldname": "quantity",
    "fieldtype": "Float",
    "label": "Quantity",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "oldfieldname": "quantity",
    "oldfieldtype": "Currency",
    "reqd": 1
@@ -202,7 +208,10 @@
   },
   {
    "collapsible": 1,
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "currency_detail",
    "fieldtype": "Section Break",
    "label": "Cost Configuration"
@@ -284,7 +293,10 @@
    "oldfieldtype": "Section Break"
   },
   {
+<<<<<<< HEAD
    "allow_bulk_edit": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -295,7 +307,10 @@
   },
   {
    "collapsible": 1,
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "scrap_section",
    "fieldtype": "Tab Break",
    "label": "Scrap & Process Loss"
@@ -313,7 +328,10 @@
    "oldfieldtype": "Section Break"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "operating_cost",
    "fieldtype": "Currency",
    "label": "Operating Cost",
@@ -328,7 +346,10 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "scrap_material_cost",
    "fieldtype": "Currency",
    "label": "Scrap Material Cost",
@@ -341,7 +362,10 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "base_operating_cost",
    "fieldtype": "Currency",
    "label": "Operating Cost (Company Currency)",
@@ -358,7 +382,10 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "base_scrap_material_cost",
    "fieldtype": "Currency",
    "label": "Scrap Material Cost(Company Currency)",
@@ -387,7 +414,10 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -435,7 +465,10 @@
   },
   {
    "collapsible": 1,
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "website_section",
    "fieldtype": "Tab Break",
    "label": "Website"
@@ -545,7 +578,10 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.with_operations",
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "operations_section_section",
    "fieldtype": "Section Break",
    "label": "Operations"
@@ -558,14 +594,21 @@
   {
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
+<<<<<<< HEAD
    "label": "% Process Loss",
    "non_negative": 1
+=======
+   "label": "% Process Loss"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
    "label": "Process Loss Qty",
+<<<<<<< HEAD
    "non_negative": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "read_only": 1
   },
   {
@@ -582,7 +625,10 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "depends_on": "eval:!doc.is_phantom_bom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "quality_inspection_section_break",
    "fieldtype": "Section Break",
    "label": "Quality Inspection"
@@ -671,12 +717,15 @@
    "fieldtype": "Link",
    "label": "Default Target Warehouse",
    "options": "Warehouse"
+<<<<<<< HEAD
   },
   {
    "default": "0",
    "fieldname": "is_phantom_bom",
    "fieldtype": "Check",
    "label": "Is Phantom BOM"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-sitemap",
@@ -684,7 +733,11 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-19 16:17:15.925156",
+=======
+ "modified": "2024-06-03 16:24:47.518411",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -717,11 +770,18 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "item, item_name",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

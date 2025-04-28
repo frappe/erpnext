@@ -7,8 +7,12 @@ import copy
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+<<<<<<< HEAD
 from frappe.utils import cint, flt, formatdate, get_link_to_form, getdate, now
 from frappe.utils.caching import request_cache
+=======
+from frappe.utils import cint, flt, formatdate, getdate, now
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.dashboard import cache_source
 
 import erpnext
@@ -20,8 +24,12 @@ from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_f
 )
 from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+<<<<<<< HEAD
 from erpnext.accounts.utils import create_payment_ledger_entry, is_immutable_ledger_enabled
 from erpnext.controllers.budget_controller import BudgetValidation
+=======
+from erpnext.accounts.utils import create_payment_ledger_entry
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
 
@@ -34,6 +42,7 @@ def make_gl_entries(
 	from_repost=False,
 ):
 	if gl_map:
+<<<<<<< HEAD
 		if (
 			not cint(frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"))
 			and gl_map[0].voucher_type != "Period Closing Voucher"
@@ -41,10 +50,13 @@ def make_gl_entries(
 			bud_val = BudgetValidation(gl_map=gl_map)
 			bud_val.validate()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not cancel:
 			make_acc_dimensions_offsetting_entry(gl_map)
 			validate_accounting_period(gl_map)
 			validate_disabled_accounts(gl_map)
+<<<<<<< HEAD
 			gl_map = process_gl_map(gl_map, merge_entries, from_repost=from_repost)
 			if gl_map and len(gl_map) > 1:
 				if gl_map[0].voucher_type != "Period Closing Voucher":
@@ -55,6 +67,17 @@ def make_gl_entries(
 						update_outstanding=update_outstanding,
 						from_repost=from_repost,
 					)
+=======
+			gl_map = process_gl_map(gl_map, merge_entries)
+			if gl_map and len(gl_map) > 1:
+				create_payment_ledger_entry(
+					gl_map,
+					cancel=0,
+					adv_adj=adv_adj,
+					update_outstanding=update_outstanding,
+					from_repost=from_repost,
+				)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
 			# Post GL Map process there may no be any GL Entries
 			elif gl_map:
@@ -91,10 +114,13 @@ def make_acc_dimensions_offsetting_entry(gl_map):
 					"credit_in_account_currency": credit,
 					"remarks": _("Offsetting for Accounting Dimension") + f" - {dimension.name}",
 					"against_voucher": None,
+<<<<<<< HEAD
 					"account_currency": dimension.account_currency,
 					# Party Type and Party are restricted to Receivable and Payable accounts
 					"party_type": None,
 					"party": None,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			)
 			offsetting_entry["against_voucher_type"] = None
@@ -122,9 +148,12 @@ def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
 	accounting_dimensions_to_offset = []
 	for acc_dimension in acc_dimensions:
 		values = set([entry.get(acc_dimension.fieldname) for entry in gl_map])
+<<<<<<< HEAD
 		acc_dimension.account_currency = frappe.get_cached_value(
 			"Account", acc_dimension.offsetting_account, "account_currency"
 		)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if len(values) > 1:
 			accounting_dimensions_to_offset.append(acc_dimension)
 
@@ -134,6 +163,7 @@ def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
 def validate_disabled_accounts(gl_map):
 	accounts = [d.account for d in gl_map if d.account]
 
+<<<<<<< HEAD
 	disabled_accounts = frappe.get_all(
 		"Account",
 		filters={"disabled": 1, "is_group": 0, "company": gl_map[0].company},
@@ -144,6 +174,19 @@ def validate_disabled_accounts(gl_map):
 	if used_disabled_accounts:
 		account_list = "<br>"
 		account_list += ", ".join([frappe.bold(d) for d in used_disabled_accounts])
+=======
+	Account = frappe.qb.DocType("Account")
+
+	disabled_accounts = (
+		frappe.qb.from_(Account)
+		.where(Account.name.isin(accounts) & Account.disabled == 1)
+		.select(Account.name, Account.disabled)
+	).run(as_dict=True)
+
+	if disabled_accounts:
+		account_list = "<br>"
+		account_list += ", ".join([frappe.bold(d.name) for d in disabled_accounts])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.throw(
 			_("Cannot create accounting entries against disabled accounts: {0}").format(account_list),
 			title=_("Disabled Account Selected"),
@@ -159,7 +202,10 @@ def validate_accounting_period(gl_map):
 		WHERE
 			ap.name = cd.parent
 			AND ap.company = %(company)s
+<<<<<<< HEAD
 			AND ap.disabled = 0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			AND cd.closed = 1
 			AND cd.document_type = %(voucher_type)s
 			AND %(date)s between ap.start_date and ap.end_date
@@ -181,12 +227,20 @@ def validate_accounting_period(gl_map):
 		)
 
 
+<<<<<<< HEAD
 def process_gl_map(gl_map, merge_entries=True, precision=None, from_repost=False):
+=======
+def process_gl_map(gl_map, merge_entries=True, precision=None):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if not gl_map:
 		return []
 
 	if gl_map[0].voucher_type != "Period Closing Voucher":
+<<<<<<< HEAD
 		gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision, from_repost)
+=======
+		gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map, precision)
@@ -196,6 +250,7 @@ def process_gl_map(gl_map, merge_entries=True, precision=None, from_repost=False
 	return gl_map
 
 
+<<<<<<< HEAD
 def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_repost=False):
 	round_off_account, default_currency = frappe.get_cached_value(
 		"Company", gl_map[0].company, ["round_off_account", "default_currency"]
@@ -205,12 +260,19 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 			frappe.get_meta("GL Entry").get_field("debit"),
 			currency=default_currency,
 		)
+=======
+def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None):
+	cost_center_allocation = get_cost_center_allocation_data(gl_map[0]["company"], gl_map[0]["posting_date"])
+	if not cost_center_allocation:
+		return gl_map
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	new_gl_map = []
 	for d in gl_map:
 		cost_center = d.get("cost_center")
 
 		# Validate budget against main cost center
+<<<<<<< HEAD
 		if not from_repost:
 			validate_expense_against_budget(
 				d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision)
@@ -234,10 +296,24 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 			for field in ("debit", "credit", "debit_in_account_currency", "credit_in_account_currency"):
 				gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
 			new_gl_map.append(gle)
+=======
+		validate_expense_against_budget(d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision))
+
+		if cost_center and cost_center_allocation.get(cost_center):
+			for sub_cost_center, percentage in cost_center_allocation.get(cost_center, {}).items():
+				gle = copy.deepcopy(d)
+				gle.cost_center = sub_cost_center
+				for field in ("debit", "credit", "debit_in_account_currency", "credit_in_account_currency"):
+					gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
+				new_gl_map.append(gle)
+		else:
+			new_gl_map.append(d)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return new_gl_map
 
 
+<<<<<<< HEAD
 @request_cache
 def get_cost_center_allocation_data(company, posting_date, cost_center):
 	cost_center_allocation = frappe.db.get_value(
@@ -263,6 +339,28 @@ def get_cost_center_allocation_data(company, posting_date, cost_center):
 	)
 
 	return records
+=======
+def get_cost_center_allocation_data(company, posting_date):
+	par = frappe.qb.DocType("Cost Center Allocation")
+	child = frappe.qb.DocType("Cost Center Allocation Percentage")
+
+	records = (
+		frappe.qb.from_(par)
+		.inner_join(child)
+		.on(par.name == child.parent)
+		.select(par.main_cost_center, child.cost_center, child.percentage)
+		.where(par.docstatus == 1)
+		.where(par.company == company)
+		.where(par.valid_from <= posting_date)
+		.orderby(par.valid_from, order=frappe.qb.desc)
+	).run(as_dict=True)
+
+	cc_allocation = frappe._dict()
+	for d in records:
+		cc_allocation.setdefault(d.main_cost_center, frappe._dict()).setdefault(d.cost_center, d.percentage)
+
+	return cc_allocation
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def merge_similar_entries(gl_map, precision=None):
@@ -271,10 +369,13 @@ def merge_similar_entries(gl_map, precision=None):
 	merge_properties = get_merge_properties(accounting_dimensions)
 
 	for entry in gl_map:
+<<<<<<< HEAD
 		if entry._skip_merge:
 			merged_gl_map.append(entry)
 			continue
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		entry.merge_key = get_merge_key(entry, merge_properties)
 		# if there is already an entry in this account then just add it
 		# to that entry
@@ -331,8 +432,11 @@ def get_merge_properties(dimensions=None):
 		"project",
 		"finance_book",
 		"voucher_no",
+<<<<<<< HEAD
 		"advance_voucher_type",
 		"advance_voucher_no",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	]
 	if dimensions:
 		merge_properties.extend(dimensions)
@@ -354,6 +458,7 @@ def check_if_in_list(gle, gl_map):
 
 
 def toggle_debit_credit_if_negative(gl_map):
+<<<<<<< HEAD
 	debit_credit_field_map = {
 		"debit": "credit",
 		"debit_in_account_currency": "credit_in_account_currency",
@@ -392,10 +497,71 @@ def toggle_debit_credit_if_negative(gl_map):
 
 			entry[debit_field] = debit
 			entry[credit_field] = credit
+=======
+	for entry in gl_map:
+		# toggle debit, credit if negative entry
+		if flt(entry.debit) < 0 and flt(entry.credit) < 0 and flt(entry.debit) == flt(entry.credit):
+			entry.credit *= -1
+			entry.debit *= -1
+
+		if (
+			flt(entry.debit_in_account_currency) < 0
+			and flt(entry.credit_in_account_currency) < 0
+			and flt(entry.debit_in_account_currency) == flt(entry.credit_in_account_currency)
+		):
+			entry.credit_in_account_currency *= -1
+			entry.debit_in_account_currency *= -1
+
+		if flt(entry.debit) < 0:
+			entry.credit = flt(entry.credit) - flt(entry.debit)
+			entry.debit = 0.0
+
+		if flt(entry.debit_in_account_currency) < 0:
+			entry.credit_in_account_currency = flt(entry.credit_in_account_currency) - flt(
+				entry.debit_in_account_currency
+			)
+			entry.debit_in_account_currency = 0.0
+
+		if flt(entry.credit) < 0:
+			entry.debit = flt(entry.debit) - flt(entry.credit)
+			entry.credit = 0.0
+
+		if flt(entry.credit_in_account_currency) < 0:
+			entry.debit_in_account_currency = flt(entry.debit_in_account_currency) - flt(
+				entry.credit_in_account_currency
+			)
+			entry.credit_in_account_currency = 0.0
+
+		update_net_values(entry)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return gl_map
 
 
+<<<<<<< HEAD
+=======
+def update_net_values(entry):
+	# In some scenarios net value needs to be shown in the ledger
+	# This method updates net values as debit or credit
+	if entry.post_net_value and entry.debit and entry.credit:
+		if entry.debit > entry.credit:
+			entry.debit = entry.debit - entry.credit
+			entry.debit_in_account_currency = (
+				entry.debit_in_account_currency - entry.credit_in_account_currency
+			)
+			entry.credit = 0
+			entry.credit_in_account_currency = 0
+		else:
+			entry.credit = entry.credit - entry.debit
+			entry.credit_in_account_currency = (
+				entry.credit_in_account_currency - entry.debit_in_account_currency
+			)
+
+			entry.debit = 0
+			entry.debit_in_account_currency = 0
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
 		validate_cwip_accounts(gl_map)
@@ -465,7 +631,11 @@ def process_debit_credit_difference(gl_map):
 	voucher_no = gl_map[0].voucher_no
 	allowance = get_debit_credit_allowance(voucher_type, precision)
 
+<<<<<<< HEAD
 	debit_credit_diff, trx_cur_debit_credit_diff = get_debit_credit_difference(gl_map, precision)
+=======
+	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if abs(debit_credit_diff) > allowance:
 		if not (
@@ -476,9 +646,15 @@ def process_debit_credit_difference(gl_map):
 			raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
 
 	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
+<<<<<<< HEAD
 		make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, precision)
 
 	debit_credit_diff, trx_cur_debit_credit_diff = get_debit_credit_difference(gl_map, precision)
+=======
+		make_round_off_gle(gl_map, debit_credit_diff, precision)
+
+	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if abs(debit_credit_diff) > allowance:
 		if not (
 			voucher_type == "Journal Entry"
@@ -490,13 +666,17 @@ def process_debit_credit_difference(gl_map):
 
 def get_debit_credit_difference(gl_map, precision):
 	debit_credit_diff = 0.0
+<<<<<<< HEAD
 	trx_cur_debit_credit_diff = 0
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	for entry in gl_map:
 		entry.debit = flt(entry.debit, precision)
 		entry.credit = flt(entry.credit, precision)
 		debit_credit_diff += entry.debit - entry.credit
 
+<<<<<<< HEAD
 		entry.debit_in_transaction_currency = flt(entry.debit_in_transaction_currency, precision)
 		entry.credit_in_transaction_currency = flt(entry.credit_in_transaction_currency, precision)
 		trx_cur_debit_credit_diff += (
@@ -507,6 +687,11 @@ def get_debit_credit_difference(gl_map, precision):
 	trx_cur_debit_credit_diff = flt(trx_cur_debit_credit_diff, precision)
 
 	return debit_credit_diff, trx_cur_debit_credit_diff
+=======
+	debit_credit_diff = flt(debit_credit_diff, precision)
+
+	return debit_credit_diff
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_debit_credit_allowance(voucher_type, precision):
@@ -526,6 +711,7 @@ def raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_
 	)
 
 
+<<<<<<< HEAD
 def has_opening_entries(gl_map: list) -> bool:
 	for x in gl_map:
 		if x.is_opening == "Yes":
@@ -535,10 +721,15 @@ def has_opening_entries(gl_map: list) -> bool:
 
 def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, precision):
 	round_off_account, round_off_cost_center, round_off_for_opening = get_round_off_account_and_cost_center(
+=======
+def make_round_off_gle(gl_map, debit_credit_diff, precision):
+	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		gl_map[0].company, gl_map[0].voucher_type, gl_map[0].voucher_no
 	)
 	round_off_gle = frappe._dict()
 	round_off_account_exists = False
+<<<<<<< HEAD
 	has_opening_entry = has_opening_entries(gl_map)
 
 	if has_opening_entry:
@@ -556,6 +747,12 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 	if gl_map[0].voucher_type != "Period Closing Voucher":
 		for d in gl_map:
 			if d.account == account:
+=======
+
+	if gl_map[0].voucher_type != "Period Closing Voucher":
+		for d in gl_map:
+			if d.account == round_off_account:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				round_off_gle = d
 				if d.debit:
 					debit_credit_diff -= flt(d.debit) - flt(d.credit)
@@ -573,17 +770,24 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 
 	round_off_gle.update(
 		{
+<<<<<<< HEAD
 			"account": account,
+=======
+			"account": round_off_account,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"debit_in_account_currency": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
 			"credit_in_account_currency": debit_credit_diff if debit_credit_diff > 0 else 0,
 			"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
 			"credit": debit_credit_diff if debit_credit_diff > 0 else 0,
+<<<<<<< HEAD
 			"debit_in_transaction_currency": abs(trx_cur_debit_credit_diff)
 			if trx_cur_debit_credit_diff < 0
 			else 0,
 			"credit_in_transaction_currency": trx_cur_debit_credit_diff
 			if trx_cur_debit_credit_diff > 0
 			else 0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"cost_center": round_off_cost_center,
 			"party_type": None,
 			"party": None,
@@ -593,9 +797,12 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 		}
 	)
 
+<<<<<<< HEAD
 	if has_opening_entry:
 		round_off_gle.update({"is_opening": "Yes"})
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	update_accounting_dimensions(round_off_gle)
 	if not round_off_account_exists:
 		gl_map.append(round_off_gle)
@@ -620,9 +827,15 @@ def update_accounting_dimensions(round_off_gle):
 
 
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use_company_default=False):
+<<<<<<< HEAD
 	round_off_account, round_off_cost_center, round_off_for_opening = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center", "round_off_for_opening"]
 	) or [None, None, None]
+=======
+	round_off_account, round_off_cost_center = frappe.get_cached_value(
+		"Company", company, ["round_off_account", "round_off_cost_center"]
+	) or [None, None]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	# Use expense account as fallback
 	if not round_off_account:
@@ -637,6 +850,7 @@ def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use
 			round_off_cost_center = parent_cost_center
 
 	if not round_off_account:
+<<<<<<< HEAD
 		frappe.throw(
 			_("Please mention '{0}' in Company: {1}").format(
 				frappe.bold("Round Off Account"), get_link_to_form("Company", company)
@@ -651,6 +865,14 @@ def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use
 		)
 
 	return round_off_account, round_off_cost_center, round_off_for_opening
+=======
+		frappe.throw(_("Please mention Round Off Account in Company"))
+
+	if not round_off_cost_center:
+		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+
+	return round_off_account, round_off_cost_center
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def make_reverse_gl_entries(
@@ -660,7 +882,10 @@ def make_reverse_gl_entries(
 	adv_adj=False,
 	update_outstanding="Yes",
 	partial_cancel=False,
+<<<<<<< HEAD
 	posting_date=None,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ):
 	"""
 	Get original gl entries of the voucher
@@ -721,6 +946,7 @@ def make_reverse_gl_entries(
 				query.run()
 		else:
 			if not immutable_ledger_enabled:
+<<<<<<< HEAD
 				gle_names = [x.get("name") for x in gl_entries]
 
 				# if names are available, cancel only that set of entries
@@ -733,6 +959,9 @@ def make_reverse_gl_entries(
 						where name in %s and is_cancelled = 0""",
 						(now(), frappe.session.user, tuple(gle_names)),
 					)
+=======
+				set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for entry in gl_entries:
 			new_gle = copy.deepcopy(entry)
@@ -742,15 +971,21 @@ def make_reverse_gl_entries(
 
 			debit_in_account_currency = new_gle.get("debit_in_account_currency", 0)
 			credit_in_account_currency = new_gle.get("credit_in_account_currency", 0)
+<<<<<<< HEAD
 			debit_in_transaction_currency = new_gle.get("debit_in_transaction_currency", 0)
 			credit_in_transaction_currency = new_gle.get("credit_in_transaction_currency", 0)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			new_gle["debit"] = credit
 			new_gle["credit"] = debit
 			new_gle["debit_in_account_currency"] = credit_in_account_currency
 			new_gle["credit_in_account_currency"] = debit_in_account_currency
+<<<<<<< HEAD
 			new_gle["debit_in_transaction_currency"] = credit_in_transaction_currency
 			new_gle["credit_in_transaction_currency"] = debit_in_transaction_currency
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			new_gle["remarks"] = "On cancellation of " + new_gle["voucher_no"]
 			new_gle["is_cancelled"] = 1
@@ -758,8 +993,11 @@ def make_reverse_gl_entries(
 			if immutable_ledger_enabled:
 				new_gle["is_cancelled"] = 0
 				new_gle["posting_date"] = frappe.form_dict.get("posting_date") or getdate()
+<<<<<<< HEAD
 			elif posting_date:
 				new_gle["posting_date"] = posting_date
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if new_gle["debit"] or new_gle["credit"]:
 				make_entry(new_gle, adv_adj, "Yes")
@@ -774,9 +1012,15 @@ def check_freezing_date(posting_date, adv_adj=False):
 	Hence stop admin to bypass if accounts are freezed
 	"""
 	if not adv_adj:
+<<<<<<< HEAD
 		acc_frozen_upto = frappe.get_single_value("Accounts Settings", "acc_frozen_upto")
 		if acc_frozen_upto:
 			frozen_accounts_modifier = frappe.get_single_value(
+=======
+		acc_frozen_upto = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
+		if acc_frozen_upto:
+			frozen_accounts_modifier = frappe.db.get_single_value(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"Accounts Settings", "frozen_accounts_modifier"
 			)
 			if getdate(posting_date) <= getdate(acc_frozen_upto) and (
@@ -797,7 +1041,11 @@ def validate_against_pcv(is_opening, posting_date, company):
 		)
 
 	last_pcv_date = frappe.db.get_value(
+<<<<<<< HEAD
 		"Period Closing Voucher", {"docstatus": 1, "company": company}, [{"MAX": "period_end_date"}]
+=======
+		"Period Closing Voucher", {"docstatus": 1, "company": company}, "max(posting_date)"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	if last_pcv_date and getdate(posting_date) <= getdate(last_pcv_date):
@@ -853,3 +1101,10 @@ def validate_allowed_dimensions(gl_entry, dimension_filter_map):
 						),
 						InvalidAccountDimensionError,
 					)
+<<<<<<< HEAD
+=======
+
+
+def is_immutable_ledger_enabled():
+	return frappe.db.get_single_value("Accounts Settings", "enable_immutable_ledger")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

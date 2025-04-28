@@ -5,6 +5,7 @@ frappe.provide("erpnext.buying");
 
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Order");
 
+<<<<<<< HEAD
 // client script for Subcontracting Order Item is not necessarily required as the server side code will do everything that is necessary.
 // this is just so that the user does not get potentially confused
 frappe.ui.form.on("Subcontracting Order Item", {
@@ -37,6 +38,12 @@ frappe.ui.form.on("Subcontracting Order Item", {
 frappe.ui.form.on("Subcontracting Order", {
 	setup: (frm) => {
 		frm.get_field("items").grid.cannot_add_rows = true;
+=======
+frappe.ui.form.on("Subcontracting Order", {
+	setup: (frm) => {
+		frm.get_field("items").grid.cannot_add_rows = true;
+		frm.get_field("items").grid.only_sortable();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.trigger("set_queries");
 
 		frm.set_indicator_formatter("item_code", (doc) => (doc.qty <= doc.received_qty ? "green" : "orange"));
@@ -172,6 +179,7 @@ frappe.ui.form.on("Subcontracting Order", {
 					__("Status")
 				);
 			}
+<<<<<<< HEAD
 
 			if (frm.doc.reserve_stock) {
 				if (frm.doc.status !== "Closed") {
@@ -210,11 +218,14 @@ frappe.ui.form.on("Subcontracting Order", {
 					}
 				});
 			}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		frm.trigger("get_materials_from_supplier");
 	},
 
+<<<<<<< HEAD
 	create_stock_reservation_entries(frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Stock Reservation"),
@@ -445,6 +456,8 @@ frappe.ui.form.on("Subcontracting Order", {
 		frappe.set_route("query-report", "Reserved Stock");
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	update_subcontracting_order_status(frm, status) {
 		frappe.call({
 			method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.update_subcontracting_order_status",
@@ -460,10 +473,13 @@ frappe.ui.form.on("Subcontracting Order", {
 		});
 	},
 
+<<<<<<< HEAD
 	company: function (frm) {
 		erpnext.utils.set_letter_head(frm);
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	get_materials_from_supplier: function (frm) {
 		let sco_rm_details = [];
 
@@ -526,24 +542,36 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		if (doc.docstatus == 1) {
 			if (!["Closed", "Completed"].includes(doc.status)) {
 				if (flt(doc.per_received) < 100) {
+<<<<<<< HEAD
 					this.frm.add_custom_button(
+=======
+					cur_frm.add_custom_button(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						__("Subcontracting Receipt"),
 						this.make_subcontracting_receipt,
 						__("Create")
 					);
 					if (me.has_unsupplied_items()) {
+<<<<<<< HEAD
 						this.frm.add_custom_button(
+=======
+						cur_frm.add_custom_button(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							__("Material to Supplier"),
 							this.make_stock_entry,
 							__("Transfer")
 						);
 					}
 				}
+<<<<<<< HEAD
 				if (flt(doc.per_received) < 100 && me.has_unsupplied_items()) {
 					this.frm.page.set_inner_btn_group_as_primary(__("Transfer"));
 				} else {
 					this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 				}
+=======
+				cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		}
 	}

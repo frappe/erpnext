@@ -5,7 +5,11 @@ import json
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.utils import cint, flt, get_link_to_form, parse_json
+=======
+from frappe.utils import get_link_to_form, parse_json
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 SLE_FIELDS = (
 	"name",
@@ -36,7 +40,11 @@ def execute(filters=None):
 
 def get_data(filters):
 	sles = get_stock_ledger_entries(filters)
+<<<<<<< HEAD
 	return add_invariant_check_fields(sles, filters)
+=======
+	return add_invariant_check_fields(sles)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_stock_ledger_entries(filters):
@@ -44,6 +52,7 @@ def get_stock_ledger_entries(filters):
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
 		filters={"item_code": filters.item_code, "warehouse": filters.warehouse, "is_cancelled": 0},
+<<<<<<< HEAD
 		order_by="posting_datetime, creation",
 	)
 
@@ -56,6 +65,17 @@ def add_invariant_check_fields(sles, filters):
 	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
 	for idx, sle in enumerate(sles):
 		queue = json.loads(sle.stock_queue) if sle.stock_queue else []
+=======
+		order_by="timestamp(posting_date, posting_time), creation",
+	)
+
+
+def add_invariant_check_fields(sles):
+	balance_qty = 0.0
+	balance_stock_value = 0.0
+	for idx, sle in enumerate(sles):
+		queue = json.loads(sle.stock_queue)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		fifo_qty = 0.0
 		fifo_value = 0.0
@@ -98,12 +118,15 @@ def add_invariant_check_fields(sles, filters):
 		)
 		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
+<<<<<<< HEAD
 		if not incorrect_idx and filters.get("show_incorrect_entries"):
 			if is_sle_has_correct_data(sle, precision):
 				continue
 			else:
 				incorrect_idx = idx
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if idx > 0:
 			sle.fifo_stock_diff = sle.fifo_stock_value - sles[idx - 1].fifo_stock_value
 			sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
@@ -113,6 +136,7 @@ def add_invariant_check_fields(sles, filters):
 				"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
 			)
 
+<<<<<<< HEAD
 	if filters.get("show_incorrect_entries"):
 		if incorrect_idx > 0:
 			sles = sles[cint(incorrect_idx) - 1 :]
@@ -130,6 +154,11 @@ def is_sle_has_correct_data(sle, precision):
 	return True
 
 
+=======
+	return sles
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_columns():
 	return [
 		{

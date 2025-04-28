@@ -462,8 +462,14 @@ def unset_existing_data(company):
 		"Sales Taxes and Charges Template",
 		"Purchase Taxes and Charges Template",
 	]:
+<<<<<<< HEAD
 		dt = frappe.qb.DocType(doctype)
 		frappe.qb.from_(dt).where(dt.company == company).delete().run()
+=======
+		frappe.db.sql(
+			f'''delete from `tab{doctype}` where `company`="%s"''' % (company)  # nosec
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def set_default_accounts(company):

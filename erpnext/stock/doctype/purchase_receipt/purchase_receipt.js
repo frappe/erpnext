@@ -11,10 +11,32 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Receipt", {
 	setup: (frm) => {
+<<<<<<< HEAD
 		frm.custom_make_buttons = {
 			"Stock Entry": "Return",
 			"Purchase Invoice": "Purchase Invoice",
 			"Landed Cost Voucher": "Landed Cost Voucher",
+=======
+		frm.make_methods = {
+			"Landed Cost Voucher": () => {
+				let lcv = frappe.model.get_new_doc("Landed Cost Voucher");
+				lcv.company = frm.doc.company;
+
+				let lcv_receipt = frappe.model.get_new_doc("Landed Cost Purchase Receipt");
+				lcv_receipt.receipt_document_type = "Purchase Receipt";
+				lcv_receipt.receipt_document = frm.doc.name;
+				lcv_receipt.supplier = frm.doc.supplier;
+				lcv_receipt.grand_total = frm.doc.grand_total;
+				lcv.purchase_receipts = [lcv_receipt];
+
+				frappe.set_route("Form", lcv.doctype, lcv.name);
+			},
+		};
+
+		frm.custom_make_buttons = {
+			"Stock Entry": "Return",
+			"Purchase Invoice": "Purchase Invoice",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		};
 
 		frm.set_query("expense_account", "items", function () {
@@ -99,6 +121,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			}
 		}
 
+<<<<<<< HEAD
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(
 				__("Landed Cost Voucher"),
@@ -128,6 +151,11 @@ frappe.ui.form.on("Purchase Receipt", {
 		});
 	},
 
+=======
+		frm.events.add_custom_buttons(frm);
+	},
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	add_custom_buttons: function (frm) {
 		if (frm.doc.docstatus == 0) {
 			frm.add_custom_button(
@@ -150,11 +178,15 @@ frappe.ui.form.on("Purchase Receipt", {
 							docstatus: 1,
 							per_received: ["<", 100],
 							company: frm.doc.company,
+<<<<<<< HEAD
 							update_stock: 0,
 						},
 						allow_child_item_selection: true,
 						child_fieldname: "items",
 						child_columns: ["item_code", "item_name", "qty", "received_qty"],
+=======
+						},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					});
 				},
 				__("Get Items From")
@@ -259,9 +291,12 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 								per_received: ["<", 99.99],
 								company: me.frm.doc.company,
 							},
+<<<<<<< HEAD
 							allow_child_item_selection: true,
 							child_fieldname: "items",
 							child_columns: ["item_code", "item_name", "qty", "received_qty"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						});
 					},
 					__("Get Items From")

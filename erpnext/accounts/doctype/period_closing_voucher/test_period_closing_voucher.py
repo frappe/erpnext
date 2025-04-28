@@ -1,9 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
@@ -12,11 +20,15 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.utils import get_fiscal_year
 
 
+<<<<<<< HEAD
 class TestPeriodClosingVoucher(IntegrationTestCase):
 	def setUp(self):
 		super().setUp()
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
 
+=======
+class TestPeriodClosingVoucher(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_closing_entry(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
 		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
@@ -30,7 +42,10 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center,
+<<<<<<< HEAD
 			company=company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			save=False,
 		)
 		jv1.company = company
@@ -43,7 +58,10 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 			account1="Cost of Goods Sold - TPC",
 			account2="Cash - TPC",
 			cost_center=cost_center,
+<<<<<<< HEAD
 			company=company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			save=False,
 		)
 		jv2.company = company
@@ -161,7 +179,10 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 			amount=400,
 			cost_center=cost_center,
 			posting_date="2021-03-15",
+<<<<<<< HEAD
 			company=company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		jv.company = company
 		jv.finance_book = create_finance_book().name
@@ -204,7 +225,10 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center,
+<<<<<<< HEAD
 			company=company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			save=False,
 		)
 		jv1.company = company
@@ -227,7 +251,10 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center1,
+<<<<<<< HEAD
 			company=company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			save=False,
 		)
 		jv1.company = company
@@ -240,7 +267,10 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center2,
+<<<<<<< HEAD
 			company=company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			save=False,
 		)
 		jv2.company = company
@@ -270,7 +300,10 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center2,
+<<<<<<< HEAD
 			company=company,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			save=False,
 		)
 
@@ -327,18 +360,30 @@ class TestPeriodClosingVoucher(IntegrationTestCase):
 		repost_doc.posting_date = today()
 		repost_doc.save()
 
+<<<<<<< HEAD
 	def make_period_closing_voucher(self, posting_date, submit=True):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 		fy = get_fiscal_year(posting_date, company="Test PCV Company")
+=======
+	def make_period_closing_voucher(self, posting_date=None, submit=True):
+		surplus_account = create_account()
+		cost_center = create_cost_center("Test Cost Center 1")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pcv = frappe.get_doc(
 			{
 				"doctype": "Period Closing Voucher",
 				"transaction_date": posting_date or today(),
+<<<<<<< HEAD
 				"period_start_date": fy[1],
 				"period_end_date": fy[2],
 				"company": "Test PCV Company",
 				"fiscal_year": fy[0],
+=======
+				"posting_date": posting_date or today(),
+				"company": "Test PCV Company",
+				"fiscal_year": get_fiscal_year(today(), company="Test PCV Company")[0],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"cost_center": cost_center,
 				"closing_account_head": surplus_account,
 				"remarks": "test",
@@ -393,4 +438,9 @@ def create_cost_center(cc_name):
 	return costcenter.name
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Cost Center"]
+=======
+test_dependencies = ["Customer", "Cost Center"]
+test_records = frappe.get_test_records("Period Closing Voucher")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

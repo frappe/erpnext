@@ -22,7 +22,11 @@ def get_warehouse_account_map(company=None):
 	)
 	warehouse_account_map = frappe.flags.warehouse_account_map
 
+<<<<<<< HEAD
 	if not warehouse_account_map or not company_warehouse_account_map or frappe.in_test:
+=======
+	if not warehouse_account_map or not company_warehouse_account_map or frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		warehouse_account = frappe._dict()
 
 		filters = {}

@@ -19,10 +19,13 @@ frappe.query_reports["Sales Order Analysis"] = {
 			width: "80",
 			reqd: 1,
 			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+<<<<<<< HEAD
 			on_change: (report) => {
 				report.set_filter_value("sales_order", []);
 				report.refresh();
 			},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "to_date",
@@ -31,10 +34,13 @@ frappe.query_reports["Sales Order Analysis"] = {
 			width: "80",
 			reqd: 1,
 			default: frappe.datetime.get_today(),
+<<<<<<< HEAD
 			on_change: (report) => {
 				report.set_filter_value("sales_order", []);
 				report.refresh();
 			},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "sales_order",
@@ -43,6 +49,7 @@ frappe.query_reports["Sales Order Analysis"] = {
 			width: "80",
 			options: "Sales Order",
 			get_data: function (txt) {
+<<<<<<< HEAD
 				let filters = { docstatus: 1 };
 
 				const from_date = frappe.query_report.get_filter_value("from_date");
@@ -50,6 +57,14 @@ frappe.query_reports["Sales Order Analysis"] = {
 				if (from_date && to_date) filters["transaction_date"] = ["between", [from_date, to_date]];
 
 				return frappe.db.get_link_options("Sales Order", txt, filters);
+=======
+				return frappe.db.get_link_options("Sales Order", txt);
+			},
+			get_query: () => {
+				return {
+					filters: { docstatus: 1 },
+				};
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{
@@ -62,6 +77,7 @@ frappe.query_reports["Sales Order Analysis"] = {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "MultiSelectList",
+<<<<<<< HEAD
 			options: ["To Pay", "To Bill", "To Deliver", "To Deliver and Bill", "Completed", "Closed"],
 			width: "80",
 			get_data: function (txt) {
@@ -73,6 +89,11 @@ frappe.query_reports["Sales Order Analysis"] = {
 					"Completed",
 					"Closed",
 				];
+=======
+			width: "80",
+			get_data: function (txt) {
+				let status = ["To Pay", "To Bill", "To Deliver", "To Deliver and Bill", "Completed"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				let options = [];
 				for (let option of status) {
 					options.push({

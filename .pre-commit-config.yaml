@@ -1,5 +1,9 @@
 exclude: 'node_modules|.git'
+<<<<<<< HEAD
 default_stages: [pre-commit]
+=======
+default_stages: [commit]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 fail_fast: false
 
 
@@ -32,6 +36,11 @@ repos:
                 cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
+<<<<<<< HEAD
+=======
+                erpnext/public/js/controllers/.*|
+                erpnext/templates/pages/order.js|
+>>>>>>> 7c4cf3e834 (Favicon.svg)
                 erpnext/templates/includes/.*
             )$
 

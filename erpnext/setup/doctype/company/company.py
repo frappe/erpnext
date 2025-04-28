@@ -6,11 +6,16 @@ import json
 
 import frappe
 import frappe.defaults
+<<<<<<< HEAD
 from frappe import _, bold
+=======
+from frappe import _
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
+<<<<<<< HEAD
 from frappe.utils import add_months, cint, formatdate, get_first_day, get_link_to_form, get_timestamp, today
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
@@ -18,6 +23,12 @@ from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
 	sync_financial_report_templates,
 )
+=======
+from frappe.utils import cint, formatdate, get_link_to_form, get_timestamp, today
+from frappe.utils.nestedset import NestedSet, rebuild_tree
+
+from erpnext.accounts.doctype.account.account import get_account_currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 
@@ -59,7 +70,10 @@ class Company(NestedSet):
 		default_deferred_revenue_account: DF.Link | None
 		default_discount_account: DF.Link | None
 		default_expense_account: DF.Link | None
+<<<<<<< HEAD
 		default_fg_warehouse: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		default_finance_book: DF.Link | None
 		default_holiday_list: DF.Link | None
 		default_in_transit_warehouse: DF.Link | None
@@ -70,17 +84,25 @@ class Company(NestedSet):
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
 		default_receivable_account: DF.Link | None
+<<<<<<< HEAD
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
 		default_selling_terms: DF.Link | None
 		default_warehouse_for_sales_return: DF.Link | None
 		default_wip_warehouse: DF.Link | None
+=======
+		default_selling_terms: DF.Link | None
+		default_warehouse_for_sales_return: DF.Link | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		depreciation_cost_center: DF.Link | None
 		depreciation_expense_account: DF.Link | None
 		disposal_account: DF.Link | None
 		domain: DF.Data | None
 		email: DF.Data | None
+<<<<<<< HEAD
 		enable_item_wise_inventory_account: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		enable_perpetual_inventory: DF.Check
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		exception_budget_approver_role: DF.Link | None
@@ -94,6 +116,7 @@ class Company(NestedSet):
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
+<<<<<<< HEAD
 		purchase_expense_account: DF.Link | None
 		purchase_expense_contra_account: DF.Link | None
 		reconcile_on_advance_payment_date: DF.Check
@@ -109,6 +132,15 @@ class Company(NestedSet):
 		sales_monthly_history: DF.SmallText | None
 		series_for_depreciation_entry: DF.Data | None
 		service_expense_account: DF.Link | None
+=======
+		reconcile_on_advance_payment_date: DF.Check
+		registration_details: DF.Code | None
+		rgt: DF.Int
+		round_off_account: DF.Link | None
+		round_off_cost_center: DF.Link | None
+		sales_monthly_history: DF.SmallText | None
+		series_for_depreciation_entry: DF.Data | None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		stock_adjustment_account: DF.Link | None
 		stock_received_but_not_billed: DF.Link | None
 		submit_err_jv: DF.Check
@@ -117,7 +149,10 @@ class Company(NestedSet):
 		transactions_annual_history: DF.Code | None
 		unrealized_exchange_gain_loss_account: DF.Link | None
 		unrealized_profit_loss_account: DF.Link | None
+<<<<<<< HEAD
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		website: DF.Data | None
 		write_off_account: DF.Link | None
 	# end: auto-generated types
@@ -166,6 +201,7 @@ class Company(NestedSet):
 		self.check_parent_changed()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
+<<<<<<< HEAD
 		self.set_reporting_currency()
 		self.validate_inventory_account_settings()
 		self.cant_change_valuation_method()
@@ -211,6 +247,8 @@ class Company(NestedSet):
 				).format(bold(self.name)),
 				title=_("Cannot Change Inventory Account Setting"),
 			)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -238,6 +276,7 @@ class Company(NestedSet):
 			["Default Income Account", "default_income_account"],
 			["Stock Received But Not Billed Account", "stock_received_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
+<<<<<<< HEAD
 			["Write Off Account", "write_off_account"],
 			["Default Payment Discount Account", "default_discount_account"],
 			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
@@ -249,10 +288,13 @@ class Company(NestedSet):
 			["Accumulated Depreciation Account", "accumulated_depreciation_account"],
 			["Depreciation Expense Account", "depreciation_expense_account"],
 			["Gain/Loss Account on Asset Disposal", "disposal_account"],
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 
 		for account in accounts:
 			if self.get(account[1]):
+<<<<<<< HEAD
 				for_company, is_group, disabled = frappe.db.get_value(
 					"Account", self.get(account[1]), ["company", "is_group", "disabled"]
 				)
@@ -267,6 +309,9 @@ class Company(NestedSet):
 						)
 					)
 
+=======
+				for_company = frappe.db.get_value("Account", self.get(account[1]), "company")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				if for_company != self.name:
 					frappe.throw(
 						_("Account {0} does not belong to company: {1}").format(
@@ -328,7 +373,10 @@ class Company(NestedSet):
 		):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
+<<<<<<< HEAD
 				sync_financial_report_templates(self.chart_of_accounts, self.existing_company)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
@@ -364,7 +412,10 @@ class Company(NestedSet):
 		frappe.clear_cache()
 
 	def create_default_warehouses(self):
+<<<<<<< HEAD
 		parent_warehouse = None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		for wh_detail in [
 			{"warehouse_name": _("All Warehouses"), "is_group": 1},
 			{"warehouse_name": _("Stores"), "is_group": 0},
@@ -372,6 +423,7 @@ class Company(NestedSet):
 			{"warehouse_name": _("Finished Goods"), "is_group": 0},
 			{"warehouse_name": _("Goods In Transit"), "is_group": 0, "warehouse_type": "Transit"},
 		]:
+<<<<<<< HEAD
 			if frappe.db.exists(
 				"Warehouse",
 				{
@@ -397,6 +449,24 @@ class Company(NestedSet):
 
 			if wh_detail["is_group"]:
 				parent_warehouse = warehouse.name
+=======
+			if not frappe.db.exists("Warehouse", "{} - {}".format(wh_detail["warehouse_name"], self.abbr)):
+				warehouse = frappe.get_doc(
+					{
+						"doctype": "Warehouse",
+						"warehouse_name": wh_detail["warehouse_name"],
+						"is_group": wh_detail["is_group"],
+						"company": self.name,
+						"parent_warehouse": "{} - {}".format(_("All Warehouses"), self.abbr)
+						if not wh_detail["is_group"]
+						else "",
+						"warehouse_type": wh_detail.get("warehouse_type"),
+					}
+				)
+				warehouse.flags.ignore_permissions = True
+				warehouse.flags.ignore_mandatory = True
+				warehouse.insert()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -533,6 +603,7 @@ class Company(NestedSet):
 					_("Set default inventory account for perpetual inventory"), alert=True, indicator="orange"
 				)
 
+<<<<<<< HEAD
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
 			return
@@ -549,6 +620,8 @@ class Company(NestedSet):
 					).format(bold(self.name))
 				)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_provisional_account_for_non_stock_items(self):
 		if not self.get("__islocal"):
 			if (
@@ -589,6 +662,7 @@ class Company(NestedSet):
 			if not is_group:
 				frappe.throw(_("Parent Company must be a group company"))
 
+<<<<<<< HEAD
 	def set_reporting_currency(self):
 		self.reporting_currency = self.default_currency
 		if self.parent_company:
@@ -597,6 +671,8 @@ class Company(NestedSet):
 			)
 			self.reporting_currency = parent_reporting_currency
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def set_default_accounts(self):
 		default_accounts = {
 			"default_cash_account": "Cash",
@@ -665,6 +741,7 @@ class Company(NestedSet):
 
 			self.db_set("disposal_account", disposal_acct)
 
+<<<<<<< HEAD
 		if not self.service_expense_account:
 			service_expense_acct = frappe.db.get_value(
 				"Account",
@@ -680,6 +757,8 @@ class Company(NestedSet):
 			if service_expense_acct:
 				self.db_set("service_expense_account", service_expense_acct)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def _set_default_account(self, fieldname, account_type):
 		if self.get(fieldname):
 			return
@@ -803,7 +882,11 @@ class Company(NestedSet):
 			frappe.db.sql("delete from tabBOM where company=%s", self.name)
 			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
 				frappe.db.sql(
+<<<<<<< HEAD
 					"delete from `tab{}` where parent in ({})".format(dt, ", ".join(["%s"] * len(boms))),
+=======
+					"delete from `tab{}` where parent in ({})" "".format(dt, ", ".join(["%s"] * len(boms))),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					tuple(boms),
 				)
 
@@ -856,6 +939,7 @@ def install_country_fixtures(company, country):
 
 
 def update_company_current_month_sales(company):
+<<<<<<< HEAD
 	from_date = get_first_day(today())
 	to_date = get_first_day(add_months(from_date, 1))
 
@@ -875,20 +959,52 @@ def update_company_current_month_sales(company):
 			month_year
 		""",
 		(from_date, to_date, company),
+=======
+	current_month_year = formatdate(today(), "MM-yyyy")
+
+	results = frappe.db.sql(
+		f"""
+		SELECT
+			SUM(base_grand_total) AS total,
+			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+		FROM
+			`tabSales Invoice`
+		WHERE
+			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			AND docstatus = 1
+			AND company = {frappe.db.escape(company)}
+		GROUP BY
+			month_year
+	""",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		as_dict=True,
 	)
 
 	monthly_total = results[0]["total"] if len(results) > 0 else 0
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
 
 
 def update_company_monthly_sales(company):
 	"""Cache past year monthly sales of every company based on sales invoices"""
+<<<<<<< HEAD
 	from frappe.utils.goal import get_monthly_results
 
 	filter_dict = {"company": company, "status": ["!=", "Draft"], "docstatus": 1}
 	month_to_value_dict = get_monthly_results(
 		"Sales Invoice", "base_grand_total", "posting_date", filter_dict, "sum"
+=======
+	import json
+
+	from frappe.utils.goal import get_monthly_results
+
+	filter_str = f"company = {frappe.db.escape(company)} and status != 'Draft' and docstatus=1"
+	month_to_value_dict = get_monthly_results(
+		"Sales Invoice", "base_grand_total", "posting_date", filter_str, "sum"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
@@ -1045,6 +1161,7 @@ def get_default_company_address(name, sort_key="is_primary_address", existing_ad
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_billing_shipping_address(name, billing_address=None, shipping_address=None):
 	primary_address = get_default_company_address(name, "is_primary_address", billing_address)
 	shipping_address = get_default_company_address(name, "is_shipping_address", shipping_address)
@@ -1053,6 +1170,8 @@ def get_billing_shipping_address(name, billing_address=None, shipping_address=No
 
 
 @frappe.whitelist()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def create_transaction_deletion_request(company):
 	from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
 		is_deletion_doc_running,

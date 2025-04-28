@@ -15,7 +15,11 @@ frappe.listview_settings["Sales Invoice"] = {
 	],
 	get_indicator: function (doc) {
 		const status_colors = {
+<<<<<<< HEAD
 			Draft: "red",
+=======
+			Draft: "grey",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			Unpaid: "orange",
 			Paid: "green",
 			Return: "gray",
@@ -32,6 +36,7 @@ frappe.listview_settings["Sales Invoice"] = {
 	right_column: "grand_total",
 
 	onload: function (listview) {
+<<<<<<< HEAD
 		if (frappe.model.can_create("Delivery Note")) {
 			listview.page.add_action_item(__("Delivery Note"), () => {
 				erpnext.bulk_transaction_processing.create(listview, "Sales Invoice", "Delivery Note");
@@ -43,5 +48,14 @@ frappe.listview_settings["Sales Invoice"] = {
 				erpnext.bulk_transaction_processing.create(listview, "Sales Invoice", "Payment Entry");
 			});
 		}
+=======
+		listview.page.add_action_item(__("Delivery Note"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Sales Invoice", "Delivery Note");
+		});
+
+		listview.page.add_action_item(__("Payment"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Sales Invoice", "Payment Entry");
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 };

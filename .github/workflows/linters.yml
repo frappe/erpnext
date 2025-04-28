@@ -3,9 +3,12 @@ name: Linters
 on:
   pull_request: { }
 
+<<<<<<< HEAD
 permissions:
   contents: read
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 jobs:
 
   linters:

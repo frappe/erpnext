@@ -1,7 +1,10 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (
 	execute,
@@ -13,10 +16,17 @@ from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics i
 )
 
 
+<<<<<<< HEAD
 class TestOpportunitySummaryBySalesStage(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
+=======
+class TestOpportunitySummaryBySalesStage(unittest.TestCase):
+	@classmethod
+	def setUpClass(self):
+		frappe.db.delete("Opportunity")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		create_company()
 		create_customer()
 		create_opportunity()
@@ -41,7 +51,11 @@ class TestOpportunitySummaryBySalesStage(IntegrationTestCase):
 
 		report = execute(filters)
 
+<<<<<<< HEAD
 		expected_data = [{"utm_source": "Cold Calling", "Prospecting": 1}]
+=======
+		expected_data = [{"source": "Cold Calling", "Prospecting": 1}]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		self.assertEqual(expected_data, report[1])
 

@@ -10,7 +10,10 @@ WEBSITE_REPOS = [
 
 DOCUMENTATION_DOMAINS = [
 	"docs.erpnext.com",
+<<<<<<< HEAD
 	"docs.frappe.io",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	"frappeframework.com",
 ]
 

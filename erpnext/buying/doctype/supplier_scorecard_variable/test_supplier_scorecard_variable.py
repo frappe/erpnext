@@ -3,14 +3,22 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
 )
 
 
+<<<<<<< HEAD
 class TestSupplierScorecardVariable(IntegrationTestCase):
+=======
+class TestSupplierScorecardVariable(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_variable_exist(self):
 		for d in test_existing_variables:
 			my_doc = frappe.get_doc("Supplier Scorecard Variable", d.get("name"))

@@ -14,6 +14,7 @@
  "owner": "Administrator", 
  "ref_doctype": "GL Entry", 
  "report_name": "Trial Balance", 
+<<<<<<< HEAD
  "report_type": "Script Report",
  "roles": [
   {
@@ -22,6 +23,16 @@
   {
    "role": "Accounts Manager"
   },
+=======
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   {
    "role": "Auditor"
   }

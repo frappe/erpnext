@@ -4,7 +4,10 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Asset",
+<<<<<<< HEAD
  "dynamic_filters_json": "[[\"Asset\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "filters_json": "[]",
  "function": "Sum",
  "idx": 0,

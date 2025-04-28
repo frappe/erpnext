@@ -1,17 +1,31 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Cost Center", "Location", "Warehouse", "Department"]
 
 
 class TestAccountingDimension(IntegrationTestCase):
+=======
+test_dependencies = ["Cost Center", "Location", "Warehouse", "Department"]
+
+
+class TestAccountingDimension(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		create_dimension()
 
@@ -58,10 +72,13 @@ class TestAccountingDimension(IntegrationTestCase):
 		self.assertEqual(gle1.get("department"), "_Test Department - _TC")
 
 	def test_mandatory(self):
+<<<<<<< HEAD
 		location = frappe.get_doc("Accounting Dimension", "Location")
 		location.dimension_defaults[0].mandatory_for_bs = True
 		location.save()
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		si = create_sales_invoice(do_not_save=1)
 		si.append(
 			"items",
@@ -125,6 +142,10 @@ def create_dimension():
 				"company": "_Test Company",
 				"reference_document": "Location",
 				"default_dimension": "Block 1",
+<<<<<<< HEAD
+=======
+				"mandatory_for_bs": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		)
 

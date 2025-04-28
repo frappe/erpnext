@@ -5,7 +5,11 @@ import copy
 from collections import defaultdict
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
@@ -25,7 +29,10 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	make_subcontracted_items,
 	set_backflush_based_on,
 )
+<<<<<<< HEAD
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -33,13 +40,26 @@ from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order im
 )
 
 
+<<<<<<< HEAD
 class TestSubcontractingOrder(IntegrationTestCase):
+=======
+class TestSubcontractingOrder(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		make_subcontracted_items()
 		make_raw_materials()
 		make_service_items()
 		make_bom_for_subcontracted_items()
 
+<<<<<<< HEAD
+=======
+	def test_populate_items_table(self):
+		sco = get_subcontracting_order()
+		sco.items = None
+		sco.populate_items_table()
+		self.assertEqual(len(sco.service_items), len(sco.items))
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_set_missing_values(self):
 		sco = get_subcontracting_order()
 		before = {sco.total_qty, sco.total, sco.total_additional_costs}
@@ -678,6 +698,7 @@ class TestSubcontractingOrder(IntegrationTestCase):
 
 		self.assertEqual(requested_qty, new_requested_qty)
 
+<<<<<<< HEAD
 	def test_subcontracting_order_rm_required_items_for_precision(self):
 		item_code = "Subcontracted Item SA9"
 		raw_materials = ["Subcontracted SRM Item 9"]
@@ -820,6 +841,8 @@ class TestSubcontractingOrder(IntegrationTestCase):
 
 		self.assertEqual(sbe_pp_list, sbe_so_list)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)

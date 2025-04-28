@@ -27,7 +27,10 @@ class QuotationItem(Document):
 		blanket_order: DF.Link | None
 		blanket_order_rate: DF.Currency
 		brand: DF.Link | None
+<<<<<<< HEAD
 		company_total_stock: DF.Float
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		conversion_factor: DF.Float
 		customer_item_code: DF.Data | None
 		description: DF.TextEditor | None

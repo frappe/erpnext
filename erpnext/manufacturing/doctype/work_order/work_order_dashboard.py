@@ -4,6 +4,7 @@ from frappe import _
 def get_data():
 	return {
 		"fieldname": "work_order",
+<<<<<<< HEAD
 		"non_standard_fieldnames": {
 			"Batch": "reference_name",
 			"Stock Reservation Entry": "voucher_no",
@@ -12,5 +13,11 @@ def get_data():
 			{"label": _("Transactions"), "items": ["Stock Entry", "Job Card", "Pick List"]},
 			{"label": _("Reference"), "items": ["Serial No", "Batch", "Material Request"]},
 			{"label": _("Stock Reservation"), "items": ["Stock Reservation Entry"]},
+=======
+		"non_standard_fieldnames": {"Batch": "reference_name"},
+		"transactions": [
+			{"label": _("Transactions"), "items": ["Stock Entry", "Job Card", "Pick List"]},
+			{"label": _("Reference"), "items": ["Serial No", "Batch", "Material Request"]},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		],
 	}

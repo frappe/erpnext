@@ -2,14 +2,21 @@ import unittest
 from uuid import uuid4 as _uuid4
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def uuid4():
 	return str(_uuid4())
 
 
+<<<<<<< HEAD
 class TestTaxes(IntegrationTestCase):
+=======
+class TestTaxes(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.company = frappe.get_doc(
 			{

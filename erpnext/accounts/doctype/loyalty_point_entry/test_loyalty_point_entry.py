@@ -1,5 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
@@ -84,3 +85,11 @@ class TestLoyaltyPointEntry(IntegrationTestCase):
 		)[0][0]
 
 		self.assertEqual(balance, 75)  # 85 added, 10 redeemed
+=======
+
+import unittest
+
+
+class TestLoyaltyPointEntry(unittest.TestCase):
+	pass
+>>>>>>> 7c4cf3e834 (Favicon.svg)

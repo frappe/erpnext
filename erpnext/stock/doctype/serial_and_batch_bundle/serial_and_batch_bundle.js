@@ -6,10 +6,13 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 		frm.trigger("set_queries");
 	},
 
+<<<<<<< HEAD
 	before_submit(frm) {
 		frappe.throw(__("The user cannot submit the Serial and Batch Bundle manually"));
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	refresh(frm) {
 		frm.trigger("toggle_fields");
 		frm.trigger("prepare_serial_batch_prompt");
@@ -55,14 +58,23 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 
 			let fields = frm.events.get_prompt_fields(frm);
 
+<<<<<<< HEAD
 			frm.add_custom_button(__("Make {0}", [label]), () => {
+=======
+			frm.add_custom_button(__("Make " + label), () => {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				frappe.prompt(
 					fields,
 					(data) => {
 						frm.events.add_serial_batch(frm, data);
 					},
+<<<<<<< HEAD
 					__("Add {0}", [label]),
 					__("Make {0}", [label])
+=======
+					"Add " + label,
+					"Make " + label
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				);
 			});
 		}
@@ -134,6 +146,7 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 	},
 
 	toggle_fields(frm) {
+<<<<<<< HEAD
 		let show_naming_series_field =
 			frappe.user_defaults.set_serial_and_batch_bundle_naming_based_on_naming_series;
 		frm.toggle_display("naming_series", cint(show_naming_series_field));
@@ -141,6 +154,8 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 
 		frm.toggle_display("naming_series", frm.doc.__islocal ? true : false);
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if (frm.doc.has_serial_no) {
 			frm.doc.entries.forEach((row) => {
 				if (Math.abs(row.qty) !== 1) {

@@ -2,13 +2,20 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
 from pypika import functions as fn
 
 import erpnext
+<<<<<<< HEAD
 import erpnext.controllers
 import erpnext.controllers.status_updater
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import InvalidQtyError
@@ -28,7 +35,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
+<<<<<<< HEAD
 class TestPurchaseReceipt(IntegrationTestCase):
+=======
+class TestPurchaseReceipt(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
@@ -367,7 +378,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"))
 
 	def test_rejected_warehouse_filter(self):
+<<<<<<< HEAD
 		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
+=======
+		pr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
 		pr.get("items")[0].qty = 3
 		pr.get("items")[0].rejected_qty = 2
@@ -376,7 +391,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, pr.save)
 
 	def test_rejected_serial_no(self):
+<<<<<<< HEAD
 		pr = frappe.copy_doc(self.globalTestRecords["Purchase Receipt"][0])
+=======
+		pr = frappe.copy_doc(test_records[0])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
 		pr.get("items")[0].qty = 3
 		pr.get("items")[0].rejected_qty = 2
@@ -454,7 +473,10 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		# Check if Original PR updated
 		self.assertEqual(pr.items[0].returned_qty, 2)
 		self.assertEqual(pr.per_returned, 40)
+<<<<<<< HEAD
 		self.assertEqual(returned.status, "Return")
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
@@ -830,7 +852,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		asset = frappe.get_doc("Asset", {"purchase_receipt": pr.name})
 		asset.available_for_use_date = frappe.utils.nowdate()
+<<<<<<< HEAD
 		asset.net_purchase_amount = 50.0
+=======
+		asset.gross_purchase_amount = 50.0
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		asset.append(
 			"finance_books",
 			{
@@ -1202,7 +1228,10 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
@@ -1213,9 +1242,18 @@ class TestPurchaseReceipt(IntegrationTestCase):
 			make_pr_against_po,
 		)
 		from erpnext.selling.doctype.sales_order.test_sales_order import (
+<<<<<<< HEAD
 			compare_payment_schedules,
 		)
 
+=======
+			automatically_fetch_payment_terms,
+			compare_payment_schedules,
+		)
+
+		automatically_fetch_payment_terms()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
 		po.payment_terms_template = "Test Receivable Template"
@@ -1233,7 +1271,13 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 1})
+=======
+		automatically_fetch_payment_terms(enable=0)
+
+	@change_settings("Stock Settings", {"allow_negative_stock": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_neg_to_positive(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -1608,7 +1652,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertTrue(return_pi.docstatus == 1)
 
 	def test_disable_last_purchase_rate(self):
+<<<<<<< HEAD
 		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+=======
+		from erpnext.stock.get_item_details import get_item_details
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		item = make_item(
 			"_Test Disable Last Purchase Rate",
@@ -1623,8 +1671,13 @@ class TestPurchaseReceipt(IntegrationTestCase):
 			item_code=item.name,
 		)
 
+<<<<<<< HEAD
 		ctx = ItemDetailsCtx(pr.items[0].as_dict())
 		ctx.update(
+=======
+		args = pr.items[0].as_dict()
+		args.update(
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			{
 				"supplier": pr.supplier,
 				"doctype": pr.doctype,
@@ -1636,7 +1689,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 			}
 		)
 
+<<<<<<< HEAD
 		res = get_item_details(ctx)
+=======
+		res = get_item_details(args)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(res.get("last_purchase_rate"), 0)
 
 		frappe.db.set_single_value("Buying Settings", "disable_last_purchase_rate", 0)
@@ -1647,7 +1704,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 			item_code=item.name,
 		)
 
+<<<<<<< HEAD
 		res = get_item_details(ctx)
+=======
+		res = get_item_details(args)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(res.get("last_purchase_rate"), 100)
 
 	def test_validate_received_qty_for_internal_pr(self):
@@ -1770,7 +1831,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		# Step - 3: Create back-date Stock Reconciliation [After DN and Before PR]
 		create_stock_reconciliation(
+<<<<<<< HEAD
 			item_code=item.name,
+=======
+			item_code=item,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			warehouse=target_warehouse,
 			qty=10,
 			rate=50,
@@ -1796,7 +1861,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 				"voucher_no": pr.name,
 				"is_cancelled": 0,
 			},
+<<<<<<< HEAD
 			fieldname=[{"SUM": "stock_value_difference"}],
+=======
+			fieldname=["sum(stock_value_difference)"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		# Value of Stock Account should be equal to the sum of Stock Value Difference
@@ -1900,7 +1969,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		data = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_no": pr_return.name, "docstatus": 1},
+<<<<<<< HEAD
 			fields=[{"SUM": "stock_value_difference", "as": "stock_value_difference"}],
+=======
+			fields=["SUM(stock_value_difference) as stock_value_difference"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)[0]
 
 		self.assertEqual(abs(data["stock_value_difference"]), 400.00)
@@ -2125,7 +2198,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		self.assertEqual(flt(pr.total * pr.conversion_rate, 2), flt(pr.base_total, 2))
 
 		# Test - 2: Sum of Debit or Credit should be equal to Purchase Receipt Base Total
+<<<<<<< HEAD
 		amount = frappe.db.get_value("GL Entry", {"docstatus": 1, "voucher_no": pr.name}, [{"SUM": "debit"}])
+=======
+		amount = frappe.db.get_value("GL Entry", {"docstatus": 1, "voucher_no": pr.name}, ["sum(debit)"])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		expected_amount = pr.base_total
 		self.assertEqual(amount, expected_amount)
 
@@ -2150,7 +2227,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		return_pr.items[0].stock_qty = 0.0
 		return_pr.submit()
 
+<<<<<<< HEAD
 		self.assertEqual(return_pr.status, "Return")
+=======
+		self.assertEqual(return_pr.status, "To Bill")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		pi = make_purchase_invoice(return_pr.name)
 		pi.submit()
@@ -3366,7 +3447,11 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		bundle = dn.items[0].serial_and_batch_bundle
 
 		valuation_rate = frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
+<<<<<<< HEAD
 		self.assertEqual(valuation_rate, 100.0)
+=======
+		self.assertEqual(valuation_rate, 100)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		doc = frappe.get_doc("Stock Settings")
 		doc.do_not_use_batchwise_valuation = 1
@@ -3690,12 +3775,17 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		columns, data = execute(
 			filters=frappe._dict(
+<<<<<<< HEAD
 				{"item_code": [item_code], "warehouse": [pr.items[0].warehouse], "company": pr.company}
+=======
+				{"item_code": item_code, "warehouse": pr.items[0].warehouse, "company": pr.company}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			)
 		)
 
 		self.assertEqual(data[0].get("bal_qty"), 50.0)
 
+<<<<<<< HEAD
 	def test_same_stock_and_transaction_uom_conversion_factor(self):
 		item_code = "Test Item for Same Stock and Transaction UOM Conversion Factor"
 		create_item(item_code)
@@ -4590,6 +4680,8 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		for row in gl_entries:
 			self.assertTrue(row.account in ["Stock In Hand - TCP1", account])
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -4838,4 +4930,9 @@ def make_purchase_receipt(**args):
 	return pr
 
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["BOM", "Item Price", "Location"]
+=======
+test_dependencies = ["BOM", "Item Price", "Location"]
+test_records = frappe.get_test_records("Purchase Receipt")
+>>>>>>> 7c4cf3e834 (Favicon.svg)

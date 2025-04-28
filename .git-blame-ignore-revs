@@ -38,6 +38,7 @@ ec74a5e56617bbd76ac402451468fd4668af543d
 
 # ruff formatting
 a308792ee7fda18a681e9181f4fd00b36385bc23
+<<<<<<< HEAD
 
 # noisy typing refactoring of get_item_details
 7b7211ac79c248a79ba8a999ff34e734d874c0ae
@@ -45,3 +46,5 @@ d827ed21adc7b36047e247cbb0dc6388d048a7f9
 
 # `frappe.flags.in_test` => `frappe.in_test`
 7a482a69985c952de0e8193c9d4e086aee65ee6d
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

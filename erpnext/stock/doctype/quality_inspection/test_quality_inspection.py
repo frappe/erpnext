@@ -2,7 +2,11 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase, change_settings
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import (
@@ -15,8 +19,15 @@ from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delive
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
+<<<<<<< HEAD
 
 class TestQualityInspection(IntegrationTestCase):
+=======
+# test_records = frappe.get_test_records('Quality Inspection')
+
+
+class TestQualityInspection(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		super().setUp()
 		create_item("_Test Item with QA")
@@ -216,7 +227,11 @@ class TestQualityInspection(IntegrationTestCase):
 		qa.save()
 		self.assertEqual(qa.status, "Accepted")
 
+<<<<<<< HEAD
 	@IntegrationTestCase.change_settings("System Settings", {"number_format": "#.###,##"})
+=======
+	@change_settings("System Settings", {"number_format": "#.###,##"})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_diff_number_format(self):
 		self.assertEqual(frappe.db.get_default("number_format"), "#.###,##")  # sanity check
 
@@ -292,7 +307,11 @@ def create_quality_inspection(**args):
 
 	if not args.readings:
 		create_quality_inspection_parameter("Size")
+<<<<<<< HEAD
 		readings = {"specification": "Size", "min_value": 0, "max_value": 10, "reading_1": "5"}
+=======
+		readings = {"specification": "Size", "min_value": 0, "max_value": 10}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if args.status == "Rejected":
 			readings["reading_1"] = "12"  # status is auto set in child on save
 	else:

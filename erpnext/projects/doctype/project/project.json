@@ -62,7 +62,10 @@
   "day_to_send",
   "weekly_time_to_send",
   "column_break_45",
+<<<<<<< HEAD
   "subject",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "message"
  ],
  "fields": [
@@ -448,6 +451,7 @@
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
+<<<<<<< HEAD
   },
   {
    "depends_on": "collect_progress",
@@ -455,6 +459,8 @@
    "fieldtype": "Data",
    "label": "Subject",
    "mandatory_depends_on": "collect_progress"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-puzzle-piece",
@@ -462,7 +468,11 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
+<<<<<<< HEAD
  "modified": "2025-08-21 17:57:58.314809",
+=======
+ "modified": "2024-04-24 10:56:16.001032",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -509,14 +519,23 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "search_fields": "project_name,customer, status, priority, is_active",
  "show_name_in_global_search": 1,
  "show_title_field_in_link": 1,
+=======
+ "search_fields": "project_name,customer, status, priority, is_active",
+ "show_name_in_global_search": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
  "title_field": "project_name",
  "track_seen": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

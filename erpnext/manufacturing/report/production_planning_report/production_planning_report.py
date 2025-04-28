@@ -113,6 +113,7 @@ class ProductionPlanReport:
 		self.orders = query.run(as_dict=True)
 
 	def get_raw_materials(self):
+<<<<<<< HEAD
 		"""Retrieve raw materials and source warehouses for production orders.
 
 		This method collects BOM or Work Order items depending on the selected
@@ -120,6 +121,8 @@ class ProductionPlanReport:
 		and `self.item_codes` accordingly.
 		"""
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if not self.orders:
 			return
 		self.warehouses = [d.warehouse for d in self.orders]
@@ -142,7 +145,11 @@ class ProductionPlanReport:
 				)
 				or []
 			)
+<<<<<<< HEAD
 			self.warehouses.extend([d.warehouse for d in raw_materials])
+=======
+			self.warehouses.extend([d.source_warehouse for d in raw_materials])
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		else:
 			bom_nos = []
@@ -230,12 +237,16 @@ class ProductionPlanReport:
 
 		purchased_items = frappe.get_all(
 			"Purchase Order Item",
+<<<<<<< HEAD
 			fields=[
 				"item_code",
 				{"MIN": "schedule_date", "as": "arrival_date"},
 				"qty as arrival_qty",
 				"warehouse",
 			],
+=======
+			fields=["item_code", "min(schedule_date) as arrival_date", "qty as arrival_qty", "warehouse"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			filters={
 				"item_code": ("in", self.item_codes),
 				"warehouse": ("in", self.warehouses),

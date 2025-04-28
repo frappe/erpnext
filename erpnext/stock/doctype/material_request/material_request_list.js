@@ -6,6 +6,7 @@ frappe.listview_settings["Material Request"] = {
 			return [__("Stopped"), "red", "status,=,Stopped"];
 		} else if (doc.transfer_status && doc.docstatus != 2) {
 			if (doc.transfer_status == "Not Started") {
+<<<<<<< HEAD
 				return [__("Not Started"), "orange", "transfer_status,=,Not Started"];
 			} else if (doc.transfer_status == "In Transit") {
 				return [__("In Transit"), "yellow", "transfer_status,=,In Transit"];
@@ -24,6 +25,16 @@ frappe.listview_settings["Material Request"] = {
 			doc.material_request_type == "Material Transfer"
 		) {
 			return [__("Partially Received"), "yellow", "per_ordered,<,100"];
+=======
+				return [__("Not Started"), "orange"];
+			} else if (doc.transfer_status == "In Transit") {
+				return [__("In Transit"), "yellow"];
+			} else if (doc.transfer_status == "Completed") {
+				return [__("Completed"), "green"];
+			}
+		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0) {
+			return [__("Pending"), "orange", "per_ordered,=,0"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) < 100) {
 			return [__("Partially ordered"), "yellow", "per_ordered,<,100"];
 		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 100) {
@@ -35,7 +46,11 @@ frappe.listview_settings["Material Request"] = {
 				return [__("Partially Received"), "yellow", "per_received,<,100"];
 			} else if (doc.material_request_type == "Purchase" && flt(doc.per_received, precision) == 100) {
 				return [__("Received"), "green", "per_received,=,100"];
+<<<<<<< HEAD
 			} else if (["Purchase", "Manufacture"].includes(doc.material_request_type)) {
+=======
+			} else if (doc.material_request_type == "Purchase") {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				return [__("Ordered"), "green", "per_ordered,=,100"];
 			} else if (doc.material_request_type == "Material Transfer") {
 				return [__("Transferred"), "green", "per_ordered,=,100"];
@@ -43,6 +58,11 @@ frappe.listview_settings["Material Request"] = {
 				return [__("Issued"), "green", "per_ordered,=,100"];
 			} else if (doc.material_request_type == "Customer Provided") {
 				return [__("Received"), "green", "per_ordered,=,100"];
+<<<<<<< HEAD
+=======
+			} else if (doc.material_request_type == "Manufacture") {
+				return [__("Manufactured"), "green", "per_ordered,=,100"];
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		}
 	},

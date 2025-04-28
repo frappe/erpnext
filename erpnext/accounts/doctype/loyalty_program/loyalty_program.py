@@ -5,7 +5,10 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.query_builder.functions import Sum
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt, today
 
 
@@ -56,6 +59,7 @@ def get_loyalty_details(
 	if not expiry_date:
 		expiry_date = today()
 
+<<<<<<< HEAD
 	LoyaltyPointEntry = frappe.qb.DocType("Loyalty Point Entry")
 
 	query = (
@@ -79,6 +83,23 @@ def get_loyalty_details(
 		query = query.where(LoyaltyPointEntry.expiry_date >= expiry_date)
 
 	loyalty_point_details = query.run(as_dict=True)
+=======
+	condition = ""
+	if company:
+		condition = " and company=%s " % frappe.db.escape(company)
+	if not include_expired_entry:
+		condition += " and expiry_date>='%s' " % expiry_date
+
+	loyalty_point_details = frappe.db.sql(
+		f"""select sum(loyalty_points) as loyalty_points,
+		sum(purchase_amount) as total_spent from `tabLoyalty Point Entry`
+		where customer=%s and loyalty_program=%s and posting_date <= %s
+		{condition}
+		group by customer""",
+		(customer, loyalty_program, expiry_date),
+		as_dict=1,
+	)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if loyalty_point_details:
 		return loyalty_point_details[0]
@@ -187,9 +208,14 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 
 		loyalty_amount = flt(points_to_redeem * loyalty_program_details.conversion_factor)
 
+<<<<<<< HEAD
 		total_amount = ref_doc.grand_total if ref_doc.is_rounded_total_disabled() else ref_doc.rounded_total
 		if loyalty_amount > total_amount:
 			frappe.throw(_("You can't redeem Loyalty Points having more value than the Total Amount."))
+=======
+		if loyalty_amount > ref_doc.rounded_total:
+			frappe.throw(_("You can't redeem Loyalty Points having more value than the Rounded Total."))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if not ref_doc.loyalty_amount and ref_doc.loyalty_amount != loyalty_amount:
 			ref_doc.loyalty_amount = loyalty_amount

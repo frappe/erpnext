@@ -197,7 +197,11 @@ frappe.ui.form.on("Invoice Discounting", {
 						from_date: frm.doc.posting_date,
 						to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
 						company: frm.doc.company,
+<<<<<<< HEAD
 						categorize_by: "Categorize by Voucher (Consolidated)",
+=======
+						group_by: "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						show_cancelled_entries: frm.doc.docstatus === 2,
 					};
 					frappe.set_route("query-report", "General Ledger");

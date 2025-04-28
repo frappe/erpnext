@@ -3,7 +3,11 @@
 
 import frappe
 from frappe import qb
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -11,7 +15,11 @@ from erpnext.accounts.report.general_ledger.general_ledger import execute
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 
+<<<<<<< HEAD
 class TestGeneralLedger(IntegrationTestCase):
+=======
+class TestGeneralLedger(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.company = "_Test Company"
 		self.clear_old_entries()
@@ -155,7 +163,11 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": today(),
 					"to_date": today(),
 					"account": [account.name],
+<<<<<<< HEAD
 					"categorize_by": "Categorize by Voucher (Consolidated)",
+=======
+					"group_by": "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				}
 			)
 		)
@@ -246,7 +258,11 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": today(),
 					"to_date": today(),
 					"account": [account.name],
+<<<<<<< HEAD
 					"categorize_by": "Categorize by Voucher (Consolidated)",
+=======
+					"group_by": "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"ignore_err": True,
 				}
 			)
@@ -261,7 +277,11 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": today(),
 					"to_date": today(),
 					"account": [account.name],
+<<<<<<< HEAD
 					"categorize_by": "Categorize by Voucher (Consolidated)",
+=======
+					"group_by": "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"ignore_err": False,
 				}
 			)
@@ -308,7 +328,11 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": si.posting_date,
 					"to_date": si.posting_date,
 					"account": [si.debit_to],
+<<<<<<< HEAD
 					"categorize_by": "Categorize by Voucher (Consolidated)",
+=======
+					"group_by": "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"ignore_cr_dr_notes": False,
 				}
 			)
@@ -325,7 +349,11 @@ class TestGeneralLedger(IntegrationTestCase):
 					"from_date": si.posting_date,
 					"to_date": si.posting_date,
 					"account": [si.debit_to],
+<<<<<<< HEAD
 					"categorize_by": "Categorize by Voucher (Consolidated)",
+=======
+					"group_by": "Group by Voucher (Consolidated)",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"ignore_cr_dr_notes": True,
 				}
 			)

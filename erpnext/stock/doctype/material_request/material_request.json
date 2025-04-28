@@ -16,6 +16,7 @@
   "column_break_2",
   "transaction_date",
   "schedule_date",
+<<<<<<< HEAD
   "buying_price_list",
   "amended_from",
   "warehouse_section",
@@ -23,6 +24,14 @@
   "last_scanned_warehouse",
   "column_break5",
   "set_from_warehouse",
+=======
+  "amended_from",
+  "warehouse_section",
+  "scan_barcode",
+  "column_break_13",
+  "set_from_warehouse",
+  "column_break5",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "set_warehouse",
   "items_section",
   "items",
@@ -81,7 +90,11 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Purpose",
+<<<<<<< HEAD
    "options": "Purchase\nMaterial Transfer\nMaterial Issue\nManufacture\nSubcontracting\nCustomer Provided",
+=======
+   "options": "Purchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "reqd": 1
   },
   {
@@ -307,7 +320,10 @@
    "fieldname": "transfer_status",
    "fieldtype": "Select",
    "label": "Transfer Status",
+<<<<<<< HEAD
    "no_copy": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "options": "\nNot Started\nIn Transit\nCompleted",
    "read_only": 1
   },
@@ -351,6 +367,7 @@
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "fieldname": "buying_price_list",
    "fieldtype": "Link",
    "label": "Price List",
@@ -362,13 +379,21 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+=======
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-31 17:19:01.166208",
+=======
+ "modified": "2024-03-27 13:10:04.971211",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
@@ -435,11 +460,18 @@
   }
  ],
  "quick_entry": 1,
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "status,transaction_date",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

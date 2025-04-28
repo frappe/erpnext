@@ -45,6 +45,7 @@ frappe.listview_settings["Purchase Invoice"] = {
 	},
 
 	onload: function (listview) {
+<<<<<<< HEAD
 		if (frappe.model.can_create("Purchase Receipt")) {
 			listview.page.add_action_item(__("Purchase Receipt"), () => {
 				erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Purchase Receipt");
@@ -56,5 +57,14 @@ frappe.listview_settings["Purchase Invoice"] = {
 				erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment Entry");
 			});
 		}
+=======
+		listview.page.add_action_item(__("Purchase Receipt"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Purchase Receipt");
+		});
+
+		listview.page.add_action_item(__("Payment"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment Entry");
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 };

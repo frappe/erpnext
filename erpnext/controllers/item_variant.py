@@ -242,7 +242,11 @@ def enqueue_multiple_variant_creation(item, args, use_template_image=False):
 			item=item,
 			args=args,
 			use_template_image=use_template_image,
+<<<<<<< HEAD
 			now=frappe.in_test,
+=======
+			now=frappe.flags.in_test,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		return "queued"
 

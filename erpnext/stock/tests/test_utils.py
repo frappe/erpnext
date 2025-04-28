@@ -1,8 +1,12 @@
 import json
 
 import frappe
+<<<<<<< HEAD
 from frappe.query_builder.functions import Timestamp
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.utils import scan_barcode
 
@@ -21,6 +25,7 @@ class StockTestMixin:
 		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0}
 		if sle_filters:
 			filters.update(sle_filters)
+<<<<<<< HEAD
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		query = (
@@ -38,6 +43,13 @@ class StockTestMixin:
 			query.orderby(Timestamp(sle.posting_date, sle.posting_time))
 			.orderby(sle.creation)
 			.run(as_dict=True)
+=======
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["*"],
+			filters=filters,
+			order_by="timestamp(posting_date, posting_time), creation",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 		self.assertGreaterEqual(len(sles), len(expected_sles))
 
@@ -70,7 +82,11 @@ class StockTestMixin:
 				self.assertEqual(exp_value, act_value, msg=f"{k} doesn't match \n{exp_gle}\n{act_gle}")
 
 
+<<<<<<< HEAD
 class TestStockUtilities(IntegrationTestCase, StockTestMixin):
+=======
+class TestStockUtilities(FrappeTestCase, StockTestMixin):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_barcode_scanning(self):
 		simple_item = self.make_item(properties={"barcodes": [{"barcode": "12399"}]})
 		self.assertEqual(scan_barcode("12399")["item_code"], simple_item.name)
@@ -94,6 +110,7 @@ class TestStockUtilities(IntegrationTestCase, StockTestMixin):
 		self.assertEqual(serial_scan["serial_no"], serial.name)
 		self.assertEqual(serial_scan["has_batch_no"], 0)
 		self.assertEqual(serial_scan["has_serial_no"], 1)
+<<<<<<< HEAD
 
 	def test_barcode_scanning_of_warehouse(self):
 		warehouse = frappe.get_doc(
@@ -135,3 +152,5 @@ class TestStockUtilities(IntegrationTestCase, StockTestMixin):
 		item_scan_with_ctx = scan_barcode("w12345", ctx=ctx)
 		self.assertEqual(item_scan_with_ctx["item_code"], item_with_warehouse.name)
 		self.assertEqual(item_scan_with_ctx["default_warehouse"], warehouse_2.name)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

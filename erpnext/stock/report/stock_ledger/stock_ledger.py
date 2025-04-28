@@ -8,7 +8,11 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, Sum
+<<<<<<< HEAD
 from frappe.utils import cint, flt, get_datetime
+=======
+from frappe.utils import cint, flt
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -72,7 +76,10 @@ def execute(filters=None):
 					batch_balance_dict[sle.batch_no] = [0, 0]
 
 				batch_balance_dict[sle.batch_no][0] += sle.actual_qty
+<<<<<<< HEAD
 				batch_balance_dict[sle.batch_no][1] += stock_value
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if filters.get("segregate_serial_batch_bundle"):
 				actual_qty = batch_balance_dict[sle.batch_no][0]
@@ -368,9 +375,12 @@ def get_columns(filters):
 
 
 def get_stock_ledger_entries(filters, items):
+<<<<<<< HEAD
 	from_date = get_datetime(filters.from_date + " 00:00:00")
 	to_date = get_datetime(filters.to_date + " 23:59:59")
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
@@ -394,8 +404,17 @@ def get_stock_ledger_entries(filters, items):
 			sle.serial_no,
 			sle.project,
 		)
+<<<<<<< HEAD
 		.where((sle.docstatus < 2) & (sle.is_cancelled == 0) & (sle.posting_datetime[from_date:to_date]))
 		.orderby(sle.posting_datetime)
+=======
+		.where(
+			(sle.docstatus < 2)
+			& (sle.is_cancelled == 0)
+			& (sle.posting_date[filters.from_date : filters.to_date])
+		)
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.orderby(sle.creation)
 	)
 
@@ -457,6 +476,7 @@ def get_items(filters):
 	query = frappe.qb.from_(item).select(item.name)
 	conditions = []
 
+<<<<<<< HEAD
 	if item_codes := filters.get("item_code"):
 		conditions.append(item.name.isin(item_codes))
 
@@ -468,12 +488,25 @@ def get_items(filters):
 			condition := get_item_group_condition(filters.get("item_group"), item)
 		):
 			conditions.append(condition)
+=======
+	if item_code := filters.get("item_code"):
+		conditions.append(item.name == item_code)
+	else:
+		if brand := filters.get("brand"):
+			conditions.append(item.brand == brand)
+		if item_group := filters.get("item_group"):
+			if condition := get_item_group_condition(item_group, item):
+				conditions.append(condition)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	items = []
 	if conditions:
 		for condition in conditions:
 			query = query.where(condition)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		items = [r[0] for r in query.run()]
 
 	return items
@@ -510,7 +543,10 @@ def get_item_details(items, sl_entries, include_uom):
 	return item_details
 
 
+<<<<<<< HEAD
 # TODO: THIS IS NOT USED
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_sle_conditions(filters):
 	conditions = []
 	if filters.get("warehouse"):
@@ -541,6 +577,7 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 	}
 
 	for fields in ["item_code", "warehouse"]:
+<<<<<<< HEAD
 		if value := filters.get(fields):
 			query_filters[fields] = ("in", value)
 
@@ -550,6 +587,14 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 			{"SUM": "actual_qty", "as": "qty_after_transaction"},
 			{"SUM": "stock_value_difference", "as": "stock_value"},
 		],
+=======
+		if filters.get(fields):
+			query_filters[fields] = filters.get(fields)
+
+	opening_data = frappe.get_all(
+		"Stock Ledger Entry",
+		fields=["sum(actual_qty) as qty_after_transaction", "sum(stock_value_difference) as stock_value"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		filters=query_filters,
 	)[0]
 
@@ -576,6 +621,7 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 	)
 
 	for field in ["item_code", "warehouse", "company"]:
+<<<<<<< HEAD
 		value = filters.get(field)
 
 		if not value:
@@ -586,6 +632,10 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 
 		else:
 			query = query.where(table[field] == value)
+=======
+		if filters.get(field):
+			query = query.where(table[field] == filters.get(field))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	bundle_data = query.run(as_dict=True)
 
@@ -640,6 +690,7 @@ def get_opening_balance(filters, columns, sl_entries):
 	return row
 
 
+<<<<<<< HEAD
 def get_warehouse_condition(warehouses):
 	if not warehouses:
 		return ""
@@ -668,6 +719,15 @@ def get_warehouse_condition(warehouses):
 
 	return f" exists (select name from `tabWarehouse` {alias} \
 		where ({conditions}) and warehouse = {alias}.name)"
+=======
+def get_warehouse_condition(warehouse):
+	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
+	if warehouse_details:
+		return f" exists (select name from `tabWarehouse` wh \
+			where wh.lft >= {warehouse_details.lft} and wh.rgt <= {warehouse_details.rgt} and warehouse = wh.name)"
+
+	return ""
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_item_group_condition(item_group, item_table=None):

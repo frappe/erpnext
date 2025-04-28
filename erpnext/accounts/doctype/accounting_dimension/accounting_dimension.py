@@ -7,7 +7,10 @@ import json
 import frappe
 from frappe import _, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+<<<<<<< HEAD
 from frappe.database.schema import validate_column_name
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.model import core_doctypes_list
 from frappe.model.document import Document
 from frappe.utils import cstr
@@ -41,11 +44,14 @@ class AccountingDimension(Document):
 		self.set_fieldname_and_label()
 
 	def validate(self):
+<<<<<<< HEAD
 		self.validate_doctype()
 		validate_column_name(self.fieldname)
 		self.validate_dimension_defaults()
 
 	def validate_doctype(self):
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.document_type in (
 			*core_doctypes_list,
 			"Accounting Dimension",
@@ -54,7 +60,10 @@ class AccountingDimension(Document):
 			"Accounting Dimension Detail",
 			"Company",
 			"Account",
+<<<<<<< HEAD
 			"Finance Book",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		):
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
@@ -67,6 +76,11 @@ class AccountingDimension(Document):
 		if not self.is_new():
 			self.validate_document_type_change()
 
+<<<<<<< HEAD
+=======
+		self.validate_dimension_defaults()
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_document_type_change(self):
 		doctype_before_save = frappe.db.get_value("Accounting Dimension", self.name, "document_type")
 		if doctype_before_save != self.document_type:
@@ -83,7 +97,11 @@ class AccountingDimension(Document):
 				frappe.throw(_("Company {0} is added more than once").format(frappe.bold(default.company)))
 
 	def after_insert(self):
+<<<<<<< HEAD
 		if frappe.in_test:
+=======
+		if frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
 			frappe.enqueue(
@@ -91,7 +109,11 @@ class AccountingDimension(Document):
 			)
 
 	def on_trash(self):
+<<<<<<< HEAD
 		if frappe.in_test:
+=======
+		if frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			delete_accounting_dimension(doc=self)
 		else:
 			frappe.enqueue(delete_accounting_dimension, doc=self, queue="long", enqueue_after_commit=True)
@@ -105,21 +127,35 @@ class AccountingDimension(Document):
 
 	def on_update(self):
 		frappe.flags.accounting_dimensions = None
+<<<<<<< HEAD
 		frappe.flags.accounting_dimensions_details = None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def make_dimension_in_accounting_doctypes(doc, doclist=None):
 	if not doclist:
 		doclist = get_doctypes_with_dimensions()
+<<<<<<< HEAD
 	doc_count = len(get_accounting_dimensions())
 	count = 0
 	repostable_doctypes = get_allowed_types_from_settings(child_doc=True)
+=======
+
+	doc_count = len(get_accounting_dimensions())
+	count = 0
+	repostable_doctypes = get_allowed_types_from_settings()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	for doctype in doclist:
 		if (doc_count + 1) % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
 			insert_after_field = "accounting_dimensions_section"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		df = {
 			"fieldname": doc.fieldname,
 			"label": doc.label,
@@ -211,7 +247,11 @@ def delete_accounting_dimension(doc):
 
 @frappe.whitelist()
 def disable_dimension(doc):
+<<<<<<< HEAD
 	if frappe.in_test:
+=======
+	if frappe.flags.in_test:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		toggle_disabling(doc=doc)
 	else:
 		frappe.enqueue(toggle_disabling, doc=doc)
@@ -264,7 +304,11 @@ def get_checks_for_pl_and_bs_accounts():
 		frappe.flags.accounting_dimensions_details = frappe.db.sql(
 			"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
 			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
+<<<<<<< HEAD
 			WHERE p.name = c.parent AND p.disabled = 0""",
+=======
+			WHERE p.name = c.parent""",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			as_dict=1,
 		)
 
@@ -309,8 +353,13 @@ def get_dimensions(with_cost_center_and_project=False):
 	if with_cost_center_and_project:
 		dimension_filters.extend(
 			[
+<<<<<<< HEAD
 				frappe._dict({"fieldname": "cost_center", "document_type": "Cost Center"}),
 				frappe._dict({"fieldname": "project", "document_type": "Project"}),
+=======
+				{"fieldname": "cost_center", "document_type": "Cost Center"},
+				{"fieldname": "project", "document_type": "Project"},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			]
 		)
 

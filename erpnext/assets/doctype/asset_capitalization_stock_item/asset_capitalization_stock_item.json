@@ -10,13 +10,21 @@
   "column_break_3",
   "warehouse",
   "section_break_6",
+<<<<<<< HEAD
   "purchase_receipt_item",
   "stock_qty",
+=======
+  "stock_qty",
+  "stock_uom",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "actual_qty",
   "column_break_9",
   "valuation_rate",
   "amount",
+<<<<<<< HEAD
   "stock_uom",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "batch_and_serial_no_section",
   "serial_and_batch_bundle",
   "use_serial_batch_fields",
@@ -54,14 +62,22 @@
   {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Purchase Details"
+=======
+   "label": "Qty and Rate"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "columns": 1,
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
+<<<<<<< HEAD
    "label": "Quantity",
+=======
+   "label": "Qty",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "non_negative": 1
   },
   {
@@ -173,6 +189,7 @@
   {
    "fieldname": "column_break_mbuv",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "purchase_receipt_item",
@@ -186,12 +203,23 @@
  "istable": 1,
  "links": [],
  "modified": "2025-03-05 12:46:01.074742",
+=======
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-06-26 17:06:22.564438",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization Stock Item",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

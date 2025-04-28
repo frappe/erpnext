@@ -21,8 +21,13 @@
  "list_title": "",
  "login_required": 1,
  "max_attachment_size": 0,
+<<<<<<< HEAD
  "modified": "2025-10-27 21:05:21.125639",
  "modified_by": "Administrator",
+=======
+ "modified": "2024-01-24 10:28:35.026064",
+ "modified_by": "rohitw1991@gmail.com",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "module": "Utilities",
  "name": "addresses",
  "owner": "Administrator",
@@ -85,6 +90,7 @@
    "show_in_filter": 0
   },
   {
+<<<<<<< HEAD
     "allow_read_on_all_link_options": 0,
     "fieldname": "pincode",
     "fieldtype": "Data",
@@ -97,6 +103,8 @@
     "show_in_filter": 0
    },
   {
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "allow_read_on_all_link_options": 0,
    "fieldname": "city",
    "fieldtype": "Data",
@@ -113,14 +121,33 @@
    "fieldname": "state",
    "fieldtype": "Data",
    "hidden": 0,
+<<<<<<< HEAD
    "label": "State/Province",
+=======
+   "label": "State",
    "max_length": 0,
    "max_value": 0,
    "read_only": 0,
    "reqd": 0,
    "show_in_filter": 0
   },
+  {
+   "allow_read_on_all_link_options": 0,
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "hidden": 0,
+   "label": "Postal Code",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
+   "max_length": 0,
+   "max_value": 0,
+   "read_only": 0,
+   "reqd": 0,
+   "show_in_filter": 0
+  },
+<<<<<<< HEAD
   
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   {
    "allow_read_on_all_link_options": 1,
    "fieldname": "country",
@@ -197,4 +224,8 @@
    "show_in_filter": 0
   }
  ]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

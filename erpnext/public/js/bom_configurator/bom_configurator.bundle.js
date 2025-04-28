@@ -25,9 +25,12 @@ class BOMConfigurator {
 		};
 
 		frappe.views.trees["BOM Configurator"] = new frappe.views.TreeView(options);
+<<<<<<< HEAD
 		let node = frappe.views.trees["BOM Configurator"].tree.root_node;
 		frappe.views.trees["BOM Configurator"].tree.show_toolbar(node);
 		frappe.views.trees["BOM Configurator"].tree.load_children(node, true);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.tree_view = frappe.views.trees["BOM Configurator"];
 	}
 
@@ -141,6 +144,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
+<<<<<<< HEAD
 								label: __(frappe.utils.icon("add", "sm") + " Phantom Item"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
@@ -153,16 +157,26 @@ class BOMConfigurator {
 							},
 							{
 								label: __("Collapse All"),
+=======
+								label: __("Expand All"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 
 									if (!node.expanded) {
 										view.tree.load_children(node, true);
 										$(node.parent[0]).find(".tree-children").show();
+<<<<<<< HEAD
 										node.$toolbar.find(".expand-all-btn").html(__("Collapse All"));
 									} else {
 										node.$tree_link.trigger("click");
 										node.$toolbar.find(".expand-all-btn").html(__("Expand All"));
+=======
+										node.$toolbar.find(".expand-all-btn").html("Collapse All");
+									} else {
+										node.$tree_link.trigger("click");
+										node.$toolbar.find(".expand-all-btn").html("Expand All");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 									}
 								},
 								condition: function (node) {
@@ -182,6 +196,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
+<<<<<<< HEAD
 								label: __(frappe.utils.icon("move", "sm") + " Phantom Item"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
@@ -193,6 +208,8 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 								label: __(frappe.utils.icon("delete", "sm") + " Item"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
@@ -213,10 +230,17 @@ class BOMConfigurator {
 									if (!node.expanded) {
 										view.tree.load_children(node, true);
 										$(node.parent[0]).find(".tree-children").show();
+<<<<<<< HEAD
 										node.$toolbar.find(".expand-all-btn").html(__("Collapse All"));
 									} else {
 										node.$tree_link.trigger("click");
 										node.$toolbar.find(".expand-all-btn").html(__("Expand All"));
+=======
+										node.$toolbar.find(".expand-all-btn").html("Collapse All");
+									} else {
+										node.$tree_link.trigger("click");
+										node.$toolbar.find(".expand-all-btn").html("Expand All");
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 									}
 								},
 								condition: function (node) {
@@ -275,10 +299,17 @@ class BOMConfigurator {
 		}
 	}
 
+<<<<<<< HEAD
 	add_sub_assembly(node, view, phantom = false) {
 		let dialog = new frappe.ui.Dialog({
 			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root, false, phantom),
 			title: phantom ? __("Add Phantom Item") : __("Add Sub Assembly"),
+=======
+	add_sub_assembly(node, view) {
+		let dialog = new frappe.ui.Dialog({
+			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root),
+			title: __("Add Sub Assembly"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 		view.events.set_query_for_workstation(dialog);
 
@@ -304,7 +335,10 @@ class BOMConfigurator {
 					operation: node.data.operation,
 					workstation_type: node.data.workstation_type,
 					operation_time: node.data.operation_time,
+<<<<<<< HEAD
 					phantom: phantom,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 				callback: (r) => {
 					view.events.load_tree(r, node);
@@ -315,18 +349,28 @@ class BOMConfigurator {
 		});
 	}
 
+<<<<<<< HEAD
 	get_sub_assembly_modal_fields(view, is_root = false, read_only = false, phantom = false) {
 		let fields = [
 			{
 				label: phantom ? __("Phantom Item") : __("Sub Assembly Item"),
+=======
+	get_sub_assembly_modal_fields(view, is_root = false, read_only = false, show_operations_fields = false) {
+		let fields = [
+			{
+				label: __("Sub Assembly Item"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				fieldname: "item_code",
 				fieldtype: "Link",
 				options: "Item",
 				reqd: 1,
 				read_only: read_only,
+<<<<<<< HEAD
 				filters: {
 					is_stock_item: !phantom,
 				},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 			{ fieldtype: "Column Break" },
 			{
@@ -336,6 +380,7 @@ class BOMConfigurator {
 				fieldtype: "Float",
 				reqd: 1,
 				read_only: read_only,
+<<<<<<< HEAD
 				change() {
 					this.layout.fields_dict.items.grid.data.forEach((row) => {
 						row.qty = flt(this.value);
@@ -347,6 +392,12 @@ class BOMConfigurator {
 		];
 
 		if (is_root && !phantom) {
+=======
+			},
+		];
+
+		if (this.frm.doc.track_operations && (is_root || show_operations_fields)) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fields.push(
 				...[
 					{ fieldtype: "Section Break" },
@@ -355,6 +406,7 @@ class BOMConfigurator {
 						fieldname: "operation",
 						fieldtype: "Link",
 						options: "Operation",
+<<<<<<< HEAD
 						get_query() {
 							let doc = view.events.frm.doc;
 
@@ -370,6 +422,98 @@ class BOMConfigurator {
 					},
 				]
 			);
+=======
+						reqd: 1,
+					},
+					{
+						label: __("Operation Time"),
+						fieldname: "operation_time",
+						fieldtype: "Int",
+						reqd: 1,
+					},
+					{
+						label: __("Is Subcontracted"),
+						fieldname: "is_subcontracted",
+						fieldtype: "Check",
+					},
+					{ fieldtype: "Column Break" },
+					{
+						label: __("Workstation Type"),
+						fieldname: "workstation_type",
+						fieldtype: "Link",
+						options: "Workstation Type",
+					},
+					{
+						label: __("Workstation"),
+						fieldname: "workstation",
+						fieldtype: "Link",
+						options: "Workstation",
+					},
+				]
+			);
+
+			if (this.frm.doc.track_semi_finished_goods) {
+				fields.push(
+					...[
+						{ label: __("Default Warehouse"), fieldtype: "Section Break", collapsible: 1 },
+						{
+							label: __("Skip Material Transfer"),
+							fieldname: "skip_material_transfer",
+							fieldtype: "Check",
+						},
+						{
+							label: __("Backflush Materials From WIP"),
+							fieldname: "backflush_from_wip_warehouse",
+							fieldtype: "Check",
+							depends_on: "eval:doc.skip_material_transfer",
+						},
+						{
+							label: __("Source Warehouse"),
+							fieldname: "source_warehouse",
+							fieldtype: "Link",
+							options: "Warehouse",
+							depends_on: "eval:!doc.backflush_from_wip_warehouse",
+							get_query() {
+								return {
+									filters: {
+										company: view.events.frm.doc.company,
+									},
+								};
+							},
+						},
+						{ fieldtype: "Column Break" },
+						{
+							label: __("Work In Progress Warehouse"),
+							fieldname: "wip_warehouse",
+							fieldtype: "Link",
+							options: "Warehouse",
+							depends_on:
+								"eval:!doc.skip_material_transfer || doc.backflush_from_wip_warehouse",
+							get_query() {
+								return {
+									filters: {
+										company: view.events.frm.doc.company,
+									},
+								};
+							},
+						},
+						{
+							label: __("Finished Good Warehouse"),
+							fieldname: "fg_warehouse",
+							fieldtype: "Link",
+							options: "Warehouse",
+							get_query() {
+								return {
+									filters: {
+										company: view.events.frm.doc.company,
+									},
+								};
+							},
+						},
+					]
+				);
+			}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		fields.push(
@@ -410,10 +554,17 @@ class BOMConfigurator {
 		return fields;
 	}
 
+<<<<<<< HEAD
 	convert_to_sub_assembly(node, view, phantom = false) {
 		let dialog = new frappe.ui.Dialog({
 			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root, true, phantom),
 			title: phantom ? __("Add Phantom Item") : __("Add Sub Assembly"),
+=======
+	convert_to_sub_assembly(node, view) {
+		let dialog = new frappe.ui.Dialog({
+			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root, true, true),
+			title: __("Add Sub Assembly"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		});
 
 		dialog.set_values({
@@ -425,6 +576,7 @@ class BOMConfigurator {
 		dialog.set_primary_action(__("Add"), () => {
 			let bom_item = dialog.get_values();
 
+<<<<<<< HEAD
 			if (!bom_item.item_code) {
 				frappe.throw(
 					phantom ? __("Phantom Item is mandatory") : __("Sub Assembly Item is mandatory")
@@ -437,6 +589,8 @@ class BOMConfigurator {
 				}
 			});
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			if (dialog.operation && !dialog.workstation_type && !dialog.workstation) {
 				frappe.throw(__("Either Workstation or Workstation Type is mandatory"));
 			}
@@ -453,7 +607,10 @@ class BOMConfigurator {
 					workstation_type: node.data.workstation_type,
 					operation_time: node.data.operation_time,
 					workstation: node.data.workstation,
+<<<<<<< HEAD
 					phantom: phantom,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				},
 				callback: (r) => {
 					node.expandable = true;
@@ -498,6 +655,126 @@ class BOMConfigurator {
 		let qty = node.data.qty || this.frm.doc.qty;
 		let fields = [{ label: __("Qty"), fieldname: "qty", default: qty, fieldtype: "Float", reqd: 1 }];
 
+<<<<<<< HEAD
+=======
+		if (node.expandable && this.frm.doc.track_operations) {
+			let data = node.data.operation ? node.data : this.frm.doc;
+
+			fields = [
+				...fields,
+				...[
+					{ fieldtype: "Section Break" },
+					{
+						label: __("Operation"),
+						fieldname: "operation",
+						fieldtype: "Link",
+						options: "Operation",
+						default: data.operation,
+					},
+					{
+						label: __("Operation Time"),
+						fieldname: "operation_time",
+						fieldtype: "Float",
+						default: data.operation_time,
+					},
+					{
+						label: __("Is Subcontracted"),
+						fieldname: "is_subcontracted",
+						fieldtype: "Check",
+						hidden: node?.is_root || 0,
+						default: data.is_subcontracted,
+					},
+					{ fieldtype: "Column Break" },
+					{
+						label: __("Workstation Type"),
+						fieldname: "workstation_type",
+						fieldtype: "Link",
+						options: "Workstation Type",
+						default: data.workstation_type,
+					},
+					{
+						label: __("Workstation"),
+						fieldname: "workstation",
+						fieldtype: "Link",
+						options: "Workstation",
+						default: data.workstation,
+						get_query() {
+							let dialog = me.frm.edit_bom_dialog;
+							let workstation_type = dialog.get_value("workstation_type");
+
+							if (workstation_type) {
+								return {
+									filters: {
+										workstation_type: dialog.get_value("workstation_type"),
+									},
+								};
+							}
+						},
+					},
+					{ fieldtype: "Section Break" },
+					{
+						label: __("Skip Material Transfer"),
+						fieldname: "skip_material_transfer",
+						fieldtype: "Check",
+						default: data.skip_material_transfer,
+					},
+					{
+						label: __("Backflush Materials From WIP"),
+						fieldname: "backflush_from_wip_warehouse",
+						fieldtype: "Check",
+						depends_on: "eval:doc.skip_material_transfer",
+						default: data.backflush_from_wip_warehouse,
+					},
+					{
+						label: __("Source Warehouse"),
+						fieldname: "source_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						default: data.source_warehouse,
+						depends_on: "eval:!doc.backflush_from_wip_warehouse",
+						get_query() {
+							return {
+								filters: {
+									company: me.frm.doc.company,
+								},
+							};
+						},
+					},
+					{ fieldtype: "Column Break" },
+					{
+						label: __("Work In Progress Warehouse"),
+						fieldname: "wip_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						default: data.wip_warehouse,
+						depends_on: "eval:!doc.skip_material_transfer || doc.backflush_from_wip_warehouse",
+						get_query() {
+							return {
+								filters: {
+									company: me.frm.doc.company,
+								},
+							};
+						},
+					},
+					{
+						label: __("Finished Good Warehouse"),
+						fieldname: "fg_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						default: data.fg_warehouse,
+						get_query() {
+							return {
+								filters: {
+									company: me.frm.doc.company,
+								},
+							};
+						},
+					},
+				],
+			];
+		}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		this.frm.edit_bom_dialog = frappe.prompt(
 			fields,
 			(data) => {

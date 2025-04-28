@@ -14,7 +14,11 @@ def execute():
 				"item_code",
 				"purchase_invoice",
 				"purchase_receipt",
+<<<<<<< HEAD
 				"net_purchase_amount",
+=======
+				"gross_purchase_amount",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"asset_quantity",
 				"purchase_invoice_item",
 				"purchase_receipt_item",
@@ -28,7 +32,11 @@ def execute():
 					"Purchase Invoice Item",
 					asset.purchase_invoice,
 					asset.item_code,
+<<<<<<< HEAD
 					asset.net_purchase_amount,
+=======
+					asset.gross_purchase_amount,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					asset.asset_quantity,
 				)
 				frappe.db.set_value("Asset", asset.name, "purchase_invoice_item", purchase_invoice_item)
@@ -39,7 +47,11 @@ def execute():
 					"Purchase Receipt Item",
 					asset.purchase_receipt,
 					asset.item_code,
+<<<<<<< HEAD
 					asset.net_purchase_amount,
+=======
+					asset.gross_purchase_amount,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					asset.asset_quantity,
 				)
 				frappe.db.set_value("Asset", asset.name, "purchase_receipt_item", purchase_receipt_item)

@@ -1,8 +1,14 @@
 erpnext.PointOfSale.PastOrderSummary = class {
+<<<<<<< HEAD
 	constructor({ wrapper, settings, events }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.print_receipt_on_order_complete = settings.print_receipt_on_order_complete;
+=======
+	constructor({ wrapper, events }) {
+		this.wrapper = wrapper;
+		this.events = events;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		this.init_component();
 	}
@@ -24,7 +30,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 					<div class="abs-container">
 						<div class="upper-section"></div>
 						<div class="label">${__("Items")}</div>
+<<<<<<< HEAD
 						<div class="items-container summary-container order-summary-container"></div>
+=======
+						<div class="items-container summary-container"></div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						<div class="label">${__("Totals")}</div>
 						<div class="totals-container summary-container"></div>
 						<div class="label">${__("Payments")}</div>
@@ -47,7 +57,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	init_email_print_dialog() {
 		const email_dialog = new frappe.ui.Dialog({
+<<<<<<< HEAD
 			title: __("Email Receipt"),
+=======
+			title: "Email Receipt",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fields: [
 				{ fieldname: "email_id", fieldtype: "Data", options: "Email", label: "Email ID", reqd: 1 },
 				{ fieldname: "content", fieldtype: "Small Text", label: "Message (if any)" },
@@ -60,7 +74,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		this.email_dialog = email_dialog;
 
 		const print_dialog = new frappe.ui.Dialog({
+<<<<<<< HEAD
 			title: __("Print Receipt"),
+=======
+			title: "Print Receipt",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			fields: [{ fieldname: "print", fieldtype: "Data", label: "Print Preview" }],
 			primary_action: () => {
 				this.print_receipt();
@@ -73,6 +91,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	get_upper_section_html(doc) {
 		const { status } = doc;
 		let indicator_color = "";
+<<<<<<< HEAD
 		const is_customer_naming_by_customer_name = frappe.sys_defaults.cust_master_name !== "Customer Name";
 
 		["Paid", "Consolidated"].includes(status) && (indicator_color = "green");
@@ -86,11 +105,22 @@ erpnext.PointOfSale.PastOrderSummary = class {
 						${is_customer_naming_by_customer_name ? `<div class="customer-code">${doc.customer}</div>` : ""}
 						<div class="customer-email">${this.customer_email}</div>
 					</div>
+=======
+
+		["Paid", "Consolidated"].includes(status) && (indicator_color = "green");
+		status === "Draft" && (indicator_color = "red");
+		status === "Return" && (indicator_color = "grey");
+
+		return `<div class="left-section">
+					<div class="customer-name">${doc.customer}</div>
+					<div class="customer-email">${this.customer_email}</div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					<div class="cashier">${__("Sold by")}: ${doc.owner}</div>
 				</div>
 				<div class="right-section">
 					<div class="paid-amount">${format_currency(doc.paid_amount, doc.currency)}</div>
 					<div class="invoice-name">${doc.name}</div>
+<<<<<<< HEAD
 					<span class="indicator-pill whitespace-nowrap ${indicator_color}"><span>${__(doc.status)}</span></span>
 				</div>`;
 	}
@@ -107,6 +137,18 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 				${item_refund_data}
 		</div>`;
+=======
+					<span class="indicator-pill whitespace-nowrap ${indicator_color}"><span>${doc.status}</span></span>
+				</div>`;
+	}
+
+	get_item_html(doc, item_data) {
+		return `<div class="item-row-wrapper">
+					<div class="item-name">${item_data.item_name}</div>
+					<div class="item-qty">${item_data.qty || 0} ${item_data.uom}</div>
+					<div class="item-rate-disc">${get_rate_discount_html()}</div>
+				</div>`;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		function get_rate_discount_html() {
 			if (item_data.rate && item_data.price_list_rate && item_data.rate !== item_data.price_list_rate) {
@@ -119,6 +161,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				)}</div>`;
 			}
 		}
+<<<<<<< HEAD
 
 		async function get_returned_qty() {
 			const r = await frappe.call({
@@ -139,12 +182,18 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				<strong>${r.message.qty}</strong> ${__("Returned")}
 			</div>`;
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	get_discount_html(doc) {
 		if (doc.discount_amount) {
 			return `<div class="summary-row-wrapper">
+<<<<<<< HEAD
 						<div>${__("Discount")} (${doc.additional_discount_percentage} %)</div>
+=======
+						<div>Discount (${doc.additional_discount_percentage} %)</div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						<div>${format_currency(doc.discount_amount, doc.currency)}</div>
 					</div>`;
 		} else {
@@ -164,9 +213,21 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		let taxes_html = doc.taxes
 			.map((t) => {
+<<<<<<< HEAD
 				return `
 				<div class="tax-row">
 					<div class="tax-label">${t.description}</div>
+=======
+				// if tax rate is 0, don't print it.
+				const description = /[0-9]+/.test(t.description)
+					? t.description
+					: t.rate != 0
+					? `${t.description} @ ${t.rate}%`
+					: t.description;
+				return `
+				<div class="tax-row">
+					<div class="tax-label">${description}</div>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, doc.currency)}</div>
 				</div>
 			`;
@@ -191,6 +252,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	bind_events() {
+<<<<<<< HEAD
 		this.$summary_container.on("click", ".return-btn", async () => {
 			const r = await this.is_invoice_returnable(this.doc.doctype, this.doc.name);
 			if (!r) {
@@ -202,20 +264,32 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				return;
 			}
 			this.events.process_return(this.doc.doctype, this.doc.name);
+=======
+		this.$summary_container.on("click", ".return-btn", () => {
+			this.events.process_return(this.doc.name);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.toggle_component(false);
 			this.$component.find(".no-summary-placeholder").css("display", "flex");
 			this.$summary_wrapper.css("display", "none");
 		});
 
 		this.$summary_container.on("click", ".edit-btn", () => {
+<<<<<<< HEAD
 			this.events.edit_order(this.doc.doctype, this.doc.name);
+=======
+			this.events.edit_order(this.doc.name);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.toggle_component(false);
 			this.$component.find(".no-summary-placeholder").css("display", "flex");
 			this.$summary_wrapper.css("display", "none");
 		});
 
 		this.$summary_container.on("click", ".delete-btn", () => {
+<<<<<<< HEAD
 			this.events.delete_order(this.doc.doctype, this.doc.name);
+=======
+			this.events.delete_order(this.doc.name);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			this.show_summary_placeholder();
 		});
 
@@ -242,10 +316,13 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		this.$summary_container.on("click", ".print-btn", () => {
 			this.print_receipt();
 		});
+<<<<<<< HEAD
 
 		this.$summary_container.on("click", ".open-btn", () => {
 			this.events.open_in_form_view(this.doc.doctype, this.doc.name);
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	print_receipt() {
@@ -364,6 +441,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		return [
 			{ condition: this.doc.docstatus === 0, visible_btns: ["Edit Order", "Delete Order"] },
 			{
+<<<<<<< HEAD
 				condition: ["Partly Paid", "Overdue", "Unpaid"].includes(this.doc.status),
 				visible_btns: ["Print Receipt", "Email Receipt", "Open in Form View"],
 			},
@@ -372,6 +450,9 @@ erpnext.PointOfSale.PastOrderSummary = class {
 					!this.doc.is_return &&
 					this.doc.docstatus === 1 &&
 					!["Partly Paid", "Overdue", "Unpaid"].includes(this.doc.status),
+=======
+				condition: !this.doc.is_return && this.doc.docstatus === 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				visible_btns: ["Print Receipt", "Email Receipt", "Return"],
 			},
 			{
@@ -401,10 +482,13 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		const condition_btns_map = this.get_condition_btn_map(after_submission);
 
 		this.add_summary_btns(condition_btns_map);
+<<<<<<< HEAD
 
 		if (after_submission && this.print_receipt_on_order_complete) {
 			this.print_receipt();
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	attach_document_info(doc) {
@@ -415,6 +499,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		});
 	}
 
+<<<<<<< HEAD
 	async attach_items_info(doc) {
 		this.$items_container.html("");
 		for (const item of doc.items) {
@@ -422,6 +507,15 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			this.$items_container.append(item_dom);
 			this.set_dynamic_rate_header_width();
 		}
+=======
+	attach_items_info(doc) {
+		this.$items_container.html("");
+		doc.items.forEach((item) => {
+			const item_dom = this.get_item_html(doc, item);
+			this.$items_container.append(item_dom);
+			this.set_dynamic_rate_header_width();
+		});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	set_dynamic_rate_header_width() {
@@ -469,6 +563,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	toggle_component(show) {
+<<<<<<< HEAD
 		this.$component.css("grid-column", "span 6 / span 6");
 		show ? this.$component.css("display", "flex") : this.$component.css("display", "none");
 	}
@@ -483,4 +578,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		});
 		return r.message;
 	}
+=======
+		show ? this.$component.css("display", "flex") : this.$component.css("display", "none");
+	}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 };

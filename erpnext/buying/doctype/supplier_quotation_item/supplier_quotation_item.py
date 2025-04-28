@@ -38,8 +38,11 @@ class SupplierQuotationItem(Document):
 		lead_time_days: DF.Int
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
+<<<<<<< HEAD
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		material_request: DF.Link | None
 		material_request_item: DF.Data | None
 		net_amount: DF.Currency
@@ -54,7 +57,10 @@ class SupplierQuotationItem(Document):
 		project: DF.Link | None
 		qty: DF.Float
 		rate: DF.Currency
+<<<<<<< HEAD
 		rate_with_margin: DF.Currency
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		request_for_quotation: DF.Link | None
 		request_for_quotation_item: DF.Data | None
 		sales_order: DF.Link | None

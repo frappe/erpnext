@@ -3,7 +3,11 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe import _, bold
+=======
+from frappe import _
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.model.document import Document
 from frappe.utils import (
 	add_days,
@@ -44,15 +48,27 @@ class Workstation(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+<<<<<<< HEAD
 		from erpnext.manufacturing.doctype.workstation_cost.workstation_cost import WorkstationCost
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		from erpnext.manufacturing.doctype.workstation_working_hour.workstation_working_hour import (
 			WorkstationWorkingHour,
 		)
 
 		description: DF.Text | None
+<<<<<<< HEAD
 		disabled: DF.Check
 		holiday_list: DF.Link | None
 		hour_rate: DF.Currency
+=======
+		holiday_list: DF.Link | None
+		hour_rate: DF.Currency
+		hour_rate_consumable: DF.Currency
+		hour_rate_electricity: DF.Currency
+		hour_rate_labour: DF.Currency
+		hour_rate_rent: DF.Currency
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		off_status_image: DF.AttachImage | None
 		on_status_image: DF.AttachImage | None
 		plant_floor: DF.Link | None
@@ -61,11 +77,15 @@ class Workstation(Document):
 		total_working_hours: DF.Float
 		warehouse: DF.Link | None
 		working_hours: DF.Table[WorkstationWorkingHour]
+<<<<<<< HEAD
 		workstation_costs: DF.Table[WorkstationCost]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		workstation_name: DF.Data
 		workstation_type: DF.Link | None
 	# end: auto-generated types
 
+<<<<<<< HEAD
 	def validate(self):
 		self.validate_duplicate_operating_component()
 
@@ -81,15 +101,20 @@ class Workstation(Document):
 					)
 				)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def before_save(self):
 		self.set_data_based_on_workstation_type()
 		self.set_hour_rate()
 		self.set_total_working_hours()
+<<<<<<< HEAD
 		self.disabled_workstation()
 
 	def disabled_workstation(self):
 		if self.disabled:
 			self.status = "Off"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def set_total_working_hours(self):
 		self.total_working_hours = 0.0
@@ -108,6 +133,7 @@ class Workstation(Document):
 			frappe.throw(_("Row #{0}: Start Time must be before End Time").format(row.idx))
 
 	def set_hour_rate(self):
+<<<<<<< HEAD
 		self.hour_rate = 0.0
 		for row in self.workstation_costs:
 			if row.operating_cost:
@@ -135,11 +161,44 @@ class Workstation(Document):
 						"idx": row.idx,
 					},
 				)
+=======
+		self.hour_rate = (
+			flt(self.hour_rate_labour)
+			+ flt(self.hour_rate_electricity)
+			+ flt(self.hour_rate_consumable)
+			+ flt(self.hour_rate_rent)
+		)
+
+	@frappe.whitelist()
+	def set_data_based_on_workstation_type(self):
+		if self.workstation_type:
+			fields = [
+				"hour_rate_labour",
+				"hour_rate_electricity",
+				"hour_rate_consumable",
+				"hour_rate_rent",
+				"hour_rate",
+				"description",
+			]
+
+			data = frappe.get_cached_value("Workstation Type", self.workstation_type, fields, as_dict=True)
+
+			if not data:
+				return
+
+			for field in fields:
+				if self.get(field):
+					continue
+
+				if value := data.get(field):
+					self.set(field, value)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
 		self.update_bom_operation()
 
+<<<<<<< HEAD
 		if self.plant_floor:
 			self.publish_workstation_status()
 
@@ -162,6 +221,8 @@ class Workstation(Document):
 			docname=self.plant_floor,
 		)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def validate_overlap_for_operation_timings(self):
 		"""Check if there is no overlap in setting Workstation Operating Hours"""
 		for d in self.get("working_hours"):
@@ -276,6 +337,7 @@ def get_job_cards(workstation, job_card=None):
 		user_employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
 
 		for row in jc_data:
+<<<<<<< HEAD
 			if row.status == "Open":
 				row.status = "Not Started"
 
@@ -283,6 +345,12 @@ def get_job_cards(workstation, job_card=None):
 			row.fg_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
 
 			row.status_colour = get_status_color(row.status)
+=======
+			item_code = row.finished_good or row.production_item
+			row.fg_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+
+			row.status_color = get_status_color(row.status)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			row.job_card_link = f"""
 					<a class="ellipsis" data-doctype="Job Card" data-name="{row.name}" href="/app/job-card/{row.name}" title="" data-original-title="{row.name}">{row.name}</a>
 				"""
@@ -390,6 +458,7 @@ def get_time_logs(job_cards):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_default_holiday_list(company=None):
 	if company:
 		if not frappe.has_permission("Company", "read"):
@@ -402,6 +471,12 @@ def get_default_holiday_list(company=None):
 		company = frappe.defaults.get_user_default("Company")
 
 	return frappe.get_cached_value("Company", company, "default_holiday_list")
+=======
+def get_default_holiday_list():
+	return frappe.get_cached_value(
+		"Company", frappe.defaults.get_user_default("Company"), "default_holiday_list"
+	)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
@@ -472,8 +547,13 @@ def get_workstations(**kwargs):
 			_workstation.on_status_image,
 			_workstation.off_status_image,
 		)
+<<<<<<< HEAD
 		.orderby(_workstation.creation, _workstation.workstation_type, _workstation.name)
 		.where((_workstation.plant_floor == kwargs.plant_floor) & (_workstation.disabled == 0))
+=======
+		.orderby(_workstation.workstation_type, _workstation.name)
+		.where(_workstation.plant_floor == kwargs.plant_floor)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	if kwargs.workstation:
@@ -485,6 +565,7 @@ def get_workstations(**kwargs):
 	if kwargs.workstation_status:
 		query = query.where(_workstation.status == kwargs.workstation_status)
 
+<<<<<<< HEAD
 	if kwargs.workstation_name:
 		query = query.where(_workstation.name == kwargs.workstation_name)
 
@@ -507,6 +588,11 @@ def get_workstations(**kwargs):
 
 def get_color_map():
 	return {
+=======
+	data = query.run(as_dict=True)
+
+	color_map = {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		"Production": "green",
 		"Off": "gray",
 		"Idle": "gray",
@@ -515,6 +601,19 @@ def get_color_map():
 		"Setup": "blue",
 	}
 
+<<<<<<< HEAD
+=======
+	for d in data:
+		d.workstation_name = get_link_to_form("Workstation", d.name)
+		d.status_image = d.on_status_image
+		d.color = color_map.get(d.status, "red")
+		d.workstation_link = get_url_to_form("Workstation", d.name)
+		if d.status != "Production":
+			d.status_image = d.off_status_image
+
+	return data
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 @frappe.whitelist()
 def update_job_card(job_card, method, **kwargs):
@@ -527,7 +626,10 @@ def update_job_card(job_card, method, **kwargs):
 	if kwargs.qty and isinstance(kwargs.qty, str):
 		kwargs.qty = flt(kwargs.qty)
 
+<<<<<<< HEAD
 	print(method)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	doc = frappe.get_doc("Job Card", job_card)
 	doc.run_method(method, **kwargs)
 

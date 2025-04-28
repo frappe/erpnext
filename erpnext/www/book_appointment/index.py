@@ -1,8 +1,14 @@
 import datetime
 import json
+<<<<<<< HEAD
 import zoneinfo
 
 import frappe
+=======
+
+import frappe
+import pytz
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe import _
 from frappe.utils.data import get_system_timezone
 
@@ -38,7 +44,13 @@ def get_appointment_settings():
 
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
+<<<<<<< HEAD
 	return zoneinfo.available_timezones()
+=======
+	import pytz
+
+	return pytz.all_timezones
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -123,17 +135,29 @@ def filter_timeslots(date, timeslots):
 
 
 def convert_to_guest_timezone(guest_tz, datetimeobject):
+<<<<<<< HEAD
 	guest_tz = zoneinfo.ZoneInfo(guest_tz)
 	local_timezone = zoneinfo.ZoneInfo(get_system_timezone())
 	datetimeobject = datetimeobject.replace(tzinfo=local_timezone)
+=======
+	guest_tz = pytz.timezone(guest_tz)
+	local_timezone = pytz.timezone(get_system_timezone())
+	datetimeobject = local_timezone.localize(datetimeobject)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	datetimeobject = datetimeobject.astimezone(guest_tz)
 	return datetimeobject
 
 
 def convert_to_system_timezone(guest_tz, datetimeobject):
+<<<<<<< HEAD
 	guest_tz = zoneinfo.ZoneInfo(guest_tz)
 	datetimeobject = datetimeobject.replace(tzinfo=guest_tz)
 	system_tz = zoneinfo.ZoneInfo(get_system_timezone())
+=======
+	guest_tz = pytz.timezone(guest_tz)
+	datetimeobject = guest_tz.localize(datetimeobject)
+	system_tz = pytz.timezone(get_system_timezone())
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	datetimeobject = datetimeobject.astimezone(system_tz)
 	return datetimeobject
 

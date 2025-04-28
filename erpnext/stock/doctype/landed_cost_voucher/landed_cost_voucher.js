@@ -5,6 +5,38 @@ frappe.provide("erpnext.stock");
 
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Landed Cost Voucher");
 erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.StockController {
+<<<<<<< HEAD
+=======
+	setup() {
+		var me = this;
+		this.frm.fields_dict.purchase_receipts.grid.get_field("receipt_document").get_query = function (
+			doc,
+			cdt,
+			cdn
+		) {
+			var d = locals[cdt][cdn];
+
+			var filters = [
+				[d.receipt_document_type, "docstatus", "=", "1"],
+				[d.receipt_document_type, "company", "=", me.frm.doc.company],
+			];
+
+			if (d.receipt_document_type == "Purchase Invoice") {
+				filters.push(["Purchase Invoice", "update_stock", "=", "1"]);
+			}
+
+			if (!me.frm.doc.company) frappe.msgprint(__("Please enter company first"));
+			return {
+				filters: filters,
+			};
+		};
+
+		this.frm.add_fetch("receipt_document", "supplier", "supplier");
+		this.frm.add_fetch("receipt_document", "posting_date", "posting_date");
+		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
+	}
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	refresh() {
 		var help_content = `<br><br>
 			<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
@@ -37,10 +69,14 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 
 		if (this.frm.doc.company) {
 			let company_currency = frappe.get_doc(":Company", this.frm.doc.company).default_currency;
+<<<<<<< HEAD
 			this.frm.set_currency_labels(
 				["total_taxes_and_charges", "total_vendor_invoices_cost"],
 				company_currency
 			);
+=======
+			this.frm.set_currency_labels(["total_taxes_and_charges"], company_currency);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 	}
 
@@ -124,6 +160,7 @@ frappe.ui.form.on("Landed Cost Taxes and Charges", {
 		frm.events.set_base_amount(frm, cdt, cdn);
 	},
 });
+<<<<<<< HEAD
 
 frappe.ui.form.on("Landed Cost Voucher", {
 	setup(frm) {
@@ -201,3 +238,5 @@ frappe.ui.form.on("Landed Cost Vendor Invoice", {
 		}
 	},
 });
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

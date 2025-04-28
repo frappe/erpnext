@@ -98,7 +98,11 @@
                 "Office Maintenance Expenses": {},
                 "Office Rent": {},
                 "Postal Expenses": {},
+<<<<<<< HEAD
                 "Print and Stationery": {},
+=======
+                "Print and Stationary": {},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
                 "Rounded Off": {
                     "account_type": "Round Off"
                 },
@@ -109,8 +113,12 @@
                 "Utility Expenses": {},
                 "Write Off": {},
                 "Exchange Gain/Loss": {},
+<<<<<<< HEAD
                 "Gain/Loss on Asset Disposal": {},
                 "Impairment": {}
+=======
+                "Gain/Loss on Asset Disposal": {}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
             },
             "root_type": "Expense"
         },
@@ -133,8 +141,12 @@
         "Source of Funds (Liabilities)": {
             "Capital Account": {
                 "Reserves and Surplus": {},
+<<<<<<< HEAD
                 "Shareholders Funds": {},
                 "Revaluation Surplus": {}
+=======
+                "Shareholders Funds": {}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
             },
             "Current Liabilities": {
                 "Accounts Payable": {

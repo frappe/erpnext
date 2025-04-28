@@ -1,14 +1,21 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import getdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.account_balance.account_balance import execute
 
 
+<<<<<<< HEAD
 class TestAccountBalance(IntegrationTestCase):
+=======
+class TestAccountBalance(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_account_balance(self):
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")
@@ -40,6 +47,7 @@ class TestAccountBalance(IntegrationTestCase):
 				"balance": 0.0,
 			},
 			{
+<<<<<<< HEAD
 				"account": "Interest Income - _TC2",
 				"currency": "EUR",
 				"balance": 0.0,
@@ -50,6 +58,8 @@ class TestAccountBalance(IntegrationTestCase):
 				"balance": 0.0,
 			},
 			{
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"account": "Sales - _TC2",
 				"currency": "EUR",
 				"balance": -100.0,

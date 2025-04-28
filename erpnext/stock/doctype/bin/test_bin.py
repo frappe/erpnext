@@ -2,13 +2,21 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.utils import _create_bin
 
 
+<<<<<<< HEAD
 class TestBin(IntegrationTestCase):
+=======
+class TestBin(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_concurrent_inserts(self):
 		"""Ensure no duplicates are possible in case of concurrent inserts"""
 		item_code = "_TestConcurrentBin"

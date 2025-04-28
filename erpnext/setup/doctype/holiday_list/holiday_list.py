@@ -31,7 +31,10 @@ class HolidayList(Document):
 		from_date: DF.Date
 		holiday_list_name: DF.Data
 		holidays: DF.Table[Holiday]
+<<<<<<< HEAD
 		is_half_day: DF.Check
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		subdivision: DF.Autocomplete | None
 		to_date: DF.Date
 		total_holidays: DF.Int
@@ -57,6 +60,7 @@ class HolidayList(Document):
 			if d in existing_holidays:
 				continue
 
+<<<<<<< HEAD
 			self.append(
 				"holidays",
 				{
@@ -66,6 +70,9 @@ class HolidayList(Document):
 					"is_half_day": self.is_half_day,
 				},
 			)
+=======
+			self.append("holidays", {"description": _(self.weekly_off), "holiday_date": d, "weekly_off": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	@frappe.whitelist()
 	def get_supported_countries(self):
@@ -158,11 +165,15 @@ class HolidayList(Document):
 		unique_dates = []
 		for row in self.holidays:
 			if row.holiday_date in unique_dates:
+<<<<<<< HEAD
 				frappe.throw(
 					_("Holiday Date {0} added multiple times").format(
 						frappe.bold(formatdate(row.holiday_date))
 					)
 				)
+=======
+				frappe.throw(_("Holiday Date {0} added multiple times").format(frappe.bold(row.holiday_date)))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			unique_dates.append(row.holiday_date)
 
@@ -203,6 +214,7 @@ def is_holiday(holiday_list, date=None):
 	if date is None:
 		date = today()
 	if holiday_list:
+<<<<<<< HEAD
 		return bool(
 			frappe.db.exists(
 				"Holiday", {"parent": holiday_list, "holiday_date": date, "is_half_day": 0}, cache=True
@@ -222,6 +234,9 @@ def is_half_holiday(holiday_list, date=None):
 				"Holiday", {"parent": holiday_list, "holiday_date": date, "is_half_day": 1}, cache=True
 			)
 		)
+=======
+		return bool(frappe.db.exists("Holiday", {"parent": holiday_list, "holiday_date": date}, cache=True))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	else:
 		return False
 

@@ -17,7 +17,11 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 			(frm.doc.party_name && ["Quotation", "Opportunity"].includes(frm.doc.doctype))
 		) {
 			let party_type = "Customer";
+<<<<<<< HEAD
 			if (frm.doc.quotation_to && ["Lead", "Prospect", "CRM Deal"].includes(frm.doc.quotation_to)) {
+=======
+			if (frm.doc.quotation_to && ["Lead", "Prospect"].includes(frm.doc.quotation_to)) {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				party_type = frm.doc.quotation_to;
 			}
 
@@ -71,10 +75,13 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 		if (!args.shipping_address && frm.doc.shipping_address) {
 			args.shipping_address = frm.doc.shipping_address;
 		}
+<<<<<<< HEAD
 
 		if (!args.dispatch_address && frm.doc.dispatch_address) {
 			args.dispatch_address = frm.doc.dispatch_address;
 		}
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	}
 
 	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {

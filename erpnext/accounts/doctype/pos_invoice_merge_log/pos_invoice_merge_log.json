@@ -5,7 +5,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+<<<<<<< HEAD
   "company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "posting_date",
   "posting_time",
   "merge_invoices_based_on",
@@ -114,6 +117,7 @@
    "label": "Posting Time",
    "no_copy": 1,
    "reqd": 1
+<<<<<<< HEAD
   },
   {
    "fieldname": "company",
@@ -124,12 +128,18 @@
    "print_hide": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-07-02 17:08:04.747202",
+=======
+ "modified": "2024-03-27 13:10:15.620564",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Merge Log",
@@ -190,9 +200,16 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

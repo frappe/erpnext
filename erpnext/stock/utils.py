@@ -10,7 +10,13 @@ from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
 import erpnext
+<<<<<<< HEAD
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
+=======
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_available_serial_nos,
+)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -56,10 +62,14 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 
 
 def get_stock_value_on(
+<<<<<<< HEAD
 	warehouses: list | str | None = None,
 	posting_date: str | None = None,
 	item_code: str | None = None,
 	company: str | None = None,
+=======
+	warehouses: list | str | None = None, posting_date: str | None = None, item_code: str | None = None
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 ) -> float:
 	if not posting_date:
 		posting_date = nowdate()
@@ -85,9 +95,12 @@ def get_stock_value_on(
 	if item_code:
 		query = query.where(sle.item_code == item_code)
 
+<<<<<<< HEAD
 	if company:
 		query = query.where(sle.company == company)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return query.run(as_list=True)[0][0]
 
 
@@ -107,8 +120,11 @@ def get_stock_balance(
 
 	from erpnext.stock.stock_ledger import get_previous_sle
 
+<<<<<<< HEAD
 	frappe.has_permission("Item", "read", throw=True)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if posting_date is None:
 		posting_date = nowdate()
 	if posting_time is None:
@@ -124,9 +140,14 @@ def get_stock_balance(
 	extra_cond = ""
 	if inventory_dimensions_dict:
 		for field, value in inventory_dimensions_dict.items():
+<<<<<<< HEAD
 			column = frappe.utils.sanitize_column(field)
 			args[field] = value
 			extra_cond += f" and {column} = %({field})s"
+=======
+			args[field] = value
+			extra_cond += f" and {field} = %({field})s"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	last_entry = get_previous_sle(args, extra_cond=extra_cond)
 
@@ -137,7 +158,12 @@ def get_stock_balance(
 					{
 						"item_code": item_code,
 						"warehouse": warehouse,
+<<<<<<< HEAD
 						"posting_datetime": get_combine_datetime(posting_date, posting_time),
+=======
+						"posting_date": posting_date,
+						"posting_time": posting_time,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 						"ignore_warehouse": 1,
 					}
 				)
@@ -212,7 +238,11 @@ def get_bin(item_code, warehouse):
 
 
 def get_or_make_bin(item_code: str, warehouse: str) -> str:
+<<<<<<< HEAD
 	bin_record = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+=======
+	bin_record = frappe.get_cached_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if not bin_record:
 		bin_obj = _create_bin(item_code, warehouse)
@@ -244,16 +274,23 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+<<<<<<< HEAD
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	in_rate = None
 
 	item_details = frappe.get_cached_value(
 		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
 	)
 
+<<<<<<< HEAD
 	use_moving_avg_for_batch = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+=======
+	use_moving_avg_for_batch = frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if isinstance(args, dict):
 		args = frappe._dict(args)
@@ -302,7 +339,11 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 
 		return batch_obj.get_incoming_rate()
 	else:
+<<<<<<< HEAD
 		valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
+=======
+		valuation_method = get_valuation_method(args.get("item_code"))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		previous_sle = get_previous_sle(args)
 		if valuation_method in ("FIFO", "LIFO"):
 			if previous_sle:
@@ -373,6 +414,7 @@ def get_avg_purchase_rate(serial_nos):
 	)
 
 
+<<<<<<< HEAD
 @frappe.request_cache
 def get_valuation_method(item_code, company=None):
 	"""get valuation method from item or default"""
@@ -383,6 +425,13 @@ def get_valuation_method(item_code, company=None):
 			if company
 			else frappe.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 		)
+=======
+def get_valuation_method(item_code):
+	"""get valuation method from item or default"""
+	val_method = frappe.db.get_value("Item", item_code, "valuation_method", cache=True)
+	if not val_method:
+		val_method = frappe.db.get_single_value("Stock Settings", "valuation_method", cache=True) or "FIFO"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return val_method
 
 
@@ -590,6 +639,7 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeScanResult:
 	def set_cache(data: BarcodeScanResult):
 		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
@@ -605,6 +655,15 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 
 	if ctx is None:
 		ctx = frappe._dict()
+=======
+def scan_barcode(search_value: str) -> BarcodeScanResult:
+	def set_cache(data: BarcodeScanResult):
+		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
+
+	def get_cache() -> BarcodeScanResult | None:
+		if data := frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}"):
+			return data
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if scan_data := get_cache():
 		return scan_data
@@ -617,6 +676,10 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 		as_dict=True,
 	)
 	if barcode_data:
+<<<<<<< HEAD
+=======
+		_update_item_info(barcode_data)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		set_cache(barcode_data)
 		return barcode_data
 
@@ -628,6 +691,10 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 		as_dict=True,
 	)
 	if serial_no_data:
+<<<<<<< HEAD
+=======
+		_update_item_info(serial_no_data)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		set_cache(serial_no_data)
 		return serial_no_data
 
@@ -646,6 +713,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 				).format(search_value, batch_no_data.item_code)
 			)
 
+<<<<<<< HEAD
 		set_cache(batch_no_data)
 		return batch_no_data
 
@@ -678,6 +746,24 @@ def _update_item_info(scan_result: dict[str, str | None], ctx: dict | None = Non
 	):
 		scan_result["default_warehouse"] = warehouse
 
+=======
+		_update_item_info(batch_no_data)
+		set_cache(batch_no_data)
+		return batch_no_data
+
+	return {}
+
+
+def _update_item_info(scan_result: dict[str, str | None]) -> dict[str, str | None]:
+	if item_code := scan_result.get("item_code"):
+		if item_info := frappe.get_cached_value(
+			"Item",
+			item_code,
+			["has_batch_no", "has_serial_no"],
+			as_dict=True,
+		):
+			scan_result.update(item_info)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return scan_result
 
 
@@ -693,6 +779,7 @@ def get_combine_datetime(posting_date, posting_time):
 	if isinstance(posting_time, datetime.timedelta):
 		posting_time = (datetime.datetime.min + posting_time).time()
 
+<<<<<<< HEAD
 	return datetime.datetime.combine(posting_date, posting_time)
 
 
@@ -717,3 +804,6 @@ def get_default_stock_uom() -> str | None:
 	)
 
 	return next((uom for uom in acceptable_default_uoms if uom in available_default_uoms), None)
+=======
+	return datetime.datetime.combine(posting_date, posting_time).replace(microsecond=0)
+>>>>>>> 7c4cf3e834 (Favicon.svg)

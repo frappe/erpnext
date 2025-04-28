@@ -60,6 +60,7 @@ erpnext.accounts.ledger_preview = {
 	},
 
 	make_dialog(label, fieldname, columns, data) {
+<<<<<<< HEAD
 		if (data.length === 0 && fieldname === "accounting_ledger_preview_html") {
 			frappe.msgprint("<strong>" + __("No Impact on Accounting Ledger") + "</strong>");
 		} else {
@@ -81,6 +82,25 @@ erpnext.accounts.ledger_preview = {
 
 			dialog.show();
 		}
+=======
+		let me = this;
+		let dialog = new frappe.ui.Dialog({
+			size: "extra-large",
+			title: __(label),
+			fields: [
+				{
+					fieldtype: "HTML",
+					fieldname: fieldname,
+				},
+			],
+		});
+
+		setTimeout(function () {
+			me.get_datatable(columns, data, dialog.get_field(fieldname).wrapper);
+		}, 200);
+
+		dialog.show();
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	get_datatable(columns, data, wrapper) {

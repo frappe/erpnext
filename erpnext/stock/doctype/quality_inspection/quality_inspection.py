@@ -6,7 +6,11 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+<<<<<<< HEAD
 from frappe.utils import cint, cstr, flt, get_link_to_form, get_number_format_info
+=======
+from frappe.utils import cint, cstr, flt, get_number_format_info
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -29,15 +33,21 @@ class QualityInspection(Document):
 		amended_from: DF.Link | None
 		batch_no: DF.Link | None
 		bom_no: DF.Link | None
+<<<<<<< HEAD
 		child_row_reference: DF.Data | None
 		company: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		description: DF.SmallText | None
 		inspected_by: DF.Link
 		inspection_type: DF.Literal["", "Incoming", "Outgoing", "In Process"]
 		item_code: DF.Link
 		item_name: DF.Data | None
 		item_serial_no: DF.Link | None
+<<<<<<< HEAD
 		letter_head: DF.Link | None
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		manual_inspection: DF.Check
 		naming_series: DF.Literal["MAT-QA-.YYYY.-"]
 		quality_inspection_template: DF.Link | None
@@ -76,6 +86,7 @@ class QualityInspection(Document):
 		if self.readings:
 			self.inspect_and_set_status()
 
+<<<<<<< HEAD
 		self.validate_inspection_required()
 		self.set_child_row_reference()
 		self.set_company()
@@ -141,6 +152,8 @@ class QualityInspection(Document):
 				).format(get_link_to_form("Item", self.item_code))
 			)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
 
@@ -160,9 +173,12 @@ class QualityInspection(Document):
 			child = self.append("readings", {})
 			child.update(d)
 			child.status = "Accepted"
+<<<<<<< HEAD
 			child.parameter_group = frappe.get_value(
 				"Quality Inspection Parameter", d.specification, "parameter_group"
 			)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	@frappe.whitelist()
 	def get_quality_inspection_template(self):
@@ -176,6 +192,7 @@ class QualityInspection(Document):
 		self.quality_inspection_template = template
 		self.get_item_specification_details()
 
+<<<<<<< HEAD
 	def on_update(self):
 		action_if_qi_in_draft = frappe.db.get_single_value(
 			"Stock Settings", "action_if_quality_inspection_is_not_submitted"
@@ -198,14 +215,29 @@ class QualityInspection(Document):
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)
+=======
+	def on_submit(self):
+		self.update_qc_reference()
+
+	def on_cancel(self):
+		self.update_qc_reference()
+
+	def on_trash(self):
+		self.update_qc_reference()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_readings_status_mandatory(self):
 		for reading in self.readings:
 			if not reading.status:
 				frappe.throw(_("Row #{0}: Status is mandatory").format(reading.idx))
 
+<<<<<<< HEAD
 	def update_qc_reference(self, remove_reference=False):
 		quality_inspection = self.name if self.docstatus < 2 and not remove_reference else ""
+=======
+	def update_qc_reference(self):
+		quality_inspection = self.name if self.docstatus == 1 else ""
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:
@@ -219,11 +251,16 @@ class QualityInspection(Document):
 				)
 
 		else:
+<<<<<<< HEAD
+=======
+			args = [quality_inspection, self.modified, self.reference_name, self.item_code]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			doctype = self.reference_type + " Item"
 
 			if self.reference_type == "Stock Entry":
 				doctype = "Stock Entry Detail"
 
+<<<<<<< HEAD
 			if doctype and self.reference_name:
 				child_doc = frappe.qb.DocType(doctype)
 
@@ -251,6 +288,31 @@ class QualityInspection(Document):
 					self.reference_name,
 					"modified",
 					self.modified,
+=======
+			if self.reference_type and self.reference_name:
+				conditions = ""
+				if self.batch_no and self.docstatus == 1:
+					conditions += " and t1.batch_no = %s"
+					args.append(self.batch_no)
+
+				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
+					conditions += " and t1.quality_inspection = %s"
+					args.append(self.name)
+
+				frappe.db.sql(
+					f"""
+					UPDATE
+						`tab{doctype}` t1, `tab{self.reference_type}` t2
+					SET
+						t1.quality_inspection = %s, t2.modified = %s
+					WHERE
+						t1.parent = %s
+						and t1.item_code = %s
+						and t1.parent = t2.name
+						{conditions}
+				""",
+					args,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				)
 
 	def inspect_and_set_status(self):
@@ -283,11 +345,17 @@ class QualityInspection(Document):
 
 	def min_max_criteria_passed(self, reading):
 		"""Determine whether all readings fall in the acceptable range."""
+<<<<<<< HEAD
 		has_reading = False
 		for i in range(1, 11):
 			reading_value = reading.get("reading_" + str(i))
 			if reading_value is not None and reading_value.strip():
 				has_reading = True
+=======
+		for i in range(1, 11):
+			reading_value = reading.get("reading_" + str(i))
+			if reading_value is not None and reading_value.strip():
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				result = (
 					flt(reading.get("min_value"))
 					<= parse_float(reading_value)
@@ -295,7 +363,11 @@ class QualityInspection(Document):
 				)
 				if not result:
 					return False
+<<<<<<< HEAD
 		return has_reading
+=======
+		return True
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def set_status_based_on_acceptance_formula(self, reading):
 		if not reading.acceptance_formula:
@@ -333,7 +405,10 @@ class QualityInspection(Document):
 			for i in range(1, 11):
 				field = "reading_" + str(i)
 				if reading.get(field) is None:
+<<<<<<< HEAD
 					data[field] = 0.0
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					continue
 
 				data[field] = parse_float(reading.get(field))
@@ -389,7 +464,11 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 		return frappe.db.sql(
 			f"""
+<<<<<<< HEAD
 				SELECT distinct item_code, item_name
+=======
+				SELECT item_code
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				FROM `tab{from_doctype}`
 				WHERE parent=%(parent)s and docstatus < 2 and item_code like %(txt)s
 				{qi_condition} {cond} {mcond}
@@ -420,11 +499,18 @@ def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters
 		limit_start=start,
 		limit_page_length=page_len,
 		filters={
+<<<<<<< HEAD
 			"docstatus": ("<", 2),
 			"name": ("like", "%%%s%%" % txt),
 			"item_code": filters.get("item_code"),
 			"reference_name": ("in", [filters.get("reference_name", ""), ""]),
 			"child_row_reference": ("in", [filters.get("child_row_reference", ""), ""]),
+=======
+			"docstatus": 1,
+			"name": ("like", "%%%s%%" % txt),
+			"item_code": filters.get("item_code"),
+			"reference_name": ("in", [filters.get("reference_name", ""), ""]),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		as_list=1,
 	)

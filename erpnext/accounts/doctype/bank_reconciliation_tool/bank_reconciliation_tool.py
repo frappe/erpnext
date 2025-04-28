@@ -8,12 +8,19 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
+<<<<<<< HEAD
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, create_batch, flt
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
 from erpnext.accounts.party import get_party_account
+=======
+from frappe.utils import cint, flt
+
+from erpnext import get_default_cost_center
+from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	get_amounts_not_reflected_in_system,
 	get_entries,
@@ -80,6 +87,7 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_account_balance(bank_account, till_date, company):
 	# returns account balance till the specified date
 	account = frappe.db.get_value("Bank Account", bank_account, "account")
@@ -91,6 +99,12 @@ def get_account_balance(bank_account, till_date, company):
 			"company": company,
 		}
 	)
+=======
+def get_account_balance(bank_account, till_date):
+	# returns account balance till the specified date
+	account = frappe.db.get_value("Bank Account", bank_account, "account")
+	filters = frappe._dict({"account": account, "report_date": till_date, "include_pos_transactions": 1})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	data = get_entries(filters)
 
 	balance_as_per_system = get_balance_on(filters["account"], filters["report_date"])
@@ -102,7 +116,15 @@ def get_account_balance(bank_account, till_date, company):
 
 	amounts_not_reflected_in_system = get_amounts_not_reflected_in_system(filters)
 
+<<<<<<< HEAD
 	return flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
+=======
+	bank_bal = (
+		flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
+	)
+
+	return bank_bal
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()
@@ -309,6 +331,7 @@ def create_payment_entry_bts(
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
+<<<<<<< HEAD
 		fieldname=["name", "unallocated_amount", "deposit", "bank_account", "currency"],
 		as_dict=True,
 	)[0]
@@ -353,12 +376,61 @@ def create_payment_entry_bts(
 	pe.insert()
 	pe.submit()
 
+=======
+		fieldname=["name", "unallocated_amount", "deposit", "bank_account"],
+		as_dict=True,
+	)[0]
+	paid_amount = bank_transaction.unallocated_amount
+	payment_type = "Receive" if bank_transaction.deposit > 0.0 else "Pay"
+
+	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
+	company = frappe.get_value("Account", company_account, "company")
+	payment_entry_dict = {
+		"company": company,
+		"payment_type": payment_type,
+		"reference_no": reference_number,
+		"reference_date": reference_date,
+		"party_type": party_type,
+		"party": party,
+		"posting_date": posting_date,
+		"paid_amount": paid_amount,
+		"received_amount": paid_amount,
+	}
+	payment_entry = frappe.new_doc("Payment Entry")
+
+	payment_entry.update(payment_entry_dict)
+
+	if mode_of_payment:
+		payment_entry.mode_of_payment = mode_of_payment
+	if project:
+		payment_entry.project = project
+	if cost_center:
+		payment_entry.cost_center = cost_center
+	if payment_type == "Receive":
+		payment_entry.paid_to = company_account
+	else:
+		payment_entry.paid_from = company_account
+
+	payment_entry.validate()
+
+	if allow_edit:
+		return payment_entry
+
+	payment_entry.insert()
+
+	payment_entry.submit()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	vouchers = json.dumps(
 		[
 			{
 				"payment_doctype": "Payment Entry",
+<<<<<<< HEAD
 				"payment_name": pe.name,
 				"amount": amt_in_bank_acc_currency,
+=======
+				"payment_name": payment_entry.name,
+				"amount": paid_amount,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			}
 		]
 	)
@@ -374,6 +446,7 @@ def auto_reconcile_vouchers(
 	from_reference_date=None,
 	to_reference_date=None,
 ):
+<<<<<<< HEAD
 	bank_transactions = get_bank_transactions(bank_account)
 
 	if len(bank_transactions) > 10:
@@ -410,6 +483,16 @@ def start_auto_reconcile(
 		linked_payments = get_linked_payments(
 			transaction.name,
 			["payment_entry", "journal_entry", "sales_invoice"],
+=======
+	frappe.flags.auto_reconcile_vouchers = True
+	reconciled, partially_reconciled = set(), set()
+
+	bank_transactions = get_bank_transactions(bank_account)
+	for transaction in bank_transactions:
+		linked_payments = get_linked_payments(
+			transaction.name,
+			["payment_entry", "journal_entry"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			from_date,
 			to_date,
 			filter_by_reference_date,
@@ -443,6 +526,10 @@ def start_auto_reconcile(
 	frappe.msgprint(title=_("Auto Reconciliation"), msg=alert_message, indicator=indicator)
 
 	frappe.flags.auto_reconcile_vouchers = False
+<<<<<<< HEAD
+=======
+	return reconciled, partially_reconciled
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 def get_auto_reconcile_message(partially_reconciled, reconciled):
@@ -514,18 +601,27 @@ def get_linked_payments(
 def subtract_allocations(gl_account, vouchers):
 	"Look up & subtract any existing Bank Transaction allocations"
 	copied = []
+<<<<<<< HEAD
 
 	voucher_docs = [(voucher.get("doctype"), voucher.get("name")) for voucher in vouchers]
 	voucher_allocated_amounts = get_total_allocated_amount(voucher_docs)
 
 	for voucher in vouchers:
 		if amount := get_allocated_amount(voucher_allocated_amounts, voucher, gl_account):
+=======
+	for voucher in vouchers:
+		rows = get_total_allocated_amount(voucher.get("doctype"), voucher.get("name"))
+		filtered_row = list(filter(lambda row: row.get("gl_account") == gl_account, rows))
+
+		if amount := None if not filtered_row else filtered_row[0]["total"]:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			voucher["paid_amount"] -= amount
 
 		copied.append(voucher)
 	return copied
 
 
+<<<<<<< HEAD
 def get_allocated_amount(voucher_allocated_amounts, voucher, gl_account):
 	if not (voucher_details := voucher_allocated_amounts.get((voucher.get("doctype"), voucher.get("name")))):
 		return
@@ -536,6 +632,8 @@ def get_allocated_amount(voucher_allocated_amounts, voucher, gl_account):
 	return row.get("total")
 
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def check_matching(
 	bank_account,
 	company,
@@ -666,7 +764,11 @@ def get_matching_queries(
 		queries.append(query)
 
 	if transaction.deposit > 0.0 and "sales_invoice" in document_types:
+<<<<<<< HEAD
 		query = get_si_matching_query(exact_match, currency, common_filters, transaction)
+=======
+		query = get_si_matching_query(exact_match, currency, common_filters)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		queries.append(query)
 
 	if transaction.withdrawal > 0.0:
@@ -764,7 +866,11 @@ def get_pe_matching_query(
 			(ref_rank + amount_rank + party_rank + 1).as_("rank"),
 			ConstantColumn("Payment Entry").as_("doctype"),
 			pe.name,
+<<<<<<< HEAD
 			pe.base_paid_amount_after_tax.as_("paid_amount"),
+=======
+			pe.paid_amount_after_tax.as_("paid_amount"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			pe.reference_no,
 			pe.reference_date,
 			pe.party,
@@ -805,20 +911,40 @@ def get_je_matching_query(
 	je = frappe.qb.DocType("Journal Entry")
 	jea = frappe.qb.DocType("Journal Entry Account")
 
+<<<<<<< HEAD
 	amount_field = f"{cr_or_dr}_in_account_currency"
+=======
+	ref_condition = je.cheque_no == transaction.reference_number
+	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
+
+	amount_field = f"{cr_or_dr}_in_account_currency"
+	amount_equality = getattr(jea, amount_field) == transaction.unallocated_amount
+	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	filter_by_date = je.posting_date.between(from_date, to_date)
 	if cint(filter_by_reference_date):
 		filter_by_date = je.cheque_date.between(from_reference_date, to_reference_date)
 
+<<<<<<< HEAD
 	subquery = (
+=======
+	query = (
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.qb.from_(jea)
 		.join(je)
 		.on(jea.parent == je.name)
 		.select(
+<<<<<<< HEAD
 			Sum(getattr(jea, amount_field)).as_("paid_amount"),
 			ConstantColumn("Journal Entry").as_("doctype"),
 			je.name,
+=======
+			(ref_rank + amount_rank + 1).as_("rank"),
+			ConstantColumn("Journal Entry").as_("doctype"),
+			je.name,
+			getattr(jea, amount_field).as_("paid_amount"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			je.cheque_no.as_("reference_no"),
 			je.cheque_date.as_("reference_date"),
 			je.pay_to_recd_from.as_("party"),
@@ -830,12 +956,19 @@ def get_je_matching_query(
 		.where(je.voucher_type != "Opening Entry")
 		.where(je.clearance_date.isnull())
 		.where(jea.account == common_filters.bank_account)
+<<<<<<< HEAD
 		.where(filter_by_date)
 		.groupby(je.name)
+=======
+		.where(amount_equality if exact_match else getattr(jea, amount_field) > 0.0)
+		.where(je.docstatus == 1)
+		.where(filter_by_date)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		.orderby(je.cheque_date if cint(filter_by_reference_date) else je.posting_date)
 	)
 
 	if frappe.flags.auto_reconcile_vouchers is True:
+<<<<<<< HEAD
 		subquery = subquery.where(je.cheque_no == transaction.reference_number)
 
 	ref_rank = frappe.qb.terms.Case().when(subquery.reference_no == transaction.reference_number, 1).else_(0)
@@ -850,18 +983,28 @@ def get_je_matching_query(
 		)
 		.where(amount_equality if exact_match else subquery.paid_amount > 0.0)
 	)
+=======
+		query = query.where(ref_condition)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	return query
 
 
+<<<<<<< HEAD
 def get_si_matching_query(exact_match, currency, common_filters, transaction):
+=======
+def get_si_matching_query(exact_match, currency, common_filters):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	# get matching sales invoice query
 	si = frappe.qb.DocType("Sales Invoice")
 	sip = frappe.qb.DocType("Sales Invoice Payment")
 
+<<<<<<< HEAD
 	ref_condition = sip.reference_no == transaction.reference_number
 	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	amount_equality = sip.amount == common_filters.amount
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
 	amount_condition = amount_equality if exact_match else sip.amount > 0.0
@@ -874,11 +1017,19 @@ def get_si_matching_query(exact_match, currency, common_filters, transaction):
 		.join(si)
 		.on(sip.parent == si.name)
 		.select(
+<<<<<<< HEAD
 			(ref_rank + party_rank + amount_rank + 1).as_("rank"),
 			ConstantColumn("Sales Invoice").as_("doctype"),
 			si.name,
 			sip.amount.as_("paid_amount"),
 			sip.reference_no,
+=======
+			(party_rank + amount_rank + 1).as_("rank"),
+			ConstantColumn("Sales Invoice").as_("doctype"),
+			si.name,
+			sip.amount.as_("paid_amount"),
+			ConstantColumn("").as_("reference_no"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			ConstantColumn("").as_("reference_date"),
 			si.customer.as_("party"),
 			ConstantColumn("Customer").as_("party_type"),
@@ -892,9 +1043,12 @@ def get_si_matching_query(exact_match, currency, common_filters, transaction):
 		.where(si.currency == currency)
 	)
 
+<<<<<<< HEAD
 	if frappe.flags.auto_reconcile_vouchers is True:
 		query = query.where(ref_condition)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return query
 
 

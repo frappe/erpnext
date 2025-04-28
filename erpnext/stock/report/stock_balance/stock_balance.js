@@ -36,6 +36,7 @@ frappe.query_reports["Stock Balance"] = {
 		},
 		{
 			fieldname: "item_code",
+<<<<<<< HEAD
 			label: __("Items"),
 			fieldtype: "MultiSelectList",
 			width: "80",
@@ -69,10 +70,21 @@ frappe.query_reports["Stock Balance"] = {
 				});
 
 				return data || [];
+=======
+			label: __("Item"),
+			fieldtype: "Link",
+			width: "80",
+			options: "Item",
+			get_query: function () {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+				};
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{
 			fieldname: "warehouse",
+<<<<<<< HEAD
 			label: __("Warehouses"),
 			fieldtype: "MultiSelectList",
 			width: "80",
@@ -87,6 +99,22 @@ frappe.query_reports["Stock Balance"] = {
 				};
 
 				return frappe.db.get_link_options("Warehouse", txt, filters);
+=======
+			label: __("Warehouse"),
+			fieldtype: "Link",
+			width: "80",
+			options: "Warehouse",
+			get_query: () => {
+				let warehouse_type = frappe.query_report.get_filter_value("warehouse_type");
+				let company = frappe.query_report.get_filter_value("company");
+
+				return {
+					filters: {
+						...(warehouse_type && { warehouse_type }),
+						...(company && { company }),
+					},
+				};
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			},
 		},
 		{
@@ -132,12 +160,15 @@ frappe.query_reports["Stock Balance"] = {
 			fieldtype: "Check",
 			default: 0,
 		},
+<<<<<<< HEAD
 		{
 			fieldname: "show_dimension_wise_stock",
 			label: __("Show Dimension Wise Stock"),
 			fieldtype: "Check",
 			default: 0,
 		},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	],
 
 	formatter: function (value, row, column, data, default_formatter) {

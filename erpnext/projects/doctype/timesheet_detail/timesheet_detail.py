@@ -2,10 +2,14 @@
 # For license information, please see license.txt
 
 
+<<<<<<< HEAD
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_to_date, flt, get_datetime, time_diff_in_hours, time_diff_in_seconds
+=======
+from frappe.model.document import Document
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 class TimesheetDetail(Document):
@@ -43,6 +47,7 @@ class TimesheetDetail(Document):
 		to_time: DF.Datetime | None
 	# end: auto-generated types
 
+<<<<<<< HEAD
 	def set_to_time(self):
 		"""Set to_time based on from_time and hours."""
 		if not (self.from_time and self.hours):
@@ -125,3 +130,6 @@ class TimesheetDetail(Document):
 				indicator="orange",
 				alert=True,
 			)
+=======
+	pass
+>>>>>>> 7c4cf3e834 (Favicon.svg)

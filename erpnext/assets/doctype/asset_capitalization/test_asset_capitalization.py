@@ -1,9 +1,16 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+<<<<<<< HEAD
 import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+=======
+
+import unittest
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import cint, flt, getdate, now_datetime
 
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
@@ -21,7 +28,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 
 
+<<<<<<< HEAD
 class TestAssetCapitalization(IntegrationTestCase):
+=======
+class TestAssetCapitalization(unittest.TestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		create_asset_data()
@@ -59,6 +70,7 @@ class TestAssetCapitalization(IntegrationTestCase):
 			company=company,
 		)
 
+<<<<<<< HEAD
 		wip_composite_asset = create_asset(
 			asset_name="Asset Capitalization WIP Composite Asset",
 			is_composite_asset=1,
@@ -69,6 +81,13 @@ class TestAssetCapitalization(IntegrationTestCase):
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			target_asset=wip_composite_asset.name,
+=======
+		# Create and submit Asset Captitalization
+		asset_capitalization = create_asset_capitalization(
+			entry_type="Capitalization",
+			capitalization_method="Create a new composite asset",
+			target_item_code="Macbook Pro",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
@@ -81,6 +100,10 @@ class TestAssetCapitalization(IntegrationTestCase):
 		)
 
 		# Test Asset Capitalization values
+<<<<<<< HEAD
+=======
+		self.assertEqual(asset_capitalization.entry_type, "Capitalization")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(asset_capitalization.target_qty, 1)
 
 		self.assertEqual(asset_capitalization.stock_items[0].valuation_rate, stock_rate)
@@ -98,9 +121,14 @@ class TestAssetCapitalization(IntegrationTestCase):
 
 		# Test Target Asset values
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
+<<<<<<< HEAD
 		self.assertEqual(target_asset.net_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_amount, total_amount)
 		self.assertEqual(target_asset.status, "Work In Progress")
+=======
+		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
+		self.assertEqual(target_asset.purchase_amount, total_amount)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# Test Consumed Asset values
 		self.assertEqual(consumed_asset.db_get("status"), "Capitalized")
@@ -154,6 +182,7 @@ class TestAssetCapitalization(IntegrationTestCase):
 			company=company,
 		)
 
+<<<<<<< HEAD
 		wip_composite_asset = create_asset(
 			asset_name="Asset Capitalization WIP Composite Asset",
 			is_composite_asset=1,
@@ -164,6 +193,13 @@ class TestAssetCapitalization(IntegrationTestCase):
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			target_asset=wip_composite_asset.name,
+=======
+		# Create and submit Asset Captitalization
+		asset_capitalization = create_asset_capitalization(
+			entry_type="Capitalization",
+			capitalization_method="Create a new composite asset",
+			target_item_code="Macbook Pro",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
@@ -176,6 +212,10 @@ class TestAssetCapitalization(IntegrationTestCase):
 		)
 
 		# Test Asset Capitalization values
+<<<<<<< HEAD
+=======
+		self.assertEqual(asset_capitalization.entry_type, "Capitalization")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(asset_capitalization.target_qty, 1)
 
 		self.assertEqual(asset_capitalization.stock_items[0].valuation_rate, stock_rate)
@@ -193,7 +233,11 @@ class TestAssetCapitalization(IntegrationTestCase):
 
 		# Test Target Asset values
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
+<<<<<<< HEAD
 		self.assertEqual(target_asset.net_purchase_amount, total_amount)
+=======
+		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(target_asset.purchase_amount, total_amount)
 
 		# Test Consumed Asset values
@@ -252,6 +296,11 @@ class TestAssetCapitalization(IntegrationTestCase):
 
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
+<<<<<<< HEAD
+=======
+			entry_type="Capitalization",
+			capitalization_method="Choose a WIP composite asset",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			target_asset=wip_composite_asset.name,
 			target_asset_location="Test Location",
 			stock_qty=stock_qty,
@@ -262,6 +311,11 @@ class TestAssetCapitalization(IntegrationTestCase):
 		)
 
 		# Test Asset Capitalization values
+<<<<<<< HEAD
+=======
+		self.assertEqual(asset_capitalization.entry_type, "Capitalization")
+		self.assertEqual(asset_capitalization.capitalization_method, "Choose a WIP composite asset")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(asset_capitalization.target_qty, 1)
 
 		self.assertEqual(asset_capitalization.stock_items[0].valuation_rate, stock_rate)
@@ -273,9 +327,14 @@ class TestAssetCapitalization(IntegrationTestCase):
 
 		# Test Target Asset values
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
+<<<<<<< HEAD
 		self.assertEqual(target_asset.net_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_amount, total_amount)
 		self.assertEqual(target_asset.status, "Work In Progress")
+=======
+		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
+		self.assertEqual(target_asset.purchase_amount, total_amount)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# Test General Ledger Entries
 		expected_gle = {
@@ -301,6 +360,113 @@ class TestAssetCapitalization(IntegrationTestCase):
 		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
 		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
 
+<<<<<<< HEAD
+=======
+	def test_decapitalization_with_depreciation(self):
+		# Variables
+		purchase_date = "2020-01-01"
+		depreciation_start_date = "2020-12-31"
+		capitalization_date = "2021-06-30"
+
+		total_number_of_depreciations = 3
+		expected_value_after_useful_life = 10_000
+		consumed_asset_purchase_value = 100_000
+		consumed_asset_current_value = 70_000
+		consumed_asset_value_before_disposal = 55_000
+
+		target_qty = 10
+		target_incoming_rate = 5500
+
+		depreciation_before_disposal_amount = 15_000
+		accumulated_depreciation = 45_000
+
+		# to accomodate for depreciation on disposal calculation minor difference
+		consumed_asset_value_before_disposal = 55_123.29
+		target_incoming_rate = 5512.329
+		depreciation_before_disposal_amount = 14_876.71
+		accumulated_depreciation = 44_876.71
+
+		# Create assets
+		consumed_asset = create_depreciation_asset(
+			asset_name="Asset Capitalization Consumable Asset",
+			asset_value=consumed_asset_purchase_value,
+			purchase_date=purchase_date,
+			depreciation_start_date=depreciation_start_date,
+			depreciation_method="Straight Line",
+			total_number_of_depreciations=total_number_of_depreciations,
+			frequency_of_depreciation=12,
+			expected_value_after_useful_life=expected_value_after_useful_life,
+			company="_Test Company with perpetual inventory",
+			submit=1,
+		)
+
+		first_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Active")
+
+		# Create and submit Asset Captitalization
+		asset_capitalization = create_asset_capitalization(
+			entry_type="Decapitalization",
+			posting_date=capitalization_date,  # half a year
+			target_item_code="Capitalization Target Stock Item",
+			target_qty=target_qty,
+			consumed_asset=consumed_asset.name,
+			company="_Test Company with perpetual inventory",
+			submit=1,
+		)
+
+		# Test Asset Capitalization values
+		self.assertEqual(asset_capitalization.entry_type, "Decapitalization")
+
+		self.assertEqual(
+			asset_capitalization.asset_items[0].current_asset_value, consumed_asset_current_value
+		)
+		self.assertEqual(
+			asset_capitalization.asset_items[0].asset_value, consumed_asset_value_before_disposal
+		)
+		self.assertEqual(asset_capitalization.asset_items_total, consumed_asset_value_before_disposal)
+
+		self.assertEqual(asset_capitalization.total_value, consumed_asset_value_before_disposal)
+		self.assertEqual(asset_capitalization.target_incoming_rate, target_incoming_rate)
+
+		# Test Consumed Asset values
+		consumed_asset.reload()
+		self.assertEqual(consumed_asset.status, "Decapitalized")
+
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
+		self.assertEqual(second_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Cancelled")
+
+		depr_schedule_of_consumed_asset = second_asset_depr_schedule.get("depreciation_schedule")
+
+		consumed_depreciation_schedule = [
+			d
+			for d in depr_schedule_of_consumed_asset
+			if getdate(d.schedule_date) == getdate(capitalization_date)
+		]
+		self.assertTrue(consumed_depreciation_schedule and consumed_depreciation_schedule[0].journal_entry)
+		self.assertEqual(
+			consumed_depreciation_schedule[0].depreciation_amount, depreciation_before_disposal_amount
+		)
+
+		# Test General Ledger Entries
+		expected_gle = {
+			"_Test Warehouse - TCP1": consumed_asset_value_before_disposal,
+			"_Test Accumulated Depreciations - TCP1": accumulated_depreciation,
+			"_Test Fixed Asset - TCP1": -consumed_asset_purchase_value,
+		}
+		actual_gle = get_actual_gle_dict(asset_capitalization.name)
+		self.assertEqual(actual_gle, expected_gle)
+
+		# Cancel Asset Capitalization and make test entries and status are reversed
+		asset_capitalization.reload()
+		asset_capitalization.cancel()
+		self.assertEqual(consumed_asset.db_get("status"), "Partially Depreciated")
+		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
+		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def test_capitalize_only_service_item(self):
 		company = "_Test Company"
 		# Variables
@@ -320,6 +486,11 @@ class TestAssetCapitalization(IntegrationTestCase):
 
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
+<<<<<<< HEAD
+=======
+			entry_type="Capitalization",
+			capitalization_method="Choose a WIP composite asset",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			target_asset=wip_composite_asset.name,
 			target_asset_location="Test Location",
 			service_qty=service_qty,
@@ -333,7 +504,11 @@ class TestAssetCapitalization(IntegrationTestCase):
 		self.assertEqual(asset_capitalization.service_items_total, service_amount)
 
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
+<<<<<<< HEAD
 		self.assertEqual(target_asset.net_purchase_amount, total_amount)
+=======
+		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.assertEqual(target_asset.purchase_amount, total_amount)
 
 		expected_gle = {
@@ -349,6 +524,7 @@ class TestAssetCapitalization(IntegrationTestCase):
 		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
 		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
 
+<<<<<<< HEAD
 	def test_capitalize_composite_component(self):
 		company = "_Test Company with perpetual inventory"
 		set_depreciation_settings_in_company(company=company)
@@ -393,6 +569,8 @@ class TestAssetCapitalization(IntegrationTestCase):
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
 		self.assertEqual(actual_gle, {})
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def create_asset_capitalization_data():
 	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
@@ -410,17 +588,30 @@ def create_asset_capitalization(**args):
 	target_item_code = target_asset.item_code or args.target_item_code
 	company = target_asset.company or args.company or "_Test Company"
 	warehouse = args.warehouse or create_warehouse("_Test Warehouse", company=company)
+<<<<<<< HEAD
+=======
+	target_warehouse = args.target_warehouse or warehouse
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	source_warehouse = args.source_warehouse or warehouse
 
 	asset_capitalization = frappe.new_doc("Asset Capitalization")
 	asset_capitalization.update(
 		{
+<<<<<<< HEAD
+=======
+			"entry_type": args.entry_type or "Capitalization",
+			"capitalization_method": args.capitalization_method or None,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"company": company,
 			"posting_date": args.posting_date or now.strftime("%Y-%m-%d"),
 			"posting_time": args.posting_time or now.strftime("%H:%M:%S.%f"),
 			"target_item_code": target_item_code,
 			"target_asset": target_asset.name,
 			"target_asset_location": "Test Location",
+<<<<<<< HEAD
+=======
+			"target_warehouse": target_warehouse,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"target_qty": flt(args.target_qty) or 1,
 			"target_batch_no": args.target_batch_no,
 			"target_serial_no": args.target_serial_no,
@@ -528,8 +719,13 @@ def create_depreciation_asset(**args):
 	asset.purchase_date = args.purchase_date or "2020-01-01"
 	asset.available_for_use_date = args.available_for_use_date or asset.purchase_date
 
+<<<<<<< HEAD
 	asset.net_purchase_amount = args.asset_value or 100000
 	asset.purchase_amount = asset.net_purchase_amount
+=======
+	asset.gross_purchase_amount = args.asset_value or 100000
+	asset.purchase_amount = asset.gross_purchase_amount
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	finance_book = asset.append("finance_books")
 	finance_book.depreciation_start_date = args.depreciation_start_date or "2020-12-31"

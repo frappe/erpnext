@@ -20,14 +20,22 @@ def get_columns(filters, trans):
 	columns = (
 		based_on_details["based_on_cols"]
 		+ period_cols
+<<<<<<< HEAD
 		+ [_("Total(Qty)") + ":Float:120", _("Total(Amt)") + ":Currency/currency:120"]
+=======
+		+ [_("Total(Qty)") + ":Float:120", _("Total(Amt)") + ":Currency:120"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 	if group_by_cols:
 		columns = (
 			based_on_details["based_on_cols"]
 			+ group_by_cols
 			+ period_cols
+<<<<<<< HEAD
 			+ [_("Total(Qty)") + ":Float:120", _("Total(Amt)") + ":Currency/currency:120"]
+=======
+			+ [_("Total(Qty)") + ":Float:120", _("Total(Amt)") + ":Currency:120"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 	conditions = {
@@ -47,7 +55,11 @@ def get_columns(filters, trans):
 def validate_filters(filters):
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
+<<<<<<< HEAD
 			frappe.throw(_("{0} is mandatory").format(_(f)))
+=======
+			frappe.throw(_("{0} is mandatory").format(f))
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if not frappe.db.exists("Fiscal Year", filters.get("fiscal_year")):
 		frappe.throw(_("Fiscal Year {0} Does Not Exist").format(filters.get("fiscal_year")))
@@ -69,7 +81,11 @@ def get_data(filters, conditions):
 		"Delivery Note",
 	]:
 		posting_date = "t1.posting_date"
+<<<<<<< HEAD
 		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
+=======
+		if filters.period_based_on:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			posting_date = "t1." + filters.period_based_on
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
@@ -97,6 +113,7 @@ def get_data(filters, conditions):
 		elif filters.get("group_by") == "Supplier":
 			sel_col = "t1.supplier"
 
+<<<<<<< HEAD
 		if filters.get("based_on") in ["Customer", "Supplier"]:
 			inc = 3
 		elif filters.get("based_on") in ["Item"]:
@@ -104,6 +121,12 @@ def get_data(filters, conditions):
 		else:
 			inc = 1
 
+=======
+		if filters.get("based_on") in ["Item", "Customer", "Supplier"]:
+			inc = 2
+		else:
+			inc = 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		data1 = frappe.db.sql(
 			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
 					where t2.parent = t1.name and t1.company = {} and {} between {} and {} and
@@ -160,7 +183,11 @@ def get_data(filters, conditions):
 
 				# get data for group_by filter
 				row1 = frappe.db.sql(
+<<<<<<< HEAD
 					""" select t4.default_currency AS currency , {} , {} from `tab{}` t1, `tab{} Item` t2 {}
+=======
+					""" select {} , {} from `tab{}` t1, `tab{} Item` t2 {}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							where t2.parent = t1.name and t1.company = {} and {} between {} and {}
 							and t1.docstatus = 1 and {} = {} and {} = {} {} {}
 						""".format(
@@ -185,15 +212,21 @@ def get_data(filters, conditions):
 				)
 
 				des[ind] = row[i][0]
+<<<<<<< HEAD
 				des[ind - 1] = row1[0][0]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 				for j in range(1, len(conditions["columns"]) - inc):
 					des[j + inc] = row1[0][j]
 
 				data.append(des)
+<<<<<<< HEAD
 
 		total_row = calculate_total_row(data1, conditions["columns"])
 		data.append(total_row)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	else:
 		data = frappe.db.sql(
 			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
@@ -217,6 +250,7 @@ def get_data(filters, conditions):
 			as_list=1,
 		)
 
+<<<<<<< HEAD
 		total_row = calculate_total_row(data, conditions["columns"])
 		data.append(total_row)
 
@@ -243,6 +277,11 @@ def calculate_total_row(data, columns):
 	return total_row
 
 
+=======
+	return data
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_mon(dt):
 	return getdate(dt).strftime("%b")
 
@@ -254,7 +293,11 @@ def period_wise_columns_query(filters, trans):
 
 	if trans in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
 		trans_date = "posting_date"
+<<<<<<< HEAD
 		if filters.period_based_on and trans in ["Purchase Invoice", "Sales Invoice"]:
+=======
+		if filters.period_based_on:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			trans_date = filters.period_based_on
 	else:
 		trans_date = "transaction_date"
@@ -266,7 +309,11 @@ def period_wise_columns_query(filters, trans):
 	else:
 		pwc = [
 			_(filters.get("fiscal_year")) + " (" + _("Qty") + "):Float:120",
+<<<<<<< HEAD
 			_(filters.get("fiscal_year")) + " (" + _("Amt") + "):Currency/currency:120",
+=======
+			_(filters.get("fiscal_year")) + " (" + _("Amt") + "):Currency:120",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 		query_details = " SUM(t2.stock_qty), SUM(t2.base_net_amount),"
 
@@ -278,17 +325,25 @@ def get_period_wise_columns(bet_dates, period, pwc):
 	if period == "Monthly":
 		pwc += [
 			_(get_mon(bet_dates[0])) + " (" + _("Qty") + "):Float:120",
+<<<<<<< HEAD
 			_(get_mon(bet_dates[0])) + " (" + _("Amt") + "):Currency/currency:120",
+=======
+			_(get_mon(bet_dates[0])) + " (" + _("Amt") + "):Currency:120",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 	else:
 		pwc += [
 			_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Qty") + "):Float:120",
+<<<<<<< HEAD
 			_(get_mon(bet_dates[0]))
 			+ "-"
 			+ _(get_mon(bet_dates[1]))
 			+ " ("
 			+ _("Amt")
 			+ "):Currency/currency:120",
+=======
+			_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Amt") + "):Currency:120",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		]
 
 
@@ -359,6 +414,7 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Customer":
+<<<<<<< HEAD
 		if trans == "Quotation":
 			based_on_details["based_on_cols"] = [
 				"Party:Link/Customer:120",
@@ -373,6 +429,13 @@ def based_wise_columns_query(based_on, trans):
 				"Territory:Link/Territory:120",
 			]
 			based_on_details["based_on_select"] = "t1.customer, t1.customer_name, t1.territory,"
+=======
+		based_on_details["based_on_cols"] = [
+			"Customer:Link/Customer:120",
+			"Territory:Link/Territory:120",
+		]
+		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
 		based_on_details["addl_tables"] = ""
 
@@ -385,10 +448,16 @@ def based_wise_columns_query(based_on, trans):
 	elif based_on == "Supplier":
 		based_on_details["based_on_cols"] = [
 			"Supplier:Link/Supplier:120",
+<<<<<<< HEAD
 			"Supplier Name:Data:120",
 			"Supplier Group:Link/Supplier Group:140",
 		]
 		based_on_details["based_on_select"] = "t1.supplier, t1.supplier_name, t3.supplier_group,"
+=======
+			"Supplier Group:Link/Supplier Group:140",
+		]
+		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_group,"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		based_on_details["based_on_group_by"] = "t1.supplier"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
@@ -420,6 +489,7 @@ def based_wise_columns_query(based_on, trans):
 		else:
 			frappe.throw(_("Project-wise data is not available for Quotation"))
 
+<<<<<<< HEAD
 	based_on_details["based_on_select"] += "t4.default_currency as currency,"
 	based_on_details["based_on_cols"].append("Currency:Link/Currency:120")
 	based_on_details["addl_tables"] += ", `tabCompany` t4"
@@ -427,6 +497,8 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details.get("addl_tables_relational_cond", "") + " and t1.company = t4.name"
 	)
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	return based_on_details
 
 

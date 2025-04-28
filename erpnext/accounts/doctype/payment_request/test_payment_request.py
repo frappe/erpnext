@@ -1,15 +1,23 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+<<<<<<< HEAD
 import re
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 import unittest
 from unittest.mock import patch
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+=======
+from frappe.tests.utils import FrappeTestCase
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -17,7 +25,11 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 
+<<<<<<< HEAD
 EXTRA_TEST_RECORD_DEPENDENCIES = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
+=======
+test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 PAYMENT_URL = "https://example.com/payment"
 
@@ -34,14 +46,20 @@ payment_method = [
 		"payment_gateway": "_Test Gateway",
 		"payment_account": "_Test Bank - _TC",
 		"currency": "INR",
+<<<<<<< HEAD
 		"company": "_Test Company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	{
 		"doctype": "Payment Gateway Account",
 		"payment_gateway": "_Test Gateway",
 		"payment_account": "_Test Bank USD - _TC",
 		"currency": "USD",
+<<<<<<< HEAD
 		"company": "_Test Company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	{
 		"doctype": "Payment Gateway Account",
@@ -49,7 +67,10 @@ payment_method = [
 		"payment_account": "_Test Bank USD - _TC",
 		"payment_channel": "Other",
 		"currency": "USD",
+<<<<<<< HEAD
 		"company": "_Test Company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 	{
 		"doctype": "Payment Gateway Account",
@@ -57,12 +78,19 @@ payment_method = [
 		"payment_account": "_Test Bank USD - _TC",
 		"payment_channel": "Phone",
 		"currency": "USD",
+<<<<<<< HEAD
 		"company": "_Test Company",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 ]
 
 
+<<<<<<< HEAD
 class TestPaymentRequest(IntegrationTestCase):
+=======
+class TestPaymentRequest(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		for payment_gateway in payment_gateways:
 			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
@@ -71,11 +99,15 @@ class TestPaymentRequest(IntegrationTestCase):
 		for method in payment_method:
 			if not frappe.db.get_value(
 				"Payment Gateway Account",
+<<<<<<< HEAD
 				{
 					"payment_gateway": method["payment_gateway"],
 					"currency": method["currency"],
 					"company": method["company"],
 				},
+=======
+				{"payment_gateway": method["payment_gateway"], "currency": method["currency"]},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"name",
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
@@ -111,7 +143,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			dt="Sales Order",
 			dn=so_inr.name,
 			recipient_id="saurabh@erpnext.com",
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - INR - _TC",
+=======
+			payment_gateway_account="_Test Gateway - INR",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		self.assertEqual(pr.reference_doctype, "Sales Order")
@@ -125,7 +161,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			dt="Sales Invoice",
 			dn=si_usd.name,
 			recipient_id="saurabh@erpnext.com",
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		self.assertEqual(pr.reference_doctype, "Sales Invoice")
@@ -138,7 +178,11 @@ class TestPaymentRequest(IntegrationTestCase):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway Other - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway Other - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=True,
 			return_doc=True,
 		)
@@ -153,7 +197,11 @@ class TestPaymentRequest(IntegrationTestCase):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",  # email channel
+=======
+			payment_gateway_account="_Test Gateway - USD",  # email channel
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=False,
 			return_doc=True,
 		)
@@ -171,7 +219,11 @@ class TestPaymentRequest(IntegrationTestCase):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway Phone - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway Phone - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=True,
 			return_doc=True,
 		)
@@ -188,7 +240,11 @@ class TestPaymentRequest(IntegrationTestCase):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",  # email channel
+=======
+			payment_gateway_account="_Test Gateway - USD",  # email channel
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=True,
 			return_doc=True,
 		)
@@ -209,7 +265,11 @@ class TestPaymentRequest(IntegrationTestCase):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",  # email channel
+=======
+			payment_gateway_account="_Test Gateway - USD",  # email channel
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			make_sales_invoice=True,
 			mute_email=True,
 			submit_doc=True,
@@ -227,7 +287,11 @@ class TestPaymentRequest(IntegrationTestCase):
 
 	def test_payment_entry_against_purchase_invoice(self):
 		si_usd = make_purchase_invoice(
+<<<<<<< HEAD
 			supplier="_Test Supplier USD",
+=======
+			customer="_Test Supplier USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			debit_to="_Test Payable USD - _TC",
 			currency="USD",
 			conversion_rate=50,
@@ -240,7 +304,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			party="_Test Supplier USD",
 			recipient_id="user@example.com",
 			mute_email=1,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=1,
 			return_doc=1,
 		)
@@ -252,7 +320,11 @@ class TestPaymentRequest(IntegrationTestCase):
 
 	def test_multiple_payment_entry_against_purchase_invoice(self):
 		purchase_invoice = make_purchase_invoice(
+<<<<<<< HEAD
 			supplier="_Test Supplier USD",
+=======
+			customer="_Test Supplier USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			debit_to="_Test Payable USD - _TC",
 			currency="USD",
 			conversion_rate=50,
@@ -265,7 +337,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			dn=purchase_invoice.name,
 			recipient_id="user@example.com",
 			mute_email=1,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return_doc=1,
 		)
 
@@ -284,7 +360,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			dn=purchase_invoice.name,
 			recipient_id="user@example.com",
 			mute_email=1,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return_doc=1,
 		)
 
@@ -308,7 +388,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			dn=so_inr.name,
 			recipient_id="saurabh@erpnext.com",
 			mute_email=1,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - INR - _TC",
+=======
+			payment_gateway_account="_Test Gateway - INR",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=1,
 			return_doc=1,
 		)
@@ -330,7 +414,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			dn=si_usd.name,
 			recipient_id="saurabh@erpnext.com",
 			mute_email=1,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=1,
 			return_doc=1,
 		)
@@ -374,7 +462,11 @@ class TestPaymentRequest(IntegrationTestCase):
 			dn=si_usd.name,
 			recipient_id="saurabh@erpnext.com",
 			mute_email=1,
+<<<<<<< HEAD
 			payment_gateway_account="_Test Gateway - USD - _TC",
+=======
+			payment_gateway_account="_Test Gateway - USD",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			submit_doc=1,
 			return_doc=1,
 		)
@@ -426,6 +518,7 @@ class TestPaymentRequest(IntegrationTestCase):
 		self.assertEqual(pe.paid_amount, 800)
 		self.assertEqual(pe.base_received_amount, 800)
 		self.assertEqual(pe.received_amount, 10)
+<<<<<<< HEAD
 
 	def test_multiple_payment_if_partially_paid_for_same_currency(self):
 		so = make_sales_order(currency="INR", qty=1, rate=1000)
@@ -851,3 +944,5 @@ class TestPaymentRequest(IntegrationTestCase):
 		pr.load_from_db()
 
 		self.assertEqual(pr.grand_total, pi.outstanding_amount)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

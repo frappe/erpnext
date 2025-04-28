@@ -19,7 +19,11 @@ def get_data(filters):
 		"Serial and Batch Bundle",
 		fields=[
 			"`tabSerial and Batch Bundle`.`voucher_type`",
+<<<<<<< HEAD
 			"`tabSerial and Batch Bundle`.`posting_datetime` as posting_date",
+=======
+			"`tabSerial and Batch Bundle`.`posting_date`",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			"`tabSerial and Batch Bundle`.`name`",
 			"`tabSerial and Batch Bundle`.`company`",
 			"`tabSerial and Batch Bundle`.`voucher_no`",
@@ -33,7 +37,11 @@ def get_data(filters):
 			"`tabSerial and Batch Entry`.`qty`",
 		],
 		filters=filter_conditions,
+<<<<<<< HEAD
 		order_by="posting_datetime",
+=======
+		order_by="posting_date",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 
@@ -54,7 +62,11 @@ def get_filter_conditions(filters):
 		filter_conditions.append(
 			[
 				"Serial and Batch Bundle",
+<<<<<<< HEAD
 				"posting_datetime",
+=======
+				"posting_date",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				"between",
 				[filters.get("from_date"), filters.get("to_date")],
 			]
@@ -106,6 +118,11 @@ def get_columns(filters, data):
 				{
 					"label": _("Voucher Type"),
 					"fieldname": "voucher_type",
+<<<<<<< HEAD
+=======
+					"fieldtype": "Link",
+					"options": "DocType",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					"width": 120,
 				},
 				{
@@ -144,6 +161,7 @@ def get_columns(filters, data):
 		)
 
 	if not item_details or item_details.get("has_serial_no"):
+<<<<<<< HEAD
 		columns.append(
 			{
 				"label": _("Serial No"),
@@ -153,6 +171,9 @@ def get_columns(filters, data):
 				"options": "Serial No",
 			}
 		)
+=======
+		columns.append({"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Data", "width": 120})
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if not item_details or item_details.get("has_batch_no"):
 		columns.extend(
@@ -183,15 +204,23 @@ def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
 	child_doctypes = frappe.get_all(
 		"DocField",
 		filters={"fieldname": "serial_and_batch_bundle"},
+<<<<<<< HEAD
 		fields=["parent"],
 		distinct=True,
+=======
+		fields=["distinct parent as parent"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 
 	query_filters = {"options": ["in", [d.parent for d in child_doctypes]]}
 	if txt:
 		query_filters["parent"] = ["like", f"%{txt}%"]
 
+<<<<<<< HEAD
 	return frappe.get_all("DocField", filters=query_filters, fields=["parent"], as_list=True, distinct=True)
+=======
+	return frappe.get_all("DocField", filters=query_filters, fields=["distinct parent"], as_list=True)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 
 @frappe.whitelist()

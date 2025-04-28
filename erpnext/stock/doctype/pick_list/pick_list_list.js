@@ -4,9 +4,14 @@
 frappe.listview_settings["Pick List"] = {
 	get_indicator: function (doc) {
 		const status_colors = {
+<<<<<<< HEAD
 			Draft: "red",
 			Open: "orange",
 			"Partly Delivered": "orange",
+=======
+			Draft: "grey",
+			Open: "orange",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			Completed: "green",
 			Cancelled: "red",
 		};

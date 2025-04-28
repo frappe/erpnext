@@ -8,6 +8,10 @@
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
+<<<<<<< HEAD
+=======
+  "title",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "naming_series",
   "customer",
   "customer_name",
@@ -30,6 +34,26 @@
   "project",
   "dimension_col_break",
   "cost_center",
+<<<<<<< HEAD
+=======
+  "customer_po_details",
+  "po_no",
+  "column_break_23",
+  "po_date",
+  "address_and_contact",
+  "customer_address",
+  "address_display",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "territory",
+  "col_break4",
+  "shipping_address_name",
+  "shipping_address",
+  "company_address",
+  "company_address_display",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -43,7 +67,10 @@
   "items_section",
   "update_stock",
   "scan_barcode",
+<<<<<<< HEAD
   "last_scanned_warehouse",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -70,11 +97,25 @@
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
+<<<<<<< HEAD
   "item_wise_tax_details",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_43",
   "base_total_taxes_and_charges",
   "column_break_47",
   "total_taxes_and_charges",
+<<<<<<< HEAD
+=======
+  "loyalty_points_redemption",
+  "loyalty_points",
+  "loyalty_amount",
+  "redeem_loyalty_points",
+  "column_break_77",
+  "loyalty_program",
+  "loyalty_redemption_account",
+  "loyalty_redemption_cost_center",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "section_break_49",
   "coupon_code",
   "apply_discount_on",
@@ -94,7 +135,17 @@
   "in_words",
   "total_advance",
   "outstanding_amount",
+<<<<<<< HEAD
   "payments_tab",
+=======
+  "advances_section",
+  "allocate_advances_automatically",
+  "get_advances",
+  "advances",
+  "payment_schedule_section",
+  "payment_terms_template",
+  "payment_schedule",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "payments_section",
   "cash_bank_account",
   "payments",
@@ -107,10 +158,13 @@
   "column_break_90",
   "change_amount",
   "account_for_change_amount",
+<<<<<<< HEAD
   "advances_section",
   "allocate_advances_automatically",
   "get_advances",
   "advances",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "column_break4",
   "write_off_amount",
   "base_write_off_amount",
@@ -118,6 +172,7 @@
   "column_break_74",
   "write_off_account",
   "write_off_cost_center",
+<<<<<<< HEAD
   "loyalty_points_redemption",
   "loyalty_points",
   "loyalty_amount",
@@ -153,6 +208,11 @@
   "po_no",
   "column_break_23",
   "po_date",
+=======
+  "terms_section_break",
+  "tc_name",
+  "terms",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "edit_printing_settings",
   "letter_head",
   "group_same_items",
@@ -162,6 +222,7 @@
   "more_information",
   "inter_company_invoice_reference",
   "customer_group",
+<<<<<<< HEAD
   "is_discounted",
   "col_break23",
   "utm_source",
@@ -169,6 +230,13 @@
   "utm_medium",
   "column_break_gpiw",
   "status",
+=======
+  "campaign",
+  "is_discounted",
+  "col_break23",
+  "status",
+  "source",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "more_info",
   "debit_to",
   "party_account_currency",
@@ -198,6 +266,19 @@
    "options": "fa fa-user"
   },
   {
+<<<<<<< HEAD
+=======
+   "allow_on_submit": 1,
+   "default": "{customer_name}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "bold": 1,
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -298,7 +379,10 @@
    "search_index": 1
   },
   {
+<<<<<<< HEAD
    "default": "Now",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -405,6 +489,10 @@
    "label": "Customer's Purchase Order Date"
   },
   {
+<<<<<<< HEAD
+=======
+   "collapsible": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
@@ -1056,6 +1144,10 @@
    "print_hide": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "collapsible": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible_depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
@@ -1135,10 +1227,15 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "collapsible": 1,
    "fieldname": "section_break_88",
    "fieldtype": "Section Break",
    "label": "Changes"
+=======
+   "fieldname": "section_break_88",
+   "fieldtype": "Section Break"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   },
   {
    "depends_on": "is_pos",
@@ -1225,6 +1322,10 @@
    "print_hide": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "collapsible": 1,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
@@ -1317,6 +1418,18 @@
    "print_hide": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "campaign",
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "oldfieldname": "campaign",
+   "oldfieldtype": "Link",
+   "options": "Campaign",
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "default": "0",
    "fieldname": "is_discounted",
    "fieldtype": "Check",
@@ -1336,11 +1449,27 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
+<<<<<<< HEAD
    "options": "\nDraft\nReturn\nCredit Note Issued\nConsolidated\nSubmitted\nPaid\nPartly Paid\nUnpaid\nPartly Paid and Discounted\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled",
+=======
+   "options": "\nDraft\nReturn\nCredit Note Issued\nConsolidated\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "print_hide": 1,
    "read_only": 1
   },
   {
+<<<<<<< HEAD
+=======
+   "fieldname": "source",
+   "fieldtype": "Link",
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "Lead Source",
+   "print_hide": 1
+  },
+  {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
@@ -1422,8 +1551,11 @@
    "width": "50%"
   },
   {
+<<<<<<< HEAD
    "fetch_from": "sales_partner.commission_rate",
    "fetch_if_empty": 1,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
    "fieldname": "commission_rate",
    "fieldtype": "Float",
    "label": "Commission Rate (%)",
@@ -1540,6 +1672,7 @@
    "fieldname": "update_billed_amount_in_delivery_note",
    "fieldtype": "Check",
    "label": "Update Billed Amount in Delivery Note"
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_gpiw",
@@ -1611,12 +1744,18 @@
    "label": "Item Wise Tax Details",
    "no_copy": 1,
    "options": "Item Wise Tax Detail"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-04 22:22:31.471752",
+=======
+ "modified": "2024-03-27 13:10:14.787999",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
@@ -1661,13 +1800,23 @@
    "role": "All"
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
+<<<<<<< HEAD
  "title_field": "customer_name",
  "track_changes": 1
 }
+=======
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

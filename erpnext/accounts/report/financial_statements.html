@@ -34,12 +34,15 @@
 	</h5>
 {% } %}
 <hr>
+<<<<<<< HEAD
 <div class="show-filters">
 			{% if subtitle %}
 				{{ subtitle }}
 				<hr>
 			{% endif %}
 </div>
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 <table class="table table-bordered">
 	<thead>
 		<tr>
@@ -53,12 +56,21 @@
 		{% for(let j=0, k=data.length; j<k; j++) { %}
 			{%
 				var row = data[j];
+<<<<<<< HEAD
 				var row_class = data[j].parent_account || data[j].parent_section ? "" : "financial-statements-important";
 				row_class += data[j].account_name || data[j].section ? "" : " financial-statements-blank-row";
 			%}
 			<tr class="{%= row_class %}">
 				<td>
 					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name || row.section %}</span>
+=======
+				var row_class = data[j].parent_account ? "" : "financial-statements-important";
+				row_class += data[j].account_name ? "" : " financial-statements-blank-row";
+			%}
+			<tr class="{%= row_class %}">
+				<td>
+					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name %}</span>
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				</td>
 				{% for(let i=1, l=report_columns.length; i<l; i++) { %}
 					<td class="text-right">
@@ -73,5 +85,9 @@
 	</tbody>
 </table>
 <p class="text-right text-muted">
+<<<<<<< HEAD
 	{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}
+=======
+	Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 </p>

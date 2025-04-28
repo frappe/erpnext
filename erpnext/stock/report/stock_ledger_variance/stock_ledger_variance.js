@@ -47,6 +47,7 @@ frappe.query_reports["Stock Ledger Variance"] = {
 			fieldname: "difference_in",
 			fieldtype: "Select",
 			label: __("Difference In"),
+<<<<<<< HEAD
 			options: [
 				{
 					// Check "Stock Ledger Invariant Check" report with A - B column
@@ -64,6 +65,9 @@ frappe.query_reports["Stock Ledger Variance"] = {
 					value: "Valuation",
 				},
 			],
+=======
+			options: ["", "Qty", "Value", "Valuation"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "include_disabled",

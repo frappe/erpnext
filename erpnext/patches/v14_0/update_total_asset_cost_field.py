@@ -3,7 +3,11 @@ import frappe
 
 def execute():
 	asset = frappe.qb.DocType("Asset")
+<<<<<<< HEAD
 	frappe.qb.update(asset).set(asset.total_asset_cost, asset.net_purchase_amount).run()
+=======
+	frappe.qb.update(asset).set(asset.total_asset_cost, asset.gross_purchase_amount).run()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	asset_repair_list = frappe.db.get_all(
 		"Asset Repair",

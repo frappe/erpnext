@@ -41,7 +41,10 @@ class Employee(NestedSet):
 		self.validate_email()
 		self.validate_status()
 		self.validate_reports_to()
+<<<<<<< HEAD
 		self.set_preferred_email()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		self.validate_preferred_email()
 
 		if self.user_id:
@@ -64,12 +67,21 @@ class Employee(NestedSet):
 
 	def validate_user_details(self):
 		if self.user_id:
+<<<<<<< HEAD
 			data = frappe.db.get_value("User", self.user_id, ["enabled"], as_dict=1)
+=======
+			data = frappe.db.get_value("User", self.user_id, ["enabled", "user_image"], as_dict=1)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if not data:
 				self.user_id = None
 				return
 
+<<<<<<< HEAD
+=======
+			if data.get("user_image") and self.image == "":
+				self.image = data.get("user_image")
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			self.validate_for_enabled_user_id(data.get("enabled", 0))
 			self.validate_duplicate_user_id()
 
@@ -78,26 +90,43 @@ class Employee(NestedSet):
 
 	def on_update(self):
 		self.update_nsm_model()
+<<<<<<< HEAD
 		frappe.clear_cache()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
 
 	def update_user_permissions(self):
+<<<<<<< HEAD
 		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
+=======
+		if not self.create_user_permission:
+			return
+		if not has_permission("User Permission", ptype="write", print_logs=False):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			return
 
 		employee_user_permission_exists = frappe.db.exists(
 			"User Permission", {"allow": "Employee", "for_value": self.name, "user": self.user_id}
 		)
 
+<<<<<<< HEAD
 		if employee_user_permission_exists and not self.create_user_permission:
 			remove_user_permission("Employee", self.name, self.user_id)
 			remove_user_permission("Company", self.company, self.user_id)
 		elif not employee_user_permission_exists and self.create_user_permission:
 			add_user_permission("Employee", self.name, self.user_id)
 			add_user_permission("Company", self.company, self.user_id)
+=======
+		if employee_user_permission_exists:
+			return
+
+		add_user_permission("Employee", self.name, self.user_id)
+		add_user_permission("Company", self.company, self.user_id)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def update_user(self):
 		# add employee role if missing
@@ -159,7 +188,13 @@ class Employee(NestedSet):
 
 	def set_preferred_email(self):
 		preferred_email_field = frappe.scrub(self.prefered_contact_email)
+<<<<<<< HEAD
 		self.prefered_email = self.get(preferred_email_field) if preferred_email_field else None
+=======
+		if preferred_email_field:
+			preferred_email = self.get(preferred_email_field)
+			self.prefered_email = preferred_email
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def validate_status(self):
 		if self.status == "Left":
@@ -248,17 +283,33 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
 
 
+<<<<<<< HEAD
+=======
+def update_user_permissions(doc, method):
+	# called via User hook
+	if "Employee" in [d.role for d in doc.get("roles")]:
+		if not has_permission("User Permission", ptype="write", print_logs=False):
+			return
+		employee = frappe.get_doc("Employee", {"user_id": doc.name})
+		employee.update_user_permissions()
+
+
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_employee_email(employee_doc):
 	return (
 		employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
 	)
 
 
+<<<<<<< HEAD
 def get_holiday_list_for_employee(employee, raise_exception=True, as_on=None):
 	hrms_override = frappe.get_hooks("employee_holiday_list")
 
 	if hrms_override:
 		return frappe.get_attr(hrms_override[-1])(employee, raise_exception, as_on)
+=======
+def get_holiday_list_for_employee(employee, raise_exception=True):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if employee:
 		holiday_list, company = frappe.get_cached_value("Employee", employee, ["holiday_list", "company"])
 	else:

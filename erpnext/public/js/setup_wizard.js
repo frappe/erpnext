@@ -8,6 +8,7 @@ frappe.pages["setup-wizard"].on_page_load = function (wrapper) {
 };
 
 frappe.setup.on("before_load", function () {
+<<<<<<< HEAD
 	if (
 		frappe.boot.setup_wizard_completed_apps?.length &&
 		frappe.boot.setup_wizard_completed_apps.includes("erpnext")
@@ -15,6 +16,8 @@ frappe.setup.on("before_load", function () {
 		return;
 	}
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	erpnext.setup.slides_settings.map(frappe.setup.add_slide);
 });
 
@@ -61,6 +64,7 @@ erpnext.setup.slides_settings = [
 
 		onload: function (slide) {
 			this.bind_events(slide);
+<<<<<<< HEAD
 		},
 
 		before_show: function () {
@@ -68,6 +72,11 @@ erpnext.setup.slides_settings = [
 			this.set_fy_dates(this);
 		},
 
+=======
+			this.load_chart_of_accounts(slide);
+			this.set_fy_dates(slide);
+		},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		validate: function () {
 			if (!this.validate_fy_dates()) {
 				return false;
@@ -102,7 +111,11 @@ erpnext.setup.slides_settings = [
 		},
 
 		set_fy_dates: function (slide) {
+<<<<<<< HEAD
 			var country = frappe.wizard.values.country || frappe.defaults.get_default("country");
+=======
+			var country = frappe.wizard.values.country;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if (country) {
 				let fy = erpnext.setup.fiscal_years[country];
@@ -124,7 +137,11 @@ erpnext.setup.slides_settings = [
 		},
 
 		load_chart_of_accounts: function (slide) {
+<<<<<<< HEAD
 			let country = frappe.wizard.values.country || frappe.defaults.get_default("country");
+=======
+			let country = frappe.wizard.values.country;
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 			if (country) {
 				frappe.call({
@@ -250,6 +267,7 @@ erpnext.setup.fiscal_years = {
 	Afghanistan: ["12-21", "12-20"],
 	Australia: ["07-01", "06-30"],
 	Bangladesh: ["07-01", "06-30"],
+<<<<<<< HEAD
 	"Costa Rica": ["10-01", "09-30"],
 	Egypt: ["07-01", "06-30"],
 	Ethiopia: ["07-08", "07-07"],
@@ -260,9 +278,22 @@ erpnext.setup.fiscal_years = {
 	Malaysia: ["07-01", "06-30"],
 	Myanmar: ["04-01", "03-31"],
 	Nepal: ["07-16", "07-15"],
+=======
+	Canada: ["04-01", "03-31"],
+	"Costa Rica": ["10-01", "09-30"],
+	Egypt: ["07-01", "06-30"],
+	"Hong Kong": ["04-01", "03-31"],
+	India: ["04-01", "03-31"],
+	Iran: ["06-23", "06-22"],
+	Myanmar: ["04-01", "03-31"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	"New Zealand": ["04-01", "03-31"],
 	Pakistan: ["07-01", "06-30"],
 	Singapore: ["04-01", "03-31"],
 	"South Africa": ["03-01", "02-28"],
+<<<<<<< HEAD
+=======
+	Thailand: ["10-01", "09-30"],
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	"United Kingdom": ["04-01", "03-31"],
 };

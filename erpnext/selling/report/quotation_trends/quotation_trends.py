@@ -25,6 +25,7 @@ def get_chart_data(data, conditions, filters):
 
 	datapoints = []
 
+<<<<<<< HEAD
 	if filters.get("based_on") in ["Customer"]:
 		start = 3
 	elif filters.get("based_on") in ["Item"]:
@@ -32,21 +33,36 @@ def get_chart_data(data, conditions, filters):
 	else:
 		start = 1
 
+=======
+	start = 2 if filters.get("based_on") in ["Item", "Customer"] else 1
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	if filters.get("group_by"):
 		start += 1
 
 	# fetch only periodic columns as labels
+<<<<<<< HEAD
 	columns = conditions.get("columns")[start:-2][2::2]
+=======
+	columns = conditions.get("columns")[start:-2][1::2]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	labels = [column.split(":")[0] for column in columns]
 	datapoints = [0] * len(labels)
 
 	for row in data:
 		# If group by filter, don't add first row of group (it's already summed)
+<<<<<<< HEAD
 		if not row[start]:
 			continue
 		# Remove None values and compute only periodic data
 		row = [x if x else 0 for x in row[start:-2]]
 		row = row[2::2]
+=======
+		if not row[start - 1]:
+			continue
+		# Remove None values and compute only periodic data
+		row = [x if x else 0 for x in row[start:-2]]
+		row = row[1::2]
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		for i in range(len(row)):
 			datapoints[i] += row[i]

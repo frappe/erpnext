@@ -18,12 +18,27 @@ def create_charts(
 		accounts = []
 
 		def _import_accounts(children, parent, root_type, root_account=False):
+<<<<<<< HEAD
 			nonlocal custom_chart
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			for account_name, child in children.items():
 				if root_account:
 					root_type = child.get("root_type")
 
+<<<<<<< HEAD
 				if account_name not in get_chart_metadata_fields():
+=======
+				if account_name not in [
+					"account_name",
+					"account_number",
+					"account_type",
+					"root_type",
+					"is_group",
+					"tax_rate",
+					"account_currency",
+				]:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					account_number = cstr(child.get("account_number")).strip()
 					account_name, account_name_in_db = add_suffix_if_duplicate(
 						account_name, account_number, accounts
@@ -47,10 +62,15 @@ def create_charts(
 							"report_type": report_type,
 							"account_number": account_number,
 							"account_type": child.get("account_type"),
+<<<<<<< HEAD
 							"account_category": child.get("account_category"),
 							"account_currency": child.get("account_currency")
 							if custom_chart
 							else frappe.get_cached_value("Company", company, "default_currency"),
+=======
+							"account_currency": child.get("account_currency")
+							or frappe.get_cached_value("Company", company, "default_currency"),
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 							"tax_rate": child.get("tax_rate"),
 						}
 					)
@@ -90,7 +110,24 @@ def add_suffix_if_duplicate(account_name, account_number, accounts):
 def identify_is_group(child):
 	if child.get("is_group"):
 		is_group = child.get("is_group")
+<<<<<<< HEAD
 	elif len(set(child.keys()) - set(get_chart_metadata_fields())):
+=======
+	elif len(
+		set(child.keys())
+		- set(
+			[
+				"account_name",
+				"account_type",
+				"root_type",
+				"is_group",
+				"tax_rate",
+				"account_number",
+				"account_currency",
+			]
+		)
+	):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		is_group = 1
 	else:
 		is_group = 0
@@ -98,7 +135,10 @@ def identify_is_group(child):
 	return is_group
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 def get_chart(chart_template, existing_company=None):
 	chart = {}
 	if existing_company:
@@ -233,7 +273,17 @@ def validate_bank_account(coa, bank_account):
 
 		def _get_account_names(account_master):
 			for account_name, child in account_master.items():
+<<<<<<< HEAD
 				if account_name not in get_chart_metadata_fields():
+=======
+				if account_name not in [
+					"account_number",
+					"account_type",
+					"root_type",
+					"is_group",
+					"tax_rate",
+				]:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 					accounts.append(account_name)
 
 					_get_account_names(child)
@@ -258,7 +308,19 @@ def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=Fals
 		"""recursively called to form a parent-child based list of dict from chart template"""
 		for account_name, child in children.items():
 			account = {}
+<<<<<<< HEAD
 			if account_name in get_chart_metadata_fields():
+=======
+			if account_name in [
+				"account_name",
+				"account_number",
+				"account_type",
+				"root_type",
+				"is_group",
+				"tax_rate",
+				"account_currency",
+			]:
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				continue
 
 			if from_coa_importer:
@@ -276,6 +338,7 @@ def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=Fals
 
 	_import_accounts(chart, None)
 	return accounts
+<<<<<<< HEAD
 
 
 def get_chart_metadata_fields():
@@ -289,3 +352,5 @@ def get_chart_metadata_fields():
 		"tax_rate",
 		"account_currency",
 	]
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

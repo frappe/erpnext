@@ -9,6 +9,7 @@ frappe.ui.form.on("Payment Request", {
 				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
 			};
 		});
+<<<<<<< HEAD
 
 		frm.set_query("payment_gateway_account", function () {
 			return {
@@ -17,6 +18,8 @@ frappe.ui.form.on("Payment Request", {
 				},
 			};
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 });
 
@@ -60,8 +63,13 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 	}
 
 	if (
+<<<<<<< HEAD
 		frm.doc.payment_request_type == "Outward" &&
 		["Initiated", "Partially Paid"].includes(frm.doc.status)
+=======
+		(!frm.doc.payment_gateway_account || frm.doc.payment_request_type == "Outward") &&
+		frm.doc.status == "Initiated"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	) {
 		frm.add_custom_button(__("Create Payment Entry"), function () {
 			frappe.call({

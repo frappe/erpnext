@@ -7,6 +7,7 @@ const SALES_DOCTYPES = ["Quotation", "Sales Order", "Delivery Note", "Sales Invo
 const PURCHASE_DOCTYPES = ["Purchase Order", "Purchase Receipt", "Purchase Invoice"];
 
 frappe.ui.form.on("Item", {
+<<<<<<< HEAD
 	valuation_method(frm) {
 		if (!frm.is_new() && frm.doc.valuation_method === "Moving Average") {
 			let stock_exists = frm.doc.__onload && frm.doc.__onload.stock_exists ? 1 : 0;
@@ -36,6 +37,8 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	setup: function (frm) {
 		frm.add_fetch("attribute", "numeric_values", "numeric_values");
 		frm.add_fetch("attribute", "from_range", "from_range");
@@ -221,6 +224,7 @@ frappe.ui.form.on("Item", {
 
 		const stock_exists = frm.doc.__onload && frm.doc.__onload.stock_exists ? 1 : 0;
 
+<<<<<<< HEAD
 		[
 			"is_stock_item",
 			"is_customer_provided_item",
@@ -228,6 +232,9 @@ frappe.ui.form.on("Item", {
 			"has_batch_no",
 			"has_variants",
 		].forEach((fieldname) => {
+=======
+		["is_stock_item", "has_serial_no", "has_batch_no", "has_variants"].forEach((fieldname) => {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			frm.set_df_property(fieldname, "read_only", stock_exists);
 		});
 
@@ -358,6 +365,7 @@ $.extend(erpnext.item, {
 			};
 		};
 
+<<<<<<< HEAD
 		frm.fields_dict["item_defaults"].grid.get_field("default_inventory_account").get_query = function (
 			doc,
 			cdt,
@@ -369,6 +377,8 @@ $.extend(erpnext.item, {
 			};
 		};
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frm.fields_dict["item_defaults"].grid.get_field("default_discount_account").get_query = function (
 			doc,
 			cdt,
@@ -505,6 +515,7 @@ $.extend(erpnext.item, {
 				},
 			};
 		});
+<<<<<<< HEAD
 
 		let fields = ["purchase_expense_account", "purchase_expense_contra_account", "default_cogs_account"];
 
@@ -531,6 +542,8 @@ $.extend(erpnext.item, {
 				},
 			};
 		});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	make_dashboard: function (frm) {
@@ -560,6 +573,7 @@ $.extend(erpnext.item, {
 			},
 			__("Actions")
 		);
+<<<<<<< HEAD
 
 		frm.add_custom_button(
 			__("Make Lead Time"),
@@ -570,6 +584,8 @@ $.extend(erpnext.item, {
 			},
 			__("Actions")
 		);
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	},
 
 	weight_to_validate: function (frm) {
@@ -627,12 +643,17 @@ $.extend(erpnext.item, {
 
 		function make_fields_from_attribute_values(attr_dict) {
 			let fields = [];
+<<<<<<< HEAD
 			let att_key = frm.doc.attributes.map((idx) => idx.attribute);
 			att_key.forEach((name, i) => {
+=======
+			Object.keys(attr_dict).forEach((name, i) => {
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				if (i % 3 === 0) {
 					fields.push({ fieldtype: "Section Break" });
 				}
 				fields.push({ fieldtype: "Column Break", label: name });
+<<<<<<< HEAD
 				fields.push({
 					fieldtype: "Data",
 					placeholder: "Search",
@@ -651,6 +672,8 @@ $.extend(erpnext.item, {
 						});
 					},
 				});
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				attr_dict[name].forEach((value) => {
 					fields.push({
 						fieldtype: "Check",
@@ -744,10 +767,13 @@ $.extend(erpnext.item, {
 			me.multiple_variant_dialog.disable_primary_action();
 			me.multiple_variant_dialog.clear();
 			me.multiple_variant_dialog.show();
+<<<<<<< HEAD
 			me.multiple_variant_dialog.$wrapper
 				.find("div[data-fieldname^='search_']")
 				.find(".clearfix")
 				.hide();
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		function get_selected_attributes() {
@@ -768,6 +794,7 @@ $.extend(erpnext.item, {
 		}
 
 		frm.doc.attributes.forEach(function (d) {
+<<<<<<< HEAD
 			if (!d.disabled) {
 				let p = new Promise((resolve) => {
 					if (!d.numeric_values) {
@@ -803,6 +830,41 @@ $.extend(erpnext.item, {
 
 				promises.push(p);
 			}
+=======
+			let p = new Promise((resolve) => {
+				if (!d.numeric_values) {
+					frappe
+						.call({
+							method: "frappe.client.get_list",
+							args: {
+								doctype: "Item Attribute Value",
+								filters: [["parent", "=", d.attribute]],
+								fields: ["attribute_value"],
+								limit_page_length: 0,
+								parent: "Item Attribute",
+								order_by: "idx",
+							},
+						})
+						.then((r) => {
+							if (r.message) {
+								attr_val_fields[d.attribute] = r.message.map(function (d) {
+									return d.attribute_value;
+								});
+								resolve();
+							}
+						});
+				} else {
+					let values = [];
+					for (var i = d.from_range; i <= d.to_range; i = flt(i + d.increment, 6)) {
+						values.push(i);
+					}
+					attr_val_fields[d.attribute] = values;
+					resolve();
+				}
+			});
+
+			promises.push(p);
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}, this);
 
 		Promise.all(promises).then(() => {
@@ -817,6 +879,7 @@ $.extend(erpnext.item, {
 		for (var i = 0; i < frm.doc.attributes.length; i++) {
 			var fieldtype, desc;
 			var row = frm.doc.attributes[i];
+<<<<<<< HEAD
 
 			if (!row.disabled) {
 				if (row.numeric_values) {
@@ -838,6 +901,28 @@ $.extend(erpnext.item, {
 					description: desc,
 				});
 			}
+=======
+			if (row.numeric_values) {
+				fieldtype = "Float";
+				desc =
+					"Min Value: " +
+					row.from_range +
+					" , Max Value: " +
+					row.to_range +
+					", in Increments of: " +
+					row.increment;
+			} else {
+				fieldtype = "Data";
+				desc = "";
+			}
+			fields = fields.concat({
+				label: row.attribute,
+				fieldname: row.attribute,
+				fieldtype: fieldtype,
+				reqd: 0,
+				description: desc,
+			});
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 
 		if (frm.doc.image) {

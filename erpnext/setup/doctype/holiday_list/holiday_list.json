@@ -16,8 +16,11 @@
   "add_weekly_holidays",
   "weekly_off",
   "get_weekly_off_dates",
+<<<<<<< HEAD
   "column_break_euok",
   "is_half_day",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   "add_local_holidays",
   "country",
   "subdivision",
@@ -138,6 +141,7 @@
    "fieldtype": "Button",
    "label": "Add to Holidays",
    "options": "get_local_holidays"
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_euok",
@@ -148,12 +152,18 @@
    "fieldname": "is_half_day",
    "fieldtype": "Check",
    "label": "Is Half Day"
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-28 15:17:05.313383",
+=======
+ "modified": "2024-03-27 13:09:49.920245",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Holiday List",
@@ -172,8 +182,15 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

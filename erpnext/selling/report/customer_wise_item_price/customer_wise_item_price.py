@@ -95,7 +95,11 @@ def get_data(filters=None):
 
 	items = get_selling_items(filters)
 	item_stock_map = frappe.get_all(
+<<<<<<< HEAD
 		"Bin", fields=["item_code", {"SUM": "actual_qty", "as": "available"}], group_by="item_code"
+=======
+		"Bin", fields=["item_code", "sum(actual_qty) AS available"], group_by="item_code"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	)
 	item_stock_map = {item.item_code: item.available for item in item_stock_map}
 	price_list_map = fetch_item_prices(

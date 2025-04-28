@@ -24,7 +24,10 @@ frappe.ui.form.on("Driver", {
 
 	transporter: function (frm, cdt, cdn) {
 		// this assumes that supplier's address has same title as supplier's name
+<<<<<<< HEAD
 		if (!frm.doc.transporter) return;
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frappe.db
 			.get_doc("Address", null, { address_title: frm.doc.transporter })
 			.then((r) => {

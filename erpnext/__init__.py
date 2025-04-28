@@ -1,9 +1,14 @@
 import functools
 import inspect
+<<<<<<< HEAD
 from typing import TypeVar
 
 import frappe
 from frappe.model.document import Document
+=======
+
+import frappe
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils.user import is_website_user
 
 __version__ = "16.0.0-dev"
@@ -57,7 +62,11 @@ def get_company_currency(company):
 
 def set_perpetual_inventory(enable=1, company=None):
 	if not company:
+<<<<<<< HEAD
 		company = "_Test Company" if frappe.in_test else get_default_company()
+=======
+		company = "_Test Company" if frappe.flags.in_test else get_default_company()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	company = frappe.get_doc("Company", company)
 	company.enable_perpetual_inventory = enable
@@ -77,7 +86,11 @@ def encode_company_abbr(name, company=None, abbr=None):
 
 def is_perpetual_inventory_enabled(company):
 	if not company:
+<<<<<<< HEAD
 		company = "_Test Company" if frappe.in_test else get_default_company()
+=======
+		company = "_Test Company" if frappe.flags.in_test else get_default_company()
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	if not hasattr(frappe.local, "enable_perpetual_inventory"):
 		frappe.local.enable_perpetual_inventory = {}
@@ -162,6 +175,7 @@ def check_app_permission():
 		return False
 
 	return True
+<<<<<<< HEAD
 
 
 T = TypeVar("T")
@@ -193,3 +207,5 @@ def normalize_ctx_input(T: type) -> callable:
 		return wrapper
 
 	return decorator
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)

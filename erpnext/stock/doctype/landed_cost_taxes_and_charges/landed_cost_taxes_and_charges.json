@@ -11,9 +11,13 @@
   "description",
   "col_break3",
   "amount",
+<<<<<<< HEAD
   "base_amount",
   "has_corrective_cost",
   "has_operating_cost"
+=======
+  "base_amount"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  ],
  "fields": [
   {
@@ -64,6 +68,7 @@
    "label": "Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+<<<<<<< HEAD
   },
   {
    "default": "0",
@@ -85,13 +90,28 @@
  "istable": 1,
  "links": [],
  "modified": "2025-07-16 15:27:59.175530",
+=======
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:09:59.493991",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
+=======
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

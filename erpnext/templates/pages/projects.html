@@ -56,8 +56,13 @@
     {{ empty_state(_("Task")) }}
   {% endif %}
 
+<<<<<<< HEAD
   {% if doc.timesheets %}
     <h4 class="my-account-header">{{ _("Timesheets") }}</h4>
+=======
+  <h4 class="my-account-header">{{ _("Timesheets") }}</h4>
+  {% if doc.timesheets %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
     <div class="website-list">
       <div class="result">
         <div class="web-list-item transaction-list-item">
@@ -73,6 +78,11 @@
       {% include "erpnext/templates/includes/projects/project_timesheets.html" %}
       </div>
     </div>
+<<<<<<< HEAD
+=======
+  {% else %}
+    {{ empty_state(_("Timesheet")) }}
+>>>>>>> 7c4cf3e834 (Favicon.svg)
   {% endif %}
 
   {% if doc.attachments %}
@@ -134,4 +144,8 @@
     </div>
   </div>
   </div>
+<<<<<<< HEAD
 {% endmacro %}
+=======
+{% endmacro %}
+>>>>>>> 7c4cf3e834 (Favicon.svg)

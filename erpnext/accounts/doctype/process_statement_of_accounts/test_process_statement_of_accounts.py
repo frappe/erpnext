@@ -3,7 +3,11 @@
 
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts import (
@@ -14,12 +18,16 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
+<<<<<<< HEAD
 class TestProcessStatementOfAccounts(AccountsTestMixin, IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.enterClassContext(cls.change_settings("Selling Settings", validate_selling_price=0))
 
+=======
+class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -81,7 +89,10 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, IntegrationTestCase):
 		process_soa = create_process_soa(
 			name="_Test Process SOA", enable_auto_email=1, report="Accounts Receivable"
 		)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		send_emails(process_soa.name, from_scheduler=True)
 		process_soa.load_from_db()
 		self.assertEqual(process_soa.posting_date, getdate(add_days(today(), 7)))
@@ -103,7 +114,10 @@ def create_process_soa(**args):
 		company=args.company or "_Test Company",
 		customers=args.customers or [{"customer": "_Test Customer"}],
 		enable_auto_email=1 if args.enable_auto_email else 0,
+<<<<<<< HEAD
 		currency=args.currency or "",
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		frequency=args.frequency or "Weekly",
 		report=args.report or "General Ledger",
 		from_date=args.from_date or getdate(today()),

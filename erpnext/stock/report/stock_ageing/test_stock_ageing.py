@@ -2,14 +2,26 @@
 # See license.txt
 
 import frappe
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
+=======
+from frappe.tests.utils import FrappeTestCase
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data
 
 
+<<<<<<< HEAD
 class TestStockAgeing(IntegrationTestCase):
 	def setUp(self) -> None:
 		self.filters = frappe._dict(company="_Test Company", to_date="2021-12-10", ranges=["30", "60", "90"])
+=======
+class TestStockAgeing(FrappeTestCase):
+	def setUp(self) -> None:
+		self.filters = frappe._dict(
+			company="_Test Company", to_date="2021-12-10", range1=30, range2=60, range3=90
+		)
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_normal_inward_outward_queue(self):
 		"Reference: Case 1 in stock_ageing_fifo_logic.md (same wh)"
@@ -18,7 +30,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=30,
 				qty_after_transaction=30,
+<<<<<<< HEAD
 				stock_value_difference=30,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Entry",
@@ -30,7 +45,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=20,
 				qty_after_transaction=50,
+<<<<<<< HEAD
 				stock_value_difference=20,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-02",
 				voucher_type="Stock Entry",
@@ -42,7 +60,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-10),
 				qty_after_transaction=40,
+<<<<<<< HEAD
 				stock_value_difference=(-10),
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -60,8 +81,11 @@ class TestStockAgeing(IntegrationTestCase):
 
 		self.assertEqual(result["qty_after_transaction"], result["total_qty"])
 		self.assertEqual(queue[0][0], 20.0)
+<<<<<<< HEAD
 		data = format_report_data(self.filters, slots, self.filters["to_date"])
 		self.assertEqual(data[0][8], 40.0)  # valuating for stock value between age 0-30
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 	def test_insufficient_balance(self):
 		"Reference: Case 3 in stock_ageing_fifo_logic.md (same wh)"
@@ -70,7 +94,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-30),
 				qty_after_transaction=(-30),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Entry",
@@ -82,7 +109,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=20,
 				qty_after_transaction=(-10),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-02",
 				voucher_type="Stock Entry",
@@ -94,7 +124,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=20,
 				qty_after_transaction=10,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -106,7 +139,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=10,
 				qty_after_transaction=20,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -135,7 +171,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=30,
 				qty_after_transaction=30,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Entry",
@@ -147,7 +186,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=0,
 				qty_after_transaction=50,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-02",
 				voucher_type="Stock Reconciliation",
@@ -159,7 +201,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-10),
 				qty_after_transaction=40,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -190,7 +235,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=0,
 				qty_after_transaction=1000,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Reconciliation",
@@ -202,7 +250,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=0,
 				qty_after_transaction=400,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-02",
 				voucher_type="Stock Reconciliation",
@@ -214,7 +265,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-10),
 				qty_after_transaction=390,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -248,7 +302,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=0,
 				qty_after_transaction=1000,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Reconciliation",
@@ -260,7 +317,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=0,
 				qty_after_transaction=400,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 2",
 				posting_date="2021-12-02",
 				voucher_type="Stock Reconciliation",
@@ -272,7 +332,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-10),
 				qty_after_transaction=990,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -319,7 +382,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=500,
 				qty_after_transaction=500,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -331,7 +397,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=450,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -343,7 +412,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=400,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -355,7 +427,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=100,
 				qty_after_transaction=500,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -392,7 +467,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=500,
 				qty_after_transaction=500,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -404,7 +482,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-100),
 				qty_after_transaction=400,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -416,7 +497,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=50,
 				qty_after_transaction=450,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -451,7 +535,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=20,
 				qty_after_transaction=20,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -463,7 +550,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=(-30),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -475,7 +565,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=(-80),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -487,7 +580,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=50,
 				qty_after_transaction=(-30),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -525,7 +621,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=500,
 				qty_after_transaction=500,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -537,7 +636,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=450,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -549,7 +651,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=100,
 				qty_after_transaction=550,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -585,7 +690,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=20,
 				qty_after_transaction=20,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-03",
 				voucher_type="Stock Entry",
@@ -597,7 +705,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=(-30),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -609,7 +720,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=50,
 				qty_after_transaction=20,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -621,7 +735,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=50,
 				qty_after_transaction=70,
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-04",
 				voucher_type="Stock Entry",
@@ -659,7 +776,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=(-50),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Entry",
@@ -671,7 +791,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=(-50),
 				qty_after_transaction=(-100),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Entry",
@@ -683,7 +806,10 @@ class TestStockAgeing(IntegrationTestCase):
 				name="Flask Item",
 				actual_qty=30,
 				qty_after_transaction=(-70),
+<<<<<<< HEAD
 				stock_value_difference=0,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 				warehouse="WH 1",
 				posting_date="2021-12-01",
 				voucher_type="Stock Entry",
@@ -761,6 +887,7 @@ class TestStockAgeing(IntegrationTestCase):
 		self.assertEqual(bal_qty, 0.9)
 		self.assertEqual(bal_qty, range_qty_sum)
 
+<<<<<<< HEAD
 	def test_ageing_stock_valuation(self):
 		"Test stock valuation for each time bucket."
 		sle = [
@@ -868,6 +995,8 @@ class TestStockAgeing(IntegrationTestCase):
 		range_valuations = range_values[1::2]
 		self.assertEqual(range_valuations, [15, 7.5, 20, 5])
 
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"

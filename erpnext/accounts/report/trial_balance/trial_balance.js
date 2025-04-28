@@ -47,6 +47,7 @@ frappe.query_reports["Trial Balance"] = {
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
+<<<<<<< HEAD
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Cost Center", txt, {
@@ -54,16 +55,33 @@ frappe.query_reports["Trial Balance"] = {
 				});
 			},
 			options: "Cost Center",
+=======
+			fieldtype: "Link",
+			options: "Cost Center",
+			get_query: function () {
+				var company = frappe.query_report.get_filter_value("company");
+				return {
+					doctype: "Cost Center",
+					filters: {
+						company: company,
+					},
+				};
+			},
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		},
 		{
 			fieldname: "project",
 			label: __("Project"),
+<<<<<<< HEAD
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
+=======
+			fieldtype: "Link",
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 			options: "Project",
 		},
 		{
@@ -112,18 +130,24 @@ frappe.query_reports["Trial Balance"] = {
 			fieldtype: "Check",
 			default: 1,
 		},
+<<<<<<< HEAD
 		{
 			fieldname: "show_group_accounts",
 			label: __("Show Group Accounts"),
 			fieldtype: "Check",
 			default: 1,
 		},
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	],
 	formatter: erpnext.financial_statements.formatter,
 	tree: true,
 	name_field: "account",
 	parent_field: "parent_account",
+<<<<<<< HEAD
 	export_hidden_cols: true,
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	initial_depth: 3,
 };
 

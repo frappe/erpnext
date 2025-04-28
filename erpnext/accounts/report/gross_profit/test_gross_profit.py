@@ -1,9 +1,16 @@
 import frappe
 from frappe import qb
+<<<<<<< HEAD
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
+=======
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import flt, nowdate
+
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.gross_profit.gross_profit import execute
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -12,7 +19,11 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
+<<<<<<< HEAD
 class TestGrossProfit(IntegrationTestCase):
+=======
+class TestGrossProfit(FrappeTestCase):
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 	def setUp(self):
 		self.create_company()
 		self.create_item()
@@ -395,6 +406,10 @@ class TestGrossProfit(IntegrationTestCase):
 		"""
 		Item Qty for Sales Invoices with multiple instances of same item go in the -ve. Ideally, the credit noteshould cancel out the invoice items.
 		"""
+<<<<<<< HEAD
+=======
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 
 		# Invoice with an item added twice
 		sinv = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate(), do_not_submit=True)
@@ -420,12 +435,21 @@ class TestGrossProfit(IntegrationTestCase):
 			"item_name": self.item,
 			"warehouse": "Stores - _GP",
 			"qty": 0.0,
+<<<<<<< HEAD
 			"avg._selling_rate": 100,
 			"valuation_rate": 0.0,
 			"selling_amount": 0.0,
 			"buying_amount": 0.0,
 			"gross_profit": 0.0,
 			"gross_profit_%": 0.0,
+=======
+			"avg._selling_rate": 0.0,
+			"valuation_rate": 0.0,
+			"selling_amount": -100.0,
+			"buying_amount": 0.0,
+			"gross_profit": -100.0,
+			"gross_profit_%": 100.0,
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		# Both items of Invoice should have '0' qty
@@ -447,11 +471,15 @@ class TestGrossProfit(IntegrationTestCase):
 		sinv = sinv.save().submit()
 
 		filters = frappe._dict(
+<<<<<<< HEAD
 			company=self.company,
 			from_date=nowdate(),
 			to_date=nowdate(),
 			group_by="Invoice",
 			include_returned_invoices=1,
+=======
+			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+>>>>>>> 7c4cf3e834 (Favicon.svg)
 		)
 
 		columns, data = execute(filters=filters)
@@ -615,6 +643,7 @@ class TestGrossProfit(IntegrationTestCase):
 		item_from_sinv2 = [x for x in data if x.parent_invoice == sinv2.name]
 		self.assertEqual(len(item_from_sinv2), 1)
 		self.assertEqual(1800, item_from_sinv2[0].valuation_rate)
+<<<<<<< HEAD
 
 	def test_gross_profit_groupby_invoices(self):
 		create_sales_invoice(
@@ -684,3 +713,5 @@ class TestGrossProfit(IntegrationTestCase):
 		self.assertEqual(total.buying_amount, 0.0)
 		self.assertEqual(total.gross_profit, 0.0)
 		self.assertEqual(total.get("gross_profit_%"), 0.0)
+=======
+>>>>>>> 7c4cf3e834 (Favicon.svg)
