@@ -70,7 +70,6 @@ class Asset(AccountsController):
 		disposal_date: DF.Date | None
 		finance_books: DF.Table[AssetFinanceBook]
 		frequency_of_depreciation: DF.Int
-		gross_purchase_amount: DF.Currency
 		image: DF.AttachImage | None
 		insurance_end_date: DF.Date | None
 		insurance_start_date: DF.Date | None
@@ -86,6 +85,7 @@ class Asset(AccountsController):
 		location: DF.Link
 		maintenance_required: DF.Check
 		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
+		net_purchase_amount: DF.Currency
 		next_depreciation_date: DF.Date | None
 		opening_accumulated_depreciation: DF.Currency
 		opening_number_of_booked_depreciations: DF.Int

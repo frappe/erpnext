@@ -31,7 +31,7 @@
   "purchase_date",
   "available_for_use_date",
   "column_break_23",
-  "gross_purchase_amount",
+  "net_purchase_amount",
   "purchase_amount",
   "asset_quantity",
   "additional_asset_cost",
@@ -225,13 +225,6 @@
    "options": "Journal Entry",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "gross_purchase_amount",
-   "fieldtype": "Currency",
-   "label": "Net Purchase Amount",
-   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
-   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "available_for_use_date",
@@ -558,6 +551,13 @@
    "fieldname": "is_composite_component",
    "fieldtype": "Check",
    "label": "Is Composite Component"
+  },
+  {
+   "fieldname": "net_purchase_amount",
+   "fieldtype": "Currency",
+   "label": "Net Purchase Amount",
+   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
+   "options": "Company:company:default_currency"
   }
  ],
  "idx": 72,
@@ -601,7 +601,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-05-20 13:44:06.229177",
+ "modified": "2025-05-23 00:53:54.249309",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
