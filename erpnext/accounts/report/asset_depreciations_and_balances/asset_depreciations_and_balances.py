@@ -87,7 +87,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 		SELECT a.asset_category,
 			   ifnull(sum(case when a.purchase_date < %(from_date)s then
 							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
-									a.gross_purchase_amount
+									a.net_purchase_amount
 							   else
 									0
 							   end
@@ -95,7 +95,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 								0
 						   end), 0) as value_as_on_from_date,
 			   ifnull(sum(case when a.purchase_date >= %(from_date)s then
-			   						a.gross_purchase_amount
+			   						a.net_purchase_amount
 			   				   else
 			   				   		0
 			   				   end), 0) as value_of_new_purchase,
@@ -103,7 +103,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Sold" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -114,7 +114,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Scrapped" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -125,7 +125,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Capitalized" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -357,7 +357,7 @@ def get_asset_details_for_grouped_by_category(filters):
 		SELECT a.name,
 			   ifnull(sum(case when a.purchase_date < %(from_date)s then
 							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
-									a.gross_purchase_amount
+									a.net_purchase_amount
 							   else
 									0
 							   end
@@ -365,7 +365,7 @@ def get_asset_details_for_grouped_by_category(filters):
 								0
 						   end), 0) as value_as_on_from_date,
 			   ifnull(sum(case when a.purchase_date >= %(from_date)s then
-			   						a.gross_purchase_amount
+			   						a.net_purchase_amount
 			   				   else
 			   				   		0
 			   				   end), 0) as value_of_new_purchase,
@@ -373,7 +373,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Sold" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -384,7 +384,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Scrapped" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end
@@ -395,7 +395,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			   						and a.disposal_date >= %(from_date)s
 			   						and a.disposal_date <= %(to_date)s then
 							   case when a.status = "Capitalized" then
-							   		a.gross_purchase_amount
+							   		a.net_purchase_amount
 							   else
 							   		0
 							   end

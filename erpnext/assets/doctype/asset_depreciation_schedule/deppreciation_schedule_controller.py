@@ -82,19 +82,19 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 				self.set_depreciation_amount_for_last_row(row_idx)
 
 			self.depreciation_amount = flt(
-				self.depreciation_amount, self.asset_doc.precision("gross_purchase_amount")
+				self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")
 			)
 			if not self.depreciation_amount:
 				break
 
 			self.pending_depreciation_amount = flt(
 				self.pending_depreciation_amount - self.depreciation_amount,
-				self.asset_doc.precision("gross_purchase_amount"),
+				self.asset_doc.precision("net_purchase_amount"),
 			)
 
 			self.adjust_depr_amount_for_salvage_value(row_idx)
 
-			if flt(self.depreciation_amount, self.asset_doc.precision("gross_purchase_amount")) > 0:
+			if flt(self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")) > 0:
 				self.add_depr_schedule_row(row_idx)
 
 	def initialize_variables(self):
@@ -310,7 +310,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		)
 
 		self.depreciation_amount = flt(
-			self.depreciation_amount, self.asset_doc.precision("gross_purchase_amount")
+			self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")
 		)
 		if self.depreciation_amount > 0:
 			self.schedule_date = self.disposal_date
@@ -383,10 +383,10 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		If gross purchase amount is too low, then depreciation amount
 		can come zero sometimes based on the frequency and number of depreciations.
 		"""
-		if flt(self.depreciation_amount, self.asset_doc.precision("gross_purchase_amount")) <= 0:
+		if flt(self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")) <= 0:
 			frappe.throw(
 				_("Gross Purchase Amount {0} cannot be depreciated over {1} cycles.").format(
-					frappe.bold(self.asset_doc.gross_purchase_amount),
+					frappe.bold(self.asset_doc.net_purchase_amount),
 					frappe.bold(self.fb_row.total_number_of_depreciations),
 				)
 			)

@@ -591,7 +591,7 @@ class TestLandedCostVoucher(IntegrationTestCase):
 		lcv.submit()
 
 		# lcv updates amount in draft asset
-		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "gross_purchase_amount"), 50080)
+		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "net_purchase_amount"), 50080)
 
 		# tear down
 		lcv.cancel()

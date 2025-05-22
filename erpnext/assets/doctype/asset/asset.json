@@ -237,7 +237,7 @@
    "fieldname": "calculate_depreciation",
    "fieldtype": "Check",
    "label": "Calculate Depreciation",
-   "read_only_depends_on": "eval:(doc.is_composite_asset && !doc.gross_purchase_amount) || doc.is_composite_component"
+   "read_only_depends_on": "eval:(doc.is_composite_asset && !doc.net_purchase_amount) || doc.is_composite_component"
   },
   {
    "default": "0",
