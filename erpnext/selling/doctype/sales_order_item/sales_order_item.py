@@ -42,6 +42,8 @@ class SalesOrderItem(Document):
 		discount_percentage: DF.Percent
 		distributed_discount_amount: DF.Currency
 		ensure_delivery_based_on_produced_serial_no: DF.Check
+		fg_item: DF.Link | None
+		fg_item_qty: DF.Float
 		grant_commission: DF.Check
 		gross_profit: DF.Currency
 		image: DF.Attach | None
@@ -84,6 +86,7 @@ class SalesOrderItem(Document):
 		stock_reserved_qty: DF.Float
 		stock_uom: DF.Link | None
 		stock_uom_rate: DF.Currency
+		subcontracted_qty: DF.Float
 		supplier: DF.Link | None
 		target_warehouse: DF.Link | None
 		total_weight: DF.Float

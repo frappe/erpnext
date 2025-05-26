@@ -38,7 +38,15 @@
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
   "experimental_section",
-  "use_legacy_js_reactivity"
+  "use_legacy_js_reactivity",
+  "subcontract",
+  "backflush_raw_materials_of_subcontract_based_on",
+  "column_break_q9qf",
+  "over_receipt_allowance",
+  "section_break_zwje",
+  "auto_create_subcontracting_inward_order",
+  "column_break_1dcg",
+  "auto_create_delivery_note"
  ],
  "fields": [
   {
@@ -230,7 +238,52 @@
    "description": "Allows users to submit Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.",
    "fieldname": "allow_zero_qty_in_quotation",
    "fieldtype": "Check",
-   "label": "Allow Quotation with Zero Quantity"
+   "label": "Allow 0 Qty in Quotation (Unit Price Items)"
+  },
+  {
+   "fieldname": "subcontract",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting Settings"
+  },
+  {
+   "default": "BOM",
+   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials of Subcontract Based On",
+   "options": "BOM\nMaterial Received for Subcontract"
+  },
+  {
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
+   "description": "Percentage you are allowed to receive more against the quantity required. For example: If you require 100 units. and your Allowance is 10% then you are allowed to receive 110 units.",
+   "fieldname": "over_receipt_allowance",
+   "fieldtype": "Float",
+   "label": "Over Receipt Allowance (%)"
+  },
+  {
+   "default": "0",
+   "description": "Subcontracting Inward Order (Draft) will be auto-created on submission of Sales Order.",
+   "fieldname": "auto_create_subcontracting_inward_order",
+   "fieldtype": "Check",
+   "label": "Auto Create Subcontracting Inward Order"
+  },
+  {
+   "default": "0",
+   "description": "Delivery Note (Draft) will be auto-created on submission of Subcontracting Delivery.",
+   "fieldname": "auto_create_delivery_note",
+   "fieldtype": "Check",
+   "label": "Auto Create Delivery Note"
+  },
+  {
+   "fieldname": "column_break_1dcg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zwje",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_q9qf",
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",

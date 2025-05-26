@@ -84,7 +84,7 @@
    "no_copy": 1,
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Data",
-   "options": "\nSales Order\nWork Order\nProduction Plan",
+   "options": "\nSales Order\nWork Order\nSubcontracting Inward Order\nProduction Plan",
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"

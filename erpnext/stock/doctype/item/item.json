@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:item_code",
+ "autoname": "naming_series:item_code",
  "creation": "2013-05-03 10:45:46",
  "description": "A Product or a Service that is bought, sold or kept in stock.",
  "doctype": "DocType",
@@ -206,9 +206,11 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_customer_provided_item",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
-   "label": "Allow Alternative Item"
+   "label": "Allow Alternative Item",
+   "read_only_depends_on": "eval:doc.is_customer_provided_item"
   },
   {
    "allow_in_quick_entry": 1,
@@ -958,7 +960,7 @@
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
- "naming_rule": "By fieldname",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -8,6 +8,8 @@ from frappe.model.document import Document
 
 class PurchaseOrderItem(Document):
 	# begin: auto-generated types
+	# ruff: noqa
+
 	# This code is auto-generated. Do not modify anything in this block.
 
 	from typing import TYPE_CHECKING
@@ -85,7 +87,7 @@ class PurchaseOrderItem(Document):
 		stock_qty: DF.Float
 		stock_uom: DF.Link
 		stock_uom_rate: DF.Currency
-		subcontracted_quantity: DF.Float
+		subcontracted_qty: DF.Float
 		supplier_part_no: DF.Data | None
 		supplier_quotation: DF.Link | None
 		supplier_quotation_item: DF.Link | None
@@ -95,6 +97,7 @@ class PurchaseOrderItem(Document):
 		weight_per_unit: DF.Float
 		weight_uom: DF.Link | None
 		wip_composite_asset: DF.Link | None
+	# ruff: noqa
 	# end: auto-generated types
 
 	pass

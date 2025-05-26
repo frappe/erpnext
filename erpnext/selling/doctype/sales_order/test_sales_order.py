@@ -2589,6 +2589,74 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		si2 = make_sales_invoice(so.name)
 		self.assertEqual(si2.items[0].qty, 20)
 
+	def test_update_items_for_subcontracting_sales_order(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_subcontracting_inward_order,
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		def update_items(so, qty):
+			trans_items = [so.items[0].as_dict().update({"docname": so.items[0].name})]
+			trans_items[0]["qty"] = qty
+			trans_items[0]["fg_item_qty"] = qty
+			trans_items = json.dumps(trans_items, default=str)
+
+			return update_child_qty_rate(
+				so.doctype,
+				trans_items,
+				so.name,
+			)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+		so = create_sales_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+		)
+
+		update_items(so, qty=20)
+		so.reload()
+
+		# Test - 1: Items should be updated as there is no Subcontracting Order against PO
+		self.assertEqual(so.items[0].qty, 20)
+		self.assertEqual(so.items[0].fg_item_qty, 20)
+
+		scio = get_subcontracting_inward_order(
+			so_name=so.name,
+			warehouse="_Test Warehouse - _TC",
+			raw_materials_receipt_warehouse="_Test Warehouse 1 - _TC",
+		)
+
+		# Test - 2: ValidationError should be raised as there is Subcontracting Order against PO
+		self.assertRaises(frappe.ValidationError, update_items, so=so, qty=30)
+
+		scio.reload()
+		scio.cancel()
+		so.reload()
+
+		update_items(so, qty=30)
+		so.reload()
+
+		# Test - 3: Items should be updated as the Subcontracting Order is cancelled
+		self.assertEqual(so.items[0].qty, 30)
+		self.assertEqual(so.items[0].fg_item_qty, 30)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
@@ -2718,3 +2786,44 @@ def make_sales_order_workflow():
 	workflow.insert(ignore_permissions=True)
 
 	return workflow
+
+
+def create_sales_order(**args):
+	so = frappe.new_doc("Sales Order")
+	args = frappe._dict(args)
+	if args.transaction_date:
+		so.transaction_date = args.transaction_date
+
+	so.schedule_date = add_days(nowdate(), 1)
+	so.company = args.company or "_Test Company"
+	so.customer = args.customer or "_Test Customer"
+	so.is_subcontracted = args.is_subcontracted or 0
+	so.currency = args.currency or frappe.get_cached_value("Company", so.company, "default_currency")
+	so.conversion_factor = args.conversion_factor or 1
+	so.delivery_date = args.delivery_date or add_days(so.transaction_date, 10)
+
+	if args.rm_items:
+		for row in args.rm_items:
+			so.append("items", row)
+	else:
+		so.append(
+			"items",
+			{
+				"item_code": args.item or args.item_code or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": args.qty if args.qty is not None else 10,
+				"rate": args.rate or 500,
+				"schedule_date": add_days(nowdate(), 1),
+				"include_exploded_items": args.get("include_exploded_items", 1),
+				"against_blanket_order": args.against_blanket_order,
+				"against_blanket": args.against_blanket,
+			},
+		)
+
+	if not args.do_not_save:
+		so.set_missing_values()
+		so.insert()
+		if not args.do_not_submit:
+			so.submit()
+
+	return so
