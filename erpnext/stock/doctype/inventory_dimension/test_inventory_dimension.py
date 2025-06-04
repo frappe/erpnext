@@ -153,7 +153,6 @@ class TestInventoryDimension(FrappeTestCase):
 
 	def test_inventory_dimension_for_purchase_receipt_and_delivery_note(self):
 		frappe.clear_cache(doctype="Inventory Dimension")
-		frappe.clear_cache("Inventory Dimension")
 
 		inv_dimension = create_inventory_dimension(
 			reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1
