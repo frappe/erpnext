@@ -240,7 +240,7 @@ def get_cost_center_allocation_data(company, posting_date, cost_center):
 			"valid_from": ("<=", posting_date),
 			"main_cost_center": cost_center,
 		},
-		pluck="name",
+		pluck=True,
 		order_by="valid_from desc",
 	)
 
