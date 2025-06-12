@@ -417,7 +417,6 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "total_additional_costs",
-   "depends_on": "eval:!doc.subcontracting_inward_order",
    "fieldname": "additional_costs_section",
    "fieldtype": "Tab Break",
    "label": "Additional Costs"

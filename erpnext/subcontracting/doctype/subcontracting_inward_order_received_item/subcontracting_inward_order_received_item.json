@@ -17,7 +17,6 @@
   "section_break_13",
   "required_qty",
   "received_qty",
-  "reserved_qty",
   "column_break_16",
   "consumed_qty",
   "work_order_qty",
@@ -133,15 +132,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "reserved_qty",
-   "fieldtype": "Float",
-   "label": "Reserved Qty",
-   "no_copy": 1,
-   "non_negative": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "work_order_qty",
    "fieldtype": "Float",
@@ -157,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-25 19:01:27.506383",
+ "modified": "2025-05-26 15:35:26.998958",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order Received Item",

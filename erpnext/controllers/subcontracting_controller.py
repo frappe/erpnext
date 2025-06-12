@@ -1558,12 +1558,13 @@ def make_rm_stock_entry(
 @frappe.whitelist()
 def make_rm_stock_entry_inward(subcontract_inward_order, target_doc=None):
 	def calculate_qty_as_per_bom(rm_item):
-		data = frappe.db.get_all(
+		data = frappe.get_value(
 			"Subcontracting Inward Order Item",
-			filters={"name": rm_item.reference_name},
-			fields=["process_loss_qty", "include_exploded_items"],
-		)[0]
-		stock_qty = frappe.db.get_value(
+			{"name": rm_item.reference_name},
+			["process_loss_qty", "include_exploded_items"],
+			as_dict=True,
+		)
+		stock_qty = frappe.get_value(
 			"BOM Explosion Item" if data.include_exploded_items else "BOM Item",
 			{"name": rm_item.bom_detail_no},
 			"stock_qty",

@@ -41,7 +41,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 		per_material_received: DF.Percent
 		per_process_loss: DF.Percent
 		per_produced: DF.Percent
-		per_returned: DF.Percent
 		raw_materials_receipt_warehouse: DF.Link
 		received_items: DF.Table[SubcontractingInwardOrderReceivedItem]
 		sales_order: DF.Link
@@ -53,23 +52,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 	# end: auto-generated types
 
 	pass
-
-	def onload(self):
-		super().onload()
-		if self.docstatus == 1:
-			has_unreserved_stock = any(
-				[
-					item.as_dict().received_qty - item.as_dict().reserved_qty > 0
-					for item in self.received_items
-				]
-			)
-
-			if frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
-				if has_unreserved_stock:
-					self.set_onload("has_unreserved_stock", True)
-
-				if any([item.as_dict().reserved_qty > 0 for item in self.received_items]):
-					self.set_onload("has_reserved_stock", True)
 
 	def before_validate(self):
 		super().before_validate()
@@ -95,18 +77,19 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Sales Order", self.sales_order)
 
-		total_to_be_received = total_received = 0
+		total_to_be_received = total_received = total_returned = 0
 		for rm in self.get("received_items"):
-			total_to_be_received += rm.required_qty
+			total_to_be_received += flt(rm.required_qty)
 			total_received += flt(rm.received_qty)
+			total_returned += flt(rm.returned_qty)
 
 		total_to_be_produced = total_produced = total_process_loss = 0
 		for item in self.get("items"):
-			total_to_be_produced += item.qty
-			total_produced += item.produced_qty
-			total_process_loss += item.process_loss_qty
+			total_to_be_produced += flt(item.qty)
+			total_produced += flt(item.produced_qty)
+			total_process_loss += flt(item.process_loss_qty)
 
-		per_material_received = flt(total_received / total_to_be_received * 100, 2)
+		per_material_received = flt((total_received - total_returned) / total_to_be_received * 100, 2)
 		per_produced = flt(total_produced / total_to_be_produced * 100, 2)
 		per_process_loss = flt(total_process_loss / total_produced * 100, 2) if total_produced else 0
 
@@ -316,6 +299,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 				"project": frappe.get_cached_value("Sales Order", self.sales_order, "project"),
 				"source_warehouse": self.raw_materials_receipt_warehouse,
 				"subcontracting_inward_order_item": d.name,
+				"reserve_stock": 1,
 			}
 
 			qty = min(

@@ -203,6 +203,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "voucher_qty",
    "fieldtype": "Float",
@@ -288,7 +289,7 @@
    "fieldtype": "Select",
    "label": "From Voucher Type",
    "no_copy": 1,
-   "options": "\nPick List\nPurchase Receipt\nStock Entry\nWork Order\nProduction Plan",
+   "options": "\nPick List\nPurchase Receipt\nStock Entry\nWork Order\nProduction Plan\nSubcontracting Inward Order",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1

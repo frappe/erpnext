@@ -689,8 +689,6 @@ class WorkOrder(Document):
 		self.create_job_card()
 
 		if self.reserve_stock:
-			if self.subcontracting_inward_order:
-				self.update_stock_reservation_entries()
 			self.update_stock_reservation()
 
 		self.update_subcontracting_inward_order_received_items()
@@ -1986,7 +1984,7 @@ class WorkOrder(Document):
 
 
 @frappe.whitelist()
-def make_stock_reservation_entries(doc, items=None, table_name=None, is_transfer=True, notify=False):
+def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=False):
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
@@ -1999,6 +1997,12 @@ def make_stock_reservation_entries(doc, items=None, table_name=None, is_transfer
 		if doc.production_plan and is_transfer:
 			sre.transfer_reservation_entries_to(
 				doc.production_plan, from_doctype="Production Plan", to_doctype="Work Order"
+			)
+		elif doc.subcontracting_inward_order:
+			sre.transfer_reservation_entries_to(
+				doc.subcontracting_inward_order,
+				from_doctype="Subcontracting Inward Order",
+				to_doctype="Work Order",
 			)
 		else:
 			sre_created = sre.make_stock_reservation_entries()
