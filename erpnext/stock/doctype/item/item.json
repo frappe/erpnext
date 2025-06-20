@@ -103,7 +103,13 @@
   "customer_details",
   "customer_items",
   "item_tax_section_break",
+  "section_break_oilf",
+  "column_break_aytr",
   "taxes",
+  "section_break_fxqz",
+  "purchase_tax_withholding_category",
+  "column_break_ltlb",
+  "sales_tax_withholding_category",
   "quality_tab",
   "inspection_required_before_purchase",
   "quality_inspection_template",
@@ -882,6 +888,35 @@
    "fieldname": "deferred_accounting_section",
    "fieldtype": "Section Break",
    "label": "Deferred Accounting"
+  },
+  {
+   "fieldname": "section_break_oilf",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_aytr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_fxqz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Purchase Tax Withholding Category",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "column_break_ltlb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Sales Tax Withholding Category",
+   "options": "Tax Withholding Category"
   }
  ],
  "icon": "fa fa-tag",
@@ -889,7 +924,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-02-03 23:43:57.253667",
+ "modified": "2025-06-20 07:49:31.139897",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -954,6 +989,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
