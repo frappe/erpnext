@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-20 04:55:28.583171",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_krko",
+  "column_break_qngi",
+  "party_type",
+  "party",
+  "tax_id",
+  "tax_withholding_category",
+  "column_break_egzm",
+  "tax_rate",
+  "taxable_amount",
+  "tax_withheld",
+  "exchange_rate",
+  "source_section",
+  "source_doctype",
+  "source_date",
+  "column_break_dahw",
+  "source_name",
+  "target_section",
+  "target_doctype",
+  "target_date",
+  "column_break_fqoe",
+  "target_name",
+  "section_break_ggna",
+  "is_manual_override",
+  "is_short_deduction",
+  "is_excess_deduction",
+  "column_break_jfjf",
+  "short_deduction_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_krko",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qngi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax ID"
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "column_break_egzm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_rate",
+   "fieldtype": "Percent",
+   "label": "Tax Rate"
+  },
+  {
+   "fieldname": "taxable_amount",
+   "fieldtype": "Currency",
+   "label": "Taxable Amount"
+  },
+  {
+   "fieldname": "tax_withheld",
+   "fieldtype": "Currency",
+   "label": "Tax Withheld"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9"
+  },
+  {
+   "description": "Transaction from which tax is withheld",
+   "fieldname": "source_section",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Link",
+   "label": "Source Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "source_date",
+   "fieldtype": "Date",
+   "label": "Source Date"
+  },
+  {
+   "fieldname": "column_break_dahw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Source Name",
+   "options": "source_doctype"
+  },
+  {
+   "description": "Transaction for which tax is withheld",
+   "fieldname": "target_section",
+   "fieldtype": "Section Break",
+   "label": "Target"
+  },
+  {
+   "fieldname": "target_doctype",
+   "fieldtype": "Link",
+   "label": "Target Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "target_date",
+   "fieldtype": "Date",
+   "label": "Target Date"
+  },
+  {
+   "fieldname": "column_break_fqoe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "target_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Target Name",
+   "options": "target_doctype"
+  },
+  {
+   "fieldname": "section_break_ggna",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_manual_override",
+   "fieldtype": "Check",
+   "label": "Is Manual Override"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_excess_deduction",
+   "fieldtype": "Check",
+   "label": "Is Excess Deduction"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_short_deduction",
+   "fieldtype": "Check",
+   "label": "Is Short Deduction"
+  },
+  {
+   "fieldname": "column_break_jfjf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "short_deduction_reason",
+   "fieldtype": "Select",
+   "label": "Short Deduction Reason",
+   "options": "\nThreshold not crossed\nLower Deduction Certificate"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-06-20 05:45:32.805943",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Tax Withholding Entry",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
