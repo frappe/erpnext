@@ -18,21 +18,23 @@
   "exchange_rate",
   "source_section",
   "source_doctype",
+  "source_name",
   "source_date",
   "column_break_dahw",
-  "source_name",
+  "is_excess_deduction",
+  "utilized_tax_withheld",
   "target_section",
   "target_doctype",
+  "target_name",
   "target_date",
   "column_break_fqoe",
-  "target_name",
-  "section_break_ggna",
-  "is_manual_override",
   "is_short_deduction",
-  "is_excess_deduction",
-  "is_cancelled",
-  "column_break_jfjf",
   "short_deduction_reason",
+  "utilized_taxable_amount",
+  "section_break_ggna",
+  "status",
+  "is_manual_override",
+  "column_break_jfjf",
   "lower_deduction_certificate"
  ],
  "fields": [
@@ -157,18 +159,6 @@
    "label": "Is Manual Override"
   },
   {
-   "default": "0",
-   "fieldname": "is_excess_deduction",
-   "fieldtype": "Check",
-   "label": "Is Excess Deduction"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_short_deduction",
-   "fieldtype": "Check",
-   "label": "Is Short Deduction"
-  },
-  {
    "fieldname": "column_break_jfjf",
    "fieldtype": "Column Break"
   },
@@ -179,23 +169,45 @@
    "options": "\nThreshold not crossed\nLower Deduction Certificate"
   },
   {
-   "default": "0",
-   "fieldname": "is_cancelled",
-   "fieldtype": "Check",
-   "label": "Is Cancelled"
-  },
-  {
    "fieldname": "lower_deduction_certificate",
    "fieldtype": "Link",
    "label": "Lower Deduction Certificate",
    "options": "Lower Deduction Certificate"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nMatched\nOpen\nClosed\nCancelled"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_short_deduction",
+   "fieldtype": "Check",
+   "label": "Is Short Deduction"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_excess_deduction",
+   "fieldtype": "Check",
+   "label": "Is Excess Deduction"
+  },
+  {
+   "fieldname": "utilized_tax_withheld",
+   "fieldtype": "Currency",
+   "label": "Utilized Tax Withheld"
+  },
+  {
+   "fieldname": "utilized_taxable_amount",
+   "fieldtype": "Currency",
+   "label": "Utilized Taxable Amount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-20 07:44:00.316470",
+ "modified": "2025-06-20 09:36:24.468593",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",

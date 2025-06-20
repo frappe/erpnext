@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
 from frappe.model.document import Document
 
 
@@ -15,7 +15,6 @@ class TaxWithholdingEntry(Document):
 		from frappe.types import DF
 
 		exchange_rate: DF.Float
-		is_cancelled: DF.Check
 		is_excess_deduction: DF.Check
 		is_manual_override: DF.Check
 		is_short_deduction: DF.Check
@@ -29,6 +28,7 @@ class TaxWithholdingEntry(Document):
 		source_date: DF.Date | None
 		source_doctype: DF.Link | None
 		source_name: DF.DynamicLink | None
+		status: DF.Literal["", "Matched", "Open", "Closed", "Cancelled"]
 		target_date: DF.Date | None
 		target_doctype: DF.Link | None
 		target_name: DF.DynamicLink | None
@@ -37,6 +37,8 @@ class TaxWithholdingEntry(Document):
 		tax_withheld: DF.Currency
 		tax_withholding_category: DF.Link | None
 		taxable_amount: DF.Currency
+		utilized_tax_withheld: DF.Currency
+		utilized_taxable_amount: DF.Currency
 	# end: auto-generated types
 
 	pass
