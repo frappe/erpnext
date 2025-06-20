@@ -28,6 +28,8 @@
   "update_billed_amount_in_sales_order",
   "update_billed_amount_in_delivery_note",
   "is_debit_note",
+  "apply_tds",
+  "tax_withholding_category",
   "amended_from",
   "is_created_using_pos",
   "pos_closing_entry",
@@ -2218,6 +2220,19 @@
    "label": "POS Closing Entry",
    "options": "POS Closing Entry",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply Tax Withholding Amount",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Default Tax Withholding Category",
+   "options": "Tax Withholding Category"
   }
  ],
  "grid_page_length": 50,
@@ -2231,7 +2246,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-03-17 19:32:31.809658",
+ "modified": "2025-06-20 07:31:09.810040",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

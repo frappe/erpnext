@@ -88,6 +88,7 @@ class SalesInvoice(SellingController):
 		amended_from: DF.Link | None
 		amount_eligible_for_commission: DF.Currency
 		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
+		apply_tds: DF.Check
 		auto_repeat: DF.Link | None
 		base_change_amount: DF.Currency
 		base_discount_amount: DF.Currency
@@ -210,6 +211,7 @@ class SalesInvoice(SellingController):
 		subscription: DF.Link | None
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
+		tax_withholding_category: DF.Link | None
 		taxes: DF.Table[SalesTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		tc_name: DF.Link | None

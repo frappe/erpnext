@@ -15,9 +15,11 @@ class TaxWithholdingEntry(Document):
 		from frappe.types import DF
 
 		exchange_rate: DF.Float
+		is_cancelled: DF.Check
 		is_excess_deduction: DF.Check
 		is_manual_override: DF.Check
 		is_short_deduction: DF.Check
+		lower_deduction_certificate: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

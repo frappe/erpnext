@@ -30,8 +30,10 @@
   "is_manual_override",
   "is_short_deduction",
   "is_excess_deduction",
+  "is_cancelled",
   "column_break_jfjf",
-  "short_deduction_reason"
+  "short_deduction_reason",
+  "lower_deduction_certificate"
  ],
  "fields": [
   {
@@ -175,13 +177,25 @@
    "fieldtype": "Select",
    "label": "Short Deduction Reason",
    "options": "\nThreshold not crossed\nLower Deduction Certificate"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled"
+  },
+  {
+   "fieldname": "lower_deduction_certificate",
+   "fieldtype": "Link",
+   "label": "Lower Deduction Certificate",
+   "options": "Lower Deduction Certificate"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-20 05:45:32.805943",
+ "modified": "2025-06-20 07:44:00.316470",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",

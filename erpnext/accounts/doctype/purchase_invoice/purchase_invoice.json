@@ -1358,7 +1358,7 @@
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Tax Withholding Category",
+   "label": "Default Tax Withholding Category",
    "options": "Tax Withholding Category",
    "print_hide": 1
   },
@@ -1658,7 +1658,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-09 16:49:22.175081",
+ "modified": "2025-06-20 07:31:48.064966",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
