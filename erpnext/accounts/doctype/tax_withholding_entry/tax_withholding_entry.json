@@ -22,7 +22,7 @@
   "source_date",
   "column_break_dahw",
   "is_excess_deduction",
-  "utilized_tax_withheld",
+  "used_tax_withheld",
   "target_section",
   "target_doctype",
   "target_name",
@@ -30,7 +30,7 @@
   "column_break_fqoe",
   "is_short_deduction",
   "short_deduction_reason",
-  "utilized_taxable_amount",
+  "used_taxable_amount",
   "section_break_ggna",
   "status",
   "is_manual_override",
@@ -193,21 +193,21 @@
    "label": "Is Excess Deduction"
   },
   {
-   "fieldname": "utilized_tax_withheld",
+   "fieldname": "used_tax_withheld",
    "fieldtype": "Currency",
-   "label": "Utilized Tax Withheld"
+   "label": "Used Tax Withheld"
   },
   {
-   "fieldname": "utilized_taxable_amount",
+   "fieldname": "used_taxable_amount",
    "fieldtype": "Currency",
-   "label": "Utilized Taxable Amount"
+   "label": "Used Taxable Amount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-20 09:36:24.468593",
+ "modified": "2025-06-20 09:45:05.444797",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",
