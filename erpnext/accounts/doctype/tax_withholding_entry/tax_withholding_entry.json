@@ -12,8 +12,8 @@
   "tax_id",
   "tax_withholding_category",
   "column_break_egzm",
-  "tax_rate",
   "taxable_amount",
+  "tax_rate",
   "tax_withheld",
   "exchange_rate",
   "source_section",
@@ -66,6 +66,7 @@
   {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
   },
@@ -74,18 +75,24 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "tax_rate",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "Tax Rate"
   },
   {
+   "columns": 1,
    "fieldname": "taxable_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Taxable Amount"
   },
   {
+   "columns": 1,
    "fieldname": "tax_withheld",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Tax Withheld"
   },
   {
@@ -145,6 +152,7 @@
   {
    "fieldname": "target_name",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
    "label": "Target Name",
    "options": "target_doctype"
   },
@@ -153,9 +161,11 @@
    "fieldtype": "Section Break"
   },
   {
+   "columns": 1,
    "default": "0",
    "fieldname": "is_manual_override",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Is Manual Override"
   },
   {
@@ -207,7 +217,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-20 09:45:05.444797",
+ "modified": "2025-06-21 05:48:13.361150",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",
