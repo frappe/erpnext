@@ -71,6 +71,7 @@ class PurchaseInvoice(BuyingController):
 			PurchaseTaxesandCharges,
 		)
 		from erpnext.accounts.doctype.tax_withheld_vouchers.tax_withheld_vouchers import TaxWithheldVouchers
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 		from erpnext.buying.doctype.purchase_receipt_item_supplied.purchase_receipt_item_supplied import (
 			PurchaseReceiptItemSupplied,
 		)
@@ -125,6 +126,7 @@ class PurchaseInvoice(BuyingController):
 		hold_comment: DF.SmallText | None
 		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
+		ignore_tds_threshold: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None
@@ -202,6 +204,7 @@ class PurchaseInvoice(BuyingController):
 		taxes_and_charges_added: DF.Currency
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
+		tds_entries: DF.Table[TaxWithholdingEntry]
 		terms: DF.TextEditor | None
 		title: DF.Data | None
 		to_date: DF.Date | None

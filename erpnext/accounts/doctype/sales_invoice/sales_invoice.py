@@ -75,6 +75,7 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
 			SalesTaxesandCharges,
 		)
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
 
@@ -133,6 +134,7 @@ class SalesInvoice(SellingController):
 		group_same_items: DF.Check
 		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
+		ignore_tds_threshold: DF.Check
 		in_words: DF.SmallText | None
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None
@@ -215,6 +217,7 @@ class SalesInvoice(SellingController):
 		taxes: DF.Table[SalesTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		tc_name: DF.Link | None
+		tds_entries: DF.Table[TaxWithholdingEntry]
 		terms: DF.TextEditor | None
 		territory: DF.Link | None
 		timesheets: DF.Table[SalesInvoiceTimesheet]
