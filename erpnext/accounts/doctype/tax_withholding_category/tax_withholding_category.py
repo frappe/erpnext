@@ -31,6 +31,8 @@ class TaxWithholdingCategory(Document):
 		consider_party_ledger_amount: DF.Check
 		rates: DF.Table[TaxWithholdingRate]
 		round_off_tax_amount: DF.Check
+		single_txn_threshold: DF.Check
+		tax_deduction_basis: DF.Literal["", "Gross Total", "Net Total"]
 		tax_on_excess_amount: DF.Check
 	# end: auto-generated types
 
