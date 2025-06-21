@@ -992,7 +992,7 @@
    "default": "1",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply TDS",
+   "label": "Consider for Tax Withholding",
    "print_hide": 1,
    "read_only": 1
   }

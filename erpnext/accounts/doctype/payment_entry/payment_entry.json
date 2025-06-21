@@ -590,7 +590,7 @@
    "depends_on": "eval:doc.party_type == 'Supplier'",
    "fieldname": "apply_tax_withholding_amount",
    "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount"
+   "label": "Consider for Tax Withholding"
   },
   {
    "collapsible": 1,

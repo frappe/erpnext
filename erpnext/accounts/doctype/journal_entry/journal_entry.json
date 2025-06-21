@@ -518,7 +518,7 @@
    "depends_on": "eval:['Credit Note', 'Debit Note'].includes(doc.voucher_type)",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount "
+   "label": "Consider for Tax Withholding "
   },
   {
    "depends_on": "eval:doc.docstatus",

@@ -894,7 +894,7 @@
    "default": "1",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply TDS"
+   "label": "Consider for Tax Withholding"
   },
   {
    "depends_on": "eval:parent.update_stock == 1 && (doc.use_serial_batch_fields === 0 || doc.docstatus === 1)",
