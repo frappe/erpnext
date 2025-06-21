@@ -1,6 +1,8 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe.model.document import Document
 
@@ -44,7 +46,7 @@ class TaxWithholdingEntry(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		self.set_tax_witholding_flags()
+		self.set_tax_withholding_flags()
 		self.set_status()
 
 	def on_submit(self):
@@ -69,7 +71,7 @@ class TaxWithholdingEntry(Document):
 		if self.target_doctype != self.parenttype or self.target_name != self.parent:
 			adjust_entry_amounts(self, "excess_deduction", for_cancel)
 
-	def set_tax_witholding_flags(self):
+	def set_tax_withholding_flags(self):
 		if not self.source_name:
 			self.is_short_deduction = 1
 			self.tax_withheld = 0
@@ -193,6 +195,8 @@ def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 			break
 
 
+# TODO: Only one date field
+
 # Steps
 # Create table in Purchase Invoice and Sales Invoice
 # Update settings for TW Category
@@ -234,3 +238,339 @@ def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 # -- Short deduction is allowed
 # -- Taxable amount is determined as (party amount / (1-tax rate))
 # -- Short or excess tax will be added to the last entry of the row
+
+
+def on_invoice_validate(doc):
+	if not doc.apply_tds:
+		doc.tax_withholding_entries = []
+		doc.tax_withholding_category = None
+		# TODO: remove tds row from taxes table
+
+		return
+
+	TaxWithholdingController(doc).calculate()
+
+
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_tax_withholding_categories,
+)
+
+
+class TaxWithholdingController:
+	def __init__(self, doc):
+		self.doc = doc
+
+	def _get_category_details(self):
+		category_names = set(
+			item.tax_withholding_category
+			for item in self.doc.items
+			if item.tax_withholding_category and item.apply_tds
+		)
+		if self.doc.tax_withholding_category:
+			category_names.add(self.doc.tax_withholding_category)
+
+		return get_tax_withholding_categories(
+			category_names, self.doc.posting_date, "Supplier", self.doc.supplier, self.doc.company
+		)
+
+	def calculate(self):
+		self.category_details = self._get_category_details()
+		self.set_category_wise_taxable_amount()
+		self.evaluate_thresholds()
+
+		entries = []
+		for category in self.category_details.values():
+			default_entry = {
+				"party_type": "Supplier",
+				"party": self.doc.supplier,
+				"tax_withholding_category": category.name,
+				"tax_rate": category.tax_rate,
+				"exchange_rate": self.doc.exchange_rate,
+				"source_doctype": self.doc.doctype,
+				"source_name": self.doc.name,
+				"source_date": self.doc.posting_date,
+				"tax_withheld": 0,  # TODO: Computed Value
+			}
+
+			if not category.threshold_crossed:
+				# TODO: add target information
+				entry = {**default_entry}
+
+				if category.tax_on_excess_amount:
+					# Add target information
+					entry.update(
+						{
+							"target_doctype": self.doc.doctype,
+							"target_name": self.doc.name,
+							"taxable_amount": category.taxable_amount,
+						}
+					)
+
+				else:
+					entry.update(
+						{
+							"is_short_deduction": 1,
+							"taxable_amount": category.taxable_amount,
+						}
+					)
+
+				entries.append(entry)
+				continue
+
+			# only for tax on excess amount
+			if category.untilized_threshold:
+				entry = {**default_entry}
+
+				taxable_amount = min(
+					category.untilized_threshold / self.doc.exchange_rate, category.taxable_amount
+				)
+
+				entry.update(
+					{
+						"target_doctype": self.doc.doctype,
+						"target_name": self.doc.name,
+						"taxable_amount": category.taxable_amount,
+						"tax_withheld": 0,
+					}
+				)
+
+				category.taxable_amount -= taxable_amount
+
+				if category.taxable_amount <= 0:
+					continue
+
+				# continue for balance
+
+			historical_entries = self.get_historical_entries(category, "Supplier", self.doc.supplier)
+
+			if category.ldc_unutilized_amount:
+				for short in historical_entries["short_deduction"]:
+					if not short.taxable_amount:
+						continue
+
+					# TODO: if is_not_valid_certificate:
+					# continue
+
+					if category.ldc_rate:
+						for excess in historical_entries["excess_deduction"]:
+							if not excess.tax_withheld:
+								continue
+
+							taxable_amount = (
+								min(
+									short.taxable_amount * short.exchange_rate,
+									excess.tax_withheld * excess.exchange_rate / category.ldc_rate,
+									category.ldc_unutilized_amount,
+								)
+								/ self.doc.exchange_rate
+							)
+
+						# TODO: adjust excess
+						continue
+
+					taxable_amount = (
+						min(short.taxable_amount * short.exchange_rate, category.ldc_unutilized_amount)
+						/ self.doc.exchange_rate
+					)
+					entry = {**default_entry}
+
+					entry.update(
+						{
+							"target_doctype": short.target_doctype,
+							"target_name": short.target_name,
+							"target_date": short.target_date,
+							"taxable_amount": taxable_amount,
+							"rate": category.ldc_rate,
+							# "short_deduction_reason": "Lower Deduction Certificate",
+							"lower_deduction_certificate": category.ldc_certificate,
+						}
+					)
+
+					category.ldc_unutilized_amount -= taxable_amount * self.doc.exchange_rate
+					short.taxable_amount -= taxable_amount
+
+					if short.taxable_amount <= 0 or category.ldc_unutilized_amount <= 0:
+						break
+
+				# TODO: update tax rate and tax amount
+				pass
+
+			# Process Old Open Entries
+			for short in historical_entries["short_deduction"]:
+				if not short.taxable_amount:
+					continue
+
+				for excess in historical_entries["excess_deduction"]:
+					if not excess.tax_withheld:
+						continue
+
+					# TODO: LDC amount in Min
+					taxable_amount = (
+						min(
+							short.taxable_amount * short.exchange_rate,
+							excess.tax_withheld * excess.exchange_rate / excess.tax_rate,
+						)
+						/ self.doc.exchange_rate
+					)
+
+					# TODO: Update
+					entry = {}
+					entry["target_doctype"] = short.target_doctype
+					entry["target_name"] = short.target_name
+					entry["source_doctype"] = excess.source_doctype
+					entry["source_name"] = excess.source_name
+					entry["taxable_amount"] = taxable_amount
+					entry["tax_withholding_category"] = category.name
+					entry["tax_rate"] = category.tax_rate
+					entry["tax_withheld"] = (
+						taxable_amount * category.tax_rate / 100
+					)  # TODO: Rounding settings
+
+					short.taxable_amount -= taxable_amount
+					excess.tax_withheld -= taxable_amount * category.tax_rate / 100
+
+					if excess.tax_withheld <= 0:
+						break
+
+				# TODO: Update short entries
+				taxable_amount = short.taxable_amount * short.exchange_rate / self.doc.exchange_rate
+				entry = {}
+				entry["target_doctype"] = short.target_doctype
+				entry["target_name"] = short.target_name
+				entry["taxable_amount"] = taxable_amount
+				entry["tax_withholding_category"] = category.name
+				entry["tax_rate"] = category.tax_rate
+				entry["tax_withheld"] = taxable_amount * category.tax_rate / 100  # TODO: Rounding
+
+				# etc
+				short.taxable_amount -= taxable_amount
+
+				if short.taxable_amount <= 0:
+					break
+
+			for excess in historical_entries["excess_deduction"]:
+				if not excess.tax_withheld:
+					continue
+
+				taxable_amount = (
+					min(
+						category.taxable_amount * self.doc.exchange_rate,
+						excess.tax_withheld * excess.exchange_rate / excess.tax_rate,
+					)
+					/ self.doc.exchange_rate
+				)
+
+				entry = {}
+				entry["target_doctype"] = self.doc.target_doctype
+				entry["target_name"] = self.doc.target_name
+				entry["source_doctype"] = excess.source_doctype
+				entry["source_name"] = excess.source_name
+				entry["taxable_amount"] = taxable_amount
+				entry["tax_withholding_category"] = category.name
+				entry["tax_rate"] = category.tax_rate
+				entry["tax_withheld"] = taxable_amount * category.tax_rate / 100  # TODO: Rounding settings
+
+				category.taxable_amount -= taxable_amount
+				excess.tax_withheld -= taxable_amount * category.tax_rate / 100
+
+				if excess.tax_withheld <= 0:
+					break
+
+			taxable_amount = category.taxable_amount
+			entry["target_doctype"] = self.doc.doctype
+			entry["target_name"] = self.doc.name
+			entry["source_doctype"] = self.doc.doctype
+			entry["source_name"] = self.doc.name
+			entry["taxable_amount"] = taxable_amount
+			entry["tax_withholding_category"] = category.name
+			entry["tax_rate"] = category.tax_rate
+			entry["tax_withheld"] = taxable_amount * category.tax_rate / 100  # TODO: Rounding settings
+
+			# Add information with tax amount
+			entries.append(
+				{
+					"category": category.name,
+					"taxable_amount": category.taxable_amount,
+					"tax_withheld": category.tax_withheld,
+					"untilized_threshold": category.untilized_threshold,
+				}
+			)
+
+		# TODO: add tax rows
+
+	def set_category_wise_taxable_amount(self):
+		# TODO: before exchange rate
+		item_amount_map = frappe._dict(
+			item_code={
+				"net_amount": 100,
+				"gross_amount": 120,
+				"tax_withholding_category": "TDS Category",
+			}
+		)
+
+		for item in item_amount_map.values():
+			category_detail = self.category_details.get(item["tax_withholding_category"])
+
+			if category_detail.tax_deduction_basis == "Net Total":
+				category_detail["taxable_amount"] += item["net_amount"]
+			else:
+				category_detail["taxable_amount"] += item["gross_amount"]
+
+	def evaluate_thresholds(self):
+		for category in self.category_details.values():
+			if self.doc.ignore_threshold_check or category.single_threshold == 0:
+				category["threshold_crossed"] = True
+				continue
+
+			elif category.single_txn_threshold or category.single_threshold:
+				category["threshold_crossed"] = category["taxable_amount"] >= category.single_threshold
+
+			# Cumulative threshold
+			# NOTE: By Pan
+			elif not category.tax_on_excess_amount:
+				# category["threshold_crossed"] = has_tax_been_withheld()
+				pass
+
+			# Tax on excess amount
+			else:
+				# category["threshold_crossed"] = get_untilized_threshold()
+				# category["untilized_threshold"] = category.single_threshold - category.tax_withheld
+				pass
+
+	def get_historical_entries(self, category, party_type, party):
+		# NOTE: By Party
+
+		entries = frappe.get_all(
+			"Tax Withholding Entry",
+			filters={
+				"tax_withholding_category": category.name,
+				"party_type": party_type,
+				"party": party,
+				"status": "Open",
+				# TODO: from and to dates filter from category
+			},
+			fields="*",
+		)
+
+		linked_payments = [("Payment Entry", "PE-0001")]
+
+		result = defaultdict(defaultdict(dict))
+		paid_through_payments = []
+		for entry in entries:
+			if entry.is_short_deduction:
+				result["short_deduction"][(entry.target_doctype, entry.target_name)] = entry
+				continue
+
+			# Excess deduction
+			if (entry.source_doctype, entry.source_name) in linked_payments:
+				paid_through_payments.append(entry)
+				continue
+
+			# Manual Adjustment Required
+			if entry.source_doctype in ["Payment Entry", "Journal Entry"]:
+				continue
+
+			# Adjusted on FIFO basis
+			result["excess_deduction"][(entry.source_doctype, entry.source_name)] = entry
+
+		return result, paid_through_payments

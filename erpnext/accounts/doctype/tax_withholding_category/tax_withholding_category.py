@@ -776,3 +776,82 @@ def normal_round(number):
 	number = int(number) + decimal_part
 
 	return number
+
+
+def get_tax_withholding_categories(
+	category_names: list[str], posting_date: str, party_type: str, parties: list[str], company: str
+) -> list[TaxWithholdingCategory]:
+	category_details = frappe._dict()
+
+	for category_name in category_names:
+		category = frappe.get_doc("Tax Withholding Category", category_name)
+
+		for rate in category.rates:
+			if getdate(rate.from_date) <= getdate(posting_date) <= getdate(rate.to_date):
+				break
+		else:
+			frappe.throw(_("No Tax Withholding data found for the current posting date."))
+
+		for account_detail in category.accounts:
+			if company == account_detail.company:
+				category_details[category_name] = frappe._dict(
+					name=category_name,
+					account_head=account_detail.account,
+					# rates
+					rate=rate.tax_withholding_rate,
+					from_date=rate.from_date,
+					to_date=rate.to_date,
+					single_threshold=rate.single_threshold,
+					cumulative_threshold=rate.cumulative_threshold,
+					# settings
+					tax_deduction_basis=category.tax_deduction_basis,
+					round_off_tax_amount=category.round_off_tax_amount,
+					tax_on_excess_amount=category.tax_on_excess_amount,
+					single_txn_threshold=category.single_txn_threshold,
+					taxable_amount=0,
+					# ldc
+					ldc_certificate=None,
+					ldc_unutilized_amount=0,
+					ldc_rate=0,
+				)
+
+				break
+		else:
+			frappe.throw(
+				_("No Tax withholding account set for Company {0} in Tax Withholding Category {1}.").format(
+					frappe.bold(company), frappe.bold(category_name)
+				)
+			)
+
+		if category.single_txn_threshold:
+			# TODO: better field name
+			category_details[category_name].threshold_value = 0
+			continue
+
+		# TODO: lower deduction certificate details
+		# Rate / Unutilized Amount / ldc_certificate
+		# TODO: compute utilized_threshold
+
+
+def get_transaction_value_till_date(
+	category_name: str, party_type: str, parties: list[str], company: str, posting_date: str
+) -> float:
+	"""
+	Fetches the transaction value till the given posting date for the specified category and parties.
+	"""
+	conditions = {
+		"company": company,
+		"posting_date": ["<=", posting_date],
+	}
+
+	if party_type == "Customer":
+		conditions["customer"] = ["in", parties]
+	elif party_type == "Supplier":
+		conditions["supplier"] = ["in", parties]
+
+	return frappe.db.get_value(
+		"Tax Withholding Entry",
+		conditions,
+		Sum("transaction_value"),
+		as_dict=True,
+	).get("transaction_value", 0.0)
