@@ -17,7 +17,7 @@ class TaxWithholdingEntry(Document):
 		from frappe.types import DF
 
 		exchange_rate: DF.Float
-		is_excess_deduction: DF.Check
+		is_excess_deduction: DF.Check  # TODO: move to status
 		is_manual_override: DF.Check
 		is_short_deduction: DF.Check
 		lower_deduction_certificate: DF.Link | None
@@ -30,7 +30,7 @@ class TaxWithholdingEntry(Document):
 		source_date: DF.Date | None
 		source_doctype: DF.Link | None
 		source_name: DF.DynamicLink | None
-		status: DF.Literal["", "Matched", "Open", "Closed", "Cancelled"]
+		status: DF.Literal["", "Matched", "Open", "Closed", "Cancelled"]  # TODO: better status for matched
 		target_date: DF.Date | None
 		target_doctype: DF.Link | None
 		target_name: DF.DynamicLink | None
@@ -74,9 +74,12 @@ class TaxWithholdingEntry(Document):
 			self.is_short_deduction = 1
 			self.tax_withheld = 0
 
-		if not self.target_name:
+		elif not self.target_name:
 			self.is_excess_deduction = 1
-			self.taxable_amount = 0
+
+			# Considered for threshold check
+			if self.source_doctype != "Payment Entry":
+				self.taxable_amount = 0
 
 	def set_status(self):
 		"""Update the status of this entry based on its current state"""
@@ -111,20 +114,20 @@ def get_entries_to_adjust(entry, adjustment_type, for_cancel):
 	"""
 	is_short = adjustment_type == "short_deduction"
 
-	field_mapping = {
+	field_map = {
 		"doctype_field": "source_doctype" if is_short else "target_doctype",
 		"name_field": "source_name" if is_short else "target_name",
 		"amount_field": "taxable_amount" if is_short else "tax_withheld",
 	}
-	field_mapping["used_field"] = f"used_{field_mapping['amount_field']}"
+	field_map["used_field"] = f"used_{field_map['amount_field']}"
 
 	status_filter = "Open" if not for_cancel else ["in", ["Open", "Closed"]]
 
 	# filter
 	filters = {
 		"tax_withholding_category": entry.tax_withholding_category,
-		field_mapping["doctype_field"]: getattr(entry, field_mapping["doctype_field"]),
-		field_mapping["name_field"]: getattr(entry, field_mapping["name_field"]),
+		field_map["doctype_field"]: getattr(entry, field_map["doctype_field"]),
+		field_map["name_field"]: getattr(entry, field_map["name_field"]),
 		f"is_{adjustment_type}": 1,
 		"status": status_filter,
 	}
@@ -135,13 +138,16 @@ def get_entries_to_adjust(entry, adjustment_type, for_cancel):
 
 	entries = frappe.get_all("Tax Withholding Entry", filters=filters, fields="*")
 
-	return {"entries": entries, "field_mapping": field_mapping}
+	return {
+		"entries": entries,
+		"amount_field": field_map["amount_field"],
+		"used_field": field_map["used_field"],
+	}
 
 
 def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 	"""
 	Adjust tax withholding entries for both short deduction and excess deduction cases.
-	This function coordinates the adjustment process using smaller focused functions.
 
 	Args:
 	        entry: The tax withholding entry document
@@ -151,9 +157,8 @@ def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 	operation_info = get_entries_to_adjust(entry, adjustment_type, for_cancel)
 
 	old_entries = operation_info["entries"]
-	field_mapping = operation_info["field_mapping"]
-	amount_field = field_mapping["amount_field"]
-	used_field = field_mapping["used_field"]
+	amount_field = operation_info["amount_field"]
+	used_field = operation_info["used_field"]
 
 	amount_to_adjust = entry.get(amount_field) * entry.exchange_rate
 
@@ -186,3 +191,46 @@ def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 		amount_to_adjust -= adj_amount
 		if amount_to_adjust <= 0:
 			break
+
+
+# Steps
+# Create table in Purchase Invoice and Sales Invoice
+# Update settings for TW Category
+# Threshold overrides for party
+# Only single threshold for TW Category
+
+# Fetch tax details
+# -- From Party at Document Level
+# -- From Item at Item Level
+
+# Calculate tax and set rows
+# -- Determine tax categories and rates and thresholds with settings
+# -- Calculate amount considering thresholds / lower deduction / gross or net
+
+# Calculate amounts (taxable)
+# -- Calculate net or gross amount for each item (excluding tds row) (document total less excluded items)
+# -- Compute this for each tax category
+# -- Determine tax rate (lower deduction)
+# -- Calculate tax withheld (taxable amount * tax rate)
+
+# If amount is deducted / deductible:
+# -- Check for short deductions historically (ignore source doctype == payment entry)
+# -- Check for excess deductions historically (from payment entry only if exisiting invoice is paid using it)
+# -- Map them automatically in the entry
+
+# Payment Entry
+# -- Threshold check (existing amount is to be considered as tax inclusive)
+# -- Short deduction rows are never included (??)
+# -- Taxable amount is entered by user
+# -- Tax Category is selected by user
+# -- It's always excess deduction (tax amount is always 0 ??)
+
+# Journal Entry
+# -- Fetch tax details from party at account level
+# -- Enable applicability at document level
+# -- Apply TDS check
+
+# -- Excess deduction is not possible
+# -- Short deduction is allowed
+# -- Taxable amount is determined as (party amount / (1-tax rate))
+# -- Short or excess tax will be added to the last entry of the row
