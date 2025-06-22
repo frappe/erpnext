@@ -9,6 +9,7 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
 
+from erpnext import allow_regional
 from erpnext.controllers.accounts_controller import validate_account_head
 
 
@@ -779,9 +780,11 @@ def normal_round(number):
 
 
 def get_tax_withholding_categories(
-	category_names: list[str], posting_date: str, party_type: str, parties: list[str], company: str
+	category_names: list[str], posting_date: str, party_type: str, party: str, company: str
 ) -> list[TaxWithholdingCategory]:
 	category_details = frappe._dict()
+
+	# parties = get_related_parties(party_type, party)
 
 	for category_name in category_names:
 		category = frappe.get_doc("Tax Withholding Category", category_name)
@@ -809,9 +812,9 @@ def get_tax_withholding_categories(
 					tax_on_excess_amount=category.tax_on_excess_amount,
 					single_txn_threshold=category.single_txn_threshold,
 					taxable_amount=0,
-					# ldc
+					# ldc (only if valid based on posting date)
 					ldc_certificate=None,
-					ldc_unutilized_amount=0,
+					ldc_unutilized_amount=0,  # Base Currency
 					ldc_rate=0,
 				)
 
@@ -855,3 +858,8 @@ def get_transaction_value_till_date(
 		Sum("transaction_value"),
 		as_dict=True,
 	).get("transaction_value", 0.0)
+
+
+@allow_regional
+def get_related_parties(party_type: str, party: str) -> list[str]:
+	return [party]
