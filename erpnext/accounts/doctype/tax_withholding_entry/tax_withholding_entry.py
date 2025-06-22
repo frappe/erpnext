@@ -19,7 +19,7 @@ class TaxWithholdingEntry(Document):
 		from frappe.types import DF
 
 		exchange_rate: DF.Float
-		is_excess_deduction: DF.Check  # TODO: move to status
+		is_excess_deduction: DF.Check
 		is_manual_override: DF.Check
 		is_short_deduction: DF.Check
 		lower_deduction_certificate: DF.Link | None
@@ -28,11 +28,11 @@ class TaxWithholdingEntry(Document):
 		parenttype: DF.Data
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
-		short_deduction_reason: DF.Literal["", "Threshold not crossed", "Lower Deduction Certificate"]
+		short_deduction_reason: DF.Literal["", "Tax on Excess", "Lower Deduction Certificate"]
 		source_date: DF.Date | None
 		source_doctype: DF.Link | None
 		source_name: DF.DynamicLink | None
-		status: DF.Literal["", "Matched", "Open", "Closed", "Cancelled"]  # TODO: better status for matched
+		status: DF.Literal["", "Matched", "Open", "Closed", "Cancelled"]
 		target_date: DF.Date | None
 		target_doctype: DF.Link | None
 		target_name: DF.DynamicLink | None
@@ -92,7 +92,9 @@ class TaxWithholdingEntry(Document):
 		if self.docstatus == 2:
 			return "Cancelled"
 
-		if self.is_short_deduction:
+		# Reasons are genuine allowed reasons for short deduction.
+		# Hence if a reason is provided, consider it as matched.
+		if self.is_short_deduction and not self.short_deduction_reason:
 			return "Closed" if self.used_taxable_amount >= self.taxable_amount else "Open"
 
 		elif self.is_excess_deduction:
@@ -331,6 +333,8 @@ class TaxWithholdingController:
 						"target_name": self.doc.name,
 						"taxable_amount": category.taxable_amount,
 						"tax_withheld": 0,
+						"is_short_deduction": 1,
+						"short_deduction_reason": "Tax on Excess",
 					}
 				)
 
@@ -349,6 +353,8 @@ class TaxWithholdingController:
 						continue
 
 					# TODO: if is_not_valid_certificate:
+					# should be ideally based on source date / document date
+					# so, already filtered ldc should come here
 					# continue
 
 					if category.ldc_rate:
@@ -365,7 +371,32 @@ class TaxWithholdingController:
 								/ self.doc.exchange_rate
 							)
 
-						# TODO: adjust excess
+							entry = {**default_entry}
+							entry.update(
+								{
+									"target_doctype": short.target_doctype,
+									"target_name": short.target_name,
+									"target_date": short.target_date,
+									"taxable_amount": taxable_amount,
+									"rate": category.ldc_rate,
+									"is_short_deduction": 1,
+									"short_deduction_reason": "Lower Deduction Certificate",
+									"lower_deduction_certificate": category.ldc_certificate,
+								}
+							)
+
+							category.ldc_unutilized_amount -= taxable_amount * self.doc.exchange_rate
+							short.taxable_amount -= taxable_amount
+							excess.tax_withheld -= taxable_amount * category.ldc_rate / 100
+
+							if (
+								short.taxable_amount <= 0
+								or category.ldc_unutilized_amount <= 0
+								or excess.tax_withheld <= 0
+							):
+								break
+
+					if not short.taxable_amount:
 						continue
 
 					taxable_amount = (
@@ -381,7 +412,8 @@ class TaxWithholdingController:
 							"target_date": short.target_date,
 							"taxable_amount": taxable_amount,
 							"rate": category.ldc_rate,
-							# "short_deduction_reason": "Lower Deduction Certificate",
+							"is_short_deduction": 1,
+							"short_deduction_reason": "Lower Deduction Certificate",
 							"lower_deduction_certificate": category.ldc_certificate,
 						}
 					)
@@ -429,8 +461,11 @@ class TaxWithholdingController:
 					short.taxable_amount -= taxable_amount
 					excess.tax_withheld -= taxable_amount * category.tax_rate / 100
 
-					if excess.tax_withheld <= 0:
+					if excess.tax_withheld <= 0 or short.taxable_amount <= 0:
 						break
+
+				if not short.taxable_amount:
+					continue
 
 				# TODO: Update short entries
 				taxable_amount = short.taxable_amount * short.exchange_rate / self.doc.exchange_rate

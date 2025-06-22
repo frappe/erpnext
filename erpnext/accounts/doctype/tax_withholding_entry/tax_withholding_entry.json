@@ -176,7 +176,7 @@
    "fieldname": "short_deduction_reason",
    "fieldtype": "Select",
    "label": "Short Deduction Reason",
-   "options": "\nThreshold not crossed\nLower Deduction Certificate"
+   "options": "\nTax on Excess\nLower Deduction Certificate"
   },
   {
    "fieldname": "lower_deduction_certificate",
@@ -217,7 +217,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-21 05:48:13.361150",
+ "modified": "2025-06-22 01:11:39.793281",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",
