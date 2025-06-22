@@ -15,7 +15,6 @@
   "taxable_amount",
   "tax_rate",
   "tax_withheld",
-  "exchange_rate",
   "source_section",
   "source_doctype",
   "source_name",
@@ -27,10 +26,12 @@
   "target_doctype",
   "target_name",
   "target_date",
+  "currency",
+  "conversion_rate",
   "column_break_fqoe",
   "is_short_deduction",
-  "short_deduction_reason",
   "used_taxable_amount",
+  "short_deduction_reason",
   "section_break_ggna",
   "status",
   "is_manual_override",
@@ -86,20 +87,14 @@
    "fieldname": "taxable_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Taxable Amount"
+   "label": "Base Taxable Amount"
   },
   {
    "columns": 1,
    "fieldname": "tax_withheld",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Tax Withheld"
-  },
-  {
-   "fieldname": "exchange_rate",
-   "fieldtype": "Float",
-   "label": "Exchange Rate",
-   "precision": "9"
+   "label": "Base Tax Withheld"
   },
   {
    "description": "Transaction from which tax is withheld",
@@ -211,13 +206,25 @@
    "fieldname": "used_taxable_amount",
    "fieldtype": "Currency",
    "label": "Used Taxable Amount"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-22 01:11:39.793281",
+ "modified": "2025-06-22 04:30:13.852796",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",
