@@ -787,77 +787,125 @@ def get_tax_withholding_categories(
 	# parties = get_related_parties(party_type, party)
 
 	for category_name in category_names:
-		category = frappe.get_doc("Tax Withholding Category", category_name)
+		doc = frappe.get_doc("Tax Withholding Category", category_name)
+		row = get_valid_tax_details_row(doc, posting_date)
+		account_head = get_valid_account(doc, company)
 
-		for rate in category.rates:
-			if getdate(rate.from_date) <= getdate(posting_date) <= getdate(rate.to_date):
-				break
-		else:
-			frappe.throw(_("No Tax Withholding data found for the current posting date."))
+		category_details[category_name] = frappe._dict(
+			name=category_name,
+			account_head=account_head,
+			# rates
+			rate=row.tax_withholding_rate,
+			from_date=row.from_date,
+			to_date=row.to_date,
+			single_threshold=row.single_threshold,
+			cumulative_threshold=row.cumulative_threshold,
+			# settings
+			tax_deduction_basis=doc.tax_deduction_basis,
+			round_off_tax_amount=doc.round_off_tax_amount,
+			tax_on_excess_amount=doc.tax_on_excess_amount,
+			single_txn_threshold=doc.single_txn_threshold,
+			taxable_amount=0,
+			# ldc (only if valid based on posting date)
+			ldc_certificate=None,
+			ldc_unutilized_amount=0,  # Base Currency
+			ldc_rate=0,
+		)
 
-		for account_detail in category.accounts:
-			if company == account_detail.company:
-				category_details[category_name] = frappe._dict(
-					name=category_name,
-					account_head=account_detail.account,
-					# rates
-					rate=rate.tax_withholding_rate,
-					from_date=rate.from_date,
-					to_date=rate.to_date,
-					single_threshold=rate.single_threshold,
-					cumulative_threshold=rate.cumulative_threshold,
-					# settings
-					tax_deduction_basis=category.tax_deduction_basis,
-					round_off_tax_amount=category.round_off_tax_amount,
-					tax_on_excess_amount=category.tax_on_excess_amount,
-					single_txn_threshold=category.single_txn_threshold,
-					taxable_amount=0,
-					# ldc (only if valid based on posting date)
-					ldc_certificate=None,
-					ldc_unutilized_amount=0,  # Base Currency
-					ldc_rate=0,
-				)
+	update_lower_deduction_certificate_details(
+		category_details, category_names, posting_date, party_type, party, company
+	)
 
-				break
-		else:
-			frappe.throw(
-				_("No Tax withholding account set for Company {0} in Tax Withholding Category {1}.").format(
-					frappe.bold(company), frappe.bold(category_name)
-				)
-			)
+	return category_details
 
-		if category.single_txn_threshold:
-			# TODO: better field name
-			category_details[category_name].threshold_value = 0
+
+def get_valid_tax_details_row(doc, posting_date):
+	for row in doc.rates:
+		if getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date):
+			return row
+
+	frappe.throw(_("No Tax Withholding data found for the current posting date."))
+
+
+def get_valid_account(doc, company):
+	for row in doc.accounts:
+		if company == row.company:
+			return row.account
+
+	frappe.throw(
+		_("No Tax withholding account set for Company {0} in Tax Withholding Category {1}.").format(
+			frappe.bold(company), frappe.bold(doc.name)
+		)
+	)
+
+
+def update_lower_deduction_certificate_details(
+	category_details, category_names, posting_date, party_type, party, company
+):
+	if party_type != "Supplier":
+		return
+
+	valid_ldcs = get_valid_ldcs(category_names, posting_date, party, company)
+
+	if not valid_ldcs:
+		return
+
+	ldc_names = [ldc.name for ldc in valid_ldcs]
+	ldc_consumed_limit = get_ldcs_utilized_amount(category_names, party_type, party, company, ldc_names)
+
+	for ldc in valid_ldcs:
+		category_name = ldc.tax_withholding_category
+		unutilized_amount = ldc.certificate_limit - (ldc_consumed_limit.get(category_name) or 0)
+		if not unutilized_amount:
 			continue
 
-		# TODO: lower deduction certificate details
-		# Rate / Unutilized Amount / ldc_certificate
-		# TODO: compute utilized_threshold
+		category_details[category_name].update(
+			{
+				"ldc_certificate": ldc.name,
+				"ldc_unutilized_amount": unutilized_amount,
+				"ldc_rate": ldc.rate,
+			}
+		)
 
 
-def get_transaction_value_till_date(
-	category_name: str, party_type: str, parties: list[str], company: str, posting_date: str
-) -> float:
-	"""
-	Fetches the transaction value till the given posting date for the specified category and parties.
-	"""
-	conditions = {
-		"company": company,
-		"posting_date": ["<=", posting_date],
-	}
+def get_valid_ldcs(category_names, posting_date, party, company):
+	ldc = frappe.qb.DocType("Lower Deduction Certificate")
+	return (
+		frappe.qb.from_(ldc)
+		.select(
+			ldc.name,
+			ldc.tax_withholding_category,
+			ldc.rate,
+			ldc.certificate_limit,
+		)
+		.where(
+			(ldc.supplier == party)
+			& (ldc.valid_from <= posting_date)
+			& (ldc.valid_upto >= posting_date)
+			& (ldc.company == company)
+			& ldc.tax_withholding_category.isin(category_names)
+		)
+		.run(as_dict=True)
+	)
 
-	if party_type == "Customer":
-		conditions["customer"] = ["in", parties]
-	elif party_type == "Supplier":
-		conditions["supplier"] = ["in", parties]
 
-	return frappe.db.get_value(
-		"Tax Withholding Entry",
-		conditions,
-		Sum("transaction_value"),
-		as_dict=True,
-	).get("transaction_value", 0.0)
+def get_ldcs_utilized_amount(category_names, party_type, party, company, lower_deduction_certificates):
+	twe = frappe.qb.DocType("Tax Withholding Entry")
+
+	return frappe._dict(
+		frappe.qb.from_(twe)
+		.select(twe.lower_deduction_certificates, Sum(twe.taxable_value).as_("limit_consumed"))
+		.where(
+			(twe.party_type == party_type)
+			& (twe.party == party)
+			& (twe.company == company)
+			& (twe.tax_withholding_category.isin(category_names))
+			& (twe.lower_deduction_certificate.isin(lower_deduction_certificates))
+			& (twe.status != "Cancelled")
+		)
+		.group_by(twe.lower_deduction_certificates)
+		.run(as_dict=True)
+	)
 
 
 @allow_regional
