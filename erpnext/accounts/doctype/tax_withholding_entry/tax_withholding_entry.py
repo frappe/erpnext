@@ -6,6 +6,7 @@ from math import inf
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 # TODO: Should threshold check be reduced with purchase returns?
 
@@ -355,8 +356,101 @@ class TaxWithholdingController:
 		# TODO
 
 	def set_category_wise_taxable_amount(self):
-		# TODO
-		return
+		if self.is_doc_level_calculation():
+			self.update_taxable_value_based_on_doc()
+		else:
+			self.update_taxable_value_based_on_item()
+
+	def update_taxable_value_based_on_doc(self):
+		# only single cateory
+		category = self.category_details[next(iter(self.category_details))]
+		amount = 0
+		if category.tax_deduction_basis == "Net Total":
+			amount = self.doc.base_net_total
+
+		elif category.tax_deduction_basis == "Gross Total":
+			amount = self.doc.base_grand_total
+			# deduct tax_withholding row
+			for row in self.doc.taxes:
+				if row.is_tax_withholding_account:
+					amount = flt(
+						amount - row.base_tax_amount_after_discount_amount,
+						self.doc.precision("base_grand_total"),
+					)
+
+		category["taxable_amount"] += amount
+
+	def update_taxable_value_based_on_item(self):
+		for item in self.doc.get("items"):
+			if not item.apply_tds:
+				continue
+
+			category = self.category_details.get(item.tax_withholding_category)
+			amount = self._get_item_taxable_amount(item, category)
+			category["taxable_amount"] = flt(
+				category["taxable_amount"] + amount, self.doc.precision("base_net_total")
+			)
+
+	def is_doc_level_calculation(self):
+		return len(self.category_details.keys()) == 1 and all(
+			item.apply_tds for item in self.doc.get("items")
+		)
+
+	def _get_item_taxable_amount(self, item, category):
+		if category.tax_deduction_basis == "Net Total":
+			return item.base_net_amount
+
+		return self._get_item_gross_amount(item)
+
+	def _get_item_gross_amount(self, item):
+		tax_amount = 0
+		precision = self.doc.precision("tax_amount_after_discount_amount", "taxes")
+
+		for tax_row in self.doc.taxes:
+			if tax_row.is_tax_withholding_account or not tax_row.base_tax_amount_after_discount_amount:
+				continue
+
+			charge_type = tax_row.charge_type
+			if tax_row.item_wise_tax_detail:
+				item_tax_details = self.get_tax_details(tax_row).get(item.item_code or item.name, {})
+				if not item_tax_details:
+					continue
+
+				tax_rate = self.get_item_tax_rate(item, tax_row)
+				total_tax_amount = item_tax_details.get("tax_amount", 0.0)
+
+				# Actual
+				if not tax_rate and total_tax_amount:
+					tax_amount += flt(item.net_amount * total_tax_amount / self.doc.net_total, precision)
+					continue
+
+				tax_amount += flt(self.get_item_tax_amount(item, tax_rate, charge_type), precision)
+
+			elif charge_type == "Actual":
+				tax_amount += flt(
+					(item.net_amount * tax_row.base_tax_amount_after_discount_amount / self.doc.net_total),
+					precision,
+				)
+
+		return flt(item.base_net_amount + tax_amount, self.doc.precision("base_net_amount", item))
+
+	def get_tax_details(self, tax_row):
+		if not getattr(tax_row, "__tax_details", None):
+			tax_row.__tax_details = frappe.parse_json(tax_row.get("item_wise_tax_detail") or "{}")
+
+		return tax_row.__tax_details
+
+	def get_item_tax_rate(self, item, tax_row):
+		item_tax_rates = frappe.parse_json(item.item_tax_rate)
+
+		if tax_row.account_head in item_tax_rates:
+			return item_tax_rates[tax_row.account_head]
+
+		return tax_row.rate
+
+	def get_item_tax_amount(self, item, tax_rate, charge_type):
+		multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
+		return tax_rate * multiplier
 
 	def evaluate_thresholds(self):
 		"""
