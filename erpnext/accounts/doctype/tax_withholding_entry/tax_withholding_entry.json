@@ -15,13 +15,6 @@
   "taxable_amount",
   "tax_rate",
   "tax_withheld",
-  "source_section",
-  "source_doctype",
-  "source_name",
-  "source_date",
-  "column_break_dahw",
-  "is_excess_deduction",
-  "used_tax_withheld",
   "target_section",
   "target_doctype",
   "target_name",
@@ -29,9 +22,14 @@
   "currency",
   "conversion_rate",
   "column_break_fqoe",
-  "is_short_deduction",
   "used_taxable_amount",
   "short_deduction_reason",
+  "source_section",
+  "source_doctype",
+  "source_name",
+  "source_date",
+  "column_break_dahw",
+  "used_tax_withheld",
   "section_break_ggna",
   "status",
   "is_manual_override",
@@ -100,7 +98,7 @@
    "description": "Transaction from which tax is withheld",
    "fieldname": "source_section",
    "fieldtype": "Section Break",
-   "label": "Source"
+   "label": "Deducted From"
   },
   {
    "fieldname": "source_doctype",
@@ -127,18 +125,18 @@
    "description": "Transaction for which tax is withheld",
    "fieldname": "target_section",
    "fieldtype": "Section Break",
-   "label": "Target"
+   "label": "Applicable For"
   },
   {
    "fieldname": "target_doctype",
    "fieldtype": "Link",
-   "label": "Target Doctype",
+   "label": "Applicable Doctype",
    "options": "DocType"
   },
   {
    "fieldname": "target_date",
    "fieldtype": "Date",
-   "label": "Target Date"
+   "label": "Applicable Doc Date"
   },
   {
    "fieldname": "column_break_fqoe",
@@ -148,7 +146,7 @@
    "fieldname": "target_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Target Name",
+   "label": "Applicable Docname",
    "options": "target_doctype"
   },
   {
@@ -186,18 +184,6 @@
    "options": "\nMatched\nOpen\nClosed\nCancelled"
   },
   {
-   "default": "0",
-   "fieldname": "is_short_deduction",
-   "fieldtype": "Check",
-   "label": "Is Short Deduction"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_excess_deduction",
-   "fieldtype": "Check",
-   "label": "Is Excess Deduction"
-  },
-  {
    "fieldname": "used_tax_withheld",
    "fieldtype": "Currency",
    "label": "Used Tax Withheld"
@@ -224,7 +210,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-22 04:30:13.852796",
+ "modified": "2025-06-23 08:44:14.166494",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",

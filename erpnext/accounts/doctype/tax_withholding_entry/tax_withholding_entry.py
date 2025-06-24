@@ -21,9 +21,7 @@ class TaxWithholdingEntry(Document):
 
 		conversion_rate: DF.Float
 		currency: DF.Link | None
-		is_excess_deduction: DF.Check
 		is_manual_override: DF.Check
-		is_short_deduction: DF.Check
 		lower_deduction_certificate: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
