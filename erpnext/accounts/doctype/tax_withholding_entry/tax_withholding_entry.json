@@ -16,20 +16,22 @@
   "tax_rate",
   "tax_withheld",
   "target_section",
-  "target_doctype",
-  "target_name",
-  "target_date",
+  "taxable_doctype",
+  "taxable_name",
+  "taxable_date",
   "currency",
   "conversion_rate",
   "column_break_fqoe",
   "used_taxable_amount",
   "short_deduction_reason",
+  "is_short_deduction",
   "source_section",
-  "source_doctype",
-  "source_name",
-  "source_date",
+  "withholding_doctype",
+  "withholding_name",
+  "withholding_date",
   "column_break_dahw",
   "used_tax_withheld",
+  "is_excess_deduction",
   "section_break_ggna",
   "status",
   "is_manual_override",
@@ -101,25 +103,8 @@
    "label": "Deducted From"
   },
   {
-   "fieldname": "source_doctype",
-   "fieldtype": "Link",
-   "label": "Source Doctype",
-   "options": "DocType"
-  },
-  {
-   "fieldname": "source_date",
-   "fieldtype": "Date",
-   "label": "Source Date"
-  },
-  {
    "fieldname": "column_break_dahw",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "source_name",
-   "fieldtype": "Dynamic Link",
-   "label": "Source Name",
-   "options": "source_doctype"
   },
   {
    "description": "Transaction for which tax is withheld",
@@ -128,26 +113,8 @@
    "label": "Applicable For"
   },
   {
-   "fieldname": "target_doctype",
-   "fieldtype": "Link",
-   "label": "Applicable Doctype",
-   "options": "DocType"
-  },
-  {
-   "fieldname": "target_date",
-   "fieldtype": "Date",
-   "label": "Applicable Doc Date"
-  },
-  {
    "fieldname": "column_break_fqoe",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "target_name",
-   "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
-   "label": "Applicable Docname",
-   "options": "target_doctype"
   },
   {
    "fieldname": "section_break_ggna",
@@ -204,13 +171,60 @@
    "fieldtype": "Float",
    "label": "Exchange Rate",
    "precision": "9"
+  },
+  {
+   "fieldname": "withholding_doctype",
+   "fieldtype": "Link",
+   "label": "Withholding Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "withholding_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Withholding Document Name",
+   "options": "withholding_doctype"
+  },
+  {
+   "fieldname": "taxable_doctype",
+   "fieldtype": "Link",
+   "label": "Taxable Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "taxable_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Taxable Document Name",
+   "options": "taxable_doctype"
+  },
+  {
+   "fieldname": "taxable_date",
+   "fieldtype": "Date",
+   "label": "Taxable Date"
+  },
+  {
+   "fieldname": "withholding_date",
+   "fieldtype": "Date",
+   "label": "Withholding Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_short_deduction",
+   "fieldtype": "Check",
+   "label": "Is Short Deduction"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_excess_deduction",
+   "fieldtype": "Check",
+   "label": "Is Excess Deduction"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-23 08:44:14.166494",
+ "modified": "2025-06-25 22:45:42.435903",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",

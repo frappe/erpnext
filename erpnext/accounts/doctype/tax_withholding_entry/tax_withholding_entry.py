@@ -22,7 +22,9 @@ class TaxWithholdingEntry(Document):
 
 		conversion_rate: DF.Float
 		currency: DF.Link | None
+		is_excess_deduction: DF.Check
 		is_manual_override: DF.Check
+		is_short_deduction: DF.Check
 		lower_deduction_certificate: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
@@ -30,20 +32,20 @@ class TaxWithholdingEntry(Document):
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
 		short_deduction_reason: DF.Literal["", "Tax on Excess", "Lower Deduction Certificate"]
-		source_date: DF.Date | None
-		source_doctype: DF.Link | None
-		source_name: DF.DynamicLink | None
 		status: DF.Literal["", "Matched", "Open", "Closed", "Cancelled"]
-		target_date: DF.Date | None
-		target_doctype: DF.Link | None
-		target_name: DF.DynamicLink | None
 		tax_id: DF.Data | None
 		tax_rate: DF.Percent
 		tax_withheld: DF.Currency
 		tax_withholding_category: DF.Link | None
 		taxable_amount: DF.Currency
+		taxable_date: DF.Date | None
+		taxable_doctype: DF.Link | None
+		taxable_name: DF.DynamicLink | None
 		used_tax_withheld: DF.Currency
 		used_taxable_amount: DF.Currency
+		withholding_date: DF.Date | None
+		withholding_doctype: DF.Link | None
+		withholding_name: DF.DynamicLink | None
 	# end: auto-generated types
 
 	def validate(self):
@@ -64,24 +66,35 @@ class TaxWithholdingEntry(Document):
 		Args:
 		        for_cancel: True if this is for a cancel operation, False for submit
 		"""
+		# convert matched to excess deduction
+		if for_cancel and not self.withholding_name and self.used_taxable_amount:
+			# TODO: update for manual override
+			self.db_set({"used_taxable_amount": 0})
+			clear_matched_entries(self, "excess_deduction")
+
+		# convert matched to short deduction
+		if for_cancel and not self.taxable_name and self.used_tax_withheld:
+			self.db_set({"used_tax_withheld": 0})
+			clear_matched_entries(self, "short_deduction")
+
 		# Process short deduction adjustments if applicable
-		if self.source_doctype != self.parenttype or self.source_name != self.parent:
+		if self.withholding_doctype != self.parenttype or self.withholding_name != self.parent:
 			adjust_entry_amounts(self, "short_deduction", for_cancel)
 
 		# Process excess deduction adjustments if applicable
-		if self.target_doctype != self.parenttype or self.target_name != self.parent:
+		if self.taxable_doctype != self.parenttype or self.taxable_name != self.parent:
 			adjust_entry_amounts(self, "excess_deduction", for_cancel)
 
 	def set_tax_withholding_flags(self):
-		if not self.source_name:
+		if not self.withholding_name:
 			self.is_short_deduction = 1
 			self.tax_withheld = 0
 
-		elif not self.target_name:
+		elif not self.taxable_name:
 			self.is_excess_deduction = 1
 
 			# Considered for threshold check
-			if self.source_doctype != "Payment Entry":
+			if self.withholding_doctype != "Payment Entry":
 				self.taxable_amount = 0
 
 	def set_status(self):
@@ -120,8 +133,8 @@ def get_entries_to_adjust(entry, adjustment_type, for_cancel):
 	is_short = adjustment_type == "short_deduction"
 
 	field_map = {
-		"doctype_field": "source_doctype" if is_short else "target_doctype",
-		"name_field": "source_name" if is_short else "target_name",
+		"doctype_field": "withholding_doctype" if is_short else "taxable_doctype",
+		"name_field": "withholding_name" if is_short else "taxable_name",
 		"amount_field": "taxable_amount" if is_short else "tax_withheld",
 	}
 	field_map["used_field"] = f"used_{field_map['amount_field']}"
@@ -197,6 +210,30 @@ def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 			break
 
 
+def clear_matched_entries(entry, adjustment_type):
+	is_short = adjustment_type == "short_deduction"
+	doctype_field = "withholding_doctype" if is_short else "taxable_doctype"
+	docname_field = "withholding_name" if is_short else "taxable_name"
+	amount_field = "tax_withheld" if is_short else "taxable_amount"
+
+	frappe.db.set_value(
+		"Tax Withholding Entry",
+		{
+			# "tax_withholding_category": entry.tax_withholding_category,
+			doctype_field: entry.get(doctype_field),
+			docname_field: entry.get(docname_field),
+			"name": ["!=", entry.name],
+			"status": "Matched",
+		},
+		{
+			doctype_field: "",
+			docname_field: "",
+			amount_field: 0,
+			f"is_{adjustment_type}": 1,
+		},
+	)
+
+
 # Steps
 # Create table in Purchase Invoice and Sales Invoice
 # Update settings for TW Category
@@ -218,7 +255,7 @@ def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 # -- Calculate tax withheld (taxable amount * tax rate)
 
 # If amount is deducted / deductible:
-# -- Check for short deductions historically (ignore source doctype == payment entry)
+# -- Check for short deductions historically (ignore withholding doctype == payment entry)
 # -- Check for excess deductions historically (from payment entry only if exisiting invoice is paid using it)
 # -- Map them automatically in the entry
 
@@ -343,13 +380,13 @@ class TaxWithholdingController:
 
 		# Step 5: Process entries for existing document
 		for entry in self.entries:
-			if entry.get("source_name"):
+			if entry.get("withholding_name"):
 				continue
 
 			entry.update(
-				source_doctype=self.doc.doctype,
-				source_name=self.doc.name,
-				source_date=self.doc.posting_date,
+				withholding_doctype=self.doc.doctype,
+				withholding_name=self.doc.name,
+				withholding_date=self.doc.posting_date,
 			)
 
 		# Update tax rows in the parent document
@@ -514,8 +551,8 @@ class TaxWithholdingController:
 				"party": self.party,
 				"status": "Open",
 				# Add date filters if needed
-				# TODO: convert this to frappe.qb filter `target_date` is short deduction and `source_date` otherwise
-				"source_date": ["between", [category.from_date, category.to_date]],
+				# TODO: convert this to frappe.qb filter `taxable_date` is short deduction and `withholding_date` otherwise
+				"withholding_date": ["between", [category.from_date, category.to_date]],
 			},
 			fields="*",
 		)
@@ -530,14 +567,14 @@ class TaxWithholdingController:
 				open_entries["short_deduction"].append(entry)
 				continue
 
-			if (entry.source_doctype, entry.source_name) in linked_payments:
+			if (entry.withholding_doctype, entry.withholding_name) in linked_payments:
 				# TODO: only add proportionate amount
 				open_entries["excess_deduction"].appendleft(entry)
 				continue
 
 			# Skip for manual adjustment
 			# TODO: alternatively, also check allocation status of the linked payment
-			if entry.source_doctype in ["Payment Entry", "Journal Entry"]:
+			if entry.withholding_doctype in ["Payment Entry", "Journal Entry"]:
 				continue
 
 			open_entries["excess_deduction"].append(entry)
@@ -546,9 +583,9 @@ class TaxWithholdingController:
 		open_entries["short_deduction"].appendleft(
 			frappe._dict(
 				{
-					"target_doctype": self.doc.doctype,
-					"target_name": self.doc.name,
-					"target_date": self.doc.posting_date,
+					"taxable_doctype": self.doc.doctype,
+					"taxable_name": self.doc.name,
+					"taxable_date": self.doc.posting_date,
 					"taxable_amount": category.taxable_amount,
 				}
 			)
@@ -570,9 +607,9 @@ class TaxWithholdingController:
 			"tax_withholding_category": category.name,
 			"tax_rate": category.tax_rate,
 			"conversion_rate": self.doc.conversion_rate,
-			"source_doctype": self.doc.doctype,
-			"source_name": self.doc.name,
-			"source_date": self.doc.posting_date,
+			"withholding_doctype": self.doc.doctype,
+			"withholding_name": self.doc.name,
+			"withholding_date": self.doc.posting_date,
 			"tax_withheld": 0,  # Will be computed later
 		}
 
@@ -581,12 +618,12 @@ class TaxWithholdingController:
 		entry = {**default_entry}
 
 		if category.tax_on_excess_amount:
-			# Add target information for excess tax
+			# Add taxable information for excess tax
 			entry.update(
 				{
-					"target_doctype": self.doc.doctype,
-					"target_name": self.doc.name,
-					"target_date": self.doc.posting_date,
+					"taxable_doctype": self.doc.doctype,
+					"taxable_name": self.doc.name,
+					"taxable_date": self.doc.posting_date,
 					"taxable_amount": category.taxable_amount,
 					"is_short_deduction": 1,
 					"short_deduction_reason": "Tax on Excess",
@@ -614,9 +651,9 @@ class TaxWithholdingController:
 
 		entry.update(
 			{
-				"target_doctype": self.doc.doctype,
-				"target_name": self.doc.name,
-				"target_date": self.doc.posting_date,
+				"taxable_doctype": self.doc.doctype,
+				"taxable_name": self.doc.name,
+				"taxable_date": self.doc.posting_date,
 				"taxable_amount": taxable_amount,
 				"tax_withheld": 0,
 				"is_short_deduction": 1,
@@ -660,9 +697,9 @@ class TaxWithholdingController:
 
 			entry.update(
 				{
-					"target_doctype": short.target_doctype,
-					"target_name": short.target_name,
-					"target_date": short.target_date,
+					"taxable_doctype": short.taxable_doctype,
+					"taxable_name": short.taxable_name,
+					"taxable_date": short.taxable_date,
 					"tax_withholding_category": category.name,
 					"tax_rate": tax_rate,
 					"party_type": self.party_type,
@@ -691,9 +728,9 @@ class TaxWithholdingController:
 				**default_entry(short),
 				"taxable_amount": amount_to_merge,
 				"tax_withheld": amount_to_merge * tax_rate / 100,  # TODO: Rounding settings
-				"source_doctype": excess.source_doctype,
-				"source_name": excess.source_name,
-				"source_date": excess.source_date,
+				"withholding_doctype": excess.withholding_doctype,
+				"withholding_name": excess.withholding_name,
+				"withholding_date": excess.withholding_date,
 			}
 
 			merged_entries.append(merged_entry)
