@@ -100,23 +100,21 @@ class TaxWithholdingEntry(Document):
 	# SUBMIT
 
 	def _process_tax_withholding_adjustments(self):
-		# SCENARIO 1: Adjust against under-withheld entries (we have taxable amount, they need withholding)
+		# adjust old taxable (under-withheld)
 		if self.is_taxable_different:
 			self._adjust_against_old_entries(field_type="taxable")
 
-		# SCENARIO 2: Adjust against over-withheld entries (we have withholding amount, they need taxable)
+		# adjust old withholding (over-withheld)
 		elif self.is_withholding_different:
 			self._adjust_against_old_entries(field_type="withholding")
 
 	def _adjust_against_old_entries(self, field_type: str) -> set:
 		"""
 		Find old entries that need adjustment and update them.
+		The logic reads like: "Match up old incomplete entries with this new entry"
 
 		Args:
-		        entry: The current entry we're submitting
 		        field_type: Either "taxable" or "withholding" - determines which fields to use
-
-		The logic reads like: "Match up old incomplete entries with this new entry"
 		"""
 
 		doctype_field = f"{field_type}_doctype"
@@ -124,10 +122,12 @@ class TaxWithholdingEntry(Document):
 		amount_field = f"{field_type}_amount"
 		status_to_find = "Under Withheld" if field_type == "taxable" else "Over Withheld"
 
-		# Find old entries that need our help
+		# old entries
 		old_entries = frappe.get_all(
 			DOCTYPE,
 			filters={
+				# NOTE: Allow offsetting across different categories
+				# Change Filters
 				"tax_withholding_category": self.tax_withholding_category,
 				"status": status_to_find,
 				doctype_field: self.get(doctype_field),
@@ -140,28 +140,29 @@ class TaxWithholdingEntry(Document):
 		remaining_amount = abs(self.get(amount_field))
 		docs_needing_reindex = set()
 
-		# Go through each old entry and try to match it with our amount
+		# update
 		for old_entry_data in old_entries:
 			old_entry = frappe.get_doc(DOCTYPE, **old_entry_data)
 			old_amount = abs(old_entry.get(amount_field))
 
 			if old_entry.get(amount_field) * value_direction < 0:
-				# If the sign of the old entry's amount is different, we can't match it
+				# sign of old entry's amount is different
 				continue
 
-			amount_we_can_match = min(old_amount, remaining_amount)  # Returns
+			amount_we_can_match = min(old_amount, remaining_amount)
 			proportion = amount_we_can_match / old_amount if old_amount else 0
 			values_to_update = self._get_values_to_update(proportion, field_type)
 
 			if old_amount <= amount_we_can_match:
-				# We can fully satisfy this old entry
+				# complete adjustment
 				frappe.db.set_value(DOCTYPE, old_entry.name, values_to_update)
 
 			else:
-				# We can only partially satisfy this old entry - need to split it
+				# partial adjustment
 				balance_amount = (old_amount - amount_we_can_match) * value_direction
 				frappe.db.set_value(DOCTYPE, old_entry.name, {amount_field: balance_amount})
 
+				# new entry
 				new_entry = frappe.copy_doc(old_entry)
 				new_entry.update(values_to_update)
 				new_entry.insert()
@@ -174,7 +175,6 @@ class TaxWithholdingEntry(Document):
 				break
 
 		else:
-			# If we couldn't match all our amount, that's an error
 			frappe.throw(
 				_("Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}").format(
 					self.idx, status_to_find, remaining_amount
@@ -203,6 +203,9 @@ class TaxWithholdingEntry(Document):
 				under_withheld_reason=self.under_withheld_reason,
 				lower_deduction_certificate=self.lower_deduction_certificate,
 			)
+
+		# NOTE: Allow offsetting across different categories
+		# Update Tax Withholding Category values
 
 		return values
 
@@ -362,7 +365,7 @@ class TaxWithholdingController:
 		self.category_details = self._get_category_details()
 
 		# Step 2: Calculate taxable amounts for each category
-		self.set_category_wise_taxable_amount()
+		TaxWithholdingAmount(self.doc, self.category_details).set_taxable_amount()
 
 		# Step 3: Apply threshold rules
 		self.evaluate_thresholds()
@@ -428,103 +431,6 @@ class TaxWithholdingController:
 		# Update tax rows in the parent document
 		# TODO
 
-	def set_category_wise_taxable_amount(self):
-		if self.is_doc_level_calculation():
-			self.update_taxable_value_based_on_doc()
-		else:
-			self.update_taxable_value_based_on_item()
-
-	def update_taxable_value_based_on_doc(self):
-		# only single cateory
-		category = self.category_details[next(iter(self.category_details))]
-		amount = 0
-		if category.tax_deduction_basis == "Net Total":
-			amount = self.doc.base_net_total
-
-		elif category.tax_deduction_basis == "Gross Total":
-			amount = self.doc.base_grand_total
-			# deduct tax_withholding row
-			for row in self.doc.taxes:
-				if row.is_tax_withholding_account:
-					amount = flt(
-						amount - row.base_tax_amount_after_discount_amount,
-						self.doc.precision("base_grand_total"),
-					)
-
-		category["taxable_amount"] += amount
-
-	def update_taxable_value_based_on_item(self):
-		for item in self.doc.get("items"):
-			if not item.apply_tds:
-				continue
-
-			category = self.category_details.get(item.tax_withholding_category)
-			amount = self._get_item_taxable_amount(item, category)
-			category["taxable_amount"] = flt(
-				category["taxable_amount"] + amount, self.doc.precision("base_net_total")
-			)
-
-	def is_doc_level_calculation(self):
-		return len(self.category_details.keys()) == 1 and all(
-			item.apply_tds for item in self.doc.get("items")
-		)
-
-	def _get_item_taxable_amount(self, item, category):
-		if category.tax_deduction_basis == "Net Total":
-			return item.base_net_amount
-
-		return self._get_item_gross_amount(item)
-
-	def _get_item_gross_amount(self, item):
-		tax_amount = 0
-		precision = self.doc.precision("tax_amount_after_discount_amount", "taxes")
-
-		for tax_row in self.doc.taxes:
-			if tax_row.is_tax_withholding_account or not tax_row.base_tax_amount_after_discount_amount:
-				continue
-
-			charge_type = tax_row.charge_type
-			if tax_row.item_wise_tax_detail:
-				item_tax_details = self.get_tax_details(tax_row).get(item.item_code or item.name, {})
-				if not item_tax_details:
-					continue
-
-				tax_rate = self.get_item_tax_rate(item, tax_row)
-				total_tax_amount = item_tax_details.get("tax_amount", 0.0)
-
-				# Actual
-				if not tax_rate and total_tax_amount:
-					tax_amount += flt(item.net_amount * total_tax_amount / self.doc.net_total, precision)
-					continue
-
-				tax_amount += flt(self.get_item_tax_amount(item, tax_rate, charge_type), precision)
-
-			elif charge_type == "Actual":
-				tax_amount += flt(
-					(item.net_amount * tax_row.base_tax_amount_after_discount_amount / self.doc.net_total),
-					precision,
-				)
-
-		return flt(item.base_net_amount + tax_amount, self.doc.precision("base_net_amount", item))
-
-	def get_tax_details(self, tax_row):
-		if not getattr(tax_row, "__tax_details", None):
-			tax_row.__tax_details = frappe.parse_json(tax_row.get("item_wise_tax_detail") or "{}")
-
-		return tax_row.__tax_details
-
-	def get_item_tax_rate(self, item, tax_row):
-		item_tax_rates = frappe.parse_json(item.item_tax_rate)
-
-		if tax_row.account_head in item_tax_rates:
-			return item_tax_rates[tax_row.account_head]
-
-		return tax_row.rate
-
-	def get_item_tax_amount(self, item, tax_rate, charge_type):
-		multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
-		return tax_rate * multiplier
-
 	def evaluate_thresholds(self):
 		"""
 		Evaluate if thresholds are crossed for each category
@@ -579,6 +485,9 @@ class TaxWithholdingController:
 
 	def get_short_excess_entries(self, category):
 		"""Get historical tax withholding entries for processing"""
+
+		# NOTE: Allow offsetting across different categories
+		# Change Filters
 		entries = frappe.get_all(
 			DOCTYPE,
 			filters={
@@ -805,3 +714,106 @@ class TaxWithholdingController:
 				short_entries.popleft()
 
 		return merged_entries
+
+
+class TaxWithholdingAmount:
+	def __init__(self, doc, category_details):
+		self.doc = doc
+		self.category_details = category_details
+
+	def set_taxable_amount(self):
+		if self.is_doc_level_calculation():
+			self.update_taxable_value_based_on_doc()
+		else:
+			self.update_taxable_value_based_on_item()
+
+	def update_taxable_value_based_on_doc(self):
+		# only single cateory
+		category = self.category_details[next(iter(self.category_details))]
+		amount = 0
+		if category.tax_deduction_basis == "Net Total":
+			amount = self.doc.base_net_total
+
+		elif category.tax_deduction_basis == "Gross Total":
+			amount = self.doc.base_grand_total
+			# deduct tax_withholding row
+			for row in self.doc.taxes:
+				if row.is_tax_withholding_account:
+					amount = flt(
+						amount - row.base_tax_amount_after_discount_amount,
+						self.doc.precision("base_grand_total"),
+					)
+
+		category["taxable_amount"] += amount
+
+	def update_taxable_value_based_on_item(self):
+		for item in self.doc.get("items"):
+			if not item.apply_tds:
+				continue
+
+			category = self.category_details.get(item.tax_withholding_category)
+			amount = self._get_item_taxable_amount(item, category)
+			category["taxable_amount"] = flt(
+				category["taxable_amount"] + amount, self.doc.precision("base_net_total")
+			)
+
+	def is_doc_level_calculation(self):
+		return len(self.category_details.keys()) == 1 and all(
+			item.apply_tds for item in self.doc.get("items")
+		)
+
+	def _get_item_taxable_amount(self, item, category):
+		if category.tax_deduction_basis == "Net Total":
+			return item.base_net_amount
+
+		return self._get_item_gross_amount(item)
+
+	def _get_item_gross_amount(self, item):
+		tax_amount = 0
+		precision = self.doc.precision("tax_amount_after_discount_amount", "taxes")
+
+		for tax_row in self.doc.taxes:
+			if tax_row.is_tax_withholding_account or not tax_row.base_tax_amount_after_discount_amount:
+				continue
+
+			charge_type = tax_row.charge_type
+			if tax_row.item_wise_tax_detail:
+				item_tax_details = self.get_tax_details(tax_row).get(item.item_code or item.name, {})
+				if not item_tax_details:
+					continue
+
+				tax_rate = self.get_item_tax_rate(item, tax_row)
+				total_tax_amount = item_tax_details.get("tax_amount", 0.0)
+
+				# Actual
+				if not tax_rate and total_tax_amount:
+					tax_amount += flt(item.net_amount * total_tax_amount / self.doc.net_total, precision)
+					continue
+
+				tax_amount += flt(self.get_item_tax_amount(item, tax_rate, charge_type), precision)
+
+			elif charge_type == "Actual":
+				tax_amount += flt(
+					(item.net_amount * tax_row.base_tax_amount_after_discount_amount / self.doc.net_total),
+					precision,
+				)
+
+		return flt(item.base_net_amount + tax_amount, self.doc.precision("base_net_amount", item))
+
+	def get_tax_details(self, tax_row):
+		if not getattr(tax_row, "__tax_details", None):
+			tax_row.__tax_details = frappe.parse_json(tax_row.get("item_wise_tax_detail") or "{}")
+
+		return tax_row.__tax_details
+
+	def get_item_tax_rate(self, item, tax_row):
+		item_tax_rates = frappe.parse_json(item.item_tax_rate)
+
+		if tax_row.account_head in item_tax_rates:
+			return item_tax_rates[tax_row.account_head]
+
+		return tax_row.rate
+
+	def get_item_tax_amount(self, item, tax_rate, charge_type):
+		multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
+		return tax_rate * multiplier
