@@ -5,6 +5,7 @@ from collections import defaultdict, deque
 from math import inf
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -22,17 +23,14 @@ class TaxWithholdingEntry(Document):
 
 		conversion_rate: DF.Float
 		currency: DF.Link | None
-		is_excess_deduction: DF.Check
 		is_manual_override: DF.Check
-		is_short_deduction: DF.Check
 		lower_deduction_certificate: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
-		short_deduction_reason: DF.Literal["", "Tax on Excess", "Lower Deduction Certificate"]
-		status: DF.Literal["", "Matched", "Open", "Closed", "Cancelled"]
+		status: DF.Literal["", "Settled", "Under Withheld", "Over Withheld", "Duplicate", "Cancelled"]
 		tax_id: DF.Data | None
 		tax_rate: DF.Percent
 		tax_withheld: DF.Currency
@@ -41,8 +39,8 @@ class TaxWithholdingEntry(Document):
 		taxable_date: DF.Date | None
 		taxable_doctype: DF.Link | None
 		taxable_name: DF.DynamicLink | None
-		used_tax_withheld: DF.Currency
-		used_taxable_amount: DF.Currency
+		tw_tax_category: DF.Link | None
+		under_withheld_reason: DF.Literal["", "Threshold Exemption", "Lower Deduction Certificate"]
 		withholding_date: DF.Date | None
 		withholding_doctype: DF.Link | None
 		withholding_name: DF.DynamicLink | None
@@ -67,14 +65,12 @@ class TaxWithholdingEntry(Document):
 		        for_cancel: True if this is for a cancel operation, False for submit
 		"""
 		# convert matched to excess deduction
-		if for_cancel and not self.withholding_name and self.used_taxable_amount:
+		if for_cancel and not self.withholding_name:
 			# TODO: update for manual override
-			self.db_set({"used_taxable_amount": 0})
 			clear_matched_entries(self, "excess_deduction")
 
 		# convert matched to short deduction
-		if for_cancel and not self.taxable_name and self.used_tax_withheld:
-			self.db_set({"used_tax_withheld": 0})
+		if for_cancel and not self.taxable_name:
 			clear_matched_entries(self, "short_deduction")
 
 		# Process short deduction adjustments if applicable
@@ -87,12 +83,9 @@ class TaxWithholdingEntry(Document):
 
 	def set_tax_withholding_flags(self):
 		if not self.withholding_name:
-			self.is_short_deduction = 1
 			self.tax_withheld = 0
 
 		elif not self.taxable_name:
-			self.is_excess_deduction = 1
-
 			# Considered for threshold check
 			if self.withholding_doctype != "Payment Entry":
 				self.taxable_amount = 0
@@ -108,14 +101,14 @@ class TaxWithholdingEntry(Document):
 
 		# Reasons are genuine allowed reasons for short deduction.
 		# Hence if a reason is provided, consider it as matched.
-		if self.is_short_deduction and not self.short_deduction_reason:
-			return "Closed" if self.used_taxable_amount >= self.taxable_amount else "Open"
+		if not self.withholding_name and not self.under_withheld_reason:
+			return "Under Withheld"
 
-		elif self.is_excess_deduction:
-			return "Closed" if self.used_tax_withheld >= self.tax_withheld else "Open"
+		elif not self.taxable_name:
+			return "Over Withheld"
 
 		else:
-			return "Matched"
+			return "Settled"
 
 
 def get_entries_to_adjust(entry, adjustment_type, for_cancel):
@@ -152,7 +145,7 @@ def get_entries_to_adjust(entry, adjustment_type, for_cancel):
 
 	if is_short:
 		# TODO: Tax on excess? ignore threshold check
-		filters["short_deduction_reason"] = ["!=", "Lower Deduction Certificate"]
+		filters["under_withheld_reason"] = ["!=", "Lower Deduction Certificate"]
 
 	entries = frappe.get_all("Tax Withholding Entry", filters=filters, fields="*")
 
@@ -208,6 +201,13 @@ def adjust_entry_amounts(entry, adjustment_type, for_cancel):
 		amount_to_adjust -= adj_amount
 		if amount_to_adjust <= 0:
 			break
+
+	else:
+		frappe.throw(
+			_(
+				"Row #{0}: Insufficient amount to adjust against existing tax withholding entries. Unadjusted amount: {1}"
+			).format(entry.idx, amount_to_adjust)
+		)
 
 
 def clear_matched_entries(entry, adjustment_type):
@@ -281,6 +281,17 @@ def clear_matched_entries(entry, adjustment_type):
 # -- Patch
 # -- Tests
 # -- Documentation
+
+## What is allowed in manual override?
+# -- Adjust taxable or tax withheld amount
+# -- Cannot adjust (increase or decrease) taxable amount if taxable doctype is not the current document. Decrease not allowed as it will result in short deduction (historically).
+# -- However, user can reduce the taxable amount in the original document.
+# -- Cannot increase tax withheld amount if withholding doctype is not the current document
+
+## How to respect user input for old adjustments?
+# -- Short deductions will come automatically. Always
+# -- Excess deductions will be applied only if TDS entries are not available in the current document.
+# -- Current document should be there to the fullest extent (except manual override of taxable amount).
 
 
 def on_invoice_validate(doc):
@@ -356,7 +367,7 @@ class TaxWithholdingController:
 			if category.ldc_unutilized_amount:
 				default_obj = {
 					"is_short_deduction": 1,
-					"short_deduction_reason": "Lower Deduction Certificate",
+					"under_withheld_reason": "Lower Deduction Certificate",
 					"lower_deduction_certificate": category.ldc_certificate,
 				}
 				merged = self._merge_entries(
@@ -626,7 +637,7 @@ class TaxWithholdingController:
 					"taxable_date": self.doc.posting_date,
 					"taxable_amount": category.taxable_amount,
 					"is_short_deduction": 1,
-					"short_deduction_reason": "Tax on Excess",
+					"under_withheld_reason": "Tax on Excess",
 				}
 			)
 
@@ -657,7 +668,7 @@ class TaxWithholdingController:
 				"taxable_amount": taxable_amount,
 				"tax_withheld": 0,
 				"is_short_deduction": 1,
-				"short_deduction_reason": "Tax on Excess",
+				"under_withheld_reason": "Tax on Excess",
 			}
 		)
 
