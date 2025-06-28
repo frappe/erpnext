@@ -11,6 +11,8 @@ from frappe.utils import flt
 
 # TODO: Should threshold check be reduced with purchase returns?
 
+DOCTYPE = "Tax Withholding Entry"
+
 
 class TaxWithholdingEntry(Document):
 	# begin: auto-generated types
@@ -33,7 +35,6 @@ class TaxWithholdingEntry(Document):
 		status: DF.Literal["", "Settled", "Under Withheld", "Over Withheld", "Duplicate", "Cancelled"]
 		tax_id: DF.Data | None
 		tax_rate: DF.Percent
-		tax_withheld: DF.Currency
 		tax_withholding_category: DF.Link | None
 		taxable_amount: DF.Currency
 		taxable_date: DF.Date | None
@@ -41,58 +42,28 @@ class TaxWithholdingEntry(Document):
 		taxable_name: DF.DynamicLink | None
 		tw_tax_category: DF.Link | None
 		under_withheld_reason: DF.Literal["", "Threshold Exemption", "Lower Deduction Certificate"]
+		withholding_amount: DF.Currency
 		withholding_date: DF.Date | None
 		withholding_doctype: DF.Link | None
 		withholding_name: DF.DynamicLink | None
 	# end: auto-generated types
 
 	def validate(self):
-		self.set_tax_withholding_flags()
 		self.set_status()
+		self.validate_adjustments()
 
 	def on_submit(self):
-		self.adjust_linked_entries(for_cancel=False)
+		self._process_tax_withholding_adjustments()
 
 	def on_cancel(self):
-		self.adjust_linked_entries(for_cancel=True)
+		self._clear_old_references()
 
-	def adjust_linked_entries(self, for_cancel=False):
-		"""
-		Adjusts related entries.
-		This method acts as a coordinator for the adjustment process.
-
-		Args:
-		        for_cancel: True if this is for a cancel operation, False for submit
-		"""
-		# convert matched to excess deduction
-		if for_cancel and not self.withholding_name:
-			# TODO: update for manual override
-			clear_matched_entries(self, "excess_deduction")
-
-		# convert matched to short deduction
-		if for_cancel and not self.taxable_name:
-			clear_matched_entries(self, "short_deduction")
-
-		# Process short deduction adjustments if applicable
-		if self.withholding_doctype != self.parenttype or self.withholding_name != self.parent:
-			adjust_entry_amounts(self, "short_deduction", for_cancel)
-
-		# Process excess deduction adjustments if applicable
-		if self.taxable_doctype != self.parenttype or self.taxable_name != self.parent:
-			adjust_entry_amounts(self, "excess_deduction", for_cancel)
-
-	def set_tax_withholding_flags(self):
-		if not self.withholding_name:
-			self.tax_withheld = 0
-
-		elif not self.taxable_name:
-			# Considered for threshold check
-			if self.withholding_doctype != "Payment Entry":
-				self.taxable_amount = 0
-
-	def set_status(self):
+	def set_status(self, status=None):
 		"""Update the status of this entry based on its current state"""
-		self.status = self.get_status()
+		if not status:
+			status = self.get_status()
+
+		self.status = status
 
 	def get_status(self):
 		"""Get the current status of this entry"""
@@ -110,128 +81,182 @@ class TaxWithholdingEntry(Document):
 		else:
 			return "Settled"
 
+	def validate_adjustments(self):
+		if self.is_taxable_different and self.is_withholding_different:
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot create entry with different taxable AND withholding document links."
+				).format(self.idx)
+			)
 
-def get_entries_to_adjust(entry, adjustment_type, for_cancel):
-	"""
-	Find entries that need adjustment based on the current entry and operation type.
+	@property
+	def is_taxable_different(self):
+		return self.taxable_doctype != self.parenttype or self.taxable_name != self.parent
 
-	Args:
-	        entry: The tax withholding entry document
-	        adjustment_type: Either "short_deduction" or "excess_deduction"
-	        for_cancel: True if this is for a cancel operation, False for submit
+	@property
+	def is_withholding_different(self):
+		return self.withholding_doctype != self.parenttype or self.withholding_name != self.parent
 
-	Returns:
-	        dict: Contains entry list, field mappings, and adjustment parameters
-	"""
-	is_short = adjustment_type == "short_deduction"
+	# SUBMIT
 
-	field_map = {
-		"doctype_field": "withholding_doctype" if is_short else "taxable_doctype",
-		"name_field": "withholding_name" if is_short else "taxable_name",
-		"amount_field": "taxable_amount" if is_short else "tax_withheld",
-	}
-	field_map["used_field"] = f"used_{field_map['amount_field']}"
+	def _process_tax_withholding_adjustments(self):
+		# SCENARIO 1: Adjust against under-withheld entries (we have taxable amount, they need withholding)
+		if self.is_taxable_different:
+			self._adjust_against_old_entries(field_type="taxable")
 
-	status_filter = "Open" if not for_cancel else ["in", ["Open", "Closed"]]
+		# SCENARIO 2: Adjust against over-withheld entries (we have withholding amount, they need taxable)
+		elif self.is_withholding_different:
+			self._adjust_against_old_entries(field_type="withholding")
 
-	# filter
-	filters = {
-		"tax_withholding_category": entry.tax_withholding_category,
-		field_map["doctype_field"]: getattr(entry, field_map["doctype_field"]),
-		field_map["name_field"]: getattr(entry, field_map["name_field"]),
-		f"is_{adjustment_type}": 1,
-		"status": status_filter,
-	}
+	def _adjust_against_old_entries(self, field_type: str) -> set:
+		"""
+		Find old entries that need adjustment and update them.
 
-	if is_short:
-		# TODO: Tax on excess? ignore threshold check
-		filters["under_withheld_reason"] = ["!=", "Lower Deduction Certificate"]
+		Args:
+		        entry: The current entry we're submitting
+		        field_type: Either "taxable" or "withholding" - determines which fields to use
 
-	entries = frappe.get_all("Tax Withholding Entry", filters=filters, fields="*")
+		The logic reads like: "Match up old incomplete entries with this new entry"
+		"""
 
-	return {
-		"entries": entries,
-		"amount_field": field_map["amount_field"],
-		"used_field": field_map["used_field"],
-	}
+		doctype_field = f"{field_type}_doctype"
+		docname_field = f"{field_type}_name"
+		amount_field = f"{field_type}_amount"
+		status_to_find = "Under Withheld" if field_type == "taxable" else "Over Withheld"
 
+		# Find old entries that need our help
+		old_entries = frappe.get_all(
+			DOCTYPE,
+			filters={
+				"tax_withholding_category": self.tax_withholding_category,
+				"status": status_to_find,
+				doctype_field: self.get(doctype_field),
+				docname_field: self.get(docname_field),
+			},
+			fields="*",
+		)
 
-def adjust_entry_amounts(entry, adjustment_type, for_cancel):
-	"""
-	Adjust tax withholding entries for both short deduction and excess deduction cases.
+		value_direction = -1 if self.get(amount_field) < 0 else 1
+		remaining_amount = abs(self.get(amount_field))
+		docs_needing_reindex = set()
 
-	Args:
-	        entry: The tax withholding entry document
-	        adjustment_type: Either "short_deduction" or "excess_deduction"
-	        for_cancel: True if this is for a cancel operation, False for submit
-	"""
-	operation_info = get_entries_to_adjust(entry, adjustment_type, for_cancel)
+		# Go through each old entry and try to match it with our amount
+		for old_entry_data in old_entries:
+			old_entry = frappe.get_doc(DOCTYPE, **old_entry_data)
+			old_amount = abs(old_entry.get(amount_field))
 
-	old_entries = operation_info["entries"]
-	amount_field = operation_info["amount_field"]
-	used_field = operation_info["used_field"]
+			if old_entry.get(amount_field) * value_direction < 0:
+				# If the sign of the old entry's amount is different, we can't match it
+				continue
 
-	amount_to_adjust = entry.get(amount_field)
+			amount_we_can_match = min(old_amount, remaining_amount)  # Returns
+			proportion = amount_we_can_match / old_amount if old_amount else 0
+			values_to_update = self._get_values_to_update(proportion, field_type)
 
-	if not amount_to_adjust or not old_entries:
-		return
+			if old_amount <= amount_we_can_match:
+				# We can fully satisfy this old entry
+				frappe.db.set_value(DOCTYPE, old_entry.name, values_to_update)
 
-	for old_entry in old_entries:
-		old_entry: TaxWithholdingEntry = frappe.get_doc("Tax Withholding Entry", **old_entry)
+			else:
+				# We can only partially satisfy this old entry - need to split it
+				balance_amount = (old_amount - amount_we_can_match) * value_direction
+				frappe.db.set_value(DOCTYPE, old_entry.name, {amount_field: balance_amount})
 
-		old_used_amount = old_entry.get(used_field)
+				new_entry = frappe.copy_doc(old_entry)
+				new_entry.update(values_to_update)
+				new_entry.insert()
 
-		if not for_cancel:
-			# use unused amounts
-			unused_amount = old_entry.get(amount_field) - old_used_amount
-			adj_amount = min(unused_amount, amount_to_adjust)
-			new_used_amount = old_used_amount + adj_amount
+				docs_needing_reindex.add((old_entry.parenttype, old_entry.parent))
+
+			remaining_amount -= amount_we_can_match
+
+			if remaining_amount <= 0:
+				break
 
 		else:
-			# reduce already used amounts
-			used_amount = old_used_amount
-			adj_amount = min(used_amount, amount_to_adjust)
-			new_used_amount = old_used_amount - adj_amount
+			# If we couldn't match all our amount, that's an error
+			frappe.throw(
+				_("Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}").format(
+					self.idx, status_to_find, remaining_amount
+				)
+			)
 
-		status = old_entry.get_status()
-		frappe.db.set_value(
-			"Tax Withholding Entry", old_entry.name, {used_field: new_used_amount, "status": status}
+		_reset_idx(docs_needing_reindex)
+
+	def _get_values_to_update(self, proportion: float, field_type: str):
+		field_to_update = "withholding" if field_type == "taxable" else "taxable"
+
+		values = {
+			f"{field_to_update}_amount": self.get(f"{field_to_update}_amount") * proportion,
+			f"{field_to_update}_doctype": self.get(f"{field_to_update}_doctype"),
+			f"{field_to_update}_name": self.get(f"{field_to_update}_name"),
+			f"{field_to_update}_date": self.get(f"{field_to_update}_date"),
+			"tax_rate": self.tax_rate,
+			"is_manual_override": self.is_manual_override,
+			"status": "Duplicate",
+		}
+
+		if field_to_update == "taxable":
+			values.update(
+				currency=self.currency,
+				conversion_rate=self.conversion_rate,
+				under_withheld_reason=self.under_withheld_reason,
+				lower_deduction_certificate=self.lower_deduction_certificate,
+			)
+
+		return values
+
+	# CANCEL
+
+	def _clear_old_references(self):
+		if self.is_taxable_different:
+			frappe.db.set_value(
+				DOCTYPE,
+				{
+					"tax_withholding_category": self.tax_withholding_category,
+					"taxable_doctype": self.taxable_doctype,
+					"taxable_name": self.taxable_name,
+					"name": ["!=", self.name],
+				},
+				{
+					"withholding_name": "",
+					"withholding_doctype": "",
+					"withholding_amount": 0,
+					"status": "Under Withheld",
+				},
+			)
+
+		elif self.is_withholding_different:
+			frappe.db.set_value(
+				DOCTYPE,
+				{
+					"tax_withholding_category": self.tax_withholding_category,
+					"withholding_doctype": self.withholding_doctype,
+					"withholding_name": self.withholding_name,
+					"name": ["!=", self.name],
+				},
+				{
+					"taxable_name": "",
+					"taxable_doctype": "",
+					"taxable_amount": 0,
+					"status": "Over Withheld",
+				},
+			)
+
+
+def _reset_idx(docs_to_reset_idx):
+	updates = []
+	for doctype, docname in docs_to_reset_idx:
+		names = frappe.get_all(
+			DOCTYPE,
+			filters={"parent": docname, "parenttype": doctype},
+			pluck="name",
 		)
 
-		amount_to_adjust -= adj_amount
-		if amount_to_adjust <= 0:
-			break
+		for idx, name in enumerate(names, start=1):
+			updates.append({"name": name, "idx": idx})
 
-	else:
-		frappe.throw(
-			_(
-				"Row #{0}: Insufficient amount to adjust against existing tax withholding entries. Unadjusted amount: {1}"
-			).format(entry.idx, amount_to_adjust)
-		)
-
-
-def clear_matched_entries(entry, adjustment_type):
-	is_short = adjustment_type == "short_deduction"
-	doctype_field = "withholding_doctype" if is_short else "taxable_doctype"
-	docname_field = "withholding_name" if is_short else "taxable_name"
-	amount_field = "tax_withheld" if is_short else "taxable_amount"
-
-	frappe.db.set_value(
-		"Tax Withholding Entry",
-		{
-			# "tax_withholding_category": entry.tax_withholding_category,
-			doctype_field: entry.get(doctype_field),
-			docname_field: entry.get(docname_field),
-			"name": ["!=", entry.name],
-			"status": "Matched",
-		},
-		{
-			doctype_field: "",
-			docname_field: "",
-			amount_field: 0,
-			f"is_{adjustment_type}": 1,
-		},
-	)
+	frappe.db.bulk_update(DOCTYPE, updates, update_modified=False)
 
 
 # Steps
@@ -544,7 +569,7 @@ class TaxWithholdingController:
 	def _check_untilized_threshold(self, category):
 		"""Check unutilized threshold for tax on excess amount"""
 		# Calculate utilized threshold from historical data
-		utilized_threshold = self._get_historical_tax_withheld(category)
+		utilized_threshold = self._get_historical_withholding_amount(category)
 		untilized_threshold = max(0, category.single_threshold - utilized_threshold)
 
 		return {
@@ -555,7 +580,7 @@ class TaxWithholdingController:
 	def get_short_excess_entries(self, category):
 		"""Get historical tax withholding entries for processing"""
 		entries = frappe.get_all(
-			"Tax Withholding Entry",
+			DOCTYPE,
 			filters={
 				"tax_withholding_category": category.name,
 				"party_type": self.party_type,
@@ -621,7 +646,7 @@ class TaxWithholdingController:
 			"withholding_doctype": self.doc.doctype,
 			"withholding_name": self.doc.name,
 			"withholding_date": self.doc.posting_date,
-			"tax_withheld": 0,  # Will be computed later
+			"withholding_amount": 0,  # Will be computed later
 		}
 
 	def _process_below_threshold_entry(self, category, default_entry):
@@ -666,7 +691,7 @@ class TaxWithholdingController:
 				"taxable_name": self.doc.name,
 				"taxable_date": self.doc.posting_date,
 				"taxable_amount": taxable_amount,
-				"tax_withheld": 0,
+				"withholding_amount": 0,
 				"is_short_deduction": 1,
 				"under_withheld_reason": "Tax on Excess",
 			}
@@ -729,7 +754,7 @@ class TaxWithholdingController:
 			excess = excess_entries[0]
 
 			# Calculate the amount to merge
-			amount_to_merge = min(short.taxable_amount, excess.tax_withheld / tax_rate, constraint)
+			amount_to_merge = min(short.taxable_amount, excess.withholding_amount / tax_rate, constraint)
 
 			if amount_to_merge <= 0:
 				break
@@ -738,7 +763,7 @@ class TaxWithholdingController:
 			merged_entry = {
 				**default_entry(short),
 				"taxable_amount": amount_to_merge,
-				"tax_withheld": amount_to_merge * tax_rate / 100,  # TODO: Rounding settings
+				"withholding_amount": amount_to_merge * tax_rate / 100,  # TODO: Rounding settings
 				"withholding_doctype": excess.withholding_doctype,
 				"withholding_name": excess.withholding_name,
 				"withholding_date": excess.withholding_date,
@@ -748,13 +773,13 @@ class TaxWithholdingController:
 
 			constraint -= amount_to_merge
 			short.taxable_amount -= amount_to_merge
-			excess.tax_withheld -= amount_to_merge * tax_rate / 100
+			excess.withholding_amount -= amount_to_merge * tax_rate / 100
 
 			# Remove zero or negative value entries
 			if short.taxable_amount <= 0:
 				short_entries.popleft()
 
-			if excess.tax_withheld <= 0:
+			if excess.withholding_amount <= 0:
 				excess_entries.popleft()
 
 		# Remaining short entries
@@ -768,7 +793,7 @@ class TaxWithholdingController:
 			merged_entry = {
 				**default_entry(short),
 				"taxable_amount": taxable_amount,
-				"tax_withheld": taxable_amount * tax_rate / 100,  # TODO: Rounding settings
+				"withholding_amount": taxable_amount * tax_rate / 100,  # TODO: Rounding settings
 			}
 
 			merged_entries.append(merged_entry)

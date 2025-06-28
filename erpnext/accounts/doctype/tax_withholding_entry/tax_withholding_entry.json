@@ -14,7 +14,7 @@
   "column_break_egzm",
   "taxable_amount",
   "tax_rate",
-  "tax_withheld",
+  "withholding_amount",
   "target_section",
   "taxable_doctype",
   "taxable_name",
@@ -85,13 +85,6 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Base Taxable Amount"
-  },
-  {
-   "columns": 1,
-   "fieldname": "tax_withheld",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Base Tax Withheld"
   },
   {
    "description": "Transaction from which tax is withheld",
@@ -208,13 +201,20 @@
    "label": "Tax Withholding Tax Category",
    "options": "Tax Category",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "withholding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Base Tax Withheld"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-28 02:03:29.454207",
+ "modified": "2025-06-28 05:36:02.384922",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",
