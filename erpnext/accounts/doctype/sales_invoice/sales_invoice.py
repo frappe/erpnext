@@ -213,11 +213,11 @@ class SalesInvoice(SellingController):
 		subscription: DF.Link | None
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
+		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
 		tax_withholding_group: DF.Link | None
 		taxes: DF.Table[SalesTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		tc_name: DF.Link | None
-		tds_entries: DF.Table[TaxWithholdingEntry]
 		terms: DF.TextEditor | None
 		territory: DF.Link | None
 		timesheets: DF.Table[SalesInvoiceTimesheet]

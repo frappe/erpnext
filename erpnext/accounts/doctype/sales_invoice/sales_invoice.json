@@ -92,7 +92,7 @@
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tds_threshold",
-  "tds_entries",
+  "tax_withholding_entries",
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
@@ -2246,16 +2246,16 @@
    "label": "Ignore Tax Withholding Threshold"
   },
   {
-   "fieldname": "tds_entries",
-   "fieldtype": "Table",
-   "label": "Tax Withholding Entries",
-   "options": "Tax Withholding Entry"
-  },
-  {
    "fieldname": "tax_withholding_group",
    "fieldtype": "Link",
    "label": "Tax Withholding Group",
    "options": "Tax Withholding Group"
+  },
+  {
+   "fieldname": "tax_withholding_entries",
+   "fieldtype": "Table",
+   "label": "Tax Withholding Entries",
+   "options": "Tax Withholding Entry"
   }
  ],
  "grid_page_length": 50,
@@ -2269,7 +2269,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-06-29 05:37:08.920935",
+ "modified": "2025-06-29 05:49:29.341058",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

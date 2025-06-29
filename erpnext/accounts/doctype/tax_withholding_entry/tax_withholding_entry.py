@@ -51,16 +51,6 @@ class TaxWithholdingEntry(Document):
 		withholding_name: DF.DynamicLink | None
 	# end: auto-generated types
 
-	def validate(self):
-		self.set_status()
-		self.validate_adjustments()
-
-	def on_submit(self):
-		self._process_tax_withholding_adjustments()
-
-	def on_cancel(self):
-		self._clear_old_references()
-
 	def set_status(self, status=None):
 		"""Update the status of this entry based on its current state"""
 		if not status:
@@ -250,79 +240,16 @@ class TaxWithholdingEntry(Document):
 			)
 
 
-def _reset_idx(docs_to_reset_idx):
-	updates = []
-	for doctype, docname in docs_to_reset_idx:
-		names = frappe.get_all(
-			DOCTYPE,
-			filters={"parent": docname, "parenttype": doctype},
-			pluck="name",
-		)
-
-		for idx, name in enumerate(names, start=1):
-			updates.append({"name": name, "idx": idx})
-
-	frappe.db.bulk_update(DOCTYPE, updates, update_modified=False)
+def on_invoice_submit(doc):
+	for entry in doc.tax_withholding_entries:
+		entry: TaxWithholdingEntry
+		entry._process_tax_withholding_adjustments()
 
 
-# Steps
-# Create table in Purchase Invoice and Sales Invoice
-# Update settings for TW Category
-# Threshold overrides for party
-# Only single threshold for TW Category
-
-# Fetch tax details
-# -- From Party at Document Level
-# -- From Item at Item Level
-
-# Calculate tax and set rows
-# -- Determine tax categories and rates and thresholds with settings
-# -- Calculate amount considering thresholds / lower deduction / gross or net
-
-# Calculate amounts (taxable)
-# -- Calculate net or gross amount for each item (excluding tds row) (document total less excluded items)
-# -- Compute this for each tax category
-# -- Determine tax rate (lower deduction)
-# -- Calculate tax withheld (taxable amount * tax rate)
-
-# If amount is deducted / deductible:
-# -- Check for under deductions historically (ignore withholding doctype == payment entry)
-# -- Check for over deductions historically (from payment entry only if exisiting invoice is paid using it)
-# -- Map them automatically in the entry
-
-# Payment Entry
-# -- Threshold check (existing amount is to be considered as tax inclusive)
-# -- under deduction rows are never included (??)
-# -- Taxable amount is entered by user
-# -- Tax Category is selected by user
-# -- It's always over deduction (tax amount is always 0 ??)
-
-# Journal Entry
-# -- Fetch tax details from party at account level
-# -- Enable applicability at document level
-# -- Apply TDS check
-
-# -- over deduction is not possible
-# -- under deduction is allowed
-# -- Taxable amount is determined as (party amount / (1-tax rate))
-# -- under or over tax will be added to the last entry of the row
-
-# Next Steps
-# -- Cleanup
-# -- Patch
-# -- Tests
-# -- Documentation
-
-## What is allowed in manual override?
-# -- Adjust taxable or tax withheld amount
-# -- Cannot adjust (increase or decrease) taxable amount if taxable doctype is not the current document. Decrease not allowed as it will result in under deduction (historically).
-# -- However, user can reduce the taxable amount in the original document.
-# -- Cannot increase tax withheld amount if withholding doctype is not the current document
-
-## How to respect user input for old adjustments?
-# -- under deductions will come automatically. Always
-# -- over deductions will be applied only if TDS entries are not available in the current document.
-# -- Current document should be there to the fullest extent (except manual override of taxable amount).
+def on_invoice_cancel(doc):
+	for entry in doc.tax_withholding_entries:
+		entry: TaxWithholdingEntry
+		entry._clear_old_references()
 
 
 def on_invoice_validate(doc):
@@ -334,6 +261,11 @@ def on_invoice_validate(doc):
 		return
 
 	TaxWithholdingController(doc).calculate()
+
+	for entry in doc.tax_withholding_entries:
+		entry: TaxWithholdingEntry
+		entry.set_status()
+		entry.validate_adjustments()
 
 
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
@@ -424,9 +356,16 @@ class TaxWithholdingController:
 			self.entries.extend(merged)
 
 		# Step 5: Process entries for existing document
+		if not any(entry.is_manual_override for entry in self.doc.tax_withholding_entries):
+			self.doc.tax_withholding_entries = self.entries
 
-		# Update tax rows in the parent document
-		# TODO
+		else:
+			# To the extent of taxable amount with manual override
+			# Reduce the entries to be processed above
+
+			pass
+			# Update tax rows in the parent document
+			# TODO
 
 	def evaluate_thresholds(self):
 		"""
@@ -839,6 +778,21 @@ class TaxWithholdingAmount:
 	def get_item_tax_amount(self, item, tax_rate, charge_type):
 		multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
 		return tax_rate * multiplier
+
+
+def _reset_idx(docs_to_reset_idx):
+	updates = []
+	for doctype, docname in docs_to_reset_idx:
+		names = frappe.get_all(
+			DOCTYPE,
+			filters={"parent": docname, "parenttype": doctype},
+			pluck="name",
+		)
+
+		for idx, name in enumerate(names, start=1):
+			updates.append({"name": name, "idx": idx})
+
+	frappe.db.bulk_update(DOCTYPE, updates, update_modified=False)
 
 
 @erpnext.allow_regional
