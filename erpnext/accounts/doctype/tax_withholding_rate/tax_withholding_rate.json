@@ -10,8 +10,8 @@
   "tax_category",
   "column_break_3",
   "tax_withholding_rate",
-  "single_threshold",
-  "cumulative_threshold"
+  "cumulative_threshold",
+  "single_threshold"
  ],
  "fields": [
   {
@@ -31,14 +31,14 @@
    "fieldname": "single_threshold",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Single Transaction Threshold"
+   "label": "Transaction Threshold"
   },
   {
    "columns": 3,
    "fieldname": "cumulative_threshold",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Cumulative Transaction Threshold"
+   "label": "Cumulative Threshold"
   },
   {
    "columns": 2,
@@ -67,7 +67,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-23 02:26:51.862395",
+ "modified": "2025-06-29 02:31:45.316581",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Rate",

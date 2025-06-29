@@ -14,7 +14,8 @@
   "column_break_2",
   "round_off_tax_amount",
   "tax_on_excess_amount",
-  "single_txn_threshold",
+  "disable_cumulative_threshold",
+  "disable_transaction_threshold",
   "section_break_8",
   "rates",
   "section_break_7",
@@ -92,15 +93,22 @@
   },
   {
    "default": "0",
-   "description": "When checked, apply threshold per individual transaction only",
-   "fieldname": "single_txn_threshold",
+   "description": "When checked, only transaction threshold will be applied for transaction individually",
+   "fieldname": "disable_cumulative_threshold",
    "fieldtype": "Check",
-   "label": "Consider Single Transaction Threshold Only"
+   "label": "Disable Cumulative Threshold"
+  },
+  {
+   "default": "0",
+   "description": "When checked, only cumulative threshold will be applied",
+   "fieldname": "disable_transaction_threshold",
+   "fieldtype": "Check",
+   "label": "Disable Transaction Threshold"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-21 06:22:42.639505",
+ "modified": "2025-06-29 02:47:26.161396",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Category",

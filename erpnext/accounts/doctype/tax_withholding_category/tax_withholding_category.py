@@ -30,14 +30,16 @@ class TaxWithholdingCategory(Document):
 		accounts: DF.Table[TaxWithholdingAccount]
 		category_name: DF.Data | None
 		consider_party_ledger_amount: DF.Check
+		disable_cumulative_threshold: DF.Check
+		disable_transaction_threshold: DF.Check
 		rates: DF.Table[TaxWithholdingRate]
 		round_off_tax_amount: DF.Check
-		single_txn_threshold: DF.Check
 		tax_deduction_basis: DF.Literal["", "Gross Total", "Net Total"]
 		tax_on_excess_amount: DF.Check
 	# end: auto-generated types
 
 	def validate(self):
+		# TODO: Disable single threshold if tax on excess is enabled
 		self.validate_dates()
 		self.validate_companies_and_accounts()
 		self.validate_thresholds()
@@ -804,7 +806,8 @@ def get_tax_withholding_categories(
 			tax_deduction_basis=doc.tax_deduction_basis,
 			round_off_tax_amount=doc.round_off_tax_amount,
 			tax_on_excess_amount=doc.tax_on_excess_amount,
-			single_txn_threshold=doc.single_txn_threshold,
+			disable_cumulative_threshold=doc.disable_cumulative_threshold,
+			disable_transaction_threshold=doc.disable_transaction_threshold,
 			taxable_amount=0,
 			# ldc (only if valid based on posting date)
 			ldc_certificate=None,

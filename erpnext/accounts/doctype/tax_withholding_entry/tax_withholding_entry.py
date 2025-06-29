@@ -1,13 +1,16 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections import defaultdict, deque
+from collections import deque
 from math import inf
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
+
+import erpnext
 
 # TODO: Should threshold check be reduced with purchase returns?
 
@@ -70,7 +73,7 @@ class TaxWithholdingEntry(Document):
 		if self.docstatus == 2:
 			return "Cancelled"
 
-		# Reasons are genuine allowed reasons for short deduction.
+		# Reasons are genuine allowed reasons for under deduction.
 		# Hence if a reason is provided, consider it as matched.
 		if not self.withholding_name and not self.under_withheld_reason:
 			return "Under Withheld"
@@ -283,26 +286,26 @@ def _reset_idx(docs_to_reset_idx):
 # -- Calculate tax withheld (taxable amount * tax rate)
 
 # If amount is deducted / deductible:
-# -- Check for short deductions historically (ignore withholding doctype == payment entry)
-# -- Check for excess deductions historically (from payment entry only if exisiting invoice is paid using it)
+# -- Check for under deductions historically (ignore withholding doctype == payment entry)
+# -- Check for over deductions historically (from payment entry only if exisiting invoice is paid using it)
 # -- Map them automatically in the entry
 
 # Payment Entry
 # -- Threshold check (existing amount is to be considered as tax inclusive)
-# -- Short deduction rows are never included (??)
+# -- under deduction rows are never included (??)
 # -- Taxable amount is entered by user
 # -- Tax Category is selected by user
-# -- It's always excess deduction (tax amount is always 0 ??)
+# -- It's always over deduction (tax amount is always 0 ??)
 
 # Journal Entry
 # -- Fetch tax details from party at account level
 # -- Enable applicability at document level
 # -- Apply TDS check
 
-# -- Excess deduction is not possible
-# -- Short deduction is allowed
+# -- over deduction is not possible
+# -- under deduction is allowed
 # -- Taxable amount is determined as (party amount / (1-tax rate))
-# -- Short or excess tax will be added to the last entry of the row
+# -- under or over tax will be added to the last entry of the row
 
 # Next Steps
 # -- Cleanup
@@ -312,13 +315,13 @@ def _reset_idx(docs_to_reset_idx):
 
 ## What is allowed in manual override?
 # -- Adjust taxable or tax withheld amount
-# -- Cannot adjust (increase or decrease) taxable amount if taxable doctype is not the current document. Decrease not allowed as it will result in short deduction (historically).
+# -- Cannot adjust (increase or decrease) taxable amount if taxable doctype is not the current document. Decrease not allowed as it will result in under deduction (historically).
 # -- However, user can reduce the taxable amount in the original document.
 # -- Cannot increase tax withheld amount if withholding doctype is not the current document
 
 ## How to respect user input for old adjustments?
-# -- Short deductions will come automatically. Always
-# -- Excess deductions will be applied only if TDS entries are not available in the current document.
+# -- under deductions will come automatically. Always
+# -- over deductions will be applied only if TDS entries are not available in the current document.
 # -- Current document should be there to the fullest extent (except manual override of taxable amount).
 
 
@@ -372,35 +375,37 @@ class TaxWithholdingController:
 
 		# Step 4: Process each category
 		for category in self.category_details.values():
-			# Get the default entry template for this category
-			default_entry = self._create_default_entry(category)
-
 			# threshold not crossed
 			if not category.threshold_crossed:
-				entry = self._process_below_threshold_entry(category, default_entry)
-				self.entries.append(entry)
+				category.taxable_amount = 0
+				self.entries.append(
+					{
+						**self._create_default_entry(category),
+						"taxable_amount": category.taxable_amount,
+						"status": "Under Withheld",
+					}
+				)
 				continue
 
-			# tax on excess amount
-			if category.untilized_threshold:
-				entry = self._process_excess_threshold_entry(category, default_entry)
-				self.entries.append(entry)
+			# tax on over amount
+			elif category.unused_threshold:
+				self.entries.append(self._process_excess_threshold_entry(category))
 
 				if category.taxable_amount <= 0:
 					continue
 
-			open_entries = self.get_short_excess_entries(category)
+			open_entries = self.get_under_over_withheld_entries(category)
 
 			# ldc
 			if category.ldc_unutilized_amount:
 				default_obj = {
-					"is_short_deduction": 1,
+					"status": "Settled",
 					"under_withheld_reason": "Lower Deduction Certificate",
 					"lower_deduction_certificate": category.ldc_certificate,
 				}
 				merged = self._merge_entries(
-					open_entries["short_deduction"],
-					open_entries["excess_deduction"],
+					open_entries["under_withheld"],
+					open_entries["over_withheld"],
 					category,
 					tax_rate=category.ldc_rate,
 					constraint=category.ldc_unutilized_amount,
@@ -408,25 +413,17 @@ class TaxWithholdingController:
 				)
 
 				self.entries.extend(merged)
-				if not open_entries["short_deduction"]:
+				if not open_entries["under_withheld"]:
 					continue
 
+			# to pay
 			merged = self._merge_entries(
-				open_entries["short_deduction"], open_entries["excess_deduction"], category
+				open_entries["under_withheld"], open_entries["over_withheld"], category
 			)
 
 			self.entries.extend(merged)
 
 		# Step 5: Process entries for existing document
-		for entry in self.entries:
-			if entry.get("withholding_name"):
-				continue
-
-			entry.update(
-				withholding_doctype=self.doc.doctype,
-				withholding_name=self.doc.name,
-				withholding_date=self.doc.posting_date,
-			)
 
 		# Update tax rows in the parent document
 		# TODO
@@ -441,80 +438,105 @@ class TaxWithholdingController:
 		"""
 		# (by PAN)
 		for category in self.category_details.values():
-			category["threshold_crossed"] = False
-			category["untilized_threshold"] = 0
+			category.threshold_crossed = False
+			category.unused_threshold = 0
 
 			# threshold check skipped
 			if self.doc.ignore_threshold_check or category.single_threshold == 0:
-				category["threshold_crossed"] = True
-				continue
+				category.threshold_crossed = True
 
-			# single threshold
-			if category.single_txn_threshold:
-				category["threshold_crossed"] = category["taxable_amount"] >= category.single_txn_threshold
-				continue
+			# only transaction threshold
+			elif category.disable_cumulative_threshold:
+				category.threshold_crossed = category.taxable_amount >= category.single_threshold
 
-			# cumulative threshold
-			if not category.tax_on_excess_amount:
-				category["threshold_crossed"] = self._check_cumulative_threshold(category)
-				continue
+			# no cumulative threshold
+			elif category.cumulative_threshold == 0:
+				category.threshold_crossed = True
+
+			# cumulative / transaction threshold
+			elif not category.tax_on_excess_amount:
+				category.threshold_crossed = self._is_threshold_crossed(category)
 
 			# tax on excess amount
 			else:
-				threshold_data = self._check_untilized_threshold(category)
-				category["threshold_crossed"] = threshold_data["threshold_crossed"]
-				category["untilized_threshold"] = threshold_data["untilized_threshold"]
+				category.threshold_crossed = True
+				category.unused_threshold = self._get_unused_threshold(category)
 
-	def _check_cumulative_threshold(self, category):
+	def _is_threshold_crossed(self, category):
 		"""Check if cumulative threshold is crossed based on previous tax withheld"""
-		# This would check if tax has been withheld previously for this party and category
-		# TODO: Implement actual check based on business logic
-		total_taxable_amount = self._get_historical_taxable_amount(category)
-		return total_taxable_amount >= category.cumulative_threshold
-
-	def _check_untilized_threshold(self, category):
-		"""Check unutilized threshold for tax on excess amount"""
-		# Calculate utilized threshold from historical data
-		utilized_threshold = self._get_historical_withholding_amount(category)
-		untilized_threshold = max(0, category.single_threshold - utilized_threshold)
-
-		return {
-			"threshold_crossed": True,  # Always calculate tax, but might be on reduced amount
-			"untilized_threshold": untilized_threshold,
-		}
-
-	def get_short_excess_entries(self, category):
-		"""Get historical tax withholding entries for processing"""
-
-		# NOTE: Allow offsetting across different categories
-		# Change Filters
-		entries = frappe.get_all(
-			DOCTYPE,
-			filters={
-				"tax_withholding_category": category.name,
-				"party_type": self.party_type,
-				"party": self.party,
-				"status": "Open",
-				# Add date filters if needed
-				# TODO: convert this to frappe.qb filter `taxable_date` is short deduction and `withholding_date` otherwise
-				"withholding_date": ["between", [category.from_date, category.to_date]],
-			},
-			fields="*",
+		entry = frappe.qb.DocType(DOCTYPE)
+		result = frappe._dict(
+			self._base_threshold_query(category).where(entry.status.isin(["Settled", "Under Withheld"])).run()
 		)
 
+		# NOTE: Once deducted, always deducted. Not checking cumulative threshold again purposefully.
+		# conservative approach to avoid tax disputes as it can have conflicting views
+		# https://www.taxtmi.com/forum/issue?id=118627
+
+		if result.get("Settled", 0) > 0:
+			return True
+
+		# Cumulative / Transaction Threshold Check
+		threshold_to_check = category.cumulative_threshold - result.get("Under Withheld", 0)
+
+		if not category.disable_transaction_threshold:
+			threshold_to_check = min(threshold_to_check, category.single_threshold)
+
+		return category.taxable_amount >= threshold_to_check
+
+	def _get_unused_threshold(self, category):
+		"""Check unutilized threshold for tax on excess amount"""
+		entry = frappe.qb.DocType(DOCTYPE)
+		result = frappe._dict(
+			self._base_threshold_query(category)
+			.where(IfNull(entry.under_withheld_reason, "") == "Threshold Exemption")
+			.run()
+		)
+
+		return category.cumulative_threshold - result.get("Settled", 0)
+
+	def _base_threshold_query(self, category):
+		entry = frappe.qb.DocType(DOCTYPE)
+		query = (
+			frappe.qb.from_(entry)
+			.select(entry.status, Sum(entry.taxable_amount).as_("taxable_amount"))
+			.where(entry.tax_withholding_category == category.name)
+			.where(entry.tw_tax_category == self.doc.tw_tax_category)
+			.where(entry.status != "Cancelled")
+			.group_by(entry.status)
+		)
+
+		# NOTE: This can be a configurable option
+		# To check if filter by tax_id is needed
+		tax_id = get_tax_id(self.party_type, self.party)
+		if tax_id:
+			query = query.where(entry.tax_id == tax_id)
+
+		else:
+			query = query.where(entry.party_type == self.party_type).where(entry.party == self.party)
+
+		return query
+
+	def get_under_over_withheld_entries(self, category):
+		"""Get historical tax withholding entries for processing"""
+
+		entries = self._get_under_over_entries(category)
 		linked_payments = self._get_linked_payments()
 
-		# Current + Short (old) / Advance + Excess (old)
-		open_entries = {"short_deduction": deque(), "excess_deduction": deque()}
+		# Current + Under Withheld (old) / Advance + Over Withheld (old)
+		open_entries = {"under_withheld": deque(), "over_withheld": deque()}
 
 		for entry in entries:
-			if entry.is_short_deduction:
-				open_entries["short_deduction"].append(entry)
+			if entry.status == "Under Withheld":
+				open_entries["under_withheld"].append(entry)
 				continue
 
-			if (entry.withholding_doctype, entry.withholding_name) in linked_payments:
-				# TODO: only add proportionate amount
-				open_entries["excess_deduction"].appendleft(entry)
+			key = (entry.withholding_doctype, entry.withholding_name)
+			if key in linked_payments:
+				# allocated / allocable
+				proportion = linked_payments[key] / (entry.taxable_amount - entry.withholding_amount)
+				entry.withholding_amount = entry.withholding_amount * proportion
+				open_entries["over_withheld"].appendleft(entry)
 				continue
 
 			# Skip for manual adjustment
@@ -522,10 +544,10 @@ class TaxWithholdingController:
 			if entry.withholding_doctype in ["Payment Entry", "Journal Entry"]:
 				continue
 
-			open_entries["excess_deduction"].append(entry)
+			open_entries["over_withheld"].append(entry)
 
-		# Add current entry to short
-		open_entries["short_deduction"].appendleft(
+		# Add current entry as under withheld
+		open_entries["under_withheld"].appendleft(
 			frappe._dict(
 				{
 					"taxable_doctype": self.doc.doctype,
@@ -538,11 +560,38 @@ class TaxWithholdingController:
 
 		return open_entries
 
+	def _get_under_over_entries(self, category):
+		# NOTE: Allow offsetting across different categories
+		# Change Filters
+
+		entry = frappe.qb.DocType(DOCTYPE)
+		base_query = (
+			frappe.qb.from_(entry)
+			.select("*")
+			.where(entry.tax_withholding_category == category.name)
+			.where(entry.party_type == self.party_type)
+			.where(entry.party == self.party)
+		)
+
+		over_withheld_query = base_query.where(entry.status == "Over Withheld").where(
+			entry.withholding_date.between(category.from_date, category.to_date)
+		)
+
+		return (
+			base_query.where(entry.status == "Under Withheld")
+			.where(entry.taxable_date.between(category.from_date, category.to_date))
+			.union(over_withheld_query)
+			.run(as_dict=True)
+		)
+
 	def _get_linked_payments(self):
 		"""Get payments linked to the current document"""
-		# TODO: Implement actual fetch of linked payments
-		# This should return a list of tuples (doctype, docname) for linked payments
-		return [("Payment Entry", "PE-0001")]
+		references = frappe._dict()
+		for ref in self.doc.advances:
+			key = (ref.reference_doctype, ref.reference_name)
+			references[key] = ref.allocated_amount * self.doc.conversion_rate
+
+		return references
 
 	def _create_default_entry(self, category):
 		"""Create a default entry template for the given category"""
@@ -550,66 +599,33 @@ class TaxWithholdingController:
 			"party_type": self.party_type,
 			"party": self.party,
 			"tax_withholding_category": category.name,
+			"tw_tax_category": category.tw_tax_category,
 			"tax_rate": category.tax_rate,
 			"conversion_rate": self.doc.conversion_rate,
+			"taxable_doctype": self.doc.doctype,
+			"taxable_name": self.doc.name,
+			"taxable_date": self.doc.posting_date,
+			"taxable_amount": 0,
 			"withholding_doctype": self.doc.doctype,
 			"withholding_name": self.doc.name,
 			"withholding_date": self.doc.posting_date,
 			"withholding_amount": 0,  # Will be computed later
 		}
 
-	def _process_below_threshold_entry(self, category, default_entry):
-		"""Process entry when threshold is not crossed"""
-		entry = {**default_entry}
-
-		if category.tax_on_excess_amount:
-			# Add taxable information for excess tax
-			entry.update(
-				{
-					"taxable_doctype": self.doc.doctype,
-					"taxable_name": self.doc.name,
-					"taxable_date": self.doc.posting_date,
-					"taxable_amount": category.taxable_amount,
-					"is_short_deduction": 1,
-					"under_withheld_reason": "Tax on Excess",
-				}
-			)
-
-		else:
-			# Mark as short deduction
-			entry.update(
-				{
-					"is_short_deduction": 1,
-					"taxable_amount": category.taxable_amount,
-				}
-			)
-
-		category.taxable_amount = 0
-
-		return entry
-
-	def _process_excess_threshold_entry(self, category, default_entry):
+	def _process_excess_threshold_entry(self, category):
 		"""Process entry for tax on excess amount"""
-		entry = {**default_entry}
 
-		taxable_amount = min(category.untilized_threshold, category.taxable_amount)
-
-		entry.update(
-			{
-				"taxable_doctype": self.doc.doctype,
-				"taxable_name": self.doc.name,
-				"taxable_date": self.doc.posting_date,
-				"taxable_amount": taxable_amount,
-				"withholding_amount": 0,
-				"is_short_deduction": 1,
-				"under_withheld_reason": "Tax on Excess",
-			}
-		)
+		taxable_amount = min(category.unused_threshold, category.taxable_amount)
 
 		# Reduce the remaining taxable amount
 		category.taxable_amount -= taxable_amount
 
-		return entry
+		return {
+			**self._create_default_entry(category),
+			"taxable_amount": taxable_amount,
+			"status": "Settled",
+			"under_withheld_reason": "Threshold Exemption",
+		}
 
 	def _update_tax_rows(self):
 		"""Update tax rows in the parent document"""
@@ -617,34 +633,35 @@ class TaxWithholdingController:
 
 	def _merge_entries(
 		self,
-		short_entries: deque,
-		excess_entries: deque,
-		category,
-		tax_rate=None,
-		constraint=inf,
-		default_obj=None,
+		under_entries: deque,
+		over_entries: deque,
+		category: dict,
+		tax_rate: float | None = None,
+		constraint: float = inf,
+		default_obj: dict | None = None,
 	):
 		"""
-		Merge short and excess entries based on the tax rate and constraint.
+		Merge under withheld and over withheld entries based on the tax rate and constraint.
+		If only under entries are available, they will be processed against current document.
 		"""
 		merged_entries = []
 
-		if not short_entries or not excess_entries or constraint <= 0:
+		if not under_entries or not over_entries or constraint <= 0:
 			return merged_entries
 
 		if tax_rate is None:
 			tax_rate = category.tax_rate
 
-		def default_entry(short):
+		def default_entry(under):
 			entry = {}
 			if default_obj:
 				entry.update(default_obj)
 
 			entry.update(
 				{
-					"taxable_doctype": short.taxable_doctype,
-					"taxable_name": short.taxable_name,
-					"taxable_date": short.taxable_date,
+					"taxable_doctype": under.taxable_doctype,
+					"taxable_name": under.taxable_name,
+					"taxable_date": under.taxable_date,
 					"tax_withholding_category": category.name,
 					"tax_rate": tax_rate,
 					"party_type": self.party_type,
@@ -654,64 +671,69 @@ class TaxWithholdingController:
 
 			return entry
 
-		# short and excess entries both available
-		while short_entries and excess_entries and constraint > 0:
+		# under and over entries both available
+		while under_entries and over_entries and constraint > 0:
 			if tax_rate == 0:
 				break
 
-			short = short_entries[0]
-			excess = excess_entries[0]
+			under = under_entries[0]
+			over = over_entries[0]
 
 			# Calculate the amount to merge
-			amount_to_merge = min(short.taxable_amount, excess.withholding_amount / tax_rate, constraint)
+			amount_to_merge = min(under.taxable_amount, over.withholding_amount / tax_rate, constraint)
 
 			if amount_to_merge <= 0:
 				break
 
 			# Create a new merged entry
 			merged_entry = {
-				**default_entry(short),
+				**default_entry(under),
 				"taxable_amount": amount_to_merge,
 				"withholding_amount": amount_to_merge * tax_rate / 100,  # TODO: Rounding settings
-				"withholding_doctype": excess.withholding_doctype,
-				"withholding_name": excess.withholding_name,
-				"withholding_date": excess.withholding_date,
+				"withholding_doctype": over.withholding_doctype,
+				"withholding_name": over.withholding_name,
+				"withholding_date": over.withholding_date,
 			}
 
-			merged_entries.append(merged_entry)
+			if merged_entry.taxable_name == self.doc.name or merged_entry.withholding_name == self.doc.name:
+				merged_entries.append(merged_entry)
 
 			constraint -= amount_to_merge
-			short.taxable_amount -= amount_to_merge
-			excess.withholding_amount -= amount_to_merge * tax_rate / 100
+			under.taxable_amount -= amount_to_merge
+			over.withholding_amount -= amount_to_merge * tax_rate / 100
 
 			# Remove zero or negative value entries
-			if short.taxable_amount <= 0:
-				short_entries.popleft()
+			if under.taxable_amount <= 0:
+				under_entries.popleft()
 
-			if excess.withholding_amount <= 0:
-				excess_entries.popleft()
+			if over.withholding_amount <= 0:
+				over_entries.popleft()
 
-		# Remaining short entries
-		while short_entries and constraint > 0:
-			short = short_entries[0]
-			taxable_amount = min(short.taxable_amount, constraint)
+		# Remaining under entries
+		while under_entries and constraint > 0:
+			under = under_entries[0]
+			taxable_amount = min(under.taxable_amount, constraint)
 
 			if taxable_amount <= 0:
 				break
 
 			merged_entry = {
-				**default_entry(short),
+				**default_entry(under),
 				"taxable_amount": taxable_amount,
 				"withholding_amount": taxable_amount * tax_rate / 100,  # TODO: Rounding settings
+				# Paid from the current document
+				"withholding_doctype": self.doc.doctype,
+				"withholding_name": self.doc.name,
+				"withholding_date": self.doc.posting_date,
 			}
 
 			merged_entries.append(merged_entry)
 
 			constraint -= taxable_amount
-			short.taxable_amount -= taxable_amount
+			under.taxable_amount -= taxable_amount
 
-			if short.taxable_amount <= 0:
-				short_entries.popleft()
+			if under.taxable_amount <= 0:
+				under_entries.popleft()
 
 		return merged_entries
 
@@ -817,3 +839,8 @@ class TaxWithholdingAmount:
 	def get_item_tax_amount(self, item, tax_rate, charge_type):
 		multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
 		return tax_rate * multiplier
+
+
+@erpnext.allow_regional
+def get_tax_id(party_type, party):
+	return None
