@@ -125,6 +125,7 @@ class TaxWithholdingEntry(Document):
 				"status": status_to_find,
 				doctype_field: self.get(doctype_field),
 				docname_field: self.get(docname_field),
+				"docstatus": 1,
 			},
 			fields="*",
 		)
@@ -441,7 +442,7 @@ class TaxWithholdingController:
 			.select(entry.status, Sum(entry.taxable_amount).as_("taxable_amount"))
 			.where(entry.tax_withholding_category == category.name)
 			.where(entry.tw_tax_category == self.doc.tw_tax_category)
-			.where(entry.status != "Cancelled")
+			.where(entry.docstatus == 1)
 			.group_by(entry.status)
 		)
 
@@ -510,6 +511,7 @@ class TaxWithholdingController:
 			.where(entry.tax_withholding_category == category.name)
 			.where(entry.party_type == self.party_type)
 			.where(entry.party == self.party)
+			.where(entry.docstatus == 1)
 		)
 
 		over_withheld_query = base_query.where(entry.status == "Over Withheld").where(
@@ -785,7 +787,7 @@ def _reset_idx(docs_to_reset_idx):
 	for doctype, docname in docs_to_reset_idx:
 		names = frappe.get_all(
 			DOCTYPE,
-			filters={"parent": docname, "parenttype": doctype},
+			filters={"parent": docname, "parenttype": doctype, "docstatus": 1},
 			pluck="name",
 		)
 
