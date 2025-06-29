@@ -197,7 +197,7 @@ class PurchaseInvoice(BuyingController):
 		tax_category: DF.Link | None
 		tax_id: DF.ReadOnly | None
 		tax_withheld_vouchers: DF.Table[TaxWithheldVouchers]
-		tax_withholding_category: DF.Link | None
+		tax_withholding_group: DF.Link | None
 		tax_withholding_net_total: DF.Currency
 		taxes: DF.Table[PurchaseTaxesandCharges]
 		taxes_and_charges: DF.Link | None

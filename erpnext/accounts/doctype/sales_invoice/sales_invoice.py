@@ -213,7 +213,7 @@ class SalesInvoice(SellingController):
 		subscription: DF.Link | None
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
-		tax_withholding_category: DF.Link | None
+		tax_withholding_group: DF.Link | None
 		taxes: DF.Table[SalesTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		tc_name: DF.Link | None

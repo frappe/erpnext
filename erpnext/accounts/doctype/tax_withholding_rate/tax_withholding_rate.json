@@ -7,7 +7,7 @@
  "field_order": [
   "from_date",
   "to_date",
-  "tax_category",
+  "tax_withholding_group",
   "column_break_3",
   "tax_withholding_rate",
   "cumulative_threshold",
@@ -57,17 +57,17 @@
    "reqd": 1
   },
   {
-   "fieldname": "tax_category",
+   "fieldname": "tax_withholding_group",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Tax Category",
-   "options": "Tax Category"
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-29 02:31:45.316581",
+ "modified": "2025-06-29 05:31:05.120377",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Rate",

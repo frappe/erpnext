@@ -20,7 +20,7 @@ class TaxWithholdingRate(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		single_threshold: DF.Float
-		tax_category: DF.Link | None
+		tax_withholding_group: DF.Link | None
 		tax_withholding_rate: DF.Float
 		to_date: DF.Date
 	# end: auto-generated types

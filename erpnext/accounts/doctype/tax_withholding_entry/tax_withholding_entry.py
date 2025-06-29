@@ -39,11 +39,11 @@ class TaxWithholdingEntry(Document):
 		tax_id: DF.Data | None
 		tax_rate: DF.Percent
 		tax_withholding_category: DF.Link | None
+		tax_withholding_group: DF.Link | None
 		taxable_amount: DF.Currency
 		taxable_date: DF.Date | None
 		taxable_doctype: DF.Link | None
 		taxable_name: DF.DynamicLink | None
-		tw_tax_category: DF.Link | None
 		under_withheld_reason: DF.Literal["", "Threshold Exemption", "Lower Deduction Certificate"]
 		withholding_amount: DF.Currency
 		withholding_date: DF.Date | None

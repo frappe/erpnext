@@ -62,9 +62,10 @@
   "tax_tab",
   "taxation_section",
   "tax_id",
-  "column_break_21",
   "tax_category",
+  "column_break_21",
   "tax_withholding_category",
+  "tax_withholding_group",
   "accounting_tab",
   "credit_limit_section",
   "payment_terms",
@@ -605,6 +606,12 @@
    "fieldtype": "Table",
    "label": "Supplier Numbers",
    "options": "Supplier Number At Customer"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
   }
  ],
  "icon": "fa fa-user",
@@ -618,7 +625,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2025-04-27 12:01:29.549008",
+ "modified": "2025-06-29 05:32:05.666142",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

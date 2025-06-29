@@ -100,7 +100,7 @@
   "outstanding_amount",
   "disable_rounded_total",
   "section_tax_withholding_entry",
-  "tax_withholding_category",
+  "tax_withholding_group",
   "ignore_tds_threshold",
   "tds_entries",
   "section_break_44",
@@ -1358,13 +1358,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Default Tax Withholding Category",
-   "options": "Tax Withholding Category",
-   "print_hide": 1
-  },
-  {
    "fieldname": "billing_address",
    "fieldtype": "Link",
    "label": "Select Billing Address",
@@ -1673,6 +1666,13 @@
    "fieldtype": "Table",
    "label": "Tax Withholding Entries",
    "options": "Tax Withholding Entry"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group",
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -1680,7 +1680,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-21 05:40:48.600313",
+ "modified": "2025-06-29 05:33:36.112283",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
