@@ -79,7 +79,8 @@ class WebsiteItem(WebsiteGenerator):
 		self.publish_unpublish_desk_item(publish=False)
 
 	def validate_duplicate_website_item(self):
-		existing_web_item = frappe.db.exists("Website Item", {"item_code": self.item_code})
+		"""Validate if a duplicate website item exists item code and uom_item"""
+		existing_web_item = frappe.db.exists("Website Item", {"item_code": self.item_code, "uom_item": self.uom_item})
 		if existing_web_item and existing_web_item != self.name:
 			message = _("Website Item already exists against Item {0}").format(frappe.bold(self.item_code))
 			frappe.throw(message, title=_("Already Published"))
