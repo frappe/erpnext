@@ -134,7 +134,7 @@ class SalesInvoice(SellingController):
 		group_same_items: DF.Check
 		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
-		ignore_tds_threshold: DF.Check
+		ignore_tax_withholding_threshold: DF.Check
 		in_words: DF.SmallText | None
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None

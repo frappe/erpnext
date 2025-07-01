@@ -797,7 +797,7 @@ def get_tax_withholding_categories(
 			name=category_name,
 			account_head=account_head,
 			# rates
-			rate=row.tax_withholding_rate,
+			tax_rate=row.tax_withholding_rate,
 			from_date=row.from_date,
 			to_date=row.to_date,
 			single_threshold=row.single_threshold,

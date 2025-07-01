@@ -214,6 +214,7 @@ class TaxWithholdingEntry(Document):
 					"taxable_doctype": self.taxable_doctype,
 					"taxable_name": self.taxable_name,
 					"name": ["!=", self.name],
+					"docstatus": 1,
 				},
 				{
 					"withholding_name": "",
@@ -231,6 +232,7 @@ class TaxWithholdingEntry(Document):
 					"withholding_doctype": self.withholding_doctype,
 					"withholding_name": self.withholding_name,
 					"name": ["!=", self.name],
+					"docstatus": 1,
 				},
 				{
 					"taxable_name": "",
@@ -265,7 +267,7 @@ def on_invoice_validate(doc):
 
 	for entry in doc.tax_withholding_entries:
 		entry: TaxWithholdingEntry
-		entry.set_status()
+		entry.set_status(entry.status)
 		entry.validate_adjustments()
 
 
@@ -310,14 +312,13 @@ class TaxWithholdingController:
 		for category in self.category_details.values():
 			# threshold not crossed
 			if not category.threshold_crossed:
-				category.taxable_amount = 0
 				self.entries.append(
 					{
 						**self._create_default_entry(category),
 						"taxable_amount": category.taxable_amount,
-						"status": "Under Withheld",
 					}
 				)
+				category.taxable_amount = 0
 				continue
 
 			# tax on over amount
@@ -332,7 +333,6 @@ class TaxWithholdingController:
 			# ldc
 			if category.ldc_unutilized_amount:
 				default_obj = {
-					"status": "Settled",
 					"under_withheld_reason": "Lower Deduction Certificate",
 					"lower_deduction_certificate": category.ldc_certificate,
 				}
@@ -358,15 +358,18 @@ class TaxWithholdingController:
 
 		# Step 5: Process entries for existing document
 		if not any(entry.is_manual_override for entry in self.doc.tax_withholding_entries):
-			self.doc.tax_withholding_entries = self.entries
+			self.doc.tax_withholding_entries = []
+			self.doc.extend("tax_withholding_entries", self.entries)
 
 		else:
+			# TODO
 			# To the extent of taxable amount with manual override
 			# Reduce the entries to be processed above
 
 			pass
-			# Update tax rows in the parent document
-			# TODO
+
+		# TODO
+		# Step 6: Update tax rows in the parent document
 
 	def evaluate_thresholds(self):
 		"""
@@ -382,7 +385,7 @@ class TaxWithholdingController:
 			category.unused_threshold = 0
 
 			# threshold check skipped
-			if self.doc.ignore_threshold_check or category.single_threshold == 0:
+			if self.doc.ignore_tax_withholding_threshold:
 				category.threshold_crossed = True
 
 			# only transaction threshold
@@ -441,9 +444,9 @@ class TaxWithholdingController:
 			frappe.qb.from_(entry)
 			.select(entry.status, Sum(entry.taxable_amount).as_("taxable_amount"))
 			.where(entry.tax_withholding_category == category.name)
-			.where(entry.tw_tax_category == self.doc.tw_tax_category)
+			.where(entry.tax_withholding_group == self.doc.tax_withholding_group)
 			.where(entry.docstatus == 1)
-			.group_by(entry.status)
+			.groupby(entry.status)
 		)
 
 		# NOTE: This can be a configurable option
@@ -540,7 +543,7 @@ class TaxWithholdingController:
 			"party_type": self.party_type,
 			"party": self.party,
 			"tax_withholding_category": category.name,
-			"tw_tax_category": category.tw_tax_category,
+			"tax_withholding_group": category.tax_withholding_group,
 			"tax_rate": category.tax_rate,
 			"conversion_rate": self.doc.conversion_rate,
 			"taxable_doctype": self.doc.doctype,
@@ -564,7 +567,6 @@ class TaxWithholdingController:
 		return {
 			**self._create_default_entry(category),
 			"taxable_amount": taxable_amount,
-			"status": "Settled",
 			"under_withheld_reason": "Threshold Exemption",
 		}
 
@@ -587,7 +589,7 @@ class TaxWithholdingController:
 		"""
 		merged_entries = []
 
-		if not under_entries or not over_entries or constraint <= 0:
+		if not under_entries or constraint <= 0:
 			return merged_entries
 
 		if tax_rate is None:

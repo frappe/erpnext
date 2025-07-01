@@ -25,6 +25,9 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
+from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import (
+	on_invoice_validate as compute_tax_withholding,
+)
 from erpnext.accounts.general_ledger import (
 	get_round_off_account_and_cost_center,
 	make_gl_entries,
@@ -126,7 +129,7 @@ class PurchaseInvoice(BuyingController):
 		hold_comment: DF.SmallText | None
 		ignore_default_payment_terms_template: DF.Check
 		ignore_pricing_rule: DF.Check
-		ignore_tds_threshold: DF.Check
+		ignore_tax_withholding_threshold: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None
@@ -298,6 +301,7 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		compute_tax_withholding(self)
 		self.set_percentage_received()
 
 	def set_percentage_received(self):
