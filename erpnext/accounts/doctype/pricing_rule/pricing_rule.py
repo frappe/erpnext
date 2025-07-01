@@ -372,7 +372,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 			# Override already set price list rate (from item price)
 			# if pricing_rule_rate > 0
 			item_details.update({
-				"price_list_rate": pricing_rule_rate # * args.get("conversion_factor", 1),
+				"price_list_rate": pricing_rule_rate  * args.get("conversion_factor", 1),
 			})
 		item_details.update({
 			"discount_percentage": 0.0
