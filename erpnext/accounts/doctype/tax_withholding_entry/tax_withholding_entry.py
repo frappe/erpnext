@@ -860,6 +860,20 @@ class ItemTax:
 		return tax_row.rate
 
 
+class PurchaseTaxWithholding(TaxWithholdingController):
+	def __init__(self, doc):
+		super().__init__(doc)
+		self.party_type = "Supplier"
+		self.party = doc.supplier
+
+
+class SalesTaxWithholding(TaxWithholdingController):
+	def __init__(self, doc):
+		super().__init__(doc)
+		self.party_type = "Customer"
+		self.party = doc.customer
+
+
 def _reset_idx(docs_to_reset_idx):
 	updates = []
 	for doctype, docname in docs_to_reset_idx:
