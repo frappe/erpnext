@@ -294,7 +294,12 @@ class TaxWithholdingController:
 			category_names.add(self.doc.tax_withholding_category)
 
 		return get_tax_withholding_categories(
-			category_names, self.doc.posting_date, self.party_type, self.party, self.doc.company
+			category_names,
+			self.doc.tax_withholding_group,
+			self.doc.posting_date,
+			self.party_type,
+			self.party,
+			self.doc.company,
 		)
 
 	def calculate(self):

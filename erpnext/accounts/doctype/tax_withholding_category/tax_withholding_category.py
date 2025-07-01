@@ -83,6 +83,27 @@ class TaxWithholdingCategory(Document):
 					).format(d.idx)
 				)
 
+	def get_applicable_tax_row(self, posting_date, tax_withholding_group):
+		for row in self.rates:
+			if (
+				getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date)
+				and row.tax_withholding_group == tax_withholding_group
+			):
+				return row
+
+		frappe.throw(_("No Tax Withholding data found for the current posting date."))
+
+	def get_company_account(self, company):
+		for row in self.accounts:
+			if company == row.company:
+				return row.account
+
+		frappe.throw(
+			_("No Tax withholding account set for Company {0} in Tax Withholding Category {1}.").format(
+				frappe.bold(company), frappe.bold(self.name)
+			)
+		)
+
 
 def get_party_details(inv):
 	party_type, party = "", ""
@@ -781,138 +802,138 @@ def normal_round(number):
 	return number
 
 
-def get_tax_withholding_categories(
-	category_names: list[str], posting_date: str, party_type: str, party: str, company: str
-) -> list[TaxWithholdingCategory]:
-	category_details = frappe._dict()
+class TaxWithholdingDetails:
+	def __init__(
+		self,
+		tax_withholding_categories: list[str],
+		tax_withholding_group: str,
+		posting_date: str,
+		party_type: str,
+		party: str,
+		company: str,
+	):
+		self.tax_withholding_categories = tax_withholding_categories
+		self.tax_withholding_group = tax_withholding_group
+		self.posting_date = posting_date
+		self.party_type = party_type
+		self.party = party
+		self.company = company
 
-	# parties = get_related_parties(party_type, party)
+	def get(self) -> list:
+		"""
+		Fetches tax withholding categories based on the provided parameters.
+		"""
+		if not self.tax_withholding_categories:
+			return []
 
-	for category_name in category_names:
-		doc = frappe.get_doc("Tax Withholding Category", category_name)
-		row = get_valid_tax_details_row(doc, posting_date)
-		account_head = get_valid_account(doc, company)
+		self.category_details = frappe._dict()
 
-		category_details[category_name] = frappe._dict(
-			name=category_name,
-			account_head=account_head,
-			# rates
-			tax_rate=row.tax_withholding_rate,
-			from_date=row.from_date,
-			to_date=row.to_date,
-			single_threshold=row.single_threshold,
-			cumulative_threshold=row.cumulative_threshold,
-			# settings
-			tax_deduction_basis=doc.tax_deduction_basis,
-			round_off_tax_amount=doc.round_off_tax_amount,
-			tax_on_excess_amount=doc.tax_on_excess_amount,
-			disable_cumulative_threshold=doc.disable_cumulative_threshold,
-			disable_transaction_threshold=doc.disable_transaction_threshold,
-			taxable_amount=0,
-			# ldc (only if valid based on posting date)
-			ldc_certificate=None,
-			ldc_unutilized_amount=0,  # Base Currency
-			ldc_rate=0,
+		for category_name in self.tax_withholding_categories:
+			doc: TaxWithholdingCategory = frappe.get_cached_doc("Tax Withholding Category", category_name)
+			row = doc.get_applicable_tax_row(self.posting_date, self.tax_withholding_group)
+			account_head = doc.get_company_account(self.company)
+
+			self.category_details[category_name] = frappe._dict(
+				name=category_name,
+				account_head=account_head,
+				# rates
+				tax_rate=row.tax_withholding_rate,
+				from_date=row.from_date,
+				to_date=row.to_date,
+				single_threshold=row.single_threshold,
+				cumulative_threshold=row.cumulative_threshold,
+				# settings
+				tax_deduction_basis=doc.tax_deduction_basis,
+				round_off_tax_amount=doc.round_off_tax_amount,
+				tax_on_excess_amount=doc.tax_on_excess_amount,
+				disable_cumulative_threshold=doc.disable_cumulative_threshold,
+				disable_transaction_threshold=doc.disable_transaction_threshold,
+				taxable_amount=0,
+				# ldc (only if valid based on posting date)
+				ldc_certificate=None,
+				ldc_unutilized_amount=0,  # Base Currency
+				ldc_rate=0,
+			)
+
+		self.update_lower_deduction_certificate_details()
+
+		return self.category_details
+
+	def update_lower_deduction_certificate_details(self):
+		if self.party_type != "Supplier":
+			return
+
+		# NOTE: This can be a configurable option
+		# To check if filter by tax_id is needed
+		tax_id = get_tax_id_for_party(self.party_type, self.party)
+
+		# ldc details
+		ldc_records = self.get_valid_ldc_records(tax_id)
+		if not ldc_records:
+			return
+
+		ldc_names = [ldc.name for ldc in ldc_records]
+		ldc_utilization_map = self.get_ldc_utilized_by_category(ldc_names, tax_id)
+
+		# map
+		for ldc in ldc_records:
+			category_name = ldc.tax_withholding_category
+
+			unutilized_amount = ldc.certificate_limit - (ldc_utilization_map.get(category_name) or 0)
+			if not unutilized_amount:
+				continue
+
+			self.category_details[category_name].update(
+				{
+					"ldc_certificate": ldc.name,
+					"ldc_unutilized_amount": unutilized_amount,
+					"ldc_rate": ldc.rate,
+				}
+			)
+
+	def get_valid_ldc_records(self, tax_id):
+		ldc = frappe.qb.DocType("Lower Deduction Certificate")
+		query = (
+			frappe.qb.from_(ldc)
+			.select(
+				ldc.name,
+				ldc.tax_withholding_category,
+				ldc.rate,
+				ldc.certificate_limit,
+			)
+			.where(
+				(ldc.valid_from <= self.posting_date)
+				& (ldc.valid_upto >= self.posting_date)
+				& (ldc.company == self.company)
+				& ldc.tax_withholding_category.isin(self.category_details.keys())
+			)
 		)
 
-	update_lower_deduction_certificate_details(
-		category_details, category_names, posting_date, party_type, party, company
-	)
+		query = query.where(ldc.pan_no == tax_id) if tax_id else query.where(ldc.supplier == self.party)
 
-	return category_details
+		return query.run(as_dict=True)
 
-
-def get_valid_tax_details_row(doc, posting_date):
-	for row in doc.rates:
-		if getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date):
-			return row
-
-	frappe.throw(_("No Tax Withholding data found for the current posting date."))
-
-
-def get_valid_account(doc, company):
-	for row in doc.accounts:
-		if company == row.company:
-			return row.account
-
-	frappe.throw(
-		_("No Tax withholding account set for Company {0} in Tax Withholding Category {1}.").format(
-			frappe.bold(company), frappe.bold(doc.name)
-		)
-	)
-
-
-def update_lower_deduction_certificate_details(
-	category_details, category_names, posting_date, party_type, party, company
-):
-	if party_type != "Supplier":
-		return
-
-	valid_ldcs = get_valid_ldcs(category_names, posting_date, party, company)
-
-	if not valid_ldcs:
-		return
-
-	ldc_names = [ldc.name for ldc in valid_ldcs]
-	ldc_consumed_limit = get_ldcs_utilized_amount(category_names, party_type, party, company, ldc_names)
-
-	for ldc in valid_ldcs:
-		category_name = ldc.tax_withholding_category
-		unutilized_amount = ldc.certificate_limit - (ldc_consumed_limit.get(category_name) or 0)
-		if not unutilized_amount:
-			continue
-
-		category_details[category_name].update(
-			{
-				"ldc_certificate": ldc.name,
-				"ldc_unutilized_amount": unutilized_amount,
-				"ldc_rate": ldc.rate,
-			}
+	def get_ldc_utilized_by_category(self, ldc_names, tax_id):
+		twe = frappe.qb.DocType("Tax Withholding Entry")
+		query = (
+			frappe.qb.from_(twe)
+			.select(twe.lower_deduction_certificate, Sum(twe.taxable_value).as_("limit_consumed"))
+			.where(
+				(twe.company == self.company)
+				& (twe.party_type == self.party_type)
+				& (twe.tax_withholding_category.isin(self.category_details.keys()))
+				& (twe.lower_deduction_certificate.isin(ldc_names))
+				& (twe.docstatus == 1)
+				& (twe.status == "Settled")
+			)
+			.group_by(twe.lower_deduction_certificate)
 		)
 
+		query = query.where(twe.tax_id == tax_id) if tax_id else query.where(twe.party == self.party)
 
-def get_valid_ldcs(category_names, posting_date, party, company):
-	ldc = frappe.qb.DocType("Lower Deduction Certificate")
-	return (
-		frappe.qb.from_(ldc)
-		.select(
-			ldc.name,
-			ldc.tax_withholding_category,
-			ldc.rate,
-			ldc.certificate_limit,
-		)
-		.where(
-			(ldc.supplier == party)
-			& (ldc.valid_from <= posting_date)
-			& (ldc.valid_upto >= posting_date)
-			& (ldc.company == company)
-			& ldc.tax_withholding_category.isin(category_names)
-		)
-		.run(as_dict=True)
-	)
-
-
-def get_ldcs_utilized_amount(category_names, party_type, party, company, lower_deduction_certificates):
-	twe = frappe.qb.DocType("Tax Withholding Entry")
-
-	return frappe._dict(
-		frappe.qb.from_(twe)
-		.select(twe.lower_deduction_certificate, Sum(twe.taxable_value).as_("limit_consumed"))
-		.where(
-			(twe.party_type == party_type)
-			& (twe.party == party)
-			& (twe.company == company)
-			& (twe.tax_withholding_category.isin(category_names))
-			& (twe.lower_deduction_certificate.isin(lower_deduction_certificates))
-		)
-		.group_by(twe.lower_deduction_certificate)
-			& (twe.status != "Cancelled")
-		)
-		.group_by(twe.lower_deduction_certificates)
-		.run(as_dict=True)
-	)
+		return frappe._dict(query.run(as_dict=True))
 
 
 @allow_regional
-def get_related_parties(party_type: str, party: str) -> list[str]:
-	return [party]
+def get_tax_id_for_party(party_type, party):
+	return None
