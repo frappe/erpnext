@@ -6,12 +6,13 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_krko",
+  "company",
   "party_type",
   "party",
   "tax_id",
+  "column_break_egzm",
   "tax_withholding_category",
   "tax_withholding_group",
-  "column_break_egzm",
   "taxable_amount",
   "tax_rate",
   "withholding_amount",
@@ -211,13 +212,19 @@
    "label": "Tax Withholding Group",
    "options": "Tax Withholding Group",
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-29 05:34:58.439777",
+ "modified": "2025-06-30 23:30:50.191485",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",

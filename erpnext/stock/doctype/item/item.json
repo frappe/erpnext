@@ -903,7 +903,6 @@
    "fieldtype": "Section Break"
   },
   {
-  {
    "fieldname": "purchase_tax_withholding_category",
    "fieldtype": "Link",
    "label": "Purchase Tax Withholding Category",

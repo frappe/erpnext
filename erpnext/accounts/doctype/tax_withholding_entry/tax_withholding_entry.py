@@ -26,6 +26,7 @@ class TaxWithholdingEntry(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		company: DF.Link | None
 		conversion_rate: DF.Float
 		currency: DF.Link | None
 		is_manual_override: DF.Check
@@ -272,7 +273,8 @@ def on_invoice_validate(doc):
 
 
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
-	get_tax_withholding_categories,
+	TaxWithholdingDetails,
+	get_tax_id_for_party,
 )
 
 
@@ -293,14 +295,14 @@ class TaxWithholdingController:
 		if self.doc.tax_withholding_category:
 			category_names.add(self.doc.tax_withholding_category)
 
-		return get_tax_withholding_categories(
+		return TaxWithholdingDetails(
 			category_names,
 			self.doc.tax_withholding_group,
 			self.doc.posting_date,
 			self.party_type,
 			self.party,
 			self.doc.company,
-		)
+		).get()
 
 	def calculate(self):
 		"""Main orchestrator for tax withholding calculation"""
@@ -448,20 +450,17 @@ class TaxWithholdingController:
 		query = (
 			frappe.qb.from_(entry)
 			.select(entry.status, Sum(entry.taxable_amount).as_("taxable_amount"))
+			.where(entry.party_type == self.party_type)
 			.where(entry.tax_withholding_category == category.name)
-			.where(entry.tax_withholding_group == self.doc.tax_withholding_group)
+			.where(entry.company == self.doc.company)
 			.where(entry.docstatus == 1)
 			.groupby(entry.status)
 		)
 
 		# NOTE: This can be a configurable option
 		# To check if filter by tax_id is needed
-		tax_id = get_tax_id(self.party_type, self.party)
-		if tax_id:
-			query = query.where(entry.tax_id == tax_id)
-
-		else:
-			query = query.where(entry.party_type == self.party_type).where(entry.party == self.party)
+		tax_id = get_tax_id_for_party(self.party_type, self.party)
+		query = query.where(entry.tax_id == tax_id) if tax_id else query.where(entry.party == self.party)
 
 		return query
 
@@ -519,6 +518,7 @@ class TaxWithholdingController:
 			.where(entry.tax_withholding_category == category.name)
 			.where(entry.party_type == self.party_type)
 			.where(entry.party == self.party)
+			.where(entry.company == self.doc.company)
 			.where(entry.docstatus == 1)
 		)
 
@@ -545,6 +545,7 @@ class TaxWithholdingController:
 	def _create_default_entry(self, category):
 		"""Create a default entry template for the given category"""
 		return {
+			"company": self.doc.company,
 			"party_type": self.party_type,
 			"party": self.party,
 			"tax_withholding_category": category.name,
@@ -614,6 +615,7 @@ class TaxWithholdingController:
 					"tax_rate": tax_rate,
 					"party_type": self.party_type,
 					"party": self.party,
+					"company": self.doc.company,
 				}
 			)
 
@@ -802,8 +804,3 @@ def _reset_idx(docs_to_reset_idx):
 			updates.append({"name": name, "idx": idx})
 
 	frappe.db.bulk_update(DOCTYPE, updates, update_modified=False)
-
-
-@erpnext.allow_regional
-def get_tax_id(party_type, party):
-	return None
