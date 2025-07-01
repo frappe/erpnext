@@ -826,14 +826,15 @@ class TaxWithholdingDetails:
 		if not self.tax_withholding_categories:
 			return []
 
-		self.category_details = frappe._dict()
+		category_details = frappe._dict()
+		ldc_details = self.get_ldc_details()
 
 		for category_name in self.tax_withholding_categories:
 			doc: TaxWithholdingCategory = frappe.get_cached_doc("Tax Withholding Category", category_name)
 			row = doc.get_applicable_tax_row(self.posting_date, self.tax_withholding_group)
 			account_head = doc.get_company_account(self.company)
 
-			self.category_details[category_name] = frappe._dict(
+			category_detail = frappe._dict(
 				name=category_name,
 				account_head=account_head,
 				# rates
@@ -849,19 +850,25 @@ class TaxWithholdingDetails:
 				disable_cumulative_threshold=doc.disable_cumulative_threshold,
 				disable_transaction_threshold=doc.disable_transaction_threshold,
 				taxable_amount=0,
-				# ldc (only if valid based on posting date)
-				ldc_certificate=None,
-				ldc_unutilized_amount=0,  # Base Currency
-				ldc_rate=0,
 			)
 
-		self.update_lower_deduction_certificate_details()
+			# ldc (only if valid based on posting date)
+			if ldc_detail := ldc_details.get(category_name):
+				category_detail.update(ldc_detail)
 
-		return self.category_details
+			category_details[category_name] = category_detail
 
-	def update_lower_deduction_certificate_details(self):
+		return category_details
+
+	def get_ldc_details(self):
+		"""
+		Fetches the Lower Deduction Certificate (LDC) details for the given party.
+		Assumes that only one LDC per category can be valid at a time.
+		"""
+		ldc_details = {}
+
 		if self.party_type != "Supplier":
-			return
+			return ldc_details
 
 		# NOTE: This can be a configurable option
 		# To check if filter by tax_id is needed
@@ -870,10 +877,10 @@ class TaxWithholdingDetails:
 		# ldc details
 		ldc_records = self.get_valid_ldc_records(tax_id)
 		if not ldc_records:
-			return
+			return ldc_details
 
 		ldc_names = [ldc.name for ldc in ldc_records]
-		ldc_utilization_map = self.get_ldc_utilized_by_category(ldc_names, tax_id)
+		ldc_utilization_map = self.get_ldc_utilization_by_category(ldc_names, tax_id)
 
 		# map
 		for ldc in ldc_records:
@@ -883,13 +890,13 @@ class TaxWithholdingDetails:
 			if not unutilized_amount:
 				continue
 
-			self.category_details[category_name].update(
-				{
-					"ldc_certificate": ldc.name,
-					"ldc_unutilized_amount": unutilized_amount,
-					"ldc_rate": ldc.rate,
-				}
+			ldc_details[category_name] = dict(
+				ldc_certificate=ldc.name,
+				ldc_unutilized_amount=unutilized_amount,
+				ldc_rate=ldc.rate,
 			)
+
+		return ldc_details
 
 	def get_valid_ldc_records(self, tax_id):
 		ldc = frappe.qb.DocType("Lower Deduction Certificate")
@@ -905,7 +912,7 @@ class TaxWithholdingDetails:
 				(ldc.valid_from <= self.posting_date)
 				& (ldc.valid_upto >= self.posting_date)
 				& (ldc.company == self.company)
-				& ldc.tax_withholding_category.isin(self.category_details.keys())
+				& ldc.tax_withholding_category.isin(self.tax_withholding_categories)
 			)
 		)
 
@@ -913,7 +920,7 @@ class TaxWithholdingDetails:
 
 		return query.run(as_dict=True)
 
-	def get_ldc_utilized_by_category(self, ldc_names, tax_id):
+	def get_ldc_utilization_by_category(self, ldc_names, tax_id):
 		twe = frappe.qb.DocType("Tax Withholding Entry")
 		query = (
 			frappe.qb.from_(twe)
@@ -921,12 +928,12 @@ class TaxWithholdingDetails:
 			.where(
 				(twe.company == self.company)
 				& (twe.party_type == self.party_type)
-				& (twe.tax_withholding_category.isin(self.category_details.keys()))
+				& (twe.tax_withholding_category.isin(self.tax_withholding_categories))
 				& (twe.lower_deduction_certificate.isin(ldc_names))
 				& (twe.docstatus == 1)
 				& (twe.status == "Settled")
 			)
-			.group_by(twe.lower_deduction_certificate)
+			.groupby(twe.lower_deduction_certificate)
 		)
 
 		query = query.where(twe.tax_id == tax_id) if tax_id else query.where(twe.party == self.party)
