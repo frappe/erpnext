@@ -310,7 +310,7 @@ class TaxWithholdingController:
 		self.category_details = self._get_category_details()
 
 		# Step 2: Calculate taxable amounts for each category
-		TaxWithholdingAmount(self.doc, self.category_details).set_taxable_amount()
+		self.update_taxable_amounts()
 
 		# Step 3: Apply threshold rules
 		self.evaluate_thresholds()
@@ -377,6 +377,52 @@ class TaxWithholdingController:
 
 		# TODO
 		# Step 6: Update tax rows in the parent document
+
+	def update_taxable_amounts(self):
+		if not self.doc.base_net_total:
+			return
+
+		# one category for all items
+		if len(self.category_details.keys()) == 1 and all(item.apply_tds for item in self.doc.get("items")):
+			self.update_amount_for_doc()
+
+		else:
+			self.update_amount_for_item()
+
+	def update_amount_for_doc(self):
+		# only single category
+		category = self.category_details[next(iter(self.category_details))]
+
+		# Net Total
+		if category.tax_deduction_basis != "Gross Total":
+			category["taxable_amount"] = self.doc.base_net_total
+			return
+
+		# Gross Total
+		tax_withheld = 0
+		for row in self.doc.taxes:
+			if row.is_tax_withholding_account:
+				tax_withheld += row.base_tax_amount_after_discount_amount
+
+		precision = self.doc.precision("base_net_total")
+		category["taxable_amount"] = flt(self.doc.base_grand_total - tax_withheld, precision)
+
+	def update_amount_for_item(self):
+		precision = self.doc.precision("base_net_total", "items")
+		filters = {"is_tax_withholding_account": 0}
+
+		for item in self.doc.get("items"):
+			if not item.apply_tds:
+				continue
+
+			category = self.category_details.get(item.tax_withholding_category)
+
+			if category.tax_deduction_basis != "Gross Total":
+				taxable_amount = item.base_net_amount
+			else:
+				taxable_amount = item.base_net_amount + ItemTax.get(self.doc, item, filters)
+
+			category["taxable_amount"] += flt(taxable_amount, precision)
 
 	def evaluate_thresholds(self):
 		"""
@@ -688,107 +734,57 @@ class TaxWithholdingController:
 		return merged_entries
 
 
-class TaxWithholdingAmount:
-	def __init__(self, doc, category_details):
-		self.doc = doc
-		self.category_details = category_details
+class ItemTax:
+	def get(self, doc, item, filters=None):
+		# NOTE: Its important to apportion taxes based on item tax rate
+		# (instead of amount / qty proportion) to get correct tax amount
 
-	def set_taxable_amount(self):
-		if self.is_doc_level_calculation():
-			self.update_taxable_value_based_on_doc()
-		else:
-			self.update_taxable_value_based_on_item()
-
-	def update_taxable_value_based_on_doc(self):
-		# only single cateory
-		category = self.category_details[next(iter(self.category_details))]
-		amount = 0
-		if category.tax_deduction_basis == "Net Total":
-			amount = self.doc.base_net_total
-
-		elif category.tax_deduction_basis == "Gross Total":
-			amount = self.doc.base_grand_total
-			# deduct tax_withholding row
-			for row in self.doc.taxes:
-				if row.is_tax_withholding_account:
-					amount = flt(
-						amount - row.base_tax_amount_after_discount_amount,
-						self.doc.precision("base_grand_total"),
-					)
-
-		category["taxable_amount"] += amount
-
-	def update_taxable_value_based_on_item(self):
-		for item in self.doc.get("items"):
-			if not item.apply_tds:
-				continue
-
-			category = self.category_details.get(item.tax_withholding_category)
-			amount = self._get_item_taxable_amount(item, category)
-			category["taxable_amount"] = flt(
-				category["taxable_amount"] + amount, self.doc.precision("base_net_total")
-			)
-
-	def is_doc_level_calculation(self):
-		return len(self.category_details.keys()) == 1 and all(
-			item.apply_tds for item in self.doc.get("items")
-		)
-
-	def _get_item_taxable_amount(self, item, category):
-		if category.tax_deduction_basis == "Net Total":
-			return item.base_net_amount
-
-		return self._get_item_gross_amount(item)
-
-	def _get_item_gross_amount(self, item):
 		tax_amount = 0
-		precision = self.doc.precision("tax_amount_after_discount_amount", "taxes")
+		item_proportion = item.base_net_amount / doc.base_net_total
 
-		for tax_row in self.doc.taxes:
+		for tax_row in doc.taxes:
 			if tax_row.is_tax_withholding_account or not tax_row.base_tax_amount_after_discount_amount:
 				continue
 
 			charge_type = tax_row.charge_type
 			if tax_row.item_wise_tax_detail:
-				item_tax_details = self.get_tax_details(tax_row).get(item.item_code or item.name, {})
-				if not item_tax_details:
+				# tax rate
+				tax_rate = self._get_item_tax_rate(item, tax_row)
+
+				# tax amount
+				if tax_rate:
+					multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
+					tax_amount += multiplier * tax_rate
 					continue
 
-				tax_rate = self.get_item_tax_rate(item, tax_row)
-				total_tax_amount = item_tax_details.get("tax_amount", 0.0)
+				# eg: charge_type == actual
+				item_key = item.item_code or item.name
+				item_tax_detail = self._get_item_tax_details(tax_row).get(item_key, {})
 
-				# Actual
-				if not tax_rate and total_tax_amount:
-					tax_amount += flt(item.net_amount * total_tax_amount / self.doc.net_total, precision)
-					continue
-
-				tax_amount += flt(self.get_item_tax_amount(item, tax_rate, charge_type), precision)
+				tax_amount += item_tax_detail.get("tax_amount", 0) * item_proportion
 
 			elif charge_type == "Actual":
-				tax_amount += flt(
-					(item.net_amount * tax_row.base_tax_amount_after_discount_amount / self.doc.net_total),
-					precision,
-				)
+				tax_amount += tax_row.base_tax_amount_after_discount_amount * item_proportion
 
-		return flt(item.base_net_amount + tax_amount, self.doc.precision("base_net_amount", item))
+		return tax_amount
 
-	def get_tax_details(self, tax_row):
+	def _get_item_tax_details(self, tax_row):
+		# temp cache
 		if not getattr(tax_row, "__tax_details", None):
 			tax_row.__tax_details = frappe.parse_json(tax_row.get("item_wise_tax_detail") or "{}")
 
 		return tax_row.__tax_details
 
-	def get_item_tax_rate(self, item, tax_row):
+	def _get_item_tax_rate(self, item, tax_row):
+		# NOTE: Use item tax rate as same item code
+		# could have different tax rates in same invoice
+
 		item_tax_rates = frappe.parse_json(item.item_tax_rate)
 
 		if tax_row.account_head in item_tax_rates:
 			return item_tax_rates[tax_row.account_head]
 
 		return tax_row.rate
-
-	def get_item_tax_amount(self, item, tax_rate, charge_type):
-		multiplier = item.qty if charge_type == "On Item Quantity" else item.base_net_amount / 100
-		return tax_rate * multiplier
 
 
 def _reset_idx(docs_to_reset_idx):
