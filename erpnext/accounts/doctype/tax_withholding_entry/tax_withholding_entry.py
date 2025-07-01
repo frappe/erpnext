@@ -384,12 +384,12 @@ class TaxWithholdingController:
 
 		# one category for all items
 		if len(self.category_details.keys()) == 1 and all(item.apply_tds for item in self.doc.get("items")):
-			self.update_amount_for_doc()
+			self._update_amount_for_doc()
 
 		else:
-			self.update_amount_for_item()
+			self._update_amount_for_item()
 
-	def update_amount_for_doc(self):
+	def _update_amount_for_doc(self):
 		# only single category
 		category = self.category_details[next(iter(self.category_details))]
 
@@ -407,7 +407,7 @@ class TaxWithholdingController:
 		precision = self.doc.precision("base_net_total")
 		category["taxable_amount"] = flt(self.doc.base_grand_total - tax_withheld, precision)
 
-	def update_amount_for_item(self):
+	def _update_amount_for_item(self):
 		precision = self.doc.precision("base_net_total", "items")
 		filters = {"is_tax_withholding_account": 0}
 
