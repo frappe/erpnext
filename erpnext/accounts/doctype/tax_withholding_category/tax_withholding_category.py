@@ -897,13 +897,15 @@ def get_ldcs_utilized_amount(category_names, party_type, party, company, lower_d
 
 	return frappe._dict(
 		frappe.qb.from_(twe)
-		.select(twe.lower_deduction_certificates, Sum(twe.taxable_value).as_("limit_consumed"))
+		.select(twe.lower_deduction_certificate, Sum(twe.taxable_value).as_("limit_consumed"))
 		.where(
 			(twe.party_type == party_type)
 			& (twe.party == party)
 			& (twe.company == company)
 			& (twe.tax_withholding_category.isin(category_names))
 			& (twe.lower_deduction_certificate.isin(lower_deduction_certificates))
+		)
+		.group_by(twe.lower_deduction_certificate)
 			& (twe.status != "Cancelled")
 		)
 		.group_by(twe.lower_deduction_certificates)

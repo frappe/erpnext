@@ -84,7 +84,8 @@
    "fieldname": "taxable_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Base Taxable Amount"
+   "label": "Base Taxable Amount",
+   "read_only_depends_on": "eval: !doc.is_manual_override"
   },
   {
    "description": "Transaction from which tax is withheld",
@@ -199,7 +200,8 @@
    "fieldname": "withholding_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Base Tax Withheld"
+   "label": "Base Tax Withheld",
+   "read_only_depends_on": "eval: !doc.is_manual_override"
   },
   {
    "columns": 1,

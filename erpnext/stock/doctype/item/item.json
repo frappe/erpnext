@@ -903,9 +903,11 @@
    "fieldtype": "Section Break"
   },
   {
+  {
    "fieldname": "purchase_tax_withholding_category",
    "fieldtype": "Link",
    "label": "Purchase Tax Withholding Category",
+   "depends_on": "is_purchase_item",
    "options": "Tax Withholding Category"
   },
   {
@@ -916,6 +918,7 @@
    "fieldname": "sales_tax_withholding_category",
    "fieldtype": "Link",
    "label": "Sales Tax Withholding Category",
+   "depends_on": "is_sales_item",
    "options": "Tax Withholding Category"
   }
  ],
