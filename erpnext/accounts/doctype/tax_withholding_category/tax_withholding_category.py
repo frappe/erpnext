@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
@@ -836,6 +838,7 @@ class TaxWithholdingDetails:
 
 			category_detail = frappe._dict(
 				name=category_name,
+				description=doc.category_name,
 				account_head=account_head,
 				# rates
 				tax_rate=row.tax_withholding_rate,
@@ -850,6 +853,9 @@ class TaxWithholdingDetails:
 				disable_cumulative_threshold=doc.disable_cumulative_threshold,
 				disable_transaction_threshold=doc.disable_transaction_threshold,
 				taxable_amount=0,
+				# defaults (exitisting entries in the table)
+				taxable_overrides=defaultdict(float),
+				withheld_overrides=defaultdict(float),
 			)
 
 			# ldc (only if valid based on posting date)

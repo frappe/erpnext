@@ -287,7 +287,7 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Purchase Invoice":
 			self.calculate_paid_amount()
 			# apply tax withholding only if checked and applicable
-			self.set_tax_withholding()
+			# self.set_tax_withholding()
 
 		with temporary_flag("company", self.company):
 			validate_regional(self)

@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections import deque
+from collections import defaultdict, deque
 from math import inf
 
 import frappe
@@ -292,8 +292,6 @@ class TaxWithholdingController:
 			for item in self.doc.items
 			if item.tax_withholding_category and item.apply_tds
 		)
-		if self.doc.tax_withholding_category:
-			category_names.add(self.doc.tax_withholding_category)
 
 		return TaxWithholdingDetails(
 			category_names,
@@ -311,12 +309,16 @@ class TaxWithholdingController:
 
 		# Step 2: Calculate taxable amounts for each category
 		self.update_taxable_amounts()
+		self.update_manual_overrides()
 
 		# Step 3: Apply threshold rules
 		self.evaluate_thresholds()
 
 		# Step 4: Process each category
 		for category in self.category_details.values():
+			if not category.taxable_amount:
+				continue
+
 			# threshold not crossed
 			if not category.threshold_crossed:
 				self.entries.append(
@@ -364,19 +366,40 @@ class TaxWithholdingController:
 			self.entries.extend(merged)
 
 		# Step 5: Process entries for existing document
-		if not any(entry.is_manual_override for entry in self.doc.tax_withholding_entries):
-			self.doc.tax_withholding_entries = []
-			self.doc.extend("tax_withholding_entries", self.entries)
+		self.doc.extend("tax_withholding_entries", self.entries)
 
-		else:
-			# TODO
-			# To the extent of taxable amount with manual override
-			# Reduce the entries to be processed above
-
-			pass
-
-		# TODO
 		# Step 6: Update tax rows in the parent document
+		self.update_tax_rows()
+
+	def update_manual_overrides(self):
+		# To the extent of taxable amount / withheld amount of manual overrides
+		# Reduce the entries to be processed
+
+		entries = [row for row in self.doc.tax_withholding_entries if row.is_manual_override]
+		self.doc.tax_withholding_entries = entries
+
+		for entry in entries:
+			entry: TaxWithholdingEntry
+			category = self.category_details.get(entry.tax_withholding_category)
+
+			# amendment reference
+			if self.doc.amended_from:
+				if entry.taxable_name == self.doc.amended_from:
+					entry.taxable_name = self.doc.name
+
+				if entry.withholding_name == self.doc.amended_from:
+					entry.withholding_name = self.doc.name
+
+			# update overrides
+			if entry.taxable_amount:
+				if entry.taxable_name == entry.parent:
+					# reduce the taxable amount
+					category.taxable_amount -= entry.taxable_amount
+				else:
+					category.taxable_overrides[entry.taxable_name] += entry.taxable_amount
+
+			if entry.withholding_amount and entry.withholding_name != entry.parent:
+				category.withheld_overrides[entry.withholding_name] += entry.withholding_amount
 
 	def update_taxable_amounts(self):
 		if not self.doc.base_net_total:
@@ -521,6 +544,7 @@ class TaxWithholdingController:
 
 		for entry in entries:
 			if entry.status == "Under Withheld":
+				entry.taxable_amount -= category.taxable_overrides.get(entry.taxable_name, 0)
 				open_entries["under_withheld"].append(entry)
 				continue
 
@@ -529,6 +553,7 @@ class TaxWithholdingController:
 				# allocated / allocable
 				proportion = linked_payments[key] / (entry.taxable_amount - entry.withholding_amount)
 				entry.withholding_amount = entry.withholding_amount * proportion
+				entry.withholding_amount -= category.withheld_overrides.get(entry.withholding_name, 0)
 				open_entries["over_withheld"].appendleft(entry)
 				continue
 
@@ -537,6 +562,7 @@ class TaxWithholdingController:
 			if entry.withholding_doctype in ["Payment Entry", "Journal Entry"]:
 				continue
 
+			entry.withholding_amount -= category.withheld_overrides.get(entry.withholding_name, 0)
 			open_entries["over_withheld"].append(entry)
 
 		# Add current entry as under withheld
@@ -622,9 +648,48 @@ class TaxWithholdingController:
 			"under_withheld_reason": "Threshold Exemption",
 		}
 
-	def _update_tax_rows(self):
+	def update_tax_rows(self):
 		"""Update tax rows in the parent document"""
-		pass
+		account_amount_map = defaultdict(float)
+		existing_taxes = {row.account_head: row for row in self.doc.taxes if row.is_tax_withholding_account}
+		precision = self.doc.precision("tax_amount", "taxes")
+
+		for entry in self.doc.tax_withholding_entries:
+			category = self.category_details.get(entry.tax_withholding_category)
+			account_amount_map[category.account_head] += entry.withholding_amount
+
+		for account_head, amount in account_amount_map.items():
+			tax_amount = flt(amount / self.doc.conversion_rate, precision)
+			existing_tax = existing_taxes.get(account_head)
+
+			if existing_tax:
+				if existing_tax.tax_amount == tax_amount:
+					continue
+
+				existing_tax.tax_amount = tax_amount
+
+			if not tax_amount:
+				continue
+
+			else:
+				self.doc.append(
+					"taxes",
+					{
+						"is_tax_withholding_account": 1,
+						"category": "Total",
+						"charge_type": "Actual",
+						"account_head": account_head,
+						"description": account_head,
+						"cost_center": self.doc.cost_center,
+						"add_deduct_tax": "Deduct",
+						"tax_amount": tax_amount,
+					},
+				)
+
+		# remove tax withholding rows with zero tax amount
+		self.doc.taxes = [
+			row for row in self.doc.taxes if not (row.is_tax_withholding_account and not row.tax_amount)
+		]
 
 	def _merge_entries(
 		self,
@@ -640,6 +705,7 @@ class TaxWithholdingController:
 		If only under entries are available, they will be processed against current document.
 		"""
 		merged_entries = []
+		precision = self.doc.precision("withholding_amount", "tax_withholding_entries")
 
 		if not under_entries or constraint <= 0:
 			return merged_entries
@@ -667,6 +733,13 @@ class TaxWithholdingController:
 
 			return entry
 
+		def compute_withheld_amount(taxable_amount, tax_rate):
+			amount = taxable_amount * tax_rate / 100
+			if category.round_off_tax_amount:
+				return flt(amount, 0)
+
+			return flt(amount, precision)
+
 		# under and over entries both available
 		while under_entries and over_entries and constraint > 0:
 			if tax_rate == 0:
@@ -685,7 +758,7 @@ class TaxWithholdingController:
 			merged_entry = {
 				**default_entry(under),
 				"taxable_amount": amount_to_merge,
-				"withholding_amount": amount_to_merge * tax_rate / 100,  # TODO: Rounding settings
+				"withholding_amount": compute_withheld_amount(amount_to_merge, tax_rate),
 				"withholding_doctype": over.withholding_doctype,
 				"withholding_name": over.withholding_name,
 				"withholding_date": over.withholding_date,
@@ -716,7 +789,7 @@ class TaxWithholdingController:
 			merged_entry = {
 				**default_entry(under),
 				"taxable_amount": taxable_amount,
-				"withholding_amount": taxable_amount * tax_rate / 100,  # TODO: Rounding settings
+				"withholding_amount": compute_withheld_amount(taxable_amount, tax_rate),
 				# Paid from the current document
 				"withholding_doctype": self.doc.doctype,
 				"withholding_name": self.doc.name,
