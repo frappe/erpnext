@@ -251,7 +251,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		"free_item_data": [],
 		"parent": args.parent,
 		"parenttype": args.parenttype,
-		"child_docname": args.get('child_docname')
+		"child_docname": args.get('child_docname'),
+		"current_price_list_rate": price_list_rate or args.get('current_price_list_rate')
 	})
 
 	if args.ignore_pricing_rule or not args.item_code:
@@ -371,9 +372,14 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule_rate:
 			# Override already set price list rate (from item price)
 			# if pricing_rule_rate > 0
+			if not item_details.get('current_price_list_rate', 0.0):
+				frappe.throw(_("Current Price List Rate is not set for item {0}").format(item_details.get('item_code')))
 			item_details.update({
-				"price_list_rate": pricing_rule_rate  * args.get("conversion_factor", 1),
+				"price_list_rate": item_details.get('current_price_list_rate', 0.0),
+				"new_rate": pricing_rule_rate,
+				"discount_amount": flt(item_details.get('current_price_list_rate', 0.0) - pricing_rule_rate, 2),
 			})
+			pricing_rule.pricing_rule_for = "Discount Amount"
 		item_details.update({
 			"discount_percentage": 0.0
 		})
