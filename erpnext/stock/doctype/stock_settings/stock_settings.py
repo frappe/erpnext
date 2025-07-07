@@ -46,15 +46,18 @@ class StockSettings(Document):
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		do_not_use_batchwise_valuation: DF.Check
+		enable_day_end_stock_ledger_check: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
 		mr_qty_allowance: DF.Float
 		naming_series_prefix: DF.Data | None
+		notify_stock_ledger_issue_to_role: DF.Link | None
 		over_delivery_receipt_allowance: DF.Float
 		over_picking_allowance: DF.Percent
 		pick_serial_and_batch_based_on: DF.Literal["FIFO", "LIFO", "Expiry"]
 		reorder_email_notify: DF.Check
+		repost_incorrect_entries: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
 		role_allowed_to_over_deliver_receive: DF.Link | None
 		sample_retention_warehouse: DF.Link | None

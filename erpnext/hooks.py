@@ -429,9 +429,10 @@ scheduler_events = {
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.utilities.doctype.video.video.update_youtube_data",
 	],
-	"daily": [],
 	"daily_long": [],
-	"daily_maintenance": [
+	"daily_maintenance": [],
+	"daily": [
+		"erpnext.stock.doctype.day_end_inventory_audit.day_end_inventory_audit.create_audit",
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",

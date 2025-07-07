@@ -82,7 +82,12 @@
   "stock_frozen_upto_days",
   "column_break_26",
   "role_allowed_to_create_edit_back_dated_transactions",
-  "stock_auth_role"
+  "stock_auth_role",
+  "audit_tab",
+  "enable_day_end_stock_ledger_check",
+  "repost_incorrect_entries",
+  "column_break_ntxq",
+  "notify_stock_ledger_issue_to_role"
  ],
  "fields": [
   {
@@ -538,6 +543,33 @@
    "label": "Update Price List Based On",
    "mandatory_depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
    "options": "Rate\nPrice List Rate"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_day_end_stock_ledger_check",
+   "description": "The system will repost to correct the incorrect entries found during the Day-End Stock Ledger Check",
+   "fieldname": "repost_incorrect_entries",
+   "fieldtype": "Check",
+   "label": "Repost Incorrect Entries"
+  },
+  {
+   "default": "0",
+   "description": "The system will conduct an audit at the end of the day to find the stock ledger entries that had discrepancies.",
+   "fieldname": "enable_day_end_stock_ledger_check",
+   "fieldtype": "Check",
+   "label": "Enable Day End Stock Ledger Check"
+  },
+  {
+   "depends_on": "enable_day_end_stock_ledger_check",
+   "description": "The users with the selected role receive a notification about incorrect stock ledgers.",
+   "fieldname": "notify_stock_ledger_issue_to_role",
+   "fieldtype": "Link",
+   "label": "Notify Stock Ledger Issue to Role",
+   "options": "Role"
+  },
+  {
+   "fieldname": "column_break_ntxq",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -545,7 +577,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-06 02:39:24.284587",
+ "modified": "2025-05-07 02:39:24.284587",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
