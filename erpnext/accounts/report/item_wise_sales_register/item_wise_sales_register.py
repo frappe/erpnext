@@ -5,13 +5,14 @@
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import functions as fn
 from frappe.utils import cstr, flt
 from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.xlsxutils import handle_html
 from pypika import Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns
 from erpnext.controllers.taxes_and_totals import ItemWiseTaxDetail
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,
@@ -434,7 +435,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			si.is_internal_customer,
 			si.customer,
 			si.remarks,
-			si.territory,
+			fn.IfNull(si.territory, "Not Specified").as_("territory"),
 			si.company,
 			si.base_net_total,
 			sii.project,
@@ -457,7 +458,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			sii.base_net_rate,
 			sii.base_net_amount,
 			si.customer_name,
-			si.customer_group,
+			fn.IfNull(si.customer_group, "Not Specified").as_("customer_group"),
 			sii.so_detail,
 			si.update_stock,
 			sii.uom,
@@ -525,7 +526,7 @@ def get_grand_total(filters, doctype):
 				"docstatus": 1,
 				"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
 			},
-			"sum(base_grand_total)",
+			[{"SUM": "base_grand_total"}],
 		)
 	)
 

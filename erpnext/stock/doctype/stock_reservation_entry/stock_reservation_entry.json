@@ -93,7 +93,6 @@
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
    "in_filter": 1,
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Voucher No",
    "no_copy": 1,
@@ -173,7 +172,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nDelivered\nCancelled",
+   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nDelivered\nCancelled\nClosed",
    "read_only": 1
   },
   {
@@ -345,7 +344,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-30 22:15:22.998138",
+ "modified": "2025-06-24 00:24:40.394164",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
@@ -455,5 +454,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "voucher_no",
  "track_changes": 1
 }

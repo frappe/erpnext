@@ -74,6 +74,7 @@
    "label": "User Details"
   },
   {
+   "fetch_from": "pos_opening_entry.company",
    "fetch_if_empty": 1,
    "fieldname": "company",
    "fieldtype": "Link",
@@ -103,6 +104,7 @@
    "fieldtype": "Link",
    "label": "Cashier",
    "options": "User",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -259,7 +261,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2025-06-06 12:00:31.955176",
+ "modified": "2025-06-14 02:38:14.962291",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

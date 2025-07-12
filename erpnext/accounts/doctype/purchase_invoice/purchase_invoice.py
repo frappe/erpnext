@@ -265,6 +265,7 @@ class PurchaseInvoice(BuyingController):
 			self.is_opening = "No"
 
 		self.validate_posting_time()
+		self.validate_posting_date_with_po()
 
 		super().validate()
 
@@ -1344,17 +1345,12 @@ class PurchaseInvoice(BuyingController):
 
 			warehouse_debit_amount = stock_amount
 
-		elif self.is_return and self.update_stock and self.is_internal_supplier and warehouse_debit_amount:
+		elif self.is_return and self.update_stock and (self.is_internal_supplier or not self.return_against):
 			net_rate = item.base_net_amount
 			if item.sales_incoming_rate:  # for internal transfer
 				net_rate = item.qty * item.sales_incoming_rate
 
-			stock_amount = (
-				net_rate
-				+ item.item_tax_amount
-				+ flt(item.landed_cost_voucher_amount)
-				+ flt(item.get("amount_difference_with_purchase_invoice"))
-			)
+			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 
 			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
 				cost_of_goods_sold_account = self.get_company_default("default_expense_account")

@@ -175,6 +175,9 @@ class StockLedgerEntry(Document):
 		if frappe.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
 			return
 
+		if self.is_adjustment_entry:
+			return
+
 		if not self.get("via_landed_cost_voucher"):
 			SerialBatchBundle(
 				sle=self,
@@ -189,7 +192,7 @@ class StockLedgerEntry(Document):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
+				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
 		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
 			frappe.throw(_("Actual Qty is mandatory"))

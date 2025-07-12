@@ -37,6 +37,8 @@ class POSOpeningEntry(StatusUpdater):
 
 	def validate(self):
 		self.validate_pos_profile_and_cashier()
+		self.check_open_pos_exists()
+		self.check_user_already_assigned()
 		self.validate_payment_method_account()
 		self.set_status()
 
@@ -48,6 +50,22 @@ class POSOpeningEntry(StatusUpdater):
 
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
 			frappe.throw(_("User {} is disabled. Please select valid user/cashier").format(self.user))
+
+	def check_open_pos_exists(self):
+		if frappe.db.exists("POS Opening Entry", {"pos_profile": self.pos_profile, "status": "Open"}):
+			frappe.throw(
+				title=_("POS Opening Entry Exists"),
+				msg=_(
+					"{0} is open. Close the POS or cancel the existing POS Opening Entry to create a new POS Opening Entry."
+				).format(frappe.bold(self.pos_profile)),
+			)
+
+	def check_user_already_assigned(self):
+		if frappe.db.exists("POS Opening Entry", {"user": self.user, "status": "Open"}):
+			frappe.throw(
+				title=_("Cannot Assign Cashier"),
+				msg=_("Cashier is currently assigned to another POS."),
+			)
 
 	def validate_payment_method_account(self):
 		invalid_modes = []
@@ -71,5 +89,25 @@ class POSOpeningEntry(StatusUpdater):
 	def on_submit(self):
 		self.set_status(update=True)
 
+	def before_cancel(self):
+		self.check_poe_is_cancellable()
+
 	def on_cancel(self):
 		self.set_status(update=True)
+		frappe.publish_realtime(
+			f"poe_{self.name}",
+			message={"operation": "Cancelled"},
+			docname=f"POS Opening Entry/{self.name}",
+		)
+
+	def check_poe_is_cancellable(self):
+		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import get_invoices
+
+		invoices = get_invoices(
+			self.period_start_date, frappe.utils.get_datetime(), self.pos_profile, self.user
+		)
+		if invoices.get("invoices"):
+			frappe.throw(
+				title=_("POS Opening Entry Cancellation Error"),
+				msg=_("POS Opening Entry cannot be cancelled as unconsolidated Invoices exists."),
+			)

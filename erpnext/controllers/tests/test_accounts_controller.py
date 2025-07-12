@@ -935,7 +935,10 @@ class TestAccountsController(IntegrationTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"add_taxes_from_item_tax_template": 1})
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
+	)
 	def test_18_fetch_taxes_based_on_taxes_and_charges_template(self):
 		# Create a Sales Taxes and Charges Template
 		if not frappe.db.exists("Sales Taxes and Charges Template", "_Test Tax - _TC"):
@@ -963,6 +966,30 @@ class TestAccountsController(IntegrationTestCase):
 		sinv.insert()
 
 		self.assertEqual(sinv.total_taxes_and_charges, 4.5)
+
+	@IntegrationTestCase.change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 1, "add_taxes_from_taxes_and_charges_template": 0},
+	)
+	def test_19_fetch_taxes_based_on_item_tax_template_template(self):
+		# Create a Sales Invoice
+		sinv = frappe.new_doc("Sales Invoice")
+		sinv.customer = self.customer
+		sinv.company = self.company
+		sinv.currency = "INR"
+		sinv.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 50,
+				"item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
+			},
+		)
+		sinv.insert()
+
+		self.assertEqual(sinv.taxes[0].account_head, "_Test Account Excise Duty - _TC")
+		self.assertEqual(sinv.total_taxes_and_charges, 5)
 
 	def test_20_journal_against_sales_invoice(self):
 		# Invoice in Foreign Currency

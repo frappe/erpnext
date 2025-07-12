@@ -67,11 +67,12 @@ class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
 		mid_year = add_to_date(fiscal_year[1], months=6)
 		tds_doc = frappe.get_doc("Tax Withholding Category", "TDS - 3")
 		tds_doc.rates[0].to_date = mid_year
+		from_date = add_to_date(mid_year, days=1)
 		tds_doc.append(
 			"rates",
 			{
 				"tax_withholding_rate": 20,
-				"from_date": add_to_date(mid_year, days=1),
+				"from_date": from_date,
 				"to_date": fiscal_year[2],
 				"single_threshold": 1,
 				"cumulative_threshold": 1,
@@ -80,18 +81,19 @@ class TestTaxWithholdingDetails(AccountsTestMixin, IntegrationTestCase):
 
 		tds_doc.save()
 
-		inv_1 = make_purchase_invoice(rate=1000, do_not_submit=True)
+		inv_1 = make_purchase_invoice(
+			rate=1000, posting_date=add_to_date(fiscal_year[1], days=1), do_not_save=True, do_not_submit=True
+		)
+		inv_1.set_posting_time = 1
 		inv_1.apply_tds = 1
-		inv_1.tax_withholding_category = "TDS - 3"
+		inv_1.tax_withholding_category = tds_doc.name
+		inv_1.save()
 		inv_1.submit()
 
-		inv_2 = make_purchase_invoice(
-			rate=1000, do_not_submit=True, posting_date=add_to_date(mid_year, days=1), do_not_save=True
-		)
+		inv_2 = make_purchase_invoice(rate=1000, posting_date=from_date, do_not_save=True, do_not_submit=True)
 		inv_2.set_posting_time = 1
-
-		inv_1.apply_tds = 1
-		inv_2.tax_withholding_category = "TDS - 3"
+		inv_2.apply_tds = 1
+		inv_2.tax_withholding_category = tds_doc.name
 		inv_2.save()
 		inv_2.submit()
 

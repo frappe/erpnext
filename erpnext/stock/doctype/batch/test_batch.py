@@ -305,8 +305,18 @@ class TestBatch(IntegrationTestCase):
 		self.assertEqual(
 			get_batch_qty(item_code="ITEM-BATCH-2", warehouse="_Test Warehouse - _TC"),
 			[
-				{"batch_no": "batch a", "qty": 90.0, "warehouse": "_Test Warehouse - _TC"},
-				{"batch_no": "batch b", "qty": 90.0, "warehouse": "_Test Warehouse - _TC"},
+				{
+					"batch_no": "batch a",
+					"qty": 90.0,
+					"warehouse": "_Test Warehouse - _TC",
+					"expiry_date": None,
+				},
+				{
+					"batch_no": "batch b",
+					"qty": 90.0,
+					"warehouse": "_Test Warehouse - _TC",
+					"expiry_date": None,
+				},
 			],
 		)
 

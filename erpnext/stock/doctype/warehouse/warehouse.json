@@ -175,7 +175,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State",
+   "label": "State/Province",
    "oldfieldname": "state",
    "oldfieldtype": "Select"
   },
@@ -260,11 +260,12 @@
    "label": "Is Rejected Warehouse"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-01-22 10:47:00.674163",
+ "modified": "2025-06-26 11:19:04.673115",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -317,6 +318,7 @@
    "role": "Manufacturing User"
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

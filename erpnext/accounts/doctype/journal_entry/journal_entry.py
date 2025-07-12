@@ -24,6 +24,7 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
+	get_advance_payment_doctypes,
 	get_balance_on,
 	get_stock_accounts,
 	get_stock_and_account_balance,
@@ -62,6 +63,7 @@ class JournalEntry(AccountsController):
 		difference: DF.Currency
 		due_date: DF.Date | None
 		finance_book: DF.Link | None
+		for_all_stock_asset_accounts: DF.Check
 		from_template: DF.Link | None
 		inter_company_journal_entry_reference: DF.Link | None
 		is_opening: DF.Literal["No", "Yes"]
@@ -70,14 +72,15 @@ class JournalEntry(AccountsController):
 		mode_of_payment: DF.Link | None
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
-		paid_loan: DF.Data | None
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
+		periodic_entry_difference_account: DF.Link | None
 		posting_date: DF.Date
 		process_deferred_accounting: DF.Link | None
 		remark: DF.SmallText | None
 		reversal_of: DF.Link | None
 		select_print_heading: DF.Link | None
+		stock_asset_account: DF.Link | None
 		stock_entry: DF.Link | None
 		tax_withholding_category: DF.Link | None
 		title: DF.Data | None
@@ -101,6 +104,7 @@ class JournalEntry(AccountsController):
 			"Opening Entry",
 			"Depreciation Entry",
 			"Asset Disposal",
+			"Periodic Accounting Entry",
 			"Exchange Rate Revaluation",
 			"Exchange Gain Or Loss",
 			"Deferred Revenue",
@@ -147,8 +151,7 @@ class JournalEntry(AccountsController):
 
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
-
-		if not self.title:
+		if self.is_new() or not self.title:
 			self.title = self.get_title()
 
 	def validate_advance_accounts(self):
@@ -198,6 +201,76 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 
+	@frappe.whitelist()
+	def get_balance_for_periodic_accounting(self):
+		self.validate_company_for_periodic_accounting()
+
+		stock_accounts = self.get_stock_accounts_for_periodic_accounting()
+		self.set("accounts", [])
+		for account in stock_accounts:
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(
+				account, self.posting_date, self.company
+			)
+
+			difference_value = flt(stock_bal - account_bal, self.precision("difference"))
+
+			if difference_value == 0:
+				frappe.msgprint(
+					_("No difference found for stock account {0}").format(frappe.bold(account)),
+					alert=True,
+				)
+				continue
+
+			self.append(
+				"accounts",
+				{
+					"account": account,
+					"debit_in_account_currency": difference_value if difference_value > 0 else 0,
+					"credit_in_account_currency": abs(difference_value) if difference_value < 0 else 0,
+				},
+			)
+
+			self.append(
+				"accounts",
+				{
+					"account": self.periodic_entry_difference_account,
+					"credit_in_account_currency": difference_value if difference_value > 0 else 0,
+					"debit_in_account_currency": abs(difference_value) if difference_value < 0 else 0,
+				},
+			)
+
+	def validate_company_for_periodic_accounting(self):
+		if erpnext.is_perpetual_inventory_enabled(self.company):
+			frappe.throw(
+				_(
+					"Periodic Accounting Entry is not allowed for company {0} with perpetual inventory enabled"
+				).format(self.company)
+			)
+
+		if not self.periodic_entry_difference_account:
+			frappe.throw(_("Please select Periodic Accounting Entry Difference Account"))
+
+	def get_stock_accounts_for_periodic_accounting(self):
+		if self.voucher_type != "Periodic Accounting Entry":
+			return []
+
+		if self.for_all_stock_asset_accounts:
+			return frappe.get_all(
+				"Account",
+				filters={
+					"company": self.company,
+					"account_type": "Stock",
+					"root_type": "Asset",
+					"is_group": 0,
+				},
+				pluck="name",
+			)
+
+		if not self.stock_asset_account:
+			frappe.throw(_("Please select Stock Asset Account"))
+
+		return [self.stock_asset_account]
+
 	def on_update_after_submit(self):
 		# Flag will be set on Reconciliation
 		# Reconciliation tool will anyways repost ledger entries. So, no need to check and do implicit repost.
@@ -238,9 +311,7 @@ class JournalEntry(AccountsController):
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
-			"advance_payment_payable_doctypes"
-		)
+		advance_payment_doctypes = get_advance_payment_doctypes()
 		for d in self.get("accounts"):
 			if d.is_advance:
 				if d.reference_type in advance_payment_doctypes:
@@ -280,6 +351,10 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Account {0} should be of type Expense").format(d.account))
 
 	def validate_stock_accounts(self):
+		if self.voucher_type == "Periodic Accounting Entry":
+			# Skip validation for periodic accounting entry
+			return
+
 		stock_accounts = get_stock_accounts(self.company, accounts=self.accounts)
 		for account in stock_accounts:
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(
@@ -1070,7 +1145,9 @@ class JournalEntry(AccountsController):
 
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
-		currency = bank_account_currency = party_account_currency = pay_to_recd_from = None
+		currency = (
+			bank_account_currency
+		) = party_account_currency = pay_to_recd_from = self.pay_to_recd_from = None
 		party_type = None
 		for d in self.get("accounts"):
 			if d.party_type in ["Customer", "Supplier"] and d.party:

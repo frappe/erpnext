@@ -161,7 +161,6 @@ class PickList(TransactionBase):
 				"Sales Order": {
 					"ref_dn_field": "sales_order",
 					"compare_fields": [
-						["customer", "="],
 						["company", "="],
 					],
 				},
@@ -776,16 +775,16 @@ class PickList(TransactionBase):
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
 		"""Compute how many full bundles can be created from picked items."""
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
-		possible_bundles = []
+		possible_bundles = {}
 		for item in self.locations:
 			if item.sales_order_item != bundle_row:
 				continue
 
 			if qty_in_bundle := bundle_items.get(item.item_code):
-				possible_bundles.append(item.picked_qty / qty_in_bundle)
-			else:
-				possible_bundles.append(0)
-		return int(flt(min(possible_bundles), precision or 6))
+				possible_bundles.setdefault(item.product_bundle_item, 0)
+				possible_bundles[item.product_bundle_item] += item.picked_qty / qty_in_bundle
+
+		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
 	def has_unreserved_stock(self):
 		if self.purpose == "Delivery":
@@ -1221,8 +1220,10 @@ def create_delivery_note(source_name, target_doc=None):
 	return delivery_note
 
 
-def create_dn_wo_so(pick_list):
-	delivery_note = frappe.new_doc("Delivery Note")
+def create_dn_wo_so(pick_list, delivery_note=None):
+	if not delivery_note:
+		delivery_note = frappe.new_doc("Delivery Note")
+
 	delivery_note.company = pick_list.company
 
 	item_table_mapper_without_so = {
@@ -1234,6 +1235,8 @@ def create_dn_wo_so(pick_list):
 		},
 	}
 	map_pl_locations(pick_list, item_table_mapper_without_so, delivery_note)
+	delivery_note.flags.ignore_mandatory = True
+	delivery_note.save()
 
 	return delivery_note
 
@@ -1244,22 +1247,30 @@ def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
 	pick_list = frappe.get_doc("Pick List", source_name)
 	validate_item_locations(pick_list)
 
-	if kwargs and (order := kwargs.get("sales_order")):
-		sales_orders = {order}
+	sales_order_arg = kwargs.get("sales_order") if kwargs else None
+	customer_arg = kwargs.get("customer") if kwargs else None
+
+	if sales_order_arg:
+		sales_orders = {sales_order_arg}
 	else:
 		sales_orders = {row.sales_order for row in pick_list.locations if row.sales_order}
 
-		if kwargs and (customer := kwargs.get("customer")):
+		if customer_arg:
 			sales_orders = frappe.get_all(
 				"Sales Order",
-				filters={"customer": customer, "name": ["in", list(sales_orders)]},
+				filters={"customer": customer_arg, "name": ["in", list(sales_orders)]},
 				pluck="name",
 			)
 
-	if not sales_orders:
-		return
+	delivery_note = create_dn_from_so(pick_list, sales_orders, delivery_note=target_doc)
 
-	return create_dn_from_so(pick_list, sales_orders, delivery_note=target_doc)
+	if not sales_order_arg and not all(item.sales_order for item in pick_list.locations):
+		if isinstance(delivery_note, str):
+			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
+
+		delivery_note = create_dn_wo_so(pick_list, delivery_note)
+
+	return delivery_note
 
 
 def create_dn_with_so(sales_dict, pick_list):
@@ -1268,11 +1279,19 @@ def create_dn_with_so(sales_dict, pick_list):
 
 	for customer in sales_dict:
 		delivery_note = create_dn_from_so(pick_list, sales_dict[customer], None)
+		if delivery_note:
+			delivery_note.flags.ignore_mandatory = True
+			# updates packed_items on save
+			# save as multiple customers are possible
+			delivery_note.save()
 
 	return delivery_note
 
 
 def create_dn_from_so(pick_list, sales_order_list, delivery_note=None):
+	if not sales_order_list:
+		return delivery_note
+
 	item_table_mapper = {
 		"doctype": "Delivery Note Item",
 		"field_map": {
@@ -1284,6 +1303,7 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None):
 	}
 
 	kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
+
 	delivery_note = create_delivery_note_from_sales_order(
 		next(iter(sales_order_list)), delivery_note, kwargs=kwargs
 	)
@@ -1291,11 +1311,8 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None):
 	if not delivery_note:
 		return
 
-	if delivery_note:
-		for so in sales_order_list:
-			map_pl_locations(pick_list, item_table_mapper, delivery_note, so)
-
-		update_packed_item_details(pick_list, delivery_note)
+	for so in sales_order_list:
+		map_pl_locations(pick_list, item_table_mapper, delivery_note, so)
 
 	return delivery_note
 
@@ -1331,7 +1348,8 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.company = pick_list.company
-	delivery_note.customer = frappe.get_value("Sales Order", sales_order, "customer")
+	if sales_order:
+		delivery_note.customer = frappe.get_value("Sales Order", sales_order, "customer")
 
 
 def add_product_bundles_to_delivery_note(
@@ -1353,32 +1371,8 @@ def add_product_bundles_to_delivery_note(
 		dn_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
 			so_row, product_bundle_qty_map[item_code]
 		)
+		dn_bundle_item.against_pick_list = pick_list.name
 		update_delivery_note_item(sales_order_item, dn_bundle_item, delivery_note)
-
-
-def update_packed_item_details(pick_list: "PickList", delivery_note) -> None:
-	"""Update stock details on packed items table of delivery note."""
-
-	def _find_so_row(packed_item):
-		for item in delivery_note.items:
-			if packed_item.parent_detail_docname == item.name:
-				return item.so_detail
-
-	def _find_pick_list_location(bundle_row, packed_item):
-		if not bundle_row:
-			return
-		for loc in pick_list.locations:
-			if loc.product_bundle_item == bundle_row and loc.item_code == packed_item.item_code:
-				return loc
-
-	for packed_item in delivery_note.packed_items:
-		so_row = _find_so_row(packed_item)
-		location = _find_pick_list_location(so_row, packed_item)
-		if not location:
-			continue
-		packed_item.warehouse = location.warehouse
-		packed_item.batch_no = location.batch_no
-		packed_item.serial_no = location.serial_no
 
 
 @frappe.whitelist()
@@ -1558,20 +1552,23 @@ def get_pick_list_query(doctype, txt, searchfield, start, page_len, filters):
 
 	PICK_LIST = frappe.qb.DocType("Pick List")
 	PICK_LIST_ITEM = frappe.qb.DocType("Pick List Item")
+	SALES_ORDER = frappe.qb.DocType("Sales Order")
 
 	query = (
 		frappe.qb.from_(PICK_LIST)
 		.join(PICK_LIST_ITEM)
 		.on(PICK_LIST.name == PICK_LIST_ITEM.parent)
+		.join(SALES_ORDER)
+		.on(PICK_LIST_ITEM.sales_order == SALES_ORDER.name)
 		.select(
 			PICK_LIST.name,
-			PICK_LIST.customer,
+			SALES_ORDER.customer,
 			Replace(GROUP_CONCAT(PICK_LIST_ITEM.sales_order).distinct(), ",", "<br>").as_("sales_order"),
 		)
 		.where(PICK_LIST.docstatus == 1)
 		.where(PICK_LIST.status.isin(["Open", "Partly Delivered"]))
 		.where(PICK_LIST.company == filters.get("company"))
-		.where(PICK_LIST.customer == filters.get("customer"))
+		.where(SALES_ORDER.customer == filters.get("customer"))
 		.groupby(PICK_LIST.name)
 	)
 

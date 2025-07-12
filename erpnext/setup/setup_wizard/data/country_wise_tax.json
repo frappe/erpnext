@@ -60,10 +60,155 @@
 	},
 
 	"Australia": {
-		"Australia GST": {
-			"account_name": "GST 10%",
-			"tax_rate": 10.00,
-			"default": 1
+		"tax_categories" :[ 
+			{
+				"title" : "Domestic GST Supplier"
+			},
+			{
+				"title" : "Domestic GST Customer"
+			},
+			{
+				"title" : "Export Customer"
+			},
+			{
+				"title" : "GST Free Customer"
+			},
+			{
+				"title" : "Capital Goods Supplier"
+			},
+			{
+				"title" : "Import / GST Free Supplier"
+			}
+		],
+		"chart_of_accounts": {
+			"Australia - Chart of Accounts with Account Numbers": {
+				"sales_tax_templates": [
+					{
+						"title": "AU Sales - GST",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "GST Collected (Payable)",
+									"account_number": "22010",
+									"account_type": "Tax",
+									"tax_rate": "10"
+								},
+								"is_default" : 1,
+								"description": "GST Collected (Payable)",
+								"rate": 10
+							}
+						]
+					},
+					{
+						"title": "Export Sales - GST Free",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "GST Collected (Payable)",
+									"account_number": "22010",
+									"account_type": "Tax",
+									"tax_rate": "10"
+								},
+								"description": "GST Collected (Payable)",
+								"rate": 0
+							}
+						]
+					},
+					{
+						"title": "AU Sales - GST Free",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "GST Collected (Payable)",
+									"account_number": "22010",
+									"account_type": "Tax",
+									"tax_rate": "10"
+								},
+								"description": "GST Collected (Payable)",
+								"rate": 0
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "AU Capital Purchase - GST",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "GST Paid (Receivable)",
+									"account_number": "22020",
+									"account_type": "Tax",
+									"tax_rate": "10"
+								},
+								"description": "GST Paid (Receivable)",
+								"rate": 10
+							}
+						]
+					},
+					{
+						"title": "Import & GST-Free Purchase",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "GST Paid (Receivable)",
+									"account_number": "22020",
+									"account_type": "Tax",
+									"tax_rate": "10"
+								},
+								"description": "GST Paid (Receivable)",
+								"rate": 0
+							}
+						]
+					},
+					{
+						"title": "AU Non Capital Purchase - GST",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "GST Paid (Receivable)",
+									"account_number": "22020",
+									"account_type": "Tax",
+									"tax_rate": "10"
+								},
+								"description": "GST Paid (Receivable)",
+								"is_default" :1,
+								"rate": 10
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "GST Exempt Sales",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "GST Collected (Payable)",
+									"account_number": "22010",
+									"root_type": "Liability",
+									"tax_rate": "10"
+								},
+								"tax_rate": 0
+							}
+						]
+					},
+					{
+						"title" : "GST Exempt Purchase",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "GST Paid (Receivable)",
+									"account_number": "22020",
+									"root_type": "Liability",
+									"tax_rate": "10"
+								},
+								"tax_rate": 0
+							}
+						]
+					}
+				]
+			}
 		}
 	},
 

@@ -179,7 +179,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, dimension_list):
 def get_condition(dimension):
 	conditions = []
 
-	conditions.append(f"{frappe.scrub(dimension)} in %(dimensions)s")
+	conditions.append(f"{frappe.scrub(dimension)} in (%(dimensions)s)")
 
 	return " and {}".format(" and ".join(conditions)) if conditions else ""
 

@@ -4,11 +4,12 @@ import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import flt, nowdate, nowtime, today
+from frappe.utils import add_months, flt, get_first_day, nowdate, nowtime, today
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
 	get_asset_value_after_depreciation,
+	make_sales_invoice,
 )
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
@@ -33,6 +34,33 @@ class TestAssetRepair(IntegrationTestCase):
 		create_asset_data()
 		create_item("_Test Stock Item")
 		frappe.db.sql("delete from `tabTax Rule`")
+
+	def test_asset_status(self):
+		date = nowdate()
+		purchase_date = add_months(get_first_day(date), -2)
+
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date=purchase_date,
+			purchase_date=purchase_date,
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=10,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+
+		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
+		si.customer = "_Test Customer"
+		si.due_date = date
+		si.get("items")[0].rate = 25000
+		si.insert()
+		si.submit()
+
+		asset.reload()
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+		asset_repair = frappe.new_doc("Asset Repair")
+		asset_repair.update({"company": "_Test Company", "asset": asset.name, "asset_name": asset.asset_name})
+		self.assertRaises(frappe.ValidationError, asset_repair.save)
 
 	def test_update_status(self):
 		asset = create_asset(submit=1)

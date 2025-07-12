@@ -105,7 +105,6 @@ class TestQueries(ERPNextTestSuite):
 			value=1,
 			property_type="Check",
 		)
-		frappe.clear_cache(doctype="Payment Entry")
 
 		user = create_user("test_employee_query@example.com", "Accounts User", "HR User")
 		add_user_permissions(
@@ -136,7 +135,6 @@ class TestQueries(ERPNextTestSuite):
 			self.assertGreater(len(result), 1)
 
 			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
-			frappe.clear_cache(doctype="Payment Entry")
 
 			# only one employee should be returned even though ignore_user_permissions is passed as 1
 			result = queries.employee_query(**params)

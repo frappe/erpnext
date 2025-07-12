@@ -16,7 +16,6 @@ class StockRepostingSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		do_reposting_for_each_stock_transaction: DF.Check
 		end_time: DF.Time | None
 		item_based_reposting: DF.Check
 		limit_reposting_timeslot: DF.Check
@@ -29,10 +28,6 @@ class StockRepostingSettings(Document):
 
 	def validate(self):
 		self.set_minimum_reposting_time_slot()
-
-	def before_save(self):
-		if self.do_reposting_for_each_stock_transaction:
-			self.item_based_reposting = 1
 
 	def set_minimum_reposting_time_slot(self):
 		"""Ensure that timeslot for reposting is at least 12 hours."""

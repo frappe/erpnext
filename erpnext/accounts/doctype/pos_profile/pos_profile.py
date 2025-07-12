@@ -32,6 +32,7 @@ class POSProfile(Document):
 			"Always Ask", "Save Changes and Load New Invoice", "Discard Changes and Load New Invoice"
 		]
 		allow_discount_change: DF.Check
+		allow_partial_payment: DF.Check
 		allow_rate_change: DF.Check
 		applicable_for_users: DF.Table[POSProfileUser]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]

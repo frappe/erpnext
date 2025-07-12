@@ -20,6 +20,7 @@
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
+  "disassembled_qty",
   "process_loss_qty",
   "project",
   "track_semi_finished_goods",
@@ -592,6 +593,14 @@
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
    "label": " Reserve Stock"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "disassembled_qty",
+   "fieldtype": "Float",
+   "label": "Disassembled Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -600,7 +609,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-25 11:46:38.739588",
+ "modified": "2025-06-21 00:55:45.916224",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

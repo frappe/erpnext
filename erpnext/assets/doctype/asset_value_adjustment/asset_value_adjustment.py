@@ -180,12 +180,21 @@ class AssetValueAdjustment(Document):
 		if asset.calculate_depreciation:
 			for row in asset.finance_books:
 				if cstr(row.finance_book) == cstr(self.finance_book):
-					row.value_after_depreciation += flt(difference_amount)
+					salvage_value_adjustment = (
+						self.get_adjusted_salvage_value_amount(row, difference_amount) or 0
+					)
+					row.expected_value_after_useful_life += salvage_value_adjustment
+					row.value_after_depreciation = row.value_after_depreciation + flt(difference_amount)
 					row.db_update()
 
 		asset.value_after_depreciation += flt(difference_amount)
 		asset.db_update()
 		return asset
+
+	def get_adjusted_salvage_value_amount(self, row, difference_amount):
+		if row.expected_value_after_useful_life:
+			salvage_value_adjustment = (difference_amount * row.salvage_value_percentage) / 100
+			return flt(salvage_value_adjustment if self.docstatus == 1 else -1 * salvage_value_adjustment)
 
 	def get_adjustment_note(self):
 		if self.docstatus == 1:

@@ -18,11 +18,13 @@ frappe.listview_settings["POS Invoice"] = {
 			Draft: "red",
 			Unpaid: "orange",
 			Paid: "green",
+			"Partly Paid": "yellow",
 			Submitted: "blue",
 			Consolidated: "green",
 			Return: "darkgrey",
 			"Unpaid and Discounted": "orange",
 			"Overdue and Discounted": "red",
+			"Partly Paid and Discounted": "yellow",
 			Overdue: "red",
 		};
 		return [__(doc.status), status_color[doc.status], "status,=," + doc.status];

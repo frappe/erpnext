@@ -117,14 +117,15 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
 			if (
-				frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
-				!doc.valid_till ||
-				frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0
+				frappe.model.can_create("Sales Order") &&
+				(frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
+					!doc.valid_till ||
+					frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0)
 			) {
 				this.frm.add_custom_button(__("Sales Order"), () => this.make_sales_order(), __("Create"));
 			}
 
-			if (doc.status !== "Ordered") {
+			if (doc.status !== "Ordered" && this.frm.has_perm("write")) {
 				this.frm.add_custom_button(__("Set as Lost"), () => {
 					this.frm.trigger("set_as_lost_dialog");
 				});
@@ -133,7 +134,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if (this.frm.doc.docstatus === 0) {
+		if (this.frm.doc.docstatus === 0 && frappe.model.can_read("Opportunity")) {
 			this.frm.add_custom_button(
 				__("Opportunity"),
 				function () {

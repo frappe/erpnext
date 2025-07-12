@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import DocType
+from frappe.query_builder.functions import Abs
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
@@ -661,7 +662,8 @@ def get_rate_for_return(
 	if voucher_type in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		select_field = "incoming_rate"
 	else:
-		select_field = "abs(stock_value_difference / actual_qty)"
+		StockLedgerEntry = frappe.qb.DocType("Stock Ledger Entry")
+		select_field = Abs(StockLedgerEntry.stock_value_difference / StockLedgerEntry.actual_qty)
 
 	rate = flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
 	if not (rate and return_against) and voucher_type in ["Sales Invoice", "Delivery Note"]:
@@ -682,6 +684,14 @@ def get_rate_for_return(
 				},
 				raise_error_if_no_rate=False,
 			)
+
+	if not rate and voucher_type in ["Sales Invoice", "Delivery Note"]:
+		details = frappe.db.get_value(
+			voucher_type + " Item", voucher_detail_no, ["rate", "allow_zero_valuation_rate"], as_dict=1
+		)
+
+		if details and not details.allow_zero_valuation_rate:
+			rate = flt(details.rate)
 
 	return rate
 

@@ -19,19 +19,15 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
+
+	if not sl_entries:
+		return columns, []
+
 	item_details = get_item_details(items, sl_entries, False)
-
-	opening_row = get_opening_balance_data(filters, columns, sl_entries)
-
+	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 	data = process_stock_ledger_entries(sl_entries, item_details, opening_row, precision)
-
 	return columns, data
-
-
-def get_opening_balance_data(filters, columns, sl_entries):
-	opening_row = get_opening_balance(filters, columns, sl_entries)
-	return opening_row
 
 
 def process_stock_ledger_entries(sl_entries, item_details, opening_row, precision):

@@ -62,6 +62,7 @@
   "day_to_send",
   "weekly_time_to_send",
   "column_break_45",
+  "subject",
   "message"
  ],
  "fields": [
@@ -447,6 +448,13 @@
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "depends_on": "collect_progress",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "mandatory_depends_on": "collect_progress"
   }
  ],
  "icon": "fa fa-puzzle-piece",
@@ -454,7 +462,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2024-04-24 10:56:16.001032",
+ "modified": "2025-07-03 10:54:30.444139",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -501,6 +509,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "project_name,customer, status, priority, is_active",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

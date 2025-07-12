@@ -66,7 +66,7 @@ erpnext.PointOfSale.PastOrderList = class {
 			df: {
 				label: __("Invoice Status"),
 				fieldtype: "Select",
-				options: `Draft\nPaid\nConsolidated\nReturn`,
+				options: ["Draft", "Paid", "Consolidated", "Return", "Partly Paid"].join("\n"),
 				placeholder: __("Filter by invoice status"),
 				onchange: function () {
 					if (me.$component.is(":visible")) me.refresh_list();
@@ -114,7 +114,7 @@ erpnext.PointOfSale.PastOrderList = class {
 						<svg class="mr-2" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
 						</svg>
-						${frappe.ellipsis(invoice.customer, 20)}
+						${frappe.ellipsis(invoice.customer_name, 20)}
 					</div>
 					<div class="invoice-name">${invoice.name}</div>
 				</div>

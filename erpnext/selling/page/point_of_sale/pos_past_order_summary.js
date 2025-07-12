@@ -73,14 +73,19 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	get_upper_section_html(doc) {
 		const { status } = doc;
 		let indicator_color = "";
+		const is_customer_naming_by_customer_name = frappe.sys_defaults.cust_master_name !== "Customer Name";
 
 		["Paid", "Consolidated"].includes(status) && (indicator_color = "green");
-		status === "Draft" && (indicator_color = "red");
-		status === "Return" && (indicator_color = "grey");
+		["Partly Paid", "Overdue"].includes(status) && (indicator_color = "yellow");
+		["Draft", "Unpaid"].includes(status) && (indicator_color = "red");
+		["Credit Note Issued", "Return"].includes(status) && (indicator_color = "grey");
 
 		return `<div class="left-section">
-					<div class="customer-name">${doc.customer}</div>
-					<div class="customer-email">${this.customer_email}</div>
+					<div class="customer-section">
+						<div class="customer-name">${doc.customer_name}</div>
+						${is_customer_naming_by_customer_name ? `<div class="customer-code">${doc.customer}</div>` : ""}
+						<div class="customer-email">${this.customer_email}</div>
+					</div>
 					<div class="cashier">${__("Sold by")}: ${doc.owner}</div>
 				</div>
 				<div class="right-section">
@@ -159,15 +164,9 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		let taxes_html = doc.taxes
 			.map((t) => {
-				// if tax rate is 0, don't print it.
-				const description = /[0-9]+/.test(t.description)
-					? t.description
-					: t.rate != 0
-					? `${t.description} @ ${t.rate}%`
-					: t.description;
 				return `
 				<div class="tax-row">
-					<div class="tax-label">${description}</div>
+					<div class="tax-label">${t.description}</div>
 					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, doc.currency)}</div>
 				</div>
 			`;
@@ -242,6 +241,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		this.$summary_container.on("click", ".print-btn", () => {
 			this.print_receipt();
+		});
+
+		this.$summary_container.on("click", ".open-btn", () => {
+			this.events.open_in_form_view(this.doc.doctype, this.doc.name);
 		});
 	}
 
@@ -361,7 +364,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		return [
 			{ condition: this.doc.docstatus === 0, visible_btns: ["Edit Order", "Delete Order"] },
 			{
-				condition: !this.doc.is_return && this.doc.docstatus === 1,
+				condition: ["Partly Paid", "Overdue", "Unpaid"].includes(this.doc.status),
+				visible_btns: ["Print Receipt", "Email Receipt", "Open in Form View"],
+			},
+			{
+				condition:
+					!this.doc.is_return &&
+					this.doc.docstatus === 1 &&
+					!["Partly Paid", "Overdue", "Unpaid"].includes(this.doc.status),
 				visible_btns: ["Print Receipt", "Email Receipt", "Return"],
 			},
 			{

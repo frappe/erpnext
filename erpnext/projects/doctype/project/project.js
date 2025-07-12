@@ -202,6 +202,12 @@ frappe.ui.form.on("Project", {
 				});
 		});
 	},
+
+	collect_progress: function (frm) {
+		if (frm.doc.collect_progress && !frm.doc.subject) {
+			frm.set_value("subject", __("For project {0}, update your status", [frm.doc.name]));
+		}
+	},
 });
 
 function open_form(frm, doctype, child_doctype, parentfield) {

@@ -20,6 +20,39 @@ frappe.ui.form.on("Journal Entry", {
 			"Unreconcile Payment Entries",
 			"Bank Transaction",
 		];
+
+		frm.trigger("set_queries");
+	},
+
+	set_queries(frm) {
+		frm.set_query("periodic_entry_difference_account", function () {
+			return {
+				filters: {
+					is_group: 0,
+					company: frm.doc.company,
+				},
+			};
+		});
+
+		frm.set_query("stock_asset_account", function () {
+			return {
+				filters: {
+					is_group: 0,
+					account_type: "Stock",
+					company: frm.doc.company,
+				},
+			};
+		});
+	},
+
+	get_balance_for_periodic_accounting(frm) {
+		frm.call({
+			method: "get_balance_for_periodic_accounting",
+			doc: frm.doc,
+			callback: function (r) {
+				refresh_field("accounts");
+			},
+		});
 	},
 
 	refresh: function (frm) {

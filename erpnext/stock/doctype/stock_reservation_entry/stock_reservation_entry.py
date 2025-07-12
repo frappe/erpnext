@@ -1,11 +1,13 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
 from typing import Literal
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, nowdate, nowtime, parse_json
 
@@ -41,7 +43,13 @@ class StockReservationEntry(Document):
 		reserved_qty: DF.Float
 		sb_entries: DF.Table[SerialandBatchEntry]
 		status: DF.Literal[
-			"Draft", "Partially Reserved", "Reserved", "Partially Delivered", "Delivered", "Cancelled"
+			"Draft",
+			"Partially Reserved",
+			"Reserved",
+			"Partially Delivered",
+			"Delivered",
+			"Cancelled",
+			"Closed",
 		]
 		stock_uom: DF.Link | None
 		transferred_qty: DF.Float
@@ -114,6 +122,11 @@ class StockReservationEntry(Document):
 			index = 0
 			for row in sres:
 				status = "Reserved"
+
+				if self.has_batch_no or self.has_serial_no:
+					serial_batch_data = self.get_serial_batch_entries()
+					update_serial_batch_delivered_qty(serial_batch_data, row.name, is_cancelled=True)
+
 				if delivered_qty <= 0 or index == 0:
 					frappe.db.set_value(
 						"Stock Reservation Entry",
@@ -142,6 +155,22 @@ class StockReservationEntry(Document):
 					)
 
 					delivered_qty -= row.reserved_qty
+
+	def get_serial_batch_entries(self):
+		serial_nos = []
+		batches = defaultdict(float)
+		for entry in self.sb_entries:
+			if entry.serial_no:
+				serial_nos.append(entry.serial_no)
+			elif entry.batch_no:
+				batches[entry.batch_no] += entry.qty
+
+		return frappe._dict(
+			{
+				"serial_nos": serial_nos,
+				"batches": batches,
+			}
+		)
 
 	def get_from_voucher_reservation_entries(self):
 		return frappe.get_all(
@@ -181,7 +210,7 @@ class StockReservationEntry(Document):
 		]
 		for d in mandatory:
 			if not self.get(d):
-				msg = _("{0} is required").format(self.meta.get_label(d))
+				msg = _("{0} is required").format(_(self.meta.get_label(d)))
 				frappe.throw(msg)
 
 	def validate_group_warehouse(self) -> None:
@@ -1156,7 +1185,7 @@ class StockReservation:
 			sre.voucher_no = item.get("voucher_no") or self.doc.name
 			sre.voucher_detail_no = item.get(child_doctype) or item.name or item.get("voucher_detail_no")
 			sre.available_qty = self.available_qty_to_reserve
-			sre.voucher_qty = qty
+			sre.voucher_qty = self.qty_to_be_reserved
 			sre.reserved_qty = self.qty_to_be_reserved
 			sre.company = self.doc.company
 			sre.stock_uom = item_details.stock_uom
@@ -1235,7 +1264,6 @@ class StockReservation:
 		return available_qty
 
 	def transfer_reservation_entries_to(self, docnames, from_doctype, to_doctype):
-		delivery_qty_to_update = frappe._dict()
 		if isinstance(docnames, str):
 			docnames = [docnames]
 
@@ -1247,54 +1275,88 @@ class StockReservation:
 		if not reservation_entries:
 			return
 
-		entries_to_reserve = []
+		entries_to_reserve = frappe._dict({})
 		for row in reservation_entries:
+			reserved_qty_field = "reserved_qty" if row.reservation_based_on == "Qty" else "sabb_qty"
+			delivered_qty_field = (
+				"delivered_qty" if row.reservation_based_on == "Qty" else "sabb_delivered_qty"
+			)
+			available_qty = row.get(reserved_qty_field) - row.get(delivered_qty_field)
+
 			for entry in items_to_reserve:
 				if not (
 					row.item_code == entry.item_code and row.warehouse == entry.warehouse and entry.qty > 0
 				):
 					continue
 
-				available_qty = row.reserved_qty - row.delivered_qty
 				if available_qty <= 0:
 					continue
+
+				key = (row.item_code, row.warehouse)
+
+				if key not in entries_to_reserve:
+					entries_to_reserve.setdefault(
+						key,
+						frappe._dict(
+							{
+								"qty_to_reserve": 0.0,
+								"item_code": row.item_code,
+								"warehouse": row.warehouse,
+								"voucher_type": entry.voucher_type,
+								"voucher_no": entry.voucher_no,
+								"voucher_detail_no": entry.voucher_detail_no,
+								"serial_nos": [],
+								"sre_names": defaultdict(float),
+								"batches": defaultdict(float),
+								"against_row": row,
+								"company": self.doc.company,
+							}
+						),
+					)
 
 				# transfer qty
 				if available_qty > entry.qty:
 					qty_to_reserve = entry.qty
-					row.delivered_qty += available_qty - entry.qty
-					delivery_qty_to_update.setdefault(row.name, row.delivered_qty)
 				else:
 					qty_to_reserve = available_qty
-					row.delivered_qty += qty_to_reserve
-					delivery_qty_to_update.setdefault(row.name, row.delivered_qty)
 
-				entries_to_reserve.append([entry, row, qty_to_reserve])
-
+				available_qty -= qty_to_reserve
 				entry.qty -= qty_to_reserve
 
-		if delivery_qty_to_update:
-			self.update_delivered_qty(delivery_qty_to_update)
+				entries_to_reserve[key]["qty_to_reserve"] += qty_to_reserve
+				if row.has_batch_no:
+					entries_to_reserve[key]["batches"][row.batch_no] += qty_to_reserve
 
-		for entry, row, qty_to_reserve in entries_to_reserve:
-			self.make_stock_reservation_entry(entry, row, qty_to_reserve)
+				if row.has_serial_no:
+					entries_to_reserve[key]["serial_nos"].append(row.serial_no)
 
-	def update_delivered_qty(self, delivery_qty_to_update):
-		for name, delivered_qty in delivery_qty_to_update.items():
+				if row.name:
+					entries_to_reserve[key]["sre_names"][row.name] += qty_to_reserve
+
+		for key in entries_to_reserve:
+			data = entries_to_reserve[key]
+			self.update_delivered_qty(data)
+			self.make_stock_reservation_entry(data)
+
+	def update_delivered_qty(self, data):
+		for name, delivered_qty in data.get("sre_names").items():
 			doctype = frappe.qb.DocType("Stock Reservation Entry")
 			query = (
 				frappe.qb.update(doctype)
-				.set(doctype.delivered_qty, delivered_qty)
+				.set(doctype.delivered_qty, doctype.delivered_qty + delivered_qty)
 				.set(
 					doctype.status,
-					"Delivered" if doctype.reserved_qty == doctype.delivered_qty else "Reserved",
+					Case().when((doctype.reserved_qty == doctype.delivered_qty), "Closed").else_("Reserved"),
 				)
 				.where(doctype.name == name)
 			)
 
 			query.run()
 
-	def make_stock_reservation_entry(self, row, against_row, reserved_qty):
+			if data.serial_nos or data.batches:
+				update_serial_batch_delivered_qty(data, name)
+
+	def make_stock_reservation_entry(self, row):
 		fields = [
 			"item_code",
 			"warehouse",
@@ -1309,9 +1371,11 @@ class StockReservation:
 		for row_field in fields:
 			sre.set(row_field, row.get(row_field))
 
-		sre.available_qty = reserved_qty
-		sre.reserved_qty = reserved_qty
-		sre.voucher_qty = row.required_qty
+		sre.available_qty = row.get("qty_to_reserve")
+		sre.reserved_qty = row.get("qty_to_reserve")
+		sre.voucher_qty = row.get("qty_to_reserve")
+
+		against_row = row.get("against_row")
 		sre.from_voucher_no = against_row.voucher_no
 		sre.from_voucher_detail_no = against_row.voucher_detail_no
 		sre.from_voucher_type = against_row.voucher_type
@@ -1319,26 +1383,68 @@ class StockReservation:
 		sre.has_serial_no = against_row.has_serial_no
 		sre.has_batch_no = against_row.has_batch_no
 
-		bundles = [against_row.name]
-		if row.serial_and_batch_bundles:
-			bundles = row.serial_and_batch_bundles
+		if row.serial_nos:
+			for serial_no in row.serial_nos:
+				batch_no = None
+				if row.batches:
+					batch_no = frappe.db.get_value("Serial No", serial_no, "batch_no")
 
-		self.set_serial_batch(sre, bundles)
+				sre.append(
+					"sb_entries",
+					{"serial_no": serial_no, "warehouse": row.warehouse, "batch_no": batch_no, "qty": 1},
+				)
+
+		elif row.batches:
+			for batch_no, qty in row.batches.items():
+				sre.append(
+					"sb_entries",
+					{"batch_no": batch_no, "warehouse": row.warehouse, "qty": qty},
+				)
+
 		sre.save()
 		sre.submit()
 
 	def get_reserved_entries(self, doctype, docnames):
-		filters = {
-			"docstatus": 1,
-			"status": ("not in", ["Delivered", "Cancelled", "Draft"]),
-			"voucher_type": doctype,
-			"voucher_no": docnames,
-		}
+		if isinstance(docnames, str):
+			docnames = [docnames]
 
-		if isinstance(docnames, list):
-			filters["voucher_no"] = ("in", docnames)
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		sabb_entry = frappe.qb.DocType("Serial and Batch Entry")
 
-		return frappe.get_all("Stock Reservation Entry", fields=["*"], filters=filters)
+		query = (
+			frappe.qb.from_(sre)
+			.left_join(sabb_entry)
+			.on(sre.name == sabb_entry.parent)
+			.select(
+				sre.name,
+				sre.item_code,
+				sre.warehouse,
+				sre.voucher_type,
+				sre.voucher_no,
+				sre.voucher_detail_no,
+				sre.reserved_qty,
+				sre.delivered_qty,
+				sre.transferred_qty,
+				sre.consumed_qty,
+				sre.has_serial_no,
+				sre.has_batch_no,
+				sre.reservation_based_on,
+				sabb_entry.serial_no,
+				sabb_entry.batch_no,
+				sabb_entry.qty.as_("sabb_qty"),
+				sabb_entry.delivered_qty.as_("sabb_delivered_qty"),
+			)
+			.where(
+				(sre.docstatus == 1)
+				& (sre.status.notin(["Delivered", "Cancelled", "Draft", "Closed"]))
+				& (sre.voucher_type == doctype)
+				& (sre.voucher_no.isin(docnames))
+			)
+			.orderby(sre.creation)
+			.orderby(sabb_entry.idx)
+		)
+
+		return query.run(as_dict=True)
 
 	def get_items_to_reserve(self, docnames, from_doctype, to_doctype):
 		field = frappe.scrub(from_doctype)
@@ -1688,3 +1794,26 @@ def get_stock_reservation_entries_for_voucher(
 		query = query.where(sre.status.notin(["Delivered", "Cancelled"]))
 
 	return query.run(as_dict=True)
+
+
+def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
+	if row.serial_nos:
+		doctype = frappe.qb.DocType("Serial and Batch Entry")
+		query = (
+			frappe.qb.update(doctype)
+			.set(doctype.delivered_qty, (doctype.delivered_qty + (1 if not is_cancelled else -1)))
+			.where((doctype.parent == name) & (doctype.serial_no.isin(row.serial_nos)))
+		)
+
+		query.run()
+
+	elif row.batches:
+		for batch_no, qty in row.batches.items():
+			doctype = frappe.qb.DocType("Serial and Batch Entry")
+			query = (
+				frappe.qb.update(doctype)
+				.set(doctype.delivered_qty, (doctype.delivered_qty + (qty if not is_cancelled else -1 * qty)))
+				.where((doctype.parent == name) & (doctype.batch_no == batch_no))
+			)
+
+		query.run()

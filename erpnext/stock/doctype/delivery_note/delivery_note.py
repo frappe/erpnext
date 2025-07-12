@@ -1276,6 +1276,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"field_no_map": ["taxes_and_charges", "set_warehouse"],
+				"field_map": {"shipping_address_name": "shipping_address"},
 			},
 			doctype + " Item": {
 				"doctype": target_doctype + " Item",

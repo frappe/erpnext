@@ -365,17 +365,9 @@ class TestStockReservationEntry(IntegrationTestCase):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
-					item.qty = 80
+					item.qty = 70
 
 				dn2.save()
-				for row in dn2.items:
-					if row.item_code in item_wise_serial_nos:
-						consumed_serial_no = ", ".join(item_wise_serial_nos[row.item_code])
-						picked_serial_no = get_serial_nos(row.serial_no)
-
-						serial_nos = list(set(picked_serial_no) - set(consumed_serial_no))
-						row.serial_no = "\n".join(serial_nos)
-
 				dn2.submit()
 
 			for item in so.items:

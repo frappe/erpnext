@@ -3,6 +3,7 @@
 
 
 import frappe
+import frappe.utils
 from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
@@ -1105,21 +1106,51 @@ class SalesInvoice(SellingController):
 		if self.invoice_type_in_pos == "POS Invoice" and not self.is_return:
 			frappe.throw(_("Transactions using Sales Invoice in POS are disabled."))
 
+		self.validate_pos_opening_entry()
+
 	def validate_full_payment(self):
+		allow_partial_payment = frappe.db.get_value("POS Profile", self.pos_profile, "allow_partial_payment")
 		invoice_total = flt(self.rounded_total) or flt(self.grand_total)
 
-		if self.docstatus == 1:
-			if self.is_return and self.paid_amount != invoice_total:
-				frappe.throw(
-					msg=_("Partial Payment in POS Transactions are not allowed."),
-					exc=PartialPaymentValidationError,
-				)
+		if (
+			self.docstatus == 1
+			and not self.is_return
+			and not allow_partial_payment
+			and self.paid_amount < invoice_total
+		):
+			frappe.throw(
+				msg=_("Partial Payment in POS Transactions are not allowed."),
+				exc=PartialPaymentValidationError,
+			)
 
-			if self.paid_amount < invoice_total:
-				frappe.throw(
-					msg=_("Partial Payment in POS Transactions are not allowed."),
-					exc=PartialPaymentValidationError,
-				)
+	def validate_pos_opening_entry(self):
+		opening_entries = frappe.get_all(
+			"POS Opening Entry",
+			fields=["name", "period_start_date"],
+			filters={"pos_profile": self.pos_profile, "status": "Open"},
+			order_by="period_start_date desc",
+		)
+		if not opening_entries:
+			frappe.throw(
+				title=_("POS Opening Entry Missing"),
+				msg=_("No open POS Opening Entry found for POS Profile {0}.").format(
+					frappe.bold(self.pos_profile)
+				),
+			)
+		if len(opening_entries) > 1:
+			frappe.throw(
+				title=_("Multiple POS Opening Entry"),
+				msg=_(
+					"POS Profile - {0} has multiple open POS Opening Entries. Please close or cancel the existing entries before proceeding."
+				).format(self.pos_profile),
+			)
+		if frappe.utils.get_date_str(opening_entries[0].get("period_start_date")) != frappe.utils.today():
+			frappe.throw(
+				title=_("Outdated POS Opening Entry"),
+				msg=_(
+					"POS Opening Entry - {0} is outdated. Please close the POS and create a new POS Opening Entry."
+				).format(opening_entries[0].get("name")),
+			)
 
 	def validate_warehouse(self):
 		super().validate_warehouse()

@@ -345,7 +345,10 @@ erpnext.PointOfSale.ItemSelector = class {
 				const items = this.search_index[selling_price_list][search_term];
 				this.items = items;
 				this.render_item_list(items);
-				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
+				this.auto_add_item &&
+					this.search_field.$input[0].value &&
+					this.items.length == 1 &&
+					this.add_filtered_item_to_cart();
 				return;
 			}
 		}
@@ -358,35 +361,16 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 			this.items = items;
 			this.render_item_list(items);
-			this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
+			this.auto_add_item &&
+				this.search_field.$input[0].value &&
+				this.items.length == 1 &&
+				this.add_filtered_item_to_cart();
 		});
 	}
 
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
 		this.set_search_value("");
-	}
-
-	resize_selector(minimize) {
-		minimize
-			? this.$component
-					.find(".filter-section")
-					.css("grid-template-columns", "repeat(1, minmax(0, 1fr))")
-			: this.$component
-					.find(".filter-section")
-					.css("grid-template-columns", "repeat(12, minmax(0, 1fr))");
-
-		minimize
-			? this.$component.find(".search-field").css("margin", "var(--margin-sm) 0px")
-			: this.$component.find(".search-field").css("margin", "0px var(--margin-sm)");
-
-		minimize
-			? this.$component.css("grid-column", "span 2 / span 2")
-			: this.$component.css("grid-column", "span 6 / span 6");
-
-		minimize
-			? this.$items_container.css("grid-template-columns", "repeat(1, minmax(0, 1fr))")
-			: this.$items_container.css("grid-template-columns", "repeat(4, minmax(0, 1fr))");
 	}
 
 	toggle_component(show) {

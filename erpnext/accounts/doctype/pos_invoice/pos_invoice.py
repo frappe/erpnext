@@ -149,7 +149,9 @@ class POSInvoice(SalesInvoice):
 			"Consolidated",
 			"Submitted",
 			"Paid",
+			"Partly Paid",
 			"Unpaid",
+			"Partly Paid and Discounted",
 			"Unpaid and Discounted",
 			"Overdue and Discounted",
 			"Overdue",
@@ -219,6 +221,9 @@ class POSInvoice(SalesInvoice):
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
+
+	def before_submit(self):
+		self.set_outstanding_amount()
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -373,18 +378,6 @@ class POSInvoice(SalesInvoice):
 						_("Payment related to {0} is not completed").format(pay.mode_of_payment)
 					)
 
-	def validate_pos_opening_entry(self):
-		opening_entries = frappe.get_list(
-			"POS Opening Entry", filters={"pos_profile": self.pos_profile, "status": "Open", "docstatus": 1}
-		)
-		if len(opening_entries) == 0:
-			frappe.throw(
-				title=_("POS Opening Entry Missing"),
-				msg=_("No open POS Opening Entry found for POS Profile {0}.").format(
-					frappe.bold(self.pos_profile)
-				),
-			)
-
 	def validate_stock_availablility(self):
 		if self.is_return:
 			return
@@ -537,6 +530,10 @@ class POSInvoice(SalesInvoice):
 				)
 			)
 
+	def set_outstanding_amount(self):
+		total = flt(self.rounded_total) or flt(self.grand_total)
+		self.outstanding_amount = total - flt(self.paid_amount) if total > flt(self.paid_amount) else 0
+
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
 			not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center
@@ -558,6 +555,8 @@ class POSInvoice(SalesInvoice):
 				self.status = "Draft"
 			return
 
+		total = flt(self.rounded_total) or flt(self.grand_total)
+
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
@@ -573,6 +572,14 @@ class POSInvoice(SalesInvoice):
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
 					self.status = "Overdue"
+				elif (
+					0 < flt(self.outstanding_amount) < total
+					and self.is_discounted
+					and self.get_discounting_status() == "Disbursed"
+				):
+					self.status = "Partly Paid and Discounted"
+				elif 0 < flt(self.outstanding_amount) < total:
+					self.status = "Partly Paid"
 				elif (
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
@@ -793,6 +800,48 @@ class POSInvoice(SalesInvoice):
 		if pr:
 			return frappe.get_doc("Payment Request", pr)
 
+	@frappe.whitelist()
+	def update_payments(self, payments):
+		if self.status == "Consolidated":
+			frappe.throw(_("Create Payment Entry for Consolidated POS Invoices."))
+
+		paid_amount = flt(self.paid_amount)
+		total = flt(self.rounded_total) or flt(self.grand_total)
+
+		if paid_amount >= total:
+			frappe.throw(title=_("Invoice Paid"), msg=_("This invoice has already been paid."))
+
+		idx = self.payments[-1].idx if self.payments else -1
+
+		for d in payments:
+			idx += 1
+			payment = create_payments_on_invoice(self, idx, frappe._dict(d))
+			paid_amount += flt(payment.amount)
+			payment.submit()
+
+		paid_amount = flt(flt(paid_amount), self.precision("paid_amount"))
+		base_paid_amount = flt(flt(paid_amount * self.conversion_rate), self.precision("base_paid_amount"))
+		outstanding_amount = (
+			flt(flt(total - paid_amount), self.precision("outstanding_amount")) if total > paid_amount else 0
+		)
+		change_amount = (
+			flt(flt(paid_amount - total), self.precision("change_amount")) if paid_amount > total else 0
+		)
+
+		pi = frappe.qb.DocType("POS Invoice")
+		query = (
+			frappe.qb.update(pi)
+			.set(pi.paid_amount, paid_amount)
+			.set(pi.base_paid_amount, base_paid_amount)
+			.set(pi.outstanding_amount, outstanding_amount)
+			.set(pi.change_amount, change_amount)
+			.where(pi.name == self.name)
+		)
+		query.run()
+		self.reload()
+
+		self.set_status(update=True)
+
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
@@ -944,3 +993,19 @@ def get_item_group(pos_profile):
 			item_groups.extend(get_descendants_of("Item Group", row.item_group))
 
 	return list(set(item_groups))
+
+
+def create_payments_on_invoice(doc, idx, payment_details):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+
+	payment = frappe.new_doc("Sales Invoice Payment")
+	payment.idx = idx
+	payment.mode_of_payment = payment_details.mode_of_payment
+	payment.amount = payment_details.amount
+	payment.base_amount = payment.amount * doc.conversion_rate
+	payment.parent = doc.name
+	payment.parentfield = "payments"
+	payment.parenttype = doc.doctype
+	payment.account = get_bank_cash_account(payment.mode_of_payment, doc.company).get("account")
+
+	return payment

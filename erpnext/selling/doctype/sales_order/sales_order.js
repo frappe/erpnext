@@ -181,14 +181,20 @@ frappe.ui.form.on("Sales Order", {
 		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
 			return {
-				filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]],
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+					["Warehouse", "is_group", "=", 0],
+				],
 			};
 		});
 
 		frm.set_query("warehouse", "items", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 			let query = {
-				filters: [["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]],
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+					["Warehouse", "is_group", "=", 0],
+				],
 			};
 			if (row.item_code) {
 				query.query = "erpnext.controllers.queries.warehouse_query";
@@ -831,6 +837,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 									fieldtype: "Read Only",
 									fieldname: "item_code",
 									label: __("Item Code"),
+									in_list_view: 1,
+								},
+								{
+									fieldtype: "Read Only",
+									fieldname: "item_name",
+									label: __("Item Name"),
 									in_list_view: 1,
 								},
 								{

@@ -9,7 +9,7 @@ import re
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
 from pypika.terms import ExistsCriterion
 
@@ -109,14 +109,19 @@ def get_period_list(
 
 
 def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
-	fiscal_year = frappe.db.sql(
-		"""select min(year_start_date) as year_start_date,
-		max(year_end_date) as year_end_date from `tabFiscal Year` where
-		name between %(from_fiscal_year)s and %(to_fiscal_year)s""",
-		{"from_fiscal_year": from_fiscal_year, "to_fiscal_year": to_fiscal_year},
-		as_dict=1,
+	from_year_start_date = frappe.get_cached_value("Fiscal Year", from_fiscal_year, "year_start_date")
+	to_year_end_date = frappe.get_cached_value("Fiscal Year", to_fiscal_year, "year_end_date")
+
+	fy = frappe.qb.DocType("Fiscal Year")
+
+	query = (
+		frappe.qb.from_(fy)
+		.select(Min(fy.year_start_date).as_("year_start_date"), Max(fy.year_end_date).as_("year_end_date"))
+		.where(fy.year_start_date >= from_year_start_date)
+		.where(fy.year_end_date <= to_year_end_date)
 	)
 
+	fiscal_year = query.run(as_dict=True)
 	return fiscal_year[0] if fiscal_year else {}
 
 

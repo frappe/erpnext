@@ -89,46 +89,64 @@ class BankClearance(Document):
 
 	@frappe.whitelist()
 	def update_clearance_date(self):
-		clearance_date_updated = False
+		invalid_document = []
+		invalid_cheque_date = []
+		entries_to_update = []
+
+		def validate_entry(d):
+			is_valid = True
+			if not d.payment_document:
+				invalid_document.append(str(d.idx))
+				is_valid = False
+
+			if d.clearance_date and d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
+				invalid_cheque_date.append(str(d.idx))
+				is_valid = False
+
+			return is_valid
+
 		for d in self.get("payment_entries"):
-			if d.clearance_date:
-				if not d.payment_document:
-					frappe.throw(_("Row #{0}: Payment document is required to complete the transaction"))
-
-				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
-					frappe.throw(
-						_("Row #{0}: For {1} Clearance date {2} cannot be before Cheque Date {3}").format(
-							d.idx,
-							get_link_to_form(d.payment_document, d.payment_entry),
-							d.clearance_date,
-							d.cheque_date,
-						)
-					)
-
-			if d.clearance_date or self.include_reconciled_entries:
+			if validate_entry(d) and (d.clearance_date or self.include_reconciled_entries):
 				if not d.clearance_date:
 					d.clearance_date = None
 
-				if d.payment_document == "Sales Invoice":
-					frappe.db.set_value(
-						"Sales Invoice Payment",
-						{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
-						"clearance_date",
-						d.clearance_date,
-					)
+				entries_to_update.append(d)
 
-				else:
-					# using db_set to trigger notification
-					payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
-					payment_entry.db_set("clearance_date", d.clearance_date)
+		if invalid_document or invalid_cheque_date:
+			msg = _("<p>Please correct the following row(s):</p><ul>")
+			if invalid_document:
+				msg += _("<li>Payment document required for row(s): {0}</li>").format(
+					", ".join(invalid_document)
+				)
 
-				clearance_date_updated = True
+			if invalid_cheque_date:
+				msg += _("<li>Clearance date must be after cheque date for row(s): {0}</li>").format(
+					", ".join(invalid_cheque_date)
+				)
 
-		if clearance_date_updated:
-			self.get_payment_entries()
-			msgprint(_("Clearance Date updated"))
-		else:
+			msg += "</ul>"
+			frappe.throw(_(msg))
+			return
+
+		if not entries_to_update:
 			msgprint(_("Clearance Date not mentioned"))
+			return
+
+		for d in entries_to_update:
+			if d.payment_document == "Sales Invoice":
+				frappe.db.set_value(
+					"Sales Invoice Payment",
+					{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
+					"clearance_date",
+					d.clearance_date,
+				)
+			else:
+				# using db_set to trigger notification
+				payment_entry = frappe.get_lazy_doc(d.payment_document, d.payment_entry)
+				payment_entry.db_set("clearance_date", d.clearance_date)
+
+		self.get_payment_entries()
+		msgprint(_("Clearance Date updated"))
 
 
 def get_payment_entries_for_bank_clearance(

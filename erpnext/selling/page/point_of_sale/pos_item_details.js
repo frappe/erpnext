@@ -322,6 +322,15 @@ erpnext.PointOfSale.ItemDetails = class {
 				me.conversion_factor_control.df.read_only = item_row.stock_uom == this.value;
 				me.conversion_factor_control.refresh();
 			};
+			this.uom_control.df.get_query = () => {
+				return {
+					query: "erpnext.controllers.queries.get_item_uom_query",
+					filters: {
+						item_code: me.current_item.item_code,
+					},
+				};
+			};
+			this.uom_control.refresh();
 		}
 
 		const frm_doctype = this.events.get_frm().doc.doctype;

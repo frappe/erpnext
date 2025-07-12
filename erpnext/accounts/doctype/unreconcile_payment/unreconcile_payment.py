@@ -12,6 +12,7 @@ from frappe.utils.data import comma_and
 
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
+	get_advance_payment_doctypes,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
 )
@@ -84,9 +85,7 @@ class UnreconcilePayment(Document):
 			update_voucher_outstanding(
 				alloc.reference_doctype, alloc.reference_name, alloc.account, alloc.party_type, alloc.party
 			)
-			if doc.doctype in frappe.get_hooks("advance_payment_payable_doctypes") + frappe.get_hooks(
-				"advance_payment_receivable_doctypes"
-			):
+			if doc.doctype in get_advance_payment_doctypes():
 				doc.set_total_advance_paid()
 
 			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", True)

@@ -209,12 +209,15 @@ class POSClosingEntry(StatusUpdater):
 	def on_submit(self):
 		consolidate_pos_invoices(closing_entry=self)
 		frappe.publish_realtime(
-			f"poe_{self.pos_opening_entry}_closed",
-			self,
+			f"poe_{self.pos_opening_entry}",
+			message={"operation": "Closed", "doc": self},
 			docname=f"POS Opening Entry/{self.pos_opening_entry}",
 		)
 
 		self.update_sales_invoices_closing_entry()
+
+	def before_cancel(self):
+		self.check_pce_is_cancellable()
 
 	def on_cancel(self):
 		unconsolidate_pos_invoices(closing_entry=self)
@@ -235,6 +238,15 @@ class POSClosingEntry(StatusUpdater):
 		for d in self.sales_invoices:
 			frappe.db.set_value(
 				"Sales Invoice", d.sales_invoice, "pos_closing_entry", self.name if not cancel else None
+			)
+
+	def check_pce_is_cancellable(self):
+		if frappe.db.exists("POS Opening Entry", {"pos_profile": self.pos_profile, "status": "Open"}):
+			frappe.throw(
+				title=_("Cannot cancel POS Closing Entry"),
+				msg=_(
+					"POS Profile - {0} is currently open. Please close the POS or cancel the existing POS Opening Entry before cancelling this POS Closing Entry."
+				).format(frappe.bold(self.pos_profile)),
 			)
 
 
@@ -267,7 +279,7 @@ def get_invoices(start, end, pos_profile, user):
 
 def get_payments(invoices):
 	if not len(invoices):
-		return
+		return []
 
 	invoices_name = [d.name for d in invoices]
 
@@ -301,7 +313,7 @@ def get_payments(invoices):
 
 def get_taxes(invoices):
 	if not len(invoices):
-		return
+		return []
 
 	invoices_name = [d.name for d in invoices]
 

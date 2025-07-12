@@ -3,15 +3,19 @@
 
 
 import csv
+import io
 import json
 import re
+from datetime import date, datetime
 
 import frappe
+import mt940
 import openpyxl
 from frappe import _
 from frappe.core.doctype.data_import.data_import import DataImport
 from frappe.core.doctype.data_import.importer import Importer, ImportFile
 from frappe.utils.background_jobs import enqueue
+from frappe.utils.file_manager import get_file, save_file
 from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
@@ -35,6 +39,7 @@ class BankStatementImport(DataImport):
 		delimiter_options: DF.Data | None
 		google_sheets_url: DF.Data | None
 		import_file: DF.Attach | None
+		import_mt940_fromat: DF.Check
 		import_type: DF.Literal["", "Insert New Records", "Update Existing Records"]
 		mute_emails: DF.Check
 		reference_doctype: DF.Link
@@ -43,6 +48,7 @@ class BankStatementImport(DataImport):
 		submit_after_import: DF.Check
 		template_options: DF.Code | None
 		template_warnings: DF.Code | None
+		use_csv_sniffer: DF.Check
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -65,8 +71,9 @@ class BankStatementImport(DataImport):
 
 			self.template_warnings = ""
 
-		self.validate_import_file()
-		self.validate_google_sheets_url()
+		if self.import_file and not self.import_file.lower().endswith(".txt"):
+			self.validate_import_file()
+			self.validate_google_sheets_url()
 
 	def start_import(self):
 		preview = frappe.get_doc("Bank Statement Import", self.name).get_preview_from_template(
@@ -105,6 +112,68 @@ class BankStatementImport(DataImport):
 
 
 @frappe.whitelist()
+def convert_mt940_to_csv(data_import, mt940_file_path):
+	doc = frappe.get_doc("Bank Statement Import", data_import)
+
+	file_doc, content = get_file(mt940_file_path)
+
+	if not is_mt940_format(content):
+		frappe.throw(_("The uploaded file does not appear to be in valid MT940 format."))
+
+	if is_mt940_format(content) and not doc.import_mt940_fromat:
+		frappe.throw(_("MT940 file detected. Please enable 'Import MT940 Format' to proceed."))
+
+	try:
+		transactions = mt940.parse(content)
+	except Exception as e:
+		frappe.throw(_("Failed to parse MT940 format. Error: {0}").format(str(e)))
+
+	if not transactions:
+		frappe.throw(_("Parsed file is not in valid MT940 format or contains no transactions."))
+
+	# Use in-memory file buffer instead of writing to temp file
+	csv_buffer = io.StringIO()
+	writer = csv.writer(csv_buffer)
+
+	headers = ["Date", "Deposit", "Withdrawal", "Description", "Reference Number", "Bank Account", "Currency"]
+	writer.writerow(headers)
+
+	for txn in transactions:
+		txn_date = getattr(txn, "date", None)
+		raw_date = txn.data.get("date", "")
+
+		if txn_date:
+			date_str = txn_date.strftime("%Y-%m-%d")
+		elif isinstance(raw_date, date | datetime):
+			date_str = raw_date.strftime("%Y-%m-%d")
+		else:
+			date_str = str(raw_date)
+
+		raw_amount = str(txn.data.get("amount", ""))
+		parts = raw_amount.strip().split()
+		amount_value = float(parts[0]) if parts else 0.0
+
+		deposit = amount_value if amount_value > 0 else ""
+		withdrawal = abs(amount_value) if amount_value < 0 else ""
+		description = txn.data.get("extra_details") or ""
+		reference = txn.data.get("transaction_reference") or ""
+		currency = txn.data.get("currency", "")
+
+		writer.writerow([date_str, deposit, withdrawal, description, reference, doc.bank_account, currency])
+
+	# Prepare in-memory CSV for upload
+	csv_content = csv_buffer.getvalue().encode("utf-8")
+	csv_buffer.close()
+
+	filename = f"{frappe.utils.now_datetime().strftime('%Y%m%d%H%M%S')}_converted_mt940.csv"
+
+	# Save to File Manager
+	saved_file = save_file(filename, csv_content, doc.doctype, doc.name, is_private=True, df="import_file")
+
+	return saved_file.file_url
+
+
+@frappe.whitelist()
 def get_preview_from_template(data_import, import_file=None, google_sheets_url=None):
 	return frappe.get_doc("Bank Statement Import", data_import).get_preview_from_template(
 		import_file, google_sheets_url
@@ -126,6 +195,12 @@ def download_errored_template(data_import_name):
 @frappe.whitelist()
 def download_import_log(data_import_name):
 	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
+
+
+def is_mt940_format(content: str) -> bool:
+	"""Check if the content has key MT940 tags"""
+	required_tags = [":20:", ":25:", ":28C:", ":61:"]
+	return all(tag in content for tag in required_tags)
 
 
 def parse_data_from_template(raw_data):

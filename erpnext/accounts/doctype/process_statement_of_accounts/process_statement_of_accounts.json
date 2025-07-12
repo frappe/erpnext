@@ -376,7 +376,7 @@
    "default": "0",
    "fieldname": "ignore_exchange_rate_revaluation_journals",
    "fieldtype": "Check",
-   "label": "Ignore Exchange Rate Revaluation Journals"
+   "label": "Ignore Exchange Rate Revaluation and Gain / Loss Journals"
   },
   {
    "default": "0",
@@ -400,7 +400,7 @@
   }
  ],
  "links": [],
- "modified": "2025-04-30 14:43:23.643006",
+ "modified": "2025-07-08 16:52:12.602384",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

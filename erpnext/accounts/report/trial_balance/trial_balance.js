@@ -111,6 +111,12 @@ frappe.query_reports["Trial Balance"] = {
 			fieldtype: "Check",
 			default: 1,
 		},
+		{
+			fieldname: "show_group_accounts",
+			label: __("Show Group Accounts"),
+			fieldtype: "Check",
+			default: 1,
+		},
 	],
 	formatter: erpnext.financial_statements.formatter,
 	tree: true,

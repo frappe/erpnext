@@ -3,15 +3,12 @@
 
 import frappe
 from frappe import qb
-from frappe.tests import IntegrationTestCase, change_settings
+from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, today
 
-from erpnext.accounts.doctype.account.test_account import create_account
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
-from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
 
 class TestGeneralLedger(IntegrationTestCase):
@@ -170,90 +167,6 @@ class TestGeneralLedger(IntegrationTestCase):
 		self.assertEqual(data[2]["credit"], 900)
 		self.assertEqual(data[3]["debit"], 100)
 		self.assertEqual(data[3]["credit"], 100)
-
-	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
-	def test_debit_in_exchange_gain_loss_account(self):
-		company = "_Test Company"
-
-		exchange_gain_loss_account = frappe.db.get_value("Company", "exchange_gain_loss_account")
-		if not exchange_gain_loss_account:
-			frappe.db.set_value(
-				"Company", company, "exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC"
-			)
-
-		account_name = "_Test Receivable USD - _TC"
-		customer_name = "_Test Customer USD"
-
-		sales_invoice = create_sales_invoice(
-			company=company,
-			customer=customer_name,
-			currency="USD",
-			debit_to=account_name,
-			conversion_rate=85,
-			posting_date=today(),
-		)
-
-		payment_entry = create_payment_entry(
-			company=company,
-			party_type="Customer",
-			party=customer_name,
-			payment_type="Receive",
-			paid_from=account_name,
-			paid_from_account_currency="USD",
-			paid_to="Cash - _TC",
-			paid_to_account_currency="INR",
-			paid_amount=10,
-			do_not_submit=True,
-		)
-		payment_entry.base_paid_amount = 800
-		payment_entry.received_amount = 800
-		payment_entry.currency = "USD"
-		payment_entry.source_exchange_rate = 80
-		payment_entry.append(
-			"references",
-			frappe._dict(
-				{
-					"reference_doctype": "Sales Invoice",
-					"reference_name": sales_invoice.name,
-					"total_amount": 10,
-					"outstanding_amount": 10,
-					"exchange_rate": 85,
-					"allocated_amount": 10,
-					"exchange_gain_loss": -50,
-				}
-			),
-		)
-		payment_entry.save()
-		payment_entry.submit()
-
-		journal_entry = frappe.get_all(
-			"Journal Entry Account", filters={"reference_name": sales_invoice.name}, fields=["parent"]
-		)
-
-		columns, data = execute(
-			frappe._dict(
-				{
-					"company": company,
-					"from_date": today(),
-					"to_date": today(),
-					"include_dimensions": 1,
-					"include_default_book_entries": 1,
-					"account": ["_Test Exchange Gain/Loss - _TC"],
-					"categorize_by": "Categorize by Voucher (Consolidated)",
-				}
-			)
-		)
-
-		entry = data[1]
-		self.assertEqual(entry["debit"], 50)
-		self.assertEqual(entry["voucher_type"], "Journal Entry")
-		self.assertEqual(entry["voucher_no"], journal_entry[0]["parent"])
-
-		payment_entry.cancel()
-		payment_entry.delete()
-		sales_invoice.reload()
-		sales_invoice.cancel()
-		sales_invoice.delete()
 
 	def test_ignore_exchange_rate_journals_filter(self):
 		# create a new account with USD currency

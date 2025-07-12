@@ -285,7 +285,7 @@ class SerialBatchBundle:
 			frappe.throw(_(msg))
 
 	def delink_serial_and_batch_bundle(self):
-		if self.is_pos_transaction():
+		if self.is_pos_or_asset_repair_transaction():
 			return
 
 		update_values = {
@@ -338,21 +338,29 @@ class SerialBatchBundle:
 			self.cancel_serial_and_batch_bundle()
 
 	def cancel_serial_and_batch_bundle(self):
-		if self.is_pos_transaction():
+		if self.is_pos_or_asset_repair_transaction():
 			return
 
 		doc = frappe.get_cached_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle)
 		if doc.docstatus == 1:
 			doc.cancel()
 
-	def is_pos_transaction(self):
+	def is_pos_or_asset_repair_transaction(self):
+		voucher_type = frappe.get_cached_value(
+			"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "voucher_type"
+		)
+
 		if (
 			self.sle.voucher_type == "Sales Invoice"
 			and self.sle.serial_and_batch_bundle
-			and frappe.get_cached_value(
-				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "voucher_type"
-			)
-			== "POS Invoice"
+			and voucher_type == "POS Invoice"
+		):
+			return True
+
+		if (
+			self.sle.voucher_type == "Stock Entry"
+			and self.sle.serial_and_batch_bundle
+			and voucher_type == "Asset Repair"
 		):
 			return True
 

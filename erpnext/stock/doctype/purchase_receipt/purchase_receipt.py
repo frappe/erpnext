@@ -235,6 +235,7 @@ class PurchaseReceipt(BuyingController):
 
 	def validate(self):
 		self.validate_posting_time()
+		self.validate_posting_date_with_po()
 		super().validate()
 
 		if self._action != "submit":

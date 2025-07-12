@@ -600,7 +600,7 @@
    "collapsible": 1,
    "fieldname": "exit",
    "fieldtype": "Tab Break",
-   "label": "Exit",
+   "label": "Employee Exit",
    "oldfieldtype": "Section Break"
   },
   {
@@ -822,7 +822,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2025-02-07 13:54:40.122345",
+ "modified": "2025-07-04 08:29:34.347269",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

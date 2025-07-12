@@ -192,7 +192,7 @@ class TestSupplierPortal(IntegrationTestCase):
 		supplier.append("portal_users", {"user": user})
 		supplier.save()
 
-		frappe.set_user(user)
-		_, suppliers = get_customers_suppliers("Purchase Order", user)
+		with self.set_user(user):
+			_, suppliers = get_customers_suppliers("Purchase Order", user)
 
-		self.assertIn(supplier.name, suppliers)
+			self.assertIn(supplier.name, suppliers)

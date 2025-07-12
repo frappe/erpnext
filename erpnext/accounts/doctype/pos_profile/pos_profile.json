@@ -26,13 +26,14 @@
   "auto_add_item_to_cart",
   "validate_stock_on_save",
   "print_receipt_on_order_complete",
+  "action_on_new_invoice",
   "column_break_16",
   "update_stock",
   "ignore_pricing_rule",
   "allow_rate_change",
   "allow_discount_change",
   "set_grand_total_to_default_mop",
-  "action_on_new_invoice",
+  "allow_partial_payment",
   "section_break_23",
   "item_groups",
   "column_break_25",
@@ -423,6 +424,12 @@
    "fieldtype": "Select",
    "label": "Action on New Invoice",
    "options": "Always Ask\nSave Changes and Load New Invoice\nDiscard Changes and Load New Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_partial_payment",
+   "fieldtype": "Check",
+   "label": "Allow Partial Payment"
   }
  ],
  "grid_page_length": 50,
@@ -451,7 +458,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2025-05-23 12:12:32.247652",
+ "modified": "2025-06-24 11:19:19.834905",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

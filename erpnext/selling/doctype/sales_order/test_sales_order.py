@@ -547,17 +547,20 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 
 		test_user = create_user("test_so_child_perms@example.com", "Accounts User")
-		frappe.set_user(test_user.name)
+		with self.set_user(test_user.name):
+			# update qty
+			trans_item = json.dumps(
+				[{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": so.items[0].name}]
+			)
+			self.assertRaises(
+				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
+			)
 
-		# update qty
-		trans_item = json.dumps(
-			[{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": so.items[0].name}]
-		)
-		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
-
-		# add new item
-		trans_item = json.dumps([{"item_code": "_Test Item", "rate": 100, "qty": 2}])
-		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+			# add new item
+			trans_item = json.dumps([{"item_code": "_Test Item", "rate": 100, "qty": 2}])
+			self.assertRaises(
+				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
+			)
 
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
@@ -569,26 +572,25 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		user = "test@example.com"
 		test_user = frappe.get_doc("User", user)
 		test_user.add_roles("Sales User", "Test Junior Approver")
-		frappe.set_user(user)
+		with self.set_user(user):
+			# user shouldn't be able to edit since grand_total will become > 200 if qty is doubled
+			trans_item = json.dumps(
+				[{"item_code": "_Test Item", "rate": 150, "qty": 2, "docname": so.items[0].name}]
+			)
+			self.assertRaises(
+				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
+			)
 
-		# user shouldn't be able to edit since grand_total will become > 200 if qty is doubled
-		trans_item = json.dumps(
-			[{"item_code": "_Test Item", "rate": 150, "qty": 2, "docname": so.items[0].name}]
-		)
-		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
-
-		frappe.set_user("Administrator")
 		user2 = "test2@example.com"
 		test_user2 = frappe.get_doc("User", user2)
 		test_user2.add_roles("Sales User", "Test Approver")
-		frappe.set_user(user2)
 
-		# Test Approver is allowed to edit with grand_total > 200
-		update_child_qty_rate("Sales Order", trans_item, so.name)
-		so.reload()
-		self.assertEqual(so.items[0].qty, 2)
+		with self.set_user(user2):
+			# Test Approver is allowed to edit with grand_total > 200
+			update_child_qty_rate("Sales Order", trans_item, so.name)
+			so.reload()
+			self.assertEqual(so.items[0].qty, 2)
 
-		frappe.set_user("Administrator")
 		test_user.remove_roles("Sales User", "Test Junior Approver", "Test Approver")
 		test_user2.remove_roles("Sales User", "Test Junior Approver", "Test Approver")
 		workflow.is_active = 0
@@ -816,22 +818,20 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", test_user_2.name)
 		frappe.permissions.add_user_permission("Company", "_Test Company 1", test_user_2.name)
 
-		frappe.set_user(test_user.name)
+		with self.set_user(test_user.name):
+			so = make_sales_order(
+				company="_Test Company 1",
+				customer="_Test Customer 1",
+				warehouse="_Test Warehouse 2 - _TC1",
+				do_not_save=True,
+			)
+			so.conversion_rate = 0.02
+			so.plc_conversion_rate = 0.02
+			self.assertRaises(frappe.PermissionError, so.insert)
 
-		so = make_sales_order(
-			company="_Test Company 1",
-			customer="_Test Customer 1",
-			warehouse="_Test Warehouse 2 - _TC1",
-			do_not_save=True,
-		)
-		so.conversion_rate = 0.02
-		so.plc_conversion_rate = 0.02
-		self.assertRaises(frappe.PermissionError, so.insert)
+		with self.set_user(test_user_2.name):
+			so.insert()
 
-		frappe.set_user(test_user_2.name)
-		so.insert()
-
-		frappe.set_user("Administrator")
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", test_user.name)
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", test_user_2.name)
 		frappe.permissions.remove_user_permission("Company", "_Test Company 1", test_user_2.name)

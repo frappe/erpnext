@@ -2022,7 +2022,7 @@ class TestProductionPlan(IntegrationTestCase):
 			else:
 				# For raw materials 2 stock reservation entries
 				# 5 qty was present already in stock and 5 added from new PO
-				self.assertEqual(len(reserved_entries), 2)
+				self.assertEqual(len(reserved_entries), 1)
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
@@ -2097,7 +2097,7 @@ class TestProductionPlan(IntegrationTestCase):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 6)
+		self.assertTrue(len(reserved_entries) == 30)
 
 		for row in reserved_entries:
 			self.assertEqual(row.reserved_qty, 5.0)
@@ -2136,7 +2136,7 @@ class TestProductionPlan(IntegrationTestCase):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 9)
+		self.assertTrue(len(reserved_entries) == 45)
 		serial_nos_res_for_pp = frappe.get_all(
 			"Serial and Batch Entry",
 			filters={"parent": ("in", [x.name for x in reserved_entries]), "docstatus": 1},
@@ -2166,11 +2166,11 @@ class TestProductionPlan(IntegrationTestCase):
 				self.assertFalse(serial_no in additional_serial_nos)
 
 			if wo_doc.production_item == "Finished Good For SR":
-				self.assertEqual(len(reserved_entries), 3)
+				self.assertEqual(len(reserved_entries), 15)
 			else:
 				# For raw materials 2 stock reservation entries
 				# 5 qty was present already in stock and 5 added from new PO
-				self.assertEqual(len(reserved_entries), 2)
+				self.assertEqual(len(reserved_entries), 10)
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)

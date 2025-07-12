@@ -32,6 +32,7 @@
   "determine_address_tax_category_from",
   "column_break_19",
   "add_taxes_from_item_tax_template",
+  "add_taxes_from_taxes_and_charges_template",
   "book_tax_discount_loss",
   "round_row_wise_tax",
   "print_settings",
@@ -89,6 +90,8 @@
   "receivable_payable_remarks_length",
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
+  "column_break_ntmi",
+  "drop_ar_procedures",
   "legacy_section",
   "ignore_is_opening_check_for_reporting",
   "payment_request_settings",
@@ -555,7 +558,7 @@
    "fieldname": "receivable_payable_fetch_method",
    "fieldtype": "Select",
    "label": "Data Fetch Method",
-   "options": "Buffered Cursor\nUnBuffered Cursor"
+   "options": "Buffered Cursor\nUnBuffered Cursor\nRaw SQL"
   },
   {
    "fieldname": "accounts_receivable_payable_tuning_section",
@@ -618,10 +621,29 @@
   },
   {
    "default": "0",
-   "description": "Enable this field to fetch the exchange rates for Pegged Currencies.\n\n",
+   "description": "System will do an implicit conversion using the pegged currency. <br>\nEx: Instead of AED -&gt; INR, system will do AED -&gt; USD -&gt; INR using the pegged exchange rate of AED against USD.",
+   "documentation_url": "/app/pegged-currencies/Pegged Currencies",
    "fieldname": "allow_pegged_currencies_exchange_rates",
    "fieldtype": "Check",
-   "label": "Allow Pegged Currencies Exchange Rates"
+   "label": "Allow Implicit Pegged Currency Conversion"
+  },
+  {
+   "default": "0",
+   "description": "If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template.",
+   "fieldname": "add_taxes_from_taxes_and_charges_template",
+   "fieldtype": "Check",
+   "label": "Automatically Add Taxes from Taxes and Charges Template"
+  },
+  {
+   "fieldname": "column_break_ntmi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.receivable_payable_fetch_method == \"Raw SQL\"",
+   "description": "Drops existing SQL Procedures and Function setup by Accounts Receivable report",
+   "fieldname": "drop_ar_procedures",
+   "fieldtype": "Button",
+   "label": "Drop Procedures"
   }
  ],
  "grid_page_length": 50,
@@ -630,7 +652,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-06-16 16:40:54.871486",
+ "modified": "2025-06-23 15:55:33.346398",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

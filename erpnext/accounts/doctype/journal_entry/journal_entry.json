@@ -13,15 +13,21 @@
   "title",
   "voucher_type",
   "naming_series",
-  "finance_book",
   "process_deferred_accounting",
   "reversal_of",
-  "tax_withholding_category",
   "column_break1",
   "from_template",
   "company",
   "posting_date",
+  "finance_book",
   "apply_tds",
+  "tax_withholding_category",
+  "section_break_tcvw",
+  "for_all_stock_asset_accounts",
+  "column_break_wpau",
+  "stock_asset_account",
+  "periodic_entry_difference_account",
+  "get_balance_for_periodic_accounting",
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
@@ -40,7 +46,6 @@
   "reference",
   "clearance_date",
   "remark",
-  "paid_loan",
   "inter_company_journal_entry_reference",
   "column_break98",
   "bill_no",
@@ -89,7 +94,7 @@
    "label": "Entry Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nAsset Disposal\nExchange Rate Revaluation\nExchange Gain Or Loss\nDeferred Revenue\nDeferred Expense",
+   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nAsset Disposal\nPeriodic Accounting Entry\nExchange Rate Revaluation\nExchange Gain Or Loss\nDeferred Revenue\nDeferred Expense",
    "reqd": 1,
    "search_index": 1
   },
@@ -303,13 +308,6 @@
    "oldfieldname": "remark",
    "oldfieldtype": "Small Text",
    "read_only": 1
-  },
-  {
-   "fieldname": "paid_loan",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Paid Loan",
-   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.voucher_type== \"Inter Company Journal Entry\"",
@@ -543,6 +541,42 @@
    "label": "Is System Generated",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
+   "fieldname": "periodic_entry_difference_account",
+   "fieldtype": "Link",
+   "label": "Periodic Entry Difference Account",
+   "mandatory_depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
+   "fieldname": "section_break_tcvw",
+   "fieldtype": "Section Break",
+   "label": "Periodic Accounting"
+  },
+  {
+   "default": "1",
+   "fieldname": "for_all_stock_asset_accounts",
+   "fieldtype": "Check",
+   "label": "For All Stock Asset Accounts"
+  },
+  {
+   "depends_on": "eval:doc.for_all_stock_asset_accounts === 0",
+   "fieldname": "stock_asset_account",
+   "fieldtype": "Link",
+   "label": "Stock Asset Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_wpau",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "get_balance_for_periodic_accounting",
+   "fieldtype": "Button",
+   "label": "Get Balance"
   }
  ],
  "icon": "fa fa-file-text",
@@ -557,7 +591,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-12-26 15:32:20.730666",
+ "modified": "2025-07-06 15:22:58.465131",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -602,6 +636,7 @@
    "role": "Auditor"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
  "sort_field": "creation",
  "sort_order": "DESC",

@@ -47,7 +47,7 @@ def get_columns(filters, trans):
 def validate_filters(filters):
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
-			frappe.throw(_("{0} is mandatory").format(f))
+			frappe.throw(_("{0} is mandatory").format(_(f)))
 
 	if not frappe.db.exists("Fiscal Year", filters.get("fiscal_year")):
 		frappe.throw(_("Fiscal Year {0} Does Not Exist").format(filters.get("fiscal_year")))
@@ -97,10 +97,13 @@ def get_data(filters, conditions):
 		elif filters.get("group_by") == "Supplier":
 			sel_col = "t1.supplier"
 
-		if filters.get("based_on") in ["Item", "Customer", "Supplier"]:
+		if filters.get("based_on") in ["Customer", "Supplier"]:
+			inc = 3
+		elif filters.get("based_on") in ["Item"]:
 			inc = 2
 		else:
 			inc = 1
+
 		data1 = frappe.db.sql(
 			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
 					where t2.parent = t1.name and t1.company = {} and {} between {} and {} and
@@ -157,7 +160,7 @@ def get_data(filters, conditions):
 
 				# get data for group_by filter
 				row1 = frappe.db.sql(
-					""" select t1.currency , {} , {} from `tab{}` t1, `tab{} Item` t2 {}
+					""" select t4.default_currency AS currency , {} , {} from `tab{}` t1, `tab{} Item` t2 {}
 							where t2.parent = t1.name and t1.company = {} and {} between {} and {}
 							and t1.docstatus = 1 and {} = {} and {} = {} {} {}
 						""".format(
@@ -330,11 +333,20 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Customer":
-		based_on_details["based_on_cols"] = [
-			"Customer:Link/Customer:120",
-			"Territory:Link/Territory:120",
-		]
-		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
+		if trans == "Quotation":
+			based_on_details["based_on_cols"] = [
+				"Party:Link/Customer:120",
+				"Party Name:Data:120",
+				"Territory:Link/Territory:120",
+			]
+			based_on_details["based_on_select"] = "t1.party_name, t1.customer_name, t1.territory,"
+		else:
+			based_on_details["based_on_cols"] = [
+				"Customer:Link/Customer:120",
+				"Customer Name:Data:120",
+				"Territory:Link/Territory:120",
+			]
+			based_on_details["based_on_select"] = "t1.customer, t1.customer_name, t1.territory,"
 		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
 		based_on_details["addl_tables"] = ""
 
@@ -347,9 +359,10 @@ def based_wise_columns_query(based_on, trans):
 	elif based_on == "Supplier":
 		based_on_details["based_on_cols"] = [
 			"Supplier:Link/Supplier:120",
+			"Supplier Name:Data:120",
 			"Supplier Group:Link/Supplier Group:140",
 		]
-		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_group,"
+		based_on_details["based_on_select"] = "t1.supplier, t1.supplier_name, t3.supplier_group,"
 		based_on_details["based_on_group_by"] = "t1.supplier"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
@@ -381,8 +394,12 @@ def based_wise_columns_query(based_on, trans):
 		else:
 			frappe.throw(_("Project-wise data is not available for Quotation"))
 
-	based_on_details["based_on_select"] += "t1.currency,"
+	based_on_details["based_on_select"] += "t4.default_currency as currency,"
 	based_on_details["based_on_cols"].append("Currency:Link/Currency:120")
+	based_on_details["addl_tables"] += ", `tabCompany` t4"
+	based_on_details["addl_tables_relational_cond"] = (
+		based_on_details.get("addl_tables_relational_cond", "") + " and t1.company = t4.name"
+	)
 
 	return based_on_details
 

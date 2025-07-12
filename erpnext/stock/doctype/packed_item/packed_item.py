@@ -7,6 +7,7 @@
 import json
 
 import frappe
+import frappe.defaults
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -89,6 +90,10 @@ def make_packing_list(doc):
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
 				update_packed_item_price_data(pi_row, item_data, doc)
+
+				if item_row.get("against_pick_list"):
+					update_packed_item_with_pick_list_info(item_row, pi_row)
+
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
 				if set_price_from_children:  # create/update bundle item wise price dict
@@ -237,6 +242,28 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 
+def update_packed_item_with_pick_list_info(main_item_row, pi_row):
+	pl_row = frappe.db.get_value(
+		"Pick List Item",
+		{
+			"item_code": pi_row.item_code,
+			"sales_order": main_item_row.get("against_sales_order"),
+			"sales_order_item": main_item_row.get("so_detail"),
+			"parent": main_item_row.against_pick_list,
+		},
+		["warehouse", "batch_no", "serial_no"],
+		as_dict=True,
+		order_by="qty desc",
+	)
+
+	if not pl_row:
+		return
+
+	pi_row.warehouse = pl_row.warehouse
+	pi_row.batch_no = pl_row.batch_no
+	pi_row.serial_no = pl_row.serial_no
+
+
 def update_packed_item_price_data(pi_row, item_data, doc):
 	"Set price as per price list or from the Item master."
 	if pi_row.rate:
@@ -322,12 +349,20 @@ def on_doctype_update():
 
 
 @frappe.whitelist()
-def get_items_from_product_bundle(row):
+def get_items_from_product_bundle(row, price_list):
 	row, items = ItemDetailsCtx(json.loads(row)), []
 
 	bundled_items = get_product_bundle_items(row["item_code"])
 	for item in bundled_items:
-		row.update({"item_code": item.item_code, "qty": flt(row["quantity"]) * flt(item.qty)})
+		row.update(
+			{
+				"item_code": item.item_code,
+				"qty": flt(row["quantity"]) * flt(item.qty),
+				"conversion_rate": 1,
+				"price_list": price_list,
+				"currency": frappe.defaults.get_defaults().currency,
+			}
+		)
 		items.append(get_item_details(row))
 
 	return items

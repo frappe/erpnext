@@ -206,6 +206,56 @@ class TestPricingRule(IntegrationTestCase):
 		details = get_item_details(args)
 		self.assertEqual(details.get("discount_percentage"), 10)
 
+	def test_unset_group_condition(self):
+		"""
+		If args are not set for group condition, then pricing rule should not be applied.
+		"""
+		from erpnext.stock.get_item_details import get_item_details
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"items": [{"item_code": "_Test Item"}],
+			"currency": "USD",
+			"selling": 1,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
+			"discount_percentage": 10,
+			"applicable_for": "Territory",
+			"territory": "All Territories",
+			"company": "_Test Company",
+		}
+		frappe.get_doc(test_record.copy()).insert()
+		args = frappe._dict(
+			{
+				"item_code": "_Test Item",
+				"company": "_Test Company",
+				"price_list": "_Test Price List",
+				"currency": "_Test Currency",
+				"doctype": "Sales Order",
+				"conversion_rate": 1,
+				"price_list_currency": "_Test Currency",
+				"plc_conversion_rate": 1,
+				"order_type": "Sales",
+				"customer": "_Test Customer",
+				"name": None,
+			}
+		)
+
+		# without territory in customer
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		territory = customer.territory
+
+		customer.territory = None
+		customer.save()
+
+		details = get_item_details(args)
+		self.assertEqual(details.get("discount_percentage"), 0)
+
+		customer.territory = territory
+		customer.save()
+
 	def test_pricing_rule_for_variants(self):
 		from erpnext.stock.get_item_details import get_item_details
 

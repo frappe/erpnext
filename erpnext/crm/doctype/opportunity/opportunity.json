@@ -600,7 +600,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State"
+   "label": "State/Province"
   },
   {
    "fieldname": "country",
@@ -614,21 +614,21 @@
   },
   {
    "fieldname": "utm_source",
-   "print_hide": 1,
    "fieldtype": "Link",
    "label": "Source",
    "oldfieldname": "source",
    "oldfieldtype": "Select",
-   "options": "UTM Source"
+   "options": "UTM Source",
+   "print_hide": 1
   },
   {
    "fieldname": "utm_campaign",
-   "print_hide": 1,
    "fieldtype": "Link",
    "label": "Campaign",
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
-   "options": "UTM Campaign"
+   "options": "UTM Campaign",
+   "print_hide": 1
   },
   {
    "fieldname": "section_break_analytics",
@@ -641,22 +641,23 @@
   },
   {
    "fieldname": "utm_medium",
-   "print_hide": 1,
    "fieldtype": "Link",
    "label": "Medium",
-   "options": "UTM Medium"
+   "options": "UTM Medium",
+   "print_hide": 1
   },
   {
    "fieldname": "utm_content",
-   "print_hide": 1,
    "fieldtype": "Data",
-   "label": "Content"
+   "label": "Content",
+   "print_hide": 1
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2024-08-20 04:12:29.095761",
+ "modified": "2025-06-26 11:16:13.665866",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
@@ -688,6 +689,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status,transaction_date,party_name,opportunity_type,territory,company",
  "sender_field": "contact_email",
  "show_name_in_global_search": 1,

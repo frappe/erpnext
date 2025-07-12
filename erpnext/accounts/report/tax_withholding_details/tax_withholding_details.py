@@ -121,7 +121,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 				)
 				out.append(row)
 
-	out.sort(key=lambda x: x["section_code"])
+	out.sort(key=lambda x: (x["section_code"], x["transaction_date"]))
 
 	return out
 
