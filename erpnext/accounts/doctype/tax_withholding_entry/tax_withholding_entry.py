@@ -94,6 +94,8 @@ class TaxWithholdingEntry(Document):
 	# SUBMIT
 
 	def _process_tax_withholding_adjustments(self):
+		if self.status != "Settled":
+			return
 		# adjust old taxable (under-withheld)
 		if self.is_taxable_different:
 			self._adjust_against_old_entries(field_type="taxable")
@@ -207,6 +209,9 @@ class TaxWithholdingEntry(Document):
 	# CANCEL
 
 	def _clear_old_references(self):
+		if self.status != "Settled":
+			return
+
 		if self.is_taxable_different:
 			frappe.db.set_value(
 				DOCTYPE,
