@@ -247,25 +247,6 @@ class TaxWithholdingEntry(Document):
 			)
 
 
-def on_invoice_submit(doc):
-	for entry in doc.tax_withholding_entries:
-		entry: TaxWithholdingEntry
-		entry._process_tax_withholding_adjustments()
-
-
-def on_invoice_cancel(doc):
-	for entry in doc.tax_withholding_entries:
-		entry: TaxWithholdingEntry
-		entry._clear_old_references()
-
-
-def on_invoice_validate(doc):
-	for entry in doc.tax_withholding_entries:
-		entry: TaxWithholdingEntry
-		entry.set_status(entry.status)
-		entry.validate_adjustments()
-
-
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	TaxWithholdingDetails,
 	get_tax_id_for_party,
@@ -279,11 +260,7 @@ class TaxWithholdingController:
 
 	def _get_category_details(self):
 		"""Get tax withholding category details for the current document"""
-		category_names = set(
-			item.tax_withholding_category
-			for item in self.doc.items
-			if item.tax_withholding_category and item.apply_tds
-		)
+		category_names = self._get_category_names()
 
 		return TaxWithholdingDetails(
 			category_names,
@@ -293,6 +270,15 @@ class TaxWithholdingController:
 			self.party,
 			self.doc.company,
 		).get()
+
+	def _get_category_names(self):
+		category_names = set(
+			item.tax_withholding_category
+			for item in self.doc.items
+			if item.tax_withholding_category and item.apply_tds
+		)
+
+		return category_names
 
 	def calculate(self):
 		"""Main orchestrator for tax withholding calculation"""
@@ -366,6 +352,7 @@ class TaxWithholdingController:
 
 		# Step 6: Update tax rows in the parent document
 		self.update_tax_rows()
+		self.after_validate()
 
 	def update_manual_overrides(self):
 		# To the extent of taxable amount / withheld amount of manual overrides
@@ -803,6 +790,22 @@ class TaxWithholdingController:
 
 		return merged_entries
 
+	def after_validate(self):
+		for entry in self.doc.tax_withholding_entries:
+			entry: TaxWithholdingEntry
+			entry.set_status(entry.status)
+			entry.validate_adjustments()
+
+	def on_submit(self):
+		for entry in self.doc.tax_withholding_entries:
+			entry: TaxWithholdingEntry
+			entry._process_tax_withholding_adjustments()
+
+	def on_cancel(self):
+		for entry in self.doc.tax_withholding_entries:
+			entry: TaxWithholdingEntry
+			entry._clear_old_references()
+
 
 class ItemTax:
 	def get(self, doc, item, filters=None):
@@ -876,13 +879,6 @@ class PurchaseTaxWithholding(TaxWithholdingController):
 			return
 
 		self.calculate()
-		on_invoice_validate(self.doc)
-
-	def on_submit(self):
-		on_invoice_submit(self.doc)
-
-	def on_cancel(self):
-		on_invoice_cancel(self.doc)
 
 
 class SalesTaxWithholding(TaxWithholdingController):
@@ -902,13 +898,30 @@ class SalesTaxWithholding(TaxWithholdingController):
 			return
 
 		self.calculate()
-		on_invoice_validate(self.doc)
 
-	def on_submit(self):
-		on_invoice_submit(self.doc)
 
-	def on_cancel(self):
-		on_invoice_cancel(self.doc)
+class PaymentTaxWithholding(TaxWithholdingController):
+	def __init__(self, doc):
+		super().__init__(doc)
+		self.party_type = doc.party_type
+		self.party = doc.party
+
+	def on_validate(self):
+		if not self.doc.apply_tds or self.get("is_opening") == "Yes" or self.doc.party_type != "Supplier":
+			self.doc.tax_withholding_entries = []
+			return
+
+		self.calculate()
+
+	def _get_category_names(self):
+		return [self.doc.tax_withholding_category]
+
+	def update_taxable_amounts(self):
+		category = self.category_details[next(iter(self.category_details))]
+		category["taxable_amount"] = self.doc.unallocated_amount
+
+	def update_tax_rows(self):
+		pass
 
 
 def _reset_idx(docs_to_reset_idx):
