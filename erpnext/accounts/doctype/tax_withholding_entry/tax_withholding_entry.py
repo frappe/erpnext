@@ -187,7 +187,7 @@ class TaxWithholdingEntry(Document):
 			f"{field_to_update}_name": self.get(f"{field_to_update}_name"),
 			f"{field_to_update}_date": self.get(f"{field_to_update}_date"),
 			"tax_rate": self.tax_rate,
-			"is_manual_override": self.is_manual_override,
+			"is_manual_override": bool(self.is_manual_override),
 			"status": "Duplicate",
 		}
 
