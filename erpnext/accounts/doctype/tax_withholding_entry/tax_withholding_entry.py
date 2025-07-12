@@ -325,6 +325,10 @@ class TaxWithholdingController:
 					{
 						**self._create_default_entry(category),
 						"taxable_amount": category.taxable_amount,
+						"withholding_doctype": "",
+						"withholding_name": "",
+						"withholding_date": "",
+						"withholding_amount": 0,
 					}
 				)
 				category.taxable_amount = 0
