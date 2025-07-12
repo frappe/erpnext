@@ -222,7 +222,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			});
 		}
 
-		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
 	}
 
@@ -363,9 +362,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			function () {
 				me.apply_pricing_rule();
 				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
-				me.frm.doc.tax_withholding_category = me.frm.supplier_tds;
 				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
-				me.frm.set_df_property("tax_withholding_category", "hidden", me.frm.supplier_tds ? 0 : 1);
 
 				// while duplicating, don't change payment terms
 				if (me.frm.doc.__run_link_triggers === false) {
@@ -379,25 +376,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	apply_tds(frm) {
 		var me = this;
 		me.frm.set_value("tax_withheld_vouchers", []);
-		if (!me.frm.doc.apply_tds) {
-			me.frm.set_value("tax_withholding_category", "");
-			me.frm.set_df_property("tax_withholding_category", "hidden", 1);
-		} else {
-			me.frm.set_value("tax_withholding_category", me.frm.supplier_tds);
-			me.frm.set_df_property("tax_withholding_category", "hidden", 0);
-		}
-	}
-
-	tax_withholding_category(frm) {
-		var me = this;
-		let filtered_taxes = (me.frm.doc.taxes || []).filter((row) => !row.is_tax_withholding_account);
-		me.frm.clear_table("taxes");
-
-		filtered_taxes.forEach((row) => {
-			me.frm.add_child("taxes", row);
-		});
-
-		me.frm.refresh_field("taxes");
 	}
 
 	credit_to() {

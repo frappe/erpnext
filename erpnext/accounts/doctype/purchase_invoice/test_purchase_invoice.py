@@ -1631,7 +1631,6 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 			do_not_submit=1,
 		)
 		pi.apply_tds = 1
-		pi.tax_withholding_category = tax_withholding_category
 		pi.save()
 		pi.submit()
 
