@@ -431,11 +431,11 @@ class TaxWithholdingController:
 		category["taxable_amount"] = flt(self.doc.base_grand_total - tax_withheld, precision)
 
 	def _update_amount_for_item(self):
-		precision = self.doc.precision("base_net_total", "items")
+		precision = self.doc.precision("base_net_rate", "items")
 		filters = {"is_tax_withholding_account": 0}
 
 		for item in self.doc.get("items"):
-			if not item.apply_tds:
+			if not (item.apply_tds and item.tax_withholding_category):
 				continue
 
 			category = self.category_details.get(item.tax_withholding_category)

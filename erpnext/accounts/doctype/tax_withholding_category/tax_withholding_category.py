@@ -814,10 +814,10 @@ class TaxWithholdingDetails:
 		"""
 		Fetches tax withholding categories based on the provided parameters.
 		"""
-		if not self.tax_withholding_categories:
-			return []
-
 		category_details = frappe._dict()
+		if not self.tax_withholding_categories:
+			return category_details
+
 		ldc_details = self.get_ldc_details()
 
 		for category_name in self.tax_withholding_categories:
