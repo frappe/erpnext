@@ -881,7 +881,7 @@ class TaxWithholdingDetails:
 		for ldc in ldc_records:
 			category_name = ldc.tax_withholding_category
 
-			unutilized_amount = ldc.certificate_limit - (ldc_utilization_map.get(category_name) or 0)
+			unutilized_amount = ldc.certificate_limit - (ldc_utilization_map.get(ldc.name) or 0)
 			if not unutilized_amount:
 				continue
 
@@ -933,7 +933,7 @@ class TaxWithholdingDetails:
 
 		query = query.where(twe.tax_id == tax_id) if tax_id else query.where(twe.party == self.party)
 
-		return frappe._dict(query.run(as_dict=True))
+		return frappe._dict(query.run())
 
 
 @allow_regional
