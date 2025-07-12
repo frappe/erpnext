@@ -10,8 +10,6 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
-import erpnext
-
 # TODO: Should threshold check be reduced with purchase returns?
 
 DOCTYPE = "Tax Withholding Entry"
@@ -262,15 +260,6 @@ def on_invoice_cancel(doc):
 
 
 def on_invoice_validate(doc):
-	if not doc.apply_tds:
-		doc.tax_withholding_entries = []
-		doc.tax_withholding_category = None
-		# TODO: remove tds row from taxes table
-
-		return
-
-	TaxWithholdingController(doc).calculate()
-
 	for entry in doc.tax_withholding_entries:
 		entry: TaxWithholdingEntry
 		entry.set_status(entry.status)
@@ -286,8 +275,6 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 class TaxWithholdingController:
 	def __init__(self, doc):
 		self.doc = doc
-		self.party_type = "Supplier"
-		self.party = doc.supplier
 		self.entries = []
 
 	def _get_category_details(self):
@@ -699,6 +686,7 @@ class TaxWithholdingController:
 		self.doc.taxes = [
 			row for row in self.doc.taxes if not (row.is_tax_withholding_account and not row.tax_amount)
 		]
+		self.doc.calculate_taxes_and_totals()
 
 	def _merge_entries(
 		self,
@@ -875,12 +863,52 @@ class PurchaseTaxWithholding(TaxWithholdingController):
 		self.party_type = "Supplier"
 		self.party = doc.supplier
 
+	def on_validate(self):
+		tds_category = frappe.db.get_value(self.party_type, self.party, "tax_withholding_category")
+		for item in self.doc.items:
+			if item.apply_tds:
+				item.tax_withholding_category = tds_category
+
+		if not self.doc.apply_tds:
+			self.doc.tax_withholding_entries = []
+			# TODO: remove tds row from taxes table
+
+			return
+
+		self.calculate()
+		on_invoice_validate(self.doc)
+
+	def on_submit(self):
+		on_invoice_submit(self.doc)
+
+	def on_cancel(self):
+		on_invoice_cancel(self.doc)
+
 
 class SalesTaxWithholding(TaxWithholdingController):
 	def __init__(self, doc):
 		super().__init__(doc)
 		self.party_type = "Customer"
 		self.party = doc.customer
+
+	def on_validate(self):
+		tds_category = frappe.db.get_value(self.party_type, self.party, "tax_withholding_category")
+		for item in self.doc.items:
+			if item.apply_tds:
+				item.tax_withholding_category = tds_category
+
+		if not self.doc.apply_tds or self.get("is_opening") == "Yes":
+			self.doc.tax_withholding_entries = []
+			return
+
+		self.calculate()
+		on_invoice_validate(self.doc)
+
+	def on_submit(self):
+		on_invoice_submit(self.doc)
+
+	def on_cancel(self):
+		on_invoice_cancel(self.doc)
 
 
 def _reset_idx(docs_to_reset_idx):

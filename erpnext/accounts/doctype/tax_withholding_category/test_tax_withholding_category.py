@@ -949,6 +949,7 @@ def create_sales_invoice(**args):
 			"posting_date": today(),
 			"customer": args.customer,
 			"company": "_Test Company",
+			"apply_tds": 0 if args.do_not_apply_tds else 1,
 			"taxes_and_charges": "",
 			"currency": "INR",
 			"debit_to": "Debtors - _TC",
@@ -1094,6 +1095,7 @@ def create_tax_withholding_category_records():
 		account="TDS - _TC",
 		single_threshold=0,
 		cumulative_threshold=30000.00,
+		disable_transaction_threshold=1,
 	)
 
 	# Category for TCS
@@ -1105,6 +1107,9 @@ def create_tax_withholding_category_records():
 		account="TCS - _TC",
 		single_threshold=0,
 		cumulative_threshold=30000.00,
+		disable_transaction_threshold=1,
+		tax_deduction_basis="Gross Total",
+		tax_on_excess_amount=1,
 	)
 
 	# Single threshold
@@ -1178,6 +1183,7 @@ def create_tax_withholding_category_records():
 		account="TDS - _TC",
 		single_threshold=0,
 		cumulative_threshold=30000,
+		disable_transaction_threshold=1,
 	)
 
 
@@ -1191,6 +1197,8 @@ def create_tax_withholding_category(
 	cumulative_threshold=0,
 	round_off_tax_amount=0,
 	tax_on_excess_amount=0,
+	disable_transaction_threshold=0,
+	tax_deduction_basis="Net Total",
 ):
 	if not frappe.db.exists("Tax Withholding Category", category_name):
 		frappe.get_doc(
@@ -1200,6 +1208,8 @@ def create_tax_withholding_category(
 				"category_name": category_name,
 				"round_off_tax_amount": round_off_tax_amount,
 				"tax_on_excess_amount": tax_on_excess_amount,
+				"disable_transaction_threshold": disable_transaction_threshold,
+				"tax_deduction_basis": tax_deduction_basis,
 				"rates": [
 					{
 						"from_date": from_date,

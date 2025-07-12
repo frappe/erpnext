@@ -22,9 +22,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
-from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import (
-	on_invoice_validate as compute_tax_withholding,
-)
+from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import PurchaseTaxWithholding
 from erpnext.accounts.general_ledger import (
 	get_round_off_account_and_cost_center,
 	make_gl_entries,
@@ -299,13 +297,8 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
-		self.set_tax_withholding_category(self)
-		compute_tax_withholding(self)
+		PurchaseTaxWithholding(self).on_validate()
 		self.set_percentage_received()
-
-	def set_tax_withholding_category(self):
-		if not self.apply_tds:
-			pass
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
@@ -747,6 +740,7 @@ class PurchaseInvoice(BuyingController):
 
 	def on_submit(self):
 		super().on_submit()
+		PurchaseTaxWithholding(self).on_submit()
 
 		self.check_prev_docstatus()
 
@@ -1656,6 +1650,7 @@ class PurchaseInvoice(BuyingController):
 		check_if_return_invoice_linked_with_payment_entry(self)
 
 		super().on_cancel()
+		PurchaseTaxWithholding(self).on_cancel()
 
 		self.check_on_hold_or_closed_status()
 
@@ -1827,31 +1822,6 @@ class PurchaseInvoice(BuyingController):
 	def unblock_invoice(self):
 		self.db_set("on_hold", 0)
 		self.db_set("release_date", None)
-
-	def allocate_advance_tds(self, tax_withholding_details, advance_taxes):
-		for tax in advance_taxes:
-			allocated_amount = 0
-			pending_amount = flt(tax.tax_amount - tax.allocated_amount)
-			if flt(tax_withholding_details.get("tax_amount")) >= pending_amount:
-				tax_withholding_details["tax_amount"] -= pending_amount
-				allocated_amount = pending_amount
-			elif (
-				flt(tax_withholding_details.get("tax_amount"))
-				and flt(tax_withholding_details.get("tax_amount")) < pending_amount
-			):
-				allocated_amount = tax_withholding_details["tax_amount"]
-				tax_withholding_details["tax_amount"] = 0
-
-			self.append(
-				"advance_tax",
-				{
-					"reference_type": "Payment Entry",
-					"reference_name": tax.parent,
-					"reference_detail": tax.name,
-					"account_head": tax.account_head,
-					"allocated_amount": allocated_amount,
-				},
-			)
 
 	def update_advance_tax_references(self, cancel=0):
 		for tax in self.get("advance_tax"):
