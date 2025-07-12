@@ -919,7 +919,7 @@ class TaxWithholdingDetails:
 		twe = frappe.qb.DocType("Tax Withholding Entry")
 		query = (
 			frappe.qb.from_(twe)
-			.select(twe.lower_deduction_certificate, Sum(twe.taxable_value).as_("limit_consumed"))
+			.select(twe.lower_deduction_certificate, Sum(twe.taxable_amount).as_("limit_consumed"))
 			.where(
 				(twe.company == self.company)
 				& (twe.party_type == self.party_type)
