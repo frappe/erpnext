@@ -1127,7 +1127,6 @@ def create_tax_withholding_category_records():
 		single_threshold=0,
 		cumulative_threshold=30000,
 		round_off_tax_amount=1,
-		consider_party_ledger_amount=1,
 		tax_on_excess_amount=1,
 	)
 
@@ -1169,7 +1168,6 @@ def create_tax_withholding_category_records():
 		account="TDS - _TC",
 		single_threshold=5000,
 		cumulative_threshold=10000,
-		consider_party_ledger_amount=1,
 	)
 
 	create_tax_withholding_category(
@@ -1192,7 +1190,6 @@ def create_tax_withholding_category(
 	single_threshold=0,
 	cumulative_threshold=0,
 	round_off_tax_amount=0,
-	consider_party_ledger_amount=0,
 	tax_on_excess_amount=0,
 ):
 	if not frappe.db.exists("Tax Withholding Category", category_name):
@@ -1202,7 +1199,6 @@ def create_tax_withholding_category(
 				"name": category_name,
 				"category_name": category_name,
 				"round_off_tax_amount": round_off_tax_amount,
-				"consider_party_ledger_amount": consider_party_ledger_amount,
 				"tax_on_excess_amount": tax_on_excess_amount,
 				"rates": [
 					{

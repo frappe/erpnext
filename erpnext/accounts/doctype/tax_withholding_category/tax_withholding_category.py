@@ -31,7 +31,6 @@ class TaxWithholdingCategory(Document):
 
 		accounts: DF.Table[TaxWithholdingAccount]
 		category_name: DF.Data | None
-		consider_party_ledger_amount: DF.Check
 		disable_cumulative_threshold: DF.Check
 		disable_transaction_threshold: DF.Check
 		rates: DF.Table[TaxWithholdingRate]
@@ -233,7 +232,6 @@ def get_tax_withholding_details(tax_withholding_category, posting_date, company)
 					"description": tax_withholding.category_name
 					if tax_withholding.category_name
 					else tax_withholding_category,
-					"consider_party_ledger_amount": tax_withholding.consider_party_ledger_amount,
 					"tax_on_excess_amount": tax_withholding.tax_on_excess_amount,
 					"round_off_tax_amount": tax_withholding.round_off_tax_amount,
 				}
@@ -616,12 +614,6 @@ def get_tds_amount(ldc, parties, inv, tax_details, voucher_wise_amount):
 		"company": inv.company,
 	}
 
-	consider_party_ledger_amt = cint(tax_details.consider_party_ledger_amount)
-
-	if consider_party_ledger_amt:
-		pe_filters.pop("apply_tax_withholding_amount", None)
-		pe_filters.pop("tax_withholding_category", None)
-
 	# Get Amount via payment entry
 	payment_entries = frappe.db.get_all(
 		"Payment Entry",
@@ -647,11 +639,8 @@ def get_tds_amount(ldc, parties, inv, tax_details, voucher_wise_amount):
 	supp_credit_amt = jv_credit_amt + pe_credit_amt + inv.get("tax_withholding_net_total", 0)
 	tax_withholding_net_total = inv.get("base_tax_withholding_net_total", 0)
 
-	# if consider_party_ledger_amount is checked, then threshold will be based on grand total
-	amt_for_threshold = pi_grand_total if consider_party_ledger_amt else pi_base_net_total
-
 	cumulative_threshold_breached = (
-		cumulative_threshold and (supp_credit_amt + amt_for_threshold) >= cumulative_threshold
+		cumulative_threshold and (supp_credit_amt + pi_base_net_total) >= cumulative_threshold
 	)
 
 	if (threshold and tax_withholding_net_total >= threshold) or (cumulative_threshold_breached):

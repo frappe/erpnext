@@ -19,8 +19,7 @@
   "section_break_8",
   "rates",
   "section_break_7",
-  "accounts",
-  "consider_party_ledger_amount"
+  "accounts"
  ],
  "fields": [
   {
@@ -64,13 +63,6 @@
   },
   {
    "default": "0",
-   "description": "Even invoices with apply tax withholding unchecked will be considered for checking cumulative threshold breach",
-   "fieldname": "consider_party_ledger_amount",
-   "fieldtype": "Check",
-   "label": "Consider Entire Party Ledger Amount"
-  },
-  {
-   "default": "0",
    "description": "Tax withheld only for amount exceeding cumulative threshold",
    "fieldname": "tax_on_excess_amount",
    "fieldtype": "Check",
@@ -108,7 +100,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-29 02:47:26.161396",
+ "modified": "2025-07-12 12:14:14.649012",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Category",
