@@ -28,6 +28,7 @@ class AdvanceTaxesandCharges(Document):
 		currency: DF.Link | None
 		description: DF.SmallText
 		included_in_paid_amount: DF.Check
+		is_tax_withholding_account: DF.Check
 		net_amount: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data

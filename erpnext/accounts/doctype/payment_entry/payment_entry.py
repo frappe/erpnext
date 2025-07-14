@@ -30,9 +30,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
 )
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
-	get_party_tax_withholding_details,
-)
+from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import PaymentTaxWithholding
 from erpnext.accounts.general_ledger import (
 	make_gl_entries,
 	make_reverse_gl_entries,
@@ -194,7 +192,7 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
-		self.set_tax_withholding()
+		PaymentTaxWithholding(self).on_validate()
 		self.set_status()
 		self.set_total_in_words()
 
@@ -204,6 +202,7 @@ class PaymentEntry(AccountsController):
 	def on_submit(self):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
+		PaymentTaxWithholding(self).on_submit()
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
 		self.update_payment_schedule()
@@ -309,6 +308,7 @@ class PaymentEntry(AccountsController):
 			"Advance Payment Ledger Entry",
 		)
 		super().on_cancel()
+		PaymentTaxWithholding(self).on_cancel()
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.delink_advance_entry_references()
@@ -945,93 +945,6 @@ class PaymentEntry(AccountsController):
 
 		self.base_in_words = money_in_words(base_amount, self.company_currency)
 		self.in_words = money_in_words(amount, currency)
-
-	def set_tax_withholding(self):
-		if self.party_type != "Supplier":
-			return
-
-		if not self.apply_tds:
-			return
-
-		net_total = self.calculate_tax_withholding_net_total()
-
-		# Adding args as purchase invoice to get TDS amount
-		args = frappe._dict(
-			{
-				"company": self.company,
-				"doctype": "Payment Entry",
-				"supplier": self.party,
-				"posting_date": self.posting_date,
-				"net_total": net_total,
-			}
-		)
-
-		tax_withholding_details = get_party_tax_withholding_details(args, self.tax_withholding_category)
-
-		if not tax_withholding_details:
-			return
-
-		tax_withholding_details.update(
-			{"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company)}
-		)
-
-		accounts = []
-		for d in self.taxes:
-			if d.account_head == tax_withholding_details.get("account_head"):
-				# Preserve user updated included in paid amount
-				if d.included_in_paid_amount:
-					tax_withholding_details.update({"included_in_paid_amount": d.included_in_paid_amount})
-
-				d.update(tax_withholding_details)
-			accounts.append(d.account_head)
-
-		if not accounts or tax_withholding_details.get("account_head") not in accounts:
-			self.append("taxes", tax_withholding_details)
-
-		to_remove = [
-			d
-			for d in self.taxes
-			if not d.tax_amount and d.account_head == tax_withholding_details.get("account_head")
-		]
-
-		for d in to_remove:
-			self.remove(d)
-
-	def calculate_tax_withholding_net_total(self):
-		net_total = 0
-		order_details = self.get_order_wise_tax_withholding_net_total()
-
-		for d in self.references:
-			tax_withholding_net_total = order_details.get(d.reference_name)
-			if not tax_withholding_net_total:
-				continue
-
-			net_taxable_outstanding = max(
-				0, d.outstanding_amount - (d.total_amount - tax_withholding_net_total)
-			)
-
-			net_total += min(net_taxable_outstanding, d.allocated_amount)
-
-		net_total += self.unallocated_amount
-
-		return net_total
-
-	def get_order_wise_tax_withholding_net_total(self):
-		if self.party_type == "Supplier":
-			doctype = "Purchase Order"
-		else:
-			doctype = "Sales Order"
-
-		docnames = [d.reference_name for d in self.references if d.reference_doctype == doctype]
-
-		return frappe._dict(
-			frappe.db.get_all(
-				doctype,
-				filters={"name": ["in", docnames]},
-				fields=["name", "base_tax_withholding_net_total"],
-				as_list=True,
-			)
-		)
 
 	def apply_taxes(self):
 		self.initialize_taxes()

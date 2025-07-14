@@ -10,6 +10,9 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
+import erpnext
+from erpnext.accounts.utils import get_advance_payment_doctypes
+
 # TODO: Should threshold check be reduced with purchase returns?
 
 DOCTYPE = "Tax Withholding Entry"
@@ -273,6 +276,7 @@ class TaxWithholdingController:
 	def __init__(self, doc):
 		self.doc = doc
 		self.entries = []
+		self.precision = self.doc.precision("withholding_amount", "tax_withholding_entries")
 
 	def _get_category_details(self):
 		"""Get tax withholding category details for the current document"""
@@ -314,61 +318,66 @@ class TaxWithholdingController:
 
 		# Step 4: Process each category
 		for category in self.category_details.values():
-			if not category.taxable_amount:
-				continue
-
-			# threshold not crossed
-			if not category.threshold_crossed:
-				self.entries.append(
-					{
-						**self._create_default_entry(category),
-						"taxable_amount": category.taxable_amount,
-						"withholding_doctype": "",
-						"withholding_name": "",
-						"withholding_date": "",
-						"withholding_amount": 0,
-					}
-				)
-				category.taxable_amount = 0
-				continue
-
-			# tax on over amount
-			elif category.unused_threshold:
-				self.entries.append(self._process_excess_threshold_entry(category))
-
-				if category.taxable_amount <= 0:
-					continue
-
-			open_entries = self.get_under_over_withheld_entries(category)
-
-			# ldc
-			if category.ldc_unutilized_amount:
-				default_obj = {
-					"under_withheld_reason": "Lower Deduction Certificate",
-					"lower_deduction_certificate": category.ldc_certificate,
-				}
-				merged = self._merge_entries(
-					open_entries["under_withheld"],
-					open_entries["over_withheld"],
-					category,
-					tax_rate=category.ldc_rate,
-					constraint=category.ldc_unutilized_amount,
-					default_obj=default_obj,
-				)
-
-				self.entries.extend(merged)
-				if not open_entries["under_withheld"]:
-					continue
-
-			# to pay
-			merged = self._merge_entries(
-				open_entries["under_withheld"], open_entries["over_withheld"], category
-			)
-
-			self.entries.extend(merged)
+			self.entries += self.get_tax_withholding_entries(category)
 
 		# Step 5: Process entries for existing document
 		self.doc.extend("tax_withholding_entries", self.entries)
+		self.update_tax_rows()
+		self.after_validate()
+
+	def get_tax_withholding_entries(self, category):
+		entries = []
+		if not category.taxable_amount:
+			return entries
+
+		# threshold not crossed
+		if not category.threshold_crossed:
+			entries.append(
+				{
+					**self._create_default_entry(category),
+					"taxable_amount": category.taxable_amount,
+					"withholding_doctype": "",
+					"withholding_name": "",
+					"withholding_date": "",
+					"withholding_amount": 0,
+				}
+			)
+			category.taxable_amount = 0
+			return entries
+
+		# tax on over amount
+		elif category.unused_threshold:
+			entries.append(self._process_excess_threshold_entry(category))
+
+			if category.taxable_amount <= 0:
+				return entries
+
+		open_entries = self.get_under_over_withheld_entries(category)
+
+		# ldc
+		if category.ldc_unutilized_amount:
+			default_obj = {
+				"under_withheld_reason": "Lower Deduction Certificate",
+				"lower_deduction_certificate": category.ldc_certificate,
+			}
+			merged = self._merge_entries(
+				open_entries["under_withheld"],
+				open_entries["over_withheld"],
+				category,
+				tax_rate=category.ldc_rate,
+				constraint=category.ldc_unutilized_amount,
+				default_obj=default_obj,
+			)
+
+			entries.extend(merged)
+			if not open_entries["under_withheld"]:
+				return entries
+
+		# to pay
+		merged = self._merge_entries(open_entries["under_withheld"], open_entries["over_withheld"], category)
+		entries.extend(merged)
+
+		return entries
 
 	def update_taxable_amounts(self):
 		if not self.doc.base_net_total:
@@ -592,7 +601,7 @@ class TaxWithholdingController:
 			"tax_withholding_category": category.name,
 			"tax_withholding_group": category.tax_withholding_group,
 			"tax_rate": category.tax_rate,
-			"conversion_rate": self.doc.conversion_rate,
+			"conversion_rate": self.doc.get("conversion_rate") or 1,
 			"taxable_doctype": self.doc.doctype,
 			"taxable_name": self.doc.name,
 			"taxable_date": self.doc.posting_date,
@@ -641,6 +650,7 @@ class TaxWithholdingController:
 				continue
 
 			else:
+				cost_center = self.doc.cost_center or erpnext.get_default_cost_center(self.doc.company)
 				self.doc.append(
 					"taxes",
 					{
@@ -649,7 +659,7 @@ class TaxWithholdingController:
 						"charge_type": "Actual",
 						"account_head": account_head,
 						"description": account_head,
-						"cost_center": self.doc.cost_center,
+						"cost_center": cost_center,
 						"add_deduct_tax": "Deduct",
 						"tax_amount": tax_amount,
 					},
@@ -675,7 +685,6 @@ class TaxWithholdingController:
 		If only under entries are available, they will be processed against current document.
 		"""
 		merged_entries = []
-		precision = self.doc.precision("withholding_amount", "tax_withholding_entries")
 
 		if not under_entries or constraint <= 0:
 			return merged_entries
@@ -703,13 +712,6 @@ class TaxWithholdingController:
 
 			return entry
 
-		def compute_withheld_amount(taxable_amount, tax_rate):
-			amount = taxable_amount * tax_rate / 100
-			if category.round_off_tax_amount:
-				return flt(amount, 0)
-
-			return flt(amount, precision)
-
 		# under and over entries both available
 		while under_entries and over_entries and constraint > 0:
 			if tax_rate == 0:
@@ -728,7 +730,11 @@ class TaxWithholdingController:
 			merged_entry = {
 				**default_entry(under),
 				"taxable_amount": amount_to_merge,
-				"withholding_amount": compute_withheld_amount(amount_to_merge, tax_rate),
+				"withholding_amount": self.compute_withheld_amount(
+					amount_to_merge,
+					tax_rate,
+					round_off_tax_amount=category.round_off_tax_amount,
+				),
 				"withholding_doctype": over.withholding_doctype,
 				"withholding_name": over.withholding_name,
 				"withholding_date": over.withholding_date,
@@ -759,7 +765,11 @@ class TaxWithholdingController:
 			merged_entry = {
 				**default_entry(under),
 				"taxable_amount": taxable_amount,
-				"withholding_amount": compute_withheld_amount(taxable_amount, tax_rate),
+				"withholding_amount": self.compute_withheld_amount(
+					taxable_amount,
+					tax_rate,
+					round_off_tax_amount=category.round_off_tax_amount,
+				),
 				# Paid from the current document
 				"withholding_doctype": self.doc.doctype,
 				"withholding_name": self.doc.name,
@@ -776,8 +786,14 @@ class TaxWithholdingController:
 
 		return merged_entries
 
+	def compute_withheld_amount(self, taxable_amount, tax_rate, round_off_tax_amount=False):
+		amount = taxable_amount * tax_rate / 100
+		if round_off_tax_amount:
+			return flt(amount, 0)
+
+		return flt(amount, self.precision)
+
 	def after_validate(self):
-		self.update_tax_rows()
 		for entry in self.doc.tax_withholding_entries:
 			entry: TaxWithholdingEntry
 			entry.set_status(entry.status)
@@ -881,12 +897,11 @@ class SalesTaxWithholding(TaxWithholdingController):
 			if item.apply_tds:
 				item.tax_withholding_category = tds_category
 
-		if not self.doc.apply_tds or self.get("is_opening") == "Yes":
+		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
 			self.doc.tax_withholding_entries = []
 			return
 
 		self.calculate()
-		self.after_validate()
 
 
 class PaymentTaxWithholding(TaxWithholdingController):
@@ -896,22 +911,88 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		self.party = doc.party
 
 	def on_validate(self):
-		if not self.doc.apply_tds or self.get("is_opening") == "Yes" or self.doc.party_type != "Supplier":
+		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes" or self.doc.party_type != "Supplier":
 			self.doc.tax_withholding_entries = []
 			return
 
 		self.calculate()
-		self.after_validate()
 
 	def _get_category_names(self):
 		return [self.doc.tax_withholding_category]
 
 	def update_taxable_amounts(self):
 		category = self.category_details[next(iter(self.category_details))]
-		category["taxable_amount"] = self.doc.unallocated_amount
+
+		taxable_amount = self.doc.unallocated_amount
+		taxable_amount += sum(
+			flt(d.allocated_amount)
+			for d in self.doc.references
+			if d.reference_doctype in get_advance_payment_doctypes()
+		)
+
+		category["taxable_amount"] = taxable_amount
+
+	def get_tax_withholding_entries(self, category):
+		# create over withholding entry
+		return [
+			{
+				**self._create_default_entry(category),
+				"taxable_amount": category.taxable_amount,
+				"taxable_doctype": "",
+				"taxable_name": "",
+				"taxable_date": "",
+				"withholding_amount": self.compute_withheld_amount(
+					category.taxable_amount,
+					category.tax_rate,
+					round_off_tax_amount=category.round_off_tax_amount,
+				),
+				"conversion_rate": self.doc.source_exchange_rate or 1,
+			}
+		]
 
 	def update_tax_rows(self):
-		pass
+		"""Update tax rows in the parent document"""
+		account_amount_map = defaultdict(float)
+		existing_taxes = {row.account_head: row for row in self.doc.taxes if row.is_tax_withholding_account}
+		precision = self.doc.precision("tax_amount", "taxes")
+
+		for entry in self.doc.tax_withholding_entries:
+			category = self.category_details.get(entry.tax_withholding_category)
+			account_amount_map[category.account_head] += entry.withholding_amount
+
+		for account_head, amount in account_amount_map.items():
+			tax_amount = flt(amount / self.doc.source_exchange_rate, precision)
+			existing_tax = existing_taxes.get(account_head)
+
+			if existing_tax:
+				if existing_tax.tax_amount == tax_amount:
+					continue
+
+				existing_tax.tax_amount = tax_amount
+
+			if not tax_amount:
+				continue
+
+			else:
+				cost_center = self.doc.cost_center or erpnext.get_default_cost_center(self.doc.company)
+				self.doc.append(
+					"taxes",
+					{
+						"is_tax_withholding_account": 1,
+						"category": "Total",
+						"charge_type": "Actual",
+						"account_head": account_head,
+						"description": account_head,
+						"cost_center": cost_center,
+						"add_deduct_tax": "Deduct",
+						"tax_amount": tax_amount,
+					},
+				)
+
+		# remove tax withholding rows with zero tax amount
+		self.doc.taxes = [
+			row for row in self.doc.taxes if not (row.is_tax_withholding_account and not row.tax_amount)
+		]
 
 
 def _reset_idx(docs_to_reset_idx):
