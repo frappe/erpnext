@@ -563,8 +563,8 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	apply_tax_withholding_amount: function (frm) {
-		if (!frm.doc.apply_tax_withholding_amount) {
+	apply_tds: function (frm) {
+		if (!frm.doc.apply_tds) {
 			frm.set_value("tax_withholding_category", "");
 		} else {
 			frappe.db.get_value("Supplier", frm.doc.party, "tax_withholding_category", (values) => {

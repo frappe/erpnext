@@ -530,7 +530,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.assertEqual(order.taxes[0].tax_amount, 4000)
 
 		payment = get_payment_entry(order.doctype, order.name)
-		payment.apply_tax_withholding_amount = 1
+		payment.apply_tds = 1
 		payment.tax_withholding_category = "Cumulative Threshold TDS"
 		payment.save().submit()
 		self.assertEqual(payment.taxes[0].tax_amount, 4000)
@@ -585,7 +585,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		pe = create_payment_entry(
 			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier6", paid_amount=1000
 		)
-		pe.apply_tax_withholding_amount = 1
+		pe.apply_tds = 1
 		pe.tax_withholding_category = "Test Multi Invoice Category"
 		pe.save()
 		pe.submit()
@@ -636,7 +636,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		pe3 = create_payment_entry(
 			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier7", paid_amount=4000
 		)
-		pe3.apply_tax_withholding_amount = 1
+		pe3.apply_tds = 1
 		pe3.save()
 		pe3.submit()
 
@@ -794,7 +794,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		payment = get_payment_entry(po.doctype, po.name)
 		payment.posting_date = po_and_advance_posting_date
 		payment.paid_amount = 60000
-		payment.apply_tax_withholding_amount = 1
+		payment.apply_tds = 1
 		payment.tax_withholding_category = category
 		payment.references = []
 		payment.taxes = []

@@ -80,9 +80,10 @@ class PaymentEntry(AccountsController):
 		from erpnext.accounts.doctype.payment_entry_reference.payment_entry_reference import (
 			PaymentEntryReference,
 		)
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 
 		amended_from: DF.Link | None
-		apply_tax_withholding_amount: DF.Check
+		apply_tds: DF.Check
 		auto_repeat: DF.Link | None
 		bank: DF.ReadOnly | None
 		bank_account: DF.Link | None
@@ -103,11 +104,13 @@ class PaymentEntry(AccountsController):
 		custom_remarks: DF.Check
 		deductions: DF.Table[PaymentEntryDeduction]
 		difference_amount: DF.Currency
+		ignore_tax_withholding_threshold: DF.Check
 		in_words: DF.SmallText | None
 		is_opening: DF.Literal["No", "Yes"]
 		letter_head: DF.Link | None
 		mode_of_payment: DF.Link | None
 		naming_series: DF.Literal["ACC-PAY-.YYYY.-"]
+		override_tax_withholding_entries: DF.Check
 		paid_amount: DF.Currency
 		paid_amount_after_tax: DF.Currency
 		paid_from: DF.Link
@@ -139,6 +142,8 @@ class PaymentEntry(AccountsController):
 		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
 		target_exchange_rate: DF.Float
 		tax_withholding_category: DF.Link | None
+		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
+		tax_withholding_group: DF.Link | None
 		taxes: DF.Table[AdvanceTaxesandCharges]
 		title: DF.Data | None
 		total_allocated_amount: DF.Currency
@@ -945,7 +950,7 @@ class PaymentEntry(AccountsController):
 		if self.party_type != "Supplier":
 			return
 
-		if not self.apply_tax_withholding_amount:
+		if not self.apply_tds:
 			return
 
 		net_total = self.calculate_tax_withholding_net_total()
