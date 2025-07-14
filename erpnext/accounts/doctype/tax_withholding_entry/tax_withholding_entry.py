@@ -57,6 +57,22 @@ class TaxWithholdingEntry(Document):
 
 		self.status = status
 
+	def set_manual_override(self):
+		"""
+		If tax amount is not as per tax rate and taxable amount, mark this entry as manual override.
+		Maintaing for amendment purposes, as this is not a user-facing field.
+		"""
+		self.is_manual_override = 0
+		if not (self.taxable_amount and self.tax_rate):
+			return
+
+		expected_withholding_amount = flt(
+			self.taxable_amount * self.tax_rate / 100, self.precision("withholding_amount")
+		)
+
+		if expected_withholding_amount != self.withholding_amount:
+			self.is_manual_override = 1
+
 	def get_status(self):
 		"""Get the current status of this entry"""
 		if self.docstatus == 2:
@@ -282,12 +298,16 @@ class TaxWithholdingController:
 
 	def calculate(self):
 		"""Main orchestrator for tax withholding calculation"""
+		if self.doc.override_tax_withholding_entries:
+			return
+
+		self.doc.tax_withholding_entries = []
+
 		# Step 1: Gather category details
 		self.category_details = self._get_category_details()
 
 		# Step 2: Calculate taxable amounts for each category
 		self.update_taxable_amounts()
-		self.update_manual_overrides()
 
 		# Step 3: Apply threshold rules
 		self.evaluate_thresholds()
@@ -349,40 +369,6 @@ class TaxWithholdingController:
 
 		# Step 5: Process entries for existing document
 		self.doc.extend("tax_withholding_entries", self.entries)
-
-		# Step 6: Update tax rows in the parent document
-		self.update_tax_rows()
-		self.after_validate()
-
-	def update_manual_overrides(self):
-		# To the extent of taxable amount / withheld amount of manual overrides
-		# Reduce the entries to be processed
-
-		entries = [row for row in self.doc.tax_withholding_entries if row.is_manual_override]
-		self.doc.tax_withholding_entries = entries
-
-		for entry in entries:
-			entry: TaxWithholdingEntry
-			category = self.category_details.get(entry.tax_withholding_category)
-
-			# amendment reference
-			if self.doc.amended_from:
-				if entry.taxable_name == self.doc.amended_from:
-					entry.taxable_name = self.doc.name
-
-				if entry.withholding_name == self.doc.amended_from:
-					entry.withholding_name = self.doc.name
-
-			# update overrides
-			if entry.taxable_amount:
-				if entry.taxable_name == entry.parent:
-					# reduce the taxable amount
-					category.taxable_amount -= entry.taxable_amount
-				else:
-					category.taxable_overrides[entry.taxable_name] += entry.taxable_amount
-
-			if entry.withholding_amount and entry.withholding_name != entry.parent:
-				category.withheld_overrides[entry.withholding_name] += entry.withholding_amount
 
 	def update_taxable_amounts(self):
 		if not self.doc.base_net_total:
@@ -791,9 +777,11 @@ class TaxWithholdingController:
 		return merged_entries
 
 	def after_validate(self):
+		self.update_tax_rows()
 		for entry in self.doc.tax_withholding_entries:
 			entry: TaxWithholdingEntry
 			entry.set_status(entry.status)
+			entry.set_manual_override()
 			entry.validate_adjustments()
 
 	def on_submit(self):
@@ -898,6 +886,7 @@ class SalesTaxWithholding(TaxWithholdingController):
 			return
 
 		self.calculate()
+		self.after_validate()
 
 
 class PaymentTaxWithholding(TaxWithholdingController):
@@ -912,6 +901,7 @@ class PaymentTaxWithholding(TaxWithholdingController):
 			return
 
 		self.calculate()
+		self.after_validate()
 
 	def _get_category_names(self):
 		return [self.doc.tax_withholding_category]

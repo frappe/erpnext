@@ -117,7 +117,7 @@
    "default": "0",
    "fieldname": "is_manual_override",
    "fieldtype": "Check",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Is Manual Override"
   },
   {
@@ -224,7 +224,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-30 23:30:50.191485",
+ "modified": "2025-07-14 06:25:09.450016",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Entry",

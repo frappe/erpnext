@@ -145,6 +145,7 @@ class PurchaseInvoice(BuyingController):
 		only_include_allocated_payments: DF.Check
 		other_charges_calculation: DF.TextEditor | None
 		outstanding_amount: DF.Currency
+		override_tax_withholding_entries: DF.Check
 		paid_amount: DF.Currency
 		party_account_currency: DF.Link | None
 		payment_schedule: DF.Table[PaymentSchedule]

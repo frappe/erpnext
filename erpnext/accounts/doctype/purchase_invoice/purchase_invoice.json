@@ -102,6 +102,7 @@
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tax_withholding_threshold",
+  "override_tax_withholding_entries",
   "tax_withholding_entries",
   "section_break_44",
   "apply_discount_on",
@@ -1666,13 +1667,20 @@
    "fieldname": "tax_withholding_entries",
    "fieldtype": "Table",
    "label": "Tax Withholding Entries",
-   "options": "Tax Withholding Entry"
+   "options": "Tax Withholding Entry",
+   "read_only_depends_on": "eval: !doc.override_tax_withholding_entries"
   },
   {
    "default": "0",
    "fieldname": "ignore_tax_withholding_threshold",
    "fieldtype": "Check",
    "label": "Ignore Tax Withholding Threshold"
+  },
+  {
+   "default": "0",
+   "fieldname": "override_tax_withholding_entries",
+   "fieldtype": "Check",
+   "label": "Edit Tax Withholding Entries"
   }
  ],
  "grid_page_length": 50,
@@ -1680,7 +1688,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-29 06:20:50.164310",
+ "modified": "2025-07-14 07:05:44.582268",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
