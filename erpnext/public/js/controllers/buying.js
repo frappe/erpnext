@@ -582,7 +582,6 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 						ignore_pricing_rule: frm.doc.ignore_pricing_rule,
 						doctype: frm.doc.doctype
 					},
-					price_list: frm.doc.price_list,
 				},
 				freeze: true,
 				callback: function(r) {

@@ -32,7 +32,7 @@ value_fields = (
 def execute(filters=None):
 	validate_filters(filters)
 	data = get_data(filters)
-	columns = get_columns()
+	columns = get_columns(filters)
 	return columns, data
 
 
@@ -407,6 +407,10 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 			),
 		}
 
+		if filters.get("show_account_name_and_number"):
+			row["acc_name"] = d.account_name
+			row["acc_number"] = d.account_number
+
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
 
@@ -427,7 +431,24 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 	return data
 
 
-def get_columns():
+def get_columns(filters):
+	account_name_number_cols = []
+	if filters.get("show_account_name_and_number"):
+		account_name_number_cols = [
+			{
+				"fieldname": "acc_name",
+				"label": _("Account Name"),
+				"fieldtype": "Data",
+				"width": 250,
+			},
+			{
+				"fieldname": "acc_number",
+				"label": _("Account Number"),
+				"fieldtype": "Data",
+				"width": 120,
+			},
+		]
+
 	return [
 		{
 			"fieldname": "account",
@@ -436,6 +457,7 @@ def get_columns():
 			"options": "Account",
 			"width": 300,
 		},
+		*account_name_number_cols,
 		{
 			"fieldname": "currency",
 			"label": _("Currency"),

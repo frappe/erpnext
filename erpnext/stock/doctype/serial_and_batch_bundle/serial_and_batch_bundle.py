@@ -2178,15 +2178,15 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 
 	if kwargs.batch_no:
 		if isinstance(kwargs.batch_no, list):
-			query = query.where(sb_entry.batch_no.isin(kwargs.batch_no))
+			query = query.where(sb_entry.batch_no.notin(kwargs.batch_no))
 		else:
-			query = query.where(sb_entry.batch_no == kwargs.batch_no)
+			query = query.where(sb_entry.batch_no != kwargs.batch_no)
 
 	if kwargs.warehouse:
 		if isinstance(kwargs.warehouse, list):
-			query = query.where(sre.warehouse.isin(kwargs.warehouse))
+			query = query.where(sre.warehouse.notin(kwargs.warehouse))
 		else:
-			query = query.where(sre.warehouse == kwargs.warehouse)
+			query = query.where(sre.warehouse != kwargs.warehouse)
 
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
@@ -2203,12 +2203,25 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 
 
 def get_auto_batch_nos(kwargs):
+	if kwargs.against_sales_order and (
+		only_consider_batches := get_batches_to_be_considered(kwargs.against_sales_order)
+	):
+		batches, warehouses = [], []
+		for item in only_consider_batches:
+			batches.append(item.batch_no)
+			warehouses.append(item.warehouse)
+
+		if batches:
+			kwargs.batch_no = batches
+			kwargs.warehouse = warehouses
 	available_batches = get_available_batches(kwargs)
 	qty = flt(kwargs.qty)
 
 	stock_ledgers_batches = get_stock_ledgers_batches(kwargs)
 	pos_invoice_batches = get_reserved_batches_for_pos(kwargs)
 	sre_reserved_batches = get_reserved_batches_for_sre(kwargs)
+	kwargs.batch_no = kwargs.warehouse = None
+
 	picked_batches = frappe._dict()
 	if kwargs.get("is_pick_list"):
 		picked_batches = get_picked_batches(kwargs)
@@ -2236,6 +2249,25 @@ def get_auto_batch_nos(kwargs):
 		return available_batches
 
 	return get_qty_based_available_batches(available_batches, qty)
+
+
+def get_batches_to_be_considered(sales_order_name):
+	parent = frappe.qb.DocType("Stock Reservation Entry")
+	child = frappe.qb.DocType("Serial and Batch Entry")
+
+	query = (
+		frappe.qb.from_(parent)
+		.join(child)
+		.on(parent.name == child.parent)
+		.select(child.batch_no, child.warehouse)
+		.distinct()
+		.where(
+			(parent.docstatus == 1)
+			& (parent.voucher_no == sales_order_name)
+			& (child.delivered_qty < child.qty)
+		)
+	)
+	return query.run(as_dict=True)
 
 
 def filter_zero_near_batches(available_batches, kwargs):

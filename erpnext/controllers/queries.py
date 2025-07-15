@@ -42,14 +42,14 @@ def employee_query(
 			ptype="select" if frappe.only_has_select_perm(doctype) else "read",
 		)
 
+	search_conditions = " or ".join([f"{field} like %(txt)s" for field in fields])
 	mcond = "" if ignore_permissions else get_match_cond(doctype)
 
 	return frappe.db.sql(
 		"""select {fields} from `tabEmployee`
 		where status in ('Active', 'Suspended')
 			and docstatus < 2
-			and ({key} like %(txt)s
-				or employee_name like %(txt)s)
+			and ({key} like %(txt)s or {search_conditions})
 			{fcond} {mcond}
 		order by
 			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
@@ -62,6 +62,7 @@ def employee_query(
 				"key": searchfield,
 				"fcond": get_filters_cond(doctype, filters, conditions),
 				"mcond": mcond,
+				"search_conditions": search_conditions,
 			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},

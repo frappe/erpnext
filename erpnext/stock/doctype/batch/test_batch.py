@@ -35,8 +35,10 @@ class TestBatch(IntegrationTestCase):
 	def make_batch_item(cls, item_name=None):
 		from erpnext.stock.doctype.item.test_item import make_item
 
-		if not frappe.db.exists(item_name):
+		if not frappe.db.exists("Item", item_name):
 			return make_item(item_name, dict(has_batch_no=1, create_new_batch=1, is_stock_item=1))
+
+		return frappe.get_doc("Item", item_name)
 
 	def test_purchase_receipt(self, batch_qty=100):
 		"""Test automated batch creation from Purchase Receipt"""

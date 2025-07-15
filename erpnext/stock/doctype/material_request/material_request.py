@@ -163,8 +163,8 @@ class MaterialRequest(BuyingController):
 
 		self.validate_pp_qty()
 
-		if not self.price_list:
-			self.price_list = frappe.defaults.get_defaults().buying_price_list
+		if not self.buying_price_list:
+			self.buying_price_list = frappe.defaults.get_defaults().buying_price_list
 
 	def validate_pp_qty(self):
 		items_from_pp = [item for item in self.items if item.material_request_plan_item]

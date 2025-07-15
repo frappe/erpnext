@@ -42,6 +42,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 			item.base_rate_with_margin = item.rate_with_margin * flt(frm.doc.conversion_rate);
 
+			cur_frm.cscript.set_gross_profit(item);
+			cur_frm.cscript.calculate_taxes_and_totals();
+			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
+
 			if (item.item_code && item.rate) {
 				frappe.call({
 					method: "erpnext.stock.get_item_details.get_item_tax_template",
@@ -63,10 +67,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				});
 			}
-
-			cur_frm.cscript.set_gross_profit(item);
-			cur_frm.cscript.calculate_taxes_and_totals();
-			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
 		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {

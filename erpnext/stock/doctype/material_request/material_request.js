@@ -43,7 +43,7 @@ frappe.ui.form.on("Material Request", {
 			};
 		});
 
-		frm.set_query("price_list", () => {
+		frm.set_query("buying_price_list", () => {
 			return {
 				filters: {
 					buying: 1,
@@ -87,7 +87,7 @@ frappe.ui.form.on("Material Request", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-		frm.doc.price_list = frappe.defaults.get_default("buying_price_list");
+		frm.doc.buying_price_list = frappe.defaults.get_default("buying_price_list");
 	},
 
 	company: function (frm) {
@@ -269,8 +269,8 @@ frappe.ui.form.on("Material Request", {
 					from_warehouse: item.from_warehouse,
 					warehouse: item.warehouse,
 					doctype: frm.doc.doctype,
-					buying_price_list: frm.doc.price_list
-						? frm.doc.price_list
+					buying_price_list: frm.doc.buying_price_list
+						? frm.doc.buying_price_list
 						: frappe.defaults.get_default("buying_price_list"),
 					currency: frappe.defaults.get_default("Currency"),
 					name: frm.doc.name,

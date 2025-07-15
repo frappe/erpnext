@@ -1133,13 +1133,6 @@ def create_pos_invoice(**args):
 	return pos_inv
 
 
-def make_batch_item(item_name):
-	from erpnext.stock.doctype.item.test_item import make_item
-
-	if not frappe.db.exists(item_name):
-		return make_item(item_name, dict(has_batch_no=1, create_new_batch=1, is_stock_item=1))
-
-
 def set_allow_partial_payment(pos_profile, value):
 	pos_profile.reload()
 	pos_profile.allow_partial_payment = value

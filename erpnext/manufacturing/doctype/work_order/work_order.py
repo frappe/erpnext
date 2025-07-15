@@ -1608,6 +1608,7 @@ class WorkOrder(Document):
 				"docstatus": 1,
 			},
 			fields=[
+				"item_code",
 				"name",
 				"stock_qty",
 				"stock_reserved_qty",
