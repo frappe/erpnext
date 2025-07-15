@@ -786,8 +786,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		po = create_purchase_order(supplier=supplier, qty=10, rate=10000)
 		po.transaction_date = po_and_advance_posting_date
 		po.taxes = []
-		po.apply_tds = False
-		po.tax_withholding_category = None
 		po.save().submit()
 
 		# Partial advance

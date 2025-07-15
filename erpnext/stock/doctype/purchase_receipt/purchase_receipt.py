@@ -52,7 +52,6 @@ class PurchaseReceipt(BuyingController):
 		base_net_total: DF.Currency
 		base_rounded_total: DF.Currency
 		base_rounding_adjustment: DF.Currency
-		base_tax_withholding_net_total: DF.Currency
 		base_taxes_and_charges_added: DF.Currency
 		base_taxes_and_charges_deducted: DF.Currency
 		base_total: DF.Currency
@@ -126,7 +125,6 @@ class PurchaseReceipt(BuyingController):
 		supplier_name: DF.Data | None
 		supplier_warehouse: DF.Link | None
 		tax_category: DF.Link | None
-		tax_withholding_net_total: DF.Currency
 		taxes: DF.Table[PurchaseTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		taxes_and_charges_added: DF.Currency

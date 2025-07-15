@@ -21,8 +21,6 @@
   "schedule_date",
   "column_break1",
   "company",
-  "apply_tds",
-  "tax_withholding_category",
   "is_subcontracted",
   "has_unit_price_items",
   "supplier_warehouse",
@@ -55,8 +53,6 @@
   "column_break_26",
   "total",
   "net_total",
-  "tax_withholding_net_total",
-  "base_tax_withholding_net_total",
   "section_break_48",
   "pricing_rules",
   "raw_material_details",
@@ -1132,19 +1128,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "apply_tds",
-   "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount"
-  },
-  {
-   "depends_on": "eval: doc.apply_tds",
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -1222,28 +1205,6 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "default": "0",
-   "depends_on": "apply_tds",
-   "fieldname": "tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "depends_on": "apply_tds",
-   "fieldname": "base_tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Base Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_99",
    "fieldtype": "Column Break"
   },
@@ -1314,7 +1275,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-09 16:54:08.836106",
+ "modified": "2025-07-15 02:38:02.414813",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
