@@ -587,7 +587,7 @@ class TaxWithholdingController:
 		"""Get payments linked to the current document"""
 		references = frappe._dict()
 		for ref in self.doc.advances:
-			key = (ref.reference_doctype, ref.reference_name)
+			key = (ref.reference_type, ref.reference_name)
 			references[key] = ref.allocated_amount * self.doc.conversion_rate
 
 		return references
