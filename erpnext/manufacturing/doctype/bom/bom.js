@@ -33,14 +33,6 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
-		frm.set_query("source_warehouse", "items", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
-
 		frm.set_query("item", function () {
 			return {
 				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
@@ -84,6 +76,7 @@ frappe.ui.form.on("BOM", {
 		frm.events.set_company_filters_to_child(frm, "wip_warehouse", "operations");
 		frm.events.set_company_filters_to_child(frm, "fg_warehouse", "operations");
 		frm.events.set_company_filters_to_child(frm, "source_warehouse", "operations");
+		frm.events.set_company_filters_to_child(frm, "source_warehouse", "items");
 	},
 
 	set_hour_rate: function (frm, d, doctype, docname) {
