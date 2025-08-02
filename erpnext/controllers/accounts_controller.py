@@ -419,6 +419,15 @@ class AccountsController(TransactionBase):
 				self.set_expense_account(for_validate)
 
 	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
+		# do not apply pricing rule if qty is less than min_qty
+		cur_pricing_rule = get_applied_pricing_rules(pricing_rule_args.get("pricing_rules"))[0]
+		cur_pricing_rule_doc = frappe.get_cached_doc("Pricing Rule", cur_pricing_rule)
+		if cur_pricing_rule_doc.get('is_qty_multiple'):
+			if item.get("qty") < cur_pricing_rule_doc.get("min_qty"):
+				item.set("pricing_rules", None)
+				pricing_rule_args['pricing_rules'] = None
+				return
+
 		if not pricing_rule_args.get("validate_applied_rule", 0):
 			# if user changed the discount percentage then set user's discount percentage ?
 			if pricing_rule_args.get("price_or_product_discount") == 'Price':

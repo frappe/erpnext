@@ -124,7 +124,11 @@ def _get_pricing_rules(apply_on, args, values):
 	values["price_list"] = args.get("price_list")
 
 	if apply_on != 'Transaction':
-		conditions += " and {child_doc}.uom = {uom}".format(child_doc=child_doc, uom=frappe.db.escape(args.get('uom')))
+		# conditions += " and {child_doc}.uom = {uom}".format(child_doc=child_doc, uom=frappe.db.escape(args.get('uom')))
+		conditions += " and ({child_doc}.uom = {uom} or `tabPricing Rule`.other_uom = {uom})".format(
+			child_doc=child_doc,
+			uom=frappe.db.escape(args.get("uom"))
+		)
 
 	pricing_rules = frappe.db.sql("""select `tabPricing Rule`.*,
 			{child_doc}.{apply_on_field}, {child_doc}.uom
@@ -144,6 +148,11 @@ def _get_pricing_rules(apply_on, args, values):
 			warehouse_cond = warehouse_conditions,
 			apply_on_other_field = "other_{0}".format(apply_on_field),
 			conditions = conditions), values, as_dict=1) or []
+
+	# dont not apply rule for the main item in pricing rule for POS Page, this will be managed from POS Page
+	if len(pricing_rules) >= 1 and pricing_rules[0].get('apply_rule_on_other'):
+		if pricing_rules[0].get(apply_on_field) == args.get(apply_on_field) or args.get('parenttype') == 'POS Invoice':
+			return []
 
 	return pricing_rules
 
@@ -244,7 +253,8 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 				amount += data[1]
 
 		if pricing_rules[0].apply_rule_on_other and not pricing_rules[0].mixed_conditions and doc:
-			pricing_rules = get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules) or []
+			if args.get('stock_qty') != 123456789 and doc.get('doctype') not in ['POS Invoice', 'Easy POS Invoice']:
+				pricing_rules = get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules) or []
 		else:
 			pricing_rules = filter_pricing_rules_for_qty_amount(stock_qty, amount, pricing_rules, args)
 
