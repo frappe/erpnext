@@ -63,7 +63,7 @@ class TaxWithholdingEntry(Document):
 	def set_manual_override(self):
 		"""
 		If tax amount is not as per tax rate and taxable amount, mark this entry as manual override.
-		Maintaing for amendment purposes, as this is not a user-facing field.
+		Maintaining for amendment purposes, as this is not a user-facing field.
 		"""
 		self.is_manual_override = 0
 		if not (self.taxable_amount and self.tax_rate):
