@@ -338,6 +338,11 @@ class POSInvoiceMergeLog(Document):
 			invoice.flags.ignore_pos_profile = True
 			invoice.pos_profile = ""
 
+		# Unset Commission Section
+		invoice.set("sales_partner", None)
+		invoice.set("commission_rate", 0)
+		invoice.set("total_commission", 0)
+
 		return invoice
 
 	def get_new_sales_invoice(self):

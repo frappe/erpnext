@@ -4,7 +4,7 @@
 from collections import defaultdict
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Abs
@@ -37,6 +37,18 @@ def validate_return_against(doc):
 		ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
 
 		party_type = "customer" if doc.doctype in ("Sales Invoice", "Delivery Note") else "supplier"
+
+		if ref_doc.get(party_type) != doc.get(party_type):
+			frappe.throw(
+				_("The {0} {1} does not match with the {0} {2} in the {3} {4}").format(
+					doc.meta.get_label(party_type),
+					bold(doc.get(party_type)),
+					bold(ref_doc.get(party_type)),
+					ref_doc.doctype,
+					ref_doc.name,
+				),
+				title=_("Party Mismatch"),
+			)
 
 		if (
 			ref_doc.company == doc.company

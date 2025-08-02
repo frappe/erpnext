@@ -169,6 +169,10 @@ def start_repost(account_repost_doc=str) -> None:
 					frappe.db.delete(
 						"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
 					)
+					frappe.db.delete(
+						"Advance Payment Ledger Entry",
+						filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
+					)
 
 				if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 					if not repost_doc.delete_cancelled_entries:

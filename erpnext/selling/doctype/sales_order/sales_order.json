@@ -349,7 +349,6 @@
    "options": "fa fa-bullhorn"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -430,7 +429,6 @@
    "width": "50%"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1434,6 +1432,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Auto Repeat",
+   "no_copy": 1,
    "options": "Auto Repeat"
   },
   {
@@ -1687,7 +1686,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-03 16:49:00.676927",
+ "modified": "2025-07-28 12:14:29.760988",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

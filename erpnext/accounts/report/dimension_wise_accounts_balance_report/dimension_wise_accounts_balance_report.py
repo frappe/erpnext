@@ -86,7 +86,7 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 		"finance_book": cstr(filters.get("finance_book")),
 	}
 
-	gl_filters["dimensions"] = set(dimension_list)
+	gl_filters["dimensions"] = tuple(set(dimension_list))
 
 	if filters.get("include_default_book_entries"):
 		gl_filters["company_fb"] = frappe.get_cached_value("Company", filters.company, "default_finance_book")
@@ -179,7 +179,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, dimension_list):
 def get_condition(dimension):
 	conditions = []
 
-	conditions.append(f"{frappe.scrub(dimension)} in (%(dimensions)s)")
+	conditions.append(f"{frappe.scrub(dimension)} in %(dimensions)s")
 
 	return " and {}".format(" and ".join(conditions)) if conditions else ""
 

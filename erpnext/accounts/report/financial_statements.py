@@ -295,6 +295,8 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 				"account_name": (
 					f"{_(d.account_number)} - {_(d.account_name)}" if d.account_number else _(d.account_name)
 				),
+				"acc_name": d.account_name,
+				"acc_number": d.account_number,
 			}
 		)
 		for period in period_list:
@@ -650,6 +652,25 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 			"width": 300,
 		}
 	]
+	if not cash_flow:
+		columns.extend(
+			[
+				{
+					"fieldname": "acc_name",
+					"label": _("Account Name"),
+					"fieldtype": "Data",
+					"width": 250,
+					"hidden": 1,
+				},
+				{
+					"fieldname": "acc_number",
+					"label": _("Account Number"),
+					"fieldtype": "Data",
+					"width": 120,
+					"hidden": 1,
+				},
+			]
+		)
 	if company:
 		columns.append(
 			{

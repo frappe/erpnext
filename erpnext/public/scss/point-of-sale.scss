@@ -113,12 +113,107 @@
 
 		> .items-container {
 			display: grid;
-			grid-template-columns: repeat(4, minmax(0, 1fr));
-			gap: var(--margin-lg);
-			padding: var(--padding-lg);
 			padding-top: var(--padding-xs);
 			overflow-y: scroll;
 			overflow-x: hidden;
+
+			&.show-item-image {
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: var(--margin-lg);
+				padding: var(--padding-lg);
+
+				> .item-wrapper {
+					border-radius: var(--border-radius-md);
+					box-shadow: var(--shadow-base);
+
+					&:hover {
+						transform: scale(1.02, 1.02);
+					}
+				}
+			}
+
+			&.hide-item-image {
+				display: flex;
+				flex-direction: column;
+				padding-left: 1.5em;
+				padding-right: 1.5em;
+				padding-top: 0;
+
+				> .list-column {
+					display: flex;
+					position: sticky;
+					top: 0;
+					z-index: 1;
+					background-color: var(--fg-color);
+					font-weight: bold;
+					flex-direction: row;
+					gap: 2rem;
+					align-items: center;
+					min-height: 3rem;
+					height: 3rem;
+					border-bottom: 1px solid var(--gray-300);
+
+					> .column-name {
+						width: 55%;
+						text-align: left;
+						white-space: initial;
+					}
+
+					> .column-price {
+						width: 15%;
+					}
+
+					> .column-uom {
+						width: 15%;
+						text-align: center;
+					}
+
+					> .column-qty-available {
+						width: 15%;
+						text-align: right;
+					}
+				}
+
+				> .item-wrapper {
+					border-top: 1px solid var(--gray-300);
+
+					&:hover {
+						background-color: var(--control-bg);
+					}
+
+					.item-detail {
+						flex-direction: row;
+						gap: 2rem;
+						align-items: center;
+						min-height: 3rem;
+						height: 3rem;
+
+						> .item-name,
+						.column-name {
+							width: 55%;
+							text-align: left;
+							white-space: initial;
+						}
+
+						> .item-price,
+						.column-price {
+							width: 15%;
+						}
+
+						> .item-uom,
+						.column-uom {
+							width: 15%;
+							text-align: center;
+						}
+
+						> .item-qty-available,
+						.column-qty-available {
+							width: 15%;
+							text-align: right;
+						}
+					}
+				}
+			}
 
 			&:after {
 				content: "";
@@ -128,13 +223,7 @@
 
 			> .item-wrapper {
 				@extend .pointer-no-select;
-				border-radius: var(--border-radius-md);
-				box-shadow: var(--shadow-base);
 				position: relative;
-
-				&:hover {
-					transform: scale(1.02, 1.02);
-				}
 
 				.item-qty-pill {
 					position: absolute;

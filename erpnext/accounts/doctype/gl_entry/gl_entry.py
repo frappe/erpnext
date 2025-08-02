@@ -18,7 +18,7 @@ from erpnext.accounts.party import (
 	validate_party_frozen_disabled,
 	validate_party_gle_currency,
 )
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year
+from erpnext.accounts.utils import OUTSTANDING_DOCTYPES, get_account_currency, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
 exclude_from_linked_with = True
@@ -224,26 +224,23 @@ class GLEntry(Document):
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
 
-		ret = frappe.db.sql(
-			"""select is_group, docstatus, company
-			from tabAccount where name=%s""",
-			self.account,
-			as_dict=1,
-		)[0]
+		account = frappe.get_cached_value(
+			"Account", self.account, fieldname=["is_group", "docstatus", "company"], as_dict=True
+		)
 
-		if ret.is_group == 1:
+		if account.is_group == 1:
 			frappe.throw(
 				_(
 					"""{0} {1}: Account {2} is a Group Account and group accounts cannot be used in transactions"""
 				).format(self.voucher_type, self.voucher_no, self.account)
 			)
 
-		if ret.docstatus == 2:
+		if account.docstatus == 2:
 			frappe.throw(
 				_("{0} {1}: Account {2} is inactive").format(self.voucher_type, self.voucher_no, self.account)
 			)
 
-		if ret.company != self.company:
+		if account.company != self.company:
 			frappe.throw(
 				_("{0} {1}: Account {2} does not belong to Company {3}").format(
 					self.voucher_type, self.voucher_no, self.account, self.company
@@ -385,7 +382,7 @@ def update_outstanding_amt(
 				)
 			)
 
-	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
+	if against_voucher_type in OUTSTANDING_DOCTYPES:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 
 		# Didn't use db_set for optimization purpose
@@ -462,4 +459,9 @@ def rename_temporarily_named_docs(doctype):
 				f"UPDATE `tab{doctype}` SET name = %s, to_rename = 0, modified = %s where name = %s",
 				(newname, now(), oldname),
 			)
+
+			for hook_type in ("on_gle_rename", "on_sle_rename"):
+				for hook in frappe.get_hooks(hook_type):
+					frappe.call(hook, newname=newname, oldname=oldname)
+
 		frappe.db.commit()

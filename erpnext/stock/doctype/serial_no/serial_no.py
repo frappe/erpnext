@@ -40,6 +40,7 @@ class SerialNo(StockController):
 		batch_no: DF.Link | None
 		brand: DF.Link | None
 		company: DF.Link
+		customer: DF.Link | None
 		description: DF.Text | None
 		employee: DF.Link | None
 		item_code: DF.Link

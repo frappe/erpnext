@@ -4,7 +4,7 @@ import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import add_months, flt, get_first_day, nowdate, nowtime, today
+from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -388,6 +388,7 @@ def create_asset_repair(**args):
 
 	if args.submit:
 		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = add_days(args.failure_date, 1)
 		asset_repair.cost_center = frappe.db.get_value("Company", asset.company, "cost_center")
 
 		if args.stock_consumption:

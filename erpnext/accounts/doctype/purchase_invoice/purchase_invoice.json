@@ -62,6 +62,7 @@
   "column_break_50",
   "base_total",
   "base_net_total",
+  "claimed_landed_cost_amount",
   "column_break_28",
   "total",
   "net_total",
@@ -1649,6 +1650,15 @@
    "print_hide": 1
   },
   {
+   "fieldname": "claimed_landed_cost_amount",
+   "fieldtype": "Currency",
+   "label": "Claimed Landed Cost Amount (Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "collapsible": 1,
    "collapsible_depends_on": "eval: doc.apply_tds && doc.docstatus == 0",
    "depends_on": "eval: doc.apply_tds",
@@ -1688,7 +1698,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-14 07:05:44.582268",
+ "modified": "2025-07-30 23:16:05.722875",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

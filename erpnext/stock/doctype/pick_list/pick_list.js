@@ -21,6 +21,14 @@ frappe.ui.form.on("Pick List", {
 			"Stock Entry": "Stock Entry",
 		};
 
+		frm.set_query("warehouse", "locations", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+
 		frm.set_query("parent_warehouse", () => {
 			return {
 				filters: {
@@ -91,6 +99,15 @@ frappe.ui.form.on("Pick List", {
 			});
 		}
 	},
+
+	pick_manually: function (frm) {
+		frm.fields_dict.locations.grid.update_docfield_property(
+			"warehouse",
+			"read_only",
+			!frm.doc.pick_manually
+		);
+	},
+
 	get_item_locations: (frm) => {
 		// Button on the form
 		frm.events.set_item_locations(frm, false);

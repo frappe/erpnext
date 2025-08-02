@@ -307,6 +307,7 @@
    "fieldname": "transfer_status",
    "fieldtype": "Select",
    "label": "Transfer Status",
+   "no_copy": 1,
    "options": "\nNot Started\nIn Transit\nCompleted",
    "read_only": 1
   },
@@ -364,7 +365,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-11 21:03:26.588307",
+ "modified": "2025-07-28 15:13:49.000037",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

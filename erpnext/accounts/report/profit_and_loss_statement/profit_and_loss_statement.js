@@ -31,3 +31,5 @@ frappe.query_reports["Profit and Loss Statement"]["filters"].push({
 	fieldtype: "Check",
 	default: 1,
 });
+
+frappe.query_reports["Profit and Loss Statement"]["export_hidden_cols"] = true;

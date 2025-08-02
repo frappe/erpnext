@@ -142,7 +142,7 @@ class TestProfitAndLossStatement(AccountsTestMixin, IntegrationTestCase):
 			accumulated_values=False,
 		)
 		result = execute(filters)
-		columns = [result[0][2], result[0][3]]
+		columns = [result[0][4], result[0][5]]
 		expected = {
 			"account": income_acc,
 			columns[0].get("fieldname"): 450.0,
@@ -163,7 +163,7 @@ class TestProfitAndLossStatement(AccountsTestMixin, IntegrationTestCase):
 			columns[1].get("fieldname"): 570.0,
 		}
 		result = execute(filters)
-		columns = [result[0][2], result[0][3]]
+		columns = [result[0][4], result[0][5]]
 		actual = [x for x in result[1] if x.get("account") == income_acc]
 		self.assertEqual(len(actual), 1)
 		actual = actual[0]

@@ -19,13 +19,14 @@
    "fieldname": "field",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Field"
+   "label": "Field",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:16.969895",
+ "modified": "2025-07-29 18:08:40.323579",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Search Fields",

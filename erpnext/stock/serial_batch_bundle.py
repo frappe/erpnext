@@ -391,7 +391,7 @@ class SerialBatchBundle:
 		self.update_serial_no_status_warehouse(self.sle, serial_nos)
 
 	def update_serial_no_status_warehouse(self, sle, serial_nos):
-		warehouse = self.warehouse if sle.actual_qty > 0 else None
+		warehouse = sle.warehouse if sle.actual_qty > 0 else None
 
 		if isinstance(serial_nos, str):
 			serial_nos = [serial_nos]
@@ -409,6 +409,10 @@ class SerialBatchBundle:
 				]:
 					status = "Consumed"
 
+		customer = None
+		if sle.voucher_type in ["Sales Invoice", "Delivery Note"] and sle.actual_qty < 0:
+			customer = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "customer")
+
 		sn_table = frappe.qb.DocType("Serial No")
 
 		query = (
@@ -419,10 +423,11 @@ class SerialBatchBundle:
 				"Active"
 				if warehouse
 				else status
-				if (sn_table.purchase_document_no != sle.voucher_no and sle.is_cancelled != 1)
+				if (sn_table.purchase_document_no != sle.voucher_no or sle.is_cancelled != 1)
 				else "Inactive",
 			)
 			.set(sn_table.company, sle.company)
+			.set(sn_table.customer, customer)
 			.where(sn_table.name.isin(serial_nos))
 		)
 
@@ -750,6 +755,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				& (parent.is_cancelled == 0)
 				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
 			)
+			.for_update()
 			.groupby(child.batch_no)
 		)
 

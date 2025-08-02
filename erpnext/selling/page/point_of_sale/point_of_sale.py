@@ -268,6 +268,8 @@ def add_search_fields_condition(search_term):
 	search_fields = frappe.get_all("POS Search Fields", fields=["fieldname"])
 	if search_fields:
 		for field in search_fields:
+			if not field.get("fieldname"):
+				continue
 			condition += " or item.`{}` like {}".format(
 				field["fieldname"], frappe.db.escape("%" + search_term + "%")
 			)

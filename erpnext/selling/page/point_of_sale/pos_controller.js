@@ -581,6 +581,7 @@ erpnext.PointOfSale.Controller = class {
 		this.cart.toggle_component(show);
 		this.cart.toggle_numpad(!show);
 		this.cart.toggle_checkout_btn(show);
+		this.cart.enable_customer_selection();
 		this.item_selector.toggle_component(show);
 
 		// do not show item details or payment if recent order is toggled off

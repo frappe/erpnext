@@ -15,6 +15,7 @@
   "batch_no",
   "warehouse",
   "purchase_rate",
+  "customer",
   "column_break1",
   "status",
   "item_name",
@@ -267,12 +268,21 @@
    "label": "Creation Document No",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "no_copy": 1,
+   "options": "Customer",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2025-01-15 15:22:49.873889",
+ "modified": "2025-07-15 13:36:21.938700",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -310,6 +320,7 @@
    "role": "Stock User"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "item_code",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

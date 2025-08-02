@@ -74,6 +74,7 @@
    "fieldname": "hour_rate_electricity",
    "fieldtype": "Currency",
    "label": "Electricity Cost",
+   "non_negative": 1,
    "oldfieldname": "hour_rate_electricity",
    "oldfieldtype": "Currency"
   },
@@ -83,6 +84,7 @@
    "fieldname": "hour_rate_consumable",
    "fieldtype": "Currency",
    "label": "Consumable Cost",
+   "non_negative": 1,
    "oldfieldname": "hour_rate_consumable",
    "oldfieldtype": "Currency"
   },
@@ -96,6 +98,7 @@
    "fieldname": "hour_rate_rent",
    "fieldtype": "Currency",
    "label": "Rent Cost",
+   "non_negative": 1,
    "oldfieldname": "hour_rate_rent",
    "oldfieldtype": "Currency"
   },
@@ -105,6 +108,7 @@
    "fieldname": "hour_rate_labour",
    "fieldtype": "Currency",
    "label": "Wages",
+   "non_negative": 1,
    "oldfieldname": "hour_rate_labour",
    "oldfieldtype": "Currency"
   },
@@ -140,6 +144,7 @@
    "fieldname": "production_capacity",
    "fieldtype": "Int",
    "label": "Job Capacity",
+   "non_negative": 1,
    "reqd": 1
   },
   {
@@ -254,7 +259,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2024-09-26 13:41:12.279344",
+ "modified": "2025-07-13 16:02:13.615001",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
@@ -274,6 +279,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",

@@ -30,3 +30,5 @@ frappe.query_reports["Balance Sheet"]["filters"].push({
 	fieldtype: "Check",
 	default: 1,
 });
+
+frappe.query_reports["Balance Sheet"]["export_hidden_cols"] = true;

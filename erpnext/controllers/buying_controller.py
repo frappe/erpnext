@@ -348,7 +348,7 @@ class BuyingController(SubcontractingController):
 		tax_accounts, total_valuation_amount, total_actual_tax_amount = self.get_tax_details()
 
 		for i, item in enumerate(self.get("items")):
-			if item.item_code and item.qty:
+			if item.item_code and (item.qty or item.get("rejected_qty")):
 				item_tax_amount, actual_tax_amount = 0.0, 0.0
 				if i == (last_item_idx - 1):
 					item_tax_amount = total_valuation_amount
@@ -387,7 +387,19 @@ class BuyingController(SubcontractingController):
 				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
+				if (
+					not net_rate
+					and item.get("rejected_qty")
+					and frappe.get_single_value(
+						"Buying Settings", "set_valuation_rate_for_rejected_materials"
+					)
+				):
+					net_rate = item.rejected_qty * item.net_rate
+
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
+				if not qty_in_stock_uom and item.get("rejected_qty"):
+					qty_in_stock_uom = flt(item.rejected_qty * item.conversion_factor)
+
 				if self.get("is_old_subcontracting_flow"):
 					item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
 					item.valuation_rate = (
@@ -527,13 +539,12 @@ class BuyingController(SubcontractingController):
 					raise_error_if_no_rate=False,
 				)
 
-				d.sales_incoming_rate = flt(outgoing_rate * (d.conversion_factor or 1), d.precision("rate"))
+				d.sales_incoming_rate = flt(outgoing_rate * (d.conversion_factor or 1))
 			else:
 				field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
 				d.sales_incoming_rate = flt(
 					frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
-					* (d.conversion_factor or 1),
-					d.precision("rate"),
+					* (d.conversion_factor or 1)
 				)
 
 	def validate_for_subcontracting(self):

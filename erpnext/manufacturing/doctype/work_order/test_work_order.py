@@ -2965,56 +2965,45 @@ class TestWorkOrder(IntegrationTestCase):
 			fg_warehouse="_Test Warehouse 2 - _TC",
 		)
 
-		# Initial check
-		self.assertEqual(wo.operations[0].operation, "Test Operation A")
-		self.assertEqual(wo.operations[1].operation, "Test Operation B")
-		self.assertEqual(wo.operations[2].operation, "Test Operation C")
-		self.assertEqual(wo.operations[3].operation, "Test Operation D")
-
 		wo = frappe.copy_doc(wo)
-		wo.operations[3].sequence_id = 2
+		wo.operations[3].sequence_id = None
+
+		# Test 1 : If any one operation does not have sequence ID then error will be thrown
+		self.assertRaises(frappe.ValidationError, wo.submit)
+
+		for op in wo.operations:
+			op.sequence_id = None
 		wo.submit()
 
-		# Test 2 : Sort line items in child table based on sequence ID
-		self.assertEqual(wo.operations[0].operation, "Test Operation A")
-		self.assertEqual(wo.operations[1].operation, "Test Operation B")
-		self.assertEqual(wo.operations[2].operation, "Test Operation D")
-		self.assertEqual(wo.operations[3].operation, "Test Operation C")
+		# Test 2 : If none of the operations have sequence ID then they will be sequenced as per their idx
+		for op in wo.operations:
+			self.assertEqual(op.sequence_id, op.idx)
 
 		wo = frappe.copy_doc(wo)
-		wo.operations[3].sequence_id = 1
-		wo.submit()
+		wo.operations[0].sequence_id = 2
 
-		self.assertEqual(wo.operations[0].operation, "Test Operation A")
-		self.assertEqual(wo.operations[1].operation, "Test Operation C")
-		self.assertEqual(wo.operations[2].operation, "Test Operation B")
-		self.assertEqual(wo.operations[3].operation, "Test Operation D")
+		# Test 3 : Sequence IDs should not miss the correct sequence of numbers
+		self.assertRaises(frappe.ValidationError, wo.submit)
 
-		wo = frappe.copy_doc(wo)
-		wo.operations[0].sequence_id = 3
-		wo.submit()
+		wo.operations[1].sequence_id = 1
 
-		self.assertEqual(wo.operations[0].operation, "Test Operation C")
-		self.assertEqual(wo.operations[1].operation, "Test Operation B")
-		self.assertEqual(wo.operations[2].operation, "Test Operation D")
-		self.assertEqual(wo.operations[3].operation, "Test Operation A")
-
-		wo = frappe.copy_doc(wo)
-		wo.operations[1].sequence_id = 0
-
-		# Test 3 - Error should be thrown if any one operation does not have sequence id but others do
+		# Test 4 : Sequence IDs should be in the correct ascending order
 		self.assertRaises(frappe.ValidationError, wo.submit)
 
 		workstation = frappe.get_doc("Workstation", "Test Workstation A")
 		workstation.production_capacity = 4
 		workstation.save()
-
 		wo = frappe.copy_doc(wo)
+		wo.operations[0].sequence_id = 1
 		wo.operations[1].sequence_id = 2
+		wo.operations[2].sequence_id = 2
+		wo.operations[3].sequence_id = 3
 		wo.submit()
 
-		# Test 4 - If Sequence ID is same then planned start time for both operations should be same
-		self.assertEqual(wo.operations[1].planned_start_time, wo.operations[2].planned_start_time)
+		# Test 5 : If two operations have the same sequence ID then the next operation will start 10 mins after the longest previous operation ends
+		self.assertEqual(
+			wo.operations[3].planned_start_time, add_to_date(wo.operations[1].planned_end_time, minutes=10)
+		)
 
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):

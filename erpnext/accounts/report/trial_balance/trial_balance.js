@@ -117,16 +117,12 @@ frappe.query_reports["Trial Balance"] = {
 			fieldtype: "Check",
 			default: 1,
 		},
-		{
-			fieldname: "show_account_name_and_number",
-			label: __("Show Account Name and Number"),
-			fieldtype: "Check",
-		},
 	],
 	formatter: erpnext.financial_statements.formatter,
 	tree: true,
 	name_field: "account",
 	parent_field: "parent_account",
+	export_hidden_cols: true,
 	initial_depth: 3,
 };
 

@@ -1515,6 +1515,82 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 
 		self.assertTrue(len(stock_ledgers) == 2)
 
+	def test_serial_no_backdated_stock_reco(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		serial_item = self.make_item(
+			"Test Serial Item Stock Reco Backdated",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TSISRB.####",
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		se = make_stock_entry(
+			item_code=serial_item,
+			target=warehouse,
+			qty=1,
+			basic_rate=100,
+			use_serial_batch_fields=1,
+		)
+
+		serial_no = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)[0]
+		status = frappe.get_value(
+			"Serial No",
+			serial_no,
+			"status",
+		)
+
+		self.assertTrue(status == "Active")
+
+		sr = create_stock_reconciliation(
+			item_code=serial_item,
+			warehouse=warehouse,
+			qty=1,
+			rate=200,
+			use_serial_batch_fields=1,
+			serial_no=serial_no,
+		)
+
+		sr.reload()
+
+		status = frappe.get_value(
+			"Serial No",
+			serial_no,
+			"status",
+		)
+
+		self.assertTrue(status == "Active")
+
+		make_stock_entry(
+			item_code=serial_item,
+			source=warehouse,
+			qty=1,
+			basic_rate=100,
+			use_serial_batch_fields=1,
+		)
+
+		status = frappe.get_value(
+			"Serial No",
+			serial_no,
+			"status",
+		)
+
+		self.assertFalse(status == "Active")
+
+		sr.cancel()
+
+		status = frappe.get_value(
+			"Serial No",
+			serial_no,
+			"status",
+		)
+
+		self.assertFalse(status == "Active")
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

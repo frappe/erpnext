@@ -176,6 +176,7 @@ erpnext.buying = {
 						this.frm.set_value("shipping_address", r.message.shipping_address || "");
 					},
 				});
+				erpnext.utils.set_letter_head(this.frm)
 			}
 
 			supplier_address() {

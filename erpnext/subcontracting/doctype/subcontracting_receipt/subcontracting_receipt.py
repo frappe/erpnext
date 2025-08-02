@@ -153,7 +153,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_available_qty_for_consumption()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-		self.set_subcontracting_order_status()
+		self.set_subcontracting_order_status(update_bin=False)
 		self.set_consumed_qty_in_subcontract_order()
 
 		for table_name in ["items", "supplied_items"]:
@@ -181,7 +181,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_consumed_qty_in_subcontract_order()
-		self.set_subcontracting_order_status()
+		self.set_subcontracting_order_status(update_bin=False)
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()

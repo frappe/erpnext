@@ -457,6 +457,7 @@ class SalesOrder(SellingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Payment Ledger Entry",
+			"Advance Payment Ledger Entry",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 		)
@@ -787,7 +788,8 @@ class SalesOrder(SellingController):
 
 		if self.delivery_date:
 			for item in self.items:
-				item.delivery_date = self.delivery_date
+				if not item.delivery_date:
+					item.delivery_date = self.delivery_date
 
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
@@ -1391,6 +1393,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
 		target.project = source_parent.project
 
+	def update_item_for_packed_item(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.ordered_qty)
+
 	suppliers = [item.get("supplier") for item in selected_items if item.get("supplier")]
 	suppliers = list(dict.fromkeys(suppliers))  # remove duplicates while preserving order
 
@@ -1444,13 +1449,35 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 					"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 					and doc.supplier == supplier
 					and doc.item_code in items_to_map
-					and doc.delivered_by_supplier == 1,
+					and not is_product_bundle(doc.item_code),
+				},
+				"Packed Item": {
+					"doctype": "Purchase Order Item",
+					"field_map": [
+						["name", "sales_order_packed_item"],
+						["parent", "sales_order"],
+						["uom", "uom"],
+						["conversion_factor", "conversion_factor"],
+						["parent_item", "product_bundle"],
+						["rate", "rate"],
+					],
+					"field_no_map": [
+						"price_list_rate",
+						"item_tax_template",
+						"discount_percentage",
+						"discount_amount",
+						"supplier",
+						"pricing_rules",
+					],
+					"postprocess": update_item_for_packed_item,
+					"condition": lambda doc: doc.parent_item in items_to_map,
 				},
 			},
 			target_doc,
 			set_missing_values,
 		)
 
+		set_delivery_date(doc.items, source_name)
 		doc.insert()
 		frappe.db.commit()
 		purchase_orders.append(doc)
@@ -1466,9 +1493,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 	if isinstance(selected_items, str):
 		selected_items = json.loads(selected_items)
 
-	items_to_map = [
-		item.get("item_code") for item in selected_items if item.get("item_code") and item.get("item_code")
-	]
+	items_to_map = [item.get("item_code") for item in selected_items if item.get("item_code")]
 	items_to_map = list(set(items_to_map))
 
 	def is_drop_ship_order(target):

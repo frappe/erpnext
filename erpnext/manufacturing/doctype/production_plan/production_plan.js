@@ -47,6 +47,14 @@ frappe.ui.form.on("Production Plan", {
 			};
 		});
 
+		frm.set_query("sub_assembly_warehouse", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.set_query("material_request", "material_requests", function () {
 			return {
 				filters: {

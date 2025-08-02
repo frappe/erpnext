@@ -23,6 +23,7 @@
   "use_serial_batch_fields",
   "column_break_11",
   "serial_and_batch_bundle",
+  "delivered_by_supplier",
   "section_break_bgys",
   "serial_no",
   "column_break_qlha",
@@ -290,18 +291,26 @@
   {
    "fieldname": "column_break_qlha",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "delivered_by_supplier",
+   "fieldtype": "Check",
+   "label": "Supplier delivers to Customer",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-02-18 13:06:02.789654",
+ "modified": "2025-07-09 19:12:45.850219",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

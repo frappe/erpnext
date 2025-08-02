@@ -21,7 +21,7 @@ frappe.query_reports["Sales Partner Target Variance based on Item Group"] = {
 			fieldname: "doctype",
 			label: __("Document Type"),
 			fieldtype: "Select",
-			options: "Sales Order\nDelivery Note\nSales Invoice",
+			options: "Sales Order\nDelivery Note\nSales Invoice\nPOS Invoice",
 			default: "Sales Order",
 		},
 		{

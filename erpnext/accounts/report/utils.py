@@ -86,7 +86,7 @@ def get_rate_as_at(date, from_currency, to_currency):
 	return rate
 
 
-def convert_to_presentation_currency(gl_entries, currency_info):
+def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 	"""
 	Take a list of GL Entries and change the 'debit' and 'credit' values to currencies
 	in `currency_info`.
@@ -99,6 +99,13 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 	company_currency = currency_info["company_currency"]
 
 	account_currencies = list(set(entry["account_currency"] for entry in gl_entries))
+	exchange_gain_or_loss = False
+
+	if filters and isinstance(filters.get("account"), list):
+		account_filter = filters.get("account")
+		gain_loss_account = frappe.db.get_value("Company", filters.company, "exchange_gain_loss_account")
+
+		exchange_gain_or_loss = len(account_filter) == 1 and account_filter[0] == gain_loss_account
 
 	for entry in gl_entries:
 		debit = flt(entry["debit"])
@@ -107,7 +114,11 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 		credit_in_account_currency = flt(entry["credit_in_account_currency"])
 		account_currency = entry["account_currency"]
 
-		if len(account_currencies) == 1 and account_currency == presentation_currency:
+		if (
+			len(account_currencies) == 1
+			and account_currency == presentation_currency
+			and not exchange_gain_or_loss
+		):
 			entry["debit"] = debit_in_account_currency
 			entry["credit"] = credit_in_account_currency
 		else:

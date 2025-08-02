@@ -8,16 +8,16 @@ erpnext/assets/                 @khushi8112
 erpnext/regional                @ruthra-kumar
 erpnext/selling                 @ruthra-kumar
 erpnext/support/                @ruthra-kumar
-pos*                            
+pos*                            @diptanilsaha
 
-erpnext/buying/                 @rohitwaghchaure
+erpnext/buying/                 @rohitwaghchaure @mihir-kandoi
 erpnext/maintenance/            @rohitwaghchaure
-erpnext/manufacturing/          @rohitwaghchaure
+erpnext/manufacturing/          @rohitwaghchaure @mihir-kandoi
 erpnext/quality_management/     @rohitwaghchaure
-erpnext/stock/                  @rohitwaghchaure
-erpnext/subcontracting          @rohitwaghchaure
+erpnext/stock/                  @rohitwaghchaure @mihir-kandoi
+erpnext/subcontracting          @mihir-kandoi
 
-erpnext/controllers/            @ruthra-kumar @rohitwaghchaure
+erpnext/controllers/            @ruthra-kumar @rohitwaghchaure @mihir-kandoi
 erpnext/patches/                @ruthra-kumar
 
 .github/                        @ruthra-kumar

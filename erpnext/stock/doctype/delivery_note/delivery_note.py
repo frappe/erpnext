@@ -10,6 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt
 
+from erpnext.accounts.party import get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
 from erpnext.controllers.selling_controller import SellingController
 
@@ -466,6 +467,7 @@ class DeliveryNote(SellingController):
 			self.make_bundle_for_sales_purchase_return(table_name)
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
+		self.validate_standalone_serial_nos_customer()
 		self.update_stock_reservation_entries()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -917,8 +919,25 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 	automatically_fetch_payment_terms = cint(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
-	if automatically_fetch_payment_terms and not doc.is_return:
-		doc.set_payment_schedule()
+
+	if not doc.is_return:
+		so, doctype, fieldname = doc.get_order_details()
+		if (
+			doc.linked_order_has_payment_terms(so, fieldname, doctype)
+			and not automatically_fetch_payment_terms
+		):
+			payment_terms_template = frappe.db.get_value(doctype, so, "payment_terms_template")
+			doc.payment_terms_template = payment_terms_template
+			doc.due_date = get_due_date(
+				doc.posting_date,
+				"Customer",
+				doc.customer,
+				doc.company,
+				template_name=doc.payment_terms_template,
+			)
+
+		elif automatically_fetch_payment_terms:
+			doc.set_payment_schedule()
 
 	return doc
 

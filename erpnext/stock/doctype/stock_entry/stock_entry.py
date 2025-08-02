@@ -1727,9 +1727,6 @@ class StockEntry(StockController):
 			else:
 				job_doc.set_manufactured_qty()
 
-		if self.job_card and frappe.get_cached_value("Job Card", self.job_card, "finished_good"):
-			return
-
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)

@@ -36,6 +36,12 @@ def get_columns(filters):
 			"width": 140,
 		},
 		{
+			"label": _("Currency"),
+			"fieldname": "currency",
+			"fieldtype": "Data",
+			"width": 80,
+		},
+		{
 			"label": _("Territory"),
 			"options": "Territory",
 			"fieldname": "territory",
@@ -43,7 +49,13 @@ def get_columns(filters):
 			"width": 100,
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
-		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 120},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120,
+		},
 		{
 			"label": _("Sales Partner"),
 			"options": "Sales Partner",
@@ -61,6 +73,7 @@ def get_columns(filters):
 			"label": _("Total Commission"),
 			"fieldname": "total_commission",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120,
 		},
 	]
@@ -70,19 +83,19 @@ def get_columns(filters):
 
 def get_entries(filters):
 	date_field = "transaction_date" if filters.get("doctype") == "Sales Order" else "posting_date"
-
+	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	conditions = get_conditions(filters, date_field)
 	entries = frappe.db.sql(
 		"""
 		SELECT
 			name, customer, territory, {} as posting_date, base_net_total as amount,
-			sales_partner, commission_rate, total_commission
+			sales_partner, commission_rate, total_commission, '{}' as currency
 		FROM
 			`tab{}`
 		WHERE
 			{} and docstatus = 1 and sales_partner is not null
 			and sales_partner != '' order by name desc, sales_partner
-		""".format(date_field, filters.get("doctype"), conditions),
+		""".format(date_field, company_currency, filters.get("doctype"), conditions),
 		filters,
 		as_dict=1,
 	)

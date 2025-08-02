@@ -711,6 +711,10 @@ class PurchaseReceipt(BuyingController):
 		warehouse_with_no_account = []
 
 		for d in self.get("items"):
+			remarks = self.get("remarks") or _("Accounting Entry for {0}").format(
+				"Asset" if d.is_fixed_asset else "Stock"
+			)
+
 			if (
 				provisional_accounting_for_non_stock_items
 				and d.item_code not in stock_items
@@ -722,10 +726,6 @@ class PurchaseReceipt(BuyingController):
 					d, gl_entries, self.posting_date, d.get("provisional_expense_account")
 				)
 			elif flt(d.qty) and (flt(d.valuation_rate) or self.is_return):
-				remarks = self.get("remarks") or _("Accounting Entry for {0}").format(
-					"Asset" if d.is_fixed_asset else "Stock"
-				)
-
 				if not (
 					(erpnext.is_perpetual_inventory_enabled(self.company) and d.item_code in stock_items)
 					or (d.is_fixed_asset and not d.purchase_invoice)
@@ -770,7 +770,7 @@ class PurchaseReceipt(BuyingController):
 					make_amount_difference_entry(d)
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
-			elif (d.warehouse and d.warehouse not in warehouse_with_no_account) or (
+			elif (d.warehouse and d.qty and d.warehouse not in warehouse_with_no_account) or (
 				not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 				and d.rejected_warehouse
 				and d.rejected_warehouse not in warehouse_with_no_account
@@ -783,10 +783,18 @@ class PurchaseReceipt(BuyingController):
 			if d.rejected_qty and frappe.db.get_single_value(
 				"Buying Settings", "set_valuation_rate_for_rejected_materials"
 			):
+				stock_asset_rbnb = (
+					self.get_company_default("asset_received_but_not_billed")
+					if d.is_fixed_asset
+					else self.get_company_default("stock_received_but_not_billed")
+				)
+
 				stock_value_diff = get_stock_value_difference(self.name, d.name, d.rejected_warehouse)
 				stock_asset_account_name = warehouse_account[d.rejected_warehouse]["account"]
 
 				make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
+				if not d.qty:
+					make_stock_received_but_not_billed_entry(d)
 
 		if warehouse_with_no_account:
 			frappe.msgprint(

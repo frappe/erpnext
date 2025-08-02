@@ -659,7 +659,7 @@ class TestAssetDepreciationSchedule(IntegrationTestCase):
 
 		self.assertEqual(schedules, expected_depreciation_before_repair)
 
-	def test_daily_prorata_based_depreciation_schedule_after_cancelling_asset_repair_for(self):
+	def test_daily_prorata_based_depreciation_schedule_after_cancelling_asset_repair(self):
 		asset = create_asset(
 			item_code="Macbook Pro",
 			gross_purchase_amount=500,
