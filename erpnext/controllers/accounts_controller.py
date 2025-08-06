@@ -1023,9 +1023,12 @@ class AccountsController(TransactionBase):
 								item.expense_account = value
 
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field(
-						"is_fixed_asset"
+						"is_fixed_asset", "tax_withholding_category"
 					):
 						item.set("is_fixed_asset", ret.get("is_fixed_asset", 0))
+
+						if not item.get("tax_withholding_category") and ret.get("tax_withholding_category"):
+							item.set("tax_withholding_category", ret.get("tax_withholding_category"))
 
 					# Double check for cost center
 					# Items add via promotional scheme may not have cost center set

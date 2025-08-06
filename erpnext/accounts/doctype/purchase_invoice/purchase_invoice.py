@@ -244,8 +244,10 @@ class PurchaseInvoice(BuyingController):
 
 	def onload(self):
 		super().onload()
-		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
-		self.set_onload("supplier_tds", supplier_tds)
+		tax_withholding_category = frappe.get_cached_value(
+			"Supplier", self.supplier, "tax_withholding_category"
+		)
+		self.set_onload("tax_withholding_category", tax_withholding_category)
 
 		if self.is_new():
 			self.set("tax_withheld_vouchers", [])
@@ -347,10 +349,10 @@ class PurchaseInvoice(BuyingController):
 				self.posting_date, "Supplier", self.supplier, self.company, self.bill_date
 			)
 
-		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		tds_category = frappe.get_cached_value("Supplier", self.supplier, "tax_withholding_category")
 		if tds_category and not for_validate:
 			self.apply_tds = 1
-			self.set_onload("supplier_tds", tds_category)
+			self.set_onload("tax_withholding_category", tds_category)
 
 		super().set_missing_values(for_validate)
 

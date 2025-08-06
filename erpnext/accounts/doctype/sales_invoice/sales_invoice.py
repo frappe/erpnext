@@ -283,6 +283,13 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	def onload(self):
+		super().onload()
+		tax_withholding_category = frappe.get_cached_value(
+			"Customer", self.customer, "tax_withholding_category"
+		)
+		self.set_onload("tax_withholding_category", tax_withholding_category)
+
 	def validate(self):
 		self.validate_auto_set_posting_time()
 		super().validate()

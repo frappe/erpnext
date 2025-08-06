@@ -361,8 +361,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			},
 			function () {
 				me.apply_pricing_rule();
-				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
-				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
+				me.frm.doc.apply_tds = me.frm.tax_withholding_category ? 1 : 0;
+				me.frm.set_df_property("apply_tds", "read_only", me.frm.tax_withholding_category ? 0 : 1);
 
 				// while duplicating, don't change payment terms
 				if (me.frm.doc.__run_link_triggers === false) {
@@ -679,9 +679,9 @@ frappe.ui.form.on("Purchase Invoice", {
 	onload: function (frm) {
 		if (frm.doc.__onload && frm.doc.supplier) {
 			if (frm.is_new()) {
-				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
+				frm.doc.apply_tds = frm.doc.__onload.tax_withholding_category ? 1 : 0;
 			}
-			if (!frm.doc.__onload.supplier_tds) {
+			if (!frm.doc.__onload.tax_withholding_category) {
 				frm.set_df_property("apply_tds", "read_only", 1);
 			}
 		}

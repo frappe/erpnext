@@ -358,6 +358,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				),
 			},
 			function () {
+				me.frm.doc.apply_tds = me.frm.tax_withholding_category ? 1 : 0;
+				me.frm.set_df_property("apply_tds", "read_only", me.frm.tax_withholding_category ? 0 : 1);
 				me.apply_pricing_rule();
 			}
 		);
