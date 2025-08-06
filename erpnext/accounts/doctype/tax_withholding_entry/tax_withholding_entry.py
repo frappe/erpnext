@@ -793,6 +793,23 @@ class TaxWithholdingController:
 
 		return flt(amount, self.precision)
 
+	def apply_tax_withholding(self):
+		recalculate = False
+		for row in self.doc.taxes:
+			if row.is_tax_withholding_account and row.tax_amount:
+				row.tax_amount = 0
+				row.base_tax_amount_after_discount_amount = 0
+				recalculate = True
+
+		if recalculate:
+			self.doc.calculate_taxes_and_totals()
+
+		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
+			self.doc.tax_withholding_entries = []
+			return False
+
+		return True
+
 	def after_validate(self):
 		for entry in self.doc.tax_withholding_entries:
 			entry: TaxWithholdingEntry
@@ -871,15 +888,7 @@ class PurchaseTaxWithholding(TaxWithholdingController):
 		self.party = doc.supplier
 
 	def on_validate(self):
-		tds_category = frappe.db.get_value(self.party_type, self.party, "tax_withholding_category")
-		for item in self.doc.items:
-			if item.apply_tds:
-				item.tax_withholding_category = tds_category
-
-		if not self.doc.apply_tds:
-			self.doc.tax_withholding_entries = []
-			# TODO: remove tds row from taxes table
-
+		if not self.apply_tax_withholding():
 			return
 
 		self.calculate()
@@ -892,13 +901,7 @@ class SalesTaxWithholding(TaxWithholdingController):
 		self.party = doc.customer
 
 	def on_validate(self):
-		tds_category = frappe.db.get_value(self.party_type, self.party, "tax_withholding_category")
-		for item in self.doc.items:
-			if item.apply_tds:
-				item.tax_withholding_category = tds_category
-
-		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
-			self.doc.tax_withholding_entries = []
+		if not self.apply_tax_withholding():
 			return
 
 		self.calculate()
@@ -910,9 +913,25 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		self.party_type = doc.party_type
 		self.party = doc.party
 
-	def on_validate(self):
-		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes" or self.doc.party_type != "Supplier":
+	def apply_tax_withholding(self):
+		recalculate = False
+		for row in self.doc.taxes:
+			if row.is_tax_withholding_account and row.tax_amount:
+				row.tax_amount = 0
+				row.base_tax_amount_after_discount_amount = 0
+				recalculate = True
+
+		if recalculate:
+			self.doc.apply_taxes()
+
+		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
 			self.doc.tax_withholding_entries = []
+			return False
+
+		return True
+
+	def on_validate(self):
+		if not self.apply_tax_withholding():
 			return
 
 		self.calculate()
@@ -993,6 +1012,7 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		self.doc.taxes = [
 			row for row in self.doc.taxes if not (row.is_tax_withholding_account and not row.tax_amount)
 		]
+		self.doc.apply_taxes()
 
 
 def _reset_idx(docs_to_reset_idx):
