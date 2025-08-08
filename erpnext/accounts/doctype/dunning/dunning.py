@@ -11,6 +11,7 @@
 
 		-> Resolves dunning automatically
 """
+
 import json
 
 import frappe
@@ -190,6 +191,46 @@ def resolve_dunning(doc, state):
 
 				dunning.status = "Resolved" if resolve else "Unresolved"
 				dunning.save()
+
+
+def resolve_dunning_for_credit_note(doc, state):
+	"""
+	Check if dunning should be resolved when a credit note is issued against a Sales Invoice.
+	Only process if update_outstanding_for_self is False (credit note is being applied against the original invoice).
+	"""
+	if not doc.is_return or doc.get("update_outstanding_for_self"):
+		return
+
+	if not doc.get("return_against"):
+		return
+
+	original_invoice = doc.return_against
+	if doc.docstatus == 1:
+		state = "Unresolved"
+	elif doc.docstatus == 2:
+		state = "Resolved"
+	else:
+		return
+
+	dunnings = get_linked_dunnings_as_per_state(original_invoice, state)
+
+	for dunning in dunnings:
+		resolve = True
+		dunning = frappe.get_doc("Dunning", dunning.get("name"))
+		for overdue_payment in dunning.overdue_payments:
+			outstanding_inv = frappe.get_value(
+				"Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount"
+			)
+			outstanding_ps = frappe.get_value(
+				"Payment Schedule", overdue_payment.payment_schedule, "outstanding"
+			)
+			resolve = resolve and (False if (outstanding_ps > 0 and outstanding_inv > 0) else True)
+
+		new_status = "Resolved" if (resolve and doc.docstatus == 1) else "Unresolved"
+
+		if dunning.status != new_status:
+			dunning.status = new_status
+			dunning.save()
 
 
 def get_linked_dunnings_as_per_state(sales_invoice, state):
