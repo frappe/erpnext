@@ -380,12 +380,12 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 
 	def validate_depreciation_amount_for_low_value_assets(self):
 		"""
-		If gross purchase amount is too low, then depreciation amount
+		If net purchase amount is too low, then depreciation amount
 		can come zero sometimes based on the frequency and number of depreciations.
 		"""
 		if flt(self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")) <= 0:
 			frappe.throw(
-				_("Gross Purchase Amount {0} cannot be depreciated over {1} cycles.").format(
+				_("Net Purchase Amount {0} cannot be depreciated over {1} cycles.").format(
 					frappe.bold(self.asset_doc.net_purchase_amount),
 					frappe.bold(self.fb_row.total_number_of_depreciations),
 				)

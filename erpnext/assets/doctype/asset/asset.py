@@ -379,7 +379,7 @@ class Asset(AccountsController):
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
 		if not flt(self.net_purchase_amount) and not self.is_composite_asset:
-			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
+			frappe.throw(_("Net Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
 			if (
@@ -440,11 +440,11 @@ class Asset(AccountsController):
 
 		if self.net_purchase_amount and self.net_purchase_amount != self.purchase_amount:
 			error_message = _(
-				"Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
+				"Net Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
 			)
 			error_message += "<br>"
 			error_message += _("Please do not book expense of multiple assets against one single Asset.")
-			frappe.throw(error_message, title=_("Invalid Gross Purchase Amount"))
+			frappe.throw(error_message, title=_("Invalid Net Purchase Amount"))
 
 	def make_asset_movement(self):
 		reference_doctype = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
@@ -488,7 +488,7 @@ class Asset(AccountsController):
 		)
 		if flt(row.expected_value_after_useful_life) >= flt(self.net_purchase_amount):
 			frappe.throw(
-				_("Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount").format(
+				_("Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount").format(
 					row.idx
 				)
 			)
