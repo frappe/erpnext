@@ -48,8 +48,8 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 							"reference_code": "INC001",
 							"display_name": "Income",
 							"indentation_level": 0,
-							"row_type": "Account Data",
-							"data_source": "Closing Balance",
+							"data_type": "Account Data",
+							"balance_type": "Closing Balance",
 							"bold_text": 1,
 							"calculation_formula": '["root_type", "=", "Income"]',
 						},
@@ -57,8 +57,8 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 							"reference_code": "EXP001",
 							"display_name": "Expenses",
 							"indentation_level": 0,
-							"row_type": "Account Data",
-							"data_source": "Closing Balance",
+							"data_type": "Account Data",
+							"balance_type": "Closing Balance",
 							"bold_text": 1,
 							"calculation_formula": '["root_type", "=", "Expense"]',
 						},
@@ -66,7 +66,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 							"reference_code": "NET001",
 							"display_name": "Net Profit/Loss",
 							"indentation_level": 0,
-							"row_type": "Formula/Calculation",
+							"data_type": "Calculated Amount",
 							"bold_text": 1,
 							"calculation_formula": "INC001 - EXP001",
 						},
@@ -83,8 +83,8 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		order = resolver.get_processing_order()
 
 		# Should process account rows before formula rows
-		account_indices = [i for i, row in enumerate(order) if row.row_type == "Account Data"]
-		formula_indices = [i for i, row in enumerate(order) if row.row_type == "Formula/Calculation"]
+		account_indices = [i for i, row in enumerate(order) if row.data_type == "Account Data"]
+		formula_indices = [i for i, row in enumerate(order) if row.data_type == "Calculated Amount"]
 
 		self.assertTrue(all(ai < fi for ai in account_indices for fi in formula_indices))
 
@@ -133,11 +133,11 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 					"doctype": "Financial Report Template",
 					"template_name": "Invalid Template",
 					"rows": [
-						{"reference_code": "DUP001", "display_name": "Row 1", "row_type": "Account Data"},
+						{"reference_code": "DUP001", "display_name": "Row 1", "data_type": "Account Data"},
 						{
 							"reference_code": "DUP001",  # Duplicate
 							"display_name": "Row 2",
-							"row_type": "Account Data",
+							"data_type": "Account Data",
 						},
 					],
 				}
@@ -155,13 +155,13 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 						{
 							"reference_code": "A001",
 							"display_name": "Row A",
-							"row_type": "Formula/Calculation",
+							"data_type": "Calculated Amount",
 							"calculation_formula": "B001 + 100",
 						},
 						{
 							"reference_code": "B001",
 							"display_name": "Row B",
-							"row_type": "Formula/Calculation",
+							"data_type": "Calculated Amount",
 							"calculation_formula": "A001 + 200",  # Circular reference
 						},
 					],
@@ -191,7 +191,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Create a mock row for testing
 		mock_row = frappe._dict(
 			{
-				"data_source": "Closing Balance",
+				"balance_type": "Closing Balance",
 				"calculation_formula": '["root_type", "=", "Income"]',
 				"reference_code": "TEST_INC",
 			}
@@ -290,8 +290,8 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Mock request for period movement
 		request = {
 			"accounts": ["Sales - _TC"],
-			"data_source": "Period Movement",
-			"row": frappe._dict({"data_source": "Period Movement"}),
+			"balance_type": "Period Movement (Debits - Credits)",
+			"row": frappe._dict({"balance_type": "Period Movement (Debits - Credits)"}),
 		}
 
 		# Create some sample balance data
@@ -400,7 +400,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test with Income accounts
 		income_row = frappe._dict(
 			{
-				"data_source": "Closing Balance",
+				"balance_type": "Closing Balance",
 				"calculation_formula": '["root_type", "=", "Income"]',
 				"reference_code": "INCOME",
 			}
@@ -409,7 +409,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test with Expense accounts
 		expense_row = frappe._dict(
 			{
-				"data_source": "Closing Balance",
+				"balance_type": "Closing Balance",
 				"calculation_formula": '["root_type", "=", "Expense"]',
 				"reference_code": "EXPENSE",
 			}
@@ -485,17 +485,20 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		mock_balance_data = {"Test Account": {"2023_q1": {"opening": 1000, "movement": 500, "closing": 1500}}}
 
 		# Test Opening Balance
-		opening_request = {"accounts": ["Test Account"], "data_source": "Opening Balance"}
+		opening_request = {"accounts": ["Test Account"], "balance_type": "Opening Balance"}
 		opening_totals = processor.calculate_totals(opening_request, mock_balance_data)
 		self.assertEqual(opening_totals[0], 1000)
 
 		# Test Closing Balance
-		closing_request = {"accounts": ["Test Account"], "data_source": "Closing Balance"}
+		closing_request = {"accounts": ["Test Account"], "balance_type": "Closing Balance"}
 		closing_totals = processor.calculate_totals(closing_request, mock_balance_data)
 		self.assertEqual(closing_totals[0], 1500)
 
 		# Test Period Movement
-		movement_request = {"accounts": ["Test Account"], "data_source": "Period Movement"}
+		movement_request = {
+			"accounts": ["Test Account"],
+			"balance_type": "Period Movement (Debits - Credits)",
+		}
 		movement_totals = processor.calculate_totals(movement_request, mock_balance_data)
 		self.assertEqual(movement_totals[0], 500)
 
@@ -567,7 +570,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		test_row = frappe._dict(
 			{
-				"data_source": "Closing Balance",
+				"balance_type": "Closing Balance",
 				"calculation_formula": '["account_type", "=", "Income"]',
 				"reference_code": "MULTI_PERIOD_TEST",
 			}
@@ -619,7 +622,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test with Sales account (Income)
 		sales_row = frappe._dict(
 			{
-				"data_source": "Period Movement",
+				"balance_type": "Period Movement (Debits - Credits)",
 				"calculation_formula": '["account_name", "like", "Sales"]',
 				"reference_code": "SALES_MOVEMENT",
 			}
@@ -676,7 +679,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test with Expense account
 		expense_row = frappe._dict(
 			{
-				"data_source": "Period Movement",
+				"balance_type": "Period Movement (Debits - Credits)",
 				"calculation_formula": '["account_name", "like", "_Test Account Cost for Goods Sold"]',
 				"reference_code": "EXPENSE_MOVEMENT",
 			}
@@ -796,7 +799,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test complex nested filter
 		complex_row = frappe._dict(
 			{
-				"data_source": "Closing Balance",
+				"balance_type": "Closing Balance",
 				"calculation_formula": """{
 				"and": [
 					{
@@ -822,7 +825,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test simple filter for comparison
 		simple_row = frappe._dict(
 			{
-				"data_source": "Closing Balance",
+				"balance_type": "Closing Balance",
 				"calculation_formula": '["root_type", "=", "Asset"]',
 				"reference_code": "SIMPLE_FILTER_TEST",
 			}
@@ -869,7 +872,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test Income accounts
 		income_row = frappe._dict(
 			{
-				"data_source": "Period Movement",
+				"balance_type": "Period Movement (Debits - Credits)",
 				"calculation_formula": '["root_type", "=", "Income"]',
 				"reference_code": "TOTAL_INCOME",
 			}
@@ -878,7 +881,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Test Expense accounts
 		expense_row = frappe._dict(
 			{
-				"data_source": "Period Movement",
+				"balance_type": "Period Movement (Debits - Credits)",
 				"calculation_formula": '["root_type", "=", "Expense"]',
 				"reference_code": "TOTAL_EXPENSE",
 			}
@@ -927,7 +930,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		# Create requests for all three data sources for the same account
 		opening_row = frappe._dict(
 			{
-				"data_source": "Opening Balance",
+				"balance_type": "Opening Balance",
 				"calculation_formula": '["account_name", "=", "Debtors - _TC"]',
 				"reference_code": "OPENING_BAL",
 			}
@@ -935,7 +938,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		movement_row = frappe._dict(
 			{
-				"data_source": "Period Movement",
+				"balance_type": "Period Movement (Debits - Credits)",
 				"calculation_formula": '["account_name", "=", "Debtors - _TC"]',
 				"reference_code": "MOVEMENT",
 			}
@@ -943,7 +946,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		closing_row = frappe._dict(
 			{
-				"data_source": "Closing Balance",
+				"balance_type": "Closing Balance",
 				"calculation_formula": '["account_name", "=", "Debtors - _TC"]',
 				"reference_code": "CLOSING_BAL",
 			}

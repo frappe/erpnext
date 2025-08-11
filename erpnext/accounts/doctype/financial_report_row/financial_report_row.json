@@ -9,8 +9,8 @@
   "reference_code",
   "display_name",
   "indentation_level",
-  "row_type",
-  "data_source",
+  "data_type",
+  "balance_type",
   "column_break_hxqu",
   "bold_text",
   "italic_text",
@@ -25,14 +25,14 @@
  "fields": [
   {
    "columns": 1,
-   "description": "Unique identifier for this row (e.g., A100, B200). Used for referencing in formulas.",
+   "description": "Unique identifier for referencing this line in formulas (e.g., REV100, EXP200, ASSET100)",
    "fieldname": "reference_code",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Reference Code"
+   "label": "Line Reference"
   },
   {
-   "description": "The text that will appear in the financial report for this row",
+   "description": "The text that will appear on your financial statement (e.g., 'Total Revenue', 'Cash and Cash Equivalents')",
    "fieldname": "display_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -40,25 +40,27 @@
   },
   {
    "columns": 1,
-   "description": "Controls visual hierarchy (0=main heading, 1=sub-item, 2=sub-sub-item, etc.)",
+   "description": "Visual indentation level: 0 = Main heading (e.g., 'Assets'), 1 = Sub-category (e.g., 'Current Assets'), 2 = Individual accounts",
    "fieldname": "indentation_level",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Indentation Level"
+   "label": "Indent Level"
   },
   {
-   "fieldname": "row_type",
+   "description": "Choose how this line gets its data or if it's just formatting",
+   "fieldname": "data_type",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Row Type",
-   "options": "\nAccount Data\nFormula/Calculation\nBlank Line"
+   "label": "Data Type",
+   "options": "\nAccount Data\nCalculated Amount\nBlank Line"
   },
   {
-   "fieldname": "data_source",
+   "description": "For Account Data: Opening Balance = Start of period, Closing Balance = End of period, Period Movement = Net change (Debits - Credits) during the period",
+   "fieldname": "balance_type",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Data Source",
-   "options": "\nOpening Balance\nClosing Balance\nPeriod Movement"
+   "label": "Balance Type",
+   "options": "\nOpening Balance\nClosing Balance\nPeriod Movement\nPeriod Movement (Debits - Credits)"
   },
   {
    "fieldname": "column_break_hxqu",
@@ -66,36 +68,36 @@
   },
   {
    "default": "0",
-   "description": "Make this row appear in bold font",
+   "description": "Display this line in bold to emphasize totals or major headings",
    "fieldname": "bold_text",
    "fieldtype": "Check",
    "label": "Bold Text"
   },
   {
    "default": "0",
-   "description": "Make this row appear in italic font",
+   "description": "Display this line in italics for subtotals or notes",
    "fieldname": "italic_text",
    "fieldtype": "Check",
    "label": "Italic Text"
   },
   {
    "default": "0",
-   "description": "Use for internal calculations only - won't appear in the final report",
+   "description": "Calculate this line for other formulas but don't show it on the final report",
    "fieldname": "hidden_calculation",
    "fieldtype": "Check",
-   "label": "Hidden Calculation"
+   "label": "Hidden Line (Internal Use Only)"
   },
   {
    "default": "0",
-   "description": "Don't show this row if the value is zero",
+   "description": "Don't display this line if the amount is zero or empty",
    "fieldname": "hide_when_empty",
    "fieldtype": "Check",
-   "label": "Hide When Empty"
+   "label": "Hide If Zero"
   },
   {
    "columns": 1,
    "default": "0",
-   "description": "Multiply values by -1 (useful for expenses in P&L reports)",
+   "description": "Show negative values as positive (commonly used for expenses and contra accounts in financial statements)",
    "fieldname": "reverse_sign",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -106,9 +108,10 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Enter formulas to calculate values or specify which accounts to include",
    "fieldname": "calculation_formula",
    "fieldtype": "Code",
-   "label": "Calculation Formula"
+   "label": "Formula or Account Filter"
   },
   {
    "fieldname": "column_break_ooic",
@@ -118,7 +121,7 @@
    "fieldname": "formula_description",
    "fieldtype": "HTML",
    "label": "",
-   "options": "<div style='padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin-top: 10px;'>\n<h5 style='margin-top: 0; color: #495057;'>Formula Usage Guide</h5>\n<p style='margin-bottom: 10px; color: #6c757d;'>Use formulas to calculate values or filter accounts. Here are some examples:</p>\n\n<h6 style='color: #495057; margin-bottom: 5px;'>Account Filtering Examples:</h6>\n<ul style='margin-bottom: 15px; color: #6c757d;'>\n<li><code>[\"account.account_category\", \"in\", [\"Assets\", \"Liabilities\"]]</code> - Filter by category</li>\n<li><code>[\"account.account_type\", \"=\", \"Cash\"]</code> - Filter by account type</li>\n<li><code>[\"account.root_type\", \"in\", [\"Asset\", \"Liability\"]]</code> - Filter by root type</li>\n</ul>\n\n<h6 style='color: #495057; margin-bottom: 5px;'>Calculation Examples:</h6>\n<ul style='margin-bottom: 15px; color: #6c757d;'>\n<li><code>A100 + A200</code> - Add values from reference codes A100 and A200</li>\n<li><code>B100 - B200</code> - Subtract B200 from B100</li>\n<li><code>(A100 + A200) * 0.1</code> - Calculate 10% of combined values</li>\n</ul>\n\n<p style='margin-bottom: 0; color: #6c757d; font-size: 0.9em;'><strong>Note:</strong> Use reference codes (Reference Code field) to reference other rows in calculations.</p>\n</div>"
+   "options": "<div style='padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin-top: 10px;'>\n<h5 style='margin-top: 0; color: #495057;'>Formula and Account Filter Guide</h5>\n<p style='margin-bottom: 10px; color: #6c757d;'>Use this field to specify which accounts to include or how to calculate values.</p>\n\n<h6 style='color: #495057; margin-bottom: 5px;'>Account Selection Examples:</h6>\n<ul style='margin-bottom: 15px; color: #6c757d;'>\n<li><code>[\"account.account_category\", \"in\", [\"Assets\", \"Liabilities\"]]</code> - Include all Asset and Liability accounts</li>\n<li><code>[\"account.account_type\", \"=\", \"Cash\"]</code> - Include only Cash accounts</li>\n<li><code>[\"account.root_type\", \"in\", [\"Asset\", \"Liability\"]]</code> - Include accounts by financial statement category</li>\n<li><code>[\"account.account_name\", \"like\", \"%Revenue%\"]</code> - Include accounts with 'Revenue' in the name</li>\n</ul>\n\n<h6 style='color: #495057; margin-bottom: 5px;'>Mathematical Calculations:</h6>\n<ul style='margin-bottom: 15px; color: #6c757d;'>\n<li><code>REV100 + REV200</code> - Add two revenue line items together</li>\n<li><code>ASSETS - LIAB</code> - Calculate equity (Assets minus Liabilities)</li>\n<li><code>(REV100 + REV200) * 0.1</code> - Calculate 10% of combined revenue</li>\n<li><code>GROSS_PROFIT / REV_TOTAL</code> - Calculate gross profit margin</li>\n</ul>\n\n<p style='margin-bottom: 0; color: #6c757d; font-size: 0.9em;'><strong>Important:</strong> Use the 'Line Reference' codes from other rows when creating formulas. For Period Movement, the system calculates Debits minus Credits automatically.</p>\n</div>"
   }
  ],
  "grid_page_length": 50,

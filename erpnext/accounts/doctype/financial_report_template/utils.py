@@ -40,7 +40,7 @@ class PeriodAccountDataCollector:
 		request = {
 			"row": row,
 			"accounts": accounts,
-			"data_source": row.data_source,
+			"balance_type": row.balance_type,
 			"reference_code": row.reference_code,
 		}
 		self.data_requests.append(request)
@@ -362,7 +362,7 @@ class BalanceProcessor:
 
 	def calculate_totals(self, request: dict, account_data: dict) -> list[float]:
 		accounts = request["accounts"]
-		data_source = request["data_source"]
+		balance_type = request["balance_type"]
 		totals = []
 
 		for period in self.periods:
@@ -373,11 +373,11 @@ class BalanceProcessor:
 				if account in account_data and period_key in account_data[account]:
 					balance_info = account_data[account][period_key]
 
-					if data_source == "Opening Balance":
+					if balance_type == "Opening Balance":
 						period_sum += balance_info["opening"]
-					elif data_source == "Closing Balance":
+					elif balance_type == "Closing Balance":
 						period_sum += balance_info["closing"]
-					elif data_source == "Period Movement":
+					elif balance_type == "Period Movement (Debits - Credits)":
 						period_sum += balance_info["movement"]
 
 			totals.append(period_sum)

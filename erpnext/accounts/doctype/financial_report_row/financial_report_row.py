@@ -27,7 +27,7 @@ class FinancialReportRow(Document):
 		parenttype: DF.Data
 		row_code: DF.Data | None
 		row_label: DF.Data | None
-		row_type: DF.Literal["", "Account Balance", "Calculated Total", "Spacing"]
+		data_type: DF.Literal["", "Account Balance", "Calculated Total", "Spacing"]
 	# end: auto-generated types
 
 	pass

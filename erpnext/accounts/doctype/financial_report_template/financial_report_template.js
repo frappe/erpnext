@@ -38,7 +38,7 @@ function validate_formulas(frm) {
 		}
 
 		// referenced codes exist
-		if (row.row_type !== "Formula/Calculation") return;
+		if (row.data_type !== "Formula/Calculation") return;
 		row_codes.forEach((code) => {
 			if (row.calculation_formula.includes(code) && !row_codes.includes(code)) {
 				frappe.msgprint(__("Formula in row {0} references non-existent code: {1}", [i + 1, code]));

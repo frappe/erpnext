@@ -54,7 +54,7 @@ class FinancialReportTemplate(Document):
 		row_map = {row.reference_code: row for row in self.rows if row.reference_code}
 
 		for row in self.rows:
-			if row.row_type == "Formula/Calculation" and row.calculation_formula:
+			if row.data_type == "Calculated Amount" and row.calculation_formula:
 				# self-reference
 				referenced_codes = self.extract_codes_from_formula(row.calculation_formula, row_map.keys())
 				if row.reference_code and row.reference_code in referenced_codes:
@@ -67,10 +67,10 @@ class FinancialReportTemplate(Document):
 
 	def validate_report_structure(self):
 		for row in self.rows:
-			if row.row_type == "Account Data" and not row.data_source:
+			if row.data_type == "Account Data" and not row.balance_type:
 				frappe.throw(_("Data Source is required for Account Data row {0}").format(row.idx))
 
-			if row.row_type in ["Formula/Calculation", "Account Data"] and not row.calculation_formula:
+			if row.data_type in ["Calculated Amount", "Account Data"] and not row.calculation_formula:
 				frappe.throw(_("Calculation Formula is required for row {0}").format(row.idx))
 
 	def validate_reference_code_format(self):
@@ -116,7 +116,7 @@ class FinancialReportTemplate(Document):
 				)
 
 			row = row_map.get(code)
-			if row and row.row_type == "Formula/Calculation" and row.calculation_formula:
+			if row and row.data_type == "Calculated Amount" and row.calculation_formula:
 				next_check = self.extract_codes_from_formula(row.calculation_formula, row_map.keys())
 
 				# recursively check
