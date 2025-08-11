@@ -411,6 +411,15 @@ class Item(Document):
 					)
 				)
 
+			elif series and "#" in series:
+				hash_index = series.find("#")
+				if not hash_index == 0 and series[hash_index - 1] != ".":
+					frappe.throw(
+						_(
+							"Invalid format for {0}. Must have a dot before the number placeholders, e.g., <b>ABCD.#####</b>"
+						).format(frappe.bold(self.meta.get_field(field).label))
+					)
+
 	def check_for_active_boms(self):
 		if self.default_bom:
 			bom_item = frappe.db.get_value("BOM", self.default_bom, "item")
