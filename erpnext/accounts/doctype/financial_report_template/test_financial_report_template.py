@@ -169,6 +169,217 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			)
 			template.validate()
 
+	def test_account_filter_structure_simple_conditions(self):
+		"""Test validation of simple account filter conditions"""
+		# Test valid simple conditions
+		valid_simple_filters = [
+			'["account_type", "=", "Income"]',
+			'["root_type", "!=", "Asset"]',
+			'["is_group", "=", 0]',
+			'["account_name", "like", "Cash"]',
+			'["account_code", "in", ["1000", "2000"]]',
+			'["parent_account", "is", "set"]',
+		]
+
+		for filter_formula in valid_simple_filters:
+			template = frappe.get_doc(
+				{
+					"doctype": "Financial Report Template",
+					"template_name": f"Test Simple Filter - {filter_formula[:20]}",
+					"rows": [
+						{
+							"display_name": "Test Row",
+							"data_source": "Account Data",
+							"balance_type": "Closing Balance",
+							"calculation_formula": filter_formula,
+						}
+					],
+				}
+			)
+			# Should not raise any validation errors
+			template.validate()
+
+	def test_account_filter_structure_logical_conditions(self):
+		"""Test validation of logical (AND/OR) account filter conditions"""
+		# Test valid logical conditions
+		valid_logical_filters = [
+			'{"and": [["account_type", "=", "Income"], ["is_group", "=", 0]]}',
+			'{"or": [["root_type", "=", "Asset"], ["root_type", "=", "Liability"]]}',
+			'{"and": [["account_name", "like", "Cash"], ["account_type", "=", "Bank"]]}',
+		]
+
+		for filter_formula in valid_logical_filters:
+			template = frappe.get_doc(
+				{
+					"doctype": "Financial Report Template",
+					"template_name": f"Test Logical Filter - {filter_formula[:20]}",
+					"rows": [
+						{
+							"display_name": "Test Row",
+							"data_source": "Account Data",
+							"balance_type": "Closing Balance",
+							"calculation_formula": filter_formula,
+						}
+					],
+				}
+			)
+			# Should not raise any validation errors
+			template.validate()
+
+	def test_account_filter_structure_nested_conditions(self):
+		"""Test validation of complex nested account filter conditions"""
+		# Test valid nested conditions
+		nested_filter = """{
+			"and": [
+				{
+					"or": [
+						["account_type", "=", "Income"],
+						["account_type", "=", "Expense"]
+					]
+				},
+				["is_group", "=", 0],
+				{
+					"and": [
+						["account_name", "not like", "Depreciation"],
+						["disabled", "=", 0]
+					]
+				}
+			]
+		}"""
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Financial Report Template",
+				"template_name": "Test Nested Filter",
+				"rows": [
+					{
+						"display_name": "Complex Filter Row",
+						"data_source": "Account Data",
+						"balance_type": "Closing Balance",
+						"calculation_formula": nested_filter,
+					}
+				],
+			}
+		)
+		# Should not raise any validation errors
+		template.validate()
+
+	def test_account_filter_structure_invalid_conditions(self):
+		"""Test validation of invalid account filter conditions"""
+		# Test invalid simple conditions
+		invalid_simple_filters = [
+			'["incomplete"]',  # Missing operator and value
+			'["field", "invalid_operator", "value"]',  # Invalid operator
+			'[123, "=", "value"]',  # Non-string field
+			'["field", 456, "value"]',  # Non-string operator
+			"[]",  # Empty list
+			'["too", "many", "elements", "here"]',  # Too many elements
+		]
+
+		for filter_formula in invalid_simple_filters:
+			with self.assertRaises((frappe.ValidationError, frappe.exceptions.ValidationError)):
+				template = frappe.get_doc(
+					{
+						"doctype": "Financial Report Template",
+						"template_name": f"Invalid Simple Filter Test - {filter_formula[:10]}",
+						"rows": [
+							{
+								"display_name": "Invalid Row",
+								"data_source": "Account Data",
+								"balance_type": "Closing Balance",
+								"calculation_formula": filter_formula,
+							}
+						],
+					}
+				)
+				template.validate()
+
+		# Test invalid logical conditions
+		invalid_logical_filters = [
+			'{"invalid_operator": [["field", "=", "value"]]}',  # Invalid logical operator
+			'{"and": ["not_a_list"]}',  # AND with non-list value
+			'{"and": [["field", "=", "value"]]}',  # AND with only one condition (needs at least 2)
+			'{"and": [], "or": []}',  # Multiple keys
+			'{"and": []}',  # Empty conditions list
+		]
+
+		for filter_formula in invalid_logical_filters:
+			with self.assertRaises((frappe.ValidationError, frappe.exceptions.ValidationError)):
+				template = frappe.get_doc(
+					{
+						"doctype": "Financial Report Template",
+						"template_name": f"Invalid Logical Filter Test - {filter_formula[:10]}",
+						"rows": [
+							{
+								"display_name": "Invalid Row",
+								"data_source": "Account Data",
+								"balance_type": "Closing Balance",
+								"calculation_formula": filter_formula,
+							}
+						],
+					}
+				)
+				template.validate()
+
+	def test_account_filter_structure_invalid_json(self):
+		"""Test validation of invalid JSON in account filters"""
+		invalid_json_filters = [
+			'{"unclosed": "json"',  # Malformed JSON
+			"not_json_at_all",  # Not JSON
+			'{"account_type": =, "Income"}',  # Invalid JSON syntax
+			"",  # Empty string
+		]
+
+		for filter_formula in invalid_json_filters:
+			with self.assertRaises((frappe.ValidationError, frappe.exceptions.ValidationError)):
+				template = frappe.get_doc(
+					{
+						"doctype": "Financial Report Template",
+						"template_name": f"Invalid JSON Filter Test - {filter_formula[:10]}",
+						"rows": [
+							{
+								"display_name": "Invalid JSON Row",
+								"data_source": "Account Data",
+								"balance_type": "Closing Balance",
+								"calculation_formula": filter_formula,
+							}
+						],
+					}
+				)
+				template.validate()
+
+	def test_account_filter_structure_operators(self):
+		"""Test all supported operators in account filters"""
+		supported_operators = ["=", "==", "!=", "<>", "in", "not in", "like", "not like", "is"]
+
+		for operator in supported_operators:
+			if operator in ["in", "not in"]:
+				# For 'in' operators, use list values
+				filter_formula = f'["account_type", "{operator}", ["Income", "Expense"]]'
+			elif operator == "is":
+				# For 'is' operator, use special values
+				filter_formula = f'["parent_account", "{operator}", "set"]'
+			else:
+				# For other operators, use string values
+				filter_formula = f'["account_type", "{operator}", "Income"]'
+
+			template = frappe.get_doc(
+				{
+					"doctype": "Financial Report Template",
+					"template_name": f"Test Operator - {operator}",
+					"rows": [
+						{
+							"display_name": f"Test Row - {operator}",
+							"data_source": "Account Data",
+							"balance_type": "Closing Balance",
+							"calculation_formula": filter_formula,
+						}
+					],
+				}
+			)
+			# Should not raise any validation errors
+			template.validate()
+
 	def test_period_account_data_collector_basic(self):
 		"""Test basic functionality of PeriodAccountDataCollector"""
 		# Setup test data
