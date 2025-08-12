@@ -9,7 +9,7 @@
   "reference_code",
   "display_name",
   "indentation_level",
-  "data_type",
+  "data_source",
   "balance_type",
   "column_break_hxqu",
   "bold_text",
@@ -25,14 +25,14 @@
  "fields": [
   {
    "columns": 1,
-   "description": "Unique identifier for referencing this line in formulas (e.g., REV100, EXP200, ASSET100)",
+   "description": "Code to reference this line in formulas (e.g., REV100, EXP200, ASSET100)",
    "fieldname": "reference_code",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Line Reference"
   },
   {
-   "description": "The text that will appear on your financial statement (e.g., 'Total Revenue', 'Cash and Cash Equivalents')",
+   "description": "Text displayed on the financial statement (e.g., 'Total Revenue', 'Cash and Cash Equivalents')",
    "fieldname": "display_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -40,27 +40,29 @@
   },
   {
    "columns": 1,
-   "description": "Visual indentation level: 0 = Main heading (e.g., 'Assets'), 1 = Sub-category (e.g., 'Current Assets'), 2 = Individual accounts",
+   "description": "Indentation level: 0 = Main heading, 1 = Sub-category, 2 = Individual accounts, etc.",
    "fieldname": "indentation_level",
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Indent Level"
   },
   {
-   "description": "Choose how this line gets its data or if it's just formatting",
-   "fieldname": "data_type",
+   "description": "How this line gets its data",
+   "fieldname": "data_source",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Data Type",
-   "options": "\nAccount Data\nCalculated Amount\nBlank Line"
+   "label": "Data Source",
+   "options": "\nAccount Data\nCalculated Amount\nCustom API\nBlank Line\nColumn Break"
   },
   {
-   "description": "For Account Data: Opening Balance = Start of period, Closing Balance = End of period, Period Movement = Net change (Debits - Credits) during the period",
+   "depends_on": "eval:doc.data_source == 'Account Data'",
+   "description": "Opening Balance = Start of period, Closing Balance = End of period, Period Movement = Net change during period",
    "fieldname": "balance_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Balance Type",
-   "options": "\nOpening Balance\nClosing Balance\nPeriod Movement\nPeriod Movement (Debits - Credits)"
+   "mandatory_depends_on": "eval:doc.data_source == 'Account Data'",
+   "options": "\nOpening Balance\nClosing Balance\nPeriod Movement (Debits - Credits)"
   },
   {
    "fieldname": "column_break_hxqu",
@@ -68,28 +70,28 @@
   },
   {
    "default": "0",
-   "description": "Display this line in bold to emphasize totals or major headings",
+   "description": "Bold text for emphasis (totals, major headings)",
    "fieldname": "bold_text",
    "fieldtype": "Check",
    "label": "Bold Text"
   },
   {
    "default": "0",
-   "description": "Display this line in italics for subtotals or notes",
+   "description": "Italic text for subtotals or notes",
    "fieldname": "italic_text",
    "fieldtype": "Check",
    "label": "Italic Text"
   },
   {
    "default": "0",
-   "description": "Calculate this line for other formulas but don't show it on the final report",
+   "description": "Calculate but don't show on final report",
    "fieldname": "hidden_calculation",
    "fieldtype": "Check",
    "label": "Hidden Line (Internal Use Only)"
   },
   {
    "default": "0",
-   "description": "Don't display this line if the amount is zero or empty",
+   "description": "Hide this line if amount is zero",
    "fieldname": "hide_when_empty",
    "fieldtype": "Check",
    "label": "Hide If Zero"
@@ -97,7 +99,7 @@
   {
    "columns": 1,
    "default": "0",
-   "description": "Show negative values as positive (commonly used for expenses and contra accounts in financial statements)",
+   "description": "Show negative values as positive (for expenses in P&L)",
    "fieldname": "reverse_sign",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -108,10 +110,12 @@
    "fieldtype": "Section Break"
   },
   {
-   "description": "Enter formulas to calculate values or specify which accounts to include",
+   "depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break'",
+   "description": "Formula to calculate values or account filter criteria",
    "fieldname": "calculation_formula",
    "fieldtype": "Code",
-   "label": "Formula or Account Filter"
+   "label": "Formula or Account Filter",
+   "mandatory_depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break'"
   },
   {
    "fieldname": "column_break_ooic",
@@ -119,16 +123,14 @@
   },
   {
    "fieldname": "formula_description",
-   "fieldtype": "HTML",
-   "label": "",
-   "options": "<div style='padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin-top: 10px;'>\n<h5 style='margin-top: 0; color: #495057;'>Formula and Account Filter Guide</h5>\n<p style='margin-bottom: 10px; color: #6c757d;'>Use this field to specify which accounts to include or how to calculate values.</p>\n\n<h6 style='color: #495057; margin-bottom: 5px;'>Account Selection Examples:</h6>\n<ul style='margin-bottom: 15px; color: #6c757d;'>\n<li><code>[\"account.account_category\", \"in\", [\"Assets\", \"Liabilities\"]]</code> - Include all Asset and Liability accounts</li>\n<li><code>[\"account.account_type\", \"=\", \"Cash\"]</code> - Include only Cash accounts</li>\n<li><code>[\"account.root_type\", \"in\", [\"Asset\", \"Liability\"]]</code> - Include accounts by financial statement category</li>\n<li><code>[\"account.account_name\", \"like\", \"%Revenue%\"]</code> - Include accounts with 'Revenue' in the name</li>\n</ul>\n\n<h6 style='color: #495057; margin-bottom: 5px;'>Mathematical Calculations:</h6>\n<ul style='margin-bottom: 15px; color: #6c757d;'>\n<li><code>REV100 + REV200</code> - Add two revenue line items together</li>\n<li><code>ASSETS - LIAB</code> - Calculate equity (Assets minus Liabilities)</li>\n<li><code>(REV100 + REV200) * 0.1</code> - Calculate 10% of combined revenue</li>\n<li><code>GROSS_PROFIT / REV_TOTAL</code> - Calculate gross profit margin</li>\n</ul>\n\n<p style='margin-bottom: 0; color: #6c757d; font-size: 0.9em;'><strong>Important:</strong> Use the 'Line Reference' codes from other rows when creating formulas. For Period Movement, the system calculates Debits minus Credits automatically.</p>\n</div>"
+   "fieldtype": "HTML"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-02 06:52:10.686729",
+ "modified": "2025-08-12 06:52:40.635577",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",

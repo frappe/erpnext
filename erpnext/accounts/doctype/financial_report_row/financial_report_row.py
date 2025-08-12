@@ -14,20 +14,24 @@ class FinancialReportRow(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		balance_type: DF.Literal["", "Opening", "Closing", "Net Change (Debit - Credit)"]
-		formula: DF.Code | None
-		hide_if_zero: DF.Check
-		indent_level: DF.Int
-		inverse_value: DF.Check
-		is_bold: DF.Check
-		is_italic: DF.Check
-		is_statistical: DF.Check
+		balance_type: DF.Literal[
+			"", "Opening Balance", "Closing Balance", "Period Movement (Debits - Credits)"
+		]
+		bold_text: DF.Check
+		calculation_formula: DF.Code | None
+		data_source: DF.Literal[
+			"", "Account Data", "Calculated Amount", "Custom API", "Blank Line", "Column Break"
+		]
+		display_name: DF.Data | None
+		hidden_calculation: DF.Check
+		hide_when_empty: DF.Check
+		indentation_level: DF.Int
+		italic_text: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		row_code: DF.Data | None
-		row_label: DF.Data | None
-		data_type: DF.Literal["", "Account Balance", "Calculated Total", "Spacing"]
+		reference_code: DF.Data | None
+		reverse_sign: DF.Check
 	# end: auto-generated types
 
 	pass

@@ -17,7 +17,7 @@
  ],
  "fields": [
   {
-   "description": "Give your financial report template a descriptive name (e.g., 'Standard P&L', 'Detailed Balance Sheet')",
+   "description": "Descriptive name for your template (e.g., 'Standard P&L', 'Detailed Balance Sheet')",
    "fieldname": "template_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -26,7 +26,7 @@
    "unique": 1
   },
   {
-   "description": "Select the type of financial statement this template will generate",
+   "description": "Type of financial statement this template generates",
    "fieldname": "report_type",
    "fieldtype": "Select",
    "label": "Report Type",
@@ -55,15 +55,15 @@
    "options": "Financial Report Row"
   },
   {
-   "description": "Temporarily disable this template to prevent it from being used in reports",
    "default": "0",
+   "description": "Disable template to prevent use in reports",
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
   },
   {
    "default": "0",
-   "description": "System template - cannot be modified by users",
+   "description": "System template - cannot be modified",
    "fieldname": "is_standard",
    "fieldtype": "Check",
    "label": "Is Standard"
@@ -72,7 +72,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-02 07:44:09.195032",
+ "modified": "2025-08-12 06:52:01.100991",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Template",

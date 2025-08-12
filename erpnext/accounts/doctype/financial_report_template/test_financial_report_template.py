@@ -48,7 +48,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 							"reference_code": "INC001",
 							"display_name": "Income",
 							"indentation_level": 0,
-							"data_type": "Account Data",
+							"data_source": "Account Data",
 							"balance_type": "Closing Balance",
 							"bold_text": 1,
 							"calculation_formula": '["root_type", "=", "Income"]',
@@ -57,7 +57,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 							"reference_code": "EXP001",
 							"display_name": "Expenses",
 							"indentation_level": 0,
-							"data_type": "Account Data",
+							"data_source": "Account Data",
 							"balance_type": "Closing Balance",
 							"bold_text": 1,
 							"calculation_formula": '["root_type", "=", "Expense"]',
@@ -66,7 +66,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 							"reference_code": "NET001",
 							"display_name": "Net Profit/Loss",
 							"indentation_level": 0,
-							"data_type": "Calculated Amount",
+							"data_source": "Calculated Amount",
 							"bold_text": 1,
 							"calculation_formula": "INC001 - EXP001",
 						},
@@ -83,8 +83,8 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		order = resolver.get_processing_order()
 
 		# Should process account rows before formula rows
-		account_indices = [i for i, row in enumerate(order) if row.data_type == "Account Data"]
-		formula_indices = [i for i, row in enumerate(order) if row.data_type == "Calculated Amount"]
+		account_indices = [i for i, row in enumerate(order) if row.data_source == "Account Data"]
+		formula_indices = [i for i, row in enumerate(order) if row.data_source == "Calculated Amount"]
 
 		self.assertTrue(all(ai < fi for ai in account_indices for fi in formula_indices))
 
@@ -133,11 +133,11 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 					"doctype": "Financial Report Template",
 					"template_name": "Invalid Template",
 					"rows": [
-						{"reference_code": "DUP001", "display_name": "Row 1", "data_type": "Account Data"},
+						{"reference_code": "DUP001", "display_name": "Row 1", "data_source": "Account Data"},
 						{
 							"reference_code": "DUP001",  # Duplicate
 							"display_name": "Row 2",
-							"data_type": "Account Data",
+							"data_source": "Account Data",
 						},
 					],
 				}
@@ -155,13 +155,13 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 						{
 							"reference_code": "A001",
 							"display_name": "Row A",
-							"data_type": "Calculated Amount",
+							"data_source": "Calculated Amount",
 							"calculation_formula": "B001 + 100",
 						},
 						{
 							"reference_code": "B001",
 							"display_name": "Row B",
-							"data_type": "Calculated Amount",
+							"data_source": "Calculated Amount",
 							"calculation_formula": "A001 + 200",  # Circular reference
 						},
 					],

@@ -49,6 +49,16 @@ class PeriodAccountDataCollector:
 		"""
 		Process all data requests in a single optimized query.
 		Steps: collect accounts → fetch balances → distribute results
+
+		Returns:
+		        dict: Reference codes mapped to period values
+
+		Example:
+		        {
+		                "TOTAL_REVENUE": [15000.0, 18000.0, 22000.0],
+		                "TOTAL_EXPENSES": [12000.0, 14500.0, 16800.0],
+		                "NET_PROFIT": [3000.0, 3500.0, 5200.0]
+		        }
 		"""
 		if not self.data_requests:
 			return {}
@@ -77,7 +87,13 @@ class PeriodAccountDataCollector:
 		return results
 
 	def find_matching_accounts(self, filter_formula: str) -> list[str]:
-		"""Find accounts matching filter criteria."""
+		"""
+		Find accounts matching filter criteria.
+
+		Example:
+		        Input: '["account_type", "=", "Cash"]'
+		        Output: ["Cash - COMP", "Petty Cash - COMP", "Bank - COMP"]
+		"""
 		filter_parser = FilterExpressionParser()
 		criteria = filter_parser.parse(filter_formula)
 
@@ -107,7 +123,20 @@ class BalanceProcessor:
 		Fetch account balances for all periods with optimization.
 		Steps: get opening balances → fetch GL entries → calculate running totals
 
-		Returns dict: {account: {period_key: {opening, closing, movement}}}
+		Returns:
+		        dict: {account: {period_key: {opening, closing, movement}}}
+
+		Example:
+		        {
+		                "Cash - COMP": {
+		                        "jan2024": {"opening": 5000.0, "closing": 7500.0, "movement": 2500.0},
+		                        "feb2024": {"opening": 7500.0, "closing": 8200.0, "movement": 700.0}
+		                },
+		                "Sales - COMP": {
+		                        "jan2024": {"opening": 0.0, "closing": -15000.0, "movement": -15000.0},
+		                        "feb2024": {"opening": -15000.0, "closing": -23000.0, "movement": -8000.0}
+		                }
+		        }
 		"""
 		# Step 1: Get opening balances from Account Closing Balance if available
 		balances_data = self._get_opening_balances(accounts)
@@ -125,8 +154,14 @@ class BalanceProcessor:
 		Get opening balances for accounts, prioritizing `Period Closing Voucher` approach when enabled.
 		Steps: check settings → find latest closing voucher → get balances → rebase to period start
 
-		Returns: {account: {period_key: {"opening": balance}}}
-		Example: {"Cash - COMP": {"jan2024": {"opening": 1500.0}}}
+		Returns:
+		        dict: {account: {period_key: {"opening": balance}}}
+
+		Example:
+		        {
+		                "Cash - COMP": {"jan2024": {"opening": 1500.0}},
+		                "Sales - COMP": {"jan2024": {"opening": 0.0}}
+		        }
 		"""
 		if frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance"):
 			return self._get_opening_balances_from_gl(accounts)
@@ -392,6 +427,24 @@ class FilterExpressionParser:
 		"""
 		Parse filter formula into structured criteria.
 		Supports: ["field", "op", "value"] and {"and/or": [conditions]}
+
+		1. Simple condition: ["field", "operator", "value"]
+		   Example: ["account_type", "=", "Income"]
+
+		2. Dictionary-based complex conditions (RECOMMENDED):
+		   {
+		     "and": [condition1, condition2, ...]  # All conditions must be true
+		     "or": [condition1, condition2, ...]   # Any condition can be true
+		   }
+		   Example: {
+		     "and": [
+		       ["account_type", "=", "Income"],
+		       {"or": [
+		         ["category", "=", "Direct Income"],
+		         ["category", "=", "Indirect Income"]
+		       ]}
+		     ]
+		   }
 		"""
 		parsed_formula = ast.literal_eval(formula)
 
