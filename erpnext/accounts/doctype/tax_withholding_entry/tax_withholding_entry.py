@@ -640,14 +640,15 @@ class TaxWithholdingController:
 			tax_amount = flt(amount / self.doc.conversion_rate, precision)
 			existing_tax = existing_taxes.get(account_head)
 
+			if not tax_amount:
+				continue
+
+			# If tax row already exists, update it
 			if existing_tax:
 				if existing_tax.tax_amount == tax_amount:
 					continue
 
 				existing_tax.tax_amount = tax_amount
-
-			if not tax_amount:
-				continue
 
 			else:
 				cost_center = self.doc.cost_center or erpnext.get_default_cost_center(self.doc.company)
