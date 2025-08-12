@@ -15,14 +15,10 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
-from erpnext.accounts.report.financial_statements import (
-	calculate_values,
-	get_cost_centers_with_children,
-	set_gl_entries_by_account,
-)
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 
 
-class PeriodAccountDataCollector:
+class AccountDataCollector:
 	"""Collects account data across multiple periods efficiently."""
 
 	def __init__(self, filters: dict[str, Any], periods: list[dict]):
@@ -45,23 +41,36 @@ class PeriodAccountDataCollector:
 		}
 		self.data_requests.append(request)
 
-	def process_all_requests(self) -> dict[str, list[float]]:
+	def process_all_requests(self) -> dict[str, Any]:
 		"""
 		Process all data requests in a single optimized query.
 		Steps: collect accounts → fetch balances → distribute results
 
 		Returns:
-		        dict: Reference codes mapped to period values
+		        dict: Contains both summary and detailed account data
 
 		Example:
 		        {
-		                "TOTAL_REVENUE": [15000.0, 18000.0, 22000.0],
-		                "TOTAL_EXPENSES": [12000.0, 14500.0, 16800.0],
-		                "NET_PROFIT": [3000.0, 3500.0, 5200.0]
+		                "summary": {
+		                        "TOTAL_REVENUE": [15000.0, 18000.0, 22000.0],
+		                        "TOTAL_EXPENSES": [12000.0, 14500.0, 16800.0],
+		                        "NET_PROFIT": [3000.0, 3500.0, 5200.0]
+		                },
+		                "account_details": {
+		                        "TOTAL_REVENUE": {
+		                                "Sales - COMP": [10000.0, 12000.0, 15000.0],
+		                                "Service Income - COMP": [5000.0, 6000.0, 7000.0]
+		                        },
+		                        "TOTAL_EXPENSES": {
+		                                "Cost of Goods Sold - COMP": [8000.0, 9500.0, 11000.0],
+		                                "Office Expenses - COMP": [4000.0, 5000.0, 5800.0]
+		                        }
+		                },
+		                "period_keys": ["jan2024", "feb2024", "mar2024"]
 		        }
 		"""
 		if not self.data_requests:
-			return {}
+			return {"summary": {}, "account_details": {}, "period_keys": [p["key"] for p in self.periods]}
 
 		all_accounts = set()
 		for request in self.data_requests:
@@ -70,21 +79,36 @@ class PeriodAccountDataCollector:
 		all_accounts = list(all_accounts)
 		if not all_accounts:
 			return {
-				req["reference_code"]: [0.0] * len(self.periods)
-				for req in self.data_requests
-				if req["reference_code"]
+				"summary": {
+					req["reference_code"]: [0.0] * len(self.periods)
+					for req in self.data_requests
+					if req["reference_code"]
+				},
+				"account_details": {},
+				"period_keys": [p["key"] for p in self.periods],
 			}
 
 		balance_processor = BalanceProcessor(self.filters, self.periods)
 		account_balances = balance_processor.fetch_all_balances(all_accounts)
 
-		results = {}
-		for request in self.data_requests:
-			if request["reference_code"]:
-				period_values = balance_processor.calculate_totals(request, account_balances)
-				results[request["reference_code"]] = period_values
+		# Build Summary
+		account_details = {}
+		summary_results = {}
 
-		return results
+		for request in self.data_requests:
+			if reference_code := request["reference_code"]:
+				# detailed
+				account_values = balance_processor.get_account_values(request, account_balances)
+				account_details[reference_code] = account_values
+
+				# summary
+				summary_results[reference_code] = balance_processor.calculate_totals(account_values)
+
+		return {
+			"summary": summary_results,
+			"account_details": account_details,
+			"period_keys": [p["key"] for p in self.periods],
+		}
 
 	def find_matching_accounts(self, filter_formula: str) -> list[str]:
 		"""
@@ -395,27 +419,41 @@ class BalanceProcessor:
 		else:
 			return query.run(as_dict=True)
 
-	def calculate_totals(self, request: dict, account_data: dict) -> list[float]:
-		accounts = request["accounts"]
+	def get_account_values(self, request: dict, account_data: dict) -> dict[str, list[float]]:
+		"""Extract values for each account by period."""
 		balance_type = request["balance_type"]
-		totals = []
+		account_values = frappe._dict()
+		num_periods = len(self.periods)
 
-		for period in self.periods:
-			period_key = period["key"]
-			period_sum = 0.0
+		for account in request["accounts"]:
+			values = [0.0] * num_periods
 
-			for account in accounts:
-				if account in account_data and period_key in account_data[account]:
-					balance_info = account_data[account][period_key]
+			if account in account_data:
+				for i, period in enumerate(self.periods):
+					balance_info = account_data[account].get(period["key"], {})
+					values[i] = self._get_balance_value(balance_info, balance_type)
 
-					if balance_type == "Opening Balance":
-						period_sum += balance_info["opening"]
-					elif balance_type == "Closing Balance":
-						period_sum += balance_info["closing"]
-					elif balance_type == "Period Movement (Debits - Credits)":
-						period_sum += balance_info["movement"]
+			account_values[account] = values
 
-			totals.append(period_sum)
+		return account_values
+
+	def _get_balance_value(self, balance_info: dict, balance_type: str) -> float:
+		if balance_type == "Opening Balance":
+			return balance_info.get("opening", 0.0)
+		elif balance_type == "Closing Balance":
+			return balance_info.get("closing", 0.0)
+		elif balance_type == "Period Movement (Debits - Credits)":
+			return balance_info.get("movement", 0.0)
+		return 0.0
+
+	def calculate_totals(self, account_values: dict) -> list[float]:
+		"""Calculate the total values across all accounts for each period."""
+		num_periods = len(self.periods)
+		totals = [0.0] * num_periods
+
+		for account_values_list in account_values.values():
+			for i in range(num_periods):
+				totals[i] += account_values_list[i]
 
 		return totals
 

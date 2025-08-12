@@ -14,9 +14,9 @@ from erpnext.accounts.doctype.financial_report_template.report_engine import (
 	FormulaCalculator,
 )
 from erpnext.accounts.doctype.financial_report_template.utils import (
+	AccountDataCollector,
 	BalanceProcessor,
 	FilterExpressionParser,
-	PeriodAccountDataCollector,
 )
 
 # On IntegrationTestCase, the doctype test records and all
@@ -77,8 +77,8 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		cls.test_template = frappe.get_doc("Financial Report Template", "Test P&L Template")
 
-	def test_dependency_resolver(self):
-		"""Test dependency resolution"""
+	def test_dependency_resolver_basic_order(self):
+		"""Test basic dependency resolution ordering"""
 		resolver = DependencyResolver(self.test_template.rows)
 		order = resolver.get_processing_order()
 
@@ -397,7 +397,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
 		]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		# Create a mock row for testing
 		mock_row = frappe._dict(
@@ -411,9 +411,11 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		collector.add_data_request(mock_row)
 		results = collector.process_all_requests()
 
-		# Verify we get results for all periods
-		self.assertIn("TEST_INC", results)
-		self.assertEqual(len(results["TEST_INC"]), 2)  # Two periods
+		# Verify we get results for all periods - check new structure
+		self.assertIn("summary", results)
+		self.assertIn("account_details", results)
+		self.assertIn("TEST_INC", results["summary"])
+		self.assertEqual(len(results["summary"]["TEST_INC"]), 2)  # Two periods
 
 	def test_balance_processor_opening_balance(self):
 		"""Test opening balance calculation in BalanceProcessor"""
@@ -513,7 +515,9 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			}
 		}
 
-		totals = processor.calculate_totals(request, mock_balance_data)
+		# Get account values first, then calculate totals
+		account_values = processor.get_account_values(request, mock_balance_data)
+		totals = processor.calculate_totals(account_values)
 
 		# Should return movement values for each period
 		self.assertEqual(len(totals), 2)
@@ -606,7 +610,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			{"key": "2023_q2", "from_date": "2023-07-01", "to_date": "2023-09-30"},
 		]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		# Test with Income accounts
 		income_row = frappe._dict(
@@ -631,9 +635,10 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		results = collector.process_all_requests()
 
-		# Verify both account types return data
-		self.assertIn("INCOME", results)
-		self.assertIn("EXPENSE", results)
+		# Verify both account types return data with new structure
+		self.assertIn("summary", results)
+		self.assertIn("INCOME", results["summary"])
+		self.assertIn("EXPENSE", results["summary"])
 
 	def test_with_cost_center_filter(self):
 		"""Test BalanceProcessor with cost center filters"""
@@ -697,12 +702,14 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		# Test Opening Balance
 		opening_request = {"accounts": ["Test Account"], "balance_type": "Opening Balance"}
-		opening_totals = processor.calculate_totals(opening_request, mock_balance_data)
+		opening_account_values = processor.get_account_values(opening_request, mock_balance_data)
+		opening_totals = processor.calculate_totals(opening_account_values)
 		self.assertEqual(opening_totals[0], 1000)
 
 		# Test Closing Balance
 		closing_request = {"accounts": ["Test Account"], "balance_type": "Closing Balance"}
-		closing_totals = processor.calculate_totals(closing_request, mock_balance_data)
+		closing_account_values = processor.get_account_values(closing_request, mock_balance_data)
+		closing_totals = processor.calculate_totals(closing_account_values)
 		self.assertEqual(closing_totals[0], 1500)
 
 		# Test Period Movement
@@ -710,7 +717,8 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			"accounts": ["Test Account"],
 			"balance_type": "Period Movement (Debits - Credits)",
 		}
-		movement_totals = processor.calculate_totals(movement_request, mock_balance_data)
+		movement_account_values = processor.get_account_values(movement_request, mock_balance_data)
+		movement_totals = processor.calculate_totals(movement_account_values)
 		self.assertEqual(movement_totals[0], 500)
 
 	def test_complex_nested_filters(self):
@@ -777,7 +785,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			{"key": "2023_q3", "from_date": "2023-07-01", "to_date": "2023-09-30"},
 		]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		test_row = frappe._dict(
 			{
@@ -828,7 +836,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
 		]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		# Test with Sales account (Income)
 		sales_row = frappe._dict(
@@ -885,7 +893,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
 		]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		# Test with Expense account
 		expense_row = frappe._dict(
@@ -1005,7 +1013,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		filters = frappe._dict({"company": "_Test Company"})
 		periods = [{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"}]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		# Test complex nested filter
 		complex_row = frappe._dict(
@@ -1029,9 +1037,10 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		collector.add_data_request(complex_row)
 		results = collector.process_all_requests()
 
-		# Should find matching accounts and return balance data
-		self.assertIn("COMPLEX_FILTER_TEST", results)
-		self.assertEqual(len(results["COMPLEX_FILTER_TEST"]), 1)  # One period
+		# Should find matching accounts and return balance data - check new structure
+		self.assertIn("summary", results)
+		self.assertIn("COMPLEX_FILTER_TEST", results["summary"])
+		self.assertEqual(len(results["summary"]["COMPLEX_FILTER_TEST"]), 1)  # One period
 
 		# Test simple filter for comparison
 		simple_row = frappe._dict(
@@ -1045,7 +1054,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		collector.add_data_request(simple_row)
 		results = collector.process_all_requests()
 
-		self.assertIn("SIMPLE_FILTER_TEST", results)
+		self.assertIn("SIMPLE_FILTER_TEST", results["summary"])
 
 	def test_integration_with_profit_loss_filters(self):
 		"""Test integration with actual Profit and Loss statement filters"""
@@ -1078,7 +1087,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			{"key": "2023_feb", "from_date": "2023-02-01", "to_date": "2023-02-28"},
 		]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		# Test Income accounts
 		income_row = frappe._dict(
@@ -1102,17 +1111,18 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 		collector.add_data_request(expense_row)
 		results = collector.process_all_requests()
 
-		# Verify results
-		self.assertIn("TOTAL_INCOME", results)
-		self.assertIn("TOTAL_EXPENSE", results)
+		# Verify results with new structure
+		self.assertIn("summary", results)
+		self.assertIn("TOTAL_INCOME", results["summary"])
+		self.assertIn("TOTAL_EXPENSE", results["summary"])
 
 		# Both should have data for 2 periods
-		self.assertEqual(len(results["TOTAL_INCOME"]), 2)
-		self.assertEqual(len(results["TOTAL_EXPENSE"]), 2)
+		self.assertEqual(len(results["summary"]["TOTAL_INCOME"]), 2)
+		self.assertEqual(len(results["summary"]["TOTAL_EXPENSE"]), 2)
 
 		# January should have both income and expense movements
-		jan_income = results["TOTAL_INCOME"][0]  # January
-		jan_expense = results["TOTAL_EXPENSE"][0]  # January
+		jan_income = results["summary"]["TOTAL_INCOME"][0]  # January
+		jan_expense = results["summary"]["TOTAL_EXPENSE"][0]  # January
 
 		# Income should be negative (credit), expense positive (debit)
 		self.assertLess(jan_income, -3900)  # Sales invoice amount
@@ -1136,7 +1146,7 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
 		]
 
-		collector = PeriodAccountDataCollector(filters, periods)
+		collector = AccountDataCollector(filters, periods)
 
 		# Create requests for all three data sources for the same account
 		opening_row = frappe._dict(
@@ -1169,20 +1179,21 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		results = collector.process_all_requests()
 
-		# All should be present
-		self.assertIn("OPENING_BAL", results)
-		self.assertIn("MOVEMENT", results)
-		self.assertIn("CLOSING_BAL", results)
+		# All should be present in new structure
+		self.assertIn("summary", results)
+		self.assertIn("OPENING_BAL", results["summary"])
+		self.assertIn("MOVEMENT", results["summary"])
+		self.assertIn("CLOSING_BAL", results["summary"])
 
 		# Check Q1 consistency: Closing = Opening + Movement
-		q1_opening = results["OPENING_BAL"][0]
-		q1_movement = results["MOVEMENT"][0]
-		q1_closing = results["CLOSING_BAL"][0]
+		q1_opening = results["summary"]["OPENING_BAL"][0]
+		q1_movement = results["summary"]["MOVEMENT"][0]
+		q1_closing = results["summary"]["CLOSING_BAL"][0]
 
 		self.assertAlmostEqual(q1_closing, q1_opening + q1_movement, places=2)
 
 		# Check Q2 consistency: Q2 Opening should equal Q1 Closing
-		q2_opening = results["OPENING_BAL"][1]
+		q2_opening = results["summary"]["OPENING_BAL"][1]
 		self.assertAlmostEqual(q2_opening, q1_closing, places=2)
 
 		# Cleanup
