@@ -461,6 +461,7 @@ class SalesInvoice(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.correct_sales_order_billing_with_discounts()
 
 		self.update_billing_status_in_dn()
 		self.clear_unallocated_mode_of_payments()
@@ -589,6 +590,7 @@ class SalesInvoice(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.correct_sales_order_billing_with_discounts()
 		self.update_billing_status_in_dn()
 
 		if not self.is_return:
@@ -2096,6 +2098,112 @@ class SalesInvoice(SellingController):
 
 		if update:
 			self.db_set("status", self.status, update_modified=update_modified)
+
+	def correct_sales_order_billing_with_discounts(self):
+		"""
+		Correct Sales Order billing calculation when discounts are applied.
+		This ensures Sales Orders are auto-closed correctly regardless of discount type.
+		"""
+		if not self.items:
+			return
+
+		# Get all unique Sales Orders affected by this invoice
+		affected_sales_orders = set()
+		items_with_discounts = []
+
+		for item in self.items:
+			if not item.so_detail:
+				continue
+			
+			# Check if this item or invoice has any discount
+			has_discount = (
+				flt(item.discount_amount) > 0 
+				or flt(item.discount_percentage) > 0
+				or flt(self.discount_amount) > 0 
+				or flt(self.additional_discount_percentage) > 0
+			)
+			
+			if has_discount and item.sales_order:
+				affected_sales_orders.add(item.sales_order)
+				items_with_discounts.append(item)
+
+		if not affected_sales_orders:
+			return
+
+		# Process each affected Sales Order
+		for so_name in affected_sales_orders:
+			try:
+				self._recalculate_sales_order_billing(so_name, items_with_discounts)
+			except Exception as e:
+				frappe.log_error(f"Error updating Sales Order {so_name}: {str(e)}", "Sales Order Auto Close")
+
+	def _recalculate_sales_order_billing(self, so_name, invoice_items):
+		"""
+		Recalculate billing percentage for a specific Sales Order using original rates.
+		"""
+		# Get all Sales Order Items for this Sales Order
+		so_items = frappe.get_all(
+			"Sales Order Item", 
+			filters={"parent": so_name},
+			fields=["name", "qty", "rate", "amount"]
+		)
+
+		so_item_map = {item.name: item for item in so_items}
+		
+		# Calculate the correct billed amounts using original rates
+		updates = []
+		for invoice_item in invoice_items:
+			if invoice_item.sales_order != so_name or not invoice_item.so_detail:
+				continue
+				
+			so_item = so_item_map.get(invoice_item.so_detail)
+			if not so_item:
+				continue
+
+			# Calculate billed amount using original SO rate instead of discounted SI rate
+			# For returns, use negative quantity
+			qty_factor = -1 if self.is_return else 1
+			original_rate_amount = flt(invoice_item.qty) * flt(so_item.rate) * qty_factor
+			
+			updates.append({
+				"name": invoice_item.so_detail,
+				"billed_qty": flt(invoice_item.qty) * qty_factor,
+				"original_rate_amount": original_rate_amount
+			})
+
+		if not updates:
+			return
+
+		# Bulk update Sales Order Items with correct billing amounts
+		for update in updates:
+			# Get current billed_amt to avoid overwriting other invoices' contributions
+			current_billed_amt = frappe.db.get_value("Sales Order Item", update["name"], "billed_amt") or 0
+			
+			# Add/subtract this invoice's contribution using original rate
+			new_billed_amt = flt(current_billed_amt) + flt(update["original_rate_amount"])
+			
+			frappe.db.set_value("Sales Order Item", update["name"], "billed_amt", new_billed_amt)
+
+		# Trigger recalculation of percentages and status
+		frappe.db.sql("""
+			UPDATE `tabSales Order` 
+			SET per_billed = (
+				SELECT ROUND(
+					CASE 
+						WHEN SUM(ABS(amount)) > 0 
+						THEN SUM(LEAST(ABS(billed_amt), ABS(amount))) * 100.0 / SUM(ABS(amount))
+						ELSE 0 
+					END, 6
+				)
+				FROM `tabSales Order Item` 
+				WHERE parent = %s AND parenttype = 'Sales Order'
+			)
+			WHERE name = %s
+		""", (so_name, so_name))
+		
+		# Update status if needed
+		so_doc = frappe.get_doc("Sales Order", so_name)
+		so_doc.set_status(update=True)
 
 
 def get_total_in_party_account_currency(doc):
