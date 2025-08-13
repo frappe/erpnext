@@ -7,6 +7,9 @@ import re
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from pyparsing import Any
+
+FORMULA_REGEX = r"\b[A-Za-z][A-Za-z0-9_-]*\b"
 
 
 class FinancialReportTemplate(Document):
@@ -54,7 +57,7 @@ class FinancialReportTemplate(Document):
 
 	def _check_reference_code_format(self):
 		"""Validate reference code format - alphanumeric, underscore, hyphen only."""
-		valid_pattern = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
+		valid_pattern = re.compile(FORMULA_REGEX)
 
 		for row in self.rows:
 			if not row.reference_code:
@@ -89,6 +92,7 @@ class FinancialReportTemplate(Document):
 			return
 
 		rows_by_code = {row.reference_code: row for row in self.rows if row.reference_code}
+		dependencies = {}
 
 		for row in self.rows:
 			if not row.calculation_formula:
@@ -97,7 +101,11 @@ class FinancialReportTemplate(Document):
 			if row.data_source == "Calculated Amount":
 				self._check_balanced_parentheses(row)
 				self._check_self_reference(row, rows_by_code)
-				self._check_circular_references(row, rows_by_code)
+
+				deps = self._extract_reference_codes_from_formula(
+					row.calculation_formula, rows_by_code.keys()
+				)
+				dependencies[row.reference_code] = deps
 
 			elif row.data_source == "Account Data":
 				try:
@@ -111,6 +119,10 @@ class FinancialReportTemplate(Document):
 					frappe.throw(
 						_("Row {0}: Custom API path should be in format: app.module.method").format(row.idx)
 					)
+
+		self._check_for_missing_references(dependencies, rows_by_code)
+		if dependencies:
+			self._check_circular_references(dependencies)
 
 	# === Formula Validation Helpers ===
 	def _check_balanced_parentheses(self, row):
@@ -128,22 +140,53 @@ class FinancialReportTemplate(Document):
 		if row.reference_code in referenced_codes:
 			frappe.throw(_("Row {0} references itself in its formula").format(row.idx))
 
-	def _check_circular_references(self, row, rows_by_code):
-		"""
-		Example of circular reference issue:
-		Row A formula: "B + C"
-		Row B formula: "D - A"  # References A, which references B - creates a cycle
+	def _check_for_missing_references(self, dependencies: dict, rows_by_code: dict):
+		for row_code, deps in dependencies.items():
+			for dep in deps:
+				if dep not in rows_by_code:
+					frappe.throw(
+						_("Reference code '{0}' used in formula for '{1}' does not exist").format(
+							dep, row_code
+						)
+					)
 
-		This would create an infinite loop during calculation.
+	def _check_circular_references(self, dependencies: dict[str, list[str]]):
 		"""
-		if not row.reference_code:
-			return
+		Efficient cycle detection using DFS (Depth-First Search) with three-color algorithm:
+		- WHITE (0): unvisited node
+		- GRAY (1): currently being processed (on recursion stack)
+		- BLACK (2): fully processed
 
-		referenced_codes = self._extract_reference_codes_from_formula(
-			row.calculation_formula, rows_by_code.keys()
-		)
-		visited_codes = set()
-		self._detect_circular_reference(row.reference_code, referenced_codes, rows_by_code, visited_codes)
+		Example cycle detection:
+		A → B → C → A (cycle detected when A is GRAY and visited again)
+		"""
+		WHITE, GRAY, BLACK = 0, 1, 2
+		colors = {node: WHITE for node in dependencies.keys()}
+
+		def dfs(node, path):
+			if colors[node] == GRAY:
+				# Found a cycle - build cycle path for better error message
+				cycle_start = path.index(node)
+				cycle_nodes = [*path[cycle_start:], node]
+				frappe.throw(_("Circular dependency detected: {0}").format(" → ".join(cycle_nodes)))
+
+			if colors[node] == BLACK:
+				return  # Already processed
+
+			colors[node] = GRAY
+			path.append(node)
+
+			for neighbor in dependencies.get(node, []):
+				if neighbor in colors:  # Only check dependencies that exist
+					dfs(neighbor, path)
+
+			path.pop()
+			colors[node] = BLACK
+
+		# Check all nodes
+		for node in dependencies:
+			if colors[node] == WHITE:
+				dfs(node, [])
 
 	def _extract_reference_codes_from_formula(self, formula, available_codes):
 		found_codes = []
@@ -153,23 +196,13 @@ class FinancialReportTemplate(Document):
 			if re.search(pattern, formula):
 				found_codes.append(code)
 
+		# potential unknown references (alphabetic identifiers)
+		potential_refs = re.findall(FORMULA_REGEX, formula)
+		for ref in potential_refs:
+			if ref not in self.row_map and ref not in found_codes:
+				found_codes.append(ref)
+
 		return found_codes
-
-	def _detect_circular_reference(self, current_code, referenced_codes, rows_by_code, visited_codes):
-		visited_codes.add(current_code)
-
-		for code in referenced_codes:
-			if code in visited_codes:
-				frappe.throw(_("Circular reference detected between {0} and {1}").format(current_code, code))
-
-			row = rows_by_code.get(code)
-			if row and row.data_source == "Calculated Amount" and row.calculation_formula:
-				next_referenced_codes = self._extract_reference_codes_from_formula(
-					row.calculation_formula, rows_by_code.keys()
-				)
-				self._detect_circular_reference(
-					code, next_referenced_codes, rows_by_code, visited_codes.copy()
-				)
 
 	# === Account Filter Validation ===
 	def _validate_account_filter_structure(self, filter_config, row):
