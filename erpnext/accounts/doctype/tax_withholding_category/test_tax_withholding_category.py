@@ -54,6 +54,10 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# Sort both actual and expected entries for consistent comparison
 		def sort_key(entry):
 			return (
+				entry.get("taxable_doctype", ""),
+				entry.get("taxable_name", ""),
+				entry.get("withholding_doctype", ""),
+				entry.get("withholding_name", ""),
 				entry.get("tax_withholding_category", ""),
 				entry.get("taxable_amount", 0),
 				entry.get("withholding_amount", 0),
