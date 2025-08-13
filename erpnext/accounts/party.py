@@ -353,7 +353,7 @@ def set_other_values(party_details, party, party_type):
 	if party_type == "Customer":
 		to_copy.extend(["customer_name", "customer_group", "territory"])
 	else:
-		to_copy = ["supplier_name", "supplier_group"]
+		to_copy.extend(["supplier_name", "supplier_group"])
 
 	for f in to_copy:
 		party_details[f] = party.get(f)

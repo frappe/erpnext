@@ -544,11 +544,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
-			target_doc.tax_withholding_category = source_doc.tax_withholding_category
-			target_doc.apply_tds = source_doc.apply_tds
 
 			if doctype == "Sales Invoice":
 				target_doc.sales_invoice_item = source_doc.name
+				target_doc.tax_withholding_category = source_doc.tax_withholding_category
+				target_doc.apply_tds = source_doc.apply_tds
 			else:
 				target_doc.pos_invoice_item = source_doc.name
 
