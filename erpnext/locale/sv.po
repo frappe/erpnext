@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-08-10 09:37+0000\n"
-"PO-Revision-Date: 2025-08-12 17:14\n"
+"PO-Revision-Date: 2025-08-13 17:31\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -25309,7 +25309,7 @@ msgstr "Integration ID"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Inter Company Invoice Reference"
-msgstr "Intern Bolag Faktura Referens"
+msgstr "Inter Bolag Faktura Referens"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -25317,13 +25317,13 @@ msgstr "Intern Bolag Faktura Referens"
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Inter Company Journal Entry"
-msgstr "Intern Bolag Journal Post"
+msgstr "Inter Bolag Journal Post"
 
 #. Label of the inter_company_journal_entry_reference (Link) field in DocType
 #. 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Inter Company Journal Entry Reference"
-msgstr "Intern Bolag Journal Post Referens"
+msgstr "Inter Bolag Journal Post Referens"
 
 #. Label of the inter_company_order_reference (Link) field in DocType 'Purchase
 #. Order'
@@ -25332,7 +25332,7 @@ msgstr "Intern Bolag Journal Post Referens"
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Inter Company Order Reference"
-msgstr "Intern Bolag Order Referens"
+msgstr "Inter Bolag Order Referens"
 
 #. Label of the inter_company_reference (Link) field in DocType 'Delivery Note'
 #. Label of the inter_company_reference (Link) field in DocType 'Purchase
@@ -25340,7 +25340,7 @@ msgstr "Intern Bolag Order Referens"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Inter Company Reference"
-msgstr "Mellan Bolag Referens"
+msgstr "Inter Bolag Referens"
 
 #. Label of the inter_transfer_reference_section (Section Break) field in
 #. DocType 'Sales Order Item'
@@ -25676,7 +25676,7 @@ msgstr "Ogiltig {0}"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2182
 msgid "Invalid {0} for Inter Company Transaction."
-msgstr "Ogiltig {0} för Intern Bolag Transaktion."
+msgstr "Ogiltig {0} för Inter Bolag Transaktion."
 
 #: erpnext/accounts/report/general_ledger/general_ledger.py:101
 #: erpnext/controllers/sales_and_purchase_return.py:35
@@ -32497,7 +32497,7 @@ msgstr "Ingen Svar"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2351
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
-msgstr "Ingen Kund hittades för Intern Bolag Transaktioner som representerar Bolag {0}"
+msgstr "Ingen Kund hittades för Inter Bolag Transaktioner som representerar Bolag {0}"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:144
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:404
@@ -32591,7 +32591,7 @@ msgstr "Ingen Översikt"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2335
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
-msgstr "Ingen Leverantör hittades för Intern Bolag Transaktioner som representerar Bolag {0}"
+msgstr "Ingen Leverantör hittades för Inter Bolag Transaktioner som representerar Bolag {0}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:221
 msgid "No Tax Withholding data found for the current posting date."
@@ -32827,7 +32827,7 @@ msgstr "Inga {0} konto hittades för detta bolag."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2399
 msgid "No {0} found for Inter Company Transactions."
-msgstr "Ingen {0} hittades för Intern Bolag Transaktioner."
+msgstr "Ingen {0} hittades för Inter Bolag Transaktioner."
 
 #: erpnext/assets/doctype/asset/asset.js:286
 msgid "No."
