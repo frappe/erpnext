@@ -380,6 +380,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		doc.set_warehouse = ""
 		if doctype == "Sales Invoice" or doctype == "POS Invoice":
 			doc.is_pos = source.is_pos
+			doc.tax_withholding_group = source.tax_withholding_group
+			doc.ignore_tax_withholding_threshold = source.ignore_tax_withholding_threshold
 
 			# look for Print Heading "Credit Note"
 			if not doc.select_print_heading:
@@ -388,8 +390,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
-			if source.tax_withholding_category:
-				doc.set_onload("tax_withholding_category", source.tax_withholding_category)
 		elif doctype == "Delivery Note":
 			# manual additions to the return should hit the return warehous, too
 			doc.set_warehouse = default_warehouse_for_sales_return
