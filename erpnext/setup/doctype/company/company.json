@@ -838,7 +838,7 @@
    "options": "Advance Payment Date\nOldest Of Invoice Or Advance\nReconciliation Date"
   }
  ],
-"icon": "fa fa-building",
+ "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
@@ -910,4 +910,4 @@
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1
-}
+
