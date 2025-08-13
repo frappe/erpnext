@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 import ast
+import re
+from datetime import datetime
 from functools import reduce
 from typing import Any
 
@@ -9,13 +11,303 @@ import frappe
 from frappe import _
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, date_diff, getdate
+from frappe.utils import cstr, date_diff, flt, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
+from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+	FinancialReportTemplate,
+)
+from erpnext.accounts.report.financial_statements import (
+	get_columns,
+	get_cost_centers_with_children,
+	get_period_list,
+)
+
+
+class FinancialReportEngine:
+	"""
+	Main engine for processing custom financial report templates.
+	Orchestrates the entire report generation process.
+	"""
+
+	def __init__(self, template_name: str, filters: dict[str, Any]):
+		self.template_name = template_name
+		self.filters = filters
+		self.template = None
+		self.period_list = []
+		self.row_data = {}
+		self.processed_rows = []
+
+	def execute(self) -> tuple:
+		try:
+			self.load_template()
+
+			self.generate_periods()
+
+			columns = self.get_report_columns()
+
+			self.process_rows()
+
+			data = self.format_report_data()
+
+			return columns, data
+
+		except Exception as e:
+			frappe.log_error(f"Financial Report Error: {e!s}")
+			frappe.throw(_("Error generating financial report: {0}").format(str(e)))
+
+	def load_template(self):
+		self.template = frappe.get_doc("Financial Report Template", self.template_name)
+		if not self.template:
+			frappe.throw(_("Financial Report Template {0} not found").format(self.template_name))
+
+		if self.template.disabled:
+			frappe.throw(_("Financial Report Template {0} is disabled").format(self.template_name))
+
+	def generate_periods(self):
+		self.period_list = get_period_list(
+			self.filters.from_fiscal_year,
+			self.filters.to_fiscal_year,
+			self.filters.period_start_date,
+			self.filters.period_end_date,
+			self.filters.filter_based_on,
+			self.filters.periodicity,
+			company=self.filters.company,
+		)
+
+	def get_report_columns(self) -> list[dict]:
+		columns = [{"fieldname": "account", "label": _(""), "fieldtype": "Data", "width": 300}]
+
+		period_columns = get_columns(
+			self.filters.periodicity,
+			self.period_list,
+			self.filters.accumulated_values,
+			self.filters.company,
+		)
+
+		columns.extend(period_columns)
+		return columns
+
+	def process_rows(self):
+		"""Process all template rows in the correct dependency order"""
+		processor = RowProcessor(self.template, self.filters, self.period_list)
+		self.row_data = processor.process_all_rows()
+		self.processed_rows = processor.get_processed_rows()
+
+		# Store account details for potential use by frontend
+		self.account_details = getattr(processor, "account_details", {})
+		self.period_keys = getattr(processor, "period_keys", [])
+
+	def format_report_data(self) -> list[dict]:
+		"""Format the processed data for display"""
+		formatter = DataFormatter(self.processed_rows, self.period_list)
+		return formatter.format_for_display()
+
+
+class RowProcessor:
+	"""
+	Processes individual rows of the financial report template.
+	Handles dependency resolution and calculation order.
+	"""
+
+	def __init__(self, template, filters: dict, period_list: list):
+		self.template = template
+		self.filters = filters
+		self.period_list = period_list
+		self.row_data = {}
+		self.processed_rows = []
+		self.account_details = {}
+		self.period_keys = []
+		self.dependency_resolver = DependencyResolver(template)
+
+	def process_all_rows(self) -> dict:
+		processing_order = self.dependency_resolver.get_processing_order()
+
+		account_rows = [row for row in processing_order if row.data_source == "Account Data"]
+		if account_rows:
+			collector = AccountDataCollector(self.filters, self.period_list)
+
+			for row in account_rows:
+				collector.add_data_request(row)
+
+			account_data = collector.process_all_requests()
+
+			# Store detailed account information for later use
+			self.row_data.update(account_data.get("summary", {}))
+			self.account_details = account_data.get("account_details", {})
+			self.period_keys = account_data.get("period_keys", [])
+
+		# Process remaining rows in order
+		for row in processing_order:
+			if row.data_source == "Account Data":
+				self.process_account_row(row, self.row_data)
+			elif row.data_source == "Calculated Amount":
+				self.process_formula_row(row)
+			elif row.data_source == "Blank Line":
+				self.process_blank_row(row)
+
+			self.processed_rows.append(row)
+
+		return self.row_data
+
+	def process_account_row(self, row, summary_data: dict):
+		if not row.reference_code:
+			return
+
+		row._calculated_values = summary_data.get(row.reference_code, [0.0] * len(self.period_list))
+
+	def process_formula_row(self, row):
+		"""Process a formula calculation row"""
+		calculator = FormulaCalculator(self.row_data, self.period_list)
+		formula_result = calculator.evaluate_formula(row.calculation_formula)
+
+		# Store in row_data and assign to row object
+		if row.reference_code:
+			self.row_data[row.reference_code] = formula_result
+
+		# Always assign calculated values to the row object for display formatting
+		row._calculated_values = formula_result
+
+	def process_blank_row(self, row):
+		return [""] * len(self.period_list)
+
+	def get_processed_rows(self) -> list:
+		"""Return the list of processed rows"""
+		return self.processed_rows
+
+
+class DependencyResolver:
+	"""
+	Resolves dependencies between rows to determine processing order.
+	Ensures formulas are calculated after their dependencies.
+	"""
+
+	def __init__(self, template):
+		self.template: FinancialReportTemplate = template
+		self.rows = template.rows
+		self.row_map = {row.reference_code: row for row in self.rows if row.reference_code}
+		self.dependencies = {}
+		self.analyze_dependencies()
+		self.validate_dependencies()
+
+	def analyze_dependencies(self):
+		for row in self.rows:
+			if not row.reference_code or not row.calculation_formula:
+				continue
+
+			if row.data_source == "Calculated Amount":
+				deps = self.template._extract_reference_codes_from_formula(
+					row.calculation_formula, self.row_map.keys()
+				)
+				self.dependencies[row.reference_code] = deps
+
+	def validate_dependencies(self):
+		if self.dependencies:
+			self.check_circular_references(self.dependencies)
+
+	def get_processing_order(self) -> list:
+		# rows by type
+		api_rows = []
+		account_rows = []
+		formula_rows = []
+		other_rows = []
+
+		for row in self.rows:
+			if row.data_source == "Custom API":
+				api_rows.append(row)
+			elif row.data_source == "Account Data":
+				account_rows.append(row)
+			elif row.data_source == "Calculated Amount":
+				formula_rows.append(row)
+			else:
+				other_rows.append(row)
+
+		ordered_rows = api_rows + account_rows
+
+		# sort formula rows
+		if formula_rows:
+			ordered_formula_rows = self.topological_sort(formula_rows)
+			ordered_rows.extend(ordered_formula_rows)
+
+		ordered_rows.extend(other_rows)
+
+		return ordered_rows
+
+	def topological_sort(self, formula_rows) -> list:
+		formula_row_map = {row.reference_code: row for row in formula_rows if row.reference_code}
+
+		# calculate in-degree
+		in_degree = {code: 0 for code in formula_row_map.keys()}
+		for code, deps in self.dependencies.items():
+			if code in in_degree:
+				for dep in deps:
+					if dep in in_degree:  # only count dependencies within formula rows
+						in_degree[code] += 1
+
+		# initialize queue with nodes having no incoming edges
+		queue = [code for code, degree in in_degree.items() if degree == 0]
+		result = []
+
+		while queue:
+			current = queue.pop(0)
+			if current in formula_row_map:
+				result.append(formula_row_map[current])
+
+			# reduce in-degree for dependent nodes
+			for code, deps in self.dependencies.items():
+				if current in deps and code in in_degree:
+					in_degree[code] -= 1
+					if in_degree[code] == 0:
+						queue.append(code)
+
+		# remaining formula rows
+		for row in formula_rows:
+			if not row.reference_code or row not in result:
+				result.append(row)
+
+		return result
+
+	@staticmethod
+	def check_circular_references(dependencies: dict[str, list[str]]):
+		"""
+		Efficient cycle detection using DFS (Depth-First Search) with three-color algorithm:
+		- WHITE (0): unvisited node
+		- GRAY (1): currently being processed (on recursion stack)
+		- BLACK (2): fully processed
+
+		Example cycle detection:
+		A → B → C → A (cycle detected when A is GRAY and visited again)
+		"""
+		WHITE, GRAY, BLACK = 0, 1, 2
+		colors = {node: WHITE for node in dependencies.keys()}
+
+		def dfs(node, path):
+			if colors[node] == GRAY:
+				# Found a cycle - build cycle path for better error message
+				cycle_start = path.index(node)
+				cycle_nodes = [*path[cycle_start:], node]
+				frappe.throw(_("Circular dependency detected: {0}").format(" → ".join(cycle_nodes)))
+
+			if colors[node] == BLACK:
+				return  # Already processed
+
+			colors[node] = GRAY
+			path.append(node)
+
+			for neighbor in dependencies.get(node, []):
+				if neighbor in colors:  # Only check dependencies that exist
+					dfs(neighbor, path)
+
+			path.pop()
+			colors[node] = BLACK
+
+		# Check all nodes
+		for node in dependencies:
+			if colors[node] == WHITE:
+				dfs(node, [])
 
 
 class AccountDataCollector:
@@ -134,6 +426,201 @@ class AccountDataCollector:
 		query = query.orderby(account.name)
 		result = query.run(as_dict=True)
 		return [row.name for row in result]
+
+
+class CustomAPIHandler:
+	"""Handler for custom API data sources"""
+
+	def __init__(self, filters, periods):
+		self.filters = filters
+		self.periods = periods
+		self.cache = {}
+
+	def execute_custom_api(self, row):
+		"""Execute custom API with caching and error handling"""
+		api_path = row.calculation_formula
+		cache_key = f"{api_path}:{hash(frozenset(self.filters.items()))}"
+
+		if cache_key in self.cache:
+			return self.cache[cache_key]
+
+		try:
+			module_path, method_name = api_path.rsplit(".", 1)
+			module = frappe.get_module(module_path)
+			method = getattr(module, method_name)
+
+			# Pass standardized context
+			context = {
+				"filters": self.filters,
+				"periods": self.periods,
+				"row": row,
+				"company": self.filters.get("company"),
+			}
+
+			result = method(context)
+			self.cache[cache_key] = result
+			return result
+
+		except Exception as e:
+			frappe.log_error(f"Custom API Error: {api_path} - {e!s}")
+			return [0.0] * len(self.periods)
+
+
+class FormulaCalculator:
+	"""
+	Calculates formula expressions using row reference codes.
+	Provides a secure evaluation environment using Frappe's safe_eval.
+	"""
+
+	def __init__(self, row_data: dict, period_list: list):
+		self.row_data = row_data
+		self.period_list = period_list
+
+	def evaluate_formula(self, formula: str) -> list[float]:
+		"""Evaluate a formula for all periods"""
+		results = []
+
+		for i, _period in enumerate(self.period_list):
+			period_result = self.evaluate_formula_for_period(formula, i)
+			results.append(period_result)
+
+		return results
+
+	def evaluate_formula_for_period(self, formula: str, period_index: int) -> float:
+		"""Evaluate formula for a specific period"""
+		try:
+			# Build context with values for this period
+			context = self.build_evaluation_context(period_index)
+
+			# Use frappe's safe evaluation
+			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
+			return flt(result, 2)
+
+		except ZeroDivisionError:
+			frappe.log_error(f"Division by zero in formula: {formula}")
+			return 0.0
+		except Exception as e:
+			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
+			return 0.0
+
+	def build_evaluation_context(self, period_index: int) -> dict:
+		"""Build safe evaluation context with row values"""
+		context = {}
+
+		for code, values in self.row_data.items():
+			code: str
+			if code and code.isidentifier():
+				value = flt(values[period_index]) if len(values) > period_index else 0.0
+				context[code] = value
+
+			elif code:
+				# Log warning about invalid reference code
+				frappe.log_error(f"Invalid reference code format: {code}")
+
+		# Add math functions using shared method
+		context.update(self.get_math_functions())
+		return context
+
+	@staticmethod
+	def get_math_functions() -> dict:
+		"""Get safe mathematical functions for formula evaluation"""
+		import math
+
+		return {
+			"abs": abs,
+			"min": min,
+			"max": max,
+			"round": round,
+			"sum": sum,
+			# Add individual math functions for safety (not the full math module)
+			"sqrt": math.sqrt,
+			"pow": math.pow,
+			"ceil": math.ceil,
+			"floor": math.floor,
+		}
+
+	@classmethod
+	def validate_formula_with_context(cls, formula: str, context: dict) -> tuple[bool, str | None]:
+		"""
+		Validate a formula with given context, returning success status and error message
+		Used for validation purposes without needing a full FormulaCalculator instance
+		"""
+		try:
+			# Add math functions to context
+			validation_context = context.copy()
+			validation_context.update(cls.get_math_functions())
+
+			# Use frappe's safe_eval to validate formula
+			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=validation_context)
+
+			# Ensure result is numeric
+			if not isinstance(result, int | float):
+				return f"Formula must return a numeric value, got: {type(result).__name__}"
+
+			return None
+		except Exception as e:
+			return str(e)
+
+
+class DataFormatter:
+	"""
+	Formats processed row data for display in the report.
+	Handles indentation, styling, and visibility rules.
+	"""
+
+	def __init__(self, processed_rows: list, period_list: list):
+		self.processed_rows = processed_rows
+		self.period_list = period_list
+
+	def format_for_display(self) -> list[dict]:
+		"""Format all rows for display"""
+		formatted_data = []
+
+		for row in self.processed_rows:
+			if self.should_show_row(row):
+				formatted_row = self.format_single_row(row)
+				formatted_data.append(formatted_row)
+
+		return formatted_data
+
+	def should_show_row(self, row) -> bool:
+		"""Determine if a row should be shown based on visibility rules"""
+		if row.hide_when_empty:
+			# Check if all values are zero
+			if hasattr(row, "_calculated_values"):
+				return any(val != 0 for val in row._calculated_values)
+
+		if row.hidden_calculation:
+			return False
+
+		return True
+
+	def format_single_row(self, row) -> dict:
+		"""Format a single row for display"""
+		formatted_row = {
+			"account": self.get_display_name(row),
+			"indent": row.indentation_level or 0,
+		}
+
+		# Add period values
+		if hasattr(row, "_calculated_values"):
+			for i, period in enumerate(self.period_list):
+				period_key = period.get("key", f"period_{i}")
+				value = row._calculated_values[i] if i < len(row._calculated_values) else 0.0
+				formatted_row[period_key] = flt(value, 2)
+
+		# Apply formatting
+		if row.bold_text:
+			formatted_row["bold"] = 1
+		if row.italic_text:
+			formatted_row["italic"] = 1
+
+		return formatted_row
+
+	def get_display_name(self, row) -> str:
+		"""Get the display name for a row with proper indentation"""
+		indent = "   " * (row.indentation_level or 0)
+		return f"{indent}{row.display_name or ''}"
 
 
 class BalanceProcessor:

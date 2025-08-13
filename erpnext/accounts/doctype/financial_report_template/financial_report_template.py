@@ -7,7 +7,6 @@ import re
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from pyparsing import Any
 
 FORMULA_REGEX = r"\b[A-Za-z][A-Za-z0-9_-]*\b"
 
@@ -31,9 +30,13 @@ class FinancialReportTemplate(Document):
 		template_name: DF.Data
 	# end: auto-generated types
 
+	# Class constants for validation
+	from typing import ClassVar
+
 	def validate(self):
 		self.validate_reference_codes()
 		self.validate_row_content()
+		self.validate_references()
 
 	# === Reference Code Validation ===
 	def validate_reference_codes(self):
@@ -120,9 +123,12 @@ class FinancialReportTemplate(Document):
 						_("Row {0}: Custom API path should be in format: app.module.method").format(row.idx)
 					)
 
-		self._check_for_missing_references(dependencies, rows_by_code)
 		if dependencies:
-			self._check_circular_references(dependencies)
+			from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+				DependencyResolver,
+			)
+
+			DependencyResolver.check_circular_references(dependencies)
 
 	# === Formula Validation Helpers ===
 	def _check_balanced_parentheses(self, row):
@@ -140,54 +146,6 @@ class FinancialReportTemplate(Document):
 		if row.reference_code in referenced_codes:
 			frappe.throw(_("Row {0} references itself in its formula").format(row.idx))
 
-	def _check_for_missing_references(self, dependencies: dict, rows_by_code: dict):
-		for row_code, deps in dependencies.items():
-			for dep in deps:
-				if dep not in rows_by_code:
-					frappe.throw(
-						_("Reference code '{0}' used in formula for '{1}' does not exist").format(
-							dep, row_code
-						)
-					)
-
-	def _check_circular_references(self, dependencies: dict[str, list[str]]):
-		"""
-		Efficient cycle detection using DFS (Depth-First Search) with three-color algorithm:
-		- WHITE (0): unvisited node
-		- GRAY (1): currently being processed (on recursion stack)
-		- BLACK (2): fully processed
-
-		Example cycle detection:
-		A → B → C → A (cycle detected when A is GRAY and visited again)
-		"""
-		WHITE, GRAY, BLACK = 0, 1, 2
-		colors = {node: WHITE for node in dependencies.keys()}
-
-		def dfs(node, path):
-			if colors[node] == GRAY:
-				# Found a cycle - build cycle path for better error message
-				cycle_start = path.index(node)
-				cycle_nodes = [*path[cycle_start:], node]
-				frappe.throw(_("Circular dependency detected: {0}").format(" → ".join(cycle_nodes)))
-
-			if colors[node] == BLACK:
-				return  # Already processed
-
-			colors[node] = GRAY
-			path.append(node)
-
-			for neighbor in dependencies.get(node, []):
-				if neighbor in colors:  # Only check dependencies that exist
-					dfs(neighbor, path)
-
-			path.pop()
-			colors[node] = BLACK
-
-		# Check all nodes
-		for node in dependencies:
-			if colors[node] == WHITE:
-				dfs(node, [])
-
 	def _extract_reference_codes_from_formula(self, formula, available_codes):
 		found_codes = []
 		for code in available_codes:
@@ -196,13 +154,38 @@ class FinancialReportTemplate(Document):
 			if re.search(pattern, formula):
 				found_codes.append(code)
 
-		# potential unknown references (alphabetic identifiers)
-		potential_refs = re.findall(FORMULA_REGEX, formula)
-		for ref in potential_refs:
-			if ref not in self.row_map and ref not in found_codes:
-				found_codes.append(ref)
-
 		return found_codes
+
+	def validate_references(self):
+		"""Validate that all reference codes in formulas exist and check for circular dependencies"""
+		# This is a basic validation - comprehensive validation happens in DependencyResolver
+		all_formulas = {}
+
+		# Check row level formulas
+		for row in self.rows or []:
+			if row.data_source == "Calculated Amount" and row.calculation_formula:
+				if row.reference_code:
+					all_formulas[row.reference_code] = row.calculation_formula
+
+		# Only proceed if we have formulas to validate
+		if not all_formulas:
+			return
+
+		# Build example context with all reference codes set to sample values
+		example_context = {}
+		for row in self.rows:
+			if row.reference_code:
+				example_context[row.reference_code] = 1000.0  # Sample value
+
+		# Validate each formula using the FormulaCalculator's validation method
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			FormulaCalculator,
+		)
+
+		for ref_code, formula in all_formulas.items():
+			error_message = FormulaCalculator.validate_formula_with_context(formula, example_context)
+			if error_message:
+				frappe.throw(_("Invalid formula in '{0}': {1}").format(ref_code, error_message))
 
 	# === Account Filter Validation ===
 	def _validate_account_filter_structure(self, filter_config, row):

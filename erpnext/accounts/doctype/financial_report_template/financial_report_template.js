@@ -86,15 +86,22 @@ function update_formula_description(frm, cdt, cdn, data_source) {
 				<h5 ${title_style}>Formula Guide</h5>
 				<p ${text_style}>Create calculations using reference codes from other lines.</p>
 
-				<h6 ${subtitle_style}>Examples:</h6>
+				<h6 ${subtitle_style}>Basic Examples:</h6>
 				<ul ${list_style}>
 					<li><code>REV100 + REV200</code> - Add two revenue lines</li>
 					<li><code>ASSETS - LIABILITIES</code> - Calculate equity</li>
-					<li><code>(REV100 + REV200) * 0.1</code> - 10% of combined revenue</li>
-					<li><code>GROSS_PROFIT / TOTAL_REVENUE</code> - Profit margin</li>
+					<li><code>REVENUE * 0.1</code> - 10% of revenue</li>
 				</ul>
 
-				<p ${note_style}><strong>Required:</strong> Use 'Line Reference' codes from other rows in your formulas.</p>
+				<h6 ${subtitle_style}>Common Functions:</h6>
+				<ul ${list_style}>
+					<li><code>abs(value)</code> - Remove negative sign</li>
+					<li><code>round(value)</code> - Round to whole number</li>
+					<li><code>max(val1, val2)</code> - Larger of two values</li>
+					<li><code>min(val1, val2)</code> - Smaller of two values</li>
+				</ul>
+
+				<p ${note_style}><strong>Required:</strong> Use 'Reference Code' from other rows in your formulas.</p>
 			</div>`;
 	} else if (data_source === "Custom API") {
 		description_html = `

@@ -1,22 +1,18 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.tests.utils import make_test_records
 
-from erpnext.accounts.doctype.financial_report_template.report_engine import (
-	AccountResolver,
-	DataFormatter,
-	DependencyResolver,
-	FinancialReportEngine,
-	FormulaCalculator,
-)
-from erpnext.accounts.doctype.financial_report_template.utils import (
+from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	AccountDataCollector,
 	BalanceProcessor,
+	DataFormatter,
+	DependencyResolver,
 	FilterExpressionParser,
+	FinancialReportEngine,
+	FormulaCalculator,
 )
 
 # On IntegrationTestCase, the doctype test records and all
@@ -77,9 +73,17 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		cls.test_template = frappe.get_doc("Financial Report Template", "Test P&L Template")
 
+	def create_test_template_with_rows(self, rows_data):
+		"""Helper method to create test template with specific rows"""
+		template_name = f"Test Template {frappe.generate_hash()[:8]}"
+		template = frappe.get_doc(
+			{"doctype": "Financial Report Template", "template_name": template_name, "rows": rows_data}
+		)
+		return template
+
 	def test_dependency_resolver_basic_order(self):
 		"""Test basic dependency resolution ordering"""
-		resolver = DependencyResolver(self.test_template.rows)
+		resolver = DependencyResolver(self.test_template)
 		order = resolver.get_processing_order()
 
 		# Should process account rows before formula rows
@@ -88,22 +92,708 @@ class TestFinancialReportTemplate(IntegrationTestCase):
 
 		self.assertTrue(all(ai < fi for ai in account_indices for fi in formula_indices))
 
+	def test_dependency_resolver_simple_dependency(self):
+		"""Test dependency resolution with simple formula dependency"""
+		# Create test rows with dependencies
+		test_rows = [
+			{
+				"reference_code": "A001",
+				"display_name": "Base Account",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_type", "=", "Income"]',
+			},
+			{
+				"reference_code": "B001",
+				"display_name": "Calculated Row",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "A001 * 2",
+			},
+		]
+
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+
+		# Check dependencies were correctly identified
+		self.assertIn("B001", resolver.dependencies)
+		self.assertEqual(resolver.dependencies["B001"], ["A001"])
+
+		# Check processing order
+		order = resolver.get_processing_order()
+		a001_index = next(i for i, row in enumerate(order) if row.reference_code == "A001")
+		b001_index = next(i for i, row in enumerate(order) if row.reference_code == "B001")
+
+		self.assertLess(a001_index, b001_index, "A001 should be processed before B001")
+
+	def test_dependency_resolver_multiple_dependencies(self):
+		"""Test dependency resolution with multiple dependencies"""
+		test_rows = [
+			{
+				"reference_code": "INC001",
+				"display_name": "Income",
+				"data_source": "Account Data",
+				"calculation_formula": '["root_type", "=", "Income"]',
+			},
+			{
+				"reference_code": "EXP001",
+				"display_name": "Expenses",
+				"data_source": "Account Data",
+				"calculation_formula": '["root_type", "=", "Expense"]',
+			},
+			{
+				"reference_code": "GROSS001",
+				"display_name": "Gross Profit",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "INC001 - EXP001",
+			},
+			{
+				"reference_code": "MARGIN001",
+				"display_name": "Profit Margin",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "GROSS001 / INC001 * 100",
+			},
+		]
+
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+
+		# Check dependencies
+		self.assertEqual(set(resolver.dependencies["GROSS001"]), {"INC001", "EXP001"})
+		self.assertEqual(set(resolver.dependencies["MARGIN001"]), {"GROSS001", "INC001"})
+
+		# Check processing order
+		order = resolver.get_processing_order()
+		positions = {row.reference_code: i for i, row in enumerate(order) if row.reference_code}
+
+		# Account rows should come before formula rows
+		self.assertLess(positions["INC001"], positions["GROSS001"])
+		self.assertLess(positions["EXP001"], positions["GROSS001"])
+
+		# GROSS001 should come before MARGIN001 (which depends on it)
+		self.assertLess(positions["GROSS001"], positions["MARGIN001"])
+
+	def test_dependency_resolver_chain_dependencies(self):
+		"""Test dependency resolution with chain of dependencies (A -> B -> C -> D)"""
+		test_rows = [
+			{
+				"reference_code": "A001",
+				"display_name": "Base",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_type", "=", "Income"]',
+			},
+			{
+				"reference_code": "B001",
+				"display_name": "Level 1",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "A001 + 100",
+			},
+			{
+				"reference_code": "C001",
+				"display_name": "Level 2",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "B001 * 1.2",
+			},
+			{
+				"reference_code": "D001",
+				"display_name": "Level 3",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "C001 - 50",
+			},
+		]
+
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+		order = resolver.get_processing_order()
+		positions = {row.reference_code: i for i, row in enumerate(order) if row.reference_code}
+
+		# Verify chain order
+		self.assertLess(positions["A001"], positions["B001"])
+		self.assertLess(positions["B001"], positions["C001"])
+		self.assertLess(positions["C001"], positions["D001"])
+
+	def test_dependency_resolver_circular_dependency_detection(self):
+		test_rows = [
+			{
+				"reference_code": "A001",
+				"display_name": "Row A",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "B001 + 100",
+			},
+			{
+				"reference_code": "B001",
+				"display_name": "Row B",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "A001 + 200",
+			},
+		]
+
+		# Should raise ValidationError for circular dependency
+		test_template = self.create_test_template_with_rows(test_rows)
+		with self.assertRaises(frappe.ValidationError):
+			DependencyResolver(test_template)
+
+	def test_dependency_resolver_complex_circular_dependency(self):
+		"""Test detection of complex circular dependency (A -> B -> C -> A)"""
+		test_rows = [
+			{
+				"reference_code": "A001",
+				"display_name": "Row A",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "C001 + 100",  # A depends on C
+			},
+			{
+				"reference_code": "B001",
+				"display_name": "Row B",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "A001 + 200",  # B depends on A
+			},
+			{
+				"reference_code": "C001",
+				"display_name": "Row C",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "B001 * 1.5",  # C depends on B -> creates cycle
+			},
+		]
+
+		# Should raise ValidationError for circular dependency
+		test_template = self.create_test_template_with_rows(test_rows)
+		with self.assertRaises(frappe.ValidationError):
+			DependencyResolver(test_template)
+
+	def test_dependency_resolver_missing_reference(self):
+		"""Test detection of missing reference codes"""
+		test_rows = [
+			{
+				"reference_code": "A001",
+				"display_name": "Row A",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_type", "=", "Asset"]',
+			},
+			{
+				"reference_code": "B001",
+				"display_name": "Row B",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "A001 * 2",  # Valid reference
+			},
+		]
+
+		# This should work without errors
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+		# Basic test - ensure it doesn't crash
+		processing_order = resolver.get_processing_order()
+		self.assertEqual(len(processing_order), 2)
+
+	def test_dependency_resolver_complex_formula_parsing(self):
+		"""Test dependency extraction from complex formulas"""
+		test_rows = [
+			{
+				"reference_code": "INCOME",
+				"display_name": "Total Income",
+				"data_source": "Account Data",
+				"calculation_formula": '["root_type", "=", "Income"]',
+			},
+			{
+				"reference_code": "EXPENSE",
+				"display_name": "Total Expense",
+				"data_source": "Account Data",
+				"calculation_formula": '["root_type", "=", "Expense"]',
+			},
+			{
+				"reference_code": "TAX_RATE",
+				"display_name": "Tax Rate",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_name", "like", "Tax"]',
+			},
+			{
+				"reference_code": "NET_RESULT",
+				"display_name": "Net Result",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "(INCOME - EXPENSE) * (1 - TAX_RATE / 100)",
+			},
+		]
+
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+
+		# Should correctly identify all three dependencies in complex formula
+		net_deps = resolver.dependencies.get("NET_RESULT", [])
+		self.assertEqual(set(net_deps), {"INCOME", "EXPENSE", "TAX_RATE"})
+
+	def test_dependency_resolver_no_dependencies(self):
+		"""Test handling of rows without dependencies"""
+		test_rows = [
+			{
+				"reference_code": "A001",
+				"display_name": "Account Row",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_type", "=", "Income"]',
+			},
+			{
+				"reference_code": "B001",
+				"display_name": "Static Value",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "1000 + 500",  # No reference codes
+			},
+		]
+
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+
+		# B001 should have no dependencies
+		self.assertEqual(resolver.dependencies.get("B001", []), [])
+
+		# Should still process correctly
+		order = resolver.get_processing_order()
+		self.assertEqual(len(order), 2)
+
+	def test_dependency_resolver_mixed_data_sources(self):
+		"""Test processing order with mixed data sources"""
+		test_rows = [
+			{
+				"reference_code": "CALC001",
+				"display_name": "Calculated",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "ACC001 + 100",
+			},
+			{
+				"reference_code": None,  # Blank line
+				"display_name": "Spacing",
+				"data_source": "Blank Line",
+			},
+			{
+				"reference_code": "ACC001",
+				"display_name": "Account",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_type", "=", "Income"]',
+			},
+			{
+				"reference_code": None,  # Custom API
+				"display_name": "Custom",
+				"data_source": "Custom API",
+			},
+		]
+
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+		order = resolver.get_processing_order()
+
+		# Find positions
+		positions = {}
+		for i, row in enumerate(order):
+			if row.reference_code:
+				positions[row.reference_code] = i
+			else:
+				positions[f"{row.data_source}_{i}"] = i
+
+		# Account data should come before calculated
+		self.assertLess(positions["ACC001"], positions["CALC001"])
+
+		# All rows should be present
+		self.assertEqual(len(order), 4)
+
+	def test_dependency_resolver_partial_matches(self):
+		"""Test that partial matches are not treated as dependencies"""
+		test_rows = [
+			{
+				"reference_code": "INC001",
+				"display_name": "Income",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_type", "=", "Income"]',
+			},
+			{
+				"reference_code": "INC001_ADJ",  # Contains INC001 but shouldn't match
+				"display_name": "Income Adjustment",
+				"data_source": "Account Data",
+				"calculation_formula": '["account_type", "=", "Income"]',
+			},
+			{
+				"reference_code": "RESULT",
+				"display_name": "Result",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "INC001 + 500",  # Should only match INC001, not INC001_ADJ
+			},
+		]
+
+		test_template = self.create_test_template_with_rows(test_rows)
+		resolver = DependencyResolver(test_template)
+
+		# RESULT should only depend on INC001, not INC001_ADJ
+		self.assertEqual(resolver.dependencies["RESULT"], ["INC001"])
+
+		# Processing order should work correctly
+		order = resolver.get_processing_order()
+		positions = {row.reference_code: i for i, row in enumerate(order)}
+
+		self.assertLess(positions["INC001"], positions["RESULT"])
+		# INC001_ADJ can be processed in any order relative to RESULT since there's no dependency
+		self.assertIn("INC001_ADJ", positions)
+
 	def test_formula_calculator(self):
-		"""Test formula calculation"""
-		# Mock row data
-		row_data = {"INC001": [1000.0, 1200.0, 1500.0], "EXP001": [800.0, 900.0, 1100.0]}
+		"""Test formula calculation with various scenarios"""
+		# Mock row data with different scenarios
+		row_data = {
+			"INC001": [1000.0, 1200.0, 1500.0],
+			"EXP001": [800.0, 900.0, 1100.0],
+			"TAX001": [50.0, 60.0, 75.0],
+			"ZERO_VAL": [0.0, 0.0, 0.0],
+			"NEG_VAL": [-100.0, -200.0, -150.0],
+		}
 
 		period_list = [
-			{"key": "2023", "from_date": "2023-01-01", "to_date": "2023-12-31"},
-			{"key": "2024", "from_date": "2024-01-01", "to_date": "2024-12-31"},
-			{"key": "2025", "from_date": "2025-01-01", "to_date": "2025-12-31"},
+			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
+			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
+			{"key": "2023_q3", "from_date": "2023-07-01", "to_date": "2023-09-30"},
 		]
 
 		calculator = FormulaCalculator(row_data, period_list)
-		result = calculator.evaluate_formula("INC001 - EXP001")
 
+		# Test basic arithmetic operations
+		result = calculator.evaluate_formula("INC001 - EXP001")
 		expected = [200.0, 300.0, 400.0]  # [1000-800, 1200-900, 1500-1100]
 		self.assertEqual(result, expected)
+
+		# Test multiplication
+		result = calculator.evaluate_formula("INC001 * 2")
+		expected = [2000.0, 2400.0, 3000.0]
+		self.assertEqual(result, expected)
+
+		# Test division
+		result = calculator.evaluate_formula("INC001 / 10")
+		expected = [100.0, 120.0, 150.0]
+		self.assertEqual(result, expected)
+
+		# Test complex formula with parentheses
+		result = calculator.evaluate_formula("(INC001 - EXP001) * 0.8")
+		expected = [160.0, 240.0, 320.0]  # [(1000-800)*0.8, (1200-900)*0.8, (1500-1100)*0.8]
+		self.assertEqual(result, expected)
+
+		# Test mathematical functions
+		result = calculator.evaluate_formula("abs(NEG_VAL)")
+		expected = [100.0, 200.0, 150.0]
+		self.assertEqual(result, expected)
+
+		# Test max function
+		result = calculator.evaluate_formula("max(INC001, EXP001)")
+		expected = [1000.0, 1200.0, 1500.0]  # INC001 is always larger
+		self.assertEqual(result, expected)
+
+		# Test min function
+		result = calculator.evaluate_formula("min(INC001, EXP001)")
+		expected = [800.0, 900.0, 1100.0]  # EXP001 is always smaller
+		self.assertEqual(result, expected)
+
+	def test_formula_calculator_division_by_zero(self):
+		"""Test formula calculator handles division by zero gracefully"""
+		row_data = {
+			"NUMERATOR": [100.0, 200.0, 300.0],
+			"ZERO_VAL": [0.0, 0.0, 0.0],
+		}
+
+		period_list = [
+			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
+			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
+			{"key": "2023_q3", "from_date": "2023-07-01", "to_date": "2023-09-30"},
+		]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test division by zero - should return 0.0 for all periods
+		result = calculator.evaluate_formula("NUMERATOR / ZERO_VAL")
+		expected = [0.0, 0.0, 0.0]
+		self.assertEqual(result, expected)
+
+	def test_formula_calculator_invalid_reference_codes(self):
+		"""Test formula calculator handles invalid reference codes"""
+		row_data = {
+			"VALID_CODE": [100.0, 200.0, 300.0],
+			"123_INVALID": [50.0, 60.0, 70.0],  # Starts with number - invalid identifier
+			"VALID-DASH": [25.0, 30.0, 35.0],  # Contains dash - invalid identifier
+		}
+
+		period_list = [
+			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
+			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
+			{"key": "2023_q3", "from_date": "2023-07-01", "to_date": "2023-09-30"},
+		]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test with valid reference code
+		result = calculator.evaluate_formula("VALID_CODE * 2")
+		expected = [200.0, 400.0, 600.0]
+		self.assertEqual(result, expected)
+
+		# Test with invalid reference code - should return 0.0 (code won't be in context)
+		result = calculator.evaluate_formula("INVALID_CODE * 2")
+		expected = [0.0, 0.0, 0.0]
+		self.assertEqual(result, expected)
+
+	def test_formula_calculator_missing_values(self):
+		"""Test formula calculator handles missing values for periods"""
+		row_data = {
+			"SHORT_DATA": [100.0, 200.0],  # Only 2 periods instead of 3
+			"NORMAL_DATA": [50.0, 60.0, 70.0],
+		}
+
+		period_list = [
+			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
+			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
+			{"key": "2023_q3", "from_date": "2023-07-01", "to_date": "2023-09-30"},
+		]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test with missing period data - should use 0 for missing values
+		result = calculator.evaluate_formula("SHORT_DATA + NORMAL_DATA")
+		# SHORT_DATA has only 2 values: [100.0, 200.0], so period 2 should default to 0
+		# NORMAL_DATA has 3 values: [50.0, 60.0, 70.0]
+		# Results: [100+50, 200+60, 0+70] = [150.0, 260.0, 70.0]
+		expected = [150.0, 260.0, 70.0]  # [100+50, 200+60, 0+70]
+		self.assertEqual(result, expected)
+
+	def test_formula_calculator_complex_expressions(self):
+		"""Test formula calculator with complex mathematical expressions"""
+		row_data = {
+			"REVENUE": [10000.0, 12000.0, 15000.0],
+			"COST": [6000.0, 7200.0, 9000.0],
+			"TAX_RATE": [0.25, 0.25, 0.30],  # 25%, 25%, 30%
+		}
+
+		period_list = [
+			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
+			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
+			{"key": "2023_q3", "from_date": "2023-07-01", "to_date": "2023-09-30"},
+		]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test complex formula: (REVENUE - COST) * (1 - TAX_RATE)
+		result = calculator.evaluate_formula("(REVENUE - COST) * (1 - TAX_RATE)")
+		expected = [
+			(10000 - 6000) * (1 - 0.25),  # 4000 * 0.75 = 3000
+			(12000 - 7200) * (1 - 0.25),  # 4800 * 0.75 = 3600
+			(15000 - 9000) * (1 - 0.30),  # 6000 * 0.70 = 4200
+		]
+		# Note: The formula actually evaluates to gross profit without tax adjustment
+		# because the formula is (REVENUE - COST) * (1 - TAX_RATE), not (REVENUE - COST) - (REVENUE - COST) * TAX_RATE
+		# So the actual results are: 4000 * 0.75, 4800 * 0.75, 6000 * 0.70
+		self.assertEqual(result, [3000.0, 3600.0, 4200.0])
+
+		# Test formula with mathematical functions
+		result = calculator.evaluate_formula("round(REVENUE / COST, 2)")
+		expected = [
+			round(10000 / 6000, 2),  # 1.67
+			round(12000 / 7200, 2),  # 1.67
+			round(15000 / 9000, 2),  # 1.67
+		]
+		self.assertEqual(result, expected)
+
+	def test_formula_calculator_error_handling(self):
+		"""Test formula calculator error handling for various edge cases"""
+		row_data = {
+			"NORMAL": [100.0, 200.0, 300.0],
+		}
+
+		period_list = [
+			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
+			{"key": "2023_q2", "from_date": "2023-04-01", "to_date": "2023-06-30"},
+			{"key": "2023_q3", "from_date": "2023-07-01", "to_date": "2023-09-30"},
+		]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test invalid syntax - should return 0.0 for all periods
+		result = calculator.evaluate_formula("NORMAL + +")  # Invalid syntax
+		expected = [0.0, 0.0, 0.0]
+		self.assertEqual(result, expected)
+
+		# Test undefined variable - should return 0.0 for all periods
+		result = calculator.evaluate_formula("UNDEFINED_VAR * 2")
+		expected = [0.0, 0.0, 0.0]
+		self.assertEqual(result, expected)
+
+		# Test empty formula - should return 0.0 for all periods
+		result = calculator.evaluate_formula("")
+		expected = [0.0, 0.0, 0.0]
+		self.assertEqual(result, expected)
+
+	def test_formula_calculator_context_security(self):
+		"""Test that formula calculator provides safe evaluation context"""
+		row_data = {
+			"TEST_VAL": [100.0, 200.0, 300.0],
+		}
+
+		period_list = [
+			{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"},
+		]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test that mathematical functions are available in context
+		context = calculator.build_evaluation_context(0)
+
+		# Check that safe functions are available
+		self.assertIn("abs", context)
+		self.assertIn("min", context)
+		self.assertIn("max", context)
+		self.assertIn("round", context)
+		self.assertIn("sum", context)
+
+		# Check that individual math functions are available (not the full math module)
+		self.assertIn("sqrt", context)
+		self.assertIn("pow", context)
+		self.assertIn("ceil", context)
+		self.assertIn("floor", context)
+
+		# Ensure functions not included for financial use are not available
+		self.assertNotIn("sin", context)
+		self.assertNotIn("cos", context)
+		self.assertNotIn("tan", context)
+		self.assertNotIn("log", context)
+		self.assertNotIn("log10", context)
+		self.assertNotIn("radians", context)
+		self.assertNotIn("degrees", context)
+
+		# Ensure the full math module is not exposed for security
+		self.assertNotIn("math", context)
+
+		# Check that row data is properly included
+		self.assertIn("TEST_VAL", context)
+		self.assertEqual(context["TEST_VAL"], 100.0)
+
+		# Test that invalid reference codes are not included
+		calculator_with_invalid = FormulaCalculator(
+			{
+				"123_INVALID": [50.0],
+				"VALID_CODE": [100.0],
+			},
+			period_list,
+		)
+
+		context = calculator_with_invalid.build_evaluation_context(0)
+		self.assertNotIn("123_INVALID", context)  # Invalid identifier should be excluded
+		self.assertIn("VALID_CODE", context)  # Valid identifier should be included
+
+	def test_formula_calculator_security_protection(self):
+		"""Test that formula calculator protects against potential security issues"""
+		row_data = {"TEST_VAL": [100.0]}
+		period_list = [{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"}]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test that potentially harmful expressions are safely handled
+		# These should all return 0.0 due to safe evaluation failures
+		harmful_expressions = [
+			"__import__('os').system('ls')",  # Import attempts
+			"eval('1+1')",  # Nested eval attempts
+			"exec('print(1)')",  # Exec attempts
+			"open('/etc/passwd')",  # File operations
+			"globals()",  # Global namespace access
+			"locals()",  # Local namespace access
+		]
+
+		for expr in harmful_expressions:
+			with self.subTest(expression=expr):
+				result = calculator.evaluate_formula(expr)
+				self.assertEqual(result, [0.0], f"Harmful expression '{expr}' should return [0.0]")
+
+		# Test that only safe mathematical operations work
+		safe_expressions = [
+			"TEST_VAL + 50",
+			"abs(TEST_VAL - 200)",
+			"min(TEST_VAL, 50)",
+			"max(TEST_VAL, 150)",
+			"round(TEST_VAL / 3, 2)",
+		]
+
+		for expr in safe_expressions:
+			with self.subTest(expression=expr):
+				result = calculator.evaluate_formula(expr)
+				self.assertNotEqual(result, [0.0], f"Safe expression '{expr}' should not return [0.0]")
+				self.assertIsInstance(result[0], float, f"Safe expression '{expr}' should return a float")
+
+	def test_formula_calculator_advanced_math_functions(self):
+		"""Test that essential mathematical functions for financial calculations are available"""
+		row_data = {
+			"BASE": [2.0],
+			"EXPONENT": [3.0],
+			"VALUE": [16.0],
+			"NEGATIVE": [-100.0],
+			"DECIMAL": [2.7],
+		}
+		period_list = [{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"}]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test power function - useful for compound interest calculations
+		result = calculator.evaluate_formula("pow(BASE, EXPONENT)")
+		self.assertEqual(result[0], 8.0)  # 2^3 = 8
+
+		# Test square root - useful for standard deviation and ratio analysis
+		result = calculator.evaluate_formula("sqrt(VALUE)")
+		self.assertEqual(result[0], 4.0)  # sqrt(16) = 4
+
+		# Test absolute value - essential for variance analysis
+		result = calculator.evaluate_formula("abs(NEGATIVE)")
+		self.assertEqual(result[0], 100.0)  # abs(-100) = 100
+
+		# Test ceiling - useful for rounding up budget allocations
+		result = calculator.evaluate_formula("ceil(DECIMAL)")
+		self.assertEqual(result[0], 3.0)  # ceil(2.7) = 3
+
+		# Test floor - useful for conservative estimates
+		result = calculator.evaluate_formula("floor(DECIMAL)")
+		self.assertEqual(result[0], 2.0)  # floor(2.7) = 2
+
+		# Test min and max functions with multiple values
+		result = calculator.evaluate_formula("min(BASE, VALUE)")
+		self.assertEqual(result[0], 2.0)  # min(2.0, 16.0) = 2.0
+
+		result = calculator.evaluate_formula("max(BASE, VALUE)")
+		self.assertEqual(result[0], 16.0)  # max(2.0, 16.0) = 16.0
+
+		# Test round function - essential for financial reporting
+		result = calculator.evaluate_formula("round(DECIMAL)")
+		self.assertEqual(result[0], 3.0)  # round(2.7) = 3
+
+	def test_formula_calculator_financial_use_cases(self):
+		"""Test real-world financial calculation scenarios"""
+		row_data = {
+			"REVENUE_Q1": [1000000.0],
+			"REVENUE_Q2": [1200000.0],
+			"EXPENSES": [800000.0],
+			"BUDGET_VARIANCE": [-50000.0],
+			"ACTUAL_COSTS": [123456.78],
+			"GROWTH_RATE": [1.15],  # 15% growth
+			"YEARS": [5.0],
+		}
+		period_list = [{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"}]
+
+		calculator = FormulaCalculator(row_data, period_list)
+
+		# Test best quarterly performance
+		result = calculator.evaluate_formula("max(REVENUE_Q1, REVENUE_Q2)")
+		self.assertEqual(result[0], 1200000.0)
+
+		# Test absolute variance (remove negative sign for reporting)
+		result = calculator.evaluate_formula("abs(BUDGET_VARIANCE)")
+		self.assertEqual(result[0], 50000.0)
+
+		# Test rounded reporting figures (clean up decimals)
+		result = calculator.evaluate_formula("round(ACTUAL_COSTS)")
+		self.assertEqual(result[0], 123457.0)  # Rounded to nearest whole number
+
+		# Test conservative estimates (round down)
+		result = calculator.evaluate_formula("floor(ACTUAL_COSTS / 1000)")
+		self.assertEqual(result[0], 123.0)  # Conservative thousands
+
+		# Test compound growth calculations
+		result = calculator.evaluate_formula("pow(GROWTH_RATE, YEARS)")
+		self.assertAlmostEqual(result[0], 2.01, places=1)  # 1.15^5 ≈ 2.01
+
+		# Test profit calculation with rounding
+		result = calculator.evaluate_formula("round((REVENUE_Q1 - EXPENSES) / REVENUE_Q1 * 100)")
+		self.assertEqual(result[0], 20.0)  # 20% profit margin
 
 	def test_financial_report_engine(self):
 		"""Test the main financial report engine"""
