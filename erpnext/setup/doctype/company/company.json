@@ -126,6 +126,7 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "columns": 6,
    "fieldname": "company_name",
    "fieldtype": "Data",
    "label": "Company",
@@ -135,6 +136,7 @@
    "unique": 1
   },
   {
+   "columns": 6,
    "fieldname": "abbr",
    "fieldtype": "Data",
    "label": "Abbr",
@@ -834,73 +836,6 @@
    "fieldtype": "Select",
    "label": "Reconciliation Takes Effect On",
    "options": "Advance Payment Date\nOldest Of Invoice Or Advance\nReconciliation Date"
-  }
- ],
- "icon": "fa fa-building",
- "idx": 1,
- "image_field": "company_logo",
- "is_tree": 1,
- "links": [],
- "modified": "2025-01-09 20:12:25.471544",
- "modified_by": "Administrator",
- "module": "Setup",
- "name": "Company",
- "naming_rule": "By fieldname",
- "nsm_parent_field": "parent_company",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "Accounts User"
-  },
-  {
-   "read": 1,
-   "role": "Employee"
-  },
-  {
-   "read": 1,
-   "role": "Sales User"
-  },
-  {
-   "read": 1,
-   "role": "Purchase User"
-  },
-  {
-   "read": 1,
-   "role": "Stock User"
-  },
-  {
-   "read": 1,
-   "role": "Projects User"
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Accounts Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "role": "Auditor",
-   "select": 1
   }
  ],
  "show_name_in_global_search": 1,
