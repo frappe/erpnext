@@ -45,6 +45,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 	gle_map = get_gle_map(tds_docs)
 
 	out = []
+	entries = {}
 	for name, details in gle_map.items():
 		for entry in details:
 			tax_amount, total_amount, grand_total, base_total = 0, 0, 0, 0
@@ -119,8 +120,13 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 						"supplier_invoice_date": bill_date,
 					}
 				)
-				out.append(row)
 
+				key = entry.voucher_no
+				if key in entries:
+					entries[key]["tax_amount"] += tax_amount
+				else:
+					entries[key] = row
+	out = list(entries.values())
 	out.sort(key=lambda x: (x["section_code"], x["transaction_date"]))
 
 	return out

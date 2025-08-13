@@ -8,7 +8,7 @@ import frappe
 from frappe import qb
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.tests import IntegrationTestCase, change_settings
-from frappe.utils import add_days, flt, format_date, getdate, nowdate, today
+from frappe.utils import add_days, cint, flt, format_date, getdate, nowdate, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -4549,6 +4549,152 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(stock_ledger_entry.qty, 2.0)
 		self.assertEqual(stock_ledger_entry.stock_value_difference, 0.0)
 
+	def test_system_generated_exchange_gain_or_loss_je_after_repost(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+			update_repost_settings,
+		)
+
+		update_repost_settings()
+
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+		)
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		pe.reference_no = "10"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = si.currency
+		pe.paid_to_account_currency = "INR"
+		pe.source_exchange_rate = 85
+		pe.target_exchange_rate = 1
+		pe.paid_amount = si.outstanding_amount
+		pe.insert()
+		pe.submit()
+
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.company = si.company
+		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
+		ral.save()
+		ral.submit()
+
+		je = frappe.qb.DocType("Journal Entry")
+		jea = frappe.qb.DocType("Journal Entry Account")
+		q = (
+			(
+				frappe.qb.from_(je)
+				.join(jea)
+				.on(je.name == jea.parent)
+				.select(je.docstatus)
+				.where(
+					(je.voucher_type == "Exchange Gain Or Loss")
+					& (jea.reference_name == si.name)
+					& (jea.reference_type == "Sales Invoice")
+					& (je.is_system_generated == 1)
+				)
+			)
+			.limit(1)
+			.run()
+		)
+
+		self.assertEqual(q[0][0], 1)
+
+	def test_non_batchwise_valuation_for_moving_average(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = "_Test Item for Non Batchwise Valuation"
+		make_item_for_si(
+			item_code,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBATCH-TCNV.####",
+				"valuation_method": "Moving Average",
+			},
+		)
+
+		doc = frappe.get_doc("Stock Settings")
+		original_value = cint(doc.do_not_use_batchwise_valuation)
+
+		doc.db_set("do_not_use_batchwise_valuation", 1)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=13.02,
+			valuation_method="Moving Average",
+			use_serial_batch_fields=True,
+		)
+
+		se_batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		# without use serial and batch fields
+		si = create_sales_invoice(
+			item=item_code,
+			qty=1,
+			rate=120,
+			update_stock=1,
+			use_serial_batch_fields=False,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		si.reload()
+		si_batch = get_batch_from_bundle(si.items[0].serial_and_batch_bundle)
+
+		self.assertEqual(se_batch, si_batch)
+		self.assertEqual(si.items[0].use_serial_batch_fields, 0)
+
+		serial_and_batch_bundle = si.items[0].serial_and_batch_bundle
+		change_in_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Sales Invoice",
+				"voucher_no": si.name,
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"serial_and_batch_bundle": serial_and_batch_bundle,
+			},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(change_in_value, 13.02 * -1)
+
+		# with use serial and batch fields
+		si = create_sales_invoice(
+			item=item_code,
+			qty=1,
+			rate=120,
+			update_stock=1,
+			use_serial_batch_fields=True,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		si.reload()
+
+		self.assertEqual(si.items[0].use_serial_batch_fields, 1)
+
+		serial_and_batch_bundle = si.items[0].serial_and_batch_bundle
+		change_in_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Sales Invoice",
+				"voucher_no": si.name,
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"serial_and_batch_bundle": serial_and_batch_bundle,
+			},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(change_in_value, 13.02 * -1)
+
+		doc.db_set("do_not_use_batchwise_valuation", original_value)
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
@@ -4672,6 +4818,7 @@ def create_sales_invoice(**args):
 			"incoming_rate": args.incoming_rate or 0,
 			"serial_and_batch_bundle": bundle_id,
 			"allow_zero_valuation_rate": args.allow_zero_valuation_rate or 0,
+			"use_serial_batch_fields": args.use_serial_batch_fields or 0,
 		},
 	)
 

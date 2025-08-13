@@ -1650,7 +1650,7 @@ class StockEntry(StockController):
 
 		self.set_gl_entries_for_landed_cost_voucher(gl_entries, warehouse_account)
 
-		return process_gl_map(gl_entries)
+		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
 	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, warehouse_account):
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()

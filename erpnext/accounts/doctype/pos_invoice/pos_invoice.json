@@ -296,6 +296,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1598,7 +1599,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-18 16:50:30.516162",
+ "modified": "2025-08-04 22:22:31.471752",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

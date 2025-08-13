@@ -943,15 +943,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.frm.refresh_fields();
 	}
 
-	async set_default_payment(total_amount_to_pay, update_paid_amount) {
+	set_default_payment(total_amount_to_pay, update_paid_amount) {
 		var me = this;
 		var payment_status = true;
 		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)) {
-			let r = await frappe.db.get_value("POS Profile", this.frm.doc.pos_profile, "set_grand_total_to_default_mop");
-
-			if (!r.message.set_grand_total_to_default_mop) {
-				return;
-			}
 
 			$.each(this.frm.doc['payments'] || [], function(index, data) {
 				if(data.default && payment_status && total_amount_to_pay > 0) {

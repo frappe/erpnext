@@ -1391,7 +1391,6 @@ class SalesInvoice(SellingController):
 
 				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
-				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":

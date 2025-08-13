@@ -324,7 +324,8 @@
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
    "label": "Shelf Life In Days",
-   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
+   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date",
+   "non_negative": 1
   },
   {
    "default": "2099-12-31",
@@ -368,7 +369,8 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit"
+   "label": "Weight Per Unit",
+   "non_negative": 1
   },
   {
    "depends_on": "eval:doc.is_stock_item",
@@ -540,13 +542,15 @@
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
    "label": "Minimum Order Qty",
+   "non_negative": 1,
    "oldfieldname": "min_order_qty",
    "oldfieldtype": "Currency"
   },
   {
    "fieldname": "safety_stock",
    "fieldtype": "Float",
-   "label": "Safety Stock"
+   "label": "Safety Stock",
+   "non_negative": 1
   },
   {
    "fieldname": "purchase_details_cb",
@@ -557,6 +561,7 @@
    "fieldname": "lead_time_days",
    "fieldtype": "Int",
    "label": "Lead Time in days",
+   "non_negative": 1,
    "oldfieldname": "lead_time_days",
    "oldfieldtype": "Int"
   },
@@ -565,6 +570,7 @@
    "fieldtype": "Float",
    "label": "Last Purchase Rate",
    "no_copy": 1,
+   "non_negative": 1,
    "oldfieldname": "last_purchase_rate",
    "oldfieldtype": "Currency",
    "read_only": 1
@@ -926,7 +932,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-06-20 07:49:31.139897",
+ "modified": "2025-08-08 14:58:48.674193",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -550,7 +550,7 @@ def send_auto_email():
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
 		filters={"enable_auto_email": 1},
-		or_filters={"to_date": format_date(today()), "posting_date": format_date(today())},
+		or_filters={"to_date": today(), "posting_date": today()},
 	)
 	for entry in selected:
 		send_emails(entry.name, from_scheduler=True)

@@ -425,7 +425,6 @@
    "fieldname": "sub_assembly_warehouse",
    "fieldtype": "Link",
    "label": "Sub Assembly Warehouse",
-   "mandatory_depends_on": "eval:doc.skip_available_sub_assembly_item === 1",
    "options": "Warehouse"
   },
   {
@@ -446,7 +445,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-09 18:55:45.500257",
+ "modified": "2025-08-12 19:48:09.302503",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

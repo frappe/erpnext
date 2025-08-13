@@ -663,7 +663,9 @@ class StockController(AccountsController):
 						).format(wh, self.company)
 					)
 
-		return process_gl_map(gl_list, precision=precision)
+		return process_gl_map(
+			gl_list, precision=precision, from_repost=frappe.flags.through_repost_item_valuation
+		)
 
 	def get_debit_field_precision(self):
 		if not frappe.flags.debit_field_precision:
@@ -1070,8 +1072,9 @@ class StockController(AccountsController):
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
 		update_batch_qty(self.doctype, self.name, via_landed_cost_voucher=via_landed_cost_voucher)
 
-	def make_gl_entries_on_cancel(self):
-		cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+	def make_gl_entries_on_cancel(self, from_repost=False):
+		if not from_repost:
+			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 		if frappe.db.sql(
 			"""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""",

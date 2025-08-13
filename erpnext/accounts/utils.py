@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
 from json import loads
 from typing import TYPE_CHECKING, Optional
 
@@ -480,7 +481,6 @@ def reconcile_against_document(
 			reconciled_entries[(row.voucher_type, row.voucher_no)] = []
 
 		reconciled_entries[(row.voucher_type, row.voucher_no)].append(row)
-
 	for key, entries in reconciled_entries.items():
 		voucher_type, voucher_no = key
 
@@ -1361,6 +1361,7 @@ def create_payment_gateway_account(gateway, payment_channel="Email", company=Non
 				"payment_account": bank_account.name,
 				"currency": bank_account.account_currency,
 				"payment_channel": payment_channel,
+				"company": company,
 			}
 		).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
@@ -1833,6 +1834,7 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 
 		dr_or_cr = 0
 		account_type = None
+
 		for gle in gl_entries:
 			if gle.account in receivable_or_payable_accounts:
 				account_type = get_account_type(gle.account)
@@ -1922,14 +1924,18 @@ def create_payment_ledger_entry(
 
 		for entry in ple_map:
 			ple = frappe.get_doc(entry)
-
-			if cancel:
-				delink_original_entry(ple, partial_cancel=partial_cancel)
-
 			ple.flags.ignore_permissions = 1
 			ple.flags.adv_adj = adv_adj
 			ple.flags.from_repost = from_repost
 			ple.flags.update_outstanding = update_outstanding
+
+			if cancel:
+				delink_original_entry(ple, partial_cancel=partial_cancel)
+				ple._action = "submit"
+				ple.run_before_save_methods()
+				ple.run_post_save_methods()
+				continue
+
 			ple.submit()
 
 
@@ -1937,7 +1943,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 	if not voucher_type or not voucher_no:
 		return
 
-	if voucher_type in ["Purchase Order", "Sales Order"]:
+	if voucher_type in get_advance_payment_doctypes():
 		ref_doc = frappe.get_lazy_doc(voucher_type, voucher_no)
 		ref_doc.set_total_advance_paid()
 		return
@@ -2450,25 +2456,37 @@ def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
 		).save()
 
 
+def get_link_fields_grouped_by_option(doctype):
+	meta = frappe.get_meta(doctype)
+	link_fields_map = defaultdict(list)
+
+	for df in meta.fields:
+		if df.fieldtype == "Link" and df.options and not df.ignore_user_permissions:
+			link_fields_map[df.options].append(df.fieldname)
+
+	return link_fields_map
+
+
 def build_qb_match_conditions(doctype, user=None) -> list:
 	match_filters = build_match_conditions(doctype, user, False)
+	link_fields_map = get_link_fields_grouped_by_option(doctype)
 	criterion = []
 	apply_strict_user_permissions = frappe.get_system_settings("apply_strict_user_permissions")
 
 	if match_filters:
-		from frappe import qb
-
 		_dt = qb.DocType(doctype)
 
 		for filter in match_filters:
-			for d, names in filter.items():
-				fieldname = d.lower().replace(" ", "_")
-				field = _dt[fieldname]
+			for link_option, allowed_values in filter.items():
+				fieldnames = link_fields_map.get(link_option, [])
 
-				cond = field.isin(names)
-				if not apply_strict_user_permissions:
-					cond = (Coalesce(field, "") == "") | field.isin(names)
+				for fieldname in fieldnames:
+					field = _dt[fieldname]
+					cond = field.isin(allowed_values)
 
-				criterion.append(cond)
+					if not apply_strict_user_permissions:
+						cond = (Coalesce(field, "") == "") | cond
+
+					criterion.append(cond)
 
 	return criterion

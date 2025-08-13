@@ -218,6 +218,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -697,7 +698,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-08-13 19:05:42.386955",
+ "modified": "2025-08-04 19:21:03.338958",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -763,6 +764,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

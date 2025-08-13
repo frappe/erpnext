@@ -654,6 +654,8 @@ class JournalEntry(AccountsController):
 				elif (
 					d.party_type
 					and frappe.db.get_value("Party Type", d.party_type, "account_type") != account_type
+					and d.party_type
+					!= "Employee"  # making an excpetion for employee since they can be both payable and receivable
 				):
 					frappe.throw(
 						_("Row {0}: Account {1} and Party Type {2} have different account types").format(

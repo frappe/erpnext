@@ -10,7 +10,7 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, parse_json, today
+from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json, today
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
@@ -652,12 +652,23 @@ class BOM(WebsiteGenerator):
 			frappe.throw(_("Raw Materials cannot be blank."))
 
 		check_list = []
+		items = []
 		for m in self.get("items"):
 			if m.bom_no:
 				validate_bom_no(m.item_code, m.bom_no)
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
+			items.append(m.item_code)
+
+		if fixed_asset_items := frappe.db.get_all(
+			"Item", filters={"item_code": ("in", items), "is_fixed_asset": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Fixed Asset item {0} cannot be used in BOMs.").format(
+					", ".join(get_link_to_form("Item", item) for item in fixed_asset_items)
+				)
+			)
 
 	def check_recursion(self, bom_list=None):
 		"""Check whether recursion occurs in any bom"""
@@ -711,11 +722,42 @@ class BOM(WebsiteGenerator):
 
 			row.update(get_item_details(row.get("item_code")))
 			row.operation_row_id = operation_row_id
-			row.idx = None
-			row.name = None
-			self.append("items", row)
+
+			item_row = None
+			if row.name:
+				item_row = self.get_item_data(row.name)
+
+			if item_row:
+				item_row.update(
+					{
+						"item_code": row.get("item_code"),
+						"qty": row.get("qty"),
+					}
+				)
+			else:
+				row.idx = None
+				row.name = None
+				row.do_not_explode = 1
+				row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
+
+				self.append("items", row)
 
 		self.save()
+
+	def is_sub_assembly_item(self, item_code):
+		if not self.operations:
+			return False
+
+		for row in self.operations:
+			if row.finished_good == item_code:
+				return True
+
+		return False
+
+	def get_item_data(self, name):
+		for row in self.items:
+			if row.item_code == name:
+				return row
 
 	@frappe.whitelist()
 	def add_materials_from_bom(self, finished_good, bom_no, operation_row_id, qty=None):
@@ -734,6 +776,9 @@ class BOM(WebsiteGenerator):
 			row.uom = row.stock_uom
 			row.operation_row_id = operation_row_id
 			row.idx = None
+			row.do_not_explode = 1
+			row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
+
 			self.append("items", row)
 
 	def traverse_tree(self, bom_list=None):
@@ -935,6 +980,7 @@ class BOM(WebsiteGenerator):
 							"item_code": d.item_code,
 							"item_name": d.item_name,
 							"operation": d.operation,
+							"is_sub_assembly_item": d.is_sub_assembly_item,
 							"source_warehouse": d.source_warehouse,
 							"description": d.description,
 							"image": d.image,
@@ -967,6 +1013,7 @@ class BOM(WebsiteGenerator):
 				bom_item.description,
 				bom_item.source_warehouse,
 				bom_item.operation,
+				bom_item.is_sub_assembly_item,
 				bom_item.stock_uom,
 				bom_item.stock_qty,
 				bom_item.rate,
@@ -997,6 +1044,7 @@ class BOM(WebsiteGenerator):
 						"rate": flt(d["rate"]),
 						"include_item_in_manufacturing": d.get("include_item_in_manufacturing", 0),
 						"sourced_by_supplier": d.get("sourced_by_supplier", 0),
+						"is_sub_assembly_item": d.get("is_sub_assembly_item", 0),
 					}
 				)
 			)

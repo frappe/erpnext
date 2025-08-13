@@ -695,10 +695,16 @@ def close_or_unclose_purchase_orders(names, status):
 def set_missing_values(source, target):
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
+	target.run_method("set_use_serial_batch_fields")
 
 
 @frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None):
+def make_purchase_receipt(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 
 	def is_unit_price_row(source):
@@ -711,6 +717,11 @@ def make_purchase_receipt(source_name, target_doc=None):
 		target.base_amount = (
 			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
 		)
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
 
 	doc = get_mapped_doc(
 		"Purchase Order",
@@ -739,7 +750,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 				"condition": lambda doc: (
 					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
 				)
-				and doc.delivered_by_supplier != 1,
+				and doc.delivered_by_supplier != 1
+				and select_item(doc),
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
@@ -751,8 +763,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None):
-	return get_mapped_purchase_invoice(source_name, target_doc)
+def make_purchase_invoice(source_name, target_doc=None, args=None):
+	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
 
 @frappe.whitelist()
@@ -766,7 +778,12 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 	frappe.response.location = "/purchase-invoices/" + doc.name
 
 
-def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
+def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
@@ -802,6 +819,11 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			or item_group.get("buying_cost_center")
 		)
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	fields = {
 		"Purchase Order": {
 			"doctype": "Purchase Invoice",
@@ -824,7 +846,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				"wip_composite_asset": "wip_composite_asset",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
+			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+			and select_item(doc),
 		},
 		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 	}

@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 
-from erpnext.accounts.utils import update_voucher_outstanding
+from erpnext.accounts.utils import get_advance_payment_doctypes, update_voucher_outstanding
 
 
 class AdvancePaymentLedgerEntry(Document):
@@ -29,7 +29,7 @@ class AdvancePaymentLedgerEntry(Document):
 
 	def on_update(self):
 		if (
-			self.against_voucher_type in ["Purchase Order", "Sales Order"]
+			self.against_voucher_type in get_advance_payment_doctypes()
 			and self.flags.update_outstanding == "Yes"
 			and not frappe.flags.is_reverse_depr_entry
 		):
