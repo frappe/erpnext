@@ -10,7 +10,6 @@
   "amount",
   "column_break_2",
   "is_exchange_gain_loss",
-  "is_tax_withholding_account",
   "description"
  ],
  "fields": [
@@ -55,19 +54,12 @@
    "fieldtype": "Check",
    "label": "Is Exchange Gain / Loss?",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_tax_withholding_account",
-   "fieldtype": "Check",
-   "label": "Is Tax Withholding Account",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-14 07:27:45.249403",
+ "modified": "2025-08-13 06:52:46.130142",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Deduction",

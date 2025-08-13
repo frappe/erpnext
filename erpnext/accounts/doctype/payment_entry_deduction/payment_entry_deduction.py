@@ -19,7 +19,6 @@ class PaymentEntryDeduction(Document):
 		cost_center: DF.Link
 		description: DF.SmallText | None
 		is_exchange_gain_loss: DF.Check
-		is_tax_withholding_account: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
