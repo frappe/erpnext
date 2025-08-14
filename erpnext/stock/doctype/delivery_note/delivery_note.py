@@ -86,7 +86,11 @@ class DeliveryNote(SellingController):
 		is_return: DF.Check
 		issue_credit_note: DF.Check
 		items: DF.Table[DeliveryNoteItem]
+<<<<<<< HEAD
 		language: DF.Data | None
+=======
+		language: DF.Link | None
+>>>>>>> 58322c271b (refactor: remove `last_scanned_warehouse` field from python)
 		letter_head: DF.Link | None
 		lr_date: DF.Date | None
 		lr_no: DF.Data | None

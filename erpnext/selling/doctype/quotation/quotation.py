@@ -74,7 +74,11 @@ class Quotation(SellingController):
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		items: DF.Table[QuotationItem]
+<<<<<<< HEAD
 		language: DF.Data | None
+=======
+		language: DF.Link | None
+>>>>>>> 58322c271b (refactor: remove `last_scanned_warehouse` field from python)
 		letter_head: DF.Link | None
 		lost_reasons: DF.TableMultiSelect[QuotationLostReasonDetail]
 		named_place: DF.Data | None

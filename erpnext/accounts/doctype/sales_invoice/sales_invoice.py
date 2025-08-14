@@ -136,7 +136,11 @@ class SalesInvoice(SellingController):
 		is_pos: DF.Check
 		is_return: DF.Check
 		items: DF.Table[SalesInvoiceItem]
+<<<<<<< HEAD
 		language: DF.Data | None
+=======
+		language: DF.Link | None
+>>>>>>> 58322c271b (refactor: remove `last_scanned_warehouse` field from python)
 		letter_head: DF.Link | None
 		loyalty_amount: DF.Currency
 		loyalty_points: DF.Int
