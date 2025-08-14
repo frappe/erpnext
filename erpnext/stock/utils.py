@@ -600,6 +600,12 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 	if ctx is None:
 		ctx = frappe._dict()
 
+	elif isinstance(ctx, str):
+		ctx = json.loads(ctx, object_hook=frappe._dict)
+
+	elif isinstance(ctx, dict):
+		ctx = frappe._dict(ctx)
+
 	if scan_data := get_cache():
 		return scan_data
 
@@ -667,7 +673,7 @@ def _update_item_info(scan_result: dict[str, str | None], ctx: dict | None = Non
 	):
 		scan_result.update(item_info)
 
-	if ctx and (warehouse := get_item_warehouse(ctx, frappe._dict(name=item_code), overwrite_warehouse=True)):
+	if ctx and (warehouse := get_item_warehouse(frappe._dict(name=item_code), ctx, overwrite_warehouse=True)):
 		scan_result["default_warehouse"] = warehouse
 
 	return scan_result
