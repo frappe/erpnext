@@ -40,6 +40,7 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+  "last_scanned_warehouse",
   "column_break_31",
   "set_warehouse",
   "set_from_warehouse",
@@ -1285,6 +1286,13 @@
    "label": "Dispatch Address",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "grid_page_length": 50,

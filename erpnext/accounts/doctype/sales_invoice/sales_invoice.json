@@ -45,6 +45,7 @@
   "items_section",
   "scan_barcode",
   "update_stock",
+  "last_scanned_warehouse",
   "column_break_39",
   "set_warehouse",
   "set_target_warehouse",
@@ -2177,6 +2178,13 @@
    "label": "Company Contact Person",
    "options": "Contact",
    "print_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "grid_page_length": 50,

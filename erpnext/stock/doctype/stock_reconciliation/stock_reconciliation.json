@@ -18,6 +18,7 @@
   "set_warehouse",
   "section_break_22",
   "scan_barcode",
+  "last_scanned_warehouse",
   "column_break_12",
   "scan_mode",
   "sb9",
@@ -178,6 +179,13 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "icon": "fa fa-upload-alt",

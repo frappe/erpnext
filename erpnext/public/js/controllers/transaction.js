@@ -6,6 +6,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	setup() {
 		super.setup();
 		let me = this;
+		this.barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: this.frm });
 
 		this.set_fields_onload_for_line_item();
 		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
@@ -473,8 +474,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	scan_barcode() {
 		frappe.flags.dialog_set = false;
-		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
-		barcode_scanner.process_scan();
+		this.barcode_scanner.process_scan();
 	}
 
 	barcode(doc, cdt, cdn)  {
