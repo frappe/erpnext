@@ -1485,3 +1485,123 @@ class TestPickList(FrappeTestCase):
 		pick_list.cancel()
 		sales_order.cancel()
 		stock_entry.cancel()
+
+	def test_disabled_batch_validation(self):
+    # Create a batched item
+		item = make_item(
+			"Test Disabled Batch Item",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TDB-.####"
+			}
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# Create an active batch
+		active_batch = frappe.get_doc({
+			"doctype": "Batch",
+			"item": item,
+			"batch_id": "TDB-ACTIVE-0001",
+			"disabled": 0
+		}).insert()
+
+		# Create a disabled batch
+		disabled_batch = frappe.get_doc({
+			"doctype": "Batch",
+			"item": item,
+			"batch_id": "TDB-DISABLED-0002",
+			"disabled": 1
+		}).insert()
+
+		# Add stock for both batches using individual stock entries
+		# This ensures we have proper serial_and_batch_bundle references
+		se1 = make_stock_entry(
+			item=item,
+			to_warehouse=warehouse,
+			qty=5,
+			basic_rate=100,
+			batches=frappe._dict({active_batch.batch_id: 5})
+		)
+
+		se2 = make_stock_entry(
+			item=item,
+			to_warehouse=warehouse,
+			qty=5,
+			basic_rate=100,
+			batches=frappe._dict({disabled_batch.batch_id: 5})
+		)
+
+    # Create a Sales Order
+		so = make_sales_order(item_code=item, qty=5, rate=100, warehouse=warehouse)
+
+    # Test 1: Verify disabled batches are excluded during auto-population
+		pl = create_pick_list(so.name)
+		pl.set_item_locations()
+		pl.save()
+
+    # Should only pick from active batch
+		self.assertEqual(len(pl.locations), 1)
+		self.assertEqual(pl.locations[0].batch_no, active_batch.batch_id)
+		self.assertNotEqual(pl.locations[0].batch_no, disabled_batch.batch_id)
+
+    # Test 2: Verify validation error when a disabled batch is manually added
+		pl_manual = frappe.get_doc({
+			"doctype": "Pick List",
+			"company": "_Test Company",
+			"customer": "_Test Customer",
+			"items_based_on": "Sales Order",
+			"purpose": "Delivery",
+			"locations": [
+				{
+					"item_code": item,
+					"qty": 5,
+					"stock_qty": 5,
+					"conversion_factor": 1,
+					"batch_no": disabled_batch.batch_id,
+					"sales_order": so.name,
+					"sales_order_item": so.items[0].name,
+					"warehouse": warehouse
+				}
+			]
+		})
+
+    # This should raise a ValidationError
+		with self.assertRaises(frappe.exceptions.ValidationError):
+			pl_manual.submit()
+
+    # Test 3: Test pick list with only disabled batch stock (edge case)
+    # Consume all active batch stock first
+		consume_se = make_stock_entry(
+			item=item,
+			from_warehouse=warehouse,
+			qty=5,
+			basic_rate=100,
+			batches=frappe._dict({active_batch.batch_id: 5})
+		)
+
+    # Now try to create pick list - should have no locations since only disabled batch remains
+		so2 = make_sales_order(item_code=item, qty=3, rate=100, warehouse=warehouse)
+		pl_no_stock = create_pick_list(so2.name)
+		pl_no_stock.set_item_locations()
+
+    # Should have no locations since disabled batch stock shouldn't be picked
+		self.assertEqual(len(pl_no_stock.locations), 0)
+
+    # Cleanup
+		try:
+			if pl.docstatus == 1:
+				pl.cancel()
+			if pl_manual.docstatus == 1:
+				pl_manual.cancel()
+			so.cancel()
+			so2.cancel()
+			se1.cancel()
+			se2.cancel()
+			consume_se.cancel()
+			active_batch.delete()
+			disabled_batch.delete()
+		except Exception:
+			pass

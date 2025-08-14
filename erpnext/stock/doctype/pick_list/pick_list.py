@@ -76,6 +76,7 @@ class PickList(TransactionBase):
 
 	def validate(self):
 		self.validate_expired_batches()
+		self.validate_disabled_batches()
 		self.validate_for_qty()
 		self.validate_stock_qty()
 		self.check_serial_no_status()
@@ -248,6 +249,30 @@ class PickList(TransactionBase):
 				frappe.throw(
 					_("The following batches are expired, please restock them: <br> {0}").format(msg),
 					title=_("Expired Batches"),
+				)
+    
+	def validate_disabled_batches(self):
+		# Validates if any picked batches are disabled
+		batches = []
+		for row in self.get("locations"):
+			if row.get("batch_no") and row.get("picked_qty"):
+				batches.append(row.batch_no)
+
+		if batches:
+			batch = frappe.qb.DocType("Batch")
+			query = (
+				frappe.qb.from_(batch)
+				.select(batch.name)
+				.where((batch.name.isin(batches)) & (batch.disabled == 1))
+			)
+
+			disabled_batches = query.run(as_dict=True)
+			if disabled_batches:
+				msg = "<ul>" + "".join(f"<li>{batch.name}</li>" for batch in disabled_batches) + "</ul>"
+
+				frappe.throw(
+					_("The following batches are disabled, please restock with active batches: <br> {0}").format(msg),
+					title=_("Disabled Batches"),
 				)
 
 	def make_bundle_using_old_serial_batch_fields(self):
@@ -1142,11 +1167,19 @@ def get_available_item_locations_for_batched_item(
 		)
 	)
 
+  # Fetch all disabled batches for the item to filter them out efficiently
+	disabled_batched = set(frappe.get_all("Batch", filters={"item_code": item_code, "disabled": 1}, pluck="name"))
+  
+  
 	warehouse_wise_batches = frappe._dict()
 	rejected_warehouses = get_rejected_warehouses()
 
 	for d in data:
 		if not consider_rejected_warehouses and rejected_warehouses and d.warehouse in rejected_warehouses:
+			continue
+ 
+		# skip disabled batches
+		if d.batch_no in disabled_batched:
 			continue
 
 		if d.warehouse not in warehouse_wise_batches:
