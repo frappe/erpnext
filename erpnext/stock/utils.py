@@ -584,13 +584,21 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 
 @frappe.whitelist()
-def scan_barcode(search_value: str) -> BarcodeScanResult:
+def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeScanResult:
 	def set_cache(data: BarcodeScanResult):
 		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
+		_update_item_info(data, ctx)
 
 	def get_cache() -> BarcodeScanResult | None:
-		if data := frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}"):
-			return data
+		data = frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}")
+		if not data:
+			return
+
+		_update_item_info(data, ctx)
+		return data
+
+	if ctx is None:
+		ctx = frappe._dict()
 
 	if scan_data := get_cache():
 		return scan_data
@@ -603,7 +611,6 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 		as_dict=True,
 	)
 	if barcode_data:
-		_update_item_info(barcode_data)
 		set_cache(barcode_data)
 		return barcode_data
 
@@ -615,7 +622,6 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 		as_dict=True,
 	)
 	if serial_no_data:
-		_update_item_info(serial_no_data)
 		set_cache(serial_no_data)
 		return serial_no_data
 
@@ -634,22 +640,38 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 				).format(search_value, batch_no_data.item_code)
 			)
 
-		_update_item_info(batch_no_data)
 		set_cache(batch_no_data)
 		return batch_no_data
+
+	warehouse = frappe.get_cached_value("Warehouse", search_value, ("name", "disabled"), as_dict=True)
+	if warehouse and not warehouse.disabled:
+		warehouse_data = {"warehouse": warehouse.name}
+		set_cache(warehouse_data)
+		return warehouse_data
 
 	return {}
 
 
-def _update_item_info(scan_result: dict[str, str | None]) -> dict[str, str | None]:
-	if item_code := scan_result.get("item_code"):
-		if item_info := frappe.get_cached_value(
-			"Item",
-			item_code,
-			["has_batch_no", "has_serial_no"],
-			as_dict=True,
-		):
-			scan_result.update(item_info)
+def _update_item_info(scan_result: dict[str, str | None], ctx: dict | None = None) -> dict[str, str | None]:
+	from erpnext.stock.get_item_details import get_item_warehouse_
+
+	item_code = scan_result.get("item_code")
+	if not item_code:
+		return scan_result
+
+	if item_info := frappe.get_cached_value(
+		"Item",
+		item_code,
+		("has_batch_no", "has_serial_no"),
+		as_dict=True,
+	):
+		scan_result.update(item_info)
+
+	if ctx and (
+		warehouse := get_item_warehouse_(ctx, frappe._dict(name=item_code), overwrite_warehouse=True)
+	):
+		scan_result["default_warehouse"] = warehouse
+
 	return scan_result
 
 

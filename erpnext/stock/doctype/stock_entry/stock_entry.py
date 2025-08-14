@@ -112,6 +112,7 @@ class StockEntry(StockController):
 		is_return: DF.Check
 		items: DF.Table[StockEntryDetail]
 		job_card: DF.Link | None
+		last_scanned_warehouse: DF.Link | None
 		letter_head: DF.Link | None
 		naming_series: DF.Literal["MAT-STE-.YYYY.-"]
 		outgoing_stock_entry: DF.Link | None

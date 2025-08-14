@@ -86,6 +86,7 @@ class PurchaseReceipt(BuyingController):
 		is_subcontracted: DF.Check
 		items: DF.Table[PurchaseReceiptItem]
 		language: DF.Data | None
+		last_scanned_warehouse: DF.Link | None
 		letter_head: DF.Link | None
 		lr_date: DF.Date | None
 		lr_no: DF.Data | None

@@ -46,6 +46,7 @@ class StockReconciliation(StockController):
 		difference_amount: DF.Currency
 		expense_account: DF.Link | None
 		items: DF.Table[StockReconciliationItem]
+		last_scanned_warehouse: DF.Link | None
 		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
 		posting_date: DF.Date
 		posting_time: DF.Time

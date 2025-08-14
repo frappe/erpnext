@@ -107,6 +107,7 @@ class PurchaseOrder(BuyingController):
 		is_subcontracted: DF.Check
 		items: DF.Table[PurchaseOrderItem]
 		language: DF.Data | None
+		last_scanned_warehouse: DF.Link | None
 		letter_head: DF.Link | None
 		named_place: DF.Data | None
 		naming_series: DF.Literal["PUR-ORD-.YYYY.-"]

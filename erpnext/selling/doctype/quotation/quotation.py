@@ -74,7 +74,12 @@ class Quotation(SellingController):
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		items: DF.Table[QuotationItem]
+<<<<<<< HEAD
 		language: DF.Data | None
+=======
+		language: DF.Link | None
+		last_scanned_warehouse: DF.Link | None
+>>>>>>> 227fadc541 (feat: enhance barcode scanner to support warehouse scanning (#48865))
 		letter_head: DF.Link | None
 		lost_reasons: DF.TableMultiSelect[QuotationLostReasonDetail]
 		named_place: DF.Data | None

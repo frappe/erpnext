@@ -62,6 +62,7 @@
   "items_section",
   "update_stock",
   "scan_barcode",
+  "last_scanned_warehouse",
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -1569,6 +1570,36 @@
    "label": "Company Contact Person",
    "options": "Contact",
    "print_hide": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "payments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payments"
+  },
+  {
+   "fieldname": "contact_and_address_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+>>>>>>> 227fadc541 (feat: enhance barcode scanner to support warehouse scanning (#48865))
   }
  ],
  "icon": "fa fa-file-text",
