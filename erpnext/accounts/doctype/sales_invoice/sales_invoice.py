@@ -136,12 +136,8 @@ class SalesInvoice(SellingController):
 		is_pos: DF.Check
 		is_return: DF.Check
 		items: DF.Table[SalesInvoiceItem]
-<<<<<<< HEAD
 		language: DF.Data | None
-=======
-		language: DF.Link | None
 		last_scanned_warehouse: DF.Link | None
->>>>>>> 227fadc541 (feat: enhance barcode scanner to support warehouse scanning (#48865))
 		letter_head: DF.Link | None
 		loyalty_amount: DF.Currency
 		loyalty_points: DF.Int

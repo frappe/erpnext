@@ -1645,8 +1645,6 @@
    "label": "Select Dispatch Address ",
    "options": "Address",
    "print_hide": 1
-<<<<<<< HEAD
-=======
   },
   {
    "depends_on": "eval: doc.last_scanned_warehouse",
@@ -1654,16 +1652,6 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
-   },
-  {
-   "fieldname": "claimed_landed_cost_amount",
-   "fieldtype": "Currency",
-   "label": "Claimed Landed Cost Amount (Company Currency)",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
->>>>>>> 227fadc541 (feat: enhance barcode scanner to support warehouse scanning (#48865))
   }
  ],
  "grid_page_length": 50,

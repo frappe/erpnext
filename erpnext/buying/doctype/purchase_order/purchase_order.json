@@ -1289,20 +1289,19 @@
    "read_only": 1
   },
   {
-<<<<<<< HEAD
    "default": "0",
    "fieldname": "has_unit_price_items",
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Has Unit Price Items",
    "no_copy": 1
-=======
+  },
+  {
    "depends_on": "eval: doc.last_scanned_warehouse",
    "fieldname": "last_scanned_warehouse",
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
->>>>>>> 227fadc541 (feat: enhance barcode scanner to support warehouse scanning (#48865))
   }
  ],
  "grid_page_length": 50,
