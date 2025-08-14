@@ -139,7 +139,7 @@ class TestDunning(FrappeTestCase):
 		self.assertEqual(sales_invoice.status, "Overdue")
 		self.assertEqual(dunning.status, "Unresolved")
 
-	def test_dunning_resolution_with_credit_note(self):
+	def test_dunning_resolution_from_credit_note(self):
 		"""
 		Test that dunning is resolved when a credit note is issued against the original invoice.
 		"""

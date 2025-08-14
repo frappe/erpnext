@@ -362,11 +362,11 @@ doc_events = {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
-			"erpnext.accounts.doctype.dunning.dunning.resolve_dunning_for_credit_note",
+			"erpnext.accounts.doctype.dunning.dunning.resolve_dunnings",
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
-			"erpnext.accounts.doctype.dunning.dunning.resolve_dunning_for_credit_note",
+			"erpnext.accounts.doctype.dunning.dunning.resolve_dunnings",
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
@@ -379,9 +379,9 @@ doc_events = {
 	"Payment Entry": {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
-			"erpnext.accounts.doctype.dunning.dunning.resolve_dunning",
+			"erpnext.accounts.doctype.dunning.dunning.resolve_dunnings",
 		],
-		"on_cancel": ["erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
+		"on_cancel": ["erpnext.accounts.doctype.dunning.dunning.resolve_dunnings"],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Address": {
