@@ -198,21 +198,12 @@ def resolve_dunning_for_credit_note(doc, state):
 	Check if dunning should be resolved when a credit note is issued against a Sales Invoice.
 	Only process if update_outstanding_for_self is False (credit note is being applied against the original invoice).
 	"""
-	if not doc.is_return or doc.get("update_outstanding_for_self"):
+	if not doc.is_return or doc.get("update_outstanding_for_self") or not doc.get("return_against"):
 		return
 
-	if not doc.get("return_against"):
-		return
+	state = "Resolved" if doc.docstatus == 2 else "Unresolved"
 
-	original_invoice = doc.return_against
-	if doc.docstatus == 1:
-		state = "Unresolved"
-	elif doc.docstatus == 2:
-		state = "Resolved"
-	else:
-		return
-
-	dunnings = get_linked_dunnings_as_per_state(original_invoice, state)
+	dunnings = get_linked_dunnings_as_per_state(doc.return_against, state)
 
 	for dunning in dunnings:
 		resolve = True
