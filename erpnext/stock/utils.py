@@ -653,7 +653,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 
 
 def _update_item_info(scan_result: dict[str, str | None], ctx: dict | None = None) -> dict[str, str | None]:
-	from erpnext.stock.get_item_details import get_item_warehouse_
+	from erpnext.stock.get_item_details import get_item_warehouse
 
 	item_code = scan_result.get("item_code")
 	if not item_code:
@@ -667,9 +667,7 @@ def _update_item_info(scan_result: dict[str, str | None], ctx: dict | None = Non
 	):
 		scan_result.update(item_info)
 
-	if ctx and (
-		warehouse := get_item_warehouse_(ctx, frappe._dict(name=item_code), overwrite_warehouse=True)
-	):
+	if ctx and (warehouse := get_item_warehouse(ctx, frappe._dict(name=item_code), overwrite_warehouse=True)):
 		scan_result["default_warehouse"] = warehouse
 
 	return scan_result
