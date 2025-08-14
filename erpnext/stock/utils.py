@@ -600,11 +600,8 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 	if ctx is None:
 		ctx = frappe._dict()
 
-	elif isinstance(ctx, str):
-		ctx = json.loads(ctx, object_hook=frappe._dict)
-
-	elif isinstance(ctx, dict):
-		ctx = frappe._dict(ctx)
+	else:
+		ctx = frappe.parse_json(ctx)
 
 	if scan_data := get_cache():
 		return scan_data
