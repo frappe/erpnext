@@ -12,7 +12,7 @@ from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
-	get_loyalty_program_details_with_points,
+	get_loyalty_program_details_with_point,
 	validate_loyalty_points,
 )
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
