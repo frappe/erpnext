@@ -453,7 +453,11 @@ class PaymentReconciliation(Document):
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
 				res.difference_account = default_exchange_gain_loss_account
 				res.exchange_rate = inv.get("exchange_rate")
-				res.update({"gain_loss_posting_date": pay.get("posting_date")})
+				payment_date = pay.get("posting_date")
+				invoice_date = inv.get("invoice_date")
+				latest_date = max(payment_date, invoice_date)
+
+				res.update({"gain_loss_posting_date": latest_date})
 				if not pay.get("is_advance"):
 					if exc_gain_loss_posting_date == "Invoice":
 						res.update({"gain_loss_posting_date": inv.get("invoice_date")})
@@ -466,7 +470,6 @@ class PaymentReconciliation(Document):
 				elif inv.get("outstanding_amount") == 0:
 					entries.append(res)
 					continue
-
 			else:
 				break
 
