@@ -429,12 +429,6 @@
 		}
 	},
 
-	"China": {
-		"China Tax": {
-			"account_name": "VAT",
-			"tax_rate": 17.00
-		}
-	},
 
 	"Colombia": {
 		"Colombia Tax": {
