@@ -8,3 +8,4 @@ reviews:
   collapse_walkthrough: true
   sequence_diagrams: false
   changed_files_summary: false
+  high_level_summary: false
