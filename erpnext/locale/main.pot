@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ERPNext VERSION\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2025-08-10 09:37+0000\n"
-"PO-Revision-Date: 2025-08-10 09:37+0000\n"
+"POT-Creation-Date: 2025-08-17 09:36+0000\n"
+"PO-Revision-Date: 2025-08-17 09:36+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: hello@frappe.io\n"
 "MIME-Version: 1.0\n"
@@ -141,7 +141,7 @@ msgstr ""
 msgid "% Delivered"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:892
+#: erpnext/manufacturing/doctype/bom/bom.js:913
 #, python-format
 msgid "% Finished Item Quantity"
 msgstr ""
@@ -1034,6 +1034,10 @@ msgstr ""
 msgid "ACC-PINV-.YYYY.-"
 msgstr ""
 
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:531
+msgid "AMC Expiry (Serial)"
+msgstr ""
+
 #. Label of the amc_expiry_date (Date) field in DocType 'Serial No'
 #. Label of the amc_expiry_date (Date) field in DocType 'Warranty Claim'
 #: erpnext/stock/doctype/serial_no/serial_no.json
@@ -1261,7 +1265,7 @@ msgstr ""
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.js:30
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:190
 #: erpnext/accounts/report/general_ledger/general_ledger.js:38
-#: erpnext/accounts/report/general_ledger/general_ledger.py:652
+#: erpnext/accounts/report/general_ledger/general_ledger.py:672
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.js:30
 #: erpnext/accounts/report/payment_ledger/payment_ledger.js:30
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:152
@@ -1472,7 +1476,7 @@ msgstr ""
 msgid "Account is not set for the dashboard chart {0}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:755
+#: erpnext/assets/doctype/asset/asset.py:771
 msgid "Account not Found"
 msgstr ""
 
@@ -1854,8 +1858,8 @@ msgstr ""
 msgid "Accounting Entries"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:789
-#: erpnext/assets/doctype/asset/asset.py:804
+#: erpnext/assets/doctype/asset/asset.py:805
+#: erpnext/assets/doctype/asset/asset.py:820
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:559
 msgid "Accounting Entry for Asset"
 msgstr ""
@@ -1869,29 +1873,29 @@ msgstr ""
 msgid "Accounting Entry for Landed Cost Voucher for SCR {0}"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:814
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:816
 msgid "Accounting Entry for Service"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:999
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1020
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1038
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1059
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1080
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1104
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1211
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1447
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1469
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1001
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1022
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1040
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1061
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1082
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1106
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1213
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1449
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1471
 #: erpnext/controllers/stock_controller.py:579
 #: erpnext/controllers/stock_controller.py:596
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:907
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:909
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1627
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1641
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:613
 msgid "Accounting Entry for Stock"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:716
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:718
 msgid "Accounting Entry for {0}"
 msgstr ""
 
@@ -2434,9 +2438,9 @@ msgstr ""
 #: erpnext/buying/doctype/supplier/supplier.js:128
 #: erpnext/buying/doctype/supplier/supplier.js:137
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
-#: erpnext/manufacturing/doctype/bom/bom.js:139
-#: erpnext/manufacturing/doctype/bom/bom.js:150
-#: erpnext/manufacturing/doctype/bom/bom.js:161
+#: erpnext/manufacturing/doctype/bom/bom.js:160
+#: erpnext/manufacturing/doctype/bom/bom.js:171
+#: erpnext/manufacturing/doctype/bom/bom.js:182
 #: erpnext/projects/doctype/project/project.js:87
 #: erpnext/projects/doctype/project/project.js:95
 #: erpnext/projects/doctype/project/project.js:151
@@ -2725,7 +2729,7 @@ msgstr ""
 #: erpnext/accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/crm/doctype/lead/lead.js:85
-#: erpnext/manufacturing/doctype/bom/bom.js:922
+#: erpnext/manufacturing/doctype/bom/bom.js:943
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:55
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:235
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:264
@@ -2742,7 +2746,7 @@ msgstr ""
 msgid "Add / Edit Prices"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account_tree.js:252
+#: erpnext/accounts/doctype/account/account_tree.js:248
 msgid "Add Child"
 msgstr ""
 
@@ -2838,7 +2842,7 @@ msgid "Add Quote"
 msgstr ""
 
 #. Label of the add_raw_materials (Button) field in DocType 'BOM Operation'
-#: erpnext/manufacturing/doctype/bom/bom.js:920
+#: erpnext/manufacturing/doctype/bom/bom.js:941
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Add Raw Materials"
 msgstr ""
@@ -3415,11 +3419,11 @@ msgstr ""
 msgid "Adjust Asset Value"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1078
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1087
 msgid "Adjustment Against"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:644
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:646
 msgid "Adjustment based on Purchase Invoice rate"
 msgstr ""
 
@@ -3609,7 +3613,7 @@ msgstr ""
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 #: erpnext/accounts/report/bank_clearance_summary/bank_clearance_summary.py:39
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:91
-#: erpnext/accounts/report/general_ledger/general_ledger.py:721
+#: erpnext/accounts/report/general_ledger/general_ledger.py:741
 msgid "Against Account"
 msgstr ""
 
@@ -3628,7 +3632,7 @@ msgstr ""
 msgid "Against Customer Order {0}"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1191
+#: erpnext/selling/doctype/sales_order/sales_order.js:1194
 msgid "Against Default Supplier"
 msgstr ""
 
@@ -3720,13 +3724,13 @@ msgstr ""
 msgid "Against Stock Entry"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:329
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:331
 msgid "Against Supplier Invoice {0}"
 msgstr ""
 
 #. Label of the against_voucher (Dynamic Link) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
-#: erpnext/accounts/report/general_ledger/general_ledger.py:741
+#: erpnext/accounts/report/general_ledger/general_ledger.py:774
 msgid "Against Voucher"
 msgstr ""
 
@@ -3750,7 +3754,7 @@ msgstr ""
 #: erpnext/accounts/doctype/advance_payment_ledger_entry/advance_payment_ledger_entry.json
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
-#: erpnext/accounts/report/general_ledger/general_ledger.py:739
+#: erpnext/accounts/report/general_ledger/general_ledger.py:772
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:183
 msgid "Against Voucher Type"
 msgstr ""
@@ -4041,11 +4045,11 @@ msgstr ""
 msgid "All items are already requested"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:1335
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:1342
 msgid "All items have already been Invoiced/Returned"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:1183
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:1196
 msgid "All items have already been received"
 msgstr ""
 
@@ -4071,7 +4075,7 @@ msgstr ""
 msgid "All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:840
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:847
 msgid "All these items have already been Invoiced/Returned"
 msgstr ""
 
@@ -4136,7 +4140,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_payment_reconciliation_log_allocations/process_payment_reconciliation_log_allocations.json
 #: erpnext/accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
 #: erpnext/accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
-#: erpnext/accounts/report/gross_profit/gross_profit.py:378
+#: erpnext/accounts/report/gross_profit/gross_profit.py:384
 #: erpnext/public/js/utils/unreconcile.js:87
 msgid "Allocated Amount"
 msgstr ""
@@ -4618,7 +4622,7 @@ msgstr ""
 msgid "Also you can't switch back to FIFO after setting the valuation method to Moving Average for this item."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:200
+#: erpnext/manufacturing/doctype/bom/bom.js:221
 #: erpnext/manufacturing/doctype/work_order/work_order.js:151
 #: erpnext/manufacturing/doctype/work_order/work_order.js:166
 #: erpnext/public/js/utils.js:518
@@ -5714,11 +5718,11 @@ msgstr ""
 msgid "As there are reserved stock, you cannot disable {0}."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1031
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1046
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1743
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1760
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
 msgstr ""
 
@@ -5768,7 +5772,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.json
 #: erpnext/assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 #: erpnext/assets/workspace/assets/assets.json
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:221
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:225
 #: erpnext/stock/doctype/serial_no/serial_no.json
 msgid "Asset"
 msgstr ""
@@ -5886,7 +5890,7 @@ msgstr ""
 msgid "Asset Depreciation Schedule {0} for Asset {1} and Finance Book {2} already exists."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:176
+#: erpnext/assets/doctype/asset/asset.py:177
 msgid "Asset Depreciation Schedules created/updated:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 msgstr ""
 
@@ -5959,7 +5963,7 @@ msgstr ""
 #. Label of a Link in the Assets Workspace
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/assets/workspace/assets/assets.json
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:232
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:236
 msgid "Asset Movement"
 msgstr ""
 
@@ -5968,7 +5972,7 @@ msgstr ""
 msgid "Asset Movement Item"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1035
+#: erpnext/assets/doctype/asset/asset.py:1051
 msgid "Asset Movement record {0} created"
 msgstr ""
 
@@ -6097,11 +6101,11 @@ msgstr ""
 msgid "Asset Value Analytics"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:208
+#: erpnext/assets/doctype/asset/asset.py:209
 msgid "Asset cancelled"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:584
+#: erpnext/assets/doctype/asset/asset.py:600
 msgid "Asset cannot be cancelled, as it is already {0}"
 msgstr ""
 
@@ -6113,15 +6117,15 @@ msgstr ""
 msgid "Asset capitalized after Asset Capitalization {0} was submitted"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:217
+#: erpnext/assets/doctype/asset/asset.py:218
 msgid "Asset created"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1275
+#: erpnext/assets/doctype/asset/asset.py:1291
 msgid "Asset created after being split from Asset {0}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:220
+#: erpnext/assets/doctype/asset/asset.py:221
 msgid "Asset deleted"
 msgstr ""
 
@@ -6162,7 +6166,7 @@ msgstr ""
 msgid "Asset sold"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:195
+#: erpnext/assets/doctype/asset/asset.py:196
 msgid "Asset submitted"
 msgstr ""
 
@@ -6170,7 +6174,7 @@ msgstr ""
 msgid "Asset transferred to Location {0}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1284
+#: erpnext/assets/doctype/asset/asset.py:1300
 msgid "Asset updated after being split into Asset {0}"
 msgstr ""
 
@@ -6261,7 +6265,7 @@ msgstr ""
 msgid "Assets {assets_link} created for {item_code}"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:193
+#: erpnext/manufacturing/doctype/job_card/job_card.js:201
 msgid "Assign Job to Employee"
 msgstr ""
 
@@ -6311,11 +6315,11 @@ msgstr ""
 msgid "At least one account with exchange gain or loss is required"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1141
+#: erpnext/assets/doctype/asset/asset.py:1157
 msgid "At least one asset has to be selected."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:930
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:965
 msgid "At least one invoice has to be selected."
 msgstr ""
 
@@ -6323,7 +6327,7 @@ msgstr ""
 msgid "At least one item should be entered with negative quantity in return document"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:484
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:485
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:540
 msgid "At least one mode of payment is required for POS invoice."
 msgstr ""
@@ -6873,7 +6877,7 @@ msgstr ""
 msgid "Available Stock for Packing Items"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:313
+#: erpnext/assets/doctype/asset/asset.py:314
 msgid "Available for use date is required"
 msgstr ""
 
@@ -6890,7 +6894,7 @@ msgstr ""
 msgid "Available-for-use Date"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:418
+#: erpnext/assets/doctype/asset/asset.py:419
 msgid "Available-for-use Date should be after purchase date"
 msgstr ""
 
@@ -6945,7 +6949,7 @@ msgstr ""
 msgid "Avg. Selling Price List Rate"
 msgstr ""
 
-#: erpnext/accounts/report/gross_profit/gross_profit.py:316
+#: erpnext/accounts/report/gross_profit/gross_profit.py:322
 msgid "Avg. Selling Rate"
 msgstr ""
 
@@ -7000,7 +7004,7 @@ msgstr ""
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.js:5
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:109
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:1005
+#: erpnext/selling/doctype/sales_order/sales_order.js:1008
 #: erpnext/stock/doctype/material_request/material_request.js:334
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:633
@@ -7014,7 +7018,7 @@ msgstr ""
 msgid "BOM 1"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1519
+#: erpnext/manufacturing/doctype/bom/bom.py:1556
 msgid "BOM 1 {0} and BOM 2 {1} should not be same"
 msgstr ""
 
@@ -7233,7 +7237,7 @@ msgstr ""
 msgid "BOM Website Operation"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.js:1208
+#: erpnext/stock/doctype/stock_entry/stock_entry.js:1214
 msgid "BOM and Manufacturing Quantity are required"
 msgstr ""
 
@@ -7256,19 +7260,19 @@ msgstr ""
 msgid "BOM recursion: {1} cannot be parent or child of {0}"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1332
+#: erpnext/manufacturing/doctype/bom/bom.py:1369
 msgid "BOM {0} does not belong to Item {1}"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1314
+#: erpnext/manufacturing/doctype/bom/bom.py:1351
 msgid "BOM {0} must be active"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1317
+#: erpnext/manufacturing/doctype/bom/bom.py:1354
 msgid "BOM {0} must be submitted"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:734
+#: erpnext/manufacturing/doctype/bom/bom.py:765
 msgid "BOM {0} not found for the item {1}"
 msgstr ""
 
@@ -7339,7 +7343,7 @@ msgstr ""
 msgid "Balance (Dr - Cr)"
 msgstr ""
 
-#: erpnext/accounts/report/general_ledger/general_ledger.py:673
+#: erpnext/accounts/report/general_ledger/general_ledger.py:693
 msgid "Balance ({0})"
 msgstr ""
 
@@ -7731,7 +7735,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice_item/pos_invoice_item.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
-#: erpnext/public/js/utils/barcode_scanner.js:282
+#: erpnext/public/js/utils/barcode_scanner.js:308
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -7952,6 +7956,7 @@ msgid "Batch Details"
 msgstr ""
 
 #: erpnext/stock/doctype/batch/batch.py:197
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:455
 msgid "Batch Expiry Date"
 msgstr ""
 
@@ -8004,7 +8009,7 @@ msgstr ""
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:89
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:115
 #: erpnext/public/js/controllers/transaction.js:2446
-#: erpnext/public/js/utils/barcode_scanner.js:260
+#: erpnext/public/js/utils/barcode_scanner.js:286
 #: erpnext/public/js/utils/serial_no_batch_selector.js:438
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/item_price/item_price.json
@@ -8025,7 +8030,7 @@ msgstr ""
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.js:81
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:160
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.js:19
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:416
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:448
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:78
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
@@ -8040,7 +8045,7 @@ msgstr ""
 msgid "Batch No {0} does not exists"
 msgstr ""
 
-#: erpnext/stock/utils.py:632
+#: erpnext/stock/utils.py:638
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
 msgstr ""
 
@@ -8108,7 +8113,7 @@ msgstr ""
 msgid "Batch not created for item {} since it does not have a batch series."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:348
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:350
 msgid "Batch {0} and Warehouse"
 msgstr ""
 
@@ -8185,7 +8190,7 @@ msgstr ""
 
 #. Label of a Card Break in the Manufacturing Workspace
 #. Label of a Link in the Manufacturing Workspace
-#: erpnext/manufacturing/doctype/bom/bom.py:1188
+#: erpnext/manufacturing/doctype/bom/bom.py:1225
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/stock/doctype/material_request/material_request.js:124
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:615
@@ -8499,7 +8504,7 @@ msgid "Blanket Order Rate"
 msgstr ""
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:116
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:262
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:268
 msgid "Block Invoice"
 msgstr ""
 
@@ -8697,7 +8702,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pricing_rule_brand/pricing_rule_brand.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
-#: erpnext/accounts/report/gross_profit/gross_profit.py:300
+#: erpnext/accounts/report/gross_profit/gross_profit.py:306
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.js:53
 #: erpnext/accounts/report/sales_register/sales_register.js:64
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
@@ -8770,7 +8775,7 @@ msgstr ""
 msgid "Brokerage"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:143
+#: erpnext/manufacturing/doctype/bom/bom.js:164
 msgid "Browse BOM"
 msgstr ""
 
@@ -8992,7 +8997,7 @@ msgstr ""
 msgid "Buying & Selling Settings"
 msgstr ""
 
-#: erpnext/accounts/report/gross_profit/gross_profit.py:337
+#: erpnext/accounts/report/gross_profit/gross_profit.py:343
 msgid "Buying Amount"
 msgstr ""
 
@@ -9663,11 +9668,11 @@ msgstr ""
 msgid "Cannot covert to Group because Account Type is selected."
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:988
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:990
 msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipts."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1758
+#: erpnext/selling/doctype/sales_order/sales_order.py:1774
 #: erpnext/stock/doctype/pick_list/pick_list.py:199
 msgid "Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
 msgstr ""
@@ -9680,15 +9685,11 @@ msgstr ""
 msgid "Cannot create return for consolidated invoice {0}."
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account_tree.js:241
-msgid "Cannot create root account."
-msgstr ""
-
-#: erpnext/manufacturing/doctype/bom/bom.py:1044
+#: erpnext/manufacturing/doctype/bom/bom.py:1081
 msgid "Cannot deactivate or cancel BOM as it is linked with other BOMs"
 msgstr ""
 
-#: erpnext/crm/doctype/opportunity/opportunity.py:277
+#: erpnext/crm/doctype/opportunity/opportunity.py:282
 msgid "Cannot declare as lost, because Quotation has been made."
 msgstr ""
 
@@ -9718,7 +9719,11 @@ msgstr ""
 msgid "Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:54
+#: erpnext/public/js/utils/barcode_scanner.js:62
+msgid "Cannot find Item or Warehouse with this Barcode"
+msgstr ""
+
+#: erpnext/public/js/utils/barcode_scanner.js:63
 msgid "Cannot find Item with this Barcode"
 msgstr ""
 
@@ -9769,7 +9774,7 @@ msgstr ""
 msgid "Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:283
+#: erpnext/selling/doctype/quotation/quotation.py:285
 msgid "Cannot set as Lost as Sales Order is made."
 msgstr ""
 
@@ -9956,7 +9961,7 @@ msgstr ""
 msgid "Cash In Hand"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:319
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:321
 msgid "Cash or Bank Account is mandatory for making payment entry"
 msgstr ""
 
@@ -10582,8 +10587,8 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.js:591
 #: erpnext/selling/doctype/sales_order/sales_order.js:623
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:66
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:319
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:276
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:325
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:283
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:170
 #: erpnext/support/doctype/issue/issue.js:23
 msgid "Close"
@@ -10688,7 +10693,7 @@ msgstr ""
 msgid "Closing (Dr)"
 msgstr ""
 
-#: erpnext/accounts/report/general_ledger/general_ledger.py:379
+#: erpnext/accounts/report/general_ledger/general_ledger.py:399
 msgid "Closing (Opening + Total)"
 msgstr ""
 
@@ -11548,7 +11553,7 @@ msgstr ""
 msgid "Company name not same"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:261
+#: erpnext/assets/doctype/asset/asset.py:262
 msgid "Company of asset {0} and purchase document {1} doesn't matches."
 msgstr ""
 
@@ -11591,7 +11596,7 @@ msgstr ""
 msgid "Company {} does not exist yet. Taxes setup aborted."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:528
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:529
 msgid "Company {} does not match with POS Profile Company {}"
 msgstr ""
 
@@ -11628,7 +11633,7 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:230
+#: erpnext/manufacturing/doctype/job_card/job_card.js:238
 #: erpnext/manufacturing/doctype/workstation/workstation.js:151
 msgid "Complete Job"
 msgstr ""
@@ -11761,8 +11766,8 @@ msgstr ""
 msgid "Completed Qty cannot be greater than 'Qty to Manufacture'"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:278
-#: erpnext/manufacturing/doctype/job_card/job_card.js:373
+#: erpnext/manufacturing/doctype/job_card/job_card.js:286
+#: erpnext/manufacturing/doctype/job_card/job_card.js:381
 #: erpnext/manufacturing/doctype/workstation/workstation.js:296
 msgid "Completed Quantity"
 msgstr ""
@@ -12654,13 +12659,13 @@ msgstr ""
 msgid "Corrective Action"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:430
+#: erpnext/manufacturing/doctype/job_card/job_card.js:438
 msgid "Corrective Job Card"
 msgstr ""
 
 #. Label of the corrective_operation_section (Tab Break) field in DocType 'Job
 #. Card'
-#: erpnext/manufacturing/doctype/job_card/job_card.js:437
+#: erpnext/manufacturing/doctype/job_card/job_card.js:445
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Corrective Operation"
 msgstr ""
@@ -12804,9 +12809,9 @@ msgstr ""
 #: erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:197
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:98
 #: erpnext/accounts/report/general_ledger/general_ledger.js:153
-#: erpnext/accounts/report/general_ledger/general_ledger.py:734
+#: erpnext/accounts/report/general_ledger/general_ledger.py:767
 #: erpnext/accounts/report/gross_profit/gross_profit.js:68
-#: erpnext/accounts/report/gross_profit/gross_profit.py:364
+#: erpnext/accounts/report/gross_profit/gross_profit.py:370
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:309
 #: erpnext/accounts/report/purchase_register/purchase_register.js:46
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.py:29
@@ -12891,8 +12896,8 @@ msgstr ""
 msgid "Cost Center is a part of Cost Center Allocation, hence cannot be converted to a group"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1412
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:873
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1414
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:875
 msgid "Cost Center is required in row {0} in Taxes table for type {1}"
 msgstr ""
 
@@ -12912,11 +12917,11 @@ msgstr ""
 msgid "Cost Center {0} cannot be used for allocation as it is used as main cost center in other allocation record."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:289
+#: erpnext/assets/doctype/asset/asset.py:290
 msgid "Cost Center {} doesn't belong to Company {}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:296
+#: erpnext/assets/doctype/asset/asset.py:297
 msgid "Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
 msgstr ""
 
@@ -13032,11 +13037,11 @@ msgstr ""
 msgid "Could Not Delete Demo Data"
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:584
+#: erpnext/selling/doctype/quotation/quotation.py:606
 msgid "Could not auto create Customer due to the following missing mandatory field(s):"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:672
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:674
 msgid "Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 msgstr ""
 
@@ -13165,9 +13170,9 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:127
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:135
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:146
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:222
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:659
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:683
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:228
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:665
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:689
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:88
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:89
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:103
@@ -13207,14 +13212,14 @@ msgstr ""
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.js:34
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.js:48
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.js:64
-#: erpnext/manufacturing/doctype/bom/bom.js:171
-#: erpnext/manufacturing/doctype/bom/bom.js:180
-#: erpnext/manufacturing/doctype/bom/bom.js:190
-#: erpnext/manufacturing/doctype/bom/bom.js:194
-#: erpnext/manufacturing/doctype/bom/bom.js:438
+#: erpnext/manufacturing/doctype/bom/bom.js:192
+#: erpnext/manufacturing/doctype/bom/bom.js:201
+#: erpnext/manufacturing/doctype/bom/bom.js:211
+#: erpnext/manufacturing/doctype/bom/bom.js:215
+#: erpnext/manufacturing/doctype/bom/bom.js:459
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:99
-#: erpnext/manufacturing/doctype/job_card/job_card.js:137
-#: erpnext/manufacturing/doctype/job_card/job_card.js:151
+#: erpnext/manufacturing/doctype/job_card/job_card.js:145
+#: erpnext/manufacturing/doctype/job_card/job_card.js:159
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:268
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:145
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:159
@@ -13226,7 +13231,7 @@ msgstr ""
 #: erpnext/projects/doctype/task/task_tree.js:81
 #: erpnext/public/js/communication.js:19 erpnext/public/js/communication.js:31
 #: erpnext/public/js/communication.js:41
-#: erpnext/public/js/controllers/transaction.js:361
+#: erpnext/public/js/controllers/transaction.js:362
 #: erpnext/public/js/controllers/transaction.js:2494
 #: erpnext/selling/doctype/customer/customer.js:181
 #: erpnext/selling/doctype/quotation/quotation.js:125
@@ -13245,18 +13250,18 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.js:759
 #: erpnext/selling/doctype/sales_order/sales_order.js:766
 #: erpnext/selling/doctype/sales_order/sales_order.js:770
-#: erpnext/selling/doctype/sales_order/sales_order.js:917
-#: erpnext/selling/doctype/sales_order/sales_order.js:1056
+#: erpnext/selling/doctype/sales_order/sales_order.js:920
+#: erpnext/selling/doctype/sales_order/sales_order.js:1059
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:96
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:98
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:121
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:247
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:261
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:271
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:281
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:300
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:305
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:347
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:253
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:267
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:277
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:287
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:306
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:311
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:353
 #: erpnext/stock/doctype/item/item.js:167
 #: erpnext/stock/doctype/item/item.js:174
 #: erpnext/stock/doctype/item/item.js:182
@@ -13280,15 +13285,15 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:70
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:82
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:108
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:279
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:284
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:286
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:291
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:297
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:300
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:298
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:304
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:307
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:170
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:172
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:247
-#: erpnext/stock/doctype/stock_entry/stock_entry.js:1283
+#: erpnext/stock/doctype/stock_entry/stock_entry.js:1289
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:231
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:264
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:277
@@ -13413,7 +13418,7 @@ msgstr ""
 msgid "Create Payment Entry"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:806
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:807
 msgid "Create Payment Entry for Consolidated POS Invoices."
 msgstr ""
 
@@ -13429,7 +13434,7 @@ msgstr ""
 msgid "Create Prospect"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1238
+#: erpnext/selling/doctype/sales_order/sales_order.js:1242
 #: erpnext/utilities/activation.py:106
 msgid "Create Purchase Order"
 msgstr ""
@@ -13561,7 +13566,7 @@ msgstr ""
 msgid "Creating Accounts..."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1133
+#: erpnext/selling/doctype/sales_order/sales_order.js:1136
 msgid "Creating Delivery Note ..."
 msgstr ""
 
@@ -13581,11 +13586,11 @@ msgstr ""
 msgid "Creating Purchase Invoices ..."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1258
+#: erpnext/selling/doctype/sales_order/sales_order.js:1262
 msgid "Creating Purchase Order ..."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:740
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:746
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:569
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:73
 msgid "Creating Purchase Receipt ..."
@@ -13656,11 +13661,11 @@ msgstr ""
 msgid "Credit"
 msgstr ""
 
-#: erpnext/accounts/report/general_ledger/general_ledger.py:691
+#: erpnext/accounts/report/general_ledger/general_ledger.py:711
 msgid "Credit (Transaction)"
 msgstr ""
 
-#: erpnext/accounts/report/general_ledger/general_ledger.py:666
+#: erpnext/accounts/report/general_ledger/general_ledger.py:686
 msgid "Credit ({0})"
 msgstr ""
 
@@ -13803,14 +13808,14 @@ msgstr ""
 msgid "Credit Note will update it's own outstanding amount, even if 'Return Against' is specified."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:669
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:671
 msgid "Credit Note {0} has been created automatically"
 msgstr ""
 
 #. Label of the credit_to (Link) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:369
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:377
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:371
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:379
 #: erpnext/controllers/accounts_controller.py:2282
 msgid "Credit To"
 msgstr ""
@@ -14009,7 +14014,7 @@ msgstr ""
 #: erpnext/accounts/report/financial_statements.html:29
 #: erpnext/accounts/report/financial_statements.py:678
 #: erpnext/accounts/report/general_ledger/general_ledger.js:147
-#: erpnext/accounts/report/gross_profit/gross_profit.py:427
+#: erpnext/accounts/report/gross_profit/gross_profit.py:443
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:707
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:220
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:175
@@ -14110,7 +14115,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1665
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1733
-#: erpnext/accounts/utils.py:2319
+#: erpnext/accounts/utils.py:2323
 msgid "Currency for {0} must be {1}"
 msgstr ""
 
@@ -14376,13 +14381,13 @@ msgstr ""
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/process_statement_of_accounts_customer/process_statement_of_accounts_customer.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:286
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:289
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_reference/sales_invoice_reference.json
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:38
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:29
-#: erpnext/accounts/report/gross_profit/gross_profit.py:385
+#: erpnext/accounts/report/gross_profit/gross_profit.py:391
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:37
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.js:22
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:225
@@ -14445,8 +14450,8 @@ msgstr ""
 #: erpnext/setup/doctype/customer_group/customer_group.json
 #: erpnext/setup/doctype/territory/territory.json
 #: erpnext/setup/workspace/home/home.json
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:215
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:482
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:218
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:488
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 #: erpnext/stock/doctype/item/item.json
@@ -14460,7 +14465,7 @@ msgstr ""
 #: erpnext/stock/report/delayed_item_report/delayed_item_report.py:121
 #: erpnext/stock/report/delayed_order_report/delayed_order_report.js:36
 #: erpnext/stock/report/delayed_order_report/delayed_order_report.py:46
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:469
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:512
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
@@ -14638,7 +14643,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:185
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:56
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:228
-#: erpnext/accounts/report/gross_profit/gross_profit.py:392
+#: erpnext/accounts/report/gross_profit/gross_profit.py:398
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:212
 #: erpnext/accounts/report/sales_register/sales_register.js:27
 #: erpnext/accounts/report/sales_register/sales_register.py:202
@@ -14746,6 +14751,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:156
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:92
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:35
+#: erpnext/accounts/report/gross_profit/gross_profit.py:405
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:232
 #: erpnext/accounts/report/sales_register/sales_register.py:193
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
@@ -14893,7 +14899,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1087
 #: erpnext/selling/doctype/sales_order/sales_order.py:373
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:416
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:418
 msgid "Customer {0} does not belong to project {1}"
 msgstr ""
 
@@ -15382,11 +15388,11 @@ msgstr ""
 msgid "Debit"
 msgstr ""
 
-#: erpnext/accounts/report/general_ledger/general_ledger.py:684
+#: erpnext/accounts/report/general_ledger/general_ledger.py:704
 msgid "Debit (Transaction)"
 msgstr ""
 
-#: erpnext/accounts/report/general_ledger/general_ledger.py:659
+#: erpnext/accounts/report/general_ledger/general_ledger.py:679
 msgid "Debit ({0})"
 msgstr ""
 
@@ -16328,7 +16334,7 @@ msgstr ""
 #. Label of the delivery_date (Date) field in DocType 'Sales Order'
 #. Label of the delivery_date (Date) field in DocType 'Sales Order Item'
 #: erpnext/public/js/utils.js:813
-#: erpnext/selling/doctype/sales_order/sales_order.js:1076
+#: erpnext/selling/doctype/sales_order/sales_order.js:1079
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:321
@@ -16363,7 +16369,7 @@ msgstr ""
 #. Label of a Link in the Stock Workspace
 #. Label of a shortcut in the Stock Workspace
 #: erpnext/accounts/doctype/pos_invoice_item/pos_invoice_item.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:306
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:312
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice_list.js:36
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.js:22
@@ -16470,7 +16476,7 @@ msgstr ""
 #. Label of the delivery_trip (Link) field in DocType 'Delivery Note'
 #. Name of a DocType
 #. Label of a Link in the Stock Workspace
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:277
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:283
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 #: erpnext/stock/workspace/stock/stock.json
@@ -16660,7 +16666,7 @@ msgstr ""
 msgid "Depreciation Entry Posting Status"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1109
+#: erpnext/assets/doctype/asset/asset.py:1125
 msgid "Depreciation Entry against asset {0}"
 msgstr ""
 
@@ -16707,11 +16713,11 @@ msgstr ""
 msgid "Depreciation Posting Date cannot be before Available-for-use Date"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:318
+#: erpnext/assets/doctype/asset/asset.py:319
 msgid "Depreciation Row {0}: Depreciation Posting Date cannot be before Available-for-use Date"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:569
+#: erpnext/assets/doctype/asset/asset.py:585
 msgid "Depreciation Row {0}: Expected value after useful life must be greater than or equal to {1}"
 msgstr ""
 
@@ -16738,7 +16744,7 @@ msgstr ""
 msgid "Depreciation Schedule View"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:412
+#: erpnext/assets/doctype/asset/asset.py:413
 msgid "Depreciation cannot be calculated for fully depreciated assets"
 msgstr ""
 
@@ -16916,7 +16922,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 #: erpnext/accounts/doctype/share_type/share_type.json
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:72
-#: erpnext/accounts/report/gross_profit/gross_profit.py:302
+#: erpnext/accounts/report/gross_profit/gross_profit.py:308
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:175
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:196
 #: erpnext/accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:72
@@ -17209,7 +17215,7 @@ msgstr ""
 msgid "Difference Value"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:491
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:497
 msgid "Different 'Source Warehouse' and 'Target Warehouse' can be set for each row."
 msgstr ""
 
@@ -17979,7 +17985,7 @@ msgstr ""
 msgid "Do you want to submit the material request"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:76
+#: erpnext/manufacturing/doctype/job_card/job_card.js:84
 msgid "Do you want to submit the stock entry?"
 msgstr ""
 
@@ -18486,7 +18492,7 @@ msgstr ""
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:342
+#: erpnext/assets/doctype/asset/asset.py:343
 msgid "Duplicate Finance Book"
 msgstr ""
 
@@ -18679,7 +18685,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:495
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:501
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -19117,7 +19123,7 @@ msgstr ""
 msgid "Ems(Pica)"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1640
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1642
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
 msgstr ""
 
@@ -19354,8 +19360,8 @@ msgstr ""
 #. Label of the end_time (Time) field in DocType 'Stock Reposting Settings'
 #. Label of the end_time (Time) field in DocType 'Service Day'
 #. Label of the end_time (Datetime) field in DocType 'Call Log'
-#: erpnext/manufacturing/doctype/job_card/job_card.js:311
-#: erpnext/manufacturing/doctype/job_card/job_card.js:380
+#: erpnext/manufacturing/doctype/job_card/job_card.js:319
+#: erpnext/manufacturing/doctype/job_card/job_card.js:388
 #: erpnext/manufacturing/doctype/workstation_working_hour/workstation_working_hour.json
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 #: erpnext/support/doctype/service_day/service_day.json
@@ -19446,8 +19452,8 @@ msgstr ""
 msgid "Enter Supplier"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:337
-#: erpnext/manufacturing/doctype/job_card/job_card.js:406
+#: erpnext/manufacturing/doctype/job_card/job_card.js:345
+#: erpnext/manufacturing/doctype/job_card/job_card.js:414
 #: erpnext/manufacturing/doctype/workstation/workstation.js:312
 msgid "Enter Value"
 msgstr ""
@@ -19488,7 +19494,7 @@ msgstr ""
 msgid "Enter date to scrap asset"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:410
+#: erpnext/assets/doctype/asset/asset.py:411
 msgid "Enter depreciation details"
 msgstr ""
 
@@ -19523,7 +19529,7 @@ msgstr ""
 msgid "Enter the opening stock units."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:865
+#: erpnext/manufacturing/doctype/bom/bom.js:886
 msgid "Enter the quantity of the Item that will be manufactured from this Bill of Materials."
 msgstr ""
 
@@ -19881,7 +19887,7 @@ msgstr ""
 msgid "Excise Entry"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.js:1276
+#: erpnext/stock/doctype/stock_entry/stock_entry.js:1282
 msgid "Excise Invoice"
 msgstr ""
 
@@ -20053,7 +20059,7 @@ msgstr ""
 #: erpnext/accounts/doctype/cashier_closing/cashier_closing.json
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
 #: erpnext/accounts/doctype/process_deferred_accounting/process_deferred_accounting.json
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:596
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:598
 #: erpnext/accounts/report/account_balance/account_balance.js:28
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:89
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:178
@@ -20121,13 +20127,13 @@ msgstr ""
 msgid "Expense Head"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:490
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:514
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:534
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:492
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:516
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:536
 msgid "Expense Head Changed"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:592
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:594
 msgid "Expense account is mandatory for item {0}"
 msgstr ""
 
@@ -20266,6 +20272,11 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:254
 msgid "Extra Small"
+msgstr ""
+
+#. Label of the finished_good (Link) field in DocType 'BOM Operation'
+#: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
+msgid "FG / Semi FG Item"
 msgstr ""
 
 #. Option for the 'Valuation Method' (Select) field in DocType 'Item'
@@ -20476,7 +20487,7 @@ msgstr ""
 msgid "Fetch Customers"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js:76
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js:77
 msgid "Fetch Items from Warehouse"
 msgstr ""
 
@@ -20492,7 +20503,7 @@ msgstr ""
 msgid "Fetch Subscription Updates"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1017
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1026
 msgid "Fetch Timesheet"
 msgstr ""
 
@@ -20884,11 +20895,6 @@ msgstr ""
 msgid "Finished Goods"
 msgstr ""
 
-#. Label of the finished_good (Link) field in DocType 'BOM Operation'
-#: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
-msgid "Finished Goods / Semi Finished Goods Item"
-msgstr ""
-
 #. Label of the fg_based_section_section (Section Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Finished Goods Based Operating Cost"
@@ -20897,11 +20903,6 @@ msgstr ""
 #. Label of the fg_item (Link) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Finished Goods Item"
-msgstr ""
-
-#. Label of the finished_good_qty (Float) field in DocType 'BOM Operation'
-#: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
-msgid "Finished Goods Qty"
 msgstr ""
 
 #. Label of the fg_reference_id (Data) field in DocType 'BOM Creator Item'
@@ -21067,7 +21068,7 @@ msgstr ""
 #. Capitalization Asset Item'
 #. Label of the fixed_asset_account (Link) field in DocType 'Asset Category
 #. Account'
-#: erpnext/assets/doctype/asset/asset.py:751
+#: erpnext/assets/doctype/asset/asset.py:767
 #: erpnext/assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 #: erpnext/assets/doctype/asset_category_account/asset_category_account.json
 msgid "Fixed Asset Account"
@@ -21233,7 +21234,7 @@ msgid "For Job Card"
 msgstr ""
 
 #. Label of the for_operation (Link) field in DocType 'Job Card'
-#: erpnext/manufacturing/doctype/job_card/job_card.js:450
+#: erpnext/manufacturing/doctype/job_card/job_card.js:458
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "For Operation"
 msgstr ""
@@ -21282,7 +21283,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:466
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:997
+#: erpnext/selling/doctype/sales_order/sales_order.js:1000
 #: erpnext/stock/doctype/material_request/material_request.js:344
 #: erpnext/templates/form_grid/material_request_grid.html:36
 msgid "For Warehouse"
@@ -21352,7 +21353,7 @@ msgstr ""
 msgid "For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1635
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1652
 msgid "For row {0}: Enter Planned Qty"
 msgstr ""
 
@@ -21527,7 +21528,7 @@ msgstr ""
 
 #. Label of the from_uom (Link) field in DocType 'UOM Conversion Factor'
 #. Label of the from (Data) field in DocType 'Call Log'
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1020
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1029
 #: erpnext/setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 #: erpnext/telephony/doctype/call_log/call_log.json
 #: erpnext/templates/pages/projects.html:67
@@ -22131,7 +22132,7 @@ msgstr ""
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
-#: erpnext/accounts/report/general_ledger/general_ledger.py:644
+#: erpnext/accounts/report/general_ledger/general_ledger.py:664
 msgid "GL Entry"
 msgstr ""
 
@@ -22397,12 +22398,12 @@ msgid "Get Items"
 msgstr ""
 
 #. Label of the get_items_from (Select) field in DocType 'Production Plan'
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:170
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:192
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:270
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:299
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:330
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1073
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:173
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:198
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:273
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:305
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:339
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1082
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:612
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:632
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:366
@@ -22418,13 +22419,13 @@ msgstr ""
 #: erpnext/public/js/controllers/buying.js:296
 #: erpnext/selling/doctype/quotation/quotation.js:167
 #: erpnext/selling/doctype/sales_order/sales_order.js:174
-#: erpnext/selling/doctype/sales_order/sales_order.js:798
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:187
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:236
+#: erpnext/selling/doctype/sales_order/sales_order.js:801
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:190
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:242
 #: erpnext/stock/doctype/material_request/material_request.js:126
 #: erpnext/stock/doctype/material_request/material_request.js:221
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:156
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:270
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:160
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:277
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:319
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:366
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:395
@@ -22552,7 +22553,7 @@ msgstr ""
 msgid "Get Suppliers By"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1069
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1078
 msgid "Get Timesheets"
 msgstr ""
 
@@ -22870,7 +22871,7 @@ msgstr ""
 #. Label of the gross_profit (Currency) field in DocType 'Quotation Item'
 #. Label of the gross_profit (Currency) field in DocType 'Sales Order Item'
 #: erpnext/accounts/report/gross_profit/gross_profit.json
-#: erpnext/accounts/report/gross_profit/gross_profit.py:344
+#: erpnext/accounts/report/gross_profit/gross_profit.py:350
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
@@ -22881,7 +22882,7 @@ msgstr ""
 msgid "Gross Profit / Loss"
 msgstr ""
 
-#: erpnext/accounts/report/gross_profit/gross_profit.py:351
+#: erpnext/accounts/report/gross_profit/gross_profit.py:357
 msgid "Gross Profit Percent"
 msgstr ""
 
@@ -22893,11 +22894,11 @@ msgstr ""
 msgid "Gross Purchase Amount"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:380
+#: erpnext/assets/doctype/asset/asset.py:381
 msgid "Gross Purchase Amount is mandatory"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:425
+#: erpnext/assets/doctype/asset/asset.py:441
 msgid "Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
 msgstr ""
 
@@ -23943,11 +23944,11 @@ msgstr ""
 msgid "If you need to reconcile particular transactions against each other, then please select accordingly. If not, all the transactions will be allocated in FIFO order."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1036
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1051
 msgid "If you still want to proceed, please disable 'Skip Available Sub Assembly Items' checkbox."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1748
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1765
 msgid "If you still want to proceed, please enable {0}."
 msgstr ""
 
@@ -24021,11 +24022,11 @@ msgstr ""
 msgid "Ignore Exchange Rate Revaluation and Gain / Loss Journals"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:980
+#: erpnext/selling/doctype/sales_order/sales_order.js:983
 msgid "Ignore Existing Ordered Qty"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1740
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1757
 msgid "Ignore Existing Projected Quantity"
 msgstr ""
 
@@ -24670,7 +24671,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/manufacturing/doctype/production_plan_item/production_plan_item.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:976
+#: erpnext/selling/doctype/sales_order/sales_order.js:979
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
@@ -24869,7 +24870,7 @@ msgstr ""
 msgid "Incorrect Component Quantity"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:321
+#: erpnext/assets/doctype/asset/asset.py:322
 #: erpnext/assets/doctype/asset_value_adjustment/asset_value_adjustment.py:56
 msgid "Incorrect Date"
 msgstr ""
@@ -25115,7 +25116,7 @@ msgstr ""
 #. 'Installation Note'
 #. Label of a Link in the Stock Workspace
 #: erpnext/selling/doctype/installation_note/installation_note.json
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:257
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:263
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Installation Note"
 msgstr ""
@@ -25125,7 +25126,7 @@ msgstr ""
 msgid "Installation Note Item"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:623
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:625
 msgid "Installation Note {0} has already been submitted"
 msgstr ""
 
@@ -25183,7 +25184,7 @@ msgstr ""
 #: erpnext/stock/doctype/pick_list/pick_list.py:132
 #: erpnext/stock/doctype/pick_list/pick_list.py:1003
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:788
-#: erpnext/stock/serial_batch_bundle.py:1087 erpnext/stock/stock_ledger.py:1582
+#: erpnext/stock/serial_batch_bundle.py:1103 erpnext/stock/stock_ledger.py:1582
 #: erpnext/stock/stock_ledger.py:2068
 msgid "Insufficient Stock"
 msgstr ""
@@ -25277,12 +25278,20 @@ msgstr ""
 msgid "Inter Company Order Reference"
 msgstr ""
 
+#: erpnext/selling/doctype/sales_order/sales_order.js:742
+msgid "Inter Company Purchase Order"
+msgstr ""
+
 #. Label of the inter_company_reference (Link) field in DocType 'Delivery Note'
 #. Label of the inter_company_reference (Link) field in DocType 'Purchase
 #. Receipt'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Inter Company Reference"
+msgstr ""
+
+#: erpnext/buying/doctype/purchase_order/purchase_order.js:485
+msgid "Inter Company Sales Order"
 msgstr ""
 
 #. Label of the inter_transfer_reference_section (Section Break) field in
@@ -25326,8 +25335,16 @@ msgstr ""
 msgid "Internal Customer for company {0} already exists"
 msgstr ""
 
+#: erpnext/selling/doctype/sales_order/sales_order.js:741
+msgid "Internal Purchase Order"
+msgstr ""
+
 #: erpnext/controllers/accounts_controller.py:731
 msgid "Internal Sale or Delivery Reference missing."
+msgstr ""
+
+#: erpnext/buying/doctype/purchase_order/purchase_order.js:484
+msgid "Internal Sales Order"
 msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:733
@@ -25398,8 +25415,8 @@ msgstr ""
 msgid "Invalid"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:370
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:378
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:372
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:380
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:961
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:971
 #: erpnext/assets/doctype/asset_category/asset_category.py:69
@@ -25442,8 +25459,8 @@ msgstr ""
 msgid "Invalid Company for Inter Company Transaction."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:292
-#: erpnext/assets/doctype/asset/asset.py:299
+#: erpnext/assets/doctype/asset/asset.py:293
+#: erpnext/assets/doctype/asset/asset.py:300
 #: erpnext/controllers/accounts_controller.py:3037
 msgid "Invalid Cost Center"
 msgstr ""
@@ -25473,7 +25490,7 @@ msgstr ""
 msgid "Invalid Formula"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:430
+#: erpnext/assets/doctype/asset/asset.py:446
 msgid "Invalid Gross Purchase Amount"
 msgstr ""
 
@@ -25481,7 +25498,7 @@ msgstr ""
 msgid "Invalid Group By"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:453
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:454
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:914
 msgid "Invalid Item"
 msgstr ""
@@ -25524,7 +25541,7 @@ msgstr ""
 msgid "Invalid Priority"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1093
+#: erpnext/manufacturing/doctype/bom/bom.py:1130
 msgid "Invalid Process Loss Configuration"
 msgstr ""
 
@@ -25552,8 +25569,8 @@ msgstr ""
 msgid "Invalid Sales Invoices"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:515
-#: erpnext/assets/doctype/asset/asset.py:534
+#: erpnext/assets/doctype/asset/asset.py:531
+#: erpnext/assets/doctype/asset/asset.py:550
 msgid "Invalid Schedule"
 msgstr ""
 
@@ -25586,7 +25603,7 @@ msgstr ""
 msgid "Invalid condition expression"
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:270
+#: erpnext/selling/doctype/quotation/quotation.py:272
 msgid "Invalid lost reason {0}, please create a new lost reason"
 msgstr ""
 
@@ -25732,7 +25749,7 @@ msgstr ""
 msgid "Invoice Number"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:812
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:813
 msgid "Invoice Paid"
 msgstr ""
 
@@ -26326,6 +26343,14 @@ msgstr ""
 msgid "Is Stock Item"
 msgstr ""
 
+#. Label of the is_sub_assembly_item (Check) field in DocType 'BOM Explosion
+#. Item'
+#. Label of the is_sub_assembly_item (Check) field in DocType 'BOM Item'
+#: erpnext/manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
+#: erpnext/manufacturing/doctype/bom_item/bom_item.json
+msgid "Is Sub Assembly Item"
+msgstr ""
+
 #. Label of the is_subcontracted (Check) field in DocType 'Purchase Invoice'
 #. Label of the is_subcontracted (Check) field in DocType 'Purchase Order'
 #. Label of the is_subcontracted (Check) field in DocType 'Supplier Quotation'
@@ -26552,7 +26577,7 @@ msgstr ""
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/controllers/taxes_and_totals.py:1123
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.json
-#: erpnext/manufacturing/doctype/bom/bom.js:944
+#: erpnext/manufacturing/doctype/bom/bom.js:979
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:109
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:25
@@ -26573,7 +26598,7 @@ msgstr ""
 #: erpnext/public/js/stock_analytics.js:92
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/doctype/product_bundle_item/product_bundle_item.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:1203
+#: erpnext/selling/doctype/sales_order/sales_order.js:1206
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:46
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.js:14
 #: erpnext/selling/report/item_wise_sales_history/item_wise_sales_history.js:36
@@ -26776,10 +26801,10 @@ msgstr ""
 #: erpnext/accounts/doctype/pricing_rule_item_code/pricing_rule_item_code.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 #: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1026
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1035
 #: erpnext/accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:68
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:37
-#: erpnext/accounts/report/gross_profit/gross_profit.py:281
+#: erpnext/accounts/report/gross_profit/gross_profit.py:287
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:150
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:171
 #: erpnext/accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:37
@@ -26836,8 +26861,8 @@ msgstr ""
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:345
 #: erpnext/selling/doctype/sales_order/sales_order.js:453
-#: erpnext/selling/doctype/sales_order/sales_order.js:839
-#: erpnext/selling/doctype/sales_order/sales_order.js:990
+#: erpnext/selling/doctype/sales_order/sales_order.js:842
+#: erpnext/selling/doctype/sales_order/sales_order.js:993
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:29
 #: erpnext/selling/report/item_wise_sales_history/item_wise_sales_history.py:27
@@ -26880,7 +26905,7 @@ msgstr ""
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:18
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:125
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.js:8
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:396
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:419
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:7
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:130
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:104
@@ -26907,7 +26932,7 @@ msgstr ""
 msgid "Item Code cannot be changed for Serial No."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:445
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:447
 msgid "Item Code required at Row No {0}"
 msgstr ""
 
@@ -27012,7 +27037,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
 #: erpnext/accounts/report/gross_profit/gross_profit.js:44
-#: erpnext/accounts/report/gross_profit/gross_profit.py:294
+#: erpnext/accounts/report/gross_profit/gross_profit.py:300
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.js:21
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:28
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.js:28
@@ -27224,7 +27249,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:74
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:71
-#: erpnext/accounts/report/gross_profit/gross_profit.py:288
+#: erpnext/accounts/report/gross_profit/gross_profit.py:294
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:33
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:156
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:177
@@ -27273,7 +27298,7 @@ msgstr ""
 #: erpnext/public/js/controllers/transaction.js:2414
 #: erpnext/public/js/utils.js:756
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:845
+#: erpnext/selling/doctype/sales_order/sales_order.js:848
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:35
 #: erpnext/selling/report/item_wise_sales_history/item_wise_sales_history.py:33
@@ -27307,7 +27332,7 @@ msgstr ""
 #: erpnext/stock/report/item_shortage_report/item_shortage_report.py:143
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:54
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:131
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:403
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:426
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:136
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:31
 #: erpnext/stock/report/stock_balance/stock_balance.py:404
@@ -27356,7 +27381,7 @@ msgstr ""
 msgid "Item Price Stock"
 msgstr ""
 
-#: erpnext/stock/get_item_details.py:1063
+#: erpnext/stock/get_item_details.py:1058
 msgid "Item Price added for {0} in Price List {1}"
 msgstr ""
 
@@ -27364,7 +27389,7 @@ msgstr ""
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
 msgstr ""
 
-#: erpnext/stock/get_item_details.py:1042
+#: erpnext/stock/get_item_details.py:1037
 msgid "Item Price updated for {0} in Price List {1}"
 msgstr ""
 
@@ -27512,8 +27537,8 @@ msgstr ""
 msgid "Item UOM"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:409
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:416
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:410
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:417
 msgid "Item Unavailable"
 msgstr ""
 
@@ -27629,7 +27654,7 @@ msgid "Item must be added using 'Get Items from Purchase Receipts' button"
 msgstr ""
 
 #: erpnext/buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:42
-#: erpnext/selling/doctype/sales_order/sales_order.js:1210
+#: erpnext/selling/doctype/sales_order/sales_order.js:1213
 msgid "Item name"
 msgstr ""
 
@@ -27676,7 +27701,7 @@ msgstr ""
 msgid "Item {0} cannot be ordered more than {1} against Blanket Order {2}."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:274
+#: erpnext/assets/doctype/asset/asset.py:275
 #: erpnext/stock/doctype/item/item.py:634
 msgid "Item {0} does not exist"
 msgstr ""
@@ -27697,7 +27722,7 @@ msgstr ""
 msgid "Item {0} has already been returned"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:276
+#: erpnext/assets/doctype/asset/asset.py:277
 msgid "Item {0} has been disabled"
 msgstr ""
 
@@ -27713,7 +27738,7 @@ msgstr ""
 msgid "Item {0} ignored since it is not a stock item"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:565
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:567
 msgid "Item {0} is already reserved/delivered against Sales Order {1}."
 msgstr ""
 
@@ -27741,7 +27766,7 @@ msgstr ""
 msgid "Item {0} is not active or end of life has been reached"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:278
+#: erpnext/assets/doctype/asset/asset.py:279
 msgid "Item {0} must be a Fixed Asset Item"
 msgstr ""
 
@@ -27753,7 +27778,7 @@ msgstr ""
 msgid "Item {0} must be a Sub-contracted Item"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:280
+#: erpnext/assets/doctype/asset/asset.py:281
 msgid "Item {0} must be a non-stock item"
 msgstr ""
 
@@ -27810,7 +27835,7 @@ msgstr ""
 msgid "Item-wise Sales Register"
 msgstr ""
 
-#: erpnext/stock/get_item_details.py:703
+#: erpnext/stock/get_item_details.py:698
 msgid "Item/Item Code required to get Item Tax Template."
 msgstr ""
 
@@ -27868,11 +27893,11 @@ msgstr ""
 #: erpnext/selling/doctype/installation_note/installation_note.json
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/doctype/quotation/quotation.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:831
+#: erpnext/selling/doctype/sales_order/sales_order.js:834
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:19
 #: erpnext/setup/doctype/item_group/item_group.js:87
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:487
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:493
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -27902,8 +27927,8 @@ msgstr ""
 msgid "Items Filter"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1601
-#: erpnext/selling/doctype/sales_order/sales_order.js:1246
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1618
+#: erpnext/selling/doctype/sales_order/sales_order.js:1250
 msgid "Items Required"
 msgstr ""
 
@@ -27923,7 +27948,7 @@ msgstr ""
 msgid "Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1026
+#: erpnext/selling/doctype/sales_order/sales_order.js:1029
 msgid "Items for Raw Material Request"
 msgstr ""
 
@@ -27937,7 +27962,7 @@ msgstr ""
 msgid "Items to Be Repost"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1600
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1617
 msgid "Items to Manufacture are required to pull the Raw Materials associated with it."
 msgstr ""
 
@@ -28434,7 +28459,7 @@ msgstr ""
 
 #. Name of a DocType
 #. Label of a Link in the Stock Workspace
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:679
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:685
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:104
 #: erpnext/stock/workspace/stock/stock.json
@@ -28544,6 +28569,35 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/report/item_prices/item_prices.py:56
 msgid "Last Purchase Rate"
+msgstr ""
+
+#. Label of the last_scanned_warehouse (Data) field in DocType 'POS Invoice'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Purchase
+#. Invoice'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Sales Invoice'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Purchase Order'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Quotation'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Sales Order'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Delivery Note'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Material
+#. Request'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Purchase
+#. Receipt'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Stock Entry'
+#. Label of the last_scanned_warehouse (Data) field in DocType 'Stock
+#. Reconciliation'
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
+#: erpnext/buying/doctype/purchase_order/purchase_order.json
+#: erpnext/selling/doctype/quotation/quotation.json
+#: erpnext/selling/doctype/sales_order/sales_order.json
+#: erpnext/stock/doctype/delivery_note/delivery_note.json
+#: erpnext/stock/doctype/material_request/material_request.json
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
+#: erpnext/stock/doctype/stock_entry/stock_entry.json
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
+msgid "Last Scanned Warehouse"
 msgstr ""
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:328
@@ -29349,7 +29403,7 @@ msgstr ""
 #: erpnext/accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.json
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1121
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1130
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:952
@@ -29672,7 +29726,7 @@ msgstr ""
 
 #. Label of the make (Data) field in DocType 'Vehicle'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:109
-#: erpnext/manufacturing/doctype/job_card/job_card.js:471
+#: erpnext/manufacturing/doctype/job_card/job_card.js:479
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Make"
 msgstr ""
@@ -29706,7 +29760,7 @@ msgstr ""
 msgid "Make Quotation"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:356
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:363
 msgid "Make Return Entry"
 msgstr ""
 
@@ -29721,12 +29775,12 @@ msgstr ""
 msgid "Make Serial No / Batch from Work Order"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:74
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:282
+#: erpnext/manufacturing/doctype/job_card/job_card.js:82
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:289
 msgid "Make Stock Entry"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:345
+#: erpnext/manufacturing/doctype/job_card/job_card.js:353
 msgid "Make Subcontracting PO"
 msgstr ""
 
@@ -29796,18 +29850,18 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_field/pos_field.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py:147
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.js:76
-#: erpnext/manufacturing/doctype/bom/bom.js:85
-#: erpnext/manufacturing/doctype/bom/bom.js:603
+#: erpnext/manufacturing/doctype/bom/bom.js:87
+#: erpnext/manufacturing/doctype/bom/bom.js:624
 #: erpnext/manufacturing/doctype/bom/bom.py:261
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.py:71
 #: erpnext/public/js/controllers/accounts.js:249
 #: erpnext/public/js/controllers/transaction.js:2812
 #: erpnext/public/js/utils/party.js:321
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:164
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:203
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:206
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:138
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:250
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:254
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:101
 msgid "Mandatory"
 msgstr ""
@@ -29838,15 +29892,15 @@ msgstr ""
 msgid "Mandatory For Profit and Loss Account"
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:588
+#: erpnext/selling/doctype/quotation/quotation.py:610
 msgid "Mandatory Missing"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:628
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:630
 msgid "Mandatory Purchase Order"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:649
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:651
 msgid "Mandatory Purchase Receipt"
 msgstr ""
 
@@ -30111,7 +30165,7 @@ msgstr ""
 msgid "Manufacturing User"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:179
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:183
 msgid "Mapping Purchase Receipt ..."
 msgstr ""
 
@@ -30347,7 +30401,7 @@ msgstr ""
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.js:33
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:184
 #: erpnext/buying/workspace/buying/buying.json
-#: erpnext/manufacturing/doctype/job_card/job_card.js:133
+#: erpnext/manufacturing/doctype/job_card/job_card.js:141
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:155
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 #: erpnext/manufacturing/doctype/production_plan_item/production_plan_item.json
@@ -30443,7 +30497,7 @@ msgstr ""
 msgid "Material Request Type"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1704
+#: erpnext/selling/doctype/sales_order/sales_order.py:1720
 msgid "Material Request not created, as quantity for Raw Materials already available."
 msgstr ""
 
@@ -30461,7 +30515,7 @@ msgstr ""
 msgid "Material Request {0} is cancelled or stopped"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1042
+#: erpnext/selling/doctype/sales_order/sales_order.js:1045
 msgid "Material Request {0} submitted."
 msgstr ""
 
@@ -30498,7 +30552,7 @@ msgstr ""
 #. Option for the 'Purpose' (Select) field in DocType 'Pick List'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
-#: erpnext/manufacturing/doctype/job_card/job_card.js:147
+#: erpnext/manufacturing/doctype/job_card/job_card.js:155
 #: erpnext/manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:90
 #: erpnext/stock/doctype/item/item.json
@@ -30669,7 +30723,7 @@ msgstr ""
 msgid "Maximum discount for Item {0} is {1}%"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:99
+#: erpnext/public/js/utils/barcode_scanner.js:125
 msgid "Maximum quantity scanned for item {0}."
 msgstr ""
 
@@ -31140,7 +31194,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:87
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:184
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:588
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:590
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2249
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2849
 #: erpnext/assets/doctype/asset_category/asset_category.py:116
@@ -31152,7 +31206,7 @@ msgid "Missing Asset"
 msgstr ""
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:178
-#: erpnext/assets/doctype/asset/asset.py:308
+#: erpnext/assets/doctype/asset/asset.py:309
 msgid "Missing Cost Center"
 msgstr ""
 
@@ -31160,11 +31214,11 @@ msgstr ""
 msgid "Missing Default in Company"
 msgstr ""
 
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:27
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:44
 msgid "Missing Filters"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:350
+#: erpnext/assets/doctype/asset/asset.py:351
 msgid "Missing Finance Book"
 msgstr ""
 
@@ -31196,7 +31250,7 @@ msgstr ""
 msgid "Missing email template for dispatch. Please set one in Delivery Settings."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1052
+#: erpnext/manufacturing/doctype/bom/bom.py:1089
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1198
 msgid "Missing value"
 msgstr ""
@@ -31434,7 +31488,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.js:62
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:75
-#: erpnext/accounts/report/gross_profit/gross_profit.py:406
+#: erpnext/accounts/report/gross_profit/gross_profit.py:418
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 #: erpnext/buying/report/purchase_analytics/purchase_analytics.js:61
 #: erpnext/maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
@@ -31862,7 +31916,7 @@ msgstr ""
 msgid "Needs Analysis"
 msgstr ""
 
-#: erpnext/stock/serial_batch_bundle.py:1381
+#: erpnext/stock/serial_batch_bundle.py:1397
 msgid "Negative Batch Quantity"
 msgstr ""
 
@@ -32303,7 +32357,7 @@ msgstr ""
 msgid "New Task"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:156
+#: erpnext/manufacturing/doctype/bom/bom.js:177
 msgid "New Version"
 msgstr ""
 
@@ -32330,7 +32384,7 @@ msgstr ""
 msgid "New invoices will be generated as per schedule even if current invoices are unpaid or past due date"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:252
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:258
 msgid "New release date should be in the future"
 msgstr ""
 
@@ -32412,8 +32466,8 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:625
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:646
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:627
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:648
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 #: erpnext/projects/doctype/project/project.json
@@ -32472,11 +32526,11 @@ msgstr ""
 msgid "No Items selected for transfer."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:824
+#: erpnext/selling/doctype/sales_order/sales_order.js:827
 msgid "No Items with Bill of Materials to Manufacture"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:962
+#: erpnext/selling/doctype/sales_order/sales_order.js:965
 msgid "No Items with Bill of Materials."
 msgstr ""
 
@@ -32492,7 +32546,7 @@ msgstr ""
 msgid "No Outstanding Invoices found for this party"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:623
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:624
 msgid "No POS Profile found. Please create a New POS Profile first"
 msgstr ""
 
@@ -32512,7 +32566,7 @@ msgstr ""
 msgid "No Records for these settings."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:334
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:336
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1049
 msgid "No Remarks"
 msgstr ""
@@ -32541,7 +32595,7 @@ msgstr ""
 msgid "No Tax Withholding data found for the current posting date."
 msgstr ""
 
-#: erpnext/accounts/report/gross_profit/gross_profit.py:857
+#: erpnext/accounts/report/gross_profit/gross_profit.py:874
 msgid "No Terms"
 msgstr ""
 
@@ -32557,7 +32611,7 @@ msgstr ""
 msgid "No Work Orders were created"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:803
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:805
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:742
 msgid "No accounting entries for the following warehouses"
 msgstr ""
@@ -32804,7 +32858,7 @@ msgstr ""
 msgid "Non Profit"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1420
+#: erpnext/manufacturing/doctype/bom/bom.py:1457
 msgid "Non stock items"
 msgstr ""
 
@@ -32823,19 +32877,19 @@ msgid "None of the items have any change in quantity or value."
 msgstr ""
 
 #. Name of a UOM
-#: erpnext/setup/setup_wizard/data/uom_data.json erpnext/stock/utils.py:681
-#: erpnext/stock/utils.py:683
+#: erpnext/setup/setup_wizard/data/uom_data.json erpnext/stock/utils.py:703
+#: erpnext/stock/utils.py:705
 msgid "Nos"
 msgstr ""
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:66
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:270
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:271
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:556
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:568
 #: erpnext/assets/doctype/asset/asset.js:618
 #: erpnext/assets/doctype/asset/asset.js:633
 #: erpnext/controllers/buying_controller.py:269
-#: erpnext/selling/doctype/product_bundle/product_bundle.py:72
+#: erpnext/selling/doctype/product_bundle/product_bundle.py:73
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:80
 msgid "Not Allowed"
 msgstr ""
@@ -32870,7 +32924,7 @@ msgstr ""
 msgid "Not Initiated"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:812
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:823
 #: erpnext/templates/pages/material_request_info.py:21
 #: erpnext/templates/pages/order.py:37 erpnext/templates/pages/rfq.py:46
 msgid "Not Permitted"
@@ -32944,7 +32998,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2041
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2110
 #: erpnext/selling/doctype/sales_order/sales_order.py:826
-#: erpnext/selling/doctype/sales_order/sales_order.py:1685
+#: erpnext/selling/doctype/sales_order/sales_order.py:1701
 msgid "Not permitted"
 msgstr ""
 
@@ -32954,12 +33008,12 @@ msgstr ""
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:288
 #: erpnext/crm/doctype/crm_note/crm_note.json
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.py:100
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1040
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1750
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1055
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1767
 #: erpnext/projects/doctype/timesheet/timesheet.json
 #: erpnext/public/js/controllers/buying.js:477
 #: erpnext/selling/doctype/customer/customer.py:129
-#: erpnext/selling/doctype/sales_order/sales_order.js:1180
+#: erpnext/selling/doctype/sales_order/sales_order.js:1183
 #: erpnext/stock/doctype/item/item.js:526
 #: erpnext/stock/doctype/item/item.py:571
 #: erpnext/stock/doctype/item_price/item_price.json
@@ -33636,7 +33690,7 @@ msgstr ""
 msgid "Open a new ticket"
 msgstr ""
 
-#: erpnext/accounts/report/general_ledger/general_ledger.py:377
+#: erpnext/accounts/report/general_ledger/general_ledger.py:397
 #: erpnext/public/js/stock_analytics.js:97
 msgid "Opening"
 msgstr ""
@@ -33733,7 +33787,7 @@ msgstr ""
 msgid "Opening Invoice Item"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1626
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1628
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1836
 msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
 msgstr ""
@@ -33808,7 +33862,7 @@ msgstr ""
 msgid "Operating Cost Per BOM Quantity"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1436
+#: erpnext/manufacturing/doctype/bom/bom.py:1473
 msgid "Operating Cost as per Work Order / BOM"
 msgstr ""
 
@@ -33838,7 +33892,7 @@ msgstr ""
 #. Label of the operation (Link) field in DocType 'Work Order Item'
 #. Label of the operation (Link) field in DocType 'Work Order Operation'
 #. Label of a Link in the Manufacturing Workspace
-#: erpnext/manufacturing/doctype/bom/bom.js:409
+#: erpnext/manufacturing/doctype/bom/bom.js:430
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: erpnext/manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -33930,7 +33984,7 @@ msgstr ""
 msgid "Operation time does not depend on quantity to produce"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:513
+#: erpnext/manufacturing/doctype/job_card/job_card.js:521
 msgid "Operation {0} added multiple times in the work order {1}"
 msgstr ""
 
@@ -33964,7 +34018,7 @@ msgstr ""
 msgid "Operations Routing"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1061
+#: erpnext/manufacturing/doctype/bom/bom.py:1098
 msgid "Operations cannot be left blank"
 msgstr ""
 
@@ -34538,7 +34592,7 @@ msgstr ""
 msgid "Over Billing Allowance (%)"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:1260
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:1262
 msgid "Over Billing Allowance exceeded for Purchase Receipt Item {0} ({1}) by {2}%"
 msgstr ""
 
@@ -35032,7 +35086,7 @@ msgstr ""
 
 #. Name of a DocType
 #. Label of a Link in the Stock Workspace
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:293
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:299
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Packing Slip"
@@ -35043,7 +35097,7 @@ msgstr ""
 msgid "Packing Slip Item"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:639
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:641
 msgid "Packing Slip(s) cancelled"
 msgstr ""
 
@@ -35174,7 +35228,7 @@ msgstr ""
 msgid "Paid To Account Type"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:324
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:326
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1095
 msgid "Paid amount + Write Off Amount can not be greater than Grand Total"
 msgstr ""
@@ -35329,11 +35383,11 @@ msgstr ""
 msgid "Parent Item Group"
 msgstr ""
 
-#: erpnext/selling/doctype/product_bundle/product_bundle.py:80
+#: erpnext/selling/doctype/product_bundle/product_bundle.py:81
 msgid "Parent Item {0} must not be a Fixed Asset"
 msgstr ""
 
-#: erpnext/selling/doctype/product_bundle/product_bundle.py:78
+#: erpnext/selling/doctype/product_bundle/product_bundle.py:79
 msgid "Parent Item {0} must not be a Stock Item"
 msgstr ""
 
@@ -35353,7 +35407,7 @@ msgstr ""
 msgid "Parent Row No"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:496
+#: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:499
 msgid "Parent Row No not found for {0}"
 msgstr ""
 
@@ -35404,7 +35458,7 @@ msgstr ""
 msgid "Partial Payment in POS Transactions are not allowed."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1643
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1645
 msgid "Partial Stock Reservation"
 msgstr ""
 
@@ -35598,7 +35652,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:147
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:228
 #: erpnext/accounts/report/general_ledger/general_ledger.js:74
-#: erpnext/accounts/report/general_ledger/general_ledger.py:723
+#: erpnext/accounts/report/general_ledger/general_ledger.py:743
 #: erpnext/accounts/report/payment_ledger/payment_ledger.js:51
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:161
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js:46
@@ -35703,6 +35757,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/accounts/report/general_ledger/general_ledger.js:110
+#: erpnext/accounts/report/general_ledger/general_ledger.py:752
 #: erpnext/crm/doctype/contract/contract.json
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/report/address_and_contacts/address_and_contacts.js:22
@@ -35761,7 +35816,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:141
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:219
 #: erpnext/accounts/report/general_ledger/general_ledger.js:65
-#: erpnext/accounts/report/general_ledger/general_ledger.py:722
+#: erpnext/accounts/report/general_ledger/general_ledger.py:742
 #: erpnext/accounts/report/payment_ledger/payment_ledger.js:41
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:157
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js:35
@@ -35856,7 +35911,7 @@ msgstr ""
 msgid "Pause"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:216
+#: erpnext/manufacturing/doctype/job_card/job_card.js:224
 msgid "Pause Job"
 msgstr ""
 
@@ -36352,7 +36407,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_term/payment_term.json
 #: erpnext/accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1200
-#: erpnext/accounts/report/gross_profit/gross_profit.py:412
+#: erpnext/accounts/report/gross_profit/gross_profit.py:424
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:30
 msgid "Payment Term"
@@ -36465,7 +36520,7 @@ msgstr ""
 msgid "Payment against {0} {1} cannot be greater than Outstanding Amount {2}"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:748
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:749
 msgid "Payment amount cannot be less than or equal to 0"
 msgstr ""
 
@@ -36482,7 +36537,7 @@ msgstr ""
 msgid "Payment of {0} received successfully. Waiting for other requests to complete..."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:378
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:379
 msgid "Payment related to {0} is not completed"
 msgstr ""
 
@@ -36625,7 +36680,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/production_plan_item/production_plan_item.json
 #: erpnext/manufacturing/doctype/work_order/work_order.js:312
 #: erpnext/manufacturing/report/production_plan_summary/production_plan_summary.py:183
-#: erpnext/selling/doctype/sales_order/sales_order.js:1217
+#: erpnext/selling/doctype/sales_order/sales_order.js:1220
 #: erpnext/selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:45
 msgid "Pending Qty"
 msgstr ""
@@ -37004,7 +37059,7 @@ msgstr ""
 #. Reservation Entry'
 #. Label of a Link in the Stock Workspace
 #: erpnext/selling/doctype/sales_order/sales_order.js:637
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:199
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:202
 #: erpnext/stock/doctype/material_request/material_request.js:140
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -37323,12 +37378,12 @@ msgid "Please Select a Company."
 msgstr ""
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:165
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:204
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:207
 msgid "Please Select a Customer"
 msgstr ""
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:139
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:251
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:255
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:102
 msgid "Please Select a Supplier"
 msgstr ""
@@ -37414,7 +37469,7 @@ msgstr ""
 msgid "Please check Process Deferred Accounting {0} and submit manually after resolving errors."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:84
+#: erpnext/manufacturing/doctype/bom/bom.js:86
 msgid "Please check either with operations or FG Based Operating Cost."
 msgstr ""
 
@@ -37459,7 +37514,7 @@ msgstr ""
 msgid "Please convert the parent account in corresponding child company to a group account."
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:586
+#: erpnext/selling/doctype/quotation/quotation.py:608
 msgid "Please create Customer from Lead {0}."
 msgstr ""
 
@@ -37475,7 +37530,7 @@ msgstr ""
 msgid "Please create purchase from internal sale or delivery document itself"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:390
+#: erpnext/assets/doctype/asset/asset.py:391
 msgid "Please create purchase receipt or purchase invoice for the item {0}"
 msgstr ""
 
@@ -37487,7 +37542,7 @@ msgstr ""
 msgid "Please disable workflow temporarily for Journal Entry {0}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:429
+#: erpnext/assets/doctype/asset/asset.py:445
 msgid "Please do not book expense of multiple assets against one single Asset."
 msgstr ""
 
@@ -37517,7 +37572,7 @@ msgstr ""
 msgid "Please enable pop-ups"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:665
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:667
 msgid "Please enable {0} in the {1}."
 msgstr ""
 
@@ -37525,11 +37580,11 @@ msgstr ""
 msgid "Please enable {} in {} to allow same item in multiple rows"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:367
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:369
 msgid "Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:375
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:377
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
 msgstr ""
 
@@ -37545,7 +37600,7 @@ msgstr ""
 msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Account</b> for company {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:508
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:509
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1188
 msgid "Please enter Account for Change Amount"
 msgstr ""
@@ -37627,7 +37682,7 @@ msgstr ""
 msgid "Please enter Warehouse and Date"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:653
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:655
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1184
 msgid "Please enter Write Off Account"
 msgstr ""
@@ -37656,7 +37711,7 @@ msgstr ""
 msgid "Please enter parent cost center"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:165
+#: erpnext/public/js/utils/barcode_scanner.js:191
 msgid "Please enter quantity for item {0}"
 msgstr ""
 
@@ -37672,7 +37727,7 @@ msgstr ""
 msgid "Please enter the company name to confirm"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:751
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:752
 msgid "Please enter the phone number first"
 msgstr ""
 
@@ -37775,7 +37830,7 @@ msgstr ""
 msgid "Please select Apply Discount On"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1650
+#: erpnext/selling/doctype/sales_order/sales_order.py:1666
 msgid "Please select BOM against item {0}"
 msgstr ""
 
@@ -37861,11 +37916,11 @@ msgstr ""
 msgid "Please select Posting Date first"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1106
+#: erpnext/manufacturing/doctype/bom/bom.py:1143
 msgid "Please select Price List"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1652
+#: erpnext/selling/doctype/sales_order/sales_order.py:1668
 msgid "Please select Qty against item {0}"
 msgstr ""
 
@@ -37873,7 +37928,7 @@ msgstr ""
 msgid "Please select Sample Retention Warehouse in Stock Settings first"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:415
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:417
 msgid "Please select Serial/Batch Nos to reserve or change Reservation Based On to Qty."
 msgstr ""
 
@@ -37893,17 +37948,17 @@ msgstr ""
 msgid "Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1338
+#: erpnext/manufacturing/doctype/bom/bom.py:1375
 msgid "Please select a BOM"
 msgstr ""
 
 #: erpnext/accounts/party.py:430
-#: erpnext/stock/doctype/pick_list/pick_list.py:1551
+#: erpnext/stock/doctype/pick_list/pick_list.py:1563
 msgid "Please select a Company"
 msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:267
-#: erpnext/manufacturing/doctype/bom/bom.js:603
+#: erpnext/manufacturing/doctype/bom/bom.js:624
 #: erpnext/manufacturing/doctype/bom/bom.py:261
 #: erpnext/public/js/controllers/accounts.js:249
 #: erpnext/public/js/controllers/transaction.js:2812
@@ -37983,11 +38038,11 @@ msgstr ""
 msgid "Please select an item code before setting the warehouse."
 msgstr ""
 
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:26
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:43
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:886
+#: erpnext/selling/doctype/sales_order/sales_order.js:889
 msgid "Please select atleast one item to continue"
 msgstr ""
 
@@ -38072,7 +38127,7 @@ msgstr ""
 msgid "Please select {0} first"
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:99
+#: erpnext/public/js/controllers/transaction.js:100
 msgid "Please set 'Apply Additional Discount On'"
 msgstr ""
 
@@ -38114,8 +38169,12 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:58
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:68
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:78
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:756
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:765
 msgid "Please set Company"
+msgstr ""
+
+#: erpnext/regional/united_arab_emirates/utils.py:26
+msgid "Please set Customer Address to determine if the transaction is an export."
 msgstr ""
 
 #: erpnext/assets/doctype/asset/depreciation.py:741
@@ -38140,7 +38199,7 @@ msgstr ""
 msgid "Please set Fixed Asset Account in Asset Category {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:585
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:587
 msgid "Please set Fixed Asset Account in {} against {}."
 msgstr ""
 
@@ -38166,7 +38225,7 @@ msgstr ""
 msgid "Please set VAT Accounts in {0}"
 msgstr ""
 
-#: erpnext/regional/united_arab_emirates/utils.py:61
+#: erpnext/regional/united_arab_emirates/utils.py:83
 msgid "Please set Vat Accounts for Company: \"{0}\" in UAE VAT Settings"
 msgstr ""
 
@@ -38174,11 +38233,11 @@ msgstr ""
 msgid "Please set a Company"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:305
+#: erpnext/assets/doctype/asset/asset.py:306
 msgid "Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1406
+#: erpnext/selling/doctype/sales_order/sales_order.py:1422
 msgid "Please set a Supplier against the Items to be considered in the Purchase Order."
 msgstr ""
 
@@ -38190,7 +38249,7 @@ msgstr ""
 msgid "Please set a default Holiday List for Employee {0} or Company {1}"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1095
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1097
 msgid "Please set account in Warehouse {0}"
 msgstr ""
 
@@ -38231,7 +38290,7 @@ msgstr ""
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
 msgstr ""
 
-#: erpnext/accounts/utils.py:2314
+#: erpnext/accounts/utils.py:2318
 msgid "Please set default Exchange Gain/Loss Account in Company {}"
 msgstr ""
 
@@ -38264,7 +38323,7 @@ msgstr ""
 msgid "Please set one of the following:"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:506
+#: erpnext/assets/doctype/asset/asset.py:522
 msgid "Please set opening number of booked depreciations"
 msgstr ""
 
@@ -38348,8 +38407,8 @@ msgid "Please specify Company"
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:110
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:441
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:494
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:447
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:503
 msgid "Please specify Company to proceed"
 msgstr ""
 
@@ -38556,8 +38615,8 @@ msgstr ""
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:61
 #: erpnext/accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:66
 #: erpnext/accounts/report/cheques_and_deposits_incorrectly_cleared/cheques_and_deposits_incorrectly_cleared.py:151
-#: erpnext/accounts/report/general_ledger/general_ledger.py:650
-#: erpnext/accounts/report/gross_profit/gross_profit.py:269
+#: erpnext/accounts/report/general_ledger/general_ledger.py:670
+#: erpnext/accounts/report/gross_profit/gross_profit.py:275
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:183
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:204
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:143
@@ -38589,7 +38648,7 @@ msgstr ""
 #: erpnext/stock/report/incorrect_serial_no_valuation/incorrect_serial_no_valuation.py:127
 #: erpnext/stock/report/incorrect_stock_value_report/incorrect_stock_value_report.py:104
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:86
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:449
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:492
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:24
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:112
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:144
@@ -38604,7 +38663,7 @@ msgstr ""
 msgid "Posting Date Inheritance for Exchange Gain / Loss"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:254
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:256
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:130
 msgid "Posting Date cannot be future date"
 msgstr ""
@@ -38644,7 +38703,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.json
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
-#: erpnext/accounts/report/gross_profit/gross_profit.py:275
+#: erpnext/accounts/report/gross_profit/gross_profit.py:281
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
@@ -38943,7 +39002,7 @@ msgstr ""
 msgid "Price List Currency"
 msgstr ""
 
-#: erpnext/stock/get_item_details.py:1236
+#: erpnext/stock/get_item_details.py:1231
 msgid "Price List Currency not selected"
 msgstr ""
 
@@ -39612,7 +39671,7 @@ msgstr ""
 msgid "Process Loss"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1089
+#: erpnext/manufacturing/doctype/bom/bom.py:1126
 msgid "Process Loss Percentage cannot be greater than 100"
 msgstr ""
 
@@ -39631,7 +39690,7 @@ msgstr ""
 msgid "Process Loss Qty"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:293
+#: erpnext/manufacturing/doctype/job_card/job_card.js:301
 msgid "Process Loss Quantity"
 msgstr ""
 
@@ -40096,15 +40155,15 @@ msgstr ""
 #: erpnext/accounts/doctype/psoa_project/psoa_project.json
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1052
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1061
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:109
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:74
 #: erpnext/accounts/report/general_ledger/general_ledger.js:164
-#: erpnext/accounts/report/general_ledger/general_ledger.py:727
+#: erpnext/accounts/report/general_ledger/general_ledger.py:760
 #: erpnext/accounts/report/gross_profit/gross_profit.js:79
-#: erpnext/accounts/report/gross_profit/gross_profit.py:357
+#: erpnext/accounts/report/gross_profit/gross_profit.py:363
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:225
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:274
 #: erpnext/accounts/report/purchase_register/purchase_register.py:207
@@ -40637,7 +40696,7 @@ msgstr ""
 #: erpnext/stock/doctype/landed_cost_item/landed_cost_item.json
 #: erpnext/stock/doctype/landed_cost_purchase_receipt/landed_cost_purchase_receipt.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:134
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:289
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:296
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt_list.js:30
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
@@ -40671,16 +40730,16 @@ msgstr ""
 msgid "Purchase Invoice Trends"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:267
+#: erpnext/assets/doctype/asset/asset.py:268
 msgid "Purchase Invoice cannot be made against an existing asset {0}"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:431
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:445
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:433
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:447
 msgid "Purchase Invoice {0} is already submitted"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:2011
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:2013
 msgid "Purchase Invoices"
 msgstr ""
 
@@ -40757,7 +40816,7 @@ msgstr ""
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/material_request/material_request.js:179
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:246
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:250
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
@@ -40833,11 +40892,11 @@ msgstr ""
 msgid "Purchase Order Pricing Rule"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:624
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:626
 msgid "Purchase Order Required"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:619
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:621
 msgid "Purchase Order Required for item {}"
 msgstr ""
 
@@ -40849,19 +40908,19 @@ msgstr ""
 msgid "Purchase Order Trends"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1179
+#: erpnext/selling/doctype/sales_order/sales_order.js:1182
 msgid "Purchase Order already created for all Sales Order items"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:320
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:322
 msgid "Purchase Order number required for Item {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:662
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:664
 msgid "Purchase Order {0} is not submitted"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:907
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:929
 msgid "Purchase Orders"
 msgstr ""
 
@@ -40909,9 +40968,9 @@ msgstr ""
 #. Reservation Entry'
 #. Label of a Link in the Stock Workspace
 #. Label of a shortcut in the Stock Workspace
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:174
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:655
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:665
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:177
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:661
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:671
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js:49
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:246
@@ -40974,11 +41033,11 @@ msgstr ""
 msgid "Purchase Receipt No"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:645
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:647
 msgid "Purchase Receipt Required"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:640
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:642
 msgid "Purchase Receipt Required for item {}"
 msgstr ""
 
@@ -40991,7 +41050,7 @@ msgstr ""
 msgid "Purchase Receipt Trends"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:384
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:391
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
 msgstr ""
 
@@ -40999,7 +41058,7 @@ msgstr ""
 msgid "Purchase Receipt {0} created."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:669
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:671
 msgid "Purchase Receipt {0} is not submitted"
 msgstr ""
 
@@ -41010,7 +41069,7 @@ msgstr ""
 msgid "Purchase Register"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:279
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:286
 msgid "Purchase Return"
 msgstr ""
 
@@ -41206,14 +41265,14 @@ msgstr ""
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 #: erpnext/accounts/print_format/sales_invoice_print/sales_invoice_print.html:91
-#: erpnext/accounts/report/gross_profit/gross_profit.py:314
+#: erpnext/accounts/report/gross_profit/gross_profit.py:320
 #: erpnext/assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 #: erpnext/buying/report/purchase_order_analysis/purchase_order_analysis.py:240
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:224
 #: erpnext/controllers/trends.py:242 erpnext/controllers/trends.py:254
 #: erpnext/controllers/trends.py:259
 #: erpnext/crm/doctype/opportunity_item/opportunity_item.json
-#: erpnext/manufacturing/doctype/bom/bom.js:964
+#: erpnext/manufacturing/doctype/bom/bom.js:999
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
@@ -41233,8 +41292,8 @@ msgstr ""
 #: erpnext/selling/doctype/product_bundle_item/product_bundle_item.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:367
 #: erpnext/selling/doctype/sales_order/sales_order.js:471
-#: erpnext/selling/doctype/sales_order/sales_order.js:863
-#: erpnext/selling/doctype/sales_order/sales_order.js:1015
+#: erpnext/selling/doctype/sales_order/sales_order.js:866
+#: erpnext/selling/doctype/sales_order/sales_order.js:1018
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:255
 #: erpnext/stock/doctype/landed_cost_item/landed_cost_item.json
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
@@ -41318,7 +41377,7 @@ msgstr ""
 
 #. Label of the for_quantity (Float) field in DocType 'Job Card'
 #. Label of the qty (Float) field in DocType 'Work Order'
-#: erpnext/manufacturing/doctype/bom/bom.js:309
+#: erpnext/manufacturing/doctype/bom/bom.js:330
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/manufacturing/report/process_loss_report/process_loss_report.py:82
@@ -41433,7 +41492,7 @@ msgstr ""
 msgid "Qty to Fetch"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:265
+#: erpnext/manufacturing/doctype/job_card/job_card.js:273
 #: erpnext/manufacturing/doctype/job_card/job_card.py:765
 msgid "Qty to Manufacture"
 msgstr ""
@@ -41446,6 +41505,8 @@ msgstr ""
 msgid "Qty to Order"
 msgstr ""
 
+#. Label of the finished_good_qty (Float) field in DocType 'BOM Operation'
+#: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:129
 msgid "Qty to Produce"
 msgstr ""
@@ -41572,7 +41633,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice_item/pos_invoice_item.json
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
-#: erpnext/manufacturing/doctype/bom/bom.js:186
+#: erpnext/manufacturing/doctype/bom/bom.js:207
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/quality_management/workspace/quality/quality.json
@@ -41647,7 +41708,7 @@ msgstr ""
 msgid "Quality Inspection Template Name"
 msgstr ""
 
-#: erpnext/public/js/controllers/transaction.js:359
+#: erpnext/public/js/controllers/transaction.js:360
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:165
 msgid "Quality Inspection(s)"
 msgstr ""
@@ -41765,7 +41826,7 @@ msgstr ""
 #: erpnext/buying/report/purchase_analytics/purchase_analytics.js:28
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:213
 #: erpnext/manufacturing/doctype/blanket_order_item/blanket_order_item.json
-#: erpnext/manufacturing/doctype/bom/bom.js:396
+#: erpnext/manufacturing/doctype/bom/bom.js:417
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:68
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
@@ -41792,7 +41853,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:36
 #: erpnext/stock/report/delayed_item_report/delayed_item_report.py:154
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:423
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:466
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:27
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
@@ -41914,8 +41975,8 @@ msgid "Quantity required for Item {0} in row {1}"
 msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:604
-#: erpnext/manufacturing/doctype/job_card/job_card.js:321
-#: erpnext/manufacturing/doctype/job_card/job_card.js:390
+#: erpnext/manufacturing/doctype/job_card/job_card.js:329
+#: erpnext/manufacturing/doctype/job_card/job_card.js:398
 #: erpnext/manufacturing/doctype/workstation/workstation.js:303
 msgid "Quantity should be greater than 0"
 msgstr ""
@@ -41944,7 +42005,7 @@ msgstr ""
 msgid "Quantity to Produce should be greater than zero."
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:236
+#: erpnext/public/js/utils/barcode_scanner.js:262
 msgid "Quantity to Scan"
 msgstr ""
 
@@ -42075,7 +42136,7 @@ msgstr ""
 #. Label of the prevdoc_docname (Link) field in DocType 'Sales Order Item'
 #. Label of a Link in the Selling Workspace
 #. Option for the 'Transaction' (Select) field in DocType 'Authorization Rule'
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:277
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:280
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.js:36
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.html:20
 #: erpnext/crm/doctype/contract/contract.json
@@ -42142,7 +42203,7 @@ msgstr ""
 msgid "Quotation {0} not of type {1}"
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:343
+#: erpnext/selling/doctype/quotation/quotation.py:345
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:57
 msgid "Quotations"
 msgstr ""
@@ -42594,8 +42655,8 @@ msgstr ""
 #. Label of the materials_section (Section Break) field in DocType 'BOM'
 #. Label of the section_break_8 (Section Break) field in DocType 'Job Card'
 #. Label of the mr_items (Table) field in DocType 'Production Plan'
-#: erpnext/manufacturing/doctype/bom/bom.js:349
-#: erpnext/manufacturing/doctype/bom/bom.js:938
+#: erpnext/manufacturing/doctype/bom/bom.js:370
+#: erpnext/manufacturing/doctype/bom/bom.js:972
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
@@ -42758,7 +42819,7 @@ msgid "Reason"
 msgstr ""
 
 #. Label of the hold_comment (Small Text) field in DocType 'Purchase Invoice'
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:276
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:282
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Reason For Putting On Hold"
 msgstr ""
@@ -42769,7 +42830,7 @@ msgid "Reason for Failure"
 msgstr ""
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:748
-#: erpnext/selling/doctype/sales_order/sales_order.js:1338
+#: erpnext/selling/doctype/sales_order/sales_order.js:1341
 msgid "Reason for Hold"
 msgstr ""
 
@@ -42778,7 +42839,7 @@ msgstr ""
 msgid "Reason for Leaving"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1353
+#: erpnext/selling/doctype/sales_order/sales_order.js:1356
 msgid "Reason for hold:"
 msgstr ""
 
@@ -43148,7 +43209,7 @@ msgstr ""
 msgid "Records"
 msgstr ""
 
-#: erpnext/regional/united_arab_emirates/utils.py:171
+#: erpnext/regional/united_arab_emirates/utils.py:193
 msgid "Recoverable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"
 msgstr ""
 
@@ -43590,11 +43651,11 @@ msgstr ""
 msgid "References"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:383
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:385
 msgid "References to Sales Invoices are Incomplete"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:378
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:380
 msgid "References to Sales Orders are Incomplete"
 msgstr ""
 
@@ -43739,14 +43800,14 @@ msgstr ""
 
 #. Label of the release_date (Date) field in DocType 'Purchase Invoice'
 #. Label of the release_date (Date) field in DocType 'Supplier'
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:268
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:312
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:274
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:318
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Release Date"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:315
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:317
 msgid "Release date must be in the future"
 msgstr ""
 
@@ -43821,7 +43882,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1254
 #: erpnext/accounts/report/general_ledger/general_ledger.html:84
 #: erpnext/accounts/report/general_ledger/general_ledger.html:110
-#: erpnext/accounts/report/general_ledger/general_ledger.py:752
+#: erpnext/accounts/report/general_ledger/general_ledger.py:785
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:112
 #: erpnext/accounts/report/purchase_register/purchase_register.py:296
 #: erpnext/accounts/report/sales_register/sales_register.py:335
@@ -43918,8 +43979,8 @@ msgstr ""
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:58
 #: erpnext/crm/doctype/opportunity/opportunity.js:130
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:354
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:305
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:360
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:312
 #: erpnext/support/doctype/issue/issue.js:39
 msgid "Reopen"
 msgstr ""
@@ -44552,7 +44613,7 @@ msgstr ""
 msgid "Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:606
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:608
 msgid "Reserved Qty should be greater than Delivered Qty."
 msgstr ""
 
@@ -44853,7 +44914,7 @@ msgstr ""
 msgid "Resume"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:200
+#: erpnext/manufacturing/doctype/job_card/job_card.js:208
 msgid "Resume Job"
 msgstr ""
 
@@ -44883,7 +44944,7 @@ msgstr ""
 msgid "Retained Earnings"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:295
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:302
 msgid "Retention Stock Entry"
 msgstr ""
 
@@ -44977,13 +45038,13 @@ msgstr ""
 msgid "Return Issued"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:355
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:362
 msgid "Return Qty"
 msgstr ""
 
 #. Label of the return_qty_from_rejected_warehouse (Check) field in DocType
 #. 'Purchase Receipt Item'
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:331
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:338
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Return Qty from Rejected Warehouse"
 msgstr ""
@@ -45449,12 +45510,12 @@ msgstr ""
 msgid "Row #1: Sequence ID must be 1 for Operation {0}."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:517
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:518
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1919
 msgid "Row #{0} (Payment Table): Amount must be negative"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:515
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:516
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1914
 msgid "Row #{0} (Payment Table): Amount must be positive"
 msgstr ""
@@ -45513,7 +45574,7 @@ msgstr ""
 msgid "Row #{0}: BOM is not specified for subcontracting item {0}"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:405
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:407
 msgid "Row #{0}: Batch No {1} is already selected."
 msgstr ""
 
@@ -45549,7 +45610,7 @@ msgstr ""
 msgid "Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
 msgstr ""
 
-#: erpnext/selling/doctype/product_bundle/product_bundle.py:86
+#: erpnext/selling/doctype/product_bundle/product_bundle.py:87
 msgid "Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
 msgstr ""
 
@@ -45589,7 +45650,7 @@ msgstr ""
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:533
+#: erpnext/assets/doctype/asset/asset.py:549
 msgid "Row #{0}: Depreciation Start Date is required"
 msgstr ""
 
@@ -45641,7 +45702,7 @@ msgstr ""
 msgid "Row #{0}: From Time and To Time fields are required"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:394
+#: erpnext/public/js/utils/barcode_scanner.js:428
 msgid "Row #{0}: Item added"
 msgstr ""
 
@@ -45649,7 +45710,7 @@ msgstr ""
 msgid "Row #{0}: Item {1} does not exist"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1547
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1549
 msgid "Row #{0}: Item {1} has been picked, please reserve stock from the Pick List."
 msgstr ""
 
@@ -45673,11 +45734,11 @@ msgstr ""
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:527
+#: erpnext/assets/doctype/asset/asset.py:543
 msgid "Row #{0}: Next Depreciation Date cannot be before Available-for-use Date"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:522
+#: erpnext/assets/doctype/asset/asset.py:538
 msgid "Row #{0}: Next Depreciation Date cannot be before Purchase Date"
 msgstr ""
 
@@ -45685,11 +45746,11 @@ msgstr ""
 msgid "Row #{0}: Not allowed to change Supplier as Purchase Order already exists"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1630
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1632
 msgid "Row #{0}: Only {1} available to reserve for the Item {2}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:499
+#: erpnext/assets/doctype/asset/asset.py:515
 msgid "Row #{0}: Opening Accumulated Depreciation must be less than or equal to {1}"
 msgstr ""
 
@@ -45697,15 +45758,15 @@ msgstr ""
 msgid "Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1009
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1010
 msgid "Row #{0}: Please select Item Code in Assembly Items"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1012
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1013
 msgid "Row #{0}: Please select the BOM No in Assembly Items"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1006
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1007
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
 msgstr ""
 
@@ -45717,7 +45778,7 @@ msgstr ""
 msgid "Row #{0}: Please update deferred revenue/expense account in item row or default account in company master"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:392
+#: erpnext/public/js/utils/barcode_scanner.js:426
 msgid "Row #{0}: Qty increased by {1}"
 msgstr ""
 
@@ -45726,7 +45787,7 @@ msgstr ""
 msgid "Row #{0}: Qty must be a positive number"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:393
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:395
 msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
 msgstr ""
 
@@ -45742,12 +45803,16 @@ msgstr ""
 msgid "Row #{0}: Quality Inspection {1} was rejected for item {2}"
 msgstr ""
 
+#: erpnext/selling/doctype/product_bundle/product_bundle.py:96
+msgid "Row #{0}: Quantity cannot be a non-positive number. Please increase the quantity or remove the Item {1}"
+msgstr ""
+
 #: erpnext/controllers/accounts_controller.py:1375
 #: erpnext/controllers/accounts_controller.py:3663
 msgid "Row #{0}: Quantity for Item {1} cannot be zero."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1615
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1617
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
 msgstr ""
 
@@ -45798,11 +45863,11 @@ msgstr ""
 msgid "Row #{0}: Serial No {1} does not belong to Batch {2}"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:342
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:344
 msgid "Row #{0}: Serial No {1} for Item {2} is not available in {3} {4} or might be reserved in another {5}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:358
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:360
 msgid "Row #{0}: Serial No {1} is already selected."
 msgstr ""
 
@@ -45822,6 +45887,10 @@ msgstr ""
 msgid "Row #{0}: Set Supplier for item {1}"
 msgstr ""
 
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1017
+msgid "Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+msgstr ""
+
 #: erpnext/manufacturing/doctype/workstation/workstation.py:92
 msgid "Row #{0}: Start Time and End Time are required"
 msgstr ""
@@ -45838,32 +45907,32 @@ msgstr ""
 msgid "Row #{0}: Status must be {1} for Invoice Discounting {2}"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:367
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:369
 msgid "Row #{0}: Stock cannot be reserved for Item {1} against a disabled Batch {2}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1560
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1562
 msgid "Row #{0}: Stock cannot be reserved for a non-stock Item {1}"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1573
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1575
 msgid "Row #{0}: Stock cannot be reserved in group warehouse {1}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1587
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1589
 msgid "Row #{0}: Stock is already reserved for the Item {1}."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:537
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:539
 msgid "Row #{0}: Stock is reserved for item {1} in warehouse {2}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:377
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:379
 msgid "Row #{0}: Stock not available to reserve for Item {1} against Batch {2} in Warehouse {3}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1222
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1601
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1224
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1603
 msgid "Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}."
 msgstr ""
 
@@ -45879,7 +45948,7 @@ msgstr ""
 msgid "Row #{0}: Timings conflicts with row {1}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:512
+#: erpnext/assets/doctype/asset/asset.py:528
 msgid "Row #{0}: Total Number of Depreciations cannot be less than or equal to Opening Number of Booked Depreciations"
 msgstr ""
 
@@ -45951,11 +46020,11 @@ msgstr ""
 msgid "Row #{}: Currency of {} - {} doesn't matches company currency."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:349
+#: erpnext/assets/doctype/asset/asset.py:350
 msgid "Row #{}: Finance Book should not be empty since you're using multiple."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:406
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:407
 msgid "Row #{}: Item Code: {} is not available under warehouse {}."
 msgstr ""
 
@@ -45975,23 +46044,23 @@ msgstr ""
 msgid "Row #{}: Please assign task to a member."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:341
+#: erpnext/assets/doctype/asset/asset.py:342
 msgid "Row #{}: Please use a different Finance Book."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:477
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:478
 msgid "Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:413
-msgid "Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}."
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:414
+msgid "Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}."
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:104
 msgid "Row #{}: The original Invoice {} of return invoice {} is not consolidated."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:450
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:451
 msgid "Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
 msgstr ""
 
@@ -46012,7 +46081,7 @@ msgstr ""
 msgid "Row #{}: {} {} doesn't belong to Company {}. Please select valid {}."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:434
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:436
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
 msgstr ""
 
@@ -46121,19 +46190,19 @@ msgstr ""
 msgid "Row {0}: Exchange Rate is mandatory"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:474
+#: erpnext/assets/doctype/asset/asset.py:490
 msgid "Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:525
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:527
 msgid "Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:482
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:484
 msgid "Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:507
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:509
 msgid "Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}"
 msgstr ""
 
@@ -46186,7 +46255,7 @@ msgstr ""
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:594
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:596
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
 msgstr ""
 
@@ -46302,7 +46371,7 @@ msgstr ""
 msgid "Row {0}: UOM Conversion Factor is mandatory"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1072
+#: erpnext/manufacturing/doctype/bom/bom.py:1109
 #: erpnext/manufacturing/doctype/work_order/work_order.py:277
 msgid "Row {0}: Workstation or Workstation Type is mandatory for an operation {1}"
 msgstr ""
@@ -46529,6 +46598,8 @@ msgstr ""
 #: erpnext/accounts/doctype/shipping_rule/shipping_rule_dashboard.py:10
 #: erpnext/accounts/doctype/tax_category/tax_category_dashboard.py:9
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
+#: erpnext/crm/doctype/opportunity/opportunity.js:288
+#: erpnext/crm/doctype/opportunity/opportunity.py:158
 #: erpnext/projects/doctype/project/project_dashboard.py:15
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:185
 #: erpnext/selling/doctype/quotation/quotation.json
@@ -46621,8 +46692,8 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice_reference/sales_invoice_reference.json
 #: erpnext/accounts/print_format/sales_auditing_voucher/sales_auditing_voucher.html:5
 #: erpnext/accounts/report/gross_profit/gross_profit.js:30
-#: erpnext/accounts/report/gross_profit/gross_profit.py:256
-#: erpnext/accounts/report/gross_profit/gross_profit.py:263
+#: erpnext/accounts/report/gross_profit/gross_profit.py:262
+#: erpnext/accounts/report/gross_profit/gross_profit.py:269
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 #: erpnext/crm/doctype/contract/contract.json
@@ -46634,7 +46705,7 @@ msgstr ""
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 #: erpnext/setup/workspace/home/home.json
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:343
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:349
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:65
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 msgid "Sales Invoice"
@@ -46712,11 +46783,11 @@ msgstr ""
 msgid "Sales Invoice isn't created by user {}"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:422
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:423
 msgid "Sales Invoice mode is activated in POS. Please create Sales Invoice instead."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:614
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:616
 msgid "Sales Invoice {0} has already been submitted"
 msgstr ""
 
@@ -46860,7 +46931,7 @@ msgstr ""
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:160
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:223
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:226
 #: erpnext/stock/doctype/material_request/material_request.js:219
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
@@ -46912,7 +46983,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/production_plan_item_reference/production_plan_item_reference.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:313
-#: erpnext/selling/doctype/sales_order/sales_order.js:870
+#: erpnext/selling/doctype/sales_order/sales_order.js:873
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
@@ -46945,7 +47016,7 @@ msgstr ""
 msgid "Sales Order Trends"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:266
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:268
 msgid "Sales Order required for Item {0}"
 msgstr ""
 
@@ -47115,7 +47186,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:191
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:80
 #: erpnext/accounts/report/gross_profit/gross_profit.js:50
-#: erpnext/accounts/report/gross_profit/gross_profit.py:371
+#: erpnext/accounts/report/gross_profit/gross_profit.py:377
 #: erpnext/crm/workspace/crm/crm.json
 #: erpnext/maintenance/doctype/maintenance_schedule_detail/maintenance_schedule_detail.json
 #: erpnext/maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
@@ -47196,8 +47267,8 @@ msgstr ""
 msgid "Sales Representative"
 msgstr ""
 
-#: erpnext/accounts/report/gross_profit/gross_profit.py:857
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:267
+#: erpnext/accounts/report/gross_profit/gross_profit.py:874
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:273
 msgid "Sales Return"
 msgstr ""
 
@@ -47455,8 +47526,8 @@ msgstr ""
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.js:119
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:628
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.js:75
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:286
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:322
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:292
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:328
 #: erpnext/public/js/call_popup/call_popup.js:169
 #: erpnext/selling/page/point_of_sale/pos_payment.js:62
 msgid "Save"
@@ -47494,7 +47565,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
-#: erpnext/public/js/utils/barcode_scanner.js:215
+#: erpnext/public/js/utils/barcode_scanner.js:241
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
@@ -47526,7 +47597,7 @@ msgstr ""
 msgid "Scan Serial No"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:179
+#: erpnext/public/js/utils/barcode_scanner.js:205
 msgid "Scan barcode for item {0}"
 msgstr ""
 
@@ -47540,7 +47611,7 @@ msgstr ""
 msgid "Scanned Cheque"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:247
+#: erpnext/public/js/utils/barcode_scanner.js:273
 msgid "Scanned Quantity"
 msgstr ""
 
@@ -47833,7 +47904,7 @@ msgid "Segregate Serial / Batch Bundle"
 msgstr ""
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:250
-#: erpnext/selling/doctype/sales_order/sales_order.js:1107
+#: erpnext/selling/doctype/sales_order/sales_order.js:1110
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:96
 #: erpnext/selling/report/sales_analytics/sales_analytics.js:93
 msgid "Select"
@@ -47855,15 +47926,15 @@ msgstr ""
 msgid "Select Attribute Values"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:853
+#: erpnext/selling/doctype/sales_order/sales_order.js:856
 msgid "Select BOM"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:834
+#: erpnext/selling/doctype/sales_order/sales_order.js:837
 msgid "Select BOM and Qty for Production"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:985
+#: erpnext/selling/doctype/sales_order/sales_order.js:988
 msgid "Select BOM, Qty and For Warehouse"
 msgstr ""
 
@@ -47893,7 +47964,7 @@ msgstr ""
 msgid "Select Company"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:468
+#: erpnext/manufacturing/doctype/job_card/job_card.js:476
 msgid "Select Corrective Operation"
 msgstr ""
 
@@ -47934,7 +48005,7 @@ msgstr ""
 msgid "Select DocType"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:186
+#: erpnext/manufacturing/doctype/job_card/job_card.js:194
 msgid "Select Employees"
 msgstr ""
 
@@ -47942,12 +48013,12 @@ msgstr ""
 msgid "Select Finished Good"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1186
-#: erpnext/selling/doctype/sales_order/sales_order.js:1198
+#: erpnext/selling/doctype/sales_order/sales_order.js:1189
+#: erpnext/selling/doctype/sales_order/sales_order.js:1201
 msgid "Select Items"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:1072
+#: erpnext/selling/doctype/sales_order/sales_order.js:1075
 msgid "Select Items based on Delivery Date"
 msgstr ""
 
@@ -47958,7 +48029,7 @@ msgstr ""
 #. Label of the select_items_to_manufacture_section (Section Break) field in
 #. DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:881
+#: erpnext/selling/doctype/sales_order/sales_order.js:884
 msgid "Select Items to Manufacture"
 msgstr ""
 
@@ -47972,7 +48043,7 @@ msgstr ""
 msgid "Select Job Worker Address"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1118
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1127
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:955
 msgid "Select Loyalty Program"
 msgstr ""
@@ -48106,7 +48177,7 @@ msgstr ""
 msgid "Select item group"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:376
+#: erpnext/manufacturing/doctype/bom/bom.js:397
 msgid "Select template item"
 msgstr ""
 
@@ -48123,7 +48194,7 @@ msgstr ""
 msgid "Select the Item to be manufactured."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:858
+#: erpnext/manufacturing/doctype/bom/bom.js:879
 msgid "Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically."
 msgstr ""
 
@@ -48144,11 +48215,11 @@ msgstr ""
 msgid "Select the date and your timezone"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:877
+#: erpnext/manufacturing/doctype/bom/bom.js:898
 msgid "Select the raw materials (Items) required to manufacture the Item"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:431
+#: erpnext/manufacturing/doctype/bom/bom.js:452
 msgid "Select variant item code for the template item {0}"
 msgstr ""
 
@@ -48233,7 +48304,7 @@ msgstr ""
 msgid "Selling"
 msgstr ""
 
-#: erpnext/accounts/report/gross_profit/gross_profit.py:330
+#: erpnext/accounts/report/gross_profit/gross_profit.py:336
 msgid "Selling Amount"
 msgstr ""
 
@@ -48405,7 +48476,7 @@ msgstr ""
 msgid "Serial / Batch Bundle"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:441
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:442
 msgid "Serial / Batch Bundle Missing"
 msgstr ""
 
@@ -48482,7 +48553,7 @@ msgstr ""
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.js:65
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:149
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.js:37
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:409
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:436
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:38
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:60
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:336
@@ -48582,7 +48653,7 @@ msgstr ""
 msgid "Serial No {0} already exists"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:321
+#: erpnext/public/js/utils/barcode_scanner.js:347
 msgid "Serial No {0} already scanned"
 msgstr ""
 
@@ -48603,7 +48674,7 @@ msgstr ""
 msgid "Serial No {0} does not exists"
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:402
+#: erpnext/public/js/utils/barcode_scanner.js:436
 msgid "Serial No {0} is already added"
 msgstr ""
 
@@ -48631,7 +48702,7 @@ msgstr ""
 msgid "Serial No: {0} has already been transacted into another POS Invoice."
 msgstr ""
 
-#: erpnext/public/js/utils/barcode_scanner.js:271
+#: erpnext/public/js/utils/barcode_scanner.js:297
 #: erpnext/public/js/utils/serial_no_batch_selector.js:16
 #: erpnext/public/js/utils/serial_no_batch_selector.js:190
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:50
@@ -49128,8 +49199,8 @@ msgstr ""
 msgid "Set Default Supplier"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:339
-#: erpnext/manufacturing/doctype/job_card/job_card.js:408
+#: erpnext/manufacturing/doctype/job_card/job_card.js:347
+#: erpnext/manufacturing/doctype/job_card/job_card.js:416
 msgid "Set Finished Good Quantity"
 msgstr ""
 
@@ -49160,11 +49231,11 @@ msgstr ""
 msgid "Set Landed Cost Based on Purchase Invoice Rate"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1130
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1139
 msgid "Set Loyalty Program"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:306
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:312
 msgid "Set New Release Date"
 msgstr ""
 
@@ -49193,7 +49264,7 @@ msgstr ""
 msgid "Set Posting Date"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:904
+#: erpnext/manufacturing/doctype/bom/bom.js:925
 msgid "Set Process Loss Item Quantity"
 msgstr ""
 
@@ -49207,7 +49278,7 @@ msgstr ""
 msgid "Set Project and all Tasks to status {0}?"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:905
+#: erpnext/manufacturing/doctype/bom/bom.js:926
 msgid "Set Quantity"
 msgstr ""
 
@@ -49314,7 +49385,7 @@ msgstr ""
 msgid "Set fieldname from which you want to fetch the data from the parent form."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:894
+#: erpnext/manufacturing/doctype/bom/bom.js:915
 msgid "Set quantity of process loss item:"
 msgstr ""
 
@@ -49344,15 +49415,15 @@ msgstr ""
 msgid "Set this if the customer is a Public Administration company."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:750
+#: erpnext/assets/doctype/asset/asset.py:766
 msgid "Set {0} in asset category {1} for company {2}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1083
+#: erpnext/assets/doctype/asset/asset.py:1099
 msgid "Set {0} in asset category {1} or company {2}"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1080
+#: erpnext/assets/doctype/asset/asset.py:1096
 msgid "Set {0} in company {1}"
 msgstr ""
 
@@ -49419,7 +49490,7 @@ msgstr ""
 msgid "Setting up company"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1051
+#: erpnext/manufacturing/doctype/bom/bom.py:1088
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1197
 msgid "Setting {0} is required"
 msgstr ""
@@ -49552,7 +49623,7 @@ msgid "Shift Name"
 msgstr ""
 
 #. Name of a DocType
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:243
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:249
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Shipment"
 msgstr ""
@@ -49603,7 +49674,7 @@ msgstr ""
 msgid "Shipment details"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:785
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:787
 msgid "Shipments"
 msgstr ""
 
@@ -50288,7 +50359,7 @@ msgstr ""
 msgid "Source Document Name"
 msgstr ""
 
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:435
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:478
 msgid "Source Document No"
 msgstr ""
 
@@ -50338,7 +50409,7 @@ msgstr ""
 #. Label of the s_warehouse (Link) field in DocType 'Stock Entry Detail'
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
-#: erpnext/manufacturing/doctype/bom/bom.js:403
+#: erpnext/manufacturing/doctype/bom/bom.js:424
 #: erpnext/manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -50366,7 +50437,7 @@ msgstr ""
 msgid "Source Warehouse Address Link"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1152
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1154
 msgid "Source Warehouse is mandatory for the Item {0}."
 msgstr ""
 
@@ -50462,7 +50533,7 @@ msgstr ""
 msgid "Split Qty"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1222
+#: erpnext/assets/doctype/asset/asset.py:1238
 msgid "Split Quantity must be less than Asset Quantity"
 msgstr ""
 
@@ -50655,7 +50726,7 @@ msgstr ""
 msgid "Start Import"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/job_card/job_card.js:180
+#: erpnext/manufacturing/doctype/job_card/job_card.js:188
 #: erpnext/manufacturing/doctype/workstation/workstation.js:124
 msgid "Start Job"
 msgstr ""
@@ -50964,14 +51035,14 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/employee/employee.json
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:323
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:358
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:329
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:364
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/pick_list/pick_list.json
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:276
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:305
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:283
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:312
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
@@ -51050,8 +51121,8 @@ msgstr ""
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:50
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:73
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1337
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1363
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1339
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1365
 #: erpnext/accounts/report/account_balance/account_balance.js:58
 msgid "Stock Adjustment"
 msgstr ""
@@ -51208,7 +51279,7 @@ msgstr ""
 msgid "Stock Entry Type"
 msgstr ""
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:1384
+#: erpnext/stock/doctype/pick_list/pick_list.py:1396
 msgid "Stock Entry has been already created against this Pick List"
 msgstr ""
 
@@ -51442,14 +51513,14 @@ msgstr ""
 #: erpnext/stock/doctype/pick_list/pick_list.js:166
 #: erpnext/stock/doctype/stock_entry/stock_entry_dashboard.py:12
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:714
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:666
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1225
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1563
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1576
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1590
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1604
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1618
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1635
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:668
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1227
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1565
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1578
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1592
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1606
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1620
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1637
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:176
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:188
@@ -51458,13 +51529,13 @@ msgstr ""
 msgid "Stock Reservation"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1744
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1746
 msgid "Stock Reservation Entries Cancelled"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:2138
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:2156
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1738
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1696
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1698
 msgid "Stock Reservation Entries Created"
 msgstr ""
 
@@ -51472,25 +51543,25 @@ msgstr ""
 #: erpnext/public/js/stock_reservation.js:308
 #: erpnext/selling/doctype/sales_order/sales_order.js:444
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.json
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:352
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:354
 #: erpnext/stock/report/reserved_stock/reserved_stock.js:53
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:171
 msgid "Stock Reservation Entry"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:528
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:530
 msgid "Stock Reservation Entry cannot be updated as it has been delivered."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:522
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:524
 msgid "Stock Reservation Entry created against a Pick List cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:547
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:549
 msgid "Stock Reservation Warehouse Mismatch"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:675
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:677
 msgid "Stock Reservation can only be created against {0}."
 msgstr ""
 
@@ -51525,7 +51596,7 @@ msgstr ""
 #. Label of a Link in the Stock Workspace
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/workspace/settings/settings.json
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:667
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:669
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Stock Settings"
@@ -51731,11 +51802,11 @@ msgstr ""
 msgid "Stock cannot be reserved in group warehouse {0}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1508
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1510
 msgid "Stock cannot be reserved in the group warehouse {0}."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:727
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:729
 msgid "Stock cannot be updated against Purchase Receipt {0}"
 msgstr ""
 
@@ -51747,11 +51818,11 @@ msgstr ""
 msgid "Stock cannot be updated because the invoice contains a drop shipping item. Please disable 'Update Stock' or remove the drop shipping item."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1119
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1121
 msgid "Stock has been unreserved for work order {0}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:323
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:325
 msgid "Stock not available for Item {0} in Warehouse {1}."
 msgstr ""
 
@@ -52063,7 +52134,7 @@ msgstr ""
 msgid "Subcontracting Order Supplied Item"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:943
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:965
 msgid "Subcontracting Order {0} created."
 msgstr ""
 
@@ -52153,7 +52224,7 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:939
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:961
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:910
 msgid "Submit Action Failed"
 msgstr ""
@@ -52604,7 +52675,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.js:230
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:160
-#: erpnext/selling/doctype/sales_order/sales_order.js:1231
+#: erpnext/selling/doctype/sales_order/sales_order.js:1235
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/doctype/sms_center/sms_center.json
 #: erpnext/setup/workspace/home/home.json
@@ -52615,7 +52686,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/shipment/shipment.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:462
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:505
 #: erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.js:8
 msgid "Supplier"
 msgstr ""
@@ -52740,7 +52811,7 @@ msgstr ""
 msgid "Supplier Invoice Date"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1730
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1732
 msgid "Supplier Invoice Date cannot be greater than Posting Date"
 msgstr ""
 
@@ -52750,12 +52821,12 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:59
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/report/general_ledger/general_ledger.html:104
-#: erpnext/accounts/report/general_ledger/general_ledger.py:747
+#: erpnext/accounts/report/general_ledger/general_ledger.py:780
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:218
 msgid "Supplier Invoice No"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1757
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1759
 msgid "Supplier Invoice No exists in Purchase Invoice {0}"
 msgstr ""
 
@@ -52983,7 +53054,7 @@ msgstr ""
 #. Label of the supplier_warehouse (Link) field in DocType 'Purchase Receipt'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
-#: erpnext/manufacturing/doctype/job_card/job_card.js:62
+#: erpnext/manufacturing/doctype/job_card/job_card.js:70
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Supplier Warehouse"
 msgstr ""
@@ -53317,7 +53388,7 @@ msgstr ""
 msgid "TDS Computation Summary"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1514
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1516
 msgid "TDS Deducted"
 msgstr ""
 
@@ -54172,7 +54243,7 @@ msgstr ""
 msgid "Template"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:355
+#: erpnext/manufacturing/doctype/bom/bom.js:376
 msgid "Template Item"
 msgstr ""
 
@@ -54408,7 +54479,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:182
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:68
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:221
-#: erpnext/accounts/report/gross_profit/gross_profit.py:399
+#: erpnext/accounts/report/gross_profit/gross_profit.py:411
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.js:8
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:21
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:263
@@ -54507,7 +54578,7 @@ msgstr ""
 msgid "The BOM which will be replaced"
 msgstr ""
 
-#: erpnext/stock/serial_batch_bundle.py:1378
+#: erpnext/stock/serial_batch_bundle.py:1394
 msgid "The Batch {0} has negative quantity {1} in warehouse {2}. Please correct the quantity."
 msgstr ""
 
@@ -54622,7 +54693,7 @@ msgstr ""
 msgid "The field To Shareholder cannot be blank"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:397
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:399
 msgid "The field {0} in row {1} is not set"
 msgstr ""
 
@@ -54689,6 +54760,10 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:525
 msgid "The job card {0} is in {1} state and you cannot start it again."
+msgstr ""
+
+#: erpnext/public/js/utils/barcode_scanner.js:533
+msgid "The last scanned warehouse has been cleared and won't be set in the subsequently scanned items"
 msgstr ""
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.py:46
@@ -54769,7 +54844,7 @@ msgstr ""
 msgid "The selected BOMs are not for the same item"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:493
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:494
 msgid "The selected change account {} doesn't belongs to Company {}."
 msgstr ""
 
@@ -54903,7 +54978,7 @@ msgstr ""
 msgid "Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:579
+#: erpnext/assets/doctype/asset/asset.py:595
 msgid "There are active maintenance or repairs against the asset. You must complete all of them before cancelling the asset."
 msgstr ""
 
@@ -55006,7 +55081,7 @@ msgstr ""
 msgid "This Month's Summary"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:952
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:974
 msgid "This PO has been fully subcontracted."
 msgstr ""
 
@@ -55030,7 +55105,7 @@ msgstr ""
 msgid "This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:359
+#: erpnext/assets/doctype/asset/asset.py:360
 msgid "This asset category is marked as non-depreciable. Please disable depreciation calculation or choose a different category."
 msgstr ""
 
@@ -55042,7 +55117,7 @@ msgstr ""
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:483
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:489
 msgid "This field is used to set the 'Customer'."
 msgstr ""
 
@@ -55052,11 +55127,11 @@ msgstr ""
 msgid "This filter will be applied to Journal Entry."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:812
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:813
 msgid "This invoice has already been paid."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:219
+#: erpnext/manufacturing/doctype/bom/bom.js:240
 msgid "This is a Template BOM and will be used to make the work order for {0} of the item {1}"
 msgstr ""
 
@@ -55129,7 +55204,7 @@ msgstr ""
 msgid "This is considered dangerous from accounting point of view."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:531
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:533
 msgid "This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice"
 msgstr ""
 
@@ -55145,7 +55220,7 @@ msgstr ""
 msgid "This item filter has already been applied for the {0}"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:496
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:502
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
 msgstr ""
 
@@ -55181,7 +55256,7 @@ msgstr ""
 msgid "This schedule was created when Asset {0} was scrapped."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:1356
+#: erpnext/assets/doctype/asset/asset.py:1372
 msgid "This schedule was created when Asset {0} was {1} into new Asset {2}."
 msgstr ""
 
@@ -55203,7 +55278,7 @@ msgstr ""
 msgid "This section allows the user to set the Body and Closing text of the Dunning Letter for the Dunning Type based on language, which can be used in Print."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.js:489
+#: erpnext/stock/doctype/delivery_note/delivery_note.js:495
 msgid "This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc."
 msgstr ""
 
@@ -55403,7 +55478,7 @@ msgstr ""
 #. Name of a DocType
 #. Label of a Link in the Projects Workspace
 #. Label of a shortcut in the Projects Workspace
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1014
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1023
 #: erpnext/projects/doctype/timesheet/timesheet.json
 #: erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py:26
 #: erpnext/projects/report/timesheet_billing_summary/timesheet_billing_summary.py:59
@@ -55518,7 +55593,7 @@ msgstr ""
 #. Label of the to_uom (Link) field in DocType 'UOM Conversion Factor'
 #. Label of the to (Data) field in DocType 'Call Log'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1046
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1055
 #: erpnext/setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 #: erpnext/telephony/doctype/call_log/call_log.json
 #: erpnext/templates/pages/projects.html:68
@@ -55889,7 +55964,7 @@ msgstr ""
 msgid "To Warehouse (Optional)"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:872
+#: erpnext/manufacturing/doctype/bom/bom.js:893
 msgid "To add Operations tick the 'With Operations' checkbox."
 msgstr ""
 
@@ -55964,11 +56039,11 @@ msgstr ""
 msgid "To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:621
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:623
 msgid "To submit the invoice without purchase order please set {0} as {1} in {2}"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:642
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:644
 msgid "To submit the invoice without purchase receipt please set {0} as {1} in {2}"
 msgstr ""
 
@@ -55978,7 +56053,7 @@ msgid "To use a different finance book, please uncheck 'Include Default FB Asset
 msgstr ""
 
 #: erpnext/accounts/report/financial_statements.py:603
-#: erpnext/accounts/report/general_ledger/general_ledger.py:304
+#: erpnext/accounts/report/general_ledger/general_ledger.py:310
 #: erpnext/accounts/report/trial_balance/trial_balance.py:292
 msgid "To use a different finance book, please uncheck 'Include Default FB Entries'"
 msgstr ""
@@ -56072,7 +56147,7 @@ msgstr ""
 #: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:229
 #: erpnext/accounts/report/financial_statements.py:699
 #: erpnext/accounts/report/general_ledger/general_ledger.html:132
-#: erpnext/accounts/report/general_ledger/general_ledger.py:378
+#: erpnext/accounts/report/general_ledger/general_ledger.py:398
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:699
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:93
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:98
@@ -56881,7 +56956,7 @@ msgstr ""
 msgid "Total hours: {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:523
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:524
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:536
 msgid "Total payments amount can't be greater than {}"
 msgstr ""
@@ -57541,7 +57616,7 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_review_objective/quality_review_objective.json
 #: erpnext/selling/doctype/product_bundle_item/product_bundle_item.json
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
-#: erpnext/selling/doctype/sales_order/sales_order.js:1225
+#: erpnext/selling/doctype/sales_order/sales_order.js:1228
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/selling/report/item_wise_sales_history/item_wise_sales_history.py:43
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:138
@@ -57615,7 +57690,7 @@ msgstr ""
 msgid "UOM Conversion Factor"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1387
+#: erpnext/manufacturing/doctype/production_plan/production_plan.py:1404
 msgid "UOM Conversion factor ({0} -> {1}) not found for item: {2}"
 msgstr ""
 
@@ -57999,11 +58074,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/account/account.js:204
 #: erpnext/accounts/doctype/cost_center/cost_center.js:107
-#: erpnext/manufacturing/doctype/job_card/job_card.js:338
-#: erpnext/manufacturing/doctype/job_card/job_card.js:407
+#: erpnext/manufacturing/doctype/job_card/job_card.js:346
+#: erpnext/manufacturing/doctype/job_card/job_card.js:415
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:500
 #: erpnext/public/js/utils.js:608 erpnext/public/js/utils.js:912
-#: erpnext/public/js/utils/barcode_scanner.js:183
+#: erpnext/public/js/utils/barcode_scanner.js:209
 #: erpnext/public/js/utils/serial_no_batch_selector.js:17
 #: erpnext/public/js/utils/serial_no_batch_selector.js:191
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js:179
@@ -58104,7 +58179,7 @@ msgstr ""
 #. Option for the 'Update Type' (Select) field in DocType 'BOM Update Log'
 #. Label of the update_cost_section (Section Break) field in DocType 'BOM
 #. Update Tool'
-#: erpnext/manufacturing/doctype/bom/bom.js:135
+#: erpnext/manufacturing/doctype/bom/bom.js:156
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.json
 #: erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.json
 msgid "Update Cost"
@@ -58198,7 +58273,7 @@ msgstr ""
 msgid "Update latest price in all BOMs"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:401
+#: erpnext/assets/doctype/asset/asset.py:402
 msgid "Update stock must be enabled for the purchase invoice {0}"
 msgstr ""
 
@@ -58214,7 +58289,7 @@ msgstr ""
 msgid "Update timestamp on new communication"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:534
+#: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:539
 msgid "Updated successfully"
 msgstr ""
 
@@ -58322,7 +58397,7 @@ msgstr ""
 
 #. Label of the use_multi_level_bom (Check) field in DocType 'Work Order'
 #. Label of the use_multi_level_bom (Check) field in DocType 'Stock Entry'
-#: erpnext/manufacturing/doctype/bom/bom.js:337
+#: erpnext/manufacturing/doctype/bom/bom.js:358
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Use Multi-Level BOM"
@@ -58652,7 +58727,7 @@ msgstr ""
 msgid "Valid till Date cannot be before Transaction Date"
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:154
+#: erpnext/selling/doctype/quotation/quotation.py:156
 msgid "Valid till date cannot be before transaction date"
 msgstr ""
 
@@ -58714,7 +58789,7 @@ msgstr ""
 msgid "Validity in Days"
 msgstr ""
 
-#: erpnext/selling/doctype/quotation/quotation.py:361
+#: erpnext/selling/doctype/quotation/quotation.py:363
 msgid "Validity period of this quotation has ended."
 msgstr ""
 
@@ -58763,7 +58838,7 @@ msgstr ""
 #. Label of the valuation_rate (Currency) field in DocType 'Stock
 #. Reconciliation Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
-#: erpnext/accounts/report/gross_profit/gross_profit.py:323
+#: erpnext/accounts/report/gross_profit/gross_profit.py:329
 #: erpnext/assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 #: erpnext/assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -58992,7 +59067,7 @@ msgstr ""
 msgid "Variant Attributes"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:176
+#: erpnext/manufacturing/doctype/bom/bom.js:197
 msgid "Variant BOM"
 msgstr ""
 
@@ -59014,8 +59089,8 @@ msgstr ""
 msgid "Variant Field"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:291
-#: erpnext/manufacturing/doctype/bom/bom.js:370
+#: erpnext/manufacturing/doctype/bom/bom.js:312
+#: erpnext/manufacturing/doctype/bom/bom.js:391
 msgid "Variant Item"
 msgstr ""
 
@@ -59149,7 +59224,7 @@ msgstr ""
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:56
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.js:205
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:76
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:673
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:679
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.js:14
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.js:24
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:167
@@ -59173,8 +59248,8 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.js:142
 #: erpnext/stock/doctype/item/item.js:150
 #: erpnext/stock/doctype/item/item.js:158
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:228
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:239
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:232
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:243
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:297
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:46
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:62
@@ -59202,7 +59277,7 @@ msgstr ""
 msgid "View Leads"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account_tree.js:275
+#: erpnext/accounts/doctype/account/account_tree.js:270
 #: erpnext/stock/doctype/batch/batch.js:18
 msgid "View Ledger"
 msgstr ""
@@ -59340,7 +59415,7 @@ msgstr ""
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.js:42
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:209
 #: erpnext/accounts/report/general_ledger/general_ledger.js:49
-#: erpnext/accounts/report/general_ledger/general_ledger.py:715
+#: erpnext/accounts/report/general_ledger/general_ledger.py:735
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.js:41
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:33
 #: erpnext/accounts/report/payment_ledger/payment_ledger.js:65
@@ -59379,7 +59454,7 @@ msgstr ""
 
 #. Label of the voucher_subtype (Small Text) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
-#: erpnext/accounts/report/general_ledger/general_ledger.py:709
+#: erpnext/accounts/report/general_ledger/general_ledger.py:729
 msgid "Voucher Subtype"
 msgstr ""
 
@@ -59411,7 +59486,7 @@ msgstr ""
 #: erpnext/accounts/doctype/unreconcile_payment/unreconcile_payment.json
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1184
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:200
-#: erpnext/accounts/report/general_ledger/general_ledger.py:707
+#: erpnext/accounts/report/general_ledger/general_ledger.py:727
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:31
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:165
 #: erpnext/accounts/report/purchase_register/purchase_register.py:158
@@ -59432,7 +59507,7 @@ msgstr ""
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:145
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.js:40
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:107
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:429
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:472
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:27
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:114
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:320
@@ -59566,7 +59641,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/accounts/report/gross_profit/gross_profit.js:56
-#: erpnext/accounts/report/gross_profit/gross_profit.py:308
+#: erpnext/accounts/report/gross_profit/gross_profit.py:314
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.js:41
 #: erpnext/accounts/report/purchase_register/purchase_register.js:52
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.py:28
@@ -59616,7 +59691,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.json
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:350
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:352
 #: erpnext/stock/doctype/warehouse/warehouse.json
 #: erpnext/stock/page/stock_balance/stock_balance.js:11
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:25
@@ -59642,7 +59717,7 @@ msgstr ""
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:96
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.js:34
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:138
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:442
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:485
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:21
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:47
 #: erpnext/stock/report/stock_ageing/stock_ageing.js:30
@@ -59764,7 +59839,7 @@ msgid "Warehouse not found against the account {0}"
 msgstr ""
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1160
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:424
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:426
 msgid "Warehouse required for stock Item {0}"
 msgstr ""
 
@@ -59951,6 +60026,10 @@ msgstr ""
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 #: erpnext/support/workspace/support/support.json
 msgid "Warranty Claim"
+msgstr ""
+
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:525
+msgid "Warranty Expiry (Serial)"
 msgstr ""
 
 #. Label of the warranty_expiry_date (Date) field in DocType 'Serial No'
@@ -60376,7 +60455,7 @@ msgstr ""
 #. Entry'
 #. Option for the 'From Voucher Type' (Select) field in DocType 'Stock
 #. Reservation Entry'
-#: erpnext/manufacturing/doctype/bom/bom.js:167
+#: erpnext/manufacturing/doctype/bom/bom.js:188
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -60398,7 +60477,7 @@ msgstr ""
 #: erpnext/stock/doctype/serial_no/serial_no.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.json
-#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:455
+#: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:498
 #: erpnext/templates/pages/material_request_info.html:45
 msgid "Work Order"
 msgstr ""
@@ -60462,7 +60541,7 @@ msgstr ""
 msgid "Work Order has been {0}"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:823
+#: erpnext/selling/doctype/sales_order/sales_order.js:826
 msgid "Work Order not created"
 msgstr ""
 
@@ -60475,7 +60554,7 @@ msgstr ""
 msgid "Work Orders"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.js:908
+#: erpnext/selling/doctype/sales_order/sales_order.js:911
 msgid "Work Orders Created: {0}"
 msgstr ""
 
@@ -60915,7 +60994,7 @@ msgid "You can only have Plans with the same billing cycle in a Subscription"
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:412
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:876
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:885
 msgid "You can only redeem max {0} points in this order."
 msgstr ""
 
@@ -60943,7 +61022,7 @@ msgstr ""
 msgid "You can't redeem Loyalty Points having more value than the Total Amount."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:653
+#: erpnext/manufacturing/doctype/bom/bom.js:674
 msgid "You cannot change the rate if BOM is mentioned against any Item."
 msgstr ""
 
@@ -61043,7 +61122,7 @@ msgstr ""
 msgid "You must select a customer before adding an item."
 msgstr ""
 
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:267
+#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:268
 msgid "You need to cancel POS Closing Entry {} to be able to cancel this document."
 msgstr ""
 
@@ -61140,7 +61219,7 @@ msgstr ""
 msgid "as Title"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:896
+#: erpnext/manufacturing/doctype/bom/bom.js:917
 msgid "as a percentage of finished item quantity"
 msgstr ""
 
@@ -61160,7 +61239,7 @@ msgstr ""
 msgid "cannot be greater than 100"
 msgstr ""
 
-#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:331
+#: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:333
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1046
 msgid "dated {0}"
 msgstr ""
@@ -61533,7 +61612,7 @@ msgstr ""
 msgid "{0} account is not of type {1}"
 msgstr ""
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:496
+#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:498
 msgid "{0} account not found while submitting purchase receipt"
 msgstr ""
 
@@ -61557,7 +61636,7 @@ msgstr ""
 msgid "{0} already has a Parent Procedure {1}."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:542
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:544
 msgid "{0} and {1}"
 msgstr ""
 
@@ -61728,6 +61807,10 @@ msgstr ""
 msgid "{0} is required"
 msgstr ""
 
+#: erpnext/assets/doctype/asset/asset.py:431
+msgid "{0} is still in Draft. Please submit it before saving the Asset."
+msgstr ""
+
 #: erpnext/manufacturing/doctype/work_order/work_order.js:454
 msgid "{0} items in progress"
 msgstr ""
@@ -61813,6 +61896,10 @@ msgstr ""
 msgid "{0} will be given as discount."
 msgstr ""
 
+#: erpnext/public/js/utils/barcode_scanner.js:523
+msgid "{0} will be set as the {1} in subsequently scanned items"
+msgstr ""
+
 #: erpnext/manufacturing/doctype/job_card/job_card.py:883
 msgid "{0} {1}"
 msgstr ""
@@ -61825,7 +61912,7 @@ msgstr ""
 msgid "{0} {1} Partially Reconciled"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:516
+#: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:518
 msgid "{0} {1} cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
 msgstr ""
 
