@@ -4,3 +4,7 @@ reviews:
       - "sync translations"
       - "update POT file"
   review_status: false
+  poem: false
+  collapse_walkthrough: true
+  sequence_diagrams: false
+  changed_files_summary: false
