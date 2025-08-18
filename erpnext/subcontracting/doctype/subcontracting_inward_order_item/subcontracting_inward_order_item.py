@@ -18,6 +18,7 @@ class SubcontractingInwardOrderItem(Document):
 		bom: DF.Link
 		conversion_factor: DF.Float
 		delivered_qty: DF.Float
+		delivery_warehouse: DF.Link
 		include_exploded_items: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data
@@ -36,7 +37,6 @@ class SubcontractingInwardOrderItem(Document):
 	pass
 
 	def update_manufacturing_qty_fields(self):
-		"""Update manufacturing qty fields in the item table"""
 		table = frappe.qb.DocType("Work Order")
 		query = (
 			frappe.qb.from_(table)
@@ -51,4 +51,20 @@ class SubcontractingInwardOrderItem(Document):
 
 		self.db_set("produced_qty", result.produced_qty)
 		self.db_set("process_loss_qty", result.process_loss_qty)
+		self.save()
+
+	def update_delivered_qty(self, scio_detail):
+		table = frappe.qb.DocType("Stock Entry Detail")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.transfer_qty).as_("delivered_qty"))
+			.where(
+				(table.docstatus == 1)
+				& (table.stock_entry_type == "Subcontracting Inward")
+				& (table.subcontracting_inward_order_item == self.name)
+			)
+		)
+		result = query.run(as_dict=True)[0]
+
+		self.db_set("delivered_qty", result.delivered_qty or 0.0)
 		self.save()

@@ -542,7 +542,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					based_on: based_on,
 					posting_date: this.frm.doc.posting_date,
 					posting_time: this.frm.doc.posting_time,
-					scio_rm_detail: this.item.scio_rm_detail,
+					scio_detail: this.item.scio_detail,
 				},
 				callback: (r) => {
 					if (r.message) {

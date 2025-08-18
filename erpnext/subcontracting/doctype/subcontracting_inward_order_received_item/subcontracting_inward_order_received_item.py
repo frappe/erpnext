@@ -16,7 +16,7 @@ class SubcontractingInwardOrderReceivedItem(Document):
 
 		bom_detail_no: DF.Data | None
 		consumed_qty: DF.Float
-		conversion_factor: DF.Float
+		is_customer_provided_item: DF.Check
 		main_item_code: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
@@ -25,6 +25,7 @@ class SubcontractingInwardOrderReceivedItem(Document):
 		reference_name: DF.Data | None
 		required_qty: DF.Float
 		reserve_warehouse: DF.Link | None
+		reserved_qty: DF.Float
 		returned_qty: DF.Float
 		rm_item_code: DF.Link | None
 		stock_uom: DF.Link | None

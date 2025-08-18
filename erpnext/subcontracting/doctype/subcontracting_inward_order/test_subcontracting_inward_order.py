@@ -35,7 +35,7 @@ def create_subcontracting_inward_order(**args):
 	args = frappe._dict(args)
 	scio = get_mapped_subcontracting_inward_order(source_name=args.so_name)
 
-	scio.raw_materials_receipt_Warehouse = args.raw_materials_receipt_warehouse
+	scio.customer_warehouse = args.customer_warehouse
 
 	for item in scio.items:
 		item.include_exploded_items = args.get("include_exploded_items", 1)

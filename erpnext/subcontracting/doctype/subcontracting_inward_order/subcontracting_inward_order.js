@@ -35,13 +35,13 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 		frm.get_field("items").grid.cannot_add_rows = true;
 		frm.trigger("set_queries");
 
-		frm.set_indicator_formatter("item_code", (doc) => (doc.qty <= doc.received_qty ? "green" : "orange"));
-
-		frm.set_query("raw_materials_receipt_warehouse", () => {
+		frm.set_query("customer_warehouse", () => {
 			return {
 				filters: {
 					is_group: 0,
+					is_rejected_warehouse: 0,
 					company: frm.doc.company,
+					customer: frm.doc.customer,
 				},
 			};
 		});
@@ -54,12 +54,37 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 				},
 			};
 		});
+
+		frm.set_query("delivery_warehouse", "items", () => {
+			return {
+				filters: {
+					is_group: 0,
+					is_rejected_warehouse: 0,
+					company: frm.doc.company,
+				},
+			};
+		});
+
+		frm.set_query("set_delivery_warehouse", () => {
+			return {
+				filters: {
+					is_group: 0,
+					is_rejected_warehouse: 0,
+					company: frm.doc.company,
+				},
+			};
+		});
 	},
 
-	onload: (frm) => {
-		if (!frm.doc.transaction_date) {
-			frm.set_value("transaction_date", frappe.datetime.get_today());
-		}
+	set_delivery_warehouse: (frm) => {
+		frm.doc.items.forEach((item) =>
+			frappe.model.set_value(
+				item.doctype,
+				item.name,
+				"delivery_warehouse",
+				frm.doc.set_delivery_warehouse
+			)
+		);
 	},
 
 	sales_order: (frm) => {
@@ -88,7 +113,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 					() => frm.events.update_subcontracting_inward_order_status(frm),
 					__("Status")
 				);
-			} else if (flt(frm.doc.per_delivered, 2) < 100) {
+			} else {
 				frm.add_custom_button(
 					__("Close"),
 					() => frm.events.update_subcontracting_inward_order_status(frm, "Closed"),
@@ -134,30 +159,8 @@ erpnext.selling.SubcontractingInwardOrderController = class SubcontractingInward
 	}
 
 	refresh(doc) {
-		var me = this;
-
-		if (doc.__onload && doc.__onload.has_unreserved_stock) {
-			me.frm.add_custom_button(
-				__("Reserve"),
-				() => me.frm.events.create_stock_reservation_entries(me.frm),
-				__("Stock Reservation")
-			);
-		}
-
-		if (
-			doc.__onload &&
-			doc.__onload.has_reserved_stock &&
-			frappe.model.can_cancel("Stock Reservation Entry")
-		) {
-			me.frm.add_custom_button(
-				__("Unreserve"),
-				() => me.frm.events.cancel_stock_reservation_entries(me.frm),
-				__("Stock Reservation")
-			);
-		}
-
 		if (doc.docstatus == 1) {
-			if (!["Closed", "Completed"].includes(doc.status)) {
+			if (doc.status != "Closed") {
 				if (
 					doc.received_items.some(
 						(item) => item.received_qty - item.work_order_qty - item.returned_qty > 0
@@ -169,6 +172,7 @@ erpnext.selling.SubcontractingInwardOrderController = class SubcontractingInward
 						__("Return")
 					);
 				}
+
 				if (doc.per_produced < 100) {
 					this.frm.add_custom_button(
 						__("Work Order"),
@@ -188,21 +192,22 @@ erpnext.selling.SubcontractingInwardOrderController = class SubcontractingInward
 						__("Create")
 					);
 				}
+				if (doc.per_delivered > 0 && doc.per_returned < 100) {
+					this.frm.add_custom_button(
+						__("Finished Goods Return"),
+						this.make_fg_return,
+						__("Return")
+					);
+				}
 				if (doc.per_produced < 100) {
 					this.frm.page.set_inner_btn_group_as_primary(__("Receive"));
-				} else {
+				} else if (doc.per_delivered < 100) {
 					this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+				} else if (doc.per_delivered >= 100 && doc.per_returned < 100) {
+					this.frm.page.set_inner_btn_group_as_primary(__("Return"));
 				}
 			}
 		}
-	}
-
-	make_subcontracting_delivery() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order.make_subcontracting_delivery",
-			frm: cur_frm,
-			freeze_message: __("Creating Subcontracting Delivery ..."),
-		});
 	}
 
 	make_stock_entry() {
@@ -223,6 +228,32 @@ erpnext.selling.SubcontractingInwardOrderController = class SubcontractingInward
 			method: "erpnext.controllers.subcontracting_controller.make_rm_return",
 			args: {
 				subcontract_inward_order: cur_frm.doc.name,
+			},
+			callback: (r) => {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+		});
+	}
+
+	make_subcontracting_delivery() {
+		frappe.call({
+			method: "erpnext.controllers.subcontracting_controller.make_subcontracting_delivery",
+			args: {
+				subcontracting_inward_order: cur_frm.doc.name,
+			},
+			callback: (r) => {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+		});
+	}
+
+	make_subcontracting_return() {
+		frappe.call({
+			method: "erpnext.controllers.subcontracting_controller.make_subcontracting_return",
+			args: {
+				subcontracting_inward_order: cur_frm.doc.name,
 			},
 			callback: (r) => {
 				var doclist = frappe.model.sync(r.message);

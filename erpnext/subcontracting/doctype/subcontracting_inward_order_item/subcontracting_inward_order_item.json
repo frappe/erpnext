@@ -11,6 +11,7 @@
   "item_name",
   "column_break_3",
   "bom",
+  "delivery_warehouse",
   "include_exploded_items",
   "quantity_section",
   "qty",
@@ -109,6 +110,7 @@
   {
    "fieldname": "delivered_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Delivered Qty",
    "no_copy": 1,
    "non_negative": 1,
@@ -163,6 +165,15 @@
    "fieldname": "quantity_section",
    "fieldtype": "Section Break",
    "label": "Quantity"
+  },
+  {
+   "fieldname": "delivery_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Delivery Warehouse",
+   "no_copy": 1,
+   "options": "Warehouse",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -170,7 +181,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-25 20:32:33.916928",
+ "modified": "2025-08-28 12:38:59.854650",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order Item",

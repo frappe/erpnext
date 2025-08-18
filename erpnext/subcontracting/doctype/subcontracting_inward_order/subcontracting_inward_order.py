@@ -26,6 +26,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order_received_item.subcontracting_inward_order_received_item import (
 			SubcontractingInwardOrderReceivedItem,
 		)
+		from erpnext.subcontracting.doctype.subcontracting_inward_order_scrap_item.subcontracting_inward_order_scrap_item import (
+			SubcontractingInwardOrderScrapItem,
+		)
 		from erpnext.subcontracting.doctype.subcontracting_inward_order_service_item.subcontracting_inward_order_service_item import (
 			SubcontractingInwardOrderServiceItem,
 		)
@@ -34,18 +37,22 @@ class SubcontractingInwardOrder(SubcontractingController):
 		company: DF.Link
 		customer: DF.Link
 		customer_name: DF.Data
+		customer_warehouse: DF.Link
 		items: DF.Table[SubcontractingInwardOrderItem]
 		letter_head: DF.Link | None
 		naming_series: DF.Literal["SCI-ORD-.YYYY.-"]
 		per_delivered: DF.Percent
-		per_material_received: DF.Percent
 		per_process_loss: DF.Percent
 		per_produced: DF.Percent
-		raw_materials_receipt_warehouse: DF.Link
+		per_raw_material_received: DF.Percent
+		per_raw_material_returned: DF.Percent
+		per_returned: DF.Percent
 		received_items: DF.Table[SubcontractingInwardOrderReceivedItem]
 		sales_order: DF.Link
+		scrap_items: DF.Table[SubcontractingInwardOrderScrapItem]
 		select_print_heading: DF.Link | None
 		service_items: DF.Table[SubcontractingInwardOrderServiceItem]
+		set_delivery_warehouse: DF.Link | None
 		status: DF.Literal["Draft", "Open", "Ongoing", "Produced", "Delivered", "Cancelled", "Closed"]
 		title: DF.Data | None
 		transaction_date: DF.Date
@@ -58,11 +65,11 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def validate(self):
 		super().validate()
+		self.set_is_customer_provided_item()
+		self.validate_customer_warehouse()
 		self.validate_sales_order_for_subcontracting()
-		self.validate_items()
 		self.validate_service_items()
 		self.set_missing_values()
-		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def on_submit(self):
 		self.validate_customer_provided_items()
@@ -77,35 +84,43 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Sales Order", self.sales_order)
 
-		total_to_be_received = total_received = total_returned = 0
+		total_to_be_received = total_received = total_rm_returned = 0
 		for rm in self.get("received_items"):
 			total_to_be_received += flt(rm.required_qty)
 			total_received += flt(rm.received_qty)
-			total_returned += flt(rm.returned_qty)
+			total_rm_returned += flt(rm.returned_qty)
 
-		total_to_be_produced = total_produced = total_process_loss = 0
+		total_to_be_produced = total_produced = total_process_loss = total_delivered = total_fg_returned = 0
 		for item in self.get("items"):
 			total_to_be_produced += flt(item.qty)
 			total_produced += flt(item.produced_qty)
 			total_process_loss += flt(item.process_loss_qty)
+			total_delivered += flt(item.delivered_qty)
+			total_fg_returned += flt(item.returned_qty)
 
-		per_material_received = flt((total_received - total_returned) / total_to_be_received * 100, 2)
+		per_raw_material_received = flt(total_received / total_to_be_received * 100, 2)
+		per_raw_material_returned = flt(total_rm_returned / total_received * 100, 2) if total_received else 0
 		per_produced = flt(total_produced / total_to_be_produced * 100, 2)
 		per_process_loss = flt(total_process_loss / total_produced * 100, 2) if total_produced else 0
+		per_delivered = flt(total_delivered / total_to_be_produced * 100, 2)
+		per_returned = flt(total_fg_returned / total_delivered * 100, 2) if total_delivered else 0
 
-		self.db_set("per_material_received", per_material_received, update_modified=update_modified)
+		self.db_set("per_raw_material_received", per_raw_material_received, update_modified=update_modified)
+		self.db_set("per_raw_material_returned", per_raw_material_returned, update_modified=update_modified)
 		self.db_set("per_produced", per_produced, update_modified=update_modified)
 		self.db_set("per_process_loss", per_process_loss, update_modified=update_modified)
+		self.db_set("per_delivered", per_delivered, update_modified=update_modified)
+		self.db_set("per_returned", per_returned, update_modified=update_modified)
 
 		if self.docstatus >= 1 and not status:
 			if self.docstatus == 1:
 				if self.status == "Draft":
 					status = "Open"
-				elif self.per_produced == 100:
-					status = "Produced"
 				elif self.per_delivered == 100:
 					status = "Delivered"
-				elif self.per_material_received > 0:
+				elif self.per_produced == 100:
+					status = "Produced"
+				elif self.per_raw_material_received > 0:
 					status = "Ongoing"
 				else:
 					status = "Open"
@@ -124,6 +139,14 @@ class SubcontractingInwardOrder(SubcontractingController):
 				else (doc.subcontracted_qty - service_item.qty)
 			)
 			doc.save()
+
+	def validate_customer_warehouse(self):
+		if frappe.get_value("Warehouse", self.customer_warehouse, "customer") != self.customer:
+			frappe.throw(
+				_("Customer Warehouse {0} does not belong to Customer {1}.").format(
+					frappe.bold(self.customer_warehouse), frappe.bold(self.customer)
+				)
+			)
 
 	def validate_sales_order_for_subcontracting(self):
 		if self.sales_order:
@@ -215,11 +238,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			for item in items:
 				self.append("items", item)
 
-		self.set_missing_values()
-
-	def set_missing_values(self):
-		self.calculate_service_costs()
-		self.set_is_customer_provided_item()  # TODO: Fetch from not working for some reason?
+		self.set_is_customer_provided_item()  # Fetch from not working for some reason?
 
 	def validate_customer_provided_items(self):
 		"""Check if atleast one raw material is customer provided"""
@@ -231,34 +250,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 						"Atleast one raw material for Finished Good Item {0} should be customer provided."
 					).format(frappe.bold(item.item_code))
 				)
-
-	def calculate_additional_costs(self):
-		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
-
-		if self.total_additional_costs:
-			if self.distribute_additional_costs_based_on == "Amount":
-				total_amt = sum(
-					flt(item.amount) for item in self.get("items") if not item.get("is_scrap_item")
-				)
-				for item in self.items:
-					if not item.get("is_scrap_item"):
-						item.additional_cost_per_qty = (
-							(item.amount * self.total_additional_costs) / total_amt
-						) / item.qty
-			else:
-				total_qty = sum(flt(item.qty) for item in self.get("items") if not item.get("is_scrap_item"))
-				additional_cost_per_qty = self.total_additional_costs / total_qty
-				for item in self.items:
-					if not item.get("is_scrap_item"):
-						item.additional_cost_per_qty = additional_cost_per_qty
-		else:
-			for item in self.items:
-				if not item.get("is_scrap_item"):
-					item.additional_cost_per_qty = 0
-
-	def calculate_service_costs(self):
-		for idx, item in enumerate(self.get("service_items")):
-			self.items[idx].service_cost_per_qty = item.amount / self.items[idx].qty
 
 	def set_is_customer_provided_item(self):
 		for item in self.get("received_items"):
@@ -297,9 +288,10 @@ class SubcontractingInwardOrder(SubcontractingController):
 				"stock_uom": d.stock_uom,
 				"company": self.company,
 				"project": frappe.get_cached_value("Sales Order", self.sales_order, "project"),
-				"source_warehouse": self.raw_materials_receipt_warehouse,
+				"source_warehouse": self.customer_warehouse,
 				"subcontracting_inward_order_item": d.name,
 				"reserve_stock": 1,
+				"fg_warehouse": d.delivery_warehouse,
 			}
 
 			qty = min(
@@ -310,13 +302,12 @@ class SubcontractingInwardOrder(SubcontractingController):
 						d.precision("qty"),
 					)
 					for item in self.get("received_items")
-					if item.reference_name == d.name
+					if item.reference_name == d.name and item.is_customer_provided_item
 				]
 			)
+			qty = int(qty) if frappe.get_value("UOM", d.stock_uom, "must_be_whole_number") else qty
 
-			item_details.update(
-				{"qty": int(qty) if frappe.get_value("UOM", d.stock_uom, "must_be_whole_number") else qty}
-			)
+			item_details.update({"qty": qty, "max_producible_qty": qty})
 			item_list.append(item_details)
 
 		return item_list
@@ -349,36 +340,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if doc_list:
 			doc_list = [get_link_to_form(doctype, p) for p in doc_list]
 			frappe.msgprint(_("{0} created").format(comma_and(doc_list)))
-
-	@frappe.whitelist()
-	def create_stock_reservation_entries(
-		self,
-		items_details: list[dict] | None = None,
-		notify=True,
-	) -> None:
-		"""Creates Stock Reservation Entries for Sales Order Items."""
-
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			create_stock_reservation_entries_for_scio_rm_items as create_stock_reservation_entries,
-		)
-
-		create_stock_reservation_entries(
-			scio=self,
-			items_details=items_details,
-			notify=notify,
-		)
-
-	@frappe.whitelist()
-	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
-		"""Cancel Stock Reservation Entries for Sales Order Items."""
-
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			cancel_stock_reservation_entries,
-		)
-
-		cancel_stock_reservation_entries(
-			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
-		)
 
 
 @frappe.whitelist()

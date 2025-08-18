@@ -1918,12 +1918,12 @@ def get_serial_and_batch_ledger(**kwargs):
 def get_auto_data(**kwargs):
 	kwargs = frappe._dict(kwargs)
 	if cint(kwargs.has_serial_no):
-		if not kwargs.scio_rm_detail:
+		if not kwargs.scio_detail:
 			return get_available_serial_nos(kwargs)
 		else:
 			return get_serial_nos_from_sre(kwargs)
 	elif cint(kwargs.has_batch_no):
-		if not kwargs.scio_rm_detail:
+		if not kwargs.scio_detail:
 			return get_auto_batch_nos(kwargs)
 		else:
 			return get_batch_nos_from_sre(kwargs)
@@ -2038,7 +2038,7 @@ def get_serial_nos_from_sre(kwargs):
 		.select(child_table.serial_no, child_table.batch_no, child_table.warehouse)
 		.where(
 			(table.docstatus == 1)
-			& (table.voucher_detail_no == kwargs.scio_rm_detail)
+			& (table.voucher_detail_no == kwargs.scio_detail)
 			& (child_table.qty != child_table.delivered_qty)
 		)
 		.limit(cint(kwargs.qty) or 10000000)
@@ -2475,7 +2475,7 @@ def get_batch_nos_from_sre(kwargs):
 		)
 		.where(
 			(table.docstatus == 1)
-			& (table.voucher_detail_no == kwargs.scio_rm_detail)
+			& (table.voucher_detail_no == kwargs.scio_detail)
 			& (child_table.qty != child_table.delivered_qty)
 		)
 		.groupby(child_table.batch_no)

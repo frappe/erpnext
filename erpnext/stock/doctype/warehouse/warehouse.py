@@ -29,6 +29,7 @@ class Warehouse(NestedSet):
 		address_line_2: DF.Data | None
 		city: DF.Data | None
 		company: DF.Link
+		customer: DF.Link | None
 		default_in_transit_warehouse: DF.Link | None
 		disabled: DF.Check
 		email_id: DF.Data | None

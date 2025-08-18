@@ -19,11 +19,7 @@
   "fg_item",
   "column_break_12",
   "fg_item_qty",
-  "sales_order_item",
-  "section_break_kphn",
-  "material_request",
-  "column_break_piqi",
-  "material_request_item"
+  "sales_order_item"
  ],
  "fields": [
   {
@@ -125,38 +121,13 @@
    "label": "Sales Order Item",
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_break_kphn",
-   "fieldtype": "Section Break",
-   "label": "Reference"
-  },
-  {
-   "fieldname": "material_request",
-   "fieldtype": "Link",
-   "label": "Material Request",
-   "no_copy": 1,
-   "options": "Material Request",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_piqi",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "material_request_item",
-   "fieldtype": "Data",
-   "label": "Material Request Item",
-   "no_copy": 1,
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-20 13:24:24.027048",
+ "modified": "2025-08-19 13:31:58.300327",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order Service Item",

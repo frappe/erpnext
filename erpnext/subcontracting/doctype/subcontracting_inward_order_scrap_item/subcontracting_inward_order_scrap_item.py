@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class SubcontractingInwardOrderServiceItem(Document):
+class SubcontractingInwardOrderScrapItem(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,17 +14,16 @@ class SubcontractingInwardOrderServiceItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		amount: DF.Currency
-		fg_item: DF.Link
-		fg_item_qty: DF.Float
+		delivered_qty: DF.Float
+		fg_item_code: DF.Link
 		item_code: DF.Link
-		item_name: DF.Data
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		qty: DF.Float
-		rate: DF.Currency
-		sales_order_item: DF.Data | None
+		produced_qty: DF.Float
+		reference_name: DF.Data
+		stock_uom: DF.Link
+		warehouse: DF.Link
 	# end: auto-generated types
 
 	pass

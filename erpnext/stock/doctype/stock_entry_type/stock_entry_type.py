@@ -34,6 +34,7 @@ class StockEntryType(Document):
 			"Receive from Customer",
 			"Return Raw Material to Customer",
 			"Subcontracting Delivery",
+			"Subcontracting Return",
 		]
 	# end: auto-generated types
 

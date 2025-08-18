@@ -54,7 +54,7 @@ class StockEntryDetail(Document):
 		retain_sample: DF.Check
 		s_warehouse: DF.Link | None
 		sample_quantity: DF.Int
-		scio_rm_detail: DF.Data | None
+		scio_detail: DF.Data | None
 		sco_rm_detail: DF.Data | None
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None

@@ -421,6 +421,10 @@ frappe.ui.form.on("Stock Entry", {
 		}
 
 		frm.events.set_route_options_for_new_doc(frm);
+
+		if (frm.doc.subcontracting_inward_order && frm.doc.stock_entry_type == "Subcontracting Delivery") {
+			frm.set_df_property("items", "cannot_add_rows", true);
+		}
 	},
 
 	set_route_options_for_new_doc(frm) {
@@ -1128,7 +1132,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	refresh() {
-		var me = this;
 		erpnext.toggle_naming_series();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();

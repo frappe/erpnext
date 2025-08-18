@@ -87,7 +87,6 @@
   "lead_time_days",
   "last_purchase_rate",
   "is_customer_provided_item",
-  "customer",
   "supplier_details",
   "delivered_by_supplier",
   "column_break2",
@@ -586,13 +585,6 @@
    "fieldname": "is_customer_provided_item",
    "fieldtype": "Check",
    "label": "Is Customer Provided Item"
-  },
-  {
-   "depends_on": "eval:doc.is_customer_provided_item==1",
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Customer"
   },
   {
    "collapsible": 1,

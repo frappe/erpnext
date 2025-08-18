@@ -2640,7 +2640,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		scio = get_subcontracting_inward_order(
 			so_name=so.name,
 			warehouse="_Test Warehouse - _TC",
-			raw_materials_receipt_warehouse="_Test Warehouse 1 - _TC",
+			customer_warehouse="_Test Warehouse 1 - _TC",
 		)
 
 		# Test - 2: ValidationError should be raised as there is Subcontracting Order against PO

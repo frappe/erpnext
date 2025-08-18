@@ -2103,7 +2103,7 @@ def make_subcontracting_inward_order(source_name, target_doc=None, save=False, s
 
 		return target_doc
 	else:
-		frappe.throw(_("This PO has been fully subcontracted."))
+		frappe.throw(_("This Sales Order has been fully subcontracted."))
 
 
 def is_so_fully_subcontracted(so_name):

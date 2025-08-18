@@ -39,14 +39,16 @@
   "allow_zero_qty_in_sales_order",
   "experimental_section",
   "use_legacy_js_reactivity",
-  "subcontract",
+  "subcontracting_settings_tab",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_q9qf",
   "over_receipt_allowance",
   "section_break_zwje",
   "auto_create_subcontracting_inward_order",
-  "column_break_1dcg",
-  "auto_create_delivery_note"
+  "section_break_zwh6",
+  "allow_delivery_of_overproduced_qty",
+  "column_break_mla9",
+  "deliver_scrap_items"
  ],
  "fields": [
   {
@@ -241,11 +243,6 @@
    "label": "Allow 0 Qty in Quotation (Unit Price Items)"
   },
   {
-   "fieldname": "subcontract",
-   "fieldtype": "Tab Break",
-   "label": "Subcontracting Settings"
-  },
-  {
    "default": "BOM",
    "fieldname": "backflush_raw_materials_of_subcontract_based_on",
    "fieldtype": "Select",
@@ -267,23 +264,41 @@
    "label": "Auto Create Subcontracting Inward Order"
   },
   {
-   "default": "0",
-   "description": "Delivery Note (Draft) will be auto-created on submission of Subcontracting Delivery.",
-   "fieldname": "auto_create_delivery_note",
-   "fieldtype": "Check",
-   "label": "Auto Create Delivery Note"
-  },
-  {
-   "fieldname": "column_break_1dcg",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_zwje",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Auto Creation"
   },
   {
    "fieldname": "column_break_q9qf",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zwh6",
+   "fieldtype": "Section Break",
+   "label": "Delivery"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, system will allow user to deliver the entire quantity of the finished goods produced against the Subcontracting Inward Order. If disabled, system will allow delivery of only the ordered quantity.",
+   "fieldname": "allow_delivery_of_overproduced_qty",
+   "fieldtype": "Check",
+   "label": "Allow Delivery of over-produced Qty"
+  },
+  {
+   "fieldname": "column_break_mla9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the Scrap Item generated against a Finished Good will also be added in the Stock Entry when delivering that Finished Good.",
+   "fieldname": "deliver_scrap_items",
+   "fieldtype": "Check",
+   "label": "Deliver Scrap Items"
+  },
+  {
+   "fieldname": "subcontracting_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting Settings"
   },
   {
    "default": "0",
