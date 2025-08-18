@@ -1940,11 +1940,11 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 	):
 		outstanding = voucher_outstanding[0]
 		ref_doc = frappe.get_doc(voucher_type, voucher_no)
+		previous_outstanding_amount = ref_doc.outstanding_amount
 		outstanding_amount = flt(
 			outstanding["outstanding_in_account_currency"], ref_doc.precision("outstanding_amount")
 		)
 
-<<<<<<< HEAD
 		# Didn't use db_set for optimisation purpose
 		ref_doc.outstanding_amount = outstanding_amount
 		frappe.db.set_value(
@@ -1954,29 +1954,9 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 			outstanding_amount,
 		)
 
+		update_linked_dunnings(ref_doc, previous_outstanding_amount)
 		ref_doc.set_status(update=True)
 		ref_doc.notify_update()
-=======
-	outstanding = voucher_outstanding[0]
-	ref_doc = frappe.get_lazy_doc(voucher_type, voucher_no)
-	previous_outstanding_amount = ref_doc.outstanding_amount
-	outstanding_amount = flt(
-		outstanding["outstanding_in_account_currency"], ref_doc.precision("outstanding_amount")
-	)
-
-	# Didn't use db_set for optimisation purpose
-	ref_doc.outstanding_amount = outstanding_amount
-	frappe.db.set_value(
-		voucher_type,
-		voucher_no,
-		"outstanding_amount",
-		outstanding_amount,
-	)
-
-	update_linked_dunnings(ref_doc, previous_outstanding_amount)
-	ref_doc.set_status(update=True)
-	ref_doc.notify_update()
->>>>>>> d959ca1694 (fix: handle dunning status change on all changes to outstanding amount)
 
 
 def delink_original_entry(pl_entry, partial_cancel=False):

@@ -157,67 +157,12 @@ class Dunning(AccountsController):
 		]
 
 
-<<<<<<< HEAD
-def resolve_dunnings(doc, method=None):
-	"""
-	Resolve / unresolve Dunning based on whether all payments have been made.
-	Called when a Payment Entry / Credit Note is submitted / cancelled.
-	"""
-
-	match doc.doctype:
-		case "Payment Entry":
-			return resolve_dunnings_from_payment_entry(doc)
-		case "Sales Invoice":
-			return resolve_dunnings_from_credit_note(doc)
-
-
-def resolve_dunnings_from_payment_entry(doc):
-	is_submitted = doc.docstatus == 1
-
-	for reference in doc.references:
-		if reference.reference_doctype != "Sales Invoice" or not reference.allocated_amount:
-			continue
-
-<<<<<<< HEAD
-		if reference.reference_doctype == "Sales Invoice" and (
-			submit_condition if doc.docstatus == 1 else cancel_condition
-		):
-			state = "Resolved" if doc.docstatus == 2 else "Unresolved"
-			dunnings = get_linked_dunnings_as_per_state(reference.reference_name, state)
-
-			for dunning in dunnings:
-				resolve = True
-				dunning = frappe.get_doc("Dunning", dunning.get("name"))
-				for overdue_payment in dunning.overdue_payments:
-					outstanding_inv = frappe.get_value(
-						"Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount"
-					)
-					outstanding_ps = frappe.get_value(
-						"Payment Schedule", overdue_payment.payment_schedule, "outstanding"
-					)
-					resolve = False if (outstanding_ps > 0 and outstanding_inv > 0) else True
-
-				dunning.status = "Resolved" if resolve else "Unresolved"
-				dunning.save()
-=======
-		_update_linked_dunnings(reference.reference_name, to_resolve=is_submitted)
->>>>>>> fe2d0ea43b (refactor: commonify and improve perf)
-
-
-def resolve_dunnings_from_credit_note(doc):
-	"""
-	Check if dunning should be resolved when a credit note is issued against a Sales Invoice.
-	Only process if update_outstanding_for_self is False (credit note is being applied against the original invoice).
-	"""
-	if not doc.is_return or doc.update_outstanding_for_self or not doc.return_against:
-=======
 def update_linked_dunnings(doc, previous_outstanding_amount):
 	if (
 		doc.doctype != "Sales Invoice"
 		or doc.is_return
 		or previous_outstanding_amount == doc.outstanding_amount
 	):
->>>>>>> d959ca1694 (fix: handle dunning status change on all changes to outstanding amount)
 		return
 
 	to_resolve = doc.outstanding_amount < previous_outstanding_amount
