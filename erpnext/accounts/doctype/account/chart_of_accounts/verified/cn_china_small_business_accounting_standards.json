@@ -639,7 +639,7 @@
                 "tax_rate": ""
             },
             "资本公积": {
-                "is_group": 0,
+                "is_group": 1,
                 "root_type": "",
                 "account_number": 3002,
                 "account_type": "Equity",
@@ -792,7 +792,7 @@
                 }       
             },
             "研发支出": {
-                "is_group": 0,
+                "is_group": 1,
                 "root_type": "",
                 "account_number": 4301,
                 "account_type": "",
