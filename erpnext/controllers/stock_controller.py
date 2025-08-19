@@ -1854,6 +1854,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 		row.warehouse = kwargs.warehouse
 
+	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()
 	bundle_doc.flags.ignore_permissions = True
 	bundle_doc.flags.ignore_validate = True

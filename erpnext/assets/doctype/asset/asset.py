@@ -122,6 +122,7 @@ class Asset(AccountsController):
 	def validate(self):
 		self.validate_category()
 		self.validate_precision()
+		self.validate_linked_purchase_docs()
 		self.set_purchase_doc_row_item()
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
@@ -408,6 +409,21 @@ class Asset(AccountsController):
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
+
+	def validate_linked_purchase_docs(self):
+		for doctype_field, doctype_name in [
+			("purchase_receipt", "Purchase Receipt"),
+			("purchase_invoice", "Purchase Invoice"),
+		]:
+			linked_doc = getattr(self, doctype_field, None)
+			if linked_doc:
+				docstatus = frappe.db.get_value(doctype_name, linked_doc, "docstatus")
+				if docstatus == 0:
+					frappe.throw(
+						_("{0} is still in Draft. Please submit it before saving the Asset.").format(
+							get_link_to_form(doctype_name, linked_doc)
+						)
+					)
 
 	def validate_gross_and_purchase_amount(self):
 		if self.is_existing_asset:
@@ -1083,7 +1099,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 def make_journal_entry(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
 	(
-		_,
+		fixed_asset_account,
 		accumulated_depreciation_account,
 		depreciation_expense_account,
 	) = get_depreciation_accounts(asset.asset_category, asset.company)

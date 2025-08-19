@@ -700,6 +700,7 @@ class SalesInvoice(SellingController):
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
 				"campaign": pos.get("campaign"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
+				"skip_default_payment": pos.get("disable_grand_total_to_default_mop"),
 			}
 
 	def update_time_sheet(self, sales_invoice):

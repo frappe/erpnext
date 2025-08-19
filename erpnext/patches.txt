@@ -420,3 +420,4 @@ erpnext.patches.v15_0.repost_gl_entries_with_no_account_subcontracting #2025-08-
 execute:frappe.db.set_single_value("Accounts Settings", "fetch_valuation_rate_for_internal_transaction", 1)
 erpnext.patches.v15_0.add_company_payment_gateway_account
 erpnext.patches.v15_0.update_uae_zero_rated_fetch
+erpnext.patches.v15_0.update_fieldname_in_accounting_dimension_filter

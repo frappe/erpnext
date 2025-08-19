@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
@@ -824,6 +826,11 @@ def get_returned_qty_map(delivery_note):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	doc = frappe.get_doc("Delivery Note", source_name)
 
 	to_make_invoice_qty_map = {}
@@ -875,6 +882,11 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 		return pending_qty
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	doc = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -897,6 +909,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 				"filter": lambda d: get_pending_qty(d) <= 0
 				if not doc.get("is_return")
 				else get_pending_qty(d) > 0,
+				"condition": select_item,
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",

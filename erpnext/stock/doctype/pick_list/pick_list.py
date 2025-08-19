@@ -1252,11 +1252,16 @@ def create_dn_wo_so(pick_list, delivery_note=None):
 @frappe.whitelist()
 def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
 	"""Get Items from Multiple Pick Lists and create a Delivery Note for filtered customer"""
+	if kwargs is None:
+		kwargs = {}
+	if isinstance(kwargs, str):
+		kwargs = json.loads(kwargs)
+
 	pick_list = frappe.get_doc("Pick List", source_name)
 	validate_item_locations(pick_list)
 
-	sales_order_arg = kwargs.get("sales_order") if kwargs else None
-	customer_arg = kwargs.get("customer") if kwargs else None
+	sales_order_arg = kwargs.get("sales_order")
+	customer_arg = kwargs.get("customer")
 
 	if sales_order_arg:
 		sales_orders = {sales_order_arg}
@@ -1270,7 +1275,7 @@ def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
 				pluck="name",
 			)
 
-	delivery_note = create_dn_from_so(pick_list, sales_orders, delivery_note=target_doc)
+	delivery_note = create_dn_from_so(pick_list, sales_orders, delivery_note=target_doc, kwargs=kwargs)
 
 	if not sales_order_arg and not all(item.sales_order for item in pick_list.locations):
 		if isinstance(delivery_note, str):
@@ -1296,9 +1301,14 @@ def create_dn_with_so(sales_dict, pick_list):
 	return delivery_note
 
 
-def create_dn_from_so(pick_list, sales_order_list, delivery_note=None):
+def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=None):
 	if not sales_order_list:
 		return delivery_note
+
+	def select_item(d):
+		filtered_items = kwargs.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
 
 	item_table_mapper = {
 		"doctype": "Delivery Note Item",
@@ -1307,7 +1317,9 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None):
 			"name": "so_detail",
 			"parent": "against_sales_order",
 		},
-		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1,
+		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
+		and doc.delivered_by_supplier != 1
+		and select_item(doc),
 	}
 
 	kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
