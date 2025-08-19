@@ -1149,7 +1149,7 @@ def get_currency_precision():
 
 
 def get_fraction_units(currency: str) -> int:
-	"""Returns the number offraction units for a currency."""
+	"""Returns the number of fraction units for a currency."""
 	fraction_units = frappe.db.get_value("Currency", currency, "fraction_units")
 
 	if fraction_units is None:
