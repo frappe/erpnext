@@ -9,6 +9,7 @@ from frappe import _
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Order
 from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
@@ -582,35 +583,32 @@ def get_supplier_tag():
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filters):
-	conditions = ""
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_supplier = frappe.qb.DocType("Request for Quotation Supplier")
+
+	query = (
+		frappe.qb.from_(rfq)
+		.from_(rfq_supplier)
+		.select(rfq.name)
+		.distinct()
+		.select(rfq.transaction_date, rfq.company)
+		.where(
+			(rfq.name == rfq_supplier.parent)
+			& (rfq_supplier.supplier == filters.get("supplier"))
+			& (rfq.docstatus == 1)
+			& (rfq.company == filters.get("company"))
+		)
+		.orderby(rfq.transaction_date, order=Order.asc)
+		.limit(page_len)
+		.offset(start)
+	)
+
 	if txt:
-		conditions += "and rfq.name like '%%" + txt + "%%' "
+		query = query.where(rfq.name.like(f"%%{txt}%%"))
 
 	if filters.get("transaction_date"):
-		conditions += "and rfq.transaction_date = '{}'".format(filters.get("transaction_date"))
+		query = query.where(rfq.transaction_date == filters.get("transaction_date"))
 
-	rfq_data = frappe.db.sql(
-		f"""
-		select
-			distinct rfq.name, rfq.transaction_date,
-			rfq.company
-		from
-			`tabRequest for Quotation` rfq, `tabRequest for Quotation Supplier` rfq_supplier
-		where
-			rfq.name = rfq_supplier.parent
-			and rfq_supplier.supplier = %(supplier)s
-			and rfq.docstatus = 1
-			and rfq.company = %(company)s
-			{conditions}
-		order by rfq.transaction_date ASC
-		limit %(page_len)s offset %(start)s """,
-		{
-			"page_len": page_len,
-			"start": start,
-			"company": filters.get("company"),
-			"supplier": filters.get("supplier"),
-		},
-		as_dict=1,
-	)
+	rfq_data = query.run(as_dict=1)
 
 	return rfq_data

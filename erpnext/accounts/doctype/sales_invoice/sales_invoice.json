@@ -45,6 +45,7 @@
   "ignore_pricing_rule",
   "items_section",
   "scan_barcode",
+  "last_scanned_warehouse",
   "update_stock",
   "column_break_39",
   "set_warehouse",
@@ -373,6 +374,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "hide_days": 1,
@@ -2219,6 +2221,13 @@
    "label": "POS Closing Entry",
    "options": "POS Closing Entry",
    "print_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "grid_page_length": 50,
@@ -2232,7 +2241,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-06-26 14:06:56.773552",
+ "modified": "2025-08-04 19:20:28.732039",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

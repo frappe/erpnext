@@ -574,7 +574,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.make_item_gl_entries(gl_entries, warehouse_account)
 		self.make_item_gl_entries_for_lcv(gl_entries, warehouse_account)
 
-		return process_gl_map(gl_entries)
+		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
 		warehouse_with_no_account = []

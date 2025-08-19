@@ -39,7 +39,11 @@
   "company",
   "column_break_2cmm",
   "work_order",
-  "purchase_document_no"
+  "source_document_section",
+  "reference_doctype",
+  "posting_date",
+  "column_break_ctcx",
+  "reference_name"
  ],
  "fields": [
   {
@@ -263,13 +267,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "purchase_document_no",
-   "fieldtype": "Data",
-   "label": "Creation Document No",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -277,12 +274,45 @@
    "options": "Customer",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "source_document_section",
+   "fieldtype": "Section Break",
+   "label": "Source Document"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Source Document Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ctcx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Source Document Name",
+   "no_copy": 1,
+   "options": "reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2025-07-15 13:36:21.938700",
+ "modified": "2025-08-05 17:17:11.328682",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",

@@ -32,6 +32,7 @@
   "ignore_pricing_rule",
   "items_section",
   "scan_barcode",
+  "last_scanned_warehouse",
   "items",
   "sec_break23",
   "total_qty",
@@ -1099,13 +1100,20 @@
    "hidden": 1,
    "label": "Has Unit Price Items",
    "no_copy": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-27 16:04:39.208077",
+ "modified": "2025-07-31 17:23:48.875382",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

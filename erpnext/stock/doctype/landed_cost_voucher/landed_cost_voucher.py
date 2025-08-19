@@ -82,27 +82,11 @@ class LandedCostVoucher(Document):
 
 		self.set_applicable_charges_on_item()
 		self.set_total_vendor_invoices_cost()
-		self.validate_vendor_invoices_cost_with_landed_cost()
 
 	def set_total_vendor_invoices_cost(self):
 		self.total_vendor_invoices_cost = 0.0
 		for row in self.vendor_invoices:
 			self.total_vendor_invoices_cost += flt(row.amount)
-
-	def validate_vendor_invoices_cost_with_landed_cost(self):
-		if not self.total_vendor_invoices_cost:
-			return
-
-		precision = frappe.get_precision("Landed Cost Voucher", "total_vendor_invoices_cost")
-
-		if flt(self.total_vendor_invoices_cost, precision) != flt(self.total_taxes_and_charges, precision):
-			frappe.throw(
-				_("Total Vendor Invoices Cost ({0}) must be equal to the Total Landed Cost ({1}).").format(
-					bold(self.total_vendor_invoices_cost),
-					bold(self.total_taxes_and_charges),
-				),
-				title=_("Incorrect Landed Cost"),
-			)
 
 	def validate_line_items(self):
 		for d in self.get("items"):

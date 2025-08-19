@@ -209,6 +209,12 @@ def get_gl_entries(filters, accounting_dimensions):
 		as_dict=1,
 	)
 
+	party_name_map = get_party_name_map()
+
+	for gl_entry in gl_entries:
+		if gl_entry.party_type and gl_entry.party:
+			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
+
 	if filters.get("presentation_currency"):
 		return convert_to_presentation_currency(gl_entries, currency_map, filters)
 	else:
@@ -339,6 +345,20 @@ def get_conditions(filters):
 						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def get_party_name_map():
+	party_map = {}
+
+	customers = frappe.get_all("Customer", fields=["name", "customer_name"])
+	party_map["Customer"] = {c.name: c.customer_name for c in customers}
+
+	suppliers = frappe.get_all("Supplier", fields=["name", "supplier_name"])
+	party_map["Supplier"] = {s.name: s.supplier_name for s in suppliers}
+
+	employees = frappe.get_all("Employee", fields=["name", "employee_name"])
+	party_map["Employee"] = {e.name: e.employee_name for e in employees}
+	return party_map
 
 
 def get_accounts_with_children(accounts):
@@ -627,6 +647,18 @@ def get_columns(filters):
 		company = filters.get("company") or get_default_company()
 		filters["presentation_currency"] = currency = get_company_currency(company)
 
+	company_currency = get_company_currency(filters.get("company") or get_default_company())
+
+	if (
+		filters.get("show_amount_in_company_currency")
+		and filters["presentation_currency"] != company_currency
+	):
+		frappe.throw(
+			_(
+				f'Presentation Currency cannot be {frappe.bold(filters["presentation_currency"])} , When {frappe.bold("Show Credit / Debit in Company Currency")} is enabled.'
+			)
+		)
+
 	columns = [
 		{
 			"label": _("GL Entry"),
@@ -710,6 +742,19 @@ def get_columns(filters):
 		{"label": _("Party Type"), "fieldname": "party_type", "width": 100},
 		{"label": _("Party"), "fieldname": "party", "width": 100},
 	]
+
+	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
+	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+
+	if supplier_master_name != "Supplier Name" or customer_master_name != "Customer Name":
+		columns.append(
+			{
+				"label": _("Party Name"),
+				"fieldname": "party_name",
+				"fieldtype": "Data",
+				"width": 150,
+			}
+		)
 
 	if filters.get("include_dimensions"):
 		columns.append({"label": _("Project"), "options": "Project", "fieldname": "project", "width": 100})

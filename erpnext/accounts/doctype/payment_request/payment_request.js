@@ -9,6 +9,14 @@ frappe.ui.form.on("Payment Request", {
 				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
 			};
 		});
+
+		frm.set_query("payment_gateway_account", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
 	},
 });
 

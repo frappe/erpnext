@@ -55,6 +55,16 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
+
+		if (this.frm.doc.pos_profile) {
+			frappe.db
+				.get_value("POS Profile", this.frm.doc.pos_profile, "set_grand_total_to_default_mop")
+				.then((r) => {
+					if (!r.exc) {
+						this.frm.set_default_payment = r.message.set_grand_total_to_default_mop;
+					}
+				});
+		}
 	}
 
 	onload_post_render(frm) {
@@ -120,6 +130,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.doc.campaign = r.message.campaign;
 						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
+						this.frm.set_default_payment = r.message.set_default_payment;
 					}
 					this.frm.script_manager.trigger("update_stock");
 					this.calculate_taxes_and_totals();

@@ -10,7 +10,7 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, parse_json, today
+from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json, today
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
@@ -652,12 +652,23 @@ class BOM(WebsiteGenerator):
 			frappe.throw(_("Raw Materials cannot be blank."))
 
 		check_list = []
+		items = []
 		for m in self.get("items"):
 			if m.bom_no:
 				validate_bom_no(m.item_code, m.bom_no)
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
+			items.append(m.item_code)
+
+		if fixed_asset_items := frappe.db.get_all(
+			"Item", filters={"item_code": ("in", items), "is_fixed_asset": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Fixed Asset item {0} cannot be used in BOMs.").format(
+					", ".join(get_link_to_form("Item", item) for item in fixed_asset_items)
+				)
+			)
 
 	def check_recursion(self, bom_list=None):
 		"""Check whether recursion occurs in any bom"""
@@ -711,11 +722,42 @@ class BOM(WebsiteGenerator):
 
 			row.update(get_item_details(row.get("item_code")))
 			row.operation_row_id = operation_row_id
-			row.idx = None
-			row.name = None
-			self.append("items", row)
+
+			item_row = None
+			if row.name:
+				item_row = self.get_item_data(row.name)
+
+			if item_row:
+				item_row.update(
+					{
+						"item_code": row.get("item_code"),
+						"qty": row.get("qty"),
+					}
+				)
+			else:
+				row.idx = None
+				row.name = None
+				row.do_not_explode = 1
+				row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
+
+				self.append("items", row)
 
 		self.save()
+
+	def is_sub_assembly_item(self, item_code):
+		if not self.operations:
+			return False
+
+		for row in self.operations:
+			if row.finished_good == item_code:
+				return True
+
+		return False
+
+	def get_item_data(self, name):
+		for row in self.items:
+			if row.item_code == name:
+				return row
 
 	@frappe.whitelist()
 	def add_materials_from_bom(self, finished_good, bom_no, operation_row_id, qty=None):
@@ -734,6 +776,9 @@ class BOM(WebsiteGenerator):
 			row.uom = row.stock_uom
 			row.operation_row_id = operation_row_id
 			row.idx = None
+			row.do_not_explode = 1
+			row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
+
 			self.append("items", row)
 
 	def traverse_tree(self, bom_list=None):
@@ -935,6 +980,7 @@ class BOM(WebsiteGenerator):
 							"item_code": d.item_code,
 							"item_name": d.item_name,
 							"operation": d.operation,
+							"is_sub_assembly_item": d.is_sub_assembly_item,
 							"source_warehouse": d.source_warehouse,
 							"description": d.description,
 							"image": d.image,
@@ -967,6 +1013,7 @@ class BOM(WebsiteGenerator):
 				bom_item.description,
 				bom_item.source_warehouse,
 				bom_item.operation,
+				bom_item.is_sub_assembly_item,
 				bom_item.stock_uom,
 				bom_item.stock_qty,
 				bom_item.rate,
@@ -997,6 +1044,7 @@ class BOM(WebsiteGenerator):
 						"rate": flt(d["rate"]),
 						"include_item_in_manufacturing": d.get("include_item_in_manufacturing", 0),
 						"sourced_by_supplier": d.get("sourced_by_supplier", 0),
+						"is_sub_assembly_item": d.get("is_sub_assembly_item", 0),
 					}
 				)
 			)
@@ -1373,11 +1421,11 @@ def add_additional_cost(stock_entry, work_order):
 		as_dict=1,
 	)
 
-	expecnse_account = (
+	expense_account = (
 		company_account.default_operating_cost_account or company_account.default_expense_account
 	)
-	add_non_stock_items_cost(stock_entry, work_order, expecnse_account)
-	add_operations_cost(stock_entry, work_order, expecnse_account)
+	add_non_stock_items_cost(stock_entry, work_order, expense_account)
+	add_operations_cost(stock_entry, work_order, expense_account)
 
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account):
@@ -1412,20 +1460,73 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 		)
 
 
+def add_operating_cost_component_wise(
+	stock_entry, work_order=None, operating_cost_per_unit=None, op_expense_account=None
+):
+	if not work_order:
+		return False
+
+	cost_added = False
+	for row in work_order.operations:
+		workstation_cost = frappe.get_all(
+			"Workstation Cost",
+			fields=["operating_component", "operating_cost"],
+			filters={
+				"parent": row.workstation,
+				"parenttype": "Workstation",
+			},
+		)
+
+		for wc in workstation_cost:
+			expense_account = get_component_account(wc.operating_component) or op_expense_account
+			actual_cp_operating_cost = flt(
+				flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0),
+				row.precision("actual_operating_cost"),
+			)
+
+			per_unit_cost = flt(actual_cp_operating_cost) / flt(row.completed_qty)
+
+			if per_unit_cost and expense_account:
+				stock_entry.append(
+					"additional_costs",
+					{
+						"expense_account": expense_account,
+						"description": _("{0} Operating Cost for operation {1}").format(
+							wc.operating_component, row.operation
+						),
+						"amount": per_unit_cost * flt(stock_entry.fg_completed_qty),
+					},
+				)
+
+				cost_added = True
+
+	return cost_added
+
+
+@frappe.request_cache
+def get_component_account(parent):
+	return frappe.db.get_value("Workstation Operating Component Account", parent, "expense_account")
+
+
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit
 
 	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
 
 	if operating_cost_per_unit:
-		stock_entry.append(
-			"additional_costs",
-			{
-				"expense_account": expense_account,
-				"description": _("Operating Cost as per Work Order / BOM"),
-				"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
-			},
+		cost_added = add_operating_cost_component_wise(
+			stock_entry, work_order, operating_cost_per_unit, expense_account
 		)
+
+		if not cost_added:
+			stock_entry.append(
+				"additional_costs",
+				{
+					"expense_account": expense_account,
+					"description": _("Operating Cost as per Work Order / BOM"),
+					"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
+				},
+			)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
 		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)

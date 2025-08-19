@@ -764,6 +764,7 @@ class SalesInvoice(SellingController):
 				"utm_campaign": pos.get("utm_campaign"),
 				"utm_medium": pos.get("utm_medium"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
+				"set_default_payment": pos.get("set_grand_total_to_default_mop", 1),
 			}
 
 	@frappe.whitelist()
@@ -1409,7 +1410,6 @@ class SalesInvoice(SellingController):
 
 				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
-				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":

@@ -1001,6 +1001,7 @@ class ProductionPlan(Document):
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 		bin_details = frappe._dict()
 
+		track_semi_finished_goods = True
 		for row in self.po_items:
 			if self.skip_available_sub_assembly_item and not self.sub_assembly_warehouse:
 				frappe.throw(_("Row #{0}: Please select the Sub Assembly Warehouse").format(row.idx))
@@ -1011,7 +1012,17 @@ class ProductionPlan(Document):
 			if not row.bom_no:
 				frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
+			if frappe.db.get_value("BOM", row.bom_no, "track_semi_finished_goods"):
+				frappe.msgprint(
+					_(
+						"Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+					).format(row.idx, row.bom_no)
+				)
+				continue
+
 			bom_data = []
+
+			track_semi_finished_goods = False
 
 			get_sub_assembly_items(
 				[item.production_item for item in sub_assembly_items_store],
@@ -1026,7 +1037,11 @@ class ProductionPlan(Document):
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 			sub_assembly_items_store.extend(bom_data)
 
-		if not sub_assembly_items_store and self.skip_available_sub_assembly_item:
+		if (
+			not track_semi_finished_goods
+			and not sub_assembly_items_store
+			and self.skip_available_sub_assembly_item
+		):
 			message = (
 				_(
 					"As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
@@ -1253,6 +1268,7 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 		)
 		.where(
 			(bei.docstatus < 2)
+			& (bei.is_sub_assembly_item == 0)
 			& (bom.name == bom_no)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
@@ -1321,6 +1337,7 @@ def get_subitems(
 		)
 		.where(
 			(bom.name == bom_no)
+			& (bom_item.is_sub_assembly_item == 0)
 			& (bom_item.docstatus < 2)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
@@ -2003,6 +2020,7 @@ def get_raw_materials_of_sub_assembly_items(
 		)
 		.where(
 			(bei.docstatus == 1)
+			& (bei.is_sub_assembly_item == 0)
 			& (bom.name == bom_no)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
