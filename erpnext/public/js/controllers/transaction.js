@@ -3017,16 +3017,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
+						const company_currency = me.get_company_currency();
 						for (let d in r.message) {
 							row[d] = r.message[d];
-							const company_currency = me.get_company_currency();
-							me.update_payment_schedule_grid_labels(company_currency);
 						}
+						me.update_payment_schedule_grid_labels(company_currency);
+						me.frm.refresh_field("payment_schedule");
 					}
 				},
 			});
+		} else {
+			me.frm.refresh_field("payment_schedule");
 		}
-		me.frm.refresh_field("payment_schedule");
 	}
 
 	against_blanket_order(doc, cdt, cdn) {

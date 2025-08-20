@@ -3400,7 +3400,6 @@ def get_payment_term_details(
 	fields_to_copy = [
 		"description",
 		"invoice_portion",
-		"payment_term",
 		"discount_type",
 		"discount",
 		"mode_of_payment",
@@ -3432,8 +3431,8 @@ def get_payment_term_details(
 	return term_details
 
 
-def get_due_date(term, posting_date=None, bill_date=None, default_date=None):
-	due_date = default_date
+def get_due_date(term, posting_date=None, bill_date=None):
+	due_date = None
 	date = bill_date or posting_date
 	if term.due_date_based_on == "Day(s) after invoice date":
 		due_date = add_days(date, term.credit_days)
