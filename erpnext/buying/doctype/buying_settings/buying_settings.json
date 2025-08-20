@@ -268,6 +268,7 @@
    "fieldname": "fixed_email",
    "fieldtype": "Link",
    "label": "Fixed Outgoing Email Account",
+   "link_filters": "[[\"Email Account\",\"enable_outgoing\",\"=\",1]]",
    "options": "Email Account"
   }
  ],
@@ -277,7 +278,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-08-20 21:15:21.401305",
+ "modified": "2025-08-20 22:13:38.506889",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
