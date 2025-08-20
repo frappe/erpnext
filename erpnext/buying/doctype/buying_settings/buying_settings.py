@@ -23,13 +23,12 @@ class BuyingSettings(Document):
 		allow_zero_qty_in_supplier_quotation: DF.Check
 		auto_create_purchase_receipt: DF.Check
 		auto_create_subcontracting_order: DF.Check
-		backflush_raw_materials_of_subcontract_based_on: DF.Literal[
-			"BOM", "Material Transferred for Subcontract"
-		]
+		backflush_raw_materials_of_subcontract_based_on: DF.Literal["BOM", "Material Transferred for Subcontract"]
 		bill_for_rejected_quantity_in_purchase_invoice: DF.Check
 		blanket_order_allowance: DF.Float
 		buying_price_list: DF.Link | None
 		disable_last_purchase_rate: DF.Check
+		fixed_email: DF.Link | None
 		maintain_same_rate: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		over_transfer_allowance: DF.Float
