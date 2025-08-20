@@ -1315,7 +1315,7 @@ class TestDeliveryNote(IntegrationTestCase):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 0)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,

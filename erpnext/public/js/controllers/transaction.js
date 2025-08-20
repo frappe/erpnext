@@ -1228,10 +1228,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	discount_date(doc, cdt, cdn) {
-		// Remove fields as due_date is auto-managed by payment terms
-		["discount_validity", "discount_validity_based_on"].forEach(function (field) {
-			frappe.model.set_value(cdt, cdn, field, "");
+		// Remove fields as discount_date is auto-managed by payment terms
+		const row = locals[cdt][cdn];
+		["discount_validity", "discount_validity_based_on"].forEach((field) => {
+			row[field] = "";
 		});
+		this.frm.refresh_field("payment_schedule");
 	}
 
 	due_date(doc, cdt, cdn) {
@@ -1239,9 +1241,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// be removed as due_date is automatically changed based on payment terms
 		if (doc.doctype !== cdt) {
 			// Remove fields as due_date is auto-managed by payment terms
-			["due_date_based_on", "credit_days", "credit_months"].forEach(function (field) {
-				frappe.model.set_value(cdt, cdn, field, "");
+			const row = locals[cdt][cdn];
+			["due_date_based_on", "credit_days", "credit_months"].forEach((field) => {
+				row[field] = "";
 			});
+			this.frm.refresh_field("payment_schedule");
 			return;
 		}
 

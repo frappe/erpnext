@@ -3396,19 +3396,28 @@ def get_payment_term_details(
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
-	term_details.description = term.description
-	term_details.invoice_portion = term.invoice_portion
+
+	fields_to_copy = [
+		"description",
+		"invoice_portion",
+		"payment_term",
+		"discount_type",
+		"discount",
+		"mode_of_payment",
+		"due_date_based_on",
+		"credit_days",
+		"credit_months",
+		"discount_validity_based_on",
+		"discount_validity",
+	]
+
+	for field in fields_to_copy:
+		term_details[field] = term.get(field)
+
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
 	term_details.base_payment_amount = flt(term.invoice_portion) * flt(base_grand_total) / 100
-	term_details.discount_type = term.discount_type
-	term_details.discount = term.discount
 	term_details.outstanding = term_details.payment_amount
-	term_details.mode_of_payment = term.mode_of_payment
-	term_details.due_date_based_on = term.due_date_based_on
-	term_details.credit_days = term.credit_days
-	term_details.credit_months = term.credit_months
-	term_details.discount_validity_based_on = term.discount_validity_based_on
-	term_details.discount_validity = term.discount_validity
+	term_details.base_outstanding = term_details.base_payment_amount
 
 	if bill_date:
 		term_details.due_date = get_due_date(term, bill_date)
