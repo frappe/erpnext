@@ -20,9 +20,9 @@
   "amended_from",
   "warehouse_section",
   "scan_barcode",
-  "column_break_13",
-  "set_from_warehouse",
+  "last_scanned_warehouse",
   "column_break5",
+  "set_from_warehouse",
   "set_warehouse",
   "items_section",
   "items",
@@ -351,21 +351,24 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "buying_price_list",
    "fieldtype": "Link",
    "label": "Price List",
    "options": "Price List"
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-28 15:13:49.000037",
+ "modified": "2025-07-31 17:19:01.166208",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

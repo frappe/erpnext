@@ -60,7 +60,7 @@ def import_genericode():
 			"doctype": "File",
 			"attached_to_doctype": "Code List",
 			"attached_to_name": code_list.name,
-			"folder": "Home/Attachments",
+			"folder": frappe.db.get_value("File", {"is_attachments_folder": 1}),
 			"file_name": frappe.local.uploaded_filename,
 			"file_url": frappe.local.uploaded_file_url,
 			"is_private": 1,

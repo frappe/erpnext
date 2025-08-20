@@ -855,18 +855,21 @@ class SellingController(StockController):
 				if not item.get(so_field) or not item.so_detail:
 					continue
 
-				sre_list = frappe.db.get_all(
-					"Stock Reservation Entry",
-					{
-						"docstatus": 1,
-						"voucher_type": "Sales Order",
-						"voucher_no": item.get(so_field),
-						"voucher_detail_no": item.so_detail,
-						"warehouse": item.warehouse,
-						"status": ["not in", ["Delivered", "Cancelled"]],
-					},
-					order_by="creation",
+				table = frappe.qb.DocType("Stock Reservation Entry")
+				query = (
+					frappe.qb.from_(table)
+					.select(table.name)
+					.where(
+						(table.docstatus == 1)
+						& (table.voucher_type == "Sales Order")
+						& (table.voucher_no == item.get(so_field))
+						& (table.voucher_detail_no == item.so_detail)
+						& (table.warehouse == item.warehouse)
+						& (table.delivered_qty < table.reserved_qty)
+					)
+					.orderby(table.creation)
 				)
+				sre_list = query.run(pluck="name")
 
 				# Skip if no Stock Reservation Entries.
 				if not sre_list:

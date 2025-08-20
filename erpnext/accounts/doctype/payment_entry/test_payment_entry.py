@@ -52,7 +52,7 @@ class TestPaymentEntry(IntegrationTestCase):
 		self.assertEqual(pe.paid_to_account_type, "Cash")
 
 		expected_gle = dict(
-			(d[0], d) for d in [["Debtors - _TC", 0, 1000, so.name], ["_Test Cash - _TC", 1000.0, 0, None]]
+			(d[0], d) for d in [["Debtors - _TC", 0, 1000, pe.name], ["_Test Cash - _TC", 1000.0, 0, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -84,7 +84,7 @@ class TestPaymentEntry(IntegrationTestCase):
 
 		expected_gle = dict(
 			(d[0], d)
-			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], [pe.paid_to, 5500.0, 0, None]]
+			for d in [["_Test Receivable USD - _TC", 0, 5500, pe.name], [pe.paid_to, 5500.0, 0, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)

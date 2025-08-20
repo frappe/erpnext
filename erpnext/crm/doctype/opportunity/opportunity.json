@@ -157,7 +157,6 @@
    "no_copy": 1
   },
   {
-   "default": "Sales",
    "fieldname": "opportunity_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -657,7 +656,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2025-06-26 11:16:13.665866",
+ "modified": "2025-08-11 13:35:39.476016",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

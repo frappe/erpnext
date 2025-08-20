@@ -738,8 +738,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						if (internal) {
 							let button_label =
 								me.frm.doc.company === me.frm.doc.represents_company
-									? "Internal Purchase Order"
-									: "Inter Company Purchase Order";
+									? __("Internal Purchase Order")
+									: __("Inter Company Purchase Order");
 
 							me.frm.add_custom_button(
 								button_label,
@@ -793,6 +793,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							docstatus: 1,
 							status: ["!=", "Lost"],
 						},
+						allow_child_item_selection: true,
+						child_fieldname: "items",
+						child_columns: ["item_code", "item_name", "qty", "rate", "amount"],
 					});
 				},
 				__("Get Items From")
@@ -1223,6 +1226,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							read_only: 1,
 							fieldname: "uom",
 							label: __("UOM"),
+							options: "UOM",
 							in_list_view: 1,
 						},
 						{
@@ -1296,7 +1300,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					let pending_qty = (flt(d.stock_qty) - ordered_qty) / flt(d.conversion_factor);
 					if (pending_qty > 0) {
 						po_items.push({
-							doctype: "Sales Order Item",
 							name: d.name,
 							item_name: d.item_name,
 							item_code: d.item_code,

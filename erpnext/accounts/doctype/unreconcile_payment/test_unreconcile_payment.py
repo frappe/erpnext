@@ -465,9 +465,25 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
 
-		# Assert 'Advance Paid'
 		so.reload()
 		self.assertEqual(so.advance_paid, 1000)
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		unreconcile.allocations = [x for x in unreconcile.allocations if x.reference_name == si.name]
+		unreconcile.save().submit()
+
+		# after unreconcilaition advance paid will be reduced
+		# Assert 'Advance Paid'
+		so.reload()
+		self.assertEqual(so.advance_paid, 0)
 
 		self.disable_advance_as_liability()
 

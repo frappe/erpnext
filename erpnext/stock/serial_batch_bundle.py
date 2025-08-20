@@ -113,6 +113,7 @@ class SerialBatchBundle:
 				"is_rejected": self.is_rejected_entry(),
 				"is_packed": self.is_packed_entry(),
 				"make_bundle_from_sle": 1,
+				"sle": self.sle,
 			}
 		).make_serial_and_batch_bundle()
 
@@ -185,7 +186,23 @@ class SerialBatchBundle:
 			}
 
 			if self.sle.actual_qty < 0 and self.is_material_transfer():
-				values_to_update["valuation_rate"] = flt(sn_doc.avg_rate)
+				basic_rate = flt(sn_doc.avg_rate)
+				ste_detail = frappe.db.get_value(
+					"Stock Entry Detail",
+					self.sle.voucher_detail_no,
+					["additional_cost", "landed_cost_voucher_amount", "transfer_qty"],
+					as_dict=True,
+				)
+
+				additional_cost = 0.0
+
+				if ste_detail:
+					additional_cost = (
+						flt(ste_detail.additional_cost) + flt(ste_detail.landed_cost_voucher_amount)
+					) / flt(ste_detail.transfer_qty)
+
+				values_to_update["basic_rate"] = basic_rate
+				values_to_update["valuation_rate"] = basic_rate + additional_cost
 
 			if not frappe.get_single_value(
 				"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle"
@@ -423,7 +440,7 @@ class SerialBatchBundle:
 				"Active"
 				if warehouse
 				else status
-				if (sn_table.purchase_document_no != sle.voucher_no or sle.is_cancelled != 1)
+				if (sn_table.reference_name != sle.voucher_no or sle.is_cancelled != 1)
 				else "Inactive",
 			)
 			.set(sn_table.company, sle.company)
@@ -1036,6 +1053,14 @@ class SerialBatchCreation:
 
 		if not hasattr(self, "do_not_submit") or not self.do_not_submit:
 			doc.flags.ignore_voucher_validation = True
+			if self.get("sle"):
+				doc.flags.ignore_validate = True
+				doc.save()
+				self.sle.db_set("serial_and_batch_bundle", doc.name, update_modified=False)
+
+			if doc.flags.ignore_validate:
+				doc.flags.ignore_validate = False
+
 			doc.submit()
 		else:
 			doc.save()
@@ -1263,6 +1288,10 @@ class SerialBatchCreation:
 		if self.get("voucher_no"):
 			voucher_no = self.get("voucher_no")
 
+		voucher_type = ""
+		if self.get("voucher_type"):
+			voucher_type = self.get("voucher_type")
+
 		for _i in range(abs(cint(self.actual_qty))):
 			serial_no = make_autoname(self.serial_no_series, "Serial No")
 			sr_nos.append(serial_no)
@@ -1280,6 +1309,7 @@ class SerialBatchCreation:
 					self.item_name,
 					self.description,
 					"Active",
+					voucher_type,
 					voucher_no,
 					self.batch_no,
 				)
@@ -1299,7 +1329,8 @@ class SerialBatchCreation:
 				"item_name",
 				"description",
 				"status",
-				"purchase_document_no",
+				"reference_doctype",
+				"reference_name",
 				"batch_no",
 			]
 

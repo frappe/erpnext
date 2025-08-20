@@ -302,7 +302,7 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 
 
 def get_expense_breakup(args, currency, budget_against):
-	msg = "<hr>Total Expenses booked through - <ul>"
+	msg = "<hr> {{ _('Total Expenses booked through') }} - <ul>"
 
 	common_filters = frappe._dict(
 		{
@@ -316,7 +316,7 @@ def get_expense_breakup(args, currency, budget_against):
 		"<li>"
 		+ frappe.utils.get_link_to_report(
 			"General Ledger",
-			label="Actual Expenses",
+			label=_("Actual Expenses"),
 			filters=common_filters.copy().update(
 				{
 					"from_date": frappe.get_cached_value("Fiscal Year", args.fiscal_year, "year_start_date"),
@@ -334,7 +334,7 @@ def get_expense_breakup(args, currency, budget_against):
 		"<li>"
 		+ frappe.utils.get_link_to_report(
 			"Material Request",
-			label="Material Requests",
+			label=_("Material Requests"),
 			report_type="Report Builder",
 			doctype="Material Request",
 			filters=common_filters.copy().update(
@@ -357,7 +357,7 @@ def get_expense_breakup(args, currency, budget_against):
 		"<li>"
 		+ frappe.utils.get_link_to_report(
 			"Purchase Order",
-			label="Unbilled Orders",
+			label=_("Unbilled Orders"),
 			report_type="Report Builder",
 			doctype="Purchase Order",
 			filters=common_filters.copy().update(

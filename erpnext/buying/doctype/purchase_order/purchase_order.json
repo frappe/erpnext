@@ -41,8 +41,9 @@
   "ignore_pricing_rule",
   "before_items_section",
   "scan_barcode",
-  "set_from_warehouse",
+  "last_scanned_warehouse",
   "items_col_break",
+  "set_from_warehouse",
   "set_warehouse",
   "items_section",
   "items",
@@ -1307,6 +1308,13 @@
    "label": "Dispatch Address Details",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "grid_page_length": 50,
@@ -1314,7 +1322,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-09 16:54:08.836106",
+ "modified": "2025-07-31 17:19:40.816883",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

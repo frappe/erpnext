@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
@@ -30,6 +30,9 @@ class LandedCostVoucher(Document):
 		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
 			LandedCostTaxesandCharges,
 		)
+		from erpnext.stock.doctype.landed_cost_vendor_invoice.landed_cost_vendor_invoice import (
+			LandedCostVendorInvoice,
+		)
 
 		amended_from: DF.Link | None
 		company: DF.Link
@@ -40,6 +43,8 @@ class LandedCostVoucher(Document):
 		purchase_receipts: DF.Table[LandedCostPurchaseReceipt]
 		taxes: DF.Table[LandedCostTaxesandCharges]
 		total_taxes_and_charges: DF.Currency
+		total_vendor_invoices_cost: DF.Currency
+		vendor_invoices: DF.Table[LandedCostVendorInvoice]
 	# end: auto-generated types
 
 	@frappe.whitelist()
@@ -76,6 +81,12 @@ class LandedCostVoucher(Document):
 			self.get_items_from_purchase_receipts()
 
 		self.set_applicable_charges_on_item()
+		self.set_total_vendor_invoices_cost()
+
+	def set_total_vendor_invoices_cost(self):
+		self.total_vendor_invoices_cost = 0.0
+		for row in self.vendor_invoices:
+			self.total_vendor_invoices_cost += flt(row.amount)
 
 	def validate_line_items(self):
 		for d in self.get("items"):
@@ -234,9 +245,20 @@ class LandedCostVoucher(Document):
 	def on_submit(self):
 		self.validate_applicable_charges_for_item()
 		self.update_landed_cost()
+		self.update_claimed_landed_cost()
 
 	def on_cancel(self):
 		self.update_landed_cost()
+		self.update_claimed_landed_cost()
+
+	def update_claimed_landed_cost(self):
+		for row in self.vendor_invoices:
+			frappe.db.set_value(
+				"Purchase Invoice",
+				row.vendor_invoice,
+				"claimed_landed_cost_amount",
+				flt(row.amount, row.precision("amount")) if self.docstatus == 1 else 0.0,
+			)
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -333,6 +355,24 @@ class LandedCostVoucher(Document):
 						tuple([item.valuation_rate, *serial_nos]),
 					)
 
+	@frappe.whitelist()
+	def get_vendor_invoice_amount(self, vendor_invoice):
+		filters = frappe._dict(
+			{
+				"name": vendor_invoice,
+				"company": self.company,
+			}
+		)
+
+		query = get_vendor_invoice_query(filters)
+
+		result = query.run(as_dict=True)
+		amount = result[0].unclaimed_amount if result else 0.0
+
+		return {
+			"amount": amount,
+		}
+
 
 def get_pr_items(purchase_receipt):
 	item = frappe.qb.DocType("Item")
@@ -383,3 +423,55 @@ def get_pr_items(purchase_receipt):
 		)
 
 	return query.run(as_dict=True)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_vendor_invoices(doctype, txt, searchfield, start, page_len, filters):
+	if not frappe.has_permission("Purchase Invoice", "read"):
+		return []
+
+	if txt and txt.lower().startswith(("select", "delete", "update")):
+		frappe.throw(_("Invalid search query"), title=_("Invalid Query"))
+
+	query = get_vendor_invoice_query(filters)
+
+	if txt:
+		query = query.where(doctype.name.like(f"%{txt}%"))
+
+	if start:
+		query = query.limit(page_len).offset(start)
+
+	return query.run(as_list=True)
+
+
+def get_vendor_invoice_query(filters):
+	doctype = frappe.qb.DocType("Purchase Invoice")
+	child_doctype = frappe.qb.DocType("Purchase Invoice Item")
+	item = frappe.qb.DocType("Item")
+
+	query = (
+		frappe.qb.from_(doctype)
+		.inner_join(child_doctype)
+		.on(child_doctype.parent == doctype.name)
+		.inner_join(item)
+		.on(item.name == child_doctype.item_code)
+		.select(
+			doctype.name,
+			(doctype.base_total - doctype.claimed_landed_cost_amount).as_("unclaimed_amount"),
+		)
+		.where(
+			(doctype.docstatus == 1)
+			& (doctype.is_subcontracted == 0)
+			& (doctype.is_return == 0)
+			& (doctype.update_stock == 0)
+			& (doctype.company == filters.get("company"))
+			& (item.is_stock_item == 0)
+		)
+		.having(frappe.qb.Field("unclaimed_amount") > 0)
+	)
+
+	if filters.get("name"):
+		query = query.where(doctype.name == filters.get("name"))
+
+	return query

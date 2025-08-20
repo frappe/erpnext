@@ -2208,6 +2208,138 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		self.assertEqual(len(pr.get("payments")), 0)
 		self.assertEqual(pr.get("invoices")[0].get("outstanding_amount"), 200)
 
+	def test_partial_advance_payment_with_closed_fiscal_year(self):
+		"""
+		Test Advance Payment partial reconciliation before period closing and partial after period closing
+		"""
+		default_settings = frappe.db.get_value(
+			"Company",
+			self.company,
+			[
+				"book_advance_payments_in_separate_party_account",
+				"default_advance_paid_account",
+				"reconciliation_takes_effect_on",
+			],
+			as_dict=True,
+		)
+		first_fy_start_date = frappe.db.get_value(
+			"Fiscal Year", {"disabled": 0}, [{"MIN": "year_start_date"}]
+		)
+		prev_fy_start_date = add_years(first_fy_start_date, -1)
+		prev_fy_end_date = add_days(first_fy_start_date, -1)
+
+		create_fiscal_year(
+			company=self.company, year_start_date=prev_fy_start_date, year_end_date=prev_fy_end_date
+		)
+
+		frappe.db.set_value(
+			"Company",
+			self.company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_paid_account": self.advance_payable_account,
+				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
+			},
+		)
+
+		self.supplier = "_Test Supplier"
+
+		# Create advance payment of 1000 (previous FY)
+		pe = self.create_payment_entry(amount=1000, posting_date=prev_fy_start_date)
+		pe.party_type = "Supplier"
+		pe.party = self.supplier
+		pe.payment_type = "Pay"
+		pe.paid_from = self.cash
+		pe.paid_to = self.advance_payable_account
+		pe.save().submit()
+
+		# Create purchase invoice of 600 (previous FY)
+		pi1 = self.create_purchase_invoice(qty=1, rate=600, do_not_submit=True)
+		pi1.posting_date = prev_fy_start_date
+		pi1.set_posting_time = 1
+		pi1.supplier = self.supplier
+		pi1.credit_to = self.creditors
+		pi1.save().submit()
+
+		# Reconcile advance payment
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors
+		pr.default_advance_account = self.advance_payable_account
+		pr.from_invoice_date = pr.to_invoice_date = pi1.posting_date
+		pr.from_payment_date = pr.to_payment_date = pe.posting_date
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.invoices if x.invoice_number == pi1.name]
+		payments = [x.as_dict() for x in pr.payments if x.reference_name == pe.name]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		# Verify partial reconciliation
+		pe.reload()
+		pi1.reload()
+
+		self.assertEqual(len(pe.references), 1)
+		self.assertEqual(pe.references[0].allocated_amount, 600)
+		self.assertEqual(flt(pe.unallocated_amount), 400)
+
+		self.assertEqual(pi1.outstanding_amount, 0)
+		self.assertEqual(pi1.status, "Paid")
+
+		# Close accounting period for March (previous FY)
+		pcv = make_period_closing_voucher(
+			company=self.company, cost_center=self.cost_center, posting_date=prev_fy_end_date
+		)
+		pcv.reload()
+		self.assertEqual(pcv.gle_processing_status, "Completed")
+
+		# Change reconciliation setting to "Reconciliation Date"
+		frappe.db.set_value(
+			"Company",
+			self.company,
+			"reconciliation_takes_effect_on",
+			"Reconciliation Date",
+		)
+
+		# Create new purchase invoice for 400 in new fiscal year
+		pi2 = self.create_purchase_invoice(qty=1, rate=400, do_not_submit=True)
+		pi2.posting_date = today()
+		pi2.set_posting_time = 1
+		pi2.supplier = self.supplier
+		pi2.currency = "INR"
+		pi2.credit_to = self.creditors
+		pi2.save()
+		pi2.submit()
+
+		# Allocate 600 from advance payment to purchase invoice
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors
+		pr.default_advance_account = self.advance_payable_account
+		pr.from_invoice_date = pr.to_invoice_date = pi2.posting_date
+		pr.from_payment_date = pr.to_payment_date = pe.posting_date
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.invoices if x.invoice_number == pi2.name]
+		payments = [x.as_dict() for x in pr.payments if x.reference_name == pe.name]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		pe.reload()
+		pi2.reload()
+
+		# Assert advance payment is fully allocated
+		self.assertEqual(len(pe.references), 2)
+		self.assertEqual(flt(pe.unallocated_amount), 0)
+
+		# Assert new invoice is fully paid
+		self.assertEqual(pi2.outstanding_amount, 0)
+		self.assertEqual(pi2.status, "Paid")
+
+		# Verify reconciliation dates are correct based on company setting
+		self.assertEqual(getdate(pe.references[0].reconcile_effect_on), getdate(pi1.posting_date))
+		self.assertEqual(getdate(pe.references[1].reconcile_effect_on), getdate(pi2.posting_date))
+
+		frappe.db.set_value("Company", self.company, default_settings)
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):

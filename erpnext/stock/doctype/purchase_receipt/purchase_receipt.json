@@ -40,6 +40,7 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+  "last_scanned_warehouse",
   "column_break_31",
   "set_warehouse",
   "set_from_warehouse",
@@ -243,6 +244,7 @@
    "width": "100px"
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1083,7 +1085,8 @@
    "no_copy": 1,
    "options": "Delivery Note",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "scan_barcode",
@@ -1283,6 +1286,13 @@
    "label": "Dispatch Address",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "grid_page_length": 50,
@@ -1290,7 +1300,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-09 16:52:19.323878",
+ "modified": "2025-08-06 16:41:02.690658",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

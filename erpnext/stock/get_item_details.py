@@ -585,20 +585,15 @@ def get_item_warehouse_(ctx: ItemDetailsCtx, item, overwrite_warehouse, defaults
 			or ctx.warehouse
 		)
 
-		if not warehouse:
-			defaults = frappe.defaults.get_defaults() or {}
-			warehouse_exists = frappe.db.exists(
-				"Warehouse", {"name": defaults.default_warehouse, "company": ctx.company}
-			)
-			if defaults.get("default_warehouse") and warehouse_exists:
-				warehouse = defaults.default_warehouse
-
 	else:
 		warehouse = ctx.warehouse
 
 	if not warehouse:
 		default_warehouse = frappe.get_single_value("Stock Settings", "default_warehouse")
-		if frappe.db.get_value("Warehouse", default_warehouse, "company") == ctx.company:
+		if (
+			default_warehouse
+			and frappe.get_cached_value("Warehouse", default_warehouse, "company") == ctx.company
+		):
 			return default_warehouse
 
 	return warehouse
@@ -1343,11 +1338,11 @@ def get_conversion_factor(item_code, uom):
 
 	if item.variant_of:
 		filters["parent"] = ("in", (item_code, item.variant_of))
-	conversion_factor = frappe.db.get_value("UOM Conversion Detail", filters, "conversion_factor")
+	conversion_factor = frappe.get_all("UOM Conversion Detail", filters, pluck="conversion_factor")
 	if not conversion_factor:
-		conversion_factor = get_uom_conv_factor(uom, item.stock_uom)
+		conversion_factor = [get_uom_conv_factor(uom, item.stock_uom) or 1]
 
-	return {"conversion_factor": conversion_factor or 1.0}
+	return {"conversion_factor": conversion_factor[-1]}
 
 
 @frappe.whitelist()

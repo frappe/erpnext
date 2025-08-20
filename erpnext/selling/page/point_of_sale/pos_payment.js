@@ -453,7 +453,7 @@ erpnext.PointOfSale.Payment = class {
 		this.render_payment_mode_dom();
 		this.make_invoice_field_dialog();
 		this.update_totals_section();
-		this.set_grand_total_to_default_mop();
+		this.focus_on_default_mop();
 	}
 
 	after_render() {
@@ -557,6 +557,7 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	focus_on_default_mop() {
+		if (!this.set_gt_to_default_mop) return;
 		const doc = this.events.get_frm().doc;
 		const payments = doc.payments;
 		payments.forEach((p) => {
@@ -709,12 +710,6 @@ erpnext.PointOfSale.Payment = class {
 			.replace(/[^\p{L}\p{N}_-]/gu, "")
 			.replace(/^[^_a-zA-Z\p{L}]+/u, "")
 			.toLowerCase();
-	}
-
-	set_grand_total_to_default_mop() {
-		if (this.set_gt_to_default_mop) {
-			this.focus_on_default_mop();
-		}
 	}
 
 	validate_reqd_invoice_fields() {

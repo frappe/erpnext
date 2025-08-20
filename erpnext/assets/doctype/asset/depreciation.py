@@ -249,7 +249,9 @@ def setup_journal_entry_metadata(je, depr_schedule_doc, depr_series, depr_schedu
 	je.posting_date = depr_schedule.schedule_date
 	je.company = asset.company
 	je.finance_book = depr_schedule_doc.finance_book
-	je.remark = f"Depreciation Entry against {asset.name} worth {depr_schedule.depreciation_amount}"
+	je.remark = _("Depreciation Entry against {0} worth {1}").format(
+		asset.name, depr_schedule.depreciation_amount
+	)
 
 
 def get_credit_and_debit_entry(

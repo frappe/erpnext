@@ -756,18 +756,14 @@ def get_prorata_factor(
 	return diff / plan_days
 
 
-def process_all(subscription: str | None = None, posting_date: DateTimeLikeObject | None = None) -> None:
+def process_all(subscription: list, posting_date: DateTimeLikeObject | None = None) -> None:
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
 	"""
-	filters = {"status": ("!=", "Cancelled")}
 
-	if subscription:
-		filters["name"] = subscription
-
-	for subscription in frappe.get_all("Subscription", filters, pluck="name"):
+	for subscription_name in subscription:
 		try:
-			subscription = frappe.get_doc("Subscription", subscription)
+			subscription = frappe.get_doc("Subscription", subscription_name)
 			subscription.process(posting_date)
 			frappe.db.commit()
 		except frappe.ValidationError:

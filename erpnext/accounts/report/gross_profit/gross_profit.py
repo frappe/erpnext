@@ -33,6 +33,7 @@ def execute(filters=None):
 				"invoice_or_item",
 				"customer",
 				"customer_group",
+				"customer_name",
 				"posting_date",
 				"item_code",
 				"item_name",
@@ -95,6 +96,7 @@ def execute(filters=None):
 			"customer": [
 				"customer",
 				"customer_group",
+				"customer_name",
 				"qty",
 				"base_rate",
 				"buying_rate",
@@ -250,6 +252,10 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 
 def get_columns(group_wise_columns, filters):
 	columns = []
+
+	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
+	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+
 	column_map = frappe._dict(
 		{
 			"parent": {
@@ -395,6 +401,12 @@ def get_columns(group_wise_columns, filters):
 				"options": "Customer Group",
 				"width": 100,
 			},
+			"customer_name": {
+				"label": _("Customer Name"),
+				"fieldname": "customer_name",
+				"fieldtype": "Data",
+				"width": 150,
+			},
 			"territory": {
 				"label": _("Territory"),
 				"fieldname": "territory",
@@ -419,6 +431,10 @@ def get_columns(group_wise_columns, filters):
 	)
 
 	for col in group_wise_columns.get(scrub(filters.group_by)):
+		if col == "customer_name" and (
+			supplier_master_name == "Supplier Name" and customer_master_name == "Customer Name"
+		):
+			continue
 		columns.append(column_map.get(col))
 
 	columns.append(
@@ -440,6 +456,7 @@ def get_column_names():
 			"invoice_or_item": "sales_invoice",
 			"customer": "customer",
 			"customer_group": "customer_group",
+			"customer_name": "customer_name",
 			"posting_date": "posting_date",
 			"item_code": "item_code",
 			"item_name": "item_name",
@@ -905,7 +922,7 @@ class GrossProfitGenerator:
 				`tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
 				`tabSales Invoice`.posting_date, `tabSales Invoice`.posting_time,
 				`tabSales Invoice`.project, `tabSales Invoice`.update_stock,
-				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group,
+				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group, `tabSales Invoice`.customer_name,
 				`tabSales Invoice`.territory, `tabSales Invoice Item`.item_code,
 				`tabSales Invoice`.base_net_total as "invoice_base_net_total",
 				`tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
@@ -1003,6 +1020,7 @@ class GrossProfitGenerator:
 				"update_stock": row.update_stock,
 				"customer": row.customer,
 				"customer_group": row.customer_group,
+				"customer_name": row.customer_name,
 				"item_code": None,
 				"item_name": None,
 				"description": None,
@@ -1032,6 +1050,7 @@ class GrossProfitGenerator:
 				"project": row.project,
 				"customer": row.customer,
 				"customer_group": row.customer_group,
+				"customer_name": row.customer_name,
 				"item_code": item.item_code,
 				"item_name": item.item_name,
 				"description": item.description,
