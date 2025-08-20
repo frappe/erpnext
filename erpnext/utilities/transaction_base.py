@@ -5,7 +5,8 @@
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cint, flt, get_time, now_datetime
+from frappe.utils import cint, flt, get_system_timezone, get_time, now_datetime
+from pytz import timezone
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
@@ -25,8 +26,12 @@ class TransactionBase(StatusUpdater):
 
 		if not getattr(self, "set_posting_time", None):
 			now = now_datetime()
-			self.posting_date = now.strftime("%Y-%m-%d")
-			self.posting_time = now.strftime("%H:%M:%S.%f")
+			user_id = getattr(frappe.session, "user", None)
+			user_now = convert_to_user_timezone(now, user_id)
+
+			self.posting_date = user_now.strftime("%Y-%m-%d")
+			self.posting_time = user_now.strftime("%H:%M:%S")
+
 		elif self.posting_time:
 			try:
 				get_time(self.posting_time)
@@ -565,3 +570,38 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 							),
 							UOMMustBeIntegerError,
 						)
+
+
+def convert_timezone(dt, from_tz, to_tz):
+	if not dt:
+		return dt
+	try:
+		source_tz = timezone(from_tz)
+		target_tz = timezone(to_tz)
+		if dt.tzinfo is None:
+			dt = source_tz.localize(dt)
+		else:
+			dt = dt.astimezone(source_tz)
+
+		if from_tz == to_tz:
+			return dt
+
+		final_dt = dt.astimezone(target_tz)
+
+		return final_dt
+	except Exception:
+		frappe.log_error(
+			title=_("Error converting timezone"),
+			message=frappe.get_traceback(),
+		)
+		return dt
+
+
+def convert_to_user_timezone(dt, user=None):
+	system_tz = get_system_timezone()
+	if not user:
+		return convert_timezone(dt, system_tz, system_tz)
+
+	user_tz = frappe.get_cached_value("User", user, "time_zone") or system_tz
+
+	return convert_timezone(dt, system_tz, user_tz)
