@@ -2586,13 +2586,13 @@ class AccountsController(TransactionBase):
 				if schedule.due_date_based_on:
 					payment_schedule["due_date"] = get_due_date(schedule, posting_date)
 					payment_schedule["due_date_based_on"] = schedule.due_date_based_on
-					payment_schedule["credit_days"] = schedule.credit_days
-					payment_schedule["credit_months"] = schedule.credit_months
+					payment_schedule["credit_days"] = cint(schedule.credit_days)
+					payment_schedule["credit_months"] = cint(schedule.credit_months)
 
 				if schedule.discount_validity_based_on:
 					payment_schedule["discount_date"] = get_discount_date(schedule, posting_date)
 					payment_schedule["discount_validity_based_on"] = schedule.discount_validity_based_on
-					payment_schedule["discount_validity"] = schedule.discount_validity
+					payment_schedule["discount_validity"] = cint(schedule.discount_validity)
 
 				payment_schedule["payment_amount"] = flt(
 					grand_total * flt(payment_schedule["invoice_portion"]) / 100,
@@ -3435,11 +3435,11 @@ def get_due_date(term, posting_date=None, bill_date=None):
 	due_date = None
 	date = bill_date or posting_date
 	if term.due_date_based_on == "Day(s) after invoice date":
-		due_date = add_days(date, term.credit_days)
+		due_date = add_days(date, cint(term.credit_days))
 	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
-		due_date = add_days(get_last_day(date), term.credit_days)
+		due_date = add_days(get_last_day(date), cint(term.credit_days))
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
-		due_date = get_last_day(add_months(date, term.credit_months))
+		due_date = get_last_day(add_months(date, cint(term.credit_months)))
 	return due_date
 
 
@@ -3447,11 +3447,11 @@ def get_discount_date(term, posting_date=None, bill_date=None):
 	discount_validity = None
 	date = bill_date or posting_date
 	if term.discount_validity_based_on == "Day(s) after invoice date":
-		discount_validity = add_days(date, term.discount_validity)
+		discount_validity = add_days(date, cint(term.discount_validity))
 	elif term.discount_validity_based_on == "Day(s) after the end of the invoice month":
-		discount_validity = add_days(get_last_day(date), term.discount_validity)
+		discount_validity = add_days(get_last_day(date), cint(term.discount_validity))
 	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
-		discount_validity = get_last_day(add_months(date, term.discount_validity))
+		discount_validity = get_last_day(add_months(date, cint(term.discount_validity)))
 	return discount_validity
 
 
