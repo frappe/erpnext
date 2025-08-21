@@ -8,6 +8,8 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
+	formated_data,
+	get_all_columns,
 	get_columns,
 	get_data,
 	get_filtered_list_for_consolidated_report,
@@ -67,7 +69,10 @@ def execute(filters=None):
 	)
 
 	message, opening_balance = check_opening_balance(asset, liability, equity)
-
+	asset = asset or []
+	liability = liability or []
+	equity = equity or []
+	new_data = formated_data({"asset": asset, "liability": liability, "equity": equity}, period_list)
 	data = []
 	data.extend(asset or [])
 	data.extend(liability or [])
@@ -92,9 +97,17 @@ def execute(filters=None):
 	if total_credit:
 		data.append(total_credit)
 
-	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, company=filters.company
-	)
+	if filters.report_view == "Horizontal":
+		columns = get_all_columns(
+			filters.periodicity,
+			period_list,
+			filters.accumulated_values,
+			filters.company,
+			sections=("asset", "liability", "equity"),
+		)
+		data = new_data
+	else:
+		columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	chart = get_chart_data(filters, columns, asset, liability, equity, currency)
 
