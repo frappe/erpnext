@@ -44,6 +44,71 @@ erpnext.financial_statements = {
 		if (data && column.fieldname == this.name_field) {
 			// first column
 			value = data.section_name || data.account_name || value;
+		}
+		if (frappe.query_report.get_filter_value("report_view") === "Horizontal") {
+			const get_section_from_field = (fieldname) => {
+				if (!fieldname) return null;
+				if (fieldname.endsWith("_account")) return fieldname.slice(0, -"_account".length);
+				if (fieldname.endsWith("_currency")) return fieldname.slice(0, -"_currency".length);
+				const i = fieldname.indexOf("_");
+				return i > 0 ? fieldname.slice(0, i) : null;
+			};
+
+			const section = get_section_from_field(column.fieldname);
+			const indent_field = section ? `${section}_indent` : null;
+			const indent_raw = indent_field ? data[indent_field] : undefined;
+			const indent_level = indent_raw === undefined ? null : parseInt(indent_raw, 10) || 0;
+
+			let $value;
+			let display_value = value;
+
+			if (column.fieldname && column.fieldname.endsWith("_account")) {
+				if (
+					indent_level !== null &&
+					indent_level > 0 &&
+					!(typeof display_value === "string" && display_value.startsWith("&nbsp;"))
+				) {
+					display_value = "&nbsp;".repeat(indent_level * 3) + display_value;
+				}
+				$value = $(`<span>${display_value}</span>`);
+			} else {
+				if (column.fieldtype === "Currency") {
+					const currency =
+						(section && data[`${section}_currency`]) ||
+						data.currency ||
+						frappe.defaults.get_default("currency");
+
+					const raw_value = data[column.fieldname];
+					if (raw_value !== undefined && raw_value !== null && raw_value !== "") {
+						display_value = frappe.format(raw_value, {
+							fieldtype: "Currency",
+							options: currency,
+						});
+					} else {
+						display_value = "";
+					}
+				}
+				$value = $(`<span>${display_value}</span>`);
+			}
+
+			if (indent_level === 0) {
+				if (typeof display_value === "string") {
+					display_value = display_value.replace(/^'(.*)'$/, "$1");
+				}
+				$value = $(`<span style="font-weight: bold;">${display_value}</span>`);
+			}
+
+			const raw_value_for_warn = data[column.fieldname];
+			if (data.warn_if_negative && typeof raw_value_for_warn === "number" && raw_value_for_warn < 0) {
+				$value.addClass("text-danger");
+			}
+
+			value = $value.wrap("<p></p>").parent().html();
+			return value;
+		}
+
+		if (data && column.fieldname == "account") {
+			value = data.account_name || value;
 
 			if (filter && filter?.text && filter?.type == "contains") {
 				if (!value.toLowerCase().includes(filter.text)) {
