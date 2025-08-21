@@ -69,10 +69,6 @@ def execute(filters=None):
 	)
 
 	message, opening_balance = check_opening_balance(asset, liability, equity)
-	asset = asset or []
-	liability = liability or []
-	equity = equity or []
-	new_data = get_formatted_data({"asset": asset, "liability": liability, "equity": equity}, period_list)
 	data = []
 	data.extend(asset or [])
 	data.extend(liability or [])
@@ -98,14 +94,17 @@ def execute(filters=None):
 		data.append(total_credit)
 
 	if filters.report_view == "Horizontal":
-		columns = get_all_columns(
-			filters.periodicity,
+		data, columns = prepare_horizontal_balance_sheet(
+			asset,
+			liability,
+			equity,
+			provisional_profit_loss,
+			total_credit,
+			opening_balance,
 			period_list,
-			filters.accumulated_values,
-			filters.company,
-			sections=("asset", "liability", "equity"),
+			filters,
+			currency,
 		)
-		data = new_data
 	else:
 		columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
@@ -187,6 +186,79 @@ def check_opening_balance(asset, liability, equity):
 	if opening_balance:
 		return _("Previous Financial Year is not closed"), opening_balance
 	return None, None
+
+
+def prepare_horizontal_balance_sheet(
+	asset,
+	liability,
+	equity,
+	provisional_profit_loss,
+	total_credit,
+	opening_balance,
+	period_list,
+	filters,
+	currency,
+):
+	sections_data = {"asset": asset or [], "liability": liability or [], "equity": equity or []}
+
+	formatted_data = get_formatted_data(sections_data, period_list)
+	extra_rows = []
+
+	if opening_balance and round(opening_balance, 2) != 0:
+		extra_rows.append(
+			create_asset_row(
+				_("Unclosed Fiscal Years Profit / Loss (Credit)"), opening_balance, period_list, currency
+			)
+		)
+		if provisional_profit_loss:
+			for key in provisional_profit_loss.keys():
+				if key not in ["account", "total", "warn_if_negative", "currency"]:
+					provisional_profit_loss[key] -= opening_balance
+
+	if provisional_profit_loss:
+		extra_rows.append(
+			create_asset_row(
+				_("Provisional Profit / Loss"), provisional_profit_loss.get("total"), period_list, currency
+			)
+		)
+
+	if total_credit:
+		extra_rows.append(
+			create_asset_row(_("Total Credit"), total_credit.get("total"), period_list, currency)
+		)
+
+	formatted_data.extend(extra_rows)
+
+	columns = get_all_columns(
+		filters.periodicity,
+		period_list,
+		filters.accumulated_values,
+		filters.company,
+		sections=("asset", "liability", "equity"),
+	)
+
+	return formatted_data, columns
+
+
+def create_asset_row(label, amount, period_list, currency):
+	row = frappe._dict({})
+	row["asset_account"] = label
+	row["asset_currency"] = currency
+	row["asset_indent"] = ""
+
+	if period_list:
+		first_period = period_list[0].key
+		row[f"asset_{first_period}"] = amount if amount is not None else ""
+		for period in period_list[1:]:
+			row[f"asset_{period.key}"] = ""
+
+	for section in ["liability", "equity"]:
+		row[f"{section}_account"] = ""
+		row[f"{section}_currency"] = ""
+		row[f"{section}_indent"] = ""
+		for period in period_list:
+			row[f"{section}_{period.key}"] = ""
+	return row
 
 
 def get_report_summary(
