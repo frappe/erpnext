@@ -612,7 +612,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.cleanup_invoices(invoices)
 
 	def test_tcs_on_unallocated_advance_payments(self):
-		# TODO : This test is not working as expected.Currently payment entry for customer is not supported
 		frappe.db.set_value(
 			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
 		)
@@ -679,11 +678,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 			d.cancel()
 
 	def test_tcs_on_allocated_advance_payments(self):
-		# TODO : This test is not working as expected.Currently payment entry for customer is not supported
-
-		frappe.db.set_value(
-			"Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS"
-		)
+		self.setup_party_with_category("Customer", "Test TCS Customer", "Cumulative Threshold TCS")
 
 		vouchers = []
 
@@ -693,8 +688,28 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		)
 		pe.paid_from = "Debtors - _TC"
 		pe.paid_to = "Cash - _TC"
+		pe.apply_tds = 1  # Fixed field name from apply_tax_withholding_amount
+		pe.tax_withholding_category = "Cumulative Threshold TCS"
 		pe.submit()
 		vouchers.append(pe)
+
+		# Validate payment entry tax withholding entries
+		payment_expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TCS",
+				party_type="Customer",
+				party="Test TCS Customer",
+				tax_rate=10.0,
+				taxable_amount=30000.0,
+				withholding_amount=3000.0,  # Always Over Withheld
+				status="Over Withheld",  # Settled because it's a threshold exemption
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, payment_expected_entries)
 
 		si = create_sales_invoice(customer="Test TCS Customer", rate=50000)
 		advances = si.get_advance_entries()
@@ -715,7 +730,40 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		# tcs = (inv amt)50000+(adv amt)30000-(adv adj) 30000 - threshold(30000) * rate 10%
 		self.assertEqual(tcs_charged, 2000)
 
-		# cancel invoice and payments to avoid clashing
+		# Validate invoice tax withholding entries
+		invoice_expected_entries = [
+			# Main invoice entry
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TCS",
+				party_type="Customer",
+				party="Test TCS Customer",
+				tax_rate=10.0,
+				taxable_amount=30000,  # Net amount after advance adjustment (50000-30000)
+				withholding_amount=0,  # Tax on net amount: 30000 * 10%
+				status="Settled",
+				taxable_doctype="Sales Invoice",
+				taxable_name=si.name,
+				withholding_doctype="Sales Invoice",
+				withholding_name=si.name,
+				under_withheld_reason="Threshold Exemption",
+			),
+			# Advance allocation adjustment entry
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Cumulative Threshold TCS",
+				party_type="Customer",
+				party="Test TCS Customer",
+				tax_rate=10.0,
+				taxable_amount=20000.0,  # Positive amount that's allocated
+				withholding_amount=2000.0,  # No tax on allocated advance
+				status="Settled",
+				taxable_doctype="Sales Invoice",
+				taxable_name=si.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+		]
+		self.validate_tax_withholding_entries("Sales Invoice", si.name, invoice_expected_entries)
+
 		for d in reversed(vouchers):
 			d.reload()
 			d.cancel()

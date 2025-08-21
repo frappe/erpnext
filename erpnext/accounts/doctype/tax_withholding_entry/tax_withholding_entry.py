@@ -194,7 +194,6 @@ class TaxWithholdingEntry(Document):
 					self.idx, status_to_find, remaining_amount
 				)
 			)
-
 		_reset_idx(docs_needing_reindex)
 
 	def _get_values_to_update(self, proportion: float, field_type: str):
@@ -426,11 +425,6 @@ class TaxWithholdingController:
 				open_entries["over_withheld"].appendleft(entry)
 				continue
 
-			# Skip manual adjustment entries
-			if entry.withholding_doctype in ["Payment Entry", "Journal Entry"]:
-				continue
-
-			entry.withholding_amount -= category.withheld_overrides.get(entry.withholding_name, 0)
 			open_entries["over_withheld"].append(entry)
 
 	def _process_ldc_entries(self, open_entries, category):
@@ -627,7 +621,7 @@ class TaxWithholdingController:
 			"tax_withholding_category": category.name,
 			"tax_withholding_group": category.tax_withholding_group,
 			"tax_rate": category.tax_rate,
-			"conversion_rate": self.doc.get("conversion_rate") or 1,
+			"conversion_rate": self.get_conversion_rate() or 1,
 			"taxable_doctype": self.doc.doctype,
 			"taxable_name": self.doc.name,
 			"taxable_date": self.doc.posting_date,
@@ -643,9 +637,10 @@ class TaxWithholdingController:
 		account_amount_map = self._calculate_account_wise_amount()
 		existing_taxes = {row.account_head: row for row in self.doc.taxes if row.is_tax_withholding_account}
 		precision = self.doc.precision("tax_amount", "taxes")
+		conversion_rate = self.get_conversion_rate()
 
 		for account_head, amount in account_amount_map.items():
-			tax_amount = flt(amount / self.doc.conversion_rate, precision)
+			tax_amount = flt(amount / conversion_rate, precision)
 			if not tax_amount:
 				continue
 
@@ -669,7 +664,7 @@ class TaxWithholdingController:
 				)
 
 		self._remove_zero_tax_rows()
-		self.doc.calculate_taxes_and_totals()
+		self.calculate_taxes_and_totals()
 
 	def _calculate_account_wise_amount(self):
 		"""Calculate total withholding amounts by account"""
@@ -828,6 +823,41 @@ class TaxWithholdingController:
 			entry: TaxWithholdingEntry
 			entry._clear_old_references()
 
+	def _is_tax_withholding_applicable(self):
+		"""Check if tax withholding should be applied to this document"""
+		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
+			self.doc.tax_withholding_entries = []
+			return False
+
+		# Clear existing tax withholding amounts before recalculation
+		self._clear_existing_tax_amounts()
+		return True
+
+	def _clear_existing_tax_amounts(self):
+		"""Clear existing tax withholding amounts from tax rows"""
+		recalculate = False
+		for row in self.doc.taxes:
+			if row.is_tax_withholding_account and row.tax_amount:
+				row.tax_amount = 0
+				row.base_tax_amount_after_discount_amount = 0
+				recalculate = True
+
+		if recalculate:
+			# Recalculate taxes and totals if any tax row was cleared
+			self.calculate_taxes_and_totals()
+
+	def calculate_taxes_and_totals(self):
+		self.doc.calculate_taxes_and_totals()
+
+	def get_conversion_rate(self):
+		"""Get conversion rate for the document"""
+		return self.doc.get("conversion_rate")
+
+	def on_validate(self):
+		"""Validate and calculate tax withholding for sales transactions"""
+		if self._is_tax_withholding_applicable():
+			self.calculate()
+
 
 class ItemTax:
 	def get(self, doc, item, filters=None):
@@ -890,33 +920,6 @@ class PurchaseTaxWithholding(TaxWithholdingController):
 		self.party_type = "Supplier"
 		self.party = doc.supplier
 
-	def on_validate(self):
-		"""Validate and calculate tax withholding for purchase transactions"""
-		if self._should_apply_tax_withholding():
-			self.calculate()
-
-	def _should_apply_tax_withholding(self):
-		"""Check if tax withholding should be applied to this document"""
-		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
-			self.doc.tax_withholding_entries = []
-			return False
-
-		# Clear existing tax withholding amounts before recalculation
-		self._clear_existing_tax_amounts()
-		return True
-
-	def _clear_existing_tax_amounts(self):
-		"""Clear existing tax withholding amounts from tax rows"""
-		recalculate = False
-		for row in self.doc.taxes:
-			if row.is_tax_withholding_account and row.tax_amount:
-				row.tax_amount = 0
-				row.base_tax_amount_after_discount_amount = 0
-				recalculate = True
-
-		if recalculate:
-			self.doc.calculate_taxes_and_totals()
-
 
 class SalesTaxWithholding(TaxWithholdingController):
 	"""Tax withholding controller for Sales Invoices (TCS)"""
@@ -926,33 +929,6 @@ class SalesTaxWithholding(TaxWithholdingController):
 		self.party_type = "Customer"
 		self.party = doc.customer
 
-	def on_validate(self):
-		"""Validate and calculate tax withholding for sales transactions"""
-		if self._should_apply_tax_withholding():
-			self.calculate()
-
-	def _should_apply_tax_withholding(self):
-		"""Check if tax withholding should be applied to this document"""
-		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
-			self.doc.tax_withholding_entries = []
-			return False
-
-		# Clear existing tax withholding amounts before recalculation
-		self._clear_existing_tax_amounts()
-		return True
-
-	def _clear_existing_tax_amounts(self):
-		"""Clear existing tax withholding amounts from tax rows"""
-		recalculate = False
-		for row in self.doc.taxes:
-			if row.is_tax_withholding_account and row.tax_amount:
-				row.tax_amount = 0
-				row.base_tax_amount_after_discount_amount = 0
-				recalculate = True
-
-		if recalculate:
-			self.doc.calculate_taxes_and_totals()
-
 
 class PaymentTaxWithholding(TaxWithholdingController):
 	"""Tax withholding controller for Payment Entries"""
@@ -961,33 +937,6 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		super().__init__(doc)
 		self.party_type = doc.party_type
 		self.party = doc.party
-
-	def on_validate(self):
-		"""Validate and calculate tax withholding for payment transactions"""
-		if self._should_apply_tax_withholding():
-			self.calculate()
-
-	def _should_apply_tax_withholding(self):
-		"""Check if tax withholding should be applied to this payment"""
-		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
-			self.doc.tax_withholding_entries = []
-			return False
-
-		# Clear existing tax withholding amounts before recalculation
-		self._clear_existing_tax_amounts()
-		return True
-
-	def _clear_existing_tax_amounts(self):
-		"""Clear existing tax withholding amounts from tax rows"""
-		recalculate = False
-		for row in self.doc.taxes:
-			if row.is_tax_withholding_account and row.tax_amount:
-				row.tax_amount = 0
-				row.base_tax_amount_after_discount_amount = 0
-				recalculate = True
-
-		if recalculate:
-			self.doc.apply_taxes()
 
 	def _get_category_names(self):
 		"""Get tax withholding category names for payment entries"""
@@ -1007,58 +956,41 @@ class PaymentTaxWithholding(TaxWithholdingController):
 
 		category["taxable_amount"] = taxable_amount
 
-	def _create_entries_for_category(self, category):
-		"""Create over withholding entry for payments"""
-		return [
+	def get_conversion_rate(self):
+		return self.doc.source_exchange_rate
+
+	def calculate_taxes_and_totals(self):
+		self.doc.apply_taxes()
+
+	def _get_open_entries_for_category(self, category):
+		# for payment only over withheld
+		open_entries = {"under_withheld": deque(), "over_withheld": deque()}
+
+		current_entry = frappe._dict(
 			{
 				**self._create_default_entry(category),
 				"taxable_amount": category.taxable_amount,
 				"taxable_doctype": "",
 				"taxable_name": "",
 				"taxable_date": "",
-				"withholding_amount": self.compute_withheld_amount(
-					category.taxable_amount,
-					category.tax_rate,
-					round_off_tax_amount=category.round_off_tax_amount,
-				),
-				"conversion_rate": self.doc.source_exchange_rate or 1,
 			}
-		]
+		)
 
-	def update_tax_rows(self):
-		"""Update tax rows for payment entries with proper exchange rate handling"""
-		account_amount_map = self._calculate_account_wise_amount()
-		existing_taxes = {row.account_head: row for row in self.doc.taxes if row.is_tax_withholding_account}
-		precision = self.doc.precision("tax_amount", "taxes")
-		cost_center = self.doc.cost_center or erpnext.get_default_cost_center(self.doc.company)
+		open_entries["over_withheld"].append(current_entry)
 
-		for account_head, amount in account_amount_map.items():
-			tax_amount = flt(amount / self.doc.source_exchange_rate, precision)
-			existing_tax = existing_taxes.get(account_head)
+		return open_entries
 
-			if existing_tax:
-				if existing_tax.tax_amount != tax_amount:
-					existing_tax.tax_amount = tax_amount
-			elif tax_amount:
-				self.doc.append(
-					"taxes",
-					{
-						"is_tax_withholding_account": 1,
-						"category": "Total",
-						"charge_type": "Actual",
-						"account_head": account_head,
-						"description": account_head,
-						"cost_center": cost_center,
-						"add_deduct_tax": "Deduct",
-						"tax_amount": tax_amount,
-					},
-				)
-		self._remove_zero_tax_rows()
-		self.doc.apply_taxes()
+	def _is_threshold_crossed_for_category(self, category):
+		"""For payment entries if apply_tds is checked, return True"""
+		return True
+
+	def _get_unused_threshold(self, category):
+		"""Always withhold Tax and whenever tax gets deducted adjust it"""
+		return 0
 
 
 def _reset_idx(docs_to_reset_idx):
-	updates = []
+	updates = {}
 	for doctype, docname in docs_to_reset_idx:
 		names = frappe.get_all(
 			DOCTYPE,
@@ -1067,6 +999,7 @@ def _reset_idx(docs_to_reset_idx):
 		)
 
 		for idx, name in enumerate(names, start=1):
-			updates.append({"name": name, "idx": idx})
+			updates[name] = {"idx": idx}
 
-	frappe.db.bulk_update(DOCTYPE, updates, update_modified=False)
+	if updates:
+		frappe.db.bulk_update(DOCTYPE, updates, update_modified=False)
