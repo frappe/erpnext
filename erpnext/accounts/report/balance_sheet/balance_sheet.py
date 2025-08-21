@@ -199,7 +199,8 @@ def prepare_horizontal_balance_sheet(
 	filters,
 	currency,
 ):
-	sections_data = {"asset": asset or [], "liability": liability or [], "equity": equity or []}
+	merged_liability = (liability or []) + (equity or [])
+	sections_data = {"asset": asset or [], "liability": merged_liability, "equity": []}
 
 	formatted_data = get_formatted_data(sections_data, period_list)
 	extra_rows = []
@@ -234,7 +235,7 @@ def prepare_horizontal_balance_sheet(
 		period_list,
 		filters.accumulated_values,
 		filters.company,
-		sections=("asset", "liability", "equity"),
+		sections=("asset", "liability"),
 	)
 
 	return formatted_data, columns
