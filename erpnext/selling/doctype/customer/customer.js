@@ -14,6 +14,16 @@ frappe.ui.form.on("Customer", {
 					method: "erpnext.selling.doctype.customer.customer.make_opportunity",
 					frm: cur_frm,
 				}),
+<<<<<<< HEAD
+=======
+			"Payment Entry": () =>
+				frappe.model.open_mapped_doc({
+					method: "erpnext.selling.doctype.customer.customer.make_payment_entry",
+					frm: frm,
+				}),
+			"Pricing Rule": () => erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name),
+			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
+>>>>>>> c54ccc56c7 (feat: add make methods for Bank Account (#49000))
 		};
 
 		frm.add_fetch("lead_name", "company_name", "customer_name");
