@@ -9,6 +9,8 @@ from frappe.utils import flt
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
 	compute_margin_view_data,
+	formated_data,
+	get_all_columns,
 	get_columns,
 	get_data,
 	get_filtered_list_for_consolidated_report,
@@ -50,15 +52,24 @@ def execute(filters=None):
 	net_profit_loss = get_net_profit_loss(
 		income, expense, period_list, filters.company, filters.presentation_currency
 	)
-
+	new_data = formated_data({"income": income, "expense": expense}, period_list)
 	data = []
 	data.extend(income or [])
 	data.extend(expense or [])
 	if net_profit_loss:
 		data.append(net_profit_loss)
 
-	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
-
+	if filters.report_view == "Horizontal":
+		columns = get_all_columns(
+			filters.periodicity,
+			period_list,
+			filters.accumulated_values,
+			filters.company,
+			sections=("expense", "income"),
+		)
+		data = new_data
+	else:
+		columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
