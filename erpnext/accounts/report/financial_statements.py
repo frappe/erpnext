@@ -706,6 +706,88 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 	return columns
 
 
+def get_all_columns(
+	periodicity, period_list, accumulated_values=1, company=None, sections=("expense", "income")
+):
+	columns = []
+
+	for section in sections:
+		columns.append(
+			{
+				"fieldname": f"{section}_account",
+				"label": _(section.capitalize()),
+				"fieldtype": "Link",
+				"options": "Account",
+				"width": 300,
+			}
+		)
+
+		if company:
+			columns.append(
+				{
+					"fieldname": f"{section}_currency",
+					"label": _("Currency"),
+					"fieldtype": "Link",
+					"options": "Currency",
+					"hidden": 1,
+				}
+			)
+
+		for period in period_list:
+			key_name = f"{section}_{cstr(period.key)}"
+			columns.append(
+				{
+					"fieldname": key_name,
+					"label": period.label,
+					"fieldtype": "Currency",
+					"options": "currency",
+					"width": 150,
+				}
+			)
+
+	if periodicity != "Yearly" and not accumulated_values:
+		columns.append(
+			{
+				"fieldname": "total",
+				"label": _("Total"),
+				"fieldtype": "Currency",
+				"width": 150,
+				"options": "currency",
+			}
+		)
+
+	return columns
+
+
+def formated_data(sections_data, period_list):
+	new_data = []
+	max_len = max(len(v) for v in sections_data.values())
+
+	for i in range(max_len):
+		row = {}
+		for section, data in sections_data.items():
+			if i < len(data):
+				indent_level = cint(data[i].get("indent", 0))
+				row.update(create_section_data(section, period_list, data[i], indent_level))
+			else:
+				row.update(create_section_data(section, period_list, None, 0))
+		new_data.append(row)
+
+	return new_data
+
+
+def create_section_data(section, period_list, record, indent_level):
+	row = {}
+	for period in period_list:
+		key_name = f"{section}_{cstr(period.key)}"
+		row[key_name] = record.get(period.key) if record else ""
+
+	row[f"{section}_account"] = record["account"] if record else ""
+	row[f"{section}_currency"] = record["currency"] if record else ""
+	row[f"{section}_indent"] = indent_level
+	return row
+
+
 def get_filtered_list_for_consolidated_report(filters, period_list):
 	filtered_summary_list = []
 	for period in period_list:
