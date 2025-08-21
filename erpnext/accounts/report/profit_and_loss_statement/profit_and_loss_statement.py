@@ -4,16 +4,16 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
 	compute_margin_view_data,
-	formated_data,
 	get_all_columns,
 	get_columns,
 	get_data,
 	get_filtered_list_for_consolidated_report,
+	get_formatted_data,
 	get_period_list,
 )
 
@@ -52,7 +52,6 @@ def execute(filters=None):
 	net_profit_loss = get_net_profit_loss(
 		income, expense, period_list, filters.company, filters.presentation_currency
 	)
-	new_data = formated_data({"income": income, "expense": expense}, period_list)
 	data = []
 	data.extend(income or [])
 	data.extend(expense or [])
@@ -60,14 +59,7 @@ def execute(filters=None):
 		data.append(net_profit_loss)
 
 	if filters.report_view == "Horizontal":
-		columns = get_all_columns(
-			filters.periodicity,
-			period_list,
-			filters.accumulated_values,
-			filters.company,
-			sections=("expense", "income"),
-		)
-		data = new_data
+		data, columns = prepare_horizontal_view(income, expense, net_profit_loss, period_list, filters)
 	else:
 		columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 	currency = filters.presentation_currency or frappe.get_cached_value(
@@ -86,6 +78,34 @@ def execute(filters=None):
 		compute_margin_view_data(data, period_list, filters.accumulated_values)
 
 	return columns, data, None, chart, report_summary, primitive_summary
+
+
+def prepare_horizontal_view(income, expense, net_profit_loss, period_list, filters):
+	sections_data = {"expense": expense or [], "income": income or []}
+	formatted_data = get_formatted_data(sections_data, period_list)
+
+	if net_profit_loss:
+		net_row = frappe._dict({})
+		net_row["income_account"] = net_profit_loss["account"]
+		net_row["expense_account"] = net_profit_loss["account"]
+		net_row["income_indent"] = ""
+		net_row["expense_indent"] = ""
+
+		for period in period_list:
+			net_row[f"income_{period.key}"] = net_profit_loss[period.key]
+			net_row[f"expense_{period.key}"] = net_profit_loss[period.key]
+
+		formatted_data.append(net_row)
+
+	columns = get_all_columns(
+		filters.periodicity,
+		period_list,
+		filters.accumulated_values,
+		filters.company,
+		sections=("expense", "income"),
+	)
+
+	return formatted_data, columns
 
 
 def get_report_summary(

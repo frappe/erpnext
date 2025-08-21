@@ -8,11 +8,11 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
-	formated_data,
 	get_all_columns,
 	get_columns,
 	get_data,
 	get_filtered_list_for_consolidated_report,
+	get_formatted_data,
 	get_period_list,
 )
 
@@ -72,7 +72,7 @@ def execute(filters=None):
 	asset = asset or []
 	liability = liability or []
 	equity = equity or []
-	new_data = formated_data({"asset": asset, "liability": liability, "equity": equity}, period_list)
+	new_data = get_formatted_data({"asset": asset, "liability": liability, "equity": equity}, period_list)
 	data = []
 	data.extend(asset or [])
 	data.extend(liability or [])

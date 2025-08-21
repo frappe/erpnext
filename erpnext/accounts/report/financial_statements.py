@@ -759,7 +759,7 @@ def get_all_columns(
 	return columns
 
 
-def formated_data(sections_data, period_list):
+def get_formatted_data(sections_data, period_list):
 	new_data = []
 	max_len = max(len(v) for v in sections_data.values())
 
