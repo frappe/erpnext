@@ -42,6 +42,21 @@ frappe.ui.form.on("Supplier", {
 				},
 			};
 		});
+<<<<<<< HEAD
+=======
+
+		frm.set_query("user", "portal_users", function (doc) {
+			return {
+				filters: {
+					ignore_user_type: true,
+				},
+			};
+		});
+
+		frm.make_methods = {
+			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
+		};
+>>>>>>> c54ccc56c7 (feat: add make methods for Bank Account (#49000))
 	},
 
 	refresh: function (frm) {
