@@ -1170,7 +1170,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_purchase_order() {
 		let pending_items = this.frm.doc.items.some((item) => {
-			let pending_qty = flt(item.stock_qty) - flt(item.ordered_qty);
+			let ordered_qty = this.get_ordered_qty(item, this.frm.doc);
+			let pending_qty = flt(item.stock_qty) - ordered_qty;
 			return pending_qty > 0;
 		});
 		if (!pending_items) {
@@ -1324,8 +1325,15 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			// calculate ordered qty based on packed items in case of product bundle
 			let packed_items = so.packed_items.filter((pi) => pi.parent_detail_docname == item.name);
 			if (packed_items && packed_items.length) {
-				ordered_qty = packed_items.reduce((sum, pi) => sum + flt(pi.ordered_qty), 0);
-				ordered_qty = ordered_qty / packed_items.length;
+				// Check if ALL packed items are fully ordered
+				let all_packed_items_ordered = packed_items.every((pi) => flt(pi.ordered_qty) >= flt(pi.qty));
+				if (all_packed_items_ordered) {
+					// If all packed items are fully ordered, the bundle is fully ordered
+					ordered_qty = item.stock_qty;
+				} else {
+					// If any packed item is not fully ordered, bundle is not ordered
+					ordered_qty = 0;
+				}
 			}
 		}
 		return ordered_qty;
