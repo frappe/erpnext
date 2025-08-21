@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-08-17 09:36+0000\n"
-"PO-Revision-Date: 2025-08-17 18:14\n"
+"PO-Revision-Date: 2025-08-21 19:13\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -22673,7 +22673,7 @@ msgstr "Målsättning"
 #. Label of a Card Break in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
 msgid "Goal and Procedure"
-msgstr "Målsättning och Förfarande"
+msgstr "Målsättning och Procedur"
 
 #. Group in Quality Procedure's connections
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.json
@@ -39699,7 +39699,7 @@ msgstr "Problem"
 #: erpnext/quality_management/doctype/quality_goal/quality_goal.json
 #: erpnext/quality_management/doctype/quality_review/quality_review.json
 msgid "Procedure"
-msgstr "Förfarande"
+msgstr "Procedur"
 
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.js:39
 msgid "Procedures dropped"
@@ -41815,7 +41815,7 @@ msgstr "Kvalitet Möte Protokoll"
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure_tree.js:10
 #: erpnext/quality_management/workspace/quality/quality.json
 msgid "Quality Procedure"
-msgstr "Kvalitet Förfarande"
+msgstr "Kvalitet Procedur"
 
 #. Name of a DocType
 #: erpnext/quality_management/doctype/quality_procedure_process/quality_procedure_process.json
@@ -52043,7 +52043,7 @@ msgstr "Underåtgärder"
 #. Label of the procedure (Link) field in DocType 'Quality Procedure Process'
 #: erpnext/quality_management/doctype/quality_procedure_process/quality_procedure_process.json
 msgid "Sub Procedure"
-msgstr "Underförfarande"
+msgstr "Underprocedur"
 
 #: erpnext/accounts/print_format/sales_invoice_print/sales_invoice_print.html:129
 msgid "Sub Total"
@@ -57428,7 +57428,7 @@ msgstr "Träd Typ"
 #. Label of a Link in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
 msgid "Tree of Procedures"
-msgstr "Kvalitet Förfarande Träd"
+msgstr "Kvalitet Procedur Träd"
 
 #. Name of a report
 #. Label of a shortcut in the Accounting Workspace
@@ -61695,7 +61695,7 @@ msgstr "{0} mot Försäljning Order {1}"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:69
 msgid "{0} already has a Parent Procedure {1}."
-msgstr "{0} har redan Överordnad Förfarande {1}."
+msgstr "{0} har redan Överordnad Procedur {1}."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:544
 msgid "{0} and {1}"
