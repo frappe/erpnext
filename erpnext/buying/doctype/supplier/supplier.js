@@ -67,6 +67,7 @@ frappe.ui.form.on("Supplier", {
 
 		frm.make_methods = {
 			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
+			"Pricing Rule": () => erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name),
 		};
 	},
 
