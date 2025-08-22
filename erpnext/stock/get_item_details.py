@@ -1277,17 +1277,6 @@ def get_pos_profile(company, pos_profile=None, user=None):
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
-<<<<<<< HEAD
-	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
-	filters = {"parent": item_code, "uom": uom}
-
-	if variant_of:
-		filters["parent"] = ("in", (item_code, variant_of))
-	conversion_factor = frappe.get_all("UOM Conversion Detail", filters, pluck="conversion_factor")
-	if not conversion_factor:
-		stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
-		conversion_factor = [get_uom_conv_factor(uom, stock_uom) or 1]
-=======
 	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
 	if not item_code or not item or uom == item.stock_uom:
 		return {"conversion_factor": 1.0}
@@ -1295,7 +1284,6 @@ def get_conversion_factor(item_code, uom):
 	item_codes = [item_code]
 	if item.variant_of:
 		item_codes.append(item.variant_of)
->>>>>>> d61977d002 (fix: ensure variant conversion factor is returned before the template's)
 
 	parent = frappe.qb.DocType("Item")
 	child = frappe.qb.DocType("UOM Conversion Detail")
