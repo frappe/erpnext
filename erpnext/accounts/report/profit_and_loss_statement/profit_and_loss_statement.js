@@ -16,11 +16,6 @@ frappe.query_reports["Profit and Loss Statement"]["filters"].push({
 	],
 	default: "Report",
 	reqd: 1,
-	on_change: function () {
-		let filter_based_on = frappe.query_reports.get_filter_value("selected_view");
-		frappe.query_reports.toggle_filter_display("report_view", filter_based_on === "Report");
-		frappe.query_reports.refresh();
-	},
 });
 
 frappe.query_reports["Profit and Loss Statement"]["filters"].push({
