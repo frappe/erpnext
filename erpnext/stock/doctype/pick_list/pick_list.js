@@ -100,7 +100,11 @@ frappe.ui.form.on("Pick List", {
 		}
 	},
 
-	pick_manually: function (frm) {
+	pick_manually: (frm) => {
+		frm.trigger("update_warehouse_property");
+	},
+
+	update_warehouse_property: (frm) => {
 		frm.fields_dict.locations.grid.update_docfield_property(
 			"warehouse",
 			"read_only",
@@ -114,6 +118,7 @@ frappe.ui.form.on("Pick List", {
 	},
 	refresh: (frm) => {
 		frm.trigger("add_get_items_button");
+		frm.trigger("update_warehouse_property");
 		if (frm.doc.docstatus === 1) {
 			const status_completed = frm.doc.status === "Completed";
 			frm.set_df_property("locations", "allow_on_submit", status_completed ? 0 : 1);

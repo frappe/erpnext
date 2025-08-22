@@ -696,7 +696,7 @@ def get_available_qty_to_reserve(
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		query = (
 			frappe.qb.from_(sre)
-			.select(Sum(sre.reserved_qty - sre.delivered_qty))
+			.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
 			.where(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)
@@ -1328,6 +1328,36 @@ class StockReservation:
 			data = entries_to_reserve[key]
 			self.update_delivered_qty(data)
 			self.make_stock_reservation_entry(data)
+
+		extra_items = set((entry.item_code, entry.warehouse) for entry in items_to_reserve) - set(
+			(row.item_code, row.warehouse) for row in reservation_entries
+		)
+		for entry in [
+			entry for entry in items_to_reserve if (entry.item_code, entry.warehouse) in extra_items
+		]:
+			available_qty = get_available_qty_to_reserve(entry.item_code, entry.warehouse)
+			if not available_qty:
+				frappe.msgprint(
+					_("No available quantity to reserve for item {0} in warehouse {1}").format(
+						frappe.bold(entry.item_code), frappe.bold(entry.warehouse)
+					),
+					alert=True,
+				)
+				continue
+			sre = frappe.new_doc("Stock Reservation Entry")
+			sre.company = self.doc.company
+			sre.voucher_type = entry.voucher_type
+			sre.voucher_no = entry.voucher_no
+			sre.voucher_detail_no = entry.voucher_detail_no
+			sre.available_qty = available_qty
+			sre.voucher_qty = entry.required_qty
+			sre.item_code = entry.item_code
+			sre.warehouse = entry.warehouse
+			sre.reserved_qty = min(sre.available_qty, entry.qty)
+			sre.has_serial_no = frappe.get_value("Item", sre.item_code, "has_serial_no")
+			sre.has_batch_no = frappe.get_value("Item", sre.item_code, "has_batch_no")
+			sre.insert()
+			sre.submit()
 
 	def update_delivered_qty(self, data):
 		for name, delivered_qty in data.get("sre_names").items():

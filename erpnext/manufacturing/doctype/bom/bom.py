@@ -1421,11 +1421,11 @@ def add_additional_cost(stock_entry, work_order):
 		as_dict=1,
 	)
 
-	expecnse_account = (
+	expense_account = (
 		company_account.default_operating_cost_account or company_account.default_expense_account
 	)
-	add_non_stock_items_cost(stock_entry, work_order, expecnse_account)
-	add_operations_cost(stock_entry, work_order, expecnse_account)
+	add_non_stock_items_cost(stock_entry, work_order, expense_account)
+	add_operations_cost(stock_entry, work_order, expense_account)
 
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account):
@@ -1460,20 +1460,73 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 		)
 
 
+def add_operating_cost_component_wise(
+	stock_entry, work_order=None, operating_cost_per_unit=None, op_expense_account=None
+):
+	if not work_order:
+		return False
+
+	cost_added = False
+	for row in work_order.operations:
+		workstation_cost = frappe.get_all(
+			"Workstation Cost",
+			fields=["operating_component", "operating_cost"],
+			filters={
+				"parent": row.workstation,
+				"parenttype": "Workstation",
+			},
+		)
+
+		for wc in workstation_cost:
+			expense_account = get_component_account(wc.operating_component) or op_expense_account
+			actual_cp_operating_cost = flt(
+				flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0),
+				row.precision("actual_operating_cost"),
+			)
+
+			per_unit_cost = flt(actual_cp_operating_cost) / flt(row.completed_qty)
+
+			if per_unit_cost and expense_account:
+				stock_entry.append(
+					"additional_costs",
+					{
+						"expense_account": expense_account,
+						"description": _("{0} Operating Cost for operation {1}").format(
+							wc.operating_component, row.operation
+						),
+						"amount": per_unit_cost * flt(stock_entry.fg_completed_qty),
+					},
+				)
+
+				cost_added = True
+
+	return cost_added
+
+
+@frappe.request_cache
+def get_component_account(parent):
+	return frappe.db.get_value("Workstation Operating Component Account", parent, "expense_account")
+
+
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit
 
 	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
 
 	if operating_cost_per_unit:
-		stock_entry.append(
-			"additional_costs",
-			{
-				"expense_account": expense_account,
-				"description": _("Operating Cost as per Work Order / BOM"),
-				"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
-			},
+		cost_added = add_operating_cost_component_wise(
+			stock_entry, work_order, operating_cost_per_unit, expense_account
 		)
+
+		if not cost_added:
+			stock_entry.append(
+				"additional_costs",
+				{
+					"expense_account": expense_account,
+					"description": _("Operating Cost as per Work Order / BOM"),
+					"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
+				},
+			)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
 		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)

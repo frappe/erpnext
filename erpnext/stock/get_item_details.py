@@ -1328,21 +1328,32 @@ def get_pos_profile(company, pos_profile=None, user=None):
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
 	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
-	if not item_code or not item:
+	if not item_code or not item or uom == item.stock_uom:
 		return {"conversion_factor": 1.0}
 
-	if uom == item.stock_uom:
-		return {"conversion_factor": 1.0}
-
-	filters = {"parent": item_code, "uom": uom}
-
+	item_codes = [item_code]
 	if item.variant_of:
-		filters["parent"] = ("in", (item_code, item.variant_of))
-	conversion_factor = frappe.get_all("UOM Conversion Detail", filters, pluck="conversion_factor")
-	if not conversion_factor:
-		conversion_factor = [get_uom_conv_factor(uom, item.stock_uom) or 1]
+		item_codes.append(item.variant_of)
 
-	return {"conversion_factor": conversion_factor[-1]}
+	parent = frappe.qb.DocType("Item")
+	child = frappe.qb.DocType("UOM Conversion Detail")
+	query = (
+		frappe.qb.from_(parent)
+		.join(child)
+		.on(parent.name == child.parent)
+		.select(child.conversion_factor)
+		.where((parent.name.isin(item_codes)) & (child.uom == uom))
+		.orderby(parent.has_variants)
+		.limit(1)
+	)
+	conversion_factor = query.run(pluck="conversion_factor")
+
+	if not conversion_factor:
+		conversion_factor = get_uom_conv_factor(uom, item.stock_uom)
+	else:
+		conversion_factor = conversion_factor[0]
+
+	return {"conversion_factor": conversion_factor or 1.0}
 
 
 @frappe.whitelist()

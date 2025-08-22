@@ -434,3 +434,5 @@ erpnext.patches.v15_0.update_uae_zero_rated_fetch
 erpnext.patches.v15_0.add_company_payment_gateway_account
 erpnext.patches.v16_0.update_serial_no_reference_name
 erpnext.patches.v16_0.set_invoice_type_in_pos_settings
+erpnext.patches.v15_0.update_fieldname_in_accounting_dimension_filter
+erpnext.patches.v16_0.make_workstation_operating_components #1

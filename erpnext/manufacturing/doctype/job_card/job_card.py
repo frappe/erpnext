@@ -157,6 +157,9 @@ class JobCard(Document):
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
+		if self.sub_operations:
+			self.set_total_completed_qty_from_sub_operations()
+
 		self.validate_work_order()
 
 	def on_update(self):
@@ -280,8 +283,13 @@ class JobCard(Document):
 					}
 				)
 
+	def set_total_completed_qty_from_sub_operations(self):
+		sub_op_total_qty = []
 		for row in self.sub_operations:
-			self.total_completed_qty += row.completed_qty
+			sub_op_total_qty.append(flt(row.completed_qty))
+
+		if sub_op_total_qty:
+			self.total_completed_qty = min(sub_op_total_qty)
 
 	def get_overlap_for(self, args, open_job_cards=None):
 		time_logs = []
@@ -613,7 +621,7 @@ class JobCard(Document):
 			self.save()
 
 	def update_sub_operation_status(self):
-		if not (self.sub_operations and self.time_logs):
+		if not self.sub_operations:
 			return
 
 		operation_wise_completed_time = {}

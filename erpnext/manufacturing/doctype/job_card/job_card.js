@@ -31,6 +31,16 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+		frm.set_query("operation", "time_logs", () => {
+			let operations = (frm.doc.sub_operations || []).map((d) => d.sub_operation);
+			return {
+				filters: {
+					name: ["in", operations],
+				},
+			};
+		});
+
+		frm.events.set_company_filters(frm, "target_warehouse");
 		frm.events.set_company_filters(frm, "source_warehouse");
 		frm.events.set_company_filters(frm, "wip_warehouse");
 		frm.set_query("source_warehouse", "items", () => {
@@ -184,7 +194,12 @@ frappe.ui.form.on("Job Card", {
 				!frm.doc.finished_good ||
 				!has_items?.length)
 		) {
-			if (!frm.doc.time_logs?.length) {
+			let last_row = {};
+			if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+				last_row = get_last_row(frm.doc.time_logs);
+			}
+
+			if (!frm.doc.time_logs?.length || (frm.doc.sub_operations?.length && last_row?.to_time)) {
 				frm.add_custom_button(__("Start Job"), () => {
 					let from_time = frappe.datetime.now_datetime();
 					if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
@@ -313,7 +328,12 @@ frappe.ui.form.on("Job Card", {
 		];
 
 		let last_completed_row = get_last_completed_row(frm.doc.time_logs);
-		if (!last_completed_row || !last_completed_row.to_time) {
+		let last_row = {};
+		if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+			last_row = get_last_row(frm.doc.time_logs);
+		}
+
+		if (!last_completed_row || !last_completed_row.to_time || !last_row.to_time) {
 			fields.push({
 				fieldtype: "Datetime",
 				label: __("End Time"),
@@ -757,4 +777,8 @@ function get_last_completed_row(time_logs) {
 		let last_completed_row = completed_rows[completed_rows.length - 1];
 		return last_completed_row;
 	}
+}
+
+function get_last_row(time_logs) {
+	return time_logs[time_logs.length - 1] || {};
 }

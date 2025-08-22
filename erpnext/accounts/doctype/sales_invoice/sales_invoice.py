@@ -764,6 +764,7 @@ class SalesInvoice(SellingController):
 				"utm_campaign": pos.get("utm_campaign"),
 				"utm_medium": pos.get("utm_medium"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
+				"set_default_payment": pos.get("set_grand_total_to_default_mop", 1),
 			}
 
 	@frappe.whitelist()

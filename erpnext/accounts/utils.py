@@ -1940,6 +1940,8 @@ def create_payment_ledger_entry(
 
 
 def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, party):
+	from erpnext.accounts.doctype.dunning.dunning import update_linked_dunnings
+
 	if not voucher_type or not voucher_no:
 		return
 
@@ -1969,6 +1971,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 
 	outstanding = voucher_outstanding[0]
 	ref_doc = frappe.get_lazy_doc(voucher_type, voucher_no)
+	previous_outstanding_amount = ref_doc.outstanding_amount
 	outstanding_amount = flt(
 		outstanding["outstanding_in_account_currency"], ref_doc.precision("outstanding_amount")
 	)
@@ -1982,6 +1985,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		outstanding_amount,
 	)
 
+	update_linked_dunnings(ref_doc, previous_outstanding_amount)
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
 

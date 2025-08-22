@@ -1421,8 +1421,8 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 				"postprocess": update_item,
 				"filter": lambda d: (
 					get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
-				)
-				and select_item(d),
+				),
+				"condition": select_item,
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",

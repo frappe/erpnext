@@ -717,7 +717,13 @@ class POSInvoice(SalesInvoice):
 				"Account", self.debit_to, "account_currency"
 			)
 		if not self.due_date and self.customer:
-			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
+			self.due_date = get_due_date(
+				self.posting_date,
+				"Customer",
+				self.customer,
+				self.company,
+				template_name=self.payment_terms_template,
+			)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
@@ -732,6 +738,7 @@ class POSInvoice(SalesInvoice):
 				"utm_campaign": profile.get("utm_campaign"),
 				"utm_medium": profile.get("utm_medium"),
 				"allow_print_before_pay": profile.get("allow_print_before_pay"),
+				"set_default_payment": profile.get("set_grand_total_to_default_mop"),
 			}
 
 	@frappe.whitelist()
