@@ -110,6 +110,7 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 	def cleanup_invoices(self, invoice_list):
 		"""Clean up invoices in reverse order to avoid dependency issues"""
 		for invoice in reversed(invoice_list):
+			invoice.reload()
 			invoice.cancel()
 
 	def test_cumulative_threshold_tds(self):
@@ -1291,6 +1292,145 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 
 		pi1.cancel()
 		pi2.cancel()
+
+	def test_payment_entry_with_ldc_and_invoice_adjustment(self):
+		"""
+		Test: Payment Entry with LDC, then Invoice, with correct tax adjustment.
+		- Payment Entry (advance) is made and tax is deducted at LDC rate
+		- Purchase Invoice is created for a higher amount
+		- For the portion of invoice covered by advance, tax is adjusted at LDC rate
+		- For the remaining invoice amount, tax is deducted at normal rate
+		"""
+
+		invoices = []
+		pan = "ABCTY1234D"
+		supplier = "Test LDC Supplier"
+		category = "Test Service Category"
+		ldc_no = "TEST-1"
+
+		frappe.db.set_value(
+			"Supplier",
+			supplier,
+			{
+				"tax_withholding_category": category,
+				"pan": pan,
+			},
+		)
+
+		create_lower_deduction_certificate(
+			supplier=supplier,
+			certificate_no=ldc_no,
+			tax_withholding_category=category,
+			tax_rate=0,
+			limit=10000,
+		)
+
+		# Payment Entry (advance) with LDC
+		advance_amount = 6000.0
+		pe = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party=supplier, paid_amount=advance_amount
+		)
+		pe.apply_tds = 1
+		pe.tax_withholding_category = category
+		pe.save()
+		pe.submit()
+		invoices.append(pe)
+
+		# Validate payment entry tax withholding entries (LDC rate)
+		expected_pe_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category=category,
+				party_type="Supplier",
+				party=supplier,
+				tax_rate=0.0,
+				taxable_amount=advance_amount,
+				withholding_amount=0.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+				under_withheld_reason="Lower Deduction Certificate",
+				lower_deduction_certificate=ldc_no,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_pe_entries)
+
+		# Now create and link the invoice (do not update PE after this point)
+		invoice_amount = 15000
+		pi = create_purchase_invoice(
+			supplier=supplier,
+			rate=invoice_amount,
+		)
+
+		advances = pi.get_advance_entries()
+		pi.append(
+			"advances",
+			{
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"advance_amount": advances[0].amount,
+				"allocated_amount": advance_amount,
+			},
+		)
+		pi.save()
+		pi.submit()
+		invoices.append(pi)
+
+		# Validate invoice tax withholding entries
+		expected_pi_entries = [
+			# LDC portion (settled)
+			self.get_tax_withholding_entry(
+				tax_withholding_category=category,
+				party_type="Supplier",
+				party=supplier,
+				tax_rate=0.0,
+				taxable_amount=advance_amount,
+				withholding_amount=0.0,
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+				under_withheld_reason="Lower Deduction Certificate",
+				lower_deduction_certificate=ldc_no,
+				status="Settled",
+			),
+			# Balance LDC portion (settled)
+			self.get_tax_withholding_entry(
+				tax_withholding_category=category,
+				party_type="Supplier",
+				party=supplier,
+				tax_rate=0.0,
+				taxable_amount=4000.0,
+				withholding_amount=0.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+				under_withheld_reason="Lower Deduction Certificate",
+				lower_deduction_certificate=ldc_no,
+			),
+			# Balance LDC portion (settled)
+			self.get_tax_withholding_entry(
+				tax_withholding_category=category,
+				party_type="Supplier",
+				party=supplier,
+				tax_rate=10.0,
+				taxable_amount=5000.0,
+				withholding_amount=500.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+				under_withheld_reason=None,
+				lower_deduction_certificate=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, expected_pi_entries)
+
+		self.cleanup_invoices(invoices)
 
 	def set_previous_fy_and_tax_category(self):
 		test_company = "_Test Company"

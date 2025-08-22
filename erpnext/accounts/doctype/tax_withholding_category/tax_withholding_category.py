@@ -842,9 +842,6 @@ class TaxWithholdingDetails:
 				disable_cumulative_threshold=doc.disable_cumulative_threshold,
 				disable_transaction_threshold=doc.disable_transaction_threshold,
 				taxable_amount=0,
-				# defaults (exitisting entries in the table)
-				taxable_overrides=defaultdict(float),
-				withheld_overrides=defaultdict(float),
 			)
 
 			# ldc (only if valid based on posting date)
@@ -926,7 +923,7 @@ class TaxWithholdingDetails:
 				& (twe.tax_withholding_category.isin(self.tax_withholding_categories))
 				& (twe.lower_deduction_certificate.isin(ldc_names))
 				& (twe.docstatus == 1)
-				& (twe.status == "Settled")
+				& (twe.status.isin(["Settled", "Over Withheld"]))
 			)
 			.groupby(twe.lower_deduction_certificate)
 		)

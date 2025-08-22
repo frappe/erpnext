@@ -349,17 +349,18 @@ class TaxWithholdingController:
 
 		# Case 3: Process remaining amount with historical entries
 		open_entries = self._get_open_entries_for_category(category)
+		under_entries = open_entries["under_withheld"]
+		over_entries = open_entries["over_withheld"]
+
+		# Case 4: Adjust Under and Over Withheld Entries
+		entries.extend(self._adjust_under_over_withheld(under_entries, over_entries, category))
 
 		# Case 4: Lower Deduction Certificate processing
 		if category.ldc_unutilized_amount:
-			entries.extend(self._process_ldc_entries(open_entries, category))
-			if not open_entries["under_withheld"]:
-				return entries
+			entries.extend(self._process_ldc_entries(under_entries, over_entries, category))
 
 		# Case 5: Regular tax withholding processing
-		entries.extend(
-			self._merge_entries(open_entries["under_withheld"], open_entries["over_withheld"], category)
-		)
+		entries.extend(self._merge_entries(under_entries, over_entries, category))
 
 		return entries
 
@@ -396,12 +397,12 @@ class TaxWithholdingController:
 		self._categorize_historical_entries(entries, linked_payments, category, open_entries)
 
 		# Add current document as under withheld
-		current_entry = frappe._dict(
+		current_entry = self._create_default_entry(category).update(
 			{
-				"taxable_doctype": self.doc.doctype,
-				"taxable_name": self.doc.name,
-				"taxable_date": self.doc.posting_date,
 				"taxable_amount": category.taxable_amount,
+				"withholding_doctype": "",
+				"withholding_name": "",
+				"withholding_date": "",
 			}
 		)
 		open_entries["under_withheld"].appendleft(current_entry)
@@ -421,13 +422,16 @@ class TaxWithholdingController:
 			if key in linked_payments:
 				# Calculate proportion for linked payments
 				proportion = linked_payments[key] / (entry.taxable_amount - entry.withholding_amount)
+
+				# for handling rounding adjustments
+				proportion = min(proportion, 1)
 				entry.withholding_amount *= proportion
 				open_entries["over_withheld"].appendleft(entry)
 				continue
 
 			open_entries["over_withheld"].append(entry)
 
-	def _process_ldc_entries(self, open_entries, category):
+	def _process_ldc_entries(self, under_entries, over_entries, category):
 		"""Process entries with Lower Deduction Certificate"""
 		ldc_config = {
 			"under_withheld_reason": "Lower Deduction Certificate",
@@ -435,8 +439,8 @@ class TaxWithholdingController:
 		}
 
 		return self._merge_entries(
-			open_entries["under_withheld"],
-			open_entries["over_withheld"],
+			under_entries,
+			over_entries,
 			category,
 			tax_rate=category.ldc_rate,
 			constraint=category.ldc_unutilized_amount,
@@ -614,23 +618,25 @@ class TaxWithholdingController:
 
 	def _create_default_entry(self, category):
 		"""Create a default entry template for the given category"""
-		return {
-			"company": self.doc.company,
-			"party_type": self.party_type,
-			"party": self.party,
-			"tax_withholding_category": category.name,
-			"tax_withholding_group": category.tax_withholding_group,
-			"tax_rate": category.tax_rate,
-			"conversion_rate": self.get_conversion_rate() or 1,
-			"taxable_doctype": self.doc.doctype,
-			"taxable_name": self.doc.name,
-			"taxable_date": self.doc.posting_date,
-			"taxable_amount": 0,
-			"withholding_doctype": self.doc.doctype,
-			"withholding_name": self.doc.name,
-			"withholding_date": self.doc.posting_date,
-			"withholding_amount": 0,  # Will be computed later
-		}
+		return frappe._dict(
+			{
+				"company": self.doc.company,
+				"party_type": self.party_type,
+				"party": self.party,
+				"tax_withholding_category": category.name,
+				"tax_withholding_group": category.tax_withholding_group,
+				"tax_rate": category.tax_rate,
+				"conversion_rate": self.get_conversion_rate() or 1,
+				"taxable_doctype": self.doc.doctype,
+				"taxable_name": self.doc.name,
+				"taxable_date": self.doc.posting_date,
+				"taxable_amount": 0,
+				"withholding_doctype": self.doc.doctype,
+				"withholding_name": self.doc.name,
+				"withholding_date": self.doc.posting_date,
+				"withholding_amount": 0,  # Will be computed later
+			}
+		)
 
 	def update_tax_rows(self):
 		"""Update tax rows in the parent document based on withholding entries"""
@@ -682,6 +688,88 @@ class TaxWithholdingController:
 			row for row in self.doc.taxes if not (row.is_tax_withholding_account and not row.tax_amount)
 		]
 
+	def _adjust_under_over_withheld(
+		self,
+		under_entries: deque,
+		over_entries: deque,
+		category: dict,
+	):
+		"""
+		Merge under withheld and over withheld entries based on the tax rate and constraint.
+		If only under and over entries are available, they will be processed against current document.
+		"""
+		if not (under_entries and over_entries):
+			return []
+
+		consolidated_entries = {}
+
+		def _get_entry_key(entry):
+			"""Generate unique key for entry consolidation"""
+			return (
+				entry.get("withholding_doctype"),
+				entry.get("withholding_name"),
+				entry.get("taxable_doctype"),
+				entry.get("taxable_name"),
+				entry.get("tax_withholding_category"),
+				entry.get("tax_withholding_group"),
+			)
+
+		while under_entries and over_entries:
+			under = under_entries[0]
+			over = over_entries[0]
+
+			# Calculate tax amount for this taxable amount
+			tax_amount = self.compute_withheld_amount(
+				under.taxable_amount, over.tax_rate, round_off_tax_amount=category.round_off_tax_amount
+			)
+
+			tax_amount_to_merge = flt(min(tax_amount, over.withholding_amount), self.precision)
+
+			if over.tax_rate == 0:
+				taxable_amount = min(under.taxable_amount, over.taxable_amount)
+			else:
+				taxable_amount = (
+					flt(under.taxable_amount / tax_amount * tax_amount_to_merge, self.precision)
+					if tax_amount
+					else 0
+				)
+
+			# Create merged entry
+			merged_entry = under.copy()
+			merged_entry.update(
+				{
+					"taxable_amount": taxable_amount,
+					"withholding_amount": tax_amount_to_merge,
+					"withholding_doctype": over.withholding_doctype,
+					"withholding_name": over.withholding_name,
+					"withholding_date": over.withholding_date,
+					"under_withheld_reason": over.under_withheld_reason,
+					"tax_rate": over.tax_rate,
+				}
+			)
+
+			# Consolidate entries by document combination
+			if self._should_include_entry(merged_entry):
+				key = _get_entry_key(merged_entry)
+
+				if key not in consolidated_entries:
+					consolidated_entries[key] = merged_entry.copy()
+				else:
+					# Accumulate amounts
+					consolidated_entries[key]["taxable_amount"] += merged_entry["taxable_amount"]
+					consolidated_entries[key]["withholding_amount"] += merged_entry["withholding_amount"]
+
+			# Update remaining amounts and clean up
+			under.taxable_amount -= taxable_amount
+			over.withholding_amount -= tax_amount
+
+			if under.taxable_amount <= 0:
+				under_entries.popleft()
+			if over.withholding_amount <= 0:
+				over_entries.popleft()
+
+		return list(consolidated_entries.values())
+
 	def _merge_entries(
 		self,
 		under_entries: deque,
@@ -702,11 +790,6 @@ class TaxWithholdingController:
 		if tax_rate is None:
 			tax_rate = category.tax_rate
 
-		# Adjust under and over entries
-		constraint = self._process_matched_entries(
-			under_entries, over_entries, category, tax_rate, constraint, default_obj, merged_entries
-		)
-
 		# Process remaining under entries
 		constraint = self._process_remaining_entries(
 			under_entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type="under"
@@ -718,77 +801,6 @@ class TaxWithholdingController:
 		)
 
 		return merged_entries
-
-	def _process_matched_entries(
-		self, under_entries, over_entries, category, tax_rate, constraint, default_obj, merged_entries
-	):
-		"""Process matched under and over withheld entries with consolidation"""
-		consolidated_entries = {}
-
-		def _get_entry_key(entry):
-			"""Generate unique key for entry consolidation"""
-			return (
-				entry.get("withholding_doctype"),
-				entry.get("withholding_name"),
-				entry.get("taxable_doctype"),
-				entry.get("taxable_name"),
-			)
-
-		while under_entries and over_entries and constraint > 0:
-			if tax_rate == 0:
-				break
-
-			under = under_entries[0]
-			over = over_entries[0]
-
-			taxable_amount = min(under.taxable_amount, constraint)
-
-			# Calculate tax amount for this taxable amount
-			tax_amount = self.compute_withheld_amount(
-				taxable_amount, tax_rate, round_off_tax_amount=category.round_off_tax_amount
-			)
-
-			tax_amount_to_merge = flt(min(tax_amount, over.withholding_amount), self.precision)
-			taxable_amount = flt(tax_amount_to_merge, self.precision) * 100 / tax_rate if tax_rate else 0
-
-			if tax_amount <= 0 or taxable_amount <= 0:
-				break
-
-			# Create merged entry
-			merged_entry = self._create_base_entry(under, category, tax_rate, default_obj)
-			merged_entry.update(
-				{
-					"taxable_amount": taxable_amount,
-					"withholding_amount": tax_amount,
-					"withholding_doctype": over.withholding_doctype,
-					"withholding_name": over.withholding_name,
-					"withholding_date": over.withholding_date,
-				}
-			)
-
-			# Consolidate entries by document combination
-			if self._should_include_entry(merged_entry):
-				key = _get_entry_key(merged_entry)
-
-				if key not in consolidated_entries:
-					consolidated_entries[key] = merged_entry.copy()
-				else:
-					# Accumulate amounts
-					consolidated_entries[key]["taxable_amount"] += merged_entry["taxable_amount"]
-					consolidated_entries[key]["withholding_amount"] += merged_entry["withholding_amount"]
-
-			# Update remaining amounts and clean up
-			under.taxable_amount -= taxable_amount
-			over.withholding_amount -= tax_amount
-			constraint -= taxable_amount
-
-			if under.taxable_amount <= 0:
-				under_entries.popleft()
-			if over.withholding_amount <= 0:
-				over_entries.popleft()
-
-		merged_entries.extend(consolidated_entries.values())
-		return constraint
 
 	def _process_remaining_entries(
 		self, entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type
@@ -844,6 +856,7 @@ class TaxWithholdingController:
 						"taxable_doctype": "",
 						"taxable_name": "",
 						"taxable_date": "",
+						"conversion_rate": self.get_conversion_rate(),
 					}
 				)
 				# Only include over entries related to current document
