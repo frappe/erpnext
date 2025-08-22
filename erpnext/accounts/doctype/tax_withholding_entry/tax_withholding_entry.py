@@ -693,37 +693,47 @@ class TaxWithholdingController:
 	):
 		"""
 		Merge under withheld and over withheld entries based on the tax rate and constraint.
-		If only under entries are available, they will be processed against current document.
+		If only under and over entries are available, they will be processed against current document.
 		"""
 		merged_entries = []
-
-		if not under_entries or constraint <= 0:
+		if not ((under_entries or over_entries) and constraint > 0):
 			return merged_entries
 
 		if tax_rate is None:
 			tax_rate = category.tax_rate
 
-		def default_entry(under):
-			entry = {}
-			if default_obj:
-				entry.update(default_obj)
+		# Adjust under and over entries
+		constraint = self._process_matched_entries(
+			under_entries, over_entries, category, tax_rate, constraint, default_obj, merged_entries
+		)
 
-			entry.update(
-				{
-					"taxable_doctype": under.taxable_doctype,
-					"taxable_name": under.taxable_name,
-					"taxable_date": under.taxable_date,
-					"tax_withholding_category": category.name,
-					"tax_rate": tax_rate,
-					"party_type": self.party_type,
-					"party": self.party,
-					"company": self.doc.company,
-				}
+		# Process remaining under entries
+		constraint = self._process_remaining_entries(
+			under_entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type="under"
+		)
+
+		# Process remaining over entries
+		self._process_remaining_entries(
+			over_entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type="over"
+		)
+
+		return merged_entries
+
+	def _process_matched_entries(
+		self, under_entries, over_entries, category, tax_rate, constraint, default_obj, merged_entries
+	):
+		"""Process matched under and over withheld entries with consolidation"""
+		consolidated_entries = {}
+
+		def _get_entry_key(entry):
+			"""Generate unique key for entry consolidation"""
+			return (
+				entry.get("withholding_doctype"),
+				entry.get("withholding_name"),
+				entry.get("taxable_doctype"),
+				entry.get("taxable_name"),
 			)
 
-			return entry
-
-		# under and over entries both available
 		while under_entries and over_entries and constraint > 0:
 			if tax_rate == 0:
 				break
@@ -731,71 +741,148 @@ class TaxWithholdingController:
 			under = under_entries[0]
 			over = over_entries[0]
 
-			# Calculate the amount to merge
-			amount_to_merge = min(under.taxable_amount, over.withholding_amount / tax_rate, constraint)
+			taxable_amount = min(under.taxable_amount, constraint)
 
-			if amount_to_merge <= 0:
+			# Calculate tax amount for this taxable amount
+			tax_amount = self.compute_withheld_amount(
+				taxable_amount, tax_rate, round_off_tax_amount=category.round_off_tax_amount
+			)
+
+			tax_amount_to_merge = flt(min(tax_amount, over.withholding_amount), self.precision)
+			taxable_amount = flt(tax_amount_to_merge, self.precision) * 100 / tax_rate if tax_rate else 0
+
+			if tax_amount <= 0 or taxable_amount <= 0:
 				break
 
-			# Create a new merged entry
-			merged_entry = {
-				**default_entry(under),
-				"taxable_amount": amount_to_merge,
-				"withholding_amount": self.compute_withheld_amount(
-					amount_to_merge,
-					tax_rate,
-					round_off_tax_amount=category.round_off_tax_amount,
-				),
-				"withholding_doctype": over.withholding_doctype,
-				"withholding_name": over.withholding_name,
-				"withholding_date": over.withholding_date,
-			}
+			# Create merged entry
+			merged_entry = self._create_base_entry(under, category, tax_rate, default_obj)
+			merged_entry.update(
+				{
+					"taxable_amount": taxable_amount,
+					"withholding_amount": tax_amount,
+					"withholding_doctype": over.withholding_doctype,
+					"withholding_name": over.withholding_name,
+					"withholding_date": over.withholding_date,
+				}
+			)
 
-			if merged_entry.taxable_name == self.doc.name or merged_entry.withholding_name == self.doc.name:
-				merged_entries.append(merged_entry)
+			# Consolidate entries by document combination
+			if self._should_include_entry(merged_entry):
+				key = _get_entry_key(merged_entry)
 
-			constraint -= amount_to_merge
-			under.taxable_amount -= amount_to_merge
-			over.withholding_amount -= amount_to_merge * tax_rate / 100
+				if key not in consolidated_entries:
+					consolidated_entries[key] = merged_entry.copy()
+				else:
+					# Accumulate amounts
+					consolidated_entries[key]["taxable_amount"] += merged_entry["taxable_amount"]
+					consolidated_entries[key]["withholding_amount"] += merged_entry["withholding_amount"]
 
-			# Remove zero or negative value entries
+			# Update remaining amounts and clean up
+			under.taxable_amount -= taxable_amount
+			over.withholding_amount -= tax_amount
+			constraint -= taxable_amount
+
 			if under.taxable_amount <= 0:
 				under_entries.popleft()
-
 			if over.withholding_amount <= 0:
 				over_entries.popleft()
 
-		# Remaining under entries
-		while under_entries and constraint > 0:
-			under = under_entries[0]
-			taxable_amount = min(under.taxable_amount, constraint)
+		merged_entries.extend(consolidated_entries.values())
+		return constraint
 
-			if taxable_amount <= 0:
+	def _process_remaining_entries(
+		self, entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type
+	):
+		"""
+		- Create remaining Over and Under Withheld Entries
+		- Adjust remaining Under Withheld Entries against current doc
+		- Create Over Withheld Entries for any excess for current document(Payment)
+
+		"""
+		while entries and constraint > 0:
+			entry = entries[0]
+
+			# Get source amount - both types use taxable_amount as source
+			amount_to_process = min(entry.taxable_amount, constraint)
+
+			if amount_to_process <= 0:
 				break
 
-			merged_entry = {
-				**default_entry(under),
-				"taxable_amount": taxable_amount,
-				"withholding_amount": self.compute_withheld_amount(
-					taxable_amount,
-					tax_rate,
-					round_off_tax_amount=category.round_off_tax_amount,
-				),
-				# Paid from the current document
-				"withholding_doctype": self.doc.doctype,
-				"withholding_name": self.doc.name,
-				"withholding_date": self.doc.posting_date,
+			# Create base entry and calculate withholding amount
+			merged_entry = self._create_base_entry(entry, category, tax_rate, default_obj)
+			merged_entry.update(
+				{
+					"taxable_amount": amount_to_process,
+					"withholding_amount": self.compute_withheld_amount(
+						amount_to_process, tax_rate, round_off_tax_amount=category.round_off_tax_amount
+					),
+				}
+			)
+
+			if entry_type == "under":
+				# Under entries: Adjust new withholding from current doc.
+				merged_entry.update(
+					{
+						"withholding_doctype": self.doc.doctype,
+						"withholding_name": self.doc.name,
+						"withholding_date": self.doc.posting_date,
+					}
+				)
+				# Always include under entries
+				merged_entries.append(merged_entry)
+				# Update entry amounts
+				entry.taxable_amount -= amount_to_process
+				if entry.taxable_amount <= 0:
+					entries.popleft()
+			else:  # entry_type == "over"
+				# Over entries: adjust existing over-withheld amounts
+				merged_entry.update(
+					{
+						"withholding_doctype": entry.withholding_doctype,
+						"withholding_name": entry.withholding_name,
+						"withholding_date": entry.withholding_date,
+						"taxable_doctype": "",
+						"taxable_name": "",
+						"taxable_date": "",
+					}
+				)
+				# Only include over entries related to current document
+				if self._should_include_entry(merged_entry):
+					merged_entries.append(merged_entry)
+
+				# Update entry amounts - over entries update withholding_amount
+				entry.withholding_amount -= amount_to_process
+				if entry.withholding_amount <= 0:
+					entries.popleft()
+
+			# Update constraint
+			constraint -= amount_to_process
+
+		return constraint
+
+	def _create_base_entry(self, source_entry, category, tax_rate, default_obj):
+		"""Create a base entry with common fields"""
+		entry = {}
+		if default_obj:
+			entry.update(default_obj)
+
+		entry.update(
+			{
+				"taxable_doctype": source_entry.taxable_doctype,
+				"taxable_name": source_entry.taxable_name,
+				"taxable_date": source_entry.taxable_date,
+				"tax_withholding_category": category.name,
+				"tax_rate": tax_rate,
+				"party_type": self.party_type,
+				"party": self.party,
+				"company": self.doc.company,
 			}
+		)
+		return entry
 
-			merged_entries.append(merged_entry)
-
-			constraint -= taxable_amount
-			under.taxable_amount -= taxable_amount
-
-			if under.taxable_amount <= 0:
-				under_entries.popleft()
-
-		return merged_entries
+	def _should_include_entry(self, entry):
+		"""Check if entry should be included (relates to current document)"""
+		return entry.get("taxable_name") == self.doc.name or entry.get("withholding_name") == self.doc.name
 
 	def compute_withheld_amount(self, taxable_amount, tax_rate, round_off_tax_amount=False):
 		"""Calculate the withholding amount based on taxable amount and rate"""
