@@ -745,6 +745,7 @@ class TaxWithholdingController:
 					"withholding_date": over.withholding_date,
 					"under_withheld_reason": over.under_withheld_reason,
 					"tax_rate": over.tax_rate,
+					"lower_deduction_certificate": over.lower_deduction_certificate,
 				}
 			)
 
@@ -761,7 +762,7 @@ class TaxWithholdingController:
 
 			# Update remaining amounts and clean up
 			under.taxable_amount -= taxable_amount
-			over.withholding_amount -= tax_amount
+			over.withholding_amount -= tax_amount_to_merge
 
 			if under.taxable_amount <= 0:
 				under_entries.popleft()
@@ -864,8 +865,8 @@ class TaxWithholdingController:
 					merged_entries.append(merged_entry)
 
 				# Update entry amounts - over entries update withholding_amount
-				entry.withholding_amount -= amount_to_process
-				if entry.withholding_amount <= 0:
+				entry.taxable_amount -= amount_to_process
+				if entry.taxable_amount <= 0:
 					entries.popleft()
 
 			# Update constraint
@@ -925,12 +926,13 @@ class TaxWithholdingController:
 
 	def _is_tax_withholding_applicable(self):
 		"""Check if tax withholding should be applied to this document"""
-		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes":
+		# Clear existing tax withholding amounts before recalculation
+		self._clear_existing_tax_amounts()
+
+		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes" or not self._get_category_names():
 			self.doc.tax_withholding_entries = []
 			return False
 
-		# Clear existing tax withholding amounts before recalculation
-		self._clear_existing_tax_amounts()
 		return True
 
 	def _clear_existing_tax_amounts(self):
@@ -1040,6 +1042,10 @@ class PaymentTaxWithholding(TaxWithholdingController):
 
 	def _get_category_names(self):
 		"""Get tax withholding category names for payment entries"""
+
+		if not self.doc.tax_withholding_category:
+			return []
+
 		return [self.doc.tax_withholding_category]
 
 	def _update_taxable_amounts(self):
