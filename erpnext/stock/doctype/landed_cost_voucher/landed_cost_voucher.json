@@ -152,6 +152,7 @@
    "fieldname": "total_vendor_invoices_cost",
    "fieldtype": "Currency",
    "label": "Total Vendor Invoices Cost (Company Currency)",
+   "options": "Company:company:default_currency",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
