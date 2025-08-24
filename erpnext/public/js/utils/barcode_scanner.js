@@ -460,7 +460,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				if (warehouse) {
 					warehouse_match = row[warehouse_field] === warehouse;
 				} else {
-					warehouse_match = !row[warehouse_field];
+					warehouse_match = true;
 				}
 			}
 
