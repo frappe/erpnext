@@ -135,6 +135,9 @@ class TaxWithholdingEntry(Document):
 		amount_field = f"{field_type}_amount"
 		status_to_find = "Under Withheld" if field_type == "taxable" else "Over Withheld"
 
+		if not self.tax_rate:
+			amount_field = "taxable_amount"
+
 		# old entries
 		old_entries = frappe.get_all(
 			DOCTYPE,
