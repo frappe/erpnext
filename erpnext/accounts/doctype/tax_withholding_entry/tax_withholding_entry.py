@@ -165,7 +165,7 @@ class TaxWithholdingEntry(Document):
 
 			amount_we_can_match = min(old_amount, remaining_amount)
 			proportion = amount_we_can_match / old_amount if old_amount else 0
-			values_to_update = self._get_values_to_update(proportion, field_type)
+			values_to_update = self._get_values_to_update(old_entry, proportion, field_type)
 
 			if old_amount <= amount_we_can_match:
 				# complete adjustment
@@ -173,8 +173,13 @@ class TaxWithholdingEntry(Document):
 
 			else:
 				# partial adjustment
+				# Calculate balance values for both taxable and withholding amounts
 				balance_amount = (old_amount - amount_we_can_match) * value_direction
-				frappe.db.set_value(DOCTYPE, old_entry.name, {amount_field: balance_amount})
+				balance_proportion = balance_amount / old_amount if old_amount else 0
+				balance_values = self._get_balance_values_to_update(old_entry, balance_proportion, field_type)
+				balance_values[amount_field] = balance_amount
+
+				frappe.db.set_value(DOCTYPE, old_entry.name, balance_values)
 
 				# new entry
 				new_entry = frappe.copy_doc(old_entry)
@@ -196,7 +201,7 @@ class TaxWithholdingEntry(Document):
 			)
 		_reset_idx(docs_needing_reindex)
 
-	def _get_values_to_update(self, proportion: float, field_type: str):
+	def _get_values_to_update(self, old_entry, proportion: float, field_type: str):
 		field_to_update = "withholding" if field_type == "taxable" else "taxable"
 
 		values = {
@@ -207,7 +212,13 @@ class TaxWithholdingEntry(Document):
 			"tax_rate": self.tax_rate,
 			"is_manual_override": bool(self.is_manual_override),
 			"status": "Duplicate",
+			"under_withheld_reason": None,  # Ensure this is always None for Duplicate entries
 		}
+
+		# For partial adjustments, we need to proportionally adjust both taxable and withholding amounts
+		if proportion < 1.0:
+			values["taxable_amount"] = old_entry.taxable_amount * proportion
+			values["withholding_amount"] = old_entry.withholding_amount * proportion
 
 		if field_to_update == "taxable":
 			values.update(
@@ -221,6 +232,14 @@ class TaxWithholdingEntry(Document):
 		# Update Tax Withholding Category values
 
 		return values
+
+	def _get_balance_values_to_update(self, old_entry, balance_proportion: float, field_type: str):
+		"""Calculate the balance amounts for both taxable and withholding fields for partial adjustments"""
+		field_to_update = "withholding" if field_type == "taxable" else "taxable"
+		field = f"{field_to_update}_amount"
+		amount = flt(old_entry.get(field) * balance_proportion, self.precision(field))
+
+		return {field: amount}
 
 	# CANCEL
 
@@ -421,6 +440,7 @@ class TaxWithholdingController:
 			key = (entry.withholding_doctype, entry.withholding_name)
 			if key in linked_payments:
 				# Calculate proportion for linked payments
+				# TODO: whether it should be entry.taxable_amount only or do we need proportion
 				proportion = linked_payments[key] / (entry.taxable_amount - entry.withholding_amount)
 
 				# for handling rounding adjustments
@@ -701,75 +721,53 @@ class TaxWithholdingController:
 		if not (under_entries and over_entries):
 			return []
 
-		consolidated_entries = {}
-
-		def _get_entry_key(entry):
-			"""Generate unique key for entry consolidation"""
-			return (
-				entry.get("withholding_doctype"),
-				entry.get("withholding_name"),
-				entry.get("taxable_doctype"),
-				entry.get("taxable_name"),
-				entry.get("tax_withholding_category"),
-				entry.get("tax_withholding_group"),
-			)
+		merged_entries = []
 
 		while under_entries and over_entries:
 			under = under_entries[0]
 			over = over_entries[0]
+			tax_rate = over.tax_rate
 
 			# Calculate tax amount for this taxable amount
 			tax_amount = self.compute_withheld_amount(
-				under.taxable_amount, over.tax_rate, round_off_tax_amount=category.round_off_tax_amount
+				under.taxable_amount, tax_rate, round_off_tax_amount=category.round_off_tax_amount
 			)
 
-			tax_amount_to_merge = flt(min(tax_amount, over.withholding_amount), self.precision)
+			tax_amount = flt(min(tax_amount, over.withholding_amount), self.precision)
 
-			if over.tax_rate == 0:
+			if tax_rate == 0:
 				taxable_amount = min(under.taxable_amount, over.taxable_amount)
 			else:
-				taxable_amount = (
-					flt(under.taxable_amount / tax_amount * tax_amount_to_merge, self.precision)
-					if tax_amount
-					else 0
-				)
+				taxable_amount = flt(100 / tax_rate * tax_amount, self.precision)
 
 			# Create merged entry
 			merged_entry = under.copy()
 			merged_entry.update(
 				{
 					"taxable_amount": taxable_amount,
-					"withholding_amount": tax_amount_to_merge,
+					"withholding_amount": tax_amount,
 					"withholding_doctype": over.withholding_doctype,
 					"withholding_name": over.withholding_name,
 					"withholding_date": over.withholding_date,
 					"under_withheld_reason": over.under_withheld_reason,
-					"tax_rate": over.tax_rate,
+					"tax_rate": tax_rate,
 					"lower_deduction_certificate": over.lower_deduction_certificate,
 				}
 			)
 
 			# Consolidate entries by document combination
 			if self._should_include_entry(merged_entry):
-				key = _get_entry_key(merged_entry)
+				merged_entries.append(merged_entry)
 
-				if key not in consolidated_entries:
-					consolidated_entries[key] = merged_entry.copy()
-				else:
-					# Accumulate amounts
-					consolidated_entries[key]["taxable_amount"] += merged_entry["taxable_amount"]
-					consolidated_entries[key]["withholding_amount"] += merged_entry["withholding_amount"]
-
-			# Update remaining amounts and clean up
 			under.taxable_amount -= taxable_amount
-			over.withholding_amount -= tax_amount_to_merge
+			over.withholding_amount -= tax_amount
 
-			if under.taxable_amount <= 0:
+			if flt(under.taxable_amount, self.precision) <= 0:
 				under_entries.popleft()
-			if over.withholding_amount <= 0:
+			if flt(over.withholding_amount, self.precision) <= 0:
 				over_entries.popleft()
 
-		return list(consolidated_entries.values())
+		return merged_entries
 
 	def _merge_entries(
 		self,
@@ -825,7 +823,7 @@ class TaxWithholdingController:
 			merged_entry = self._create_base_entry(entry, category, tax_rate, default_obj)
 			merged_entry.update(
 				{
-					"taxable_amount": amount_to_process,
+					"taxable_amount": flt(amount_to_process, self.precision),
 					"withholding_amount": self.compute_withheld_amount(
 						amount_to_process, tax_rate, round_off_tax_amount=category.round_off_tax_amount
 					),
@@ -845,7 +843,7 @@ class TaxWithholdingController:
 				merged_entries.append(merged_entry)
 				# Update entry amounts
 				entry.taxable_amount -= amount_to_process
-				if entry.taxable_amount <= 0:
+				if flt(entry.taxable_amount, self.precision) <= 0:
 					entries.popleft()
 			else:  # entry_type == "over"
 				# Over entries: adjust existing over-withheld amounts
@@ -866,7 +864,7 @@ class TaxWithholdingController:
 
 				# Update entry amounts - over entries update withholding_amount
 				entry.taxable_amount -= amount_to_process
-				if entry.taxable_amount <= 0:
+				if flt(entry.taxable_amount, self.precision) <= 0:
 					entries.popleft()
 
 			# Update constraint

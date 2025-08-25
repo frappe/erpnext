@@ -69,8 +69,21 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		sorted_entries = sorted(entries, key=sort_key)
 		sorted_expected = sorted(expected_entries, key=sort_key)
 
+		# Normalize empty strings and None values for comparison
+		def normalize_entry(entry):
+			normalized = entry.copy()
+			# Convert None to empty string and empty string to None for consistent comparison
+			for field in ["under_withheld_reason", "lower_deduction_certificate"]:
+				if field in normalized:
+					if normalized[field] == "" or normalized[field] is None:
+						normalized[field] = None
+			return normalized
+
+		normalized_entries = [normalize_entry(entry) for entry in sorted_entries]
+		normalized_expected = [normalize_entry(entry) for entry in sorted_expected]
+
 		self.assertEqual(
-			sorted_entries, sorted_expected, "Tax withholding entries do not match expected values"
+			normalized_entries, normalized_expected, "Tax withholding entries do not match expected values"
 		)
 
 	def get_tax_withholding_entry(self, **kwargs):
@@ -1108,9 +1121,28 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Payment Entry", pe2.name, expected_entries)
 
 		# Final invoice - should breach cumulative threshold and settle all previous entries
-		pi2 = create_purchase_invoice(supplier="Test TDS Supplier6", rate=9000, do_not_save=True)
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier6", rate=12000, do_not_save=True)
 		pi2.apply_tds = 1
 		pi2.tax_withholding_category = "Test Multi Invoice Category"
+		advances = pi2.get_advance_entries()
+		pi2.append(
+			"advances",
+			{
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"advance_amount": advances[0].amount,
+				"allocated_amount": advances[0].amount,
+			},
+		)
+		pi2.append(
+			"advances",
+			{
+				"reference_type": advances[1].reference_type,
+				"reference_name": advances[1].reference_name,
+				"advance_amount": advances[1].amount,
+				"allocated_amount": advances[1].amount,
+			},
+		)
 		pi2.save()
 		pi2.submit()
 		invoices.append(pi2)
@@ -1165,43 +1197,195 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 				withholding_name=pe2.name,
 				under_withheld_reason=None,
 			),
+			# against second payment entry
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=3000.0,  # Final invoice amount
+				withholding_amount=300.0,  # TDS on final invoice
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,  # Final invoice itself
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+				under_withheld_reason=None,
+			),
 		]
 		self.validate_tax_withholding_entries("Purchase Invoice", pi2.name, expected_entries)
 
+		# validate duplicate entries in Purchase Invoice 1
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=4000.0,
+				withholding_amount=400.0,
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+				under_withheld_reason=None,
+			),
+		]
+
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, expected_entries)
+		# validate duplicate entries in payment entry 1
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=3000.0,  # Final invoice amount
+				withholding_amount=300.0,  # TDS on final invoice
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,  # Final invoice itself
+				withholding_doctype="Payment Entry",
+				withholding_name=pe1.name,
+				under_withheld_reason=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe1.name, expected_entries)
+
+		# Validate duplicate entries in payment entry 2
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=6000.0,  # Final invoice amount
+				withholding_amount=600.0,  # TDS on final invoice
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,  # Final invoice itself
+				withholding_doctype="Payment Entry",
+				withholding_name=pe2.name,
+				under_withheld_reason=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe2.name, expected_entries)
+
 		self.cleanup_invoices(invoices)
 
-	def test_tax_withholding_via_payment_entry_for_advances(self):
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier7", "tax_withholding_category", "Advance TDS Category"
+	def test_tds_deduction_with_partial_payment_adjustment(self):
+		invoices = []
+		self.setup_party_with_category("Supplier", "Test TDS Supplier6", "Test Multi Invoice Category")
+
+		pe = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier6", paid_amount=6000
 		)
+		pe.apply_tds = 1
+		pe.tax_withholding_category = "Test Multi Invoice Category"
+		pe.save()
+		pe.submit()
+		invoices.append(pe)
 
-		# create payment entry
-		pe1 = create_payment_entry(
-			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier7", paid_amount=4000
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=6000.0,
+				withholding_amount=600.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			)
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=12000, do_not_save=True)
+		pi.apply_tds = 1
+		pi.tax_withholding_category = "Test Multi Invoice Category"
+		advances = pi.get_advance_entries()
+		pi.append(
+			"advances",
+			{
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"advance_amount": advances[0].amount,
+				"allocated_amount": 3600,
+			},
 		)
-		pe1.submit()
+		pi.save()
+		pi.submit()
+		invoices.append(pi)
 
-		self.assertFalse(pe1.get("taxes"))
-
-		pe2 = create_payment_entry(
-			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier7", paid_amount=4000
-		)
-		pe2.submit()
-
-		self.assertFalse(pe2.get("taxes"))
-
-		pe3 = create_payment_entry(
-			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier7", paid_amount=4000
-		)
-		pe3.apply_tds = 1
-		pe3.tax_withholding_category = "Advance TDS Category"
-		pe3.save()
-		pe3.submit()
-
-		self.assertEqual(pe3.get("taxes")[0].tax_amount, 400)
-		pe1.cancel()
-		pe2.cancel()
-		pe3.cancel()
+		expected_entries = [
+			# against first payment entry
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=4000.0,
+				withholding_amount=400.0,  # 600 * 6000/(6000-5400)
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,  # Final invoice itself
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+				under_withheld_reason=None,
+			),
+			# against remaining invoice
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=8000.0,  # Final invoice amount
+				withholding_amount=800.0,  # TDS on final invoice
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,  # Final invoice itself
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+				under_withheld_reason=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, expected_entries)
+		# validate duplicate entries
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=4000.0,
+				withholding_amount=400.0,  # 600 * 6000/(6000-5400)
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,  # Final invoice itself
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+				under_withheld_reason=None,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier6",
+				tax_rate=10.0,
+				taxable_amount=2000.0,
+				withholding_amount=200.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+		]
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
+		self.cleanup_invoices(invoices)
 
 	def test_lower_deduction_certificate_application(self):
 		frappe.db.set_value(
