@@ -209,8 +209,19 @@ frappe.ui.form.on("Job Card", {
 								label: __("Select Employees"),
 								options: "Job Card Time Log",
 								fieldname: "employees",
+								get_query: () => {
+									return {
+										filters: {
+											status: "Active",
+										},
+									};
+								},
 							},
 							(d) => {
+								if (!d.employees || d.employees.length === 0) {
+									frappe.msgprint(__("Please select at least one Employee"));
+									return;
+								}
 								frm.events.start_timer(frm, from_time, d.employees);
 							},
 							__("Assign Job to Employee")
