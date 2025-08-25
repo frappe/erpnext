@@ -180,6 +180,10 @@ erpnext.buying = {
 					},
 				});
 				erpnext.utils.set_letter_head(this.frm);
+
+				// Ensure base TransactionController company handler runs to set currency,
+				// pricing, taxes, and terms based on company and party.
+				super.company();
 			}
 
 			supplier_address() {
