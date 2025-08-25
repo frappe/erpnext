@@ -25,6 +25,10 @@ frappe.query_reports["Balance Sheet"]["filters"].push({
 	default: ["Vertical"],
 	reqd: 1,
 	depends_on: "eval:doc.selected_view == 'Report'",
+	on_change: function () {
+		frappe.query_report.export_dialog = undefined;
+		frappe.query_report.refresh();
+	},
 });
 
 frappe.query_reports["Balance Sheet"]["filters"].push({
