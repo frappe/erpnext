@@ -37,7 +37,21 @@
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
   "experimental_section",
-  "use_server_side_reactivity"
+  "use_server_side_reactivity",
+  "subcontract",
+  "backflush_raw_materials_of_subcontract_based_on",
+  "column_break_q9qf",
+  "over_receipt_allowance",
+  "section_break_zwje",
+  "auto_create_subcontracting_inward_order",
+  "column_break_1dcg",
+  "auto_create_delivery_note",
+  "stock_reservation_section",
+  "reserve_non_customer_provided_items",
+  "section_break_zwh6",
+  "allow_delivery_of_overproduced_qty",
+  "column_break_idtu",
+  "do_not_include_scrap_items"
  ],
  "fields": [
   {
@@ -235,7 +249,88 @@
    "description": "Allows users to submit Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.",
    "fieldname": "allow_zero_qty_in_quotation",
    "fieldtype": "Check",
-   "label": "Allow Quotation with Zero Quantity"
+   "label": "Allow 0 Qty in Quotation (Unit Price Items)"
+  },
+  {
+   "fieldname": "subcontract",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting Settings"
+  },
+  {
+   "default": "BOM",
+   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials of Subcontract Based On",
+   "options": "BOM\nMaterial Received for Subcontract"
+  },
+  {
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
+   "description": "Percentage you are allowed to receive more against the quantity required. For example: If you require 100 units. and your Allowance is 10% then you are allowed to receive 110 units.",
+   "fieldname": "over_receipt_allowance",
+   "fieldtype": "Float",
+   "label": "Over Receipt Allowance (%)"
+  },
+  {
+   "default": "0",
+   "description": "Subcontracting Inward Order (Draft) will be auto-created on submission of Sales Order.",
+   "fieldname": "auto_create_subcontracting_inward_order",
+   "fieldtype": "Check",
+   "label": "Auto Create Subcontracting Inward Order"
+  },
+  {
+   "default": "0",
+   "description": "Delivery Note (Draft) will be auto-created on submission of Subcontracting Delivery.",
+   "fieldname": "auto_create_delivery_note",
+   "fieldtype": "Check",
+   "label": "Auto Create Delivery Note"
+  },
+  {
+   "fieldname": "column_break_1dcg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zwje",
+   "fieldtype": "Section Break",
+   "label": "Auto Creation"
+  },
+  {
+   "fieldname": "column_break_q9qf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zwh6",
+   "fieldtype": "Section Break",
+   "label": "Delivery"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, system will allow user to deliver the entire quantity of the finished goods produced against the Subcontracting Inward Order. If disabled, system will allow delivery of only the ordered quantity.",
+   "fieldname": "allow_delivery_of_overproduced_qty",
+   "fieldtype": "Check",
+   "label": "Allow Delivery of over-produced Qty"
+  },
+  {
+   "fieldname": "column_break_idtu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "By default, system will include Scrap Items when creating Subcontracting Delivery.\nIf enabled, system will no longer add Scrap Items when creating Subcontracting Delivery.",
+   "fieldname": "do_not_include_scrap_items",
+   "fieldtype": "Check",
+   "label": "Do not include Scrap Items"
+  },
+  {
+   "fieldname": "stock_reservation_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Reservation"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, Non Customer Provided Items will be reserved on submission of Subcontracted Inward Order.\nIf disabled, they will be reserved on submission of Work Order instead.",
+   "fieldname": "reserve_non_customer_provided_items",
+   "fieldtype": "Check",
+   "label": "Reserve non Customer Provided Items"
   }
  ],
  "grid_page_length": 50,
@@ -244,7 +339,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-06 15:23:14.332971",
+ "modified": "2025-08-14 14:25:02.126513",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

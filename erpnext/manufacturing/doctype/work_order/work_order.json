@@ -14,10 +14,13 @@
   "item_name",
   "image",
   "bom_no",
+  "subcontracting_inward_order",
+  "subcontracting_inward_order_item",
   "sales_order",
   "column_break1",
   "company",
   "qty",
+  "max_producible_qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
   "disassembled_qty",
@@ -161,7 +164,8 @@
    "fieldname": "use_multi_level_bom",
    "fieldtype": "Check",
    "label": "Use Multi-Level BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.subcontracting_inward_order"
   },
   {
    "default": "0",
@@ -220,7 +224,8 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "label": "Sales Order",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only_depends_on": "subcontracting_inward_order"
   },
   {
    "fieldname": "project",
@@ -232,7 +237,7 @@
   },
   {
    "default": "0",
-   "depends_on": "skip_transfer",
+   "depends_on": "eval:doc.skip_transfer && !doc.subcontracting_inward_order",
    "fieldname": "from_wip_warehouse",
    "fieldtype": "Check",
    "label": "Backflush Raw Materials From Work-in-Progress Warehouse"
@@ -244,6 +249,7 @@
    "options": "fa fa-building"
   },
   {
+   "depends_on": "eval:!(doc.skip_transfer && doc.subcontracting_inward_order)",
    "description": "This is a location where operations are executed.",
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
@@ -256,7 +262,8 @@
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only_depends_on": "subcontracting_inward_order"
   },
   {
    "fieldname": "column_break_12",
@@ -415,6 +422,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "eval:!doc.subcontracting_inward_order",
    "description": "Manufacture against Material Request",
    "fieldname": "material_request",
    "fieldtype": "Link",
@@ -592,7 +600,8 @@
    "default": "0",
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
-   "label": " Reserve Stock"
+   "label": "Reserve Stock",
+   "read_only_depends_on": "subcontracting_inward_order"
   },
   {
    "depends_on": "eval:doc.docstatus==1",
@@ -600,6 +609,32 @@
    "fieldtype": "Float",
    "label": "Disassembled Qty",
    "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "subcontracting_inward_order",
+   "fieldname": "subcontracting_inward_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Inward Order",
+   "options": "Subcontracting Inward Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subcontracting_inward_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Subcontracting Inward Order Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "max_producible_qty",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Max Producible Qty",
+   "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   }
  ],

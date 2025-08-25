@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-12 11:34:16.393300",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "fg_item_code",
+  "column_break_hoxe",
+  "stock_uom",
+  "reserve_warehouse",
+  "column_break_rptg",
+  "reference_name",
+  "section_break_gqk9",
+  "produced_qty",
+  "delivered_qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hoxe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reserve_warehouse",
+   "fieldtype": "Link",
+   "label": "Reserve Warehouse",
+   "options": "Warehouse",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rptg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "label": "Reference Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_gqk9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "produced_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Produced Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "delivered_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Delivered Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "fg_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Finished Good Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-12 12:47:29.181289",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontracting Inward Order Scrap Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -93,6 +93,7 @@ frappe.ui.form.on("Stock Entry", {
 							"Manufacture",
 							"Repack",
 							"Send to Subcontractor",
+							"Receive from Customer",
 						],
 						doc.purpose
 					)
@@ -607,9 +608,13 @@ frappe.ui.form.on("Stock Entry", {
 	show_bom_custom_button: function (frm) {
 		if (
 			frm.doc.docstatus === 0 &&
-			["Material Issue", "Material Receipt", "Material Transfer", "Send to Subcontractor"].includes(
-				frm.doc.purpose
-			)
+			[
+				"Material Issue",
+				"Material Receipt",
+				"Material Transfer",
+				"Send to Subcontractor",
+				"Receive from Customer",
+			].includes(frm.doc.purpose)
 		) {
 			frm.add_custom_button(
 				__("Bill of Materials"),
@@ -622,10 +627,6 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	get_items_from_bom: function (frm) {
-		let filters = function () {
-			return { filters: { docstatus: 1 } };
-		};
-
 		let fields = [
 			{
 				fieldname: "bom",
@@ -798,6 +799,18 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontract_order",
 				source_name: frm.doc.subcontracting_order,
+				target_doc: frm,
+				freeze: true,
+			});
+		}
+	},
+
+	subcontracting_inward_order: (frm) => {
+		if (frm.doc.subcontracting_inward_order) {
+			frm.set_value("sales_order", "");
+			erpnext.utils.map_current_doc({
+				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontract_inward_order",
+				source_name: frm.doc.subcontracting_inward_order,
 				target_doc: frm,
 				freeze: true,
 			});
@@ -1045,6 +1058,20 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			};
 		});
 
+		this.frm.set_query("subcontracting_inward_order", function () {
+			return {
+				filters: {
+					docstatus: 1,
+					company: me.frm.doc.company,
+					status: ["not in", ["Completed", "Closed"]],
+				},
+			};
+		});
+
+		if (me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
+			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
+		}
+
 		this.frm.fields_dict.items.grid.get_field("expense_account").get_query = function () {
 			if (erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 				return {
@@ -1060,6 +1087,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			this.frm.add_fetch("purchase_order", "supplier", "supplier");
 		} else {
 			this.frm.add_fetch("subcontracting_order", "supplier", "supplier");
+			this.frm.add_fetch("subcontracting_inward_order", "customer", "customer");
 		}
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: "supplier", doctype: "Supplier" };
@@ -1345,6 +1373,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 				doc.delivery_note_no =
 				doc.sales_invoice_no =
 					null;
+		} else if (doc.purpose === "Receive from Customer") {
+			doc.supplier = doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 		} else {
 			doc.customer =
 				doc.customer_name =

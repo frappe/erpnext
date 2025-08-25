@@ -91,9 +91,11 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_customer_provided_item",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
-   "label": "Allow Alternative Item"
+   "label": "Allow Alternative Item",
+   "read_only_depends_on": "eval:doc.is_customer_provided_item"
   },
   {
    "default": "0",
@@ -195,7 +197,7 @@
  "grid_page_length": 50,
  "istable": 1,
  "links": [],
- "modified": "2025-05-12 17:36:00.115181",
+ "modified": "2025-05-24 17:31:22.211661",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

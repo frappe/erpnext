@@ -936,7 +936,14 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 		frappe.qb.from_(table)
 		.select(
 			table.name,
-			Concat("#", table.idx, ", ", table.item_code),
+			Concat(
+				"#",
+				table.idx,
+				", ",
+				table.item_code
+				if doctype != "Subcontracting Inward Order Received Item"
+				else table.rm_item_code,
+			),
 		)
 		.orderby(table.idx)
 		.offset(start)

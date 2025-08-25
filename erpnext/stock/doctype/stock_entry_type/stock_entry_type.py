@@ -31,6 +31,9 @@ class StockEntryType(Document):
 			"Repack",
 			"Send to Subcontractor",
 			"Disassemble",
+			"Receive from Customer",
+			"Return Raw Material to Customer",
+			"Subcontracting Delivery",
 		]
 	# end: auto-generated types
 
@@ -49,7 +52,7 @@ class StockEntryType(Document):
 			"Manufacture",
 			"Repack",
 			"Send to Subcontractor",
-			"Disassemble",
+			"Receive from Customer" "Disassemble",
 		]:
 			frappe.throw(f"Stock Entry Type {self.name} cannot be set as standard")
 

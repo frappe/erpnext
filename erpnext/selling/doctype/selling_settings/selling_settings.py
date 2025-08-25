@@ -20,15 +20,22 @@ class SellingSettings(Document):
 		from frappe.types import DF
 
 		allow_against_multiple_purchase_orders: DF.Check
+		allow_delivery_of_overproduced_qty: DF.Check
 		allow_multiple_items: DF.Check
 		allow_negative_rates_for_items: DF.Check
 		allow_sales_order_creation_for_expired_quotation: DF.Check
 		allow_zero_qty_in_quotation: DF.Check
 		allow_zero_qty_in_sales_order: DF.Check
+		auto_create_delivery_note: DF.Check
+		auto_create_subcontracting_inward_order: DF.Check
+		backflush_raw_materials_of_subcontract_based_on: DF.Literal[
+			"BOM", "Material Received for Subcontract"
+		]
 		blanket_order_allowance: DF.Float
 		cust_master_name: DF.Literal["Customer Name", "Naming Series", "Auto Name"]
 		customer_group: DF.Link | None
 		dn_required: DF.Literal["No", "Yes"]
+		do_not_include_scrap_items: DF.Check
 		dont_reserve_sales_order_qty_on_sales_return: DF.Check
 		editable_bundle_item_rates: DF.Check
 		editable_price_list_rate: DF.Check
@@ -37,6 +44,8 @@ class SellingSettings(Document):
 		hide_tax_id: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		maintain_same_sales_rate: DF.Check
+		over_receipt_allowance: DF.Float
+		reserve_non_customer_provided_items: DF.Check
 		role_to_override_stop_action: DF.Link | None
 		sales_update_frequency: DF.Literal["Monthly", "Each Transaction", "Daily"]
 		selling_price_list: DF.Link | None

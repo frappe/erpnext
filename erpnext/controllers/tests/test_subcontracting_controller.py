@@ -14,6 +14,7 @@ from erpnext.controllers.subcontracting_controller import (
 	make_rm_stock_entry,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.selling.doctype.sales_order.test_sales_order import create_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	make_serial_batch_bundle,
@@ -1427,6 +1428,42 @@ def get_subcontracting_order(**args):
 	)
 
 	return create_subcontracting_order(po_name=po.name, **args)
+
+
+def get_subcontracting_inward_order(**args):
+	from erpnext.subcontracting.doctype.subcontracting_inward_order.test_subcontracting_inward_order import (
+		create_subcontracting_inward_order,
+	)
+
+	args = frappe._dict(args)
+
+	if args.get("so_name"):
+		so = frappe.get_doc("Sales Order", args.get("so_name"))
+
+		if so.is_subcontracted:
+			return create_subcontracting_inward_order(**args)
+
+	if not args.service_items:
+		service_items = [
+			{
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+	else:
+		service_items = args.service_items
+
+	po = create_sales_order(
+		rm_items=service_items,
+		is_subcontracted=1,
+		company=args.company,
+	)
+
+	return create_subcontracting_inward_order(po_name=po.name, **args)
 
 
 def get_rm_items(supplied_items):

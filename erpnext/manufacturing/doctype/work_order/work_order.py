@@ -101,6 +101,7 @@ class WorkOrder(Document):
 		material_request: DF.Link | None
 		material_request_item: DF.Data | None
 		material_transferred_for_manufacturing: DF.Float
+		max_producible_qty: DF.Float
 		naming_series: DF.Literal["MFG-WO-.YYYY.-"]
 		operations: DF.Table[WorkOrderOperation]
 		planned_end_date: DF.Datetime | None
@@ -136,6 +137,8 @@ class WorkOrder(Document):
 			"Cancelled",
 		]
 		stock_uom: DF.Link | None
+		subcontracting_inward_order: DF.Link | None
+		subcontracting_inward_order_item: DF.Data | None
 		total_operating_cost: DF.Currency
 		track_semi_finished_goods: DF.Check
 		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
@@ -177,7 +180,9 @@ class WorkOrder(Document):
 		if self.bom_no:
 			validate_bom_no(self.production_item, self.bom_no)
 
-		self.validate_sales_order()
+		if not self.get("subcontracting_inward_order"):
+			self.validate_sales_order()
+
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
@@ -200,6 +205,7 @@ class WorkOrder(Document):
 		self.set_required_items(reset_only_qty=len(self.get("required_items")))
 		self.enable_auto_reserve_stock()
 		self.validate_operations_sequence()
+		self.validate_subcontracting_inward_order()
 
 	def validate_dates(self):
 		if self.actual_start_date and self.actual_end_date:
@@ -207,7 +213,7 @@ class WorkOrder(Document):
 				frappe.throw(_("Actual End Date cannot be before Actual Start Date"))
 
 	def validate_fg_warehouse_for_reservation(self):
-		if self.reserve_stock and self.sales_order:
+		if self.reserve_stock and self.sales_order and not self.subcontracting_inward_order:
 			warehouses = frappe.get_all(
 				"Sales Order Item",
 				filters={"parent": self.sales_order, "item_code": self.production_item},
@@ -253,6 +259,33 @@ class WorkOrder(Document):
 						)
 					)
 				sequence_id = op.sequence_id
+
+	def validate_subcontracting_inward_order(self):
+		if scio_item_name := self.get("subcontracting_inward_order_item"):
+			data = frappe.get_value(
+				"Subcontracting Inward Order Item", scio_item_name, ["qty", "produced_qty"], as_dict=True
+			)
+			if self.qty > data.qty - data.produced_qty:
+				frappe.throw(
+					_(
+						"Quantity to be manufactured cannot exceed quantity {0} in Subcontracting Inward Order"
+					).format(frappe.bold(data.qty - data.produced_qty))
+				)
+			if self.source_warehouse != (
+				rm_receipt_warehouse := frappe.db.get_value(
+					"Subcontracting Inward Order",
+					self.subcontracting_inward_order,
+					"customer_warehouse",
+				)
+			):
+				frappe.throw(
+					_(
+						"Source Warehouse {0} must be same as Customer Warehouse {1} in the Subcontracting Inward Order"
+					).format(
+						frappe.bold(self.source_warehouse),
+						frappe.bold(rm_receipt_warehouse),
+					)
+				)
 
 	def set_warehouses(self):
 		for row in self.required_items:
@@ -593,6 +626,8 @@ class WorkOrder(Document):
 		if self.reserve_stock:
 			self.update_stock_reservation()
 
+		self.update_subcontracting_inward_order_received_items()
+
 	def on_cancel(self):
 		self.validate_cancel()
 		self.db_set("status", "Cancelled")
@@ -614,9 +649,28 @@ class WorkOrder(Document):
 		if self.reserve_stock:
 			self.update_stock_reservation()
 
+		self.update_subcontracting_inward_order_received_items(cancel=True)
+
 	def update_stock_reservation(self):
 		make_stock_reservation_entries(self)
 		self.db_set("status", self.get_status())
+
+	def update_subcontracting_inward_order_received_items(self, cancel=False):
+		if scio_item_name := self.get("subcontracting_inward_order_item"):
+			scio_rm_item_names = frappe.db.get_all(
+				"Subcontracting Inward Order Received Item",
+				filters={"reference_name": scio_item_name, "docstatus": 1},
+				fields=["name"],
+			)
+			for scio_rm_item_name in scio_rm_item_names:
+				scio_rm_item = frappe.get_doc("Subcontracting Inward Order Received Item", scio_rm_item_name)
+				required_qty = next(
+					wo_item.required_qty
+					for wo_item in self.get("required_items")
+					if wo_item.item_code == scio_rm_item.rm_item_code
+				)
+				scio_rm_item.work_order_qty += required_qty if not cancel else -required_qty
+				scio_rm_item.save()
 
 	def create_serial_no_batch_no(self):
 		if not (self.has_serial_no or self.has_batch_no):
@@ -1186,6 +1240,14 @@ class WorkOrder(Document):
 					OverProductionError,
 				)
 
+		if self.subcontracting_inward_order and self.qty > self.max_producible_qty:
+			frappe.throw(
+				_("Cannot produce more than {0} quantity for {1}").format(
+					frappe.bold(self.max_producible_qty), frappe.bold(self.production_item)
+				),
+				OverProductionError,
+			)
+
 	def validate_transfer_against(self):
 		if self.docstatus != 1:
 			# let user configure operations until they're ready to submit
@@ -1483,7 +1545,7 @@ class WorkOrder(Document):
 
 		stock_entry.reload()
 		if stock_entry.purpose == "Manufacture" and (
-			self.sales_order or self.production_plan_sub_assembly_item
+			self.sales_order or self.production_plan_sub_assembly_item or self.subcontracting_inward_order
 		):
 			items = self.get_finished_goods_for_reservation(stock_entry)
 		elif stock_entry.purpose == "Material Transfer for Manufacture":
@@ -1528,6 +1590,8 @@ class WorkOrder(Document):
 		if self.production_plan_sub_assembly_item:
 			# Reserve the sub-assembly item for the final product for the work order.
 			item_details = self.get_wo_details()
+		elif self.subcontracting_inward_order:
+			item_details = self.get_scio_details()
 		else:
 			# Reserve the final product for the sales order.
 			item_details = self.get_so_details()
@@ -1552,7 +1616,8 @@ class WorkOrder(Document):
 					or row.t_warehouse != warehouse
 					or row.item_code != item.item_code
 				):
-					continue
+					if not (self.subcontracting_inward_order and row.is_scrap_item):
+						continue
 
 				reserved_qty = qty_to_reserve
 				if qty_to_reserve > row.transfer_qty:
@@ -1569,7 +1634,7 @@ class WorkOrder(Document):
 							"voucher_detail_no": item.name,
 							"item_code": row.item_code,
 							"warehouse": row.t_warehouse,
-							"stock_qty": reserved_qty,
+							"stock_qty": reserved_qty if not row.is_scrap_item else row.transfer_qty,
 							"from_voucher_no": stock_entry.name,
 							"from_voucher_type": stock_entry.doctype,
 							"from_voucher_detail_no": row.name,
@@ -1615,6 +1680,25 @@ class WorkOrder(Document):
 		)
 
 		return query.run(as_dict=1)
+
+	def get_scio_details(self):
+		return frappe.get_all(
+			"Subcontracting Inward Order Item",
+			filters={
+				"name": self.subcontracting_inward_order_item,
+				"docstatus": 1,
+			},
+			fields=[
+				"item_code",
+				"name",
+				"qty as stock_qty",
+				"produced_qty as stock_reserved_qty",
+				"delivery_warehouse as warehouse",
+				"parent as voucher_no",
+				"parenttype as voucher_type",
+				"delivered_qty",
+			],
+		)
 
 	def get_so_details(self):
 		return frappe.get_all(
@@ -1718,7 +1802,8 @@ class WorkOrder(Document):
 
 
 @frappe.whitelist()
-def make_stock_reservation_entries(doc, items=None, table_name=None, is_transfer=True, notify=False):
+def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=False):
+	is_transfer = cint(is_transfer)
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
@@ -1731,6 +1816,13 @@ def make_stock_reservation_entries(doc, items=None, table_name=None, is_transfer
 		if doc.production_plan and is_transfer:
 			sre.transfer_reservation_entries_to(
 				doc.production_plan, from_doctype="Production Plan", to_doctype="Work Order"
+			)
+		elif doc.subcontracting_inward_order and is_transfer:
+			sre.transfer_reservation_entries_to(
+				doc.subcontracting_inward_order,
+				from_doctype="Subcontracting Inward Order",
+				to_doctype="Work Order",
+				against_fg_item=doc.subcontracting_inward_order_item,
 			)
 		else:
 			sre_created = sre.make_stock_reservation_entries()
@@ -1993,6 +2085,9 @@ def make_stock_entry(work_order_id, purpose, qty=None, target_warehouse=None):
 	stock_entry.fg_completed_qty = (
 		qty if qty is not None else (flt(work_order.qty) - flt(work_order.produced_qty))
 	)
+
+	if purpose == "Manufacture" and work_order.subcontracting_inward_order:
+		stock_entry.subcontracting_inward_order = work_order.subcontracting_inward_order
 
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")

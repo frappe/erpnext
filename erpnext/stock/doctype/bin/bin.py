@@ -222,6 +222,65 @@ class Bin(Document):
 			self.set_projected_qty()
 			self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
+	def update_reserved_qty_for_sub_contracting_inward(
+		self, subcontract_doctype="Subcontracting Inward Order"
+	):
+		subcontract_order = frappe.qb.DocType(subcontract_doctype)
+		received_item = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+
+		conditions = (
+			(received_item.rm_item_code == self.item_code)
+			& (subcontract_order.name == received_item.parent)
+			& (subcontract_order.per_delivered < 100)
+			& (received_item.reserve_warehouse == self.warehouse)
+			& (subcontract_order.docstatus == 1)
+		)
+
+		reserved_qty_for_sub_contract = (
+			frappe.qb.from_(subcontract_order)
+			.from_(received_item)
+			.select(Sum(Coalesce(received_item.required_qty, 0)))
+			.where(conditions)
+		).run()[0][0] or 0.0
+
+		se = frappe.qb.DocType("Stock Entry")
+		se_item = frappe.qb.DocType("Stock Entry Detail")
+
+		if frappe.db.field_exists("Stock Entry", "is_return"):
+			qty_field = Case().when(se.is_return == 1, se_item.transfer_qty * -1).else_(se_item.transfer_qty)
+		else:
+			qty_field = se_item.transfer_qty
+
+		conditions = (
+			(se.docstatus == 1)
+			& (se.purpose == "Receive from Customer")
+			& ((se_item.item_code == self.item_code) | (se_item.original_item == self.item_code))
+			& (se.name == se_item.parent)
+			& (subcontract_order.docstatus == 1)
+			& (subcontract_order.per_delivered < 100)
+			& (
+				(Coalesce(se.subcontracting_order, "") != "")
+				& (subcontract_order.name == se.subcontracting_inward_order)
+			)
+		)
+
+		materials_transferred = (
+			frappe.qb.from_(se)
+			.from_(se_item)
+			.from_(subcontract_order)
+			.select(Sum(qty_field))
+			.where(conditions)
+		).run()[0][0] or 0.0
+
+		if reserved_qty_for_sub_contract > materials_transferred:
+			reserved_qty_for_sub_contract = reserved_qty_for_sub_contract - materials_transferred
+		else:
+			reserved_qty_for_sub_contract = 0
+
+		self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract, update_modified=True)
+		self.set_projected_qty()
+		self.db_set("projected_qty", self.projected_qty, update_modified=True)
+
 	def update_reserved_stock(self):
 		"""Update `Reserved Stock` on change in Reserved Qty of Stock Reservation Entry"""
 

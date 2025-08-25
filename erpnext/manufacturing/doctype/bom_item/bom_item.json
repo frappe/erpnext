@@ -42,7 +42,8 @@
   "original_item",
   "column_break_33",
   "sourced_by_supplier",
-  "is_sub_assembly_item"
+  "is_sub_assembly_item",
+  "is_customer_provided_item"
  ],
  "fields": [
   {
@@ -308,6 +309,14 @@
    "fieldtype": "Check",
    "label": "Is Sub Assembly Item",
    "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_customer_provided_item",
+   "fieldname": "is_customer_provided_item",
+   "fieldtype": "Check",
+   "label": "Is Customer Provided Item",
    "read_only": 1
   }
  ],
