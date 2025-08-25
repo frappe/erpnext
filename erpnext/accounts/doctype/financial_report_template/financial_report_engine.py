@@ -2,10 +2,12 @@
 # For license information, please see license.txt
 
 import ast
-import re
+import math
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from datetime import datetime
 from functools import reduce
-from typing import Any
+from typing import Any, Union
 
 import frappe
 from frappe import _
@@ -26,85 +28,541 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 )
 
+# ============================================================================
+# DATA MODELS
+# ============================================================================
+
+
+@dataclass
+class PeriodValue:
+	"""Represents financial data for a single period"""
+
+	period_key: str
+	opening: float = 0.0
+	closing: float = 0.0
+	movement: float = 0.0
+
+	def get_value(self, balance_type: str) -> float:
+		if balance_type == "Opening Balance":
+			return self.opening
+		elif balance_type == "Closing Balance":
+			return self.closing
+		elif balance_type == "Period Movement (Debits - Credits)":
+			return self.movement
+		return 0.0
+
+
+@dataclass
+class AccountData:
+	"""Account data across all periods"""
+
+	account_name: str
+	period_values: list[PeriodValue] = field(default_factory=list)
+	_period_lookup: dict[str, PeriodValue] = field(default_factory=dict)
+
+	def add_period(self, period_value: PeriodValue) -> None:
+		"""Add period data in order"""
+		if period_value.period_key not in self._period_lookup:
+			self.period_values.append(period_value)
+		else:
+			# Update existing period
+			for i, pv in enumerate(self.period_values):
+				if pv.period_key == period_value.period_key:
+					self.period_values[i] = period_value
+					break
+
+		self._period_lookup[period_value.period_key] = period_value
+
+	def get_period(self, period_key: str) -> PeriodValue | None:
+		return self._period_lookup.get(period_key)
+
+	def get_values_by_type(self, balance_type: str) -> list[float]:
+		return [pv.get_value(balance_type) for pv in self.period_values]
+
+	def has_periods(self) -> bool:
+		return len(self.period_values) > 0
+
+
+@dataclass
+class RowData:
+	"""Represents a processed template row with calculated values"""
+
+	row: Any  # FinancialReportRow
+	values: list[float] = field(default_factory=list)
+	account_details: dict[str, AccountData] | None = None
+	is_detail_row: bool = False
+	parent_reference: str | None = None
+
+
+@dataclass
+class SegmentData:
+	"""Represents a segment with its rows and metadata"""
+
+	rows: list[RowData]
+	label: str = ""
+	index: int = 0
+
+
+@dataclass
+class ReportContext:
+	"""Context object that flows through the pipeline"""
+
+	template: Any  # FinancialReportTemplate
+	filters: dict[str, Any]
+	period_list: list[dict] = field(default_factory=list)
+	processed_rows: list[RowData] = field(default_factory=list)
+	column_segments: list[list[RowData]] = field(default_factory=list)
+	account_data: dict[str, AccountData] = field(default_factory=dict)
+	raw_data: dict[str, Any] = field(default_factory=dict)
+	show_detailed: bool = False
+
+	def get_result(self) -> tuple[list[dict], list[dict]]:
+		"""Get final formatted columns and data"""
+		return self.raw_data.get("columns", []), self.raw_data.get("formatted_data", [])
+
+
+@dataclass
+class FormattingRule:
+	"""Rule for applying formatting to rows"""
+
+	condition: callable
+	format_properties: dict[str, Any]
+
+	def applies_to(self, row_data: RowData) -> bool:
+		"""Check if rule applies to given row"""
+		try:
+			return self.condition(row_data)
+		except Exception:
+			return False
+
+
+# ============================================================================
+# REPORT ENGINE
+# ============================================================================
+
 
 class FinancialReportEngine:
-	"""
-	Main engine for processing custom financial report templates.
-	Orchestrates the entire report generation process.
-	"""
-
-	def __init__(self, template_name: str, filters: dict[str, Any]):
-		self.template_name = template_name
-		self.filters = filters
-		self.template = None
-		self.period_list = []
-		self.row_data = {}
-		self.processed_rows = []
-
-	def execute(self) -> tuple:
+	def execute(self, filters: dict[str, Any]) -> tuple[list[dict], list[dict]]:
+		"""Execute the complete report generation"""
 		try:
-			self.load_template()
+			# Initialize context
+			context = self._initialize_context(filters)
 
-			self.generate_periods()
+			# Execute
+			self.collect_financial_data(context)
+			self.process_calculations(context)
+			self.format_report_data(context)
 
-			columns = self.get_report_columns()
-
-			self.process_rows()
-
-			data = self.format_report_data()
-
-			return columns, data
+			return context.get_result()
 
 		except Exception as e:
-			frappe.log_error(f"Financial Report Error: {e!s}")
+			frappe.log_error(f"Financial Report Engine Error: {e!s}")
 			frappe.throw(_("Error generating financial report: {0}").format(str(e)))
 
-	def load_template(self):
-		self.template = frappe.get_doc("Financial Report Template", self.template_name)
-		if not self.template:
-			frappe.throw(_("Financial Report Template {0} not found").format(self.template_name))
+	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
+		template_name = filters.get("template_name")
+		template = frappe.get_doc("Financial Report Template", template_name)
 
-		if self.template.disabled:
-			frappe.throw(_("Financial Report Template {0} is disabled").format(self.template_name))
+		if not template:
+			frappe.throw(_("Financial Report Template {0} not found").format(template_name))
 
-	def generate_periods(self):
-		self.period_list = get_period_list(
-			self.filters.from_fiscal_year,
-			self.filters.to_fiscal_year,
-			self.filters.period_start_date,
-			self.filters.period_end_date,
-			self.filters.filter_based_on,
-			self.filters.periodicity,
-			company=self.filters.company,
+		if template.disabled:
+			frappe.throw(_("Financial Report Template {0} is disabled").format(template_name))
+
+		# Generate periods
+		period_list = get_period_list(
+			filters.from_fiscal_year,
+			filters.to_fiscal_year,
+			filters.period_start_date,
+			filters.period_end_date,
+			filters.filter_based_on,
+			filters.periodicity,
+			company=filters.company,
 		)
 
-	def get_report_columns(self) -> list[dict]:
-		columns = [{"fieldname": "account", "label": _(""), "fieldtype": "Data", "width": 300}]
+		context = ReportContext(
+			template=template,
+			filters=filters,
+			period_list=period_list,
+			show_detailed=filters.get("simple_vs_detailed") == "Detailed",
+		)
+		# Add period_keys to context
+		context.raw_data["period_keys"] = [p["key"] for p in period_list]
+		return context
 
-		period_columns = get_columns(
-			self.filters.periodicity,
-			self.period_list,
-			self.filters.accumulated_values,
-			self.filters.company,
+	def collect_financial_data(self, context: ReportContext) -> ReportContext:
+		collector = DataCollector(context.filters, context.period_list)
+
+		# Collect all account data requirements
+		for row in context.template.rows:
+			if row.data_source == "Account Data":
+				collector.add_account_request(row)
+
+		# Fetch all data at once
+		all_data = collector.collect_all_data()
+		context.account_data = all_data["account_data"]
+		context.raw_data.update(all_data)
+
+		return context
+
+	def process_calculations(self, context: ReportContext) -> ReportContext:
+		processor = RowProcessor(context)
+		context.processed_rows = processor.process_all_rows()
+
+		return context
+
+	def format_report_data(self, context: ReportContext) -> ReportContext:
+		formatter = DataFormatter(context)
+		formatted_data, columns = formatter.format_for_display()
+
+		context.raw_data["formatted_data"] = formatted_data
+		context.raw_data["columns"] = columns
+
+		return context
+
+
+# ============================================================================
+# DATA COLLECTION
+# ============================================================================
+
+
+class DataCollector:
+	"""Data collector that fetches all data in optimized queries"""
+
+	def __init__(self, filters: dict[str, Any], periods: list[dict]):
+		self.filters = filters
+		self.periods = periods
+		self.company = filters.get("company")
+		self.account_requests = []
+		self.query_builder = FinancialQueryBuilder(filters, periods)
+
+	def add_account_request(self, row):
+		accounts = self._parse_account_filter(row.calculation_formula) if row.calculation_formula else []
+
+		self.account_requests.append(
+			{
+				"row": row,
+				"accounts": accounts,
+				"balance_type": row.balance_type,
+				"reference_code": row.reference_code,
+			}
 		)
 
-		columns.extend(period_columns)
-		return columns
+	def collect_all_data(self) -> dict[str, Any]:
+		if not self.account_requests:
+			return {"account_data": {}, "summary": {}, "account_details": {}}
 
-	def process_rows(self):
-		"""Process all template rows in the correct dependency order"""
-		processor = RowProcessor(self.template, self.filters, self.period_list)
-		self.row_data = processor.process_all_rows()
-		self.processed_rows = processor.get_processed_rows()
+		# Get all unique accounts
+		all_accounts = set()
+		for request in self.account_requests:
+			all_accounts.update(request["accounts"])
 
-		# Store account details for potential use by frontend
-		self.account_details = getattr(processor, "account_details", {})
-		self.period_keys = getattr(processor, "period_keys", [])
+		all_accounts = list(all_accounts)
+		if not all_accounts:
+			return {"account_data": {}, "summary": {}, "account_details": {}}
 
-	def format_report_data(self) -> list[dict]:
-		"""Format the processed data for display"""
-		formatter = DataFormatter(self.processed_rows, self.period_list)
-		return formatter.format_for_display()
+		# Fetch balance data for all accounts
+		account_data = self.query_builder.fetch_account_balances(all_accounts)
+
+		# Calculate summaries for each request
+		summary = {}
+		account_details = {}
+
+		for request in self.account_requests:
+			ref_code = request["reference_code"]
+			balance_type = request["balance_type"]
+			accounts = request["accounts"]
+
+			if not ref_code:
+				continue
+
+			total_values = [0.0] * len(self.periods)
+			request_account_details = {}
+
+			for account_name in accounts:
+				if account_name in account_data:
+					account_obj: AccountData = account_data[account_name]
+					account_values = account_obj.get_values_by_type(balance_type)
+
+					# Add to totals
+					for i, value in enumerate(account_values):
+						total_values[i] += value
+
+					# Store for detailed view
+					request_account_details[account_name] = account_obj
+
+			summary[ref_code] = total_values
+			account_details[ref_code] = request_account_details
+
+		return {"account_data": account_data, "summary": summary, "account_details": account_details}
+
+	def _parse_account_filter(self, filter_formula: str) -> list[str]:
+		"""
+		Find accounts matching filter criteria.
+
+		Example:
+		        Input: '["account_type", "=", "Cash"]'
+		        Output: ["Cash - COMP", "Petty Cash - COMP", "Bank - COMP"]
+		"""
+		filter_parser = FilterExpressionParser()
+		criteria = filter_parser.parse(filter_formula)
+
+		account = frappe.qb.DocType("Account")
+		query = (
+			frappe.qb.from_(account)
+			.select(account.name)
+			.where(account.disabled == 0)
+			.where(account.is_group == 0)
+		)
+
+		if self.company:
+			query = query.where(account.company == self.company)
+
+		where_condition = filter_parser.build_condition(criteria, account)
+		if where_condition is not None:
+			query = query.where(where_condition)
+
+		query = query.orderby(account.name)
+		result = query.run(as_dict=True)
+		return [row.name for row in result]
+
+
+class FinancialQueryBuilder:
+	"""Centralized query builder for financial data"""
+
+	def __init__(self, filters: dict[str, Any], periods: list[dict]):
+		self.filters = filters
+		self.periods = periods
+		self.company = filters.get("company")
+
+	def fetch_account_balances(self, accounts: list[str]) -> dict[str, AccountData]:
+		"""
+		Fetch account balances for all periods with optimization.
+		Steps: get opening balances → fetch GL entries → calculate running totals
+
+		Returns:
+		        dict: {account: AccountData}
+		"""
+		# Get opening balances
+		balances_data = self._get_opening_balances(accounts)
+
+		# Get GL movements
+		gl_data = self._get_gl_movements(accounts)
+
+		# Calculate running balances
+		return self._calculate_running_balances(balances_data, gl_data)
+
+	def _get_opening_balances(self, accounts: list[str]) -> dict[str, dict[str, dict[str, float]]]:
+		if frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance"):
+			return self._get_opening_balances_from_gl(accounts)
+
+		first_period_start = getdate(self.periods[0]["from_date"])
+		last_closing_voucher = frappe.db.get_all(
+			"Period Closing Voucher",
+			filters={
+				"docstatus": 1,
+				"company": self.company,
+				"period_end_date": ("<", first_period_start),
+			},
+			fields=["period_end_date", "name"],
+			order_by="period_end_date desc",
+			limit=1,
+		)
+
+		if last_closing_voucher:
+			closing_voucher = last_closing_voucher[0]
+			closing_data = self._get_closing_balances(accounts, closing_voucher.name)
+
+			if closing_data:
+				return self._rebase_closing_balances(closing_data, closing_voucher.period_end_date)
+
+		return self._get_opening_balances_from_gl(accounts)
+
+	def _get_closing_balances(self, account_names: list[str], closing_voucher: str) -> dict[str, float]:
+		acb_table = frappe.qb.DocType("Account Closing Balance")
+
+		query = (
+			frappe.qb.from_(acb_table)
+			.select(
+				acb_table.account,
+				(acb_table.debit - acb_table.credit).as_("balance"),
+			)
+			.where(acb_table.company == self.company)
+			.where(acb_table.account.isin(account_names))
+			.where(acb_table.period_closing_voucher == closing_voucher)
+		)
+
+		query = self._apply_standard_filters(query, acb_table)
+		results = self._execute_with_permissions(query, "Account Closing Balance")
+
+		return {row["account"]: row["balance"] for row in results}
+
+	def _rebase_closing_balances(
+		self, closing_data: dict[str, float], closing_date: str
+	) -> dict[str, dict[str, dict[str, float]]]:
+		balances_data = {}
+
+		first_period_key = self.periods[0]["key"]
+		report_start = getdate(self.periods[0]["from_date"])
+		closing_end = getdate(closing_date)
+
+		has_gap = date_diff(report_start, closing_end) > 1
+
+		gap_movements = {}
+		if has_gap:
+			gap_movements = self._get_gap_movements(list(closing_data.keys()), closing_date, report_start)
+
+		for account, closing_balance in closing_data.items():
+			gap_movement = gap_movements.get(account, 0.0)
+			opening_balance = closing_balance + gap_movement
+
+			account_data = AccountData(account)
+			account_data.add_period(PeriodValue(first_period_key, opening_balance, 0, 0))
+			balances_data[account] = account_data
+
+		return balances_data
+
+	def _get_opening_balances_from_gl(self, accounts: list[str]) -> dict:
+		# Simulate zero closing balances
+		zero_closing_balances = {account: 0.0 for account in accounts}
+
+		# Use a very early date
+		earliest_date = "1900-01-01"
+
+		return self._rebase_closing_balances(zero_closing_balances, earliest_date)
+
+	def _get_gap_movements(self, account_names: list[str], from_date: str, to_date: str) -> dict[str, float]:
+		gl_table = frappe.qb.DocType("GL Entry")
+
+		query = (
+			frappe.qb.from_(gl_table)
+			.select(gl_table.account, Sum(gl_table.debit - gl_table.credit).as_("movement"))
+			.where(gl_table.company == self.company)
+			.where(gl_table.is_cancelled == 0)
+			.where(gl_table.account.isin(account_names))
+			.where(gl_table.posting_date > from_date)
+			.where(gl_table.posting_date < to_date)
+			.groupby(gl_table.account)
+		)
+
+		query = self._apply_standard_filters(query, gl_table)
+		results = self._execute_with_permissions(query, "GL Entry")
+
+		return {row["account"]: row["movement"] or 0.0 for row in results}
+
+	def _get_gl_movements(self, account_names: list[str]) -> list[dict]:
+		gl_table = frappe.qb.DocType("GL Entry")
+
+		query = (
+			frappe.qb.from_(gl_table)
+			.select(gl_table.account)
+			.where(gl_table.company == self.company)
+			.where(gl_table.is_cancelled == 0)
+			.where(gl_table.account.isin(account_names))
+			.where(gl_table.posting_date >= self.periods[0]["from_date"])
+			.groupby(gl_table.account)
+		)
+
+		if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+			query = query.where(gl_table.is_opening == "No")
+
+		# Add period-specific columns
+		for period in self.periods:
+			period_condition = (
+				Case()
+				.when(
+					(gl_table.posting_date >= period["from_date"])
+					& (gl_table.posting_date <= period["to_date"]),
+					gl_table.debit - gl_table.credit,
+				)
+				.else_(0)
+			)
+			query = query.select(Sum(period_condition).as_(period["key"]))
+
+		query = self._apply_standard_filters(query, gl_table)
+		return self._execute_with_permissions(query, "GL Entry")
+
+	def _calculate_running_balances(self, balances_data: dict, gl_data: list[dict]) -> dict:
+		for row in gl_data:
+			account = row["account"]
+			if account not in balances_data:
+				balances_data[account] = AccountData(account)
+
+			account_data: AccountData = balances_data[account]
+
+			if account_data.has_periods():
+				first_period = account_data.get_period(self.periods[0]["key"])
+				current_balance = first_period.get_value("Opening Balance") if first_period else 0.0
+			else:
+				current_balance = 0.0
+
+			for period in self.periods:
+				period_key = period["key"]
+				movement = row.get(period_key, 0.0)
+				closing_balance = current_balance + movement
+
+				account_data.add_period(PeriodValue(period_key, current_balance, closing_balance, movement))
+
+				current_balance = closing_balance
+
+		return balances_data
+
+	def _apply_standard_filters(self, query, table):
+		if self.filters.get("ignore_closing_entries"):
+			if hasattr(table, "is_period_closing_voucher_entry"):
+				query = query.where(table.is_period_closing_voucher_entry == 0)
+			else:
+				query = query.where(table.voucher_type != "Period Closing Voucher")
+
+		if self.filters.get("project"):
+			projects = self.filters.get("project")
+			if isinstance(projects, str):
+				projects = [projects]
+			query = query.where(table.project.isin(projects))
+
+		if self.filters.get("cost_center"):
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
+			query = query.where(table.cost_center.isin(self.filters.cost_center))
+
+		finance_book = self.filters.get("finance_book")
+		if self.filters.get("include_default_book_entries"):
+			default_book = frappe.get_cached_value("Company", self.filters.company, "default_finance_book")
+
+			if finance_book and default_book and cstr(finance_book) != cstr(default_book):
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default FB Entries'")
+				)
+
+			query = query.where(
+				(table.finance_book.isin([cstr(finance_book), cstr(default_book), ""]))
+				| (table.finance_book.isnull())
+			)
+		else:
+			query = query.where(
+				(table.finance_book.isin([cstr(finance_book), ""])) | (table.finance_book.isnull())
+			)
+
+		dimensions = get_accounting_dimensions(as_list=False)
+		for dimension in dimensions:
+			if self.filters.get(dimension.fieldname):
+				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+					self.filters[dimension.fieldname] = get_dimension_with_children(
+						dimension.document_type, self.filters.get(dimension.fieldname)
+					)
+
+				query = query.where(table[dimension.fieldname].isin(self.filters.get(dimension.fieldname)))
+
+		return query
+
+	def _execute_with_permissions(self, query, doctype):
+		from frappe.desk.reportview import build_match_conditions
+
+		user_conditions = build_match_conditions(doctype)
+
+		if user_conditions:
+			return frappe.db.sql(f"{query.walk()} AND {user_conditions}", as_dict=True)
+		else:
+			return query.run(as_dict=True)
 
 
 class RowProcessor:
@@ -113,162 +571,118 @@ class RowProcessor:
 	Handles dependency resolution and calculation order.
 	"""
 
-	def __init__(self, template, filters: dict, period_list: list):
-		self.template = template
-		self.filters = filters
-		self.period_list = period_list
-		self.row_data = {}
-		self.processed_rows = []
-		self.account_details = {}
-		self.period_keys = []
-		self.dependency_resolver = DependencyResolver(template)
+	def __init__(self, context: ReportContext):
+		self.context = context
+		self.period_list = context.period_list
+		self.row_values = {}  # For formula calculations
+		self.dependency_resolver = DependencyResolver(context.template)
 
-	def process_all_rows(self) -> dict:
+	def process_all_rows(self) -> list[RowData]:
 		processing_order = self.dependency_resolver.get_processing_order()
+		processed_rows = []
 
-		account_rows = [row for row in processing_order if row.data_source == "Account Data"]
-		if account_rows:
-			collector = AccountDataCollector(self.filters, self.period_list)
+		# Get account data from context
+		account_summary = self.context.raw_data.get("summary", {})
+		account_details = self.context.raw_data.get("account_details", {})
 
-			for row in account_rows:
-				collector.add_data_request(row)
-
-			account_data = collector.process_all_requests()
-
-			# Store detailed account information for later use
-			self.row_data.update(account_data.get("summary", {}))
-			self.account_details = account_data.get("account_details", {})
-			self.period_keys = account_data.get("period_keys", [])
-
-		# Process remaining rows in order
 		for row in processing_order:
-			if row.data_source == "Account Data":
-				self.process_account_row(row, self.row_data)
-			elif row.data_source == "Calculated Amount":
-				self.process_formula_row(row)
-			elif row.data_source == "Blank Line":
-				self.process_blank_row(row)
+			row_data = self._process_single_row(row, account_summary, account_details)
+			processed_rows.append(row_data)
 
-			self.processed_rows.append(row)
+		processed_rows.sort(key=lambda x: getattr(x.row, "idx", 0) or 0)
 
-		return self.row_data
+		return processed_rows
 
-	def process_account_row(self, row, summary_data: dict):
-		if not row.reference_code:
-			return
+	def _process_single_row(self, row, account_summary: dict, account_details: dict) -> RowData:
+		if row.data_source == "Account Data":
+			return self._process_account_row(row, account_summary, account_details)
+		elif row.data_source == "Custom API":
+			return self._process_api_row(row)
+		elif row.data_source == "Calculated Amount":
+			return self._process_formula_row(row)
+		elif row.data_source == "Blank Line":
+			return self._process_blank_row(row)
+		elif row.data_source == "Column Break":
+			return self._process_column_break_row(row)
+		else:
+			return RowData(row=row, values=[0.0] * len(self.period_list))
 
-		row._calculated_values = summary_data.get(row.reference_code, [0.0] * len(self.period_list))
+	def _process_account_row(self, row, account_summary: dict, account_details: dict) -> RowData:
+		ref_code = row.reference_code
+		values = account_summary.get(ref_code, [0.0] * len(self.period_list))
+		details = account_details.get(ref_code, {})
 
-	def process_formula_row(self, row):
-		"""Process a formula calculation row"""
-		calculator = FormulaCalculator(self.row_data, self.period_list)
-		formula_result = calculator.evaluate_formula(row.calculation_formula)
+		# Store for formula calculations
+		if ref_code:
+			self.row_values[ref_code] = values
 
-		# Store in row_data and assign to row object
+		return RowData(row=row, values=values, account_details=details)
+
+	def _process_api_row(self, row) -> RowData:
+		api_path = row.calculation_formula
+
+		try:
+			module_path, method_name = api_path.rsplit(".", 1)
+			module = frappe.get_module(module_path)
+			method = getattr(module, method_name)
+
+			context = {
+				"filters": self.context.filters,
+				"periods": self.period_list,
+				"row": row,
+				"company": self.context.filters.get("company"),
+			}
+
+			values = method(context)
+		except Exception as e:
+			frappe.log_error(f"Custom API Error: {api_path} - {e!s}")
+			values = [0.0] * len(self.period_list)
+
 		if row.reference_code:
-			self.row_data[row.reference_code] = formula_result
+			self.row_values[row.reference_code] = values
 
-		# Always assign calculated values to the row object for display formatting
-		row._calculated_values = formula_result
+		return RowData(row=row, values=values)
 
-	def process_blank_row(self, row):
-		return [""] * len(self.period_list)
+	def _process_formula_row(self, row) -> RowData:
+		calculator = FormulaCalculator(self.row_values, self.period_list)
+		values = calculator.evaluate_formula(row.calculation_formula)
 
-	def get_processed_rows(self) -> list:
-		"""Return the list of processed rows"""
-		return self.processed_rows
+		# Store for future formula calculations
+		if row.reference_code:
+			self.row_values[row.reference_code] = values
+
+		return RowData(row=row, values=values)
+
+	def _process_blank_row(self, row) -> RowData:
+		return RowData(row=row, values=[""] * len(self.period_list))
+
+	def _process_column_break_row(self, row) -> RowData:
+		return RowData(row=row, values=[])
 
 
 class DependencyResolver:
-	"""
-	Resolves dependencies between rows to determine processing order.
-	Ensures formulas are calculated after their dependencies.
-	"""
+	"""Optimized dependency resolver with better circular reference detection"""
 
 	def __init__(self, template):
 		self.template: FinancialReportTemplate = template
 		self.rows = template.rows
 		self.row_map = {row.reference_code: row for row in self.rows if row.reference_code}
 		self.dependencies = {}
-		self.analyze_dependencies()
-		self.validate_dependencies()
+		self._analyze_dependencies()
+		self._validate_dependencies()
 
-	def analyze_dependencies(self):
+	def _analyze_dependencies(self):
 		for row in self.rows:
-			if not row.reference_code or not row.calculation_formula:
-				continue
-
-			if row.data_source == "Calculated Amount":
+			if row.data_source == "Calculated Amount" and row.calculation_formula:
 				deps = self.template._extract_reference_codes_from_formula(
 					row.calculation_formula, self.row_map.keys()
 				)
-				self.dependencies[row.reference_code] = deps
+				if deps:
+					self.dependencies[row.reference_code] = deps
 
-	def validate_dependencies(self):
+	def _validate_dependencies(self):
 		if self.dependencies:
 			self.check_circular_references(self.dependencies)
-
-	def get_processing_order(self) -> list:
-		# rows by type
-		api_rows = []
-		account_rows = []
-		formula_rows = []
-		other_rows = []
-
-		for row in self.rows:
-			if row.data_source == "Custom API":
-				api_rows.append(row)
-			elif row.data_source == "Account Data":
-				account_rows.append(row)
-			elif row.data_source == "Calculated Amount":
-				formula_rows.append(row)
-			else:
-				other_rows.append(row)
-
-		ordered_rows = api_rows + account_rows
-
-		# sort formula rows
-		if formula_rows:
-			ordered_formula_rows = self.topological_sort(formula_rows)
-			ordered_rows.extend(ordered_formula_rows)
-
-		ordered_rows.extend(other_rows)
-
-		return ordered_rows
-
-	def topological_sort(self, formula_rows) -> list:
-		formula_row_map = {row.reference_code: row for row in formula_rows if row.reference_code}
-
-		# calculate in-degree
-		in_degree = {code: 0 for code in formula_row_map.keys()}
-		for code, deps in self.dependencies.items():
-			if code in in_degree:
-				for dep in deps:
-					if dep in in_degree:  # only count dependencies within formula rows
-						in_degree[code] += 1
-
-		# initialize queue with nodes having no incoming edges
-		queue = [code for code, degree in in_degree.items() if degree == 0]
-		result = []
-
-		while queue:
-			current = queue.pop(0)
-			if current in formula_row_map:
-				result.append(formula_row_map[current])
-
-			# reduce in-degree for dependent nodes
-			for code, deps in self.dependencies.items():
-				if current in deps and code in in_degree:
-					in_degree[code] -= 1
-					if in_degree[code] == 0:
-						queue.append(code)
-
-		# remaining formula rows
-		for row in formula_rows:
-			if not row.reference_code or row not in result:
-				result.append(row)
-
-		return result
 
 	@staticmethod
 	def check_circular_references(dependencies: dict[str, list[str]]):
@@ -309,191 +723,89 @@ class DependencyResolver:
 			if colors[node] == WHITE:
 				dfs(node, [])
 
+	def get_processing_order(self) -> list:
+		# rows by type
+		api_rows = []
+		account_rows = []
+		formula_rows = []
+		other_rows = []
 
-class AccountDataCollector:
-	"""Collects account data across multiple periods efficiently."""
+		for row in self.rows:
+			if row.data_source == "Custom API":
+				api_rows.append(row)
+			elif row.data_source == "Account Data":
+				account_rows.append(row)
+			elif row.data_source == "Calculated Amount":
+				formula_rows.append(row)
+			else:
+				other_rows.append(row)
 
-	def __init__(self, filters: dict[str, Any], periods: list[dict]):
-		self.filters = filters
-		self.periods = periods
-		self.company = filters.get("company")
-		self.data_requests = []
+		ordered_rows = api_rows + account_rows
 
-	def add_data_request(self, row, accounts: list[str] | None = None):
-		if not accounts and row.calculation_formula:
-			accounts = self.find_matching_accounts(row.calculation_formula)
-		elif not accounts:
-			accounts = []
+		# sort formula rows
+		if formula_rows:
+			ordered_formula_rows = self._topological_sort(formula_rows)
+			ordered_rows.extend(ordered_formula_rows)
 
-		request = {
-			"row": row,
-			"accounts": accounts,
-			"balance_type": row.balance_type,
-			"reference_code": row.reference_code,
-		}
-		self.data_requests.append(request)
+		ordered_rows.extend(other_rows)
 
-	def process_all_requests(self) -> dict[str, Any]:
-		"""
-		Process all data requests in a single optimized query.
-		Steps: collect accounts → fetch balances → distribute results
+		return ordered_rows
 
-		Returns:
-		        dict: Contains both summary and detailed account data
+	def _topological_sort(self, formula_rows: list) -> list:
+		formula_row_map = {row.reference_code: row for row in formula_rows if row.reference_code}
 
-		Example:
-		        {
-		                "summary": {
-		                        "TOTAL_REVENUE": [15000.0, 18000.0, 22000.0],
-		                        "TOTAL_EXPENSES": [12000.0, 14500.0, 16800.0],
-		                        "NET_PROFIT": [3000.0, 3500.0, 5200.0]
-		                },
-		                "account_details": {
-		                        "TOTAL_REVENUE": {
-		                                "Sales - COMP": [10000.0, 12000.0, 15000.0],
-		                                "Service Income - COMP": [5000.0, 6000.0, 7000.0]
-		                        },
-		                        "TOTAL_EXPENSES": {
-		                                "Cost of Goods Sold - COMP": [8000.0, 9500.0, 11000.0],
-		                                "Office Expenses - COMP": [4000.0, 5000.0, 5800.0]
-		                        }
-		                },
-		                "period_keys": ["jan2024", "feb2024", "mar2024"]
-		        }
-		"""
-		if not self.data_requests:
-			return {"summary": {}, "account_details": {}, "period_keys": [p["key"] for p in self.periods]}
+		# Calculate in-degree
+		in_degree = {code: 0 for code in formula_row_map.keys()}
+		for code, deps in self.dependencies.items():
+			if code in in_degree:
+				for dep in deps:
+					if dep in in_degree:
+						in_degree[code] += 1
 
-		all_accounts = set()
-		for request in self.data_requests:
-			all_accounts.update(request["accounts"])
+		# Topological sort
+		queue = [code for code, degree in in_degree.items() if degree == 0]
+		result = []
 
-		all_accounts = list(all_accounts)
-		if not all_accounts:
-			return {
-				"summary": {
-					req["reference_code"]: [0.0] * len(self.periods)
-					for req in self.data_requests
-					if req["reference_code"]
-				},
-				"account_details": {},
-				"period_keys": [p["key"] for p in self.periods],
-			}
+		while queue:
+			current = queue.pop(0)
+			result.append(formula_row_map[current])
 
-		balance_processor = BalanceProcessor(self.filters, self.periods)
-		account_balances = balance_processor.fetch_all_balances(all_accounts)
+			for code, deps in self.dependencies.items():
+				if current in deps and code in in_degree:
+					in_degree[code] -= 1
+					if in_degree[code] == 0:
+						queue.append(code)
 
-		# Build Summary
-		account_details = {}
-		summary_results = {}
+		# Add any remaining formula rows
+		for row in formula_rows:
+			if row not in result:
+				result.append(row)
 
-		for request in self.data_requests:
-			if reference_code := request["reference_code"]:
-				# detailed
-				account_values = balance_processor.get_account_values(request, account_balances)
-				account_details[reference_code] = account_values
-
-				# summary
-				summary_results[reference_code] = balance_processor.calculate_totals(account_values)
-
-		return {
-			"summary": summary_results,
-			"account_details": account_details,
-			"period_keys": [p["key"] for p in self.periods],
-		}
-
-	def find_matching_accounts(self, filter_formula: str) -> list[str]:
-		"""
-		Find accounts matching filter criteria.
-
-		Example:
-		        Input: '["account_type", "=", "Cash"]'
-		        Output: ["Cash - COMP", "Petty Cash - COMP", "Bank - COMP"]
-		"""
-		filter_parser = FilterExpressionParser()
-		criteria = filter_parser.parse(filter_formula)
-
-		account = frappe.qb.DocType("Account")
-		query = frappe.qb.from_(account).select(account.name).where(account.disabled == 0)
-
-		if self.company:
-			query = query.where(account.company == self.company)
-
-		where_condition = filter_parser.build_condition(criteria, account)
-		if where_condition is not None:
-			query = query.where(where_condition)
-
-		query = query.orderby(account.name)
-		result = query.run(as_dict=True)
-		return [row.name for row in result]
-
-
-class CustomAPIHandler:
-	"""Handler for custom API data sources"""
-
-	def __init__(self, filters, periods):
-		self.filters = filters
-		self.periods = periods
-		self.cache = {}
-
-	def execute_custom_api(self, row):
-		"""Execute custom API with caching and error handling"""
-		api_path = row.calculation_formula
-		cache_key = f"{api_path}:{hash(frozenset(self.filters.items()))}"
-
-		if cache_key in self.cache:
-			return self.cache[cache_key]
-
-		try:
-			module_path, method_name = api_path.rsplit(".", 1)
-			module = frappe.get_module(module_path)
-			method = getattr(module, method_name)
-
-			# Pass standardized context
-			context = {
-				"filters": self.filters,
-				"periods": self.periods,
-				"row": row,
-				"company": self.filters.get("company"),
-			}
-
-			result = method(context)
-			self.cache[cache_key] = result
-			return result
-
-		except Exception as e:
-			frappe.log_error(f"Custom API Error: {api_path} - {e!s}")
-			return [0.0] * len(self.periods)
+		return result
 
 
 class FormulaCalculator:
-	"""
-	Calculates formula expressions using row reference codes.
-	Provides a secure evaluation environment using Frappe's safe_eval.
-	"""
+	"""Enhanced formula calculator with better error handling"""
 
-	def __init__(self, row_data: dict, period_list: list):
+	def __init__(self, row_data: dict[str, list[float]], period_list: list[dict]):
 		self.row_data = row_data
 		self.period_list = period_list
 
 	def evaluate_formula(self, formula: str) -> list[float]:
-		"""Evaluate a formula for all periods"""
 		results = []
 
-		for i, _period in enumerate(self.period_list):
-			period_result = self.evaluate_formula_for_period(formula, i)
-			results.append(period_result)
+		for i in range(len(self.period_list)):
+			result = self._evaluate_for_period(formula, i)
+			results.append(result)
 
 		return results
 
-	def evaluate_formula_for_period(self, formula: str, period_index: int) -> float:
-		"""Evaluate formula for a specific period"""
+	def _evaluate_for_period(self, formula: str, period_index: int) -> float:
 		try:
-			# Build context with values for this period
-			context = self.build_evaluation_context(period_index)
+			context = self._build_context(period_index)
 
-			# Use frappe's safe evaluation
-			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
+			# Use frappe's safe_eval for security
+			result = frappe.safe_eval(formula, context)
 			return flt(result, 2)
 
 		except ZeroDivisionError:
@@ -503,36 +815,28 @@ class FormulaCalculator:
 			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
 			return 0.0
 
-	def build_evaluation_context(self, period_index: int) -> dict:
-		"""Build safe evaluation context with row values"""
+	def _build_context(self, period_index: int) -> dict[str, Any]:
 		context = {}
 
+		# Add row values
 		for code, values in self.row_data.items():
-			code: str
-			if code and code.isidentifier():
-				value = flt(values[period_index]) if len(values) > period_index else 0.0
-				context[code] = value
+			if period_index < len(values):
+				context[code] = values[period_index]
+			else:
+				context[code] = 0.0
 
-			elif code:
-				# Log warning about invalid reference code
-				frappe.log_error(f"Invalid reference code format: {code}")
+		# Add math functions
+		context.update(self._get_math_functions())
 
-		# Add math functions using shared method
-		context.update(self.get_math_functions())
 		return context
 
-	@staticmethod
-	def get_math_functions() -> dict:
-		"""Get safe mathematical functions for formula evaluation"""
-		import math
-
+	def _get_math_functions(self) -> dict[str, Any]:
 		return {
 			"abs": abs,
+			"round": round,
 			"min": min,
 			"max": max,
-			"round": round,
 			"sum": sum,
-			# Add individual math functions for safety (not the full math module)
 			"sqrt": math.sqrt,
 			"pow": math.pow,
 			"ceil": math.ceil,
@@ -540,15 +844,11 @@ class FormulaCalculator:
 		}
 
 	@classmethod
-	def validate_formula_with_context(cls, formula: str, context: dict) -> tuple[bool, str | None]:
-		"""
-		Validate a formula with given context, returning success status and error message
-		Used for validation purposes without needing a full FormulaCalculator instance
-		"""
+	def validate_formula_with_context(cls, formula: str, context: dict) -> str | None:
 		try:
 			# Add math functions to context
 			validation_context = context.copy()
-			validation_context.update(cls.get_math_functions())
+			validation_context.update(cls._get_math_functions())
 
 			# Use frappe's safe_eval to validate formula
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=validation_context)
@@ -557,398 +857,15 @@ class FormulaCalculator:
 			if not isinstance(result, int | float):
 				return f"Formula must return a numeric value, got: {type(result).__name__}"
 
-			return None
+			return None  # Success
 		except Exception as e:
 			return str(e)
 
 
-class DataFormatter:
-	"""
-	Formats processed row data for display in the report.
-	Handles indentation, styling, and visibility rules.
-	"""
-
-	def __init__(self, processed_rows: list, period_list: list):
-		self.processed_rows = processed_rows
-		self.period_list = period_list
-
-	def format_for_display(self) -> list[dict]:
-		"""Format all rows for display"""
-		formatted_data = []
-
-		for row in self.processed_rows:
-			if self.should_show_row(row):
-				formatted_row = self.format_single_row(row)
-				formatted_data.append(formatted_row)
-
-		return formatted_data
-
-	def should_show_row(self, row) -> bool:
-		"""Determine if a row should be shown based on visibility rules"""
-		if row.hide_when_empty:
-			# Check if all values are zero
-			if hasattr(row, "_calculated_values"):
-				return any(val != 0 for val in row._calculated_values)
-
-		if row.hidden_calculation:
-			return False
-
-		return True
-
-	def format_single_row(self, row) -> dict:
-		"""Format a single row for display"""
-		formatted_row = {
-			"account": self.get_display_name(row),
-			"indent": row.indentation_level or 0,
-		}
-
-		# Add period values
-		if hasattr(row, "_calculated_values"):
-			for i, period in enumerate(self.period_list):
-				period_key = period.get("key", f"period_{i}")
-				value = row._calculated_values[i] if i < len(row._calculated_values) else 0.0
-				formatted_row[period_key] = flt(value, 2)
-
-		# Apply formatting
-		if row.bold_text:
-			formatted_row["bold"] = 1
-		if row.italic_text:
-			formatted_row["italic"] = 1
-
-		return formatted_row
-
-	def get_display_name(self, row) -> str:
-		"""Get the display name for a row with proper indentation"""
-		indent = "   " * (row.indentation_level or 0)
-		return f"{indent}{row.display_name or ''}"
-
-
-class BalanceProcessor:
-	def __init__(self, filters: dict, periods: list[dict]):
-		self.filters = filters
-		self.periods = periods
-		self.company = filters.get("company")
-
-	def fetch_all_balances(self, accounts: list[str]) -> dict:
-		"""
-		Fetch account balances for all periods with optimization.
-		Steps: get opening balances → fetch GL entries → calculate running totals
-
-		Returns:
-		        dict: {account: {period_key: {opening, closing, movement}}}
-
-		Example:
-		        {
-		                "Cash - COMP": {
-		                        "jan2024": {"opening": 5000.0, "closing": 7500.0, "movement": 2500.0},
-		                        "feb2024": {"opening": 7500.0, "closing": 8200.0, "movement": 700.0}
-		                },
-		                "Sales - COMP": {
-		                        "jan2024": {"opening": 0.0, "closing": -15000.0, "movement": -15000.0},
-		                        "feb2024": {"opening": -15000.0, "closing": -23000.0, "movement": -8000.0}
-		                }
-		        }
-		"""
-		# Step 1: Get opening balances from Account Closing Balance if available
-		balances_data = self._get_opening_balances(accounts)
-
-		# Step 2: Get GL Entry data (from adjusted date or original period start)
-		gl_data = self._get_gl_movements(accounts)
-
-		# Step 3: Calculate running balances
-		balances_data = self._calculate_running_balances(balances_data, gl_data)
-
-		return balances_data
-
-	def _get_opening_balances(self, accounts: list[str]) -> dict[str, dict[str, dict[str, float]]]:
-		"""
-		Get opening balances for accounts, prioritizing `Period Closing Voucher` approach when enabled.
-		Steps: check settings → find latest closing voucher → get balances → rebase to period start
-
-		Returns:
-		        dict: {account: {period_key: {"opening": balance}}}
-
-		Example:
-		        {
-		                "Cash - COMP": {"jan2024": {"opening": 1500.0}},
-		                "Sales - COMP": {"jan2024": {"opening": 0.0}}
-		        }
-		"""
-		if frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance"):
-			return self._get_opening_balances_from_gl(accounts)
-
-		first_period_start = getdate(self.periods[0]["from_date"])
-		last_closing_voucher = frappe.db.get_all(
-			"Period Closing Voucher",
-			filters={
-				"docstatus": 1,
-				"company": self.company,
-				"period_end_date": ("<", first_period_start),
-			},
-			fields=["period_end_date", "name"],
-			order_by="period_end_date desc",
-			limit=1,
-		)
-
-		if last_closing_voucher:
-			closing_balances = self._get_closing_balances(accounts, last_closing_voucher[0].name)
-
-			if closing_balances:
-				return self._rebase_closing_balances(
-					closing_balances, last_closing_voucher[0].period_end_date
-				)
-
-		return self._get_opening_balances_from_gl(accounts)
-
-	def _get_closing_balances(self, account_names: list[str], closing_voucher: str) -> dict:
-		acb_table = frappe.qb.DocType("Account Closing Balance")
-
-		query = (
-			frappe.qb.from_(acb_table)
-			.select(
-				acb_table.account,
-				(acb_table.debit - acb_table.credit).as_("balance"),
-			)
-			.where(acb_table.company == self.company)
-			.where(acb_table.account.isin(account_names))
-			.where(acb_table.period_closing_voucher == closing_voucher)
-		)
-
-		query = self._apply_filters(query, acb_table)
-		results = self._execute_with_permissions(query, "Account Closing Balance")
-
-		return {row["account"]: row["balance"] for row in results}
-
-	def _rebase_closing_balances(self, closing_data: dict, closing_date: str) -> dict:
-		"""Rebase closing balances to align with the report start date."""
-		balances_data = {}
-
-		if not closing_data:
-			return balances_data
-
-		default_balances = {"opening": 0.0, "closing": 0.0, "movement": 0.0}
-
-		first_period_key = self.periods[0]["key"]
-		report_start = getdate(self.periods[0]["from_date"])
-		closing_end = getdate(closing_date)
-
-		has_gap = date_diff(report_start, closing_end) > 1
-
-		gap_movements = {}
-		if has_gap:
-			gap_movements = self._get_gap_movements(list(closing_data.keys()), closing_date, report_start)
-
-		for account, closing_balance in closing_data.items():
-			if account not in balances_data:
-				balances_data[account] = {}
-			if first_period_key not in balances_data[account]:
-				balances_data[account][first_period_key] = default_balances.copy()
-
-			gap_adjustment = gap_movements.get(account, 0.0) if has_gap else 0.0
-			opening_balance = closing_balance + gap_adjustment
-
-			balances_data[account][first_period_key]["opening"] = opening_balance
-
-		return balances_data
-
-	def _get_gap_movements(self, account_names: list[str], from_date: str, to_date: str) -> dict:
-		query, gl_table = self._build_gl_base_query(account_names)
-
-		query = (
-			query.select(Sum(gl_table.debit - gl_table.credit).as_("movement"))
-			.where(gl_table.posting_date > from_date)
-			.where(gl_table.posting_date < to_date)
-		)
-
-		results = self._execute_with_permissions(query, "GL Entry")
-		return {row["account"]: row["movement"] or 0.0 for row in results}
-
-	def _get_opening_balances_from_gl(self, account_names: list[str]) -> dict:
-		"""Calculate opening balances from GL movements when closing vouchers are disabled."""
-
-		# Simulate zero closing balances
-		zero_closing_balances = {account: 0.0 for account in account_names}
-
-		# Use a very early date
-		earliest_date = "1900-01-01"
-
-		return self._rebase_closing_balances(zero_closing_balances, earliest_date)
-
-	def _get_gl_movements(self, account_names: list[str]) -> list:
-		query, gl_table = self._build_gl_base_query(account_names)
-
-		start_date = self.periods[0]["from_date"]
-		query = query.where(gl_table.posting_date >= start_date)
-
-		for period in self.periods:
-			period_key = period["key"]
-			period_start = period["from_date"]
-			period_end = period["to_date"]
-
-			movement_column = Sum(
-				Case()
-				.when(
-					(gl_table.posting_date >= period_start) & (gl_table.posting_date <= period_end),
-					gl_table.debit - gl_table.credit,
-				)
-				.else_(0)
-			).as_(f"{period_key}_movement")
-			query = query.select(movement_column)
-
-		return self._execute_with_permissions(query, "GL Entry")
-
-	def _calculate_running_balances(self, balances_data: dict, gl_data: list) -> dict:
-		for row in gl_data:
-			account = row["account"]
-
-			if account not in balances_data:
-				balances_data[account] = {}
-
-			running_total = 0.0
-
-			first_period_key = self.periods[0]["key"]
-			if (
-				first_period_key in balances_data.get(account, {})
-				and "opening" in balances_data[account][first_period_key]
-			):
-				running_total = balances_data[account][first_period_key]["opening"]
-
-			for period in self.periods:
-				period_key = period["key"]
-				movement = row.get(f"{period_key}_movement", 0.0) or 0.0
-
-				if period_key not in balances_data[account]:
-					balances_data[account][period_key] = {}
-
-				balances_data[account][period_key]["opening"] = running_total
-				balances_data[account][period_key]["movement"] = movement
-				balances_data[account][period_key]["closing"] = running_total + movement
-
-				running_total += movement
-
-		return balances_data
-
-	def _build_gl_base_query(self, account_names: list[str]) -> tuple:
-		gl_table = frappe.qb.DocType("GL Entry")
-
-		query = (
-			frappe.qb.from_(gl_table)
-			.select(gl_table.account)
-			.where(gl_table.company == self.company)
-			.where(gl_table.is_cancelled == 0)
-			.where(gl_table.account.isin(account_names))
-			.groupby(gl_table.account)
-		)
-
-		if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
-			query = query.where(gl_table.is_opening == "No")
-
-		query = self._apply_filters(query, gl_table)
-		return query, gl_table
-
-	def _apply_filters(self, query, table):
-		"""Apply standard financial filters to query."""
-		if self.filters.get("ignore_closing_entries"):
-			if hasattr(table, "is_period_closing_voucher_entry"):
-				query = query.where(table.is_period_closing_voucher_entry == 0)
-			else:
-				query = query.where(table.voucher_type != "Period Closing Voucher")
-
-		if self.filters.get("project"):
-			if not isinstance(self.filters.get("project"), list):
-				self.filters.project = frappe.parse_json(self.filters.get("project"))
-			query = query.where(table.project.isin(self.filters.project))
-
-		if self.filters.get("cost_center"):
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
-			query = query.where(table.cost_center.isin(self.filters.cost_center))
-
-		finance_book = self.filters.get("finance_book")
-		if self.filters.get("include_default_book_entries"):
-			default_book = frappe.get_cached_value("Company", self.filters.company, "default_finance_book")
-
-			if finance_book and default_book and cstr(finance_book) != cstr(default_book):
-				frappe.throw(
-					_("To use a different finance book, please uncheck 'Include Default FB Entries'")
-				)
-
-			query = query.where(
-				(table.finance_book.isin([cstr(finance_book), cstr(default_book), ""]))
-				| (table.finance_book.isnull())
-			)
-		else:
-			query = query.where(
-				(table.finance_book.isin([cstr(finance_book), ""])) | (table.finance_book.isnull())
-			)
-
-		dimensions = get_accounting_dimensions(as_list=False)
-		for dimension in dimensions:
-			if self.filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					self.filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, self.filters.get(dimension.fieldname)
-					)
-
-				query = query.where(table[dimension.fieldname].isin(self.filters.get(dimension.fieldname)))
-
-		return query
-
-	def _execute_with_permissions(self, query, doctype):
-		query_sql = query.walk()
-
-		from frappe.desk.reportview import build_match_conditions
-
-		user_conditions = build_match_conditions(doctype)
-
-		if user_conditions:
-			final_query = f"({query_sql}) AND ({user_conditions})"
-			return frappe.db.sql(final_query, as_dict=True)
-		else:
-			return query.run(as_dict=True)
-
-	def get_account_values(self, request: dict, account_data: dict) -> dict[str, list[float]]:
-		"""Extract values for each account by period."""
-		balance_type = request["balance_type"]
-		account_values = frappe._dict()
-		num_periods = len(self.periods)
-
-		for account in request["accounts"]:
-			values = [0.0] * num_periods
-
-			if account in account_data:
-				for i, period in enumerate(self.periods):
-					balance_info = account_data[account].get(period["key"], {})
-					values[i] = self._get_balance_value(balance_info, balance_type)
-
-			account_values[account] = values
-
-		return account_values
-
-	def _get_balance_value(self, balance_info: dict, balance_type: str) -> float:
-		if balance_type == "Opening Balance":
-			return balance_info.get("opening", 0.0)
-		elif balance_type == "Closing Balance":
-			return balance_info.get("closing", 0.0)
-		elif balance_type == "Period Movement (Debits - Credits)":
-			return balance_info.get("movement", 0.0)
-		return 0.0
-
-	def calculate_totals(self, account_values: dict) -> list[float]:
-		"""Calculate the total values across all accounts for each period."""
-		num_periods = len(self.periods)
-		totals = [0.0] * num_periods
-
-		for account_values_list in account_values.values():
-			for i in range(num_periods):
-				totals[i] += account_values_list[i]
-
-		return totals
-
-
 class FilterExpressionParser:
-	"""Converts filter formulas into database query conditions."""
+	"""Enhanced filter expression parser"""
 
-	def parse(self, formula: str) -> dict:
+	def parse(self, formula: str) -> dict[str, Any]:
 		"""
 		Parse filter formula into structured criteria.
 		Supports: ["field", "op", "value"] and {"and/or": [conditions]}
@@ -956,7 +873,7 @@ class FilterExpressionParser:
 		1. Simple condition: ["field", "operator", "value"]
 		   Example: ["account_type", "=", "Income"]
 
-		2. Dictionary-based complex conditions (RECOMMENDED):
+		2. Dictionary-based complex conditions:
 		   {
 		     "and": [condition1, condition2, ...]  # All conditions must be true
 		     "or": [condition1, condition2, ...]   # Any condition can be true
@@ -971,48 +888,44 @@ class FilterExpressionParser:
 		     ]
 		   }
 		"""
-		parsed_formula = ast.literal_eval(formula)
+		try:
+			parsed_formula = ast.literal_eval(formula)
 
-		if isinstance(parsed_formula, dict):
-			return self._parse_logical_condition(parsed_formula)
+			if isinstance(parsed_formula, dict):
+				return self._parse_logical_condition(parsed_formula)
+			elif self._is_simple_condition(parsed_formula):
+				return {
+					"type": "simple",
+					"field": parsed_formula[0],
+					"operator": parsed_formula[1],
+					"value": parsed_formula[2],
+				}
 
-		elif self._is_simple_condition(parsed_formula):
-			return {
-				"type": "simple",
-				"field": parsed_formula[0],
-				"operator": parsed_formula[1],
-				"value": parsed_formula[2],
-			}
+		except Exception:
+			frappe.log_error(f"Failed to parse filter formula: {formula}")
 
-		return {}
+		return {"type": "invalid"}
 
-	def _parse_logical_condition(self, condition_dict: dict) -> dict:
+	def _parse_logical_condition(self, condition_dict: dict) -> dict[str, Any]:
 		if not isinstance(condition_dict, dict) or len(condition_dict) != 1:
 			return {"type": "invalid"}
 
 		logical_op = next(iter(condition_dict.keys())).lower()
 		sub_conditions = condition_dict[logical_op]
 
-		if logical_op not in ["and", "or"] or not isinstance(sub_conditions, list) or len(sub_conditions) < 2:
+		if logical_op not in ["and", "or"] or not isinstance(sub_conditions, list):
 			return {"type": "invalid"}
 
-		parsed_sub_conditions = []
+		parsed_conditions = []
 		for condition in sub_conditions:
 			if isinstance(condition, dict):
-				parsed_condition = self._parse_logical_condition(condition)
+				parsed_conditions.append(self._parse_logical_condition(condition))
 			elif self._is_simple_condition(condition):
-				parsed_condition = {
-					"type": "simple",
-					"field": condition[0],
-					"operator": condition[1],
-					"value": condition[2],
-				}
-			else:
-				parsed_condition = {"type": "invalid"}
+				parsed_conditions.append(
+					{"type": "simple", "field": condition[0], "operator": condition[1], "value": condition[2]}
+				)
 
-			parsed_sub_conditions.append(parsed_condition)
-
-		return {"type": "logical", "operator": logical_op, "conditions": parsed_sub_conditions}
+		return {"type": "logical", "operator": logical_op, "conditions": parsed_conditions}
 
 	def _is_simple_condition(self, parsed) -> bool:
 		return (
@@ -1023,31 +936,13 @@ class FilterExpressionParser:
 		)
 
 	def build_condition(self, criteria: dict, table):
-		"""Convert criteria into database query conditions."""
-		if not criteria or criteria.get("type") == "invalid":
-			return None
-
-		if criteria["type"] == "simple":
-			return self._create_field_condition(criteria, table)
-
-		elif criteria["type"] == "logical":
-			conditions = []
-			for sub_criteria in criteria["conditions"]:
-				condition = self.build_condition(sub_criteria, table)
-				if condition is not None:
-					conditions.append(condition)
-
-			if not conditions:
-				return None
-
-			if criteria["operator"] == "and":
-				return reduce(lambda a, b: a & b, conditions)
-			elif criteria["operator"] == "or":
-				return reduce(lambda a, b: a | b, conditions)
-
+		if criteria.get("type") == "simple":
+			return self._build_simple_condition(criteria, table)
+		elif criteria.get("type") == "logical":
+			return self._build_logical_condition(criteria, table)
 		return None
 
-	def _create_field_condition(self, criteria: dict, table):
+	def _build_simple_condition(self, criteria: dict, table):
 		field_name = criteria["field"]
 		operator = criteria["operator"]
 		value = criteria["value"]
@@ -1069,12 +964,418 @@ class FilterExpressionParser:
 			return field.like(f"%{value}%")
 		elif operator == "not like":
 			return field.not_like(f"%{value}%")
-		elif operator == "is":
-			if value is None or (isinstance(value, str) and value.lower() == "set"):
-				return field.isnull()
-			elif value is None or (isinstance(value, str) and value.lower() == "not set"):
-				return field.isnotnull()
-			else:
-				return field == value
+		elif operator == ">":
+			return field > value
+		elif operator == ">=":
+			return field >= value
+		elif operator == "<":
+			return field < value
+		elif operator == "<=":
+			return field <= value
 
 		return None
+
+	def _build_logical_condition(self, criteria: dict, table):
+		operator = criteria["operator"]
+		conditions = []
+
+		for sub_criteria in criteria["conditions"]:
+			condition = self.build_condition(sub_criteria, table)
+			if condition is not None:
+				conditions.append(condition)
+
+		if not conditions:
+			return None
+
+		if operator == "and":
+			return reduce(lambda a, b: a & b, conditions)
+		elif operator == "or":
+			return reduce(lambda a, b: a | b, conditions)
+
+		return None
+
+
+# ============================================================================
+# FORMATTING
+# ============================================================================
+
+
+class FormattingEngine:
+	"""Manages formatting rules and application"""
+
+	def __init__(self):
+		self.rules = [
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "bold_text", False), format_properties={"bold": True}
+			),
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "italic_text", False), format_properties={"italic": True}
+			),
+			FormattingRule(
+				condition=lambda rd: rd.is_detail_row, format_properties={"is_detail": True, "prefix": "• "}
+			),
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "reverse_sign", False),
+				format_properties={"reverse_sign": True},
+			),
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "warn_if_negative", False),
+				format_properties={"warn_if_negative": True},
+			),
+		]
+
+	def get_formatting(self, row_data: RowData) -> dict[str, Any]:
+		formatting = {}
+		for rule in self.rules:
+			if rule.applies_to(row_data):
+				formatting.update(rule.format_properties)
+		return formatting
+
+
+class SegmentOrganizer:
+	"""Handles segment organization by `Column Break` and metadata extraction"""
+
+	def __init__(self, processed_rows: list[RowData]):
+		self.segments = self._organize_into_segments(processed_rows)
+
+	def _organize_into_segments(self, rows: list[RowData]) -> list[SegmentData]:
+		segments = []
+		current_rows = []
+		segment_index = 0
+		pending_label = ""
+
+		for row_data in rows:
+			if row_data.row.data_source == "Column Break":
+				# Save current segment with pending label from previous column break
+				if current_rows:
+					segments.append(SegmentData(rows=current_rows, label=pending_label, index=segment_index))
+					segment_index += 1
+					current_rows = []
+
+				# Label for the next segment
+				pending_label = getattr(row_data.row, "display_name", "") or ""
+				pending_label = pending_label.strip() if pending_label else ""
+			else:
+				current_rows.append(row_data)
+
+		# Add final segment
+		if current_rows or not segments:
+			segments.append(SegmentData(rows=current_rows, label=pending_label, index=segment_index))
+
+		return segments
+
+	@property
+	def is_single_segment(self) -> bool:
+		return len(self.segments) == 1
+
+	@property
+	def max_rows(self) -> int:
+		return max(len(seg.rows) for seg in self.segments) if self.segments else 0
+
+	@property
+	def segment_labels(self) -> dict[int, str]:
+		return {seg.index: seg.label for seg in self.segments if seg.label}
+
+
+class RowFormatterBase(ABC):
+	"""Abstract base for row formatting strategies"""
+
+	def __init__(self, context: ReportContext, formatting_engine: FormattingEngine):
+		self.context = context
+		self.period_list = context.period_list
+		self.formatting_engine = formatting_engine
+
+	@abstractmethod
+	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
+		pass
+
+	@abstractmethod
+	def get_columns(self, segments: list[SegmentData], base_columns: list[dict]) -> list[dict]:
+		pass
+
+	def _get_period_value(self, row_data: RowData, period_index: int) -> Any:
+		if period_index < len(row_data.values):
+			value = row_data.values[period_index]
+			if getattr(row_data.row, "reverse_sign", False):
+				value = -value
+			return value
+
+		return ""
+
+	def _should_show_row(self, row_data: RowData) -> bool:
+		row = row_data.row
+
+		# Always show blank lines
+		if row.data_source == "Blank Line":
+			return True
+
+		if getattr(row, "hidden_calculation", False):
+			return False
+
+		if getattr(row, "hide_when_empty", False):
+			significant_values = [
+				val for val in row_data.values if isinstance(val, int | float) and abs(flt(val)) > 0.01
+			]
+			return len(significant_values) > 0
+
+		return True
+
+
+class SingleSegmentFormatter(RowFormatterBase):
+	"""Formatter for single-segment layouts"""
+
+	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
+		if not segments or row_index >= len(segments[0].rows):
+			return {}
+
+		row_data = segments[0].rows[row_index]
+		if not self._should_show_row(row_data):
+			return {}
+
+		formatted = {
+			"account": getattr(row_data.row, "display_name", "") or "",
+			"indent": getattr(row_data.row, "indentation_level", 0),
+		}
+
+		# Add period values
+		for i, period in enumerate(self.period_list):
+			value = self._get_period_value(row_data, i)
+			formatted[period["key"]] = value
+
+		# Add formatting metadata
+		formatting = self.formatting_engine.get_formatting(row_data)
+		formatted.update(formatting)
+
+		return formatted
+
+	def get_columns(self, segments: list[SegmentData], base_columns: list[dict]) -> list[dict]:
+		return base_columns
+
+
+class MultiSegmentFormatter(RowFormatterBase):
+	"""Formatter for multi-segment layouts"""
+
+	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
+		formatted = {}
+		has_content = False
+
+		for segment in segments:
+			if row_index < len(segment.rows):
+				row_data = segment.rows[row_index]
+				if self._should_show_row(row_data):
+					self._add_segment_data(formatted, row_data, segment)
+					has_content = True
+			else:
+				self._add_empty_segment(formatted, segment)
+
+		return formatted if has_content else {}
+
+	def get_columns(self, segments: list[SegmentData], base_columns: list[dict]) -> list[dict]:
+		columns = []
+
+		for segment in segments:
+			for col in base_columns:
+				new_col = col.copy()
+
+				if col["fieldname"] == "account":
+					new_col["fieldname"] = f"account_seg_{segment.index}"
+					new_col["label"] = segment.label or f"Account (Segment {segment.index + 1})"
+				else:
+					new_col["fieldname"] = f"seg_{segment.index}_{col['fieldname']}"
+					# For period columns, combine custom label with period label
+					if segment.label and col["fieldname"] in [p["key"] for p in self.period_list]:
+						new_col["label"] = f"{segment.label} - {col['label']}"
+
+				columns.append(new_col)
+
+		return columns
+
+	def _add_segment_data(self, formatted: dict, row_data: RowData, segment: SegmentData):
+		formatted[f"account_seg_{segment.index}"] = getattr(row_data.row, "display_name", "") or ""
+
+		# Period values
+		for i, period in enumerate(self.period_list):
+			value = self._get_period_value(row_data, i)
+			formatted[f"seg_{segment.index}_{period['key']}"] = value
+
+		# Formatting metadata
+		if "segment_formatting" not in formatted:
+			formatted["segment_formatting"] = {}
+
+		formatting = self.formatting_engine.get_formatting(row_data)
+		formatting["indent"] = getattr(row_data.row, "indentation_level", 0)
+		formatted["segment_formatting"][f"seg_{segment.index}"] = formatting
+
+	def _add_empty_segment(self, formatted: dict, segment: SegmentData):
+		"""Add empty values for missing segment data"""
+		formatted[f"account_seg_{segment.index}"] = ""
+		for period in self.period_list:
+			formatted[f"seg_{segment.index}_{period['key']}"] = ""
+
+
+class DetailRowBuilder:
+	"""Builds detail rows for account breakdown"""
+
+	def __init__(self, filters: dict, parent_row_data: RowData):
+		self.filters = filters
+		self.parent_row_data = parent_row_data
+
+	def build(self) -> list[RowData]:
+		if not self.parent_row_data.account_details:
+			return []
+
+		detail_rows = []
+		parent_row = self.parent_row_data.row
+
+		for account_name, account_data in self.parent_row_data.account_details.items():
+			detail_row = self._create_detail_row_object(account_name, parent_row)
+
+			balance_type = getattr(parent_row, "balance_type", "Closing Balance")
+			values = account_data.get_values_by_type(balance_type)
+
+			detail_row_data = RowData(
+				row=detail_row,
+				values=values,
+				is_detail_row=True,
+				parent_reference=parent_row.reference_code,
+			)
+
+			detail_rows.append(detail_row_data)
+
+		return detail_rows
+
+	def _create_detail_row_object(self, account_name: str, parent_row):
+		short_name = account_name.split(" - ")[0].strip()
+
+		return type(
+			"DetailRow",
+			(),
+			{
+				"display_name": short_name,
+				"account": account_name,
+				"account_name": short_name,
+				"from_date": self.filters.get("period_start_date"),
+				"to_date": self.filters.get("period_end_date"),
+				"year_start_date": self.filters.get("period_start_date"),
+				"year_end_date": self.filters.get("period_end_date"),
+				"data_source": "Account Detail",
+				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
+				"bold_text": False,
+				"italic_text": True,
+				"reverse_sign": getattr(parent_row, "reverse_sign", False),
+				"warn_if_negative": getattr(parent_row, "warn_if_negative", False),
+				"hide_when_empty": getattr(parent_row, "hide_when_empty", False),
+				"hidden_calculation": False,
+				"idx": getattr(parent_row, "idx", 0) + 0.1,
+			},
+		)()
+
+
+class DataFormatter:
+	"""Refactored formatter using composition and strategy pattern"""
+
+	def __init__(self, context: ReportContext):
+		self.context = context
+		self.formatting_engine = FormattingEngine()
+
+		self.organizer = SegmentOrganizer(context.processed_rows)
+
+		if self.organizer.is_single_segment:
+			self.formatter = SingleSegmentFormatter(context, self.formatting_engine)
+		else:
+			self.formatter = MultiSegmentFormatter(context, self.formatting_engine)
+
+		if context.show_detailed:
+			self._expand_segments_with_details()
+
+	def format_for_display(self) -> tuple[list[dict], list[dict]]:
+		formatted_data = self._format_rows()
+		columns = self._generate_columns()
+		return formatted_data, columns
+
+	def _format_rows(self) -> list[dict]:
+		formatted_data = []
+
+		for row_index in range(self.organizer.max_rows):
+			formatted_row = self.formatter.format_row(self.organizer.segments, row_index)
+
+			if formatted_row or self._is_blank_line_at(row_index):
+				# Add metadata
+				formatted_row["_segment_info"] = {
+					"total_segments": len(self.organizer.segments),
+					"template_name": self.context.template.name,
+					"has_custom_formatting": bool(self.context.template.name),
+					"segment_labels": self.organizer.segment_labels,
+				}
+
+				# Mark blank lines
+				if self._is_blank_line_at(row_index):
+					formatted_row["_is_blank_line"] = True
+
+				formatted_data.append(formatted_row)
+
+		return formatted_data
+
+	def _generate_columns(self) -> list[dict]:
+		base_columns = get_columns(
+			self.context.filters.get("periodicity"),
+			self.context.period_list,
+			self.context.filters.get("accumulated_values"),
+			self.context.filters.get("company"),
+		)
+
+		return self.formatter.get_columns(self.organizer.segments, base_columns)
+
+	def _expand_segments_with_details(self):
+		for segment in self.organizer.segments:
+			expanded_rows = []
+
+			for row_data in segment.rows:
+				expanded_rows.append(row_data)
+
+				if row_data.account_details:
+					detail_rows = DetailRowBuilder(self.context.filters, row_data).build()
+					expanded_rows.extend(detail_rows)
+
+			segment.rows = expanded_rows
+
+	def _is_blank_line_at(self, row_index: int) -> bool:
+		return any(
+			row_index < len(seg.rows) and seg.rows[row_index].row.data_source == "Blank Line"
+			for seg in self.organizer.segments
+		)
+
+
+def validate_template_rows(template) -> list[str]:
+	issues = []
+
+	# Check for duplicate reference codes
+	ref_codes = [row.reference_code for row in template.rows if row.reference_code]
+	if len(ref_codes) != len(set(ref_codes)):
+		issues.append("Duplicate reference codes found")
+
+	# Check formula dependencies
+	try:
+		DependencyResolver(template)
+	except Exception as e:
+		issues.append(f"Dependency validation failed: {e!s}")
+
+	return issues
+
+
+def get_template_summary(template_name: str) -> dict[str, Any]:
+	template = frappe.get_doc("Financial Report Template", template_name)
+
+	row_counts = {}
+	for row in template.rows:
+		source = row.data_source or "Unknown"
+		row_counts[source] = row_counts.get(source, 0) + 1
+
+	return {
+		"template_name": template_name,
+		"total_rows": len(template.rows),
+		"row_breakdown": row_counts,
+		"has_formulas": "Calculated Amount" in row_counts,
+		"has_column_breaks": "Column Break" in row_counts,
+		"validation_issues": validate_template_rows(template),
+	}
