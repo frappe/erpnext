@@ -772,16 +772,16 @@ class ProductionPlan(Document):
 			if row.type_of_manufacturing == "Material Request":
 				continue
 
-			work_order_data = {
-				"wip_warehouse": default_warehouses.get("wip_warehouse"),
-				"fg_warehouse": default_warehouses.get("fg_warehouse"),
-				"company": self.get("company"),
-			}
+			work_order_data = {"company": self.get("company")}
 
 			if flt(row.qty) <= flt(row.ordered_qty):
 				continue
 
 			self.prepare_data_for_sub_assembly_items(row, work_order_data)
+
+			# set default values
+			set_default_warehouses(work_order_data, default_warehouses)
+			work_order_data["company"] = self.get("company")
 
 			if work_order_data.get("qty") <= 0:
 				continue
@@ -796,6 +796,7 @@ class ProductionPlan(Document):
 			"item_name",
 			"qty",
 			"fg_warehouse",
+			"wip_warehouse",
 			"description",
 			"bom_no",
 			"stock_uom",
@@ -884,14 +885,12 @@ class ProductionPlan(Document):
 
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
+
 		if not wo.source_warehouse:
 			wo.source_warehouse = item.get("fg_warehouse")
 
 		wo.reserve_stock = self.reserve_stock
 		wo.planned_start_date = item.get("planned_start_date") or item.get("schedule_date")
-
-		if item.get("warehouse"):
-			wo.fg_warehouse = item.get("warehouse")
 
 		wo.set_work_order_operations()
 		wo.set_required_items(reset_source_warehouse=True)
@@ -1909,9 +1908,18 @@ def get_sub_assembly_items(
 
 
 def set_default_warehouses(row, default_warehouses):
-	for field in ["wip_warehouse", "fg_warehouse"]:
-		if not row.get(field):
-			row[field] = default_warehouses.get(field)
+	"""
+	Set `fg_warehouse` and `wip_warehouse` from row or defaults.
+
+	**Priority:**
+
+	- fg_warehouse: row.fg_warehouse -> row.warehouse -> defaults.fg_warehouse
+	- wip_warehouse: row.wip_warehouse -> defaults.wip_warehouse
+	"""
+	row["fg_warehouse"] = (
+		row.get("fg_warehouse") or row.get("warehouse") or default_warehouses.get("fg_warehouse")
+	)
+	row["wip_warehouse"] = row.get("wip_warehouse") or default_warehouses.get("wip_warehouse")
 
 
 def get_reserved_qty_for_production_plan(item_code, warehouse):
