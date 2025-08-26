@@ -178,8 +178,8 @@ class TaxWithholdingEntry(Document):
 				# partial adjustment
 				# Calculate balance values for both taxable and withholding amounts
 				balance_amount = (old_amount - amount_we_can_match) * value_direction
-				balance_proportion = balance_amount / old_amount if old_amount else 0
-				balance_values = self._get_balance_values_to_update(old_entry, balance_proportion, field_type)
+
+				balance_values = self._get_balance_values_to_update(old_entry, proportion, field_type)
 				balance_values[amount_field] = balance_amount
 
 				frappe.db.set_value(DOCTYPE, old_entry.name, balance_values)
@@ -236,11 +236,13 @@ class TaxWithholdingEntry(Document):
 
 		return values
 
-	def _get_balance_values_to_update(self, old_entry, balance_proportion: float, field_type: str):
+	def _get_balance_values_to_update(self, old_entry, proportion: float, field_type: str):
 		"""Calculate the balance amounts for both taxable and withholding fields for partial adjustments"""
 		field_to_update = "withholding" if field_type == "taxable" else "taxable"
 		field = f"{field_to_update}_amount"
-		amount = flt(old_entry.get(field) * balance_proportion, self.precision(field))
+		proportion = 1 - proportion
+
+		amount = flt(old_entry.get(field) * proportion, self.precision(field))
 
 		return {field: amount}
 
