@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-08-24 09:35+0000\n"
-"PO-Revision-Date: 2025-08-24 20:45\n"
+"PO-Revision-Date: 2025-08-26 21:51\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Italian\n"
 "MIME-Version: 1.0\n"
@@ -6213,7 +6213,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Assets"
-msgstr ""
+msgstr "Risorse"
 
 #: erpnext/controllers/buying_controller.py:964
 msgid "Assets not created for {item_code}. You will have to create asset manually."
@@ -40387,7 +40387,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order_dashboard.py:28
 #: erpnext/setup/doctype/company/company_dashboard.py:25
 msgid "Projects"
-msgstr ""
+msgstr "Progetti"
 
 #. Name of a role
 #: erpnext/projects/doctype/project/project.json
@@ -41539,7 +41539,7 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Quality"
-msgstr ""
+msgstr "Qualità"
 
 #. Name of a DocType
 #. Option for the 'Document Type' (Select) field in DocType 'Quality Meeting
