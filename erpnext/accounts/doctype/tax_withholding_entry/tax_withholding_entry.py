@@ -245,25 +245,31 @@ class TaxWithholdingEntry(Document):
 		return {field: amount}
 
 	# CANCEL
-
 	def _clear_old_references(self):
-		if self.status != "Settled":
+		if self.status not in ["Settled", "Duplicate"]:
 			return
+
+		filters = {
+			"tax_withholding_category": self.tax_withholding_category,
+			"taxable_doctype": self.taxable_doctype,
+			"taxable_name": self.taxable_name,
+			"withholding_doctype": self.withholding_doctype,
+			"withholding_name": self.withholding_name,
+			"name": ["!=", self.name],
+			"docstatus": 1,
+		}
 
 		if self.is_taxable_different:
 			frappe.db.set_value(
 				DOCTYPE,
-				{
-					"tax_withholding_category": self.tax_withholding_category,
-					"taxable_doctype": self.taxable_doctype,
-					"taxable_name": self.taxable_name,
-					"name": ["!=", self.name],
-					"docstatus": 1,
-				},
+				filters,
 				{
 					"withholding_name": "",
 					"withholding_doctype": "",
 					"withholding_amount": 0,
+					"withholding_date": None,
+					"under_withheld_reason": "",
+					"lower_deduction_certificate": "",
 					"status": "Under Withheld",
 				},
 			)
@@ -271,17 +277,11 @@ class TaxWithholdingEntry(Document):
 		elif self.is_withholding_different:
 			frappe.db.set_value(
 				DOCTYPE,
-				{
-					"tax_withholding_category": self.tax_withholding_category,
-					"withholding_doctype": self.withholding_doctype,
-					"withholding_name": self.withholding_name,
-					"name": ["!=", self.name],
-					"docstatus": 1,
-				},
+				filters,
 				{
 					"taxable_name": "",
 					"taxable_doctype": "",
-					"taxable_amount": 0,
+					"taxable_date": None,
 					"status": "Over Withheld",
 				},
 			)

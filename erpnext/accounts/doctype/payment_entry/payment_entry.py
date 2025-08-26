@@ -304,6 +304,7 @@ class PaymentEntry(AccountsController):
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 			"Advance Payment Ledger Entry",
+			"Tax Withholding Entry",
 		)
 		super().on_cancel()
 		PaymentTaxWithholding(self).on_cancel()

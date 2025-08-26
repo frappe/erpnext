@@ -294,6 +294,7 @@ class JournalEntry(AccountsController):
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 			"Advance Payment Ledger Entry",
+			"Tax Withholding Entry",
 		)
 		self.make_gl_entries(1)
 		self.unlink_advance_entry_reference()

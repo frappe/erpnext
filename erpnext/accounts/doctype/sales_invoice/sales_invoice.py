@@ -620,6 +620,7 @@ class SalesInvoice(SellingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Tax Withholding Entry",
 		)
 
 		self.delete_auto_created_batches()

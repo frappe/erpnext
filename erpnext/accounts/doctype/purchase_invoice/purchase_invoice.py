@@ -1710,6 +1710,7 @@ class PurchaseInvoice(BuyingController):
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 			"Serial and Batch Bundle",
+			"Tax Withholding Entry",
 		)
 		self.update_advance_tax_references(cancel=1)
 
