@@ -27,7 +27,7 @@ class ProductionPlanSubAssemblyItem(Document):
 		parent_item_code: DF.Link | None
 		parentfield: DF.Data
 		parenttype: DF.Data
-		production_item: DF.Link | None
+		production_item: DF.Link
 		production_plan_item: DF.Data | None
 		projected_qty: DF.Float
 		purchase_order: DF.Link | None
