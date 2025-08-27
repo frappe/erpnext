@@ -2,11 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Production Plan", {
-	onload: function (frm) {
-		// prevent adding rows to sub-assembly items
-		frm.get_field("sub_assembly_items").grid.cannot_add_rows = true;
-	},
-
 	before_save(frm) {
 		// preserve temporary names on production plan item to re-link sub-assembly items
 		frm.doc.po_items.forEach((item) => {
