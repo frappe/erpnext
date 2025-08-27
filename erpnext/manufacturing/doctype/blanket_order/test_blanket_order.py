@@ -113,12 +113,36 @@ class TestBlanketOrder(IntegrationTestCase):
 		bo = make_blanket_order(blanket_order_type="Purchasing", supplier=supplier, item_code=item_code)
 		self.assertEqual(bo.items[0].party_item_code, "SUPP-PART-1")
 
+	def test_multicurrency_blanket_order(self):
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		supplier = create_supplier(supplier_name="_Test BO USD Supplier", default_currency="USD")
+		bo = make_blanket_order(
+			blanket_order_type="Purchasing",
+			supplier=supplier.name,
+			currency="USD",
+			conversion_rate=86,
+			quantity=10,
+			rate=5,
+		)
+		self.assertEqual(bo.items[0].base_rate, 430)
+
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+
+		self.assertEqual(po.currency, "USD")
+		self.assertEqual(po.conversion_rate, 86)
+		self.assertEqual(po.items[0].rate, 5)
+		self.assertEqual(po.items[0].base_rate, 430)
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
 	bo = frappe.new_doc("Blanket Order")
 	bo.blanket_order_type = args.blanket_order_type
 	bo.company = args.company or "_Test Company"
+	bo.currency = args.currency or get_company_currency(bo.company)
+	bo.conversion_rate = args.conversion_rate or 1.0
 
 	if args.blanket_order_type == "Selling":
 		bo.customer = args.customer or "_Test Customer"
