@@ -26,6 +26,8 @@ class BlanketOrder(Document):
 		amended_from: DF.Link | None
 		blanket_order_type: DF.Literal["", "Selling", "Purchasing"]
 		company: DF.Link
+		conversion_rate: DF.Float
+		currency: DF.Link
 		customer: DF.Link | None
 		customer_name: DF.Data | None
 		from_date: DF.Date
@@ -45,6 +47,7 @@ class BlanketOrder(Document):
 		self.validate_duplicate_items()
 		self.validate_item_qty()
 		self.set_party_item_code()
+		self.calculate_base_rate()
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
@@ -122,6 +125,10 @@ class BlanketOrder(Document):
 		for d in self.items:
 			if d.qty < 0:
 				frappe.throw(_("Row {0}: Quantity cannot be negative.").format(d.idx))
+
+	def calculate_base_rate(self):
+		for d in self.items:
+			d.base_rate = flt(d.rate * self.conversion_rate, d.precision("base_rate"))
 
 
 @frappe.whitelist()

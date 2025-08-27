@@ -14,6 +14,7 @@ class BlanketOrderItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		base_rate: DF.Currency
 		item_code: DF.Link
 		item_name: DF.Data | None
 		ordered_qty: DF.Float
