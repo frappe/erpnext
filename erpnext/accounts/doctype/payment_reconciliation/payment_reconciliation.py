@@ -576,6 +576,7 @@ class PaymentReconciliation(Document):
 				"difference_amount": flt(row.get("difference_amount")),
 				"difference_account": row.get("difference_account"),
 				"difference_posting_date": row.get("gain_loss_posting_date"),
+				"debit_or_credit_note_posting_date": row.get("debit_or_credit_note_posting_date"),
 				"cost_center": row.get("cost_center"),
 			}
 		)
@@ -765,7 +766,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 			{
 				"doctype": "Journal Entry",
 				"voucher_type": voucher_type,
-				"posting_date": today(),
+				"posting_date": inv.get("debit_or_credit_note_posting_date") or today(),
 				"company": company,
 				"multi_currency": 1 if inv.currency != company_currency else 0,
 				"accounts": [

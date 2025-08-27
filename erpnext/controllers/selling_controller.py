@@ -935,7 +935,7 @@ class SellingController(StockController):
 						"voucher_no": item.get(so_field),
 						"voucher_detail_no": item.so_detail,
 						"warehouse": item.warehouse,
-						"status": ["in", ["Partially Delivered", "Delivered"]],
+						"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
 					},
 					order_by="creation",
 				)

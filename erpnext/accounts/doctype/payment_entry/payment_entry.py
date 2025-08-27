@@ -200,9 +200,9 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.update_payment_requests()
+		self.update_payment_schedule()
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
-		self.update_payment_schedule()
 		self.set_status()
 
 	def validate_for_repost(self):
@@ -303,10 +303,10 @@ class PaymentEntry(AccountsController):
 		)
 		super().on_cancel()
 		self.update_payment_requests(cancel=True)
+		self.update_payment_schedule(cancel=1)
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.delink_advance_entry_references()
-		self.update_payment_schedule(cancel=1)
 		self.set_status()
 
 	def update_payment_requests(self, cancel=False):

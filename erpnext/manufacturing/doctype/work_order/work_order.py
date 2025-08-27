@@ -1317,16 +1317,15 @@ class WorkOrder(Document):
 		data = query.run(as_dict=1) or []
 		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
+		row_wise_serial_batch = frappe._dict({})
+		if self.reserve_stock:
+			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
+
 		for row in self.required_items:
 			transferred_qty = transferred_items.get(row.item_code) or 0.0
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
-
-		if not self.reserve_stock:
-			return
-
-		row_wise_serial_batch = get_row_wise_serial_batch(self.name)
-		for row in self.required_items:
-			self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
+			if self.reserve_stock:
+				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
 		if names := frappe.get_all(
@@ -1342,7 +1341,7 @@ class WorkOrder(Document):
 			for name in names:
 				doc = frappe.get_doc("Stock Reservation Entry", name)
 				qty_to_update = 0.0
-				if transferred_qty <= 0:
+				if transferred_qty < 0:
 					continue
 
 				if transferred_qty > flt(doc.reserved_qty - doc.consumed_qty):
@@ -1352,12 +1351,16 @@ class WorkOrder(Document):
 					qty_to_update = transferred_qty
 					transferred_qty = 0.0
 
-				if qty_to_update <= 0:
+				if qty_to_update < 0:
 					continue
 
 				doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 					doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+
+				if doc.transferred_qty >= doc.reserved_qty:
+					doc.db_set("status", "Closed", update_modified=False)
+
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
 
@@ -2405,7 +2408,7 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 
 	row_wise_serial_batch = {}
 	for entry in serial_batch_entries:
-		key = (entry.item_code, entry.warehouse, entry.voucher_detail_no)
+		key = (entry.item_code, entry.warehouse)
 		if key not in row_wise_serial_batch:
 			row_wise_serial_batch[key] = frappe._dict(
 				{

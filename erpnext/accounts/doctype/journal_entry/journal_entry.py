@@ -1796,6 +1796,14 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 
 @frappe.whitelist()
 def make_reverse_journal_entry(source_name, target_doc=None):
+	existing_reverse = frappe.db.exists("Journal Entry", {"reversal_of": source_name, "docstatus": 1})
+	if existing_reverse:
+		frappe.throw(
+			_("A Reverse Journal Entry {0} already exists for this Journal Entry.").format(
+				get_link_to_form("Journal Entry", existing_reverse)
+			)
+		)
+
 	from frappe.model.mapper import get_mapped_doc
 
 	def post_process(source, target):

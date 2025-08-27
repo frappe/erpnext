@@ -6,6 +6,9 @@ on:
       - '**.js'
       - '**.md'
       - '**.html'
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
     types: [opened, labelled, synchronize, reopened]
 
 concurrency:

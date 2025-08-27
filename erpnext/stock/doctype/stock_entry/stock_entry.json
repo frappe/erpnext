@@ -51,6 +51,7 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+  "last_scanned_warehouse",
   "items_section",
   "items",
   "get_stock_and_rate",
@@ -691,6 +692,13 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "icon": "fa fa-file-text",
