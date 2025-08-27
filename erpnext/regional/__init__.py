@@ -19,6 +19,9 @@ def create_transaction_log(doc, method):
 	Appends the transaction to a chain of hashed logs for legal resons.
 	Called on submit of Sales Invoice and Payment Entry.
 	"""
+	if frappe.conf.get("disable_transaction_log", False):
+		return
+
 	region = get_region()
 	if region not in ["Germany"]:
 		return
