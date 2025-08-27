@@ -772,7 +772,7 @@ class ProductionPlan(Document):
 			if row.type_of_manufacturing == "Material Request":
 				continue
 
-			work_order_data = {"company": self.get("company")}
+			work_order_data = {"company": self.company}
 
 			if flt(row.qty) <= flt(row.ordered_qty):
 				continue
@@ -781,7 +781,6 @@ class ProductionPlan(Document):
 
 			# set default values
 			set_default_warehouses(work_order_data, default_warehouses)
-			work_order_data["company"] = self.get("company")
 
 			if work_order_data.get("qty") <= 0:
 				continue
