@@ -498,7 +498,7 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, row_item):
 				return pricing_rules
 
 
-def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
+def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None, free_item=False):
 	if items is None:
 		items = []
 	sum_qty, sum_amt = [0, 0]
@@ -511,36 +511,25 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 	child_doctype = f"{doctype} Item"
 	apply_on = frappe.scrub(pr_doc.get("apply_on"))
 
-	values = [pr_doc.valid_from, pr_doc.valid_upto]
-	condition = ""
-
+	parent = frappe.qb.DocType(doctype)
+	child = frappe.qb.DocType(child_doctype)
+	query = (
+		frappe.qb.from_(child)
+		.join(parent)
+		.on(child.parent == parent.name)
+		.select(child.stock_qty, child.amount)
+		.where(parent[date_field].between(pr_doc.valid_from, pr_doc.valid_upto))
+		.where(parent.docstatus == 1)
+		.where(child.is_free_item == free_item)
+	)
 	if pr_doc.warehouse:
 		warehouses = get_child_warehouses(pr_doc.warehouse)
-
-		condition += """ and `tab{child_doc}`.warehouse in ({warehouses})
-			""".format(child_doc=child_doctype, warehouses=",".join(["%s"] * len(warehouses)))
-
-		values.extend(warehouses)
+		query = query.where(child.warehouse.isin(warehouses))
 
 	if items:
-		condition += " and `tab{child_doc}`.{apply_on} in ({items})".format(
-			child_doc=child_doctype, apply_on=apply_on, items=",".join(["%s"] * len(items))
-		)
+		query = query.where(child[apply_on].isin(items))
 
-		values.extend(items)
-
-	data_set = frappe.db.sql(
-		f""" SELECT `tab{child_doctype}`.stock_qty,
-			`tab{child_doctype}`.amount
-		FROM `tab{child_doctype}`, `tab{doctype}`
-		WHERE
-			`tab{child_doctype}`.parent = `tab{doctype}`.name and `tab{doctype}`.{date_field}
-			between %s and %s and `tab{doctype}`.docstatus = 1
-			{condition} group by `tab{child_doctype}`.name
-	""",
-		tuple(values),
-		as_dict=1,
-	)
+	data_set = query.run(as_dict=True)
 
 	for data in data_set:
 		sum_qty += data.get("stock_qty")
@@ -653,7 +642,14 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 			)
 		)
 
-	qty = pricing_rule.free_qty or 1
+	qty = pricing_rule.free_qty or flt(1)
+
+	if pricing_rule.is_cumulative:
+		items = [args.get(frappe.scrub(pricing_rule.get("apply_on")))]
+		data = get_qty_amount_data_for_cumulative(pricing_rule, doc, items, free_item=True)
+		if data[0]:
+			qty -= data[0]
+
 	if pricing_rule.is_recursive:
 		transaction_qty = sum(
 			[
