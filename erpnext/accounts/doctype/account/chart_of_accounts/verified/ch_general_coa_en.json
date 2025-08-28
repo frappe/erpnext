@@ -1,0 +1,228 @@
+{
+  "countryCode": "ch",
+  "name": "Switzerland - General CoA - EN",
+  "tree": {
+    "1-Assets": {
+      "10-Current Assets": {
+        "100-Cash and Cash Equivalents": {
+          "1000-Cash on Hand": {
+            "accountType": "Cash"
+          },
+          "1020-Bank Accounts": {
+            "accountType": "Bank"
+          }
+        },
+        "106-Short‑Term Financial Assets at Market Value": {
+          "1060-Securities": {},
+          "1069-Valuation Adjustments – Securities": {}
+        },
+        "110-Trade Receivables": {
+          "1100-Trade Receivables (Debtors)": {},
+          "1109-Allowance for Doubtful Accounts": {}
+        },
+        "114-Other Current Receivables": {
+          "1140-Advances and Loans": {},
+          "1149-Valuation Adjustments – Advances and Loans": {},
+          "1170-Input VAT – Materials, Goods, Services, Energy": {},
+          "1171-Input VAT – Investments, Other Operating Expenses": {},
+          "1176-Withholding Tax Credit": {},
+          "1180-Receivables from Social Security & Pension Funds": {},
+          "1189-Source Tax Credit": {},
+          "1190-Miscellaneous Current Receivables": {},
+          "1199-Valuation Adjustments – Miscellaneous Current Receivables": {}
+        },
+        "120-Inventory & Unbilled Services": {
+          "1200-Merchandise": {},
+          "1210-Raw Materials": {},
+          "1220-Semi‑Finished Goods": {},
+          "1230-Consumables & Supplies": {},
+          "1250-Consignment Merchandise": {},
+          "1260-Finished Goods": {},
+          "1270-Work in Progress": {},
+          "1280-Unbilled Services": {}
+        },
+        "130-Prepaid Expenses": {
+          "1300-Paid Expenses for Next Fiscal Year": {},
+          "1301-Accrued Income": {}
+        }
+      },
+      "14-Fixed Assets": {
+        "140-Financial Investments": {
+          "1400-Securities": {},
+          "1409-Valuation Adjustments – Securities": {},
+          "1440-Loans": {},
+          "1441-Mortgages": {},
+          "1449-Valuation Adjustments – Long‑Term Receivables": {}
+        },
+        "148-Equity Investments": {
+          "1480-Equity Investments": {},
+          "1489-Valuation Adjustments – Equity Investments": {}
+        },
+        "150-Tangible Fixed Assets": {
+          "1500-Machinery & Equipment": {},
+          "1509-Valuation Adjustments – Machinery & Equipment": {},
+          "1510-Furniture & Fixtures": {},
+          "1519-Valuation Adjustments – Furniture & Fixtures": {},
+          "1520-Office Machines, IT & Communications Tech": {},
+          "1529-Valuation Adjustments – Office Machines, IT & Communications Tech": {},
+          "1530-Vehicles": {},
+          "1539-Valuation Adjustments – Vehicles": {},
+          "1540-Tools & Equipment": {},
+          "1549-Valuation Adjustments – Tools & Equipment": {}
+        },
+        "160-Real Estate Fixed Assets": {
+          "1600-Commercial Property": {},
+          "1609-Valuation Adjustments – Commercial Property": {}
+        },
+        "170-Intangible Assets": {
+          "1700-Patents, Know‑How, Licenses, Rights, Developments": {},
+          "1709-Valuation Adjustments – Patents, etc.": {},
+          "1770-Goodwill": {},
+          "1779-Valuation Adjustments – Goodwill": {}
+        },
+        "180-Unpaid Share Capital / Equity Contributions": {
+          "1850-Unpaid Stock / Share / Membership Capital": {}
+        }
+      },
+      "rootType": "Asset"
+    },
+    "2-Liabilities": {
+      "20-Short-Term Liabilities": {
+        "200-Trade Payables": {
+          "2000-Trade Payables (Creditors)": {},
+          "2030-Received Advances": {}
+        },
+        "210-Short-Term Interest-Bearing Liabilities": {
+          "2100-Bank Liabilities": {},
+          "2120-Finance Lease Liabilities": {},
+          "2140-Other Interest-Bearing Liabilities": {}
+        },
+        "220-Other Short-Term Liabilities": {
+          "2200-VAT Payable (Sales Tax)": {},
+          "2201-VAT Settlement Account": {},
+          "2206-Withholding Tax": {},
+          "2208-Direct Taxes": {},
+          "2210-Other Short-Term Liabilities": {},
+          "2261-Declared Distributions": {},
+          "2270-Social Security & Pension Obligations": {},
+          "2279-Withholding Tax": {}
+        },
+        "230-Accrued Liabilities and Short-Term Provisions": {
+          "2300-Accrued Expenses": {},
+          "2301-Accrued Income for Next Year": {},
+          "2330-Short-Term Provisions": {}
+        }
+      },
+      "24-Long-Term Liabilities": {
+        "240-Long-Term Interest-Bearing Liabilities": {
+          "2400-Bank Liabilities": {},
+          "2420-Finance Lease Liabilities": {},
+          "2430-Bond Liabilities": {},
+          "2450-Loans": {},
+          "2451-Mortgages": {}
+        },
+        "250-Other Long-Term Liabilities": {
+          "2500-Other Long-Term Liabilities (Non-Interest Bearing)": {}
+        },
+        "260-Provisions and Statutory Similar Items": {
+          "2600-Provisions": {}
+        }
+      },
+      "28-Equity (Legal Entities)": {
+        "280-Share Capital / Equity Capital": {
+          "2800-Share Capital": {}
+        },
+        "290-Reserves and Retained Earnings / Loss": {
+          "2900-Statutory Capital Reserve": {},
+          "2930-Treasury Shares Reserve": {},
+          "2940-Revaluation Reserve": {},
+          "2950-Statutory Profit Reserve": {},
+          "2960-Voluntary Profit Reserves": {},
+          "2970-Retained Earnings (Profit Carryforward) or Loss Carryforward": {},
+          "2979-Net Profit or Net Loss": {},
+          "2980-Treasury Shares (Negative Item)": {}
+        }
+      },
+      "Duties and Taxes": {
+        "VAT 8.1%": {
+          "accountType": "Tax",
+          "taxRate": 8.1
+        },
+        "VAT 2.6%": {
+          "accountType": "Tax",
+          "taxRate": 2.6
+        },
+        "VAT 3.8%": {
+          "accountType": "Tax",
+          "taxRate": 3.8
+        }
+      },
+      "rootType": "Liability"
+    },
+    "3-Operating Revenue from Sales and Services": {
+      "3000-Production Revenue": {},
+      "3200-Trade Revenue": {},
+      "3400-Service Revenue": {},
+      "3600-Other Revenue from Sales and Services": {},
+      "3700-Own Work": {},
+      "3710-Own Consumption": {},
+      "3800-Revenue Reductions": {},
+      "3805-Bad Debt Losses (Debtors), Change in Allowance": {},
+      "3900-Inventory Changes of Work-in-Progress": {},
+      "3901-Inventory Changes of Finished Goods": {},
+      "3940-Inventory Changes of Unbilled Services": {},
+      "rootType": "Income"
+    },
+    "4-Expense for Materials, Merchandise, Services and Energy": {
+      "4000-Production Material Expense": {},
+      "4200-Merchandise Expense": {},
+      "4400-Expense for Purchased Services": {},
+      "4500-Energy Expense for Production": {},
+      "4900-Expense Reductions": {},
+      "rootType": "Expense"
+    },
+    "5-Personnel Expense": {
+      "5000-Salary Expense": {},
+      "5700-Social Insurance Expense": {},
+      "5800-Other Personnel Expense": {},
+      "5900-Third-Party Services": {},
+      "rootType": "Expense"
+    },
+    "6-Other Operating Expenses, Depreciation and Impairments, and Financial Result": {
+      "6000-Space Expense": {},
+      "6100-Maintenance, Repairs, Replacement of Mobile Fixed Assets": {},
+      "6105-Leasing Expense for Mobile Fixed Assets": {},
+      "6200-Vehicle and Transport Expense": {},
+      "6260-Vehicle Leasing and Rentals": {},
+      "6300-Property Insurance, Taxes, Fees, Permits": {},
+      "6400-Energy and Disposal Expense": {},
+      "6500-Administrative Expense": {},
+      "6570-IT Expense Including Leasing": {},
+      "6600-Advertising Expense": {},
+      "6700-Other Operating Expense": {},
+      "6800-Depreciation and Impairments on Fixed‑Asset Positions": {},
+      "6900-Financial Expense": {},
+      "6950-Financial Income": {},
+      "rootType": "Expense"
+    },
+    "7-Operating Miscellaneous Income": {
+      "7000-Miscellaneous Operating Revenue": {},
+      "7010-Miscellaneous Operating Expense": {},
+      "7500-Operational Real Estate Revenue": {},
+      "7510-Operational Real Estate Expense": {},
+      "rootType": "Income"
+    },
+    "8-Non‑Operating Extraordinary One‑Off or Periodic Expense and Income": {
+      "8000-Non‑Operating Expense": {},
+      "8100-Non‑Operating Income": {},
+      "8500-Extraordinary One‑Off or Periodic Expense": {},
+      "8510-Extraordinary One‑Off or Periodic Income": {},
+      "8900-Direct Taxes": {},
+      "rootType": "Expense"
+    },
+    "9-Closing": {
+      "9200-Annual Profit or Loss": {},
+      "rootType": "Equity"
+    }
+  }
+}
