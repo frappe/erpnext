@@ -1170,8 +1170,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_purchase_order() {
 		let pending_items = this.frm.doc.items.some((item) => {
-			let ordered_qty = this.get_ordered_qty(item, this.frm.doc);
-			let pending_qty = flt(item.stock_qty) - ordered_qty;
+			const pending_qty = flt(item.stock_qty) - this.get_ordered_qty(item, this.frm.doc);
 			return pending_qty > 0;
 		});
 		if (!pending_items) {
@@ -1325,7 +1324,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			// calculate ordered qty based on packed items in case of product bundle
 			let packed_items = so.packed_items.filter((pi) => pi.parent_detail_docname == item.name);
 			if (packed_items && packed_items.length) {
-				const all_packed_items_ordered = packed_items.every((pi) => flt(pi.ordered_qty) >= flt(pi.qty));
+				const all_packed_items_ordered = packed_items.every(
+					(pi) => flt(pi.ordered_qty) >= flt(pi.qty)
+				);
 				ordered_qty = all_packed_items_ordered ? item.stock_qty : 0;
 			}
 		}
