@@ -1325,15 +1325,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			// calculate ordered qty based on packed items in case of product bundle
 			let packed_items = so.packed_items.filter((pi) => pi.parent_detail_docname == item.name);
 			if (packed_items && packed_items.length) {
-				// Check if ALL packed items are fully ordered
-				let all_packed_items_ordered = packed_items.every((pi) => flt(pi.ordered_qty) >= flt(pi.qty));
-				if (all_packed_items_ordered) {
-					// If all packed items are fully ordered, the bundle is fully ordered
-					ordered_qty = item.stock_qty;
-				} else {
-					// If any packed item is not fully ordered, bundle is not ordered
-					ordered_qty = 0;
-				}
+				const all_packed_items_ordered = packed_items.every((pi) => flt(pi.ordered_qty) >= flt(pi.qty));
+				ordered_qty = all_packed_items_ordered ? item.stock_qty : 0;
 			}
 		}
 		return ordered_qty;
