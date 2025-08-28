@@ -823,6 +823,27 @@ frappe.ui.form.on("Stock Entry", {
 			refresh_field("process_loss_qty");
 		}
 	},
+	recalculate_totals: function(frm) {
+		let total_incoming = 0.0;
+		let total_outgoing = 0.0;
+
+		(frm.doc.items || []).forEach(function(d) {
+			d.amount = flt(d.qty) * flt(d.basic_rate);   
+
+			if (d.t_warehouse) {
+				total_incoming += d.amount;
+			}
+			if (d.s_warehouse) {
+				total_outgoing += d.amount;
+			}
+		});
+
+		frm.set_value("total_incoming_value", total_incoming);
+		frm.set_value("total_outgoing_value", total_outgoing);
+		frm.set_value("value_difference", total_incoming - total_outgoing);
+
+		frm.refresh_field("items");
+	}
 });
 
 frappe.ui.form.on("Stock Entry Detail", {
@@ -860,6 +881,7 @@ frappe.ui.form.on("Stock Entry Detail", {
 	basic_rate(frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 		frm.events.calculate_basic_amount(frm, item);
+		frm.events.recalculate_totals(frm);   
 	},
 
 	uom(doc, cdt, cdn) {
@@ -1426,3 +1448,10 @@ function check_should_not_attach_bom_items(bom_no) {
 }
 
 extend_cscript(cur_frm.cscript, new erpnext.stock.StockEntry({ frm: cur_frm }));
+
+
+
+
+
+
+
