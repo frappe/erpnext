@@ -159,8 +159,14 @@ erpnext.buying = {
 				});
 			}
 
+<<<<<<< HEAD
 			company(){
 				if(!frappe.meta.has_field(this.frm.doc.doctype, "billing_address")) return;
+=======
+			company() {
+				super.company();
+				if (!frappe.meta.has_field(this.frm.doc.doctype, "billing_address")) return;
+>>>>>>> aedb171dd4 (fix: :bug: fixing buying controller to include transaction controller… (#49140))
 
 				frappe.call({
 					method: "erpnext.setup.doctype.company.company.get_billing_shipping_address",
