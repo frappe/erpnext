@@ -642,12 +642,12 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 			)
 		)
 
-	qty = pricing_rule.free_qty or flt(1)
+	qty = pricing_rule.free_qty or 1
 
 	if pricing_rule.is_cumulative:
 		items = [args.get(frappe.scrub(pricing_rule.get("apply_on")))]
 		data = get_qty_amount_data_for_cumulative(pricing_rule, doc, items, free_item=True)
-		if data[0]:
+		if data and data[0]:
 			qty -= data[0]
 
 	if pricing_rule.is_recursive:
