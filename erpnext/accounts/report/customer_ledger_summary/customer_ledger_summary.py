@@ -6,7 +6,7 @@ import frappe
 from frappe import _, qb, scrub
 from frappe.query_builder import Criterion, Tuple
 from frappe.query_builder.functions import IfNull
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, nowdate, flt
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import LiteralValue
 
@@ -307,8 +307,8 @@ class PartyLedgerSummaryReport:
 				or row.closing_balance  # Fixed typo from closing_amount to closing_balance
 			):
 				adjustments = self.party_adjustment_details.get(party, {})
-				# Fix double counting by subtracting already-allocated advances
     
+				# Fix double counting by subtracting already-allocated advances
 				total_party_adjustment = sum(
 					flt(amount) for amount in adjustments.values()
 				)
