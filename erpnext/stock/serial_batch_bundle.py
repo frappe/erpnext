@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.model.naming import make_autoname
+from frappe.model.naming import NamingSeries, parse_naming_series
 from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, now, nowtime, today
 from pypika import Order
@@ -106,6 +106,7 @@ class SerialBatchBundle:
 				"voucher_no": self.sle.voucher_no,
 				"voucher_detail_no": self.sle.voucher_detail_no,
 				"qty": self.sle.actual_qty,
+				"incoming_rate": self.sle.incoming_rate,
 				"avg_rate": self.sle.incoming_rate,
 				"total_amount": flt(self.sle.actual_qty) * flt(self.sle.incoming_rate),
 				"type_of_transaction": "Inward" if self.sle.actual_qty > 0 else "Outward",
@@ -113,6 +114,7 @@ class SerialBatchBundle:
 				"is_rejected": self.is_rejected_entry(),
 				"is_packed": self.is_packed_entry(),
 				"make_bundle_from_sle": 1,
+				"auto_created_serial_and_batch_bundle": 1,
 				"sle": self.sle,
 			}
 		).make_serial_and_batch_bundle()
@@ -340,6 +342,14 @@ class SerialBatchBundle:
 
 			if docstatus == 0:
 				self.submit_serial_and_batch_bundle()
+
+		if (
+			self.sle.auto_created_serial_and_batch_bundle
+			and self.sle.actual_qty > 0
+			and self.item_details.has_serial_no
+			and not self.item_details.has_batch_no
+		):
+			return
 
 		if self.item_details.has_serial_no == 1:
 			self.set_warehouse_and_status_in_serial_nos()
@@ -954,6 +964,10 @@ class SerialBatchCreation:
 			setattr(self, key, value)
 			self.__dict__[key] = value
 
+	def set_attr(self, key, value):
+		setattr(self, key, value)
+		self.__dict__[key] = value
+
 	def get(self, key):
 		return self.__dict__.get(key)
 
@@ -1031,6 +1045,7 @@ class SerialBatchCreation:
 			if key in valid_columns:
 				doc.set(key, value)
 
+		self.set_attr("has_auto_created_serial_and_batch", False)
 		if self.type_of_transaction == "Outward":
 			self.set_auto_serial_batch_entries_for_outward()
 		elif self.type_of_transaction == "Inward":
@@ -1040,7 +1055,21 @@ class SerialBatchCreation:
 		if hasattr(self, "via_landed_cost_voucher") and self.via_landed_cost_voucher:
 			doc.flags.via_landed_cost_voucher = self.via_landed_cost_voucher
 
-		self.set_serial_batch_entries(doc)
+		if (
+			self.get("sle")
+			and self.get("has_auto_created_serial_and_batch")
+			and self.sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
+			and self.sle.actual_qty > 0
+			and not is_internal_supplier(self.sle.voucher_type, self.sle.voucher_no)
+		):
+			doc.flags.ignore_mandatory = True
+			doc.flags.ignore_validate = True
+			doc.save()
+			self.set_serial_batch_entries_for_purchase_receipt(doc)
+			return doc
+		else:
+			self.set_serial_batch_entries(doc)
+
 		if not doc.get("entries"):
 			return frappe._dict({})
 
@@ -1204,7 +1233,131 @@ class SerialBatchCreation:
 				"batch_no",
 			]
 
-			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+			frappe.db.bulk_insert("Serial No", fields=fields, values=serial_nos_details)
+
+	def set_serial_batch_entries_for_purchase_receipt(self, doc):
+		incoming_rate = self.get("incoming_rate")
+
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		values = []
+		fields = []
+		total_amount = 0
+		total_qty = 0
+		if self.get("serial_nos"):
+			fields = [
+				"serial_no",
+				"qty",
+				"batch_no",
+				"incoming_rate",
+				"stock_value_difference",
+				"parent",
+				"parentfield",
+				"parenttype",
+				"idx",
+				"creation",
+				"modified",
+				"owner",
+				"modified_by",
+				"name",
+				"docstatus",
+				"warehouse",
+			]
+			serial_no_wise_batch = frappe._dict({})
+			if self.has_batch_no:
+				serial_no_wise_batch = get_serial_nos_batch(self.serial_nos)
+
+			qty = 1
+			for index, serial_no in enumerate(self.serial_nos):
+				if self.get("serial_nos_valuation"):
+					incoming_rate = self.get("serial_nos_valuation").get(serial_no)
+
+				total_amount += flt(incoming_rate) * flt(qty)
+				values.append(
+					(
+						serial_no,
+						qty,
+						serial_no_wise_batch.get(serial_no) or self.get("batch_no"),
+						incoming_rate,
+						flt(incoming_rate) * qty,
+						doc.name,
+						"entries",
+						"Serial and Batch Bundle",
+						index + 1,
+						now(),
+						now(),
+						frappe.session.user,
+						frappe.session.user,
+						frappe.generate_hash(length=15),
+						1,
+						self.warehouse,
+					)
+				)
+
+			total_qty = len(self.serial_nos)
+
+		elif self.get("batches"):
+			fields = [
+				"batch_no",
+				"qty",
+				"incoming_rate",
+				"stock_value_difference",
+				"parent",
+				"parentfield",
+				"parenttype",
+				"idx",
+				"creation",
+				"modified",
+				"owner",
+				"modified_by",
+				"name",
+				"docstatus",
+				"warehouse",
+			]
+
+			for batch_no, batch_qty in self.batches.items():
+				if self.get("batches_valuation"):
+					incoming_rate = flt(self.get("batches_valuation").get(batch_no))
+
+				qty = flt(batch_qty, precision) * (-1 if self.type_of_transaction == "Outward" else 1)
+				total_qty += qty
+				total_amount += flt(incoming_rate) * qty
+				values.append(
+					(
+						batch_no,
+						qty,
+						incoming_rate,
+						flt(incoming_rate) * flt(qty, precision),
+						doc.name,
+						"entries",
+						"Serial and Batch Bundle",
+						len(values) + 1,
+						now(),
+						now(),
+						frappe.session.user,
+						frappe.session.user,
+						frappe.generate_hash(length=15),
+						1,
+						self.warehouse,
+					)
+				)
+
+		if fields and values:
+			frappe.db.bulk_insert("Serial and Batch Entry", fields=fields, values=values)
+
+		avg_rate = 0
+		if total_qty and total_amount:
+			avg_rate = flt(total_amount) / flt(total_qty)
+
+		doc.db_set(
+			{
+				"docstatus": 1,
+				"total_amount": total_amount,
+				"avg_rate": avg_rate,
+				"total_qty": total_qty,
+			}
+		)
+
+		doc.reload()
 
 	def set_serial_batch_entries(self, doc):
 		incoming_rate = self.get("incoming_rate")
@@ -1266,6 +1419,8 @@ class SerialBatchCreation:
 				if batch_no := frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "batch_no"):
 					return batch_no
 
+		self.has_auto_created_serial_and_batch = True
+
 		return make_batch(
 			frappe._dict(
 				{
@@ -1292,8 +1447,17 @@ class SerialBatchCreation:
 		if self.get("voucher_type"):
 			voucher_type = self.get("voucher_type")
 
+		obj = NamingSeries(self.serial_no_series)
+		current_value = obj.get_current_value()
+
+		def get_series(partial_series, digits):
+			return f"{current_value:0{digits}d}"
+
+		self.has_auto_created_serial_and_batch = True
 		for _i in range(abs(cint(self.actual_qty))):
-			serial_no = make_autoname(self.serial_no_series, "Serial No")
+			current_value += 1
+
+			serial_no = parse_naming_series(self.serial_no_series, number_generator=get_series)
 			sr_nos.append(serial_no)
 			serial_nos_details.append(
 				(
@@ -1334,7 +1498,9 @@ class SerialBatchCreation:
 				"batch_no",
 			]
 
-			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+			frappe.db.bulk_insert("Serial No", fields=fields, values=serial_nos_details)
+
+		obj.update_counter(current_value)
 
 		return sr_nos
 
@@ -1413,3 +1579,8 @@ def get_distinct_batches(voucher_type, voucher_no):
 		group_by="batch_no",
 		pluck="batch_no",
 	)
+
+
+@frappe.request_cache
+def is_internal_supplier(voucher_type, voucher_no):
+	return frappe.db.get_value(voucher_type, voucher_no, "is_internal_supplier")

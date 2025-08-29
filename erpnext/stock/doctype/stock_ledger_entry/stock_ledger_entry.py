@@ -186,6 +186,9 @@ class StockLedgerEntry(Document):
 				company=self.company,
 			)
 
+		if self.auto_created_serial_and_batch_bundle:
+			return
+
 		self.validate_serial_batch_no_bundle()
 
 	def validate_mandatory(self):
