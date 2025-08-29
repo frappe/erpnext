@@ -198,6 +198,10 @@ class JournalEntry(AccountsController):
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		self.update_payment_requests(cancel=False)
+
+	def update_payment_requests(self, cancel=False):
+		update_payment_requests_as_per_je_accounts(self)
 
 	@frappe.whitelist()
 	def get_balance_for_periodic_accounting(self):
@@ -1836,3 +1840,86 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+def get_against_voucher_details(jv):
+	ref_fields = ["party_type", "party", "reference_type", "reference_name", "debit_in_account_currency"]
+	ref_details = []
+	for acc in jv.accounts:
+		if (matched := [acc.get(rf) for rf in ref_fields]) and all(matched):
+			ref_details.append(matched)
+	return ref_details
+
+
+def update_payment_requests_as_per_je_accounts(jv, cancel=False):
+	"""
+	Update Payment Request's `Status` and `Outstanding Amount` based on Journal Entry Account's `Party Account Currency`.
+	"""
+	if not jv.payment_order:
+		return
+
+	voucher_details = get_against_voucher_details(jv)
+
+	references = []
+
+	po = frappe.get_doc("Payment Order", jv.payment_order)
+	for po_ref in po.references:
+		key = ["Supplier", po_ref.supplier, po_ref.reference_doctype, po_ref.reference_name, po_ref.amount]
+		if key in voucher_details and po_ref.payment_request:
+			voucher_details[voucher_details.index(key)].append(po_ref.payment_request)
+			references.append(
+				frappe._dict({"payment_request": po_ref.payment_request, "allocated_amount": po_ref.amount})
+			)
+
+	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
+	referenced_payment_requests = frappe.get_all(
+		"Payment Request",
+		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},
+		fields=[
+			"name",
+			"grand_total",
+			"outstanding_amount",
+			"payment_request_type",
+		],
+	)
+
+	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
+
+	for ref in references:
+		if not ref.payment_request:
+			continue
+
+		payment_request = referenced_payment_requests[ref.payment_request]
+		pr_outstanding = payment_request["outstanding_amount"]
+
+		# update outstanding amount
+		new_outstanding_amount = flt(
+			pr_outstanding + ref.allocated_amount if cancel else pr_outstanding - ref.allocated_amount,
+			precision,
+		)
+
+		# to handle same payment request for the multiple allocations
+		payment_request["outstanding_amount"] = new_outstanding_amount
+
+		if not cancel and new_outstanding_amount < 0:
+			frappe.throw(
+				msg=_(
+					"The allocated amount is greater than the outstanding amount of Payment Request {0}"
+				).format(ref.payment_request),
+				title=_("Invalid Allocated Amount"),
+			)
+
+		# update status
+		if new_outstanding_amount == payment_request["grand_total"]:
+			status = "Initiated" if payment_request["payment_request_type"] == "Outward" else "Requested"
+		elif new_outstanding_amount == 0:
+			status = "Paid"
+		elif new_outstanding_amount > 0:
+			status = "Partially Paid"
+
+		# update database
+		frappe.db.set_value(
+			"Payment Request",
+			ref.payment_request,
+			{"outstanding_amount": new_outstanding_amount, "status": status},
+		)
