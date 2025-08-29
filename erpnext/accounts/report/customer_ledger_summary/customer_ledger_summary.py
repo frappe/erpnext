@@ -306,12 +306,15 @@ class PartyLedgerSummaryReport:
 				or row.return_amount
 				or row.closing_balance  # Fixed typo from closing_amount to closing_balance
 			):
+				adjustments = self.party_adjustment_details.get(party, {})
+				# Fix double counting by subtracting already-allocated advances
+    
 				total_party_adjustment = sum(
-					amount for amount in self.party_adjustment_details.get(party, {}).values()
+					flt(amount) for amount in adjustments.values()
 				)
 				row.paid_amount -= total_party_adjustment
 
-				adjustments = self.party_adjustment_details.get(party, {})
+				# Add breakdown columns
 				for account in self.party_adjustment_accounts:
 					row["adj_" + scrub(account)] = adjustments.get(account, 0)
 
