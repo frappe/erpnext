@@ -514,7 +514,7 @@ def reconcile_against_document(
 					referenced_row.outstanding_amount -= flt(entry.allocated_amount)
 
 				reposting_rows.append(referenced_row)
-
+		doc.update_payment_requests()
 		doc.save(ignore_permissions=True)
 
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
@@ -738,6 +738,8 @@ def update_reference_in_payment_entry(
 		new_row.update(reference_details)
 		row = new_row
 
+	update_payment_request_reference(row)
+
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.clear_unallocated_reference_document_rows()
 	payment_entry.setup_party_account_field()
@@ -768,6 +770,32 @@ def update_reference_in_payment_entry(
 		payment_entry.save(ignore_permissions=True)
 
 	return row
+
+
+def update_payment_request_reference(row):
+	payment_request = frappe.db.get_value(
+		"Payment Request",
+		{
+			"reference_doctype": row.reference_doctype,
+			"reference_name": row.reference_name,
+			"outstanding_amount": row.allocated_amount,
+			"docstatus": 1,
+			"status": ["in", ["Initiated", "Payment Ordered"]],
+		},
+		"name",
+	)
+
+	if payment_request:
+		row.payment_request = payment_request
+		frappe.msgprint(
+			_(
+				"Payment Request {} has been allocated to Payment Entry {} at row #{}".format(
+					payment_request, row.parent, row.idx
+				)
+			),
+			alert=1,
+			indicator="blue",
+		)
 
 
 def get_reconciliation_effect_date(against_voucher_type, against_voucher, company, posting_date):
