@@ -15,6 +15,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, date_diff, flt, getdate
 
+from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
@@ -102,13 +103,18 @@ class SegmentData:
 	rows: list[RowData]
 	label: str = ""
 	index: int = 0
+	id: str | None = None
+
+	def __post_init__(self):
+		if not self.id and self.index is not None:
+			self.id = f"seg_{self.index}"
 
 
 @dataclass
 class ReportContext:
 	"""Context object that flows through the pipeline"""
 
-	template: Any  # FinancialReportTemplate
+	template: FinancialReportTemplate
 	filters: dict[str, Any]
 	period_list: list[dict] = field(default_factory=list)
 	processed_rows: list[RowData] = field(default_factory=list)
@@ -116,6 +122,7 @@ class ReportContext:
 	account_data: dict[str, AccountData] = field(default_factory=dict)
 	raw_data: dict[str, Any] = field(default_factory=dict)
 	show_detailed: bool = False
+	currency: str | None = None
 
 	def get_result(self) -> tuple[list[dict], list[dict]]:
 		"""Get final formatted columns and data"""
@@ -186,6 +193,9 @@ class FinancialReportEngine:
 			filters=filters,
 			period_list=period_list,
 			show_detailed=filters.get("simple_vs_detailed") == "Detailed",
+			# TODO: Enhance this to support report currencies
+			# after fixing which exchange rate to use for P&L
+			currency=get_company_currency(filters.company),
 		)
 		# Add period_keys to context
 		context.raw_data["period_keys"] = [p["key"] for p in period_list]
@@ -808,7 +818,7 @@ class DependencyResolver:
 		validator = DependencyValidator(self.template)
 		result = validator.validate()
 
-		if result.has_errors:
+		if result.issues:
 			error_messages = [str(issue) for issue in result.issues]
 			frappe.throw("<br><br>".join(error_messages))
 
@@ -965,18 +975,13 @@ class DataFormatter:
 		for row_index in range(self.organizer.max_rows):
 			formatted_row = self.formatter.format_row(self.organizer.segments, row_index)
 
-			if formatted_row or self._is_blank_line_at(row_index):
+			if formatted_row:  # Always include rows that were formatted
 				# Add metadata
 				formatted_row["_segment_info"] = {
 					"total_segments": len(self.organizer.segments),
-					"template_name": self.context.template.name,
-					"has_custom_formatting": bool(self.context.template.name),
 					"segment_labels": self.organizer.segment_labels,
+					"period_keys": [p["key"] for p in self.context.period_list],  # Add period keys
 				}
-
-				# Mark blank lines
-				if self._is_blank_line_at(row_index):
-					formatted_row["_is_blank_line"] = True
 
 				formatted_data.append(formatted_row)
 
@@ -1005,12 +1010,6 @@ class DataFormatter:
 
 			segment.rows = expanded_rows
 
-	def _is_blank_line_at(self, row_index: int) -> bool:
-		return any(
-			row_index < len(seg.rows) and seg.rows[row_index].row.data_source == "Blank Line"
-			for seg in self.organizer.segments
-		)
-
 
 class FormattingEngine:
 	"""Manages formatting rules and application"""
@@ -1033,6 +1032,10 @@ class FormattingEngine:
 			FormattingRule(
 				condition=lambda rd: getattr(rd.row, "warn_if_negative", False),
 				format_properties={"warn_if_negative": True},
+			),
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "data_source", "") == "Blank Line",
+				format_properties={"is_blank_line": True},
 			),
 		]
 
@@ -1057,6 +1060,9 @@ class SegmentOrganizer:
 		pending_label = ""
 
 		for row_data in rows:
+			if not self._should_show_row(row_data):
+				continue
+
 			if row_data.row.data_source == "Column Break":
 				# Save current segment with pending label from previous column break
 				if current_rows:
@@ -1088,30 +1094,6 @@ class SegmentOrganizer:
 	def segment_labels(self) -> dict[int, str]:
 		return {seg.index: seg.label for seg in self.segments if seg.label}
 
-
-class RowFormatterBase(ABC):
-	def __init__(self, context: ReportContext, formatting_engine: FormattingEngine):
-		self.context = context
-		self.period_list = context.period_list
-		self.formatting_engine = formatting_engine
-
-	@abstractmethod
-	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
-		pass
-
-	@abstractmethod
-	def get_columns(self, segments: list[SegmentData], base_columns: list[dict]) -> list[dict]:
-		pass
-
-	def _get_period_value(self, row_data: RowData, period_index: int) -> Any:
-		if period_index < len(row_data.values):
-			value = row_data.values[period_index]
-			if getattr(row_data.row, "reverse_sign", False):
-				value = -value
-			return value
-
-		return ""
-
 	def _should_show_row(self, row_data: RowData) -> bool:
 		row = row_data.row
 
@@ -1131,26 +1113,55 @@ class RowFormatterBase(ABC):
 		return True
 
 
+class RowFormatterBase(ABC):
+	def __init__(self, context: ReportContext, formatting_engine: FormattingEngine):
+		self.context = context
+		self.period_list = context.period_list
+		self.formatting_engine = formatting_engine
+
+	@abstractmethod
+	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
+		pass
+
+	@abstractmethod
+	def get_columns(self, segments: list[SegmentData], base_columns: list[dict]) -> list[dict]:
+		pass
+
+	def _get_values(self, row_data: RowData) -> dict[str, Any]:
+		print(self.context.filters, "\n\n")
+		values = {
+			"account": getattr(row_data.row, "display_name", "") or "",
+			"indent": getattr(row_data.row, "indentation_level", 0),
+			"account_name": getattr(row_data.row, "account", "") or "",
+			"currency": getattr(self.context.currency, "currency", "") or "",
+			"period_start_date": getattr(self.context.filters, "period_start_date", "") or "",
+			"period_end_date": getattr(self.context.filters, "period_end_date", "") or "",
+		}
+
+		for i, period in enumerate(self.period_list):
+			values[period["key"]] = self._get_period_value(row_data, i)
+
+		return values
+
+	def _get_period_value(self, row_data: RowData, period_index: int) -> Any:
+		if period_index < len(row_data.values):
+			value = row_data.values[period_index]
+			if getattr(row_data.row, "reverse_sign", False):
+				value = -value
+			return value
+
+		return ""
+
+
 class SingleSegmentFormatter(RowFormatterBase):
 	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
 		if not segments or row_index >= len(segments[0].rows):
 			return {}
 
 		row_data = segments[0].rows[row_index]
-		if not self._should_show_row(row_data):
-			return {}
 
-		formatted = {
-			"account": getattr(row_data.row, "display_name", "") or "",
-			"indent": getattr(row_data.row, "indentation_level", 0),
-		}
+		formatted = self._get_values(row_data)
 
-		# Add period values
-		for i, period in enumerate(self.period_list):
-			value = self._get_period_value(row_data, i)
-			formatted[period["key"]] = value
-
-		# Add formatting metadata
 		formatting = self.formatting_engine.get_formatting(row_data)
 		formatted.update(formatting)
 
@@ -1163,59 +1174,55 @@ class SingleSegmentFormatter(RowFormatterBase):
 class MultiSegmentFormatter(RowFormatterBase):
 	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
 		formatted = {}
-		has_content = False
 
 		for segment in segments:
 			if row_index < len(segment.rows):
 				row_data = segment.rows[row_index]
-				if self._should_show_row(row_data):
-					self._add_segment_data(formatted, row_data, segment)
-					has_content = True
+				self._add_segment_data(formatted, row_data, segment)
 			else:
 				self._add_empty_segment(formatted, segment)
 
-		return formatted if has_content else {}
+		return formatted
 
 	def get_columns(self, segments: list[SegmentData], base_columns: list[dict]) -> list[dict]:
 		columns = []
 
+		# TODO: Refactor
 		for segment in segments:
 			for col in base_columns:
 				new_col = col.copy()
 
+				new_col["fieldname"] = f"{segment.id}_{col['fieldname']}"
+
 				if col["fieldname"] == "account":
-					new_col["fieldname"] = f"account_seg_{segment.index}"
 					new_col["label"] = segment.label or f"Account (Segment {segment.index + 1})"
-				else:
-					new_col["fieldname"] = f"seg_{segment.index}_{col['fieldname']}"
-					# For period columns, combine custom label with period label
-					if segment.label and col["fieldname"] in [p["key"] for p in self.period_list]:
-						new_col["label"] = f"{segment.label} - {col['label']}"
+
+				if segment.label and col["fieldname"] in [p["key"] for p in self.period_list]:
+					new_col["label"] = f"{segment.label} - {col['label']}"
 
 				columns.append(new_col)
 
 		return columns
 
 	def _add_segment_data(self, formatted: dict, row_data: RowData, segment: SegmentData):
-		formatted[f"account_seg_{segment.index}"] = getattr(row_data.row, "display_name", "") or ""
+		segment_values = self._get_values(row_data)
 
-		# Period values
-		for i, period in enumerate(self.period_list):
-			value = self._get_period_value(row_data, i)
-			formatted[f"seg_{segment.index}_{period['key']}"] = value
+		for key, value in segment_values.items():
+			formatted[f"{segment.id}_{key}"] = value
 
-		# Formatting metadata
-		if "segment_formatting" not in formatted:
-			formatted["segment_formatting"] = {}
+		if "segment_values" not in formatted:
+			formatted["segment_values"] = {}
 
 		formatting = self.formatting_engine.get_formatting(row_data)
-		formatting["indent"] = getattr(row_data.row, "indentation_level", 0)
-		formatted["segment_formatting"][f"seg_{segment.index}"] = formatting
+		segment_values.update(formatting)
+		formatted["segment_values"][f"{segment.id}"] = segment_values
 
 	def _add_empty_segment(self, formatted: dict, segment: SegmentData):
-		formatted[f"account_seg_{segment.index}"] = ""
+		formatted[f"account_{segment.id}"] = ""
 		for period in self.period_list:
-			formatted[f"seg_{segment.index}_{period['key']}"] = ""
+			formatted[f"{segment.id}_{period['key']}"] = ""
+
+		formatted["segment_values"][f"{segment.id}"] = {"is_blank_line": True}
 
 
 class DetailRowBuilder:
@@ -1250,7 +1257,7 @@ class DetailRowBuilder:
 		return detail_rows
 
 	def _create_detail_row_object(self, account_name: str, parent_row):
-		short_name = account_name.split(" - ")[0].strip()
+		short_name = account_name.rsplit(" - ", 1)[0].strip()
 
 		return type(
 			"DetailRow",
@@ -1259,10 +1266,6 @@ class DetailRowBuilder:
 				"display_name": short_name,
 				"account": account_name,
 				"account_name": short_name,
-				"from_date": self.filters.get("period_start_date"),
-				"to_date": self.filters.get("period_end_date"),
-				"year_start_date": self.filters.get("period_start_date"),
-				"year_end_date": self.filters.get("period_end_date"),
 				"data_source": "Account Detail",
 				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
 				"bold_text": False,
@@ -1271,6 +1274,5 @@ class DetailRowBuilder:
 				"warn_if_negative": getattr(parent_row, "warn_if_negative", False),
 				"hide_when_empty": getattr(parent_row, "hide_when_empty", False),
 				"hidden_calculation": False,
-				"idx": getattr(parent_row, "idx", 0) + 0.1,
 			},
 		)()
