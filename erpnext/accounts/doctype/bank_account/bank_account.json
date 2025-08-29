@@ -132,7 +132,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "IBAN",
-   "length": 30,
+   "length": 34,
    "options": "IBAN"
   },
   {
@@ -252,7 +252,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2025-08-26 23:29:24.984767",
+ "modified": "2025-08-29 12:32:01.081687",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
