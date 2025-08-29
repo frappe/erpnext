@@ -61,7 +61,7 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 
 	if (
 		frm.doc.payment_request_type == "Outward" &&
-		["Initiated", "Partially Paid"].includes(frm.doc.status)
+		["Initiated", "Partially Paid", "Payment Ordered"].includes(frm.doc.status)
 	) {
 		frm.add_custom_button(__("Create Payment Entry"), function () {
 			frappe.call({
