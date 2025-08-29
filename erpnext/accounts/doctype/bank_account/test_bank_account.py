@@ -9,6 +9,7 @@ from frappe import ValidationError
 # test_records = frappe.get_test_records('Bank Account')
 
 
+<<<<<<< HEAD
 class TestBankAccount(unittest.TestCase):
 	def test_validate_iban(self):
 		valid_ibans = [
@@ -45,3 +46,7 @@ class TestBankAccount(unittest.TestCase):
 			msg = f"BankAccount.validate_iban() accepted invalid IBAN {not_iban}"
 			with self.assertRaises(ValidationError, msg=msg):
 				bank_account.validate_iban()
+=======
+class TestBankAccount(IntegrationTestCase):
+	pass
+>>>>>>> 4dd428de41 (chore(Bank Account): remove IBAN validation)
