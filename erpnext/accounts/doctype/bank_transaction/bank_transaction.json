@@ -223,7 +223,8 @@
   {
    "fieldname": "bank_party_iban",
    "fieldtype": "Data",
-   "label": "Party IBAN (Bank Statement)"
+   "label": "Party IBAN (Bank Statement)",
+   "options": "IBAN"
   },
   {
    "fieldname": "bank_party_account_number",
@@ -238,7 +239,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-18 17:24:57.044666",
+ "modified": "2025-08-29 11:53:45.908169",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
