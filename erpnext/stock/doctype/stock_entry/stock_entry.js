@@ -715,6 +715,7 @@ frappe.ui.form.on("Stock Entry", {
 			precision("basic_amount", item)
 		);
 		frm.events.calculate_total_additional_costs(frm);
+		frm.events.recalculate_totals(frm);
 	},
 
 	calculate_total_additional_costs: function (frm) {
@@ -822,6 +823,27 @@ frappe.ui.form.on("Stock Entry", {
 			);
 			refresh_field("process_loss_qty");
 		}
+	},
+
+	recalculate_totals(frm) {
+		let total_incoming = 0;
+		let total_outgoing = 0;
+
+		frm.doc.items.forEach(function (d) {
+			d.amount = flt(d.qty) * flt(d.basic_rate);
+			if (d.t_warehouse) {
+				total_incoming += d.amount;
+			}
+			if (d.s_warehouse) {
+				total_outgoing += d.amount;
+			}
+		});
+
+		frm.set_value("total_incoming_value", total_incoming);
+		frm.set_value("total_outgoing_value", total_outgoing);
+		frm.set_value("value_difference", total_incoming - total_outgoing);
+
+		frm.refresh_field("items");
 	},
 });
 
