@@ -111,51 +111,90 @@ def get_file(file_name):
 
 
 def generate_data_from_csv(file_doc, as_dict=False):
-	"""read csv file and return the generated nested tree"""
+        """read csv file and return the generated nested tree"""
 
-	file_path = file_doc.get_full_path()
+        file_path = file_doc.get_full_path()
+        data = []
 
-	data = []
-	with open(file_path) as in_file:
-		csv_reader = list(csv.reader(in_file))
-		headers = csv_reader[0]
-		del csv_reader[0]  # delete top row and headers row
+        # open with explicit encoding and newline for correct csv parsing (handles BOM)
+        with open(file_path, encoding="utf-8-sig", newline="") as in_file:
+                csv_reader = list(csv.reader(in_file))
+                if not csv_reader:
+                        return data
 
-		for row in csv_reader:
-			if as_dict:
-				data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
-			else:
-				if not row[1] and len(row) > 1:
-					row[1] = row[0]
-					row[3] = row[2]
-				data.append(row)
+                headers = csv_reader[0]
+                rows = csv_reader[1:]
 
-	# convert csv data
-	return data
+                for row in rows:
+                        # skip empty / whitespace-only rows
+                        if not row or all((c or "").strip() == "" for c in row):
+                                continue
+
+                        # pad to 8 columns to be safe downstream
+                        if len(row) < 8:
+                                row += [""] * (8 - len(row))
+
+                        if as_dict:
+                                data.append(
+                                        {
+                                                frappe.scrub(header): (row[index] if index < len(row) else "")
+                                                for index, header in enumerate(headers)
+                                        }
+                                )
+                        else:
+                                # check lengths BEFORE indexing to avoid IndexError
+                                if len(row) > 1 and not row[1]:
+                                        row[1] = row[0]
+                                if len(row) > 3 and not row[3]:
+                                        row[3] = row[2] if len(row) > 2 else ""
+                                data.append(row)
+
+        return data
 
 
 def generate_data_from_excel(file_doc, extension, as_dict=False):
-	content = file_doc.get_content()
+        """read excel file and return the generated nested tree"""
 
-	if extension == "xlsx":
-		rows = read_xlsx_file_from_attached_file(fcontent=content)
-	elif extension == "xls":
-		rows = read_xls_file_from_attached_file(content)
+        content = file_doc.get_content()
 
-	data = []
-	headers = rows[0]
-	del rows[0]
+        if extension == "xlsx":
+                rows = read_xlsx_file_from_attached_file(fcontent=content)
+        elif extension == "xls":
+                rows = read_xls_file_from_attached_file(content)
+        else:
+                return []
 
-	for row in rows:
-		if as_dict:
-			data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
-		else:
-			if not row[1]:
-				row[1] = row[0]
-				row[3] = row[2]
-			data.append(row)
+        data = []
+        if not rows:
+                return data
 
-	return data
+        headers = rows[0]
+        rows = rows[1:]
+
+        for row in rows:
+                # skip empty / whitespace-only rows
+                if not row or all((c or "").strip() == "" for c in row):
+                        continue
+
+                # pad to 8 columns to be safe downstream
+                if len(row) < 8:
+                        row += [""] * (8 - len(row))
+
+                if as_dict:
+                        data.append(
+                                {
+                                        frappe.scrub(header): (row[index] if index < len(row) else "")
+                                        for index, header in enumerate(headers)
+                                }
+                        )
+                else:
+                        if len(row) > 1 and not row[1]:
+                                row[1] = row[0]
+                        if len(row) > 3 and not row[3]:
+                                row[3] = row[2] if len(row) > 2 else ""
+                        data.append(row)
+
+        return data
 
 
 @frappe.whitelist()
