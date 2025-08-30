@@ -23,6 +23,10 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 )
 
 
+# expected number of columns in the COA template
+EXPECTED_COLUMNS = 8
+
+
 class ChartofAccountsImporter(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -47,7 +51,7 @@ def validate_columns(data):
 
 	no_of_columns = max([len(d) for d in data])
 
-	if no_of_columns != 8:
+	if no_of_columns != EXPECTED_COLUMNS:
 		frappe.throw(
 			_(
 				"Columns are not according to template. Please compare the uploaded file with standard template"
@@ -111,90 +115,86 @@ def get_file(file_name):
 
 
 def generate_data_from_csv(file_doc, as_dict=False):
-        """read csv file and return the generated nested tree"""
+	"""read csv file and return the generated nested tree"""
 
-        file_path = file_doc.get_full_path()
-        data = []
+	file_path = file_doc.get_full_path()
+	data = []
 
-        # open with explicit encoding and newline for correct csv parsing (handles BOM)
-        with open(file_path, encoding="utf-8-sig", newline="") as in_file:
-                csv_reader = list(csv.reader(in_file))
-                if not csv_reader:
-                        return data
+	# open with explicit encoding and newline for correct csv parsing (handles BOM)
+	with open(file_path, encoding="utf-8-sig", newline="") as in_file:
+		csv_reader = csv.reader(in_file)
+		headers = next(csv_reader, None)
+		if not headers:
+			return data
 
-                headers = csv_reader[0]
-                rows = csv_reader[1:]
+		for row in csv_reader:
+			# skip empty / whitespace-only rows
+			if not row or all(cstr(c).strip() == "" for c in row):
+				continue
 
-                for row in rows:
-                        # skip empty / whitespace-only rows
-                        if not row or all((c or "").strip() == "" for c in row):
-                                continue
+			if as_dict:
+				data.append(
+					{
+						frappe.scrub(header): (row[index] if index < len(row) else "")
+						for index, header in enumerate(headers)
+					}
+				)
+				continue
 
-                        # pad to 8 columns to be safe downstream
-                        if len(row) < 8:
-                                row += [""] * (8 - len(row))
+			# list mode: pad to EXPECTED_COLUMNS and backfill safe indices
+			if len(row) < EXPECTED_COLUMNS:
+				row += [""] * (EXPECTED_COLUMNS - len(row))
+			# check lengths BEFORE indexing to avoid IndexError
+			if len(row) > 1 and not cstr(row[1]).strip():
+				row[1] = row[0]
+			if len(row) > 3 and not cstr(row[3]).strip():
+				row[3] = row[2] if len(row) > 2 else ""
+			data.append(row)
 
-                        if as_dict:
-                                data.append(
-                                        {
-                                                frappe.scrub(header): (row[index] if index < len(row) else "")
-                                                for index, header in enumerate(headers)
-                                        }
-                                )
-                        else:
-                                # check lengths BEFORE indexing to avoid IndexError
-                                if len(row) > 1 and not row[1]:
-                                        row[1] = row[0]
-                                if len(row) > 3 and not row[3]:
-                                        row[3] = row[2] if len(row) > 2 else ""
-                                data.append(row)
-
-        return data
+	return data
 
 
 def generate_data_from_excel(file_doc, extension, as_dict=False):
-        """read excel file and return the generated nested tree"""
+	"""read excel file and return the generated nested tree"""
 
-        content = file_doc.get_content()
+	content = file_doc.get_content()
 
-        if extension == "xlsx":
-                rows = read_xlsx_file_from_attached_file(fcontent=content)
-        elif extension == "xls":
-                rows = read_xls_file_from_attached_file(content)
-        else:
-                return []
+	if extension == "xlsx":
+		rows = read_xlsx_file_from_attached_file(fcontent=content)
+	elif extension == "xls":
+		rows = read_xls_file_from_attached_file(content)
+	else:
+		return []
 
-        data = []
-        if not rows:
-                return data
+	data = []
+	if not rows:
+		return data
 
-        headers = rows[0]
-        rows = rows[1:]
+	headers = rows[0]
+	for row in rows[1:]:
+		# skip empty / whitespace-only rows
+		if not row or all(cstr(c).strip() == "" for c in row):
+			continue
 
-        for row in rows:
-                # skip empty / whitespace-only rows
-                if not row or all((c or "").strip() == "" for c in row):
-                        continue
+		if as_dict:
+			data.append(
+				{
+					frappe.scrub(header): (row[index] if index < len(row) else "")
+					for index, header in enumerate(headers)
+				}
+			)
+			continue
 
-                # pad to 8 columns to be safe downstream
-                if len(row) < 8:
-                        row += [""] * (8 - len(row))
+		# list mode: pad to EXPECTED_COLUMNS and backfill safe indices
+		if len(row) < EXPECTED_COLUMNS:
+			row += [""] * (EXPECTED_COLUMNS - len(row))
+		if len(row) > 1 and not cstr(row[1]).strip():
+			row[1] = row[0]
+		if len(row) > 3 and not cstr(row[3]).strip():
+			row[3] = row[2] if len(row) > 2 else ""
+		data.append(row)
 
-                if as_dict:
-                        data.append(
-                                {
-                                        frappe.scrub(header): (row[index] if index < len(row) else "")
-                                        for index, header in enumerate(headers)
-                                }
-                        )
-                else:
-                        if len(row) > 1 and not row[1]:
-                                row[1] = row[0]
-                        if len(row) > 3 and not row[3]:
-                                row[3] = row[2] if len(row) > 2 else ""
-                        data.append(row)
-
-        return data
+	return data
 
 
 @frappe.whitelist()

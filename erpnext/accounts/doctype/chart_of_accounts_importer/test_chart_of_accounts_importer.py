@@ -40,7 +40,7 @@ class TestGenerateDataFromCSV(FrappeTestCase):
 
 
     def test_bom_and_empty_rows(self):
-        csv_content = u"\ufeffHeader1,Header2,Header3\nA,,C\n  ,  ,  \nB,D\n"
+        csv_content = "\ufeffHeader1,Header2,Header3\nA,,C\n  ,  ,  \nB,D\n"
         p = self._tmp_csv(csv_content)
         try:
             data = generate_data_from_csv(self._file_stub(p), as_dict=False)
@@ -57,7 +57,7 @@ class TestGenerateDataFromCSV(FrappeTestCase):
 
 
     def test_as_dict_mode(self):
-        csv_content = u"\ufeffAccount Name,Account Code,Group?\nCash,,Yes\n"
+        csv_content = "\ufeffAccount Name,Account Code,Group?\nCash,,Yes\n"
         p = self._tmp_csv(csv_content)
         try:
             data = generate_data_from_csv(self._file_stub(p), as_dict=True)
