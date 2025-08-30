@@ -393,7 +393,7 @@ class FormulaValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return "Field and operator must be strings"
 
-			valid_ops = ["=", "!=", "in", "not in", "like", ">", ">=", "<", "<="]
+			valid_ops = ["=", "==", "!=", "<>", "in", "not in", "like", "not like", ">", ">=", "<", "<="]
 			if operator not in valid_ops:
 				return f"Invalid operator '{operator}'"
 

@@ -29,6 +29,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_cost_centers_with_children,
 	get_period_list,
 )
+from erpnext.accounts.utils import get_currency_precision
 
 # ============================================================================
 # DATA MODELS
@@ -891,6 +892,7 @@ class FormulaCalculator:
 	def __init__(self, row_data: dict[str, list[float]], period_list: list[dict]):
 		self.row_data = row_data
 		self.period_list = period_list
+		self.precision = get_currency_precision()
 
 	def evaluate_formula(self, formula: str) -> list[float]:
 		results = []
@@ -905,7 +907,7 @@ class FormulaCalculator:
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, context)
-			return flt(result, 2)
+			return flt(result, self.precision)
 
 		except ZeroDivisionError:
 			frappe.log_error(f"Division by zero in formula: {formula}")
