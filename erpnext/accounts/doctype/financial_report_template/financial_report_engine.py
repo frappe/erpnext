@@ -138,11 +138,7 @@ class FormattingRule:
 	format_properties: dict[str, Any]
 
 	def applies_to(self, row_data: RowData) -> bool:
-		"""Check if rule applies to given row"""
-		try:
-			return self.condition(row_data)
-		except Exception:
-			return False
+		return self.condition(row_data)
 
 
 # ============================================================================
@@ -598,6 +594,7 @@ class FilterExpressionParser:
 		     ]
 		   }
 		"""
+		# TODO:
 		try:
 			parsed_formula = ast.literal_eval(formula)
 
@@ -764,6 +761,7 @@ class RowProcessor:
 
 	def _process_api_row(self, row) -> RowData:
 		api_path = row.calculation_formula
+		# TODO
 
 		try:
 			module_path, method_name = api_path.rsplit(".", 1)
@@ -895,6 +893,7 @@ class FormulaCalculator:
 		self.precision = get_currency_precision()
 
 	def evaluate_formula(self, formula: str) -> list[float]:
+		formula = self._preprocess_formula(formula)
 		results = []
 
 		for i in range(len(self.period_list)):
@@ -904,6 +903,7 @@ class FormulaCalculator:
 		return results
 
 	def _evaluate_for_period(self, formula: str, period_index: int) -> float:
+		# TODO: consistent error handling
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, context)
@@ -916,13 +916,19 @@ class FormulaCalculator:
 			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
 			return 0.0
 
+	def _preprocess_formula(self, formula: str) -> str:
+		if not formula or not isinstance(formula, str):
+			return ""
+
+		return formula.strip()
+
 	def _build_context(self, period_index: int) -> dict[str, Any]:
 		context = {}
 
 		# row values
 		for code, values in self.row_data.items():
 			if period_index < len(values):
-				context[code] = values[period_index]
+				context[code] = values[period_index] or 0.0
 			else:
 				context[code] = 0.0
 
@@ -1017,6 +1023,9 @@ class FormattingEngine:
 	"""Manages formatting rules and application"""
 
 	def __init__(self):
+		self.initialize_rules()
+
+	def initialize_rules(self):
 		self.rules = [
 			FormattingRule(
 				condition=lambda rd: getattr(rd.row, "bold_text", False), format_properties={"bold": True}
@@ -1130,7 +1139,6 @@ class RowFormatterBase(ABC):
 		pass
 
 	def _get_values(self, row_data: RowData) -> dict[str, Any]:
-		print(self.context.filters, "\n\n")
 		values = {
 			"account": getattr(row_data.row, "display_name", "") or "",
 			"indent": getattr(row_data.row, "indentation_level", 0),
