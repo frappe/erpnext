@@ -532,6 +532,13 @@ frappe.ui.form.on("BOM", {
 });
 
 frappe.ui.form.on("BOM Operation", {
+	finished_good(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.finished_good === frm.doc.item) {
+			frappe.model.set_value(row.doctype, row.name, "is_final_finished_good", 1);
+		}
+	},
+
 	bom_no(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 

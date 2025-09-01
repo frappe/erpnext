@@ -31,6 +31,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Repair Cost",
+   "non_negative": 1,
    "options": "Company:company:default_currency",
    "reqd": 1
   }
@@ -38,12 +39,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-30 13:02:43.040762",
- "modified_by": "Administrator",
+ "modified": "2025-08-16 16:40:32.000006",
+ "modified_by": "administrator",
  "module": "Assets",
  "name": "Asset Repair Purchase Invoice",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

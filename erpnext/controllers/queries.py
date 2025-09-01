@@ -588,20 +588,26 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		"""select distinct bo.name, bo.blanket_order_type, bo.to_date
-		from `tabBlanket Order` bo, `tabBlanket Order Item` boi
-		where
-			boi.parent = bo.name
-			and boi.item_code = {item_code}
-			and bo.blanket_order_type = '{blanket_order_type}'
-			and bo.company = {company}
-			and bo.docstatus = 1""".format(
-			item_code=frappe.db.escape(filters.get("item")),
-			blanket_order_type=filters.get("blanket_order_type"),
-			company=frappe.db.escape(filters.get("company")),
+	bo = frappe.qb.DocType("Blanket Order")
+	bo_item = frappe.qb.DocType("Blanket Order Item")
+
+	blanket_orders = (
+		frappe.qb.from_(bo)
+		.from_(bo_item)
+		.select(bo.name)
+		.distinct()
+		.select(bo.blanket_order_type, bo.to_date)
+		.where(
+			(bo_item.parent == bo.name)
+			& (bo_item.item_code == filters.get("item"))
+			& (bo.blanket_order_type == filters.get("blanket_order_type"))
+			& (bo.company == filters.get("company"))
+			& (bo.docstatus == 1)
 		)
+		.run()
 	)
+
+	return blanket_orders
 
 
 @frappe.whitelist()
@@ -620,7 +626,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("company"):
 		condition += "and tabAccount.company = %(company)s"
 
-	condition += f"and tabAccount.disabled = {filters.get('disabled', 0)}"
+	condition += " and tabAccount.disabled = %(disabled)s"
 
 	return frappe.db.sql(
 		f"""select tabAccount.name from `tabAccount`
@@ -630,7 +636,11 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				and tabAccount.`{searchfield}` LIKE %(txt)s
 				{condition} {get_match_cond(doctype)}
 			order by idx desc, name""",
-		{"txt": "%" + txt + "%", "company": filters.get("company", "")},
+		{
+			"txt": "%" + txt + "%",
+			"company": filters.get("company", ""),
+			"disabled": cint(filters.get("disabled", 0)),
+		},
 	)
 
 

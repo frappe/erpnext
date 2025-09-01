@@ -51,19 +51,19 @@
   {
    "fieldname": "purchase_receipts",
    "fieldtype": "Table",
-   "label": "Receipts",
+   "label": "Vouchers",
    "options": "Landed Cost Purchase Receipt",
    "reqd": 1
   },
   {
    "fieldname": "purchase_receipt_items",
    "fieldtype": "Section Break",
-   "label": "Purchase Receipt Items"
+   "label": "Items"
   },
   {
    "fieldname": "get_items_from_purchase_receipts",
    "fieldtype": "Button",
-   "label": "Get Items From Receipts"
+   "label": "Get Items"
   },
   {
    "fieldname": "items",
@@ -152,6 +152,7 @@
    "fieldname": "total_vendor_invoices_cost",
    "fieldtype": "Currency",
    "label": "Total Vendor Invoices Cost (Company Currency)",
+   "options": "Company:company:default_currency",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -162,7 +163,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-30 19:25:04.899698",
+ "modified": "2025-08-27 00:41:53.537375",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",

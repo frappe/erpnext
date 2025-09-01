@@ -27,6 +27,7 @@
   "sales_person",
   "show_remarks",
   "based_on_payment_terms",
+  "show_future_payments",
   "section_break_3",
   "customer_collection",
   "collection_name",
@@ -398,10 +399,17 @@
    "fieldtype": "Select",
    "label": "Categorize By",
    "options": "\nCategorize by Voucher\nCategorize by Voucher (Consolidated)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
+   "fieldname": "show_future_payments",
+   "fieldtype": "Check",
+   "label": "Show Future Payments"
   }
  ],
  "links": [],
- "modified": "2025-08-04 18:21:12.603623",
+ "modified": "2025-08-29 00:20:08.088189",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

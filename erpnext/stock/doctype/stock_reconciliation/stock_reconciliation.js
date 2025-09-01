@@ -7,6 +7,7 @@ frappe.provide("erpnext.accounts.dimensions");
 frappe.ui.form.on("Stock Reconciliation", {
 	setup(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		frm.barcode_scanner = new erpnext.utils.BarcodeScanner({ frm });
 	},
 
 	onload: function (frm) {
@@ -96,8 +97,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	scan_barcode: function (frm) {
-		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: frm });
-		barcode_scanner.process_scan();
+		frm.barcode_scanner.process_scan();
 	},
 
 	scan_mode: function (frm) {

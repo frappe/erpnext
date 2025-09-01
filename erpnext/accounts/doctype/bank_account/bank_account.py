@@ -118,15 +118,6 @@ class BankAccount(Document):
 			)
 
 
-@frappe.whitelist()
-def make_bank_account(doctype, docname):
-	doc = frappe.new_doc("Bank Account")
-	doc.party_type = doctype
-	doc.party = docname
-
-	return doc
-
-
 def get_party_bank_account(party_type, party):
 	return frappe.db.get_value(
 		"Bank Account",

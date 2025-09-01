@@ -145,8 +145,10 @@ def validate_expense_against_budget(args, expense_amount=0):
 	if not frappe.db.count("Budget", cache=True):
 		return
 
-	if args.get("company") and not args.fiscal_year:
+	if not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
+
+	if args.get("company"):
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
 			"Company", args.get("company"), "exception_budget_approver_role"
 		)

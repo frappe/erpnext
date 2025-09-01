@@ -108,6 +108,12 @@ class ReportData:
 					sabb.reference_name,
 					"work_order",
 				)
+			elif sabb.reference_doctype == "Delivery Note":
+				row["customer"] = frappe.db.get_value(
+					"Delivery Note",
+					sabb.reference_name,
+					"customer",
+				)
 
 			data.append(row)
 
@@ -500,22 +506,29 @@ class ReportData:
 					"options": "Work Order",
 					"width": 160,
 				},
+			]
+		)
+
+		if self.filters.get("traceability_direction") == "Backward":
+			columns.append(
 				{
 					"fieldname": "supplier",
 					"label": _("Supplier"),
 					"fieldtype": "Link",
 					"options": "Supplier",
 					"width": 150,
-				},
+				}
+			)
+		else:
+			columns.append(
 				{
 					"fieldname": "customer",
 					"label": _("Customer"),
 					"fieldtype": "Link",
 					"options": "Customer",
 					"width": 150,
-				},
-			]
-		)
+				}
+			)
 
 		if has_serial_no:
 			columns.extend(

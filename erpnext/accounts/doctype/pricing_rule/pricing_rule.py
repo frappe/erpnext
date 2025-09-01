@@ -703,17 +703,6 @@ def set_transaction_type(args):
 
 
 @frappe.whitelist()
-def make_pricing_rule(doctype, docname):
-	doc = frappe.new_doc("Pricing Rule")
-	doc.applicable_for = doctype
-	doc.set(frappe.scrub(doctype), docname)
-	doc.selling = 1 if doctype == "Customer" else 0
-	doc.buying = 1 if doctype == "Supplier" else 0
-
-	return doc
-
-
-@frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	items = [filters.get("value")]
