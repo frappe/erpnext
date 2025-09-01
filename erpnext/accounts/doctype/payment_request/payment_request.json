@@ -449,11 +449,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-12-27 21:29:10.361894",
-=======
  "modified": "2025-08-29 11:52:48.555415",
->>>>>>> cab262c147 (feat: set options for IBAN fields)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
