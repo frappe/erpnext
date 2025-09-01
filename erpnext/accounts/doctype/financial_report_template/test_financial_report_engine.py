@@ -29,7 +29,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 	"""Test cases for DependencyResolver class"""
 
 	# 1. BASIC FUNCTIONALITY
-	def test_basic_processing_order(self):
+	def test_resolve_basic_processing_order(self):
 		resolver = DependencyResolver(self.test_template)
 		order = resolver.get_processing_order()
 
@@ -39,7 +39,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 
 		self.assertTrue(all(ai < fi for ai in account_indices for fi in formula_indices))
 
-	def test_simple_dependency_resolution(self):
+	def test_resolve_simple_dependency(self):
 		# Create test rows with dependencies
 		test_rows = [
 			{
@@ -72,7 +72,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		self.assertLess(a001_index, b001_index, "A001 should be processed before B001")
 
 	# 2. DEPENDENCY PATTERNS
-	def test_multiple_dependencies(self):
+	def test_resolve_multiple_dependencies(self):
 		test_rows = [
 			{
 				"reference_code": "INC001",
@@ -120,7 +120,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		# GROSS001 should come before MARGIN001 (which depends on it)
 		self.assertLess(positions["GROSS001"], positions["MARGIN001"])
 
-	def test_chain_dependencies(self):
+	def test_resolve_chain_dependencies(self):
 		"""Test dependency resolution with chain of dependencies (A -> B -> C -> D)"""
 		test_rows = [
 			{
@@ -160,7 +160,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		self.assertLess(positions["B001"], positions["C001"])
 		self.assertLess(positions["C001"], positions["D001"])
 
-	def test_diamond_dependency_pattern(self):
+	def test_resolve_diamond_dependency_pattern(self):
 		"""Test Diamond Dependency Pattern - A → B, A → C, and both B,C → D"""
 		test_rows = [
 			{
@@ -207,7 +207,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		# Verify D has correct dependencies
 		self.assertEqual(set(resolver.dependencies["D001"]), {"B001", "C001"})
 
-	def test_independent_formula_row_groups(self):
+	def test_resolve_independent_formula_row_groups(self):
 		test_rows = [
 			# Chain 1: A → B → C
 			{
@@ -279,7 +279,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 				self.assertFalse(deps.intersection(chain1_codes), f"{code} should not depend on chain 1")
 
 	# 3. DATA SOURCE PROCESSING
-	def test_process_mixed_data_sources(self):
+	def test_resolve_mixed_data_sources(self):
 		test_rows = [
 			{
 				"reference_code": "CALC001",
@@ -324,7 +324,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		# All rows should be present
 		self.assertEqual(len(order), 4)
 
-	def test_api_to_formula_dependencies(self):
+	def test_resolve_api_to_formula_dependencies(self):
 		test_rows = [
 			{
 				"reference_code": "API001",
@@ -358,7 +358,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		# API001 should be processed before ACC001 (API rows come first)
 		self.assertLess(positions["API001"], positions["ACC001"])
 
-	def test_cross_datasource_dependencies(self):
+	def test_resolve_cross_datasource_dependencies(self):
 		test_rows = [
 			{
 				"reference_code": "API001",
@@ -444,7 +444,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		net_deps = resolver.dependencies.get("NET_RESULT", [])
 		self.assertEqual(set(net_deps), {"INCOME", "EXPENSE", "TAX_RATE"})
 
-	def test_extract_with_math_functions(self):
+	def test_extract_references_with_math_functions(self):
 		test_rows = [
 			{
 				"reference_code": "INCOME",
@@ -499,7 +499,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		# MATH_TEST3 should correctly identify dependencies despite sqrt/pow functions
 		self.assertEqual(set(resolver.dependencies["MATH_TEST3"]), {"INCOME", "EXPENSE"})
 
-	def test_accurate_reference_extraction(self):
+	def test_extract_accurate_reference_matching(self):
 		test_rows = [
 			{
 				"reference_code": "INC001",
@@ -602,7 +602,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		self.assertIn("INC001_ADJ", positions)
 
 	# 5. EDGE CASES
-	def test_rows_without_dependencies(self):
+	def test_resolve_rows_without_dependencies(self):
 		test_rows = [
 			{
 				"reference_code": "A001",
@@ -685,7 +685,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		}
 		self.assertLess(positions["VALID001"], positions["CALC001"])
 
-	def test_include_orphaned_nodes(self):
+	def test_resolve_include_orphaned_nodes(self):
 		test_rows = [
 			{
 				"reference_code": "USED001",
@@ -761,7 +761,7 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 		self.assertEqual(len(processing_order), 2)
 
 	# 6. ERROR DETECTION
-	def test_circular_dependency(self):
+	def test_detect_circular_dependency(self):
 		"""Test detection of circular dependency (A -> B -> C -> A)"""
 		test_rows = [
 			{
@@ -793,8 +793,18 @@ class TestDependencyResolver(FinancialReportTemplateTestCase):
 class TestFormulaCalculator(FinancialReportTemplateTestCase):
 	"""Test cases for FormulaCalculator class"""
 
+	def _create_mock_report_row(self, formula: str, reference_code: str = "TEST_ROW"):
+		class MockReportRow:
+			def __init__(self, formula, ref_code):
+				self.calculation_formula = formula
+				self.reference_code = ref_code
+				self.data_source = "Calculated Amount"
+				self.idx = 1
+
+		return MockReportRow(formula, reference_code)
+
 	# 1. FOUNDATION TESTS
-	def test_basic_operations(self):
+	def test_evaluate_basic_operations(self):
 		# Mock row data with different scenarios
 		row_data = {
 			"INC001": [1000.0, 1200.0, 1500.0],
@@ -812,35 +822,35 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		result = calculator.evaluate_formula("INC001 - EXP001")
+		result = calculator.evaluate_formula(self._create_mock_report_row("INC001 - EXP001"))
 		expected = [200.0, 300.0, 400.0]  # [1000-800, 1200-900, 1500-1100]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("INC001 * 2")
+		result = calculator.evaluate_formula(self._create_mock_report_row("INC001 * 2"))
 		expected = [2000.0, 2400.0, 3000.0]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("INC001 / 10")
+		result = calculator.evaluate_formula(self._create_mock_report_row("INC001 / 10"))
 		expected = [100.0, 120.0, 150.0]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("(INC001 - EXP001) * 0.8")
+		result = calculator.evaluate_formula(self._create_mock_report_row("(INC001 - EXP001) * 0.8"))
 		expected = [160.0, 240.0, 320.0]  # [(1000-800)*0.8, (1200-900)*0.8, (1500-1100)*0.8]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("abs(NEG_VAL)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("abs(NEG_VAL)"))
 		expected = [100.0, 200.0, 150.0]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("max(INC001, EXP001)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("max(INC001, EXP001)"))
 		expected = [1000.0, 1200.0, 1500.0]  # INC001 is always larger
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("min(INC001, EXP001)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("min(INC001, EXP001)"))
 		expected = [800.0, 900.0, 1100.0]  # EXP001 is always smaller
 		self.assertEqual(result, expected)
 
-	def test_division_by_zero(self):
+	def test_handle_division_by_zero(self):
 		row_data = {
 			"NUMERATOR": [100.0, 200.0, 300.0],
 			"ZERO_VAL": [0.0, 0.0, 0.0],
@@ -854,12 +864,12 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		result = calculator.evaluate_formula("NUMERATOR / ZERO_VAL")
+		result = calculator.evaluate_formula(self._create_mock_report_row("NUMERATOR / ZERO_VAL"))
 		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
 	# 2. DATA HANDLING TESTS
-	def test_missing_values(self):
+	def test_handle_missing_values(self):
 		row_data = {
 			"SHORT_DATA": [100.0, 200.0],  # Only 2 periods instead of 3
 			"NORMAL_DATA": [50.0, 60.0, 70.0],
@@ -873,14 +883,14 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		result = calculator.evaluate_formula("SHORT_DATA + NORMAL_DATA")
+		result = calculator.evaluate_formula(self._create_mock_report_row("SHORT_DATA + NORMAL_DATA"))
 
 		expected = [150.0, 260.0, 70.0]  # [100+50, 200+60, 0+70]
 		self.assertEqual(result, expected)
 
 		# Empty row_data
 		empty_calculator = FormulaCalculator({}, period_list)
-		result = empty_calculator.evaluate_formula("MISSING_CODE * 2")
+		result = empty_calculator.evaluate_formula(self._create_mock_report_row("MISSING_CODE * 2"))
 		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
@@ -890,17 +900,17 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 			"NORMAL": [10.0, 20.0, 30.0],
 		}
 		none_calculator = FormulaCalculator(row_data_with_none, period_list)
-		result = none_calculator.evaluate_formula("WITH_NONE + NORMAL")
+		result = none_calculator.evaluate_formula(self._create_mock_report_row("WITH_NONE + NORMAL"))
 		expected = [110.0, 20.0, 330.0]  # [100+10, 0+20, 300+30]
 		self.assertEqual(result, expected)
 
 		# Zero periods
 		zero_period_calculator = FormulaCalculator({"TEST": [100.0]}, [])
-		result = zero_period_calculator.evaluate_formula("TEST * 2")
+		result = zero_period_calculator.evaluate_formula(self._create_mock_report_row("TEST * 2"))
 		expected = []  # No periods means no results
 		self.assertEqual(result, expected)
 
-	def test_invalid_reference_codes(self):
+	def test_handle_invalid_reference_codes(self):
 		"""Test formula calculator handles invalid reference codes"""
 		row_data = {
 			"VALID_CODE": [100.0, 200.0, 300.0],
@@ -917,21 +927,23 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		calculator = FormulaCalculator(row_data, period_list)
 
 		# Test with valid reference code
-		result = calculator.evaluate_formula("VALID_CODE * 2")
+		result = calculator.evaluate_formula(self._create_mock_report_row("VALID_CODE * 2"))
 		expected = [200.0, 400.0, 600.0]
 		self.assertEqual(result, expected)
 
 		# Test with invalid reference code - should return 0.0 (code won't be in context)
-		result = calculator.evaluate_formula("INVALID_CODE * 2")
+		result = calculator.evaluate_formula(self._create_mock_report_row("INVALID_CODE * 2"))
 		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
 		# Test reference code case sensitivity
-		result = calculator.evaluate_formula("valid_code * 2")  # lowercase version
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("valid_code * 2")
+		)  # lowercase version
 		expected = [0.0, 0.0, 0.0]  # Should fail since codes are case-sensitive
 		self.assertEqual(result, expected)
 
-	def test_mismatched_period_data_lengths(self):
+	def test_handle_mismatched_period_data_lengths(self):
 		"""Test scenarios with mismatched period data"""
 		# Test when row_data has more values than periods
 		row_data_extra = {
@@ -943,7 +955,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		]  # Only 2 periods
 
 		calculator_extra = FormulaCalculator(row_data_extra, period_list_short)
-		result = calculator_extra.evaluate_formula("EXTRA_DATA * 2")
+		result = calculator_extra.evaluate_formula(self._create_mock_report_row("EXTRA_DATA * 2"))
 		expected = [200.0, 400.0]  # Only processes first 2 values
 		self.assertEqual(result, expected)
 
@@ -960,7 +972,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		]
 
 		calculator_mixed = FormulaCalculator(row_data_mixed, period_list_three)
-		result = calculator_mixed.evaluate_formula("SHORT + MEDIUM + LONG")
+		result = calculator_mixed.evaluate_formula(self._create_mock_report_row("SHORT + MEDIUM + LONG"))
 		# Period 0: 100 + 200 + 400 = 700
 		# Period 1: 0 + 300 + 500 = 800
 		# Period 2: 0 + 0 + 600 = 600
@@ -968,7 +980,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		self.assertEqual(result, expected)
 
 	# 3. COMPLEX EXPRESSIONS
-	def test_complex_expressions(self):
+	def test_evaluate_complex_expressions(self):
 		row_data = {
 			"REVENUE": [10000.0, 12000.0, 15000.0],
 			"COST": [6000.0, 7200.0, 9000.0],
@@ -983,7 +995,9 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		result = calculator.evaluate_formula("(REVENUE - COST) * (1 - TAX_RATE)")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("(REVENUE - COST) * (1 - TAX_RATE)")
+		)
 		expected = [
 			(10000 - 6000) * (1 - 0.25),
 			(12000 - 7200) * (1 - 0.25),
@@ -991,7 +1005,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("round(REVENUE / COST, 2)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("round(REVENUE / COST, 2)"))
 		expected = [
 			round(10000 / 6000, 2),
 			round(12000 / 7200, 2),
@@ -999,7 +1013,9 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("REVENUE + COST * TAX_RATE - 100")  # Tests PEMDAS order
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("REVENUE + COST * TAX_RATE - 100")
+		)  # Tests PEMDAS order
 		expected = [
 			10000 + 6000 * 0.25 - 100,
 			12000 + 7200 * 0.25 - 100,
@@ -1007,7 +1023,9 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("((REVENUE + COST) * (TAX_RATE + 0.1)) / 2")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("((REVENUE + COST) * (TAX_RATE + 0.1)) / 2")
+		)
 		expected = [
 			((10000 + 6000) * (0.25 + 0.1)) / 2,
 			((12000 + 7200) * (0.25 + 0.1)) / 2,
@@ -1015,7 +1033,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		]
 		self.assertEqual(result, expected)
 
-		result = calculator.evaluate_formula("REVENUE * 2.5 + 100")
+		result = calculator.evaluate_formula(self._create_mock_report_row("REVENUE * 2.5 + 100"))
 		expected = [
 			10000 * 2.5 + 100,
 			12000 * 2.5 + 100,
@@ -1023,7 +1041,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		]
 		self.assertEqual(result, expected)
 
-	def test_nested_function_combinations(self):
+	def test_evaluate_nested_function_combinations(self):
 		row_data = {
 			"BASE": [4.0],
 			"POSITIVE": [16.0],  # Use positive number for sqrt
@@ -1033,20 +1051,24 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		result = calculator.evaluate_formula("round(sqrt(POSITIVE), 2)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("round(sqrt(POSITIVE), 2)"))
 		expected = round((16.0**0.5), 2)  # round(sqrt(16), 2) = round(4.0, 2) = 4.0
 		self.assertEqual(result[0], expected)
 
-		result = calculator.evaluate_formula("max(POSITIVE, min(BASE, DECIMAL))")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("max(POSITIVE, min(BASE, DECIMAL))")
+		)
 		expected = max(16.0, min(4.0, 2.7))  # max(16.0, 2.7) = 16.0
 		self.assertEqual(result[0], expected)
 
-		result = calculator.evaluate_formula("pow(max(BASE, 2), min(DECIMAL, 3))")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("pow(max(BASE, 2), min(DECIMAL, 3))")
+		)
 		expected = pow(max(4.0, 2), min(2.7, 3))  # pow(4.0, 2.7)
 		self.assertAlmostEqual(result[0], expected, places=2)
 
 	# 4. FINANCIAL DOMAIN
-	def test_financial_use_cases(self):
+	def test_calculate_financial_use_cases(self):
 		row_data = {
 			"REVENUE_Q1": [1000000.0],
 			"REVENUE_Q2": [1200000.0],
@@ -1061,31 +1083,33 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		calculator = FormulaCalculator(row_data, period_list)
 
 		# Best quarterly performance
-		result = calculator.evaluate_formula("max(REVENUE_Q1, REVENUE_Q2)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("max(REVENUE_Q1, REVENUE_Q2)"))
 		self.assertEqual(result[0], 1200000.0)
 
 		# Absolute variance (remove negative sign for reporting)
-		result = calculator.evaluate_formula("abs(BUDGET_VARIANCE)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("abs(BUDGET_VARIANCE)"))
 		self.assertEqual(result[0], 50000.0)
 
 		# Rounded reporting figures
-		result = calculator.evaluate_formula("round(ACTUAL_COSTS)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("round(ACTUAL_COSTS)"))
 		self.assertEqual(result[0], 123457.0)  # Rounded to nearest whole number
 
 		# Conservative estimates
-		result = calculator.evaluate_formula("floor(ACTUAL_COSTS / 1000)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("floor(ACTUAL_COSTS / 1000)"))
 		self.assertEqual(result[0], 123.0)  # Conservative thousands
 
 		# Compound growth calculations
-		result = calculator.evaluate_formula("pow(GROWTH_RATE, YEARS)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("pow(GROWTH_RATE, YEARS)"))
 		expected = flt(1.15**5, get_currency_precision())
 		self.assertEqual(result[0], expected)
 
 		# Profit calculation with rounding
-		result = calculator.evaluate_formula("round((REVENUE_Q1 - EXPENSES) / REVENUE_Q1 * 100)")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("round((REVENUE_Q1 - EXPENSES) / REVENUE_Q1 * 100)")
+		)
 		self.assertEqual(result[0], 20.0)  # 20% profit margin
 
-	def test_common_financial_patterns(self):
+	def test_calculate_common_financial_patterns(self):
 		"""Test patterns commonly used in financial calculations"""
 		row_data = {
 			"ACTUAL": [100000.0],
@@ -1098,27 +1122,33 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		result = calculator.evaluate_formula("(ACTUAL - BUDGET) / (BUDGET + 0.0001) * 100")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("(ACTUAL - BUDGET) / (BUDGET + 0.0001) * 100")
+		)
 		expected = (100000.0 - 80000.0) / (80000.0 + 0.0001) * 100
 		self.assertAlmostEqual(result[0], expected, places=2)
 
 		# conditional logic simulation: max(0, ACTUAL - BUDGET) (similar to IF positive)
-		result = calculator.evaluate_formula("max(0, ACTUAL - BUDGET)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("max(0, ACTUAL - BUDGET)"))
 		expected = max(0, 100000.0 - 80000.0)  # 20000.0
 		self.assertEqual(result[0], expected)
 
 		# clamping patterns: min(max(ACTUAL, LOWER_BOUND), UPPER_BOUND)
-		result = calculator.evaluate_formula("min(max(ACTUAL, LOWER_BOUND), UPPER_BOUND)")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("min(max(ACTUAL, LOWER_BOUND), UPPER_BOUND)")
+		)
 		expected = min(max(100000.0, 50000.0), 150000.0)  # min(100000.0, 150000.0) = 100000.0
 		self.assertEqual(result[0], expected)
 
 		# year-over-year growth calculation
-		result = calculator.evaluate_formula("(ACTUAL - PREVIOUS_YEAR) / PREVIOUS_YEAR * 100")
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("(ACTUAL - PREVIOUS_YEAR) / PREVIOUS_YEAR * 100")
+		)
 		expected = (100000.0 - 90000.0) / 90000.0 * 100
 		self.assertAlmostEqual(result[0], expected, places=2)
 
 	# 5. EDGE CASES
-	def test_error_handling(self):
+	def test_handle_error_cases(self):
 		"""Test formula calculator error handling for various edge cases"""
 		row_data = {
 			"NORMAL": [100.0, 200.0, 300.0],
@@ -1133,37 +1163,41 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		calculator = FormulaCalculator(row_data, period_list)
 
 		# Test invalid syntax - should return 0.0 for all periods
-		result = calculator.evaluate_formula("NORMAL + +")  # Invalid syntax
+		result = calculator.evaluate_formula(self._create_mock_report_row("NORMAL + +"))  # Invalid syntax
 		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
 		# Test undefined variable - should return 0.0 for all periods
-		result = calculator.evaluate_formula("UNDEFINED_VAR * 2")
+		result = calculator.evaluate_formula(self._create_mock_report_row("UNDEFINED_VAR * 2"))
 		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
 		# Test empty formula - should return 0.0 for all periods
-		result = calculator.evaluate_formula("")
+		result = calculator.evaluate_formula(self._create_mock_report_row(""))
 		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
 		# Test whitespace and formatting tolerance
-		result = calculator.evaluate_formula("  NORMAL   +   100  ")  # Extra spaces
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("  NORMAL   +   100  ")
+		)  # Extra spaces
 		expected = [200.0, 300.0, 400.0]
 		self.assertEqual(result, expected)
 
 		# Test extremely long formulas
 		long_formula = "NORMAL + " + " + ".join(["10"] * 100)  # Very long formula
-		result = calculator.evaluate_formula(long_formula)
+		result = calculator.evaluate_formula(self._create_mock_report_row(long_formula))
 		expected = [1100.0, 1200.0, 1300.0]  # 100 + (100 * 10) = 1100 added to each value
 		self.assertEqual(result, expected)
 
 		# Test Unicode characters in formula (should fail gracefully)
-		result = calculator.evaluate_formula("NORMAL + ∞")  # Unicode infinity symbol
+		result = calculator.evaluate_formula(
+			self._create_mock_report_row("NORMAL + ∞")
+		)  # Unicode infinity symbol
 		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
-	def test_math_function_edge_cases(self):
+	def test_evaluate_math_function_edge_cases(self):
 		"""Test edge cases for mathematical functions"""
 		row_data = {
 			"ZERO": [0.0],
@@ -1174,17 +1208,17 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		calculator = FormulaCalculator(row_data, period_list)
 
 		# Test sqrt with zero values
-		result = calculator.evaluate_formula("sqrt(ZERO)")
+		result = calculator.evaluate_formula(self._create_mock_report_row("sqrt(ZERO)"))
 		self.assertEqual(result[0], 0.0)
 
 		# Test very small numbers precision
-		result = calculator.evaluate_formula("SMALL_DECIMAL * SMALL_DECIMAL")
+		result = calculator.evaluate_formula(self._create_mock_report_row("SMALL_DECIMAL * SMALL_DECIMAL"))
 		expected = 0.0001 * 0.0001
 		# Depends on currency precision
 		self.assertTrue(result[0] == 0.0 or abs(result[0] - expected) < 1e-6)
 
 	# 6. OTHER
-	def test_security_protection(self):
+	def test_prevent_security_vulnerabilities(self):
 		row_data = {"TEST_VAL": [100.0]}
 		period_list = [{"key": "2023_q1", "from_date": "2023-01-01", "to_date": "2023-03-31"}]
 
@@ -1203,7 +1237,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		for expr in harmful_expressions:
 			with self.subTest(expression=expr):
-				result = calculator.evaluate_formula(expr)
+				result = calculator.evaluate_formula(self._create_mock_report_row(expr))
 				self.assertEqual(result, [0.0], f"Harmful expression '{expr}' should return [0.0]")
 
 		# Only safe mathematical operations work
@@ -1217,7 +1251,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		for expr in safe_expressions:
 			with self.subTest(expression=expr):
-				result = calculator.evaluate_formula(expr)
+				result = calculator.evaluate_formula(self._create_mock_report_row(expr))
 				self.assertNotEqual(result, [0.0], f"Safe expression '{expr}' should not return [0.0]")
 				self.assertIsInstance(result[0], float, f"Safe expression '{expr}' should return a float")
 

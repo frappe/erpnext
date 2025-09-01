@@ -11,6 +11,8 @@ from typing import Any, ClassVar, Union
 
 import frappe
 from frappe import _
+from frappe.database.operator_map import OPERATOR_MAP
+from frappe.database.query import SQLFunctionParser
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, date_diff, flt, getdate
@@ -23,7 +25,12 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
 	FinancialReportTemplate,
 )
-from erpnext.accounts.doctype.financial_report_template.financial_report_validation import DependencyValidator
+from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
+	AccountFilterValidator,
+	CalculationFormulaValidator,
+	DependencyValidator,
+	FormulaValidator,
+)
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
 	get_cost_centers_with_children,
@@ -60,27 +67,22 @@ class AccountData:
 	"""Account data across all periods"""
 
 	account_name: str
-	period_values: list[PeriodValue] = field(default_factory=list)
-	_period_lookup: dict[str, PeriodValue] = field(default_factory=dict)
+	period_values: dict[str, PeriodValue] = field(default_factory=dict)
 
 	def add_period(self, period_value: PeriodValue) -> None:
-		"""Add period data in order"""
-		if period_value.period_key not in self._period_lookup:
-			self.period_values.append(period_value)
-		else:
-			# Update existing period
-			for i, pv in enumerate(self.period_values):
-				if pv.period_key == period_value.period_key:
-					self.period_values[i] = period_value
-					break
-
-		self._period_lookup[period_value.period_key] = period_value
+		self.period_values[period_value.period_key] = period_value
 
 	def get_period(self, period_key: str) -> PeriodValue | None:
-		return self._period_lookup.get(period_key)
+		return self.period_values.get(period_key)
 
 	def get_values_by_type(self, balance_type: str) -> list[float]:
-		return [pv.get_value(balance_type) for pv in self.period_values]
+		return [pv.get_value(balance_type) for pv in self.period_values.values()]
+
+	def get_ordered_values(self, period_keys: list[str], balance_type: str) -> list[float]:
+		return [
+			self.period_values[key].get_value(balance_type) if key in self.period_values else 0.0
+			for key in period_keys
+		]
 
 	def has_periods(self) -> bool:
 		return len(self.period_values) > 0
@@ -241,9 +243,16 @@ class DataCollector:
 		self.company = filters.get("company")
 		self.account_requests = []
 		self.query_builder = FinancialQueryBuilder(filters, periods)
+		self.account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 
 	def add_account_request(self, row):
-		accounts = self._parse_account_filter(row.calculation_formula) if row.calculation_formula else []
+		issues = FormulaValidator._validate_account_filter(row, self.account_fields)
+
+		# TODO: handle errors
+		for issue in issues:
+			frappe.throw(f"Row {row.idx or ''}: {issue.message} for template {row.parent}")
+
+		accounts = self._parse_account_filter(row)
 
 		self.account_requests.append(
 			{
@@ -273,45 +282,47 @@ class DataCollector:
 		# Calculate summaries for each request
 		summary = {}
 		account_details = {}
+		period_keys = [p["key"] for p in self.periods]
 
 		for request in self.account_requests:
 			ref_code = request["reference_code"]
-			balance_type = request["balance_type"]
-			accounts = request["accounts"]
-
 			if not ref_code:
 				continue
+
+			balance_type = request["balance_type"]
+			accounts = request["accounts"]
 
 			total_values = [0.0] * len(self.periods)
 			request_account_details = {}
 
 			for account_name in accounts:
-				if account_name in account_data:
-					account_obj: AccountData = account_data[account_name]
-					account_values = account_obj.get_values_by_type(balance_type)
+				if account_name not in account_data:
+					continue
 
-					# Add to totals
-					for i, value in enumerate(account_values):
-						total_values[i] += value
+				account_obj: AccountData = account_data[account_name]
+				account_values = account_obj.get_ordered_values(period_keys, balance_type)
 
-					# Store for detailed view
-					request_account_details[account_name] = account_obj
+				# Add to totals
+				for i, value in enumerate(account_values):
+					total_values[i] += value
+
+				# Store for detailed view
+				request_account_details[account_name] = account_obj
 
 			summary[ref_code] = total_values
 			account_details[ref_code] = request_account_details
 
 		return {"account_data": account_data, "summary": summary, "account_details": account_details}
 
-	def _parse_account_filter(self, filter_formula: str) -> list[str]:
+	def _parse_account_filter(self, report_row) -> list[str]:
 		"""
 		Find accounts matching filter criteria.
 
 		Example:
-		        Input: '["account_type", "=", "Cash"]'
-		        Output: ["Cash - COMP", "Petty Cash - COMP", "Bank - COMP"]
+		                Input: '["account_type", "=", "Cash"]'
+		                Output: ["Cash - COMP", "Petty Cash - COMP", "Bank - COMP"]
 		"""
 		filter_parser = FilterExpressionParser()
-		criteria = filter_parser.parse(filter_formula)
 
 		account = frappe.qb.DocType("Account")
 		query = (
@@ -324,7 +335,7 @@ class DataCollector:
 		if self.company:
 			query = query.where(account.company == self.company)
 
-		where_condition = filter_parser.build_condition(criteria, account)
+		where_condition = filter_parser.build_condition(report_row, account)
 		if where_condition is not None:
 			query = query.where(where_condition)
 
@@ -347,7 +358,7 @@ class FinancialQueryBuilder:
 		Steps: get opening balances → fetch GL entries → calculate running totals
 
 		Returns:
-		        dict: {account: AccountData}
+		                dict: {account: AccountData}
 		"""
 		balances_data = self._get_opening_balances(accounts)
 
@@ -569,137 +580,99 @@ class FinancialQueryBuilder:
 
 
 class FilterExpressionParser:
-	"""Enhanced filter expression parser"""
+	"""Direct filter expression to SQL condition builder"""
 
-	def parse(self, formula: str) -> dict[str, Any]:
+	def __init__(self):
+		self.validator = AccountFilterValidator()
+
+	def build_condition(self, report_row, table):
 		"""
-		Parse filter formula into structured criteria.
-		Supports: ["field", "op", "value"] and {"and/or": [conditions]}
+		Build SQL condition directly from filter formula.
 
+		Supports:
 		1. Simple condition: ["field", "operator", "value"]
 		   Example: ["account_type", "=", "Income"]
 
-		2. Dictionary-based complex conditions:
+		2. Complex logical conditions:
+		   {"and": [condition1, condition2, ...]}  # All conditions must be true
+		   {"or": [condition1, condition2, ...]}   # Any condition can be true
+
+		   Example:
 		   {
-		     "and": [condition1, condition2, ...]  # All conditions must be true
-		     "or": [condition1, condition2, ...]   # Any condition can be true
+		         "and": [
+		           ["account_type", "=", "Income"],
+		           {"or": [
+		                 ["category", "=", "Direct Income"],
+		                 ["category", "=", "Indirect Income"]
+		           ]}
+		         ]
 		   }
-		   Example: {
-		     "and": [
-		       ["account_type", "=", "Income"],
-		       {"or": [
-		         ["category", "=", "Direct Income"],
-		         ["category", "=", "Indirect Income"]
-		       ]}
-		     ]
-		   }
+
+		Returns:
+		        SQL condition object or None if invalid
 		"""
-		# TODO:
+		filter_formula = report_row.calculation_formula
+		if not filter_formula:
+			return None
+
+		errors = self.validator.validate(report_row)
+		if errors:
+			frappe.throw("<br><br>".join(errors))
+
 		try:
-			parsed_formula = ast.literal_eval(formula)
+			parsed = ast.literal_eval(filter_formula)
+			return self._build_from_parsed(parsed, table)
+		except (ValueError, SyntaxError) as e:
+			frappe.log_error(f"Invalid filter formula syntax: {filter_formula} - {e}")
+			return None
+		except Exception as e:
+			frappe.log_error(f"Failed to build condition from formula: {filter_formula} - {e}")
+			return None
 
-			if isinstance(parsed_formula, dict):
-				return self._parse_logical_condition(parsed_formula)
-			elif self._is_simple_condition(parsed_formula):
-				return {
-					"type": "simple",
-					"field": parsed_formula[0],
-					"operator": parsed_formula[1],
-					"value": parsed_formula[2],
-				}
+	def _build_from_parsed(self, parsed, table):
+		if isinstance(parsed, dict):
+			return self._build_logical_condition(parsed, table)
 
-		except Exception:
-			frappe.log_error(f"Failed to parse filter formula: {formula}")
+		if isinstance(parsed, list):
+			return self._build_simple_condition(parsed, table)
 
-		return {"type": "invalid"}
+		return None
 
-	def _parse_logical_condition(self, condition_dict: dict) -> dict[str, Any]:
-		if not isinstance(condition_dict, dict) or len(condition_dict) != 1:
-			return {"type": "invalid"}
+	def _build_simple_condition(self, condition_list: list[str, str, str | float], table):
+		field_name, operator, value = condition_list
+
+		if value is None:
+			return None
+
+		field = getattr(table, field_name, None)
+		operator_fn = OPERATOR_MAP.get(operator.casefold())
+
+		return operator_fn(field, value)
+
+	def _build_logical_condition(self, condition_dict: dict, table):
+		"""Build SQL condition from logical {"and/or": [...]} format"""
 
 		logical_op = next(iter(condition_dict.keys())).lower()
-		sub_conditions = condition_dict[logical_op]
+		sub_conditions = condition_dict.get(logical_op)
 
-		if logical_op not in ["and", "or"] or not isinstance(sub_conditions, list):
-			return {"type": "invalid"}
-
-		parsed_conditions = []
-		for condition in sub_conditions:
-			if isinstance(condition, dict):
-				parsed_conditions.append(self._parse_logical_condition(condition))
-			elif self._is_simple_condition(condition):
-				parsed_conditions.append(
-					{"type": "simple", "field": condition[0], "operator": condition[1], "value": condition[2]}
-				)
-
-		return {"type": "logical", "operator": logical_op, "conditions": parsed_conditions}
-
-	def _is_simple_condition(self, parsed) -> bool:
-		return (
-			isinstance(parsed, list)
-			and len(parsed) == 3
-			and isinstance(parsed[0], str)
-			and isinstance(parsed[1], str)
-		)
-
-	def build_condition(self, criteria: dict, table):
-		if criteria.get("type") == "simple":
-			return self._build_simple_condition(criteria, table)
-		elif criteria.get("type") == "logical":
-			return self._build_logical_condition(criteria, table)
-		return None
-
-	def _build_simple_condition(self, criteria: dict, table):
-		field_name = criteria["field"]
-		operator = criteria["operator"]
-		value = criteria["value"]
-
-		if not hasattr(table, field_name):
-			return None
-
-		field = getattr(table, field_name)
-
-		if operator in ["=", "=="]:
-			return field == value
-		elif operator in ["!=", "<>"]:
-			return field != value
-		elif operator == "in" and isinstance(value, list):
-			return field.isin(value)
-		elif operator == "not in" and isinstance(value, list):
-			return field.notin(value)
-		elif operator == "like":
-			return field.like(f"%{value}%")
-		elif operator == "not like":
-			return field.not_like(f"%{value}%")
-		elif operator == ">":
-			return field > value
-		elif operator == ">=":
-			return field >= value
-		elif operator == "<":
-			return field < value
-		elif operator == "<=":
-			return field <= value
-
-		return None
-
-	def _build_logical_condition(self, criteria: dict, table):
-		operator = criteria["operator"]
-		conditions = []
-
-		for sub_criteria in criteria["conditions"]:
-			condition = self.build_condition(sub_criteria, table)
+		# recursive
+		built_conditions = []
+		for sub_condition in sub_conditions:
+			condition = self._build_from_parsed(sub_condition, table)
 			if condition is not None:
-				conditions.append(condition)
+				built_conditions.append(condition)
 
-		if not conditions:
+		if not built_conditions:
 			return None
 
-		if operator == "and":
-			return reduce(lambda a, b: a & b, conditions)
-		elif operator == "or":
-			return reduce(lambda a, b: a | b, conditions)
+		if len(built_conditions) == 1:
+			return built_conditions[0]
 
-		return None
+		# combine
+		if logical_op == "and":
+			return reduce(lambda a, b: a & b, built_conditions)
+		else:  # logical_op == "or"
+			return reduce(lambda a, b: a | b, built_conditions)
 
 
 # ============================================================================
@@ -787,7 +760,7 @@ class RowProcessor:
 
 	def _process_formula_row(self, row) -> RowData:
 		calculator = FormulaCalculator(self.row_values, self.period_list)
-		values = calculator.evaluate_formula(row.calculation_formula)
+		values = calculator.evaluate_formula(row)
 
 		if row.reference_code:
 			self.row_values[row.reference_code] = values
@@ -854,13 +827,16 @@ class DependencyResolver:
 	def _topological_sort(self, formula_rows: list) -> list:
 		formula_row_map = {row.reference_code: row for row in formula_rows if row.reference_code}
 
+		adj_list = {code: [] for code in formula_row_map}
+		in_degree = {code: 0 for code in formula_row_map}
+
 		# Calculate in-degree
-		in_degree = {code: 0 for code in formula_row_map.keys()}
-		for code, deps in self.dependencies.items():
-			if code in in_degree:
-				for dep in deps:
-					if dep in in_degree:
-						in_degree[code] += 1
+		for code in formula_row_map:
+			deps = self.dependencies.get(code, [])
+			for dep in deps:
+				if dep in formula_row_map:  # Only consider dependencies within formula rows
+					adj_list[dep].append(code)
+					in_degree[code] += 1
 
 		# Topological sort
 		queue = [code for code, degree in in_degree.items() if degree == 0]
@@ -870,15 +846,16 @@ class DependencyResolver:
 			current = queue.pop(0)
 			result.append(formula_row_map[current])
 
-			for code, deps in self.dependencies.items():
-				if current in deps and code in in_degree:
-					in_degree[code] -= 1
-					if in_degree[code] == 0:
-						queue.append(code)
+			# Reduce in-degree
+			for neighbor in adj_list[current]:
+				in_degree[neighbor] -= 1
+				if in_degree[neighbor] == 0:
+					queue.append(neighbor)
 
 		# Add any remaining formula rows
+		result_set = set(result)
 		for row in formula_rows:
-			if row not in result:
+			if row not in result_set:
 				result.append(row)
 
 		return result
@@ -891,11 +868,31 @@ class FormulaCalculator:
 		self.row_data = row_data
 		self.period_list = period_list
 		self.precision = get_currency_precision()
+		self.validator = CalculationFormulaValidator(set(row_data.keys()))
 
-	def evaluate_formula(self, formula: str) -> list[float]:
-		formula = self._preprocess_formula(formula)
+		self.math_functions = {
+			"abs": abs,
+			"round": round,
+			"min": min,
+			"max": max,
+			"sum": sum,
+			"sqrt": math.sqrt,
+			"pow": math.pow,
+			"ceil": math.ceil,
+			"floor": math.floor,
+		}
+
+	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
+		validation_result = self.validator.validate(report_row)
+		formula = report_row.calculation_formula
+
+		if validation_result.issues:
+			# TODO: Throw?
+			messages = "<br><br>".join(issue.message for issue in validation_result.issues)
+			frappe.log_error(f"Formula validation errors found:\n{messages}")
+			return [0.0] * len(self.period_list)
+
 		results = []
-
 		for i in range(len(self.period_list)):
 			result = self._evaluate_for_period(formula, i)
 			results.append(result)
@@ -916,12 +913,6 @@ class FormulaCalculator:
 			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
 			return 0.0
 
-	def _preprocess_formula(self, formula: str) -> str:
-		if not formula or not isinstance(formula, str):
-			return ""
-
-		return formula.strip()
-
 	def _build_context(self, period_index: int) -> dict[str, Any]:
 		context = {}
 
@@ -933,23 +924,9 @@ class FormulaCalculator:
 				context[code] = 0.0
 
 		# math functions
-		context.update(FormulaCalculator._get_math_functions())
+		context.update(self.math_functions)
 
 		return context
-
-	@staticmethod
-	def _get_math_functions() -> dict[str, Any]:
-		return {
-			"abs": abs,
-			"round": round,
-			"min": min,
-			"max": max,
-			"sum": sum,
-			"sqrt": math.sqrt,
-			"pow": math.pow,
-			"ceil": math.ceil,
-			"floor": math.floor,
-		}
 
 
 # ============================================================================
@@ -1220,19 +1197,17 @@ class MultiSegmentFormatter(RowFormatterBase):
 		for key, value in segment_values.items():
 			formatted[f"{segment.id}_{key}"] = value
 
-		if "segment_values" not in formatted:
-			formatted["segment_values"] = {}
-
 		formatting = self.formatting_engine.get_formatting(row_data)
 		segment_values.update(formatting)
-		formatted["segment_values"][f"{segment.id}"] = segment_values
+
+		formatted["segment_values"][segment.id] = segment_values
 
 	def _add_empty_segment(self, formatted: dict, segment: SegmentData):
 		formatted[f"account_{segment.id}"] = ""
 		for period in self.period_list:
 			formatted[f"{segment.id}_{period['key']}"] = ""
 
-		formatted["segment_values"][f"{segment.id}"] = {"is_blank_line": True}
+		formatted["segment_values"][segment.id] = {"is_blank_line": True}
 
 
 class DetailRowBuilder:

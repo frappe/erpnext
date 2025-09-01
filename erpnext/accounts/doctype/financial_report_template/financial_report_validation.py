@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+import ast
 import json
 import re
 from abc import ABC, abstractmethod
@@ -10,6 +10,8 @@ from typing import Any, ClassVar
 
 import frappe
 from frappe import _
+from frappe.database.operator_map import OPERATOR_MAP
+from frappe.database.query import SQLFunctionParser
 
 
 @dataclass
@@ -67,8 +69,9 @@ class TemplateValidator:
 			result.merge(validator.validate(self.template))
 
 		# Run row-level validations
+		account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 		for row in self.template.rows:
-			result.merge(self.formula_validator.validate(row))
+			result.merge(self.formula_validator.validate(row, account_fields))
 
 		return result
 
@@ -293,29 +296,31 @@ class DependencyValidator(Validator):
 		return None
 
 
-class FormulaValidator(Validator):
-	def __init__(self, template):
-		self.template = template
-		self.rows_by_code = {row.reference_code: row for row in template.rows if row.reference_code}
+class CalculationFormulaValidator(Validator):
+	"""Validates calculation formulas used in Calculated Amount rows"""
+
+	def __init__(self, reference_codes: set[str]):
+		self.reference_codes = reference_codes
 
 	def validate(self, row) -> ValidationResult:
+		"""Validate calculation formula for a single row"""
 		issues = []
 
-		if not row.calculation_formula:
+		if row.data_source != "Calculated Amount":
 			return ValidationResult(issues)
 
-		if row.data_source == "Calculated Amount":
-			issues.extend(self._validate_calculated_formula(row))
-		elif row.data_source == "Account Data":
-			issues.extend(self._validate_account_filter(row))
-		elif row.data_source == "Custom API":
-			issues.extend(self._validate_custom_api(row))
+		if not row.calculation_formula:
+			issues.append(
+				ValidationIssue(
+					message="Formula is required for Calculated Amount",
+					row_idx=row.idx,
+					field="Formula",
+				)
+			)
+			return ValidationResult(issues)
 
-		return ValidationResult(issues)
-
-	def _validate_calculated_formula(self, row) -> list[ValidationIssue]:
-		issues = []
-		formula = row.calculation_formula
+		formula = self._preprocess_formula(row.calculation_formula)
+		row.calculation_formula = formula
 
 		# Check parentheses
 		if not self._are_parentheses_balanced(formula):
@@ -325,10 +330,10 @@ class FormulaValidator(Validator):
 					row_idx=row.idx,
 				)
 			)
-			return issues  # Can't validate further
+			return ValidationResult(issues)
 
 		# Check self-reference
-		available_codes = list(self.rows_by_code.keys())
+		available_codes = list(self.reference_codes)
 		refs = extract_reference_codes_from_formula(formula, available_codes)
 		if row.reference_code and row.reference_code in refs:
 			issues.append(
@@ -358,43 +363,109 @@ class FormulaValidator(Validator):
 				)
 			)
 
-		return issues
+		return ValidationResult(issues)
 
-	def _validate_account_filter(self, row) -> list[ValidationIssue]:
+	def _preprocess_formula(self, formula: str) -> str:
+		if not formula or not isinstance(formula, str):
+			return ""
+
+		return formula.strip()
+
+	@staticmethod
+	def _are_parentheses_balanced(formula: str) -> bool:
+		return formula.count("(") == formula.count(")")
+
+	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
+		try:
+			context = {code: 1.0 for code in available_codes}
+			context.update(
+				{
+					"abs": abs,
+					"round": round,
+					"min": min,
+					"max": max,
+					"sum": sum,
+					"sqrt": lambda x: x**0.5,
+					"pow": pow,
+					"ceil": lambda x: int(x) + (1 if x % 1 else 0),
+					"floor": lambda x: int(x),
+				}
+			)
+
+			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
+
+			if not isinstance(result, int | float):
+				return f"Formula must return a numeric value, got {type(result).__name__}"
+
+			return None
+		except Exception as e:
+			return str(e)
+
+
+class AccountFilterValidator(Validator):
+	"""Validates account filter expressions used in Account Data rows"""
+
+	def __init__(self, account_fields: set | None = None):
+		self.account_fields = account_fields or {
+			field.fieldname for field in frappe.get_meta("Account").fields
+		}
+
+	def validate(self, row) -> ValidationResult:
+		"""Validate account filter for a single row"""
+		issues = []
+
+		if row.data_source != "Account Data":
+			return ValidationResult(issues)
+
+		if not row.calculation_formula:
+			issues.append(
+				ValidationIssue(
+					message="Account filter is required for Account Data",
+					row_idx=row.idx,
+					field="Formula",
+				)
+			)
+			return ValidationResult(issues)
+
 		try:
 			filter_config = json.loads(row.calculation_formula)
-			error = self._validate_filter_structure(filter_config)
+			error = self._validate_filter_structure(filter_config, self.account_fields)
 
 			if error:
-				return [
+				issues.append(
 					ValidationIssue(
 						message=error,
 						row_idx=row.idx,
 						field="Account Filter",
 					)
-				]
+				)
+
 		except json.JSONDecodeError as e:
-			return [
+			issues.append(
 				ValidationIssue(
 					message=f"Invalid JSON format: {e!s}",
 					row_idx=row.idx,
 					field="Account Filter",
 				)
-			]
+			)
 
-		return []
+		return ValidationResult(issues)
 
-	def _validate_filter_structure(self, filter_config) -> str | None:
+	def _validate_filter_structure(self, filter_config, account_fields: set) -> str | None:
+		"""Recursively validate filter structure"""
 		if isinstance(filter_config, list):
 			if len(filter_config) != 3:
 				return "Filter must be [field, operator, value]"
 
 			field, operator, value = filter_config
+
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return "Field and operator must be strings"
 
-			valid_ops = ["=", "==", "!=", "<>", "in", "not in", "like", "not like", ">", ">=", "<", "<="]
-			if operator not in valid_ops:
+			if field not in account_fields:
+				return f"Field '{field}' is not a valid account field"
+
+			if operator.casefold() not in OPERATOR_MAP:
 				return f"Invalid operator '{operator}'"
 
 			if operator in ["in", "not in"] and not isinstance(value, list):
@@ -413,13 +484,41 @@ class FormulaValidator(Validator):
 				return "Logical conditions need at least 2 sub-conditions"
 
 			for condition in conditions:
-				error = self._validate_filter_structure(condition)
+				error = self._validate_filter_structure(condition, account_fields)
 				if error:
 					return error
 		else:
 			return "Filter must be a list or dict"
 
 		return None
+
+
+class FormulaValidator(Validator):
+	def __init__(self, template):
+		self.template = template
+		reference_codes = {row.reference_code for row in template.rows if row.reference_code}
+		self.calculation_validator = CalculationFormulaValidator(reference_codes)
+		self.account_filter_validator = AccountFilterValidator()
+
+	def validate(self, row, account_fields: set) -> ValidationResult:
+		issues = []
+
+		if not row.calculation_formula:
+			return ValidationResult(issues)
+
+		if row.data_source == "Calculated Amount":
+			return self.calculation_validator.validate(row)
+
+		elif row.data_source == "Account Data":
+			# Update account fields if provided
+			if account_fields:
+				self.account_filter_validator.account_fields = account_fields
+			return self.account_filter_validator.validate(row)
+
+		elif row.data_source == "Custom API":
+			issues.extend(self._validate_custom_api(row))
+
+		return ValidationResult(issues)
 
 	def _validate_custom_api(self, row) -> list[ValidationIssue]:
 		api_path = row.calculation_formula
@@ -456,36 +555,6 @@ class FormulaValidator(Validator):
 			]
 
 		return []
-
-	@staticmethod
-	def _are_parentheses_balanced(formula: str) -> bool:
-		return formula.count("(") == formula.count(")")
-
-	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
-		try:
-			context = {code: 1.0 for code in available_codes}
-			context.update(
-				{
-					"abs": abs,
-					"round": round,
-					"min": min,
-					"max": max,
-					"sum": sum,
-					"sqrt": lambda x: x**0.5,
-					"pow": pow,
-					"ceil": lambda x: int(x) + (1 if x % 1 else 0),
-					"floor": lambda x: int(x),
-				}
-			)
-
-			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
-
-			if not isinstance(result, int | float):
-				return f"Formula must return a numeric value, got {type(result).__name__}"
-
-			return None
-		except Exception as e:
-			return str(e)
 
 
 def extract_reference_codes_from_formula(formula: str, available_codes: list[str]) -> list[str]:
