@@ -1,34 +1,51 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.query_reports["Balance Sheet"] = $.extend({}, erpnext.financial_statements);
+const REPORT_NAME = "Balance Sheet";
 
-erpnext.utils.add_dimensions("Balance Sheet", 10);
+frappe.query_reports[REPORT_NAME] = $.extend({}, erpnext.financial_statements);
 
-frappe.query_reports["Balance Sheet"]["filters"].push({
-	fieldname: "selected_view",
-	label: __("Select View"),
-	fieldtype: "Select",
-	options: [
-		{ value: "Report", label: __("Report View") },
-		{ value: "Growth", label: __("Growth View") },
-	],
-	default: "Report",
-	reqd: 1,
-});
+erpnext.utils.add_dimensions(REPORT_NAME, 10);
 
-frappe.query_reports["Balance Sheet"]["filters"].push({
-	fieldname: "accumulated_values",
-	label: __("Accumulated Values"),
-	fieldtype: "Check",
-	default: 1,
-});
-
-frappe.query_reports["Balance Sheet"]["filters"].push({
-	fieldname: "include_default_book_entries",
-	label: __("Include Default FB Entries"),
-	fieldtype: "Check",
-	default: 1,
-});
+frappe.query_reports[REPORT_NAME]["filters"].push(
+	{
+		fieldname: "report_template",
+		label: __("Report Template"),
+		fieldtype: "Link",
+		options: "Financial Report Template",
+		get_query: { filters: { report_type: REPORT_NAME } },
+	},
+	{
+		fieldname: "show_account_details",
+		label: __("Account Detail Level"),
+		fieldtype: "Select",
+		options: ["Summary Only", "Show Account Breakdown"],
+		default: "Summary Only",
+		depends_on: "eval:!!frappe.query_report.get_filter_value('report_template')",
+	},
+	{
+		fieldname: "selected_view",
+		label: __("Select View"),
+		fieldtype: "Select",
+		options: [
+			{ value: "Report", label: __("Report View") },
+			{ value: "Growth", label: __("Growth View") },
+		],
+		default: "Report",
+		reqd: 1,
+	},
+	{
+		fieldname: "accumulated_values",
+		label: __("Accumulated Values"),
+		fieldtype: "Check",
+		default: 1,
+	},
+	{
+		fieldname: "include_default_book_entries",
+		label: __("Include Default FB Entries"),
+		fieldtype: "Check",
+		default: 1,
+	}
+);
 
 frappe.query_reports["Balance Sheet"]["export_hidden_cols"] = true;

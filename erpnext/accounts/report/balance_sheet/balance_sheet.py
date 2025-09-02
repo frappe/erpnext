@@ -6,6 +6,9 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+	FinancialReportEngine,
+)
 from erpnext.accounts.report.financial_statements import (
 	compute_growth_view_data,
 	get_columns,
@@ -16,6 +19,10 @@ from erpnext.accounts.report.financial_statements import (
 
 
 def execute(filters=None):
+	if filters.report_template:
+		columns, data = FinancialReportEngine().execute(filters)
+		return columns, data
+
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,

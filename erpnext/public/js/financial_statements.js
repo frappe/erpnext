@@ -8,7 +8,7 @@ erpnext.financial_statements = {
 		if (this._is_special_view(column, data))
 			return this._format_special_view(value, row, column, data, default_formatter);
 
-		if (frappe.query_report.get_filter_value("template_name"))
+		if (frappe.query_report.get_filter_value("report_template"))
 			return this._format_custom_report(value, row, column, data, default_formatter, filter);
 		else return this._format_standard_report(value, row, column, data, default_formatter, filter);
 	},

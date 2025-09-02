@@ -152,6 +152,8 @@ class FinancialReportEngine:
 	def execute(self, filters: dict[str, Any]) -> tuple[list[dict], list[dict]]:
 		"""Execute the complete report generation"""
 		try:
+			self._validate_filters(filters)
+
 			# Initialize context
 			context = self._initialize_context(filters)
 
@@ -166,8 +168,21 @@ class FinancialReportEngine:
 			frappe.log_error(f"Financial Report Engine Error: {e!s}")
 			frappe.throw(_("Error generating financial report: {0}").format(str(e)))
 
+	def _validate_filters(self, filters: dict[str, Any]) -> None:
+		required_filters = ["report_template", "period_start_date", "period_end_date"]
+
+		for filter_key in required_filters:
+			if not filters.get(filter_key):
+				frappe.throw(_("Missing required filter: {0}").format(filter_key))
+
+		if filters.get("presentation_currency"):
+			frappe.msgprint(_("Currency filters are currently unsupported in Custom Financial Report."))
+
+		if (view := filters.get("selected_view")) and view != "Report":
+			frappe.msgprint(_("{0} view is currently unsupported in Custom Financial Report.").format(view))
+
 	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
-		template_name = filters.get("template_name")
+		template_name = filters.get("report_template")
 		template = frappe.get_doc("Financial Report Template", template_name)
 
 		if not template:
@@ -187,11 +202,14 @@ class FinancialReportEngine:
 			company=filters.company,
 		)
 
+		# Support both old and new field names for backward compatibility
+		show_detailed = filters.get("show_account_details") == "Show Account Breakdown"
+
 		context = ReportContext(
 			template=template,
 			filters=filters,
 			period_list=period_list,
-			show_detailed=filters.get("simple_vs_detailed") == "Detailed",
+			show_detailed=show_detailed,
 			# TODO: Enhance this to support report currencies
 			# after fixing which exchange rate to use for P&L
 			currency=get_company_currency(filters.company),
