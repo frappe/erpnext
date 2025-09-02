@@ -4,6 +4,7 @@ import unittest
 
 import frappe
 from frappe.tests import IntegrationTestCase
+from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.promotional_scheme.promotional_scheme import TransactionExists
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -172,6 +173,50 @@ class TestPromotionalScheme(IntegrationTestCase):
 		)
 		ps.mixed_conditions = True
 		self.assertRaises(frappe.ValidationError, ps.save)
+
+	def test_cumulative_product_discount_slabs(self):
+		ps = make_promotional_scheme(applicable_for="Customer", customer="_Test Customer 1")
+		ps.is_cumulative = True
+		ps.valid_from = ps.valid_upto = nowdate()
+		ps.set("price_discount_slabs", [])
+		ps.set("items", [])
+		ps.set(
+			"items",
+			[
+				{
+					"item_code": "_Test Item 2",
+				}
+			],
+		)
+		ps.set(
+			"product_discount_slabs",
+			[
+				{
+					"rule_description": "Test1",
+					"min_qty": 500,
+					"max_qty": 500,
+					"same_item": True,
+					"free_qty": 50,
+				},
+				{
+					"rule_description": "Test2",
+					"min_qty": 1000,
+					"max_qty": 1000,
+					"same_item": True,
+					"free_qty": 120,
+				},
+			],
+		)
+		ps.save()
+
+		so1 = make_sales_order(customer="_Test Customer 1", item_code="_Test Item 2", qty=500)
+		self.assertEqual(so1.items[1].qty, 50)
+
+		so2 = make_sales_order(customer="_Test Customer 1", item_code="_Test Item 2", qty=500)
+		self.assertEqual(so2.items[1].qty, 70)
+
+		so1.reload().cancel().delete()
+		so2.reload().cancel().delete()
 
 
 def make_promotional_scheme(**args):
