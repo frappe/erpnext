@@ -277,16 +277,68 @@ class TaxWithholdingEntry(Document):
 			)
 
 		elif self.is_withholding_different:
+			if self.taxable_amount < 0:
+				# Special handling for return invoice cancellation (3-entry approach)
+				self._handle_return_invoice_cancellation(filters)
+			else:
+				frappe.db.set_value(
+					DOCTYPE,
+					filters,
+					{
+						"taxable_name": "",
+						"taxable_doctype": "",
+						"taxable_date": None,
+						"status": "Over Withheld",
+					},
+				)
+
+	def _handle_return_invoice_cancellation(self, filters):
+		"""Handle return invoice cancellation with 3-entry approach for tax integrity"""
+		# Get old entries that need adjustment - inspired by _adjust_against_old_entries
+		old_entries = frappe.get_all(
+			DOCTYPE,
+			filters=filters,
+			fields="*",
+		)
+
+		docs_needing_reindex = set()
+
+		for entry in old_entries:
+			old_entry = frappe.get_doc(DOCTYPE, **entry)
 			frappe.db.set_value(
 				DOCTYPE,
-				filters,
+				entry["name"],
 				{
-					"taxable_name": "",
-					"taxable_doctype": "",
-					"taxable_date": None,
-					"status": "Over Withheld",
+					"taxable_doctype": old_entry.withholding_doctype,
+					"taxable_name": old_entry.withholding_name,
+					"taxable_date": old_entry.withholding_date,
 				},
 			)
+
+			# cases where withholding amount is zero
+			if entry.withholding_amount == 0:
+				continue
+
+			new_entry = frappe.copy_doc(old_entry)
+			values_to_update = {
+				"taxable_amount": abs(old_entry.taxable_amount),
+				"withholding_amount": 0,
+				"status": "Under Withheld",
+				"under_withheld_reason": "",
+				"taxable_doctype": old_entry.withholding_doctype,
+				"taxable_name": old_entry.withholding_name,
+				"taxable_date": old_entry.withholding_date,
+				"withholding_doctype": "",
+				"withholding_name": "",
+				"withholding_date": None,
+			}
+			new_entry.update(values_to_update)
+			new_entry.insert()
+
+			docs_needing_reindex.add((old_entry.withholding_doctype, old_entry.withholding_name))
+
+		# Reset idx for documents that had new entries added (like _adjust_against_old_entries does)
+		_reset_idx(docs_needing_reindex)
 
 
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
@@ -818,10 +870,10 @@ class TaxWithholdingController:
 		while entries and constraint > 0:
 			entry = entries[0]
 
-			# Get source amount - both types use taxable_amount as source
+			value_direction = -1 if entry.taxable_amount < 0 else 1
 			amount_to_process = min(entry.taxable_amount, constraint)
 
-			if amount_to_process <= 0:
+			if amount_to_process * value_direction <= 0:
 				break
 
 			# Create base entry and calculate withholding amount
@@ -848,7 +900,7 @@ class TaxWithholdingController:
 				merged_entries.append(merged_entry)
 				# Update entry amounts
 				entry.taxable_amount -= amount_to_process
-				if flt(entry.taxable_amount, self.precision) <= 0:
+				if flt(entry.taxable_amount * value_direction, self.precision) <= 0:
 					entries.popleft()
 			else:  # entry_type == "over"
 				# Over entries: adjust existing over-withheld amounts
@@ -869,7 +921,7 @@ class TaxWithholdingController:
 
 				# Update entry amounts - over entries update withholding_amount
 				entry.taxable_amount -= amount_to_process
-				if flt(entry.taxable_amount, self.precision) <= 0:
+				if flt(entry.taxable_amount * value_direction, self.precision) <= 0:
 					entries.popleft()
 
 			# Update constraint

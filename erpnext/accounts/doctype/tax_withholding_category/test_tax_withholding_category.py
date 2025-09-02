@@ -1038,35 +1038,6 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		]
 		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, expected_entries)
 
-		# Return invoice - creates negative entry, still under withheld
-		pi1 = create_purchase_invoice(supplier="Test TDS Supplier6", rate=2000, do_not_save=True)
-		pi1.apply_tds = 1
-		pi1.is_return = 1
-		pi1.items[0].qty = -1
-		pi1.tax_withholding_category = "Test Multi Invoice Category"
-		pi1.save()
-		pi1.submit()
-		invoices.append(pi1)
-
-		# Validate tax withholding entry for return invoice (negative amount, under withheld)
-		expected_entries = [
-			self.get_tax_withholding_entry(
-				tax_withholding_category="Test Multi Invoice Category",
-				party_type="Supplier",
-				party="Test TDS Supplier6",
-				tax_rate=10.0,
-				taxable_amount=-2000.0,  # Negative for return
-				withholding_amount=0.0,  # No TDS on negative/return amounts
-				status="Under Withheld",  # Returns stay under withheld
-				taxable_doctype="Purchase Invoice",
-				taxable_name=pi1.name,
-				withholding_doctype="",
-				withholding_name="",
-				under_withheld_reason=None,
-			)
-		]
-		self.validate_tax_withholding_entries("Purchase Invoice", pi1.name, expected_entries)
-
 		pe1 = create_payment_entry(
 			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier6", paid_amount=3000
 		)
@@ -2315,26 +2286,221 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Purchase Invoice", pi3.name, expected_entries)
 		self.cleanup_invoices(invoices)
 
+	def test_tds_for_return_invoices(self):
+		"""Test TDS handling for return invoices with 3-entry cancellation approach"""
+		invoices = []
+		self.setup_party_with_category("Supplier", "Test TDS Supplier8", "Test Multi Invoice Category")
 
-def cancel_invoices():
-	purchase_invoices = frappe.get_all(
-		"Purchase Invoice",
-		{
-			"supplier": ["in", ["Test TDS Supplier", "Test TDS Supplier1", "Test TDS Supplier2"]],
-			"docstatus": 1,
-		},
-		pluck="name",
-	)
+		# Create return invoice
+		pi1 = create_purchase_invoice(
+			supplier="Test TDS Supplier8", rate=3000, is_return=1, qty=-1, do_not_save=True
+		)
+		pi1.apply_tds = 1
+		pi1.tax_withholding_category = "Test Multi Invoice Category"
+		pi1.save()
+		pi1.submit()
+		invoices.append(pi1)
 
-	sales_invoices = frappe.get_all(
-		"Sales Invoice", {"customer": "Test TCS Customer", "docstatus": 1}, pluck="name"
-	)
+		# Create regular invoice that breaches threshold
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier8", rate=10000, do_not_save=True)
+		pi2.apply_tds = 1
+		pi2.tax_withholding_category = "Test Multi Invoice Category"
+		pi2.save()
+		pi2.submit()
+		invoices.append(pi2)
 
-	for d in purchase_invoices:
-		frappe.get_doc("Purchase Invoice", d).cancel()
+		# Before cancellation: 2 entries (cross-referenced settlement)
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=-3000.0,
+				withholding_amount=-300.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi1.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=10000.0,
+				withholding_amount=1000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,  # pi2 settles against itself after adjustment
+			),
+		]
 
-	for d in sales_invoices:
-		frappe.get_doc("Sales Invoice", d).cancel()
+		self.validate_tax_withholding_entries("Purchase Invoice", pi2.name, expected_entries)
+
+		# Duplicate Entries in P1 before cancellation
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=-3000.0,
+				withholding_amount=-300.0,
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi1.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+			)
+		]
+
+		self.validate_tax_withholding_entries("Purchase Invoice", pi1.name, expected_entries)
+
+		pi1.reload()
+		pi1.cancel()
+
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=10000.0,
+				withholding_amount=1000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=-3000.0,
+				withholding_amount=-300.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+				under_withheld_reason=None,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=3000.0,
+				withholding_amount=0.0,
+				status="Under Withheld",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,  # Points to withholding document, not cancelled return
+				withholding_doctype="",
+				withholding_name="",
+				under_withheld_reason="",
+			),
+		]
+
+		self.validate_tax_withholding_entries("Purchase Invoice", pi2.name, expected_entries)
+
+		# Test future invoice adjustment against the under withheld credit
+		pi3 = create_purchase_invoice(supplier="Test TDS Supplier8", rate=5000, do_not_save=True)
+		pi3.apply_tds = 1
+		pi3.tax_withholding_category = "Test Multi Invoice Category"
+		pi3.save()
+		pi3.submit()
+		invoices.append(pi3)
+
+		# pi3 should adjust against the under withheld entry from pi1 cancellation
+		expected_entries = [
+			# Settlement of the cancelled return invoice credit
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=3000.0,
+				withholding_amount=300.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,  # References the source of under withheld
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi3.name,
+			),
+			# Remaining amount with normal tax
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=5000.0,  # 5000 - 3000 already adjusted
+				withholding_amount=500.0,  # 2000 * 10%
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi3.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi3.name,
+			),
+		]
+
+		self.validate_tax_withholding_entries("Purchase Invoice", pi3.name, expected_entries)
+
+		# expected entries in pi2
+		expected_entries = [
+			# Original pi2 entry (unchanged)
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=10000.0,
+				withholding_amount=1000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+			),
+			# Entry 1: Original entry from pi1 made settled (self-settle)
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=-3000.0,
+				withholding_amount=-300.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi2.name,
+				under_withheld_reason=None,
+			),
+			# Entry 2: Under withheld entry for future adjustment (taxable fields point to pi2)
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,
+				taxable_amount=3000.0,
+				withholding_amount=300.0,
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi2.name,  # Points to withholding document, not cancelled return
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi3.name,
+				under_withheld_reason="",
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi2.name, expected_entries)
+
+		self.cleanup_invoices(invoices)
 
 
 def create_purchase_invoice(**args):
@@ -2348,6 +2514,7 @@ def create_purchase_invoice(**args):
 			"set_posting_time": args.set_posting_time or False,
 			"posting_date": args.posting_date or today(),
 			"apply_tds": 0 if args.do_not_apply_tds else 1,
+			"is_return": args.is_return or 0,
 			"supplier": args.supplier,
 			"company": "_Test Company",
 			"taxes_and_charges": "",
