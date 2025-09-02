@@ -24,7 +24,7 @@ frappe.ui.form.on("Financial Report Template", {
 frappe.ui.form.on("Financial Report Row", {
 	data_source(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
-		update_formula_description(frm, cdt, cdn, row.data_source);
+		update_formula_description(frm, row.data_source);
 
 		if (row.data_source !== "Account Data") {
 			frappe.model.set_value(cdt, cdn, "balance_type", "");
@@ -35,13 +35,13 @@ frappe.ui.form.on("Financial Report Row", {
 		}
 	},
 
-	refresh(frm, cdt, cdn) {
+	form_render(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
-		update_formula_description(frm, cdt, cdn, row.data_source);
+		update_formula_description(frm, row.data_source);
 	},
 });
 
-function update_formula_description(frm, cdt, cdn, data_source) {
+function update_formula_description(frm, data_source) {
 	let grid = frm.fields_dict.rows.grid;
 	let field = grid.fields_map.formula_description;
 	console.log(field);

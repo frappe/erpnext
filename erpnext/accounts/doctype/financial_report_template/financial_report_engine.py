@@ -246,12 +246,6 @@ class DataCollector:
 		self.account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 
 	def add_account_request(self, row):
-		issues = FormulaValidator._validate_account_filter(row, self.account_fields)
-
-		# TODO: handle errors
-		for issue in issues:
-			frappe.throw(f"Row {row.idx or ''}: {issue.message} for template {row.parent}")
-
 		accounts = self._parse_account_filter(row)
 
 		self.account_requests.append(
@@ -616,8 +610,10 @@ class FilterExpressionParser:
 			return None
 
 		errors = self.validator.validate(report_row)
-		if errors:
-			frappe.throw("<br><br>".join(errors))
+		if not errors.is_valid:
+			error_messages = [str(issue) for issue in errors.issues]
+			frappe.log_error(f"Filter validation errors found:\n{'<br><br>'.join(error_messages)}")
+			return None
 
 		try:
 			parsed = ast.literal_eval(filter_formula)
@@ -737,18 +733,10 @@ class RowProcessor:
 		# TODO
 
 		try:
-			module_path, method_name = api_path.rsplit(".", 1)
-			module = frappe.get_module(module_path)
-			method = getattr(module, method_name)
+			values = frappe.call(api_path, filters=self.context.filters, periods=self.period_list, row=row)
 
-			context = {
-				"filters": self.context.filters,
-				"periods": self.period_list,
-				"row": row,
-				"company": self.context.filters.get("company"),
-			}
-
-			values = method(context)
+			# TODO: add support for server script
+			# use form_dict to pass input in server script
 		except Exception as e:
 			frappe.log_error(f"Custom API Error: {api_path} - {e!s}")
 			values = [0.0] * len(self.period_list)
@@ -1160,7 +1148,7 @@ class SingleSegmentFormatter(RowFormatterBase):
 
 class MultiSegmentFormatter(RowFormatterBase):
 	def format_row(self, segments: list[SegmentData], row_index: int) -> dict[str, Any]:
-		formatted = {}
+		formatted = {"segment_values": {}}
 
 		for segment in segments:
 			if row_index < len(segment.rows):

@@ -480,8 +480,8 @@ class AccountFilterValidator(Validator):
 				return "Logical operators must be 'and' or 'or'"
 
 			conditions = filter_config[next(iter(filter_config.keys()))]
-			if not isinstance(conditions, list) or len(conditions) < 2:
-				return "Logical conditions need at least 2 sub-conditions"
+			if not isinstance(conditions, list) or len(conditions) < 1:
+				return "Logical conditions need at least 1 sub-condition"
 
 			for condition in conditions:
 				error = self._validate_filter_structure(condition, account_fields)
