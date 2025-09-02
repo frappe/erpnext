@@ -1286,3 +1286,364 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		for func_name in math_functions:
 			self.assertIn(func_name, context_0)
 			self.assertTrue(callable(context_0[func_name]))
+
+
+class TestFilterExpressionParser(FinancialReportTemplateTestCase):
+	"""Test cases for FilterExpressionParser class"""
+
+	def _create_mock_report_row(self, formula: str, reference_code: str = "TEST_ROW"):
+		class MockReportRow:
+			def __init__(self, formula, ref_code):
+				self.calculation_formula = formula
+				self.reference_code = ref_code
+				self.data_source = "Account Data"
+				self.idx = 1
+
+		return MockReportRow(formula, reference_code)
+
+	# 1. BASIC PARSING
+	def test_parse_simple_equality_condition(self):
+		parser = FilterExpressionParser()
+
+		# Test simple equality condition
+		simple_formula = '["account_type", "=", "Income"]'
+
+		# Test with mock table
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+		mock_row = self._create_mock_report_row(simple_formula)
+		condition = parser.build_condition(mock_row, account_table)
+		self.assertIsNotNone(condition)
+
+		# Verify the condition contains the expected field and value
+		condition_str = str(condition)
+		self.assertIn("account_type", condition_str)
+		self.assertIn("Income", condition_str)
+
+	def test_parse_logical_and_or_conditions(self):
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Test AND condition
+		and_formula = """{"and": [["account_type", "=", "Income"], ["is_group", "=", 0]]}"""
+		mock_row_and = self._create_mock_report_row(and_formula)
+		condition = parser.build_condition(mock_row_and, account_table)
+		self.assertIsNotNone(condition)
+
+		condition_str = str(condition)
+		self.assertIn("account_type", condition_str)
+		self.assertIn("is_group", condition_str)
+		self.assertIn("AND", condition_str)
+
+		# Test OR condition
+		or_formula = """{"or": [["root_type", "=", "Asset"], ["root_type", "=", "Liability"]]}"""
+		mock_row_or = self._create_mock_report_row(or_formula)
+		condition = parser.build_condition(mock_row_or, account_table)
+		self.assertIsNotNone(condition)
+
+		condition_str = str(condition)
+		self.assertIn("root_type", condition_str)
+		self.assertIn("Asset", condition_str)
+		self.assertIn("Liability", condition_str)
+		self.assertIn("OR", condition_str)
+
+	# 2. OPERATOR SUPPORT
+	def test_parse_valid_operators(self):
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		test_cases = [
+			('["account_name", "!=", "Cash"]', "!="),
+			('["account_number", "like", "1000"]', "like"),
+			('["account_type", "in", ["Income", "Expense"]]', "in"),
+			('["account_type", "not in", ["Asset", "Liability"]]', "not in"),
+			('["account_name", "not like", "Expense"]', "not like"),
+			('["account_number", ">=", 1000]', ">="),
+			('["account_number", ">", 0]', ">"),
+			('["account_number", "<=", 5000]', "<="),
+			('["account_number", "<", 100]', "<"),
+			('["is_group", "=", 0]', "="),
+		]
+
+		for formula, expected_op in test_cases:
+			mock_row = self._create_mock_report_row(formula)
+			condition = parser.build_condition(mock_row, account_table)
+			self.assertIsNotNone(condition, f"Failed to build condition for operator {expected_op}")
+
+	def test_build_logical_condition_with_reduce(self):
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Test AND logic with multiple conditions
+		and_formula = '{"and": [["account_type", "=", "Income"], ["is_group", "=", 0], ["disabled", "=", 0]]}'
+		mock_row_and = self._create_mock_report_row(and_formula)
+		condition = parser.build_condition(mock_row_and, account_table)
+		self.assertIsNotNone(condition)
+		condition_str = str(condition)
+		self.assertEqual(condition_str.count("AND"), 2)
+
+		# Test OR logic with multiple conditions
+		or_formula = '{"or": [["root_type", "=", "Asset"], ["root_type", "=", "Liability"], ["root_type", "=", "Income"]]}'
+		mock_row_or = self._create_mock_report_row(or_formula)
+		condition = parser.build_condition(mock_row_or, account_table)
+		self.assertIsNotNone(condition)
+		condition_str = str(condition)
+		self.assertEqual(condition_str.count("OR"), 2)
+
+	def test_operator_value_compatibility(self):
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Test "in" operator with list value - should work
+		in_formula = '["account_type", "in", ["Income", "Expense"]]'
+		mock_row_in = self._create_mock_report_row(in_formula)
+		condition = parser.build_condition(mock_row_in, account_table)
+		self.assertIsNotNone(condition)  # Should work with list
+
+		# Test numeric operators with proper values
+		numeric_formulas = [
+			'["tax_rate", ">", 10.0]',
+			'["tax_rate", ">=", 0]',
+			'["tax_rate", "<", 50.0]',
+			'["tax_rate", "<=", 100.0]',
+		]
+
+		for formula in numeric_formulas:
+			mock_row = self._create_mock_report_row(formula)
+			condition = parser.build_condition(mock_row, account_table)
+			self.assertIsNotNone(condition)
+
+	# 3. COMPLEX STRUCTURES
+	def test_parse_complex_nested_filters(self):
+		"""Test complex nested filter expressions"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Complex nested condition: ((Income OR Expense) AND NOT Other) AND is_group=0
+		complex_formula = """{
+            "and": [
+                {
+                    "and": [
+                        {
+                            "or": [
+                                ["root_type", "=", "Income"],
+                                ["root_type", "=", "Expense"]
+                            ]
+                        },
+                        ["account_category", "!=", "Other Income"]
+                    ]
+                },
+                ["is_group", "=", 0]
+            ]
+        }"""
+
+		mock_row_complex = self._create_mock_report_row(complex_formula)
+		condition = parser.build_condition(mock_row_complex, account_table)
+		self.assertIsNotNone(condition)
+
+		condition_str = str(condition)
+		self.assertIn("root_type", condition_str)
+		self.assertIn("account_category", condition_str)
+		self.assertIn("is_group", condition_str)
+		self.assertIn("AND", condition_str)
+		self.assertIn("OR", condition_str)
+
+	def test_parse_deeply_nested_conditions(self):
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Triple nesting: AND containing OR containing AND
+		deep_nested = """{
+            "and": [
+                {
+                    "or": [
+                        {
+                            "and": [
+                                ["account_type", "=", "Income Account"],
+                                ["is_group", "=", 0]
+                            ]
+                        },
+                        ["root_type", "=", "Asset"]
+                    ]
+                },
+                ["disabled", "=", 0]
+            ]
+        }"""
+
+		mock_row_deep = self._create_mock_report_row(deep_nested)
+		condition = parser.build_condition(mock_row_deep, account_table)
+		self.assertIsNotNone(condition)
+
+		condition_str = str(condition)
+		self.assertIn("account_type", condition_str)
+		self.assertIn("root_type", condition_str)
+		self.assertIn("disabled", condition_str)
+		self.assertIn("AND", condition_str)
+		self.assertIn("OR", condition_str)
+
+	# 4. VALUE TYPES
+	def test_parse_different_value_types(self):
+		"""Test different value types in conditions"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		test_cases = [
+			'["tax_rate", ">=", 10.50]',  # Float
+			'["is_group", "=", 1]',  # Integer
+			'["account_name", "=", ""]',  # Empty string
+			'["account_type", "in", ["Income Account", "Expense Account"]]',  # List value
+		]
+
+		for formula in test_cases:
+			mock_row = self._create_mock_report_row(formula)
+			condition = parser.build_condition(mock_row, account_table)
+			self.assertIsNotNone(condition, f"Failed to build condition for {formula}")
+
+	# 5. EDGE CASES
+	def test_parse_special_characters_in_values(self):
+		"""Test special characters in filter values"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		test_cases = [
+			('["account_name", "=", "John\'s Account"]', "apostrophe"),
+			('["account_number", "like", "%100%"]', "wildcards"),
+			('["account_name", "=", "Test & Development"]', "ampersand"),
+		]
+
+		for formula, _case_type in test_cases:
+			mock_row = self._create_mock_report_row(formula)
+			condition = parser.build_condition(mock_row, account_table)
+			self.assertIsNotNone(condition, f"Failed to build condition for {_case_type} case")
+
+	def test_parse_logical_operator_edge_cases(self):
+		"""Test edge cases for logical operators"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Test empty conditions list - should return None
+		empty_and = '{"and": []}'
+		mock_row_empty = self._create_mock_report_row(empty_and)
+		condition = parser.build_condition(mock_row_empty, account_table)
+		self.assertIsNone(condition)
+
+		# Test single condition in logical operator
+		single_condition = '{"and": [["account_type", "=", "Bank"]]}'
+		mock_row_single = self._create_mock_report_row(single_condition)
+		condition = parser.build_condition(mock_row_single, account_table)
+		self.assertIsNotNone(condition)
+
+		# Test case sensitivity - should be invalid
+		wrong_case = '{"AND": [["account_type", "=", "Bank"]]}'
+		mock_row_wrong = self._create_mock_report_row(wrong_case)
+		condition = parser.build_condition(mock_row_wrong, account_table)
+		self.assertIsNone(condition)  # Should return None due to invalid logical operator
+
+	# 6. ERROR HANDLING
+	def test_parse_invalid_filter_expressions(self):
+		"""Test handling of invalid filter expressions"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Test malformed expressions - all should return None
+		invalid_expressions = [
+			'["incomplete"]',  # Missing operator and value
+			'{"invalid": "structure"}',  # Wrong structure
+			"not_a_list_or_dict",  # Invalid format
+			'["field", "=", "value", "extra"]',  # Too many elements - actually might work due to slicing
+			'["field"]',  # Single element
+			'["field", "="]',  # Missing value - actually gets handled as empty value
+			'{"AND": [["field", "=", "value"]]}',  # Wrong case
+			'{"and": [["field", "=", "value"]], "or": [["field2", "=", "value2"]]}',  # Multiple keys
+			'{"xor": [["field", "=", "value"]]}',  # Invalid logical operator
+			'{"and": "not_a_list"}',  # Non-list value for logical operator
+			"not even close to valid syntax",  # Unparseable string
+		]
+
+		for expr in invalid_expressions:
+			mock_row = self._create_mock_report_row(expr)
+			condition = parser.build_condition(mock_row, account_table)
+			self.assertIsNone(condition, f"Expression {expr} should be invalid and return None")
+
+	def test_parse_malformed_logical_conditions(self):
+		"""Test malformed logical conditions"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		malformed_expressions = [
+			'{"and": [["field", "=", "value"]], "or": [["field2", "=", "value2"]]}',  # Multiple keys
+			'{"xor": [["field", "=", "value"]]}',  # Invalid logical operator
+			'{"and": "not_a_list"}',  # Non-list value for logical operator
+		]
+
+		for expr in malformed_expressions:
+			mock_row = self._create_mock_report_row(expr)
+			condition = parser.build_condition(mock_row, account_table)
+			self.assertIsNone(condition, f"Malformed expression {expr} should return None")
+
+		# Test mixed types in conditions - should return None due to validation failure
+		mixed_types = '{"and": [["account_type", "=", "Bank"], "string", 123]}'
+		mock_row_mixed = self._create_mock_report_row(mixed_types)
+		condition = parser.build_condition(mock_row_mixed, account_table)
+		# Should return None because invalid sub-conditions cause validation to fail
+		self.assertIsNone(condition)
+
+	def test_handle_exception_robustness(self):
+		"""Test exception handling for various inputs"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		problematic_inputs = [
+			"not even close to valid syntax",  # Unparseable string
+			'{"field": "value"}',  # JSON-like but not proper format
+		]
+
+		for test_input in problematic_inputs:
+			mock_row = self._create_mock_report_row(test_input)
+			condition = parser.build_condition(mock_row, account_table)
+			self.assertIsNone(condition, f"Input {test_input} should result in None")
+
+	# 7. BUILD CONDITIONS
+	def test_build_condition_field_validation(self):
+		"""Test field validation behavior"""
+		parser = FilterExpressionParser()
+		from frappe.query_builder import DocType
+
+		account_table = DocType("Account")
+
+		# Test with existing field - should work
+		valid_formula = '["account_name", "=", "test"]'
+		mock_row_valid = self._create_mock_report_row(valid_formula)
+		condition = parser.build_condition(mock_row_valid, account_table)
+		self.assertIsNotNone(condition)
+
+		# Test with invalid formula - should return None
+		invalid_formula = "invalid formula"
+		mock_row_invalid = self._create_mock_report_row(invalid_formula)
+		condition = parser.build_condition(mock_row_invalid, account_table)
+		self.assertIsNone(condition)

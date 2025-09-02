@@ -44,7 +44,6 @@ frappe.ui.form.on("Financial Report Row", {
 function update_formula_description(frm, data_source) {
 	let grid = frm.fields_dict.rows.grid;
 	let field = grid.fields_map.formula_description;
-	console.log(field);
 	if (!field) return;
 
 	// Common CSS styles and elements
