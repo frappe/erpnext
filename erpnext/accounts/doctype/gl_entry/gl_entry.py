@@ -308,7 +308,7 @@ def validate_balance_type(account, adv_adj=False):
 		if balance_must_be:
 			balance = frappe.db.sql(
 				"""select sum(debit) - sum(credit)
-				from `tabGL Entry` where account = %s""",
+				from `tabGL Entry` where is_cancelled = 0 and account = %s""",
 				account,
 			)[0][0]
 

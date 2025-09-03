@@ -1408,8 +1408,8 @@ class WorkOrder(Document):
 			if not self.reserve_stock:
 				continue
 
-			wip_warehouse = wip_warehouse or item.source_warehouse
-			self.update_consumed_qty_in_stock_reservation(item, consumed_qty, wip_warehouse)
+			warehouse = wip_warehouse or item.source_warehouse
+			self.update_consumed_qty_in_stock_reservation(item, consumed_qty, warehouse)
 
 	def update_consumed_qty_in_stock_reservation(self, item, consumed_qty, wip_warehouse):
 		filters = {

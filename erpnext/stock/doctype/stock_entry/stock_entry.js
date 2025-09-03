@@ -1006,7 +1006,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.barcode_scanner = new erpnext.utils.BarcodeScanner({
 			frm: this.frm,
 			warehouse_field: (doc) => {
-				return doc.purpose === "Material Transfer" ? "t_warehouse" : "s_warehouse";
+				return doc.purpose === "Material Receipt" ? "t_warehouse" : "s_warehouse";
 			},
 		});
 

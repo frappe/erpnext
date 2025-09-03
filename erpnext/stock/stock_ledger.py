@@ -978,10 +978,12 @@ class update_entries_after:
 				self.wh_data.valuation_rate = self.get_fallback_rate(sle)
 
 	def reset_actual_qty_for_stock_reco(self, sle):
-		doc = frappe.get_cached_doc("Stock Reconciliation", sle.voucher_no)
+		doc = frappe.get_doc("Stock Reconciliation", sle.voucher_no)
 		doc.recalculate_current_qty(sle.voucher_detail_no, sle.creation, sle.actual_qty > 0)
 
 		if sle.actual_qty < 0:
+			doc.reload()
+
 			sle.actual_qty = (
 				flt(frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"))
 				* -1
@@ -989,6 +991,16 @@ class update_entries_after:
 
 			if abs(sle.actual_qty) == 0.0:
 				sle.is_cancelled = 1
+
+				if sle.serial_and_batch_bundle:
+					for row in doc.items:
+						if row.name == sle.voucher_detail_no:
+							row.db_set("current_serial_and_batch_bundle", "")
+
+					sabb_doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
+					sabb_doc.voucher_detail_no = None
+					sabb_doc.voucher_no = None
+					sabb_doc.cancel()
 
 		if sle.serial_and_batch_bundle and frappe.get_cached_value("Item", sle.item_code, "has_serial_no"):
 			self.update_serial_no_status(sle)

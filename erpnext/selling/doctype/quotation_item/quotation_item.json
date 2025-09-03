@@ -365,6 +365,7 @@
    "fieldname": "base_net_rate",
    "fieldtype": "Currency",
    "label": "Net Rate (Company Currency)",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },

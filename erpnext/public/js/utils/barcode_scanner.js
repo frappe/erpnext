@@ -459,12 +459,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			const item_scanned = row.has_item_scanned;
 
 			let warehouse_match = true;
-			if (has_warehouse_field) {
-				if (warehouse) {
-					warehouse_match = row[warehouse_field] === warehouse;
-				} else {
-					warehouse_match = !row[warehouse_field];
-				}
+			if (has_warehouse_field && warehouse && row[warehouse_field]) {
+				warehouse_match = row[warehouse_field] === warehouse;
 			}
 
 			return (

@@ -62,7 +62,10 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 
 		if (this.frm.doc.company) {
 			let company_currency = frappe.get_doc(":Company", this.frm.doc.company).default_currency;
-			this.frm.set_currency_labels(["total_taxes_and_charges"], company_currency);
+			this.frm.set_currency_labels(
+				["total_taxes_and_charges", "total_vendor_invoices_cost"],
+				company_currency
+			);
 		}
 	}
 

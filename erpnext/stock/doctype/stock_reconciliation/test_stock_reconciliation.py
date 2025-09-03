@@ -1591,6 +1591,80 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 
 		self.assertFalse(status == "Active")
 
+	def test_stock_reconciliation_for_batch_with_backward(self):
+		# Make stock inward for 10 -> Stock Reco for 20 after two days
+		# Make backdated delivery note for 10 qty between stock inward and stock reco
+		# Check the state of the current serial and batch bundle in the stock reco
+		# The state should be cancelled
+
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = "Test Stock Reco for Batch with Backward"
+
+		self.make_item(
+			item_code, {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BCN-CB.#####"}
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		se = make_stock_entry(
+			posting_date=add_days(nowdate(), -2),
+			posting_time="02:00",
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+		)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=20,
+			rate=200,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			posting_date=nowdate(),
+			posting_time="03:00",
+		)
+
+		current_sabb = sr.items[0].current_serial_and_batch_bundle
+
+		self.assertTrue(frappe.db.get_value("Serial and Batch Bundle", current_sabb, "docstatus") == 1)
+
+		self.assertTrue(
+			frappe.db.get_value(
+				"Stock Ledger Entry", {"serial_and_batch_bundle": current_sabb, "is_cancelled": 0}, "name"
+			)
+		)
+		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
+		self.assertTrue(sr.items[0].current_qty)
+		self.assertTrue(sr.items[0].current_qty == 10)
+
+		se = make_stock_entry(
+			posting_date=add_days(nowdate(), -1),
+			posting_time="02:00",
+			item_code=item_code,
+			source=warehouse,
+			qty=10,
+			basic_rate=100,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+
+		sr.reload()
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
+		self.assertTrue(sr.items[0].current_qty == 0)
+
+		self.assertFalse(frappe.db.get_value("Serial and Batch Bundle", current_sabb, "docstatus") == 1)
+
+		self.assertFalse(
+			frappe.db.get_value(
+				"Stock Ledger Entry", {"serial_and_batch_bundle": current_sabb, "is_cancelled": 0}, "name"
+			)
+		)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

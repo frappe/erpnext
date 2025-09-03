@@ -357,7 +357,6 @@ doc_events = {
 	},
 	"Sales Invoice": {
 		"on_submit": [
-			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
 		],
 		"on_cancel": [
@@ -372,9 +371,6 @@ doc_events = {
 		]
 	},
 	"Payment Entry": {
-		"on_submit": [
-			"erpnext.regional.create_transaction_log",
-		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Address": {

@@ -814,7 +814,8 @@
    "depends_on": "eval:doc.salary_mode == 'Bank'",
    "fieldname": "iban",
    "fieldtype": "Data",
-   "label": "IBAN"
+   "label": "IBAN",
+   "options": "IBAN"
   }
  ],
  "icon": "fa fa-user",
@@ -822,7 +823,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2025-07-04 08:29:34.347269",
+ "modified": "2025-08-29 11:52:12.819878",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
@@ -864,6 +865,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "employee_name",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

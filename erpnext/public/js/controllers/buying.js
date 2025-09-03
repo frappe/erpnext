@@ -163,6 +163,7 @@ erpnext.buying = {
 			}
 
 			company() {
+				super.company();
 				if (!frappe.meta.has_field(this.frm.doc.doctype, "billing_address")) return;
 
 				frappe.call({

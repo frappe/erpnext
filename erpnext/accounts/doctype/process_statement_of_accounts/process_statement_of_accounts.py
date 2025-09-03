@@ -72,6 +72,7 @@ class ProcessStatementOfAccounts(Document):
 		sales_partner: DF.Link | None
 		sales_person: DF.Link | None
 		sender: DF.Link | None
+		show_future_payments: DF.Check
 		show_net_values_in_party_account: DF.Check
 		show_remarks: DF.Check
 		start_date: DF.Date | None
@@ -266,6 +267,7 @@ def get_ar_filters(doc, entry):
 		"sales_person": doc.sales_person if doc.sales_person else None,
 		"territory": doc.territory if doc.territory else None,
 		"based_on_payment_terms": doc.based_on_payment_terms,
+		"show_future_payments": doc.show_future_payments,
 		"report_name": "Accounts Receivable",
 		"ageing_based_on": doc.ageing_based_on,
 		"range1": 30,

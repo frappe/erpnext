@@ -289,7 +289,11 @@ class RequestforQuotation(BuyingController):
 		email_template = frappe.get_doc("Email Template", self.email_template)
 		message = frappe.render_template(email_template.response_, doc_args)
 		subject = frappe.render_template(email_template.subject, doc_args)
-		sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
+		fixed_procurement_email = frappe.db.get_single_value("Buying Settings", "fixed_email")
+		if fixed_procurement_email:
+			sender = frappe.db.get_value("Email Account", fixed_procurement_email, "email_id")
+		else:
+			sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
 
 		if preview:
 			return {"message": message, "subject": subject}

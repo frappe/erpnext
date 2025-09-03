@@ -397,7 +397,7 @@ erpnext.patches.v15_0.update_cc_in_process_statement_of_accounts
 erpnext.patches.v15_0.refactor_closing_stock_balance #5
 erpnext.patches.v15_0.update_asset_status_to_work_in_progress
 erpnext.patches.v15_0.rename_manufacturing_settings_field
-erpnext.patches.v15_0.sync_auto_reconcile_config
+erpnext.patches.v15_0.sync_auto_reconcile_config #2025-08-26
 execute:frappe.db.set_single_value("Accounts Settings", "exchange_gain_loss_posting_date", "Payment")
 erpnext.patches.v14_0.disable_add_row_in_gross_profit
 erpnext.patches.v14_0.update_posting_datetime

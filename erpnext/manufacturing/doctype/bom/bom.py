@@ -764,6 +764,9 @@ class BOM(WebsiteGenerator):
 		if not frappe.db.exists("BOM", {"item": finished_good, "name": bom_no, "docstatus": 1}):
 			frappe.throw(_("BOM {0} not found for the item {1}").format(bom_no, finished_good))
 
+		if self.items and not self.items[0].item_code:
+			self.set("items", [])
+
 		if not qty:
 			qty = 1
 
