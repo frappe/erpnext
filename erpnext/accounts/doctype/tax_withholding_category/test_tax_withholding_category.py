@@ -2526,6 +2526,235 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		pi.tax_withholding_entries[0].taxable_amount = 15000  # correct taxable amount
 		pi.save()
 
+	def test_manual_tax_adjustment_with_partial_adjustment_and_rate_change(self):
+		"""Test manual tax adjustment where tax rate is changed during adjustment between payment and invoice"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier8", "Test Multi Invoice Category")
+
+		# Step 1: Create a Payment Entry with over withheld amount at 10% rate
+		pe = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier8", paid_amount=150000
+		)
+		pe.apply_tds = 1
+		pe.tax_withholding_category = "Test Multi Invoice Category"
+		pe.save().submit()
+
+		# Step 2: Create Purchase Invoice with partial adjustment and manual rate change
+		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=80000, do_not_save=True)
+		pi.tax_withholding_category = "Test Multi Invoice Category"
+		pi.override_tax_withholding_entries = 1  # Enable manual override
+		pi.tax_withholding_entries = []
+
+		# Entry 1: Partial adjustment with new tax rate (12% instead of 10%)
+		pi.append(
+			"tax_withholding_entries",
+			{
+				"tax_withholding_category": "Test Multi Invoice Category",
+				"party_type": "Supplier",
+				"party": "Test TDS Supplier8",
+				"tax_rate": 12.0,  # Changed rate from 10% to 12%
+				"taxable_amount": 50000.0,  # Partial taxable amount
+				"withholding_amount": 6000.0,  # 50000 * 12% = 6000
+				"taxable_doctype": "Purchase Invoice",
+				"taxable_name": pi.name,
+				"withholding_doctype": "Payment Entry",
+				"withholding_name": pe.name,
+				"conversion_rate": 1.0,
+			},
+		)
+
+		# Entry 2: Remaining taxable amount under withheld
+		pi.append(
+			"tax_withholding_entries",
+			{
+				"tax_withholding_category": "Test Multi Invoice Category",
+				"party_type": "Supplier",
+				"party": "Test TDS Supplier8",
+				"tax_rate": 12.0,  # Same new rate
+				"taxable_amount": 30000.0,  # Remaining taxable amount (80000 - 50000)
+				"withholding_amount": 3600.0,  # 30000 * 12% = 3600
+				"taxable_doctype": "Purchase Invoice",
+				"taxable_name": pi.name,
+				"withholding_doctype": "Purchase Invoice",
+				"withholding_name": pi.name,
+				"conversion_rate": 1.0,
+			},
+		)
+
+		pi.save()
+		pi.submit()
+
+		# Step 3: Verify the tax withholding entries
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=12.0,  # Updated rate
+				taxable_amount=50000.0,
+				withholding_amount=6000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=12.0,  # Updated rate
+				taxable_amount=30000.0,
+				withholding_amount=3600.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+			),
+		]
+
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, expected_entries)
+
+		# expected_entries in pe
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=12.0,  # Updated rate
+				taxable_amount=50000.0,
+				withholding_amount=6000.0,
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=10.0,  # Updated rate
+				taxable_amount=90000.0,
+				withholding_amount=9000.0,
+				status="Over Withheld",
+				taxable_doctype="",
+				taxable_name="",
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+		]
+
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
+
+	def test_manual_tax_adjustment_with_rate_change(self):
+		"""Test manual tax adjustment where tax rate is changed during adjustment between payment and invoice"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier8", "Test Multi Invoice Category")
+
+		# Step 1: Create a Payment Entry with over withheld amount at 10% rate
+		pe = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier8", paid_amount=150000
+		)
+		pe.apply_tds = 1
+		pe.tax_withholding_category = "Test Multi Invoice Category"
+		pe.save().submit()
+
+		# Step 2: Create Purchase Invoice with partial adjustment and manual rate change
+		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=80000, do_not_save=True)
+		pi.tax_withholding_category = "Test Multi Invoice Category"
+		pi.override_tax_withholding_entries = 1  # Enable manual override
+		pi.tax_withholding_entries = []
+
+		# Entry 1: Partial adjustment with new tax rate (12% instead of 10%)
+		pi.append(
+			"tax_withholding_entries",
+			{
+				"tax_withholding_category": "Test Multi Invoice Category",
+				"party_type": "Supplier",
+				"party": "Test TDS Supplier8",
+				"tax_rate": 30.0,  # Changed rate from 10% to 12%
+				"taxable_amount": 50000.0,  # Partial taxable amount
+				"withholding_amount": 15000.0,  # 50000 * 12% = 6000
+				"taxable_doctype": "Purchase Invoice",
+				"taxable_name": pi.name,
+				"withholding_doctype": "Payment Entry",
+				"withholding_name": pe.name,
+				"conversion_rate": 1.0,
+			},
+		)
+
+		# Entry 2: Remaining taxable amount under withheld
+		pi.append(
+			"tax_withholding_entries",
+			{
+				"tax_withholding_category": "Test Multi Invoice Category",
+				"party_type": "Supplier",
+				"party": "Test TDS Supplier8",
+				"tax_rate": 12.0,  # Same new rate
+				"taxable_amount": 30000.0,  # Remaining taxable amount (80000 - 50000)
+				"withholding_amount": 3600.0,  # 30000 * 12% = 3600
+				"taxable_doctype": "Purchase Invoice",
+				"taxable_name": pi.name,
+				"withholding_doctype": "Purchase Invoice",
+				"withholding_name": pi.name,
+				"conversion_rate": 1.0,
+			},
+		)
+
+		pi.save()
+		pi.submit()
+
+		# Step 3: Verify the tax withholding entries
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=30.0,  # Updated rate
+				taxable_amount=50000.0,
+				withholding_amount=15000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			),
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=12.0,  # Updated rate
+				taxable_amount=30000.0,
+				withholding_amount=3600.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi.name,
+			),
+		]
+
+		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, expected_entries)
+
+		# expected_entries in pe
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="Test Multi Invoice Category",
+				party_type="Supplier",
+				party="Test TDS Supplier8",
+				tax_rate=30.0,  # Updated rate
+				taxable_amount=50000.0,
+				withholding_amount=15000.0,
+				status="Duplicate",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi.name,
+				withholding_doctype="Payment Entry",
+				withholding_name=pe.name,
+			)
+		]
+
+		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object

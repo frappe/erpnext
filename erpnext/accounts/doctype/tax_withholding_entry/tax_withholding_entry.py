@@ -180,6 +180,16 @@ class TaxWithholdingEntry(Document):
 				frappe.db.set_value(DOCTYPE, old_entry.name, balance_values)
 
 				# new entry
+				# For partial adjustments, we need to proportionally adjust both taxable and withholding amounts
+				values_to_update["withholding_amount"] = old_entry.withholding_amount * proportion
+				values_to_update["taxable_amount"] = old_entry.taxable_amount * proportion
+
+				# If tax rate has changed, recalculate taxable amount based on new rate
+				if self.tax_rate != old_entry.tax_rate:
+					values_to_update["taxable_amount"] = flt(
+						values_to_update["withholding_amount"] * 100 / self.tax_rate, 2
+					)
+
 				new_entry = frappe.copy_doc(old_entry)
 				new_entry.update(values_to_update)
 				new_entry.insert()
@@ -209,13 +219,8 @@ class TaxWithholdingEntry(Document):
 			f"{field_to_update}_date": self.get(f"{field_to_update}_date"),
 			"tax_rate": self.tax_rate,
 			"status": "Duplicate",
-			"under_withheld_reason": None,  # Ensure this is always None for Duplicate entries
+			"under_withheld_reason": None,
 		}
-
-		# For partial adjustments, we need to proportionally adjust both taxable and withholding amounts
-		if proportion < 1.0:
-			values["taxable_amount"] = old_entry.taxable_amount * proportion
-			values["withholding_amount"] = old_entry.withholding_amount * proportion
 
 		if field_to_update == "taxable":
 			values.update(
