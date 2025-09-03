@@ -312,3 +312,21 @@ def execute(filters=None):
 			row["docstatus"] = status_map.get(row["docstatus"], row["docstatus"])
 
 	return columns, data
+
+
+@frappe.whitelist()
+def repost_ledger(docs, delete_existing=0):
+	docs = json.loads(docs) if isinstance(docs, str) else docs
+	delete_existing = int(delete_existing)
+
+	ral = frappe.new_doc("Repost Accounting Ledger")
+	ral.company = frappe.defaults.get_user_default("Company")
+
+	ral.delete_cancelled_entries = delete_existing
+
+	for doc in docs:
+		ral.append("vouchers", {"voucher_type": doc.get("voucher_type"), "voucher_no": doc.get("voucher_no")})
+
+	ral.insert()
+	ral.submit()
+	return ral.name

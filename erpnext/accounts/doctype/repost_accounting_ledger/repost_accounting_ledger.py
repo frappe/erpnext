@@ -28,6 +28,7 @@ class RepostAccountingLedger(Document):
 		amended_from: DF.Link | None
 		company: DF.Link | None
 		delete_cancelled_entries: DF.Check
+		job_status: DF.Literal["Queued", "Completed", "Failed"]
 		vouchers: DF.Table[RepostAccountingLedgerItems]
 	# end: auto-generated types
 
