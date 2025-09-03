@@ -1,6 +1,8 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
@@ -82,6 +84,8 @@ class General_Payment_Ledger_Comparison:
 						gle.voucher_no,
 						gle.party_type,
 						gle.party,
+						gle.posting_date,
+						gle.docstatus,
 						outstanding,
 					)
 					.where(
@@ -120,6 +124,8 @@ class General_Payment_Ledger_Comparison:
 						ple.voucher_no,
 						ple.party_type,
 						ple.party,
+						ple.posting_date,
+						ple.docstatus,
 						Sum(ple.amount).as_("outstanding"),
 					)
 					.where(
@@ -175,6 +181,16 @@ class General_Payment_Ledger_Comparison:
 
 	def get_columns(self):
 		self.columns = []
+
+		self.columns.append(
+			dict(
+				label=_("Posting Date"),
+				fieldname="posting_date",
+				fieldtype="Date",
+				width="100",
+			)
+		)
+
 		self.columns.append(
 			dict(
 				label=_("Company"),
@@ -211,6 +227,15 @@ class General_Payment_Ledger_Comparison:
 				fieldtype="Dynamic Link",
 				options="voucher_type",
 				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Status"),
+				fieldname="docstatus",
+				fieldtype="Data",
+				width="80",
 			)
 		)
 
@@ -253,6 +278,16 @@ class General_Payment_Ledger_Comparison:
 			)
 		)
 
+		self.columns.append(
+			dict(
+				label=_("Difference"),
+				fieldname="difference",
+				fieldtype="Currency",
+				options="Company:company:default_currency",
+				width="100",
+			)
+		)
+
 	def run(self):
 		self.get_accounts()
 		self.generate_filters()
@@ -270,5 +305,10 @@ def execute(filters=None):
 
 	rpt = General_Payment_Ledger_Comparison(filters)
 	columns, data = rpt.run()
+
+	status_map = {0: "Draft", 1: "Submitted", 2: "Cancelled"}
+	for row in data:
+		if "docstatus" in row:
+			row["docstatus"] = status_map.get(row["docstatus"], row["docstatus"])
 
 	return columns, data
