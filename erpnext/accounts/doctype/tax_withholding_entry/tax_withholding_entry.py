@@ -108,8 +108,6 @@ class TaxWithholdingEntry(Document):
 	def is_withholding_different(self):
 		return self.withholding_doctype != self.parenttype or self.withholding_name != self.parent
 
-	# SUBMIT
-
 	def _process_tax_withholding_adjustments(self):
 		if self.status != "Settled":
 			return
@@ -278,7 +276,7 @@ class TaxWithholdingEntry(Document):
 
 		elif self.is_withholding_different:
 			if self.taxable_amount < 0:
-				# Special handling for return invoice cancellation (3-entry approach)
+				# Special handling for return invoice cancellation
 				self._handle_return_invoice_cancellation(filters)
 			else:
 				frappe.db.set_value(
@@ -293,7 +291,7 @@ class TaxWithholdingEntry(Document):
 				)
 
 	def _handle_return_invoice_cancellation(self, filters):
-		"""Handle return invoice cancellation with 3-entry approach for tax integrity"""
+		"""Handle return invoice cancellation"""
 		# Get old entries that need adjustment - inspired by _adjust_against_old_entries
 		old_entries = frappe.get_all(
 			DOCTYPE,
@@ -304,14 +302,13 @@ class TaxWithholdingEntry(Document):
 		docs_needing_reindex = set()
 
 		for entry in old_entries:
-			old_entry = frappe.get_doc(DOCTYPE, **entry)
 			frappe.db.set_value(
 				DOCTYPE,
-				entry["name"],
+				entry.name,
 				{
-					"taxable_doctype": old_entry.withholding_doctype,
-					"taxable_name": old_entry.withholding_name,
-					"taxable_date": old_entry.withholding_date,
+					"taxable_doctype": entry.withholding_doctype,
+					"taxable_name": entry.withholding_name,
+					"taxable_date": entry.withholding_date,
 				},
 			)
 
@@ -319,15 +316,15 @@ class TaxWithholdingEntry(Document):
 			if entry.withholding_amount == 0:
 				continue
 
-			new_entry = frappe.copy_doc(old_entry)
+			new_entry = frappe.copy_doc(frappe.get_doc(DOCTYPE, **entry))
 			values_to_update = {
-				"taxable_amount": abs(old_entry.taxable_amount),
+				"taxable_amount": abs(entry.taxable_amount),
 				"withholding_amount": 0,
 				"status": "Under Withheld",
 				"under_withheld_reason": "",
-				"taxable_doctype": old_entry.withholding_doctype,
-				"taxable_name": old_entry.withholding_name,
-				"taxable_date": old_entry.withholding_date,
+				"taxable_doctype": entry.withholding_doctype,
+				"taxable_name": entry.withholding_name,
+				"taxable_date": entry.withholding_date,
 				"withholding_doctype": "",
 				"withholding_name": "",
 				"withholding_date": None,
@@ -335,7 +332,7 @@ class TaxWithholdingEntry(Document):
 			new_entry.update(values_to_update)
 			new_entry.insert()
 
-			docs_needing_reindex.add((old_entry.withholding_doctype, old_entry.withholding_name))
+			docs_needing_reindex.add((entry.parent, entry.parenttype))
 
 		# Reset idx for documents that had new entries added (like _adjust_against_old_entries does)
 		_reset_idx(docs_needing_reindex)
@@ -387,7 +384,6 @@ class TaxWithholdingController:
 		self._process_withholding_entries()
 
 	def _generate_withholding_entries(self):
-		"""Handle automatic calculation mode - recalculate everything"""
 		# Clear existing entries
 		self.doc.tax_withholding_entries = []
 
@@ -470,7 +466,7 @@ class TaxWithholdingController:
 		open_entries = {"under_withheld": deque(), "over_withheld": deque()}
 
 		# Process historical entries
-		self._categorize_historical_entries(entries, linked_payments, category, open_entries)
+		self._categorize_historical_entries(entries, linked_payments, open_entries)
 
 		# Add current document as under withheld
 		current_entry = self._create_default_entry(category).update(
@@ -485,11 +481,10 @@ class TaxWithholdingController:
 
 		return open_entries
 
-	def _categorize_historical_entries(self, entries, linked_payments, category, open_entries):
+	def _categorize_historical_entries(self, entries, linked_payments, open_entries):
 		"""Categorize historical entries into under withheld and over withheld"""
 		for entry in entries:
 			if entry.status == "Under Withheld":
-				# Adjust for any overrides
 				open_entries["under_withheld"].append(entry)
 				continue
 
@@ -504,6 +499,10 @@ class TaxWithholdingController:
 				proportion = min(proportion, 1)
 				entry.withholding_amount *= proportion
 				open_entries["over_withheld"].appendleft(entry)
+				continue
+
+			# only linked payment entries are allowed
+			if entry.withholding_doctype in ["Payment Entry", "Journal Entry"]:
 				continue
 
 			open_entries["over_withheld"].append(entry)
@@ -847,28 +846,25 @@ class TaxWithholdingController:
 			tax_rate = category.tax_rate
 
 		# Process remaining under entries
-		constraint = self._process_remaining_entries(
-			under_entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type="under"
+		constraint = self._process_under_withheld_entries(
+			under_entries, category, tax_rate, constraint, default_obj, merged_entries
 		)
 
 		# Process remaining over entries
-		self._process_remaining_entries(
-			over_entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type="over"
+		self._process_over_withheld_entries(
+			over_entries, category, tax_rate, constraint, default_obj, merged_entries
 		)
 
 		return merged_entries
 
-	def _process_remaining_entries(
-		self, entries, category, tax_rate, constraint, default_obj, merged_entries, entry_type
+	def _process_under_withheld_entries(
+		self, under_entries, category, tax_rate, constraint, default_obj, merged_entries
 	):
 		"""
-		- Create remaining Over and Under Withheld Entries
-		- Adjust remaining Under Withheld Entries against current doc
-		- Create Over Withheld Entries for any excess for current document(Payment)
-
+		Process remaining Under Withheld Entries - adjust against current document
 		"""
-		while entries and constraint > 0:
-			entry = entries[0]
+		while under_entries and constraint > 0:
+			entry = under_entries[0]
 
 			value_direction = -1 if entry.taxable_amount < 0 else 1
 			amount_to_process = min(entry.taxable_amount, constraint)
@@ -884,45 +880,66 @@ class TaxWithholdingController:
 					"withholding_amount": self.compute_withheld_amount(
 						amount_to_process, tax_rate, round_off_tax_amount=category.round_off_tax_amount
 					),
+					"withholding_doctype": self.doc.doctype,
+					"withholding_name": self.doc.name,
+					"withholding_date": self.doc.posting_date,
 				}
 			)
 
-			if entry_type == "under":
-				# Under entries: Adjust new withholding from current doc.
-				merged_entry.update(
-					{
-						"withholding_doctype": self.doc.doctype,
-						"withholding_name": self.doc.name,
-						"withholding_date": self.doc.posting_date,
-					}
-				)
-				# Always include under entries
-				merged_entries.append(merged_entry)
-				# Update entry amounts
-				entry.taxable_amount -= amount_to_process
-				if flt(entry.taxable_amount * value_direction, self.precision) <= 0:
-					entries.popleft()
-			else:  # entry_type == "over"
-				# Over entries: adjust existing over-withheld amounts
-				merged_entry.update(
-					{
-						"withholding_doctype": entry.withholding_doctype,
-						"withholding_name": entry.withholding_name,
-						"withholding_date": entry.withholding_date,
-						"taxable_doctype": "",
-						"taxable_name": "",
-						"taxable_date": "",
-						"conversion_rate": self.get_conversion_rate(),
-					}
-				)
-				# Only include over entries related to current document
-				if self._should_include_entry(merged_entry):
-					merged_entries.append(merged_entry)
+			# Always include under entries
+			merged_entries.append(merged_entry)
 
-				# Update entry amounts - over entries update withholding_amount
-				entry.taxable_amount -= amount_to_process
-				if flt(entry.taxable_amount * value_direction, self.precision) <= 0:
-					entries.popleft()
+			# Update entry amounts
+			entry.taxable_amount -= amount_to_process
+			if flt(entry.taxable_amount * value_direction, self.precision) <= 0:
+				under_entries.popleft()
+
+			# Update constraint
+			constraint -= amount_to_process
+
+		return constraint
+
+	def _process_over_withheld_entries(
+		self, over_entries, category, tax_rate, constraint, default_obj, merged_entries
+	):
+		"""
+		Process remaining Over Withheld Entries - adjust existing over-withheld amounts
+		"""
+		while over_entries and constraint > 0:
+			entry = over_entries[0]
+
+			value_direction = -1 if entry.taxable_amount < 0 else 1
+			amount_to_process = min(entry.taxable_amount, constraint)
+
+			if amount_to_process * value_direction <= 0:
+				break
+
+			# Create base entry and calculate withholding amount
+			merged_entry = self._create_base_entry(entry, category, tax_rate, default_obj)
+			merged_entry.update(
+				{
+					"taxable_amount": flt(amount_to_process, self.precision),
+					"withholding_amount": self.compute_withheld_amount(
+						amount_to_process, tax_rate, round_off_tax_amount=category.round_off_tax_amount
+					),
+					"withholding_doctype": entry.withholding_doctype,
+					"withholding_name": entry.withholding_name,
+					"withholding_date": entry.withholding_date,
+					"taxable_doctype": "",
+					"taxable_name": "",
+					"taxable_date": "",
+					"conversion_rate": self.get_conversion_rate(),
+				}
+			)
+
+			# Only include over entries related to current document
+			if self._should_include_entry(merged_entry):
+				merged_entries.append(merged_entry)
+
+			# Update entry amounts
+			entry.taxable_amount -= amount_to_process
+			if flt(entry.taxable_amount * value_direction, self.precision) <= 0:
+				over_entries.popleft()
 
 			# Update constraint
 			constraint -= amount_to_process
