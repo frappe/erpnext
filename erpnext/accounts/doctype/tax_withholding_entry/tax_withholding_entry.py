@@ -30,7 +30,6 @@ class TaxWithholdingEntry(Document):
 		company: DF.Link | None
 		conversion_rate: DF.Float
 		currency: DF.Link | None
-		is_manual_override: DF.Check
 		lower_deduction_certificate: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
@@ -59,22 +58,6 @@ class TaxWithholdingEntry(Document):
 			status = self.get_status()
 
 		self.status = status
-
-	def set_manual_override(self):
-		"""
-		If tax amount is not as per tax rate and taxable amount, mark this entry as manual override.
-		Maintaining for amendment purposes, as this is not a user-facing field.
-		"""
-		self.is_manual_override = 0
-		if not (self.taxable_amount and self.tax_rate):
-			return
-
-		expected_withholding_amount = flt(
-			self.taxable_amount * self.tax_rate / 100, self.precision("withholding_amount")
-		)
-
-		if expected_withholding_amount != self.withholding_amount:
-			self.is_manual_override = 1
 
 	def get_status(self):
 		"""Get the current status of this entry"""
@@ -211,7 +194,6 @@ class TaxWithholdingEntry(Document):
 			f"{field_to_update}_name": self.get(f"{field_to_update}_name"),
 			f"{field_to_update}_date": self.get(f"{field_to_update}_date"),
 			"tax_rate": self.tax_rate,
-			"is_manual_override": bool(self.is_manual_override),
 			"status": "Duplicate",
 			"under_withheld_reason": None,  # Ensure this is always None for Duplicate entries
 		}
@@ -983,7 +965,6 @@ class TaxWithholdingController:
 		for entry in self.doc.tax_withholding_entries:
 			entry: TaxWithholdingEntry
 			entry.set_status(entry.status)
-			entry.set_manual_override()
 			entry.validate_adjustments()
 
 	def on_submit(self):
