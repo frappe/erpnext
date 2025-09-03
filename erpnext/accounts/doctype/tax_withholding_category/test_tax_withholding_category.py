@@ -2,6 +2,7 @@
 # See license.txt
 
 import datetime
+import re
 import unittest
 
 import frappe
@@ -2501,6 +2502,29 @@ class TestTaxWithholdingCategory(IntegrationTestCase):
 		self.validate_tax_withholding_entries("Purchase Invoice", pi2.name, expected_entries)
 
 		self.cleanup_invoices(invoices)
+
+	def test_manual_tax_withholding_validation(self):
+		"""Test validation when user manually overrides tax withholding entries with incorrect amounts"""
+		self.setup_party_with_category("Supplier", "Test TDS Supplier6", "Test Multi Invoice Category")
+
+		# Create purchase invoice with manual override
+		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=20000, do_not_save=True)
+		pi.apply_tds = 1
+		pi.tax_withholding_category = "Test Multi Invoice Category"
+		pi.ignore_tax_withholding_threshold = 1
+		pi.save()
+
+		pi.override_tax_withholding_entries = 1  # Enable manual override
+		pi.tax_withholding_entries[0].withholding_amount = 1500  # incorrect  tax withheld
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			r"Row #\d+: Withholding Amount \d+(\.\d+)? does not match calculated amount \d+(\.\d+)?",
+			pi.save,
+		)
+
+		pi.reload()
+		pi.tax_withholding_entries[0].taxable_amount = 15000  # correct taxable amount
+		pi.save()
 
 
 def create_purchase_invoice(**args):

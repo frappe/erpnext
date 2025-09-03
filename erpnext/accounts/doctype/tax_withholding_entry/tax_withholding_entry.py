@@ -13,8 +13,6 @@ from frappe.utils import flt
 import erpnext
 from erpnext.accounts.utils import get_advance_payment_doctypes
 
-# TODO: Should threshold check be reduced with purchase returns?
-
 DOCTYPE = "Tax Withholding Entry"
 
 
@@ -81,6 +79,22 @@ class TaxWithholdingEntry(Document):
 				_(
 					"Row #{0}: Cannot create entry with different taxable AND withholding document links."
 				).format(self.idx)
+			)
+
+	def validate_tax_withheld_amount(self):
+		if not self.withholding_name or self.under_withheld_reason:
+			return
+
+		precision = self.precision("withholding_amount")
+		precision_allowance = 1 / (10**precision)
+
+		tax_to_withheld = flt(self.taxable_amount * (self.tax_rate / 100), precision)
+		diff = abs(tax_to_withheld - self.withholding_amount)
+		if diff > precision_allowance:
+			frappe.throw(
+				_("Row #{0}: Withholding Amount {1} does not match calculated amount {2}.").format(
+					self.idx, self.withholding_amount, tax_to_withheld
+				)
 			)
 
 	@property
@@ -966,6 +980,7 @@ class TaxWithholdingController:
 			entry: TaxWithholdingEntry
 			entry.set_status(entry.status)
 			entry.validate_adjustments()
+			entry.validate_tax_withheld_amount()
 
 	def on_submit(self):
 		for entry in self.doc.tax_withholding_entries:
