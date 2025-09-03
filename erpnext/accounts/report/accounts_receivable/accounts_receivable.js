@@ -180,6 +180,11 @@ frappe.query_reports["Accounts Receivable"] = {
 			label: __("Group by Voucher"),
 			fieldtype: "Check",
 		},
+		{
+			fieldname: "handle_employee_advances",
+			label: __("Handle Employee Advances"),
+			fieldtype: "Check",
+		},
 	],
 
 	formatter: function (value, row, column, data, default_formatter) {
@@ -203,7 +208,10 @@ erpnext.utils.add_dimensions("Accounts Receivable", 9);
 function get_party_type_options() {
 	let options = [];
 	frappe.db
-		.get_list("Party Type", { filters: { account_type: "Receivable" }, fields: ["name"] })
+		.get_list("Party Type", {
+			or_filters: { name: "Employee", account_type: "Receivable" },
+			fields: ["name"],
+		})
 		.then((res) => {
 			res.forEach((party_type) => {
 				options.push(party_type.name);
