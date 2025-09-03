@@ -2083,6 +2083,9 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 	if filters.get("sales_orders"):
 		query = query.where(so_table.name.isin(filters.get("sales_orders")))
 
+	if filters.get("item_code"):
+		query = query.where(table.item_code == filters.get("item_code"))
+
 	if txt:
 		query = query.where(table.parent.like(f"%{txt}%"))
 

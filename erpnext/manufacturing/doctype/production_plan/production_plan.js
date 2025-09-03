@@ -34,6 +34,7 @@ frappe.ui.form.on("Production Plan", {
 				query: "erpnext.manufacturing.doctype.production_plan.production_plan.sales_order_query",
 				filters: {
 					company: frm.doc.company,
+					item_code: frm.doc.item_code,
 				},
 			};
 		});
