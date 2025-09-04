@@ -52,7 +52,8 @@ class StockEntryType(Document):
 			"Manufacture",
 			"Repack",
 			"Send to Subcontractor",
-			"Receive from Customer" "Disassemble",
+			"Receive from Customer",
+			"Disassemble",
 		]:
 			frappe.throw(f"Stock Entry Type {self.name} cannot be set as standard")
 

@@ -3761,6 +3761,7 @@ class StockEntry(StockController):
 					qty_to_decrease = {row.sre_name: 0 for row in result}
 					consumed_qty = {batch: 0 for batch in batch_list}
 					for row in result:
+						batches_to_remove = []
 						if serial_list:
 							frappe.delete_doc("Serial and Batch Entry", row.sbe_name)
 							qty_to_decrease[row.sre_name] += row.qty
@@ -3780,10 +3781,11 @@ class StockEntry(StockController):
 										"Serial and Batch Entry", row.sbe_name, "qty", sbe_qty - qty
 									)
 									qty_to_decrease[row.sre_name] += qty
-									batch_list.remove(batch)
+									batches_to_remove.append(batch)
 								else:
 									qty_to_decrease[row.sre_name] += row.qty
 									consumed_qty[batch] += row.qty
+							batch_list = [b for b in batch_list if b not in batches_to_remove]
 
 					for sre_name, qty in qty_to_decrease.items():
 						sre_qtys = frappe.get_value(
@@ -3931,7 +3933,6 @@ class StockEntry(StockController):
 						.orderby(table.creation)
 					)
 					sre_list = query.run(pluck="name")
-					print("Cancel", sre_list)
 
 					# Skip if no Stock Reservation Entries.
 					if not sre_list:

@@ -87,16 +87,13 @@ frappe.ui.form.on("Stock Entry", {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
 				if (
-					in_list(
-						[
-							"Material Transfer for Manufacture",
-							"Manufacture",
-							"Repack",
-							"Send to Subcontractor",
-							"Receive from Customer",
-						],
-						doc.purpose
-					)
+					[
+						"Material Transfer for Manufacture",
+						"Manufacture",
+						"Repack",
+						"Send to Subcontractor",
+						"Receive from Customer",
+					].includes(doc.purpose)
 				) {
 					filters = {
 						item_code: item.item_code,
