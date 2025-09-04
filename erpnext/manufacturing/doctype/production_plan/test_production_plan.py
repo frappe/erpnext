@@ -692,7 +692,6 @@ class TestProductionPlan(IntegrationTestCase):
 		mr = frappe.get_doc("Material Request", material_request)
 
 		self.assertTrue(mr.material_request_type, "Customer Provided")
-		self.assertTrue(mr.customer, "_Test Customer")
 
 	def test_production_plan_with_multi_level_bom(self):
 		"""

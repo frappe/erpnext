@@ -949,7 +949,6 @@ class ProductionPlan(Document):
 						"status": "Draft",
 						"company": self.company,
 						"material_request_type": material_request_type,
-						"customer": item_doc.customer or "",
 					}
 				)
 				material_request_list.append(material_request)
