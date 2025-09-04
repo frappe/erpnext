@@ -3761,11 +3761,11 @@ class StockEntry(StockController):
 					qty_to_decrease = {row.sre_name: 0 for row in result}
 					consumed_qty = {batch: 0 for batch in batch_list}
 					for row in result:
-						batches_to_remove = []
 						if serial_list:
 							frappe.delete_doc("Serial and Batch Entry", row.sbe_name)
 							qty_to_decrease[row.sre_name] += row.qty
 						elif batch_list and not serial_list:
+							batches_to_remove = []
 							for batch in batch_list:
 								sabb_qty = abs(
 									frappe.get_value(
