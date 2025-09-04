@@ -81,7 +81,6 @@ frappe.query_reports["General and Payment Ledger Comparison"] = {
 						async: true,
 						callback: function (r) {
 							if (r.message) {
-								console.log(r.message);
 								let alert_message =
 									`<a href='/app/repost-accounting-ledger/${r.message}' target='_blank'>` +
 									__("Repost Initiated, click to view status") +
