@@ -261,11 +261,13 @@ class SubcontractingController(StockController):
 		self.__changed_name.extend(item_dict.keys())
 
 	def __get_backflush_based_on(self):
-		self.backflush_based_on = frappe.db.get_single_value(
-			"Buying Settings"
+		self.backflush_based_on = (
+			frappe.db.get_single_value(
+				"Buying Settings",
+				"backflush_raw_materials_of_subcontract_based_on",
+			)
 			if self.subcontract_data.order_doctype == "Subcontracting Order"
-			else "Selling Settings",
-			"backflush_raw_materials_of_subcontract_based_on",
+			else "Material Transferred for Subcontract"
 		)
 
 	def initialized_fields(self):
@@ -1596,7 +1598,7 @@ def make_rm_stock_entry_inward(subcontract_inward_order, target_doc=None):
 			ignore_child_tables=True,
 		)
 
-		stock_entry.purpose = "Material Receipt"
+		stock_entry.purpose = "Receive from Customer"
 		stock_entry.subcontracting_inward_order = subcontract_inward_order.name
 
 		stock_entry.set_stock_entry_type()
@@ -1647,7 +1649,8 @@ def make_rm_return(subcontract_inward_order, target_doc=None):
 		ignore_child_tables=True,
 	)
 
-	stock_entry.stock_entry_type = "Return Raw Material to Customer"
+	stock_entry.purpose = "Return Raw Material to Customer"
+	stock_entry.set_stock_entry_type()
 	stock_entry.subcontracting_inward_order = subcontract_inward_order.name
 
 	for rm_item in rm_items:
@@ -1691,7 +1694,8 @@ def make_subcontracting_delivery(subcontracting_inward_order, target_doc=None):
 		ignore_child_tables=True,
 	)
 
-	stock_entry.stock_entry_type = "Subcontracting Delivery"
+	stock_entry.purpose = "Subcontracting Delivery"
+	stock_entry.set_stock_entry_type()
 	stock_entry.subcontracting_inward_order = subcontracting_inward_order.name
 	scio_details = []
 
@@ -1711,12 +1715,17 @@ def make_subcontracting_delivery(subcontracting_inward_order, target_doc=None):
 				"from_warehouse": fg_item.delivery_warehouse,
 				"stock_uom": fg_item.stock_uom,
 				"scio_detail": fg_item.name,
+				"is_finished_item": 1,
 			}
 		}
 
 		stock_entry.add_to_stock_entry_detail(items_dict)
 
-	if subcontracting_inward_order.scrap_items and scio_details:
+	if (
+		frappe.get_single_value("Selling Settings", "deliver_scrap_items")
+		and subcontracting_inward_order.scrap_items
+		and scio_details
+	):
 		scrap_items = [
 			scrap_item
 			for scrap_item in subcontracting_inward_order.scrap_items
@@ -1736,6 +1745,54 @@ def make_subcontracting_delivery(subcontracting_inward_order, target_doc=None):
 				}
 
 				stock_entry.add_to_stock_entry_detail(items_dict)
+
+	if target_doc:
+		return stock_entry
+	else:
+		return stock_entry.as_dict()
+
+
+@frappe.whitelist()
+def make_subcontracting_return(subcontracting_inward_order, target_doc=None):
+	subcontracting_inward_order = frappe.get_doc("Subcontracting Inward Order", subcontracting_inward_order)
+	fg_items = subcontracting_inward_order.items
+
+	if target_doc and target_doc.get("items"):
+		target_doc.items = []
+
+	stock_entry = get_mapped_doc(
+		"Subcontracting Inward Order",
+		subcontracting_inward_order.name,
+		{
+			"Subcontracting Inward Order": {
+				"doctype": "Stock Entry",
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+				"field_map": {"name": "subcontracting_inward_order"},
+			},
+		},
+		target_doc,
+		ignore_child_tables=True,
+	)
+
+	stock_entry.purpose = "Subcontracting Return"
+	stock_entry.set_stock_entry_type()
+
+	for fg_item in fg_items:
+		qty = fg_item.delivered_qty - fg_item.returned_qty
+		if qty < 0:
+			continue
+
+		items_dict = {
+			fg_item.item_code: {
+				"qty": qty,
+				"stock_uom": fg_item.stock_uom,
+				"scio_detail": fg_item.name,
+			}
+		}
+
+		stock_entry.add_to_stock_entry_detail(items_dict)
 
 	if target_doc:
 		return stock_entry

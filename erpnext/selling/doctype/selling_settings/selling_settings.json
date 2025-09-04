@@ -40,11 +40,6 @@
   "experimental_section",
   "use_legacy_js_reactivity",
   "subcontracting_settings_tab",
-  "backflush_raw_materials_of_subcontract_based_on",
-  "column_break_q9qf",
-  "over_receipt_allowance",
-  "section_break_zwje",
-  "auto_create_subcontracting_inward_order",
   "section_break_zwh6",
   "allow_delivery_of_overproduced_qty",
   "column_break_mla9",
@@ -241,36 +236,6 @@
    "fieldname": "allow_zero_qty_in_quotation",
    "fieldtype": "Check",
    "label": "Allow 0 Qty in Quotation (Unit Price Items)"
-  },
-  {
-   "default": "BOM",
-   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
-   "fieldtype": "Select",
-   "label": "Backflush Raw Materials of Subcontract Based On",
-   "options": "BOM\nMaterial Received for Subcontract"
-  },
-  {
-   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
-   "description": "Percentage you are allowed to receive more against the quantity required. For example: If you require 100 units. and your Allowance is 10% then you are allowed to receive 110 units.",
-   "fieldname": "over_receipt_allowance",
-   "fieldtype": "Float",
-   "label": "Over Receipt Allowance (%)"
-  },
-  {
-   "default": "0",
-   "description": "Subcontracting Inward Order (Draft) will be auto-created on submission of Sales Order.",
-   "fieldname": "auto_create_subcontracting_inward_order",
-   "fieldtype": "Check",
-   "label": "Auto Create Subcontracting Inward Order"
-  },
-  {
-   "fieldname": "section_break_zwje",
-   "fieldtype": "Section Break",
-   "label": "Auto Creation"
-  },
-  {
-   "fieldname": "column_break_q9qf",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_zwh6",

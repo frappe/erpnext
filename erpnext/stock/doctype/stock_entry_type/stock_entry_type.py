@@ -21,7 +21,6 @@ class StockEntryType(Document):
 		add_to_transit: DF.Check
 		is_standard: DF.Check
 		purpose: DF.Literal[
-			"",
 			"Material Issue",
 			"Material Receipt",
 			"Material Transfer",

@@ -262,6 +262,7 @@
   },
   {
    "allow_in_quick_entry": 1,
+   "description": "Only to be used for Subcontracting Inward.",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -273,7 +274,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-08-06 16:22:27.186120",
+ "modified": "2025-09-02 17:25:51.811844",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

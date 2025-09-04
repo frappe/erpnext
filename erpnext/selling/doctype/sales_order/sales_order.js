@@ -1013,7 +1013,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					if (
 						flt(doc.per_delivered) < 100 &&
 						(order_is_a_sale || order_is_a_custom_sale) &&
-						allow_delivery
+						allow_delivery &&
+						!doc.is_subcontracted
 					) {
 						if (frappe.model.can_create("Delivery Note")) {
 							this.frm.add_custom_button(
@@ -1033,7 +1034,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					// sales invoice
-					if (flt(doc.per_billed) < 100 && frappe.model.can_create("Sales Invoice")) {
+					if (
+						(flt(doc.per_billed) < 100 && frappe.model.can_create("Sales Invoice")) ||
+						doc.is_subcontracted
+					) {
 						this.frm.add_custom_button(
 							__("Sales Invoice"),
 							() => me.make_sales_invoice(),
@@ -1045,7 +1049,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					if (
 						(!doc.order_type ||
 							((order_is_a_sale || order_is_a_custom_sale) && flt(doc.per_delivered) < 100)) &&
-						frappe.model.can_create("Material Request")
+						frappe.model.can_create("Material Request") &&
+						!doc.is_subcontracted
 					) {
 						if (!doc.is_subcontracted) {
 							this.frm.add_custom_button(
@@ -1062,7 +1067,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					// Make Purchase Order
-					if (!this.frm.doc.is_internal_customer && frappe.model.can_create("Purchase Order")) {
+					if (
+						!this.frm.doc.is_internal_customer &&
+						frappe.model.can_create("Purchase Order") &&
+						!doc.is_subcontracted
+					) {
 						this.frm.add_custom_button(
 							__("Purchase Order"),
 							() => this.make_purchase_order(),

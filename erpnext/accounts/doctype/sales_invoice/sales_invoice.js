@@ -191,6 +191,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		if (this.frm.doc.is_created_using_pos && !this.frm.doc.is_return) {
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 		}
+
+		if (me.frm.doc.has_subcontracted) {
+			me.frm.set_df_property("update_stock", "read_only", 1);
+			me.frm.toggle_display("update_stock", 0);
+		}
 	}
 
 	make_invoice_discounting() {

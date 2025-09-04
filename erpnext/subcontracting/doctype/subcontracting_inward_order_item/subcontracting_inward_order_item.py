@@ -52,19 +52,3 @@ class SubcontractingInwardOrderItem(Document):
 		self.db_set("produced_qty", result.produced_qty)
 		self.db_set("process_loss_qty", result.process_loss_qty)
 		self.save()
-
-	def update_delivered_qty(self, scio_detail):
-		table = frappe.qb.DocType("Stock Entry Detail")
-		query = (
-			frappe.qb.from_(table)
-			.select(Sum(table.transfer_qty).as_("delivered_qty"))
-			.where(
-				(table.docstatus == 1)
-				& (table.stock_entry_type == "Subcontracting Inward")
-				& (table.subcontracting_inward_order_item == self.name)
-			)
-		)
-		result = query.run(as_dict=True)[0]
-
-		self.db_set("delivered_qty", result.delivered_qty or 0.0)
-		self.save()

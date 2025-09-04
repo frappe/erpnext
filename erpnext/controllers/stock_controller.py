@@ -95,9 +95,11 @@ class StockController(AccountsController):
 			"Stock Reconciliation",
 		]:
 			for item in self.get("items"):
-				if (item.get("valuation_rate") == 0 or item.get("incoming_rate") == 0) and item.get(
-					"allow_zero_valuation_rate"
-				) == 0:
+				if (
+					(item.get("valuation_rate") == 0 or item.get("incoming_rate") == 0)
+					and item.get("allow_zero_valuation_rate") == 0
+					and frappe.get_value("Item", item.item_code, "is_stock_item")
+				):
 					frappe.toast(
 						_(
 							"Row #{0}: Item {1} has zero rate but 'Allow Zero Valuation Rate' is not enabled."
@@ -1264,19 +1266,12 @@ class StockController(AccountsController):
 		for d in self.get("items"):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.get_cached_value("Item", d.item_code, "is_customer_provided_item") or (
-				(
-					d.get("is_finished_item")
-					or d.get("is_scrap_item")
-					or (
-						frappe.db.exists("Subcontracting Inward Order Item", d.get("scio_detail"))
-						and self.stock_entry_type == "Subcontracting Delivery"
-					)
-				)
+				(d.get("is_finished_item") or d.get("is_scrap_item"))
 				and d.get("valuation_rate") == 0
 				and self.get("subcontracting_inward_order")
 			):
 				d.allow_zero_valuation_rate = 1
-			elif self.get("stock_entry_type") == "Receive from Customer":
+			elif self.get("purpose") == "Receive from Customer":
 				frappe.throw(
 					_("Item {0} should be a customer provided item.").format(frappe.bold(d.item_code))
 				)

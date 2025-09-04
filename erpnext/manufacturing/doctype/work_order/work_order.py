@@ -185,6 +185,8 @@ class WorkOrder(Document):
 
 		if not self.get("subcontracting_inward_order"):
 			self.validate_sales_order()
+		else:
+			self.validate_self_rm_warehouse()
 
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
@@ -362,6 +364,15 @@ class WorkOrder(Document):
 					self.validate_work_order_against_so()
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
+
+	def validate_self_rm_warehouse(self):
+		for item in [item for item in self.required_items if not item.is_customer_provided_item]:
+			if frappe.get_value("Warehouse", item.source_warehouse, "customer"):
+				frappe.throw(
+					_("Row #{0}: Source Warehouse {1} for item {2} cannot be a customer warehouse.").format(
+						item.idx, frappe.bold(item.source_warehouse), frappe.bold(item.item_code)
+					)
+				)
 
 	def check_sales_order_on_hold_or_close(self):
 		status = frappe.db.get_value("Sales Order", self.sales_order, "status")
@@ -1392,6 +1403,11 @@ class WorkOrder(Document):
 							"operation_row_id": item.operation_row_id,
 						},
 					)
+
+					if self.subcontracting_inward_order and not frappe.get_value(
+						"Item", item.item_code, "is_customer_provided_item"
+					):
+						self.required_items[-1].source_warehouse = item.default_warehouse
 
 					if not self.project:
 						self.project = item.get("project")

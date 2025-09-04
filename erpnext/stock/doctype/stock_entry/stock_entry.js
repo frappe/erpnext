@@ -215,7 +215,7 @@ frappe.ui.form.on("Stock Entry", {
 	refresh: function (frm) {
 		frm.trigger("get_items_from_transit_entry");
 
-		if (!frm.doc.docstatus) {
+		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
 			frm.trigger("validate_purpose_consumption");
 			frm.add_custom_button(
 				__("Material Request"),
@@ -300,7 +300,7 @@ frappe.ui.form.on("Stock Entry", {
 			}
 		}
 
-		if (frm.doc.docstatus === 0) {
+		if (frm.doc.docstatus === 0 && !frm.doc.subcontracting_inward_order) {
 			frm.add_custom_button(
 				__("Purchase Invoice"),
 				function () {
@@ -368,7 +368,11 @@ frappe.ui.form.on("Stock Entry", {
 			);
 		}
 
-		if (frm.doc.docstatus === 0 && frm.doc.purpose == "Material Issue") {
+		if (
+			frm.doc.docstatus === 0 &&
+			frm.doc.purpose == "Material Issue" &&
+			!frm.doc.subcontracting_inward_order
+		) {
 			frm.add_custom_button(
 				__("Expired Batches"),
 				function () {
@@ -422,7 +426,12 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.events.set_route_options_for_new_doc(frm);
 
-		if (frm.doc.subcontracting_inward_order && frm.doc.stock_entry_type == "Subcontracting Delivery") {
+		if (
+			frm.doc.subcontracting_inward_order &&
+			["Return Raw Material to Customer", "Subcontracting Return", "Subcontracting Delivery"].includes(
+				frm.doc.purpose
+			)
+		) {
 			frm.set_df_property("items", "cannot_add_rows", true);
 		}
 	},
@@ -450,7 +459,7 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	get_items_from_transit_entry: function (frm) {
-		if (frm.doc.docstatus === 0) {
+		if (frm.doc.docstatus === 0 && !frm.doc.subcontracting_inward_order) {
 			frm.add_custom_button(
 				__("Transit Entry"),
 				function () {
@@ -618,7 +627,8 @@ frappe.ui.form.on("Stock Entry", {
 				"Material Transfer",
 				"Send to Subcontractor",
 				"Receive from Customer",
-			].includes(frm.doc.purpose)
+			].includes(frm.doc.purpose) &&
+			!frm.doc.subcontracting_inward_order
 		) {
 			frm.add_custom_button(
 				__("Bill of Materials"),
@@ -1086,16 +1096,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			};
 		});
 
-		this.frm.set_query("subcontracting_inward_order", function () {
-			return {
-				filters: {
-					docstatus: 1,
-					company: me.frm.doc.company,
-					status: ["not in", ["Completed", "Closed"]],
-				},
-			};
-		});
-
 		if (me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 		}
@@ -1120,6 +1120,24 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: "supplier", doctype: "Supplier" };
 		this.frm.set_query("supplier_address", erpnext.queries.address_query);
+
+		if (!this.frm.doc.subcontracting_inward_order) {
+			this.frm.set_query("stock_entry_type", function () {
+				return {
+					filters: {
+						purpose: [
+							"not in",
+							[
+								"Receive from Customer",
+								"Return Raw Material to Customer",
+								"Subcontracting Delivery",
+								"Subcontracting Return",
+							],
+						],
+					},
+				};
+			});
+		}
 	}
 
 	onload_post_render() {

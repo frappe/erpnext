@@ -151,61 +151,55 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 });
 
 erpnext.selling.SubcontractingInwardOrderController = class SubcontractingInwardOrderController {
-	setup() {
-		this.frm.custom_make_buttons = {
-			"Subcontracting Delivery": "Subcontracting Delivery",
-			"Stock Entry": "Material from Customer",
-		};
-	}
-
 	refresh(doc) {
-		if (doc.docstatus == 1) {
-			if (doc.status != "Closed") {
-				if (
-					doc.received_items.some(
-						(item) => item.received_qty - item.work_order_qty - item.returned_qty > 0
-					)
-				) {
-					this.frm.add_custom_button(
-						__("Raw Materials to Customer"),
-						() => this.frm.trigger("make_rm_return"),
-						__("Return")
-					);
-				}
-
+		if (doc.docstatus == 1 && doc.status != "Closed") {
+			const is_raw_materials_received = doc.received_items.some((item) =>
+				item.is_customer_provided_item
+					? item.received_qty - item.work_order_qty - item.returned_qty > 0
+					: false
+			);
+			if (is_raw_materials_received) {
+				this.frm.add_custom_button(
+					__("Raw Materials to Customer"),
+					() => this.frm.trigger("make_rm_return"),
+					__("Return")
+				);
 				if (doc.per_produced < 100) {
 					this.frm.add_custom_button(
 						__("Work Order"),
 						() => this.frm.trigger("make_work_order"),
 						__("Create")
 					);
-					this.frm.add_custom_button(
-						__("Material from Customer"),
-						this.make_stock_entry,
-						__("Receive")
-					);
 				}
-				if (doc.per_delivered < 100) {
-					this.frm.add_custom_button(
-						__("Subcontracting Delivery"),
-						this.make_subcontracting_delivery,
-						__("Create")
-					);
-				}
-				if (doc.per_delivered > 0 && doc.per_returned < 100) {
-					this.frm.add_custom_button(
-						__("Finished Goods Return"),
-						this.make_fg_return,
-						__("Return")
-					);
-				}
-				if (doc.per_produced < 100) {
-					this.frm.page.set_inner_btn_group_as_primary(__("Receive"));
-				} else if (doc.per_delivered < 100) {
-					this.frm.page.set_inner_btn_group_as_primary(__("Create"));
-				} else if (doc.per_delivered >= 100 && doc.per_returned < 100) {
-					this.frm.page.set_inner_btn_group_as_primary(__("Return"));
-				}
+			}
+
+			if (doc.per_produced < 100) {
+				this.frm.add_custom_button(
+					__("Material from Customer"),
+					this.make_stock_entry,
+					__("Receive")
+				);
+			}
+			if (doc.per_produced > 0 && doc.per_delivered < 100) {
+				this.frm.add_custom_button(
+					__("Subcontracting Delivery"),
+					this.make_subcontracting_delivery,
+					__("Create")
+				);
+			}
+			if (doc.per_delivered > 0 && doc.per_returned < 100) {
+				this.frm.add_custom_button(
+					__("Finished Goods Return"),
+					this.make_subcontracting_return,
+					__("Return")
+				);
+			}
+			if (doc.per_produced < 100) {
+				this.frm.page.set_inner_btn_group_as_primary(__("Receive"));
+			} else if (doc.per_delivered < 100) {
+				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+			} else if (doc.per_delivered >= 100 && doc.per_returned < 100) {
+				this.frm.page.set_inner_btn_group_as_primary(__("Return"));
 			}
 		}
 	}

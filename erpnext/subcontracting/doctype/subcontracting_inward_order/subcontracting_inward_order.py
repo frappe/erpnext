@@ -8,7 +8,6 @@ from frappe.utils import comma_and, flt, get_link_to_form
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
-from erpnext.stock.stock_balance import update_bin_qty
 
 
 class SubcontractingInwardOrder(SubcontractingController):
@@ -39,7 +38,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 		customer_name: DF.Data
 		customer_warehouse: DF.Link
 		items: DF.Table[SubcontractingInwardOrderItem]
-		letter_head: DF.Link | None
 		naming_series: DF.Literal["SCI-ORD-.YYYY.-"]
 		per_delivered: DF.Percent
 		per_process_loss: DF.Percent
@@ -50,7 +48,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 		received_items: DF.Table[SubcontractingInwardOrderReceivedItem]
 		sales_order: DF.Link
 		scrap_items: DF.Table[SubcontractingInwardOrderScrapItem]
-		select_print_heading: DF.Link | None
 		service_items: DF.Table[SubcontractingInwardOrderServiceItem]
 		set_delivery_warehouse: DF.Link | None
 		status: DF.Literal["Draft", "Open", "Ongoing", "Produced", "Delivered", "Cancelled", "Closed"]

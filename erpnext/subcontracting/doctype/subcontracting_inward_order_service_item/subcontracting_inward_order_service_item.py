@@ -25,6 +25,7 @@ class SubcontractingInwardOrderServiceItem(Document):
 		qty: DF.Float
 		rate: DF.Currency
 		sales_order_item: DF.Data | None
+		uom: DF.Link
 	# end: auto-generated types
 
 	pass

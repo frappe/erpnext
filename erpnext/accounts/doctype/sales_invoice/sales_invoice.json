@@ -31,6 +31,7 @@
   "amended_from",
   "is_created_using_pos",
   "pos_closing_entry",
+  "has_subcontracted",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -2229,6 +2230,14 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_subcontracted",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Subcontracted",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

@@ -37,10 +37,6 @@
   "per_raw_material_returned",
   "per_process_loss",
   "per_returned",
-  "printing_settings_section",
-  "select_print_heading",
-  "column_break_43",
-  "letter_head",
   "tab_connections"
  ],
  "fields": [
@@ -132,7 +128,6 @@
   },
   {
    "allow_bulk_edit": 1,
-   "allow_on_submit": 1,
    "depends_on": "sales_order",
    "fieldname": "items",
    "fieldtype": "Table",
@@ -141,8 +136,6 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "depends_on": "sales_order",
    "fieldname": "service_items_section",
    "fieldtype": "Section Break",
    "label": "Service Items"
@@ -161,20 +154,19 @@
    "depends_on": "received_items",
    "fieldname": "raw_materials_received_section",
    "fieldtype": "Section Break",
-   "label": "Raw Materials Received"
+   "label": "Raw Materials Required"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "received_items",
    "fieldtype": "Table",
-   "label": "Received Items",
+   "label": "Required Items",
    "no_copy": 1,
    "options": "Subcontracting Inward Order Received Item",
    "print_hide": 1,
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "order_status_section",
    "fieldtype": "Section Break",
    "label": "Order Status"
@@ -205,37 +197,6 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "printing_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Printing Settings",
-   "print_hide": 1,
-   "print_width": "50%",
-   "width": "50%"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "select_print_heading",
-   "fieldtype": "Link",
-   "label": "Print Heading",
-   "no_copy": 1,
-   "options": "Print Heading",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
-   "fieldname": "column_break_43",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "letter_head",
-   "fieldtype": "Link",
-   "label": "Letter Head",
-   "options": "Letter Head",
-   "print_hide": 1
   },
   {
    "fieldname": "tab_other_info",
@@ -333,7 +294,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-28 12:55:04.826521",
+ "modified": "2025-09-02 18:02:56.552746",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order",

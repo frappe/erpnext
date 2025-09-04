@@ -212,9 +212,7 @@ class SalesOrder(SellingController):
 		result = True
 
 		if self.is_subcontracted:
-			if frappe.db.exists(
-				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": ["!=", 2]}
-			):
+			if frappe.db.exists("Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}):
 				result = False
 
 		return result
@@ -501,13 +499,6 @@ class SalesOrder(SellingController):
 
 		if self.get("reserve_stock") and not self.get("is_subcontracted"):
 			self.create_stock_reservation_entries()
-
-		self.auto_create_subcontracting_inward_order()
-
-	def auto_create_subcontracting_inward_order(self):
-		if self.is_subcontracted:
-			if frappe.db.get_single_value("Selling Settings", "auto_create_subcontracting_inward_order"):
-				make_subcontracting_inward_order(self.name, save=True, notify=True)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -1398,6 +1389,46 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 		postprocess,
 		ignore_permissions=ignore_permissions,
 	)
+
+	if frappe.get_value("Sales Order", source_name, "is_subcontracted"):
+		parent = frappe.qb.DocType("Subcontracting Inward Order")
+		child = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+		query = (
+			frappe.qb.from_(parent)
+			.join(child)
+			.on(parent.name == child.parent)
+			.select(
+				child.required_qty,
+				child.consumed_qty,
+				child.billed_qty,
+				child.rm_item_code,
+				child.stock_uom,
+				child.name,
+			)
+			.where(
+				(parent.docstatus == 1)
+				& (parent.sales_order == source_name)
+				& (child.is_customer_provided_item == 0)
+			)
+		)
+		result = query.run(as_dict=True)
+
+		if result:
+			idx = len(doclist.items) + 1
+			for item in result:
+				if (qty := max(item.required_qty, item.consumed_qty) - item.billed_qty) > 0:
+					doclist.append(
+						"items",
+						{
+							"item_code": item.rm_item_code,
+							"qty": qty,
+							"uom": item.stock_uom,
+							"scio_detail": item.name,
+						},
+					)
+					doclist.process_item_selection(idx)
+					idx += 1
+			doclist.has_subcontracted = 1
 
 	automatically_fetch_payment_terms = cint(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")

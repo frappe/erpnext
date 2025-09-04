@@ -99,7 +99,8 @@
    "label": "Source Warehouse",
    "oldfieldname": "s_warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only_depends_on": "eval:in_list([\"Subcontracting Delivery\", \"Return Raw Material to Customer\"], parent.purpose)"
   },
   {
    "fieldname": "col_break1",
@@ -646,7 +647,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-24 12:14:20.751423",
+ "modified": "2025-09-04 15:10:35.285928",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
