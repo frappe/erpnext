@@ -50,7 +50,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-02 06:24:47.003760",
+ "modified": "2025-09-02 05:25:04.999360",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",
@@ -71,6 +71,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "account_category_name, description",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

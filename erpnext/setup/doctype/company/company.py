@@ -15,6 +15,7 @@ from frappe.utils import cint, formatdate, get_link_to_form, get_timestamp, toda
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.accounts.doctype.account_category.account_category import create_default_account_categories
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 
@@ -246,6 +247,7 @@ class Company(NestedSet):
 		):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
+				create_default_account_categories()
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
@@ -681,7 +683,7 @@ class Company(NestedSet):
 			frappe.db.sql("delete from tabBOM where company=%s", self.name)
 			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
 				frappe.db.sql(
-					"delete from `tab{}` where parent in ({})" "".format(dt, ", ".join(["%s"] * len(boms))),
+					"delete from `tab{}` where parent in ({})".format(dt, ", ".join(["%s"] * len(boms))),
 					tuple(boms),
 				)
 
