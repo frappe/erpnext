@@ -795,10 +795,7 @@ class DependencyResolver:
 
 		validator = DependencyValidator(self.template)
 		result = validator.validate()
-
-		if result.issues:
-			error_messages = [str(issue) for issue in result.issues]
-			frappe.throw("<br><br>".join(error_messages))
+		result.notify_user()
 
 		self.dependencies = validator.dependencies
 

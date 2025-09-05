@@ -6,6 +6,7 @@ import json
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, ClassVar
 
 import frappe
@@ -36,17 +37,47 @@ class ValidationIssue:
 
 @dataclass
 class ValidationResult:
-	"""Result of validation containing all issues"""
-
 	issues: list[ValidationIssue] = field(default_factory=list)
+	warnings: list[ValidationIssue] = field(default_factory=list)
 
 	@property
 	def is_valid(self) -> bool:
 		return len(self.issues) == 0
 
+	@property
+	def has_warnings(self) -> bool:
+		return len(self.warnings) > 0
+
+	@property
+	def error_count(self) -> int:
+		return len(self.issues)
+
+	@property
+	def warning_count(self) -> int:
+		return len(self.warnings)
+
 	def merge(self, other: "ValidationResult") -> "ValidationResult":
 		self.issues.extend(other.issues)
+		self.warnings.extend(other.warnings)
 		return self
+
+	def add_error(self, issue: ValidationIssue) -> None:
+		"""Add a critical error that prevents functionality"""
+		self.issues.append(issue)
+
+	def add_warning(self, issue: ValidationIssue) -> None:
+		"""Add a warning for recommendatory validation"""
+		self.warnings.append(issue)
+
+	def notify_user(self) -> None:
+		warnings = "<br><br>".join(str(w) for w in self.warnings)
+		errors = "<br><br>".join(str(e) for e in self.issues)
+
+		if warnings:
+			frappe.msgprint(warnings, title=_("Warnings"), indicator="orange")
+
+		if errors:
+			frappe.throw(errors, title=_("Errors"))
 
 
 class TemplateValidator:
@@ -75,10 +106,6 @@ class TemplateValidator:
 
 		return result
 
-	def get_error_messages(self) -> list[str]:
-		result = self.validate()
-		return [str(issue) for issue in result.issues]
-
 
 class Validator(ABC):
 	@abstractmethod
@@ -90,39 +117,37 @@ class StandardTemplateValidator(Validator):
 	PROTECTED_FIELDS: ClassVar[list[str]] = ["template_name", "report_type", "module"]
 
 	def validate(self, template) -> ValidationResult:
-		issues = []
+		result = ValidationResult()
 
 		if not template.is_standard or not hasattr(template, "_doc_before_save"):
-			return ValidationResult(issues)
+			return result
 
 		if not template._doc_before_save or not template._doc_before_save.is_standard:
-			return ValidationResult(issues)
+			return result
 
 		for field_name in self.PROTECTED_FIELDS:
 			if template.get(field_name) != template._doc_before_save.get(field_name):
-				issues.append(
+				result.add_error(
 					ValidationIssue(
 						message=f"Cannot modify {field_name.replace('_', ' ').title()} in standard template",
 					)
 				)
 
-		return ValidationResult(issues)
+		return result
 
 
 class TemplateStructureValidator(Validator):
 	def validate(self, template) -> ValidationResult:
-		issues = []
+		result = ValidationResult()
 
-		issues.extend(self._validate_reference_codes(template))
+		result.merge(self._validate_reference_codes(template))
+		result.merge(self._validate_required_fields(template))
+		result.merge(self._validate_orphaned_references(template))
 
-		issues.extend(self._validate_required_fields(template))
+		return result
 
-		issues.extend(self._validate_orphaned_references(template))
-
-		return ValidationResult(issues)
-
-	def _validate_reference_codes(self, template) -> list[ValidationIssue]:
-		issues = []
+	def _validate_reference_codes(self, template) -> ValidationResult:
+		result = ValidationResult()
 		used_codes = set()
 
 		for row in template.rows:
@@ -133,7 +158,7 @@ class TemplateStructureValidator(Validator):
 
 			# Check format
 			if not re.match(r"^[A-Za-z][A-Za-z0-9_-]*$", ref_code):
-				issues.append(
+				result.add_error(
 					ValidationIssue(
 						message=f"Invalid line reference format: '{ref_code}'. Must start with letter and contain only letters, numbers, underscores, and hyphens",
 						row_idx=row.idx,
@@ -142,7 +167,7 @@ class TemplateStructureValidator(Validator):
 
 			# Check uniqueness
 			if ref_code in used_codes:
-				issues.append(
+				result.add_error(
 					ValidationIssue(
 						message=f"Duplicate line reference: '{ref_code}'",
 						row_idx=row.idx,
@@ -150,15 +175,15 @@ class TemplateStructureValidator(Validator):
 				)
 			used_codes.add(ref_code)
 
-		return issues
+		return result
 
-	def _validate_required_fields(self, template) -> list[ValidationIssue]:
-		issues = []
+	def _validate_required_fields(self, template) -> ValidationResult:
+		result = ValidationResult()
 
 		for row in template.rows:
 			# Balance type required
 			if row.data_source == "Account Data" and not row.balance_type:
-				issues.append(
+				result.add_error(
 					ValidationIssue(
 						message="Balance Type is required for Account Data",
 						row_idx=row.idx,
@@ -168,17 +193,17 @@ class TemplateStructureValidator(Validator):
 			# Calculation formula required
 			if row.data_source in ["Account Data", "Calculated Amount", "Custom API"]:
 				if not row.calculation_formula:
-					issues.append(
+					result.add_error(
 						ValidationIssue(
 							message=f"Formula is required for {row.data_source}",
 							row_idx=row.idx,
 						)
 					)
 
-		return issues
+		return result
 
-	def _validate_orphaned_references(self, template) -> list[ValidationIssue]:
-		issues = []
+	def _validate_orphaned_references(self, template) -> ValidationResult:
+		result = ValidationResult()
 		all_refs = {row.reference_code for row in template.rows if row.reference_code}
 		used_refs = set()
 
@@ -190,14 +215,14 @@ class TemplateStructureValidator(Validator):
 
 		orphaned = all_refs - used_refs
 		if orphaned:
-			# TODO: could be a message print instead of throw
-			issues.append(
+			# Add as warning since orphaned references don't break functionality
+			result.add_warning(
 				ValidationIssue(
 					message=f"Orphaned Line Reference (not used in any formula): {', '.join(orphaned)}",
 				)
 			)
 
-		return issues
+		return result
 
 
 class DependencyValidator(Validator):
@@ -206,13 +231,12 @@ class DependencyValidator(Validator):
 		self.dependencies = self._build_dependency_graph()
 
 	def validate(self, context=None) -> ValidationResult:
-		issues = []
+		result = ValidationResult()
 
-		issues.extend(self._validate_circular_dependencies())
+		result.merge(self._validate_circular_dependencies())
+		result.merge(self._validate_missing_dependencies())
 
-		issues.extend(self._validate_missing_dependencies())
-
-		return ValidationResult(issues)
+		return result
 
 	def _build_dependency_graph(self) -> dict[str, list[str]]:
 		graph = {}
@@ -226,7 +250,7 @@ class DependencyValidator(Validator):
 
 		return graph
 
-	def _validate_circular_dependencies(self) -> list[ValidationIssue]:
+	def _validate_circular_dependencies(self) -> ValidationResult:
 		"""
 		Efficient cycle detection using DFS (Depth-First Search) with three-color algorithm:
 		- WHITE (0): unvisited node
@@ -236,9 +260,9 @@ class DependencyValidator(Validator):
 		Example cycle detection:
 		A → B → C → A (cycle detected when A is GRAY and visited again)
 		"""
+		result = ValidationResult()
 		WHITE, GRAY, BLACK = 0, 1, 2
 		colors = {node: WHITE for node in self.dependencies}
-		cycles = []
 
 		def dfs(node, path):
 			if node not in colors:
@@ -248,7 +272,7 @@ class DependencyValidator(Validator):
 				# Found cycle
 				cycle_start = path.index(node)
 				cycle = [*path[cycle_start:], node]
-				cycles.append(
+				result.add_error(
 					ValidationIssue(
 						message=f"Circular dependency detected: {' → '.join(cycle)}",
 					)
@@ -270,24 +294,24 @@ class DependencyValidator(Validator):
 			if colors[node] == WHITE:
 				dfs(node, [])
 
-		return cycles
+		return result
 
-	def _validate_missing_dependencies(self) -> list[ValidationIssue]:
+	def _validate_missing_dependencies(self) -> ValidationResult:
 		available = {row.reference_code for row in self.template.rows if row.reference_code}
+		result = ValidationResult()
 
-		issues = []
 		for ref_code, deps in self.dependencies.items():
 			undefined = [d for d in deps if d not in available]
 			if undefined:
 				row_idx = self._get_row_idx(ref_code)
-				issues.append(
+				result.add_error(
 					ValidationIssue(
 						message=f"Line References undefined in Formula: {', '.join(undefined)}",
 						row_idx=row_idx,
 					)
 				)
 
-		return issues
+		return result
 
 	def _get_row_idx(self, reference_code: str) -> int | None:
 		for row in self.template.rows:
@@ -304,39 +328,39 @@ class CalculationFormulaValidator(Validator):
 
 	def validate(self, row) -> ValidationResult:
 		"""Validate calculation formula for a single row"""
-		issues = []
+		result = ValidationResult()
 
 		if row.data_source != "Calculated Amount":
-			return ValidationResult(issues)
+			return result
 
 		if not row.calculation_formula:
-			issues.append(
+			result.add_error(
 				ValidationIssue(
 					message="Formula is required for Calculated Amount",
 					row_idx=row.idx,
 					field="Formula",
 				)
 			)
-			return ValidationResult(issues)
+			return result
 
 		formula = self._preprocess_formula(row.calculation_formula)
 		row.calculation_formula = formula
 
 		# Check parentheses
 		if not self._are_parentheses_balanced(formula):
-			issues.append(
+			result.add_error(
 				ValidationIssue(
 					message="Formula has unbalanced parentheses",
 					row_idx=row.idx,
 				)
 			)
-			return ValidationResult(issues)
+			return result
 
 		# Check self-reference
 		available_codes = list(self.reference_codes)
 		refs = extract_reference_codes_from_formula(formula, available_codes)
 		if row.reference_code and row.reference_code in refs:
-			issues.append(
+			result.add_error(
 				ValidationIssue(
 					message=f"Formula references itself ('{row.reference_code}')",
 					row_idx=row.idx,
@@ -346,7 +370,7 @@ class CalculationFormulaValidator(Validator):
 		# Check undefined references
 		undefined = set(refs) - set(available_codes)
 		if undefined:
-			issues.append(
+			result.add_error(
 				ValidationIssue(
 					message=f"Formula references undefined codes: {', '.join(undefined)}",
 					row_idx=row.idx,
@@ -356,14 +380,14 @@ class CalculationFormulaValidator(Validator):
 		# Try to evaluate with dummy values
 		eval_error = self._test_formula_evaluation(formula, available_codes)
 		if eval_error:
-			issues.append(
+			result.add_error(
 				ValidationIssue(
 					message=f"Formula evaluation error: {eval_error}",
 					row_idx=row.idx,
 				)
 			)
 
-		return ValidationResult(issues)
+		return result
 
 	def _preprocess_formula(self, formula: str) -> str:
 		if not formula or not isinstance(formula, str):
@@ -412,27 +436,27 @@ class AccountFilterValidator(Validator):
 
 	def validate(self, row) -> ValidationResult:
 		"""Validate account filter for a single row"""
-		issues = []
+		result = ValidationResult()
 
 		if row.data_source != "Account Data":
-			return ValidationResult(issues)
+			return result
 
 		if not row.calculation_formula:
-			issues.append(
+			result.add_error(
 				ValidationIssue(
 					message="Account filter is required for Account Data",
 					row_idx=row.idx,
 					field="Formula",
 				)
 			)
-			return ValidationResult(issues)
+			return result
 
 		try:
 			filter_config = json.loads(row.calculation_formula)
 			error = self._validate_filter_structure(filter_config, self.account_fields)
 
 			if error:
-				issues.append(
+				result.add_error(
 					ValidationIssue(
 						message=error,
 						row_idx=row.idx,
@@ -441,7 +465,7 @@ class AccountFilterValidator(Validator):
 				)
 
 		except json.JSONDecodeError as e:
-			issues.append(
+			result.add_error(
 				ValidationIssue(
 					message=f"Invalid JSON format: {e!s}",
 					row_idx=row.idx,
@@ -449,7 +473,7 @@ class AccountFilterValidator(Validator):
 				)
 			)
 
-		return ValidationResult(issues)
+		return result
 
 	def _validate_filter_structure(self, filter_config, account_fields: set) -> str | None:
 		"""Recursively validate filter structure"""
@@ -501,10 +525,10 @@ class FormulaValidator(Validator):
 		self.account_filter_validator = AccountFilterValidator()
 
 	def validate(self, row, account_fields: set) -> ValidationResult:
-		issues = []
+		result = ValidationResult()
 
 		if not row.calculation_formula:
-			return ValidationResult(issues)
+			return result
 
 		if row.data_source == "Calculated Amount":
 			return self.calculation_validator.validate(row)
@@ -516,21 +540,23 @@ class FormulaValidator(Validator):
 			return self.account_filter_validator.validate(row)
 
 		elif row.data_source == "Custom API":
-			issues.extend(self._validate_custom_api(row))
+			result.merge(self._validate_custom_api(row))
 
-		return ValidationResult(issues)
+		return result
 
-	def _validate_custom_api(self, row) -> list[ValidationIssue]:
+	def _validate_custom_api(self, row) -> ValidationResult:
+		result = ValidationResult()
 		api_path = row.calculation_formula
 
 		if "." not in api_path:
-			return [
+			result.add_error(
 				ValidationIssue(
 					message="Custom API path should be in format: app.module.method",
 					row_idx=row.idx,
 					field="Formula",
 				)
-			]
+			)
+			return result
 
 		# Method exists?
 		try:
@@ -538,23 +564,23 @@ class FormulaValidator(Validator):
 			module = frappe.get_module(module_path)
 
 			if not hasattr(module, method_name):
-				return [
+				result.add_error(
 					ValidationIssue(
-						message=f"Method '{method_name}' not found in module '{module_path}'",
+						message=f"Method '{method_name}' not found in module '{module_path}' (might be environment-specific)",
 						row_idx=row.idx,
 						field="Formula",
 					)
-				]
+				)
 		except Exception as e:
-			return [
+			result.add_error(
 				ValidationIssue(
 					message=f"Could not validate API path: {e!s}",
 					row_idx=row.idx,
 					field="Formula",
 				)
-			]
+			)
 
-		return []
+		return result
 
 
 def extract_reference_codes_from_formula(formula: str, available_codes: list[str]) -> list[str]:

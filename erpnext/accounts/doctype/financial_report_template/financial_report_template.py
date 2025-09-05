@@ -30,10 +30,7 @@ class FinancialReportTemplate(Document):
 	def validate(self):
 		validator = TemplateValidator(self)
 		result = validator.validate()
-
-		if not result.is_valid:
-			error_messages = [str(issue) for issue in result.issues]
-			frappe.throw("<br><br>".join(error_messages))
+		result.notify_user()
 
 	def on_update(self):
 		self._export_template()
