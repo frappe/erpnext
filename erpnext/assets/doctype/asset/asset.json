@@ -87,6 +87,7 @@
    "options": "ACC-ASS-.YYYY.-"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "item_code",
    "fetch_from": "item_code.item_name",
    "fetch_if_empty": 1,
@@ -153,6 +154,7 @@
   {
    "allow_on_submit": 1,
    "fetch_from": "item_code.image",
+   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -203,8 +205,8 @@
    "fieldname": "purchase_date",
    "fieldtype": "Date",
    "label": "Purchase Date",
-   "mandatory_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
-   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
+   "reqd": 1
   },
   {
    "fieldname": "disposal_date",
@@ -511,6 +513,7 @@
    "fieldname": "total_asset_cost",
    "fieldtype": "Currency",
    "label": "Total Asset Cost",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -519,6 +522,7 @@
    "fieldname": "additional_asset_cost",
    "fieldtype": "Currency",
    "label": "Additional Asset Cost",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -592,7 +596,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-02-20 14:09:05.421913",
+ "modified": "2025-05-20 00:44:06.229177",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -630,6 +634,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

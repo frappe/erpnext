@@ -115,7 +115,7 @@ class StockReservationEntry(Document):
 		]
 		for d in mandatory:
 			if not self.get(d):
-				msg = _("{0} is required").format(self.meta.get_label(d))
+				msg = _("{0} is required").format(_(self.meta.get_label(d)))
 				frappe.throw(msg)
 
 	def validate_group_warehouse(self) -> None:
@@ -445,6 +445,7 @@ class StockReservationEntry(Document):
 			voucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)
 
 		allowed_qty = min(self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty))
+		qty_to_be_reserved = flt(qty_to_be_reserved, self.precision("reserved_qty"))
 
 		if self.get("_action") != "submit" and self.voucher_type == "Sales Order" and allowed_qty <= 0:
 			msg = _("Item {0} is already reserved/delivered against Sales Order {1}.").format(

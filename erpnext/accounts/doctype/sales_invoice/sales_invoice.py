@@ -461,6 +461,7 @@ class SalesInvoice(SellingController):
 				self.make_bundle_for_sales_purchase_return(table_name)
 				self.make_bundle_using_old_serial_batch_fields(table_name)
 
+			self.validate_standalone_serial_nos_customer()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
 
@@ -699,6 +700,7 @@ class SalesInvoice(SellingController):
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
 				"campaign": pos.get("campaign"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
+				"skip_default_payment": pos.get("disable_grand_total_to_default_mop"),
 			}
 
 	def update_time_sheet(self, sales_invoice):
@@ -751,10 +753,10 @@ class SalesInvoice(SellingController):
 		self.paid_amount = paid_amount
 		self.base_paid_amount = base_paid_amount
 
+	@frappe.whitelist()
 	def set_account_for_mode_of_payment(self):
 		for payment in self.payments:
-			if not payment.account:
-				payment.account = get_bank_cash_account(payment.mode_of_payment, self.company).get("account")
+			payment.account = get_bank_cash_account(payment.mode_of_payment, self.company).get("account")
 
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
@@ -1205,7 +1207,6 @@ class SalesInvoice(SellingController):
 
 				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
-				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
@@ -1348,7 +1349,7 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")):
+			if flt(item.base_net_amount, item.precision("base_net_amount")) or item.is_fixed_asset:
 				# Do not book income for transfer within same company
 				if self.is_internal_transfer():
 					continue
@@ -1356,7 +1357,9 @@ class SalesInvoice(SellingController):
 				if item.is_fixed_asset:
 					asset = self.get_asset(item)
 
-					if self.is_return:
+					if (self.docstatus == 2 and not self.is_return) or (
+						self.docstatus == 1 and self.is_return
+					):
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
 							asset,
 							item.base_net_amount,
@@ -1367,10 +1370,13 @@ class SalesInvoice(SellingController):
 						)
 						asset.db_set("disposal_date", None)
 						add_asset_activity(asset.name, _("Asset returned"))
+						asset_status = asset.get_status()
 
-						if asset.calculate_depreciation:
-							posting_date = frappe.db.get_value(
-								"Sales Invoice", self.return_against, "posting_date"
+						if asset.calculate_depreciation and not asset_status == "Fully Depreciated":
+							posting_date = (
+								frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
+								if self.is_return
+								else self.posting_date
 							)
 							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
 							notes = _(
@@ -1467,8 +1473,10 @@ class SalesInvoice(SellingController):
 		return self._enable_discount_accounting
 
 	def set_asset_status(self, asset):
-		if self.is_return:
+		if self.is_return and not self.docstatus == 2:
 			asset.set_status()
+		elif self.is_return and self.docstatus == 2:
+			asset.set_status("Sold")
 		else:
 			asset.set_status("Sold" if self.docstatus == 1 else None)
 
@@ -2286,6 +2294,18 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		set_purchase_references(target)
 
 	def update_details(source_doc, target_doc, source_parent):
+		def _validate_address_link(address, link_doctype, link_name):
+			return frappe.db.get_value(
+				"Dynamic Link",
+				{
+					"parent": address,
+					"parenttype": "Address",
+					"link_doctype": link_doctype,
+					"link_name": link_name,
+				},
+				"parent",
+			)
+
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			currency = frappe.db.get_value("Supplier", details.get("party"), "default_currency")
@@ -2296,13 +2316,34 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.buying_price_list = source_doc.selling_price_list
 
 			# Invert Addresses
-			update_address(target_doc, "supplier_address", "address_display", source_doc.company_address)
-			update_address(
-				target_doc, "shipping_address", "shipping_address_display", source_doc.customer_address
-			)
-			update_address(
-				target_doc, "billing_address", "billing_address_display", source_doc.customer_address
-			)
+			if source_doc.company_address and _validate_address_link(
+				source_doc.company_address, "Supplier", details.get("party")
+			):
+				update_address(target_doc, "supplier_address", "address_display", source_doc.company_address)
+			if source_doc.dispatch_address_name and _validate_address_link(
+				source_doc.dispatch_address_name, "Company", details.get("company")
+			):
+				update_address(
+					target_doc,
+					"dispatch_address",
+					"dispatch_address_display",
+					source_doc.dispatch_address_name,
+				)
+			if source_doc.shipping_address_name and _validate_address_link(
+				source_doc.shipping_address_name, "Company", details.get("company")
+			):
+				update_address(
+					target_doc,
+					"shipping_address",
+					"shipping_address_display",
+					source_doc.shipping_address_name,
+				)
+			if source_doc.customer_address and _validate_address_link(
+				source_doc.customer_address, "Company", details.get("company")
+			):
+				update_address(
+					target_doc, "billing_address", "billing_address_display", source_doc.customer_address
+				)
 
 			if currency:
 				target_doc.currency = currency
@@ -2323,13 +2364,22 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
 
-			update_address(
-				target_doc, "company_address", "company_address_display", source_doc.supplier_address
-			)
-			update_address(
-				target_doc, "shipping_address_name", "shipping_address", source_doc.shipping_address
-			)
-			update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
+			if source_doc.supplier_address and _validate_address_link(
+				source_doc.supplier_address, "Company", details.get("company")
+			):
+				update_address(
+					target_doc, "company_address", "company_address_display", source_doc.supplier_address
+				)
+			if source_doc.shipping_address and _validate_address_link(
+				source_doc.shipping_address, "Customer", details.get("party")
+			):
+				update_address(
+					target_doc, "shipping_address_name", "shipping_address", source_doc.shipping_address
+				)
+			if source_doc.shipping_address and _validate_address_link(
+				source_doc.shipping_address, "Customer", details.get("party")
+			):
+				update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
 
 			if currency:
 				target_doc.currency = currency
@@ -2720,9 +2770,11 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 				target.closing_text = letter_text.get("closing_text")
 				target.language = letter_text.get("language")
 
-		# update outstanding
+		# update outstanding from doc
 		if source.payment_schedule and len(source.payment_schedule) == 1:
-			target.overdue_payments[0].outstanding = source.get("outstanding_amount")
+			for row in target.overdue_payments:
+				if row.payment_schedule == source.payment_schedule[0].name:
+					row.outstanding = source.get("outstanding_amount")
 
 		target.validate()
 

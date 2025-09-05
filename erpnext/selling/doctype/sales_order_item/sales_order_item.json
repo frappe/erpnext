@@ -40,6 +40,7 @@
   "column_break_19",
   "discount_percentage",
   "discount_amount",
+  "distributed_discount_amount",
   "base_rate_with_margin",
   "section_break_simple1",
   "rate",
@@ -287,7 +288,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount || doc.distributed_discount_amount",
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -914,6 +915,12 @@
    "report_hide": 1
   },
   {
+   "fieldname": "distributed_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Distributed Discount Amount",
+   "options": "currency"
+  },
+  {
    "allow_on_submit": 1,
    "fieldname": "company_total_stock",
    "fieldtype": "Float",
@@ -964,7 +971,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-02-28 09:45:43.934947",
+ "modified": "2025-02-28 09:45:44.934947",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

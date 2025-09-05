@@ -94,6 +94,7 @@ def get_expected_data(bom, warehouse, qty_to_produce, show_exploded_view=False):
 		expected_data.append(
 			[
 				item.item_code,
+				item.item_name,
 				item.description,
 				item.stock_qty,
 				item.stock_uom,

@@ -62,6 +62,7 @@ class Project(Document):
 		sales_order: DF.Link | None
 		second_email: DF.Time | None
 		status: DF.Literal["Open", "Completed", "Cancelled"]
+		subject: DF.Data | None
 		to_time: DF.Time | None
 		total_billable_amount: DF.Currency
 		total_billed_amount: DF.Currency
@@ -606,8 +607,6 @@ def send_project_update_email_to_users(project):
 		}
 	).insert()
 
-	subject = "For project %s, update your status" % (project)
-
 	incoming_email_account = frappe.db.get_value(
 		"Email Account", dict(enable_incoming=1, default_incoming=1), "email_id"
 	)
@@ -615,7 +614,7 @@ def send_project_update_email_to_users(project):
 	frappe.sendmail(
 		recipients=get_users_email(doc),
 		message=doc.message,
-		subject=_(subject),
+		subject=doc.subject,
 		reference_doctype=project_update.doctype,
 		reference_name=project_update.name,
 		reply_to=incoming_email_account,
@@ -750,12 +749,7 @@ def calculate_total_purchase_cost(project: str | None = None):
 
 
 @frappe.whitelist()
-def recalculate_project_total_purchase_cost(project: str | None = None):
-	if project:
-		total_purchase_cost = calculate_total_purchase_cost(project)
-		frappe.db.set_value(
-			"Project",
-			project,
-			"total_purchase_cost",
-			(total_purchase_cost and total_purchase_cost[0][0] or 0),
-		)
+def update_costing_and_billing(project: str | None = None):
+	project = frappe.get_doc("Project", project)
+	project.update_costing()
+	project.db_update()

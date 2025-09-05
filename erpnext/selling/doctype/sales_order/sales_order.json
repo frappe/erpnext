@@ -25,6 +25,7 @@
   "po_date",
   "company",
   "skip_delivery_note",
+  "has_unit_price_items",
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -40,6 +41,7 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+  "last_scanned_warehouse",
   "column_break_28",
   "set_warehouse",
   "reserve_stock",
@@ -357,7 +359,6 @@
    "options": "fa fa-bullhorn"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -438,7 +439,6 @@
    "width": "50%"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1461,6 +1461,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Auto Repeat",
+   "no_copy": 1,
    "options": "Auto Repeat"
   },
   {
@@ -1649,13 +1650,28 @@
    "label": "Company Contact Person",
    "options": "Contact",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_unit_price_items",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Unit Price Items",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-02-06 16:02:20.320877",
+ "modified": "2025-07-28 12:14:29.760988",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1724,6 +1740,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

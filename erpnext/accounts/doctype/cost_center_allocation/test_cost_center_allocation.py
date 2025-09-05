@@ -4,6 +4,8 @@
 import unittest
 
 import frappe
+from frappe.query_builder.functions import Sum
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -189,6 +191,31 @@ class TestCostCenterAllocation(unittest.TestCase):
 		coa1.cancel()
 		coa2.cancel()
 		jv.cancel()
+
+	@change_settings("System Settings", {"rounding_method": "Commercial Rounding"})
+	def test_debit_credit_on_cost_center_allocation_for_commercial_rounding(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 2 - _TC": 50, "Sub Cost Center 3 - _TC": 50},
+		)
+
+		si = create_sales_invoice(rate=145.65, cost_center="Main Cost Center 1 - _TC")
+
+		gl_entry = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gl_entry)
+			.select(Sum(gl_entry.credit).as_("cr"), Sum(gl_entry.debit).as_("dr"))
+			.where(gl_entry.voucher_type == "Sales Invoice")
+			.where(gl_entry.voucher_no == si.name)
+		).run(as_dict=1)
+
+		self.assertEqual(gl_entries[0].cr, gl_entries[0].dr)
+
+		si.cancel()
+		cca.cancel()
 
 
 def create_cost_center_allocation(

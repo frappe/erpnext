@@ -6,7 +6,11 @@ import unittest
 import frappe
 from frappe.utils import now_datetime, nowdate
 
-from erpnext.accounts.doctype.budget.budget import BudgetError, get_actual_expense
+from erpnext.accounts.doctype.budget.budget import (
+	BudgetError,
+	get_accumulated_monthly_budget,
+	get_actual_expense,
+)
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -96,6 +100,10 @@ class TestBudget(unittest.TestCase):
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 		frappe.db.set_value("Budget", budget.name, "fiscal_year", fiscal_year)
 
+		accumulated_limit = get_accumulated_monthly_budget(
+			budget.monthly_distribution, nowdate(), budget.fiscal_year, budget.accounts[0].budget_amount
+		)
+
 		mr = frappe.get_doc(
 			{
 				"doctype": "Material Request",
@@ -109,7 +117,7 @@ class TestBudget(unittest.TestCase):
 						"uom": "_Test UOM",
 						"warehouse": "_Test Warehouse - _TC",
 						"schedule_date": nowdate(),
-						"rate": 100000,
+						"rate": accumulated_limit + 1,
 						"expense_account": "_Test Account Cost for Goods Sold - _TC",
 						"cost_center": "_Test Cost Center - _TC",
 					}

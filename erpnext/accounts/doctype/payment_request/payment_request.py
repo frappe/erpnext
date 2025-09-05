@@ -539,7 +539,9 @@ def make_payment_request(**args):
 	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
 		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
-	ref_doc = frappe.get_doc(args.dt, args.dn)
+	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
+	if not args.get("company"):
+		args.company = ref_doc.company
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
@@ -670,7 +672,12 @@ def get_amount(ref_doc, payment_account=None):
 
 	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
-		grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - ref_doc.advance_paid
+		advance_amount = flt(ref_doc.advance_paid)
+		if ref_doc.party_account_currency != ref_doc.currency:
+			advance_amount = flt(flt(ref_doc.advance_paid) / ref_doc.conversion_rate)
+
+		grand_total = (flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)) - advance_amount
+
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if (
 			dt == "Sales Invoice"
@@ -777,7 +784,7 @@ def get_gateway_details(args):  # nosemgrep
 	"""
 	Return gateway and payment account of default payment gateway
 	"""
-	gateway_account = args.get("payment_gateway_account", {"is_default": 1})
+	gateway_account = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
 	if gateway_account:
 		return get_payment_gateway_account(gateway_account)
 
@@ -824,8 +831,7 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	if not references:
 		return
 
-	precision = references[0].precision("allocated_amount")
-
+	precision = frappe.get_precision("Payment Entry Reference", "allocated_amount")
 	referenced_payment_requests = frappe.get_all(
 		"Payment Request",
 		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},

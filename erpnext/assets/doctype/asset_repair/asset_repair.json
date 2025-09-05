@@ -74,6 +74,7 @@
    "fieldname": "completion_date",
    "fieldtype": "Datetime",
    "label": "Completion Date",
+   "mandatory_depends_on": "eval:doc.repair_status==\"Completed\"",
    "no_copy": 1
   },
   {
@@ -138,6 +139,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
+   "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Fully Depreciated\",\"Sold\",\"Scrapped\",null]]]",
    "options": "Asset",
    "reqd": 1
   },
@@ -248,7 +250,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-13 16:14:14.398356",
+ "modified": "2025-07-29 15:14:34.044564",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
@@ -286,6 +288,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

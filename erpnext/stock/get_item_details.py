@@ -567,20 +567,15 @@ def get_item_warehouse(item, args, overwrite_warehouse, defaults=None):
 			or args.get("warehouse")
 		)
 
-		if not warehouse:
-			defaults = frappe.defaults.get_defaults() or {}
-			warehouse_exists = frappe.db.exists(
-				"Warehouse", {"name": defaults.default_warehouse, "company": args.company}
-			)
-			if defaults.get("default_warehouse") and warehouse_exists:
-				warehouse = defaults.default_warehouse
-
 	else:
 		warehouse = args.get("warehouse")
 
 	if not warehouse:
-		default_warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
-		if frappe.db.get_value("Warehouse", default_warehouse, "company") == args.company:
+		default_warehouse = frappe.get_single_value("Stock Settings", "default_warehouse")
+		if (
+			default_warehouse
+			and frappe.get_cached_value("Warehouse", default_warehouse, "company") == args.company
+		):
 			return default_warehouse
 
 	return warehouse
@@ -662,13 +657,17 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 	return out
 
 
-def get_item_tax_template(args, item, out):
-	"""
-	args = {
-	        "tax_category": None
-	        "item_tax_template": None
-	}
-	"""
+@frappe.whitelist()
+def get_item_tax_template(args, item=None, out=None):
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	if not item:
+		if not args.get("item_code"):
+			frappe.throw(_("Item/Item Code required to get Item Tax Template."))
+		else:
+			item = frappe.get_cached_doc("Item", args.get("item_code"))
+
 	item_tax_template = None
 	if item.taxes:
 		item_tax_template = _get_item_tax_template(args, item.taxes, out)
@@ -680,8 +679,10 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-	if args.get("child_doctype") and item_tax_template:
+	if out and args.get("child_doctype") and item_tax_template:
 		out.update(get_fetch_values(args.get("child_doctype"), "item_tax_template", item_tax_template))
+
+	return item_tax_template
 
 
 def _get_item_tax_template(args, taxes, out=None, for_validate=False):
@@ -911,8 +912,8 @@ def get_price_list_rate(args, item_doc, out=None):
 			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
 		# insert in database
-		if price_list_rate is None or frappe.db.get_single_value(
-			"Stock Settings", "update_existing_price_list_rate"
+		if price_list_rate is None or frappe.get_cached_value(
+			"Stock Settings", "Stock Settings", "update_existing_price_list_rate"
 		):
 			insert_item_price(args)
 
@@ -946,54 +947,71 @@ def insert_item_price(args):
 	):
 		return
 
-	if frappe.db.get_value("Price List", args.price_list, "currency", cache=True) == args.currency and cint(
-		frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")
-	):
-		if frappe.has_permission("Item Price", "write"):
-			price_list_rate = (
-				(flt(args.rate) + flt(args.discount_amount)) / args.get("conversion_factor")
-				if args.get("conversion_factor")
-				else (flt(args.rate) + flt(args.discount_amount))
-			)
+	stock_settings = frappe.get_cached_doc("Stock Settings")
 
-			item_price = frappe.db.get_value(
-				"Item Price",
-				{
-					"item_code": args.item_code,
-					"price_list": args.price_list,
-					"currency": args.currency,
-					"uom": args.stock_uom,
-				},
-				["name", "price_list_rate"],
-				as_dict=1,
-			)
-			if item_price and item_price.name:
-				if item_price.price_list_rate != price_list_rate and frappe.db.get_single_value(
-					"Stock Settings", "update_existing_price_list_rate"
-				):
-					frappe.db.set_value("Item Price", item_price.name, "price_list_rate", price_list_rate)
-					frappe.msgprint(
-						_("Item Price updated for {0} in Price List {1}").format(
-							args.item_code, args.price_list
-						),
-						alert=True,
-					)
-			else:
-				item_price = frappe.get_doc(
-					{
-						"doctype": "Item Price",
-						"price_list": args.price_list,
-						"item_code": args.item_code,
-						"currency": args.currency,
-						"price_list_rate": price_list_rate,
-						"uom": args.stock_uom,
-					}
-				)
-				item_price.insert()
-				frappe.msgprint(
-					_("Item Price added for {0} in Price List {1}").format(args.item_code, args.price_list),
-					alert=True,
-				)
+	if (
+		not frappe.db.get_value("Price List", args.price_list, "currency", cache=True) == args.currency
+		or not stock_settings.auto_insert_price_list_rate_if_missing
+		or not frappe.has_permission("Item Price", "write")
+	):
+		return
+
+	item_price = frappe.db.get_value(
+		"Item Price",
+		{
+			"item_code": args.item_code,
+			"price_list": args.price_list,
+			"currency": args.currency,
+			"uom": args.stock_uom,
+		},
+		["name", "price_list_rate"],
+		as_dict=1,
+	)
+
+	update_based_on_price_list_rate = stock_settings.update_price_list_based_on == "Price List Rate"
+
+	if item_price and item_price.name:
+		if not stock_settings.update_existing_price_list_rate:
+			return
+
+		rate_to_consider = flt(args.price_list_rate) if update_based_on_price_list_rate else flt(args.rate)
+		price_list_rate = _get_stock_uom_rate(rate_to_consider, args)
+
+		if not price_list_rate or item_price.price_list_rate == price_list_rate:
+			return
+
+		frappe.db.set_value("Item Price", item_price.name, "price_list_rate", price_list_rate)
+		frappe.msgprint(
+			_("Item Price updated for {0} in Price List {1}").format(args.item_code, args.price_list),
+			alert=True,
+		)
+	else:
+		rate_to_consider = (
+			(flt(args.price_list_rate) or flt(args.rate))
+			if update_based_on_price_list_rate
+			else flt(args.rate)
+		)
+		price_list_rate = _get_stock_uom_rate(rate_to_consider, args)
+
+		item_price = frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": args.price_list,
+				"item_code": args.item_code,
+				"currency": args.currency,
+				"price_list_rate": price_list_rate,
+				"uom": args.stock_uom,
+			}
+		)
+		item_price.insert()
+		frappe.msgprint(
+			_("Item Price added for {0} in Price List {1}").format(args.item_code, args.price_list),
+			alert=True,
+		)
+
+
+def _get_stock_uom_rate(rate, args):
+	return rate / args.conversion_factor if args.conversion_factor else rate
 
 
 def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) -> list[dict]:
@@ -1259,15 +1277,31 @@ def get_pos_profile(company, pos_profile=None, user=None):
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
-	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
-	filters = {"parent": item_code, "uom": uom}
+	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
+	if not item_code or not item or uom == item.stock_uom:
+		return {"conversion_factor": 1.0}
 
-	if variant_of:
-		filters["parent"] = ("in", (item_code, variant_of))
-	conversion_factor = frappe.db.get_value("UOM Conversion Detail", filters, "conversion_factor")
+	item_codes = [item_code]
+	if item.variant_of:
+		item_codes.append(item.variant_of)
+
+	parent = frappe.qb.DocType("Item")
+	child = frappe.qb.DocType("UOM Conversion Detail")
+	query = (
+		frappe.qb.from_(parent)
+		.join(child)
+		.on(parent.name == child.parent)
+		.select(child.conversion_factor)
+		.where((parent.name.isin(item_codes)) & (child.uom == uom))
+		.orderby(parent.has_variants)
+		.limit(1)
+	)
+	conversion_factor = query.run(pluck="conversion_factor")
+
 	if not conversion_factor:
-		stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
-		conversion_factor = get_uom_conv_factor(uom, stock_uom)
+		conversion_factor = get_uom_conv_factor(uom, item.stock_uom)
+	else:
+		conversion_factor = conversion_factor[0]
 
 	return {"conversion_factor": conversion_factor or 1.0}
 

@@ -157,6 +157,8 @@ def link_existing_conversations(doc, state):
 	"""
 	Called from hooks on creation of Contact or Lead to link all the existing conversations.
 	"""
+	if doc.flags.ignore_auto_link_call_log:
+		return
 	if doc.doctype != "Contact":
 		return
 	try:
@@ -183,12 +185,12 @@ def link_existing_conversations(doc, state):
 				""",
 				dict(phone_number=f"%{number}", docname=doc.name, doctype=doc.doctype),
 			)
-
-			for log in logs:
-				call_log = frappe.get_doc("Call Log", log)
-				call_log.add_link(link_type=doc.doctype, link_name=doc.name)
-				call_log.save(ignore_permissions=True)
-			frappe.db.commit()
+			if logs:
+				for log in logs:
+					call_log = frappe.get_doc("Call Log", log)
+					call_log.add_link(link_type=doc.doctype, link_name=doc.name)
+					call_log.save(ignore_permissions=True)
+				frappe.db.commit()
 	except Exception:
 		frappe.log_error(title=_("Error during caller information update"))
 

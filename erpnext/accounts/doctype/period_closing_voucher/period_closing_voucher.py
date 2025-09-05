@@ -75,6 +75,17 @@ class PeriodClosingVoucher(AccountsController):
 			return
 
 		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
+		previous_fiscal_year_closed = frappe.db.exists(
+			"Period Closing Voucher",
+			{
+				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
+				"docstatus": 1,
+				"company": self.company,
+			},
+		)
+		if previous_fiscal_year_closed:
+			return
+
 		gle_exists_in_previous_year = frappe.db.exists(
 			"GL Entry",
 			{
@@ -86,16 +97,7 @@ class PeriodClosingVoucher(AccountsController):
 		if not gle_exists_in_previous_year:
 			return
 
-		previous_fiscal_year_closed = frappe.db.exists(
-			"Period Closing Voucher",
-			{
-				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
-				"docstatus": 1,
-				"company": self.company,
-			},
-		)
-		if not previous_fiscal_year_closed:
-			frappe.throw(_("Previous Year is not closed, please close it first"))
+		frappe.throw(_("Previous Year is not closed, please close it first"))
 
 	def block_if_future_closing_voucher_exists(self):
 		future_closing_voucher = self.get_future_closing_voucher()
@@ -133,7 +135,12 @@ class PeriodClosingVoucher(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Account Closing Balance",
+		)
 		self.block_if_future_closing_voucher_exists()
 		self.db_set("gle_processing_status", "In Progress")
 		self.cancel_gl_entries()
@@ -205,8 +212,10 @@ class PeriodClosingVoucher(AccountsController):
 		return gl_entry
 
 	def get_gle_for_closing_account(self, dimension_balance, dimensions):
-		balance_in_account_currency = flt(dimension_balance.balance_in_account_currency)
 		balance_in_company_currency = flt(dimension_balance.balance_in_company_currency)
+		debit = balance_in_company_currency if balance_in_company_currency > 0 else 0
+		credit = abs(balance_in_company_currency) if balance_in_company_currency < 0 else 0
+
 		gl_entry = frappe._dict(
 			{
 				"company": self.company,
@@ -215,14 +224,10 @@ class PeriodClosingVoucher(AccountsController):
 				"account_currency": frappe.db.get_value(
 					"Account", self.closing_account_head, "account_currency"
 				),
-				"debit_in_account_currency": balance_in_account_currency
-				if balance_in_account_currency > 0
-				else 0,
-				"debit": balance_in_company_currency if balance_in_company_currency > 0 else 0,
-				"credit_in_account_currency": abs(balance_in_account_currency)
-				if balance_in_account_currency < 0
-				else 0,
-				"credit": abs(balance_in_company_currency) if balance_in_company_currency < 0 else 0,
+				"debit_in_account_currency": debit,
+				"debit": debit,
+				"credit_in_account_currency": credit,
+				"credit": credit,
 				"is_period_closing_voucher_entry": 1,
 				"voucher_type": "Period Closing Voucher",
 				"voucher_no": self.name,

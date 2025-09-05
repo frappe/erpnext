@@ -6,6 +6,7 @@
  "field_order": [
   "payment_gateway",
   "payment_channel",
+  "company",
   "is_default",
   "column_break_4",
   "payment_account",
@@ -70,11 +71,21 @@
    "fieldtype": "Select",
    "label": "Payment Channel",
    "options": "\nEmail\nPhone"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-20 13:30:27.722852",
+ "modified": "2025-07-14 16:49:55.210352",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Gateway Account",

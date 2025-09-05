@@ -48,7 +48,7 @@ class Budget(Document):
 		cost_center: DF.Link | None
 		fiscal_year: DF.Link
 		monthly_distribution: DF.Link | None
-		naming_series: DF.Data | None
+		naming_series: DF.Literal["BUDGET-.YYYY.-"]
 		project: DF.Link | None
 	# end: auto-generated types
 
@@ -136,17 +136,16 @@ class Budget(Document):
 		):
 			self.applicable_on_booking_actual_expenses = 1
 
-	def before_naming(self):
-		self.naming_series = f"{{{frappe.scrub(self.budget_against)}}}./.{self.fiscal_year}/.###"
-
 
 def validate_expense_against_budget(args, expense_amount=0):
 	args = frappe._dict(args)
 	if not frappe.get_all("Budget", limit=1):
 		return
 
-	if args.get("company") and not args.fiscal_year:
+	if not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
+
+	if args.get("company"):
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
 			"Company", args.get("company"), "exception_budget_approver_role"
 		)

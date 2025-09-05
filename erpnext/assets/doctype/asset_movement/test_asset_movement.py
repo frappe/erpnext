@@ -88,7 +88,7 @@ class TestAssetMovement(unittest.TestCase):
 		)
 
 		# after issuing, asset should belong to an employee not at a location
-		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), None)
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "custodian"), employee)
 
 		create_asset_movement(

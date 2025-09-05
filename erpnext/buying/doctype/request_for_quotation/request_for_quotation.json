@@ -16,6 +16,7 @@
   "transaction_date",
   "schedule_date",
   "status",
+  "has_unit_price_items",
   "amended_from",
   "suppliers_section",
   "suppliers",
@@ -306,13 +307,22 @@
    "fieldtype": "Small Text",
    "label": "Billing Address Details",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_unit_price_items",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Unit Price Items",
+   "no_copy": 1
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-06 12:45:28.898706",
+ "modified": "2025-03-03 16:48:39.856779",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -377,6 +387,7 @@
    "role": "All"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "status, transaction_date",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

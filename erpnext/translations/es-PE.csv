@@ -388,7 +388,6 @@ Maintenance Visit Purpose,Propósito de la Visita de Mantenimiento,
 No of Sent SMS,No. de SMS enviados,
 Stock Received But Not Billed,Inventario Recibido pero no facturados,
 Stores,Tiendas,
-Row {0}: Qty is mandatory,Fila {0}: Cantidad es obligatorio,
 Report Type is mandatory,Tipo de informe es obligatorio,
 "System User (login) ID. If set, it will become default for all HR forms.","Usuario del Sistema (login )ID. Si se establece , será por defecto para todas las formas de Recursos Humanos."
 UOM Conversion factor is required in row {0},"El factor de conversión de la (UdM) Unidad de medida, es requerida en la linea {0}"

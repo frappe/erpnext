@@ -54,6 +54,29 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 			};
 		});
 		frm.set_query("account", function () {
+			if (!frm.doc.company) {
+				frappe.throw(__("Please set Company"));
+			}
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+		frm.set_query("cost_center", function () {
+			if (!frm.doc.company) {
+				frappe.throw(__("Please set Company"));
+			}
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+		frm.set_query("project", function () {
+			if (!frm.doc.company) {
+				frappe.throw(__("Please set Company"));
+			}
 			return {
 				filters: {
 					company: frm.doc.company,
@@ -64,6 +87,12 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 			frm.set_value("from_date", frappe.datetime.add_months(frappe.datetime.get_today(), -1));
 			frm.set_value("to_date", frappe.datetime.get_today());
 		}
+	},
+	company: function (frm) {
+		frm.set_value("account", "");
+		frm.set_value("cost_center", "");
+		frm.set_value("project", "");
+		erpnext.utils.set_letter_head(frm);
 	},
 	report: function (frm) {
 		let filters = {

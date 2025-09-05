@@ -62,14 +62,21 @@ frappe.ui.form.on("Asset Movement", {
 			fieldnames_to_be_altered = {
 				target_location: { read_only: 0, reqd: 1 },
 				source_location: { read_only: 1, reqd: 0 },
-				from_employee: { read_only: 0, reqd: 0 },
-				to_employee: { read_only: 1, reqd: 0 },
+				from_employee: { read_only: 1, reqd: 0 },
+				to_employee: { read_only: 0, reqd: 0 },
 			};
 		} else if (frm.doc.purpose === "Issue") {
 			fieldnames_to_be_altered = {
 				target_location: { read_only: 1, reqd: 0 },
 				source_location: { read_only: 1, reqd: 0 },
 				from_employee: { read_only: 1, reqd: 0 },
+				to_employee: { read_only: 0, reqd: 1 },
+			};
+		} else if (frm.doc.purpose === "Transfer and Issue") {
+			fieldnames_to_be_altered = {
+				target_location: { read_only: 0, reqd: 1 },
+				source_location: { read_only: 0, reqd: 1 },
+				from_employee: { read_only: 0, reqd: 1 },
 				to_employee: { read_only: 0, reqd: 1 },
 			};
 		}

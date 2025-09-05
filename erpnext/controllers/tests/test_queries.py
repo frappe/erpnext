@@ -2,6 +2,9 @@ import unittest
 from functools import partial
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.core.doctype.user_permission.user_permission import add_user_permissions
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
 
@@ -81,3 +84,54 @@ class TestQueries(unittest.TestCase):
 
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
+
+	def test_employee_query_with_user_permissions(self):
+		# party field is a dynamic link field in Payment Entry doctype with ignore_user_permissions=0
+		ps = make_property_setter(
+			doctype="Payment Entry",
+			fieldname="party",
+			property="ignore_user_permissions",
+			value=1,
+			property_type="Check",
+		)
+		ps.save()
+
+		user = create_user("test_employee_query@example.com", ("Accounts User", "HR User"))
+		add_user_permissions(
+			{
+				"user": user.name,
+				"doctype": "Employee",
+				"docname": "_T-Employee-00001",
+				"is_default": 1,
+				"apply_to_all_doctypes": 1,
+				"applicable_doctypes": [],
+				"hide_descendants": 0,
+			}
+		)
+
+		frappe.reload_doc("accounts", "doctype", "payment entry")
+
+		frappe.set_user(user.name)
+		params = {
+			"doctype": "Employee",
+			"txt": "",
+			"searchfield": "name",
+			"start": 0,
+			"page_len": 20,
+			"filters": None,
+			"reference_doctype": "Payment Entry",
+			"ignore_user_permissions": 1,
+		}
+
+		result = queries.employee_query(**params)
+		self.assertGreater(len(result), 1)
+
+		ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
+		frappe.reload_doc("accounts", "doctype", "payment entry")
+		frappe.clear_cache()
+
+		# only one employee should be returned even though ignore_user_permissions is passed as 1
+		result = queries.employee_query(**params)
+		self.assertEqual(len(result), 1)
+
+		frappe.set_user("Administrator")

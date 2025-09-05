@@ -523,7 +523,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		dns = create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list)
 		sle_details = fetch_sle_details_for_doc_list(dns, ["stock_value_difference"])
 		svd_list = [-1 * d["stock_value_difference"] for d in sle_details]
-		expected_incoming_rates = expected_abs_svd = [100.0, 100.0, 100.0, 100.0]
+		expected_incoming_rates = expected_abs_svd = [75.0, 125.0, 75.0, 125.0]
 
 		self.assertEqual(expected_abs_svd, svd_list, "Incorrect 'Stock Value Difference' values")
 		for dn, _incoming_rate in zip(dns, expected_incoming_rates, strict=False):
@@ -1314,7 +1314,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		# To deliver 100 qty we fall short of 11.0073 qty (11.007 with precision 3)
 		# Stock up with 11.007 (balance in db becomes 99.9997, on UI it will show as 100)
 		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
-		self.assertEqual(get_stock_balance(item_code, warehouse), 99.9997)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 100.0)
 
 		# See if delivery note goes through
 		# Negative qty error should not be raised as 99.9997 is 100 with precision 3 (system precision)

@@ -37,6 +37,7 @@
   "column_break_19",
   "discount_percentage",
   "discount_amount",
+  "distributed_discount_amount",
   "base_rate_with_margin",
   "section_break1",
   "rate",
@@ -259,7 +260,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount || doc.distributed_discount_amount",
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -933,6 +934,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "distributed_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Distributed Discount Amount",
+   "options": "currency"
+  },
+  {
    "fieldname": "available_quantity_section",
    "fieldtype": "Section Break",
    "label": "Available Quantity"
@@ -976,7 +983,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-12 16:33:52.503777",
+ "modified": "2025-03-12 16:33:55.503777",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

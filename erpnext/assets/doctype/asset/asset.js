@@ -72,6 +72,12 @@ frappe.ui.form.on("Asset", {
 				filters: { item_code: doc.item_code },
 			};
 		});
+
+		if (frm.doc.docstatus == 1) {
+			frm.custom_make_buttons = {
+				"Asset Capitalization": "Asset Capitalization",
+			};
+		}
 	},
 
 	refresh: function (frm) {
@@ -658,10 +664,6 @@ frappe.ui.form.on("Asset", {
 					} else {
 						frm.set_value("purchase_invoice_item", data.purchase_invoice_item);
 					}
-
-					let is_editable = !data.is_multiple_items; // if multiple items, then fields should be read-only
-					frm.set_df_property("gross_purchase_amount", "read_only", is_editable);
-					frm.set_df_property("asset_quantity", "read_only", is_editable);
 				}
 			},
 		});

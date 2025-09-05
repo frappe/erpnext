@@ -37,6 +37,14 @@ frappe.ui.form.on("Production Plan", {
 			};
 		});
 
+		frm.set_query("sub_assembly_warehouse", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.set_query("material_request", "material_requests", function () {
 			return {
 				filters: {
@@ -116,7 +124,9 @@ frappe.ui.form.on("Production Plan", {
 					);
 				}
 
-				if (frm.doc.po_items && frm.doc.status !== "Closed") {
+				let items = frm.events.get_items_for_work_order(frm);
+
+				if (items?.length && frm.doc.status !== "Closed") {
 					frm.add_custom_button(
 						__("Work Order / Subcontract PO"),
 						() => {
@@ -191,6 +201,24 @@ frappe.ui.form.on("Production Plan", {
 		</table>`;
 
 		set_field_options("projected_qty_formula", projected_qty_formula);
+	},
+
+	get_items_for_work_order(frm) {
+		let items = frm.doc.po_items;
+		if (frm.doc.sub_assembly_items?.length) {
+			items = [...items, ...frm.doc.sub_assembly_items];
+		}
+
+		let has_items =
+			items.filter((item) => {
+				if (item.planned_qty) {
+					return item.planned_qty > item.ordered_qty;
+				} else {
+					return item.qty > (item.received_qty || item.ordered_qty);
+				}
+			}) || [];
+
+		return has_items;
 	},
 
 	close_open_production_plan(frm, close = false) {

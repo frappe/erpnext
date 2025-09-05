@@ -21,7 +21,6 @@
   "party_name",
   "book_advance_payments_in_separate_party_account",
   "reconcile_on_advance_payment_date",
-  "advance_reconciliation_takes_effect_on",
   "column_break_11",
   "bank_account",
   "party_bank_account",
@@ -203,14 +202,14 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "party",
+   "depends_on": "eval: doc.party && doc.party_type !== \"Employee\"",
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact",
    "options": "Contact"
   },
   {
-   "depends_on": "contact_person",
+   "depends_on": "eval: (doc.contact_person || doc.party_type === \"Employee\") && doc.contact_email",
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Email",
@@ -229,6 +228,7 @@
    "fieldname": "party_balance",
    "fieldtype": "Currency",
    "label": "Party Balance",
+   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -786,18 +786,9 @@
    "options": "No\nYes",
    "print_hide": 1,
    "search_index": 1
-  },
-  {
-   "default": "Oldest Of Invoice Or Advance",
-   "fetch_from": "company.reconciliation_takes_effect_on",
-   "fieldname": "advance_reconciliation_takes_effect_on",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Advance Reconciliation Takes Effect On",
-   "no_copy": 1,
-   "options": "Advance Payment Date\nOldest Of Invoice Or Advance\nReconciliation Date"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [
@@ -809,7 +800,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2025-01-31 17:27:28.555246",
+ "modified": "2025-05-15 18:01:04.013025",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -849,6 +840,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

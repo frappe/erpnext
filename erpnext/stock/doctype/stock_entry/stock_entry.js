@@ -179,6 +179,7 @@ frappe.ui.form.on("Stock Entry", {
 				inspection_type: "Incoming",
 				reference_type: frm.doc.doctype,
 				reference_name: frm.doc.name,
+				child_row_reference: row.doc.name,
 				item_code: row.doc.item_code,
 				description: row.doc.description,
 				item_serial_no: row.doc.serial_no ? row.doc.serial_no.split("\n")[0] : null,
@@ -194,6 +195,7 @@ frappe.ui.form.on("Stock Entry", {
 				filters: {
 					item_code: d.item_code,
 					reference_name: doc.name,
+					child_row_reference: d.name,
 				},
 			};
 		});
@@ -462,6 +464,7 @@ frappe.ui.form.on("Stock Entry", {
 							docstatus: 1,
 							purpose: "Material Transfer",
 							add_to_transit: 1,
+							per_transferred: ["<", 100],
 						},
 					});
 				},
@@ -950,6 +953,15 @@ frappe.ui.form.on("Stock Entry Detail", {
 	},
 
 	batch_no(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.batch_no) {
+			frappe.model.set_value(cdt, cdn, {
+				use_serial_batch_fields: 1,
+				serial_and_batch_bundle: "",
+			});
+		}
+
 		validate_sample_quantity(frm, cdt, cdn);
 	},
 
@@ -990,6 +1002,13 @@ frappe.ui.form.on("Landed Cost Taxes and Charges", {
 erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockController {
 	setup() {
 		var me = this;
+
+		this.barcode_scanner = new erpnext.utils.BarcodeScanner({
+			frm: this.frm,
+			warehouse_field: (doc) => {
+				return doc.purpose === "Material Receipt" ? "t_warehouse" : "s_warehouse";
+			},
+		});
 
 		this.setup_posting_date_time_check();
 
@@ -1074,6 +1093,13 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	serial_no(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 
+		if (item.serial_no) {
+			frappe.model.set_value(cdt, cdn, {
+				use_serial_batch_fields: 1,
+				serial_and_batch_bundle: "",
+			});
+		}
+
 		if (item?.serial_no) {
 			// Replace all occurences of comma with line feed
 			item.serial_no = item.serial_no.replace(/,/g, "\n");
@@ -1111,8 +1137,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 	scan_barcode() {
 		frappe.flags.dialog_set = false;
-		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: this.frm });
-		barcode_scanner.process_scan();
+		this.barcode_scanner.process_scan();
 	}
 
 	on_submit() {

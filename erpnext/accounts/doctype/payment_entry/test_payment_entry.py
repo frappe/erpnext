@@ -49,8 +49,10 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.insert()
 		pe.submit()
 
+		self.assertEqual(pe.paid_to_account_type, "Cash")
+
 		expected_gle = dict(
-			(d[0], d) for d in [["Debtors - _TC", 0, 1000, so.name], ["_Test Cash - _TC", 1000.0, 0, None]]
+			(d[0], d) for d in [["Debtors - _TC", 0, 1000, pe.name], ["_Test Cash - _TC", 1000.0, 0, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -82,7 +84,7 @@ class TestPaymentEntry(FrappeTestCase):
 
 		expected_gle = dict(
 			(d[0], d)
-			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], [pe.paid_to, 5500.0, 0, None]]
+			for d in [["_Test Receivable USD - _TC", 0, 5500, pe.name], [pe.paid_to, 5500.0, 0, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -559,6 +561,8 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.source_exchange_rate = 50
 		pe.insert()
 		pe.submit()
+
+		self.assertEqual(pe.paid_from_account_type, "Bank")
 
 		outstanding_amount, status = frappe.db.get_value(
 			"Purchase Invoice", pi.name, ["outstanding_amount", "status"]

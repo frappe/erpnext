@@ -5,6 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "posting_date",
   "posting_time",
   "merge_invoices_based_on",
@@ -113,12 +114,22 @@
    "label": "Posting Time",
    "no_copy": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-01 11:36:42.456429",
+ "modified": "2025-07-02 17:08:04.747202",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Merge Log",
@@ -179,7 +190,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "row_format": "Dynamic",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

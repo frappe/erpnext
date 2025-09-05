@@ -236,8 +236,11 @@ class SubcontractingOrder(SubcontractingController):
 
 		return flt(query[0][0]) if query else 0
 
-	def update_reserved_qty_for_subcontracting(self):
+	def update_reserved_qty_for_subcontracting(self, sco_item_rows=None):
 		for item in self.supplied_items:
+			if sco_item_rows and item.reference_name not in sco_item_rows:
+				continue
+
 			if item.rm_item_code:
 				stock_bin = get_bin(item.rm_item_code, item.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
@@ -299,7 +302,7 @@ class SubcontractingOrder(SubcontractingController):
 
 		self.set_missing_values()
 
-	def update_status(self, status=None, update_modified=True):
+	def update_status(self, status=None, update_modified=True, update_bin=True):
 		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Purchase Order", self.purchase_order)
 
@@ -329,8 +332,9 @@ class SubcontractingOrder(SubcontractingController):
 			self.db_set("status", status, update_modified=update_modified)
 
 		self.update_requested_qty()
-		self.update_ordered_qty_for_subcontracting()
-		self.update_reserved_qty_for_subcontracting()
+		if update_bin:
+			self.update_ordered_qty_for_subcontracting()
+			self.update_reserved_qty_for_subcontracting()
 
 	def update_subcontracted_quantity_in_po(self, cancel=False):
 		for service_item in self.service_items:

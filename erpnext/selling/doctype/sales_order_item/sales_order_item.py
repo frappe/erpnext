@@ -40,6 +40,7 @@ class SalesOrderItem(Document):
 		description: DF.TextEditor | None
 		discount_amount: DF.Currency
 		discount_percentage: DF.Percent
+		distributed_discount_amount: DF.Currency
 		ensure_delivery_based_on_produced_serial_no: DF.Check
 		grant_commission: DF.Check
 		gross_profit: DF.Currency

@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-01-10 16:34:16",
+ "creation": "2025-04-09 12:09:40.634472",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -20,6 +20,7 @@
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
+  "disassembled_qty",
   "process_loss_qty",
   "project",
   "section_break_ndpq",
@@ -586,6 +587,14 @@
   {
    "fieldname": "section_break_ndpq",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "disassembled_qty",
+   "fieldtype": "Float",
+   "label": "Disassembled Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -593,7 +602,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-11 15:47:13.454422",
+ "modified": "2025-06-21 00:55:45.916224",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder.functions import IfNull, Max
 from frappe.utils import flt
 from pypika.terms import ExistsCriterion
 
@@ -208,29 +208,20 @@ def get_stock_ledger_entries(filters, items):
 	if not items:
 		return []
 
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-	sle2 = frappe.qb.DocType("Stock Ledger Entry")
+	max_posting_datetime_query = get_item_wise_max_posting_datetime(filters, items)
 
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
-		.left_join(sle2)
+		.join(max_posting_datetime_query)
 		.on(
-			(sle.item_code == sle2.item_code)
-			& (sle.warehouse == sle2.warehouse)
-			& (sle.posting_datetime < sle2.posting_datetime)
-			& (sle.name < sle2.name)
+			(sle.item_code == max_posting_datetime_query.item_code)
+			& (sle.warehouse == max_posting_datetime_query.warehouse)
+			& (sle.posting_datetime == max_posting_datetime_query.posting_datetime)
 		)
 		.select(sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company)
-		.where((sle2.name.isnull()) & (sle.docstatus < 2) & (sle.item_code.isin(items)))
+		.where(sle.is_cancelled == 0)
 	)
-
-	if filters.get("company"):
-		query = query.where(sle.company == filters.get("company"))
-
-	if date := filters.get("date"):
-		query = query.where(sle.posting_date <= date)
-	else:
-		frappe.throw(_("'Date' is required"))
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value(
@@ -247,4 +238,44 @@ def get_stock_ledger_entries(filters, items):
 				)
 			)
 
+	if filters.get("company"):
+		query = query.where(sle.company == filters.get("company"))
+
+	if filters.get("data"):
+		query = query.where(sle.posting_date <= filters.get("data"))
+
 	return query.run(as_dict=True)
+
+
+def get_item_wise_max_posting_datetime(filters, items):
+	"""Get the maximum Stock Ledger Entry name for the given filters and items."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(sle.item_code, sle.warehouse, sle.name, Max(sle.posting_datetime).as_("posting_datetime"))
+		.where(sle.item_code.isin(items) & (sle.is_cancelled == 0))
+		.groupby(sle.item_code, sle.warehouse)
+	)
+
+	if filters.get("warehouse"):
+		warehouse_details = frappe.db.get_value(
+			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
+		)
+
+		if warehouse_details:
+			wh = frappe.qb.DocType("Warehouse")
+			query = query.where(
+				sle.warehouse.isin(
+					frappe.qb.from_(wh)
+					.select(wh.name)
+					.where((wh.lft >= warehouse_details.lft) & (wh.rgt <= warehouse_details.rgt))
+				)
+			)
+
+	if filters.get("company"):
+		query = query.where(sle.company == filters.get("company"))
+
+	if filters.get("data"):
+		query = query.where(sle.posting_date <= filters.get("data"))
+
+	return query

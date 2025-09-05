@@ -1,63 +1,28 @@
 import frappe
-from frappe import qb
-from frappe.query_builder.custom import ConstantColumn
+from frappe.model.naming import _generate_random_string
+from frappe.query_builder import Case
+from frappe.utils import now_datetime
 
+from erpnext.accounts.utils import get_advance_payment_doctypes
 
-def get_advance_doctypes() -> list:
-	return frappe.get_hooks("advance_payment_doctypes")
+DOCTYPE = "Advance Payment Ledger Entry"
 
-
-def get_payments_with_so_po_reference() -> list:
-	advance_payment_entries = []
-	advance_doctypes = get_advance_doctypes()
-	per = qb.DocType("Payment Entry Reference")
-	payments_with_reference = (
-		qb.from_(per)
-		.select(per.parent)
-		.distinct()
-		.where(per.reference_doctype.isin(advance_doctypes) & per.docstatus.eq(1))
-		.run()
-	)
-	if payments_with_reference:
-		pe = qb.DocType("Payment Entry")
-		advance_payment_entries = (
-			qb.from_(pe)
-			.select(ConstantColumn("Payment Entry").as_("doctype"))
-			.select(pe.name)
-			.where(pe.name.isin(payments_with_reference) & pe.docstatus.eq(1))
-			.run(as_dict=True)
-		)
-
-	return advance_payment_entries
-
-
-def get_journals_with_so_po_reference() -> list:
-	advance_journal_entries = []
-	advance_doctypes = get_advance_doctypes()
-	jea = qb.DocType("Journal Entry Account")
-	journals_with_reference = (
-		qb.from_(jea)
-		.select(jea.parent)
-		.distinct()
-		.where(jea.reference_type.isin(advance_doctypes) & jea.docstatus.eq(1))
-		.run()
-	)
-	if journals_with_reference:
-		je = qb.DocType("Journal Entry")
-		advance_journal_entries = (
-			qb.from_(je)
-			.select(ConstantColumn("Journal Entry").as_("doctype"))
-			.select(je.name)
-			.where(je.name.isin(journals_with_reference) & je.docstatus.eq(1))
-			.run(as_dict=True)
-		)
-
-	return advance_journal_entries
-
-
-def make_advance_ledger_entries(vouchers: list):
-	for x in vouchers:
-		frappe.get_doc(x.doctype, x.name).make_advance_payment_ledger_entries()
+FIELDS = [
+	"name",
+	"creation",
+	"modified",
+	"owner",
+	"modified_by",
+	"company",
+	"voucher_type",
+	"voucher_no",
+	"against_voucher_type",
+	"against_voucher_no",
+	"amount",
+	"currency",
+	"event",
+	"delinked",
+]
 
 
 def execute():
@@ -65,9 +30,102 @@ def execute():
 	Description:
 	Create Advance Payment Ledger Entry for all Payments made against Sales / Purchase Orders
 	"""
-	frappe.db.truncate("Advance Payment Ledger Entry")
-	payment_entries = get_payments_with_so_po_reference()
-	make_advance_ledger_entries(payment_entries)
+	frappe.db.truncate(DOCTYPE)
+	advance_doctpyes = get_advance_payment_doctypes()
 
-	journals = get_journals_with_so_po_reference()
-	make_advance_ledger_entries(journals)
+	if not advance_doctpyes:
+		return
+
+	make_advance_ledger_entries_for_payment_entries(advance_doctpyes)
+	make_advance_ledger_entries_for_journal_entries(advance_doctpyes)
+
+
+def make_advance_ledger_entries_for_payment_entries(advance_doctpyes) -> list:
+	pe = frappe.qb.DocType("Payment Entry")
+	per = frappe.qb.DocType("Payment Entry Reference")
+
+	entries = (
+		frappe.qb.from_(per)
+		.inner_join(pe)
+		.on(pe.name == per.parent)
+		.select(
+			pe.company,
+			per.parenttype.as_("voucher_type"),
+			per.parent.as_("voucher_no"),
+			per.reference_doctype.as_("against_voucher_type"),
+			per.reference_name.as_("against_voucher_no"),
+			per.allocated_amount.as_("amount"),
+			Case()
+			.when(pe.payment_type == "Receive", pe.paid_from_account_currency)
+			.else_(pe.paid_to_account_currency)
+			.as_("currency"),
+		)
+		.where(per.reference_doctype.isin(advance_doctpyes) & per.docstatus.eq(1))
+		.run(as_dict=True)
+	)
+
+	if not entries:
+		return
+
+	bulk_insert_advance_entries(entries)
+
+
+def make_advance_ledger_entries_for_journal_entries(advance_doctpyes) -> list:
+	je = frappe.qb.DocType("Journal Entry")
+	jea = frappe.qb.DocType("Journal Entry Account")
+
+	entries = (
+		frappe.qb.from_(jea)
+		.inner_join(je)
+		.on(je.name == jea.parent)
+		.select(
+			je.company,
+			jea.parenttype.as_("voucher_type"),
+			jea.parent.as_("voucher_no"),
+			jea.reference_type.as_("against_voucher_type"),
+			jea.reference_name.as_("against_voucher_no"),
+			Case()
+			.when(jea.account_type == "Receivable", jea.credit_in_account_currency)
+			.else_(jea.debit_in_account_currency)
+			.as_("amount"),
+			jea.account_currency.as_("currency"),
+		)
+		.where(jea.reference_type.isin(advance_doctpyes) & jea.docstatus.eq(1))
+		.run(as_dict=True)
+	)
+
+	if not entries:
+		return
+
+	bulk_insert_advance_entries(entries)
+
+
+def bulk_insert_advance_entries(entries):
+	details = []
+	user = frappe.session.user
+	now = now_datetime()
+	for entry in entries:
+		if entry.amount < 0:
+			continue
+		details.append(get_values(user, now, entry))
+
+	frappe.db.bulk_insert(DOCTYPE, fields=FIELDS, values=details)
+
+
+def get_values(user, now, entry):
+	return (
+		_generate_random_string(10),
+		now,
+		now,
+		user,
+		user,
+		entry.company,
+		entry.voucher_type,
+		entry.voucher_no,
+		entry.against_voucher_type,
+		entry.against_voucher_no,
+		entry.amount * -1,
+		entry.currency,
+		"Submit",
+		0,
+	)

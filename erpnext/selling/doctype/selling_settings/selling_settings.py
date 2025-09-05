@@ -23,6 +23,8 @@ class SellingSettings(Document):
 		allow_multiple_items: DF.Check
 		allow_negative_rates_for_items: DF.Check
 		allow_sales_order_creation_for_expired_quotation: DF.Check
+		allow_zero_qty_in_quotation: DF.Check
+		allow_zero_qty_in_sales_order: DF.Check
 		blanket_order_allowance: DF.Float
 		cust_master_name: DF.Literal["Customer Name", "Naming Series", "Auto Name"]
 		customer_group: DF.Link | None

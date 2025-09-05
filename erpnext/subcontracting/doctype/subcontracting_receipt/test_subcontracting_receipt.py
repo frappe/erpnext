@@ -373,6 +373,56 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
+		service_items = [
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA4",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.supplied_items[1].expense_account = "_Test Write Off - TCP1"
+		scr.save()
+		scr.submit()
+
+		for item in scr.supplied_items:
+			self.assertTrue(item.expense_account)
+
+		gl_entries = get_gl_entries("Subcontracting Receipt", scr.name)
+		self.assertTrue(gl_entries)
+
+		fg_warehouse_ac = get_inventory_account(scr.company, scr.items[0].warehouse)
+		expense_account = scr.items[0].expense_account
+		expected_values = {
+			fg_warehouse_ac: [4000, 3000],
+			expense_account: [2000, 4000],
+			"_Test Write Off - TCP1": [1000, 0],
+		}
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
 		service_items = [

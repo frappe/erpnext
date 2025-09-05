@@ -16,6 +16,7 @@
   "stock_uom",
   "price_list_defaults_section",
   "auto_insert_price_list_rate_if_missing",
+  "update_price_list_based_on",
   "column_break_12",
   "update_existing_price_list_rate",
   "conversion_factor_section",
@@ -62,6 +63,20 @@
   "use_naming_series",
   "column_break_wslv",
   "naming_series_prefix",
+  "stock_reservation_tab",
+  "enable_stock_reservation",
+  "column_break_rx3e",
+  "allow_partial_reservation",
+  "auto_reserve_stock_for_sales_order_on_purchase",
+  "serial_and_batch_reservation_section",
+  "auto_reserve_serial_and_batch",
+  "quality_tab",
+  "quality_inspection_settings_section",
+  "action_if_quality_inspection_is_not_submitted",
+  "column_break_23",
+  "action_if_quality_inspection_is_rejected",
+  "section_break_uiau",
+  "allow_to_make_quality_inspection_after_purchase_or_delivery",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -456,7 +471,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.valuation_method === \"Moving Average\"",
    "description": "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate.",
    "fieldname": "do_not_use_batchwise_valuation",
    "fieldtype": "Check",
@@ -503,6 +517,30 @@
    "fieldname": "allow_uom_with_conversion_rate_defined_in_item",
    "fieldtype": "Check",
    "label": "Allow UOM with Conversion Rate Defined in Item"
+  },
+  {
+   "fieldname": "quality_tab",
+   "fieldtype": "Tab Break",
+   "label": "Quality"
+  },
+  {
+   "fieldname": "section_break_uiau",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_make_quality_inspection_after_purchase_or_delivery",
+   "fieldtype": "Check",
+   "label": "Allow to Make Quality Inspection after Purchase / Delivery"
+  },
+  {
+   "default": "Rate",
+   "depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
+   "fieldname": "update_price_list_based_on",
+   "fieldtype": "Select",
+   "label": "Update Price List Based On",
+   "mandatory_depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
+   "options": "Rate\nPrice List Rate"
   }
  ],
  "icon": "icon-cog",
@@ -510,7 +548,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-03-31 15:34:20.752065",
+ "modified": "2025-05-06 02:39:24.284587",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

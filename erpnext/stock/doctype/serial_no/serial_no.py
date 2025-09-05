@@ -40,6 +40,7 @@ class SerialNo(StockController):
 		batch_no: DF.Link | None
 		brand: DF.Link | None
 		company: DF.Link
+		customer: DF.Link | None
 		description: DF.Text | None
 		employee: DF.Link | None
 		item_code: DF.Link
@@ -147,6 +148,17 @@ def get_serial_nos(serial_no):
 		return serial_no
 
 	return [s.strip() for s in cstr(serial_no).strip().replace(",", "\n").split("\n") if s.strip()]
+
+
+def get_serial_nos_from_sle_list(bundles):
+	table = frappe.qb.DocType("Serial and Batch Entry")
+	query = frappe.qb.from_(table).select(table.parent, table.serial_no).where(table.parent.isin(bundles))
+	data = query.run(as_dict=True)
+
+	result = {}
+	for d in data:
+		result.setdefault(d.parent, []).append(d.serial_no)
+	return result
 
 
 def clean_serial_no_string(serial_no: str) -> str:

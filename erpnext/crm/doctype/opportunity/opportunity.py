@@ -126,6 +126,7 @@ class Opportunity(TransactionBase, CRMNote):
 				link_communications(self.opportunity_from, self.party_name, self)
 
 	def validate(self):
+		self.set_opportunity_type()
 		self.make_new_lead_if_required()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
@@ -149,6 +150,10 @@ class Opportunity(TransactionBase, CRMNote):
 					self.set(field, value)
 				except Exception:
 					continue
+
+	def set_opportunity_type(self):
+		if self.is_new() and not self.opportunity_type:
+			self.opportunity_type = _("Sales")
 
 	def set_exchange_rate(self):
 		company_currency = frappe.get_cached_value("Company", self.company, "default_currency")

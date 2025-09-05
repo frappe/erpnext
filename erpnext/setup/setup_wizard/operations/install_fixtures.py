@@ -266,8 +266,6 @@ def install(country=None):
 		{"doctype": "Issue Priority", "name": _("Low")},
 		{"doctype": "Issue Priority", "name": _("Medium")},
 		{"doctype": "Issue Priority", "name": _("High")},
-		{"doctype": "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
-		{"doctype": "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{"doctype": "Party Type", "party_type": "Customer", "account_type": "Receivable"},
 		{"doctype": "Party Type", "party_type": "Supplier", "account_type": "Payable"},
 		{"doctype": "Party Type", "party_type": "Employee", "account_type": "Payable"},
@@ -482,14 +480,19 @@ def install_defaults(args=None):  # nosemgrep
 	create_bank_account(args)
 
 
-def set_global_defaults(args):
+def set_global_defaults(kwargs):
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
+	company = frappe.db.get_value(
+		"Company",
+		{"company_name": kwargs.get("company_name")},
+		"name",
+	)
 
 	global_defaults.update(
 		{
-			"default_currency": args.get("currency"),
-			"default_company": args.get("company_name"),
-			"country": args.get("country"),
+			"default_currency": kwargs.get("currency"),
+			"default_company": company,
+			"country": kwargs.get("country"),
 		}
 	)
 
@@ -504,7 +507,9 @@ def update_stock_settings():
 	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
+	stock_settings.update_price_list_based_on = "Rate"
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
+	stock_settings.flags.ignore_permissions = True
 	stock_settings.save()
 
 

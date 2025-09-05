@@ -21,6 +21,7 @@
   "purchase_order",
   "production_plan_item",
   "column_break_7",
+  "ordered_qty",
   "received_qty",
   "indent",
   "section_break_19",
@@ -204,12 +205,19 @@
    "fieldtype": "Float",
    "label": "Produced Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "label": "Ordered Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-27 13:45:17.422435",
+ "modified": "2025-06-10 13:36:24.759101",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",

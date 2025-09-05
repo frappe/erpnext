@@ -31,6 +31,7 @@
   "determine_address_tax_category_from",
   "column_break_19",
   "add_taxes_from_item_tax_template",
+  "add_taxes_from_taxes_and_charges_template",
   "book_tax_discount_loss",
   "round_row_wise_tax",
   "print_settings",
@@ -38,8 +39,15 @@
   "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
+  "item_price_settings_section",
+  "maintain_same_internal_transaction_rate",
+  "fetch_valuation_rate_for_internal_transaction",
+  "column_break_feyo",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
   "currency_exchange_section",
   "allow_stale",
+  "allow_pegged_currencies_exchange_rates",
   "column_break_yuug",
   "stale_days",
   "section_break_jpd0",
@@ -77,9 +85,14 @@
   "reports_tab",
   "remarks_section",
   "general_ledger_remarks_length",
-  "ignore_is_opening_check_for_reporting",
   "column_break_lvjk",
   "receivable_payable_remarks_length",
+  "accounts_receivable_payable_tuning_section",
+  "receivable_payable_fetch_method",
+  "column_break_ntmi",
+  "drop_ar_procedures",
+  "legacy_section",
+  "ignore_is_opening_check_for_reporting",
   "payment_request_settings",
   "create_pr_in_draft_status"
  ],
@@ -532,6 +545,90 @@
    "fieldtype": "Select",
    "label": "Posting Date Inheritance for Exchange Gain / Loss",
    "options": "Invoice\nPayment\nReconciliation Date"
+  },
+  {
+   "fieldname": "column_break_xrnd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Buffered Cursor",
+   "fieldname": "receivable_payable_fetch_method",
+   "fieldtype": "Select",
+   "label": "Data Fetch Method",
+   "options": "Buffered Cursor\nUnBuffered Cursor\nRaw SQL"
+  },
+  {
+   "fieldname": "accounts_receivable_payable_tuning_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts Receivable / Payable Tuning"
+  },
+  {
+   "fieldname": "legacy_section",
+   "fieldtype": "Section Break",
+   "label": "Legacy Fields"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_internal_transaction_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout Internal Transaction"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_internal_transaction_rate",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action if Same Rate is Not Maintained Throughout  Internal Transaction",
+   "mandatory_depends_on": "maintain_same_internal_transaction_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval: doc.maintain_same_internal_transaction_rate && doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "column_break_feyo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "System will do an implicit conversion using the pegged currency. <br>\nEx: Instead of AED -&gt; INR, system will do AED -&gt; USD -&gt; INR using the pegged exchange rate of AED against USD.",
+   "documentation_url": "/app/pegged-currencies/Pegged Currencies",
+   "fieldname": "allow_pegged_currencies_exchange_rates",
+   "fieldtype": "Check",
+   "label": "Allow Implicit Pegged Currency Conversion"
+  },
+  {
+   "default": "0",
+   "description": "If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template.",
+   "fieldname": "add_taxes_from_taxes_and_charges_template",
+   "fieldtype": "Check",
+   "label": "Automatically Add Taxes from Taxes and Charges Template"
+  },
+  {
+   "fieldname": "column_break_ntmi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.receivable_payable_fetch_method == \"Raw SQL\"",
+   "description": "Drops existing SQL Procedures and Function setup by Accounts Receivable report",
+   "fieldname": "drop_ar_procedures",
+   "fieldtype": "Button",
+   "label": "Drop Procedures"
+  },
+  {
+   "default": "0",
+   "fieldname": "fetch_valuation_rate_for_internal_transaction",
+   "fieldtype": "Check",
+   "label": "Fetch Valuation Rate for Internal Transaction"
   }
  ],
  "icon": "icon-cog",
@@ -539,7 +636,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-01-23 13:15:44.077853",
+ "modified": "2025-07-18 13:56:47.192437",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

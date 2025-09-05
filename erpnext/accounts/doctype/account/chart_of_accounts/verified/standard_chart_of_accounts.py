@@ -13,7 +13,7 @@ def get():
 				_("Bank Accounts"): {"account_type": "Bank", "is_group": 1},
 				_("Cash In Hand"): {_("Cash"): {"account_type": "Cash"}, "account_type": "Cash"},
 				_("Loans and Advances (Assets)"): {
-					_("Employee Advances"): {},
+					_("Employee Advances"): {"account_type": "Payable"},
 				},
 				_("Securities and Deposits"): {_("Earnest Money"): {}},
 				_("Stock Assets"): {

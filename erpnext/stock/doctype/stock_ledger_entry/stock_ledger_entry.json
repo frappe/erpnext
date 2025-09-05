@@ -57,7 +57,6 @@
    "options": "Item",
    "print_width": "100px",
    "read_only": 1,
-   "search_index": 1,
    "width": "100px"
   },
   {
@@ -88,7 +87,6 @@
    "options": "Warehouse",
    "print_width": "100px",
    "read_only": 1,
-   "search_index": 1,
    "width": "100px"
   },
   {
@@ -101,7 +99,6 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "read_only": 1,
-   "search_index": 1,
    "width": "100px"
   },
   {
@@ -357,13 +354,14 @@
    "search_index": 1
   }
  ],
+ "grid_page_length": 50,
  "hide_toolbar": 1,
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-23 18:03:05.171023",
+ "modified": "2025-04-22 12:37:41.304109",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

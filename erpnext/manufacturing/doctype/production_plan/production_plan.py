@@ -4,6 +4,7 @@
 
 import copy
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _, msgprint
@@ -750,7 +751,14 @@ class ProductionPlan(Document):
 				"company": self.get("company"),
 			}
 
+			if flt(row.qty) <= flt(row.ordered_qty):
+				continue
+
 			self.prepare_data_for_sub_assembly_items(row, work_order_data)
+
+			if work_order_data.get("qty") <= 0:
+				continue
+
 			work_order = self.create_work_order(work_order_data)
 			if work_order:
 				wo_list.append(work_order)
@@ -769,6 +777,8 @@ class ProductionPlan(Document):
 		]:
 			if row.get(field):
 				wo_data[field] = row.get(field)
+
+		wo_data["qty"] = flt(row.get("qty")) - flt(row.get("ordered_qty"))
 
 		wo_data.update(
 			{
@@ -913,8 +923,7 @@ class ProductionPlan(Document):
 
 		if material_request_list:
 			material_request_list = [
-				f"""<a href="/app/Form/Material Request/{m.name}">{m.name}</a>"""
-				for m in material_request_list
+				get_link_to_form("Material Request", m.name) for m in material_request_list
 			]
 			msgprint(_("{0} created").format(comma_and(material_request_list)))
 		else:
@@ -925,6 +934,7 @@ class ProductionPlan(Document):
 		"Fetch sub assembly items and optionally combine them."
 		self.sub_assembly_items = []
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
+		bin_details = frappe._dict()
 
 		for row in self.po_items:
 			if self.skip_available_sub_assembly_item and not self.sub_assembly_warehouse:
@@ -939,6 +949,8 @@ class ProductionPlan(Document):
 			bom_data = []
 
 			get_sub_assembly_items(
+				[item.production_item for item in sub_assembly_items_store],
+				bin_details,
 				row.bom_no,
 				bom_data,
 				row.planned_qty,
@@ -1172,6 +1184,7 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			item.purchase_uom,
 			item_uom.conversion_factor,
 			item.safety_stock,
+			bom.item.as_("main_bom_item"),
 		)
 		.where(
 			(bei.docstatus < 2)
@@ -1239,6 +1252,7 @@ def get_subitems(
 			item_default.default_warehouse,
 			item.purchase_uom,
 			item_uom.conversion_factor,
+			bom.item.as_("main_bom_item"),
 		)
 		.where(
 			(bom.name == bom_no)
@@ -1352,6 +1366,7 @@ def get_material_request_items(
 			"sales_order": sales_order,
 			"description": row.get("description"),
 			"uom": row.get("purchase_uom") or row.get("stock_uom"),
+			"main_bom_item": row.get("main_bom_item"),
 		}
 
 
@@ -1528,10 +1543,10 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 	so_item_details = frappe._dict()
 
-	sub_assembly_items = {}
+	sub_assembly_items = defaultdict(int)
 	if doc.get("skip_available_sub_assembly_item") and doc.get("sub_assembly_items"):
 		for d in doc.get("sub_assembly_items"):
-			sub_assembly_items.setdefault((d.get("production_item"), d.get("bom_no")), d.get("qty"))
+			sub_assembly_items[(d.get("production_item"), d.get("bom_no"))] += d.get("qty")
 
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
@@ -1560,6 +1575,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 					item_details = {}
 					if doc.get("sub_assembly_items"):
 						item_details = get_raw_materials_of_sub_assembly_items(
+							so_item_details[doc.get("sales_order")].keys() if so_item_details else [],
 							item_details,
 							company,
 							bom_no,
@@ -1737,6 +1753,8 @@ def get_item_data(item_code):
 
 
 def get_sub_assembly_items(
+	sub_assembly_items,
+	bin_details,
 	bom_no,
 	bom_data,
 	to_produce_qty,
@@ -1751,25 +1769,28 @@ def get_sub_assembly_items(
 			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
 			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 
-			bin_details = frappe._dict()
-			if skip_available_sub_assembly_item:
-				bin_details = get_bin_details(d, company, for_warehouse=warehouse)
+			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
+				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
 
-				for _bin_dict in bin_details:
+				for _bin_dict in bin_details[d.item_code]:
 					if _bin_dict.projected_qty > 0:
-						if _bin_dict.projected_qty > stock_qty:
+						if _bin_dict.projected_qty >= stock_qty:
+							_bin_dict.projected_qty -= stock_qty
 							stock_qty = 0
 							continue
 						else:
 							stock_qty = stock_qty - _bin_dict.projected_qty
+							sub_assembly_items.append(d.item_code)
 			elif warehouse:
-				bin_details = get_bin_details(d, company, for_warehouse=warehouse)
+				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
 
 			if stock_qty > 0:
 				bom_data.append(
 					frappe._dict(
 						{
-							"actual_qty": bin_details[0].get("actual_qty", 0) if bin_details else 0,
+							"actual_qty": bin_details[d.item_code][0].get("actual_qty", 0)
+							if bin_details.get(d.item_code)
+							else 0,
 							"parent_item_code": parent_item_code,
 							"description": d.description,
 							"production_item": d.item_code,
@@ -1787,6 +1808,8 @@ def get_sub_assembly_items(
 
 				if d.value:
 					get_sub_assembly_items(
+						sub_assembly_items,
+						bin_details,
 						d.value,
 						bom_data,
 						stock_qty,
@@ -1866,7 +1889,13 @@ def get_non_completed_production_plans():
 
 
 def get_raw_materials_of_sub_assembly_items(
-	item_details, company, bom_no, include_non_stock_items, sub_assembly_items, planned_qty=1
+	existing_sub_assembly_items,
+	item_details,
+	company,
+	bom_no,
+	include_non_stock_items,
+	sub_assembly_items,
+	planned_qty=1,
 ):
 	bei = frappe.qb.DocType("BOM Item")
 	bom = frappe.qb.DocType("BOM")
@@ -1899,6 +1928,7 @@ def get_raw_materials_of_sub_assembly_items(
 			item.purchase_uom,
 			item_uom.conversion_factor,
 			item.safety_stock,
+			bom.item.as_("main_bom_item"),
 		)
 		.where(
 			(bei.docstatus == 1)
@@ -1910,12 +1940,13 @@ def get_raw_materials_of_sub_assembly_items(
 
 	for item in items:
 		key = (item.item_code, item.bom_no)
-		if item.bom_no and key not in sub_assembly_items:
+		if (item.bom_no and key not in sub_assembly_items) or (item.item_code in existing_sub_assembly_items):
 			continue
 
 		if item.bom_no:
 			planned_qty = flt(sub_assembly_items[key])
 			get_raw_materials_of_sub_assembly_items(
+				existing_sub_assembly_items,
 				item_details,
 				company,
 				item.bom_no,

@@ -9,6 +9,7 @@ import re
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
 from pypika.terms import ExistsCriterion
 
@@ -108,14 +109,19 @@ def get_period_list(
 
 
 def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
-	fiscal_year = frappe.db.sql(
-		"""select min(year_start_date) as year_start_date,
-		max(year_end_date) as year_end_date from `tabFiscal Year` where
-		name between %(from_fiscal_year)s and %(to_fiscal_year)s""",
-		{"from_fiscal_year": from_fiscal_year, "to_fiscal_year": to_fiscal_year},
-		as_dict=1,
+	from_year_start_date = frappe.get_cached_value("Fiscal Year", from_fiscal_year, "year_start_date")
+	to_year_end_date = frappe.get_cached_value("Fiscal Year", to_fiscal_year, "year_end_date")
+
+	fy = frappe.qb.DocType("Fiscal Year")
+
+	query = (
+		frappe.qb.from_(fy)
+		.select(Min(fy.year_start_date).as_("year_start_date"), Max(fy.year_end_date).as_("year_end_date"))
+		.where(fy.year_start_date >= from_year_start_date)
+		.where(fy.year_end_date <= to_year_end_date)
 	)
 
+	fiscal_year = query.run(as_dict=True)
 	return fiscal_year[0] if fiscal_year else {}
 
 
@@ -428,6 +434,7 @@ def set_gl_entries_by_account(
 	root_type=None,
 	ignore_closing_entries=False,
 	ignore_opening_entries=False,
+	group_by_account=False,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
@@ -459,6 +466,7 @@ def set_gl_entries_by_account(
 				root_type,
 				ignore_closing_entries,
 				last_period_closing_voucher[0].name,
+				group_by_account=group_by_account,
 			)
 			from_date = add_days(last_period_closing_voucher[0].period_end_date, 1)
 			ignore_opening_entries = True
@@ -473,6 +481,7 @@ def set_gl_entries_by_account(
 		root_type,
 		ignore_closing_entries,
 		ignore_opening_entries=ignore_opening_entries,
+		group_by_account=group_by_account,
 	)
 
 	if filters and filters.get("presentation_currency"):
@@ -495,16 +504,21 @@ def get_accounting_entries(
 	ignore_closing_entries=None,
 	period_closing_voucher=None,
 	ignore_opening_entries=False,
+	group_by_account=False,
 ):
 	gl_entry = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(gl_entry)
 		.select(
 			gl_entry.account,
-			gl_entry.debit,
-			gl_entry.credit,
-			gl_entry.debit_in_account_currency,
-			gl_entry.credit_in_account_currency,
+			gl_entry.debit if not group_by_account else Sum(gl_entry.debit).as_("debit"),
+			gl_entry.credit if not group_by_account else Sum(gl_entry.credit).as_("credit"),
+			gl_entry.debit_in_account_currency
+			if not group_by_account
+			else Sum(gl_entry.debit_in_account_currency).as_("debit_in_account_currency"),
+			gl_entry.credit_in_account_currency
+			if not group_by_account
+			else Sum(gl_entry.credit_in_account_currency).as_("credit_in_account_currency"),
 			gl_entry.account_currency,
 		)
 		.where(gl_entry.company == filters.company)
@@ -518,6 +532,7 @@ def get_accounting_entries(
 		query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
 		query = query.where(gl_entry.posting_date <= to_date)
+		query = query.force_index("posting_date_company_index")
 
 		if ignore_opening_entries and not ignore_is_opening:
 			query = query.where(gl_entry.is_opening == "No")
@@ -538,6 +553,9 @@ def get_accounting_entries(
 
 	if match_conditions:
 		query += "and" + match_conditions
+
+	if group_by_account:
+		query += " GROUP BY `account`"
 
 	return frappe.db.sql(query, params, as_dict=True)
 

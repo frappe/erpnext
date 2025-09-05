@@ -31,6 +31,91 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 
+def get_data(filters):
+	data = []
+
+	conditions = get_conditions(filters)
+	pr_supplier_map = get_purchase_receipt_supplier_map()
+	pi_supplier_map = get_purchase_invoice_supplier_map()
+
+	assets_linked_to_fb = get_assets_linked_to_fb(filters)
+
+	company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+	if filters.include_default_book_assets and company_fb:
+		finance_book = company_fb
+	elif filters.finance_book:
+		finance_book = filters.finance_book
+	else:
+		finance_book = None
+
+	depreciation_amount_map = get_asset_depreciation_amount_map(filters, finance_book)
+
+	revaluation_amount_map = get_asset_value_adjustment_map(filters, finance_book)
+
+	group_by = frappe.scrub(filters.get("group_by"))
+
+	if group_by in ("asset_category", "location"):
+		data = get_group_by_data(
+			group_by, conditions, assets_linked_to_fb, depreciation_amount_map, revaluation_amount_map
+		)
+		return data
+
+	fields = [
+		"name as asset_id",
+		"asset_name",
+		"status",
+		"department",
+		"company",
+		"cost_center",
+		"calculate_depreciation",
+		"purchase_receipt",
+		"asset_category",
+		"purchase_date",
+		"gross_purchase_amount",
+		"location",
+		"available_for_use_date",
+		"purchase_invoice",
+		"opening_accumulated_depreciation",
+	]
+	assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
+
+	for asset in assets_record:
+		if assets_linked_to_fb and asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
+			continue
+
+		depreciation_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
+		revaluation_amount = revaluation_amount_map.get(asset.asset_id, 0.0)
+		asset_value = (
+			asset.gross_purchase_amount
+			- asset.opening_accumulated_depreciation
+			- depreciation_amount
+			+ revaluation_amount
+		)
+
+		row = {
+			"asset_id": asset.asset_id,
+			"asset_name": asset.asset_name,
+			"status": asset.status,
+			"department": asset.department,
+			"cost_center": asset.cost_center,
+			"vendor_name": pr_supplier_map.get(asset.purchase_receipt)
+			or pi_supplier_map.get(asset.purchase_invoice),
+			"gross_purchase_amount": asset.gross_purchase_amount,
+			"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
+			"depreciated_amount": depreciation_amount,
+			"available_for_use_date": asset.available_for_use_date,
+			"location": asset.location,
+			"asset_category": asset.asset_category,
+			"purchase_date": asset.purchase_date,
+			"asset_value": asset_value,
+			"company": asset.company,
+		}
+		data.append(row)
+
+	return data
+
+
 def get_conditions(filters):
 	conditions = {"docstatus": 1}
 	status = filters.status
@@ -74,83 +159,6 @@ def get_conditions(filters):
 		conditions["status"] = (operand, ["Sold", "Scrapped", "Capitalized"])
 
 	return conditions
-
-
-def get_data(filters):
-	data = []
-
-	conditions = get_conditions(filters)
-	pr_supplier_map = get_purchase_receipt_supplier_map()
-	pi_supplier_map = get_purchase_invoice_supplier_map()
-
-	assets_linked_to_fb = get_assets_linked_to_fb(filters)
-
-	company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
-
-	if filters.include_default_book_assets and company_fb:
-		finance_book = company_fb
-	elif filters.finance_book:
-		finance_book = filters.finance_book
-	else:
-		finance_book = None
-
-	depreciation_amount_map = get_asset_depreciation_amount_map(filters, finance_book)
-
-	group_by = frappe.scrub(filters.get("group_by"))
-
-	if group_by in ("asset_category", "location"):
-		data = get_group_by_data(group_by, conditions, assets_linked_to_fb, depreciation_amount_map)
-		return data
-
-	fields = [
-		"name as asset_id",
-		"asset_name",
-		"status",
-		"department",
-		"company",
-		"cost_center",
-		"calculate_depreciation",
-		"purchase_receipt",
-		"asset_category",
-		"purchase_date",
-		"gross_purchase_amount",
-		"location",
-		"available_for_use_date",
-		"purchase_invoice",
-		"opening_accumulated_depreciation",
-	]
-	assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
-
-	for asset in assets_record:
-		if assets_linked_to_fb and asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
-			continue
-
-		depreciation_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
-		asset_value = (
-			asset.gross_purchase_amount - asset.opening_accumulated_depreciation - depreciation_amount
-		)
-
-		row = {
-			"asset_id": asset.asset_id,
-			"asset_name": asset.asset_name,
-			"status": asset.status,
-			"department": asset.department,
-			"cost_center": asset.cost_center,
-			"vendor_name": pr_supplier_map.get(asset.purchase_receipt)
-			or pi_supplier_map.get(asset.purchase_invoice),
-			"gross_purchase_amount": asset.gross_purchase_amount,
-			"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
-			"depreciated_amount": depreciation_amount,
-			"available_for_use_date": asset.available_for_use_date,
-			"location": asset.location,
-			"asset_category": asset.asset_category,
-			"purchase_date": asset.purchase_date,
-			"asset_value": asset_value,
-			"company": asset.company,
-		}
-		data.append(row)
-
-	return data
 
 
 def prepare_chart_data(data, filters):
@@ -290,7 +298,59 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 	return dict(asset_depr_amount_map)
 
 
-def get_group_by_data(group_by, conditions, assets_linked_to_fb, depreciation_amount_map):
+def get_asset_value_adjustment_map(filters, finance_book):
+	start_date = filters.from_date if filters.filter_based_on == "Date Range" else filters.year_start_date
+	end_date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
+
+	asset = frappe.qb.DocType("Asset")
+	gle = frappe.qb.DocType("GL Entry")
+	aca = frappe.qb.DocType("Asset Category Account")
+	company = frappe.qb.DocType("Company")
+
+	query = (
+		frappe.qb.from_(gle)
+		.join(asset)
+		.on(gle.against_voucher == asset.name)
+		.join(aca)
+		.on((aca.parent == asset.asset_category) & (aca.company_name == asset.company))
+		.join(company)
+		.on(company.name == asset.company)
+		.select(asset.name.as_("asset"), Sum(gle.debit - gle.credit).as_("adjustment_amount"))
+		.where(gle.account == aca.fixed_asset_account)
+		.where(gle.is_cancelled == 0)
+		.where(company.name == filters.company)
+		.where(asset.docstatus == 1)
+	)
+
+	if filters.only_existing_assets:
+		query = query.where(asset.is_existing_asset == 1)
+	if filters.asset_category:
+		query = query.where(asset.asset_category == filters.asset_category)
+	if filters.cost_center:
+		query = query.where(asset.cost_center == filters.cost_center)
+	if filters.status:
+		if filters.status == "In Location":
+			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
+		else:
+			query = query.where(asset.status.isin(["Sold", "Scrapped", "Capitalized"]))
+	if finance_book:
+		query = query.where((gle.finance_book.isin([cstr(finance_book), ""])) | (gle.finance_book.isnull()))
+	else:
+		query = query.where((gle.finance_book.isin([""])) | (gle.finance_book.isnull()))
+	if filters.filter_based_on in ("Date Range", "Fiscal Year"):
+		query = query.where(gle.posting_date >= start_date)
+		query = query.where(gle.posting_date <= end_date)
+
+	query = query.groupby(asset.name)
+
+	asset_adjustment_map = query.run()
+
+	return dict(asset_adjustment_map)
+
+
+def get_group_by_data(
+	group_by, conditions, assets_linked_to_fb, depreciation_amount_map, revaluation_amount_map
+):
 	fields = [
 		group_by,
 		"name",
@@ -307,8 +367,12 @@ def get_group_by_data(group_by, conditions, assets_linked_to_fb, depreciation_am
 			continue
 
 		a["depreciated_amount"] = depreciation_amount_map.get(a["name"], 0.0)
+		a["revaluation_amount"] = revaluation_amount_map.get(a["name"], 0.0)
 		a["asset_value"] = (
-			a["gross_purchase_amount"] - a["opening_accumulated_depreciation"] - a["depreciated_amount"]
+			a["gross_purchase_amount"]
+			- a["opening_accumulated_depreciation"]
+			- a["depreciated_amount"]
+			+ a["revaluation_amount"]
 		)
 
 		del a["name"]

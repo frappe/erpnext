@@ -47,7 +47,7 @@ frappe.ui.form.on("Event", {
 		frm.add_custom_button(
 			__("Add Sales Partners"),
 			function () {
-				new frappe.desk.eventParticipants(frm, "Sales Partners");
+				new frappe.desk.eventParticipants(frm, "Sales Partner");
 			},
 			__("Add Participants")
 		);

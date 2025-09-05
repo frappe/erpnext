@@ -5,7 +5,7 @@
 from urllib.parse import urlparse
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
@@ -14,6 +14,7 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 	get_pdf,
 	make_supplier_quotation_from_rfq,
 )
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.stock.doctype.item.test_item import make_item
@@ -21,6 +22,26 @@ from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
 class TestRequestforQuotation(FrappeTestCase):
+	def test_rfq_qty(self):
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			rfq.save()
+
+		# No error with qty=1
+		rfq.items[0].qty = 1
+		rfq.save()
+		self.assertEqual(rfq.items[0].qty, 1)
+
+	def test_rfq_zero_qty(self):
+		"""
+		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
+		"""
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+
+		with change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1}):
+			rfq.save()
+			self.assertEqual(rfq.items[0].qty, 0)
+
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()
 
@@ -161,6 +182,32 @@ class TestRequestforQuotation(FrappeTestCase):
 		supplier_doc.reload()
 		self.assertTrue(supplier_doc.portal_users[0].user)
 
+	@change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1})
+	def test_supplier_quotation_from_zero_qty_rfq(self):
+		rfq = make_request_for_quotation(qty=0)
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.get("suppliers")[0].supplier)
+
+		self.assertEqual(len(sq.items), 1)
+		self.assertEqual(sq.items[0].qty, 0)
+		self.assertEqual(sq.items[0].item_code, rfq.items[0].item_code)
+
+	@change_settings(
+		"Buying Settings",
+		{
+			"allow_zero_qty_in_request_for_quotation": 1,
+			"allow_zero_qty_in_supplier_quotation": 1,
+		},
+	)
+	def test_supplier_quotation_from_zero_qty_rfq_in_portal(self):
+		rfq = make_request_for_quotation(qty=0)
+		rfq.supplier = rfq.suppliers[0].supplier
+		sq_name = create_supplier_quotation(rfq)
+
+		sq = frappe.get_doc("Supplier Quotation", sq_name)
+		self.assertEqual(len(sq.items), 1)
+		self.assertEqual(sq.items[0].qty, 0)
+		self.assertEqual(sq.items[0].item_code, rfq.items[0].item_code)
+
 
 def make_request_for_quotation(**args) -> "RequestforQuotation":
 	"""
@@ -184,14 +231,17 @@ def make_request_for_quotation(**args) -> "RequestforQuotation":
 			"description": "_Test Item",
 			"uom": args.uom or "_Test UOM",
 			"stock_uom": args.stock_uom or "_Test UOM",
-			"qty": args.qty or 5,
+			"qty": args.qty if args.qty is not None else 5,
 			"conversion_factor": args.conversion_factor or 1.0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"schedule_date": nowdate(),
 		},
 	)
 
-	rfq.submit()
+	if not args.do_not_save:
+		rfq.insert()
+		if not args.do_not_submit:
+			rfq.submit()
 
 	return rfq
 

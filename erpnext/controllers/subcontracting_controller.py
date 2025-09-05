@@ -464,7 +464,7 @@ class SubcontractingController(StockController):
 			i += 1
 
 	def __remove_serial_and_batch_bundle(self, item):
-		if item.serial_and_batch_bundle:
+		if item.get("serial_and_batch_bundle"):
 			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
 
 	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
@@ -601,12 +601,15 @@ class SubcontractingController(StockController):
 				rm_obj.use_serial_batch_fields = 1
 				self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
-		if self.doctype == "Subcontracting Receipt" and not use_serial_batch_fields:
-			rm_obj.serial_and_batch_bundle = self.__set_serial_and_batch_bundle(
-				item_row, rm_obj, rm_obj.consumed_qty
-			)
+		if self.doctype == "Subcontracting Receipt":
+			if not use_serial_batch_fields:
+				rm_obj.serial_and_batch_bundle = self.__set_serial_and_batch_bundle(
+					item_row, rm_obj, rm_obj.consumed_qty
+				)
 
-			self.set_rate_for_supplied_items(rm_obj, item_row)
+				self.set_rate_for_supplied_items(rm_obj, item_row)
+			elif self.backflush_based_on == "BOM":
+				self.update_rate_for_supplied_items()
 
 	def update_rate_for_supplied_items(self):
 		if self.doctype != "Subcontracting Receipt":
@@ -950,7 +953,7 @@ class SubcontractingController(StockController):
 					)
 
 				sco_doc.update_ordered_qty_for_subcontracting(sco_item_rows)
-				sco_doc.update_reserved_qty_for_subcontracting()
+				sco_doc.update_reserved_qty_for_subcontracting(sco_item_rows)
 
 	def make_sl_entries_for_supplier_warehouse(self, sl_entries):
 		if hasattr(self, "supplied_items"):
@@ -1043,7 +1046,7 @@ class SubcontractingController(StockController):
 
 		return supplied_items_cost
 
-	def set_subcontracting_order_status(self):
+	def set_subcontracting_order_status(self, update_bin=True):
 		if self.doctype == "Subcontracting Order":
 			self.update_status()
 		elif self.doctype == "Subcontracting Receipt":
@@ -1052,7 +1055,7 @@ class SubcontractingController(StockController):
 			if self.subcontract_orders:
 				for sco in set(self.subcontract_orders):
 					sco_doc = frappe.get_doc("Subcontracting Order", sco)
-					sco_doc.update_status()
+					sco_doc.update_status(update_bin=update_bin)
 
 	def calculate_additional_costs(self):
 		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))

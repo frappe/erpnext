@@ -143,7 +143,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:!doc.apply_to_all_doctypes",
    "description": "Set fieldname from which you want to fetch the data from the parent form.",
    "fieldname": "fetch_from_parent",
    "fieldtype": "Select",
@@ -189,7 +188,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-08 08:58:50.228211",
+ "modified": "2025-07-07 15:51:29.329064",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

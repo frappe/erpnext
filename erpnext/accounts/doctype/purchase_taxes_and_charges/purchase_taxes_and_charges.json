@@ -196,7 +196,7 @@
    "fieldname": "item_wise_tax_detail",
    "fieldtype": "Code",
    "hidden": 1,
-   "label": "Item Wise Tax Detail ",
+   "label": "Item Wise Tax Detail",
    "oldfieldname": "item_wise_tax_detail",
    "oldfieldtype": "Small Text",
    "print_hide": 1,
@@ -235,10 +235,11 @@
    "read_only": 1
   }
  ],
+ "grid_page_length": 50,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-08 19:51:36.678551",
+ "modified": "2025-04-15 13:14:48.936047",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",

@@ -26,6 +26,7 @@ class ManufacturingSettings(Document):
 		default_scrap_warehouse: DF.Link | None
 		default_wip_warehouse: DF.Link | None
 		disable_capacity_planning: DF.Check
+		enforce_time_logs: DF.Check
 		get_rm_cost_from_consumption_entry: DF.Check
 		job_card_excess_transfer: DF.Check
 		make_serial_no_batch_from_work_order: DF.Check

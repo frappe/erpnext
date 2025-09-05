@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours
+from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours, time_diff_in_seconds
 
 from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
@@ -194,7 +194,7 @@ class Timesheet(Document):
 			return
 
 		_to_time = get_datetime(add_to_date(data.from_time, hours=data.hours, as_datetime=True))
-		if data.to_time != _to_time:
+		if abs(time_diff_in_seconds(_to_time, data.to_time)) >= 1:
 			data.to_time = _to_time
 
 	def validate_overlap(self, data):
@@ -342,12 +342,16 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 
 @frappe.whitelist()
 def get_timesheet_detail_rate(timelog, currency):
-	timelog_detail = frappe.db.sql(
-		f"""SELECT tsd.billing_amount as billing_amount,
-		ts.currency as currency FROM `tabTimesheet Detail` tsd
-		INNER JOIN `tabTimesheet` ts ON ts.name=tsd.parent
-		WHERE tsd.name = '{timelog}'""",
-		as_dict=1,
+	ts = frappe.qb.DocType("Timesheet")
+	ts_detail = frappe.qb.DocType("Timesheet Detail")
+
+	timelog_detail = (
+		frappe.qb.from_(ts_detail)
+		.inner_join(ts)
+		.on(ts.name == ts_detail.parent)
+		.select(ts_detail.billing_amount.as_("billing_amount"), ts.currency.as_("currency"))
+		.where(ts_detail.name == timelog)
+		.run(as_dict=1)
 	)[0]
 
 	if timelog_detail.currency:
@@ -513,7 +517,6 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 	user = frappe.session.user
 	# find customer name from contact.
 	customer = ""
-	timesheets = []
 
 	contact = frappe.db.exists("Contact", {"user": user})
 	if contact:
@@ -522,31 +525,43 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 		customer = contact.get_link_for("Customer")
 
 	if customer:
-		sales_invoices = [
-			d.name for d in frappe.get_all("Sales Invoice", filters={"customer": customer})
-		] or [None]
-		projects = [d.name for d in frappe.get_all("Project", filters={"customer": customer})]
-		# Return timesheet related data to web portal.
-		timesheets = frappe.db.sql(
-			f"""
-			SELECT
-				ts.name, tsd.activity_type, ts.status, ts.total_billable_hours,
-				COALESCE(ts.sales_invoice, tsd.sales_invoice) AS sales_invoice, tsd.project
-			FROM `tabTimesheet` ts, `tabTimesheet Detail` tsd
-			WHERE tsd.parent = ts.name AND
-				(
-					ts.sales_invoice IN %(sales_invoices)s OR
-					tsd.sales_invoice IN %(sales_invoices)s OR
-					tsd.project IN %(projects)s
-				)
-			ORDER BY `end_date` ASC
-			LIMIT {limit_page_length} offset {limit_start}
-		""",
-			dict(sales_invoices=sales_invoices, projects=projects),
-			as_dict=True,
-		)  # nosec
+		sales_invoices = frappe.get_all("Sales Invoice", filters={"customer": customer}, pluck="name")
+		projects = frappe.get_all("Project", filters={"customer": customer}, pluck="name")
 
-	return timesheets
+		# Return timesheet related data to web portal.
+		table = frappe.qb.DocType("Timesheet")
+		child_table = frappe.qb.DocType("Timesheet Detail")
+		query = (
+			frappe.qb.from_(table)
+			.join(child_table)
+			.on(table.name == child_table.parent)
+			.select(
+				table.name,
+				child_table.activity_type,
+				table.status,
+				child_table.billing_hours,
+				(table.sales_invoice | child_table.sales_invoice).as_("sales_invoice"),
+				child_table.project,
+			)
+			.orderby(table.end_date)
+			.limit(limit_page_length)
+			.offset(limit_start)
+		)
+
+		conditions = []
+		if sales_invoices:
+			conditions.extend(
+				[table.sales_invoice.isin(sales_invoices), child_table.sales_invoice.isin(sales_invoices)]
+			)
+		if projects:
+			conditions.append(child_table.project.isin(projects))
+
+		if conditions:
+			query = query.where(frappe.qb.terms.Criterion.any(conditions))
+
+		return query.run(as_dict=True)
+	else:
+		return {}
 
 
 def get_list_context(context=None):

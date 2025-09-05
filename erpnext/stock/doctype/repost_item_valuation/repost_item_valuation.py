@@ -70,12 +70,33 @@ class RepostItemValuation(Document):
 		)
 
 	def validate(self):
+		self.set_company()
 		self.validate_period_closing_voucher()
 		self.set_status(write=False)
 		self.reset_field_values()
-		self.set_company()
 		self.validate_accounts_freeze()
 		self.reset_recreate_stock_ledgers()
+		self.validate_recreate_stock_ledgers()
+
+	def validate_recreate_stock_ledgers(self):
+		if not self.recreate_stock_ledgers:
+			return
+
+		items = []
+		if self.based_on == "Item and Warehouse":
+			items.append(self.item_code)
+		else:
+			items = get_items_to_be_repost(self.voucher_type, self.voucher_no)
+			items = list(set([d.item_code for d in items]))
+
+		if serial_batch_items := frappe.get_all(
+			"Item", or_filters={"has_serial_no": 1, "has_batch_no": 1}, filters={"name": ("in", items)}
+		):
+			item_list = ", ".join([d.name for d in serial_batch_items])
+			msg = _(
+				"Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
+			).format(item_list)
+			frappe.throw(msg)
 
 	def validate_period_closing_voucher(self):
 		# Period Closing Voucher
@@ -167,6 +188,7 @@ class RepostItemValuation(Document):
 	def on_trash(self):
 		self.clear_attachment()
 
+	@frappe.whitelist()
 	def set_company(self):
 		if self.based_on == "Transaction":
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
@@ -260,10 +282,10 @@ class RepostItemValuation(Document):
 		"""Recreate Stock Ledger Entries for the transaction."""
 		if self.based_on == "Transaction" and self.recreate_stock_ledgers:
 			doc = frappe.get_doc(self.voucher_type, self.voucher_no)
-			doc.docstatus = 2
-			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+			doc.db_set("docstatus", 2)
+			doc.update_stock_ledger(allow_negative_stock=True)
 
-			doc.docstatus = 1
+			doc.db_set("docstatus", 1)
 			doc.update_stock_ledger(allow_negative_stock=True)
 
 
@@ -342,7 +364,7 @@ def remove_attached_file(docname):
 	if file_name := frappe.db.get_value(
 		"File", {"attached_to_name": docname, "attached_to_doctype": "Repost Item Valuation"}, "name"
 	):
-		frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True)
+		frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True, force=True)
 
 
 def repost_sl_entries(doc):

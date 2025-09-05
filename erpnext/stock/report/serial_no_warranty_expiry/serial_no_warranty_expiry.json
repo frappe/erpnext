@@ -10,14 +10,14 @@
  "is_standard": "Yes",
  "json": "{\"add_total_row\": 0, \"sort_by\": \"Serial No.modified\", \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [[\"Serial No\", \"warehouse\", \"=\", \"\"]], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Serial No\"], [\"item_code\", \"Serial No\"], [\"amc_expiry_date\", \"Serial No\"], [\"maintenance_status\", \"Serial No\"],[\"item_name\", \"Serial No\"], [\"description\", \"Serial No\"], [\"item_group\", \"Serial No\"], [\"brand\", \"Serial No\"]]}",
  "letterhead": null,
- "modified": "2024-09-26 13:07:23.451182",
+ "modified": "2025-04-24 13:07:23.451182",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Serial No Service Contract Expiry",
+ "name": "Serial No Warranty Expiry",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Serial No",
- "report_name": "Serial No Service Contract Expiry",
+ "report_name": "Serial No Warranty Expiry",
  "report_type": "Report Builder",
  "roles": [
   {

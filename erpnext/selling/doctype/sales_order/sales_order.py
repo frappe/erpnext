@@ -110,6 +110,7 @@ class SalesOrder(SellingController):
 		from_date: DF.Date | None
 		grand_total: DF.Currency
 		group_same_items: DF.Check
+		has_unit_price_items: DF.Check
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
@@ -195,6 +196,10 @@ class SalesOrder(SellingController):
 		if has_reserved_stock(self.doctype, self.name):
 			self.set_onload("has_reserved_stock", True)
 
+	def before_validate(self):
+		self.set_has_unit_price_items()
+		self.flags.allow_zero_qty = self.has_unit_price_items
+
 	def validate(self):
 		super().validate()
 		self.validate_delivery_date()
@@ -230,6 +235,17 @@ class SalesOrder(SellingController):
 			self.delivery_status = "Not Delivered"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
+	def set_has_unit_price_items(self):
+		"""
+		If permitted in settings and any item has 0 qty, the SO has unit price items.
+		"""
+		if not frappe.db.get_single_value("Selling Settings", "allow_zero_qty_in_sales_order"):
+			return
+
+		self.has_unit_price_items = any(
+			not row.qty for row in self.get("items") if (row.item_code and not row.qty)
+		)
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
@@ -428,6 +444,7 @@ class SalesOrder(SellingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Payment Ledger Entry",
+			"Advance Payment Ledger Entry",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 		)
@@ -755,6 +772,14 @@ class SalesOrder(SellingController):
 			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
 		)
 
+	def set_missing_values(self, for_validate=False):
+		super().set_missing_values(for_validate)
+
+		if self.delivery_date:
+			for item in self.items:
+				if not item.delivery_date:
+					item.delivery_date = self.delivery_date
+
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 	"""Returns the unreserved quantity for the Sales Order Item."""
@@ -946,6 +971,17 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
+	# 0 qty is accepted, as the qty is uncertain for some items
+	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
+
+	def is_unit_price_row(source):
+		return has_unit_price_items and source.qty == 0
+
+	def select_item(d):
+		filtered_items = kwargs.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	def set_missing_values(source, target):
 		if kwargs.get("ignore_pricing_rule"):
 			# Skip pricing rule when the dn is creating from the pick list
@@ -982,12 +1018,16 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 			if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
 				return False
 
-		return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
+		return (
+			(abs(doc.delivered_qty) < abs(doc.qty)) or is_unit_price_row(doc)
+		) and doc.delivered_by_supplier != 1
 
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		target.qty = (
+			flt(source.qty) if is_unit_price_row(source) else flt(source.qty) - flt(source.delivered_qty)
+		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -1007,7 +1047,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
-			"condition": condition,
+			"condition": lambda d: condition(d) and select_item(d),
 			"postprocess": update_item,
 		}
 
@@ -1063,7 +1103,18 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	# 0 qty is accepted, as the qty is uncertain for some items
+	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
+
+	def is_unit_price_row(source):
+		return has_unit_price_items and source.qty == 0
+
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
@@ -1093,12 +1144,29 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
 	def update_item(source, target, source_parent):
-		target.amount = flt(source.amount) - flt(source.billed_amt)
+		def get_billed_qty(so_item_name):
+			from frappe.query_builder.functions import Sum
+
+			table = frappe.qb.DocType("Sales Invoice Item")
+			query = (
+				frappe.qb.from_(table)
+				.select(Sum(table.qty).as_("qty"))
+				.where((table.docstatus == 1) & (table.so_detail == so_item_name))
+			)
+			return query.run(pluck="qty")[0] or 0
+
+		if source_parent.has_unit_price_items:
+			# 0 Amount rows (as seen in Unit Price Items) should be mapped as it is
+			pending_amount = flt(source.amount) - flt(source.billed_amt)
+			target.amount = pending_amount if flt(source.amount) else 0
+		else:
+			target.amount = flt(source.amount) - flt(source.billed_amt)
+
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = (
-			target.amount / flt(source.rate)
-			if (source.rate and source.billed_amt)
-			else source.qty - source.returned_qty
+			source.qty - get_billed_qty(source.name)
+			if (source.qty and source.billed_amt)
+			else (source.qty if is_unit_price_row(source) else source.qty - source.returned_qty)
 		)
 
 		if source_parent.project:
@@ -1110,6 +1178,11 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 			if cost_center:
 				target.cost_center = cost_center
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
 
 	doclist = get_mapped_doc(
 		"Sales Order",
@@ -1131,8 +1204,12 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 					"parent": "sales_order",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.qty
-				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
+				"condition": lambda doc: (
+					True
+					if is_unit_price_row(doc)
+					else (doc.qty and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)))
+				)
+				and select_item(doc),
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
@@ -1311,6 +1388,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
 		target.project = source_parent.project
 
+	def update_item_for_packed_item(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.ordered_qty)
+
 	suppliers = [item.get("supplier") for item in selected_items if item.get("supplier")]
 	suppliers = list(dict.fromkeys(suppliers))  # remove duplicates while preserving order
 
@@ -1328,6 +1408,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 			{
 				"Sales Order": {
 					"doctype": "Purchase Order",
+					"field_map": {"dispatch_address_name": "dispatch_address"},
 					"field_no_map": [
 						"address_display",
 						"contact_display",
@@ -1363,13 +1444,35 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 					"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 					and doc.supplier == supplier
 					and doc.item_code in items_to_map
-					and doc.delivered_by_supplier == 1,
+					and not is_product_bundle(doc.item_code),
+				},
+				"Packed Item": {
+					"doctype": "Purchase Order Item",
+					"field_map": [
+						["name", "sales_order_packed_item"],
+						["parent", "sales_order"],
+						["uom", "uom"],
+						["conversion_factor", "conversion_factor"],
+						["parent_item", "product_bundle"],
+						["rate", "rate"],
+					],
+					"field_no_map": [
+						"price_list_rate",
+						"item_tax_template",
+						"discount_percentage",
+						"discount_amount",
+						"supplier",
+						"pricing_rules",
+					],
+					"postprocess": update_item_for_packed_item,
+					"condition": lambda doc: doc.parent_item in items_to_map,
 				},
 			},
 			target_doc,
 			set_missing_values,
 		)
 
+		set_delivery_date(doc.items, source_name)
 		doc.insert()
 		frappe.db.commit()
 		purchase_orders.append(doc)
@@ -1385,9 +1488,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 	if isinstance(selected_items, str):
 		selected_items = json.loads(selected_items)
 
-	items_to_map = [
-		item.get("item_code") for item in selected_items if item.get("item_code") and item.get("item_code")
-	]
+	items_to_map = [item.get("item_code") for item in selected_items if item.get("item_code")]
 	items_to_map = list(set(items_to_map))
 
 	def is_drop_ship_order(target):
@@ -1427,6 +1528,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 			target.customer = target.customer_name = target.shipping_address = None
 
 		target.run_method("set_missing_values")
+		if not target.taxes:
+			target.append_taxes_from_item_tax_template()
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
@@ -1445,6 +1548,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		{
 			"Sales Order": {
 				"doctype": "Purchase Order",
+				"field_map": {"dispatch_address_name": "dispatch_address"},
 				"field_no_map": [
 					"address_display",
 					"contact_display",
@@ -1585,6 +1689,11 @@ def make_raw_material_request(items, company, sales_order, project=None, materia
 
 	items.update({"company": company, "sales_order": sales_order})
 
+	item_wh = {}
+	for item in items.get("items"):
+		if item.get("warehouse"):
+			item_wh[item.get("item_code")] = item.get("warehouse")
+
 	raw_materials = get_items_for_material_requests(items)
 	if not raw_materials:
 		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
@@ -1609,7 +1718,7 @@ def make_raw_material_request(items, company, sales_order, project=None, materia
 				"item_code": item.get("item_code"),
 				"qty": item.get("quantity"),
 				"schedule_date": schedule_date,
-				"warehouse": item.get("warehouse"),
+				"warehouse": item_wh.get(item.get("main_bom_item")) or item.get("warehouse"),
 				"sales_order": sales_order,
 				"project": project,
 			},
@@ -1691,8 +1800,8 @@ def create_pick_list(source_name, target_doc=None):
 				"doctype": "Pick List Item",
 				"field_map": {
 					"parent": "sales_order",
-					"name": "sales_order_item",
-					"parent_detail_docname": "product_bundle_item",
+					"parent_detail_docname": "sales_order_item",
+					"name": "product_bundle_item",
 				},
 				"field_no_map": ["picked_qty"],
 				"postprocess": update_packed_item_qty,
@@ -1703,7 +1812,9 @@ def create_pick_list(source_name, target_doc=None):
 
 	doc.purpose = "Delivery"
 
-	doc.set_item_locations()
+	# Only auto-assign serial numbers if not picking manually
+	if not doc.pick_manually:
+		doc.set_item_locations()
 
 	return doc
 

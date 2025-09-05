@@ -160,11 +160,9 @@ class Batch(Document):
 		from erpnext.stock.utils import get_valuation_method
 
 		if self.is_new():
-			if get_valuation_method(self.item) == "Moving Average":
-				self.use_batchwise_valuation = 0
-				return
-
-			if frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation"):
+			if get_valuation_method(self.item) == "Moving Average" and frappe.db.get_single_value(
+				"Stock Settings", "do_not_use_batchwise_valuation"
+			):
 				self.use_batchwise_valuation = 0
 				return
 
@@ -225,6 +223,7 @@ def get_batch_qty(
 	ignore_voucher_nos=None,
 	for_stock_levels=False,
 	consider_negative_batches=False,
+	do_not_check_future_batches=False,
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -251,6 +250,7 @@ def get_batch_qty(
 			"ignore_voucher_nos": ignore_voucher_nos,
 			"for_stock_levels": for_stock_levels,
 			"consider_negative_batches": consider_negative_batches,
+			"do_not_check_future_batches": do_not_check_future_batches,
 		}
 	)
 

@@ -26,6 +26,7 @@
   "overproduction_percentage_for_work_order",
   "job_card_section",
   "add_corrective_operation_cost_in_finished_good_valuation",
+  "enforce_time_logs",
   "column_break_24",
   "job_card_excess_transfer",
   "capacity_planning",
@@ -235,13 +236,20 @@
    "fieldname": "set_op_cost_and_scrap_from_sub_assemblies",
    "fieldtype": "Check",
    "label": "Set Operating Cost / Scrap Items From Sub-assemblies"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this checkbox will force each Job Card Time Log to have From Time and To Time",
+   "fieldname": "enforce_time_logs",
+   "fieldtype": "Check",
+   "label": "Enforce Time Logs"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-05 16:11:11.639916",
+ "modified": "2025-05-16 11:23:16.916512",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

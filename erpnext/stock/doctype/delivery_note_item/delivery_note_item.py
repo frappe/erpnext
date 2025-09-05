@@ -16,6 +16,7 @@ class DeliveryNoteItem(Document):
 
 		actual_batch_qty: DF.Float
 		actual_qty: DF.Float
+		against_pick_list: DF.Link | None
 		against_sales_invoice: DF.Link | None
 		against_sales_order: DF.Link | None
 		allow_zero_valuation_rate: DF.Check
@@ -37,6 +38,7 @@ class DeliveryNoteItem(Document):
 		description: DF.TextEditor | None
 		discount_amount: DF.Currency
 		discount_percentage: DF.Float
+		distributed_discount_amount: DF.Currency
 		dn_detail: DF.Data | None
 		expense_account: DF.Link | None
 		grant_commission: DF.Check

@@ -28,6 +28,10 @@ frappe.ui.form.on("Request for Quotation", {
 				is_group: 0,
 			},
 		}));
+
+		frm.set_indicator_formatter("item_code", function (doc) {
+			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";
+		});
 	},
 
 	onload: function (frm) {
@@ -154,7 +158,33 @@ frappe.ui.form.on("Request for Quotation", {
 			);
 
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
+
+			frm.add_custom_button(
+				__("Supplier Quotation Comparison"),
+				function () {
+					frm.trigger("show_supplier_quotation_comparison");
+				},
+				__("View")
+			);
 		}
+
+		if (frm.doc.docstatus === 0) {
+			erpnext.set_unit_price_items_note(frm);
+		}
+	},
+
+	show_supplier_quotation_comparison(frm) {
+		const today = new Date();
+		const oneMonthAgo = new Date(today);
+		oneMonthAgo.setMonth(today.getMonth() - 1);
+
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: moment(oneMonthAgo).format("YYYY-MM-DD"),
+			to_date: moment(today).format("YYYY-MM-DD"),
+			request_for_quotation: frm.doc.name,
+		};
+		frappe.set_route("query-report", "Supplier Quotation Comparison");
 	},
 
 	make_supplier_quotation: function (frm) {

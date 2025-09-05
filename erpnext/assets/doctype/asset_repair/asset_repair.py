@@ -53,6 +53,7 @@ class AssetRepair(AccountsController):
 
 	def validate(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
+		self.validate_asset()
 		self.validate_dates()
 		self.update_status()
 
@@ -60,8 +61,16 @@ class AssetRepair(AccountsController):
 			self.set_stock_items_cost()
 		self.calculate_total_repair_cost()
 
+	def validate_asset(self):
+		if self.asset_doc.status in ("Sold", "Fully Depreciated", "Scrapped"):
+			frappe.throw(
+				_("Asset {0} is in {1} status and cannot be repaired.").format(
+					get_link_to_form("Asset", self.asset), self.asset_doc.status
+				)
+			)
+
 	def validate_dates(self):
-		if self.completion_date and (self.failure_date > self.completion_date):
+		if self.completion_date and (getdate(self.failure_date) > getdate(self.completion_date)):
 			frappe.throw(
 				_("Completion Date can not be before Failure Date. Please adjust the dates accordingly.")
 			)
@@ -98,9 +107,11 @@ class AssetRepair(AccountsController):
 
 			self.increase_asset_value()
 
+			total_repair_cost = self.get_total_value_of_stock_consumed()
 			if self.capitalize_repair_cost:
-				self.asset_doc.total_asset_cost += self.repair_cost
-				self.asset_doc.additional_asset_cost += self.repair_cost
+				total_repair_cost += self.repair_cost
+			self.asset_doc.total_asset_cost += total_repair_cost
+			self.asset_doc.additional_asset_cost += total_repair_cost
 
 			if self.get("stock_consumption"):
 				self.check_for_stock_items_and_warehouse()
@@ -129,6 +140,13 @@ class AssetRepair(AccountsController):
 					),
 				)
 
+	def cancel_sabb(self):
+		for row in self.stock_items:
+			if sabb := row.serial_and_batch_bundle:
+				row.db_set("serial_and_batch_bundle", None)
+				doc = frappe.get_doc("Serial and Batch Bundle", sabb)
+				doc.cancel()
+
 	def before_cancel(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 
@@ -139,9 +157,11 @@ class AssetRepair(AccountsController):
 
 			self.decrease_asset_value()
 
+			total_repair_cost = self.get_total_value_of_stock_consumed()
 			if self.capitalize_repair_cost:
-				self.asset_doc.total_asset_cost -= self.repair_cost
-				self.asset_doc.additional_asset_cost -= self.repair_cost
+				total_repair_cost += self.repair_cost
+			self.asset_doc.total_asset_cost -= total_repair_cost
+			self.asset_doc.additional_asset_cost -= total_repair_cost
 
 			if self.get("capitalize_repair_cost"):
 				self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
@@ -167,6 +187,8 @@ class AssetRepair(AccountsController):
 						get_link_to_form("Asset Repair", self.name)
 					),
 				)
+
+		self.cancel_sabb()
 
 	def after_delete(self):
 		frappe.get_doc("Asset", self.asset).set_status()
@@ -281,7 +303,7 @@ class AssetRepair(AccountsController):
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
-					"posting_date": getdate(),
+					"posting_date": self.completion_date,
 					"against_voucher_type": "Purchase Invoice",
 					"against_voucher": self.purchase_invoice,
 					"company": self.company,
@@ -300,7 +322,7 @@ class AssetRepair(AccountsController):
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
-					"posting_date": getdate(),
+					"posting_date": self.completion_date,
 					"company": self.company,
 				},
 				item=self,
@@ -334,7 +356,7 @@ class AssetRepair(AccountsController):
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,
-							"posting_date": getdate(),
+							"posting_date": self.completion_date,
 							"company": self.company,
 						},
 						item=self,
@@ -351,7 +373,7 @@ class AssetRepair(AccountsController):
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,
-							"posting_date": getdate(),
+							"posting_date": self.completion_date,
 							"against_voucher_type": "Stock Entry",
 							"against_voucher": stock_entry.name,
 							"company": self.company,

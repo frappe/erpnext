@@ -77,35 +77,34 @@ erpnext.accounts.dimensions = {
 	},
 
 	update_dimension(frm, doctype) {
-		if (this.accounting_dimensions) {
-			this.accounting_dimensions.forEach((dimension) => {
-				if (frm.is_new()) {
-					if (
-						frm.doc.company &&
-						Object.keys(this.default_dimensions || {}).length > 0 &&
-						this.default_dimensions[frm.doc.company]
-					) {
-						let default_dimension =
-							this.default_dimensions[frm.doc.company][dimension["fieldname"]];
+		if (
+			!this.accounting_dimensions ||
+			!frm.is_new() ||
+			!frm.doc.company ||
+			!this.default_dimensions?.[frm.doc.company]
+		)
+			return;
 
-						if (default_dimension) {
-							if (frappe.meta.has_field(doctype, dimension["fieldname"])) {
-								frm.set_value(dimension["fieldname"], default_dimension);
-							}
-
-							$.each(frm.doc.items || frm.doc.accounts || [], function (i, row) {
-								frappe.model.set_value(
-									row.doctype,
-									row.name,
-									dimension["fieldname"],
-									default_dimension
-								);
-							});
-						}
-					}
-				}
-			});
+		// don't set default dimensions if any of the dimension is already set due to mapping
+		if (frm.doc.__onload?.load_after_mapping) {
+			for (const dimension of this.accounting_dimensions) {
+				if (frm.doc[dimension["fieldname"]]) return;
+			}
 		}
+
+		this.accounting_dimensions.forEach((dimension) => {
+			const default_dimension = this.default_dimensions[frm.doc.company][dimension["fieldname"]];
+
+			if (!default_dimension) return;
+
+			if (frappe.meta.has_field(doctype, dimension["fieldname"])) {
+				frm.set_value(dimension["fieldname"], default_dimension);
+			}
+
+			(frm.doc.items || frm.doc.accounts || []).forEach((row) => {
+				frappe.model.set_value(row.doctype, row.name, dimension["fieldname"], default_dimension);
+			});
+		});
 	},
 
 	copy_dimension_from_first_row(frm, cdt, cdn, fieldname) {

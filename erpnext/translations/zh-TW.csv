@@ -1650,7 +1650,6 @@ Laboratory Testing Datetime,實驗室測試日期時間
 Add Quote,添加報價
 UOM coversion factor required for UOM: {0} in Item: {1},所需的計量單位計量單位：丁文因素：{0}項：{1}
 Indirect Expenses,間接費用
-Row {0}: Qty is mandatory,列#{0}：數量是強制性的
 Agriculture,農業
 Create Sales Order,創建銷售訂單
 Accounting Entry for Asset,資產會計分錄

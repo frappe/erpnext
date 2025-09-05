@@ -343,6 +343,7 @@ def get_children(doctype=None, parent=None, **kwargs):
 
 	fields = [
 		"item_code as value",
+		"item_name as title",
 		"is_expandable as expandable",
 		"parent as parent_id",
 		"qty",
@@ -472,7 +473,12 @@ def get_parent_row_no(doc, name):
 		if row.name == name:
 			return row.idx
 
-	frappe.msgprint(_("Parent Row No not found for {0}").format(name))
+	if name == doc.name:
+		return None
+
+	frappe.msgprint(_("Parent Row No not found for {0}").format(name), alert=True)
+
+	return None
 
 
 @frappe.whitelist()

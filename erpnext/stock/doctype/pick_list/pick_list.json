@@ -30,7 +30,11 @@
   "amended_from",
   "print_settings_section",
   "group_same_items",
-  "status"
+  "status_section",
+  "status",
+  "column_break_qyam",
+  "delivery_status",
+  "per_delivered"
  ],
  "fields": [
   {
@@ -181,7 +185,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nOpen\nCompleted\nCancelled",
+   "options": "Draft\nOpen\nPartly Delivered\nCompleted\nCancelled",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1,
@@ -197,7 +201,7 @@
   },
   {
    "default": "0",
-   "description": "If enabled then system won't override the picked qty / batches / serial numbers.",
+   "description": "If enabled then system won't override the picked qty / batches / serial numbers / warehouse.",
    "fieldname": "pick_manually",
    "fieldtype": "Check",
    "label": "Pick Manually"
@@ -208,11 +212,42 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Delivery Status",
+   "no_copy": 1,
+   "options": "Not Delivered\nFully Delivered\nPartly Delivered",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal && doc.purpose === \"Delivery\"",
+   "description": "% of materials delivered against this Pick List",
+   "fieldname": "per_delivered",
+   "fieldtype": "Percent",
+   "label": "% Delivered",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qyam",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2024-08-14 13:20:42.168827",
+ "modified": "2025-07-23 08:34:32.099673",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
@@ -280,6 +315,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

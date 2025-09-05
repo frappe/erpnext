@@ -101,10 +101,35 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
+		frm.set_query("sales_order", function () {
+			if (frm.doc.production_item) {
+				return {
+					query: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
+					filters: {
+						production_item: frm.doc.production_item,
+					},
+				};
+			}
+		});
+
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
 		});
+
+		if (frm.doc.docstatus == 0 && frm.doc.bom_no) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.work_order.work_order.check_if_scrap_warehouse_mandatory",
+				args: {
+					bom_no: frm.doc.bom_no,
+				},
+				callback: function (r) {
+					if (r.message["set_scrap_wh_mandatory"]) {
+						frm.toggle_reqd("scrap_warehouse", true);
+					}
+				},
+			});
+		}
 	},
 
 	onload: function (frm) {
@@ -314,13 +339,18 @@ frappe.ui.form.on("Work Order", {
 					return operations_data;
 				},
 			},
-			function (data) {
+			function () {
+				const selected_rows = dialog.fields_dict["operations"].grid.get_selected_children();
+				if (selected_rows.length == 0) {
+					frappe.msgprint(__("Please select atleast one operation to create Job Card"));
+					return;
+				}
 				frappe.call({
 					method: "erpnext.manufacturing.doctype.work_order.work_order.make_job_card",
 					freeze: true,
 					args: {
 						work_order: frm.doc.name,
-						operations: data.operations,
+						operations: selected_rows,
 					},
 					callback: function () {
 						frm.reload_doc();
@@ -331,7 +361,7 @@ frappe.ui.form.on("Work Order", {
 			__("Create")
 		);
 
-		dialog.fields_dict["operations"].grid.wrapper.find(".grid-add-row").hide();
+		dialog.fields_dict["operations"].grid.grid_buttons.hide();
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
@@ -408,7 +438,7 @@ frappe.ui.form.on("Work Order", {
 				frm.doc.material_transferred_for_manufacturing -
 				frm.doc.produced_qty -
 				frm.doc.process_loss_qty;
-			if (pending_complete) {
+			if (pending_complete > 0) {
 				var width = (pending_complete / frm.doc.qty) * 100 - added_min;
 				title = __("{0} items in progress", [pending_complete]);
 				bars.push({
@@ -481,7 +511,6 @@ frappe.ui.form.on("Work Order", {
 				callback: function (r) {
 					if (r.message) {
 						frm.set_value("sales_order", "");
-						frm.trigger("set_sales_order");
 						erpnext.in_production_item_onchange = true;
 
 						$.each(
@@ -541,23 +570,6 @@ frappe.ui.form.on("Work Order", {
 	before_submit: function (frm) {
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against", frm.doc.operations && frm.doc.operations.length > 0);
-	},
-
-	set_sales_order: function (frm) {
-		if (frm.doc.production_item) {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
-				args: { production_item: frm.doc.production_item },
-				callback: function (r) {
-					frm.set_query("sales_order", function () {
-						erpnext.in_production_item_onchange = true;
-						return {
-							filters: [["Sales Order", "name", "in", r.message]],
-						};
-					});
-				},
-			});
-		}
 	},
 
 	additional_operating_cost: function (frm) {
@@ -810,7 +822,7 @@ erpnext.work_order = {
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
 		if (purpose === "Disassemble") {
-			return flt(frm.doc.produced_qty);
+			return flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
 		}
 
 		if (frm.doc.skip_transfer) {
@@ -836,6 +848,19 @@ erpnext.work_order = {
 				description: __("Max: {0}", [max]),
 				default: max,
 			},
+			{
+				fieldtype: "Check",
+				label: __("Consider Process Loss"),
+				fieldname: "consider_process_loss",
+				default: 0,
+				onchange: function () {
+					if (this.value) {
+						frm.qty_prompt.set_value("qty", max - frm.doc.process_loss_qty);
+					} else {
+						frm.qty_prompt.set_value("qty", max);
+					}
+				},
+			},
 		];
 
 		if (purpose === "Disassemble") {
@@ -857,7 +882,7 @@ erpnext.work_order = {
 		}
 
 		return new Promise((resolve, reject) => {
-			frappe.prompt(
+			frm.qty_prompt = frappe.prompt(
 				fields,
 				(data) => {
 					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;

@@ -6,12 +6,13 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.utils import get_balance_on
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
 	automatically_fetch_payment_terms,
@@ -44,6 +45,16 @@ from erpnext.stock.stock_ledger import get_previous_sle
 
 
 class TestDeliveryNote(FrappeTestCase):
+	def test_delivery_note_qty(self):
+		dn = create_delivery_note(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			dn.save()
+
+		# No error with qty=1
+		dn.items[0].qty = 1
+		dn.save()
+		self.assertEqual(dn.items[0].qty, 1)
+
 	def test_over_billing_against_dn(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
@@ -1011,6 +1022,30 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
 
+	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
+	def test_sales_invoice_qty_after_return(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		dn = create_delivery_note(qty=10)
+
+		dnr1 = make_sales_return(dn.name)
+		dnr1.get("items")[0].qty = -3
+		dnr1.save().submit()
+
+		dnr2 = make_sales_return(dn.name)
+		dnr2.get("items")[0].qty = -2
+		dnr2.save().submit()
+
+		si = make_sales_invoice(dn.name)
+		si.save().submit()
+
+		self.assertEqual(si.get("items")[0].qty, 5)
+
+		si.reload().cancel().delete()
+		dnr1.reload().cancel().delete()
+		dnr2.reload().cancel().delete()
+		dn.reload().cancel().delete()
+
 	def test_dn_billing_status_case3(self):
 		# SO -> DN1 -> SI and SO -> SI and SO -> DN2
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -1083,6 +1118,28 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.get("items")[0].billed_amt, 1000)
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
+
+	def test_dn_billing_status_case5(self):
+		# SO -> SI(with update stock partial invoice)
+		# SO -> DN
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+
+		so = make_sales_order(po_no="12345")
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].qty = 5
+		si.update_stock = 1
+		si.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, si.po_no)
+
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		self.assertEqual(dn.get("items")[0].billed_amt, 0)
+		self.assertEqual(dn.per_billed, 0)
+		self.assertEqual(dn.status, "To Bill")
 
 	def test_delivery_trip(self):
 		dn = create_delivery_note()
@@ -2521,6 +2578,28 @@ class TestDeliveryNote(FrappeTestCase):
 			for d in bundle_data:
 				self.assertEqual(d.incoming_rate, batch_no_valuation[d.batch_no])
 
+	def test_delivery_note_per_billed_after_return(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		so = make_sales_order(qty=2)
+		dn = make_delivery_note(so.name)
+		dn.submit()
+		self.assertEqual(dn.per_billed, 0)
+
+		si = make_sales_invoice(dn.name)
+		si.location = "Test Location"
+		si.submit()
+
+		dn_return = create_delivery_note(is_return=1, return_against=dn.name, qty=-2, do_not_submit=True)
+		dn_return.items[0].dn_detail = dn.items[0].name
+		dn_return.submit()
+
+		returned = frappe.get_doc("Delivery Note", dn_return.name)
+		returned.update_prevdoc_status()
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.per_returned, 100)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
@@ -2542,7 +2621,7 @@ def create_delivery_note(**args):
 		if dn.is_return:
 			type_of_transaction = "Inward"
 
-		qty = args.get("qty") or 1
+		qty = args.qty if args.get("qty") is not None else 1
 		qty *= -1 if type_of_transaction == "Outward" else 1
 		batches = {}
 		if args.get("batch_no"):
@@ -2573,7 +2652,7 @@ def create_delivery_note(**args):
 		{
 			"item_code": args.item or args.item_code or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
-			"qty": args.qty or 1,
+			"qty": args.qty if args.get("qty") is not None else 1,
 			"rate": args.rate if args.get("rate") is not None else 100,
 			"conversion_factor": 1.0,
 			"serial_and_batch_bundle": bundle_id,

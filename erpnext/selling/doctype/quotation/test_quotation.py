@@ -2,13 +2,35 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
+
+from erpnext.controllers.accounts_controller import InvalidQtyError
+from erpnext.setup.utils import get_exchange_rate
 
 test_dependencies = ["Product Bundle"]
 
 
 class TestQuotation(FrappeTestCase):
+	def test_quotation_qty(self):
+		qo = make_quotation(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			qo.save()
+
+		# No error with qty=1
+		qo.items[0].qty = 1
+		qo.save()
+		self.assertEqual(qo.items[0].qty, 1)
+
+	def test_quotation_zero_qty(self):
+		"""
+		Test if Quote with zero qty (Unit Price Item) is conditionally allowed.
+		"""
+		qo = make_quotation(qty=0, do_not_save=True)
+		with change_settings("Selling Settings", {"allow_zero_qty_in_quotation": 1}):
+			qo.save()
+			self.assertEqual(qo.items[0].qty, 0)
+
 	def test_make_quotation_without_terms(self):
 		quotation = make_quotation(do_not_save=1)
 		self.assertFalse(quotation.get("payment_schedule"))
@@ -157,6 +179,10 @@ class TestQuotation(FrappeTestCase):
 		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
+	@change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 0},
+	)
 	def test_make_sales_order_with_terms(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
@@ -694,6 +720,10 @@ class TestQuotation(FrappeTestCase):
 		quotation.items[0].conversion_factor = 2.23
 		self.assertRaises(frappe.ValidationError, quotation.save)
 
+	@change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 1, "add_taxes_from_taxes_and_charges_template": 0},
+	)
 	def test_item_tax_template_for_quotation(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -735,10 +765,7 @@ class TestQuotation(FrappeTestCase):
 			item_doc.save()
 
 		quotation = make_quotation(item_code="_Test Item Tax Template QTN", qty=1, rate=100, do_not_submit=1)
-		self.assertFalse(quotation.taxes)
 
-		quotation.append_taxes_from_item_tax_template()
-		quotation.save()
 		self.assertTrue(quotation.taxes)
 		for row in quotation.taxes:
 			self.assertEqual(row.account_head, "_Test Vat - _TC")
@@ -760,6 +787,103 @@ class TestQuotation(FrappeTestCase):
 		self.assertEqual(quotation.grand_total, 73.8)
 		self.assertEqual(quotation.rounding_adjustment, 0)
 		self.assertEqual(quotation.rounded_total, 0)
+
+	@change_settings("Selling Settings", {"allow_zero_qty_in_quotation": 1})
+	def test_so_from_zero_qty_quotation(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Item 2", {"is_stock_item": 1})
+		quotation = make_quotation(qty=0, do_not_save=1)
+		quotation.append("items", {"item_code": "_Test Item 2", "qty": 10, "rate": 100})
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+		self.assertEqual(sales_order.items[0].qty, 0)
+		self.assertEqual(sales_order.items[1].qty, 10)
+
+		sales_order.items[0].qty = 10
+		sales_order.items[1].qty = 5
+		sales_order.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+
+		sales_order_2 = make_sales_order(quotation.name)
+		sales_order_2.delivery_date = nowdate()
+		self.assertEqual(sales_order_2.items[0].qty, 0)
+		self.assertEqual(sales_order_2.items[1].qty, 5)
+
+		del sales_order_2.items[0]
+		sales_order_2.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+
+	def test_duplicate_items_in_quotation(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# item code same but description different
+		make_item("_Test Item 2", {"is_stock_item": 1})
+
+		quotation = make_quotation(qty=1, rate=100, do_not_submit=1)
+
+		# duplicate items
+		for qty in [1, 1, 2, 3]:
+			quotation.append("items", {"item_code": "_Test Item", "qty": qty, "rate": 100})
+
+		quotation.append("items", {"item_code": "_Test Item 2", "qty": 5, "rate": 100})
+
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+
+		self.assertEqual(len(sales_order.items), 6)
+		self.assertEqual(sales_order.items[0].qty, 1)
+		self.assertEqual(sales_order.items[-1].qty, 5)
+
+		# Row 1: 10, Row 4: 1, Row 5: 1
+		sales_order.items[0].qty = 10
+		sales_order.items[3].qty = 1
+		sales_order.items[4].qty = 1
+		sales_order.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+
+		sales_order_2 = make_sales_order(quotation.name)
+		sales_order_2.delivery_date = nowdate()
+		self.assertEqual(len(sales_order_2.items), 2)
+		self.assertEqual(sales_order_2.items[0].qty, 1)
+		self.assertEqual(sales_order_2.items[1].qty, 2)
+
+		self.assertEqual(sales_order_2.items[0].quotation_item, quotation.items[3].name)
+		self.assertEqual(sales_order_2.items[1].quotation_item, quotation.items[4].name)
+
+		sales_order_2.submit()
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+
+	@change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
+	def test_make_quotation_qar_to_inr(self):
+		quotation = make_quotation(
+			currency="QAR",
+			transaction_date="2026-06-04",
+		)
+
+		cache = frappe.cache()
+		key = "currency_exchange_rate_{}:{}:{}".format("2026-06-04", "QAR", "INR")
+		value = cache.get(key)
+		expected_rate = flt(value) / 3.64
+
+		self.assertEqual(
+			quotation.conversion_rate,
+			expected_rate,
+			f"Expected conversion rate {expected_rate}, got {quotation.conversion_rate}",
+		)
 
 
 test_records = frappe.get_test_records("Quotation")
@@ -809,7 +933,7 @@ def make_quotation(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"uom": args.uom or None,
 				"rate": args.rate or 100,
 			},

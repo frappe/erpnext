@@ -417,7 +417,7 @@ class BOMConfigurator {
 						doctype: doctype,
 						docname: docname,
 						qty: data.qty,
-						parent: node.data.parent_id,
+						parent: node.data.parent_id ? node.data.parent_id : this.frm.doc.name,
 					},
 					callback: (r) => {
 						node.data.qty = data.qty;

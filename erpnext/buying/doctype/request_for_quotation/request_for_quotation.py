@@ -9,6 +9,7 @@ from frappe import _
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Order
 from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
@@ -42,6 +43,7 @@ class RequestforQuotation(BuyingController):
 		billing_address_display: DF.SmallText | None
 		company: DF.Link
 		email_template: DF.Link | None
+		has_unit_price_items: DF.Check
 		incoterm: DF.Link | None
 		items: DF.Table[RequestforQuotationItem]
 		letter_head: DF.Link | None
@@ -61,9 +63,14 @@ class RequestforQuotation(BuyingController):
 		vendor: DF.Link | None
 	# end: auto-generated types
 
+	def before_validate(self):
+		self.set_has_unit_price_items()
+		self.flags.allow_zero_qty = self.has_unit_price_items
+
 	def validate(self):
 		self.validate_duplicate_supplier()
 		self.validate_supplier_list()
+		super().validate_qty_is_not_zero()
 		validate_for_items(self)
 		super().set_qty_as_per_stock_uom()
 		self.update_email_id()
@@ -71,6 +78,17 @@ class RequestforQuotation(BuyingController):
 		if self.docstatus < 1:
 			# after amend and save, status still shows as cancelled, until submit
 			self.db_set("status", "Draft")
+
+	def set_has_unit_price_items(self):
+		"""
+		If permitted in settings and any item has 0 qty, the RFQ has unit price items.
+		"""
+		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_request_for_quotation"):
+			return
+
+		self.has_unit_price_items = any(
+			not row.qty for row in self.get("items") if (row.item_code and not row.qty)
+		)
 
 	def validate_duplicate_supplier(self):
 		supplier_list = [d.supplier for d in self.suppliers]
@@ -271,7 +289,11 @@ class RequestforQuotation(BuyingController):
 		email_template = frappe.get_doc("Email Template", self.email_template)
 		message = frappe.render_template(email_template.response_, doc_args)
 		subject = frappe.render_template(email_template.subject, doc_args)
-		sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
+		fixed_procurement_email = frappe.db.get_single_value("Buying Settings", "fixed_email")
+		if fixed_procurement_email:
+			sender = frappe.db.get_value("Email Account", fixed_procurement_email, "email_id")
+		else:
+			sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
 
 		if preview:
 			return {"message": message, "subject": subject}
@@ -439,11 +461,10 @@ def create_supplier_quotation(doc):
 
 def add_items(sq_doc, supplier, items):
 	for data in items:
-		if data.get("qty") > 0:
-			if isinstance(data, dict):
-				data = frappe._dict(data)
+		if isinstance(data, dict):
+			data = frappe._dict(data)
 
-			create_rfq_items(sq_doc, supplier, data)
+		create_rfq_items(sq_doc, supplier, data)
 
 
 def create_rfq_items(sq_doc, supplier, data):
@@ -566,35 +587,32 @@ def get_supplier_tag():
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filters):
-	conditions = ""
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_supplier = frappe.qb.DocType("Request for Quotation Supplier")
+
+	query = (
+		frappe.qb.from_(rfq)
+		.from_(rfq_supplier)
+		.select(rfq.name)
+		.distinct()
+		.select(rfq.transaction_date, rfq.company)
+		.where(
+			(rfq.name == rfq_supplier.parent)
+			& (rfq_supplier.supplier == filters.get("supplier"))
+			& (rfq.docstatus == 1)
+			& (rfq.company == filters.get("company"))
+		)
+		.orderby(rfq.transaction_date, order=Order.asc)
+		.limit(page_len)
+		.offset(start)
+	)
+
 	if txt:
-		conditions += "and rfq.name like '%%" + txt + "%%' "
+		query = query.where(rfq.name.like(f"%%{txt}%%"))
 
 	if filters.get("transaction_date"):
-		conditions += "and rfq.transaction_date = '{}'".format(filters.get("transaction_date"))
+		query = query.where(rfq.transaction_date == filters.get("transaction_date"))
 
-	rfq_data = frappe.db.sql(
-		f"""
-		select
-			distinct rfq.name, rfq.transaction_date,
-			rfq.company
-		from
-			`tabRequest for Quotation` rfq, `tabRequest for Quotation Supplier` rfq_supplier
-		where
-			rfq.name = rfq_supplier.parent
-			and rfq_supplier.supplier = %(supplier)s
-			and rfq.docstatus = 1
-			and rfq.company = %(company)s
-			{conditions}
-		order by rfq.transaction_date ASC
-		limit %(page_len)s offset %(start)s """,
-		{
-			"page_len": page_len,
-			"start": start,
-			"company": filters.get("company"),
-			"supplier": filters.get("supplier"),
-		},
-		as_dict=1,
-	)
+	rfq_data = query.run(as_dict=1)
 
 	return rfq_data

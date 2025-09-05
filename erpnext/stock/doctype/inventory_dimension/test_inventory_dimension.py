@@ -155,6 +155,8 @@ class TestInventoryDimension(FrappeTestCase):
 			reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1
 		)
 
+		inv_dimension.db_set("fetch_from_parent", "Rack")
+
 		self.assertEqual(inv_dimension.type_of_transaction, "Both")
 		self.assertEqual(inv_dimension.fetch_from_parent, "Rack")
 
@@ -672,13 +674,13 @@ def prepare_data_for_internal_transfer():
 	company = "_Test Company with perpetual inventory"
 
 	customer = create_internal_customer(
-		"_Test Internal Customer 3",
+		"_Test Internal Customer 2",
 		company,
 		company,
 	)
 
 	supplier = create_internal_supplier(
-		"_Test Internal Supplier 3",
+		"_Test Internal Supplier 2",
 		company,
 		company,
 	)

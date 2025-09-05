@@ -65,7 +65,7 @@ class TransactionBase(StatusUpdater):
 					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
 
 				for field, condition in fields:
-					if prevdoc_values[field] is not None and field not in self.exclude_fields:
+					if prevdoc_values[field] not in [None, ""] and field not in self.exclude_fields:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 	def get_prev_doc_reference_details(self, reference_names, reference_doctype, fields):
@@ -163,6 +163,9 @@ class TransactionBase(StatusUpdater):
 		child_table_values = set()
 
 		for row in self.get(child_table):
+			if default_field == "set_warehouse" and row.get("delivered_by_supplier"):
+				continue
+
 			child_table_values.add(row.get(child_table_field))
 
 		if len(child_table_values) > 1:

@@ -45,7 +45,6 @@
    "default": "ACC-BTN-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "options": "ACC-BTN-.YYYY.-",
@@ -236,9 +235,10 @@
    "fieldtype": "Column Break"
   }
  ],
+ "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-18 18:32:47.203694",
+ "modified": "2025-06-18 17:24:57.044666",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
@@ -287,6 +287,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "date",
  "sort_order": "DESC",
  "states": [],

@@ -160,6 +160,7 @@
    "fieldname": "total_completed_qty",
    "fieldtype": "Float",
    "label": "Total Completed Qty",
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -510,7 +511,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-17 15:55:11.143456",
+ "modified": "2025-08-04 15:47:54.514290",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

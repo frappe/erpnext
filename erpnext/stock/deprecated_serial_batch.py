@@ -1,4 +1,5 @@
 import datetime
+import json
 from collections import defaultdict
 
 import frappe
@@ -141,6 +142,7 @@ class DeprecatedBatchNoValuation:
 				& (sle.batch_no.isnotnull())
 				& (sle.is_cancelled == 0)
 			)
+			.for_update()
 			.groupby(sle.batch_no)
 		)
 
@@ -196,6 +198,9 @@ class DeprecatedBatchNoValuation:
 	@deprecated
 	def set_balance_value_for_non_batchwise_valuation_batches(self):
 		self.last_sle = self.get_last_sle_for_non_batch()
+		if self.last_sle and self.last_sle.stock_queue:
+			self.stock_queue = json.loads(self.last_sle.stock_queue or "[]") or []
+
 		self.set_balance_value_from_sl_entries()
 		self.set_balance_value_from_bundle()
 
@@ -232,6 +237,7 @@ class DeprecatedBatchNoValuation:
 				& (sle.is_cancelled == 0)
 				& (sle.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
+			.for_update()
 			.where(timestamp_condition)
 			.groupby(sle.batch_no)
 		)
@@ -269,6 +275,7 @@ class DeprecatedBatchNoValuation:
 			.select(
 				sle.stock_value,
 				sle.qty_after_transaction,
+				sle.stock_queue,
 			)
 			.where(
 				(sle.item_code == self.sle.item_code)
@@ -278,11 +285,18 @@ class DeprecatedBatchNoValuation:
 			.where(timestamp_condition)
 			.orderby(sle.posting_datetime, order=Order.desc)
 			.orderby(sle.creation, order=Order.desc)
+			.for_update()
 			.limit(1)
 		)
 
 		if self.sle.name:
 			query = query.where(sle.name != self.sle.name)
+
+		if self.sle.serial_and_batch_bundle:
+			query = query.where(
+				(sle.serial_and_batch_bundle != self.sle.serial_and_batch_bundle)
+				| (sle.serial_and_batch_bundle.isnull())
+			)
 
 		data = query.run(as_dict=True)
 
@@ -324,6 +338,7 @@ class DeprecatedBatchNoValuation:
 				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
 				& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
+			.for_update()
 			.where(timestamp_condition)
 			.groupby(bundle_child.batch_no)
 		)

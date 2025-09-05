@@ -3,6 +3,8 @@
 
 frappe.ui.form.on("Asset Repair", {
 	setup: function (frm) {
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+
 		frm.fields_dict.cost_center.get_query = function (doc) {
 			return {
 				filters: {
@@ -166,5 +168,38 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 	consumed_quantity: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "total_value", row.consumed_quantity * row.valuation_rate);
+	},
+
+	pick_serial_and_batch(frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+		let doc = frm.doc;
+
+		frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+				item.has_serial_no = r.message.has_serial_no;
+				item.has_batch_no = r.message.has_batch_no;
+				item.qty = item.consumed_quantity;
+				item.type_of_transaction = item.consumed_quantity > 0 ? "Outward" : "Inward";
+
+				item.title = item.has_serial_no ? __("Select Serial No") : __("Select Batch No");
+
+				if (item.has_serial_no && item.has_batch_no) {
+					item.title = __("Select Serial and Batch");
+				}
+				frm.doc.posting_date = frappe.datetime.get_today();
+				frm.doc.posting_time = frappe.datetime.now_time();
+
+				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
+					if (r) {
+						frappe.model.set_value(item.doctype, item.name, {
+							serial_and_batch_bundle: r.name,
+							use_serial_batch_fields: 0,
+							valuation_rate: r.avg_rate,
+							consumed_quantity: Math.abs(r.total_qty),
+						});
+					}
+				});
+			}
+		});
 	},
 });

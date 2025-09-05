@@ -134,7 +134,8 @@ class ExchangeRateRevaluation(Document):
 		accounts = self.get_accounts_data()
 		if accounts:
 			for acc in accounts:
-				self.append("accounts", acc)
+				if acc.get("gain_loss"):
+					self.append("accounts", acc)
 
 	@frappe.whitelist()
 	def get_accounts_data(self):

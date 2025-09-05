@@ -1,6 +1,3 @@
-<div style="margin-bottom: 7px;">
-	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
-</div>
 <h2 class="text-center">{%= __("Bank Reconciliation Statement") %}</h2>
 <h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
 <hr>
@@ -46,4 +43,4 @@
 		{% } %}
 	</tbody>
 </table>
-<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted">{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}</p>

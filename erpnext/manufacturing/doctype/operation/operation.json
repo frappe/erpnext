@@ -70,7 +70,8 @@
    "fieldname": "batch_size",
    "fieldtype": "Int",
    "label": "Batch Size",
-   "mandatory_depends_on": "create_job_card_based_on_batch_size"
+   "mandatory_depends_on": "create_job_card_based_on_batch_size",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -104,7 +105,7 @@
  "icon": "fa fa-wrench",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-24 19:15:24.357187",
+ "modified": "2025-08-04 16:14:57.659318",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Operation",

@@ -576,6 +576,7 @@ class PaymentReconciliation(Document):
 				"difference_amount": flt(row.get("difference_amount")),
 				"difference_account": row.get("difference_account"),
 				"difference_posting_date": row.get("gain_loss_posting_date"),
+				"debit_or_credit_note_posting_date": row.get("debit_or_credit_note_posting_date"),
 				"cost_center": row.get("cost_center"),
 			}
 		)
@@ -589,7 +590,7 @@ class PaymentReconciliation(Document):
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
 			if not self.get(fieldname):
-				frappe.throw(_("Please select {0} first").format(self.meta.get_label(fieldname)))
+				frappe.throw(_("Please select {0} first").format(_(self.meta.get_label(fieldname))))
 
 	def validate_entries(self):
 		if not self.get("invoices"):
@@ -765,7 +766,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 			{
 				"doctype": "Journal Entry",
 				"voucher_type": voucher_type,
-				"posting_date": today(),
+				"posting_date": inv.get("debit_or_credit_note_posting_date") or today(),
 				"company": company,
 				"multi_currency": 1 if inv.currency != company_currency else 0,
 				"accounts": [
@@ -826,7 +827,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 
 			create_gain_loss_journal(
 				company,
-				today(),
+				inv.difference_posting_date,
 				inv.party_type,
 				inv.party,
 				inv.account,

@@ -153,7 +153,12 @@ class OpportunitySummaryBySalesStage:
 			}[self.filters.get("based_on")]
 
 			if self.filters.get("based_on") == "Opportunity Owner":
-				if d.get(based_on) == "[]" or d.get(based_on) is None or d.get(based_on) == "Not Assigned":
+				if (
+					d.get(based_on) == "[]"
+					or d.get(based_on) is None
+					or d.get(based_on) == "Not Assigned"
+					or d.get(based_on) == ""
+				):
 					assignments = ["Not Assigned"]
 				else:
 					assignments = json.loads(d.get(based_on))

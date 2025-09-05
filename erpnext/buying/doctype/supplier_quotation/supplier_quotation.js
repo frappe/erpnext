@@ -11,6 +11,11 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 			Quotation: "Quotation",
 		};
 
+		const me = this;
+		this.frm.set_indicator_formatter("item_code", function (doc) {
+			return !doc.qty && me.frm.doc.has_unit_price_items ? "yellow" : "";
+		});
+
 		super.setup();
 	}
 
@@ -26,6 +31,8 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 			cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
 			cur_frm.add_custom_button(__("Quotation"), this.make_quotation, __("Create"));
 		} else if (this.frm.doc.docstatus === 0) {
+			erpnext.set_unit_price_items_note(this.frm);
+
 			this.frm.add_custom_button(
 				__("Material Request"),
 				function () {

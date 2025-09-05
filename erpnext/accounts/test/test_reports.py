@@ -12,8 +12,8 @@ DEFAULT_FILTERS = {
 
 
 REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
-	("General Ledger", {"group_by": "Group by Voucher (Consolidated)"}),
-	("General Ledger", {"group_by": "Group by Voucher (Consolidated)", "include_dimensions": 1}),
+	("General Ledger", {"categorize_by": "Categorize by Voucher (Consolidated)"}),
+	("General Ledger", {"categorize_by": "Categorize by Voucher (Consolidated)", "include_dimensions": 1}),
 	("Accounts Payable", {"range": "30, 60, 90, 120"}),
 	("Accounts Receivable", {"range": "30, 60, 90, 120"}),
 	("Consolidated Financial Statement", {"report": "Balance Sheet"}),

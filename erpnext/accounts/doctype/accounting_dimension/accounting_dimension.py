@@ -111,17 +111,15 @@ class AccountingDimension(Document):
 def make_dimension_in_accounting_doctypes(doc, doclist=None):
 	if not doclist:
 		doclist = get_doctypes_with_dimensions()
-
 	doc_count = len(get_accounting_dimensions())
 	count = 0
-	repostable_doctypes = get_allowed_types_from_settings()
+	repostable_doctypes = get_allowed_types_from_settings(child_doc=True)
 
 	for doctype in doclist:
 		if (doc_count + 1) % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
 			insert_after_field = "accounting_dimensions_section"
-
 		df = {
 			"fieldname": doc.fieldname,
 			"label": doc.label,

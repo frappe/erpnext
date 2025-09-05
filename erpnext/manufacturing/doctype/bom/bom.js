@@ -480,6 +480,10 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			child.bom_no = "";
 		}
 
+		if (doc.item == child.item_code) {
+			child.do_not_explode = 1;
+		}
+
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	}
 

@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt
+from frappe.utils import cint, create_batch, flt
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
@@ -377,16 +377,17 @@ def auto_reconcile_vouchers(
 	bank_transactions = get_bank_transactions(bank_account)
 
 	if len(bank_transactions) > 10:
-		frappe.enqueue(
-			method="erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.start_auto_reconcile",
-			queue="long",
-			bank_transactions=bank_transactions,
-			from_date=from_date,
-			to_date=to_date,
-			filter_by_reference_date=filter_by_reference_date,
-			from_reference_date=from_reference_date,
-			to_reference_date=to_reference_date,
-		)
+		for bank_transaction_batch in create_batch(bank_transactions, 1000):
+			frappe.enqueue(
+				method="erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.start_auto_reconcile",
+				queue="long",
+				bank_transactions=bank_transaction_batch,
+				from_date=from_date,
+				to_date=to_date,
+				filter_by_reference_date=filter_by_reference_date,
+				from_reference_date=from_reference_date,
+				to_reference_date=to_reference_date,
+			)
 		frappe.msgprint(_("Auto Reconciliation has started in the background"))
 	else:
 		start_auto_reconcile(

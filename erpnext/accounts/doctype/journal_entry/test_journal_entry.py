@@ -580,6 +580,18 @@ class TestJournalEntry(unittest.TestCase):
 		]
 		self.assertEqual(expected, actual)
 
+	def test_pay_to_recd_from(self):
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		jv.pay_to_recd_from = "_Test Receiver"
+		jv.save()
+		self.assertEqual(jv.pay_to_recd_from, "_Test Receiver")
+
+		jv.pay_to_recd_from = "_Test Receiver 2"
+		jv.save()
+		jv.submit()
+
+		self.assertEqual(jv.pay_to_recd_from, "_Test Receiver 2")
+
 
 def make_journal_entry(
 	account1,

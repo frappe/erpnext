@@ -38,12 +38,18 @@ from erpnext.accounts.general_ledger import (
 	make_reverse_gl_entries,
 	process_gl_map,
 )
-from erpnext.accounts.party import complete_contact_details, get_party_account, set_contact_details
+from erpnext.accounts.party import (
+	complete_contact_details,
+	get_default_contact,
+	get_party_account,
+)
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
+	get_advance_payment_doctypes,
 	get_balance_on,
 	get_outstanding_invoices,
+	get_reconciliation_effect_date,
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
@@ -111,12 +117,10 @@ class PaymentEntry(AccountsController):
 	def on_submit(self):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
+		self.update_payment_requests()
+		self.update_payment_schedule()
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
-		self.update_payment_schedule()
-		self.update_payment_requests()
-		self.make_advance_payment_ledger_entries()
-		self.update_advance_paid()  # advance_paid_status depends on the payment request amount
 		self.set_status()
 
 	def validate_for_repost(self):
@@ -216,13 +220,11 @@ class PaymentEntry(AccountsController):
 			"Advance Payment Ledger Entry",
 		)
 		super().on_cancel()
+		self.update_payment_requests(cancel=True)
+		self.update_payment_schedule(cancel=1)
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.delink_advance_entry_references()
-		self.update_payment_schedule(cancel=1)
-		self.update_payment_requests(cancel=True)
-		self.make_advance_payment_ledger_entries()
-		self.update_advance_paid()  # advance_paid_status depends on the payment request amount
 		self.set_status()
 
 	def update_payment_requests(self, cancel=False):
@@ -441,12 +443,12 @@ class PaymentEntry(AccountsController):
 				self.party_name = frappe.db.get_value(self.party_type, self.party, "name")
 
 		if self.party:
-			if not self.contact_person:
-				set_contact_details(
-					self, party=frappe._dict({"name": self.party}), party_type=self.party_type
-				)
-			else:
-				complete_contact_details(self)
+			if self.party_type == "Employee":
+				self.contact_person = None
+			elif not self.contact_person:
+				self.contact_person = get_default_contact(self.party_type, self.party)
+
+			complete_contact_details(self)
 			if not self.party_balance:
 				self.party_balance = get_balance_on(
 					party_type=self.party_type, party=self.party, date=self.posting_date, company=self.company
@@ -457,15 +459,25 @@ class PaymentEntry(AccountsController):
 				self.set(self.party_account_field, party_account)
 				self.party_account = party_account
 
-		if self.paid_from and not (self.paid_from_account_currency or self.paid_from_account_balance):
+		if self.paid_from and (
+			not self.paid_from_account_currency
+			or not self.paid_from_account_balance
+			or not self.paid_from_account_type
+		):
 			acc = get_account_details(self.paid_from, self.posting_date, self.cost_center)
 			self.paid_from_account_currency = acc.account_currency
 			self.paid_from_account_balance = acc.account_balance
+			self.paid_from_account_type = acc.account_type
 
-		if self.paid_to and not (self.paid_to_account_currency or self.paid_to_account_balance):
+		if self.paid_to and (
+			not self.paid_to_account_currency
+			or not self.paid_to_account_balance
+			or not self.paid_to_account_type
+		):
 			acc = get_account_details(self.paid_to, self.posting_date, self.cost_center)
 			self.paid_to_account_currency = acc.account_currency
 			self.paid_to_account_balance = acc.account_balance
+			self.paid_to_account_type = acc.account_type
 
 		self.party_account_currency = (
 			self.paid_from_account_currency
@@ -554,7 +566,7 @@ class PaymentEntry(AccountsController):
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
 			if not self.get(field):
-				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(field)))
+				frappe.throw(_("{0} is mandatory").format(_(self.meta.get_label(field))))
 
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
@@ -1014,7 +1026,7 @@ class PaymentEntry(AccountsController):
 
 	def calculate_base_allocated_amount_for_reference(self, d) -> float:
 		base_allocated_amount = 0
-		if d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
+		if d.reference_doctype in get_advance_payment_doctypes():
 			# When referencing Sales/Purchase Order, use the source/target exchange rate depending on payment type.
 			# This is so there are no Exchange Gain/Loss generated for such doctypes
 
@@ -1294,8 +1306,7 @@ class PaymentEntry(AccountsController):
 		if not self.party_account:
 			return
 
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_doctypes")
-
+		advance_payment_doctypes = get_advance_payment_doctypes()
 		if self.payment_type == "Receive":
 			against_account = self.paid_to
 		else:
@@ -1351,23 +1362,27 @@ class PaymentEntry(AccountsController):
 						dr_or_cr + "_in_transaction_currency": d.allocated_amount
 						if self.transaction_currency == self.party_account_currency
 						else allocated_amount_in_company_currency / self.transaction_exchange_rate,
+						"advance_voucher_type": d.advance_voucher_type,
+						"advance_voucher_no": d.advance_voucher_no,
 					},
 					item=self,
 				)
 			)
 
-			if self.book_advance_payments_in_separate_party_account:
-				if d.reference_doctype in advance_payment_doctypes:
-					# Upon reconciliation, whole ledger will be reposted. So, reference to SO/PO is fine
-					gle.update(
-						{
-							"against_voucher_type": d.reference_doctype,
-							"against_voucher": d.reference_name,
-						}
-					)
-				else:
-					# Do not reference Invoices while Advance is in separate party account
-					gle.update({"against_voucher_type": self.doctype, "against_voucher": self.name})
+			if d.reference_doctype in advance_payment_doctypes:
+				# advance reference
+				gle.update(
+					{
+						"against_voucher_type": self.doctype,
+						"against_voucher": self.name,
+						"advance_voucher_type": d.reference_doctype,
+						"advance_voucher_no": d.reference_name,
+					}
+				)
+
+			elif self.book_advance_payments_in_separate_party_account:
+				# Do not reference Invoices while Advance is in separate party account
+				gle.update({"against_voucher_type": self.doctype, "against_voucher": self.name})
 			else:
 				gle.update(
 					{
@@ -1472,26 +1487,14 @@ class PaymentEntry(AccountsController):
 			"voucher_no": self.name,
 			"voucher_detail_no": invoice.name,
 		}
-
 		if invoice.reconcile_effect_on:
 			posting_date = invoice.reconcile_effect_on
 		else:
 			# For backwards compatibility
 			# Supporting reposting on payment entries reconciled before select field introduction
-			if self.advance_reconciliation_takes_effect_on == "Advance Payment Date":
-				posting_date = self.posting_date
-			elif self.advance_reconciliation_takes_effect_on == "Oldest Of Invoice Or Advance":
-				date_field = "posting_date"
-				if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
-					date_field = "transaction_date"
-				posting_date = frappe.db.get_value(
-					invoice.reference_doctype, invoice.reference_name, date_field
-				)
-
-				if getdate(posting_date) < getdate(self.posting_date):
-					posting_date = self.posting_date
-			elif self.advance_reconciliation_takes_effect_on == "Reconciliation Date":
-				posting_date = nowdate()
+			posting_date = get_reconciliation_effect_date(
+				invoice.reference_doctype, invoice.reference_name, self.company, self.posting_date
+			)
 			frappe.db.set_value("Payment Entry Reference", invoice.name, "reconcile_effect_on", posting_date)
 
 		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
@@ -1509,6 +1512,8 @@ class PaymentEntry(AccountsController):
 			{
 				"against_voucher_type": invoice.reference_doctype,
 				"against_voucher": invoice.reference_name,
+				"advance_voucher_type": invoice.advance_voucher_type,
+				"advance_voucher_no": invoice.advance_voucher_no,
 				"posting_date": posting_date,
 			}
 		)
@@ -1533,6 +1538,8 @@ class PaymentEntry(AccountsController):
 			{
 				"against_voucher_type": "Payment Entry",
 				"against_voucher": self.name,
+				"advance_voucher_type": invoice.advance_voucher_type,
+				"advance_voucher_no": invoice.advance_voucher_no,
 			}
 		)
 		gle = self.get_gl_dict(
@@ -1680,14 +1687,6 @@ class PaymentEntry(AccountsController):
 			conversion_rate = self.source_exchange_rate
 
 		return flt(gl_dict.get(field, 0) / (conversion_rate or 1))
-
-	def update_advance_paid(self):
-		if self.payment_type in ("Receive", "Pay") and self.party:
-			for d in self.get("references"):
-				if d.allocated_amount and d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
-					frappe.get_doc(
-						d.reference_doctype, d.reference_name, for_update=True
-					).set_total_advance_paid()
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.reference_no = reference_doc.name
@@ -1980,7 +1979,7 @@ class PaymentEntry(AccountsController):
 
 			# Re allocate amount to those references which have PR set (Higher priority)
 			for ref in self.references:
-				if not ref.payment_request:
+				if not (ref.reference_doctype and ref.reference_name and ref.payment_request):
 					continue
 
 				# fetch outstanding_amount of `Reference` (Payment Term) and `Payment Request` to allocate new amount
@@ -2031,7 +2030,7 @@ class PaymentEntry(AccountsController):
 					)
 			# Re allocate amount to those references which have no PR (Lower priority)
 			for ref in self.references:
-				if ref.payment_request:
+				if ref.payment_request or not (ref.reference_doctype and ref.reference_name):
 					continue
 
 				key = (ref.reference_doctype, ref.reference_name, ref.get("payment_term"))
@@ -2347,7 +2346,7 @@ def get_outstanding_reference_documents(args, validate=False):
 		accounts = get_party_account(
 			args.get("party_type"), args.get("party"), args.get("company"), include_advance=True
 		)
-		advance_account = accounts[1] if len(accounts) >= 1 else None
+		advance_account = accounts[1] if len(accounts) > 1 else None
 
 		if party_account == advance_account:
 			party_account = accounts[0]
@@ -2927,6 +2926,8 @@ def get_payment_entry(
 		party_account_currency if payment_type == "Receive" else bank.account_currency
 	)
 	pe.paid_to_account_currency = party_account_currency if payment_type == "Pay" else bank.account_currency
+	pe.paid_from_account_type = frappe.db.get_value("Account", pe.paid_from, "account_type")
+	pe.paid_to_account_type = frappe.db.get_value("Account", pe.paid_to, "account_type")
 	pe.paid_amount = paid_amount
 	pe.received_amount = received_amount
 	pe.letter_head = doc.get("letter_head")
@@ -3286,26 +3287,25 @@ def set_paid_amount_and_received_amount(
 	if party_account_currency == bank.account_currency:
 		paid_amount = received_amount = abs(outstanding_amount)
 	else:
-		company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
-		if payment_type == "Receive":
-			paid_amount = abs(outstanding_amount)
-			if bank_amount:
-				received_amount = bank_amount
-			else:
-				if bank and company_currency != bank.account_currency:
-					received_amount = paid_amount / doc.get("conversion_rate", 1)
-				else:
-					received_amount = paid_amount * doc.get("conversion_rate", 1)
+		# settings if it is for receive
+		paid_amount = abs(outstanding_amount)
+		if bank_amount:
+			received_amount = bank_amount
 		else:
-			received_amount = abs(outstanding_amount)
-			if bank_amount:
-				paid_amount = bank_amount
+			company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
+			if bank and company_currency != bank.account_currency:
+				# doc currency can be different from bank currency
+				posting_date = doc.get("posting_date") or doc.get("transaction_date")
+				conversion_rate = get_exchange_rate(
+					bank.account_currency, party_account_currency, posting_date
+				)
+				received_amount = paid_amount / conversion_rate
 			else:
-				if bank and company_currency != bank.account_currency:
-					paid_amount = received_amount / doc.get("conversion_rate", 1)
-				else:
-					# if party account currency and bank currency is different then populate paid amount as well
-					paid_amount = received_amount * doc.get("conversion_rate", 1)
+				received_amount = paid_amount * doc.get("conversion_rate", 1)
+
+		# if payment type is pay, then paid amount and received amount are swapped
+		if payment_type == "Pay":
+			paid_amount, received_amount = received_amount, paid_amount
 
 	return paid_amount, received_amount
 

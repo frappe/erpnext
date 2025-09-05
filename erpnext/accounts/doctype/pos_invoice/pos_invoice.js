@@ -14,6 +14,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 	}
 
 	company() {
+		erpnext.utils.set_letter_head(this.frm);
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 		this.frm.set_value("set_warehouse", "");
 		this.frm.set_value("taxes_and_charges", "");
@@ -54,6 +55,16 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
+
+		if (this.frm.doc.pos_profile) {
+			frappe.db
+				.get_value("POS Profile", this.frm.doc.pos_profile, "disable_grand_total_to_default_mop")
+				.then((r) => {
+					if (!r.exc) {
+						this.frm.skip_default_payment = r.message.disable_grand_total_to_default_mop;
+					}
+				});
+		}
 	}
 
 	onload_post_render(frm) {
@@ -112,6 +123,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.doc.campaign = r.message.campaign;
 						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
+						this.frm.skip_default_payment = r.message.skip_default_payment;
 					}
 					this.frm.script_manager.trigger("update_stock");
 					this.calculate_taxes_and_totals();
@@ -320,6 +332,18 @@ frappe.ui.form.on("POS Invoice", {
 							});
 					}, 60000);
 				});
+		});
+	},
+});
+
+frappe.ui.form.on("Sales Invoice Payment", {
+	mode_of_payment: function (frm) {
+		frappe.call({
+			doc: frm.doc,
+			method: "set_account_for_mode_of_payment",
+			callback: function (r) {
+				refresh_field("payments");
+			},
 		});
 	},
 });

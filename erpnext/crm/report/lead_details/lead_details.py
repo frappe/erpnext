@@ -58,7 +58,7 @@ def get_columns():
 		{"label": _("Address"), "fieldname": "address", "fieldtype": "Data", "width": 130},
 		{"label": _("Postal Code"), "fieldname": "pincode", "fieldtype": "Data", "width": 90},
 		{"label": _("City"), "fieldname": "city", "fieldtype": "Data", "width": 100},
-		{"label": _("State"), "fieldname": "state", "fieldtype": "Data", "width": 100},
+		{"label": _("State/Province"), "fieldname": "state", "fieldtype": "Data", "width": 100},
 		{
 			"label": _("Country"),
 			"fieldname": "country",

@@ -54,6 +54,12 @@ erpnext.buying = {
 							return erpnext.queries.company_address_query(this.frm.doc)
 					});
 				}
+
+				if(this.frm.get_field('dispatch_address')) {
+					this.frm.set_query("dispatch_address", () => {
+						return erpnext.queries.address_query(this.frm.doc);
+					});
+				}
 			}
 
 			setup_queries(doc, cdt, cdn) {
@@ -153,8 +159,9 @@ erpnext.buying = {
 				});
 			}
 
-			company(){
-				if(!frappe.meta.has_field(this.frm.doc.doctype, "billing_address")) return;
+			company() {
+				super.company();
+				if (!frappe.meta.has_field(this.frm.doc.doctype, "billing_address")) return;
 
 				frappe.call({
 					method: "erpnext.setup.doctype.company.company.get_billing_shipping_address",
@@ -170,6 +177,7 @@ erpnext.buying = {
 						this.frm.set_value("shipping_address", r.message.shipping_address || "");
 					},
 				});
+				erpnext.utils.set_letter_head(this.frm)
 			}
 
 			supplier_address() {
@@ -293,6 +301,12 @@ erpnext.buying = {
 				var me = this;
 				erpnext.utils.get_address_display(this.frm, "shipping_address",
 					"shipping_address_display", true);
+			}
+
+			dispatch_address(){
+				var me = this;
+				erpnext.utils.get_address_display(this.frm, "dispatch_address",
+					"dispatch_address_display", true);
 			}
 
 			billing_address() {
@@ -569,7 +583,7 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 						transaction_date: frm.doc.transaction_date || frm.doc.posting_date,
 						ignore_pricing_rule: frm.doc.ignore_pricing_rule,
 						doctype: frm.doc.doctype
-					}
+					},
 				},
 				freeze: true,
 				callback: function(r) {
