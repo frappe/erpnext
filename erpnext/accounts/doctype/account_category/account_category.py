@@ -24,11 +24,9 @@ class AccountCategory(Document):
 
 
 def create_default_account_categories():
-	default_categories = frappe._dict(
-		frappe.get_file_json(
-			frappe.get_app_path(
-				"erpnext", "accounts", "doctype", "account_category", "default_account_categories.json"
-			)
+	default_categories = frappe.get_file_json(
+		frappe.get_app_path(
+			"erpnext", "accounts", "doctype", "account_category", "default_account_categories.json"
 		)
 	)
 

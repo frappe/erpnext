@@ -9,103 +9,172 @@ def get():
 	return {
 		_("Application of Funds (Assets)"): {
 			_("Current Assets"): {
-				_("Accounts Receivable"): {_("Debtors"): {"account_type": "Receivable"}},
-				_("Bank Accounts"): {"account_type": "Bank", "is_group": 1},
-				_("Cash In Hand"): {_("Cash"): {"account_type": "Cash"}, "account_type": "Cash"},
+				_("Accounts Receivable"): {
+					_("Debtors"): {"account_type": "Receivable", "account_category": "Trade Receivables"}
+				},
+				_("Bank Accounts"): {
+					"account_type": "Bank",
+					"is_group": 1,
+					"account_category": "Cash and Cash Equivalents",
+				},
+				_("Cash In Hand"): {
+					_("Cash"): {"account_type": "Cash", "account_category": "Cash and Cash Equivalents"},
+					"account_type": "Cash",
+					"account_category": "Cash and Cash Equivalents",
+				},
 				_("Loans and Advances (Assets)"): {
-					_("Employee Advances"): {},
+					_("Employee Advances"): {"account_category": "Other Receivables"},
 				},
-				_("Securities and Deposits"): {_("Earnest Money"): {}},
+				_("Securities and Deposits"): {
+					_("Earnest Money"): {"account_category": "Other Current Assets"}
+				},
 				_("Stock Assets"): {
-					_("Stock In Hand"): {"account_type": "Stock"},
+					_("Stock In Hand"): {"account_type": "Stock", "account_category": "Stock Assets"},
 					"account_type": "Stock",
+					"account_category": "Stock Assets",
 				},
-				_("Tax Assets"): {"is_group": 1},
+				_("Tax Assets"): {"is_group": 1, "account_category": "Other Current Assets"},
 			},
 			_("Fixed Assets"): {
-				_("Capital Equipment"): {"account_type": "Fixed Asset"},
-				_("Electronic Equipment"): {"account_type": "Fixed Asset"},
-				_("Furniture and Fixtures"): {"account_type": "Fixed Asset"},
-				_("Office Equipment"): {"account_type": "Fixed Asset"},
-				_("Plants and Machineries"): {"account_type": "Fixed Asset"},
-				_("Buildings"): {"account_type": "Fixed Asset"},
-				_("Software"): {"account_type": "Fixed Asset"},
-				_("Accumulated Depreciation"): {"account_type": "Accumulated Depreciation"},
+				_("Capital Equipment"): {
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets",
+				},
+				_("Electronic Equipment"): {
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets",
+				},
+				_("Furniture and Fixtures"): {
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets",
+				},
+				_("Office Equipment"): {"account_type": "Fixed Asset", "account_category": "Tangible Assets"},
+				_("Plants and Machineries"): {
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets",
+				},
+				_("Buildings"): {"account_type": "Fixed Asset", "account_category": "Tangible Assets"},
+				_("Software"): {"account_type": "Fixed Asset", "account_category": "Intangible Assets"},
+				_("Accumulated Depreciation"): {
+					"account_type": "Accumulated Depreciation",
+					"account_category": "Tangible Assets",
+				},
 				_("CWIP Account"): {
 					"account_type": "Capital Work in Progress",
+					"account_category": "Tangible Assets",
 				},
 			},
-			_("Investments"): {"is_group": 1},
-			_("Temporary Accounts"): {_("Temporary Opening"): {"account_type": "Temporary"}},
+			_("Investments"): {"is_group": 1, "account_category": "Long-term Investments"},
+			_("Temporary Accounts"): {
+				_("Temporary Opening"): {
+					"account_type": "Temporary",
+					"account_category": "Other Non-current Assets",
+				}
+			},
 			"root_type": "Asset",
 		},
 		_("Expenses"): {
 			_("Direct Expenses"): {
 				_("Stock Expenses"): {
-					_("Cost of Goods Sold"): {"account_type": "Cost of Goods Sold"},
-					_("Expenses Included In Asset Valuation"): {
-						"account_type": "Expenses Included In Asset Valuation"
+					_("Cost of Goods Sold"): {
+						"account_type": "Cost of Goods Sold",
+						"account_category": "Cost of Goods Sold",
 					},
-					_("Expenses Included In Valuation"): {"account_type": "Expenses Included In Valuation"},
-					_("Stock Adjustment"): {"account_type": "Stock Adjustment"},
+					_("Expenses Included In Asset Valuation"): {
+						"account_type": "Expenses Included In Asset Valuation",
+						"account_category": "Other Direct Costs",
+					},
+					_("Expenses Included In Valuation"): {
+						"account_type": "Expenses Included In Valuation",
+						"account_category": "Other Direct Costs",
+					},
+					_("Stock Adjustment"): {
+						"account_type": "Stock Adjustment",
+						"account_category": "Other Direct Costs",
+					},
 				},
 			},
 			_("Indirect Expenses"): {
-				_("Administrative Expenses"): {},
-				_("Commission on Sales"): {},
-				_("Depreciation"): {"account_type": "Depreciation"},
-				_("Entertainment Expenses"): {},
-				_("Freight and Forwarding Charges"): {"account_type": "Chargeable"},
-				_("Legal Expenses"): {},
-				_("Marketing Expenses"): {"account_type": "Chargeable"},
-				_("Miscellaneous Expenses"): {"account_type": "Chargeable"},
-				_("Office Maintenance Expenses"): {},
-				_("Office Rent"): {},
-				_("Postal Expenses"): {},
-				_("Print and Stationery"): {},
-				_("Round Off"): {"account_type": "Round Off"},
-				_("Salary"): {},
-				_("Sales Expenses"): {},
-				_("Telephone Expenses"): {},
-				_("Travel Expenses"): {},
-				_("Utility Expenses"): {},
-				_("Write Off"): {},
-				_("Exchange Gain/Loss"): {},
-				_("Gain/Loss on Asset Disposal"): {},
-				_("Impairment"): {},
+				_("Administrative Expenses"): {"account_category": "Operating Expenses"},
+				_("Commission on Sales"): {"account_category": "Operating Expenses"},
+				_("Depreciation"): {"account_type": "Depreciation", "account_category": "Operating Expenses"},
+				_("Entertainment Expenses"): {"account_category": "Operating Expenses"},
+				_("Freight and Forwarding Charges"): {
+					"account_type": "Chargeable",
+					"account_category": "Operating Expenses",
+				},
+				_("Legal Expenses"): {"account_category": "Operating Expenses"},
+				_("Marketing Expenses"): {
+					"account_type": "Chargeable",
+					"account_category": "Operating Expenses",
+				},
+				_("Miscellaneous Expenses"): {
+					"account_type": "Chargeable",
+					"account_category": "Operating Expenses",
+				},
+				_("Office Maintenance Expenses"): {"account_category": "Operating Expenses"},
+				_("Office Rent"): {"account_category": "Operating Expenses"},
+				_("Postal Expenses"): {"account_category": "Operating Expenses"},
+				_("Print and Stationery"): {"account_category": "Operating Expenses"},
+				_("Round Off"): {"account_type": "Round Off", "account_category": "Operating Expenses"},
+				_("Salary"): {"account_category": "Operating Expenses"},
+				_("Sales Expenses"): {"account_category": "Operating Expenses"},
+				_("Telephone Expenses"): {"account_category": "Operating Expenses"},
+				_("Travel Expenses"): {"account_category": "Operating Expenses"},
+				_("Utility Expenses"): {"account_category": "Operating Expenses"},
+				_("Write Off"): {"account_category": "Operating Expenses"},
+				_("Exchange Gain/Loss"): {"account_category": "Finance Costs"},
+				_("Gain/Loss on Asset Disposal"): {"account_category": "Other Operating Income"},
+				_("Impairment"): {"account_category": "Operating Expenses"},
 			},
 			"root_type": "Expense",
 		},
 		_("Income"): {
-			_("Direct Income"): {_("Sales"): {}, _("Service"): {}},
-			_("Indirect Income"): {"is_group": 1},
+			_("Direct Income"): {
+				_("Sales"): {"account_category": "Revenue from Operations"},
+				_("Service"): {"account_category": "Revenue from Operations"},
+			},
+			_("Indirect Income"): {"is_group": 1, "account_category": "Other Operating Income"},
 			"root_type": "Income",
 		},
 		_("Source of Funds (Liabilities)"): {
 			_("Current Liabilities"): {
 				_("Accounts Payable"): {
-					_("Creditors"): {"account_type": "Payable"},
-					_("Payroll Payable"): {},
+					_("Creditors"): {"account_type": "Payable", "account_category": "Trade Payables"},
+					_("Payroll Payable"): {"account_category": "Other Payables"},
 				},
 				_("Stock Liabilities"): {
-					_("Stock Received But Not Billed"): {"account_type": "Stock Received But Not Billed"},
-					_("Asset Received But Not Billed"): {"account_type": "Asset Received But Not Billed"},
+					_("Stock Received But Not Billed"): {
+						"account_type": "Stock Received But Not Billed",
+						"account_category": "Trade Payables",
+					},
+					_("Asset Received But Not Billed"): {
+						"account_type": "Asset Received But Not Billed",
+						"account_category": "Trade Payables",
+					},
 				},
-				_("Duties and Taxes"): {"account_type": "Tax", "is_group": 1},
+				_("Duties and Taxes"): {
+					"account_type": "Tax",
+					"is_group": 1,
+					"account_category": "Current Tax Liabilities",
+				},
 				_("Loans (Liabilities)"): {
-					_("Secured Loans"): {},
-					_("Unsecured Loans"): {},
-					_("Bank Overdraft Account"): {},
+					_("Secured Loans"): {"account_category": "Long-term Borrowings"},
+					_("Unsecured Loans"): {"account_category": "Long-term Borrowings"},
+					_("Bank Overdraft Account"): {"account_category": "Short-term Borrowings"},
 				},
 			},
 			"root_type": "Liability",
 		},
 		_("Equity"): {
-			_("Capital Stock"): {"account_type": "Equity"},
-			_("Dividends Paid"): {"account_type": "Equity"},
-			_("Opening Balance Equity"): {"account_type": "Equity"},
-			_("Retained Earnings"): {"account_type": "Equity"},
-			_("Revaluation Surplus"): {"account_type": "Equity"},
+			_("Capital Stock"): {"account_type": "Equity", "account_category": "Share Capital"},
+			_("Dividends Paid"): {"account_type": "Equity", "account_category": "Reserves and Surplus"},
+			_("Opening Balance Equity"): {
+				"account_type": "Equity",
+				"account_category": "Reserves and Surplus",
+			},
+			_("Retained Earnings"): {"account_type": "Equity", "account_category": "Reserves and Surplus"},
+			_("Revaluation Surplus"): {"account_type": "Equity", "account_category": "Reserves and Surplus"},
 			"root_type": "Equity",
 		},
 	}
