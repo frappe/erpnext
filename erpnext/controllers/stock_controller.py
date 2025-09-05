@@ -1265,16 +1265,8 @@ class StockController(AccountsController):
 	def validate_customer_provided_item(self):
 		for d in self.get("items"):
 			# Customer Provided parts will have zero valuation rate
-			if frappe.get_cached_value("Item", d.item_code, "is_customer_provided_item") or (
-				(d.get("is_finished_item") or d.get("is_scrap_item"))
-				and d.get("valuation_rate") == 0
-				and self.get("subcontracting_inward_order")
-			):
+			if frappe.get_cached_value("Item", d.item_code, "is_customer_provided_item"):
 				d.allow_zero_valuation_rate = 1
-			elif self.get("purpose") == "Receive from Customer":
-				frappe.throw(
-					_("Item {0} should be a customer provided item.").format(frappe.bold(d.item_code))
-				)
 
 	def set_rate_of_stock_uom(self):
 		if self.doctype in [

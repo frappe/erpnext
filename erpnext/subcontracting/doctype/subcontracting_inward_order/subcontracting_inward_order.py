@@ -1,9 +1,9 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
 import frappe
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, flt, get_link_to_form
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
@@ -34,6 +34,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 		amended_from: DF.Link | None
 		company: DF.Link
+		currency: DF.Link | None
 		customer: DF.Link
 		customer_name: DF.Data
 		customer_warehouse: DF.Link
@@ -57,25 +58,21 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	pass
 
-	def before_validate(self):
-		super().before_validate()
-
 	def validate(self):
 		super().validate()
 		self.set_is_customer_provided_item()
+		self.validate_customer_provided_items()
 		self.validate_customer_warehouse()
-		self.validate_sales_order_for_subcontracting()
 		self.validate_service_items()
 		self.set_missing_values()
 
 	def on_submit(self):
-		self.validate_customer_provided_items()
 		self.update_status()
 		self.update_subcontracted_quantity_in_so()
 
 	def on_cancel(self):
 		self.update_status()
-		self.update_subcontracted_quantity_in_so(cancel=True)
+		self.update_subcontracted_quantity_in_so()
 
 	def update_status(self, status=None, update_modified=True):
 		if self.status == "Closed" and self.status != status:
@@ -127,12 +124,12 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if status and self.status != status:
 			self.db_set("status", status, update_modified=update_modified)
 
-	def update_subcontracted_quantity_in_so(self, cancel=False):
+	def update_subcontracted_quantity_in_so(self):
 		for service_item in self.service_items:
 			doc = frappe.get_doc("Sales Order Item", service_item.sales_order_item)
 			doc.subcontracted_qty = (
 				(doc.subcontracted_qty + service_item.qty)
-				if not cancel
+				if self._action == "submit"
 				else (doc.subcontracted_qty - service_item.qty)
 			)
 			doc.save()
@@ -144,24 +141,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 					frappe.bold(self.customer_warehouse), frappe.bold(self.customer)
 				)
 			)
-
-	def validate_sales_order_for_subcontracting(self):
-		if self.sales_order:
-			so = frappe.get_doc("Sales Order", self.sales_order)
-
-			if not so.is_subcontracted:
-				frappe.throw(_("Please select a valid Sales Order that is configured for Subcontracting."))
-
-			if so.docstatus != 1:
-				msg = f"Please submit Sales Order {so.name} before proceeding."
-				frappe.throw(_(msg))
-
-			if so.per_delivered == 100:
-				msg = f"Cannot create more Subcontracting Inward Orders against the Sales Order {so.name}."
-				frappe.throw(_(msg))
-		else:
-			self.service_items = self.items = self.received_items = None
-			frappe.throw(_("Please select a Subcontracted Sales Order."))
 
 	def validate_service_items(self):
 		sales_order_items = [item.sales_order_item for item in self.items]
@@ -235,8 +214,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 			for item in items:
 				self.append("items", item)
 
-		self.set_is_customer_provided_item()  # Fetch from not working for some reason?
-
 	def validate_customer_provided_items(self):
 		"""Check if atleast one raw material is customer provided"""
 		for item in self.get("items"):
@@ -280,7 +257,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 				"production_item": d.item_code,
 				"use_multi_level_bom": d.include_exploded_items,
 				"subcontracting_inward_order": self.name,
-				"sales_order": self.sales_order,
 				"bom_no": d.bom,
 				"stock_uom": d.stock_uom,
 				"company": self.company,
@@ -337,6 +313,229 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if doc_list:
 			doc_list = [get_link_to_form(doctype, p) for p in doc_list]
 			frappe.msgprint(_("{0} created").format(comma_and(doc_list)))
+
+	@frappe.whitelist()
+	def make_rm_stock_entry_inward(self, target_doc=None):
+		def calculate_qty_as_per_bom(rm_item):
+			data = frappe.get_value(
+				"Subcontracting Inward Order Item",
+				{"name": rm_item.reference_name},
+				["process_loss_qty", "include_exploded_items"],
+				as_dict=True,
+			)
+			stock_qty = frappe.get_value(
+				"BOM Explosion Item" if data.include_exploded_items else "BOM Item",
+				{"name": rm_item.bom_detail_no},
+				"stock_qty",
+			)
+			qty = flt(
+				stock_qty * data.process_loss_qty,
+				frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty"),
+			)
+			return rm_item.required_qty - rm_item.received_qty + rm_item.returned_qty + qty
+
+		if target_doc and target_doc.get("items"):
+			target_doc.items = []
+
+		stock_entry = get_mapped_doc(
+			"Subcontracting Inward Order",
+			self.name,
+			{
+				"Subcontracting Inward Order": {
+					"doctype": "Stock Entry",
+					"validation": {
+						"docstatus": ["=", 1],
+					},
+				},
+			},
+			target_doc,
+			ignore_child_tables=True,
+		)
+
+		stock_entry.purpose = "Receive from Customer"
+		stock_entry.subcontracting_inward_order = self.name
+
+		stock_entry.set_stock_entry_type()
+
+		for rm_item in self.received_items:
+			if not rm_item.required_qty or not rm_item.is_customer_provided_item:
+				continue
+
+			items_dict = {
+				rm_item.get("rm_item_code"): {
+					"scio_detail": rm_item.get("name"),
+					"qty": calculate_qty_as_per_bom(rm_item),
+					"to_warehouse": rm_item.get("reserve_warehouse"),
+					"stock_uom": rm_item.get("stock_uom"),
+				}
+			}
+
+			stock_entry.add_to_stock_entry_detail(items_dict)
+
+		if target_doc:
+			return stock_entry
+		else:
+			return stock_entry.as_dict()
+
+	@frappe.whitelist()
+	def make_rm_return(self, target_doc=None):
+		if target_doc and target_doc.get("items"):
+			target_doc.items = []
+
+		stock_entry = get_mapped_doc(
+			"Subcontracting Inward Order",
+			self.name,
+			{
+				"Subcontracting Inward Order": {
+					"doctype": "Stock Entry",
+					"validation": {
+						"docstatus": ["=", 1],
+					},
+				},
+			},
+			target_doc,
+			ignore_child_tables=True,
+		)
+
+		stock_entry.purpose = "Return Raw Material to Customer"
+		stock_entry.set_stock_entry_type()
+		stock_entry.subcontracting_inward_order = self.name
+
+		for rm_item in self.received_items:
+			items_dict = {
+				rm_item.get("rm_item_code"): {
+					"scio_detail": rm_item.get("name"),
+					"qty": rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty,
+					"from_warehouse": rm_item.get("reserve_warehouse"),
+					"stock_uom": rm_item.get("stock_uom"),
+				}
+			}
+
+			stock_entry.add_to_stock_entry_detail(items_dict)
+
+		if target_doc:
+			return stock_entry
+		else:
+			return stock_entry.as_dict()
+
+	@frappe.whitelist()
+	def make_subcontracting_delivery(self, target_doc=None):
+		if target_doc and target_doc.get("items"):
+			target_doc.items = []
+
+		stock_entry = get_mapped_doc(
+			"Subcontracting Inward Order",
+			self.name,
+			{
+				"Subcontracting Inward Order": {
+					"doctype": "Stock Entry",
+					"validation": {
+						"docstatus": ["=", 1],
+					},
+				},
+			},
+			target_doc,
+			ignore_child_tables=True,
+		)
+
+		stock_entry.purpose = "Subcontracting Delivery"
+		stock_entry.set_stock_entry_type()
+		stock_entry.subcontracting_inward_order = self.name
+		scio_details = []
+
+		for fg_item in self.items:
+			qty = (
+				fg_item.produced_qty
+				if frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
+				else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty - fg_item.returned_qty
+			)
+			if qty < 0:
+				continue
+
+			scio_details.append(fg_item.name)
+			items_dict = {
+				fg_item.item_code: {
+					"qty": qty,
+					"from_warehouse": fg_item.delivery_warehouse,
+					"stock_uom": fg_item.stock_uom,
+					"scio_detail": fg_item.name,
+					"is_finished_item": 1,
+				}
+			}
+
+			stock_entry.add_to_stock_entry_detail(items_dict)
+
+		if (
+			frappe.get_single_value("Selling Settings", "deliver_scrap_items")
+			and self.scrap_items
+			and scio_details
+		):
+			scrap_items = [
+				scrap_item for scrap_item in self.scrap_items if scrap_item.reference_name in scio_details
+			]
+			for scrap_item in scrap_items:
+				qty = scrap_item.produced_qty - scrap_item.delivered_qty
+				if qty > 0:
+					items_dict = {
+						scrap_item.item_code: {
+							"qty": scrap_item.produced_qty - scrap_item.delivered_qty,
+							"from_warehouse": scrap_item.warehouse,
+							"stock_uom": scrap_item.stock_uom,
+							"scio_detail": scrap_item.name,
+							"is_scrap_item": 1,
+						}
+					}
+
+					stock_entry.add_to_stock_entry_detail(items_dict)
+
+		if target_doc:
+			return stock_entry
+		else:
+			return stock_entry.as_dict()
+
+	@frappe.whitelist()
+	def make_subcontracting_return(self, target_doc=None):
+		if target_doc and target_doc.get("items"):
+			target_doc.items = []
+
+		stock_entry = get_mapped_doc(
+			"Subcontracting Inward Order",
+			self.name,
+			{
+				"Subcontracting Inward Order": {
+					"doctype": "Stock Entry",
+					"validation": {
+						"docstatus": ["=", 1],
+					},
+					"field_map": {"name": "subcontracting_inward_order"},
+				},
+			},
+			target_doc,
+			ignore_child_tables=True,
+		)
+
+		stock_entry.purpose = "Subcontracting Return"
+		stock_entry.set_stock_entry_type()
+
+		for fg_item in self.items:
+			qty = fg_item.delivered_qty - fg_item.returned_qty
+			if qty < 0:
+				continue
+
+			items_dict = {
+				fg_item.item_code: {
+					"qty": qty,
+					"stock_uom": fg_item.stock_uom,
+					"scio_detail": fg_item.name,
+				}
+			}
+
+			stock_entry.add_to_stock_entry_detail(items_dict)
+
+		if target_doc:
+			return stock_entry
+		else:
+			return stock_entry.as_dict()
 
 
 @frappe.whitelist()

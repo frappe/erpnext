@@ -9,5 +9,9 @@ def get_data():
 				"label": _("Transactions"),
 				"items": ["Stock Entry"],
 			},
+			{
+				"label": _("Manufacturing"),
+				"items": ["Work Order"],
+			},
 		],
 	}

@@ -42,8 +42,7 @@
   "original_item",
   "column_break_33",
   "sourced_by_supplier",
-  "is_sub_assembly_item",
-  "is_customer_provided_item"
+  "is_sub_assembly_item"
  ],
  "fields": [
   {
@@ -310,21 +309,13 @@
    "label": "Is Sub Assembly Item",
    "no_copy": 1,
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "item_code.is_customer_provided_item",
-   "fieldname": "is_customer_provided_item",
-   "fieldtype": "Check",
-   "label": "Is Customer Provided Item",
-   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-12 20:01:59.532613",
+ "modified": "2025-09-05 12:34:59.640799",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

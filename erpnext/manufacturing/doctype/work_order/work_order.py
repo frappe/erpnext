@@ -183,7 +183,7 @@ class WorkOrder(Document):
 		if self.bom_no:
 			validate_bom_no(self.production_item, self.bom_no)
 
-		if not self.get("subcontracting_inward_order"):
+		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
 		else:
 			self.validate_self_rm_warehouse()
@@ -703,13 +703,13 @@ class WorkOrder(Document):
 		if self.reserve_stock:
 			self.update_stock_reservation()
 
-		self.update_subcontracting_inward_order_received_items(cancel=True)
+		self.update_subcontracting_inward_order_received_items()
 
 	def update_stock_reservation(self):
 		make_stock_reservation_entries(self)
 		self.db_set("status", self.get_status())
 
-	def update_subcontracting_inward_order_received_items(self, cancel=False):
+	def update_subcontracting_inward_order_received_items(self):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			scio_rm_item_names = frappe.db.get_all(
 				"Subcontracting Inward Order Received Item",
@@ -723,7 +723,7 @@ class WorkOrder(Document):
 					for wo_item in self.get("required_items")
 					if wo_item.item_code == scio_rm_item.rm_item_code
 				)
-				scio_rm_item.work_order_qty += required_qty if not cancel else -required_qty
+				scio_rm_item.work_order_qty += required_qty if self._action == "submit" else -required_qty
 				scio_rm_item.save()
 
 	def create_serial_no_batch_no(self):

@@ -103,7 +103,6 @@ class SalesOrder(SellingController):
 		customer_address: DF.Link | None
 		customer_group: DF.Link | None
 		customer_name: DF.Data | None
-		customer_warehouse: DF.Link | None
 		delivery_date: DF.Date | None
 		delivery_status: DF.Literal[
 			"Not Delivered", "Fully Delivered", "Partly Delivered", "Closed", "Not Applicable"
@@ -2149,6 +2148,15 @@ def is_so_fully_subcontracted(so_name):
 
 def get_mapped_subcontracting_inward_order(source_name, target_doc=None):
 	def post_process(source_doc, target_doc):
+		if (
+			frappe.db.count(
+				"Warehouse", {"customer": source_doc.customer, "disabled": 0, "is_rejected_warehouse": 0}
+			)
+			== 1
+		):
+			target_doc.customer_warehouse = frappe.db.get_value(
+				"Warehouse", {"customer": source_doc.customer, "disabled": 0, "is_rejected_warehouse": 0}
+			)
 		target_doc.populate_items_table()
 
 	if target_doc and isinstance(target_doc, str):

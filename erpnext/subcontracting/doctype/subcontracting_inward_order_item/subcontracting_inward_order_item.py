@@ -51,4 +51,3 @@ class SubcontractingInwardOrderItem(Document):
 
 		self.db_set("produced_qty", result.produced_qty)
 		self.db_set("process_loss_qty", result.process_loss_qty)
-		self.save()

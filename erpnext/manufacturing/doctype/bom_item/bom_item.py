@@ -25,7 +25,6 @@ class BOMItem(Document):
 		has_variants: DF.Check
 		image: DF.Attach | None
 		include_item_in_manufacturing: DF.Check
-		is_customer_provided_item: DF.Check
 		is_stock_item: DF.Check
 		is_sub_assembly_item: DF.Check
 		item_code: DF.Link

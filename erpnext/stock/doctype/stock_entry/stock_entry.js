@@ -816,18 +816,6 @@ frappe.ui.form.on("Stock Entry", {
 		}
 	},
 
-	subcontracting_inward_order: (frm) => {
-		if (frm.doc.subcontracting_inward_order) {
-			frm.set_value("sales_order", "");
-			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontract_inward_order",
-				source_name: frm.doc.subcontracting_inward_order,
-				target_doc: frm,
-				freeze: true,
-			});
-		}
-	},
-
 	process_loss_qty(frm) {
 		if (frm.doc.process_loss_qty) {
 			frm.doc.process_loss_percentage = flt(

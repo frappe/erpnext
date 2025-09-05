@@ -33,7 +33,6 @@ frappe.ui.form.on("Subcontracting Inward Order Item", {
 frappe.ui.form.on("Subcontracting Inward Order", {
 	setup: (frm) => {
 		frm.get_field("items").grid.cannot_add_rows = true;
-		frm.trigger("set_queries");
 
 		frm.set_query("customer_warehouse", () => {
 			return {
@@ -42,6 +41,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 					is_rejected_warehouse: 0,
 					company: frm.doc.company,
 					customer: frm.doc.customer,
+					disabled: 0,
 				},
 			};
 		});
@@ -61,6 +61,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 					is_group: 0,
 					is_rejected_warehouse: 0,
 					company: frm.doc.company,
+					disabled: 0,
 				},
 			};
 		});
@@ -71,6 +72,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 					is_group: 0,
 					is_rejected_warehouse: 0,
 					company: frm.doc.company,
+					disabled: 0,
 				},
 			};
 		});
@@ -104,21 +106,71 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 	},
 
 	refresh: function (frm) {
-		frappe.dynamic_link = { doc: frm.doc, fieldname: "customer", doctype: "Customer" };
+		if (frm.doc.docstatus == 1) {
+			if (frm.has_perm("submit")) {
+				if (frm.doc.status == "Closed") {
+					frm.add_custom_button(
+						__("Re-open"),
+						() => frm.events.update_subcontracting_inward_order_status(frm),
+						__("Status")
+					);
+				} else {
+					frm.add_custom_button(
+						__("Close"),
+						() => frm.events.update_subcontracting_inward_order_status(frm, "Closed"),
+						__("Status")
+					);
+				}
+			}
+			if (frm.doc.status != "Closed") {
+				const is_raw_materials_received = frm.doc.received_items.some((item) =>
+					item.is_customer_provided_item
+						? item.received_qty - item.work_order_qty - item.returned_qty > 0
+						: false
+				);
+				if (is_raw_materials_received) {
+					frm.add_custom_button(
+						__("Raw Materials to Customer"),
+						() => frm.trigger("make_rm_return"),
+						__("Return")
+					);
+					if (frm.doc.per_produced < 100) {
+						frm.add_custom_button(
+							__("Work Order"),
+							() => frm.events.make_work_order(frm),
+							__("Create")
+						);
+					}
+				}
 
-		if (frm.doc.docstatus == 1 && frm.has_perm("submit")) {
-			if (frm.doc.status == "Closed") {
-				frm.add_custom_button(
-					__("Re-open"),
-					() => frm.events.update_subcontracting_inward_order_status(frm),
-					__("Status")
-				);
-			} else {
-				frm.add_custom_button(
-					__("Close"),
-					() => frm.events.update_subcontracting_inward_order_status(frm, "Closed"),
-					__("Status")
-				);
+				if (frm.doc.per_produced < 100) {
+					frm.add_custom_button(
+						__("Material from Customer"),
+						() => frm.events.make_stock_entry(frm),
+						__("Receive")
+					);
+				}
+				if (frm.doc.per_produced > 0 && frm.doc.per_delivered < 100) {
+					frm.add_custom_button(
+						__("Subcontracting Delivery"),
+						() => frm.events.make_subcontracting_delivery(frm),
+						__("Create")
+					);
+				}
+				if (frm.doc.per_delivered > 0 && frm.doc.per_returned < 100) {
+					frm.add_custom_button(
+						__("Finished Goods Return"),
+						() => frm.events.make_subcontracting_return(frm),
+						__("Return")
+					);
+				}
+				if (frm.doc.per_produced < 100) {
+					frm.page.set_inner_btn_group_as_primary(__("Receive"));
+				} else if (frm.doc.per_delivered < 100) {
+					frm.page.set_inner_btn_group_as_primary(__("Create"));
+				} else if (frm.doc.per_delivered >= 100 && frm.doc.per_returned < 100) {
+					frm.page.set_inner_btn_group_as_primary(__("Return"));
+				}
 			}
 		}
 	},
@@ -148,113 +200,52 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 			},
 		});
 	},
+
+	make_stock_entry(frm) {
+		frappe.call({
+			method: "make_rm_stock_entry_inward",
+			freeze: true,
+			doc: frm.doc,
+			callback: (r) => {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+		});
+	},
+
+	make_rm_return(frm) {
+		frappe.call({
+			method: "make_rm_return",
+			freeze: true,
+			doc: frm.doc,
+			callback: (r) => {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+		});
+	},
+
+	make_subcontracting_delivery(frm) {
+		frappe.call({
+			method: "make_subcontracting_delivery",
+			freeze: true,
+			doc: frm.doc,
+			callback: (r) => {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+		});
+	},
+
+	make_subcontracting_return(frm) {
+		frappe.call({
+			method: "make_subcontracting_return",
+			freeze: true,
+			doc: frm.doc,
+			callback: (r) => {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			},
+		});
+	},
 });
-
-erpnext.selling.SubcontractingInwardOrderController = class SubcontractingInwardOrderController {
-	refresh(doc) {
-		if (doc.docstatus == 1 && doc.status != "Closed") {
-			const is_raw_materials_received = doc.received_items.some((item) =>
-				item.is_customer_provided_item
-					? item.received_qty - item.work_order_qty - item.returned_qty > 0
-					: false
-			);
-			if (is_raw_materials_received) {
-				this.frm.add_custom_button(
-					__("Raw Materials to Customer"),
-					() => this.frm.trigger("make_rm_return"),
-					__("Return")
-				);
-				if (doc.per_produced < 100) {
-					this.frm.add_custom_button(
-						__("Work Order"),
-						() => this.frm.trigger("make_work_order"),
-						__("Create")
-					);
-				}
-			}
-
-			if (doc.per_produced < 100) {
-				this.frm.add_custom_button(
-					__("Material from Customer"),
-					this.make_stock_entry,
-					__("Receive")
-				);
-			}
-			if (doc.per_produced > 0 && doc.per_delivered < 100) {
-				this.frm.add_custom_button(
-					__("Subcontracting Delivery"),
-					this.make_subcontracting_delivery,
-					__("Create")
-				);
-			}
-			if (doc.per_delivered > 0 && doc.per_returned < 100) {
-				this.frm.add_custom_button(
-					__("Finished Goods Return"),
-					this.make_subcontracting_return,
-					__("Return")
-				);
-			}
-			if (doc.per_produced < 100) {
-				this.frm.page.set_inner_btn_group_as_primary(__("Receive"));
-			} else if (doc.per_delivered < 100) {
-				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
-			} else if (doc.per_delivered >= 100 && doc.per_returned < 100) {
-				this.frm.page.set_inner_btn_group_as_primary(__("Return"));
-			}
-		}
-	}
-
-	make_stock_entry() {
-		frappe.call({
-			method: "erpnext.controllers.subcontracting_controller.make_rm_stock_entry_inward",
-			args: {
-				subcontract_inward_order: cur_frm.doc.name,
-			},
-			callback: (r) => {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
-	}
-
-	make_rm_return() {
-		frappe.call({
-			method: "erpnext.controllers.subcontracting_controller.make_rm_return",
-			args: {
-				subcontract_inward_order: cur_frm.doc.name,
-			},
-			callback: (r) => {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
-	}
-
-	make_subcontracting_delivery() {
-		frappe.call({
-			method: "erpnext.controllers.subcontracting_controller.make_subcontracting_delivery",
-			args: {
-				subcontracting_inward_order: cur_frm.doc.name,
-			},
-			callback: (r) => {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
-	}
-
-	make_subcontracting_return() {
-		frappe.call({
-			method: "erpnext.controllers.subcontracting_controller.make_subcontracting_return",
-			args: {
-				subcontracting_inward_order: cur_frm.doc.name,
-			},
-			callback: (r) => {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
-	}
-};
-
-extend_cscript(cur_frm.cscript, new erpnext.selling.SubcontractingInwardOrderController({ frm: cur_frm }));

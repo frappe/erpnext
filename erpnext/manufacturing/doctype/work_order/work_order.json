@@ -227,8 +227,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "label": "Sales Order",
-   "options": "Sales Order",
-   "read_only_depends_on": "subcontracting_inward_order"
+   "options": "Sales Order"
   },
   {
    "fieldname": "project",

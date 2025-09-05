@@ -244,7 +244,7 @@ class StockReservationEntry(Document):
 	def validate_reservation_based_on_qty(self) -> None:
 		"""Validates `Reserved Qty` when `Reservation Based On` is `Qty`."""
 
-		if self.reservation_based_on == "Qty" and self.voucher_type != "Subcontracting Inward Order":
+		if self.reservation_based_on == "Qty":
 			self.validate_with_allowed_qty(self.reserved_qty)
 
 	def auto_reserve_serial_and_batch(self, based_on: str | None = None) -> None:
@@ -416,8 +416,7 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 			# Should be called after validating Serial and Batch Nos.
-			if self.voucher_type != "Subcontracting Inward Order":
-				self.validate_with_allowed_qty(qty_to_be_reserved)
+			self.validate_with_allowed_qty(qty_to_be_reserved)
 			self.db_set("reserved_qty", qty_to_be_reserved)
 
 	def update_reserved_qty_in_voucher(
