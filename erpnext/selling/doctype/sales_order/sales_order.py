@@ -1675,7 +1675,7 @@ def update_status(status, name):
 
 
 @frappe.whitelist()
-def make_raw_material_request(items, company, sales_order, project=None):
+def make_raw_material_request(items, company, sales_order, project=None, material_request_type="Purchase"):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -1705,7 +1705,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			doctype="Material Request",
 			transaction_date=nowdate(),
 			company=company,
-			material_request_type="Purchase",
+			material_request_type=material_request_type,
 		)
 	)
 	for item in raw_materials:

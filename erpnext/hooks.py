@@ -22,8 +22,13 @@ add_to_apps_screen = [
 
 develop_version = "15.x.x-develop"
 
-app_include_js = "erpnext.bundle.js"
-app_include_css = "erpnext.bundle.css"
+app_include_js = [
+	"erpnext.bundle.js",
+	"https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js",
+	"https://export.dhtmlx.com/gantt/api.js",
+]
+
+app_include_css = ["erpnext.bundle.css", "https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css"]
 web_include_js = "erpnext-web.bundle.js"
 web_include_css = "erpnext-web.bundle.css"
 email_css = "email_erpnext.bundle.css"
