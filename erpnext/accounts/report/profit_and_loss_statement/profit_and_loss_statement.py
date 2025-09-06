@@ -21,8 +21,7 @@ from erpnext.accounts.report.financial_statements import (
 
 def execute(filters=None):
 	if filters.report_template:
-		columns, data = FinancialReportEngine().execute(filters)
-		return columns, data
+		return FinancialReportEngine().execute(filters)
 
 	period_list = get_period_list(
 		filters.from_fiscal_year,

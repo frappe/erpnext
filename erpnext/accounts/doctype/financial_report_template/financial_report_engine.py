@@ -149,7 +149,12 @@ class ReportContext:
 
 	def get_result(self) -> tuple[list[dict], list[dict]]:
 		"""Get final formatted columns and data"""
-		return self.raw_data.get("columns", []), self.raw_data.get("formatted_data", [])
+		return (
+			self.raw_data.get("columns", []),
+			self.raw_data.get("formatted_data", []),
+			None,
+			self.raw_data.get("chart", {}),
+		)
 
 
 @dataclass
@@ -188,6 +193,8 @@ class FinancialReportEngine:
 			self.process_calculations(context)
 			self.format_report_data(context)
 
+			# Chart
+			self.generate_chart_data(context)
 			return context.get_result()
 
 		except Exception as e:
@@ -204,7 +211,7 @@ class FinancialReportEngine:
 		if filters.get("presentation_currency"):
 			frappe.msgprint(_("Currency filters are currently unsupported in Custom Financial Report."))
 
-		if (view := filters.get("selected_view")) and view != "Report":
+		if (view := filters.get("selected_view")) and view not in ("Report",):
 			frappe.msgprint(_("{0} view is currently unsupported in Custom Financial Report.").format(view))
 
 	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
@@ -269,6 +276,12 @@ class FinancialReportEngine:
 
 		context.raw_data["formatted_data"] = formatted_data
 		context.raw_data["columns"] = columns
+
+		return context
+
+	def generate_chart_data(self, context: ReportContext) -> dict[str, Any]:
+		generator = ChartDataGenerator(context)
+		generator.generate()
 
 		return context
 
@@ -1319,3 +1332,58 @@ class DetailRowBuilder:
 				"hidden_calculation": False,
 			},
 		)()
+
+
+class ChartDataGenerator:
+	def __init__(self, context: ReportContext):
+		self.context = context
+		self.processed_rows = context.processed_rows
+		self.period_list = context.period_list
+		self.filters = context.filters
+		self.currency = context.currency
+
+	def generate(self) -> dict[str, Any]:
+		chart_rows = [
+			row
+			for row in self.processed_rows
+			if getattr(row.row, "include_in_charts", False)
+			and row.row.data_source != "Blank Line"
+			and row.row.data_source != "Column Break"
+		]
+
+		if not chart_rows:
+			return {}
+
+		labels = [p.get("label") for p in self.period_list]
+		datasets = []
+
+		for row_data in chart_rows:
+			display_name = getattr(row_data.row, "display_name", "")
+			values = []
+			for i, _period in enumerate(self.period_list):
+				if i < len(row_data.values):
+					value = row_data.values[i]
+					values.append(flt(value, 2))
+				else:
+					values.append(0.0)
+
+			# only non-zero values
+			if any(v != 0 for v in values):
+				datasets.append({"name": display_name, "values": values})
+
+		if not datasets:
+			return {}
+
+		# chart config
+		if not self.filters.get("accumulated_values") or len(labels) <= 1:
+			chart_type = "bar"
+		else:
+			chart_type = "line"
+
+		self.context.raw_data["chart"] = {
+			"data": {"labels": labels, "datasets": datasets},
+			"type": chart_type,
+			"fieldtype": "Currency",
+			"options": "currency",
+			"currency": self.currency,
+		}
