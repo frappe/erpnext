@@ -61,6 +61,11 @@ class PeriodValue:
 			return self.movement
 		return 0.0
 
+	def copy(self):
+		return PeriodValue(
+			period_key=self.period_key, opening=self.opening, closing=self.closing, movement=self.movement
+		)
+
 
 @dataclass
 class AccountData:
@@ -86,6 +91,17 @@ class AccountData:
 
 	def has_periods(self) -> bool:
 		return len(self.period_values) > 0
+
+	def copy(self):
+		copied = AccountData(account_name=self.account_name)
+		copied.period_values = {k: v.copy() for k, v in self.period_values.items()}
+		return copied
+
+	def reverse_values(self) -> None:
+		for period_value in self.period_values.values():
+			period_value.opening = -period_value.opening
+			period_value.closing = -period_value.closing
+			period_value.movement = -period_value.movement
 
 
 @dataclass
@@ -272,6 +288,7 @@ class DataCollector:
 				"accounts": accounts,
 				"balance_type": row.balance_type,
 				"reference_code": row.reference_code,
+				"reverse_sign": row.reverse_sign,
 			}
 		)
 
@@ -311,7 +328,10 @@ class DataCollector:
 				if account_name not in account_data:
 					continue
 
-				account_obj: AccountData = account_data[account_name]
+				account_obj: AccountData = account_data[account_name].copy()
+				if request["reverse_sign"]:
+					account_obj.reverse_values()
+
 				account_values = account_obj.get_ordered_values(period_keys, balance_type)
 
 				# Add to totals
@@ -753,6 +773,9 @@ class RowProcessor:
 		try:
 			values = frappe.call(api_path, filters=self.context.filters, periods=self.period_list, row=row)
 
+			if row.reverse_sign:
+				values = [-1 * v for v in values]
+
 			# TODO: add support for server script
 			# use form_dict to pass input in server script
 		except Exception as e:
@@ -888,6 +911,7 @@ class FormulaCalculator:
 	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
 		validation_result = self.validator.validate(report_row)
 		formula = report_row.calculation_formula
+		negation_factor = -1 if report_row.reverse_sign else 1
 
 		if validation_result.issues:
 			# TODO: Throw?
@@ -897,17 +921,17 @@ class FormulaCalculator:
 
 		results = []
 		for i in range(len(self.period_list)):
-			result = self._evaluate_for_period(formula, i)
+			result = self._evaluate_for_period(formula, i, negation_factor)
 			results.append(result)
 
 		return results
 
-	def _evaluate_for_period(self, formula: str, period_index: int) -> float:
+	def _evaluate_for_period(self, formula: str, period_index: int, negation_factor: int) -> float:
 		# TODO: consistent error handling
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, context)
-			return flt(result, self.precision)
+			return flt(result * negation_factor, self.precision)
 
 		except ZeroDivisionError:
 			frappe.log_error(f"Division by zero in formula: {formula}")
@@ -1015,10 +1039,6 @@ class FormattingEngine:
 			),
 			FormattingRule(
 				condition=lambda rd: rd.is_detail_row, format_properties={"is_detail": True, "prefix": "• "}
-			),
-			FormattingRule(
-				condition=lambda rd: getattr(rd.row, "reverse_sign", False),
-				format_properties={"reverse_sign": True},
 			),
 			FormattingRule(
 				condition=lambda rd: getattr(rd.row, "warn_if_negative", False),
@@ -1135,10 +1155,7 @@ class RowFormatterBase(ABC):
 
 	def _get_period_value(self, row_data: RowData, period_index: int) -> Any:
 		if period_index < len(row_data.values):
-			value = row_data.values[period_index]
-			if getattr(row_data.row, "reverse_sign", False):
-				value = -value
-			return value
+			return row_data.values[period_index]
 
 		return ""
 
