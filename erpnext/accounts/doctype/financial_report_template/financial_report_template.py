@@ -1,6 +1,9 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import os
+import shutil
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -35,7 +38,19 @@ class FinancialReportTemplate(Document):
 	def on_update(self):
 		self._export_template()
 
+	def on_trash(self):
+		self._delete_template()
+
 	def _export_template(self):
 		from frappe.modules.utils import export_module_json
 
 		return export_module_json(self, self.is_standard == 1, self.module)
+
+	def _delete_template(self):
+		if not self.is_standard or not frappe.conf.developer_mode:
+			return
+
+		module_path = frappe.get_module_path(self.module)
+		dir_path = os.path.join(module_path, "financial_report_template", frappe.scrub(self.name))
+
+		shutil.rmtree(dir_path)
