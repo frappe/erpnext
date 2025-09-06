@@ -15,7 +15,7 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.database.query import SQLFunctionParser
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, date_diff, flt, getdate
+from frappe.utils import cint, cstr, date_diff, flt, getdate
 
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -92,6 +92,10 @@ class AccountData:
 	def has_periods(self) -> bool:
 		return len(self.period_values) > 0
 
+	def accumulate_values(self) -> None:
+		for period_value in self.period_values.values():
+			period_value.movement += period_value.opening
+
 	def copy(self):
 		copied = AccountData(account_name=self.account_name)
 		copied.period_values = {k: v.copy() for k, v in self.period_values.items()}
@@ -153,10 +157,16 @@ class FormattingRule:
 	"""Rule for applying formatting to rows"""
 
 	condition: callable
-	format_properties: dict[str, Any]
+	format_properties: Union[dict[str, Any], callable]  # noqa: UP007
 
 	def applies_to(self, row_data: RowData) -> bool:
 		return self.condition(row_data)
+
+	def get_properties(self, row_data: RowData) -> dict[str, Any]:
+		"""Get the format properties, handling both static and dynamic cases"""
+		if callable(self.format_properties):
+			return self.format_properties(row_data)
+		return self.format_properties
 
 
 # ============================================================================
@@ -396,7 +406,14 @@ class FinancialQueryBuilder:
 
 		gl_data = self._get_gl_movements(accounts)
 
-		return self._calculate_running_balances(balances_data, gl_data)
+		self._calculate_running_balances(balances_data, gl_data)
+
+		if self.filters.get("accumulated_values"):
+			for account_data in balances_data.values():
+				account_data: AccountData
+				account_data.accumulate_values()
+
+		return balances_data
 
 	def _get_opening_balances(self, accounts: list[str]) -> dict[str, dict[str, dict[str, float]]]:
 		if frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance"):
@@ -551,8 +568,6 @@ class FinancialQueryBuilder:
 
 				current_balance = closing_balance
 
-		return balances_data
-
 	def _apply_standard_filters(self, query, table):
 		if self.filters.get("ignore_closing_entries"):
 			if hasattr(table, "is_period_closing_voucher_entry"):
@@ -680,6 +695,9 @@ class FilterExpressionParser:
 
 		field = getattr(table, field_name, None)
 		operator_fn = OPERATOR_MAP.get(operator.casefold())
+
+		if "like" in operator.casefold() and "%" not in value:
+			value = f"%{value}%"
 
 		return operator_fn(field, value)
 
@@ -1048,13 +1066,23 @@ class FormattingEngine:
 				condition=lambda rd: getattr(rd.row, "data_source", "") == "Blank Line",
 				format_properties={"is_blank_line": True},
 			),
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "fieldtype", ""),
+				format_properties=lambda rd: {"fieldtype": getattr(rd.row, "fieldtype", "").strip()},
+			),
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "color", ""),
+				format_properties=lambda rd: {"color": getattr(rd.row, "color", "").strip()},
+			),
 		]
 
 	def get_formatting(self, row_data: RowData) -> dict[str, Any]:
 		formatting = {}
 		for rule in self.rules:
 			if rule.applies_to(row_data):
-				formatting.update(rule.format_properties)
+				properties = rule.get_properties(row_data)
+				formatting.update(properties)
+
 		return formatting
 
 
@@ -1146,10 +1174,19 @@ class RowFormatterBase(ABC):
 			"currency": getattr(self.context.currency, "currency", "") or "",
 			"period_start_date": getattr(self.context.filters, "period_start_date", "") or "",
 			"period_end_date": getattr(self.context.filters, "period_end_date", "") or "",
+			"total": 0,
 		}
 
 		for i, period in enumerate(self.period_list):
-			values[period["key"]] = self._get_period_value(row_data, i)
+			period_value = self._get_period_value(row_data, i)
+			values[period["key"]] = period_value
+
+			if not self.context.filters.get("accumulated_values"):
+				values["total"] += flt(period_value)
+
+		# avg for percent
+		if not self.context.filters.get("accumulated_values") and row_data.row.fieldtype == "Percent":
+			values["total"] = values["total"] / len(self.period_list)
 
 		return values
 
@@ -1273,6 +1310,7 @@ class DetailRowBuilder:
 				"account_name": short_name,
 				"data_source": "Account Detail",
 				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
+				"fieldtype": getattr(parent_row, "fieldtype", None),
 				"bold_text": False,
 				"italic_text": True,
 				"reverse_sign": getattr(parent_row, "reverse_sign", False),

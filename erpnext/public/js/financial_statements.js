@@ -102,6 +102,7 @@ erpnext.financial_statements = {
 	_format_custom_value_column: function (value, data, formatting, column, default_formatter, row) {
 		if (formatting.is_blank_line) return "";
 
+		column.fieldtype = formatting.fieldtype || column.fieldtype;
 		let formattedValue = default_formatter(value, row, column, data);
 		return this._style_custom_value(formattedValue, formatting, value);
 	},
@@ -112,6 +113,7 @@ erpnext.financial_statements = {
 		if (formatting.bold) $element.css("font-weight", "bold");
 		if (formatting.italic) $element.css("font-style", "italic");
 		if (formatting.warn_if_negative && value < 0) $element.addClass("text-danger");
+		if (formatting.color) $element.css("color", formatting.color);
 
 		return $element.wrap("<p></p>").parent().html();
 	},

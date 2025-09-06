@@ -19,12 +19,15 @@ class FinancialReportRow(Document):
 		]
 		bold_text: DF.Check
 		calculation_formula: DF.Code | None
+		color: DF.Color | None
 		data_source: DF.Literal[
 			"", "Account Data", "Calculated Amount", "Custom API", "Blank Line", "Column Break"
 		]
 		display_name: DF.Data | None
+		fieldtype: DF.Literal["", "Currency", "Float", "Int", "Percent"]
 		hidden_calculation: DF.Check
 		hide_when_empty: DF.Check
+		include_in_charts: DF.Check
 		indentation_level: DF.Int
 		italic_text: DF.Check
 		parent: DF.Data
