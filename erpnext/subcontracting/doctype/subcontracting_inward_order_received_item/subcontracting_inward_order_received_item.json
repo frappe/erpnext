@@ -33,8 +33,7 @@
    "in_list_view": 1,
    "label": "Item Code",
    "options": "Item",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "columns": 2,
@@ -72,8 +71,7 @@
    "fieldname": "reference_name",
    "fieldtype": "Data",
    "label": "Reference Name",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_break_13",
@@ -184,7 +182,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-05 10:55:38.461400",
+ "modified": "2025-09-06 16:02:49.210594",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order Received Item",

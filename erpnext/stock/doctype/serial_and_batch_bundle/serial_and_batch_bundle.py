@@ -2123,13 +2123,13 @@ def get_bundle_wise_serial_nos(data, kwargs):
 def get_reserved_voucher_details(kwargs):
 	reserved_voucher_details = []
 
-	value = {
-		"Delivery Note": ["Delivery Note Item", "against_sales_order"],
-		"Stock Entry": ["Stock Entry", "work_order", "subcontracting_inward_order"],
-		"Work Order": ["Work Order", "production_plan"],
+	field_mapper = {
+		"Delivery Note": [["Delivery Note Item", "against_sales_order"]],
+		"Stock Entry": [["Stock Entry", "work_order"], ["Stock Entry", "subcontracting_inward_order"]],
+		"Work Order": [["Work Order", "production_plan"], ["Work Order", "subcontracting_inward_order"]],
 	}.get(kwargs.get("sabb_voucher_type"))
 
-	if not value or not kwargs.get("sabb_voucher_no"):
+	if not field_mapper or not kwargs.get("sabb_voucher_no"):
 		return reserved_voucher_details
 
 	voucher_based_filters = {
@@ -2148,14 +2148,15 @@ def get_reserved_voucher_details(kwargs):
 		},
 	}.get(kwargs.get("sabb_voucher_type"))
 
-	for idx in range(1, len(value)):
-		if frappe.get_value(value[0], kwargs.get("sabb_voucher_no"), value[idx]):
-			reserved_voucher_details = frappe.get_all(
-				value[0],
-				pluck=value[idx],
+	reserved_voucher_details = []
+	for row in field_mapper:
+		reserved_voucher_details.extend(
+			frappe.get_all(
+				row[0],
+				pluck=row[1],
 				filters=voucher_based_filters,
 			)
-			break
+		)
 
 	return reserved_voucher_details
 

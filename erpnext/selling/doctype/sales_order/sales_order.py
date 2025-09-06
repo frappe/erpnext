@@ -1427,7 +1427,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 					)
 					doclist.process_item_selection(idx)
 					idx += 1
-			doclist.has_subcontracted = 1
+		doclist.has_subcontracted = 1
 
 	automatically_fetch_payment_terms = cint(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")

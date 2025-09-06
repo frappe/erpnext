@@ -80,9 +80,10 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 		total_to_be_received = total_received = total_rm_returned = 0
 		for rm in self.get("received_items"):
-			total_to_be_received += flt(rm.required_qty)
-			total_received += flt(rm.received_qty)
-			total_rm_returned += flt(rm.returned_qty)
+			if rm.get("is_customer_provided_item"):
+				total_to_be_received += flt(rm.required_qty)
+				total_received += flt(rm.received_qty)
+				total_rm_returned += flt(rm.returned_qty)
 
 		total_to_be_produced = total_produced = total_process_loss = total_delivered = total_fg_returned = 0
 		for item in self.get("items"):

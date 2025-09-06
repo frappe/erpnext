@@ -11,6 +11,9 @@
   "customer_group",
   "column_break_4",
   "territory",
+  "experimental_section",
+  "use_server_side_reactivity",
+  "item_price_tab",
   "item_price_settings_section",
   "selling_price_list",
   "maintain_same_rate_action",
@@ -22,6 +25,7 @@
   "validate_selling_price",
   "editable_bundle_item_rates",
   "allow_negative_rates_for_items",
+  "transaction_tab",
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
@@ -39,7 +43,7 @@
   "allow_zero_qty_in_sales_order",
   "experimental_section",
   "use_legacy_js_reactivity",
-  "subcontracting_settings_tab",
+  "subcontracting_inward_tab",
   "section_break_zwh6",
   "allow_delivery_of_overproduced_qty",
   "column_break_mla9",
@@ -240,14 +244,14 @@
   {
    "fieldname": "section_break_zwh6",
    "fieldtype": "Section Break",
-   "label": "Delivery"
+   "label": "Subcontracting Inward Settings"
   },
   {
    "default": "0",
    "description": "If enabled, system will allow user to deliver the entire quantity of the finished goods produced against the Subcontracting Inward Order. If disabled, system will allow delivery of only the ordered quantity.",
    "fieldname": "allow_delivery_of_overproduced_qty",
    "fieldtype": "Check",
-   "label": "Allow Delivery of over-produced Qty"
+   "label": "Allow Delivery of Overproduced Qty"
   },
   {
    "fieldname": "column_break_mla9",
@@ -261,9 +265,19 @@
    "label": "Deliver Scrap Items"
   },
   {
-   "fieldname": "subcontracting_settings_tab",
+   "fieldname": "item_price_tab",
    "fieldtype": "Tab Break",
-   "label": "Subcontracting Settings"
+   "label": "Item Price"
+  },
+  {
+   "fieldname": "transaction_tab",
+   "fieldtype": "Tab Break",
+   "label": "Transaction"
+  },
+  {
+   "fieldname": "subcontracting_inward_tab",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting Inward"
   },
   {
    "default": "0",

@@ -1039,7 +1039,7 @@ class SerialBatchCreation:
 		if serial_nos:
 			self.serial_nos = serial_nos
 		if batch_nos:
-			self.batch_nos = batch_nos
+			self.batches = batch_nos
 
 		if self.type_of_transaction == "Outward":
 			self.set_auto_serial_batch_entries_for_outward()
@@ -1449,8 +1449,7 @@ def get_batchwise_qty(voucher_type, voucher_no):
 
 
 def get_serial_batch_list_from_item(item):
-	serial_list = []
-	batch_list = []
+	serial_list, batch_list = [], []
 	if item.serial_and_batch_bundle:
 		table = frappe.qb.DocType("Serial and Batch Entry")
 		query = (
