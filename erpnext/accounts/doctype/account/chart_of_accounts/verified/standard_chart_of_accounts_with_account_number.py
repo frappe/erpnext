@@ -47,6 +47,14 @@ def get():
 					},
 					"account_number": "1650",
 				},
+				_("Prepaid Expenses"): {
+					"account_number": "1660",
+					"account_category": "Other Current Assets",
+				},
+				_("Short-term Investments"): {
+					"account_number": "1670",
+					"account_category": "Short-term Investments",
+				},
 				_("Stock Assets"): {
 					_("Stock In Hand"): {
 						"account_type": "Stock",
@@ -205,17 +213,20 @@ def get():
 				_("Travel Expenses"): {"account_number": "5216", "account_category": "Operating Expenses"},
 				_("Utility Expenses"): {"account_number": "5217", "account_category": "Operating Expenses"},
 				_("Write Off"): {"account_number": "5218", "account_category": "Operating Expenses"},
-				_("Exchange Gain/Loss"): {"account_number": "5219", "account_category": "Finance Costs"},
+				_("Exchange Gain/Loss"): {"account_number": "5219", "account_category": "Operating Expenses"},
+				_("Interest Expense"): {"account_number": "5220", "account_category": "Finance Costs"},
+				_("Bank Charges"): {"account_number": "5221", "account_category": "Finance Costs"},
 				_("Gain/Loss on Asset Disposal"): {
-					"account_number": "5220",
+					"account_number": "5222",
 					"account_category": "Other Operating Income",
 				},
 				_("Miscellaneous Expenses"): {
 					"account_type": "Chargeable",
-					"account_number": "5221",
+					"account_number": "5223",
 					"account_category": "Operating Expenses",
 				},
-				"account_number": "5200",
+				_("Impairment"): {"account_number": "5224", "account_category": "Operating Expenses"},
+				_("Tax Expense"): {"account_number": "5225", "account_category": "Tax Expense"},
 			},
 			"root_type": "Expense",
 			"account_number": "5000",
@@ -227,9 +238,13 @@ def get():
 				"account_number": "4100",
 			},
 			_("Indirect Income"): {
+				_("Interest Income"): {"account_number": "4210", "account_category": "Investment Income"},
+				_("Interest on Fixed Deposits"): {
+					"account_number": "4220",
+					"account_category": "Investment Income",
+				},
 				"is_group": 1,
 				"account_number": "4200",
-				"account_category": "Other Operating Income",
 			},
 			"root_type": "Income",
 			"account_number": "4000",
@@ -244,6 +259,14 @@ def get():
 					},
 					_("Payroll Payable"): {"account_number": "2120", "account_category": "Other Payables"},
 					"account_number": "2100",
+				},
+				_("Accrued Expenses"): {
+					"account_number": "2150",
+					"account_category": "Other Current Liabilities",
+				},
+				_("Customer Advances"): {
+					"account_number": "2160",
+					"account_category": "Other Current Liabilities",
 				},
 				_("Stock Liabilities"): {
 					_("Stock Received But Not Billed"): {
@@ -268,6 +291,10 @@ def get():
 					"account_number": "2300",
 					"account_category": "Current Tax Liabilities",
 				},
+				_("Short-term Provisions"): {
+					"account_number": "2350",
+					"account_category": "Short-term Provisions",
+				},
 				_("Loans (Liabilities)"): {
 					_("Secured Loans"): {
 						"account_number": "2410",
@@ -284,6 +311,18 @@ def get():
 					"account_number": "2400",
 				},
 				"account_number": "2100-2400",
+			},
+			_("Non-Current Liabilities"): {
+				_("Long-term Provisions"): {
+					"account_number": "2510",
+					"account_category": "Long-term Provisions",
+				},
+				_("Employee Benefits Obligation"): {
+					"account_number": "2520",
+					"account_category": "Other Non-current Liabilities",
+				},
+				"is_group": 1,
+				"account_number": "2500",
 			},
 			"root_type": "Liability",
 			"account_number": "2000",
@@ -307,6 +346,11 @@ def get():
 			_("Retained Earnings"): {
 				"account_type": "Equity",
 				"account_number": "3400",
+				"account_category": "Reserves and Surplus",
+			},
+			_("Revaluation Surplus"): {
+				"account_type": "Equity",
+				"account_number": "3500",
 				"account_category": "Reserves and Surplus",
 			},
 			"root_type": "Equity",

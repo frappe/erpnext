@@ -28,6 +28,8 @@ def get():
 				_("Securities and Deposits"): {
 					_("Earnest Money"): {"account_category": "Other Current Assets"}
 				},
+				_("Prepaid Expenses"): {"account_category": "Other Current Assets"},
+				_("Short-term Investments"): {"account_category": "Short-term Investments"},
 				_("Stock Assets"): {
 					_("Stock In Hand"): {"account_type": "Stock", "account_category": "Stock Assets"},
 					"account_type": "Stock",
@@ -123,9 +125,12 @@ def get():
 				_("Travel Expenses"): {"account_category": "Operating Expenses"},
 				_("Utility Expenses"): {"account_category": "Operating Expenses"},
 				_("Write Off"): {"account_category": "Operating Expenses"},
-				_("Exchange Gain/Loss"): {"account_category": "Finance Costs"},
+				_("Exchange Gain/Loss"): {"account_category": "Operating Expenses"},
+				_("Interest Expense"): {"account_category": "Finance Costs"},
+				_("Bank Charges"): {"account_category": "Finance Costs"},
 				_("Gain/Loss on Asset Disposal"): {"account_category": "Other Operating Income"},
 				_("Impairment"): {"account_category": "Operating Expenses"},
+				_("Tax Expense"): {"account_category": "Tax Expense"},
 			},
 			"root_type": "Expense",
 		},
@@ -134,7 +139,11 @@ def get():
 				_("Sales"): {"account_category": "Revenue from Operations"},
 				_("Service"): {"account_category": "Revenue from Operations"},
 			},
-			_("Indirect Income"): {"is_group": 1, "account_category": "Other Operating Income"},
+			_("Indirect Income"): {
+				_("Interest Income"): {"account_category": "Investment Income"},
+				_("Interest on Fixed Deposits"): {"account_category": "Investment Income"},
+				"is_group": 1,
+			},
 			"root_type": "Income",
 		},
 		_("Source of Funds (Liabilities)"): {
@@ -143,6 +152,8 @@ def get():
 					_("Creditors"): {"account_type": "Payable", "account_category": "Trade Payables"},
 					_("Payroll Payable"): {"account_category": "Other Payables"},
 				},
+				_("Accrued Expenses"): {"account_category": "Other Current Liabilities"},
+				_("Customer Advances"): {"account_category": "Other Current Liabilities"},
 				_("Stock Liabilities"): {
 					_("Stock Received But Not Billed"): {
 						"account_type": "Stock Received But Not Billed",
@@ -158,11 +169,17 @@ def get():
 					"is_group": 1,
 					"account_category": "Current Tax Liabilities",
 				},
+				_("Short-term Provisions"): {"account_category": "Short-term Provisions"},
 				_("Loans (Liabilities)"): {
 					_("Secured Loans"): {"account_category": "Long-term Borrowings"},
 					_("Unsecured Loans"): {"account_category": "Long-term Borrowings"},
 					_("Bank Overdraft Account"): {"account_category": "Short-term Borrowings"},
 				},
+			},
+			_("Non-Current Liabilities"): {
+				_("Long-term Provisions"): {"account_category": "Long-term Provisions"},
+				_("Employee Benefits Obligation"): {"account_category": "Other Non-current Liabilities"},
+				"is_group": 1,
 			},
 			"root_type": "Liability",
 		},
