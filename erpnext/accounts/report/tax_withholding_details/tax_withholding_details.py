@@ -56,8 +56,11 @@ def get_tax_withholding_data(filters):
 			"transaction_date": entry.withholding_date,
 			"transaction_type": entry.taxable_doctype,
 			"ref_no": entry.taxable_name,
+			"taxable_date": entry.taxable_date,
 			"supplier_invoice_no": doc_details.get("bill_no"),
 			"supplier_invoice_date": doc_details.get("bill_date"),
+			"withholding_doctype": entry.withholding_doctype,
+			"withholding_name": entry.withholding_name,
 			"party_name": party_info.get("party_name"),
 			"tax_id": entry.tax_id,
 			"party": entry.party,
@@ -186,6 +189,12 @@ def get_columns(filters):
 				"width": 120,
 			},
 			{
+				"label": _("Reference Date"),
+				"fieldname": "taxable_date",
+				"fieldtype": "Date",
+				"width": 100,
+			},
+			{
 				"label": _("Transaction Type"),
 				"fieldname": "transaction_type",
 				"fieldtype": "Data",
@@ -203,6 +212,13 @@ def get_columns(filters):
 				"fieldname": "transaction_date",
 				"fieldtype": "Date",
 				"width": 100,
+			},
+			{
+				"label": _("Withholding Document"),
+				"fieldname": "withholding_name",
+				"fieldtype": "Dynamic Link",
+				"options": "withholding_doctype",
+				"width": 150,
 			},
 		]
 	)
