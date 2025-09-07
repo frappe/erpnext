@@ -49,6 +49,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "rows",
    "fieldtype": "Table",
    "label": "Report Line Items",
@@ -72,7 +73,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-12 06:52:01.100991",
+ "modified": "2025-09-07 02:46:06.814415",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Template",

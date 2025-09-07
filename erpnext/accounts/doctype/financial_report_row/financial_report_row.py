@@ -21,7 +21,13 @@ class FinancialReportRow(Document):
 		calculation_formula: DF.Code | None
 		color: DF.Color | None
 		data_source: DF.Literal[
-			"", "Account Data", "Calculated Amount", "Custom API", "Blank Line", "Column Break"
+			"",
+			"Account Data",
+			"Calculated Amount",
+			"Custom API",
+			"Blank Line",
+			"Column Break",
+			"Section Break",
 		]
 		display_name: DF.Data | None
 		fieldtype: DF.Literal["", "Currency", "Float", "Int", "Percent"]

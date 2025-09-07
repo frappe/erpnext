@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-08-02 04:57:05.364590",
+ "creation": "2025-09-06 09:39:46.503678",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -55,7 +55,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Data Source",
-   "options": "\nAccount Data\nCalculated Amount\nCustom API\nBlank Line\nColumn Break"
+   "options": "\nAccount Data\nCalculated Amount\nCustom API\nBlank Line\nColumn Break\nSection Break"
   },
   {
    "description": "Opening Balance = Start of period, Closing Balance = End of period, Period Movement = Net change during period",
@@ -152,7 +152,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-06 09:26:03.144761",
+ "modified": "2025-09-07 02:53:19.093494",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",

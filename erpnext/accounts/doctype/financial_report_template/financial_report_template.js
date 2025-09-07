@@ -30,7 +30,7 @@ frappe.ui.form.on("Financial Report Row", {
 			frappe.model.set_value(cdt, cdn, "balance_type", "");
 		}
 
-		if (["Blank Line", "Column Break"].includes(row.data_source)) {
+		if (["Blank Line", "Column Break", "Section Break"].includes(row.data_source)) {
 			frappe.model.set_value(cdt, cdn, "calculation_formula", "");
 		}
 	},
@@ -143,6 +143,20 @@ function update_formula_description(frm, data_source) {
 				<ul ${list_style}>
 					<li>Horizontal P&L statements</li>
 					<li>Side-by-side Balance Sheet sections</li>
+				</ul>
+
+				<p ${note_style}><strong>Note:</strong> No formula needed - this is for formatting only.</p>
+			</div>`;
+	} else if (data_source === "Section Break") {
+		description_html = `
+			<div ${container_style}>
+				<h5 ${title_style}>Section Break</h5>
+				<p ${text_style}>Creates a visual break for separating different sections.</p>
+
+				<h6 ${subtitle_style}>Use For:</h6>
+				<ul ${list_style}>
+					<li>Separating major sections in a report - say trading & profit and loss</li>
+					<li>Improving readability by adding space</li>
 				</ul>
 
 				<p ${note_style}><strong>Note:</strong> No formula needed - this is for formatting only.</p>

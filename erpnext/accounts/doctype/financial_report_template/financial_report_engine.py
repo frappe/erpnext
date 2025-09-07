@@ -129,14 +129,26 @@ class RowData:
 class SegmentData:
 	"""Represents a segment with its rows and metadata"""
 
-	rows: list[RowData]
+	rows: list[RowData] = field(default_factory=list)
 	label: str = ""
 	index: int = 0
-	id: str | None = None
 
-	def __post_init__(self):
-		if not self.id and self.index is not None:
-			self.id = f"seg_{self.index}"
+	@property
+	def id(self) -> str:
+		return f"seg_{self.index}"
+
+
+@dataclass
+class SectionData:
+	"""Represents a horizontal section containing multiple column segments"""
+
+	segments: list[SegmentData]
+	label: str = ""
+	index: int = 0
+
+	@property
+	def id(self) -> str:
+		return f"section_{self.index}"
 
 
 @dataclass
@@ -793,6 +805,8 @@ class RowProcessor:
 			return self._process_blank_row(row)
 		elif row.data_source == "Column Break":
 			return self._process_column_break_row(row)
+		elif row.data_source == "Section Break":
+			return self._process_section_break_row(row)
 		else:
 			return RowData(row=row, values=[0.0] * len(self.period_list))
 
@@ -840,6 +854,9 @@ class RowProcessor:
 		return RowData(row=row, values=[""] * len(self.period_list))
 
 	def _process_column_break_row(self, row) -> RowData:
+		return RowData(row=row, values=[])
+
+	def _process_section_break_row(self, row) -> RowData:
 		return RowData(row=row, values=[])
 
 
@@ -1024,18 +1041,16 @@ class DataFormatter:
 	def _format_rows(self) -> list[dict]:
 		formatted_data = []
 
-		for row_index in range(self.organizer.max_rows):
-			formatted_row = self.formatter.format_row(self.organizer.segments, row_index)
-
-			if formatted_row:  # Always include rows that were formatted
-				# Add metadata
-				formatted_row["_segment_info"] = {
-					"total_segments": len(self.organizer.segments),
-					"segment_labels": self.organizer.segment_labels,
-					"period_keys": [p["key"] for p in self.context.period_list],  # Add period keys
-				}
-
-				formatted_data.append(formatted_row)
+		for section in self.organizer.sections:
+			for row_index in range(self.organizer.max_rows(section)):
+				formatted_row = self.formatter.format_row(section.segments, row_index)
+				if formatted_row:  # Always include rows that were formatted
+					# Add metadata
+					formatted_row["_segment_info"] = {
+						"total_segments": len(section.segments),
+						"period_keys": [p["key"] for p in self.context.period_list],  # Add period keys
+					}
+					formatted_data.append(formatted_row)
 
 		return formatted_data
 
@@ -1047,20 +1062,21 @@ class DataFormatter:
 			self.context.filters.get("company"),
 		)
 
-		return self.formatter.get_columns(self.organizer.segments, base_columns)
+		return self.formatter.get_columns(self.organizer.section_with_max_segments.segments, base_columns)
 
 	def _expand_segments_with_details(self):
-		for segment in self.organizer.segments:
-			expanded_rows = []
+		for section in self.organizer.sections:
+			for segment in section.segments:
+				expanded_rows = []
 
-			for row_data in segment.rows:
-				expanded_rows.append(row_data)
+				for row_data in segment.rows:
+					expanded_rows.append(row_data)
 
-				if row_data.account_details:
-					detail_rows = DetailRowBuilder(self.context.filters, row_data).build()
-					expanded_rows.extend(detail_rows)
+					if row_data.account_details:
+						detail_rows = DetailRowBuilder(self.context.filters, row_data).build()
+						expanded_rows.extend(detail_rows)
 
-			segment.rows = expanded_rows
+				segment.rows = expanded_rows
 
 
 class FormattingEngine:
@@ -1109,51 +1125,110 @@ class FormattingEngine:
 
 
 class SegmentOrganizer:
-	"""Handles segment organization by `Column Break` and metadata extraction"""
+	"""Handles segment organization by `Column Break`, `Section Break` and metadata extraction"""
 
 	def __init__(self, processed_rows: list[RowData]):
-		self.segments = self._organize_into_segments(processed_rows)
+		self.sections = self._organize_into_sections(processed_rows)
 
-	def _organize_into_segments(self, rows: list[RowData]) -> list[SegmentData]:
-		segments = []
-		current_rows = []
-		segment_index = 0
-		pending_label = ""
+		# ensure same segment length across sections
+		max_segments = self.max_segments
+		for section in self.sections:
+			if len(section.segments) >= max_segments:
+				continue
+
+			# Pad with empty segments
+			empty_segments = [SegmentData(index=i) for i in range(len(section.segments), max_segments)]
+			section.segments.extend(empty_segments)
+
+	def _organize_into_sections(self, rows: list[RowData]) -> list[SectionData]:
+		sections = []
+		current_section_rows = []
+		section_index = 0
+		section_label = ""
 
 		for row_data in rows:
 			if not self._should_show_row(row_data):
 				continue
 
+			if row_data.row.data_source == "Section Break":
+				# Process current section if we have rows
+				if current_section_rows:
+					section_segments = self._organize_into_segments(current_section_rows, section_label)
+					sections.append(
+						SectionData(segments=section_segments, label=section_label, index=section_index)
+					)
+					section_index += 1
+					current_section_rows = []
+
+				# Label for the next section
+				section_label = getattr(row_data.row, "display_name", "") or ""
+			else:
+				current_section_rows.append(row_data)
+
+		# Add final section
+		if current_section_rows or not sections:
+			section_segments = self._organize_into_segments(current_section_rows, section_label)
+			sections.append(SectionData(segments=section_segments, label=section_label, index=section_index))
+
+		return sections
+
+	def _organize_into_segments(self, rows: list[RowData], section_label: str) -> list[SegmentData]:
+		segments = []
+		current_rows = []
+		segment_index = 0
+		segment_label = ""
+
+		section_header = None
+		if section_label:
+			section_header = RowData(
+				row=frappe._dict(
+					{
+						"data_source": "Blank Line",
+						"display_name": section_label,
+						"bold_text": True,
+					}
+				)
+			)
+
+		for row_data in rows:
 			if row_data.row.data_source == "Column Break":
-				# Save current segment with pending label from previous column break
+				# Save current segment
+				if section_header and current_rows:
+					current_rows.insert(0, section_header)
+
 				if current_rows:
-					segments.append(SegmentData(rows=current_rows, label=pending_label, index=segment_index))
+					segments.append(SegmentData(rows=current_rows, label=segment_label, index=segment_index))
 					segment_index += 1
 					current_rows = []
 
 				# Label for the next segment
-				pending_label = getattr(row_data.row, "display_name", "") or ""
-				pending_label = pending_label.strip() if pending_label else ""
+				segment_label = getattr(row_data.row, "display_name", "") or ""
 			else:
 				current_rows.append(row_data)
 
 		# Add final segment
+		if section_header and current_rows:
+			current_rows.insert(0, section_header)
+
 		if current_rows or not segments:
-			segments.append(SegmentData(rows=current_rows, label=pending_label, index=segment_index))
+			segments.append(SegmentData(rows=current_rows, label=segment_label, index=segment_index))
 
 		return segments
 
 	@property
 	def is_single_segment(self) -> bool:
-		return len(self.segments) == 1
+		return self.max_segments == 1
+
+	def max_rows(self, section: SectionData) -> int:
+		return max(len(seg.rows) for seg in section.segments) if section.segments else 0
 
 	@property
-	def max_rows(self) -> int:
-		return max(len(seg.rows) for seg in self.segments) if self.segments else 0
+	def max_segments(self) -> bool:
+		return max(len(s.segments) for s in self.sections)
 
 	@property
-	def segment_labels(self) -> dict[int, str]:
-		return {seg.index: seg.label for seg in self.segments if seg.label}
+	def section_with_max_segments(self) -> SectionData:
+		return max(self.sections, key=lambda s: len(s.segments))
 
 	def _should_show_row(self, row_data: RowData) -> bool:
 		row = row_data.row
@@ -1356,8 +1431,7 @@ class ChartDataGenerator:
 			row
 			for row in self.processed_rows
 			if getattr(row.row, "include_in_charts", False)
-			and row.row.data_source != "Blank Line"
-			and row.row.data_source != "Column Break"
+			and row.row.data_source not in ["Blank Line", "Column Break", "Section Break"]
 		]
 
 		if not chart_rows:
