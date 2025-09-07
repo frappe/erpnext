@@ -597,10 +597,10 @@ class FinancialQueryBuilder:
 		for account_data in balances_data.values():
 			account_data: AccountData
 
-		if self.filters.get("accumulated_values"):
-			account_data.accumulate_values()
-		else:
-			account_data.unaccumulate_values()
+			if self.filters.get("accumulated_values"):
+				account_data.accumulate_values()
+			else:
+				account_data.unaccumulate_values()
 
 	def _apply_standard_filters(self, query, table):
 		if self.filters.get("ignore_closing_entries"):

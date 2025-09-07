@@ -58,12 +58,12 @@
    "options": "\nAccount Data\nCalculated Amount\nCustom API\nBlank Line\nColumn Break\nSection Break"
   },
   {
+   "depends_on": "eval:doc.data_source == 'Account Data'",
    "description": "Opening Balance = Start of period, Closing Balance = End of period, Period Movement = Net change during period",
    "fieldname": "balance_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Balance Type",
-   "mandatory_depends_on": "eval:doc.data_source == 'Account Data'",
    "options": "\nOpening Balance\nClosing Balance\nPeriod Movement (Debits - Credits)"
   },
   {
@@ -112,12 +112,12 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break'",
+   "depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break' && doc.data_source != 'Section Break'",
    "description": "Formula to calculate values or account filter criteria",
    "fieldname": "calculation_formula",
    "fieldtype": "Code",
    "label": "Formula or Account Filter",
-   "mandatory_depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break'"
+   "mandatory_depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break' && doc.data_source != 'Section Break'"
   },
   {
    "fieldname": "column_break_ooic",
@@ -152,7 +152,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-07 02:53:19.093494",
+ "modified": "2025-09-07 06:32:17.321802",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",
