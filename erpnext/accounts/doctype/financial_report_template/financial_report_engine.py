@@ -95,6 +95,12 @@ class AccountData:
 	def accumulate_values(self) -> None:
 		for period_value in self.period_values.values():
 			period_value.movement += period_value.opening
+			# closing is accumulated by default
+
+	def unaccumulate_values(self) -> None:
+		for period_value in self.period_values.values():
+			period_value.closing -= period_value.opening
+			# movement is unaccumulated by default
 
 	def copy(self):
 		copied = AccountData(account_name=self.account_name)
@@ -416,15 +422,9 @@ class FinancialQueryBuilder:
 		                dict: {account: AccountData}
 		"""
 		balances_data = self._get_opening_balances(accounts)
-
 		gl_data = self._get_gl_movements(accounts)
-
 		self._calculate_running_balances(balances_data, gl_data)
-
-		if self.filters.get("accumulated_values"):
-			for account_data in balances_data.values():
-				account_data: AccountData
-				account_data.accumulate_values()
+		self._handle_balance_accumulation(balances_data)
 
 		return balances_data
 
@@ -580,6 +580,15 @@ class FinancialQueryBuilder:
 				account_data.add_period(PeriodValue(period_key, current_balance, closing_balance, movement))
 
 				current_balance = closing_balance
+
+	def _handle_balance_accumulation(self, balances_data):
+		for account_data in balances_data.values():
+			account_data: AccountData
+
+		if self.filters.get("accumulated_values"):
+			account_data.accumulate_values()
+		else:
+			account_data.unaccumulate_values()
 
 	def _apply_standard_filters(self, query, table):
 		if self.filters.get("ignore_closing_entries"):

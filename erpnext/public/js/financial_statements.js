@@ -63,8 +63,6 @@ erpnext.financial_statements = {
 	},
 
 	_format_custom_account_column: function (value, data, formatting, column, default_formatter, row) {
-		if (formatting.is_blank_line) return "";
-
 		// Link
 		if (formatting.is_detail) {
 			const glData = {
