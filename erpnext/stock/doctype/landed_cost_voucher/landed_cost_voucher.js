@@ -134,12 +134,12 @@ frappe.ui.form.on("Landed Cost Voucher", {
 		frm.set_query("receipt_document", "purchase_receipts", (doc, cdt, cdn) => {
 			var d = locals[cdt][cdn];
 			var filters = [
-				[d.receipt_document_type, "docstatus", "=", "1"],
+				[d.receipt_document_type, "docstatus", "=", 1],
 				[d.receipt_document_type, "company", "=", frm.doc.company],
 			];
 
-			if (d.receipt_document_type == "Purchase Invoice") {
-				filters.push(["Purchase Invoice", "update_stock", "=", "1"]);
+			if (d.receipt_document_type === "Purchase Invoice") {
+				filters.push(["Purchase Invoice", "update_stock", "=", 1]);
 			} else if (d.receipt_document_type === "Stock Entry") {
 				filters.push(["Stock Entry", "purpose", "in", ["Manufacture", "Repack"]]);
 			}
