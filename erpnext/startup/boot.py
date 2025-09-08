@@ -84,3 +84,4 @@ def bootinfo(bootinfo):
 		employee = frappe.db.get_value("Employee", {"user_id": bootinfo["user"]["name"]}, "name")
 		if employee:
 			bootinfo["user"]["employee"] = employee
+			frappe.session.data.employee = employee
