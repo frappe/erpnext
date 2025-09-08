@@ -255,7 +255,7 @@ class FinancialReportEngine:
 		)
 
 		# Support both old and new field names for backward compatibility
-		show_detailed = filters.get("show_account_details") == "Show Account Breakdown"
+		show_detailed = filters.get("show_account_details") == "Account Breakdown"
 
 		context = ReportContext(
 			template=template,

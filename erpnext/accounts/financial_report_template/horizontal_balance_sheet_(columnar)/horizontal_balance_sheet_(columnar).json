@@ -5,7 +5,7 @@
  "doctype": "Financial Report Template",
  "idx": 0,
  "is_standard": 1,
- "modified": "2025-09-07 21:48:46.085052",
+ "modified": "2025-09-07 23:33:36.081435",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Horizontal Balance Sheet (Columnar)",
@@ -416,7 +416,7 @@
   {
    "balance_type": "Closing Balance",
    "bold_text": 0,
-   "calculation_formula": "[\"account_category\", \"=\", \"Tangible Assets\"]",
+   "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Tangible Assets\"], [\"account_type\", \"!=\", \"Accumulated Depreciation\"]]}",
    "data_source": "Account Data",
    "display_name": "Property, Plant & Equipment",
    "fieldtype": "",

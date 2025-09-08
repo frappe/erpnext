@@ -19,8 +19,8 @@ frappe.query_reports[REPORT_NAME]["filters"].push(
 		fieldname: "show_account_details",
 		label: __("Account Detail Level"),
 		fieldtype: "Select",
-		options: ["Summary Only", "Show Account Breakdown"],
-		default: "Summary Only",
+		options: ["Summary", "Account Breakdown"],
+		default: "Summary",
 		depends_on: "eval:!!frappe.query_report.get_filter_value('report_template')",
 	},
 	{
