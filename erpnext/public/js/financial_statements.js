@@ -103,6 +103,9 @@ erpnext.financial_statements = {
 		if (formatting.is_blank_line) return "";
 
 		column.fieldtype = formatting.fieldtype || column.fieldtype;
+		// Avoid formatting as currency
+		if (column.fieldtype == "Float") column.options = null;
+
 		let formattedValue = default_formatter(value, row, column, data);
 		return this._style_custom_value(formattedValue, formatting, value);
 	},

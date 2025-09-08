@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+from erpnext.accounts.doctype.financial_report_row.financial_report_row import FinancialReportRow
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
 	FinancialReportTemplate,
 )
@@ -118,7 +119,7 @@ class AccountData:
 class RowData:
 	"""Represents a processed template row with calculated values"""
 
-	row: Any  # FinancialReportRow
+	row: FinancialReportRow
 	values: list[float] = field(default_factory=list)
 	account_details: dict[str, AccountData] | None = None
 	is_detail_row: bool = False
@@ -1195,6 +1196,7 @@ class SegmentOrganizer:
 				# Save current segment
 				if section_header and current_rows:
 					current_rows.insert(0, section_header)
+					section_header = RowData(row=frappe._dict({"data_source": "Blank Line"}))
 
 				if current_rows:
 					segments.append(SegmentData(rows=current_rows, label=segment_label, index=segment_index))
@@ -1309,6 +1311,10 @@ class SingleSegmentFormatter(RowFormatterBase):
 		return formatted
 
 	def get_columns(self, segments: list[SegmentData], base_columns: list[dict]) -> list[dict]:
+		for col in base_columns:
+			if col["fieldname"] == "account":
+				col["align"] = "left"
+
 		return base_columns
 
 
@@ -1337,6 +1343,7 @@ class MultiSegmentFormatter(RowFormatterBase):
 
 				if col["fieldname"] == "account":
 					new_col["label"] = segment.label or f"Account (Segment {segment.index + 1})"
+					new_col["align"] = "left"
 
 				if segment.label and col["fieldname"] in [p["key"] for p in self.period_list]:
 					new_col["label"] = f"{segment.label} - {col['label']}"
