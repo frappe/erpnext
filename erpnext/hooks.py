@@ -600,6 +600,8 @@ user_privacy_documents = [
 	},
 ]
 
+fixtures = ["Letter Head"]
+
 # ERPNext doctypes for Global Search
 global_search_doctypes = {
 	"Default": [
