@@ -92,7 +92,6 @@ class PurchaseInvoice(BuyingController):
 		base_paid_amount: DF.Currency
 		base_rounded_total: DF.Currency
 		base_rounding_adjustment: DF.Currency
-		base_tax_withholding_net_total: DF.Currency
 		base_taxes_and_charges_added: DF.Currency
 		base_taxes_and_charges_deducted: DF.Currency
 		base_total: DF.Currency
@@ -199,7 +198,6 @@ class PurchaseInvoice(BuyingController):
 		tax_id: DF.ReadOnly | None
 		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
 		tax_withholding_group: DF.Link | None
-		tax_withholding_net_total: DF.Currency
 		taxes: DF.Table[PurchaseTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		taxes_and_charges_added: DF.Currency
