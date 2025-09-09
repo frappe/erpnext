@@ -12,6 +12,147 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 		{{ add_header(loop.index, layout|len, doc, letter_head, no_letterhead, footer, print_settings) }}
 	</div>
 
+		<style>
+			.invoice-wrapper {
+				font-family: "Inter", sans-serif;
+				color: var(--black-overlay-700);
+				padding: 24px;
+			}
+
+			table.info-table,
+			table.items-table,
+			table.tax-table {
+				border-collapse: separate;
+				border-spacing: 0;
+				border: 1px solid #ededed;
+				border-radius: 10px;
+				overflow: hidden;
+			}
+
+			table.info-table td {
+				border-bottom: 1px solid #ededed;
+				padding: 8px 10px !important;
+			}
+			table.items-table td,
+			table.tax-table td {
+				border-bottom: 1px solid #ededed;
+				padding: 8px;
+			}
+
+			table.info-table td:not(:first-of-type),
+			table.items-table td:not(:first-of-type),
+			table.tax-table td:not(:first-of-type) {
+				border-left: 1px solid #ededed;
+			}
+
+			table.info-table tbody tr:last-of-type td,
+			table.items-table tbody tr:last-of-type td,
+			table.tax-table tbody tr:last-of-type td {
+				border-bottom: none;
+			}
+
+			thead.table-header {
+				background: #f8f8f8;
+			}
+			thead.table-header td {
+				color: #7c7c7c;
+			}
+
+			.text-center {
+				text-align: center;
+			}
+			.text-left {
+				text-align: left;
+			}
+			.text-right {
+				text-align: right;
+			}
+			.text-muted {
+				color: #7c7c7c;
+			}
+			.text-dark {
+				color: #525252;
+			}
+			.text-bold {
+				font-weight: bold;
+			}
+			.small-text {
+				color: #666;
+			}
+
+			.mt-10 {
+				margin-top: 10px;
+			}
+			.mt-15 {
+				margin-top: 15px;
+			}
+			.mt-20 {
+				margin-top: 20px;
+			}
+			.mt-40 {
+				margin-top: 40px;
+			}
+			.mt-80 {
+				margin-top: 80px;
+			}
+			.mb-20 {
+				margin-bottom: 20px;
+			}
+			.pb-8 {
+				padding-bottom: 8px;
+			}
+
+			.totals-table {
+				border-radius: 5px;
+				width: 100%;
+			}
+			.totals-table td {
+				padding: 4px 8px;
+			}
+			.totals-table tr {
+				border-bottom: 1px solid #ededed;
+			}
+			.totals-table tr:last-child {
+				border-bottom: none;
+			}
+			.totals-table .grand-total td {
+				padding: 6px 8px;
+				font-weight: bold;
+			}
+
+			.words-box {
+				background: #f8f8f8;
+				border-radius: 8px;
+				padding: 8px;
+				line-height: 21px;
+				letter-spacing: 0.21px;
+				font-size: small;
+			}
+
+			.info-card {
+				color: #7c7c7c;
+			}
+
+			.title {
+				color: #7c7c7c !important;
+			}
+
+			.heading {
+				color: #525252 !important;
+				font-weight: 300;
+			}
+
+			.print-format {
+				color: var(--ink-gray-8, #171717);
+				font-size: 14px;
+				font-style: normal;
+				font-weight: 420;
+				line-height: 21px;
+				padding: 12px;
+				letter-spacing: 0.14px;
+			}
+		</style>
+
 	<table class="info-table mt-10 mb-20">
 		<tr>
 			<td style="width: 50%">
