@@ -384,7 +384,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	apply_tds(frm) {
 		var me = this;
-		me.frm.set_value("tax_withheld_vouchers", []);
+		me.frm.set_value("tax_withholding_entries", []);
 	}
 
 	credit_to() {
@@ -700,7 +700,7 @@ frappe.ui.form.on("Purchase Invoice", {
 		});
 
 		if (frm.is_new()) {
-			frm.clear_table("tax_withheld_vouchers");
+			frm.clear_table("tax_withholding_entries");
 		}
 	},
 

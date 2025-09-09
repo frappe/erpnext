@@ -70,7 +70,6 @@ class PurchaseInvoice(BuyingController):
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
 		)
-		from erpnext.accounts.doctype.tax_withheld_vouchers.tax_withheld_vouchers import TaxWithheldVouchers
 		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 		from erpnext.buying.doctype.purchase_receipt_item_supplied.purchase_receipt_item_supplied import (
 			PurchaseReceiptItemSupplied,
@@ -198,7 +197,6 @@ class PurchaseInvoice(BuyingController):
 		supplier_warehouse: DF.Link | None
 		tax_category: DF.Link | None
 		tax_id: DF.ReadOnly | None
-		tax_withheld_vouchers: DF.Table[TaxWithheldVouchers]
 		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
 		tax_withholding_group: DF.Link | None
 		tax_withholding_net_total: DF.Currency
@@ -252,7 +250,7 @@ class PurchaseInvoice(BuyingController):
 		self.set_onload("tax_withholding_category", tax_withholding_category)
 
 		if self.is_new():
-			self.set("tax_withheld_vouchers", [])
+			self.set("tax_withholding_entries", [])
 
 	def before_save(self):
 		if not self.on_hold:

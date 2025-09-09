@@ -112,8 +112,6 @@
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
-  "tax_withheld_vouchers_section",
-  "tax_withheld_vouchers",
   "sec_tax_breakup",
   "other_charges_calculation",
   "pricing_rule_details",
@@ -1495,20 +1493,6 @@
    "read_only": 1
   },
   {
-   "collapsible_depends_on": "tax_withheld_vouchers",
-   "fieldname": "tax_withheld_vouchers_section",
-   "fieldtype": "Section Break",
-   "label": "Tax Withheld Vouchers"
-  },
-  {
-   "fieldname": "tax_withheld_vouchers",
-   "fieldtype": "Table",
-   "label": "Tax Withheld Vouchers",
-   "no_copy": 1,
-   "options": "Tax Withheld Vouchers",
-   "read_only": 1
-  },
-  {
    "fieldname": "payments_tab",
    "fieldtype": "Tab Break",
    "label": "Payments"
@@ -1657,7 +1641,7 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
-   },
+  },
   {
    "fieldname": "claimed_landed_cost_amount",
    "fieldtype": "Currency",
@@ -1707,7 +1691,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 19:19:11.380664",
+ "modified": "2025-09-09 03:46:41.752699",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
