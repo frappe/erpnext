@@ -1702,6 +1702,8 @@ def get_account_details_and_party_type(account, date, company, debit=None, credi
 		party_type = "Customer"
 	elif account_details.account_type == "Payable":
 		party_type = "Supplier"
+	elif account_details.account_type == "Equity":
+		party_type = "Shareholder"
 	else:
 		party_type = ""
 
