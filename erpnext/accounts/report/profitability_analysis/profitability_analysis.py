@@ -86,6 +86,7 @@ def get_data(accounts, filters, based_on):
 
 
 def calculate_values(accounts, gl_entries_by_account, filters):
+	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 	init = {"income": 0.0, "expense": 0.0, "gross_profit_loss": 0.0}
 
 	total_row = {
@@ -98,6 +99,7 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 		"account": "'" + _("Total") + "'",
 		"parent_account": None,
 		"indent": 0,
+		"currency": company_currency,
 		"has_value": True,
 	}
 
