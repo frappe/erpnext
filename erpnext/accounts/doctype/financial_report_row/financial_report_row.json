@@ -144,7 +144,7 @@
    "description": "How to format and present values in the financial report (only if different from column fieldtype)",
    "fieldname": "fieldtype",
    "fieldtype": "Select",
-   "label": "Field Type",
+   "label": "Value Type",
    "options": "\nCurrency\nFloat\nInt\nPercent"
   }
  ],
@@ -152,7 +152,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-07 06:32:17.321802",
+ "modified": "2025-09-10 01:19:41.084128",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",

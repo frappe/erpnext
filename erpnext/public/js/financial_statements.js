@@ -81,6 +81,11 @@ erpnext.financial_statements = {
 			value = default_formatter(value, row, column, data);
 		}
 
+		if (formatting.account_filters) {
+			// fetch account info
+			//
+		}
+
 		let formattedValue = String(value);
 
 		// Prefix

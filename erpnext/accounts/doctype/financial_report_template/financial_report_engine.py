@@ -322,7 +322,7 @@ class DataCollector:
 		self.account_fields = {field.fieldname for field in frappe.get_meta("Account").fields}
 
 	def add_account_request(self, row):
-		accounts = self._parse_account_filter(row)
+		accounts = self._parse_account_filter(self.company, row)
 
 		self.account_requests.append(
 			{
@@ -388,7 +388,8 @@ class DataCollector:
 
 		return {"account_data": account_data, "summary": summary, "account_details": account_details}
 
-	def _parse_account_filter(self, report_row) -> list[str]:
+	@staticmethod
+	def _parse_account_filter(company, report_row) -> list[str]:
 		"""
 		Find accounts matching filter criteria.
 
@@ -406,8 +407,8 @@ class DataCollector:
 			.where(account.is_group == 0)
 		)
 
-		if self.company:
-			query = query.where(account.company == self.company)
+		if company:
+			query = query.where(account.company == company)
 
 		where_condition = filter_parser.build_condition(report_row, account)
 		if where_condition is not None:
@@ -667,6 +668,16 @@ class FilterExpressionParser:
 	def __init__(self):
 		self.validator = AccountFilterValidator()
 
+	def build_conditions(self, report_rows, table):
+		conditions = []
+		for row in report_rows:
+			condition = self.build_condition(row, table)
+			if condition:
+				conditions.append(condition)
+
+		# ensure brackets in or condition
+		return reduce(lambda a, b: (a) | (b), conditions)
+
 	def build_condition(self, report_row, table):
 		"""
 		Build SQL condition directly from filter formula.
@@ -760,6 +771,11 @@ class FilterExpressionParser:
 			return reduce(lambda a, b: a & b, built_conditions)
 		else:  # logical_op == "or"
 			return reduce(lambda a, b: a | b, built_conditions)
+
+
+@frappe.whitelist()
+def get_accounts_by_filter(company, account_filter):
+	return DataCollector._parse_account_filter(company, frappe._dict(calculation_formula=account_filter))
 
 
 # ============================================================================
@@ -1112,6 +1128,12 @@ class FormattingEngine:
 			FormattingRule(
 				condition=lambda rd: getattr(rd.row, "color", ""),
 				format_properties=lambda rd: {"color": getattr(rd.row, "color", "").strip()},
+			),
+			FormattingRule(
+				condition=lambda rd: getattr(rd.row, "data_source", "") == "Account Data",
+				format_properties=lambda rd: {
+					"account_filters": getattr(rd.row, "calculation_formula", "").strip()
+				},
 			),
 		]
 
