@@ -38,7 +38,7 @@
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
   "experimental_section",
-  "use_server_side_reactivity"
+  "use_legacy_js_reactivity"
  ],
  "fields": [
   {
@@ -219,12 +219,6 @@
    "label": "Experimental"
   },
   {
-   "default": "1",
-   "fieldname": "use_server_side_reactivity",
-   "fieldtype": "Check",
-   "label": "Use Server Side Reactivity"
-  },
-  {
    "default": "0",
    "description": "Allows users to submit Sales Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.",
    "fieldname": "allow_zero_qty_in_sales_order",
@@ -243,6 +237,12 @@
    "fieldname": "fallback_to_default_price_list",
    "fieldtype": "Check",
    "label": "Use Prices from Default Price List as Fallback"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_legacy_js_reactivity",
+   "fieldtype": "Check",
+   "label": "Use Legacy (Client side) Reactivity"
   }
  ],
  "grid_page_length": 50,
@@ -251,7 +251,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-23 21:10:14.826653",
+ "modified": "2025-09-24 16:08:48.865885",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

@@ -17,8 +17,8 @@ def boot_session(bootinfo):
 
 		bootinfo.sysdefaults.territory = frappe.get_single_value("Selling Settings", "territory")
 		bootinfo.sysdefaults.customer_group = frappe.get_single_value("Selling Settings", "customer_group")
-		bootinfo.sysdefaults.use_server_side_reactivity = frappe.get_single_value(
-			"Selling Settings", "use_server_side_reactivity"
+		bootinfo.sysdefaults.use_legacy_js_reactivity = cint(
+			frappe.get_single_value("Selling Settings", "use_legacy_js_reactivity")
 		)
 		bootinfo.sysdefaults.allow_stale = cint(frappe.get_single_value("Accounts Settings", "allow_stale"))
 		bootinfo.sysdefaults.over_billing_allowance = frappe.get_single_value(

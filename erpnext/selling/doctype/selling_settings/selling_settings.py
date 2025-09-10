@@ -44,7 +44,7 @@ class SellingSettings(Document):
 		selling_price_list: DF.Link | None
 		so_required: DF.Literal["No", "Yes"]
 		territory: DF.Link | None
-		use_server_side_reactivity: DF.Check
+		use_legacy_js_reactivity: DF.Check
 		validate_selling_price: DF.Check
 	# end: auto-generated types
 

@@ -592,7 +592,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		frappe.flags.dialog_set = false;
 
 		// Experimental: This will be removed once stability is achieved.
-		if (frappe.boot.sysdefaults.use_server_side_reactivity) {
+		if (!frappe.boot.sysdefaults.use_legacy_js_reactivity) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.call({
 				doc: doc,
