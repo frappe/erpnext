@@ -65,10 +65,13 @@ erpnext.financial_statements = {
 	_format_custom_account_column: function (value, data, formatting, column, default_formatter, row) {
 		if (!value) return "";
 
-		// Link
-		if (formatting.is_detail) {
+		// Link to open ledger
+		const should_link_to_ledger =
+			formatting.is_detail || (formatting.account_filters && formatting.chart_of_accounts);
+
+		if (should_link_to_ledger) {
 			const glData = {
-				account: formatting.account_name || value, // Real account name
+				account: formatting.account_name || formatting.chart_of_accounts || value,
 				from_date: formatting.from_date || formatting.period_start_date,
 				to_date: formatting.to_date || formatting.period_end_date,
 				account_type: formatting.account_type,
@@ -79,11 +82,6 @@ erpnext.financial_statements = {
 				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(glData) + ")";
 
 			value = default_formatter(value, row, column, data);
-		}
-
-		if (formatting.account_filters) {
-			// fetch account info
-			//
 		}
 
 		let formattedValue = String(value);

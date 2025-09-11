@@ -1288,7 +1288,14 @@ class RowFormatterBase(ABC):
 		pass
 
 	def _get_values(self, row_data: RowData) -> dict[str, Any]:
+		# TODO: can be commonify COA? @abdeali
+		chart_of_accounts = []
+
+		if row_data.account_details:
+			chart_of_accounts = list(row_data.account_details.keys())
+
 		values = {
+			"chart_of_accounts": chart_of_accounts,
 			"account": getattr(row_data.row, "display_name", "") or "",
 			"indent": getattr(row_data.row, "indentation_level", 0),
 			"account_name": getattr(row_data.row, "account", "") or "",
