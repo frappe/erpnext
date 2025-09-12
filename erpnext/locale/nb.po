@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-07 09:35+0000\n"
-"PO-Revision-Date: 2025-09-10 00:51\n"
+"PO-Revision-Date: 2025-09-12 00:49\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -21,79 +21,79 @@ msgstr ""
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "  "
-msgstr ""
+msgstr "  "
 
 #: erpnext/selling/doctype/quotation/quotation.js:73
 msgid " Address"
-msgstr " Adresse"
+msgstr "Adresse"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:677
 msgid " Amount"
-msgstr " Beløp"
+msgstr "Beløp"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"
-msgstr " Stykkliste"
+msgstr "Stykkliste"
 
 #. Label of the istable (Check) field in DocType 'Inventory Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 msgid " Is Child Table"
-msgstr " Er Underordnet Tabell"
+msgstr "Er Underordnet Tabell"
 
 #. Label of the is_subcontracted (Check) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid " Is Subcontracted"
-msgstr " Er Underleverandør"
+msgstr "Er Underleverandør"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:174
 msgid " Item"
-msgstr " Artikkel"
+msgstr "Artikkel"
 
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:147
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:192
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:107
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:128
 msgid " Name"
-msgstr " Navn"
+msgstr "Navn"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:668
 msgid " Rate"
-msgstr " Pris"
+msgstr "Pris"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
-msgstr ""
+msgstr "Råmateriale"
 
 #. Label of the reserve_stock (Check) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid " Reserve Stock"
-msgstr ""
+msgstr "Reserver på lager"
 
 #. Label of the skip_material_transfer (Check) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid " Skip Material Transfer"
-msgstr ""
+msgstr "Hopp over materialoverføring"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:133
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:163
 msgid " Sub Assembly"
-msgstr ""
+msgstr "Delsammenstilling"
 
 #: erpnext/projects/doctype/project_update/project_update.py:104
 msgid " Summary"
-msgstr " Sammendrag"
+msgstr "Sammendrag"
 
 #: erpnext/stock/doctype/item/item.py:238
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
-msgstr ""
+msgstr "Objekt levert fra kunde kan ikke også være innkjøpsvare"
 
 #: erpnext/stock/doctype/item/item.py:240
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr ""
+msgstr "Objekt levert fra kunde kan ikke ha verdisats"
 
 #: erpnext/stock/doctype/item/item.py:316
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
-msgstr ""
+msgstr "\"Er anleggsmiddel\" kan ikke fjernes, siden det finnes en anleggsmiddelpost for varen"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:262
 msgid "\"SN-01::10\" for \"SN-01\" to \"SN-10\""
@@ -105,12 +105,12 @@ msgstr "# På Lager"
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
-msgstr ""
+msgstr "# Påkrevde varer"
 
 #. Label of the per_delivered (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "%  Delivered"
-msgstr ""
+msgstr "% Levert"
 
 #. Label of the per_billed (Percent) field in DocType 'Timesheet'
 #. Label of the per_billed (Percent) field in DocType 'Sales Order'
@@ -121,7 +121,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "% Amount Billed"
-msgstr ""
+msgstr "% Fakturert beløp"
 
 #. Label of the per_billed (Percent) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
@@ -543,7 +543,7 @@ msgstr ""
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:61
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
-msgstr ""
+msgstr "<b>Fra-tidspunktet</b> kan ikke være senere enn <b>Til-tidspunktet</b> for {0}"
 
 #. Content of the 'Help Text' (HTML) field in DocType 'Process Statement Of
 #. Accounts'
@@ -565,7 +565,22 @@ msgid "<br>\n"
 "<pre><code>Hello {{ customer.customer_name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>\n"
 "</ul>\n"
 "<!-- {% endraw %} -->"
-msgstr ""
+msgstr "<br>\n"
+"<h4>Merknad</h4>\n"
+"<ul>\n"
+"<li>\n"
+"Du kan bruke <a href=\"https://jinja.palletsprojects.com/en/2.11.x/\" target=\"_blank\">Jinja-tagger</a> i feltene <b>Emne</b> og <b>Brødtekst</b> for dynamiske verdier.\n"
+"</li><li>\n"
+"    Alle felt i denne doktypen er tilgjengelige under <b>doc</b> -objektet, og alle felt for kunden som e-posten skal sendes til er tilgjengelige under  <b>kunde</b> -objektet.\n"
+"</li></ul>\n"
+"<h4> Eksempler</h4>\n"
+"<!-- {% raw %} -->\n"
+"<ul>\n"
+"    <li><b>Emne</b>:<br><br><pre><code>Regnskapsutskrift for {{ customer.customer_name }}</code></pre><br></li>\n"
+"    <li><b>Hoveddel</b>: <br><br>\n"
+"<pre><code>Hallo {{ customer.customer_name }},<br>Send inn kontoutskriften din fra {{ doc.from_date }} til {{ doc.to_date }}.</code> </pre></li>\n"
+"</ul>\n"
+"<!-- {% endraw %} -->"
 
 #. Content of the 'Other Details' (HTML) field in DocType 'Purchase Receipt'
 #. Content of the 'Other Details' (HTML) field in DocType 'Subcontracting
@@ -573,24 +588,26 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "<div class=\"columnHeading\">Other Details</div>"
-msgstr ""
+msgstr "<div class=\"columnHeading\">Andre detaljer</div>"
 
 #. Content of the 'no_bank_transactions' (HTML) field in DocType 'Bank
 #. Reconciliation Tool'
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgid "<div class=\"text-muted text-center\">No Matching Bank Transactions Found</div>"
-msgstr ""
+msgstr "<div class=\"text-muted text-center\">Ingen matchende banktransaksjoner funnet</div>"
 
 #: erpnext/public/js/bank_reconciliation_tool/dialog_manager.js:262
 msgid "<div class=\"text-muted text-center\">{0}</div>"
-msgstr ""
+msgstr "<div class=\"text-muted text-center\">{0}</div>"
 
 #. Content of the 'settings' (HTML) field in DocType 'Cheque Print Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<div>\n"
 "<h3> All dimensions in centimeter only </h3>\n"
 "</div>"
-msgstr ""
+msgstr "<div>\n"
+"<h3>Alle mål er oppgitt i centimeter </h3>\n"
+"</div>"
 
 #. Content of the 'about' (HTML) field in DocType 'Product Bundle'
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
@@ -599,7 +616,11 @@ msgid "<h3>About Product Bundle</h3>\n\n"
 "<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>\n"
 "<h4>Example:</h4>\n"
 "<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>"
-msgstr ""
+msgstr "<h3>Om produktbunt</h3>\n\n"
+"<p>Samle en gruppe <b>varer</b> i en annen <b>vare</b>. Dette er nyttig hvis du samler en bestemt <b>vare</b> i en pakke og du har lager av de pakkede <b>varene</b>, men ikke den samlede <b>varen</b>.</p>\n"
+"<p><b>Pakkevaren</b> vil ha <code>Er lagervare</code> som <b>Nei</b> og <code>Er salgsvare</code> som <b>Ja.</b></p>\n"
+"<h4>Eksempel:</h4>\n"
+"<p>Hvis du selger bærbare datamaskiner og ryggsekker hver for seg og har en spesialpris hvis kunden kjøper begge deler, vil den bærbare datamaskinen + ryggsekken være en ny produktpakkevare.</p>"
 
 #. Content of the 'Help' (HTML) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -14815,7 +14836,7 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Customer Provided"
-msgstr ""
+msgstr "Levert fra kunde"
 
 #: erpnext/setup/doctype/company/company.py:390
 msgid "Customer Service"
@@ -25986,7 +26007,7 @@ msgstr ""
 #. Label of the is_customer_provided_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Is Customer Provided Item"
-msgstr ""
+msgstr "Er levert fra kunde"
 
 #. Label of the is_default (Check) field in DocType 'Dunning Type'
 #. Label of the is_default (Check) field in DocType 'Payment Gateway Account'
@@ -47423,7 +47444,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Salutation"
-msgstr ""
+msgstr "Hilsen"
 
 #. Label of the expected_value_after_useful_life (Currency) field in DocType
 #. 'Asset Finance Book'
@@ -47613,7 +47634,7 @@ msgstr ""
 #. Schedule'
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgid "Schedule"
-msgstr ""
+msgstr "Tidsplan"
 
 #. Label of the schedule_date (Date) field in DocType 'Depreciation Schedule'
 #. Label of the schedule_date (Datetime) field in DocType 'Production Plan Sub
@@ -58893,7 +58914,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:979
 msgid "Valuation rate for customer provided items has been set to zero."
-msgstr ""
+msgstr "Verdisatsen for objekt levert fra kunde er satt til null."
 
 #. Description of the 'Sales Incoming Rate' (Currency) field in DocType
 #. 'Purchase Invoice Item'
