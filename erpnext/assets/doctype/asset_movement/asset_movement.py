@@ -108,20 +108,22 @@ class AssetMovement(Document):
 
 	def set_latest_location_and_custodian_in_asset(self):
 		for d in self.assets:
-			current_location, current_employee = self.get_latest_location_and_custodian(d.asset)
-			self.update_asset_location_and_custodian(d.asset, current_location, current_employee)
+			current_location, current_employee, latest_purpose = self.get_latest_location_and_custodian(
+				d.asset
+			)
+			self.update_asset_location_and_custodian(
+				d.asset, current_location, current_employee, latest_purpose
+			)
 			self.log_asset_activity(d.asset, current_location, current_employee)
 
 	def get_latest_location_and_custodian(self, asset):
-		current_location, current_employee = "", ""
+		current_location, current_employee, latest_purpose = "", "", ""
 		cond = "1=1"
 
-		# latest entry corresponds to current document's location, employee when transaction date > previous dates
-		# In case of cancellation it corresponds to previous latest document's location, employee
 		args = {"asset": asset, "company": self.company}
 		latest_movement_entry = frappe.db.sql(
 			f"""
-			SELECT asm_item.target_location, asm_item.to_employee
+			SELECT asm_item.target_location, asm_item.to_employee, asm.purpose
 			FROM `tabAsset Movement Item` asm_item
 			JOIN `tabAsset Movement` asm ON asm_item.parent = asm.name
 			WHERE
@@ -137,14 +139,18 @@ class AssetMovement(Document):
 		if latest_movement_entry:
 			current_location = latest_movement_entry[0][0]
 			current_employee = latest_movement_entry[0][1]
+			latest_purpose = latest_movement_entry[0][2]
 
-		return current_location, current_employee
+		return current_location, current_employee, latest_purpose
 
-	def update_asset_location_and_custodian(self, asset_id, location, employee):
+	def update_asset_location_and_custodian(self, asset_id, location, employee, movement_purpose=None):
 		asset = frappe.get_doc("Asset", asset_id)
 
-		if employee and employee != asset.custodian:
+		if movement_purpose == "Receipt":
+			frappe.db.set_value("Asset", asset_id, "custodian", None)
+		elif employee and employee != asset.custodian:
 			frappe.db.set_value("Asset", asset_id, "custodian", employee)
+
 		if location and location != asset.location:
 			frappe.db.set_value("Asset", asset_id, "location", location)
 
