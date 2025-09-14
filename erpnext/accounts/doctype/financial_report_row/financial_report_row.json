@@ -23,7 +23,11 @@
   "section_break_ornw",
   "calculation_formula",
   "column_break_ooic",
-  "formula_description"
+  "formula_description",
+  "section_break_aayb",
+  "view_missing_accounts",
+  "column_break_glls",
+  "view_filtered_accounts"
  ],
  "fields": [
   {
@@ -146,13 +150,35 @@
    "fieldtype": "Select",
    "label": "Value Type",
    "options": "\nCurrency\nFloat\nInt\nPercent"
+  },
+  {
+   "fieldname": "section_break_aayb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: doc.data_source === \"Account Data\" && doc.calculation_formula",
+   "description": "<strong>Tree View</strong> of accounts which matched the filters.",
+   "fieldname": "view_filtered_accounts",
+   "fieldtype": "Button",
+   "label": "View Filtered Accounts"
+  },
+  {
+   "fieldname": "column_break_glls",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.data_source === \"Account Data\" && doc.calculation_formula",
+   "description": "<strong>Tree View</strong> of accounts which not matched the filters.",
+   "fieldname": "view_missing_accounts",
+   "fieldtype": "Button",
+   "label": "View Missing Accounts"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-10 01:19:41.084128",
+ "modified": "2025-09-14 05:51:03.759198",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",

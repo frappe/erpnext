@@ -37,7 +37,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_cost_centers_with_children,
 	get_period_list,
 )
-from erpnext.accounts.utils import get_currency_precision
+from erpnext.accounts.utils import get_children, get_currency_precision
 
 # ============================================================================
 # DATA MODELS
@@ -418,6 +418,28 @@ class DataCollector:
 		result = query.run(as_dict=True)
 		return [row.name for row in result]
 
+	@staticmethod
+	def get_filtered_accounts(company: str, account_rows: list) -> list[str]:
+		filter_parser = FilterExpressionParser()
+
+		account = frappe.qb.DocType("Account")
+		query = (
+			frappe.qb.from_(account)
+			.select(account.name)
+			.distinct()
+			.where(account.disabled == 0)
+			.where(account.is_group == 0)
+			.orderby(account.name)
+		)
+
+		if company:
+			query = query.where(account.company == company)
+
+		if conditions := filter_parser.build_conditions(account_rows, account):
+			query = query.where(conditions)
+
+		return query.run(pluck=True)
+
 
 class FinancialQueryBuilder:
 	"""Centralized query builder for financial data"""
@@ -704,6 +726,8 @@ class FilterExpressionParser:
 		Returns:
 		        SQL condition object or None if invalid
 		"""
+		report_row = frappe._dict(report_row)
+
 		filter_formula = report_row.calculation_formula
 		if not filter_formula:
 			return None
@@ -774,8 +798,78 @@ class FilterExpressionParser:
 
 
 @frappe.whitelist()
-def get_accounts_by_filter(company, account_filter):
-	return DataCollector._parse_account_filter(company, frappe._dict(calculation_formula=account_filter))
+def get_children_accounts(
+	parent: str,
+	company: str,
+	account_rows: str | list,
+	missed: bool = False,
+	is_root: bool = False,
+	include_disabled: bool = False,
+):
+	"""
+	Get children accounts based on the provided filters to view in tree.
+
+	Args:
+	    parent: The parent account to get children for.
+	    company: The company to filter accounts by.
+	    account_rows: Template rows with `Data Source` == `Account Data`.
+	    missed:
+	                - If True, only missed by filters accounts will be included.
+	                - If False, only filtered accounts will be included.
+	    is_root: Whether the parent is a root account.
+	    include_disabled: Whether to include disabled accounts.
+
+	Example:
+	```python
+	[
+	    {
+	        value: "Current Liabilities - WP",
+	        expandable: 1,
+	        root_type: "Liability",
+	        account_currency: "USD",
+	        parent: "Source of Funds (Liabilities) - WP",
+	    },
+	    {
+	        value: "Non-Current Liabilities - WP",
+	        expandable: 1,
+	        root_type: "Liability",
+	        account_currency: "USD",
+	        parent: "Source of Funds (Liabilities) - WP",
+	    },
+	]
+	```
+	"""
+	frappe.has_permission("Account", ptype="read", throw=True)
+
+	children_accounts = get_children(
+		"Account", parent, company, is_root=is_root, include_disabled=include_disabled
+	)
+
+	if not children_accounts:
+		return []
+
+	if isinstance(account_rows, str):
+		account_rows = frappe.parse_json(account_rows)
+
+	# TODO: need caching??
+	filtered_accounts = DataCollector.get_filtered_accounts(company, account_rows)
+
+	if not filtered_accounts:
+		return children_accounts if missed else [acc for acc in children_accounts if acc.expandable]
+
+	valid_accounts = []
+
+	for account in children_accounts:
+		if account.expandable:
+			valid_accounts.append(account)
+			continue
+
+		is_in_filtered = account.value in filtered_accounts
+
+		if (missed and not is_in_filtered) or (not missed and is_in_filtered):
+			valid_accounts.append(account)
+
+	return valid_accounts
 
 
 # ============================================================================

@@ -12,6 +12,13 @@ frappe.ui.form.on("Financial Report Template", {
 				true
 			);
 		}
+
+		// add custom button to view missed accounts
+		if (!frm.is_new() && frm.doc.rows.length > 0) {
+			frm.add_custom_button(__("View Missing Accounts"), function () {
+				show_accounts_tree(frm.doc.rows, true);
+			});
+		}
 	},
 
 	validate(frm) {
@@ -38,6 +45,16 @@ frappe.ui.form.on("Financial Report Row", {
 	form_render(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		update_formula_description(frm, row.data_source);
+	},
+
+	view_filtered_accounts(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		show_accounts_tree([row], false);
+	},
+
+	view_missing_accounts(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		show_accounts_tree([row], true);
 	},
 });
 
@@ -164,4 +181,58 @@ function update_formula_description(frm, data_source) {
 	}
 
 	grid.update_docfield_property("formula_description", "options", description_html);
+}
+
+function show_accounts_tree(template_rows, missed = false) {
+	// filtered rows
+	const account_rows = template_rows.filter((row) => row.data_source === "Account Data");
+
+	if (account_rows.length === 0) {
+		frappe.show_alert(__("No <strong>Account Data</strong> row found"));
+		return;
+	}
+
+	const dialog = new frappe.ui.Dialog({
+		title: missed ? __("Missing Accounts") : __("Filtered Accounts"),
+		fields: [
+			{
+				fieldname: "company",
+				fieldtype: "Link",
+				options: "Company",
+				label: "Company",
+				reqd: 1,
+				onchange: function () {
+					const company = dialog.get_value("company");
+
+					if (!company) return;
+
+					// render tree
+					const wrapper = dialog.get_field("tree_area").$wrapper;
+					wrapper.empty();
+
+					new frappe.ui.Tree({
+						parent: wrapper,
+						label: company,
+						root_value: company,
+						method: "erpnext.accounts.doctype.financial_report_template.financial_report_engine.get_children_accounts",
+						args: { company: company, account_rows: account_rows, missed: missed },
+						toolbar: [],
+					});
+				},
+			},
+			{
+				fieldname: "tree_area",
+				fieldtype: "HTML",
+				label: "Chart of Accounts",
+				read_only: 1,
+				depends_on: "eval: doc.company",
+			},
+		],
+		primary_action_label: __("Done"),
+		primary_action() {
+			dialog.hide();
+		},
+	});
+
+	dialog.show();
 }
