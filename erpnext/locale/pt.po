@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-07 09:35+0000\n"
-"PO-Revision-Date: 2025-09-09 00:42\n"
+"PO-Revision-Date: 2025-09-14 01:23\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Portuguese\n"
 "MIME-Version: 1.0\n"
@@ -422,7 +422,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "1 hr"
-msgstr ""
+msgstr "1 hora"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -1148,7 +1148,7 @@ msgstr ""
 #. Label of the access_key (Data) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "Access Key"
-msgstr ""
+msgstr "Chave de Acesso"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:48
 msgid "Access Key is required for Service Provider: {0}"
@@ -1339,7 +1339,7 @@ msgstr ""
 #: erpnext/accounts/report/financial_statements.py:661
 #: erpnext/accounts/report/trial_balance/trial_balance.py:443
 msgid "Account Name"
-msgstr ""
+msgstr "Nome da Conta"
 
 #: erpnext/accounts/doctype/account/account.py:338
 msgid "Account Not Found"
@@ -2697,7 +2697,7 @@ msgstr ""
 #: erpnext/public/js/utils/serial_no_batch_selector.js:191
 #: erpnext/stock/dashboard/item_dashboard_list.html:61
 msgid "Add"
-msgstr ""
+msgstr "Adicionar"
 
 #: erpnext/stock/doctype/item/item.js:514
 #: erpnext/stock/doctype/price_list/price_list.js:8
@@ -2898,7 +2898,7 @@ msgstr ""
 #. Label of the get_local_holidays (Button) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Add to Holidays"
-msgstr ""
+msgstr "Adicionar às Férias"
 
 #: erpnext/crm/doctype/lead/lead.js:38
 msgid "Add to Prospect"
@@ -6249,7 +6249,7 @@ msgstr ""
 
 #: erpnext/templates/pages/projects.html:48
 msgid "Assignment"
-msgstr ""
+msgstr "Atribuição"
 
 #. Label of the filters_section (Section Break) field in DocType 'Service Level
 #. Agreement'
