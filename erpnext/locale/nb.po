@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-07 09:35+0000\n"
-"PO-Revision-Date: 2025-09-12 00:49\n"
+"PO-Revision-Date: 2025-09-14 01:23\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -161,7 +161,7 @@ msgstr "% Opptatt"
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:285
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:340
 msgid "% Of Grand Total"
-msgstr ""
+msgstr "% av totalsummen"
 
 #. Label of the per_ordered (Percent) field in DocType 'Material Request'
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -226,7 +226,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:2293
 msgid "'Account' in the Accounting section of Customer {0}"
-msgstr ""
+msgstr "Konto i regnskapsseksjonen for kunde: {0}"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:299
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
@@ -299,7 +299,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:43
 msgid "'{0}' has been already added."
-msgstr ""
+msgstr "'{0}' er allerede lagt til."
 
 #: erpnext/setup/doctype/company/company.py:208
 #: erpnext/setup/doctype/company/company.py:219
@@ -422,7 +422,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "1 hr"
-msgstr ""
+msgstr "1 t"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -485,7 +485,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "30 mins"
-msgstr ""
+msgstr "30 min"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:115
 msgid "30-60"
@@ -516,7 +516,7 @@ msgstr ""
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "6 hrs"
-msgstr ""
+msgstr "6 t"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:97
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:351
@@ -628,7 +628,10 @@ msgid "<h3>Currency Exchange Settings Help</h3>\n"
 "<p>There are 3 variables that could be used within the endpoint, result key and in values of the parameter.</p>\n"
 "<p>Exchange rate between {from_currency} and {to_currency} on {transaction_date} is fetched by the API.</p>\n"
 "<p>Example: If your endpoint is exchange.com/2021-08-01, then, you will have to input exchange.com/{transaction_date}</p>"
-msgstr ""
+msgstr "<h3>Hjelp med innstillinger for valutaveksling</h3>\n"
+"<p>Det er 3 variabler som kan brukes i endepunktet, resultatnøkkelen og i verdiene til parameteren.</p>\n"
+"<p>Valutakurs mellom {from_currency} og {to_currency} på {transaction_date} hentes av API-et.</p>\n"
+"<p>Eksempel: Hvis endepunktet ditt er exchange.com/2021-08-01, må du legge inn exchange.com/{transaction_date}</p>"
 
 #. Content of the 'Body and Closing Text Help' (HTML) field in DocType 'Dunning
 #. Letter Text'
@@ -678,7 +681,7 @@ msgstr ""
 #. Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Account Number Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Innstillinger for kontonummer</label>"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Cheque Print Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
@@ -689,7 +692,7 @@ msgstr ""
 #. Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Date Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Datoinnstillinger</label>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:123
 msgid "<li>Clearance date must be after cheque date for row(s): {0}</li>"
@@ -749,11 +752,11 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:69
 msgid "<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?"
-msgstr ""
+msgstr "<p>Prislisteprisen er ikke angitt som redigerbar i salgsinnstillingene. I dette scenariet vil det å sette <strong>Oppdater prisliste basert på</strong> til <strong>Prislistepris</strong> forhindre automatisk oppdatering av vareprisen.</p>Er du sikker på at du vil fortsette?"
 
 #: erpnext/controllers/accounts_controller.py:2195
 msgid "<p>To allow over-billing, please set allowance in Accounts Settings.</p>"
-msgstr ""
+msgstr "<p>For å tillate overfakturering, vennligst angi tillatelse i kontoinnstillingene.</p>"
 
 #. Content of the 'Message Examples' (HTML) field in DocType 'Payment Gateway
 #. Account'
@@ -815,12 +818,12 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Reports &amp; Masters</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Rapporter &amp; grunnregistre</b></span>"
 
 #. Header text in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "<span class=\"h4\"><b>Settings</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Innstillinger</b></span>"
 
 #. Header text in the Accounting Workspace
 #. Header text in the Payables Workspace
@@ -829,7 +832,7 @@ msgstr ""
 #: erpnext/accounts/workspace/payables/payables.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "<span class=\"h4\"><b>Shortcuts</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Snarveier</b></span>"
 
 #. Header text in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
@@ -840,7 +843,13 @@ msgid "<span class=\"h4\"><b>Your Shortcuts\n"
 "\t\t\n"
 "\t\t\t\n"
 "\t\t</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Dine snarveier\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Buying Workspace
@@ -1035,18 +1044,18 @@ msgstr ""
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "API Details"
-msgstr ""
+msgstr "API-detaljer"
 
 #. Label of the api_endpoint (Data) field in DocType 'Currency Exchange
 #. Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "API Endpoint"
-msgstr ""
+msgstr "API-endepunkt"
 
 #. Label of the api_key (Data) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "API Key"
-msgstr ""
+msgstr "API-nøkkel"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -1083,7 +1092,7 @@ msgstr ""
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "About Us Settings"
-msgstr ""
+msgstr "Innstillinger for \"Om oss\""
 
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.js:37
 msgid "About {0} minute remaining"
@@ -1255,7 +1264,7 @@ msgstr ""
 #: erpnext/stock/report/incorrect_stock_value_report/incorrect_stock_value_report.js:15
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:15
 msgid "Account"
-msgstr ""
+msgstr "Konto"
 
 #. Name of a report
 #: erpnext/accounts/report/account_balance/account_balance.json
@@ -1596,7 +1605,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Accounting"
-msgstr ""
+msgstr "Regnskap"
 
 #. Label of the accounting_details_section (Section Break) field in DocType
 #. 'Dunning'
@@ -1637,7 +1646,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Accounting Details"
-msgstr ""
+msgstr "Regnskapsdetaljer"
 
 #. Name of a DocType
 #. Label of the accounting_dimension (Select) field in DocType 'Accounting
@@ -1651,27 +1660,27 @@ msgstr ""
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.js:32
 #: erpnext/accounts/workspace/accounting/accounting.json
 msgid "Accounting Dimension"
-msgstr ""
+msgstr "Regnskapsdimensjon"
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:207
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:151
 msgid "Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}."
-msgstr ""
+msgstr "Regnskapsdimensjon <b>{0}</b> er påkrevd for 'Balanse'-kontoen {1}."
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:193
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:138
 msgid "Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}."
-msgstr ""
+msgstr "Regnskapsdimensjon <b>{0}</b> er påkrevd for \"Resultatregnskap\" {1}."
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/accounting_dimension_detail/accounting_dimension_detail.json
 msgid "Accounting Dimension Detail"
-msgstr ""
+msgstr "Detaljer om regnskapsdimensjon"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Accounting Dimension Filter"
-msgstr ""
+msgstr "Filter for regnskapsdimensjon"
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Advance Taxes and Charges'
@@ -1807,7 +1816,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Accounting Dimensions"
-msgstr ""
+msgstr "Regnskapsdimensjoner"
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Purchase Invoice'
@@ -1822,39 +1831,39 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounting Dimensions "
-msgstr ""
+msgstr "Regnskapsdimensjoner "
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Payment Reconciliation'
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "Accounting Dimensions Filter"
-msgstr ""
+msgstr "Filter for regnskapsdimensjoner"
 
 #. Label of the accounts (Table) field in DocType 'Journal Entry'
 #. Label of the accounts (Table) field in DocType 'Journal Entry Template'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Accounting Entries"
-msgstr ""
+msgstr "Regnskapsposteringer"
 
 #: erpnext/assets/doctype/asset/asset.py:808
 #: erpnext/assets/doctype/asset/asset.py:823
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:559
 msgid "Accounting Entry for Asset"
-msgstr ""
+msgstr "Regnskapspostering for eiendeler"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1681
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1701
 msgid "Accounting Entry for LCV in Stock Entry {0}"
-msgstr ""
+msgstr "Regnskapspostering for LCV i lagerpostering {0}"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:755
 msgid "Accounting Entry for Landed Cost Voucher for SCR {0}"
-msgstr ""
+msgstr "Regnskapspostering for innkjøpsbilag for SCR {0}"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:816
 msgid "Accounting Entry for Service"
-msgstr ""
+msgstr "Regnskapspostering for tjeneste"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1006
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1027
@@ -1872,15 +1881,15 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1641
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:613
 msgid "Accounting Entry for Stock"
-msgstr ""
+msgstr "Regnskapspostering for lagerbeholdning"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:718
 msgid "Accounting Entry for {0}"
-msgstr ""
+msgstr "Regnskapspostering for {0}"
 
 #: erpnext/controllers/accounts_controller.py:2343
 msgid "Accounting Entry for {0}: {1} can only be made in currency: {2}"
-msgstr ""
+msgstr "Regnskapspostering for {0}: {1} kan kun gjøres i valutaen: {2}"
 
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.js:193
 #: erpnext/buying/doctype/supplier/supplier.js:90
@@ -1889,29 +1898,29 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.js:170
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:50
 msgid "Accounting Ledger"
-msgstr ""
+msgstr "Hovedbok"
 
 #. Label of a Card Break in the Accounting Workspace
 #: erpnext/accounts/workspace/accounting/accounting.json
 msgid "Accounting Masters"
-msgstr ""
+msgstr "Grunndata for regnskap"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
 #: erpnext/accounts/doctype/accounting_period/accounting_period.json
 #: erpnext/accounts/workspace/accounting/accounting.json
 msgid "Accounting Period"
-msgstr ""
+msgstr "Regnskapsperiode"
 
 #: erpnext/accounts/doctype/accounting_period/accounting_period.py:66
 msgid "Accounting Period overlaps with {0}"
-msgstr ""
+msgstr "Regnskapsperioden overlapper med {0}"
 
 #. Description of the 'Accounts Frozen Till Date' (Date) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Accounting entries are frozen up to this date. Nobody can create or modify entries except users with the role specified below"
-msgstr ""
+msgstr "Regnskapsposteringer fryses frem til denne datoen. Ingen kan opprette eller endre posteringer, bortsett fra brukere med rollen som er spesifisert nedenfor"
 
 #. Label of the applicable_on_account (Link) field in DocType 'Applicable On
 #. Account'
@@ -2039,7 +2048,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_closing_balance/stock_closing_balance.json
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Accounts Manager"
-msgstr ""
+msgstr "Regnskapsleder"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:348
 msgid "Accounts Missing Error"
@@ -2086,7 +2095,7 @@ msgstr ""
 #: erpnext/accounts/workspace/receivables/receivables.json
 #: erpnext/selling/doctype/customer/customer.js:159
 msgid "Accounts Receivable"
-msgstr ""
+msgstr "Kundefordringer"
 
 #. Label of the accounts_receivable_payable_tuning_section (Section Break)
 #. field in DocType 'Accounts Settings'
@@ -2134,7 +2143,7 @@ msgstr ""
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Accounts Settings"
-msgstr ""
+msgstr "Kontoinnstillinger"
 
 #. Name of a role
 #: erpnext/accounts/doctype/account/account.json
@@ -2226,7 +2235,7 @@ msgstr ""
 #: erpnext/stock/doctype/warehouse_type/warehouse_type.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounts User"
-msgstr ""
+msgstr "Regnskapsbruker"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1372
 msgid "Accounts table cannot be blank."
@@ -3429,7 +3438,7 @@ msgstr ""
 #: erpnext/accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
 #: erpnext/stock/reorder_item.py:394
 msgid "Administrator"
-msgstr ""
+msgstr "Administrator"
 
 #. Label of the advance_account (Link) field in DocType 'Party Account'
 #: erpnext/accounts/doctype/party_account/party_account.json
@@ -3842,7 +3851,7 @@ msgstr ""
 #. Statements'
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgid "Algorithm"
-msgstr ""
+msgstr "Algoritme"
 
 #. Name of a role
 #. Option for the 'Hold Type' (Select) field in DocType 'Supplier'
@@ -4298,7 +4307,7 @@ msgstr ""
 #. Dimension Filter'
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Allow Or Restrict Dimension"
-msgstr ""
+msgstr "Tillat eller begrens dimensjon"
 
 #. Label of the allow_overtime (Check) field in DocType 'Manufacturing
 #. Settings'
@@ -4527,7 +4536,7 @@ msgstr ""
 #. Ledger Settings'
 #: erpnext/accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
 msgid "Allowed Doctypes"
-msgstr ""
+msgstr "Tillatte dokumenttyper"
 
 #. Group in Supplier's connections
 #. Group in Customer's connections
@@ -4801,7 +4810,7 @@ msgstr ""
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 #: erpnext/telephony/doctype/telephony_call_type/telephony_call_type.json
 msgid "Amended From"
-msgstr ""
+msgstr "Korrigert fra"
 
 #. Label of the amount (Currency) field in DocType 'Advance Payment Ledger
 #. Entry'
@@ -5260,7 +5269,7 @@ msgstr ""
 #. Filter'
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Applicable Dimension"
-msgstr ""
+msgstr "Gjeldende dimensjon"
 
 #. Label of the applicable_for (Select) field in DocType 'Pricing Rule'
 #. Label of the applicable_for (Select) field in DocType 'Promotional Scheme'
@@ -5289,7 +5298,7 @@ msgstr ""
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 #: erpnext/accounts/doctype/applicable_on_account/applicable_on_account.json
 msgid "Applicable On Account"
-msgstr ""
+msgstr "Gjeldende på konto"
 
 #. Label of the to_designation (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
@@ -5526,7 +5535,7 @@ msgstr ""
 #. 'Accounting Dimension Filter'
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Apply restriction on dimension values"
-msgstr ""
+msgstr "Anvend begrensning på dimensjoneringsverdier"
 
 #. Label of the apply_to_all_doctypes (Check) field in DocType 'Inventory
 #. Dimension'
@@ -6726,7 +6735,7 @@ msgstr ""
 #. in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically Process Deferred Accounting Entry"
-msgstr ""
+msgstr "Behandle periodiserte regnskapsposteringer automatisk"
 
 #. Label of the automatically_post_balancing_accounting_entry (Check) field in
 #. DocType 'Accounting Dimension Detail'
@@ -9027,7 +9036,7 @@ msgstr "ABRUTT"
 #. Label of the cc (Link) field in DocType 'Process Statement Of Accounts CC'
 #: erpnext/accounts/doctype/process_statement_of_accounts_cc/process_statement_of_accounts_cc.json
 msgid "CC"
-msgstr ""
+msgstr "CC"
 
 #. Label of the cc_to (Table MultiSelect) field in DocType 'Process Statement
 #. Of Accounts'
@@ -30812,7 +30821,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:79
 msgid "Menu"
-msgstr ""
+msgstr "Meny"
 
 #: erpnext/accounts/doctype/account/account.js:151
 msgid "Merge"
@@ -30871,7 +30880,7 @@ msgstr ""
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "Message"
-msgstr ""
+msgstr "Melding"
 
 #. Label of the message_examples (HTML) field in DocType 'Payment Gateway
 #. Account'
@@ -31310,7 +31319,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Mobile No"
-msgstr "Mobilnummer"
+msgstr "Mobile No"
 
 #: erpnext/public/js/utils/contact_address_quick_entry.js:66
 msgid "Mobile Number"
@@ -40262,19 +40271,19 @@ msgstr ""
 #: erpnext/templates/pages/task_info.html:39
 #: erpnext/templates/pages/timelog_info.html:22
 msgid "Project"
-msgstr ""
+msgstr "Prosjekt"
 
 #: erpnext/projects/doctype/project/project.py:368
 msgid "Project Collaboration Invitation"
-msgstr ""
+msgstr "Invitasjon til prosjektsamarbeid"
 
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:38
 msgid "Project Id"
-msgstr ""
+msgstr "Prosjekt-ID"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:26
 msgid "Project Manager"
-msgstr ""
+msgstr "Prosjektleder"
 
 #. Label of the project_name (Data) field in DocType 'Sales Invoice Timesheet'
 #. Label of the project_name (Data) field in DocType 'Project'
@@ -40285,42 +40294,42 @@ msgstr ""
 #: erpnext/projects/report/project_summary/project_summary.py:54
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:42
 msgid "Project Name"
-msgstr ""
+msgstr "Prosjektnavn"
 
 #: erpnext/templates/pages/projects.html:112
 msgid "Project Progress:"
-msgstr ""
+msgstr "Fremdrift i prosjektet:"
 
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:47
 msgid "Project Start Date"
-msgstr ""
+msgstr "Prosjektets startdato"
 
 #. Label of the project_status (Text) field in DocType 'Project User'
 #: erpnext/projects/doctype/project_user/project_user.json
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:43
 msgid "Project Status"
-msgstr ""
+msgstr "Status for prosjektet"
 
 #. Name of a report
 #: erpnext/projects/report/project_summary/project_summary.json
 msgid "Project Summary"
-msgstr ""
+msgstr "Prosjektsammendrag"
 
 #: erpnext/projects/doctype/project/project.py:667
 msgid "Project Summary for {0}"
-msgstr ""
+msgstr "Prosjektsammendrag for {0}"
 
 #. Name of a DocType
 #. Label of a Link in the Projects Workspace
 #: erpnext/projects/doctype/project_template/project_template.json
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Project Template"
-msgstr ""
+msgstr "Prosjektmal"
 
 #. Name of a DocType
 #: erpnext/projects/doctype/project_template_task/project_template_task.json
 msgid "Project Template Task"
-msgstr ""
+msgstr "Oppgave i prosjektmal"
 
 #. Label of the project_type (Link) field in DocType 'Project'
 #. Label of the project_type (Link) field in DocType 'Project Template'
@@ -40333,35 +40342,35 @@ msgstr ""
 #: erpnext/projects/report/project_summary/project_summary.js:30
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Project Type"
-msgstr ""
+msgstr "Prosjekttype"
 
 #. Name of a DocType
 #. Label of a Link in the Projects Workspace
 #: erpnext/projects/doctype/project_update/project_update.json
 #: erpnext/projects/workspace/projects/projects.json
 msgid "Project Update"
-msgstr ""
+msgstr "Prosjektoppdatering"
 
 #: erpnext/config/projects.py:44
 msgid "Project Update."
-msgstr ""
+msgstr "Prosjektoppdatering."
 
 #. Name of a DocType
 #: erpnext/projects/doctype/project_user/project_user.json
 msgid "Project User"
-msgstr ""
+msgstr "Prosjektbruker"
 
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:46
 msgid "Project Value"
-msgstr ""
+msgstr "Prosjektverdi"
 
 #: erpnext/config/projects.py:20
 msgid "Project activity / task."
-msgstr ""
+msgstr "Prosjektaktivitet/oppgave."
 
 #: erpnext/config/projects.py:13
 msgid "Project master."
-msgstr ""
+msgstr "Prosjektregister"
 
 #. Description of the 'Users' (Table) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -40426,7 +40435,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order_dashboard.py:28
 #: erpnext/setup/doctype/company/company_dashboard.py:25
 msgid "Projects"
-msgstr ""
+msgstr "Prosjekter"
 
 #. Name of a role
 #: erpnext/projects/doctype/project/project.json
@@ -49270,7 +49279,7 @@ msgstr ""
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:280
 msgid "Set Password"
-msgstr ""
+msgstr "Angi passord"
 
 #. Label of the set_posting_date (Check) field in DocType 'POS Opening Entry'
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.json
