@@ -86,10 +86,12 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 		.items-table tr:first-child td:first-child,
 		.tax-table tr:first-child td:first-child {
 			border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
 		}
 		.items-table tr:first-child td:last-child,
 		.tax-table tr:first-child td:last-child {
 			border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
 		}
 
 		.in-words {
