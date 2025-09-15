@@ -174,6 +174,7 @@ frappe.ui.form.on("Subcontracting Order", {
 			}
 		}
 
+		frm.toggle_display("reserve_stock", frm.doc.__onload.is_stock_reservation_enabled);
 		frm.trigger("get_materials_from_supplier");
 	},
 

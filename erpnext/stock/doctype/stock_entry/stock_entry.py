@@ -246,6 +246,9 @@ class StockEntry(StockController):
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
 
+	def after_insert(self):
+		self.set_serial_batch_fields()
+
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.make_bundle_using_old_serial_batch_fields()
@@ -270,6 +273,8 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("In Transit")
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("Completed")
+
+		self.update_stock_reservation_entries()
 
 	def on_cancel(self):
 		self.delink_asset_repair_sabb()
@@ -297,6 +302,7 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
+		self.update_stock_reservation_entries()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 
@@ -819,6 +825,55 @@ class StockEntry(StockController):
 					),
 					title=_("Missing Item"),
 				)
+
+	def set_serial_batch_fields(self):
+		if self.purpose == "Send to Subcontractor" and frappe.get_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			for item in self.items:
+				has_batch_no, has_serial_no = frappe.get_value(
+					"Item", item.item_code, ["has_batch_no", "has_serial_no"]
+				)
+				if not has_batch_no and not has_serial_no:
+					continue
+
+				kwargs = frappe._dict(
+					{
+						"item_code": item.item_code,
+						"warehouse": item.s_warehouse,
+						"based_on": frappe.get_single_value(
+							"Stock Settings", "pick_serial_and_batch_based_on"
+						),
+						"sabb_voucher_no": self.name,
+						"sabb_voucher_detail_no": item.sco_rm_detail,
+						"sabb_voucher_type": "Stock Entry",
+					}
+				)
+
+				if has_batch_no and not item.batch_no:
+					from erpnext.stock.doctype.batch.batch import get_available_batches
+					from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+						get_batches_to_be_considered,
+					)
+
+					batch_data = get_batches_to_be_considered(self.subcontracting_order)
+					batches = []
+					for batch in batch_data:
+						if batch.batch_no:
+							batches.append(batch.batch_no)
+					kwargs.batch_no = batches
+					batches = get_available_batches(kwargs)
+
+					if len(batches) > 1:
+						continue
+					else:
+						item.batch_no = next(iter(batches))
+
+				if has_serial_no and not item.serial_no:
+					from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+
+					serial_nos = get_serial_nos_for_outward(kwargs)
+					item.serial_no = "\n".join(serial_nos)
 
 	def get_matched_items(self, item_code):
 		for row in self.items:
@@ -1751,6 +1806,146 @@ class StockEntry(StockController):
 		if self.purpose == "Disassemble" and self.fg_completed_qty:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			pro_doc.run_method("update_disassembled_qty", self.fg_completed_qty, is_cancel)
+
+	def update_stock_reservation_entries(self) -> None:
+		"""Updates Delivered Qty in Stock Reservation Entries."""
+		if self.purpose == "Send to Subcontractor" and frappe.get_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			if self._action == "submit":
+				for item in self.get("items"):
+					table = frappe.qb.DocType("Stock Reservation Entry")
+					query = (
+						frappe.qb.from_(table)
+						.select(table.name)
+						.where(
+							(table.docstatus == 1)
+							& (table.voucher_type == "Subcontracting Order")
+							& (table.voucher_no == self.subcontracting_order)
+							& (table.voucher_detail_no == item.sco_rm_detail)
+							& (table.warehouse == item.s_warehouse)
+							& (table.delivered_qty < table.reserved_qty)
+						)
+						.orderby(table.creation)
+					)
+					sre_list = query.run(pluck="name")
+
+					# Skip if no Stock Reservation Entries.
+					if not sre_list:
+						continue
+
+					qty_to_deliver = item.transfer_qty
+					for sre in sre_list:
+						if qty_to_deliver <= 0:
+							break
+
+						sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+
+						qty_can_be_deliver = 0
+						if sre_doc.reservation_based_on == "Serial and Batch":
+							sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+							if sre_doc.has_serial_no:
+								delivered_serial_nos = [d.serial_no for d in sbb.entries]
+								for entry in sre_doc.sb_entries:
+									if entry.serial_no in delivered_serial_nos:
+										entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
+										entry.db_update()
+										qty_can_be_deliver += 1
+										delivered_serial_nos.remove(entry.serial_no)
+							else:
+								delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
+								for entry in sre_doc.sb_entries:
+									if entry.batch_no in delivered_batch_qty:
+										delivered_qty = min(
+											(entry.qty - entry.delivered_qty),
+											delivered_batch_qty[entry.batch_no],
+										)
+										entry.delivered_qty += delivered_qty
+										entry.db_update()
+										qty_can_be_deliver += delivered_qty
+										delivered_batch_qty[entry.batch_no] -= delivered_qty
+						else:
+							# `Delivered Qty` should be less than or equal to `Reserved Qty`.
+							qty_can_be_deliver = min(
+								(sre_doc.reserved_qty - sre_doc.delivered_qty), qty_to_deliver
+							)
+
+						sre_doc.delivered_qty += qty_can_be_deliver
+						sre_doc.db_update()
+
+						# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
+						sre_doc.update_status()
+
+						# Update Reserved Stock in Bin.
+						sre_doc.update_reserved_stock_in_bin()
+
+						qty_to_deliver -= qty_can_be_deliver
+
+			if self._action == "cancel":
+				for item in self.get("items"):
+					sre_list = frappe.db.get_all(
+						"Stock Reservation Entry",
+						{
+							"docstatus": 1,
+							"voucher_type": "Subcontracting Order",
+							"voucher_no": self.subcontracting_order,
+							"voucher_detail_no": item.sco_rm_detail,
+							"warehouse": item.s_warehouse,
+							"status": [
+								"in",
+								["Partially Delivered", "Delivered", "Partially Used", "Closed"],
+							],
+						},
+						order_by="creation",
+					)
+
+					# Skip if no Stock Reservation Entries.
+					if not sre_list:
+						continue
+
+					qty_to_undelivered = item.transfer_qty
+					for sre in sre_list:
+						if qty_to_undelivered <= 0:
+							break
+
+						sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+
+						qty_can_be_undelivered = 0
+						if sre_doc.reservation_based_on == "Serial and Batch":
+							sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+							if sre_doc.has_serial_no:
+								serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
+								for entry in sre_doc.sb_entries:
+									if entry.serial_no in serial_nos_to_undelivered:
+										entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
+										entry.db_update()
+										qty_can_be_undelivered += 1
+										serial_nos_to_undelivered.remove(entry.serial_no)
+							else:
+								batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
+								for entry in sre_doc.sb_entries:
+									if entry.batch_no in batch_qty_to_undelivered:
+										undelivered_qty = min(
+											entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
+										)
+										entry.delivered_qty -= undelivered_qty
+										entry.db_update()
+										qty_can_be_undelivered += undelivered_qty
+										batch_qty_to_undelivered[entry.batch_no] -= undelivered_qty
+						else:
+							# `Qty to Undelivered` should be less than or equal to `Delivered Qty`.
+							qty_can_be_undelivered = min(sre_doc.delivered_qty, qty_to_undelivered)
+
+						sre_doc.delivered_qty -= qty_can_be_undelivered
+						sre_doc.db_update()
+
+						# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
+						sre_doc.update_status()
+
+						# Update Reserved Stock in Bin.
+						sre_doc.update_reserved_stock_in_bin()
+
+						qty_to_undelivered -= qty_can_be_undelivered
 
 	def make_stock_reserve_for_wip_and_fg(self):
 		if self.is_stock_reserve_for_work_order():

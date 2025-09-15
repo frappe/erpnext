@@ -1007,6 +1007,8 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 					"Job Card", item.job_card, "wip_warehouse"
 				)
 
+		target_doc.reserve_stock = frappe.get_single_value("Stock Settings", "auto_reserve_stock")
+
 	if target_doc and isinstance(target_doc, str):
 		target_doc = json.loads(target_doc)
 		for key in ["service_items", "items", "supplied_items"]:

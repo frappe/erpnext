@@ -57,7 +57,7 @@ class StockReservationEntry(Document):
 		voucher_detail_no: DF.Data | None
 		voucher_no: DF.DynamicLink | None
 		voucher_qty: DF.Float
-		voucher_type: DF.Literal["", "Sales Order", "Work Order", "Production Plan"]
+		voucher_type: DF.Literal["", "Sales Order", "Work Order", "Production Plan", "Subcontracting Order"]
 		warehouse: DF.Link | None
 	# end: auto-generated types
 

@@ -1906,9 +1906,6 @@ def get_available_serial_nos(kwargs):
 	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
 	ignore_serial_nos, consider_serial_nos = get_reserved_serial_nos(kwargs)
 
-	if consider_serial_nos:
-		filters["name"] = ("in", consider_serial_nos)
-
 	# To ignore serial nos in the same record for the draft state
 	if kwargs.get("ignore_serial_nos"):
 		ignore_serial_nos.extend(kwargs.get("ignore_serial_nos"))
@@ -1925,6 +1922,9 @@ def get_available_serial_nos(kwargs):
 		filters["name"] = ("in", time_based_serial_nos)
 	elif ignore_serial_nos:
 		filters["name"] = ("not in", ignore_serial_nos)
+
+	if consider_serial_nos:
+		filters["name"] = ("in", consider_serial_nos)
 
 	if kwargs.get("batches"):
 		batches = get_non_expired_batches(kwargs.get("batches"))
@@ -2055,13 +2055,13 @@ def get_reserved_serial_nos(kwargs) -> list:
 def get_reserved_voucher_details(kwargs):
 	reserved_voucher_details = []
 
-	value = {
-		"Delivery Note": ["Delivery Note Item", "against_sales_order"],
-		"Stock Entry": ["Stock Entry", "work_order"],
-		"Work Order": ["Work Order", "production_plan"],
+	field_mapper = {
+		"Delivery Note": [["Delivery Note Item", "against_sales_order"]],
+		"Stock Entry": [["Stock Entry", "work_order"], ["Stock Entry", "subcontracting_order"]],
+		"Work Order": [["Work Order", "production_plan"]],
 	}.get(kwargs.get("sabb_voucher_type"))
 
-	if not value or not kwargs.get("sabb_voucher_no"):
+	if not field_mapper or not kwargs.get("sabb_voucher_no"):
 		return reserved_voucher_details
 
 	voucher_based_filters = {
@@ -2080,11 +2080,15 @@ def get_reserved_voucher_details(kwargs):
 		},
 	}.get(kwargs.get("sabb_voucher_type"))
 
-	reserved_voucher_details = frappe.get_all(
-		value[0],
-		pluck=value[1],
-		filters=voucher_based_filters,
-	)
+	reserved_voucher_details = []
+	for row in field_mapper:
+		reserved_voucher_details.extend(
+			frappe.get_all(
+				row[0],
+				pluck=row[1],
+				filters=voucher_based_filters,
+			)
+		)
 
 	return reserved_voucher_details
 
