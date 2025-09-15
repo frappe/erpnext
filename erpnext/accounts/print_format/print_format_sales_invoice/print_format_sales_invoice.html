@@ -1,0 +1,310 @@
+{%- macro add_header(page_num, max_pages, doc, letter_head, no_letterhead, footer, print_settings=None,
+print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
+<div class="letter-head">{{ letter_head }}</div>
+{% endif %} {% if print_heading_template %} {{ frappe.render_template(print_heading_template, {"doc":doc}) }}
+{% endif %} {%- if doc.meta.is_submittable and doc.docstatus==2 -%}
+<div class="text-center" document-status="cancelled">
+	<h4 style="margin: 0px; color: red">{{ _("CANCELLED") }}</h4>
+</div>
+{%- endif -%} {%- endmacro -%} {% for page in layout %}
+<div class="page-break invoice-page">
+	<div {% if print_settings.repeat_header_footer %} id="header-html" class="hidden-pdf" {% endif %}>
+		{{ add_header(loop.index, layout|len, doc, letter_head, no_letterhead, footer, print_settings) }}
+	</div>
+
+	<style>
+		.invoice-page {
+			font-family: Inter, sans-serif;
+			font-size: 13px;
+			color: #171717;
+		}
+
+		.title {
+			color: #7c7c7c !important;
+		}
+		.text-muted {
+			color: #7c7c7c !important;
+		}
+		.text-dark {
+			color: #171717 !important;
+		}
+		.small-text {
+			font-size: 11px;
+			color: #666;
+		}
+
+		.text-left {
+			text-align: left;
+		}
+		.text-center {
+			text-align: center;
+		}
+		.text-right {
+			text-align: right;
+		}
+		.text-bold {
+			font-weight: 700;
+		}
+
+		.mt-15 {
+			margin-top: 15px;
+		}
+		.mt-16 {
+			margin-top: 16px;
+		}
+		.mt-40 {
+			margin-top: 40px;
+		}
+		.mw-400 {
+			max-width: 400px;
+		}
+
+		.items-table,
+		.tax-table {
+			width: 100%;
+			border-collapse: separate;
+			border-spacing: 0;
+			border-radius: 10px;
+			overflow: hidden;
+		}
+
+		.items-table td,
+		.tax-table td {
+			border-bottom: 1px solid #ededed;
+			padding: 8px;
+		}
+
+		.items-table thead td,
+		.tax-table thead td {
+			color: #7c7c7c !important;
+		}
+		.items-table thead tr:first-of-type td,
+		.tax-table thead tr:first-of-type td {
+			border-bottom: none;
+		}
+
+		.items-table tr:first-child td:first-child,
+		.tax-table tr:first-child td:first-child {
+			border-top-left-radius: 10px;
+		}
+		.items-table tr:first-child td:last-child,
+		.tax-table tr:first-child td:last-child {
+			border-top-right-radius: 10px;
+		}
+
+		.in-words {
+			color: #171717 !important;
+			max-width: 400px;
+			word-wrap: break-word;
+			line-height: 1.5;
+			font-size: 12px;
+		}
+
+		.row-divider {
+			border-bottom: 1px solid #e9e9e9;
+		}
+
+		.highlight-bg {
+			background: #f8f8f8;
+		}
+
+		.img-thumb {
+			min-width: 24px;
+			min-height: 24px;
+			max-width: 24px;
+			max-height: 24px;
+			border-radius: 6px;
+			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #f0f0f0;
+		}
+
+		.info-card {
+			margin-top: 40px;
+			color: #7c7c7c;
+		}
+
+        .info-text {
+            margin-bottom: 12px;
+        }
+
+        .print-format {
+            padding: 24px;
+            line-height: 1.5;
+            letter-spacing: 0.14px;
+        }
+
+        .print-format td{
+            padding: 8px 8px !important;
+        }
+
+        .tax-table td, .items-table td{
+            height: 40px;
+        }
+
+        .tax-table thead td, .items-table thead td{
+            height: 32px;
+        }
+	</style>
+
+	<table class="info-table col-xs-12" style="width: 100%">
+		<tr>
+			<td class="col-xs-7" style="padding: 0 !important;">
+				<div class="title col-xs-5 p-0">
+					<div class="info-text">Customer Name:</div>
+					<div class="info-text">Bill to:</div>
+				</div>
+				<div class="col-xs-7">
+					<div class="info-text">{{ doc.customer_name }}</div>
+					<div class="info-text">{{ doc.address_display or "" }}</div>
+				</div>
+			</td>
+
+			<td class="col-xs-5" style="padding: 0 !important;">
+				<div class="title col-xs-6 p-0">
+					<div class="info-text">Invoice Number:</div>
+					<div class="info-text">Invoice Date:</div>
+					<div class="info-text">Payment Due Date:</div>
+				</div>
+				<div class="col-xs-6">
+					<div class="info-text">{{ doc.name }}</div>
+					<div class="info-text">{{ frappe.utils.format_date(doc.posting_date) }}</div>
+					<div class="info-text">{{ frappe.utils.format_date(doc.due_date) }}</div>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<!-- Items Table -->
+	<table class="items-table mt-15">
+		<colgroup>
+			<col style="width: 5%" />
+			<col style="width: 35%" />
+			<col style="width: 15%" />
+			<col style="width: 10%" />
+			<col style="width: 20%" />
+			<col style="width: 15%" />
+		</colgroup>
+		<thead class="highlight-bg">
+			<tr>
+				<td class="text-center">{{ _("No") }}</td>
+				<td class="text-left">{{ _("Item") }}</td>
+				<td class="text-center">{{ _("HSN/SAC") }}</td>
+				<td class="text-right">{{ _("Quantity") }}</td>
+				<td class="text-right">{{ _("Rate") }}</td>
+				<td class="text-right">{{ _("Amount") }}</td>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in doc.items %}
+			<tr>
+				<td class="text-center">{{ loop.index }}</td>
+				<td class="text-left">
+					<div style="display: flex; align-items: center; gap: 8px">
+						<div class="img-thumb">
+							{% if item.image %}
+							<div>
+								<img src="{{ item.image }}" alt="{{ item.item_name }}" />
+							</div>
+							{% endif %}
+						</div>
+						<div>{{ item.item_name }}</div>
+					</div>
+				</td>
+
+				<td class="text-center">{{ item.gst_hsn_code }}</td>
+				<td class="text-right">{{ item.get_formatted("qty", 0) }} {{ item.uom }}</td>
+				<td class="text-right">{{ item.get_formatted("net_rate", doc) }}</td>
+				<td class="text-right">{{ item.get_formatted("net_amount", doc) }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<table class="totals mt-16" style="width: 100%;">
+		<tr>
+			<td style="width: 65%">&nbsp;</td>
+
+			<td style="width: 35%; vertical-align: top; text-align: right; padding: 0px 0px 6px 0px !important">
+				<table style="width: 100%; border-collapse: collapse">
+					<tr class="row-divider">
+						<td class="text-right title">{{ _("Sub Total:") }}</td>
+						<td class="text-right">{{ doc.get_formatted("total", doc) }}</td>
+					</tr>
+					<tr class="row-divider">
+						<td class="text-right title">
+							{{ _("Discount") }} ({{ doc.additional_discount_percentage or 0 }}%):
+						</td>
+						<td class="text-right">{{ doc.get_formatted("discount_amount", doc) }}</td>
+					</tr>
+					{% set tax_rate = doc.taxes | selectattr("tax_amount") | sum(attribute="rate") %} {% if
+					tax_rate > 0 %}
+					<tr class="row-divider">
+						<td class="text-right title">{{ _("Tax") }} ({{ tax_rate }}%):</td>
+						<td class="text-right">{{ doc.get_formatted("total_taxes_and_charges", doc) }}</td>
+					</tr>
+					{% endif %}
+				</table>
+			</td>
+		</tr>
+
+		<tr style="border-bottom: 1px solid #ededed;">
+			<td colspan="2" style="padding: 0 0 6px 0 !important">
+				<div class="highlight-bg" style="border-radius: 12px">
+					<table style="width: 100%; border-collapse: collapse">
+						<tr>
+							<td class="text-left mw-400">
+								<div class="text-capitalize"><span class="title"> {{ _("In Words: ") }}</span>{{ doc.in_words }}</div>
+							</td>
+							<td class="text-right"><b>{{ _("Grand Total:") }}</b></td>
+							<td class="text-right">
+								<span style="font-weight: 700">
+									{{ doc.get_formatted("grand_total", doc) }}
+								</span>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	{% if doc.taxes_and_charges %}
+	<table class="tax-table mt-15">
+		<div class="mt-40 pb-8">{{ _("Tax Breakup") }}</div>
+		<thead class="highlight-bg">
+			<tr>
+				<td style="width: 5%" class="text-left">{{ _("HSN/SAC") }}</td>
+				<td style="width: 15%" class="text-right">{{ _("Taxable Amount") }}</td>
+				{% for row in doc.taxes %}
+				<td style="width: 10%" class="text-right">{{ row.description }} ({{ row.rate }}%)</td>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in doc.items %}
+			<tr>
+				<td class="text-left">{{ item.gst_hsn_code }}</td>
+				<td class="text-right">{{ item.get_formatted("base_net_amount", doc) }}</td>
+				{% for row in doc.taxes %} {% set tax_amount = item.base_net_amount * (row.rate / 100) %}
+				<td class="text-right">
+					{{ frappe.format_value(tax_amount, {"fieldtype": "Currency"}, doc) }}
+				</td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
+
+	<!-- Terms -->
+	{% if doc.terms %}
+	<div class="info-card">
+		<div class="title">{{ _("Terms and Conditions") }}</div>
+		{{ doc.terms}}
+	</div>
+	{% endif %}
+</div>
+{% endfor %}
