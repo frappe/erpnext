@@ -14,6 +14,7 @@ class FinancialReportRow(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		advance_filtering: DF.Check
 		balance_type: DF.Literal[
 			"", "Opening Balance", "Closing Balance", "Period Movement (Debits - Credits)"
 		]

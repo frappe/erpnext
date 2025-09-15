@@ -30,35 +30,46 @@ frappe.ui.form.on("Financial Report Template", {
 
 frappe.ui.form.on("Financial Report Row", {
 	data_source(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
+		const row = locals[cdt][cdn];
 		update_formula_description(frm, row.data_source);
 
 		if (row.data_source !== "Account Data") {
 			frappe.model.set_value(cdt, cdn, "balance_type", "");
 		}
 
+		// TODO: should  do it on server side?
 		if (["Blank Line", "Column Break", "Section Break"].includes(row.data_source)) {
 			frappe.model.set_value(cdt, cdn, "calculation_formula", "");
 		}
+
+		set_up_filters_editor(frm, cdt, cdn);
 	},
 
 	form_render(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
+		const row = locals[cdt][cdn];
+
+		set_up_filters_editor(frm, cdt, cdn);
 		update_formula_description(frm, row.data_source);
 	},
 
 	view_filtered_accounts(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
+		const row = locals[cdt][cdn];
 		show_accounts_tree([row], false);
 	},
 
 	view_missing_accounts(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
+		const row = locals[cdt][cdn];
 		show_accounts_tree([row], true);
+	},
+
+	advance_filtering(frm, cdt, cdn) {
+		set_up_filters_editor(frm, cdt, cdn);
 	},
 });
 
 function update_formula_description(frm, data_source) {
+	if (!data_source) return;
+
 	let grid = frm.fields_dict.rows.grid;
 	let field = grid.fields_map.formula_description;
 	if (!field) return;
@@ -181,6 +192,94 @@ function update_formula_description(frm, data_source) {
 	}
 
 	grid.update_docfield_property("formula_description", "options", description_html);
+}
+
+function set_up_filters_editor(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+
+	if (row.data_source !== "Account Data" || row.advance_filtering) {
+		return;
+	}
+
+	const grid_row = frm.fields_dict["rows"].grid.get_row(cdn);
+	const wrapper = grid_row.get_field("filters_editor").$wrapper;
+	wrapper.empty();
+
+	const ACCOUNT = "Account";
+	const FIELD_IDX = 1;
+	const OPERATOR_IDX = 2;
+	const VALUE_IDX = 3;
+
+	// Parse saved filters
+	let saved_filters = [];
+
+	if (row.calculation_formula) {
+		try {
+			const parsed = JSON.parse(row.calculation_formula);
+
+			if (Array.isArray(parsed)) {
+				saved_filters = [parsed]; // array of array needed
+			} else if (parsed.and) {
+				saved_filters = parsed.and;
+			}
+		} catch (e) {
+			console.warn("Invalid calculation_formula JSON:", e);
+		}
+	}
+
+	// Ensure every filter starts with "Account"
+	if (saved_filters.length) {
+		saved_filters = saved_filters.map((f) => [ACCOUNT, ...f]);
+	}
+
+	frappe.model.with_doctype(ACCOUNT, () => {
+		const filter_group = new frappe.ui.FilterGroup({
+			parent: wrapper,
+			doctype: ACCOUNT,
+			on_change: () => {
+				// only need [[field, operator, value]]
+				const filters = filter_group
+					.get_filters()
+					.map((f) => [f[FIELD_IDX], f[OPERATOR_IDX], f[VALUE_IDX]]);
+
+				update_account_filter_for_and_conditions(cdt, cdn, filters);
+			},
+		});
+
+		try {
+			filter_group.add_filters_to_filter_group(saved_filters);
+		} catch (error) {
+			frappe.show_alert({
+				message: __("Failed to add filters to filter group: {0}", [error.message]),
+				indicator: "red",
+			});
+		}
+	});
+}
+
+function update_account_filter_for_and_conditions(cdt, cdn, filters) {
+	const row = locals[cdt][cdn];
+
+	let previous = {};
+
+	// TODO: `or` conditions are not handled
+	// TODO: default set {"and": []}
+	if (row.account_filters) {
+		try {
+			previous = JSON.parse(row.account_filters);
+		} catch {
+			previous = {};
+		}
+	}
+
+	// Always overwrite AND, preserve OR if present
+	const current = { and: filters };
+
+	if (typeof previous === "object" && previous.or) {
+		current.or = previous.or;
+	}
+
+	frappe.model.set_value(cdt, cdn, "calculation_formula", JSON.stringify(current));
 }
 
 function show_accounts_tree(template_rows, missed = false) {

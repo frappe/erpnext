@@ -21,13 +21,16 @@
   "reverse_sign",
   "include_in_charts",
   "section_break_ornw",
+  "column_break_asfe",
+  "advance_filtering",
+  "filters_editor",
   "calculation_formula",
-  "column_break_ooic",
-  "formula_description",
   "section_break_aayb",
   "view_missing_accounts",
   "column_break_glls",
-  "view_filtered_accounts"
+  "view_filtered_accounts",
+  "section_break_nmrz",
+  "formula_description"
  ],
  "fields": [
   {
@@ -116,16 +119,12 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break' && doc.data_source != 'Section Break'",
+   "depends_on": "eval: (doc.data_source === \"Account Data\" && doc.advance_filtering) && ![\"Blank Line\", \"Column Break\", \"Section Break\"].includes(doc.data_source);\n",
    "description": "Formula to calculate values or account filter criteria",
    "fieldname": "calculation_formula",
    "fieldtype": "Code",
    "label": "Formula or Account Filter",
    "mandatory_depends_on": "eval:doc.data_source != 'Blank Line' && doc.data_source != 'Column Break' && doc.data_source != 'Section Break'"
-  },
-  {
-   "fieldname": "column_break_ooic",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "formula_description",
@@ -152,6 +151,7 @@
    "options": "\nCurrency\nFloat\nInt\nPercent"
   },
   {
+   "depends_on": "eval: doc.data_source === \"Account Data\" && doc.calculation_formula",
    "fieldname": "section_break_aayb",
    "fieldtype": "Section Break"
   },
@@ -172,13 +172,37 @@
    "fieldname": "view_missing_accounts",
    "fieldtype": "Button",
    "label": "View Missing Accounts"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.data_source === \"Account Data\"",
+   "description": "Use <strong>Python</strong> filters to get Accounts",
+   "fieldname": "advance_filtering",
+   "fieldtype": "Check",
+   "label": "Advance Filtering",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.data_source === \"Account Data\" && !doc.advance_filtering",
+   "fieldname": "filters_editor",
+   "fieldtype": "HTML"
+  },
+  {
+   "depends_on": "eval: doc.data_source",
+   "fieldname": "section_break_nmrz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: ![\"Blank Line\", \"Column Break\", \"Section Break\"].includes(doc.data_source);",
+   "fieldname": "column_break_asfe",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-14 05:51:03.759198",
+ "modified": "2025-09-15 14:59:59.213797",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",

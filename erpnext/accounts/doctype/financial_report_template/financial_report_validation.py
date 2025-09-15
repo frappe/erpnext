@@ -430,6 +430,7 @@ class AccountFilterValidator(Validator):
 	"""Validates account filter expressions used in Account Data rows"""
 
 	def __init__(self, account_fields: set | None = None):
+		# TODO: should be add default fields too? because in UI filters all field are available
 		self.account_fields = account_fields or {
 			field.fieldname for field in frappe.get_meta("Account").fields
 		}
@@ -496,6 +497,7 @@ class AccountFilterValidator(Validator):
 				return f"Operator '{operator}' requires a list value"
 
 		elif isinstance(filter_config, dict):
+			# TODO: `and` and `or` both are not supported at same time
 			if len(filter_config) != 1:
 				return "Logical condition must have exactly one operator"
 
