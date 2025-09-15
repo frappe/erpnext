@@ -171,9 +171,9 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 			</td>
 		</tr>
 		<tr>
-			{% set address = (doc.address_display) %} {% if address.rstrip().endswith("<br />") %} {% set
+			{% set address = (doc.address_display) %} {% if address and address.rstrip().endswith("<br />") %} {% set
 			address = address[:-5] %} {% endif %} {% set company_address_display =
-			(doc.company_address_display) %} {% if company_address_display.rstrip().endswith("<br />") %} {%
+			(doc.company_address_display) %} {% if company_address_display and company_address_display.rstrip().endswith("<br />") %} {%
 			set company_address_display = company_address_display[:-5] %} {% endif %}
 			<td><span class="heading">{{ _("Bill From") }}:</span><br />{{ address }}</td>
 			<td><span class="heading">{{ _("Bill To") }}:</span><br />{{ company_address_display }}</td>
