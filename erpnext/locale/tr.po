@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2025-09-07 09:35+0000\n"
-"PO-Revision-Date: 2025-09-09 00:43\n"
+"POT-Creation-Date: 2025-09-14 09:34+0000\n"
+"PO-Revision-Date: 2025-09-15 01:26\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -2657,7 +2657,7 @@ msgstr "Gerçek Bitiş Tarihi"
 msgid "Actual End Date (via Timesheet)"
 msgstr "Gerçek bitiş tarihi (Zaman Tablosu'ndan)"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:207
+#: erpnext/manufacturing/doctype/work_order/work_order.py:208
 msgid "Actual End Date cannot be before Actual Start Date"
 msgstr ""
 
@@ -3467,7 +3467,7 @@ msgstr "İletişim Bilgileri"
 msgid "Address and Contacts"
 msgstr "Adres ve Kişi Bilgileri"
 
-#: erpnext/accounts/custom/address.py:31
+#: erpnext/accounts/custom/address.py:33
 msgid "Address needs to be linked to a Company. Please add a row for Company in the Links table."
 msgstr "Adresin bir Şirkete bağlanması gerekir. Lütfen Bağlantılar tablosuna Şirket için bir satır ekleyin."
 
@@ -4115,7 +4115,7 @@ msgstr "Tüm ürünler zaten Faturalandırıldı/İade Edildi"
 msgid "All items have already been received"
 msgstr "Tüm ürünler zaten alındı"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2676
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2682
 msgid "All items have already been transferred for this Work Order."
 msgstr "Bu İş Emri için tüm öğeler zaten aktarıldı."
 
@@ -4133,7 +4133,7 @@ msgstr "Tüm Yorumlar ve E-postalar, CRM belgeleri boyunca bir belgeden yeni olu
 msgid "All the items have been already returned."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1099
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1136
 msgid "All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table."
 msgstr "Tüm gerekli malzemeler (hammadde) Ürün Ağacı'ndan alınarak bu tabloya eklenir. Burada herhangi bir ürün için Kaynak Depo'yu da değiştirebilirsiniz. Üretim sırasında, bu tablodan transfer edilen hammaddeleri takip edebilirsiniz."
 
@@ -8170,7 +8170,7 @@ msgstr "Parti Ölçü Birimi"
 msgid "Batch and Serial No"
 msgstr "Parti ve Seri No"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:646
+#: erpnext/manufacturing/doctype/work_order/work_order.py:654
 msgid "Batch not created for item {} since it does not have a batch series."
 msgstr "{} öğesi için parti oluşturulamadı çünkü parti serisi yok."
 
@@ -8182,12 +8182,12 @@ msgstr "Parti {0} ve Depo"
 msgid "Batch {0} is not available in warehouse {1}"
 msgstr "{0} partisi {1} deposunda mevcut değil"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2839
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2856
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:286
 msgid "Batch {0} of Item {1} has expired."
 msgstr "{0} partisindeki {1} ürününün ömrü doldu."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2845
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2862
 msgid "Batch {0} of Item {1} is disabled."
 msgstr "{0} partisindeki {1} isimli ürün devre dışı bırakıldı."
 
@@ -9427,7 +9427,7 @@ msgstr "Kampanya Takvimleri"
 msgid "Can be approved by {0}"
 msgstr "{0} tarafından onaylanabilir"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2126
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2134
 msgid "Can not close Work Order. Since {0} Job Cards are in Work In Progress state."
 msgstr "{0} İş Kartı Devam Ediyor durumunda olduğu için İş Emri kapatılamıyor."
 
@@ -9669,7 +9669,7 @@ msgstr ""
 msgid "Cannot cancel as processing of cancelled documents is pending."
 msgstr "İptal edilen belgelerin işlenmesi beklemede olduğundan iptal edilemiyor."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:831
+#: erpnext/manufacturing/doctype/work_order/work_order.py:839
 msgid "Cannot cancel because submitted Stock Entry {0} exists"
 msgstr "Gönderilen Stok Girişi {0} mevcut olduğundan iptal edilemiyor"
 
@@ -9767,7 +9767,7 @@ msgstr "Kur Farkı Satırı Silinemiyor"
 msgid "Cannot delete Serial No {0}, as it is used in stock transactions"
 msgstr "{0} Seri Numarası stok işlemlerinde kullanıldığından silinemiyor"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:517
+#: erpnext/manufacturing/doctype/work_order/work_order.py:525
 msgid "Cannot disassemble more than produced quantity."
 msgstr ""
 
@@ -9796,15 +9796,15 @@ msgstr "{0} ürünü için varsayılan bir depo bulunamadı. Lütfen Ürün Ana 
 msgid "Cannot make any transactions until the deletion job is completed"
 msgstr "Silme işi tamamlanana kadar herhangi bir işlem yapılamaz"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:406
+#: erpnext/manufacturing/doctype/work_order/work_order.py:407
 msgid "Cannot produce more Item {0} than Sales Order quantity {1}"
 msgstr "{0} Ürünü için Sipariş Miktarı {1} adetten daha fazla üretilemez."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1181
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1189
 msgid "Cannot produce more item for {0}"
 msgstr "{0} için daha fazla ürün üretilemiyor"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1185
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1193
 msgid "Cannot produce more than {0} items for {1}"
 msgstr "{1} için {0} Üründen fazlasını üretemezsiniz"
 
@@ -9883,7 +9883,7 @@ msgstr "Kapasite (Stok Birimi)"
 msgid "Capacity Planning"
 msgstr "Kapasite Planlaması"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:817
+#: erpnext/manufacturing/doctype/work_order/work_order.py:825
 msgid "Capacity Planning Error, planned start time can not be same as end time"
 msgstr "Kapasite Planlama Hatası, planlanan başlangıç zamanı bitiş zamanı ile aynı olamaz"
 
@@ -10731,7 +10731,7 @@ msgstr "Kapalı Belge"
 msgid "Closed Documents"
 msgstr "Kapalı Belgeler"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2049
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2057
 msgid "Closed Work Order can not be stopped or Re-opened"
 msgstr "Kapatılan İş Emri durdurulamaz veya Yeniden Açılamaz"
 
@@ -11574,7 +11574,7 @@ msgstr "Şirket Adı"
 msgid "Company Name cannot be Company"
 msgstr "Şirket Adı \"Şirket\" olamaz"
 
-#: erpnext/accounts/custom/address.py:34
+#: erpnext/accounts/custom/address.py:36
 msgid "Company Not Linked"
 msgstr "Şirket Bağlı Değil"
 
@@ -11826,7 +11826,7 @@ msgstr "Tamamlanan Operasyon"
 msgid "Completed Qty"
 msgstr "Tamamlanan Miktar"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1095
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1103
 msgid "Completed Qty cannot be greater than 'Qty to Manufacture'"
 msgstr "Tamamlanan Miktar, Üretilecek Miktardan fazla olamaz."
 
@@ -12029,7 +12029,7 @@ msgstr "Tüm Parti Defteri Tutarını Dikkate Alın"
 msgid "Consider Minimum Order Qty"
 msgstr "Minimum Sipariş Miktarını Dikkate Al"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:920
+#: erpnext/manufacturing/doctype/work_order/work_order.js:941
 msgid "Consider Process Loss"
 msgstr ""
 
@@ -12179,7 +12179,7 @@ msgstr ""
 msgid "Consumed Qty"
 msgstr "Tüketilen Miktar"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1453
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1461
 msgid "Consumed Qty cannot be greater than Reserved Qty for item {0}"
 msgstr "Tüketilen Miktar, {0} öğesi için Ayrılmış Miktardan büyük olamaz"
 
@@ -13300,7 +13300,7 @@ msgstr "Alacak"
 #: erpnext/manufacturing/doctype/work_order/work_order.js:220
 #: erpnext/manufacturing/doctype/work_order/work_order.js:235
 #: erpnext/manufacturing/doctype/work_order/work_order.js:385
-#: erpnext/manufacturing/doctype/work_order/work_order.js:965
+#: erpnext/manufacturing/doctype/work_order/work_order.js:986
 #: erpnext/projects/doctype/task/task_tree.js:81
 #: erpnext/public/js/communication.js:19 erpnext/public/js/communication.js:31
 #: erpnext/public/js/communication.js:41
@@ -13495,7 +13495,7 @@ msgstr "Ödeme Girişi Oluştur"
 msgid "Create Payment Entry for Consolidated POS Invoices."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:737
+#: erpnext/manufacturing/doctype/work_order/work_order.js:750
 msgid "Create Pick List"
 msgstr "Toplama Listesi Oluştur"
 
@@ -13603,7 +13603,7 @@ msgstr "İş İstasyonu Oluştur"
 msgid "Create a variant with the template image."
 msgstr "Şablon görselini kullanarak bir varyant oluşturun."
 
-#: erpnext/stock/stock_ledger.py:1932
+#: erpnext/stock/stock_ledger.py:1929
 msgid "Create an incoming stock transaction for the Item."
 msgstr "Ürün için yeni bir stok girişi oluşturun."
 
@@ -15698,7 +15698,7 @@ msgstr "Varsayılan Ürün Ağacı"
 msgid "Default BOM ({0}) must be active for this item or its template"
 msgstr "Bu ürün veya şablonu için varsayılan Ürün Ağacı ({0}) aktif olmalıdır"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1864
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1872
 msgid "Default BOM for {0} not found"
 msgstr "{0} İçin Ürün Ağacı Bulunamadı"
 
@@ -15706,7 +15706,7 @@ msgstr "{0} İçin Ürün Ağacı Bulunamadı"
 msgid "Default BOM not found for FG Item {0}"
 msgstr "{0} Ürünü için Varsayılan Ürün Ağacı bulunamadı"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1861
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1869
 msgid "Default BOM not found for Item {0} and Project {1}"
 msgstr "{0} Ürünü ve {1} Projesi için varsayılan Ürün Ağacı bulunamadı"
 
@@ -19617,7 +19617,7 @@ msgstr "Açılış stok birimlerini girin."
 msgid "Enter the quantity of the Item that will be manufactured from this Bill of Materials."
 msgstr "Bu Ürün Ağacından üretilecek Ürünün miktarını girin."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1061
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1098
 msgid "Enter the quantity to manufacture. Raw material Items will be fetched only when this is set."
 msgstr "Üretilecek miktarı girin. Hammadde Kalemleri yalnızca bu ayarlandığında getirilecektir."
 
@@ -19823,7 +19823,7 @@ msgstr "Örnek: ABCD.#####\n"
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
 msgstr "Örnek: ABCD.#####. Seri ayarlanmışsa ve işlemlerde Parti No belirtilmemişse, bu seriye göre otomatik parti numarası oluşturulacaktır. Bu kalem için her zaman açıkça Parti No belirtmek istiyorsanız, bunu boş bırakın. Not: Bu ayar, Stok Ayarları'ndaki Seri Öneki Adlandırma'ya göre öncelikli olacaktır."
 
-#: erpnext/stock/stock_ledger.py:2198
+#: erpnext/stock/stock_ledger.py:2195
 msgid "Example: Serial No {0} reserved in {1}."
 msgstr "Örnek: Seri No {0} {1} adresinde ayrılmıştır."
 
@@ -20358,6 +20358,12 @@ msgstr "Ekstra İş Kartı Miktarı"
 msgid "Extra Large"
 msgstr "Çok Büyük"
 
+#. Label of the section_break_xhtl (Section Break) field in DocType
+#. 'Manufacturing Settings'
+#: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "Extra Material Transfer"
+msgstr ""
+
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:254
 msgid "Extra Small"
 msgstr "Çok Küçük"
@@ -20879,9 +20885,9 @@ msgstr "Mali Yıl Başlangıcı"
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
 msgstr "Mali raporlar Genel Muhasebe Girişi belge türleri kullanılarak oluşturulacaktır (Dönem Kapanış Fişinin tüm sene boyunca sırayla kaydedilmemesi veya eksik olması durumunda etkinleştirilmelidir)"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:786
-#: erpnext/manufacturing/doctype/work_order/work_order.js:801
-#: erpnext/manufacturing/doctype/work_order/work_order.js:810
+#: erpnext/manufacturing/doctype/work_order/work_order.js:807
+#: erpnext/manufacturing/doctype/work_order/work_order.js:822
+#: erpnext/manufacturing/doctype/work_order/work_order.js:831
 msgid "Finish"
 msgstr "Tamamla"
 
@@ -21319,7 +21325,7 @@ msgstr "Varsayılan Tedarikçi (İsteğe Bağlı)"
 msgid "For Item"
 msgstr "Ürün için"
 
-#: erpnext/controllers/stock_controller.py:1331
+#: erpnext/controllers/stock_controller.py:1333
 msgid "For Item {0} cannot be received more than {1} qty against the {2} {3}"
 msgstr "{0} Ürünü için {2} {3} karşılığında {1} miktarından fazla alınamaz."
 
@@ -21426,7 +21432,7 @@ msgstr ""
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "{0} Ürünü için oran pozitif bir sayı olmalıdır. Negatif oranlara izin vermek için {2} sayfasında {1} ayarını etkinleştirin"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2196
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2204
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
 msgstr "{0} Operasyonu için: Miktar ({1}) bekleyen ({2}) miktarıdan büyük olamaz"
 
@@ -23376,7 +23382,7 @@ msgstr "İşletmenizde mevsimsel çalışma varsa Bütçeyi/Hedefi aylara dağı
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr "Yukarıda bahsedilen başarısız amortisman girişleri için hata kayıtları şunlardır: {0}"
 
-#: erpnext/stock/stock_ledger.py:1917
+#: erpnext/stock/stock_ledger.py:1914
 msgid "Here are the options to proceed:"
 msgstr "İşleme devam etmek için seçenekleriniz:"
 
@@ -23909,7 +23915,7 @@ msgstr ""
 msgid "If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template."
 msgstr ""
 
-#: erpnext/stock/stock_ledger.py:1927
+#: erpnext/stock/stock_ledger.py:1924
 msgid "If not, you can Cancel / Submit this entry"
 msgstr "Aksi takdirde, bu girişi İptal Edebilir veya Gönderebilirsiniz"
 
@@ -23935,7 +23941,7 @@ msgstr ""
 msgid "If subcontracted to a vendor"
 msgstr "Eğer bir tedarikçiye alt yüklenici olarak verilirse"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1094
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1131
 msgid "If the BOM results in Scrap material, the Scrap Warehouse needs to be selected."
 msgstr "Ürün Ağacının Hurda malzemeyle sonuçlanması durumunda Hurda Deposunun seçilmesi gerekir."
 
@@ -23944,11 +23950,11 @@ msgstr "Ürün Ağacının Hurda malzemeyle sonuçlanması durumunda Hurda Depos
 msgid "If the account is frozen, entries are allowed to restricted users."
 msgstr "Eğer hesap dondurulursa, yeni girişleri belirli kullanıcılar yapabilir."
 
-#: erpnext/stock/stock_ledger.py:1920
+#: erpnext/stock/stock_ledger.py:1917
 msgid "If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table."
 msgstr "Eğer ürünün değerinin sıfır olmasını istiyorsanız, Ürünler tablosundan \"Sıfır Değerlemeye İzin Ver\" kutusunu işaretleyebilirsiniz."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1113
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1150
 msgid "If the selected BOM has Operations mentioned in it, the system will fetch all Operations from BOM, these values can be changed."
 msgstr "Seçilen Ürün Ağacında belirtilen İşlemler varsa, sistem Ürün Ağacından tüm İşlemleri getirir, bu değerler değiştirilebilir."
 
@@ -25164,13 +25170,13 @@ msgstr "Yeni Kayıt Ekle"
 msgid "Inspected By"
 msgstr "Kontrol Eden"
 
-#: erpnext/controllers/stock_controller.py:1225
+#: erpnext/controllers/stock_controller.py:1227
 msgid "Inspection Rejected"
 msgstr "Kalite Kontrol Rededildi"
 
 #. Label of the inspection_required (Check) field in DocType 'Stock Entry'
-#: erpnext/controllers/stock_controller.py:1195
 #: erpnext/controllers/stock_controller.py:1197
+#: erpnext/controllers/stock_controller.py:1199
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Inspection Required"
 msgstr "Kalite Kontrol Gerekli"
@@ -25187,7 +25193,7 @@ msgstr "Teslim Almadan Önce Kontrol Gerekli"
 msgid "Inspection Required before Purchase"
 msgstr "Satın Almadan Önce Kontrol Gerekli"
 
-#: erpnext/controllers/stock_controller.py:1210
+#: erpnext/controllers/stock_controller.py:1212
 msgid "Inspection Submission"
 msgstr "Kontrol Gönderimi"
 
@@ -25275,12 +25281,12 @@ msgstr "Yetersiz Yetki"
 #: erpnext/stock/doctype/pick_list/pick_list.py:132
 #: erpnext/stock/doctype/pick_list/pick_list.py:1003
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:788
-#: erpnext/stock/serial_batch_bundle.py:1104 erpnext/stock/stock_ledger.py:1603
-#: erpnext/stock/stock_ledger.py:2089
+#: erpnext/stock/serial_batch_bundle.py:1116 erpnext/stock/stock_ledger.py:1600
+#: erpnext/stock/stock_ledger.py:2086
 msgid "Insufficient Stock"
 msgstr "Yetersiz Stok"
 
-#: erpnext/stock/stock_ledger.py:2104
+#: erpnext/stock/stock_ledger.py:2101
 msgid "Insufficient Stock for Batch"
 msgstr "Parti için Yetersiz Stok"
 
@@ -25482,7 +25488,7 @@ msgstr "İç Transferler"
 msgid "Internal Work History"
 msgstr "Firma İçindeki Geçmişi"
 
-#: erpnext/controllers/stock_controller.py:1292
+#: erpnext/controllers/stock_controller.py:1294
 msgid "Internal transfers can only be done in company's default currency"
 msgstr "Hesaplar arası transfer yalnızca şirketin varsayılan para biriminde yapılabilir"
 
@@ -27724,7 +27730,7 @@ msgstr "Ürün ve Depo"
 msgid "Item and Warranty Details"
 msgstr "Ürün ve Garanti Detayları"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2818
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2835
 msgid "Item for row {0} does not match Material Request"
 msgstr "{0} satırındaki Kalem Malzeme Talebi ile eşleşmiyor"
 
@@ -28248,7 +28254,7 @@ msgstr "Yetkili Kişi Adı"
 msgid "Job Worker Warehouse"
 msgstr "Alt Yüklenici Deposu"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2247
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2255
 msgid "Job card {0} created"
 msgstr "İş Kartı {0} oluşturuldu"
 
@@ -30409,7 +30415,7 @@ msgstr "Ana Veriler"
 msgid "Material"
 msgstr "Malzeme"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:767
+#: erpnext/manufacturing/doctype/work_order/work_order.js:788
 msgid "Material Consumption"
 msgstr "Malzeme Tüketimi"
 
@@ -30768,7 +30774,7 @@ msgstr "Maksimum Puan"
 msgid "Max discount allowed for item: {0} is {1}%"
 msgstr "{0} Ürünü için izin verilen maksimum indirim %{1}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:915
+#: erpnext/manufacturing/doctype/work_order/work_order.js:936
 #: erpnext/stock/doctype/pick_list/pick_list.js:199
 msgid "Max: {0}"
 msgstr "En Fazla: {0}"
@@ -30790,11 +30796,11 @@ msgstr "Maksimum Vergi Dahil Birim Fiyat"
 msgid "Maximum Payment Amount"
 msgstr "Maksimum Ödeme Tutarı"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3356
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3373
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
 msgstr "Maksimum Numuneler - {0} Parti {1} ve Ürün {2} için saklanabilir."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3347
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3364
 msgid "Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}."
 msgstr "Maksimum Numuneler - {0} zaten {1} Partisi ve {3}Partisi için {2} Ürünü için saklandı."
 
@@ -30881,7 +30887,7 @@ msgstr "Megajoule"
 msgid "Megawatt"
 msgstr "Megawatt"
 
-#: erpnext/stock/stock_ledger.py:1933
+#: erpnext/stock/stock_ledger.py:1930
 msgid "Mention Valuation Rate in the Item master."
 msgstr "Ürün ana verisinde Değerleme Oranını belirtin."
 
@@ -31343,7 +31349,7 @@ msgid "Missing email template for dispatch. Please set one in Delivery Settings.
 msgstr "Sevkiyat için e-posta şablonu eksik. Lütfen Teslimat Ayarlarında bir tane belirleyin."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1092
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1198
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1206
 msgid "Missing value"
 msgstr "Eksik Değer"
 
@@ -31831,7 +31837,7 @@ msgid "Music"
 msgstr "Müzik"
 
 #. Label of the must_be_whole_number (Check) field in DocType 'UOM'
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1154
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1162
 #: erpnext/setup/doctype/uom/uom.json
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:233
 #: erpnext/utilities/transaction_base.py:563
@@ -32008,7 +32014,7 @@ msgstr "Doğal gaz"
 msgid "Needs Analysis"
 msgstr "İhtiyaç Analizi"
 
-#: erpnext/stock/serial_batch_bundle.py:1398
+#: erpnext/stock/serial_batch_bundle.py:1410
 msgid "Negative Batch Quantity"
 msgstr "Negatif Parti Miktarı"
 
@@ -33088,9 +33094,9 @@ msgid "Not in stock"
 msgstr "Stokta Yok"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:725
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1886
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2044
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2113
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1894
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2052
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2121
 #: erpnext/selling/doctype/sales_order/sales_order.py:826
 #: erpnext/selling/doctype/sales_order/sales_order.py:1712
 msgid "Not permitted"
@@ -34082,7 +34088,7 @@ msgstr "Operasyon Satır Numarası"
 msgid "Operation Time"
 msgstr "Operasyon Süresi"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1204
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1212
 msgid "Operation Time must be greater than 0 for Operation {0}"
 msgstr "{0} Operasyonu için İşlem Süresi 0'dan büyük olmalıdır"
 
@@ -34723,7 +34729,7 @@ msgstr "Fazla Teslimat/Alınan Ürün Ödeneği (%)"
 msgid "Over Picking Allowance"
 msgstr "Fazla Seçim İzni"
 
-#: erpnext/controllers/stock_controller.py:1458
+#: erpnext/controllers/stock_controller.py:1460
 msgid "Over Receipt"
 msgstr "Fazla Teslim Alma"
 
@@ -35175,7 +35181,7 @@ msgstr "Paketli Ürün"
 msgid "Packed Items"
 msgstr "Paketli Ürünler"
 
-#: erpnext/controllers/stock_controller.py:1296
+#: erpnext/controllers/stock_controller.py:1298
 msgid "Packed Items cannot be transferred internally"
 msgstr "Paketlenmiş Ürünler dahili olarak transfer edilemez"
 
@@ -37558,7 +37564,7 @@ msgstr "Lütfen hesabın kök bölgesindeki Şirkete ekleyin - {}"
 msgid "Please add {1} role to user {0}."
 msgstr "Lütfen {0} kullanıcısına {1} rolünü ekleyin."
 
-#: erpnext/controllers/stock_controller.py:1469
+#: erpnext/controllers/stock_controller.py:1471
 msgid "Please adjust the qty or edit {0} to proceed."
 msgstr "Lütfen miktarı ayarlayın veya devam etmek için {0} öğesini düzenleyin."
 
@@ -41496,7 +41502,7 @@ msgstr "Birim Başına Miktar"
 msgid "Qty To Manufacture"
 msgstr "Üretilecek Miktar"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1150
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1158
 msgid "Qty To Manufacture ({0}) cannot be a fraction for the UOM {2}. To allow this, disable '{1}' in the UOM {2}."
 msgstr "Üretim Miktarı ({0}), {2} için kesirli olamaz. Bunu sağlamak için, {2} içindeki '{1}' seçeneğini devre dışı bırakın."
 
@@ -41547,7 +41553,7 @@ msgstr "Stok Ölçü Birimine Göre Miktar"
 msgid "Qty for which recursion isn't applicable."
 msgstr "Yinelemenin uygulanamadığı miktar."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:913
+#: erpnext/manufacturing/doctype/work_order/work_order.js:934
 msgid "Qty for {0}"
 msgstr "{0} Miktarı"
 
@@ -42072,7 +42078,7 @@ msgstr "Miktar gereklidir"
 msgid "Quantity must be greater than zero, and less or equal to {0}"
 msgstr "Miktar sıfırdan büyük ve {0} değerine eşit veya daha az olmalıdır"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:958
+#: erpnext/manufacturing/doctype/work_order/work_order.js:979
 #: erpnext/stock/doctype/pick_list/pick_list.js:205
 msgid "Quantity must not be more than {0}"
 msgstr "Miktar {0} değerinden fazla olmamalıdır"
@@ -42101,11 +42107,11 @@ msgstr "Yapılması Gereken Miktar"
 msgid "Quantity to Manufacture"
 msgstr "Üretilecek Miktar"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2189
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2197
 msgid "Quantity to Manufacture can not be zero for the operation {0}"
 msgstr "{0} işlemi için Üretim Miktarı sıfır olamaz"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1142
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1150
 msgid "Quantity to Manufacture must be greater than 0."
 msgstr "Üretim Miktar 0'dan büyük olmalıdır."
 
@@ -44642,7 +44648,7 @@ msgstr ""
 msgid "Reservation Based On"
 msgstr "Rezervasyona Göre"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:827
+#: erpnext/manufacturing/doctype/work_order/work_order.js:848
 #: erpnext/selling/doctype/sales_order/sales_order.js:76
 #: erpnext/stock/doctype/pick_list/pick_list.js:149
 msgid "Reserve"
@@ -44738,14 +44744,14 @@ msgstr "Ayrılan Miktar"
 msgid "Reserved Quantity for Production"
 msgstr "Üretim İçin Ayrılan Miktar"
 
-#: erpnext/stock/stock_ledger.py:2204
+#: erpnext/stock/stock_ledger.py:2201
 msgid "Reserved Serial No."
 msgstr "Ayrılmış Seri No."
 
 #. Label of the reserved_stock (Float) field in DocType 'Bin'
 #. Name of a report
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:24
-#: erpnext/manufacturing/doctype/work_order/work_order.js:843
+#: erpnext/manufacturing/doctype/work_order/work_order.js:864
 #: erpnext/public/js/stock_reservation.js:235
 #: erpnext/selling/doctype/sales_order/sales_order.js:99
 #: erpnext/selling/doctype/sales_order/sales_order.js:434
@@ -44754,11 +44760,11 @@ msgstr "Ayrılmış Seri No."
 #: erpnext/stock/doctype/pick_list/pick_list.js:169
 #: erpnext/stock/report/reserved_stock/reserved_stock.json
 #: erpnext/stock/report/stock_balance/stock_balance.py:497
-#: erpnext/stock/stock_ledger.py:2188
+#: erpnext/stock/stock_ledger.py:2185
 msgid "Reserved Stock"
 msgstr "Ayrılmış Stok"
 
-#: erpnext/stock/stock_ledger.py:2234
+#: erpnext/stock/stock_ledger.py:2231
 msgid "Reserved Stock for Batch"
 msgstr "Parti için Ayrılmış Stok"
 
@@ -45615,7 +45621,7 @@ msgstr "Satır # {0}: {1} {2} alanında kullanılan orandan daha yüksek bir ora
 msgid "Row # {0}: Returned Item {1} does not exist in {2} {3}"
 msgstr "Satır # {0}: İade Edilen Ürün {1} {2} {3} içinde mevcut değil"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:242
+#: erpnext/manufacturing/doctype/work_order/work_order.py:243
 msgid "Row #1: Sequence ID must be 1 for Operation {0}."
 msgstr ""
 
@@ -45900,15 +45906,15 @@ msgstr "Satır #{0}: Miktar pozitif bir sayı olmalıdır"
 msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
 msgstr "Satır #{0}: Miktar, {4} deposunda {3} Partisi için {2} ürününe karşı Rezerve Edilebilir Miktar'dan (Gerçek Miktar - Rezerve Edilen Miktar) {1} küçük veya eşit olmalıdır."
 
-#: erpnext/controllers/stock_controller.py:1191
+#: erpnext/controllers/stock_controller.py:1193
 msgid "Row #{0}: Quality Inspection is required for Item {1}"
 msgstr "Satır #{0}: {1} ürünü için Kalite Kontrol gereklidir"
 
-#: erpnext/controllers/stock_controller.py:1206
+#: erpnext/controllers/stock_controller.py:1208
 msgid "Row #{0}: Quality Inspection {1} is not submitted for the item: {2}"
 msgstr "Satır #{0}: {1} Kalite Kontrol {2} Ürünü için gönderilmemiş"
 
-#: erpnext/controllers/stock_controller.py:1221
+#: erpnext/controllers/stock_controller.py:1223
 msgid "Row #{0}: Quality Inspection {1} was rejected for item {2}"
 msgstr "Satır #{0}: {1} Kalite Kontrolü {2} Ürünü için reddedildi"
 
@@ -45966,7 +45972,7 @@ msgstr "Satır #{0}: {1} öğesi için satış oranı {2} değerinden daha düş
 "\t\t\t\t\tbu doğrulamayı\n"
 "\t\t\t\t\tatlamak için {5} içinde satış fiyatı doğrulamasını devre dışı bırakabilirsiniz."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:248
+#: erpnext/manufacturing/doctype/work_order/work_order.py:249
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
 msgstr ""
 
@@ -46330,7 +46336,7 @@ msgstr "Satır {0}: Başlangıç Saati ve Bitiş Saati zorunludur."
 msgid "Row {0}: From Time and To Time of {1} is overlapping with {2}"
 msgstr "Satır {0}: {1} için Başlangıç ve Bitiş Saatleri {2} ile çakışıyor"
 
-#: erpnext/controllers/stock_controller.py:1287
+#: erpnext/controllers/stock_controller.py:1289
 msgid "Row {0}: From Warehouse is mandatory for internal transfers"
 msgstr "Satır {0}: İç transferler için Gönderen Depo zorunludur."
 
@@ -46458,7 +46464,7 @@ msgstr "Satır {0}: Amortisman zaten işlenmiş olduğundan vardiya değiştiril
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
 msgstr "Satır {0}: Hammadde {1} için alt yüklenici kalemi zorunludur"
 
-#: erpnext/controllers/stock_controller.py:1278
+#: erpnext/controllers/stock_controller.py:1280
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
 msgstr "Satır {0}: İç transferler için Hedef Depo zorunludur."
 
@@ -46483,7 +46489,7 @@ msgid "Row {0}: UOM Conversion Factor is mandatory"
 msgstr "Satır {0}: Ölçü Birimi Dönüşüm Faktörü zorunludur"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1112
-#: erpnext/manufacturing/doctype/work_order/work_order.py:277
+#: erpnext/manufacturing/doctype/work_order/work_order.py:278
 msgid "Row {0}: Workstation or Workstation Type is mandatory for an operation {1}"
 msgstr "Satır {0}: Bir Operasyon için İş İstasyonu veya İş İstasyonu Türü zorunludur {1}"
 
@@ -47139,12 +47145,12 @@ msgstr "Satış Siparişi {0} Müşterinin Satın Alma Siparişi {1} ile zaten m
 msgid "Sales Order {0} is not submitted"
 msgstr "Satış Siparişi {0} kaydedilmedi"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:328
+#: erpnext/manufacturing/doctype/work_order/work_order.py:329
 msgid "Sales Order {0} is not valid"
 msgstr "Satış Sipariş {0} geçerli değildir"
 
 #: erpnext/controllers/selling_controller.py:485
-#: erpnext/manufacturing/doctype/work_order/work_order.py:333
+#: erpnext/manufacturing/doctype/work_order/work_order.py:334
 msgid "Sales Order {0} is {1}"
 msgstr "Satış Sipariş {0} {1}"
 
@@ -47598,7 +47604,7 @@ msgstr "Numune Saklama Deposu"
 msgid "Sample Size"
 msgstr "Numune Boyutu"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3338
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3355
 msgid "Sample quantity {0} cannot be more than received quantity {1}"
 msgstr "Numune miktarı {0} alınan miktardan fazla olamaz {1}"
 
@@ -48164,7 +48170,7 @@ msgstr "Sadakat Programı Seç"
 msgid "Select Possible Supplier"
 msgstr "Tedarikçi Adayı"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:964
+#: erpnext/manufacturing/doctype/work_order/work_order.js:985
 #: erpnext/stock/doctype/pick_list/pick_list.js:215
 msgid "Select Quantity"
 msgstr "Miktarı Girin"
@@ -48302,7 +48308,7 @@ msgstr "Mutabakat yapılacak Banka Hesabını seçin."
 msgid "Select the Default Workstation where the Operation will be performed. This will be fetched in BOMs and Work Orders."
 msgstr "İşlemin gerçekleştirileceği Varsayılan İş İstasyonunu seçin. Ürün Ağaçları ve İş Emirlerinde geçerli olacaktır."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1049
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1086
 msgid "Select the Item to be manufactured."
 msgstr "Üretilecek Ürünleri Seçin."
 
@@ -48835,7 +48841,7 @@ msgstr "Seri No ve Partiler"
 msgid "Serial Nos are created successfully"
 msgstr "Seri Numaraları başarıyla oluşturuldu"
 
-#: erpnext/stock/stock_ledger.py:2194
+#: erpnext/stock/stock_ledger.py:2191
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
 msgstr "Seri Numaraları Stok Rezervasyon Girişlerinde rezerve edilmiştir, devam etmeden önce rezervasyonlarını kaldırmanız gerekmektedir."
 
@@ -48920,6 +48926,10 @@ msgstr "Seri ve Toplu Paket güncellendi"
 #: erpnext/controllers/stock_controller.py:147
 msgid "Serial and Batch Bundle {0} is already used in {1} {2}."
 msgstr "Seri ve Toplu Paket {0} zaten {1} {2} adresinde kullanılmaktadır."
+
+#: erpnext/stock/serial_batch_bundle.py:351
+msgid "Serial and Batch Bundle {0} is not submitted"
+msgstr ""
 
 #. Label of the section_break_45 (Section Break) field in DocType
 #. 'Subcontracting Receipt Item'
@@ -49513,7 +49523,7 @@ msgstr "Ürün Ağacına Göre Alt Öğeleri Ayarla"
 msgid "Set targets Item Group-wise for this Sales Person."
 msgstr "Bu Satış Personeli için Ürün Grubu bazında hedefler belirleyin."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1106
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1143
 msgid "Set the Planned Start Date (an Estimated Date at which you want the Production to begin)"
 msgstr "Planlanan Başlangıç Tarihini belirleyin"
 
@@ -49603,7 +49613,7 @@ msgid "Setting up company"
 msgstr "Şirket kuruluyor"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1091
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1197
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1205
 msgid "Setting {0} is required"
 msgstr ""
 
@@ -50784,7 +50794,7 @@ msgstr "Tüm Satış İşlemlerine uygulanabilen standart vergi şablonu. Bu şa
 msgid "Standing Name"
 msgstr "Durum Adı"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:741
+#: erpnext/manufacturing/doctype/work_order/work_order.js:754
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:57
 #: erpnext/public/js/projects/timer.js:35
 msgid "Start"
@@ -51619,9 +51629,9 @@ msgstr "Stok Yeniden Gönderim Ayarları"
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:284
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:292
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:298
-#: erpnext/manufacturing/doctype/work_order/work_order.js:829
-#: erpnext/manufacturing/doctype/work_order/work_order.js:838
-#: erpnext/manufacturing/doctype/work_order/work_order.js:845
+#: erpnext/manufacturing/doctype/work_order/work_order.js:850
+#: erpnext/manufacturing/doctype/work_order/work_order.js:859
+#: erpnext/manufacturing/doctype/work_order/work_order.js:866
 #: erpnext/manufacturing/doctype/work_order/work_order_dashboard.py:14
 #: erpnext/public/js/stock_reservation.js:12
 #: erpnext/selling/doctype/sales_order/sales_order.js:78
@@ -51654,7 +51664,7 @@ msgid "Stock Reservation Entries Cancelled"
 msgstr "Stok Rezervasyon Girişleri İptal Edildi"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:2156
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1741
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1749
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1699
 msgid "Stock Reservation Entries Created"
 msgstr "Stok Rezervasyon Girişleri Oluşturuldu"
@@ -52028,7 +52038,7 @@ msgstr "Duruş Nedeni"
 msgid "Stopped"
 msgstr "Durduruldu"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:821
+#: erpnext/manufacturing/doctype/work_order/work_order.py:829
 msgid "Stopped Work Order cannot be cancelled, Unstop it first to cancel"
 msgstr "Durdurulan İş Emri iptal edilemez, iptal etmek için önce durdurmayı kaldırın"
 
@@ -53697,7 +53707,7 @@ msgstr "Hedef Seri No"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
-#: erpnext/manufacturing/doctype/work_order/work_order.js:938
+#: erpnext/manufacturing/doctype/work_order/work_order.js:959
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/stock/dashboard/item_dashboard.js:234
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -53718,11 +53728,11 @@ msgstr "Hedef Depo Adresi"
 msgid "Target Warehouse Address Link"
 msgstr "Hedef Depo Adres Bağlantısı"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:222
+#: erpnext/manufacturing/doctype/work_order/work_order.py:223
 msgid "Target Warehouse Reservation Error"
 msgstr "Hedef Depo Stok Rezerve Edilemedi"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:573
+#: erpnext/manufacturing/doctype/work_order/work_order.py:581
 msgid "Target Warehouse is required before Submit"
 msgstr "Kaydetmeden önce Devam Eden İşler Deposu gereklidir"
 
@@ -54700,9 +54710,9 @@ msgstr "Portaldan Teklif İsteğine Erişim Devre Dışı Bırakıldı. Erişime
 msgid "The BOM which will be replaced"
 msgstr "Değiştirilecek Ürün Ağacı"
 
-#: erpnext/stock/serial_batch_bundle.py:1395
-msgid "The Batch {0} has negative quantity {1} in warehouse {2}. Please correct the quantity."
-msgstr "{0} Partisinin {2} deposunda negatif {1} değer var. Lütfen miktarı düzeltin."
+#: erpnext/stock/serial_batch_bundle.py:1407
+msgid "The Batch {0} has negative quantity {1}. Please correct the quantity."
+msgstr ""
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:71
 msgid "The Campaign '{0}' already exists for the {1} '{2}'"
@@ -54790,7 +54800,7 @@ msgstr "Faturanın para birimi {} ({}) bu ihtarnamenin para biriminden ({}) fark
 msgid "The current POS opening entry is outdated. Please close it and create a new one."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1054
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1091
 msgid "The default BOM for that item will be fetched by the system. You can also change the BOM."
 msgstr "Bu kalem için varsayılan Ürün Ağacı sistem tarafından getirilecektir. Ürün Ağacını da değiştirebilirsiniz."
 
@@ -55050,6 +55060,12 @@ msgstr "Yüklenen dosya seçilen Kod Listesi ile uyuşmuyor."
 msgid "The user cannot submit the Serial and Batch Bundle manually"
 msgstr "Kullanıcı, Seri ve Parti Paketini manuel olarak gönderemez"
 
+#. Description of the 'Transfer Extra Raw Materials to WIP (%)' (Percent) field
+#. in DocType 'Manufacturing Settings'
+#: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "The user will be able to transfer additional materials from the store to the Work in Progress (WIP) warehouse."
+msgstr ""
+
 #. Description of the 'Role Allowed to Edit Frozen Stock' (Link) field in
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -55064,15 +55080,15 @@ msgstr "{0} değeri {1} ve {2} Ürünleri arasında farklılık gösterir"
 msgid "The value {0} is already assigned to an existing Item {1}."
 msgstr "{0} değeri zaten mevcut bir Öğeye {1} atandı."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1082
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1119
 msgid "The warehouse where you store finished Items before they are shipped."
 msgstr "Ürünler sevk edilmeden önce bitmiş ürünlerin saklandığı depo."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1075
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1112
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
 msgstr "Hammaddeleri depoladığınız depo. Gereken her bir ürün için ayrı bir kaynak depo belirlenebilir. Grup deposu da kaynak depo olarak seçilebilir. İş Emri gönderildiğinde, hammadde üretim kullanımı için bu depolarda rezerve edilecektir."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1087
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1124
 msgid "The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse."
 msgstr "Üretim başladığında ürünlerinizin aktarılacağı depo. Grup Deposu aynı zamanda Devam Eden İşler Deposu olarak da seçilebilir."
 
@@ -55330,7 +55346,7 @@ msgstr "Bu durum muhasebe açısından tehlikeli kabul edilmektedir."
 msgid "This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice"
 msgstr "Bu işlem, Satın Alma Faturası oluşturulduktan sonra Satın Alma İrsaliyesi oluşturulduğunda muhasebe işlemlerini yönetmek için yapılır"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1068
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1105
 msgid "This is enabled by default. If you want to plan materials for sub-assemblies of the Item you're manufacturing leave this enabled. If you plan and manufacture the sub-assemblies separately, you can disable this checkbox."
 msgstr "Bu varsayılan olarak aktiftir. Ürettiğiniz Ürünün alt montajları için malzemeler planlamak istiyorsanız bunu aktif bırakın. Alt montajları ayrı ayrı planlıyor ve üretiyorsanız, bu onay kutusunu devre dışı bırakabilirsiniz."
 
@@ -57352,6 +57368,16 @@ msgstr "Transfer"
 msgid "Transfer Asset"
 msgstr "Varlığı Transfer Et"
 
+#: erpnext/manufacturing/doctype/work_order/work_order.js:762
+msgid "Transfer Extra Material"
+msgstr ""
+
+#. Label of the transfer_extra_materials_percentage (Percent) field in DocType
+#. 'Manufacturing Settings'
+#: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "Transfer Extra Raw Materials to WIP (%)"
+msgstr ""
+
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:453
 msgid "Transfer From Warehouses"
 msgstr "Transfer Edilecek Depo"
@@ -57825,7 +57851,7 @@ msgstr "Ölçü Birimi Dönüşüm faktörü {0} satırında gereklidir"
 msgid "UOM Name"
 msgstr "Ölçü Birimi Adı"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3260
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3277
 msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr "Ürünü içinde: {1} ölçü birimi için: {0} dönüştürme faktörü gereklidir"
 
@@ -57887,7 +57913,7 @@ msgstr "{0} ile {1} arasındaki anahtar tarih için döviz kuru bulunamadı {2}.
 msgid "Unable to find score starting at {0}. You need to have standing scores covering 0 to 100"
 msgstr "{0} ile başlayan puan bulunamadı. 0 ile 100 arasında değişen sabit puanlara sahip olmanız gerekiyor"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:779
+#: erpnext/manufacturing/doctype/work_order/work_order.py:787
 msgid "Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
 msgstr "Önümüzdeki {0} gün içinde {1} operasyonu için zaman aralığı bulunamıyor. Lütfen {2} sayfasındaki 'Kapasite Planlama' alanının değerini artırın."
 
@@ -58104,7 +58130,7 @@ msgstr "Mutabık Olunmayan Tutar"
 msgid "Unreconciled Entries"
 msgstr "Mutabık Olunmayan Girişler"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:836
+#: erpnext/manufacturing/doctype/work_order/work_order.js:857
 #: erpnext/selling/doctype/sales_order/sales_order.js:90
 #: erpnext/stock/doctype/pick_list/pick_list.js:157
 msgid "Unreserve"
@@ -58433,7 +58459,7 @@ msgstr ""
 msgid "Updating Variants..."
 msgstr "Varyantlar Güncelleniyor..."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1030
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1067
 msgid "Updating Work Order status"
 msgstr "İş Emri durumu güncelleniyor"
 
@@ -58992,11 +59018,11 @@ msgstr "Değerleme Fiyatı / Oranı"
 msgid "Valuation Rate (In / Out)"
 msgstr "Değerleme Fiyatı (Giriş / Çıkış)"
 
-#: erpnext/stock/stock_ledger.py:1936
+#: erpnext/stock/stock_ledger.py:1933
 msgid "Valuation Rate Missing"
 msgstr "Değerleme Fiyatı Eksik"
 
-#: erpnext/stock/stock_ledger.py:1914
+#: erpnext/stock/stock_ledger.py:1911
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
 msgstr "Ürün {0} için Değerleme Oranı, {1} {2} muhasebe kayıtlarını yapmak için gereklidir."
 
@@ -59987,7 +60013,7 @@ msgstr "{0} Deposu, {1} şirketine ait değil."
 msgid "Warehouse {0} does not belong to company {1}"
 msgstr "Depo {0} {1} şirketine ait değil"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:219
+#: erpnext/manufacturing/doctype/work_order/work_order.py:220
 msgid "Warehouse {0} is not allowed for Sales Order {1}, it should be {2}"
 msgstr "Depo {0}, Satış Siparişi {1} için kullanılamaz. Kullanılması gereken depo {2} şeklinde ayarlanmalı"
 
@@ -60654,12 +60680,12 @@ msgstr "İş Emri Özeti"
 msgid "Work Order cannot be created for following reason: <br> {0}"
 msgstr "Aşağıdaki nedenden dolayı İş Emri oluşturulamıyor: <br> {0}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1135
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1143
 msgid "Work Order cannot be raised against a Item Template"
 msgstr "İş Emri bir Ürün Şablonuna karşı oluşturulamaz"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2053
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2133
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2061
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2141
 msgid "Work Order has been {0}"
 msgstr "İş Emri {0}"
 
@@ -60697,7 +60723,7 @@ msgstr "Devam Eden"
 msgid "Work-in-Progress Warehouse"
 msgstr "Devam Eden İş Deposu"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:571
+#: erpnext/manufacturing/doctype/work_order/work_order.py:579
 msgid "Work-in-Progress Warehouse is required before Submit"
 msgstr "Göndermeden önce Devam Eden İşler Deposu gereklidir"
 
@@ -61336,7 +61362,7 @@ msgstr "[Önemli] [ERPNext] Otomatik Yeniden Sıralama Hataları"
 msgid "`Allow Negative rates for Items`"
 msgstr "`Ürünler için Negatif değerlere izin ver`"
 
-#: erpnext/stock/stock_ledger.py:1928
+#: erpnext/stock/stock_ledger.py:1925
 msgid "after"
 msgstr "sonra"
 
@@ -61547,7 +61573,7 @@ msgstr "ödeme uygulaması yüklü değil. Lütfen {} veya {} adresinden yükley
 msgid "per hour"
 msgstr "Saat Başı"
 
-#: erpnext/stock/stock_ledger.py:1929
+#: erpnext/stock/stock_ledger.py:1926
 msgid "performing either one below:"
 msgstr "aşağıdakilerden birini gerçekleştirin:"
 
@@ -61682,7 +61708,7 @@ msgstr "{0} '{1}' devre dışı bırakıldı."
 msgid "{0} '{1}' not in Fiscal Year {2}"
 msgstr "{0} '{1}' {2} mali yılında değil."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:491
+#: erpnext/manufacturing/doctype/work_order/work_order.py:499
 msgid "{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}"
 msgstr "{0} ({1}) İş Emrindeki üretilecek ({2}) miktar {3} değerinden fazla olamaz"
 
@@ -61973,7 +61999,7 @@ msgstr "{0} parametresi geçersiz"
 msgid "{0} payment entries can not be filtered by {1}"
 msgstr "{0} ödeme girişleri {1} ile filtrelenemez"
 
-#: erpnext/controllers/stock_controller.py:1461
+#: erpnext/controllers/stock_controller.py:1463
 msgid "{0} qty of Item {1} is being received into Warehouse {2} with capacity {3}."
 msgstr "{1} ürününden {0} miktarı, {3} kapasiteli {2} deposuna alınmaktadır."
 
@@ -61997,16 +62023,16 @@ msgstr "{0} adet {1} ürünü başka bir Çekme Listesinde işaretlenmiş."
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} ({4}) on {5} {6} for {7} to complete the transaction."
 msgstr "{2} içinde {3} ({4}) envanter boyutuyla {0} adet {1} ürünü gereklidir. İşlemi tamamlamak için {5} {6} tarihinde {7} için bu miktarın sağlanması gerekir."
 
-#: erpnext/stock/stock_ledger.py:1576 erpnext/stock/stock_ledger.py:2080
-#: erpnext/stock/stock_ledger.py:2094
+#: erpnext/stock/stock_ledger.py:1573 erpnext/stock/stock_ledger.py:2077
+#: erpnext/stock/stock_ledger.py:2091
 msgid "{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 msgstr "Bu işlemi tamamlamak için {5} için {3} {4} üzerinde {2} içinde {0} birim {1} gereklidir."
 
-#: erpnext/stock/stock_ledger.py:2181 erpnext/stock/stock_ledger.py:2227
+#: erpnext/stock/stock_ledger.py:2178 erpnext/stock/stock_ledger.py:2224
 msgid "{0} units of {1} needed in {2} on {3} {4} to complete this transaction."
 msgstr "Bu işlemi tamamlamak için {3} {4} tarihinde {2} içinde {0} adet {1} gereklidir."
 
-#: erpnext/stock/stock_ledger.py:1570
+#: erpnext/stock/stock_ledger.py:1567
 msgid "{0} units of {1} needed in {2} to complete this transaction."
 msgstr "Bu işlemi yapmak için {2} içinde {0} birim {1} gerekli."
 
@@ -62257,7 +62283,7 @@ msgstr "{doctype} {name} iptal edildi veya kapatıldı."
 msgid "{field_label} is mandatory for sub-contracted {doctype}."
 msgstr ""
 
-#: erpnext/controllers/stock_controller.py:1742
+#: erpnext/controllers/stock_controller.py:1744
 msgid "{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})"
 msgstr "{item_name} için Numune Boyutu ({sample_size}) Kabul Edilen Miktardan ({accepted_quantity}) büyük olamaz"
 
