@@ -724,7 +724,10 @@ class Item(Document):
 
 		item_defaults = frappe.db.get_values(
 			"Item Default",
-			{"parent": self.item_group},
+			{
+				"parent": self.item_group,
+				"parenttype": "Item Group",
+			},
 			[
 				"company",
 				"default_warehouse",
