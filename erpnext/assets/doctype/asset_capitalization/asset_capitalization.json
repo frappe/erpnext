@@ -41,6 +41,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "target_fixed_asset_account"
  ],
  "fields": [
@@ -274,6 +275,13 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+    "allow_on_submit": 1,
+    "fieldname": "project",
+    "fieldtype": "Link",
+    "label": "Project",
+    "options": "Project"
   },
   {
    "fieldname": "dimension_col_break",
