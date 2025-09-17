@@ -65,7 +65,6 @@
    "options": "Cost Center"
   },
   {
-    "allow_on_submit": 1,
     "fieldname": "project",
     "fieldtype": "Link",
     "label": "Project",

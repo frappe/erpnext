@@ -141,7 +141,6 @@
    "fieldtype": "Column Break"
   },
   {
-    "allow_on_submit": 1,
     "fieldname": "project",
     "fieldtype": "Link",
     "label": "Project",
