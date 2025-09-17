@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-14 09:34+0000\n"
-"PO-Revision-Date: 2025-09-16 01:36\n"
+"PO-Revision-Date: 2025-09-17 01:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -2507,7 +2507,7 @@ msgstr ""
 #: erpnext/stock/doctype/putaway_rule/putaway_rule_list.js:7
 #: erpnext/stock/doctype/serial_no/serial_no.json
 msgid "Active"
-msgstr ""
+msgstr "Aktiv"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:55
 msgid "Active Leads"
@@ -3291,7 +3291,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Address"
-msgstr ""
+msgstr "Adresse"
 
 #. Label of the address_and_contact_tab (Tab Break) field in DocType 'Dunning'
 #. Label of the contact_and_address_tab (Tab Break) field in DocType 'POS
@@ -3333,7 +3333,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Address & Contact"
-msgstr ""
+msgstr "Adresse og kontakt"
 
 #. Label of the address_section (Section Break) field in DocType 'Lead'
 #. Label of the contact_details (Tab Break) field in DocType 'Employee'
@@ -3343,14 +3343,14 @@ msgstr ""
 #: erpnext/setup/doctype/employee/employee.json
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
 msgid "Address & Contacts"
-msgstr ""
+msgstr "Adresse og kontakter"
 
 #. Label of a Link in the Financial Reports Workspace
 #. Name of a report
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/selling/report/address_and_contacts/address_and_contacts.json
 msgid "Address And Contacts"
-msgstr ""
+msgstr "Adresse og kontakter"
 
 #. Label of the address_desc (HTML) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -3380,24 +3380,24 @@ msgstr ""
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Address HTML"
-msgstr ""
+msgstr "Adresse-HTML"
 
 #. Label of the address_line_1 (Data) field in DocType 'Warehouse'
 #: erpnext/public/js/utils/contact_address_quick_entry.js:76
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Address Line 1"
-msgstr ""
+msgstr "Adresselinje 1"
 
 #. Label of the address_line_2 (Data) field in DocType 'Warehouse'
 #: erpnext/public/js/utils/contact_address_quick_entry.js:81
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Address Line 2"
-msgstr ""
+msgstr "Adresselinje 2"
 
 #. Label of the address (Link) field in DocType 'Delivery Stop'
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 msgid "Address Name"
-msgstr ""
+msgstr "Adressenavn"
 
 #. Label of the address_and_contact (Section Break) field in DocType 'Bank'
 #. Label of the address_and_contact (Section Break) field in DocType 'Bank
@@ -3419,7 +3419,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Address and Contact"
-msgstr ""
+msgstr "Adresse og kontakt"
 
 #. Label of the address_contacts (Section Break) field in DocType 'Shareholder'
 #. Label of the address_contacts (Section Break) field in DocType 'Supplier'
@@ -3429,17 +3429,17 @@ msgstr ""
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Address and Contacts"
-msgstr ""
+msgstr "Adresse og kontakter"
 
 #: erpnext/accounts/custom/address.py:33
 msgid "Address needs to be linked to a Company. Please add a row for Company in the Links table."
-msgstr ""
+msgstr "Adresse må kobles til et selskap. Legg til en rad for Firma i tabellen Koblinger."
 
 #. Description of the 'Determine Address Tax Category From' (Select) field in
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Address used to determine Tax Category in transactions"
-msgstr ""
+msgstr "Adresse som brukes til å bestemme skattekategori i transaksjoner"
 
 #: erpnext/assets/doctype/asset/asset.js:146
 msgid "Adjust Asset Value"
@@ -5372,7 +5372,7 @@ msgstr ""
 #. Description of the 'Transporter' (Link) field in DocType 'Driver'
 #: erpnext/setup/doctype/driver/driver.json
 msgid "Applicable for external driver"
-msgstr ""
+msgstr "Gjelder for ekstern driver"
 
 #: erpnext/regional/italy/setup.py:162
 msgid "Applicable if the company is SpA, SApA or SRL"
@@ -8293,7 +8293,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Billing Address"
-msgstr ""
+msgstr "Faktureringsadresse"
 
 #. Label of the billing_address_display (Text Editor) field in DocType
 #. 'Purchase Order'
@@ -8308,16 +8308,16 @@ msgstr ""
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Billing Address Details"
-msgstr ""
+msgstr "Detaljer om faktureringsadresse"
 
 #. Label of the customer_address (Link) field in DocType 'Delivery Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Billing Address Name"
-msgstr ""
+msgstr "Navn for faktureringsadresse"
 
 #: erpnext/controllers/accounts_controller.py:501
 msgid "Billing Address does not belong to the {0}"
-msgstr ""
+msgstr "Faktureringsadressen tilhører ikke {0}"
 
 #. Label of the billing_amount (Currency) field in DocType 'Sales Invoice
 #. Timesheet'
