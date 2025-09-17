@@ -646,7 +646,7 @@ class JournalEntry(AccountsController):
 			account_type = frappe.get_cached_value("Account", d.account, "account_type")
 
 			# skipping validation for payroll entry creation
-			skip_validation = frappe.flags.skip_receivable_payable_account_validation
+			skip_validation = frappe.flags.party_not_required_for_receivable_payable
 			if account_type in ["Receivable", "Payable"]:
 				if not (d.party_type and d.party) and not skip_validation:
 					frappe.throw(
