@@ -131,18 +131,19 @@ class GLEntry(Document):
 
 		if not self.is_cancelled and not (self.party_type and self.party):
 			account_type = frappe.get_cached_value("Account", self.account, "account_type")
-			if account_type == "Receivable":
-				frappe.throw(
-					_("{0} {1}: Customer is required against Receivable account {2}").format(
-						self.voucher_type, self.voucher_no, self.account
+			if not frappe.flags.skip_receivable_payable_account_validation:
+				if account_type == "Receivable":
+					frappe.throw(
+						_("{0} {1}: Customer is required against Receivable account {2}").format(
+							self.voucher_type, self.voucher_no, self.account
+						)
 					)
-				)
-			elif account_type == "Payable":
-				frappe.throw(
-					_("{0} {1}: Supplier is required against Payable account {2}").format(
-						self.voucher_type, self.voucher_no, self.account
+				elif account_type == "Payable":
+					frappe.throw(
+						_("{0} {1}: Supplier is required against Payable account {2}").format(
+							self.voucher_type, self.voucher_no, self.account
+						)
 					)
-				)
 
 		# Zero value transaction is not allowed
 		if not (
