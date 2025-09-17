@@ -155,6 +155,7 @@ def get_payment_entries_for_bank_clearance(
 	entries = []
 
 	condition = ""
+	pe_condition = ""
 	if not include_reconciled_entries:
 		condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
 		pe_condition = "and (pe.clearance_date IS NULL or pe.clearance_date='0000-00-00')"
@@ -186,7 +187,7 @@ def get_payment_entries_for_bank_clearance(
 				pe.reference_no as cheque_number, pe.reference_date as cheque_date,
 				if(pe.paid_from=%(account)s, pe.paid_amount + if(pe.payment_type = 'Pay' and c.default_currency = pe.paid_from_account_currency, pe.base_total_taxes_and_charges, pe.total_taxes_and_charges) , 0) as credit,
 				if(pe.paid_from=%(account)s, 0, pe.received_amount + pe.total_taxes_and_charges) as debit,
-				pe.posting_date, ifnull(pe.party,if(pe.paid_from=%(account)s,pe.paid_to,pe.paid_from)) as against_account, clearance_date,
+				pe.posting_date, ifnull(pe.party,if(pe.paid_from=%(account)s,pe.paid_to,pe.paid_from)) as against_account, pe.clearance_date,
 				if(pe.paid_to=%(account)s, pe.paid_to_account_currency, pe.paid_from_account_currency) as account_currency
 			from `tabPayment Entry` as pe
 			join `tabCompany` c on c.name = pe.company
