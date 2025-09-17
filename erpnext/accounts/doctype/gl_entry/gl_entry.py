@@ -131,7 +131,6 @@ class GLEntry(Document):
 
 		if not self.is_cancelled and not (self.party_type and self.party):
 			account_type = frappe.get_cached_value("Account", self.account, "account_type")
-			
 			# skipping validation for payroll entry creation in case party is not required
 			if not frappe.flags.party_not_required_for_receivable_payable:
 				if account_type == "Receivable":
