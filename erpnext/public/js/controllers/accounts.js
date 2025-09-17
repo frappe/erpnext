@@ -265,7 +265,7 @@ erpnext.accounts.pos = {
 		frappe.ui.form.on(doctype, {
 			mode_of_payment: function (frm, cdt, cdn) {
 				var d = locals[cdt][cdn];
-				get_payment_mode_account(frm, d.mode_of_payment, function (account) {
+				erpnext.accounts.pos.get_payment_mode_account(frm, d.mode_of_payment, function (account) {
 					frappe.model.set_value(cdt, cdn, "account", account);
 				});
 			},
