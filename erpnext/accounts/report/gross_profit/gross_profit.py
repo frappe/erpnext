@@ -677,7 +677,9 @@ class GrossProfitGenerator:
 				si.name = si_item.parent
 				and si.docstatus = 1
 				and si.is_return = 1
+				and si.posting_date between %(from_date)s and %(to_date)s
 		""",
+			{"from_date": self.filters.from_date, "to_date": self.filters.to_date},
 			as_dict=1,
 		)
 
