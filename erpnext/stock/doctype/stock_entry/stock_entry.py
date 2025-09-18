@@ -254,6 +254,7 @@ class StockEntry(StockController):
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_work_order()
 		self.update_disassembled_order()
+		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
 
@@ -273,8 +274,6 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("In Transit")
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("Completed")
-
-		self.update_stock_reservation_entries()
 
 	def on_cancel(self):
 		self.delink_asset_repair_sabb()
@@ -826,15 +825,18 @@ class StockEntry(StockController):
 					title=_("Missing Item"),
 				)
 
-	def set_serial_batch_fields(self):
+	def set_serial_batch_fields(self, return_not_set=False):
 		if self.purpose == "Send to Subcontractor" and frappe.get_value(
 			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
 		):
+			batches, serial_nos = frappe._dict(), frappe._dict()
 			for item in self.items:
 				has_batch_no, has_serial_no = frappe.get_value(
 					"Item", item.item_code, ["has_batch_no", "has_serial_no"]
 				)
-				if not has_batch_no and not has_serial_no:
+				if (not has_batch_no and not has_serial_no) or (
+					not item.use_serial_batch_fields and not return_not_set
+				):
 					continue
 
 				kwargs = frappe._dict(
@@ -857,23 +859,33 @@ class StockEntry(StockController):
 					)
 
 					batch_data = get_batches_to_be_considered(self.subcontracting_order)
-					batches = []
+					batch_list = []
 					for batch in batch_data:
 						if batch.batch_no:
-							batches.append(batch.batch_no)
-					kwargs.batch_no = batches
-					batches = get_available_batches(kwargs)
+							batch_list.append(batch.batch_no)
+					kwargs.batch_no = batch_list
+					batch_list = get_available_batches(kwargs)
 
-					if len(batches) > 1:
+					if len(batch_list) > 1:
 						continue
+					elif not return_not_set:
+						item.batch_no = next(iter(batch_list))
 					else:
-						item.batch_no = next(iter(batches))
+						batches[item.name] = batch_list
 
 				if has_serial_no and not item.serial_no:
 					from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 
-					serial_nos = get_serial_nos_for_outward(kwargs)
-					item.serial_no = "\n".join(serial_nos)
+					serial_list = get_serial_nos_for_outward(kwargs)
+					if not return_not_set:
+						item.serial_no = "\n".join(serial_list)
+					else:
+						serial_nos[item.name] = serial_list
+
+			if return_not_set:
+				return batches, serial_nos
+		else:
+			return {}, {}
 
 	def get_matched_items(self, item_code):
 		for row in self.items:
@@ -1173,6 +1185,7 @@ class StockEntry(StockController):
 					}
 				).update_serial_and_batch_entries()
 			elif not row.serial_and_batch_bundle:
+				batch_nos, serial_nos = self.set_serial_batch_fields(return_not_set=True)
 				bundle_doc = SerialBatchCreation(
 					{
 						"item_code": row.item_code,
@@ -1186,6 +1199,8 @@ class StockEntry(StockController):
 						"type_of_transaction": "Outward",
 						"company": self.company,
 						"do_not_submit": True,
+						"batches": batch_nos.get(row.name, []),
+						"serial_nos": serial_nos.get(row.name, []),
 					}
 				).make_serial_and_batch_bundle()
 

@@ -1044,7 +1044,7 @@ class SerialBatchCreation:
 			if key in valid_columns:
 				doc.set(key, value)
 
-		if self.type_of_transaction == "Outward":
+		if self.type_of_transaction == "Outward" and (not self.get("batches") and not self.get("serial_nos")):
 			self.set_auto_serial_batch_entries_for_outward()
 		elif self.type_of_transaction == "Inward":
 			self.set_auto_serial_batch_entries_for_inward()

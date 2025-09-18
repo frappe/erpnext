@@ -21,6 +21,7 @@
   "section_break_13",
   "required_qty",
   "supplied_qty",
+  "stock_reserved_qty",
   "column_break_16",
   "consumed_qty",
   "returned_qty",
@@ -160,12 +161,20 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: parent.reserve_stock",
+   "fieldname": "stock_reserved_qty",
+   "fieldtype": "Float",
+   "label": "Stock Reserved Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-15 16:02:41.037904",
+ "modified": "2025-09-17 12:27:54.842203",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Supplied Item",

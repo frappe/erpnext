@@ -131,6 +131,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.update_prevdoc_status()
 		self.update_status()
 		self.update_subcontracted_quantity_in_po(cancel=True)
+		self.update_stock_reserved_qty()
 
 	def validate_purchase_order_for_subcontracting(self):
 		if self.purchase_order:
@@ -352,6 +353,28 @@ class SubcontractingOrder(SubcontractingController):
 			)
 			doc.save()
 
+	def update_stock_reserved_qty(self):
+		for item in self.supplied_items:
+			item.db_set("stock_reserved_qty", 0)
+
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
+		)
+
+		for sre in sre_list:
+			item = next(
+				item
+				for item in self.supplied_items
+				if item.name == frappe.get_value("Stock Reservation Entry", sre, "voucher_detail_no")
+			)
+			item.db_set("stock_reserved_qty", 0)
+
 	def create_stock_reservation_entries(self):
 		if self.reserve_stock:
 			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -363,21 +386,6 @@ class SubcontractingOrder(SubcontractingController):
 				available_qty = get_available_qty_to_reserve(item.rm_item_code, item.reserve_warehouse)
 				if not available_qty:
 					continue
-
-				if available_qty < item.required_qty and not frappe.get_single_value(
-					"Stock Settings", "allow_partial_reservation"
-				):
-					frappe.throw(
-						_(
-							"Row #{0}: Not enough stock in Reserve Warehouse {1} for Item {2}. Available quantity is {3}, required quantity is {4}. Cannot reserve stock as 'Allow Partial Reservation' is disabled in Stock Settings."
-						).format(
-							item.idx,
-							item.reserve_warehouse,
-							item.rm_item_code,
-							available_qty,
-							item.required_qty,
-						)
-					)
 
 				has_batch_no, has_serial_no = frappe.get_value(
 					"Item", item.rm_item_code, ["has_batch_no", "has_serial_no"]
@@ -392,6 +400,7 @@ class SubcontractingOrder(SubcontractingController):
 					)
 
 				sre = frappe.new_doc("Stock Reservation Entry")
+				sre.company = self.company
 				sre.voucher_type = "Subcontracting Order"
 				sre.voucher_no = self.name
 				sre.voucher_detail_no = item.name
@@ -404,6 +413,7 @@ class SubcontractingOrder(SubcontractingController):
 				sre.reserved_qty = min(item.required_qty, available_qty)
 				sre.insert()
 				sre.submit()
+				item.db_set("stock_reserved_qty", item.stock_reserved_qty or 0 + sre.reserved_qty)
 				is_stock_reserved = True
 
 			if is_stock_reserved:

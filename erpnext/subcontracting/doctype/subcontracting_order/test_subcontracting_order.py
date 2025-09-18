@@ -700,6 +700,61 @@ class TestSubcontractingOrder(IntegrationTestCase):
 
 		self.assertEqual(sco.supplied_items[0].required_qty, 210.149)
 
+	def test_stock_reservation_entries(self):
+		"""Test simple Stock Reservation on submission of Subcontracting Order"""
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_stock_reservation_entries_for_voucher,
+		)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 2",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA2",
+				"fg_item_qty": 5,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 5",
+				"qty": 6,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA5",
+				"fg_item_qty": 6,
+			},
+		]
+
+		sco = get_subcontracting_order(service_items=service_items, reserve_stock=1, do_not_submit=1)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		sco.reload()
+		rm_items = get_rm_items(sco.supplied_items)
+
+		sre_list = get_stock_reservation_entries_for_voucher(voucher_type=sco.doctype, voucher_no=sco.name)
+		for sre in sre_list:
+			item = next(item for item in rm_items if sre.voucher_detail_no == item.get("name"))
+			self.assertEqual(sre.reserved_qty, item.get("qty"))
+			self.assertEqual(sre.reserved_qty, item.get("stock_reserved_qty"))
+
+		rm_items[0]["qty"] = 3
+		itemwise_details = copy.deepcopy(itemwise_details)
+		itemwise_details["Subcontracted SRM Item 2"]["serial_no"] = itemwise_details[
+			"Subcontracted SRM Item 2"
+		]["serial_no"][:3]
+		itemwise_details["Subcontracted SRM Item 2"]["qty"] = 3
+
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=itemwise_details,
+		)
+
+		sre_list = get_stock_reservation_entries_for_voucher(voucher_type=sco.doctype, voucher_no=sco.name)
+		self.assertEqual(sre_list[0].delivered_qty, 3)
+		self.assertEqual(sre_list[1].delivered_qty, 5)
+
 
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)
@@ -731,6 +786,9 @@ def create_subcontracting_order(**args):
 
 	if len(warehouses) == 1:
 		sco.set_warehouse = next(iter(warehouses))
+
+	if args.reserve_stock:
+		sco.reserve_stock = 1
 
 	if not args.do_not_save:
 		sco.insert()

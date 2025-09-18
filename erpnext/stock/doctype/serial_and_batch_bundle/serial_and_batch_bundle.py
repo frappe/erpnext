@@ -1906,6 +1906,9 @@ def get_available_serial_nos(kwargs):
 	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
 	ignore_serial_nos, consider_serial_nos = get_reserved_serial_nos(kwargs)
 
+	if consider_serial_nos:
+		filters["name"] = ("in", consider_serial_nos)
+
 	# To ignore serial nos in the same record for the draft state
 	if kwargs.get("ignore_serial_nos"):
 		ignore_serial_nos.extend(kwargs.get("ignore_serial_nos"))
@@ -1922,9 +1925,6 @@ def get_available_serial_nos(kwargs):
 		filters["name"] = ("in", time_based_serial_nos)
 	elif ignore_serial_nos:
 		filters["name"] = ("not in", ignore_serial_nos)
-
-	if consider_serial_nos:
-		filters["name"] = ("in", consider_serial_nos)
 
 	if kwargs.get("batches"):
 		batches = get_non_expired_batches(kwargs.get("batches"))

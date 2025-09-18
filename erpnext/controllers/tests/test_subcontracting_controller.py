@@ -1236,6 +1236,7 @@ def make_stock_transfer_entry(**args):
 		row = frappe._dict(row)
 
 		item = {
+			"name": row.name,
 			"item_code": row.main_item_code or args.main_item_code,
 			"rm_item_code": row.item_code,
 			"qty": row.qty or 1,
@@ -1435,6 +1436,7 @@ def get_rm_items(supplied_items):
 	for item in supplied_items:
 		rm_items.append(
 			{
+				"name": item.name,
 				"main_item_code": item.main_item_code,
 				"item_code": item.rm_item_code,
 				"qty": item.required_qty,
@@ -1442,6 +1444,7 @@ def get_rm_items(supplied_items):
 				"stock_uom": item.stock_uom,
 				"warehouse": item.reserve_warehouse,
 				"use_serial_batch_fields": 0,
+				"stock_reserved_qty": item.stock_reserved_qty,
 			}
 		)
 
