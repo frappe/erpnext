@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import inspect
+import time
 
 import frappe
 from frappe import _, qb
@@ -29,6 +30,7 @@ class RepostAccountingLedger(Document):
 		company: DF.Link | None
 		delete_cancelled_entries: DF.Check
 		job_status: DF.Literal["Queued", "Completed", "Failed"]
+		message: DF.Text | None
 		vouchers: DF.Table[RepostAccountingLedgerItems]
 	# end: auto-generated types
 
@@ -136,78 +138,86 @@ class RepostAccountingLedger(Document):
 		return rendered_page
 
 	def on_submit(self):
-		if len(self.vouchers) > 5:
-			job_name = "repost_accounting_ledger_" + self.name
-			frappe.enqueue(
-				method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
-				account_repost_doc=self.name,
-				is_async=True,
-				job_name=job_name,
-			)
-			frappe.msgprint(_("Repost has started in the background"))
-		else:
-			start_repost(self.name)
+		frappe.enqueue(
+			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
+			account_repost_doc=self.name,
+			is_async=True,
+			job_name=self.name,
+		)
 
 
 @frappe.whitelist()
-def start_repost(account_repost_doc=str) -> None:
+def start_repost(account_repost_doc: str) -> None:
 	from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 	frappe.flags.through_repost_accounting_ledger = True
+
 	if account_repost_doc:
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
+		repost_doc.db_set("job_status", "Queued")
+	try:
+		if repost_doc.docstatus != 1:
+			frappe.throw(_("Only submitted Repost Accounting Ledger can be processed."))
 
-		if repost_doc.docstatus == 1:
-			# Prevent repost on invoices with deferred accounting
-			repost_doc.validate_for_deferred_accounting()
+		repost_doc.validate_for_deferred_accounting()
 
-			for x in repost_doc.vouchers:
-				doc = frappe.get_doc(x.voucher_type, x.voucher_no)
+		repost_doc.db_set("job_status", "In Progress")
 
-				if repost_doc.delete_cancelled_entries:
-					frappe.db.delete(
-						"GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
-					)
-					frappe.db.delete(
-						"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
-					)
-					frappe.db.delete(
-						"Advance Payment Ledger Entry",
-						filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
-					)
+		for idx, x in enumerate(repost_doc.vouchers, start=1):
+			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 
-				if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if repost_doc.delete_cancelled_entries:
+				frappe.db.delete("GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name})
+				frappe.db.delete(
+					"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
+				)
+				frappe.db.delete(
+					"Advance Payment Ledger Entry",
+					filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
+				)
+
+			if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
+				if not repost_doc.delete_cancelled_entries:
+					doc.docstatus = 2
+					doc.make_gl_entries_on_cancel(from_repost=True)
+
+				doc.docstatus = 1
+				if doc.doctype == "Sales Invoice":
+					doc.force_set_against_income_account()
+				else:
+					doc.force_set_against_expense_account()
+				doc.make_gl_entries()
+
+			elif doc.doctype == "Purchase Receipt":
+				if not repost_doc.delete_cancelled_entries:
+					doc.docstatus = 2
+					doc.make_gl_entries_on_cancel(from_repost=True)
+				doc.docstatus = 1
+				doc.make_gl_entries(from_repost=True)
+
+			elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
+				if not repost_doc.delete_cancelled_entries:
+					doc.make_gl_entries(1)
+				doc.make_gl_entries()
+
+			elif doc.doctype in frappe.get_hooks("repost_allowed_doctypes"):
+				if hasattr(doc, "make_gl_entries") and callable(doc.make_gl_entries):
 					if not repost_doc.delete_cancelled_entries:
-						doc.docstatus = 2
-						doc.make_gl_entries_on_cancel(from_repost=True)
-
-					doc.docstatus = 1
-					if doc.doctype == "Sales Invoice":
-						doc.force_set_against_income_account()
-					else:
-						doc.force_set_against_expense_account()
+						if "cancel" in inspect.getfullargspec(doc.make_gl_entries).args:
+							doc.make_gl_entries(cancel=1)
+						else:
+							make_reverse_gl_entries(voucher_type=doc.doctype, voucher_no=doc.name)
 					doc.make_gl_entries()
 
-				elif doc.doctype == "Purchase Receipt":
-					if not repost_doc.delete_cancelled_entries:
-						doc.docstatus = 2
-						doc.make_gl_entries_on_cancel(from_repost=True)
+			repost_doc.db_set("job_status", f"In Progress ({idx}/{len(repost_doc.vouchers)})")
 
-					doc.docstatus = 1
-					doc.make_gl_entries(from_repost=True)
+		repost_doc.db_set("job_status", "Completed")
+		raise Exception("Test Exception")
 
-				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
-					if not repost_doc.delete_cancelled_entries:
-						doc.make_gl_entries(1)
-					doc.make_gl_entries()
-				elif doc.doctype in frappe.get_hooks("repost_allowed_doctypes"):
-					if hasattr(doc, "make_gl_entries") and callable(doc.make_gl_entries):
-						if not repost_doc.delete_cancelled_entries:
-							if "cancel" in inspect.getfullargspec(doc.make_gl_entries):
-								doc.make_gl_entries(cancel=1)
-							else:
-								make_reverse_gl_entries(voucher_type=doc.doctype, voucher_no=doc.name)
-						doc.make_gl_entries()
+	except Exception as e:
+		repost_doc.db_set("job_status", "Failed")
+		repost_doc.db_set("message", str(e))
+		frappe.log_error(title="Repost Accounting Ledger Failed", message=str(e))
 
 
 def get_allowed_types_from_settings(child_doc: bool = False):

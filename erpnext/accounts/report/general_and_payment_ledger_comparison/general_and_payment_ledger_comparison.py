@@ -135,7 +135,13 @@ class General_Payment_Ledger_Comparison:
 					)
 					.where(Criterion.all(filter_criterion))
 					.groupby(
-						ple.company, ple.account, ple.voucher_type, ple.voucher_no, ple.party_type, ple.party
+						ple.company,
+						ple.account,
+						ple.voucher_type,
+						ple.voucher_no,
+						ple.party_type,
+						ple.party,
+						ple.posting_date,
 					)
 					.run()
 				)
@@ -149,35 +155,67 @@ class General_Payment_Ledger_Comparison:
 			self.gle_balances = set(val.gle) | self.gle_balances
 			self.ple_balances = set(val.ple) | self.ple_balances
 
-		self.variation_in_payment_ledger = self.gle_balances.difference(self.ple_balances)
-		self.variation_in_general_ledger = self.ple_balances.difference(self.gle_balances)
-		self.diff = frappe._dict({})
+		gl_map = {
+			(x[0], x[1], x[2], x[3], x[4], x[5]): {
+				"posting_date": x[6],
+				"docstatus": x[7],
+				"balance": x[8] or 0,
+			}
+			for x in self.gle_balances
+		}
+		pl_map = {
+			(x[0], x[1], x[2], x[3], x[4], x[5]): {
+				"posting_date": x[6],
+				"docstatus": x[7],
+				"balance": x[8] or 0,
+			}
+			for x in self.ple_balances
+		}
 
-		for x in self.variation_in_payment_ledger:
-			self.diff[(x[0], x[1], x[2], x[3], x[4], x[5])] = frappe._dict({"gl_balance": x[6]})
+		self.diff = frappe._dict()
+		all_keys = set(gl_map.keys()) | set(pl_map.keys())
 
-		for x in self.variation_in_general_ledger:
-			self.diff.setdefault(
-				(x[0], x[1], x[2], x[3], x[4], x[5]), frappe._dict({"gl_balance": 0.0})
-			).update(frappe._dict({"pl_balance": x[6]}))
+		for key in all_keys:
+			gl_entry = gl_map.get(key, {})
+			pl_entry = pl_map.get(key, {})
+
+			gl_balance = gl_entry.get("balance", 0)
+			pl_balance = pl_entry.get("balance", 0)
+			posting_date = gl_entry.get("posting_date") or pl_entry.get("posting_date")
+			docstatus = gl_entry.get("docstatus") or pl_entry.get("docstatus")
+
+			self.diff[
+				(posting_date, key[0], key[1], key[2], key[3], docstatus, key[4], key[5])
+			] = frappe._dict(
+				{
+					"gl_balance": gl_balance,
+					"pl_balance": pl_balance,
+				}
+			)
 
 	def generate_data(self):
 		self.data = []
 		for key, val in self.diff.items():
-			self.data.append(
-				frappe._dict(
-					{
-						"company": key[0],
-						"account": key[1],
-						"voucher_type": key[2],
-						"voucher_no": key[3],
-						"party_type": key[4],
-						"party": key[5],
-						"gl_balance": val.gl_balance,
-						"pl_balance": val.pl_balance,
-					}
+			difference = (val.gl_balance or 0) - (val.pl_balance or 0)
+
+			if abs(difference) != 0:
+				self.data.append(
+					frappe._dict(
+						{
+							"posting_date": key[0],
+							"company": key[1],
+							"account": key[2],
+							"voucher_type": key[3],
+							"voucher_no": key[4],
+							"docstatus": key[5],
+							"party_type": key[6],
+							"party": key[7],
+							"gl_balance": val.gl_balance,
+							"pl_balance": val.pl_balance,
+							"difference": difference,
+						}
+					)
 				)
-			)
 
 	def get_columns(self):
 		self.columns = []
@@ -315,13 +353,12 @@ def execute(filters=None):
 
 
 @frappe.whitelist()
-def repost_ledger(docs, delete_existing=0):
+def repost_ledger(docs, delete_existing=0, company=None):
 	docs = json.loads(docs) if isinstance(docs, str) else docs
 	delete_existing = int(delete_existing)
 
 	ral = frappe.new_doc("Repost Accounting Ledger")
-	ral.company = frappe.defaults.get_user_default("Company")
-
+	ral.company = company
 	ral.delete_cancelled_entries = delete_existing
 
 	for doc in docs:

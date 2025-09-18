@@ -102,22 +102,12 @@ frappe.query_reports["General and Payment Ledger Comparison"] = {
 						args: { docs, delete_existing: 0 },
 						async: true,
 						callback: function (r) {
-							if (r.message) {
-								let data = r.message;
-								let alert_message =
-									`<a href='/app/repost-accounting-ledger/${data.name}' target='_blank'>` +
-									__("Repost Initiated (without deleting existing), click to view status") +
-									`</a>`;
-								frappe.show_alert({ message: alert_message, indicator: "orange" }, 10);
-							} else {
-								frappe.show_alert(
-									{
-										message: __("Repost Initiated without deleting existing."),
-										indicator: "orange",
-									},
-									10
-								);
-							}
+							let data = r.message;
+							let alert_message =
+								`<a href='/app/repost-accounting-ledger/${data}' target='_blank'>` +
+								__("Repost Initiated, click to view status") +
+								`</a>`;
+							frappe.show_alert({ message: alert_message, indicator: "orange" }, 10);
 							frappe.query_report.refresh();
 						},
 					});
