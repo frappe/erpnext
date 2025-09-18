@@ -212,7 +212,6 @@ def start_repost(account_repost_doc: str) -> None:
 			repost_doc.db_set("job_status", f"In Progress ({idx}/{len(repost_doc.vouchers)})")
 
 		repost_doc.db_set("job_status", "Completed")
-		raise Exception("Test Exception")
 
 	except Exception as e:
 		repost_doc.db_set("job_status", "Failed")
