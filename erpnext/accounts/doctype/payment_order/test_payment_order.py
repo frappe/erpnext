@@ -106,13 +106,11 @@ def create_payment_order_against_payment_entry(ref_doc, order_type, bank_account
 
 def create_payment_order_against_payment_request(ref_doc, order_type, bank_account):
 	payment_order = frappe.get_doc(
-		dict(
-			doctype="Payment Order",
-			company="_Test Company",
-			payment_order_type=order_type,
-			company_bank_account=bank_account,
-			account=frappe.db.get_value("Bank Account", bank_account, "account"),
-		)
+		doctype="Payment Order",
+		company="_Test Company",
+		payment_order_type=order_type,
+		company_bank_account=bank_account,
+		account=frappe.db.get_value("Bank Account", bank_account, "account"),
 	)
 	doc = _make_payment_order(ref_doc.name, payment_order)
 	doc.save()

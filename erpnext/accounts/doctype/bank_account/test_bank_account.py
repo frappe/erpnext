@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.bank.test_bank import create_bank
 class TestBankAccount(IntegrationTestCase):
 	pass
 
+
 def create_bank_account(**kwargs):
 	filters = {
 		"account_name": kwargs.get("account_name", "_Test Bank Account"),

@@ -201,7 +201,7 @@ class JournalEntry(AccountsController):
 		self.update_payment_requests(cancel=False)
 
 	def update_payment_requests(self, cancel=False):
-		update_payment_requests_as_per_je_accounts(self)
+		update_payment_requests_as_per_je_accounts(self, cancel=cancel)
 
 	@frappe.whitelist()
 	def get_balance_for_periodic_accounting(self):
@@ -1843,11 +1843,21 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 
 
 def get_against_voucher_details(jv):
-	ref_fields = ["party_type", "party", "reference_type", "reference_name", "debit_in_account_currency"]
+	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency") or 2
 	ref_details = []
 	for acc in jv.accounts:
-		if (matched := [acc.get(rf) for rf in ref_fields]) and all(matched):
-			ref_details.append(matched)
+		if acc.party_type and acc.party and acc.reference_type and acc.reference_name:
+			debit_amount = flt(acc.debit_in_account_currency or 0, precision)
+			if debit_amount:
+				ref_details.append(
+					[
+						acc.party_type,
+						acc.party,
+						acc.reference_type,
+						acc.reference_name,
+						flt(debit_amount, precision),
+					]
+				)
 	return ref_details
 
 
@@ -1863,15 +1873,21 @@ def update_payment_requests_as_per_je_accounts(jv, cancel=False):
 	references = []
 
 	po = frappe.get_doc("Payment Order", jv.payment_order)
+	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency") or 2
 	for po_ref in po.references:
-		key = ["Supplier", po_ref.supplier, po_ref.reference_doctype, po_ref.reference_name, po_ref.amount]
+		key = [
+			"Supplier",
+			po_ref.supplier,
+			po_ref.reference_doctype,
+			po_ref.reference_name,
+			flt(po_ref.amount, precision),
+		]
 		if key in voucher_details and po_ref.payment_request:
 			voucher_details[voucher_details.index(key)].append(po_ref.payment_request)
 			references.append(
 				frappe._dict({"payment_request": po_ref.payment_request, "allocated_amount": po_ref.amount})
 			)
 
-	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 	referenced_payment_requests = frappe.get_all(
 		"Payment Request",
 		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},

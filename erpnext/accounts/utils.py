@@ -788,10 +788,8 @@ def update_payment_request_reference(row):
 	if payment_request:
 		row.payment_request = payment_request
 		frappe.msgprint(
-			_(
-				"Payment Request {} has been allocated to Payment Entry {} at row #{}".format(
-					payment_request, row.parent, row.idx
-				)
+			_("Payment Request {0} has been allocated to Payment Entry {1} at row #{2}").format(
+				payment_request, row.parent, row.idx
 			),
 			alert=1,
 			indicator="blue",
