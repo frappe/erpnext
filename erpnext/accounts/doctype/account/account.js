@@ -1,31 +1,34 @@
-// Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2025,
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Account", {
-	setup: function (frm) {
+	setup(frm) {
 		frm.add_fetch("parent_account", "report_type", "report_type");
 		frm.add_fetch("parent_account", "root_type", "root_type");
 	},
-	onload: function (frm) {
-		frm.set_query("parent_account", function (doc) {
-			return {
-				filters: {
-					is_group: 1,
-					company: doc.company,
-				},
-			};
-		});
+
+	onload(frm) {
+		frm.set_query("parent_account", (doc) => ({
+			filters: {
+				is_group: 1,
+				company: doc.company,
+			},
+		}));
 	},
-	refresh: function (frm) {
+
+	refresh(frm) {
 		frm.toggle_display("account_name", frm.is_new());
 
 		// hide fields if group
-		frm.toggle_display(["tax_rate"], cint(frm.doc.is_group) == 0);
+		frm.toggle_display(["tax_rate"], cint(frm.doc.is_group) === 0);
 
 		frm.toggle_enable(["is_group", "company", "account_number"], frm.is_new());
 
-		if (cint(frm.doc.is_group) == 0) {
-			frm.toggle_display("freeze_account", frm.doc.__onload && frm.doc.__onload.can_freeze_account);
+		if (cint(frm.doc.is_group) === 0) {
+			frm.toggle_display(
+				"freeze_account",
+				frm.doc.__onload?.can_freeze_account
+			);
 		}
 
 		// read-only for root accounts
@@ -34,67 +37,70 @@ frappe.ui.form.on("Account", {
 				frm.set_read_only();
 				frm.set_intro(__("This is a root account and cannot be edited."));
 			} else {
-				// credit days and type if customer or supplier
 				frm.set_intro(null);
 				frm.trigger("account_type");
-				// show / hide convert buttons
 				frm.trigger("add_toolbar_buttons");
 			}
+
 			if (frm.has_perm("write")) {
 				frm.add_custom_button(
 					__("Merge Account"),
-					function () {
-						frm.trigger("merge_account");
-					},
+					() => frm.trigger("merge_account"),
 					__("Actions")
 				);
+
 				frm.add_custom_button(
 					__("Update Account Name / Number"),
-					function () {
-						frm.trigger("update_account_number");
-					},
+					() => frm.trigger("update_account_number"),
 					__("Actions")
 				);
 			}
 		}
 	},
-	account_type: function (frm) {
-		if (frm.doc.is_group == 0) {
-			frm.toggle_display(["tax_rate"], frm.doc.account_type == "Tax");
-			frm.toggle_display("warehouse", frm.doc.account_type == "Stock");
+
+	account_type(frm) {
+		if (frm.doc.is_group === 0) {
+			frm.toggle_display("tax_rate", frm.doc.account_type === "Tax");
+			frm.toggle_display("warehouse", frm.doc.account_type === "Stock");
 		}
 	},
-	add_toolbar_buttons: function (frm) {
+
+	add_toolbar_buttons(frm) {
 		frm.add_custom_button(
 			__("Chart of Accounts"),
-			() => {
-				frappe.set_route("Tree", "Account");
-			},
+			() => frappe.set_route("Tree", "Account"),
 			__("View")
 		);
 
-		if (frm.doc.is_group == 1) {
+		if (frm.doc.is_group === 1) {
 			frm.add_custom_button(
 				__("Convert to Non-Group"),
-				function () {
-					return frappe.call({
+				() => {
+					frappe.call({
 						doc: frm.doc,
 						method: "convert_group_to_ledger",
-						callback: function () {
-							frm.refresh();
-						},
+						callback: () => frm.refresh(),
 					});
 				},
 				__("Actions")
 			);
-		} else if (cint(frm.doc.is_group) == 0 && frappe.boot.user.can_read.indexOf("GL Entry") !== -1) {
+		} else if (
+			cint(frm.doc.is_group) === 0 &&
+			frappe.boot.user.can_read?.includes("GL Entry")
+		) {
 			frm.add_custom_button(
 				__("General Ledger"),
-				function () {
+				() => {
 					frappe.route_options = {
 						account: frm.doc.name,
-						from_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
-						to_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+						from_date: erpnext.utils.get_fiscal_year(
+							frappe.datetime.get_today(),
+							true
+						)[1],
+						to_date: erpnext.utils.get_fiscal_year(
+							frappe.datetime.get_today(),
+							true
+						)[2],
 						company: frm.doc.company,
 					};
 					frappe.set_route("query-report", "General Ledger");
@@ -104,13 +110,11 @@ frappe.ui.form.on("Account", {
 
 			frm.add_custom_button(
 				__("Convert to Group"),
-				function () {
-					return frappe.call({
+				() => {
+					frappe.call({
 						doc: frm.doc,
 						method: "convert_ledger_to_group",
-						callback: function () {
-							frm.refresh();
-						},
+						callback: () => frm.refresh(),
 					});
 				},
 				__("Actions")
@@ -118,8 +122,8 @@ frappe.ui.form.on("Account", {
 		}
 	},
 
-	merge_account: function (frm) {
-		var d = new frappe.ui.Dialog({
+	merge_account(frm) {
+		const d = new frappe.ui.Dialog({
 			title: __("Merge with Existing Account"),
 			fields: [
 				{
@@ -130,15 +134,14 @@ frappe.ui.form.on("Account", {
 					default: frm.doc.name,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action(values) {
 				frappe.call({
 					method: "erpnext.accounts.doctype.account.account.merge_account",
 					args: {
 						old: frm.doc.name,
-						new: data.name,
+						new: values.name,
 					},
-					callback: function (r) {
+					callback(r) {
 						if (!r.exc) {
 							if (r.message) {
 								frappe.set_route("Form", "Account", r.message);
@@ -153,8 +156,8 @@ frappe.ui.form.on("Account", {
 		d.show();
 	},
 
-	update_account_number: function (frm) {
-		var d = new frappe.ui.Dialog({
+	update_account_number(frm) {
+		const d = new frappe.ui.Dialog({
 			title: __("Update Account Number / Name"),
 			fields: [
 				{
@@ -171,11 +174,10 @@ frappe.ui.form.on("Account", {
 					default: frm.doc.account_number,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action(values) {
 				if (
-					data.account_number === frm.doc.account_number &&
-					data.account_name === frm.doc.account_name
+					values.account_number === frm.doc.account_number &&
+					values.account_name === frm.doc.account_name
 				) {
 					d.hide();
 					return;
@@ -184,17 +186,17 @@ frappe.ui.form.on("Account", {
 				frappe.call({
 					method: "erpnext.accounts.doctype.account.account.update_account_number",
 					args: {
-						account_number: data.account_number,
-						account_name: data.account_name,
+						account_number: values.account_number,
+						account_name: values.account_name,
 						name: frm.doc.name,
 					},
-					callback: function (r) {
+					callback(r) {
 						if (!r.exc) {
 							if (r.message) {
 								frappe.set_route("Form", "Account", r.message);
 							} else {
-								frm.set_value("account_number", data.account_number);
-								frm.set_value("account_name", data.account_name);
+								frm.set_value("account_number", values.account_number);
+								frm.set_value("account_name", values.account_name);
 							}
 							d.hide();
 						}
