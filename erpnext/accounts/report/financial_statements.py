@@ -325,18 +325,24 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 
 
 def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False):
+	def get_all_parents(account, parent_children_map):
+		for parent, children in parent_children_map.items():
+			for child in children:
+				if child["name"] == account and parent:
+					accounts_to_show.add(parent)
+					get_all_parents(parent, parent_children_map)
+
 	data_with_value = []
+	accounts_to_show = set()
+
 	for d in data:
 		if show_zero_values or d.get("has_value"):
+			accounts_to_show.add(d.get("account"))
+			get_all_parents(d.get("account"), parent_children_map)
+
+	for d in data:
+		if d.get("account") in accounts_to_show:
 			data_with_value.append(d)
-		else:
-			# show group with zero balance, if there are balances against child
-			children = [child.name for child in parent_children_map.get(d.get("account")) or []]
-			if children:
-				for row in data:
-					if row.get("account") in children and row.get("has_value"):
-						data_with_value.append(d)
-						break
 
 	return data_with_value
 
