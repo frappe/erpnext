@@ -1334,6 +1334,82 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Total Debit must be equal to Total Credit.
 		pr.reconcile()
 
+	def test_validate_payment_request_allocation_on_payment_reconciliation(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+		abbr = frappe.db.get_value("Company", self.company, "abbr")
+		parent_account = create_account(
+			company=self.company,
+			account_name="Bank Accounts",
+			is_group=1,
+			account_type="Bank",
+			account_currency="INR",
+			parent_account=f"Current Assets - {abbr}",
+		)
+
+		bank_account = create_account(
+			company=self.company,
+			account_name="_Test Account",
+			account_type="Bank",
+			account_currency="INR",
+			parent_account=parent_account,
+		)
+
+		self.supplier = "_Test Supplier"
+		amount = 100
+
+		pi = self.create_purchase_invoice(qty=1, rate=amount, do_not_save=1)
+		pi.credit_to = f"Creditors - {abbr}"
+		pi.save()
+		pi.submit()
+
+		pr = make_payment_request(
+			company=pi.company,
+			dt="Purchase Invoice",
+			dn=pi.name,
+			party_type="Supplier",
+			party=pi.supplier,
+			mode_of_payment="Wire Transfer",
+			return_doc=True,
+			submit_doc=True,
+		)
+
+		pe = create_payment_entry(
+			company=pi.company,
+			paid_from=bank_account,
+			paid_to=f"Creditors - {abbr}",
+			paid_amount=amount,
+			save=1,
+			submit=1,
+		)
+		prec = self.create_payment_reconciliation(party_is_customer=False)
+		prec.get_unreconciled_entries()
+
+		invoices = [
+			invoice.as_dict()
+			for invoice in prec.invoices
+			if invoice.invoice_type == pi.doctype
+			and invoice.invoice_number == pi.name
+			and invoice.amount == amount
+		]
+		payments = [
+			payment.as_dict()
+			for payment in prec.payments
+			if payment.reference_type == pe.doctype
+			and payment.reference_name == pe.name
+			and payment.amount == amount
+		]
+		prec.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		prec.reconcile()
+
+		pr.reload()
+		pe.reload()
+
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(pe.references[0].allocated_amount, amount)
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
 	def test_reconciliation_from_purchase_order_to_multiple_invoices(self):
 		"""
 		Reconciling advance payment from PO/SO to multiple invoices should not cause overallocation
