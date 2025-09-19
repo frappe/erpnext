@@ -27,6 +27,7 @@ from frappe.utils import (
 	now,
 	nowdate,
 )
+from frappe.utils.caching import site_cache
 from pypika import Order
 from pypika.functions import Coalesce
 from pypika.terms import ExistsCriterion
@@ -1145,6 +1146,29 @@ def get_currency_precision():
 		precision = get_number_format_info(number_format)[2]
 
 	return precision
+
+
+def get_fraction_units(currency: str) -> int:
+	"""Returns the number of fraction units for a currency."""
+	fraction_units = frappe.db.get_value("Currency", currency, "fraction_units")
+
+	if fraction_units is None:
+		fraction_units = 100
+
+	return fraction_units
+
+
+@site_cache()
+def get_zero_cutoff(currency: str) -> float:
+	"""Returns the zero cutoff for a currency.
+
+	For example, if the Fraction Units for a currency are set to 100, then the zero cutoff is 0.005.
+	We don't want to display values less than the zero cutoff.
+	This value was chosen for compatibility with the previous hard-coded value of 0.005.
+	"""
+	fraction_units = get_fraction_units(currency)
+
+	return 0.5 / (fraction_units or 1)
 
 
 def get_held_invoices(party_type, party):
@@ -2482,6 +2506,10 @@ def build_qb_match_conditions(doctype, user=None) -> list:
 		for filter in match_filters:
 			for link_option, allowed_values in filter.items():
 				fieldnames = link_fields_map.get(link_option, [])
+				cond = None
+
+				if link_option == doctype:
+					cond = _dt["name"].isin(allowed_values)
 
 				for fieldname in fieldnames:
 					field = _dt[fieldname]
@@ -2490,6 +2518,7 @@ def build_qb_match_conditions(doctype, user=None) -> list:
 					if not apply_strict_user_permissions:
 						cond = (Coalesce(field, "") == "") | cond
 
+				if cond:
 					criterion.append(cond)
 
 	return criterion

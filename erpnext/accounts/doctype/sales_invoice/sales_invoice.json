@@ -275,6 +275,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "hide_days": 1,
@@ -2241,7 +2242,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-08-04 19:20:28.732039",
+ "modified": "2025-09-09 14:48:59.472826",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

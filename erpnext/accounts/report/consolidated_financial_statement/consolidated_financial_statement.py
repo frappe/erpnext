@@ -38,6 +38,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 	get_report_summary as get_pl_summary,
 )
 from erpnext.accounts.report.utils import convert, convert_to_presentation_currency
+from erpnext.accounts.utils import get_zero_cutoff
 
 
 def execute(filters=None):
@@ -564,7 +565,7 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 
 			row[company] = flt(d.get(company, 0.0), 3)
 
-			if abs(row[company]) >= 0.005:
+			if abs(row[company]) >= get_zero_cutoff(filters.presentation_currency):
 				# ignore zero values
 				has_value = True
 				total += flt(row[company])

@@ -17,6 +17,9 @@ frappe.ui.form.on("Company", {
 				frm.toggle_enable("default_currency", !r.message);
 			});
 		}
+		if (frm.doc.__islocal) {
+			frm.set_value("reporting_currency", "");
+		}
 	},
 	setup: function (frm) {
 		frm.__rename_queue = "long";
@@ -154,6 +157,10 @@ frappe.ui.form.on("Company", {
 					);
 				}
 			}
+		}
+
+		if (frm.doc.__islocal) {
+			frm.set_value("reporting_currency", "");
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);

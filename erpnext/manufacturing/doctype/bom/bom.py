@@ -1414,7 +1414,7 @@ def get_children(parent=None, is_root=False, **filters):
 		return bom_items
 
 
-def add_additional_cost(stock_entry, work_order):
+def add_additional_cost(stock_entry, work_order, job_card=None):
 	# Add non stock items cost in the additional cost
 	stock_entry.additional_costs = []
 	company_account = frappe.db.get_value(
@@ -1427,13 +1427,16 @@ def add_additional_cost(stock_entry, work_order):
 	expense_account = (
 		company_account.default_operating_cost_account or company_account.default_expense_account
 	)
-	add_non_stock_items_cost(stock_entry, work_order, expense_account)
-	add_operations_cost(stock_entry, work_order, expense_account)
+	add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=job_card)
+	add_operations_cost(stock_entry, work_order, expense_account, job_card=job_card)
 
 
-def add_non_stock_items_cost(stock_entry, work_order, expense_account):
+def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=None):
 	bom = frappe.get_doc("BOM", work_order.bom_no)
-	table = "exploded_items" if work_order.get("use_multi_level_bom") else "items"
+
+	table = "items"
+	if work_order and not job_card:
+		table = "exploded_items" if work_order.get("use_multi_level_bom") else "items"
 
 	items = {}
 	for d in bom.get(table):
@@ -1464,13 +1467,16 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 
 
 def add_operating_cost_component_wise(
-	stock_entry, work_order=None, operating_cost_per_unit=None, op_expense_account=None
+	stock_entry, work_order=None, operating_cost_per_unit=None, op_expense_account=None, job_card=None
 ):
 	if not work_order:
 		return False
 
 	cost_added = False
 	for row in work_order.operations:
+		if job_card and job_card.operation_id != row.name:
+			continue
+
 		workstation_cost = frappe.get_all(
 			"Workstation Cost",
 			fields=["operating_component", "operating_cost"],
@@ -1511,14 +1517,14 @@ def get_component_account(parent):
 	return frappe.db.get_value("Workstation Operating Component Account", parent, "expense_account")
 
 
-def add_operations_cost(stock_entry, work_order=None, expense_account=None):
+def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_card=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit
 
 	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
 
 	if operating_cost_per_unit:
 		cost_added = add_operating_cost_component_wise(
-			stock_entry, work_order, operating_cost_per_unit, expense_account
+			stock_entry, work_order, operating_cost_per_unit, expense_account, job_card=job_card
 		)
 
 		if not cost_added:

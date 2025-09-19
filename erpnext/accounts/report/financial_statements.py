@@ -18,7 +18,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
 
 def get_period_list(
@@ -306,7 +306,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 
 			row[period.key] = flt(d.get(period.key, 0.0), 3)
 
-			if abs(row[period.key]) >= 0.005:
+			if abs(row[period.key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
 				total += flt(row[period.key])

@@ -328,11 +328,20 @@
 		<td></td>
 		<td></td>
 		<td></td>
-		<td></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="invoiced"), currency=data[0]["currency"]) }}</b></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="paid"), currency=data[0]["currency"]) }}</b></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="credit_note"), currency=data[0]["currency"]) }}</b></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="outstanding"), currency=data[0]["currency"]) }}</b></td>
+		{% if not(filters.show_future_payments) %}
+			<td></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="invoiced"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="paid"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="credit_note"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="outstanding"), currency=data[0]["currency"]) }}</b></td>
+		{% else %}
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="invoiced"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="outstanding"), currency=data[0]["currency"]) }}</b></td>
+			<td></td>
+			<td></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="future_amount"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="remaining_balance"), currency=data[0]["currency"]) }}</b></td>
+		{% endif %}
 	</tbody>
 </table>
 <br>

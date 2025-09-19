@@ -119,8 +119,8 @@ class SerialandBatchBundle(Document):
 		self.allow_existing_serial_nos()
 		if not self.flags.ignore_validate_serial_batch or frappe.in_test:
 			self.validate_serial_nos_duplicate()
-			self.check_future_entries_exists()
 
+		self.check_future_entries_exists()
 		self.set_is_outward()
 		self.calculate_total_qty()
 		self.set_warehouse()
@@ -229,7 +229,7 @@ class SerialandBatchBundle(Document):
 			return
 
 		if self.voucher_type == "Stock Reconciliation":
-			serial_nos = self.get_serial_nos_for_validate()
+			serial_nos, batches = self.get_serial_nos_for_validate()
 		else:
 			serial_nos = [d.serial_no for d in self.entries if d.serial_no]
 
@@ -720,15 +720,22 @@ class SerialandBatchBundle(Document):
 		if self.flags and self.flags.via_landed_cost_voucher:
 			return
 
-		if not self.has_serial_no:
-			return
+		serial_nos = []
+		batches = []
 
 		if self.voucher_type == "Stock Reconciliation":
-			serial_nos = self.get_serial_nos_for_validate(is_cancelled=is_cancelled)
+			serial_nos, batches = self.get_serial_nos_for_validate(is_cancelled=is_cancelled)
 		else:
+			batches = [d.batch_no for d in self.entries if d.batch_no]
+
+		if (
+			self.voucher_type != "Stock Reconciliation"
+			and not self.flags.ignore_validate_serial_batch
+			and self.has_serial_no
+		):
 			serial_nos = [d.serial_no for d in self.entries if d.serial_no]
 
-		if not serial_nos:
+		if self.has_batch_no and not self.has_serial_no and not batches:
 			return
 
 		parent = frappe.qb.DocType("Serial and Batch Bundle")
@@ -744,65 +751,117 @@ class SerialandBatchBundle(Document):
 			.on(parent.name == child.parent)
 			.select(
 				child.serial_no,
+				child.batch_no,
 				parent.voucher_type,
 				parent.voucher_no,
 			)
 			.where(
-				(child.serial_no.isin(serial_nos))
-				& (child.parent != self.name)
+				(child.parent != self.name)
 				& (parent.item_code == self.item_code)
 				& (parent.docstatus == 1)
 				& (parent.is_cancelled == 0)
 				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.where(timestamp_condition)
-		).run(as_dict=True)
+		)
+
+		if self.has_batch_no and not self.has_serial_no:
+			future_entries = future_entries.where(parent.voucher_type == "Stock Reconciliation")
+
+		if serial_nos:
+			future_entries = future_entries.where(
+				(child.serial_no.isin(serial_nos))
+				| ((parent.warehouse == self.warehouse) & (parent.voucher_type == "Stock Reconciliation"))
+			)
+		elif self.has_serial_no:
+			future_entries = future_entries.where(
+				(parent.warehouse == self.warehouse) & (parent.voucher_type == "Stock Reconciliation")
+			)
+		elif batches:
+			future_entries = future_entries.where(child.batch_no.isin(batches))
+
+		future_entries = future_entries.run(as_dict=True)
 
 		if future_entries:
-			msg = """The serial nos has been used in the future
-				transactions so you need to cancel them first.
-				The list of serial nos and their respective
-				transactions are as below."""
+			if self.has_serial_no:
+				title = "Serial No Exists In Future Transaction(s)"
+			else:
+				title = "Batches Exists In Future Transaction(s)"
+
+			msg = """Since the stock reconciliation exists
+				for future dates, cancel it first. For Serial/Batch,
+				if you want to make a backdated transaction,
+				avoid using stock reconciliation.
+				For more details about the transaction,
+				please refer to the list below.
+			"""
 
 			msg += "<br><br><ul>"
 
 			for d in future_entries:
-				msg += f"<li>{d.serial_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
+				if self.has_serial_no:
+					msg += f"<li>{d.serial_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
+				else:
+					msg += f"<li>{d.batch_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
 			msg += "</li></ul>"
-
-			title = "Serial No Exists In Future Transaction(s)"
 
 			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransactionError)
 
 	def get_serial_nos_for_validate(self, is_cancelled=False):
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
-		skip_serial_nos = self.get_skip_serial_nos_for_stock_reconciliation(is_cancelled=is_cancelled)
-		serial_nos = list(set(sorted(serial_nos)) - set(sorted(skip_serial_nos)))
+		batches = [d.batch_no for d in self.entries if d.batch_no]
 
-		return serial_nos
+		skip_serial_nos, skip_batches = self.get_skip_serial_nos_for_stock_reconciliation(
+			is_cancelled=is_cancelled
+		)
+
+		serial_nos = list(set(sorted(serial_nos)) - set(sorted(skip_serial_nos)))
+		batch_nos = list(set(sorted(batches)) - set(sorted(skip_batches)))
+
+		return serial_nos, batch_nos
 
 	def get_skip_serial_nos_for_stock_reconciliation(self, is_cancelled=False):
 		data = get_stock_reco_details(self.voucher_detail_no)
+
 		if not data:
-			return []
+			return [], []
+
+		current_serial_nos = set()
+		serial_nos = set()
+		current_batches = set()
+		batches = set()
 
 		if data.current_serial_no:
 			current_serial_nos = set(parse_serial_nos(data.current_serial_no))
 			serial_nos = set(parse_serial_nos(data.serial_no)) if data.serial_no else set([])
-			return list(serial_nos.intersection(current_serial_nos))
+			return list(serial_nos.intersection(current_serial_nos)), []
+
+		elif data.batch_no and data.current_qty == data.qty:
+			return [], [data.batch_no]
+
 		elif data.current_serial_and_batch_bundle:
-			current_serial_nos = set(get_serial_nos_from_bundle(data.current_serial_and_batch_bundle))
+			if self.has_serial_no:
+				current_serial_nos = set(get_serial_nos_from_bundle(data.current_serial_and_batch_bundle))
+			else:
+				current_batches = set(get_batches_from_bundle(data.current_serial_and_batch_bundle))
+
 			if is_cancelled:
-				return current_serial_nos
+				return list(current_serial_nos), list(current_batches)
 
-			serial_nos = (
-				set(get_serial_nos_from_bundle(data.serial_and_batch_bundle))
-				if data.serial_and_batch_bundle
-				else set([])
+			if self.has_serial_no:
+				serial_nos = (
+					set(get_serial_nos_from_bundle(data.serial_and_batch_bundle))
+					if data.serial_and_batch_bundle
+					else set([])
+				)
+			elif self.has_batch_no and data.serial_and_batch_bundle:
+				batches = set(get_batches_from_bundle(data.serial_and_batch_bundle))
+
+			return list(serial_nos.intersection(current_serial_nos)), list(
+				batches.intersection(current_batches)
 			)
-			return list(serial_nos.intersection(current_serial_nos))
 
-		return []
+		return [], []
 
 	def reset_qty(self, row, qty_field=None):
 		qty_field = self.get_qty_field(row, qty_field=qty_field)
@@ -2419,6 +2478,16 @@ def get_available_batches(kwargs):
 			kwargs.posting_date, kwargs.posting_time
 		)
 
+		if kwargs.get("creation"):
+			timestamp_condition = stock_ledger_entry.posting_datetime < get_combine_datetime(
+				kwargs.posting_date, kwargs.posting_time
+			)
+
+			timestamp_condition |= (
+				stock_ledger_entry.posting_datetime
+				== get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
+			) & (stock_ledger_entry.creation < kwargs.creation)
+
 		query = query.where(timestamp_condition)
 
 	for field in ["warehouse", "item_code"]:
@@ -2660,6 +2729,16 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			kwargs.posting_date, kwargs.posting_time
 		)
 
+		if kwargs.get("creation"):
+			timestamp_condition = stock_ledger_entry.posting_datetime < get_combine_datetime(
+				kwargs.posting_date, kwargs.posting_time
+			)
+
+			timestamp_condition |= (
+				stock_ledger_entry.posting_datetime
+				== get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
+			) & (stock_ledger_entry.creation < kwargs.creation)
+
 		query = query.where(timestamp_condition)
 
 	for field in ["warehouse", "item_code", "serial_no"]:
@@ -2717,6 +2796,16 @@ def get_stock_ledgers_batches(kwargs):
 		timestamp_condition = stock_ledger_entry.posting_datetime <= get_combine_datetime(
 			kwargs.posting_date, kwargs.posting_time
 		)
+
+		if kwargs.get("creation"):
+			timestamp_condition = stock_ledger_entry.posting_datetime < get_combine_datetime(
+				kwargs.posting_date, kwargs.posting_time
+			)
+
+			timestamp_condition |= (
+				stock_ledger_entry.posting_datetime
+				== get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
+			) & (stock_ledger_entry.creation < kwargs.creation)
 
 		query = query.where(timestamp_condition)
 
@@ -2793,6 +2882,14 @@ def get_stock_reco_details(voucher_detail_no):
 	return frappe.db.get_value(
 		"Stock Reconciliation Item",
 		voucher_detail_no,
-		["current_serial_no", "serial_no", "serial_and_batch_bundle", "current_serial_and_batch_bundle"],
+		[
+			"current_serial_no",
+			"serial_no",
+			"serial_and_batch_bundle",
+			"current_serial_and_batch_bundle",
+			"batch_no",
+			"qty",
+			"current_qty",
+		],
 		as_dict=True,
 	)

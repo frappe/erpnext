@@ -23,6 +23,7 @@ from frappe.utils import (
 	time_diff_in_hours,
 )
 
+from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
@@ -817,9 +818,6 @@ class JobCard(Document):
 			)
 
 	def update_work_order(self):
-		if self.track_semi_finished_goods:
-			return
-
 		if not self.work_order:
 			return
 
@@ -849,9 +847,9 @@ class JobCard(Document):
 
 	def update_semi_finished_good_details(self):
 		if self.operation_id:
-			frappe.db.set_value(
-				"Work Order Operation", self.operation_id, "completed_qty", self.manufactured_qty
-			)
+			qty = max(flt(self.manufactured_qty), flt(self.total_completed_qty))
+
+			frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", qty)
 			if (
 				self.finished_good
 				and frappe.get_cached_value("Work Order", self.work_order, "production_item")
@@ -1322,6 +1320,9 @@ class JobCard(Document):
 
 		ste.make_stock_entry()
 		ste.stock_entry.flags.ignore_mandatory = True
+		wo_doc = frappe.get_doc("Work Order", self.work_order)
+		add_additional_cost(ste.stock_entry, wo_doc, self)
+
 		ste.stock_entry.save()
 
 		if auto_submit:

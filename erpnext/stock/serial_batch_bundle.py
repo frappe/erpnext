@@ -341,6 +341,18 @@ class SerialBatchBundle:
 			if docstatus == 0:
 				self.submit_serial_and_batch_bundle()
 
+			if (
+				frappe.db.count(
+					"Serial and Batch Entry", {"parent": self.sle.serial_and_batch_bundle, "docstatus": 0}
+				)
+				> 0
+			):
+				frappe.throw(
+					_("Serial and Batch Bundle {0} is not submitted").format(
+						bold(self.sle.serial_and_batch_bundle)
+					)
+				)
+
 		if self.item_details.has_serial_no == 1:
 			self.set_warehouse_and_status_in_serial_nos()
 

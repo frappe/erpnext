@@ -61,7 +61,7 @@ class AssetMovement(Document):
 			if d.source_location:
 				if current_location != d.source_location:
 					frappe.throw(
-						_("Asset {0} does not belongs to the location {1}").format(d.asset, d.source_location)
+						_("Asset {0} does not belong to the location {1}").format(d.asset, d.source_location)
 					)
 			else:
 				d.source_location = current_location
@@ -76,11 +76,11 @@ class AssetMovement(Document):
 				frappe.throw(_("Target Location is required while receiving Asset {0}").format(d.asset))
 			if d.to_employee and frappe.db.get_value("Employee", d.to_employee, "company") != self.company:
 				frappe.throw(
-					_("Employee {0} does not belongs to the company {1}").format(d.to_employee, self.company)
+					_("Employee {0} does not belong to the company {1}").format(d.to_employee, self.company)
 				)
 
 	def validate_employee(self, d):
-		if self.purpose == "Tranfer and Issue":
+		if self.purpose == "Transfer and Issue":
 			if not d.from_employee:
 				frappe.throw(_("From Employee is required while issuing Asset {0}").format(d.asset))
 
@@ -89,7 +89,7 @@ class AssetMovement(Document):
 
 			if current_custodian != d.from_employee:
 				frappe.throw(
-					_("Asset {0} does not belongs to the custodian {1}").format(d.asset, d.from_employee)
+					_("Asset {0} does not belong to the custodian {1}").format(d.asset, d.from_employee)
 				)
 
 		if not d.to_employee:
@@ -97,7 +97,7 @@ class AssetMovement(Document):
 
 		if d.to_employee and frappe.db.get_value("Employee", d.to_employee, "company") != self.company:
 			frappe.throw(
-				_("Employee {0} does not belongs to the company {1}").format(d.to_employee, self.company)
+				_("Employee {0} does not belong to the company {1}").format(d.to_employee, self.company)
 			)
 
 	def on_submit(self):

@@ -418,7 +418,7 @@ erpnext.patches.v15_0.set_cancelled_status_to_cancelled_pos_invoice
 erpnext.patches.v15_0.rename_group_by_to_categorize_by_in_custom_reports
 erpnext.patches.v15_0.remove_agriculture_roles
 erpnext.patches.v14_0.update_full_name_in_contract
-erpnext.patches.v15_0.drop_sle_indexes
+erpnext.patches.v15_0.drop_sle_indexes #2025-09-18
 erpnext.patches.v15_0.update_pick_list_fields
 execute:frappe.db.set_single_value("Accounts Settings", "confirm_before_resetting_posting_date", 1)
 erpnext.patches.v15_0.rename_pos_closing_entry_fields #2025-06-13
@@ -436,3 +436,4 @@ erpnext.patches.v16_0.update_serial_no_reference_name
 erpnext.patches.v16_0.set_invoice_type_in_pos_settings
 erpnext.patches.v15_0.update_fieldname_in_accounting_dimension_filter
 erpnext.patches.v16_0.make_workstation_operating_components #1
+erpnext.patches.v16_0.set_reporting_currency
