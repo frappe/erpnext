@@ -1871,10 +1871,13 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 					dr_or_cr *= -1
 					dr_or_cr_account_currency *= -1
 
-				against_voucher_type = (
-					gle.against_voucher_type if gle.against_voucher_type else gle.voucher_type
-				)
-				against_voucher_no = gle.against_voucher if gle.against_voucher else gle.voucher_no
+				against_voucher_type = gle.against_voucher_type
+				against_voucher_no = gle.against_voucher
+
+				if gle.against_voucher:
+					if gle.against_voucher == gle.voucher_no and gle.advance_voucher_no:
+						against_voucher_type = gle.advance_voucher_type
+						against_voucher_no = gle.advance_voucher_no
 
 				ple = frappe._dict(
 					doctype="Payment Ledger Entry",
