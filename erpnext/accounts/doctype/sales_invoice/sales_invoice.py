@@ -1264,7 +1264,8 @@ class SalesInvoice(SellingController):
 			self.precision("base_grand_total"),
 		)
 
-		if grand_total and not self.is_internal_transfer():
+		# for applying 100% discount on whole sales invoice level
+		if grand_total >= 0 and not self.is_internal_transfer():
 			against_voucher = self.name
 			if self.is_return and self.return_against and not self.update_outstanding_for_self:
 				against_voucher = self.return_against
@@ -1349,7 +1350,8 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")) or item.is_fixed_asset:
+			# for applying 100% discount on whole sales invoice level
+			if flt(item.base_net_amount, item.precision("base_net_amount")) >= 0 or item.is_fixed_asset:
 				# Do not book income for transfer within same company
 				if self.is_internal_transfer():
 					continue
