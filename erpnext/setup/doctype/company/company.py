@@ -793,8 +793,9 @@ def update_company_monthly_sales(company):
 	from frappe.utils.goal import get_monthly_results
 
 	filter_str = f"company = {frappe.db.escape(company)} and status != 'Draft' and docstatus=1"
+    filter_dict = {"company": company, "status": ["!=", "Draft"], "docstatus": 1}
 	month_to_value_dict = get_monthly_results(
-		"Sales Invoice", "base_grand_total", "posting_date", filter_str, "sum"
+		"Sales Invoice", "base_grand_total", "posting_date", filter_dict, "sum"
 	)
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
