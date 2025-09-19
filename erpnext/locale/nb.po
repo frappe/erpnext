@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-14 09:34+0000\n"
-"PO-Revision-Date: 2025-09-17 01:44\n"
+"PO-Revision-Date: 2025-09-19 02:49\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -210,7 +210,7 @@ msgstr "% Returnert"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials billed against this Sales Order"
-msgstr ""
+msgstr "% av materialer fakturert mot denne salgsordren"
 
 #. Description of the '% Delivered' (Percent) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
@@ -222,7 +222,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials delivered against this Sales Order"
-msgstr ""
+msgstr "% av materialer levert mot denne salgsordren"
 
 #: erpnext/controllers/accounts_controller.py:2293
 msgid "'Account' in the Accounting section of Customer {0}"
@@ -230,7 +230,7 @@ msgstr "Konto i regnskapsseksjonen for kunde: {0}"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:299
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
-msgstr ""
+msgstr "\"Tillat flere salgsordrer mot en kundes innkjøpsordre"
 
 #: erpnext/controllers/trends.py:56
 msgid "'Based On' and 'Group By' can not be same"
@@ -238,7 +238,7 @@ msgstr ""
 
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:18
 msgid "'Days Since Last Order' must be greater than or equal to zero"
-msgstr ""
+msgstr "\"Dager siden siste bestilling\" må være større enn eller lik null"
 
 #: erpnext/controllers/accounts_controller.py:2298
 msgid "'Default {0} Account' in Company {1}"
@@ -753,7 +753,26 @@ msgid "<p>In your <b>Email Template</b>, you can use the following special varia
 "    </ul>\n"
 "<p></p>\n"
 "<p>Apart from these, you can access all values in this RFQ, like <code>{{ message_for_supplier }}</code> or <code>{{ terms }}</code>.</p>"
-msgstr ""
+msgstr "<p>I <b>e-postmalen </b>kan du bruke følgende spesialvariabler:\n"
+"</p>\n"
+"<ul>\n"
+"        <li>\n"
+"            <code>{{ update_password_link }}</code>: En lenke der leverandøren din kan angi et nytt passord for å logge på portalen din.\n"
+"        </li>\n"
+"        <li>\n"
+"            <code>{{ portal_link }}</code>: En lenke til denne tilbudsforespørselen i leverandørportalen din.\n"
+"        </li>\n"
+"        <li>\n"
+"            <code>{{ supplier_name }}</code>: Firmanavnet til leverandøren din.\n"
+"        </li>\n"
+"        <li>\n"
+"            <code>{{ contact.salutation }} {{ contact.last_name }}</code>: Kontaktpersonen til leverandøren din.\n"
+"        </li><li>\n"
+"            <code>{{ user_fullname }}</code>: Ditt fulle navn.\n"
+"        </li>\n"
+"    </ul>\n"
+"<p></p>\n"
+"<p>Bortsett fra disse, har du tilgang til alle verdier i denne tilbudsspørsmålet, som <code>{{ message_for_supplier }}</code> eller <code>{{ terms }}</code>.</p>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:116
 msgid "<p>Please correct the following row(s):</p><ul>"
@@ -761,7 +780,7 @@ msgstr ""
 
 #: erpnext/controllers/buying_controller.py:107
 msgid "<p>Posting Date {0} cannot be before Purchase Order date for the following:</p><ul>"
-msgstr ""
+msgstr "<p>Registringsdato {0} kan ikke være før bestillingsdatoen for følgende:</p><ul>"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:69
 msgid "<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?"
@@ -801,7 +820,7 @@ msgstr ""
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Quick Access</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Rask tilgang</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Quality Workspace
@@ -881,7 +900,7 @@ msgstr "<span class=\"h4\"><b>Dine snarveier\n"
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Snarveiene dine</b></span>"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:985
 msgid "<strong>Grand Total:</strong> {0}"
@@ -959,7 +978,7 @@ msgstr ""
 
 #: erpnext/selling/doctype/customer/customer.py:314
 msgid "A Customer Group exists with same name please change the Customer name or rename the Customer Group"
-msgstr ""
+msgstr "Det finnes en kundegruppe med samme navn, vennligst endre kundenavnet eller gi kundegruppen nytt navn"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:73
 msgid "A Holiday List can be added to exclude counting these days for the Workstation."
@@ -976,7 +995,7 @@ msgstr ""
 #. Description of a DocType
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "A Price List is a collection of Item Prices either Selling, Buying, or both"
-msgstr ""
+msgstr "En prisliste er en samling av varepriser for enten salg, kjøp eller begge deler"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/item/item.json
@@ -1389,7 +1408,7 @@ msgstr ""
 #. Label of the account_manager (Link) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Account Manager"
-msgstr ""
+msgstr "Kundeansvarlig"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:952
 #: erpnext/controllers/accounts_controller.py:2302
@@ -1990,7 +2009,7 @@ msgstr "Regnskapsposteringer fryses frem til denne datoen. Ingen kan opprette el
 #: erpnext/setup/doctype/incoterm/incoterm.json
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 msgid "Accounts"
-msgstr ""
+msgstr "Kontoer"
 
 #. Label of the closing_settings_tab (Tab Break) field in DocType 'Accounts
 #. Settings'
@@ -2105,7 +2124,7 @@ msgstr ""
 #: erpnext/accounts/workspace/payables/payables.json
 #: erpnext/buying/doctype/supplier/supplier.js:102
 msgid "Accounts Payable"
-msgstr ""
+msgstr "Leverandørreskontro"
 
 #. Name of a report
 #. Label of a Link in the Payables Workspace
@@ -2113,7 +2132,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_payable_summary/accounts_payable_summary.json
 #: erpnext/accounts/workspace/payables/payables.json
 msgid "Accounts Payable Summary"
-msgstr ""
+msgstr "Oversikt over leverandørgjeld"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
@@ -2159,7 +2178,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Accounts Receivable Summary"
-msgstr ""
+msgstr "Sammendrag av fordringer"
 
 #. Label of the accounts_receivable_unpaid (Link) field in DocType 'Invoice
 #. Discounting'
@@ -2338,7 +2357,7 @@ msgstr ""
 
 #: erpnext/selling/report/sales_partner_target_variance_based_on_item_group/item_group_wise_sales_target_variance.py:111
 msgid "Achieved ({})"
-msgstr ""
+msgstr "Oppnådd ({})"
 
 #. Label of the acquisition_date (Date) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
@@ -2440,7 +2459,7 @@ msgstr ""
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Action if Same Rate is Not Maintained Throughout Sales Cycle"
-msgstr ""
+msgstr "Tiltak hvis samme sats ikke opprettholdes gjennom hele salgssyklusen"
 
 #. Label of the action_on_new_invoice (Select) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -2479,7 +2498,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.js:202
 #: erpnext/stock/doctype/item/item.js:518 erpnext/templates/pages/order.html:20
 msgid "Actions"
-msgstr ""
+msgstr "Handlinger"
 
 #. Label of the actions_performed (Text Editor) field in DocType 'Asset
 #. Maintenance Log'
@@ -2511,7 +2530,7 @@ msgstr "Aktiv"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:55
 msgid "Active Leads"
-msgstr ""
+msgstr "Aktive potensielle kunder"
 
 #. Label of the on_status_image (Attach Image) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
@@ -2798,7 +2817,7 @@ msgstr ""
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:92
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:442
 msgid "Add Discount"
-msgstr ""
+msgstr "Legg til rabatt"
 
 #: erpnext/public/js/event.js:40
 msgid "Add Employees"
@@ -2808,7 +2827,7 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.js:254
 #: erpnext/stock/dashboard/item_dashboard.js:216
 msgid "Add Item"
-msgstr ""
+msgstr "Legg til artikkel"
 
 #: erpnext/public/js/utils/item_selector.js:20
 #: erpnext/public/js/utils/item_selector.js:35
@@ -2854,7 +2873,7 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:280
 msgid "Add Order Discount"
-msgstr ""
+msgstr "Legg til bestillingsrabatt"
 
 #: erpnext/public/js/event.js:20 erpnext/public/js/event.js:28
 #: erpnext/public/js/event.js:36 erpnext/public/js/event.js:44
@@ -3016,12 +3035,12 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:450
 msgid "Additional"
-msgstr ""
+msgstr "Ytterligere"
 
 #. Label of the additional_asset_cost (Currency) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Additional Asset Cost"
-msgstr ""
+msgstr "Tilleggskostnad for anleggsmiddel"
 
 #. Label of the additional_cost (Currency) field in DocType 'Stock Entry
 #. Detail'
@@ -3090,7 +3109,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Discount"
-msgstr ""
+msgstr "Ekstra rabatt"
 
 #. Label of the discount_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the discount_amount (Currency) field in DocType 'Purchase Invoice'
@@ -3115,7 +3134,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Discount Amount"
-msgstr ""
+msgstr "Ekstra rabattbeløp"
 
 #. Label of the base_discount_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the base_discount_amount (Currency) field in DocType 'Purchase
@@ -3142,7 +3161,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Discount Amount (Company Currency)"
-msgstr ""
+msgstr "Ekstra rabattbeløp (selskapets valuta)"
 
 #. Label of the additional_discount_percentage (Float) field in DocType 'POS
 #. Invoice'
@@ -3175,7 +3194,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Discount Percentage"
-msgstr ""
+msgstr "Ekstra rabattprosent"
 
 #. Label of the additional_info_section (Section Break) field in DocType
 #. 'Purchase Invoice'
@@ -3202,7 +3221,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Additional Info"
-msgstr ""
+msgstr "Tilleggsinfo"
 
 #. Label of the other_info_tab (Section Break) field in DocType 'Lead'
 #. Label of the additional_information (Text) field in DocType 'Quality Review'
@@ -3210,18 +3229,18 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_review/quality_review.json
 #: erpnext/selling/page/point_of_sale/pos_payment.js:59
 msgid "Additional Information"
-msgstr ""
+msgstr "Tilleggsinformasjon"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:85
 msgid "Additional Information updated successfully."
-msgstr ""
+msgstr "Tilleggsinformasjon ble oppdatert."
 
 #. Label of the additional_notes (Text) field in DocType 'Quotation Item'
 #. Label of the additional_notes (Text) field in DocType 'Sales Order Item'
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Additional Notes"
-msgstr ""
+msgstr "Tilleggsmerknader"
 
 #. Label of the additional_operating_cost (Currency) field in DocType 'Work
 #. Order'
@@ -3232,7 +3251,7 @@ msgstr ""
 #. Description of the 'Customer Details' (Text) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Additional information regarding the customer."
-msgstr ""
+msgstr "Tilleggsinformasjon som gjelder kunden."
 
 #. Label of the address_display (Text Editor) field in DocType 'Dunning'
 #. Label of the address_display (Text Editor) field in DocType 'POS Invoice'
@@ -3443,7 +3462,7 @@ msgstr "Adresse som brukes til å bestemme skattekategori i transaksjoner"
 
 #: erpnext/assets/doctype/asset/asset.js:146
 msgid "Adjust Asset Value"
-msgstr ""
+msgstr "Justere eiendelens verdi"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1095
 msgid "Adjustment Against"
@@ -3499,12 +3518,12 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Advance Paid"
-msgstr ""
+msgstr "Forskuddsbetalt"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
 msgid "Advance Payment"
-msgstr ""
+msgstr "Forskuddsbetaling"
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
@@ -3523,7 +3542,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Advance Payment Status"
-msgstr ""
+msgstr "Status for forskuddsbetaling"
 
 #. Label of the advances_section (Section Break) field in DocType 'POS Invoice'
 #. Label of the advances_section (Section Break) field in DocType 'Purchase
@@ -3652,7 +3671,7 @@ msgstr ""
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Against Blanket Order"
-msgstr ""
+msgstr "Mot blankettordre"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1045
 msgid "Against Customer Order {0}"
@@ -3660,7 +3679,7 @@ msgstr ""
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1194
 msgid "Against Default Supplier"
-msgstr ""
+msgstr "Mot misligholdt leverandør"
 
 #. Label of the dn_detail (Data) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -5039,7 +5058,7 @@ msgstr "Korrigert fra"
 #: erpnext/templates/form_grid/stock_entry_grid.html:11
 #: erpnext/templates/pages/order.html:103 erpnext/templates/pages/rfq.html:46
 msgid "Amount"
-msgstr ""
+msgstr "Beløp"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:22
 msgid "Amount (AED)"
@@ -5153,7 +5172,7 @@ msgstr ""
 #: erpnext/buying/report/purchase_order_analysis/purchase_order_analysis.py:189
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:209
 msgid "Amount to Bill"
-msgstr ""
+msgstr "Beløp til faktura"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1324
 msgid "Amount {0} {1} against {2} {3}"
@@ -5213,7 +5232,7 @@ msgstr ""
 #: erpnext/public/js/controllers/buying.js:377
 #: erpnext/public/js/utils/sales_common.js:463
 msgid "An error occurred during the update process"
-msgstr ""
+msgstr "Det oppstod en feil under oppdateringsprosessen"
 
 #: erpnext/stock/reorder_item.py:378
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
@@ -5221,7 +5240,7 @@ msgstr ""
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.html:124
 msgid "Analysis Chart"
-msgstr ""
+msgstr "Analysediagram"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:4
 msgid "Analyst"
@@ -5412,7 +5431,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:10
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:10
 msgid "Application of Funds (Assets)"
-msgstr ""
+msgstr "Anvendelse av midler (eiendeler)"
 
 #: erpnext/templates/includes/order/order_taxes.html:70
 msgid "Applied Coupon Code"
@@ -5458,7 +5477,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Apply Additional Discount On"
-msgstr ""
+msgstr "Bruk ekstra rabatt på"
 
 #. Label of the apply_discount_on (Select) field in DocType 'POS Profile'
 #. Label of the apply_discount_on (Select) field in DocType 'Pricing Rule'
@@ -5552,7 +5571,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Apply TDS"
-msgstr ""
+msgstr "Bruk TDS"
 
 #. Label of the apply_tax_withholding_amount (Check) field in DocType 'Payment
 #. Entry'
@@ -5690,12 +5709,12 @@ msgstr ""
 #: erpnext/assets/doctype/location/location.json
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Area"
-msgstr ""
+msgstr "Område"
 
 #. Label of the area_uom (Link) field in DocType 'Location'
 #: erpnext/assets/doctype/location/location.json
 msgid "Area UOM"
-msgstr ""
+msgstr "Område-måleenhet"
 
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:423
 msgid "Arrival Quantity"
@@ -5801,7 +5820,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:225
 #: erpnext/stock/doctype/serial_no/serial_no.json
 msgid "Asset"
-msgstr ""
+msgstr "Eiendel"
 
 #. Label of the asset_account (Link) field in DocType 'Share Transfer'
 #: erpnext/accounts/doctype/share_transfer/share_transfer.json
@@ -6281,7 +6300,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/assets/workspace/assets/assets.json
 msgid "Assets"
-msgstr ""
+msgstr "Eiendeler"
 
 #: erpnext/controllers/buying_controller.py:964
 msgid "Assets not created for {item_code}. You will have to create asset manually."
@@ -6504,7 +6523,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_connector.py:68
 msgid "Authentication Failed"
-msgstr ""
+msgstr "Autentisering mislyktes"
 
 #. Label of the authorised_by_section (Section Break) field in DocType
 #. 'Contract'
@@ -7411,7 +7430,7 @@ msgstr ""
 #: erpnext/public/js/financial_statements.js:124
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Balance Sheet"
-msgstr ""
+msgstr "Balanse"
 
 #. Label of the balance_sheet_summary (Heading) field in DocType 'Bisect
 #. Accounting Statements'
@@ -7473,7 +7492,7 @@ msgstr ""
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:99
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Bank"
-msgstr ""
+msgstr "Bank"
 
 #. Label of the bank_cash_account (Link) field in DocType 'Payment
 #. Reconciliation'
@@ -7676,7 +7695,7 @@ msgstr ""
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:32
 msgid "Bank Transaction"
-msgstr ""
+msgstr "Banktransaksjon"
 
 #. Label of the bank_transaction_mapping (Table) field in DocType 'Bank'
 #. Name of a DocType
@@ -7716,15 +7735,15 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:146
 msgid "Bank account {0} already exists and could not be created again"
-msgstr ""
+msgstr "Bankkonto {0} eksisterer allerede og kan ikke opprettes på nytt"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:158
 msgid "Bank accounts added"
-msgstr ""
+msgstr "Bankkontoer lagt til"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:311
 msgid "Bank transaction creation error"
-msgstr ""
+msgstr "Feil ved opprettelse av banktransaksjon"
 
 #. Label of the bank_cash_account (Link) field in DocType 'Process Payment
 #. Reconciliation'
@@ -8766,7 +8785,7 @@ msgstr ""
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Brand"
-msgstr ""
+msgstr "Merkevare"
 
 #. Label of the brand_defaults (Table) field in DocType 'Brand'
 #: erpnext/setup/doctype/brand/brand.json
@@ -9015,24 +9034,24 @@ msgstr ""
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "Buying"
-msgstr ""
+msgstr "Innkjøp"
 
 #. Label of the sales_settings (Section Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Buying & Selling Settings"
-msgstr ""
+msgstr "Innstillinger for innkjøp og salg"
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:343
 msgid "Buying Amount"
-msgstr ""
+msgstr "Innkjøpsbeløp"
 
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:40
 msgid "Buying Price List"
-msgstr ""
+msgstr "Prisliste for innkjøp"
 
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:46
 msgid "Buying Rate"
-msgstr ""
+msgstr "Innkjøpsfrekvens"
 
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
@@ -9042,20 +9061,20 @@ msgstr ""
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Buying Settings"
-msgstr ""
+msgstr "Innstillinger for innkjøp"
 
 #. Label of the buying_and_selling_tab (Tab Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Buying and Selling"
-msgstr ""
+msgstr "Innkjøp og salg"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:219
 msgid "Buying must be checked, if Applicable For is selected as {0}"
-msgstr ""
+msgstr "Kjøp må være krysset av hvis Gjelder for er valgt som {0}"
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:13
 msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
-msgstr ""
+msgstr "Som standard er leverandørnavnet angitt i henhold til leverandørnavnet som er angitt. Hvis du vil at leverandører skal navngis med en <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>navneserie</a>, velg alternativet «Navneserie»."
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -9100,7 +9119,7 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: erpnext/crm/workspace/crm/crm.json erpnext/setup/workspace/home/home.json
 msgid "CRM"
-msgstr ""
+msgstr "CRM"
 
 #. Name of a DocType
 #: erpnext/crm/doctype/crm_note/crm_note.json
@@ -9189,7 +9208,7 @@ msgstr ""
 #. Scorecard Period'
 #: erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgid "Calculations"
-msgstr ""
+msgstr "Beregninger"
 
 #. Label of the calendar_event (Link) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -9576,7 +9595,7 @@ msgstr ""
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 #: erpnext/templates/pages/task_info.html:77
 msgid "Cancelled"
-msgstr ""
+msgstr "Avbrutt"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:66
 msgid "Cannot Assign Cashier"
@@ -9643,7 +9662,7 @@ msgstr ""
 
 #: erpnext/controllers/buying_controller.py:1054
 msgid "Cannot cancel this document as it is linked with the submitted asset {asset_link}. Please cancel the asset to continue."
-msgstr ""
+msgstr "Kan ikke avbryte dette dokumentet da det er linket med innsendt eiendel {asset_link}. Avbryt eiendel for å fortsette."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:357
 msgid "Cannot cancel transaction for Completed Work Order."
@@ -9788,7 +9807,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:68
 msgid "Cannot retrieve link token. Check Error Log for more information"
-msgstr ""
+msgstr "Kan ikke hente lenketoken. Sjekk feilloggen for mer informasjon."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1468
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1647
@@ -9963,7 +9982,7 @@ msgstr ""
 #: erpnext/accounts/report/cash_flow/cash_flow.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Cash Flow"
-msgstr ""
+msgstr "Kontantstrøm"
 
 #: erpnext/public/js/financial_statements.js:134
 msgid "Cash Flow Statement"
@@ -10037,7 +10056,7 @@ msgstr ""
 #: erpnext/accounts/report/general_ledger/general_ledger.js:116
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:80
 msgid "Categorize by"
-msgstr ""
+msgstr "Kategoriser etter"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:129
 msgid "Categorize by Account"
@@ -10300,7 +10319,7 @@ msgstr ""
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/workspace/home/home.json
 msgid "Chart of Accounts"
-msgstr ""
+msgstr "Kontoplan"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -10309,7 +10328,7 @@ msgstr ""
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/setup/workspace/home/home.json
 msgid "Chart of Accounts Importer"
-msgstr ""
+msgstr "Importør av kontoplan"
 
 #. Label of a Link in the Accounting Workspace
 #: erpnext/accounts/doctype/account/account_tree.js:187
@@ -11401,7 +11420,7 @@ msgstr ""
 #: erpnext/support/report/issue_analytics/issue_analytics.js:8
 #: erpnext/support/report/issue_summary/issue_summary.js:8
 msgid "Company"
-msgstr ""
+msgstr "Selskap"
 
 #: erpnext/public/js/setup_wizard.js:36
 msgid "Company Abbreviation"
@@ -12058,7 +12077,7 @@ msgstr ""
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Consolidated Financial Statement"
-msgstr ""
+msgstr "Konsolidert finansregnskap"
 
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice'
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice Merge
@@ -12447,7 +12466,7 @@ msgstr ""
 #: erpnext/public/js/controllers/transaction.js:2708
 #: erpnext/selling/doctype/quotation/quotation.js:357
 msgid "Continue"
-msgstr ""
+msgstr "Fortsett"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -12889,7 +12908,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Cost Center"
-msgstr ""
+msgstr "Kostnadssenter"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -13084,7 +13103,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:353
 msgid "Could not detect the Company for updating Bank Accounts"
-msgstr ""
+msgstr "Kunne ikke finne selskapet for oppdatering av bankkontoer"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:129
 msgid "Could not find a suitable shift to match the difference: {0}"
@@ -14510,7 +14529,7 @@ msgstr ""
 #: erpnext/support/report/issue_summary/issue_summary.py:34
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Customer"
-msgstr ""
+msgstr "Kunde"
 
 #. Label of the customer (Link) field in DocType 'Customer Item'
 #: erpnext/accounts/doctype/customer_item/customer_item.json
@@ -14595,7 +14614,7 @@ msgstr ""
 #: erpnext/selling/report/customer_credit_balance/customer_credit_balance.json
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Customer Credit Balance"
-msgstr ""
+msgstr "Kundens kredittsaldo"
 
 #. Name of a DocType
 #: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
@@ -14705,7 +14724,7 @@ msgstr ""
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Customer Group"
-msgstr ""
+msgstr "Kundegruppe"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/customer_group_item/customer_group_item.json
@@ -14750,7 +14769,7 @@ msgstr ""
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Customer Ledger Summary"
-msgstr ""
+msgstr "Sammendrag av kunderegnskapet"
 
 #. Label of the customer_contact_mobile (Small Text) field in DocType 'Purchase
 #. Order'
@@ -15130,7 +15149,7 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: erpnext/setup/workspace/home/home.json
 msgid "Data Import and Settings"
-msgstr ""
+msgstr "Dataimport og innstillinger"
 
 #. Label of the date (Date) field in DocType 'Bank Transaction'
 #. Label of the date (Date) field in DocType 'Cashier Closing'
@@ -16329,7 +16348,7 @@ msgstr ""
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Delivered Items To Be Billed"
-msgstr ""
+msgstr "Leverte varer som skal faktureres"
 
 #. Label of the delivered_qty (Float) field in DocType 'POS Invoice Item'
 #. Label of the delivered_qty (Float) field in DocType 'Sales Invoice Item'
@@ -18479,7 +18498,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:150
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Dunning"
-msgstr ""
+msgstr "Purring"
 
 #. Label of the dunning_amount (Currency) field in DocType 'Dunning'
 #: erpnext/accounts/doctype/dunning/dunning.json
@@ -18522,7 +18541,7 @@ msgstr ""
 #: erpnext/accounts/doctype/dunning_type/dunning_type.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Dunning Type"
-msgstr ""
+msgstr "Purringstype"
 
 #: erpnext/stock/doctype/item/item.js:210
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:55
@@ -19243,7 +19262,7 @@ msgstr ""
 #. Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Enable European Access"
-msgstr ""
+msgstr "Aktiver europeisk tilgang"
 
 #. Label of the enable_fuzzy_matching (Check) field in DocType 'Accounts
 #. Settings'
@@ -20821,7 +20840,7 @@ msgstr ""
 #. Name of a Workspace
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Financial Reports"
-msgstr ""
+msgstr "Finansrapporter"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:24
 msgid "Financial Services"
@@ -20831,7 +20850,7 @@ msgstr ""
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/public/js/financial_statements.js:122
 msgid "Financial Statements"
-msgstr ""
+msgstr "Finansregnskap"
 
 #: erpnext/public/js/setup_wizard.js:48
 msgid "Financial Year Begins On"
@@ -20841,7 +20860,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
-msgstr ""
+msgstr "Finansrapporter genereres ved hjelp av dokumenttyper for hovedbokposter (bør aktiveres hvis periodeavslutningsbilag ikke posteres for alle år sekvensielt eller mangler) "
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:807
 #: erpnext/manufacturing/doctype/work_order/work_order.js:822
@@ -22313,12 +22332,12 @@ msgstr "Generell"
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "General Ledger"
-msgstr ""
+msgstr "Hovedbok"
 
 #: erpnext/stock/doctype/warehouse/warehouse.js:77
 msgctxt "Warehouse"
 msgid "General Ledger"
-msgstr ""
+msgstr "Hovedbok"
 
 #. Label of the gs (Section Break) field in DocType 'Item Group'
 #: erpnext/setup/doctype/item_group/item_group.json
@@ -22932,7 +22951,7 @@ msgstr ""
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Gross Profit"
-msgstr ""
+msgstr "Bruttofortjeneste"
 
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:196
 msgid "Gross Profit / Loss"
@@ -23483,7 +23502,7 @@ msgstr ""
 #. Name of a Workspace
 #: erpnext/setup/workspace/home/home.json
 msgid "Home"
-msgstr ""
+msgstr "Hjem"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -24292,7 +24311,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Import Data"
-msgstr ""
+msgstr "Importer data"
 
 #. Label of the import_file (Attach) field in DocType 'Bank Statement Import'
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.json
@@ -25914,7 +25933,7 @@ msgstr ""
 #: erpnext/accounts/workspace/payables/payables.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Invoicing"
-msgstr ""
+msgstr "Fakturering"
 
 #. Label of the invoicing_features_section (Section Break) field in DocType
 #. 'Accounts Settings'
@@ -26703,7 +26722,7 @@ msgstr ""
 #: erpnext/templates/pages/material_request_info.html:42
 #: erpnext/templates/pages/order.html:94
 msgid "Item"
-msgstr ""
+msgstr "Artikkel"
 
 #: erpnext/stock/report/bom_search/bom_search.js:8
 msgid "Item 1"
@@ -27872,7 +27891,7 @@ msgstr ""
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.json
 #: erpnext/accounts/workspace/payables/payables.json
 msgid "Item-wise Purchase Register"
-msgstr ""
+msgstr "Varespesifikt innkjøpsregister"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
@@ -27886,7 +27905,7 @@ msgstr ""
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Item-wise Sales Register"
-msgstr ""
+msgstr "Varespesifikt salgsregister"
 
 #: erpnext/stock/get_item_details.py:698
 msgid "Item/Item Code required to get Item Tax Template."
@@ -28272,7 +28291,7 @@ msgstr ""
 #: erpnext/assets/doctype/depreciation_schedule/depreciation_schedule.json
 #: erpnext/templates/form_grid/bank_reconciliation_grid.html:3
 msgid "Journal Entry"
-msgstr ""
+msgstr "Journalinnføring"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
@@ -28705,7 +28724,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/support/doctype/issue/issue.json
 msgid "Lead"
-msgstr ""
+msgstr "Potensiell kunde"
 
 #: erpnext/crm/doctype/lead/lead.py:549
 msgid "Lead -> Prospect"
@@ -28853,7 +28872,8 @@ msgstr ""
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Leave blank for home.\n"
 "This is relative to site URL, for example \"about\" will redirect to \"https://yoursitename.com/about\""
-msgstr ""
+msgstr "La stå tomt for startside.\n"
+"Dette er relativt til nettstedets URL, for eksempel vil «om» omdirigere til «https://dittnettstednavn.com/om»"
 
 #. Description of the 'Release Date' (Date) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
@@ -28900,7 +28920,7 @@ msgstr ""
 #. Label of a Card Break in the Financial Reports Workspace
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Ledgers"
-msgstr ""
+msgstr "Regnskapsbøker"
 
 #. Option for the 'Status' (Select) field in DocType 'Driver'
 #. Option for the 'Status' (Select) field in DocType 'Employee'
@@ -29919,7 +29939,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:254
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:101
 msgid "Mandatory"
-msgstr ""
+msgstr "Påkrevet"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:99
 msgid "Mandatory Accounting Dimension"
@@ -30036,12 +30056,12 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Manufacture"
-msgstr ""
+msgstr "Produsere"
 
 #. Description of the 'Material Request' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Manufacture against Material Request"
-msgstr ""
+msgstr "Produksjon mot materialforespørsel"
 
 #. Label of the manufactured_qty (Float) field in DocType 'Job Card'
 #. Label of the produced_qty (Float) field in DocType 'Work Order'
@@ -30049,7 +30069,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/manufacturing/report/process_loss_report/process_loss_report.py:88
 msgid "Manufactured Qty"
-msgstr ""
+msgstr "Produsert antall"
 
 #. Label of the manufacturer (Link) field in DocType 'Purchase Invoice Item'
 #. Label of the manufacturer (Link) field in DocType 'Purchase Order Item'
@@ -30075,7 +30095,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Manufacturer"
-msgstr ""
+msgstr "Produsent"
 
 #. Label of the manufacturer_part_no (Data) field in DocType 'Purchase Invoice
 #. Item'
@@ -30103,7 +30123,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Manufacturer Part Number"
-msgstr ""
+msgstr "Produsentens delenummer"
 
 #: erpnext/public/js/controllers/buying.js:420
 msgid "Manufacturer Part Number <b>{0}</b> is invalid"
@@ -30130,17 +30150,17 @@ msgstr ""
 #: erpnext/stock/doctype/batch/batch.json erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/material_request/material_request_dashboard.py:18
 msgid "Manufacturing"
-msgstr ""
+msgstr "Produksjon"
 
 #. Label of the semi_fg_bom (Link) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Manufacturing BOM"
-msgstr ""
+msgstr "Produksjons-BOM"
 
 #. Label of the manufacturing_date (Date) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Manufacturing Date"
-msgstr ""
+msgstr "Produksjonsdato"
 
 #. Name of a role
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
@@ -30162,17 +30182,17 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Manufacturing Manager"
-msgstr ""
+msgstr "Produksjonsleder"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2050
 msgid "Manufacturing Quantity is mandatory"
-msgstr ""
+msgstr "Produksjonsmengde er påkrevet"
 
 #. Label of the manufacturing_section_section (Section Break) field in DocType
 #. 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Manufacturing Section"
-msgstr ""
+msgstr "Produksjonsavdeling"
 
 #. Name of a DocType
 #. Label of a Link in the Manufacturing Workspace
@@ -30181,13 +30201,13 @@ msgstr ""
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Manufacturing Settings"
-msgstr ""
+msgstr "Innstillinger for produksjon"
 
 #. Label of the type_of_manufacturing (Select) field in DocType 'Production
 #. Plan Sub Assembly Item'
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgid "Manufacturing Type"
-msgstr ""
+msgstr "Produksjonstype"
 
 #. Name of a role
 #: erpnext/assets/doctype/asset_maintenance/asset_maintenance.json
@@ -30216,7 +30236,7 @@ msgstr ""
 #: erpnext/stock/doctype/warehouse/warehouse.json
 #: erpnext/stock/doctype/warehouse_type/warehouse_type.json
 msgid "Manufacturing User"
-msgstr ""
+msgstr "Produksjonsbruker"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:183
 msgid "Mapping Purchase Receipt ..."
@@ -33830,7 +33850,7 @@ msgstr ""
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/setup/workspace/home/home.json
 msgid "Opening Invoice Creation Tool"
-msgstr ""
+msgstr "Verktøy for registrering av åpningsfakturaer"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
@@ -34483,7 +34503,7 @@ msgstr ""
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Other Reports"
-msgstr ""
+msgstr "Andre rapporter"
 
 #. Label of the other_settings_section (Section Break) field in DocType
 #. 'Manufacturing Settings'
@@ -34896,7 +34916,7 @@ msgstr ""
 #: erpnext/accounts/report/pos_register/pos_register.py:174
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "POS Invoice"
-msgstr ""
+msgstr "POS-faktura"
 
 #. Name of a DocType
 #. Label of the pos_invoice_item (Data) field in DocType 'POS Invoice Item'
@@ -36046,7 +36066,7 @@ msgstr ""
 #: erpnext/accounts/workspace/payables/payables.json
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Payables"
-msgstr ""
+msgstr "Leverandørgjeld"
 
 #. Label of the payer_settings (Column Break) field in DocType 'Cheque Print
 #. Template'
@@ -36176,7 +36196,7 @@ msgstr ""
 #: erpnext/accounts/workspace/payables/payables.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Payment Entry"
-msgstr ""
+msgstr "Registrering av utbetaling"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
@@ -36235,7 +36255,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Payment Gateway Account"
-msgstr ""
+msgstr "Konto for betalingstjeneste"
 
 #: erpnext/accounts/utils.py:1345
 msgid "Payment Gateway Account not created, please create one manually."
@@ -36325,7 +36345,7 @@ msgstr ""
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Payment Period Based On Invoice Date"
-msgstr ""
+msgstr "Betalingsperiode basert på fakturadato"
 
 #. Label of the payment_plan_section (Section Break) field in DocType
 #. 'Subscription Plan'
@@ -36351,7 +36371,7 @@ msgstr ""
 #: erpnext/accounts/workspace/payables/payables.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Payment Reconciliation"
-msgstr ""
+msgstr "Avstemming av utbetalinger"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
@@ -36412,7 +36432,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:470
 #: erpnext/selling/doctype/sales_order/sales_order.js:757
 msgid "Payment Request"
-msgstr ""
+msgstr "Betalingsoppfordring"
 
 #. Label of the payment_request_outstanding (Float) field in DocType 'Payment
 #. Entry Reference'
@@ -36657,7 +36677,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer_dashboard.py:21
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:19
 msgid "Payments"
-msgstr ""
+msgstr "Utbetalinger"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:342
 msgid "Payments could not be updated."
@@ -40119,7 +40139,7 @@ msgstr ""
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Profit and Loss Statement"
-msgstr ""
+msgstr "Resultatregnskap"
 
 #. Label of the heading_cppb (Heading) field in DocType 'Bisect Accounting
 #. Statements'
@@ -40137,14 +40157,14 @@ msgstr ""
 #. Label of a Card Break in the Financial Reports Workspace
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Profitability"
-msgstr ""
+msgstr "Lønnsomhet"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Profitability Analysis"
-msgstr ""
+msgstr "Lønnsomhetsanalyse"
 
 #. Label of the progress_section (Section Break) field in DocType 'BOM Update
 #. Log'
@@ -40692,7 +40712,7 @@ msgstr ""
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Purchase"
-msgstr ""
+msgstr "Kjøp"
 
 #. Label of the purchase_amount (Currency) field in DocType 'Loyalty Point
 #. Entry'
@@ -40780,7 +40800,7 @@ msgstr ""
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:304
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Innkjøpsfaktura"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
@@ -40806,7 +40826,7 @@ msgstr ""
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/buying/workspace/buying/buying.json
 msgid "Purchase Invoice Trends"
-msgstr ""
+msgstr "Trender for innkjøpsfakturaer"
 
 #: erpnext/assets/doctype/asset/asset.py:268
 msgid "Purchase Invoice cannot be made against an existing asset {0}"
@@ -40919,7 +40939,7 @@ msgstr ""
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Purchase Order Analysis"
-msgstr ""
+msgstr "Analyse av innkjøpsordre"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:76
 msgid "Purchase Order Date"
@@ -41139,7 +41159,7 @@ msgstr ""
 #: erpnext/accounts/report/purchase_register/purchase_register.json
 #: erpnext/accounts/workspace/payables/payables.json
 msgid "Purchase Register"
-msgstr ""
+msgstr "Innkjøpsregister"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:286
 msgid "Purchase Return"
@@ -41625,7 +41645,7 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Quality"
-msgstr ""
+msgstr "Kvalitet"
 
 #. Name of a DocType
 #. Option for the 'Document Type' (Select) field in DocType 'Quality Meeting
@@ -43005,7 +43025,7 @@ msgstr ""
 #: erpnext/accounts/workspace/receivables/receivables.json
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Receivables"
-msgstr ""
+msgstr "Fordringer"
 
 #. Option for the 'Payment Type' (Select) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -43060,7 +43080,7 @@ msgstr ""
 #: erpnext/accounts/report/received_items_to_be_billed/received_items_to_be_billed.json
 #: erpnext/accounts/workspace/payables/payables.json
 msgid "Received Items To Be Billed"
-msgstr ""
+msgstr "Mottatte varer som skal faktureres"
 
 #: erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html:8
 msgid "Received On"
@@ -43715,7 +43735,7 @@ msgstr ""
 #: erpnext/projects/doctype/timesheet/timesheet_dashboard.py:7
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgid "References"
-msgstr ""
+msgstr "Referanser"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:385
 msgid "References to Sales Invoices are Incomplete"
@@ -44207,7 +44227,7 @@ msgstr ""
 #: erpnext/projects/workspace/projects/projects.json
 #: erpnext/support/workspace/support/support.json
 msgid "Reports"
-msgstr ""
+msgstr "Rapporter"
 
 #. Label of the reports_to (Link) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -46777,7 +46797,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:65
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Salgsfaktura"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
@@ -46829,7 +46849,7 @@ msgstr ""
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Sales Invoice Trends"
-msgstr ""
+msgstr "Trender for salgsfakturaer"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:182
 msgid "Sales Invoice does not have Payments"
@@ -47021,7 +47041,7 @@ msgstr ""
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Sales Order Analysis"
-msgstr ""
+msgstr "Analyse av salgsordre"
 
 #. Label of the sales_order_date (Date) field in DocType 'Production Plan Sales
 #. Order'
@@ -47222,14 +47242,14 @@ msgstr ""
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Sales Partners Commission"
-msgstr ""
+msgstr "Provisjon for salgspartnere"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Sales Payment Summary"
-msgstr ""
+msgstr "Sammendrag av innbetalinger fra salg"
 
 #. Option for the 'Select Customers By' (Select) field in DocType 'Process
 #. Statement Of Accounts'
@@ -47329,7 +47349,7 @@ msgstr ""
 #: erpnext/accounts/report/sales_register/sales_register.json
 #: erpnext/accounts/workspace/receivables/receivables.json
 msgid "Sales Register"
-msgstr ""
+msgstr "Salgsregister"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:28
 msgid "Sales Representative"
@@ -47599,7 +47619,7 @@ msgstr ""
 #: erpnext/public/js/call_popup/call_popup.js:169
 #: erpnext/selling/page/point_of_sale/pos_payment.js:62
 msgid "Save"
-msgstr ""
+msgstr "Lagre"
 
 #. Option for the 'Action on New Invoice' (Select) field in DocType 'POS
 #. Profile'
@@ -47643,7 +47663,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgid "Scan Barcode"
-msgstr ""
+msgstr "Skann strekkode"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:160
 msgid "Scan Batch No"
@@ -47880,7 +47900,7 @@ msgstr ""
 #: erpnext/selling/page/point_of_sale/pos_past_order_list.js:58
 #: erpnext/templates/pages/help.html:14
 msgid "Search"
-msgstr ""
+msgstr "Søk"
 
 #. Label of the search_apis_sb (Section Break) field in DocType 'Support
 #. Settings'
@@ -48368,20 +48388,20 @@ msgstr ""
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "Selling"
-msgstr ""
+msgstr "Salg"
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:336
 msgid "Selling Amount"
-msgstr ""
+msgstr "Salgsbeløp"
 
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:48
 msgid "Selling Price List"
-msgstr ""
+msgstr "Salgsprisliste"
 
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:36
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:54
 msgid "Selling Rate"
-msgstr ""
+msgstr "Salgspris"
 
 #. Name of a DocType
 #. Label of a Link in the Selling Workspace
@@ -48391,11 +48411,11 @@ msgstr ""
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Selling Settings"
-msgstr ""
+msgstr "Innstillinger for salg"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:214
 msgid "Selling must be checked, if Applicable For is selected as {0}"
-msgstr ""
+msgstr "Salg må sjekkes hvis aktuelt, hvis gjeldende for er valgt som {0}"
 
 #. Label of the semi_finished_good__finished_good_section (Section Break) field
 #. in DocType 'Job Card'
@@ -48410,7 +48430,7 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:58
 msgid "Send"
-msgstr ""
+msgstr "Send"
 
 #. Label of the send_after_days (Int) field in DocType 'Campaign Email
 #. Schedule'
@@ -48452,12 +48472,12 @@ msgstr ""
 #: erpnext/public/js/controllers/transaction.js:580
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "Send SMS"
-msgstr ""
+msgstr "Send SMS"
 
 #. Label of the send_to (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "Send To"
-msgstr ""
+msgstr "Send til"
 
 #. Label of the primary_mandatory (Check) field in DocType 'Process Statement
 #. Of Accounts'
@@ -48629,7 +48649,7 @@ msgstr ""
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 #: erpnext/support/workspace/support/support.json
 msgid "Serial No"
-msgstr ""
+msgstr "Serienummer"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:140
 msgid "Serial No (In/Out)"
@@ -48643,7 +48663,7 @@ msgstr ""
 
 #: erpnext/controllers/selling_controller.py:93
 msgid "Serial No Already Assigned"
-msgstr ""
+msgstr "Serienummer allerede tildelt"
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:33
 msgid "Serial No Count"
@@ -51191,7 +51211,7 @@ msgstr ""
 #: erpnext/stock/doctype/material_request/material_request_dashboard.py:17
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Stock"
-msgstr ""
+msgstr "Lager"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -51546,7 +51566,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Stock Reconciliation"
-msgstr ""
+msgstr "Lageravstemming"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
@@ -52767,7 +52787,7 @@ msgstr ""
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:516
 #: erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.js:8
 msgid "Supplier"
-msgstr ""
+msgstr "Leverandør"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:50
 msgid "Supplier > Supplier Type"
@@ -52930,7 +52950,7 @@ msgstr ""
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/accounts/workspace/payables/payables.json
 msgid "Supplier Ledger Summary"
-msgstr ""
+msgstr "Sammendrag av leverandørreskontro"
 
 #. Label of the supplier_name (Data) field in DocType 'Purchase Invoice'
 #. Option for the 'Supplier Naming By' (Select) field in DocType 'Buying
@@ -54597,7 +54617,7 @@ msgstr ""
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Territory"
-msgstr ""
+msgstr "Territorium"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/territory_item/territory_item.json
@@ -57469,7 +57489,7 @@ msgstr ""
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Trial Balance"
-msgstr ""
+msgstr "Saldobalanse"
 
 #. Name of a report
 #: erpnext/accounts/report/trial_balance_simple/trial_balance_simple.json
@@ -57938,7 +57958,7 @@ msgstr ""
 #: erpnext/setup/workspace/home/home.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Unit of Measure (UOM)"
-msgstr ""
+msgstr "Måleenhet (UOM)"
 
 #: erpnext/stock/doctype/item/item.py:385
 msgid "Unit of Measure {0} has been entered more than once in Conversion Factor Table"
@@ -59832,7 +59852,7 @@ msgstr ""
 #: erpnext/templates/form_grid/material_request_grid.html:8
 #: erpnext/templates/form_grid/stock_entry_grid.html:9
 msgid "Warehouse"
-msgstr ""
+msgstr "Varehus"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:4
 msgid "Warehouse Capacity Summary"
@@ -61363,7 +61383,7 @@ msgstr ""
 #. Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "development"
-msgstr ""
+msgstr "utvikling"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:450
 msgid "discount applied"
@@ -61532,7 +61552,7 @@ msgstr ""
 #. Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "production"
-msgstr ""
+msgstr "produksjon"
 
 #. Label of the quotation_item (Data) field in DocType 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
@@ -61580,7 +61600,7 @@ msgstr ""
 #. Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "sandbox"
-msgstr ""
+msgstr "sandkasse"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1326
 msgid "sold"
