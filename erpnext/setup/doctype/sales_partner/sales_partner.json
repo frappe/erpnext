@@ -2,13 +2,14 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:partner_name",
+ "autoname": "naming_series:",
  "creation": "2013-04-12 15:34:06",
  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "partner_name",
   "partner_type",
   "territory",
@@ -37,13 +38,18 @@
  ],
  "fields": [
   {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SP"
+  },
+  {
    "fieldname": "partner_name",
    "fieldtype": "Data",
    "label": "Sales Partner Name",
    "oldfieldname": "partner_name",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "partner_type",
@@ -226,5 +232,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",
- "states": []
+ "states": [],
+ "use_name_as_title": 1
 }

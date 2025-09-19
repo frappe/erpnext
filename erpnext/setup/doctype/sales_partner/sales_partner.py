@@ -43,9 +43,6 @@ class SalesPartner(WebsiteGenerator):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 
-	def autoname(self):
-		self.name = self.partner_name
-
 	def validate(self):
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
