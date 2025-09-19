@@ -1,0 +1,2766 @@
+{
+  "country_code": "lb",
+  "name": "Lebanon - Plan Comptable Général Libanais (English, 1982)",
+  "tree": {
+    "CLASS 1 - EQUITY & LONG TERM DEBTS": {
+      "root_type": "Equity",
+      "is_group": 1,
+      "account_number": "1",
+      "CAPITAL": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "10",
+        "Capital ( Company or Individual )": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "101",
+          "Subscribed Capital (Uncalled)": {
+            "root_type": "Equity",
+            "account_number": "1011"
+          },
+          "Subscribed Capital (Called & Unpaid)": {
+            "root_type": "Equity",
+            "account_number": "1012"
+          },
+          "Subscribed Capital (Called & Paid Up)": {
+            "root_type": "Equity",
+            "account_number": "1013"
+          }
+        },
+        "Premiums Related to the Capital": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "102",
+          "Issue Premiums": {
+            "root_type": "Equity",
+            "account_number": "1021"
+          },
+          "Merger Premiums": {
+            "root_type": "Equity",
+            "account_number": "1022"
+          },
+          "Contributions Premiums": {
+            "root_type": "Equity",
+            "account_number": "1023"
+          },
+          "Premium on converting D.Loans to Shares": {
+            "root_type": "Equity",
+            "account_number": "1024"
+          }
+        },
+        "Revalution Variances": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "103",
+          "R. V. of Unamortizable Fixed Assets": {
+            "root_type": "Equity",
+            "account_number": "1031"
+          },
+          "R. V. of Amortizable Fixed Assets": {
+            "root_type": "Equity",
+            "account_number": "1035"
+          }
+        },
+        "Owners Current Account": {
+          "root_type": "Equity",
+          "account_number": "109"
+        }
+      },
+      "RESERVES": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "11",
+        "Legal Reserve": {
+          "root_type": "Equity",
+          "account_number": "111"
+        },
+        "Statutary & Contractual Reserve": {
+          "root_type": "Equity",
+          "account_number": "112"
+        },
+        "Other Reserves": {
+          "root_type": "Equity",
+          "account_number": "119"
+        }
+      },
+      "BROUGHT FORWARD RESULTS": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "12",
+        "Profit Brought Forward": {
+          "root_type": "Equity",
+          "account_number": "121"
+        },
+        "Loss Brought Forward": {
+          "root_type": "Equity",
+          "account_number": "125"
+        }
+      },
+      "NET RESULT OF THE FI. PER.(PRO.or LOSS)": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "13",
+        "Gross Trade Margin": {
+          "root_type": "Equity",
+          "account_number": "131"
+        },
+        "Value Added": {
+          "root_type": "Equity",
+          "account_number": "132"
+        },
+        "Gross Trading Operating Margin": {
+          "root_type": "Equity",
+          "account_number": "133"
+        },
+        "Operating Result (Prior to Fi. In.& Ex.)": {
+          "root_type": "Equity",
+          "account_number": "134"
+        },
+        "Result Before Taxation": {
+          "root_type": "Equity",
+          "account_number": "135"
+        },
+        "Non Operating Result": {
+          "root_type": "Equity",
+          "account_number": "136"
+        },
+        "Result of the Period - Profits": {
+          "root_type": "Equity",
+          "account_number": "138"
+        },
+        "Result of the Period - Losses": {
+          "root_type": "Equity",
+          "account_number": "139"
+        }
+      },
+      "INVESTMENT SUBSIDIES": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "14",
+        "Investment Subsidies Received": {
+          "root_type": "Equity",
+          "account_number": "141"
+        },
+        "Investment Subsidies Transf. to Results": {
+          "root_type": "Equity",
+          "account_number": "145"
+        }
+      },
+      "PROVISIONS FOR CONTINGENCIES & CHARGES": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "15",
+        "Provisions for Contingencies": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "151",
+          "P. for Litigation & Sundry Contingencies": {
+            "root_type": "Equity",
+            "account_number": "1511"
+          },
+          "P. in Respect of Gua. given to Customers": {
+            "root_type": "Equity",
+            "account_number": "1512"
+          },
+          "Provisions for Losses on Exchange": {
+            "root_type": "Equity",
+            "account_number": "1513"
+          },
+          "Pro. for Losses on Future Transactions": {
+            "root_type": "Equity",
+            "account_number": "1514"
+          },
+          "Provisions for Fines and Penalties": {
+            "root_type": "Equity",
+            "account_number": "1515"
+          },
+          "Provisions for Financial Risks": {
+            "root_type": "Equity",
+            "account_number": "1516"
+          },
+          "Provisions for Extraordinary Prices Fall": {
+            "root_type": "Equity",
+            "account_number": "1517"
+          },
+          "Provisions for Non-Oper. Risks & Charges": {
+            "root_type": "Equity",
+            "account_number": "1518"
+          }
+        },
+        "Provisions for Charges": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "155",
+          "Provisions for Defferd Charges": {
+            "root_type": "Equity",
+            "account_number": "1551"
+          },
+          "P. for Emp. End of Service Indemnities &": {
+            "root_type": "Equity",
+            "is_group": 1,
+            "account_number": "1552",
+            "Prov. for End of Service Indemnity": {
+              "root_type": "Equity",
+              "account_number": "15521"
+            },
+            "Prov. for End of Service Pensions": {
+              "root_type": "Equity",
+              "account_number": "15522"
+            },
+            "Prov. for Workmen's Compensations": {
+              "root_type": "Equity",
+              "account_number": "15523"
+            }
+          },
+          "Provisions for Taxes": {
+            "root_type": "Equity",
+            "account_number": "1553"
+          }
+        }
+      },
+      "LONG & MEDIUM TERM DEBTS": {
+        "root_type": "Liability",
+        "is_group": 1,
+        "account_number": "16",
+        "Loans Against Debenture": {
+          "root_type": "Liability",
+          "account_number": "161"
+        },
+        "Loans from Financial Institutions": {
+          "root_type": "Liability",
+          "account_number": "162"
+        },
+        "Sundry Loans and Debts": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "168",
+          "Notes Payable Resulting from Pur.of Ent.": {
+            "root_type": "Liability",
+            "account_number": "1681"
+          },
+          "Deposits and Guarantees": {
+            "root_type": "Liability",
+            "account_number": "1682"
+          },
+          "Advances from the Government": {
+            "root_type": "Liability",
+            "account_number": "1683"
+          },
+          "Capitalized Life Annuities": {
+            "root_type": "Liability",
+            "account_number": "1684"
+          },
+          "Other Medium and Long Term Debts": {
+            "root_type": "Liability",
+            "account_number": "1689"
+          }
+        }
+      },
+      "ACCOUNTS WITH AFFILIATED COMPANIES": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "18",
+        "Branches and Joint Ventures Accounts (.)": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "181",
+          "Balance Brought Forward": {
+            "root_type": "Equity",
+            "account_number": "1811"
+          },
+          "Movements of the Period": {
+            "root_type": "Equity",
+            "account_number": "1815"
+          }
+        },
+        "Intercompany Charges": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "186"
+        },
+        "Intercompany Income": {
+          "root_type": "Equity",
+          "is_group": 1,
+          "account_number": "187"
+        }
+      },
+      "ACC OF REGROUPING THE CHARGES & INCOME": {
+        "root_type": "Equity",
+        "is_group": 1,
+        "account_number": "19",
+        "Determination of the Gros Trading margin": {
+          "root_type": "Equity",
+          "account_number": "191"
+        },
+        "Determination of Value Added": {
+          "root_type": "Equity",
+          "account_number": "192"
+        },
+        "Determi. of the Gross Operating Income": {
+          "root_type": "Equity",
+          "account_number": "193"
+        },
+        "D. of Op. Result (Prior to F.I. & Exp)": {
+          "root_type": "Equity",
+          "account_number": "194"
+        },
+        "D. of the Current Result before Taxation": {
+          "root_type": "Equity",
+          "account_number": "195"
+        },
+        "Determination of Non Operating Result": {
+          "root_type": "Equity",
+          "account_number": "196"
+        },
+        "Determination of the Period's Result": {
+          "root_type": "Equity",
+          "account_number": "197"
+        }
+      }
+    },
+    "CLASS 2 - ACCOUNTS OF FIXED ASSETS": {
+      "root_type": "Asset",
+      "is_group": 1,
+      "account_number": "2",
+      "INTANGIBLE FIXED ASSETS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "21",
+        "Business Concern (Keymoney,Goodwill,Cli)": {
+          "root_type": "Asset",
+          "account_type": "Fixed Asset",
+          "account_number": "211"
+        },
+        "Patents, Licences,Trade Marks & Similars": {
+          "root_type": "Asset",
+          "account_type": "Fixed Asset",
+          "account_number": "214"
+        },
+        "Establishment Expenses": {
+          "root_type": "Asset",
+          "account_type": "Accumulated Depreciation",
+          "account_number": "2811"
+        },
+        "Research and Development Expenses": {
+          "root_type": "Asset",
+          "account_type": "Accumulated Depreciation",
+          "account_number": "2812"
+        },
+        "Other Intangible Fixed Assets": {
+          "root_type": "Asset",
+          "account_number": "2919",
+          "Advance Payments on acc of Intan. F. A.": {
+            "root_type": "Asset",
+            "account_type": "Capital Work in Progress",
+            "account_number": "2198"
+          }
+        }
+      },
+      "TANGIBLE FIXED ASSETS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "22",
+        "Construction": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "223",
+          "Buildings": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28231"
+          },
+          "Ge.Installation & Leasehold Improvements": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28232"
+          },
+          "Infrastructure Works (Dams Airp.Runways)": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28233"
+          },
+          "Construction on Leasehold Land": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28234"
+          }
+        },
+        "Technical Installa. and Industrial Tools": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "224",
+          "Specialized Installations": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28241"
+          },
+          "Specific Installations": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28242"
+          },
+          "Industrial Equipment": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28243"
+          },
+          "Industrial Tools": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28244"
+          }
+        },
+        "Tangible Fixed Assets in Progress": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "227",
+          "Land": {
+            "root_type": "Asset",
+            "account_type": "Capital Work in Progress",
+            "account_number": "2271",
+            "Naked Land": {
+              "root_type": "Asset",
+              "account_type": "Fixed Asset",
+              "account_number": "2211"
+            },
+            "Built Lands (Real Estate Complexes)": {
+              "root_type": "Asset",
+              "account_type": "Fixed Asset",
+              "account_number": "2212"
+            },
+            "Extractive Land Sites (Mines & Quarris)": {
+              "root_type": "Asset",
+              "account_type": "Fixed Asset",
+              "account_number": "2213"
+            },
+            "Land Development and Reclamation": {
+              "root_type": "Asset",
+              "account_type": "Fixed Asset",
+              "account_number": "2214"
+            }
+          },
+          "Tech. Inst., Industrial Equip. & Tools": {
+            "root_type": "Asset",
+            "account_type": "Capital Work in Progress",
+            "account_number": "2274"
+          },
+          "Other Tangible Fixed Assets": {
+            "root_type": "Asset",
+            "account_number": "2926",
+            "Gn. Inst. & Other Improvements & Dvlpmnt": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28261"
+            },
+            "Office and Computer Equipment": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28262"
+            },
+            "Furniture": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28263"
+            },
+            "Agricultural Investments": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28264"
+            },
+            "Reusable Packing Material": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28265"
+            }
+          },
+          "Buildings": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28231"
+          }
+        },
+        "Advance Payments on Acc of Tangible F.A.": {
+          "root_type": "Asset",
+          "account_type": "Capital Work in Progress",
+          "account_number": "228"
+        },
+        "Land": {
+          "root_type": "Asset",
+          "account_type": "Capital Work in Progress",
+          "account_number": "2271",
+          "Naked Land": {
+            "root_type": "Asset",
+            "account_type": "Fixed Asset",
+            "account_number": "2211"
+          },
+          "Built Lands (Real Estate Complexes)": {
+            "root_type": "Asset",
+            "account_type": "Fixed Asset",
+            "account_number": "2212"
+          },
+          "Extractive Land Sites (Mines & Quarris)": {
+            "root_type": "Asset",
+            "account_type": "Fixed Asset",
+            "account_number": "2213"
+          },
+          "Land Development and Reclamation": {
+            "root_type": "Asset",
+            "account_type": "Fixed Asset",
+            "account_number": "2214"
+          }
+        },
+        "Transportation Equipment": {
+          "root_type": "Asset",
+          "account_type": "Accumulated Depreciation",
+          "account_number": "2825"
+        },
+        "Other Tangible Fixed Assets": {
+          "root_type": "Asset",
+          "account_number": "2926",
+          "Gn. Inst. & Other Improvements & Dvlpmnt": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28261"
+          },
+          "Office and Computer Equipment": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28262"
+          },
+          "Furniture": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28263"
+          },
+          "Agricultural Investments": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28264"
+          },
+          "Reusable Packing Material": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "28265"
+          }
+        }
+      },
+      "FINANCIAL FIXED ASSETS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "25",
+        "Equity Participations": {
+          "root_type": "Asset",
+          "account_number": "2951"
+        },
+        "Receivables Related to Equity Participa.": {
+          "root_type": "Asset",
+          "account_number": "2952"
+        },
+        "Other Blocked Securities": {
+          "root_type": "Asset",
+          "account_number": "2953",
+          "Ownership Rights ( Minor Participations)": {
+            "root_type": "Asset",
+            "account_number": "2531"
+          },
+          "Debenture Loans (Bonds and Debentures)": {
+            "root_type": "Asset",
+            "account_number": "2535"
+          }
+        },
+        "Long and Medium Term Loans": {
+          "root_type": "Asset",
+          "account_number": "2955",
+          "Loans to Partners": {
+            "root_type": "Asset",
+            "account_number": "2551"
+          },
+          "Loans to Employees": {
+            "root_type": "Asset",
+            "account_number": "2552"
+          },
+          "Other Loans": {
+            "root_type": "Asset",
+            "account_number": "2558"
+          }
+        },
+        "Other Blocked Long Term Receivables": {
+          "root_type": "Asset",
+          "account_number": "2959"
+        }
+      },
+      "DEPRECIATION OF FIXED ASSETS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "28",
+        "Amor. of the Business Concern (Goodwill)": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "280"
+        },
+        "Amortization of Other Intangible F. A.": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "281",
+          "Establishment Expenses": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "2811"
+          },
+          "Research and Development Expenses": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "2812"
+          },
+          "Patents, Licences & Similar Values": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "2813"
+          },
+          "Other Intangible Fixed Assets": {
+            "root_type": "Asset",
+            "account_number": "2919",
+            "Advance Payments on acc of Intan. F. A.": {
+              "root_type": "Asset",
+              "account_type": "Capital Work in Progress",
+              "account_number": "2198"
+            }
+          }
+        },
+        "Depreciation of Tangible Fixed Assets": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "282",
+          "Extractive Land Sites (Mines,Quarries..)": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "2821"
+          },
+          "Constructions": {
+            "root_type": "Asset",
+            "is_group": 1,
+            "account_number": "2823",
+            "Buildings": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28231"
+            },
+            "Ge.Installation & Leasehold Improvements": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28232"
+            },
+            "Infrastructure Works (Dams Airp.Runways)": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28233"
+            },
+            "Construction on Leasehold Land": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28234"
+            }
+          },
+          "Technical Installations & Industri.tools": {
+            "root_type": "Asset",
+            "is_group": 1,
+            "account_number": "2824",
+            "Specialized Installations": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28241"
+            },
+            "Specific Installations": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28242"
+            },
+            "Industrial Equipment": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28243"
+            },
+            "Industrial Tools": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28244"
+            }
+          },
+          "Transportation Equipment": {
+            "root_type": "Asset",
+            "account_type": "Accumulated Depreciation",
+            "account_number": "2825"
+          },
+          "Other Tangible Fixed Assets": {
+            "root_type": "Asset",
+            "account_number": "2926",
+            "Gn. Inst. & Other Improvements & Dvlpmnt": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28261"
+            },
+            "Office and Computer Equipment": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28262"
+            },
+            "Furniture": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28263"
+            },
+            "Agricultural Investments": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28264"
+            },
+            "Reusable Packing Material": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28265"
+            }
+          }
+        }
+      },
+      "PROVISION FOR DIMUNITION IN VALUE OF F.A": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "29",
+        "P. for D. in Value of Business Concern": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "290"
+        },
+        "Prov. for Dimunition in Value of I. F.A.": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "291",
+          "Trade Marks and Similars": {
+            "root_type": "Asset",
+            "account_number": "2911"
+          },
+          "Other Intangible Fixed Assets": {
+            "root_type": "Asset",
+            "account_number": "2919",
+            "Advance Payments on acc of Intan. F. A.": {
+              "root_type": "Asset",
+              "account_type": "Capital Work in Progress",
+              "account_number": "2198"
+            }
+          }
+        },
+        "Prov. for Dimunition in Value of T. F.A.": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "292",
+          "Land (Other than extractive Land Sites)": {
+            "root_type": "Asset",
+            "account_number": "2921"
+          },
+          "Other Tangible Fixed Assets": {
+            "root_type": "Asset",
+            "account_number": "2926",
+            "Gn. Inst. & Other Improvements & Dvlpmnt": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28261"
+            },
+            "Office and Computer Equipment": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28262"
+            },
+            "Furniture": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28263"
+            },
+            "Agricultural Investments": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28264"
+            },
+            "Reusable Packing Material": {
+              "root_type": "Asset",
+              "account_type": "Accumulated Depreciation",
+              "account_number": "28265"
+            }
+          }
+        },
+        "Prov.for Dimu.in Value of Financial F.A.": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "295",
+          "Equity Participations": {
+            "root_type": "Asset",
+            "account_number": "2951"
+          },
+          "Receivables Related to Equity Participa.": {
+            "root_type": "Asset",
+            "account_number": "2952"
+          },
+          "Other Blocked Securities": {
+            "root_type": "Asset",
+            "account_number": "2953",
+            "Ownership Rights ( Minor Participations)": {
+              "root_type": "Asset",
+              "account_number": "2531"
+            },
+            "Debenture Loans (Bonds and Debentures)": {
+              "root_type": "Asset",
+              "account_number": "2535"
+            }
+          },
+          "Long and Medium Term Loans": {
+            "root_type": "Asset",
+            "account_number": "2955",
+            "Loans to Partners": {
+              "root_type": "Asset",
+              "account_number": "2551"
+            },
+            "Loans to Employees": {
+              "root_type": "Asset",
+              "account_number": "2552"
+            },
+            "Other Loans": {
+              "root_type": "Asset",
+              "account_number": "2558"
+            }
+          },
+          "Other Blocked Long Term Receivables": {
+            "root_type": "Asset",
+            "account_number": "2959"
+          }
+        }
+      }
+    },
+    "CLASS 3 - INVENTORY & GOODS IN PROCESS": {
+      "root_type": "Asset",
+      "is_group": 1,
+      "account_number": "3",
+      "RAW MATERIALS AND CONSUMABLE GOODS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "31",
+        "Raw Materials": {
+          "root_type": "Asset",
+          "account_number": "311"
+        },
+        "Other Consumable Supplies and Materials": {
+          "root_type": "Asset",
+          "account_number": "315"
+        }
+      },
+      "GOODS IN PROCESS (GOODS WORKS SERVICES)": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "33",
+        "Products in Process": {
+          "root_type": "Asset",
+          "account_number": "331"
+        },
+        "Works in Progress": {
+          "root_type": "Asset",
+          "account_number": "332"
+        },
+        "Studies in Progress": {
+          "root_type": "Income",
+          "account_number": "7225"
+        },
+        "Services in Progress": {
+          "root_type": "Income",
+          "account_number": "7226"
+        }
+      },
+      "PRODUCTS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "35",
+        "Semi-Finished Goods": {
+          "root_type": "Asset",
+          "account_number": "351"
+        },
+        "Production Scrap": {
+          "root_type": "Asset",
+          "account_number": "358"
+        },
+        "Manufactured Goods": {
+          "root_type": "Income",
+          "account_number": "7255"
+        }
+      },
+      "MERCHANDISE FOR SALE": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "37",
+        "MERCHANDISE A": {
+          "root_type": "Asset",
+          "account_type": "Stock",
+          "account_number": "371"
+        },
+        "MERCHANDISE B": {
+          "root_type": "Asset",
+          "account_type": "Stock",
+          "account_number": "372"
+        }
+      },
+      "P.F.D.IN VALUE OF INV.& GOODS IN PROCESS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "39",
+        "P.f.D. in Value of Raw Mat.& Cons. Goods": {
+          "root_type": "Asset",
+          "account_number": "391"
+        },
+        "P.for D. in Value of Products in Process": {
+          "root_type": "Asset",
+          "account_number": "395"
+        },
+        "Provisions for Dim.in Value of Inventory": {
+          "root_type": "Asset",
+          "account_number": "397"
+        }
+      }
+    },
+    "CLASS 4 - RECEIVABLES & PAYABLES": {
+      "root_type": "Liability",
+      "is_group": 1,
+      "account_number": "4",
+      "SUPPLIERS": {
+        "account_number": "40",
+        "Accounts Payables ( Suppliers )": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "401",
+          "Invoices": {
+            "root_type": "Income",
+            "account_number": "701",
+            "Ordinary Clients": {
+              "root_type": "Asset",
+              "account_type": "Receivable",
+              "account_number": "4111"
+            },
+            "Doubtful Clients": {
+              "root_type": "Asset",
+              "account_number": "4115"
+            },
+            "Discounts & Allowances": {
+              "root_type": "Asset",
+              "account_number": "4119"
+            }
+          },
+          "Notes Payables": {
+            "root_type": "Liability",
+            "account_number": "4035"
+          },
+          "Invoices not received yet": {
+            "root_type": "Liability",
+            "account_number": "4038"
+          },
+          "Earned Discounts & Allowances": {
+            "root_type": "Liability",
+            "account_number": "4039"
+          }
+        },
+        "Fixed Assets Suppliers": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "403",
+          "Invoices": {
+            "root_type": "Income",
+            "account_number": "701",
+            "Ordinary Clients": {
+              "root_type": "Asset",
+              "account_type": "Receivable",
+              "account_number": "4111"
+            },
+            "Doubtful Clients": {
+              "root_type": "Asset",
+              "account_number": "4115"
+            },
+            "Discounts & Allowances": {
+              "root_type": "Asset",
+              "account_number": "4119"
+            }
+          },
+          "Notes Payables": {
+            "root_type": "Liability",
+            "account_number": "4035"
+          },
+          "Invoices not received yet": {
+            "root_type": "Liability",
+            "account_number": "4038"
+          },
+          "Earned Discounts & Allowances": {
+            "root_type": "Liability",
+            "account_number": "4039"
+          }
+        },
+        "Advce Pay. on Acc of operational suplies": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "409"
+        }
+      },
+      "PERSONNEL": {
+        "root_type": "Liability",
+        "is_group": 1,
+        "account_number": "42",
+        "Payments Due to Personnel": {
+          "root_type": "Liability",
+          "account_number": "421"
+        },
+        "Personnel's Accounts Receivable": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "428",
+          "Advances and Payments": {
+            "root_type": "Asset",
+            "account_number": "4281"
+          },
+          "Retentions": {
+            "root_type": "Asset",
+            "account_number": "4282"
+          }
+        }
+      },
+      "SOCIAL SECURITY": {
+        "root_type": "Liability",
+        "is_group": 1,
+        "account_number": "43",
+        "Accounts Payable to Social Security": {
+          "root_type": "Liability",
+          "account_number": "431",
+          "Benefits Payable": {
+            "root_type": "Liability",
+            "account_number": "4311"
+          },
+          "Notes Payable - Social Security": {
+            "root_type": "Liability",
+            "account_number": "4315"
+          },
+          "Charges tobe accrued for Social Security": {
+            "root_type": "Liability",
+            "account_number": "4318"
+          }
+        },
+        "Acc Receivable from Social Security fund": {
+          "root_type": "Asset",
+          "account_number": "438"
+        }
+      },
+      "GOVERNMENT AND PUBLIC INSTITUTIONS": {
+        "root_type": "Liability",
+        "is_group": 1,
+        "account_number": "44",
+        "Taxes Due  ( Operational )": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "441",
+          "Taxes Due  (Operational)": {
+            "root_type": "Liability",
+            "account_number": "4411"
+          },
+          "Notes Payable  ( Taxes and Rates )": {
+            "root_type": "Liability",
+            "account_number": "4415"
+          },
+          "Other Taxes to be Accured for": {
+            "root_type": "Liability",
+            "account_number": "4418"
+          }
+        },
+        "State and Public Institutions – Value Added Tax": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "442",
+          "VAT Paid": {
+            "root_type": "Asset",
+            "is_group": 1,
+            "account_number": "4421",
+            "VAT Paid on Purchases Used Exclusively for Deductible Operations": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44210"
+            },
+            "VAT Paid on Purchases Used Exclusively for Refundable Operations": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44211"
+            },
+            "VAT Paid on Purchases with Indeterminate Use": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44212"
+            },
+            "VAT Paid on Fixed Asset Purchases Used Exclusively for Deductible Operations": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44213"
+            },
+            "VAT Paid on Fixed Asset Purchases Used Exclusively for Refundable Operations": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44214"
+            },
+            "VAT Paid on Fixed Assets with Indeterminate Use": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44215"
+            },
+            "VAT Paid on Expenses Used Exclusively for Deductible Operations": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44216"
+            },
+            "VAT Paid on Expenses Used Exclusively for Refundable Operations": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44217"
+            },
+            "VAT Paid on Expenses with Indeterminate Use": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44218"
+            },
+            "VAT Paid on Advances and Payments for Investment Orders": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44219"
+            }
+          },
+          "Refundable VAT (Article 59)": {
+            "root_type": "Asset",
+            "is_group": 1,
+            "account_number": "4422",
+            "Refundable VAT (Article 59) on Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44221"
+            },
+            "Partially Refundable VAT (Article 59) on Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44222"
+            },
+            "Refundable VAT (Article 59) on Fixed Asset Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44223"
+            },
+            "Partially Refundable VAT (Article 59) on Fixed Asset Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44224"
+            },
+            "Refundable VAT (Article 59) on Expenses": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44225"
+            },
+            "Partially Refundable VAT (Article 59) on Expenses": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44226"
+            }
+          },
+          "VAT Balance": {
+            "root_type": "Asset",
+            "is_group": 1,
+            "account_number": "4425",
+            "VAT Payable": {
+              "root_type": "Liability",
+              "account_number": "44251"
+            },
+            "Carried Forward Refundable VAT": {
+              "root_type": "Asset",
+              "account_number": "44252"
+            }
+          },
+          "Deductible VAT": {
+            "root_type": "Asset",
+            "is_group": 1,
+            "account_number": "4426",
+            "Deductible VAT on Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44261"
+            },
+            "Partially Deductible VAT on Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44262"
+            },
+            "Deductible VAT on Fixed Asset Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44263"
+            },
+            "Partially Deductible VAT on Fixed Asset Purchases": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44264"
+            },
+            "Deductible VAT on Expenses": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44265"
+            },
+            "Partially Deductible VAT on Expenses": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44266"
+            },
+            "Deductible VAT on Advances and Payments for Investment Orders": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44267"
+            },
+            "Partially Deductible VAT on Advances and Payments for Investment Orders": {
+              "root_type": "Asset",
+              "account_type": "Tax",
+              "account_number": "44268"
+            }
+          },
+          "VAT Collected": {
+            "root_type": "Liability",
+            "is_group": 1,
+            "account_number": "4427",
+            "VAT Collected on Goods Deliveries": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44270"
+            },
+            "VAT Collected on Services": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44271"
+            },
+            "VAT Collected on Goods Deliveries (Cash Basis)": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44272"
+            },
+            "VAT Collected on Services (Cash Basis)": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44273"
+            },
+            "VAT Collected on Jewelry Deliveries Taxed on Gross Margin Basis": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44274"
+            },
+            "VAT Collected on Tourist Sales of Goods": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44275"
+            },
+            "VAT Collected on Internal Supplies of Goods and Services": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44276"
+            },
+            "VAT Collected on Amounts Due to Non-Residents": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44277"
+            },
+            "VAT Collected on Sale of Fixed Assets": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44278"
+            },
+            "VAT Collected on Advances and Receipts for Orders in Progress": {
+              "root_type": "Liability",
+              "account_type": "Tax",
+              "account_number": "44279"
+            }
+          },
+          "VAT Adjustable": {
+            "root_type": "Liability",
+            "is_group": 1,
+            "account_number": "4428",
+            "Debit VAT Adjustable": {
+              "root_type": "Asset",
+              "is_group": 1,
+              "account_number": "44281",
+              "Debit VAT Adjustable on Advances": {
+                "root_type": "Asset",
+                "account_number": "442811"
+              },
+              "Debit VAT Adjustable on Other Accounts": {
+                "root_type": "Asset",
+                "account_number": "442812"
+              }
+            },
+            "Credit VAT Adjustable": {
+              "root_type": "Liability",
+              "is_group": 1,
+              "account_number": "44282",
+              "Credit VAT Adjustable on Advances": {
+                "root_type": "Liability",
+                "account_number": "442821"
+              },
+              "Credit VAT Adjustable on Other Accounts": {
+                "root_type": "Liability",
+                "account_number": "442822"
+              }
+            }
+          },
+          "VAT Requested for Refund": {
+            "root_type": "Asset",
+            "is_group": 1,
+            "account_number": "4429",
+            "VAT Refund Requested – Quarterly": {
+              "root_type": "Asset",
+              "account_number": "44291"
+            },
+            "VAT Refund Requested – Semi-Annual": {
+              "root_type": "Asset",
+              "account_number": "44292"
+            },
+            "VAT Refund Requested – Annual": {
+              "root_type": "Asset",
+              "account_number": "44293"
+            },
+            "VAT Refund Requested – Article 59": {
+              "root_type": "Asset",
+              "account_number": "44294"
+            }
+          }
+        },
+        "Tax due  ( Non Operational )": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "443",
+          "Taxes on Profit": {
+            "root_type": "Liability",
+            "account_number": "4431"
+          }
+        },
+        "Govt & Pub Institutions Other Ac Payable": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "445"
+        },
+        "Govt & Public institutions Ac Receivable": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "449",
+          "Subsidies Receivable": {
+            "root_type": "Asset",
+            "account_number": "4491"
+          },
+          "Other Rceivables (Govt & Public Institu)": {
+            "root_type": "Asset",
+            "account_number": "4497"
+          },
+          "Accrued Revenues Not Collected": {
+            "root_type": "Asset",
+            "account_number": "4498"
+          }
+        }
+      },
+      "PARTNERS": {
+        "root_type": "Liability",
+        "is_group": 1,
+        "account_number": "45",
+        "Partners Curent Account": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "451",
+          "Other Partner": {
+            "root_type": "Liability",
+            "account_number": "4515"
+          },
+          "Joint Ventures": {
+            "root_type": "Liability",
+            "account_number": "4518"
+          },
+          "Holding Company": {
+            "root_type": "Liability",
+            "account_number": "45111"
+          },
+          "Subsidiary Companies": {
+            "root_type": "Liability",
+            "account_number": "45112"
+          },
+          "Affiliated Companies": {
+            "root_type": "Liability",
+            "account_number": "45113"
+          },
+          "Multi Group Companies": {
+            "root_type": "Liability",
+            "account_number": "45114"
+          }
+        },
+        "Dividends Payable": {
+          "root_type": "Liability",
+          "account_number": "453"
+        },
+        "Other Partners Payables": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "455",
+          "Contribution to The Company's Capital": {
+            "root_type": "Liability",
+            "account_number": "4551"
+          },
+          "Re Imbursement of Company's Capital": {
+            "root_type": "Liability",
+            "account_number": "4552"
+          },
+          "Other Payables": {
+            "root_type": "Liability",
+            "account_number": "4557"
+          }
+        },
+        "Shareholders Receivable": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "459",
+          "Subscried & Uncalled Capital": {
+            "root_type": "Asset",
+            "account_number": "4591"
+          },
+          "Subscribed Capital Called & Unpaid": {
+            "root_type": "Asset",
+            "account_number": "4592"
+          },
+          "Other Receivables": {
+            "root_type": "Asset",
+            "account_number": "4597"
+          }
+        }
+      },
+      "MISCELLANEOUS ACC. RECEIVABLE & PAYABLE": {
+        "root_type": "Liability",
+        "is_group": 1,
+        "account_number": "46",
+        "Miscellaneous Operating Acc Payable": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "461",
+          "Ac.Payable for Consignments & Containers": {
+            "root_type": "Liability",
+            "account_number": "4611"
+          },
+          "Other Payables  ( Opeational )": {
+            "root_type": "Liability",
+            "account_number": "4619"
+          }
+        },
+        "Instalments on Financial Fixed Assets": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "463",
+          "Uncalled Equity Participation": {
+            "root_type": "Liability",
+            "account_number": "4631"
+          },
+          "Other Blocked Securities (Uncalled)": {
+            "root_type": "Liability",
+            "account_number": "4633"
+          }
+        },
+        "Miscellaneous Acc Payable, Non Operating": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "465",
+          "Payables on Aquisition of Sec.Placements": {
+            "root_type": "Liability",
+            "account_number": "4651"
+          },
+          "Debentures": {
+            "root_type": "Liability",
+            "account_number": "4652"
+          },
+          "Installments on Aquisition of Sec.Place.": {
+            "root_type": "Liability",
+            "account_number": "4653"
+          },
+          "Other Miscellaneous Payable NonOperating": {
+            "root_type": "Liability",
+            "account_number": "4659"
+          }
+        },
+        "Misc. Accounts Receivables Operating": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "468",
+          "Acc Recei. for Consignmemts & Containers": {
+            "root_type": "Asset",
+            "account_number": "4681"
+          },
+          "Other Misc. Receivables Operational": {
+            "root_type": "Asset",
+            "account_number": "4689"
+          }
+        },
+        "Miscellaneous Receivable Non Operating": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "469",
+          "Acc Rece.on F.A. Disposal & sale of P.S.": {
+            "root_type": "Asset",
+            "account_number": "4691"
+          },
+          "Other Misc. Receibables Non Operational": {
+            "root_type": "Asset",
+            "account_number": "4699"
+          }
+        }
+      },
+      "PRE PAYMENTS & ACCRUALS": {
+        "is_group": 1,
+        "account_number": "47",
+        "TRANSITORY AND REGULARIZATION ACCOUNT": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "48",
+          "Periodical Allocation of Expenses": {
+            "root_type": "Liability",
+            "is_group": 1,
+            "account_number": "481"
+          },
+          "Periodical Allocation of Income": {
+            "root_type": "Liability",
+            "is_group": 1,
+            "account_number": "482"
+          },
+          "opening rounding differences": {
+            "root_type": "Liability",
+            "account_type": "Round Off for Opening",
+            "account_number": "483"
+          }
+        },
+        "PRO. FOR DIMU. IN VALUE OF RECEI.& PAYA.": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "49"
+        },
+        "Deferred Charges": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "471",
+          "Pre Operation Expenses": {
+            "root_type": "Asset",
+            "account_number": "4711"
+          },
+          "Major Repairs for Amortization": {
+            "root_type": "Asset",
+            "account_number": "4712"
+          },
+          "Debenture & Bonds Premiums": {
+            "root_type": "Asset",
+            "account_number": "4713"
+          },
+          "Other Deferred Charges": {
+            "root_type": "Asset",
+            "account_number": "4719"
+          }
+        },
+        "Deferred Expenses": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "472"
+        },
+        "Accrued Income": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "473"
+        },
+        "Exchange Difference  - Liabilities": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "475",
+          "Increase on Accounts Receivable": {
+            "root_type": "Liability",
+            "account_number": "4751"
+          },
+          "Decrease on Accounts Payable": {
+            "root_type": "Liability",
+            "account_number": "4752"
+          },
+          "Other Exchange Difference": {
+            "root_type": "Asset",
+            "account_number": "4768"
+          }
+        },
+        "Exchange Difference  -  Assets": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "476",
+          "Decrease on Accounts Receivable": {
+            "root_type": "Asset",
+            "account_number": "4761"
+          },
+          "Increase on Accounts Payable": {
+            "root_type": "Asset",
+            "account_number": "4762"
+          },
+          "Other Exchange Difference": {
+            "root_type": "Asset",
+            "account_number": "4768"
+          }
+        },
+        "Pro. for Di. in Value of Recei.(Clients)": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "491"
+        },
+        "Pro. for Dimu. in Value of Partners Acc.": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "495"
+        },
+        "Pro. for Di.in Values of Misc.Receivable": {
+          "root_type": "Liability",
+          "is_group": 1,
+          "account_number": "496",
+          "Miscellaneous Receivables - Operational": {
+            "root_type": "Liability",
+            "account_number": "4968"
+          },
+          "Miscellaneous Receivles -Non Operational": {
+            "root_type": "Liability",
+            "account_number": "4969"
+          }
+        }
+      }
+    },
+    "CLASS 5 - FINANCIAL ACCOUNTS": {
+      "root_type": "Asset",
+      "is_group": 1,
+      "account_number": "5",
+      "SECURITY PLACEMENTS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "50",
+        "Purchases of the Company Own Shares": {
+          "root_type": "Asset",
+          "account_number": "501"
+        },
+        "Property Rights Related to Notes": {
+          "root_type": "Asset",
+          "account_number": "502"
+        },
+        "Debentures and Bonds": {
+          "root_type": "Asset",
+          "account_number": "505"
+        },
+        "Liabilities Rights Related to Notes": {
+          "root_type": "Asset",
+          "account_number": "506"
+        }
+      },
+      "FINANCIAL INSTITUTIONS": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "51",
+        "Cheques and Coupon for Collection": {
+          "root_type": "Asset",
+          "account_type": "Bank",
+          "is_group": 1,
+          "account_number": "511"
+        },
+        "Banks": {
+          "root_type": "Asset",
+          "account_type": "Bank",
+          "is_group": 1,
+          "account_number": "512"
+        },
+        "Financial Institutions": {
+          "root_type": "Asset",
+          "is_group": 1,
+          "account_number": "519"
+        },
+        "Bank 1": {
+          "root_type": "Asset",
+          "account_type": "Bank",
+          "account_number": "51201"
+        }
+      },
+      "C A S H": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "53",
+        "Cash": {
+          "root_type": "Asset",
+          "account_type": "Cash",
+          "account_number": "531"
+        }
+      },
+      "INTERCOMPANY TRANSFERS": {
+        "root_type": "Asset",
+        "account_number": "58"
+      },
+      "PRO. FOR DIM. IN VALUE OF SEC.PLACEMENTS": {
+        "root_type": "Asset",
+        "account_number": "59"
+      }
+    },
+    "CLASS 6  -  E X P E N D I T U R E": {
+      "root_type": "Expense",
+      "is_group": 1,
+      "account_number": "6",
+      "PURCHASE AND VARIATION OF INVENTORY": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "60",
+        "Purchases": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "601",
+          "Goods": {
+            "root_type": "Expense",
+            "account_number": "6011"
+          },
+          "Purchases Containers & Packing Materials": {
+            "root_type": "Expense",
+            "account_number": "6012"
+          },
+          "Expenses Connected to Purchases & Cont.": {
+            "root_type": "Expense",
+            "account_number": "6018"
+          },
+          "Discount & Allowances Earned": {
+            "root_type": "Expense",
+            "account_number": "6019"
+          },
+          "Freight": {
+            "root_type": "Expense",
+            "account_number": "60181"
+          },
+          "Commissions": {
+            "root_type": "Expense",
+            "account_number": "60182"
+          },
+          "Clearing Expenses": {
+            "root_type": "Expense",
+            "account_number": "60184"
+          },
+          "Insurance on Freight": {
+            "root_type": "Expense",
+            "account_number": "61183"
+          },
+          "Customs Charges": {
+            "root_type": "Expense",
+            "account_number": "61185"
+          }
+        },
+        "Variation of Inventory": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "605",
+          "Opining Stock": {
+            "root_type": "Expense",
+            "account_number": "6051"
+          },
+          "Closing Stock": {
+            "root_type": "Expense",
+            "account_number": "6152"
+          }
+        }
+      },
+      "PURCHASES RAW MATERIALS & CONSUMABLES": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "61",
+        "Raw Materials & Consumables Purchases": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "611",
+          "Raw Materials Purchases": {
+            "root_type": "Expense",
+            "is_group": 1,
+            "account_number": "6111",
+            "A. Raw Materials Purchases": {
+              "root_type": "Expense",
+              "account_number": "61111"
+            },
+            "B. Raw Materials Purchases": {
+              "root_type": "Expense",
+              "account_number": "61112"
+            }
+          },
+          "Consumables Purchases": {
+            "root_type": "Expense",
+            "is_group": 1,
+            "account_number": "6112",
+            "Fuel and Gaz": {
+              "root_type": "Expense",
+              "account_number": "61121"
+            },
+            "Maintenance Products": {
+              "root_type": "Expense",
+              "account_number": "61122"
+            },
+            "Workshop and Factory Supplies": {
+              "root_type": "Expense",
+              "account_number": "61123"
+            },
+            "Stores Supplies": {
+              "root_type": "Expense",
+              "account_number": "61124"
+            },
+            "Office Supplies": {
+              "root_type": "Expense",
+              "account_number": "61125"
+            }
+          },
+          "Containers & Packing Materials Purchases": {
+            "root_type": "Expense",
+            "is_group": 1,
+            "account_number": "6113",
+            "Unreturnable Containers": {
+              "root_type": "Expense",
+              "account_number": "61131"
+            },
+            "Returnable Containers": {
+              "root_type": "Expense",
+              "account_number": "61132"
+            },
+            "Other Containers": {
+              "root_type": "Expense",
+              "account_number": "61133"
+            }
+          },
+          "Ex.Con.to Raw Mat. & Consumable Purchase": {
+            "root_type": "Expense",
+            "is_group": 1,
+            "account_number": "6118",
+            "Transport and Freight": {
+              "root_type": "Expense",
+              "account_number": "61181"
+            },
+            "Commissions and Brokerage": {
+              "root_type": "Expense",
+              "account_number": "61182"
+            },
+            "Insurance on Freight": {
+              "root_type": "Expense",
+              "account_number": "61183"
+            },
+            "Clearing Charges": {
+              "root_type": "Expense",
+              "account_number": "61184"
+            },
+            "Customs Charges": {
+              "root_type": "Expense",
+              "account_number": "61185"
+            }
+          },
+          "Discount & Allowances Earned (Detailed)": {
+            "root_type": "Expense",
+            "account_number": "6119"
+          }
+        },
+        "Vari. of Raw Mat. & Consumable Inventory": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "615",
+          "Opening Stock": {
+            "root_type": "Expense",
+            "account_number": "6151"
+          },
+          "Closing Stock": {
+            "root_type": "Expense",
+            "account_number": "6152"
+          }
+        }
+      },
+      "OTHER CHARGES & DISBURSEMENTS": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "62",
+        "Costs Related to Sub Contracts": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "621",
+          "Sub Contract  A": {
+            "root_type": "Expense",
+            "account_number": "6211"
+          },
+          "Sub Contract  B": {
+            "root_type": "Expense",
+            "account_number": "6212"
+          },
+          "Dis. & Allow.in Pur. from SubContractors": {
+            "root_type": "Expense",
+            "account_number": "6219"
+          }
+        },
+        "Leasing and Patents Cost": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "625",
+          "Leasing on Materials": {
+            "root_type": "Expense",
+            "account_number": "6251"
+          },
+          "Leasing on Property": {
+            "root_type": "Expense",
+            "account_number": "6252"
+          },
+          "Royalties": {
+            "root_type": "Expense",
+            "account_number": "6253"
+          },
+          "Licences": {
+            "root_type": "Expense",
+            "account_number": "6254"
+          },
+          "permits": {
+            "root_type": "Expense",
+            "account_number": "6255"
+          },
+          "Trade Marks": {
+            "root_type": "Expense",
+            "account_number": "6256"
+          },
+          "Know How": {
+            "root_type": "Expense",
+            "account_number": "6257"
+          },
+          "Similar Values & Rights": {
+            "root_type": "Expense",
+            "account_number": "6258"
+          }
+        },
+        "External Services": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "626",
+          "Transportation & Communication": {
+            "root_type": "Expense",
+            "account_number": "6261"
+          },
+          "Maintenance & Repairs": {
+            "root_type": "Expense",
+            "account_number": "6262"
+          },
+          "Rent & ( Building Services )": {
+            "root_type": "Expense",
+            "account_number": "6263"
+          },
+          "Hotels & Restaurants": {
+            "root_type": "Expense",
+            "account_number": "6264"
+          },
+          "Personel Services": {
+            "root_type": "Expense",
+            "account_number": "6265"
+          },
+          "Training": {
+            "root_type": "Expense",
+            "account_number": "6266"
+          },
+          "Studies and Research": {
+            "root_type": "Expense",
+            "account_number": "6267"
+          },
+          "Insurance Premiums": {
+            "root_type": "Expense",
+            "account_number": "6268"
+          },
+          "Other External Services": {
+            "root_type": "Expense",
+            "account_number": "6269"
+          },
+          "Transportation of Assets": {
+            "root_type": "Expense",
+            "account_number": "62611"
+          },
+          "Personnel Collective Transportation": {
+            "root_type": "Expense",
+            "account_number": "62612"
+          },
+          "Postage Telephone & Telecommunications": {
+            "root_type": "Expense",
+            "account_number": "62615"
+          },
+          "Rent": {
+            "root_type": "Expense",
+            "account_number": "62631"
+          },
+          "Other Related Charges": {
+            "root_type": "Expense",
+            "account_number": "62632"
+          },
+          "Entertainment": {
+            "root_type": "Expense",
+            "account_number": "62641"
+          },
+          "Travel & Transport": {
+            "root_type": "Expense",
+            "account_number": "62642"
+          },
+          "Personel Meals": {
+            "root_type": "Expense",
+            "account_number": "62643"
+          },
+          "Temperory Personnel": {
+            "root_type": "Expense",
+            "account_number": "62651"
+          },
+          "Agent's Commission": {
+            "root_type": "Expense",
+            "account_number": "62652"
+          },
+          "Fees": {
+            "root_type": "Expense",
+            "account_number": "62653"
+          },
+          "Training & Development": {
+            "root_type": "Expense",
+            "account_number": "62661"
+          },
+          "Documentations": {
+            "root_type": "Expense",
+            "account_number": "62662"
+          },
+          "Medical Care": {
+            "root_type": "Expense",
+            "account_number": "62691"
+          },
+          "Financial Fees & Expenses on Sec.& notes": {
+            "root_type": "Expense",
+            "account_number": "62692"
+          }
+        }
+      },
+      "PERSONNEL CHARGES": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "63",
+        "Salaries & Wages": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "631",
+          "Salaries": {
+            "root_type": "Expense",
+            "account_number": "6311"
+          },
+          "Wages": {
+            "root_type": "Expense",
+            "account_number": "6312"
+          },
+          "Fixed Commission": {
+            "root_type": "Expense",
+            "account_number": "6314"
+          },
+          "Manager Remunerations (Voting Rights)": {
+            "root_type": "Expense",
+            "account_number": "6316"
+          },
+          "Directors Remuneration": {
+            "root_type": "Expense",
+            "account_number": "6317"
+          }
+        },
+        "Social Security": {
+          "root_type": "Expense",
+          "account_number": "635"
+        }
+      },
+      "FEES & TAXES": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "64",
+        "Income Tax on Salaries & Remunerations": {
+          "root_type": "Expense",
+          "account_number": "641"
+        },
+        "Municipal Tax": {
+          "root_type": "Expense",
+          "account_number": "642"
+        },
+        "Value Added Tax": {
+          "root_type": "Expense",
+          "account_number": "643"
+        },
+        "Registration Fees": {
+          "root_type": "Expense",
+          "account_number": "644"
+        },
+        "Other Taxes": {
+          "root_type": "Expense",
+          "account_number": "645"
+        }
+      },
+      "AMORTIZATION DEPR. & PROV. (OPERATIONAL)": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "65",
+        "Depreciation & Amortization": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "651",
+          "Amortization of Intangible Assets": {
+            "root_type": "Expense",
+            "account_type": "Depreciation",
+            "account_number": "6511"
+          },
+          "Depreciation of Fixed Assets": {
+            "root_type": "Expense",
+            "account_type": "Depreciation",
+            "account_number": "6512"
+          },
+          "Amortization of Deffered Charges": {
+            "root_type": "Expense",
+            "account_type": "Depreciation",
+            "account_number": "6515"
+          }
+        },
+        "Provisions": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "655",
+          "Pro.for dimu.in Value of Intangible F.A.": {
+            "root_type": "Expense",
+            "account_number": "6551"
+          },
+          "Prov. for Dimu.in Value of Tangible F.A.": {
+            "root_type": "Expense",
+            "account_number": "6552"
+          },
+          "Pro.for Di.in Value of Inv.& Gds.in Pro.": {
+            "root_type": "Expense",
+            "account_number": "6553"
+          },
+          "Provisions for Bad & Doubtful Debts": {
+            "root_type": "Expense",
+            "account_number": "6554"
+          },
+          "Provisions for Risks & Chges.Operational": {
+            "root_type": "Expense",
+            "account_number": "6555"
+          }
+        }
+      },
+      "OTHER OPERATING CHARGES": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "66",
+        "Other Operating Charges": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "661",
+          "Attendance Fees": {
+            "root_type": "Expense",
+            "account_number": "6611"
+          },
+          "Losses on Irrecoverable Operating Recei.": {
+            "root_type": "Expense",
+            "account_number": "6612"
+          },
+          "rounding differences": {
+            "root_type": "Expense",
+            "account_number": "6618"
+          },
+          "write offs": {
+            "root_type": "Expense",
+            "account_number": "6619"
+          }
+        },
+        "Loss on Joint Venture": {
+          "root_type": "Expense",
+          "account_number": "665"
+        }
+      },
+      "FINANCIAL CHARGES": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "67",
+        "Interest": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "673",
+          "Interest Accounts Payable & Loans": {
+            "root_type": "Expense",
+            "account_number": "6731"
+          },
+          "Interest Overdrafts & Deposits": {
+            "root_type": "Expense",
+            "account_number": "6732"
+          },
+          "Interest Guaranteed Debenture & Bonds": {
+            "root_type": "Expense",
+            "account_number": "6733"
+          },
+          "Interest Other Accounts Payable": {
+            "root_type": "Expense",
+            "account_number": "6734"
+          },
+          "Discount Paid": {
+            "root_type": "Expense",
+            "account_number": "6735"
+          },
+          "Interest Banks & Financial Institutions": {
+            "root_type": "Expense",
+            "account_number": "6736"
+          }
+        },
+        "Negative Exchange Differences": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "675",
+          "Normal Operations": {
+            "root_type": "Expense",
+            "account_number": "6751"
+          },
+          "Capital Operations": {
+            "root_type": "Income",
+            "account_number": "7755"
+          }
+        },
+        "Net Chges on disposal of Sec. Placements": {
+          "root_type": "Expense",
+          "account_number": "676"
+        },
+        "Amortization & Pprovisions on Fina.Chges": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "679",
+          "Amortization of Reinbursement Premiums": {
+            "root_type": "Expense",
+            "account_number": "6791"
+          },
+          "Prov. for Dimu. in Value of Finan. F. A.": {
+            "root_type": "Expense",
+            "account_number": "6792"
+          },
+          "Prov.for Dimu.in Value of Sec.Placements": {
+            "root_type": "Expense",
+            "account_number": "6794"
+          },
+          "Provision for Risks & Financial Charges": {
+            "root_type": "Expense",
+            "account_number": "6795"
+          }
+        }
+      },
+      "NON OPPERATING CHARGES": {
+        "root_type": "Expense",
+        "is_group": 1,
+        "account_number": "68",
+        "INCOME TAX ON FROFITS": {
+          "root_type": "Expense",
+          "account_number": "69"
+        },
+        "Net Book Value of Fix.Assets Disposed of": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "681",
+          "Intangible Fixed Assets": {
+            "root_type": "Income",
+            "account_number": "7811"
+          },
+          "Tangible Fixed Assets": {
+            "root_type": "Income",
+            "account_number": "7812"
+          },
+          "Financial Fixed Assets": {
+            "root_type": "Income",
+            "account_number": "7815"
+          }
+        },
+        "Other Charges  - Non Operating": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "685",
+          "Charges on Administrative Operations": {
+            "root_type": "Expense",
+            "account_number": "6851"
+          },
+          "Charges on Capital Operations": {
+            "root_type": "Expense",
+            "account_number": "6855"
+          },
+          "Donations": {
+            "root_type": "Expense",
+            "account_number": "68511"
+          },
+          "Subsidies Granted": {
+            "root_type": "Expense",
+            "account_number": "68512"
+          },
+          "Fines & Penalties": {
+            "root_type": "Expense",
+            "account_number": "68513"
+          },
+          "Penalties on Contracts": {
+            "root_type": "Expense",
+            "account_number": "68514"
+          },
+          "Irrecoverable Receivables": {
+            "root_type": "Expense",
+            "account_number": "68515"
+          },
+          "Other Administrative Operations": {
+            "root_type": "Expense",
+            "account_number": "68516"
+          },
+          "Price Indexing": {
+            "root_type": "Expense",
+            "account_number": "68551"
+          },
+          "Reinbursement Allowances": {
+            "root_type": "Expense",
+            "account_number": "68552"
+          },
+          "Purcha.of the Company Own Shares & Notes": {
+            "root_type": "Expense",
+            "account_number": "68553"
+          }
+        },
+        "Depreciation & Provisions Non Operating": {
+          "root_type": "Expense",
+          "is_group": 1,
+          "account_number": "689",
+          "Exceptional Depreciation of Fixed Assets": {
+            "root_type": "Expense",
+            "account_number": "6891"
+          },
+          "Pro.for Exceptional Dimunition in Prices": {
+            "root_type": "Expense",
+            "account_number": "6892"
+          },
+          "Pro.for Risks & Charges Non Operational": {
+            "root_type": "Expense",
+            "account_number": "6895"
+          }
+        }
+      }
+    },
+    "CLASS 7 -  I N C O M E": {
+      "root_type": "Income",
+      "is_group": 1,
+      "account_number": "7",
+      "SALES OF GOODS": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "70",
+        "Invoices": {
+          "root_type": "Income",
+          "account_number": "701",
+          "Ordinary Clients": {
+            "root_type": "Asset",
+            "account_type": "Receivable",
+            "account_number": "4111"
+          },
+          "Doubtful Clients": {
+            "root_type": "Asset",
+            "account_number": "4115"
+          },
+          "Discounts & Allowances": {
+            "root_type": "Asset",
+            "account_number": "4119"
+          }
+        },
+        "Discount & Allowances Allowed": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "719",
+          "Production": {
+            "root_type": "Income",
+            "account_number": "7191"
+          },
+          "Works": {
+            "root_type": "Income",
+            "account_number": "7192"
+          },
+          "Services": {
+            "root_type": "Income",
+            "account_number": "7193"
+          },
+          "Ancillary Activities": {
+            "root_type": "Income",
+            "account_number": "7197"
+          }
+        }
+      },
+      "SALES OF PRODUCTION": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "71",
+        "Sales of Production": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "711",
+          "Sales of Manufactured Goods": {
+            "root_type": "Income",
+            "account_number": "7111"
+          },
+          "Sales of By-Products Items": {
+            "root_type": "Income",
+            "account_number": "7112"
+          },
+          "Sales of Scrap": {
+            "root_type": "Income",
+            "account_number": "7113"
+          }
+        },
+        "Proceeds from Ancillary Activities": {
+          "root_type": "Income",
+          "account_number": "717"
+        },
+        "Discount & Allowances Allowed": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "719",
+          "Production": {
+            "root_type": "Income",
+            "account_number": "7191"
+          },
+          "Works": {
+            "root_type": "Income",
+            "account_number": "7192"
+          },
+          "Services": {
+            "root_type": "Income",
+            "account_number": "7193"
+          },
+          "Ancillary Activities": {
+            "root_type": "Income",
+            "account_number": "7197"
+          }
+        },
+        "Works": {
+          "root_type": "Income",
+          "account_number": "7192"
+        },
+        "Services": {
+          "root_type": "Income",
+          "account_number": "7193"
+        }
+      },
+      "PROCUCTION  ( VARIATION )": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "72",
+        "Works in Process  (Variation)": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "721",
+          "Production in Process": {
+            "root_type": "Income",
+            "account_number": "7211"
+          },
+          "Work in Progress": {
+            "root_type": "Income",
+            "account_number": "7212"
+          }
+        },
+        "Studies & Services in Progress,Variation": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "722",
+          "Studies in Progress": {
+            "root_type": "Income",
+            "account_number": "7225"
+          },
+          "Services in Progress": {
+            "root_type": "Income",
+            "account_number": "7226"
+          }
+        },
+        "Produced Items (Variations)": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "725",
+          "By Products Items": {
+            "root_type": "Income",
+            "account_number": "7251"
+          },
+          "Manufactured Goods": {
+            "root_type": "Income",
+            "account_number": "7255"
+          },
+          "Scrap": {
+            "root_type": "Income",
+            "account_number": "7258"
+          }
+        }
+      },
+      "PRODUCTION OF FIXED ASSETS": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "73",
+        "Intangible Fixed Assets": {
+          "root_type": "Income",
+          "account_number": "7811"
+        },
+        "Tangible Fixed Assets": {
+          "root_type": "Income",
+          "account_number": "7812"
+        }
+      },
+      "OPERATING SUBSIDIES": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "74",
+        "Related to Products": {
+          "root_type": "Income",
+          "account_number": "741"
+        },
+        "Related to Production": {
+          "root_type": "Income",
+          "account_number": "742"
+        }
+      },
+      "PROVISIONS WRITE-BACK": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "75",
+        "Write-Back of Pro.for di.in Value of F.A": {
+          "root_type": "Income",
+          "account_number": "752"
+        },
+        "Write-Back of Pro.for di.in Value of C.A": {
+          "root_type": "Income",
+          "account_number": "753"
+        }
+      },
+      "OTHEI OPERATING INCOME": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "76",
+        "Ordinary Incomes": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "761",
+          "Royalties Patients Licences Trade Marks,": {
+            "root_type": "Income",
+            "account_number": "7611"
+          },
+          "Rent Income": {
+            "root_type": "Income",
+            "account_number": "7612"
+          },
+          "Director's Attendance Fees & Allowances": {
+            "root_type": "Income",
+            "account_number": "7613"
+          },
+          "Allocation of Operating Expenses": {
+            "root_type": "Income",
+            "account_number": "7619"
+          }
+        },
+        "Joint Venture Income": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "765",
+          "Net Transfers of Allocated Charges": {
+            "root_type": "Income",
+            "account_number": "7651"
+          },
+          "Net Attributions of Income": {
+            "root_type": "Income",
+            "account_number": "7655"
+          }
+        }
+      },
+      "FINANCIAL REVENUES": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "77",
+        "Revenues of Equity Participations": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "771",
+          "Dividends": {
+            "root_type": "Income",
+            "account_number": "7711"
+          },
+          "Revenue from Other Equity Participations": {
+            "root_type": "Income",
+            "account_number": "7716"
+          },
+          "Rev.from Rebles Reted to Equity Particip": {
+            "root_type": "Income",
+            "account_number": "7717"
+          }
+        },
+        "Revenue from Other Assets": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "772",
+          "Revenue from Securities Placements": {
+            "root_type": "Income",
+            "account_number": "7721"
+          },
+          "Rvenue from Blocked Securities": {
+            "root_type": "Income",
+            "account_number": "7723"
+          },
+          "Revenue from Blocked Receivable": {
+            "root_type": "Income",
+            "account_number": "7725"
+          },
+          "Revenue from Commercial Receivables": {
+            "root_type": "Income",
+            "account_number": "7726"
+          },
+          "Revenue from Miscelaneous Receibables": {
+            "root_type": "Income",
+            "account_number": "7727"
+          }
+        },
+        "Interest & Similar Revenues": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "773",
+          "Revenue on Loans Granted": {
+            "root_type": "Income",
+            "account_number": "7731"
+          },
+          "Earned Discount & Allowances": {
+            "root_type": "Income",
+            "account_number": "7733"
+          }
+        },
+        "Foreign Currencies Positive Difference": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "775",
+          "Current Operations": {
+            "root_type": "Income",
+            "account_number": "7751"
+          },
+          "Capital Operations": {
+            "root_type": "Income",
+            "account_number": "7755"
+          }
+        },
+        "Other Financial Income": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "778",
+          "Net Income on Sale of Security Placement": {
+            "root_type": "Income",
+            "account_number": "7781"
+          },
+          "Allocation of Financial Charges": {
+            "root_type": "Income",
+            "account_number": "7789"
+          }
+        },
+        "Write-Back of Financial Provisions": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "779",
+          "W-B of Provisions for dimunit. of Values": {
+            "root_type": "Income",
+            "account_number": "7793"
+          },
+          "W-B of Provisions for Risks & Charges": {
+            "root_type": "Income",
+            "account_number": "7795"
+          }
+        }
+      },
+      "NON OPERATING REVENUES": {
+        "root_type": "Income",
+        "is_group": 1,
+        "account_number": "78",
+        "Rvenues from Fixed Assets Disposals": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "781",
+          "Intangible Fixed Assets": {
+            "root_type": "Income",
+            "account_number": "7811"
+          },
+          "Tangible Fixed Assets": {
+            "root_type": "Income",
+            "account_number": "7812"
+          },
+          "Financial Fixed Assets": {
+            "root_type": "Income",
+            "account_number": "7815"
+          }
+        },
+        "Investm.Subsidies Transfered to P. or L.": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "782"
+        },
+        "Miscellaneous Income Non Operating": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "788",
+          "Exceptional Revenue on OrdinaryOperation": {
+            "root_type": "Income",
+            "account_number": "7881"
+          },
+          "Other Revenue on Exce.Capital Operations": {
+            "root_type": "Income",
+            "account_number": "7888"
+          },
+          "Allocation of Exceptional Charges": {
+            "root_type": "Income",
+            "account_number": "7889"
+          }
+        },
+        "Write-Back of Non Operating Provisions": {
+          "root_type": "Income",
+          "is_group": 1,
+          "account_number": "789",
+          "W-B of Provision for Dimunition in Value": {
+            "root_type": "Income",
+            "account_number": "7891"
+          },
+          "W-B of Provision of risks & Charges": {
+            "root_type": "Income",
+            "account_number": "7895"
+          }
+        }
+      }
+    },
+    "DEBTORS ( CUSTOMERS )": {
+      "root_type": "Asset",
+      "is_group": 1,
+      "account_number": "41",
+      "Notes Receivable ( Clients )": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "413"
+      },
+      "Advances on Works Unbilled": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "415"
+      },
+      "Invoices Under Preparation": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "418"
+      },
+      "Ad & Pay on Ac for ordrs under execution": {
+        "root_type": "Asset",
+        "is_group": 1,
+        "account_number": "419"
+      },
+      "Invoices": {
+        "root_type": "Income",
+        "account_number": "701",
+        "Ordinary Clients": {
+          "root_type": "Asset",
+          "account_type": "Receivable",
+          "account_number": "4111"
+        },
+        "Doubtful Clients": {
+          "root_type": "Asset",
+          "account_number": "4115"
+        },
+        "Discounts & Allowances": {
+          "root_type": "Asset",
+          "account_number": "4119"
+        }
+      }
+    }
+  }
+}
