@@ -1,6 +1,6 @@
 {%
 	var report_columns = report.get_columns_for_print();
-	report_columns = report_columns.filter(col => !col.hidden);
+	report_columns = report_columns.			(col => !col.hidden);
 
 	if (report_columns.length > 8) {
 		frappe.throw(__("Too many columns. Export the report and print it using a spreadsheet application."));
@@ -69,3 +69,9 @@
 <p class="text-right text-muted">
 	{%= __("Printed on {0}", [frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string())]) %}
 </p>
+<div class="show-filters">
+		{% if subtitle %}
+			{{ subtitle }}
+			<hr>
+		{% endif %}
+</div>
