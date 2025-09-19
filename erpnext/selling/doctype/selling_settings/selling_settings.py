@@ -34,6 +34,7 @@ class SellingSettings(Document):
 		editable_price_list_rate: DF.Check
 		enable_cutoff_date_on_bulk_delivery_note_creation: DF.Check
 		enable_discount_accounting: DF.Check
+		fallback_to_default_price_list: DF.Check
 		hide_tax_id: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		maintain_same_sales_rate: DF.Check
