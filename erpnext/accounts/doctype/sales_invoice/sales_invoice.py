@@ -1263,7 +1263,7 @@ class SalesInvoice(SellingController):
 			else self.base_grand_total,
 			self.precision("base_grand_total"),
 		)
-		
+
 		# for applying 100% discount on whole sales invoice level
 		if grand_total >= 0 and not self.is_internal_transfer():
 			against_voucher = self.name
