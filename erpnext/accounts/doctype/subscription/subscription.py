@@ -490,11 +490,18 @@ class Subscription(Document):
 		if prorate is None:
 			prorate = False
 
+		prorate_factor = 1
 		if prorate:
 			prorate_factor = get_prorata_factor(
 				self.current_invoice_end,
 				self.current_invoice_start,
-				cint(self.generate_invoice_at == "Beginning of the current subscription period"),
+				cint(
+					self.generate_invoice_at
+					in [
+						"Beginning of the current subscription period",
+						"Days before the current subscription period",
+					]
+				),
 			)
 
 		items = []
@@ -511,33 +518,19 @@ class Subscription(Document):
 
 			deferred = frappe.db.get_value("Item", item_code, deferred_field)
 
-			if not prorate:
-				item = {
-					"item_code": item_code,
-					"qty": plan.qty,
-					"rate": get_plan_rate(
-						plan.plan,
-						plan.qty,
-						party,
-						self.current_invoice_start,
-						self.current_invoice_end,
-					),
-					"cost_center": plan_doc.cost_center,
-				}
-			else:
-				item = {
-					"item_code": item_code,
-					"qty": plan.qty,
-					"rate": get_plan_rate(
-						plan.plan,
-						plan.qty,
-						party,
-						self.current_invoice_start,
-						self.current_invoice_end,
-						prorate_factor,
-					),
-					"cost_center": plan_doc.cost_center,
-				}
+			item = {
+				"item_code": item_code,
+				"qty": plan.qty,
+				"rate": get_plan_rate(
+					plan.plan,
+					plan.qty,
+					party,
+					self.current_invoice_start,
+					self.current_invoice_end,
+					prorate_factor,
+				),
+				"cost_center": plan_doc.cost_center,
+			}
 
 			if deferred:
 				item.update(
