@@ -137,8 +137,14 @@ class GLEntry(Document):
 
 		if not self.is_cancelled and not (self.party_type and self.party):
 			account_type = frappe.get_cached_value("Account", self.account, "account_type")
+
 			# skipping validation for payroll entry creation in case party is not required
-			if not frappe.flags.party_not_required_for_receivable_payable:
+			party_required = not frappe.flags.party_not_required_for_receivable_payable
+			not_payroll = (
+				self.against_voucher_type != "Payroll Entry"
+			)  # for manual je submission created for bank entry of payroll
+
+			if party_required and not_payroll:
 				if account_type == "Receivable":
 					frappe.throw(
 						_("{0} {1}: Customer is required against Receivable account {2}").format(
