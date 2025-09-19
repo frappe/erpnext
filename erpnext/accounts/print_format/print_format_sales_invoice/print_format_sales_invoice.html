@@ -1,8 +1,13 @@
 {%- macro add_header(page_num, max_pages, doc, letter_head, no_letterhead, footer, print_settings=None,
-print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
-<div class="letter-head">{{ letter_head }}</div>
-{% endif %} {% if print_heading_template %} {{ frappe.render_template(print_heading_template, {"doc":doc}) }}
-{% endif %} {%- endmacro -%} {% for page in layout %}
+print_heading_template=None) -%}
+{% if letter_head and not no_letterhead %}
+	<div class="letter-head">{{ letter_head }}</div>
+{% endif %}
+{% if print_heading_template %}
+	{{ frappe.render_template(print_heading_template, {"doc":doc}) }}
+{% endif %}
+{%- endmacro -%}
+{% for page in layout %}
 <div class="page-break invoice-page">
 	<div {% if print_settings.repeat_header_footer %} id="header-html" class="hidden-pdf" {% endif %}>
 		{{ add_header(loop.index, layout|len, doc, letter_head, no_letterhead, footer, print_settings) }}
@@ -11,7 +16,7 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 	<style>
 		.letter-head {
 			padding-top: 12px !important;
-			/* margin-top: 0px !important; */
+			padding-bottom: 12px !important;
 		}
 		.invoice-page {
 			font-family: Inter, sans-serif;
@@ -86,13 +91,13 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 			border-bottom: none;
 		}
 
-		.items-table tr:first-child td:first-child,
-		.tax-table tr:first-child td:first-child {
+		.items-table thead tr:first-child td:first-child,
+		.tax-table thead tr:first-child td:first-child {
 			border-top-left-radius: 10px;
 			border-bottom-left-radius: 10px;
 		}
-		.items-table tr:first-child td:last-child,
-		.tax-table tr:first-child td:last-child {
+		.items-table thead tr:first-child td:last-child,
+		.tax-table thead tr:first-child td:last-child {
 			border-top-right-radius: 10px;
 			border-bottom-right-radius: 10px;
 		}
@@ -111,19 +116,6 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 
 		.highlight-bg {
 			background: #f8f8f8;
-		}
-
-		.img-thumb {
-			min-width: 24px;
-			min-height: 24px;
-			max-width: 24px;
-			max-height: 24px;
-			border-radius: 6px;
-			overflow: hidden;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			background: #f0f0f0;
 		}
 
 		.info-card {
@@ -156,17 +148,22 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 
 		.tax-table td,
 		.items-table td {
-			height: 40px;
+			height: auto !important;
 		}
 
 		.tax-table thead td,
 		.items-table thead td {
 			height: 32px;
 		}
+
+		.item-img td {
+			border: none !important;
+			padding: 0px !important;
+		}
 	</style>
 
 	<div class="print-format-body">
-		<table class="info-table col-xs-12" style="width: 100%">
+		<table class="info-table col-xs-12" style="width: 100%; margin-left: 12px">
 			<tr>
 				<td class="col-xs-7" style="padding: 0 !important">
 					<div class="title col-xs-5 p-0">
@@ -219,16 +216,32 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 				<tr>
 					<td class="text-center">{{ loop.index }}</td>
 					<td class="text-left">
-						<div style="display: flex; align-items: center; gap: 8px">
-							<div class="img-thumb">
+						<table class="item-img" style="border-collapse: collapse">
+							<tr>
 								{% if item.image %}
-								<div>
-									<img src="{{ item.image }}" alt="{{ item.item_name }}" />
-								</div>
+								<td class="no-style" style="border-radius: 6px; vertical-align: middle">
+									<img
+										src="{{ item.image }}"
+										alt="{{ item.item_name }}"
+										style="
+											border-radius: 6px;
+											max-height: 24px;
+											min-height: 24px;
+											max-width: 24px;
+											min-width: 24px;
+											margin-right: 8px;
+										"
+									/>
+								</td>
 								{% endif %}
-							</div>
-							<div>{{ item.item_name }}</div>
-						</div>
+								<td
+									class="no-style"
+									style="vertical-align: middle !important; padding: 0 !important"
+								>
+									{{ item.item_name }}
+								</td>
+							</tr>
+						</table>
 					</td>
 
 					<td class="text-center">{{ item.gst_hsn_code }}</td>
