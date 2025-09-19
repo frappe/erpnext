@@ -483,12 +483,10 @@ class Subscription(Document):
 
 		return invoice
 
-	def get_items_from_plans(self, plans: list[dict[str, str]], prorate: bool | None = None) -> list[dict]:
+	def get_items_from_plans(self, plans: list[dict[str, str]], prorate: int = 0) -> list[dict]:
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
-		if prorate is None:
-			prorate = False
 
 		prorate_factor = 1
 		if prorate:
