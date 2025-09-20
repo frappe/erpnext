@@ -572,6 +572,28 @@ $.extend(erpnext.item, {
 		let promises = [];
 		let attr_val_fields = {};
 
+		const attribute_value_onchange = function () {
+			let selected_attributes = get_selected_attributes();
+			let lengths = [];
+			Object.keys(selected_attributes).map((key) => {
+				lengths.push(selected_attributes[key].length);
+			});
+			if (lengths.includes(0)) {
+				me.multiple_variant_dialog.get_primary_btn().html(__("Create Variants"));
+				me.multiple_variant_dialog.disable_primary_action();
+			} else {
+				let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
+				let msg;
+				if (no_of_combinations === 1) {
+					msg = __("Make {0} Variant", [no_of_combinations]);
+				} else {
+					msg = __("Make {0} Variants", [no_of_combinations]);
+				}
+				me.multiple_variant_dialog.get_primary_btn().html(msg);
+				me.multiple_variant_dialog.enable_primary_action();
+			}
+		};
+
 		function make_fields_from_attribute_values(attr_dict) {
 			let fields = [];
 			let att_key = frm.doc.attributes.map((idx) => idx.attribute);
@@ -579,10 +601,14 @@ $.extend(erpnext.item, {
 				if (i % 3 === 0) {
 					fields.push({ fieldtype: "Section Break" });
 				}
-				fields.push({ fieldtype: "Column Break", label: name });
+				fields.push({
+					fieldtype: "Column Break",
+					label: name,
+					fieldname: `${encodeURI(name)}_column_break`,
+				});
 				fields.push({
 					fieldtype: "Data",
-					placeholder: "Search",
+					placeholder: __("Search"),
 					fieldname: `search_${frappe.scrub(name)}`,
 					onchange: function (e) {
 						let value = e.target.value;
@@ -604,27 +630,7 @@ $.extend(erpnext.item, {
 						label: value,
 						fieldname: value,
 						default: 0,
-						onchange: function () {
-							let selected_attributes = get_selected_attributes();
-							let lengths = [];
-							Object.keys(selected_attributes).map((key) => {
-								lengths.push(selected_attributes[key].length);
-							});
-							if (lengths.includes(0)) {
-								me.multiple_variant_dialog.get_primary_btn().html(__("Create Variants"));
-								me.multiple_variant_dialog.disable_primary_action();
-							} else {
-								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
-								let msg;
-								if (no_of_combinations === 1) {
-									msg = __("Make {0} Variant", [no_of_combinations]);
-								} else {
-									msg = __("Make {0} Variants", [no_of_combinations]);
-								}
-								me.multiple_variant_dialog.get_primary_btn().html(msg);
-								me.multiple_variant_dialog.enable_primary_action();
-							}
-						},
+						onchange: attribute_value_onchange,
 					});
 				});
 			});
@@ -691,10 +697,91 @@ $.extend(erpnext.item, {
 			me.multiple_variant_dialog.disable_primary_action();
 			me.multiple_variant_dialog.clear();
 			me.multiple_variant_dialog.show();
+			make_create_attribute_button();
 			me.multiple_variant_dialog.$wrapper
 				.find("div[data-fieldname^='search_']")
 				.find(".clearfix")
 				.hide();
+		}
+
+		function make_create_attribute_button() {
+			if (!frappe.model.can_write("Item Attribute")) return;
+			Object.keys(attr_val_fields).forEach((attribute) => {
+				if (frm.doc.attributes.find((i) => i.attribute == attribute && !i.numeric_values)) {
+					// Wrap the label and Add btn inside the flex box
+					let $column = me.multiple_variant_dialog.$wrapper.find(
+						`.form-column[data-fieldname="${encodeURI(attribute)}_column_break"]`
+					);
+					let $label = $column.find(".column-label");
+					let $wrapper = $(`<div class="flex justify-between"></div>`);
+					$label.after($wrapper);
+					$wrapper.append($label);
+					$wrapper.append(`
+						<button class="btn btn-default btn-xs add-attribute-btn" style="margin-bottom: 8px" data-attribute-name="${encodeURI(
+							attribute
+						)}">
+							${frappe.utils.icon("add", "xs")} ${__("Add")}
+						</button>
+					`);
+				}
+			});
+			me.multiple_variant_dialog.$wrapper.find(".add-attribute-btn").on("click", (e) => {
+				let attribute_name = decodeURI(e.currentTarget.getAttribute("data-attribute-name"));
+				let dialog = new frappe.ui.Dialog({
+					title: __("Create New {0}", [attribute_name]),
+					fields: [
+						{
+							fieldname: "attribute_value",
+							label: __("Attribute Value"),
+							fieldtype: "Data",
+							reqd: 1,
+						},
+						{
+							fieldname: "abbr",
+							label: __("Abbreviation"),
+							fieldtype: "Data",
+							reqd: 1,
+						},
+					],
+					primary_action_label: __("Create"),
+					primary_action: function (data) {
+						frappe.call({
+							method: "erpnext.controllers.item_variant.create_item_attribute_value",
+							args: {
+								attribute_name: attribute_name,
+								data: data,
+							},
+							freeze: true,
+							callback: function () {
+								frappe.show_alert({
+									message: __("Updated successfully"),
+									indicator: "green",
+								});
+								dialog.hide();
+								let new_field = frappe.ui.form.make_control({
+									df: {
+										fieldtype: "Check",
+										label: data.attribute_value,
+										fieldname: data.attribute_value,
+										default: 0,
+										onchange: attribute_value_onchange,
+									},
+									parent: me.multiple_variant_dialog.$wrapper
+										.find(`[data-fieldname="${encodeURI(attribute_name)}_column_break"]`)
+										.find("form"),
+									render_input: true,
+								});
+								new_field.$wrapper.css("marginBottom", 0);
+								// Update new field in dialog
+								// to make search work
+								me.multiple_variant_dialog.fields_dict[new_field.df.fieldname] = new_field;
+								attr_val_fields[attribute_name].push(data.attribute_value);
+							},
+						});
+					},
+				});
+				dialog.show();
+			});
 		}
 
 		function get_selected_attributes() {
