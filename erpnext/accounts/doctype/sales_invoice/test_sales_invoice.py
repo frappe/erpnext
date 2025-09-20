@@ -3057,6 +3057,26 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
+	def test_100_percent_discount_on_sales_invoice(self):
+		additional_discount_account = create_account(
+			account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC",
+			company="_Test Company",
+		)
+		si = create_sales_invoice(do_not_save=1)
+		si.apply_discount_on = "Grand Total"
+		si.additional_discount_account = additional_discount_account
+		si.additional_discount_percentage = 100
+		si.submit()
+
+		expected_gle = [
+			["Discount Account - _TC", 100.0, 0.0, nowdate()],
+			["Sales - _TC", 0.0, 100.0, nowdate()],
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
 		Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.

@@ -1391,7 +1391,6 @@ class SalesInvoice(SellingController):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
-
 		if gl_entries:
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = (
@@ -1430,16 +1429,14 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
-
-		self.make_customer_gl_entry(gl_entries)
-
+		if not self.additional_discount_percentage == 100.00:
+			self.make_customer_gl_entry(gl_entries)
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
 		self.make_precision_loss_gl_entry(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
-
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
 		# merge gl entries before adding pos entries
@@ -1552,7 +1549,11 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")) or item.is_fixed_asset:
+			if (
+				flt(item.base_net_amount, item.precision("base_net_amount"))
+				or flt(item.distributed_discount_amount, item.precision("distributed_discount_amount"))
+				or item.is_fixed_asset
+			):
 				# Do not book income for transfer within same company
 				if self.is_internal_transfer():
 					continue
@@ -1591,6 +1592,7 @@ class SalesInvoice(SellingController):
 
 		# expense account gl entries
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
+			print("perp")
 			gl_entries += super().get_gl_entries()
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
