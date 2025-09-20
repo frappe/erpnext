@@ -2992,6 +2992,26 @@ class TestSalesInvoice(FrappeTestCase):
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 
 	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
+	def test_100_percent_discount_on_sales_invoice(self):
+		additional_discount_account = create_account(
+			account_name="Discount Account",
+			parent_account="Indirect Expenses - _TC",
+			company="_Test Company",
+		)
+		si = create_sales_invoice(do_not_save=1)
+		si.apply_discount_on = "Grand Total"
+		si.additional_discount_account = additional_discount_account
+		si.additional_discount_percentage = 100
+		si.submit()
+
+		expected_gle = [
+			["Discount Account - _TC", 100.0, 0.0, nowdate()],
+			["Sales - _TC", 0.0, 100.0, nowdate()],
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
 		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
 			update_repost_settings,
@@ -4756,7 +4776,6 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="
 		.orderby(gl.posting_date, gl.account, gl.creation)
 	)
 	gl_entries = q.run(as_dict=True)
-
 	doc.assertGreater(len(gl_entries), 0)
 
 	for i, gle in enumerate(gl_entries):
