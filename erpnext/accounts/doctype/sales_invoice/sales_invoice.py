@@ -1429,8 +1429,7 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
-		if not self.additional_discount_percentage == 100.00:
-			self.make_customer_gl_entry(gl_entries)
+		self.make_customer_gl_entry(gl_entries)
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
