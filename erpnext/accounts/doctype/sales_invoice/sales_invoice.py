@@ -1592,7 +1592,6 @@ class SalesInvoice(SellingController):
 
 		# expense account gl entries
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
-			print("perp")
 			gl_entries += super().get_gl_entries()
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
