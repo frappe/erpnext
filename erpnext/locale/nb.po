@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-14 09:34+0000\n"
-"PO-Revision-Date: 2025-09-19 02:49\n"
+"PO-Revision-Date: 2025-09-20 02:53\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -3617,7 +3617,7 @@ msgstr ""
 #. Label of the section_break_13 (Tab Break) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Advanced Settings"
-msgstr ""
+msgstr "Avanserte innstillinger"
 
 #. Label of the advances (Table) field in DocType 'POS Invoice'
 #. Label of the advances (Table) field in DocType 'Purchase Invoice'
@@ -8935,20 +8935,20 @@ msgstr ""
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:162
 msgid "Build All?"
-msgstr ""
+msgstr "Bygge alt?"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:20
 msgid "Build Tree"
-msgstr ""
+msgstr "Bygg trestruktur"
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:155
 msgid "Buildable Qty"
-msgstr ""
+msgstr "Byggbart antall"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:31
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:44
 msgid "Buildings"
-msgstr ""
+msgstr "Bygninger"
 
 #: erpnext/utilities/doctype/rename_tool/rename_tool.js:78
 msgid "Bulk Rename Jobs"
@@ -19490,7 +19490,7 @@ msgstr ""
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.html:23
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py:29
 msgid "Enough Parts to Build"
-msgstr ""
+msgstr "Nok deler til å bygge"
 
 #. Label of the ensure_delivery_based_on_produced_serial_no (Check) field in
 #. DocType 'Sales Order Item'
@@ -26010,7 +26010,7 @@ msgstr ""
 #. Label of the is_billing_contact (Check) field in DocType 'Contact'
 #: erpnext/erpnext_integrations/custom/contact.json
 msgid "Is Billing Contact"
-msgstr ""
+msgstr "Er faktureringskontakt"
 
 #. Label of the is_cancelled (Check) field in DocType 'GL Entry'
 #. Label of the is_cancelled (Check) field in DocType 'Serial and Batch Bundle'
@@ -28362,7 +28362,7 @@ msgstr ""
 #: erpnext/accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
 #: erpnext/accounts/doctype/currency_exchange_settings_result/currency_exchange_settings_result.json
 msgid "Key"
-msgstr ""
+msgstr "Nøkkel"
 
 #. Label of a Card Break in the Buying Workspace
 #. Label of a Card Break in the Selling Workspace
@@ -29138,7 +29138,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:15
 msgid "Link a new bank account"
-msgstr ""
+msgstr "Koble til en ny bankkonto"
 
 #. Description of the 'Sub Procedure' (Link) field in DocType 'Quality
 #. Procedure Process'
@@ -32945,7 +32945,7 @@ msgstr ""
 #. Goal'
 #: erpnext/quality_management/doctype/quality_goal/quality_goal.json
 msgid "None"
-msgstr ""
+msgstr "Ingen"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:555
 msgid "None of the items have any change in quantity or value."
@@ -33358,7 +33358,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 msgid "Off"
-msgstr ""
+msgstr "Av"
 
 #. Label of the scheduled_confirmation_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -37302,21 +37302,21 @@ msgstr ""
 #. Label of the plaid_client_id (Data) field in DocType 'Plaid Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Client ID"
-msgstr ""
+msgstr "Plaid klient-ID"
 
 #. Label of the plaid_env (Select) field in DocType 'Plaid Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Environment"
-msgstr ""
+msgstr "Plaid-miljø"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:154
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:178
 msgid "Plaid Link Failed"
-msgstr ""
+msgstr "Plaid-lenken mislyktes"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:252
 msgid "Plaid Link Refresh Required"
-msgstr ""
+msgstr "Oppdatering av Plaid-lenken er påkrevet"
 
 #: erpnext/accounts/doctype/bank/bank.js:131
 msgid "Plaid Link Updated"
@@ -37325,18 +37325,18 @@ msgstr ""
 #. Label of the plaid_secret (Password) field in DocType 'Plaid Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Secret"
-msgstr ""
+msgstr "Plaid secret"
 
 #. Label of a Link in the Accounting Workspace
 #. Name of a DocType
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Settings"
-msgstr ""
+msgstr "Innstillinger for Plaid"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:227
 msgid "Plaid transactions sync error"
-msgstr ""
+msgstr "Synkroniseringsfeil for Plaid-transaksjoner"
 
 #. Label of the plan (Link) field in DocType 'Subscription Plan Detail'
 #: erpnext/accounts/doctype/subscription_plan_detail/subscription_plan_detail.json
@@ -37577,7 +37577,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_connector.py:65
 msgid "Please check your Plaid client ID and secret values"
-msgstr ""
+msgstr "Vennligst sjekk Plaid klient-ID-en og secret"
 
 #: erpnext/crm/doctype/appointment/appointment.py:98
 #: erpnext/www/book_appointment/index.js:235
@@ -37908,7 +37908,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:251
 msgid "Please refresh or reset the Plaid linking of the Bank {}."
-msgstr ""
+msgstr "Vennligst oppdater eller tilbakestill Plaid-koblingen til banken {}."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:12
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:28
@@ -38490,7 +38490,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:97
 msgid "Please setup and enable a group account with the Account Type - {0} for the company {1}"
-msgstr ""
+msgstr "Konfigurer og aktiver en gruppekonto med kontotype - {0} for selskapet {1}"
 
 #: erpnext/assets/doctype/asset/depreciation.py:350
 msgid "Please share this email with your support team so that they can find and fix the issue."
@@ -39452,7 +39452,7 @@ msgstr "Utskriftsformat"
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Print Format Builder"
-msgstr ""
+msgstr "Utskriftsformatbygger"
 
 #. Label of the select_print_heading (Link) field in DocType 'Journal Entry'
 #. Label of the print_heading (Link) field in DocType 'Payment Entry'
@@ -41574,7 +41574,7 @@ msgstr ""
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:133
 msgid "Qty to Build"
-msgstr ""
+msgstr "Antall å bygge"
 
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:269
 msgid "Qty to Deliver"
@@ -42937,11 +42937,11 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:157
 msgid "Rebuild Tree"
-msgstr ""
+msgstr "Gjenoppbygg trestruktur"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:93
 msgid "Rebuilding BTree for period ..."
-msgstr ""
+msgstr "Gjenoppbygger BTree for perioden ..."
 
 #: erpnext/stock/doctype/bin/bin.js:10
 msgid "Recalculate Bin Qty"
@@ -44801,7 +44801,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:19
 msgid "Reset Plaid Link"
-msgstr ""
+msgstr "Tilbakestill Plaid Link"
 
 #. Label of the reset_raw_materials_table (Button) field in DocType
 #. 'Subcontracting Receipt'
@@ -48224,7 +48224,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:161
 msgid "Select a company"
-msgstr ""
+msgstr "Velg et selskap"
 
 #: erpnext/stock/doctype/item/item.js:971
 msgid "Select an Item Group."
@@ -53269,16 +53269,16 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
-msgstr ""
+msgstr "Synkroniser nå"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:36
 msgid "Sync Started"
-msgstr ""
+msgstr "Synkronisering startet"
 
 #. Label of the automatic_sync (Check) field in DocType 'Plaid Settings'
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Synchronize all accounts every hour"
-msgstr ""
+msgstr "Synkroniser alle kontoer hver time"
 
 #: erpnext/accounts/doctype/account/account.py:626
 msgid "System In Use"
@@ -53424,7 +53424,7 @@ msgstr ""
 #: erpnext/utilities/doctype/video/video.json
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "System Manager"
-msgstr ""
+msgstr "Systemansvarlig"
 
 #. Label of a Link in the Settings Workspace
 #. Label of a shortcut in the Settings Workspace
@@ -54984,7 +54984,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:37
 msgid "The sync has started in the background, please check the {0} list for new records."
-msgstr ""
+msgstr "Synkroniseringen har startet i bakgrunnen. Sjekk {0} -listen for nye poster."
 
 #. Description of the 'Invoice Type Created via POS Screen' (Select) field in
 #. DocType 'POS Settings'
@@ -55143,20 +55143,20 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:153
 msgid "There was an error creating Bank Account while linking with Plaid."
-msgstr ""
+msgstr "Det oppsto en feil under oppretting av bankkontoen under oppkobling til Plaid."
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:250
 msgid "There was an error syncing transactions."
-msgstr ""
+msgstr "Det oppstod en feil ved synkronisering av transaksjoner."
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:175
 msgid "There was an error updating Bank Account {} while linking with Plaid."
-msgstr ""
+msgstr "Det oppsto en feil under oppdatering av bankkonto {} under oppkobling til Plaid."
 
 #: erpnext/accounts/doctype/bank/bank.js:115
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:119
 msgid "There was an issue connecting to Plaid's authentication server. Check browser console for more information"
-msgstr ""
+msgstr "Det oppsto et problem med å koble til Plaids autentiseringsserver. Sjekk nettleserkonsollen for mer informasjon."
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:328
 msgid "There were errors while sending email. Please try again."
@@ -57993,7 +57993,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/bank_account/bank_account.js:33
 msgid "Unlink external integrations"
-msgstr ""
+msgstr "Koble fra eksterne integrasjoner"
 
 #. Label of the unlinked (Check) field in DocType 'Unreconcile Payment Entries'
 #: erpnext/accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
@@ -58170,7 +58170,7 @@ msgstr ""
 
 #: erpnext/erpnext_integrations/utils.py:22
 msgid "Unverified Webhook Data"
-msgstr ""
+msgstr "Ubekreftede webhook-data"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:17
 msgid "Up"
@@ -60220,58 +60220,58 @@ msgstr ""
 #: erpnext/setup/workspace/settings/settings.json
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Website"
-msgstr ""
+msgstr "Nettsted"
 
 #. Name of a DocType
 #: erpnext/portal/doctype/website_attribute/website_attribute.json
 msgid "Website Attribute"
-msgstr ""
+msgstr "Nettstedattributt"
 
 #. Label of the web_long_description (Text Editor) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Website Description"
-msgstr ""
+msgstr "Nettstedbeskrivelse"
 
 #. Name of a DocType
 #: erpnext/portal/doctype/website_filter_field/website_filter_field.json
 msgid "Website Filter Field"
-msgstr ""
+msgstr "Nettstedets filtreringsfelt"
 
 #. Label of the website_image (Attach Image) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Website Image"
-msgstr ""
+msgstr "Nettstedsbilde"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/website_item_group/website_item_group.json
 msgid "Website Item Group"
-msgstr ""
+msgstr "Nettstedets artikkelgruppe"
 
 #. Name of a role
 #: erpnext/accounts/doctype/coupon_code/coupon_code.json
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Website Manager"
-msgstr ""
+msgstr "Nettstedsansvarlig"
 
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Website Script"
-msgstr ""
+msgstr "Skript for nettstedet"
 
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Website Settings"
-msgstr ""
+msgstr "Innstillinger for nettsted"
 
 #. Label of the sb_web_spec (Section Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Website Specifications"
-msgstr ""
+msgstr "Spesifikasjoner for nettsted"
 
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Website Theme"
-msgstr ""
+msgstr "Nettstedstema"
 
 #. Option for the 'Day of Week' (Select) field in DocType 'Communication Medium
 #. Timeslot'
@@ -60757,7 +60757,7 @@ msgstr ""
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/templates/generators/bom.html:70
 msgid "Workstation"
-msgstr ""
+msgstr "Arbeidsstasjon"
 
 #. Label of the workstation (Link) field in DocType 'Downtime Entry'
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
