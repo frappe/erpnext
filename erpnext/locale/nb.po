@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-14 09:34+0000\n"
-"PO-Revision-Date: 2025-09-20 02:53\n"
+"PO-Revision-Date: 2025-09-21 02:55\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -1027,7 +1027,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.py:55
 msgid "A driver must be set to submit."
-msgstr ""
+msgstr "En sjåfør må angis for å kunne registrere."
 
 #. Description of a DocType
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -2395,7 +2395,7 @@ msgstr ""
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Action If Same Rate is Not Maintained"
-msgstr ""
+msgstr "Handling hvis samme frekvens ikke er opprettholdt"
 
 #: erpnext/quality_management/doctype/quality_review/quality_review_list.js:7
 msgid "Action Initialised"
@@ -5714,7 +5714,7 @@ msgstr "Område"
 #. Label of the area_uom (Link) field in DocType 'Location'
 #: erpnext/assets/doctype/location/location.json
 msgid "Area UOM"
-msgstr "Område-måleenhet"
+msgstr "Måleenhet (UOM) for område"
 
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:423
 msgid "Arrival Quantity"
@@ -9604,7 +9604,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:90
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.py:215
 msgid "Cannot Calculate Arrival Time as Driver Address is Missing."
-msgstr ""
+msgstr "Kan ikke beregne ankomsttid da sjåførens startadresse mangler."
 
 #: erpnext/controllers/sales_and_purchase_return.py:371
 msgid "Cannot Create Return"
@@ -9618,7 +9618,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:123
 msgid "Cannot Optimize Route as Driver Address is Missing."
-msgstr ""
+msgstr "Kan ikke optimalisere ruten fordi startadressen mangler."
 
 #: erpnext/setup/doctype/employee/employee.py:182
 msgid "Cannot Relieve Employee"
@@ -10124,7 +10124,7 @@ msgstr ""
 #. Label of the cell_number (Data) field in DocType 'Driver'
 #: erpnext/setup/doctype/driver/driver.json
 msgid "Cellphone Number"
-msgstr ""
+msgstr "Mobilnummer"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -16415,7 +16415,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Delivery Manager"
-msgstr ""
+msgstr "Leveranseansvarlig"
 
 #. Label of the delivery_note (Link) field in DocType 'POS Invoice Item'
 #. Label of the delivery_note (Link) field in DocType 'Sales Invoice Item'
@@ -16550,7 +16550,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Delivery User"
-msgstr ""
+msgstr "Leveransebruker"
 
 #. Label of the warehouse (Link) field in DocType 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
@@ -18381,42 +18381,42 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 msgid "Driver"
-msgstr ""
+msgstr "Sjåfør"
 
 #. Label of the driver_address (Link) field in DocType 'Delivery Trip'
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 msgid "Driver Address"
-msgstr ""
+msgstr "Sjåførens startadresse"
 
 #. Label of the driver_email (Data) field in DocType 'Delivery Trip'
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 msgid "Driver Email"
-msgstr ""
+msgstr "Sjåførens e-post"
 
 #. Label of the driver_name (Data) field in DocType 'Delivery Note'
 #. Label of the driver_name (Data) field in DocType 'Delivery Trip'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.json
 msgid "Driver Name"
-msgstr ""
+msgstr "Sjåførens navn"
 
 #. Label of the class (Data) field in DocType 'Driving License Category'
 #: erpnext/setup/doctype/driving_license_category/driving_license_category.json
 msgid "Driver licence class"
-msgstr ""
+msgstr "Førerkortklasse"
 
 #. Label of the driving_license_categories (Section Break) field in DocType
 #. 'Driver'
 #: erpnext/setup/doctype/driver/driver.json
 msgid "Driving License Categories"
-msgstr ""
+msgstr "Førerkortkategorier"
 
 #. Label of the driving_license_category (Table) field in DocType 'Driver'
 #. Name of a DocType
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/driving_license_category/driving_license_category.json
 msgid "Driving License Category"
-msgstr ""
+msgstr "Førerkortkategori"
 
 #. Label of the drop_ar_procedures (Button) field in DocType 'Accounts
 #. Settings'
@@ -19077,7 +19077,7 @@ msgstr ""
 #: erpnext/stock/doctype/serial_no/serial_no.json
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Employee"
-msgstr ""
+msgstr "Ansatt"
 
 #. Label of the employee_link (Link) field in DocType 'Supplier Scorecard
 #. Scoring Standing'
@@ -20275,7 +20275,7 @@ msgstr ""
 #: erpnext/stock/doctype/batch/batch.json
 #: erpnext/stock/report/available_batch_report/available_batch_report.py:58
 msgid "Expiry Date"
-msgstr ""
+msgstr "Utløpsdato"
 
 #: erpnext/stock/doctype/batch/batch.py:199
 msgid "Expiry Date Mandatory"
@@ -21197,7 +21197,7 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Fleet Manager"
-msgstr ""
+msgstr "Flåteansvarlig"
 
 #. Label of the details_tab (Tab Break) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
@@ -23109,7 +23109,7 @@ msgstr ""
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 #: erpnext/setup/setup_wizard/data/designation.txt:18
 msgid "HR Manager"
-msgstr ""
+msgstr "HR-leder"
 
 #. Name of a role
 #: erpnext/projects/doctype/timesheet/timesheet.json
@@ -23119,7 +23119,7 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "HR User"
-msgstr ""
+msgstr "HR-bruker"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Maintenance Schedule
 #. Item'
@@ -26591,7 +26591,7 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/driving_license_category/driving_license_category.json
 msgid "Issuing Date"
-msgstr ""
+msgstr "Utstedelsesdato"
 
 #: erpnext/stock/doctype/item/item.py:569
 msgid "It can take upto few hours for accurate stock values to be visible after merging items."
@@ -28927,7 +28927,7 @@ msgstr "Regnskapsbøker"
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Left"
-msgstr "Venstre"
+msgstr "Sluttet"
 
 #. Label of the left_child (Link) field in DocType 'Bisect Nodes'
 #: erpnext/accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -29077,12 +29077,12 @@ msgstr ""
 #. Label of the license_details (Section Break) field in DocType 'Driver'
 #: erpnext/setup/doctype/driver/driver.json
 msgid "License Details"
-msgstr ""
+msgstr "Førerkortdetaljer"
 
 #. Label of the license_number (Data) field in DocType 'Driver'
 #: erpnext/setup/doctype/driver/driver.json
 msgid "License Number"
-msgstr ""
+msgstr "Førerkort"
 
 #. Label of the license_plate (Data) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
@@ -36881,13 +36881,13 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Percentage"
-msgstr ""
+msgstr "Prosentandel"
 
 #. Label of the percentage (Percent) field in DocType 'Cost Center Allocation
 #. Percentage'
 #: erpnext/accounts/doctype/cost_center_allocation_percentage/cost_center_allocation_percentage.json
 msgid "Percentage (%)"
-msgstr ""
+msgstr "Prosentandel (%)"
 
 #. Label of the percentage_allocation (Float) field in DocType 'Monthly
 #. Distribution Percentage'
@@ -49055,7 +49055,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Series"
-msgstr ""
+msgstr "Nummerserie"
 
 #. Label of the series_for_depreciation_entry (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -51167,7 +51167,7 @@ msgstr ""
 #: erpnext/templates/pages/task_info.html:69
 #: erpnext/templates/pages/timelog_info.html:40
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #. Label of the status_details (Section Break) field in DocType 'Service Level
 #. Agreement'
@@ -53256,7 +53256,7 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Suspended"
-msgstr ""
+msgstr "Suspendert"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:442
 msgid "Switch Between Payment Modes"
@@ -53511,7 +53511,7 @@ msgstr ""
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:497
 msgid "Tag"
-msgstr ""
+msgstr "Stikkord"
 
 #. Label of the target (Data) field in DocType 'Quality Goal Objective'
 #. Label of the target (Data) field in DocType 'Quality Review Objective'
@@ -57436,7 +57436,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Transporter"
-msgstr ""
+msgstr "Transportør"
 
 #. Label of the transporter_info (Section Break) field in DocType
 #. 'Subcontracting Receipt'
@@ -58157,7 +58157,7 @@ msgstr ""
 #: erpnext/crm/doctype/lead/lead.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Unsubscribed"
-msgstr ""
+msgstr "Avmeldt"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:24
 msgid "Until"
@@ -58404,7 +58404,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:539
 msgid "Updated successfully"
-msgstr ""
+msgstr "Oppdateringen var vellykket"
 
 #. Description of the 'Actual Start Time' (Datetime) field in DocType 'Work
 #. Order Operation'
@@ -58627,7 +58627,7 @@ msgstr ""
 #: erpnext/telephony/doctype/voice_call_settings/voice_call_settings.json
 #: erpnext/utilities/doctype/portal_user/portal_user.json
 msgid "User"
-msgstr ""
+msgstr "Bruker"
 
 #. Label of the section_break_5 (Section Break) field in DocType 'POS Closing
 #. Entry'
