@@ -546,7 +546,8 @@ def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, v
 	return outgoing_rate
 
 
-def is_reposting_item_valuation_in_progress():
+def is_reposting_item_valuation_in_progress() -> None:
+	"""Check for active item valuation reposting and show warning if found."""
 	reposting_in_progress = frappe.db.exists(
 		"Repost Item Valuation", {"docstatus": 1, "status": ["in", ["Queued", "In Progress"]]}
 	)
