@@ -17,6 +17,16 @@ erpnext.buying = {
 				this.setup_queries(doc, cdt, cdn);
 				super.onload();
 
+				if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
+					this.frm.set_query("supplier", function () {
+						return {
+							filters: {
+								is_transporter: 0,
+							},
+						};
+					});
+				}
+
 				this.frm.set_query("shipping_rule", function () {
 					return {
 						filters: {
