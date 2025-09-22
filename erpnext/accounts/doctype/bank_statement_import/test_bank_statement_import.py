@@ -2,7 +2,6 @@
 # See license.txt
 
 import unittest
-import frappe
 
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
 	preprocess_mt940_content,
@@ -189,3 +188,22 @@ class TestBankStatementImport(unittest.TestCase):
 		# Verify that other content remains unchanged
 		self.assertIn(":20:STMTREF167619", result)  # Reference should remain unchanged
 		self.assertIn("UPI/TEST USER/123456789/PaidViaTestApp", result)
+
+	def test_preprocess_mt940_content_whitespace_variants(self):
+		"""Test handling of whitespace and different line endings"""
+		# Test with trailing spaces
+		mt940_content = ":28C:167619/1   \n"
+		expected_content = ":28C:67619/1   \n"
+		result = preprocess_mt940_content(mt940_content)
+		self.assertEqual(result, expected_content)
+
+		# Test with Windows line endings (CRLF)
+		mt940_content = ":28C:167619/1\r\n"
+		expected_content = ":28C:67619/1\r\n"
+		result = preprocess_mt940_content(mt940_content)
+		self.assertEqual(result, expected_content)
+
+		# Test with leading spaces (should not match as it's not line start)
+		mt940_content = "   :28C:167619/1\n"
+		result = preprocess_mt940_content(mt940_content)
+		self.assertEqual(result, mt940_content)  # Should remain unchanged
