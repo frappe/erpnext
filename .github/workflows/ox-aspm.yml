@@ -1,8 +1,8 @@
 name: OX ASPM Workflow
 
 on:
-  pull_request:
-    branches: [ main ]
+  push:
+    branches: [ develop ]
 
 jobs:
   aspm_scan:
