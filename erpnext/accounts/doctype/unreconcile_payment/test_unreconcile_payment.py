@@ -5,10 +5,14 @@ import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_invoice as make_pi_from_po,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -483,7 +487,7 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 		# after unreconcilaition advance paid will be reduced
 		# Assert 'Advance Paid'
 		so.reload()
-		self.assertEqual(so.advance_paid, 0)
+		self.assertEqual(so.advance_paid, 1000)  # still same as it is not unreconciled from SO
 
 		self.disable_advance_as_liability()
 
@@ -539,3 +543,82 @@ class TestUnreconcilePayment(AccountsTestMixin, IntegrationTestCase):
 
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
+
+	def test_reallocate_purchase_order_reference_on_unreconcile(self):
+		po_doc = create_purchase_order()
+
+		# Create Payment Entry linked to the PO (advance payment)
+		pe = get_payment_entry("Purchase Order", po_doc.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = today()
+		pe.paid_from_account_currency = po_doc.currency
+		pe.paid_to_account_currency = po_doc.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = po_doc.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		# Check PE initially references the PO
+		self.assertEqual(pe.references[0].reference_doctype, "Purchase Order")
+		self.assertEqual(pe.references[0].reference_name, po_doc.name)
+
+		# Create Purchase Invoice from PO and allocate advance
+		pi = make_pi_from_po(po_doc.name)
+		pi.allocate_advances_automatically = 1
+		pi.only_include_allocated_payments = 1
+		pi.submit()
+
+		pe.reload()
+
+		# After allocation, PE should reference the Purchase Invoice
+		self.assertEqual(pe.references[0].reference_doctype, "Purchase Invoice")
+		self.assertEqual(pe.references[0].reference_name, pi.name)
+
+		pi.reload()
+		# Cancel invoice to simulate unreconciliation
+		pi.cancel()
+		pe.reload()
+
+		# After unreconciliation, PE should reallocate reference back to PO
+		self.assertEqual(pe.references[0].reference_doctype, "Purchase Order")
+		self.assertEqual(pe.references[0].reference_name, po_doc.name)
+
+	def test_reallocate_sales_order_reference_on_unreconcile(self):
+		so = self.create_sales_order()
+		pe = self.create_payment_entry()
+		pe.paid_amount = 1000
+		pe.append(
+			"references",
+			{"reference_doctype": so.doctype, "reference_name": so.name, "allocated_amount": 1000},
+		)
+		pe.save().submit()
+
+		# Assert 'Advance Paid'
+		so.reload()
+		self.assertEqual(so.advance_paid, 1000)
+
+		# Check PE initially references the SO
+		self.assertEqual(pe.references[0].reference_doctype, "Sales Order")
+		self.assertEqual(pe.references[0].reference_name, so.name)
+
+		# Create Sales Invoice from PO and allocate advance
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.only_include_allocated_payments = 1
+		si.submit()
+
+		pe.reload()
+
+		# After allocation, PE should reference the Sales Invoice
+		self.assertEqual(pe.references[0].reference_doctype, "Sales Invoice")
+		self.assertEqual(pe.references[0].reference_name, si.name)
+
+		si.reload()
+		# Cancel invoice to simulate unreconciliation
+		si.cancel()
+		pe.reload()
+
+		# After unreconciliation, PE should reallocate reference back to SO
+		self.assertEqual(pe.references[0].reference_doctype, "Sales Order")
+		self.assertEqual(pe.references[0].reference_name, so.name)
