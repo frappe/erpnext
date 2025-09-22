@@ -276,6 +276,7 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 
 
 def update_mapping_db(bank, template_options):
+	"""Update bank transaction mapping database with template options."""
 	bank = frappe.get_doc("Bank", bank)
 	for d in bank.bank_transaction_mapping:
 		d.delete()
@@ -287,6 +288,7 @@ def update_mapping_db(bank, template_options):
 
 
 def add_bank_account(data, bank_account):
+	"""Add bank account information to data rows."""
 	bank_account_loc = None
 	if "Bank Account" not in data[0]:
 		data[0].append("Bank Account")
@@ -303,6 +305,7 @@ def add_bank_account(data, bank_account):
 
 
 def write_files(import_file, data):
+	"""Write processed data to CSV or Excel files."""
 	full_file_path = import_file.file_doc.get_full_path()
 	parts = import_file.file_doc.get_extension()
 	extension = parts[1]
@@ -312,11 +315,12 @@ def write_files(import_file, data):
 		with open(full_file_path, "w", newline="") as file:
 			writer = csv.writer(file)
 			writer.writerows(data)
-	elif extension == "xlsx" or "xls":
+	elif extension in ("xlsx", "xls"):
 		write_xlsx(data, "trans", file_path=full_file_path)
 
 
 def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
+	"""Write data to Excel file with formatting."""
 	# from xlsx utils with changes
 	column_widths = column_widths or []
 	if wb is None:
