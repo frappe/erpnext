@@ -1024,6 +1024,20 @@ def convert_to_list(result):
 def remove_ref_doc_link_from_pe(
 	ref_type: str | None = None, ref_no: str | None = None, payment_name: str | None = None
 ):
+	order_type = "Sales Order" if ref_type == "Sales Invoice" else "Purchase Order"
+	order_refs = []
+
+	# fetch all linked SO/PO from invoice items
+	if ref_type in ["Sales Invoice", "Purchase Invoice"]:
+		order_refs = frappe.get_all(
+			ref_type + " Item",
+			filters={
+				"parent": ref_no,
+				frappe.scrub(order_type): ["not in", ["", None]],
+			},
+			pluck=frappe.scrub(order_type),
+		)
+
 	per = qb.DocType("Payment Entry Reference")
 	pay = qb.DocType("Payment Entry")
 
@@ -1049,10 +1063,13 @@ def remove_ref_doc_link_from_pe(
 
 	linked_pe = set()
 	row_names = set()
-
+	advance_row_names = set()
 	for row in reference_rows:
 		linked_pe.add(row.parent)
-		row_names.add(row.name)
+		if order_refs and row.advance_voucher_type == order_type and row.advance_voucher_no in order_refs:
+			advance_row_names.add(row.name)
+		else:
+			row_names.add(row.name)
 
 	from erpnext.accounts.doctype.payment_request.payment_request import (
 		update_payment_requests_as_per_pe_references,
@@ -1062,15 +1079,31 @@ def remove_ref_doc_link_from_pe(
 	update_payment_requests_as_per_pe_references(reference_rows, cancel=True)
 
 	# Update allocated amounts and modified fields in one go
-	(
-		qb.update(per)
-		.set(per.allocated_amount, 0)
-		.set(per.modified, now())
-		.set(per.modified_by, frappe.session.user)
-		.where(per.name.isin(row_names))
-		.where(per.parenttype == "Payment Entry")
-		.run()
-	)
+	if row_names:
+		(
+			qb.update(per)
+			.set(per.allocated_amount, 0)
+			.set(per.modified, now())
+			.set(per.modified_by, frappe.session.user)
+			.where(per.name.isin(row_names))
+			.where(per.parenttype == "Payment Entry")
+			.run()
+		)
+
+	# if order reference found retain the link
+	if advance_row_names and order_refs:
+		(
+			qb.update(per)
+			.set(per.reference_doctype, order_type)
+			.set(per.reference_name, order_refs[0])
+			.set(per.advance_voucher_type, None)
+			.set(per.advance_voucher_no, None)
+			.set(per.modified, now())
+			.set(per.modified_by, frappe.session.user)
+			.where(per.name.isin(advance_row_names))
+			.where(per.parenttype == "Payment Entry")
+			.run()
+		)
 
 	for pe in linked_pe:
 		try:
