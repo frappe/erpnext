@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      
       - name: Run OX ASPM Scan
         run: |
           docker run --rm -v ${{ github.workspace }}:/repo ghcr.io/oxsecurity/ox-scan:latest \
@@ -17,6 +20,7 @@ jobs:
                  --branch "${{ github.ref_name }}" \
                  --token "${{ secrets.OX_API_TOKEN }}" \
                  --output json --file ox-aspm.json
+
 
 
       - name: Upload results
