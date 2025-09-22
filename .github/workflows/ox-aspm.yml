@@ -11,13 +11,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run OX ASPM Scan
-        run: docker run --rm \
-             -v ${{ github.workspace }}:/repo \
-             ghcr.io/oxsecurity/ox-scan:latest \
-             scan --repo "${{ github.repository }}" \
-                  --branch "${{ github.ref }}" \
-                  --token "${{ secrets.OX_API_TOKEN }}" \
-                  --output json --file ox-aspm.json
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/repo ghcr.io/oxsecurity/ox-scan:latest \
+            scan --repo "${{ github.repository }}" \
+                 --branch "${{ github.ref_name }}" \
+                 --token "${{ secrets.OX_API_TOKEN }}" \
+                 --output json --file ox-aspm.json
+
 
       - name: Upload results
         uses: actions/upload-artifact@v4
