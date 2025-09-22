@@ -111,8 +111,7 @@ class BankStatementImport(DataImport):
 		return None
 
 
-@frappe.whitelist()
-def preprocess_mt940_content(content):
+def preprocess_mt940_content(content: str) -> str:
 	"""Preprocess MT940 content to fix statement number format issues.
 
 	The MT940 standard expects statement numbers to be maximum 5 digits,
