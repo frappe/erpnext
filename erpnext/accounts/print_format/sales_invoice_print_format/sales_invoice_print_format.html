@@ -1,12 +1,18 @@
 {%- macro add_header(page_num, max_pages, doc, letter_head, no_letterhead, footer, print_settings=None,
-print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
+print_heading_template=None) -%}
+{% if letter_head and not no_letterhead %}
 <div class="letter-head">{{ letter_head }}</div>
-{% endif %} {% if print_heading_template %} {{ frappe.render_template(print_heading_template, {"doc":doc}) }}
-{% else %} {% endif %} {%- if doc.meta.is_submittable and doc.docstatus==2-%}
+{% endif %}
+{% if print_heading_template %}
+	{{ frappe.render_template(print_heading_template, {"doc":doc}) }}
+{% else %}
+{% endif %}
+{%- if doc.meta.is_submittable and doc.docstatus==2-%}
 <div class="text-center" document-status="cancelled">
 	<h4 style="margin: 0px">{{ _("CANCELLED") }}</h4>
 </div>
-{%- endif -%} {%- endmacro -%} {% for page in layout %}
+{%- endif -%}
+{%- endmacro -%} {% for page in layout %}
 <div class="page-break invoice-wrapper">
 	<div {% if print_settings.repeat_header_footer %} id="header-html" class="hidden-pdf" {% endif %}>
 		{{ add_header(loop.index, layout|len, doc, letter_head, no_letterhead, footer, print_settings) }}
@@ -174,7 +180,7 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 		}
 	</style>
 	<div class="print-format-body">
-		<table class="info-table mb-20">
+		<table class="info-table mb-20" style="width: 100%">
 			<tr>
 				<td style="width: 50%">
 					<span class="heading">{{ _("Customer Name") }}:</span> {{doc.customer_name }}
@@ -192,11 +198,15 @@ print_heading_template=None) -%} {% if letter_head and not no_letterhead %}
 				</td>
 			</tr>
 			<tr>
-				{% set address = (doc.address_display) %} {% if address and address.rstrip().endswith("<br />")
-				%} {% set address = address[:-5] %} {% endif %} {% set company_address_display =
-				(doc.company_address_display) %} {% if company_address_display and
-				company_address_display.rstrip().endswith("<br />") %} {% set company_address_display =
-				company_address_display[:-5] %} {% endif %}
+				{% set address = (doc.address_display) %}
+				{% if address and address.rstrip().endswith("<br />") %}
+					{% set address = address[:-5] %}
+				{% endif %}
+
+				{% set company_address_display = (doc.company_address_display) %}
+				{% if company_address_display and company_address_display.rstrip().endswith("<br />") %}
+					{% set company_address_display = company_address_display[:-5] %}
+				{% endif %}
 				<td><span class="heading">{{ _("Bill From") }}:</span><br />{{ address }}</td>
 				<td><span class="heading">{{ _("Bill To") }}:</span><br />{{ company_address_display }}</td>
 			</tr>
