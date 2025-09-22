@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import flt
 from rapidfuzz import fuzz, process
+from rapidfuzz.utils import default_process
 
 
 class AutoMatchParty:
@@ -132,7 +133,12 @@ class AutoMatchbyPartyNameDescription:
 
 	def fuzzy_search_and_return_result(self, party, names, field) -> tuple | None:
 		skip = False
-		result = process.extract(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
+		result = process.extract(
+			query=self.get(field),
+			choices=names,
+			scorer=fuzz.token_set_ratio,
+			processor=default_process,
+		)
 		party_name, skip = self.process_fuzzy_result(result)
 
 		if not party_name:
