@@ -118,22 +118,27 @@ def preprocess_mt940_content(content: str) -> str:
 	but some banks provide longer statement numbers that cause parsing errors.
 	This function truncates statement numbers longer than 5 digits to the last 5 digits.
 	"""
-	# Pattern to match :28C: field with statement number and optional sequence
-	pattern = r'(:28C:)(\d{6,})(/\d+)?'
+	# Fast-path: bail if no :28C: tag exists
+	if ":28C:" not in content:
+		return content
+
+	# Match :28C: at start of line, capture digits and optional /seq, preserve whitespace
+	pattern = re.compile(r'(?m)^(:28C:)(\d{6,})(/\d+)?(\s*)$')
 
 	def replace_statement_number(match):
 		prefix = match.group(1)  # ':28C:'
 		statement_num = match.group(2)  # The statement number
 		sequence_part = match.group(3) or ''  # The sequence part like '/1'
+		trailing_space = match.group(4) or ''  # Preserve trailing whitespace
 
 		# If statement number is longer than 5 digits, truncate to last 5 digits
 		if len(statement_num) > 5:
 			statement_num = statement_num[-5:]
 
-		return prefix + statement_num + sequence_part
+		return prefix + statement_num + sequence_part + trailing_space
 
 	# Apply the replacement
-	processed_content = re.sub(pattern, replace_statement_number, content)
+	processed_content = pattern.sub(replace_statement_number, content)
 	return processed_content
 
 
@@ -142,10 +147,11 @@ def convert_mt940_to_csv(data_import, mt940_file_path):
 
 	file_doc, content = get_file(mt940_file_path)
 
-	if not is_mt940_format(content):
+	is_mt940 = is_mt940_format(content)
+	if not is_mt940:
 		frappe.throw(_("The uploaded file does not appear to be in valid MT940 format."))
 
-	if is_mt940_format(content) and not doc.import_mt940_fromat:
+	if is_mt940 and not doc.import_mt940_fromat:
 		frappe.throw(_("MT940 file detected. Please enable 'Import MT940 Format' to proceed."))
 
 	try:
