@@ -196,7 +196,6 @@ print_heading_template=None) -%}
 			<colgroup>
 				<col style="width: 5%" />
 				<col style="width: 35%" />
-				<col style="width: 15%" />
 				<col style="width: 10%" />
 				<col style="width: 20%" />
 				<col style="width: 15%" />
@@ -205,7 +204,6 @@ print_heading_template=None) -%}
 				<tr>
 					<td class="text-center">{{ _("No") }}</td>
 					<td class="text-left">{{ _("Item") }}</td>
-					<td class="text-center">{{ _("HSN/SAC") }}</td>
 					<td class="text-right">{{ _("Quantity") }}</td>
 					<td class="text-right">{{ _("Rate") }}</td>
 					<td class="text-right">{{ _("Amount") }}</td>
@@ -245,7 +243,6 @@ print_heading_template=None) -%}
 						</table>
 					</td>
 
-					<td class="text-center">{{ item.gst_hsn_code }}</td>
 					<td class="text-right">{{ item.get_formatted("qty", 0) }} {{ item.uom }}</td>
 					<td class="text-right">{{ item.get_formatted("net_rate", doc) }}</td>
 					<td class="text-right">{{ item.get_formatted("net_amount", doc) }}</td>
@@ -312,34 +309,6 @@ print_heading_template=None) -%}
 				</td>
 			</tr>
 		</table>
-
-		{% if doc.taxes_and_charges %}
-		<table class="tax-table mt-15">
-			<div class="mt-40 pb-8">{{ _("Tax Breakup") }}</div>
-			<thead class="highlight-bg">
-				<tr>
-					<td style="width: 5%" class="text-left">{{ _("HSN/SAC") }}</td>
-					<td style="width: 15%" class="text-right">{{ _("Taxable Amount") }}</td>
-					{% for row in doc.taxes %}
-					<td style="width: 10%" class="text-right">{{ row.description }} ({{ row.rate }}%)</td>
-					{% endfor %}
-				</tr>
-			</thead>
-			<tbody>
-				{% for item in doc.items %}
-				<tr>
-					<td class="text-left">{{ item.gst_hsn_code }}</td>
-					<td class="text-right">{{ item.get_formatted("base_net_amount", doc) }}</td>
-					{% for row in doc.taxes %} {% set tax_amount = item.base_net_amount * (row.rate / 100) %}
-					<td class="text-right">
-						{{ frappe.format_value(tax_amount, {"fieldtype": "Currency"}, doc) }}
-					</td>
-					{% endfor %}
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-		{% endif %}
 
 		<!-- Terms -->
 		{% if doc.terms %}

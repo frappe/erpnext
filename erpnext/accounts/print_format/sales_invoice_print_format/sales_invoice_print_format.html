@@ -280,39 +280,6 @@ print_heading_template=None) -%}
 			</div>
 		</div>
 
-		<!-- Tax Breakup -->
-		{% if doc.taxes_and_charges %}
-		<div class="mt-40 pb-8">{{ _("Tax Breakup") }}</div>
-		<div>
-			<table class="tax-table" style="width: 100%">
-				<thead class="table-header">
-					<tr>
-						<td class="text-left">{{ _("HSN/SAC") }}</td>
-						<td class="text-right">{{ _("Taxable Amount") }}</td>
-						{% for row in doc.taxes %}
-						<td class="text-right">{{ row.description }}</td>
-						{% endfor %}
-					</tr>
-				</thead>
-				<tbody>
-					{% for item in doc.items %}
-					<tr>
-						<td class="text-left">{{ item.gst_hsn_code }}</td>
-						<td class="text-right">{{ item.get_formatted("base_net_amount", doc) }}</td>
-						{% for row in doc.taxes %} {% set tax_amount = item.base_net_amount * (row.rate / 100)
-						%}
-						<td class="text-right">
-							({{ (row.rate) }}%) {{ frappe.format_value(tax_amount, {"fieldtype": "Currency"},
-							doc) }}
-						</td>
-						{% endfor %}
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-		{% endif %}
-
 		<!-- Terms -->
 		{% if doc.terms %}
 		<div class="info-card mt-40">
