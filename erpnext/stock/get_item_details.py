@@ -118,8 +118,10 @@ def get_item_details(
 
 	out.update(get_price_list_rate(ctx, item))
 
-	if not out.price_list_rate and frappe.get_single_value(
-		"Selling Settings", "fallback_to_default_price_list"
+	if (
+		not out.price_list_rate
+		and ctx.transaction_type == "selling"
+		and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
 	):
 		fallback_args = ctx.copy()
 		fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
