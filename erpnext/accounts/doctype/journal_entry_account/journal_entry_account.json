@@ -34,6 +34,7 @@
   "reference_detail_no",
   "advance_voucher_type",
   "advance_voucher_no",
+  "party_not_required",
   "col_break3",
   "is_advance",
   "user_remark",
@@ -280,12 +281,20 @@
    "no_copy": 1,
    "options": "advance_voucher_type",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "party_not_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Party Not Required",
+   "no_copy": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-25 04:45:28.117715",
+ "modified": "2025-09-23 18:52:01.147554",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

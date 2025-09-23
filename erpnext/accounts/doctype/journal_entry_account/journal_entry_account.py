@@ -32,6 +32,7 @@ class JournalEntryAccount(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		party: DF.DynamicLink | None
+		party_not_required: DF.Check
 		party_type: DF.Link | None
 		project: DF.Link | None
 		reference_detail_no: DF.Data | None
