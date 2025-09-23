@@ -35,7 +35,6 @@ def execute(filters=None):
 	if filters.get("party"):
 		filters.party = frappe.parse_json(filters.get("party"))
 
-
 	validate_filters(filters, account_details)
 
 	validate_party(filters)
@@ -195,7 +194,8 @@ def get_gl_entries(filters, accounting_dimensions):
 			voucher_type, voucher_subtype, voucher_no, {dimension_fields}
 			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
-			against, is_opening, creation {select_fields}
+			against, is_opening, creation {select_fields},
+			transaction_currency
 		from `tabGL Entry`
 		where company=%(company)s {get_conditions(filters)}
 		{order_by_statement}
@@ -358,6 +358,7 @@ def get_accounts_with_children(accounts):
 		conditions.append((doctype.lft >= account.lft) & (doctype.rgt <= account.rgt))
 
 	return frappe.qb.from_(doctype).select(doctype.name).where(Criterion.any(conditions)).run(pluck=True)
+
 
 def set_bill_no(gl_entries):
 	inv_details = get_supplier_invoice_details()
@@ -687,7 +688,7 @@ def get_columns(filters):
 
 	if filters.get("include_dimensions"):
 		columns.append({"label": _("Project"), "options": "Project", "fieldname": "project", "width": 100})
-		
+
 		for dim in get_accounting_dimensions(as_list=False):
 			columns.append(
 				{"label": _(dim.label), "options": dim.label, "fieldname": dim.fieldname, "width": 100}
