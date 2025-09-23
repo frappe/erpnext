@@ -84,7 +84,6 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
-
 		frm.set_query("operation", "required_items", function () {
 			return {
 				query: "erpnext.manufacturing.doctype.work_order.work_order.get_bom_operations",
@@ -93,6 +92,17 @@ frappe.ui.form.on("Work Order", {
 					parenttype: "BOM",
 				},
 			};
+		});
+
+		frm.set_query("sales_order", function () {
+			if (frm.doc.production_item) {
+				return {
+					query: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
+					filters: {
+						production_item: frm.doc.production_item,
+					},
+				};
+			}
 		});
 
 		// formatter for work order operation
@@ -179,7 +189,6 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		}
-
 
 		if (frm.doc.status == "Completed") {
 			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
@@ -473,7 +482,6 @@ frappe.ui.form.on("Work Order", {
 				callback: function (r) {
 					if (r.message) {
 						frm.set_value("sales_order", "");
-						frm.trigger("set_sales_order");
 						erpnext.in_production_item_onchange = true;
 
 						$.each(
@@ -529,28 +537,10 @@ frappe.ui.form.on("Work Order", {
 		frm.toggle_reqd("transfer_material_against", frm.doc.operations && frm.doc.operations.length > 0);
 	},
 
-	set_sales_order: function (frm) {
-		if (frm.doc.production_item) {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
-				args: { production_item: frm.doc.production_item },
-				callback: function (r) {
-					frm.set_query("sales_order", function () {
-						erpnext.in_production_item_onchange = true;
-						return {
-							filters: [["Sales Order", "name", "in", r.message]],
-						};
-					});
-				},
-			});
-		}
-	},
-
 	additional_operating_cost: function (frm) {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
-
 });
 
 frappe.ui.form.on("Work Order Item", {
