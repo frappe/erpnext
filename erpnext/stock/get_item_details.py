@@ -98,7 +98,18 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	out.update(get_price_list_rate(args, item))
 
+<<<<<<< HEAD
 	args.customer = current_customer
+=======
+	if not out.price_list_rate and frappe.get_single_value(
+		"Selling Settings", "fallback_to_default_price_list"
+	):
+		fallback_args = ctx.copy()
+		fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+		out.update(get_price_list_rate(fallback_args, item))
+
+	ctx.customer = current_customer
+>>>>>>> ff78aaeb3b (feat: allow fallback to default selling price list (#49634))
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
