@@ -2950,6 +2950,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				valid_from: ["<=", doc.transaction_date || doc.bill_date || doc.posting_date],
 				item_group: item.item_group,
 				base_net_rate: item.base_net_rate,
+				disabled: 0,
 			};
 
 			if (doc.tax_category) filters["tax_category"] = doc.tax_category;
