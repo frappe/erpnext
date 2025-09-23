@@ -327,8 +327,7 @@
 		{% endfor %}
 		<td></td>
 		<td></td>
-		<td></td>
-		{% if not(filters.show_future_payments) and filters.show_remarks %}
+		{% if (filters.show_future_payments) or filters.show_remarks %}
 			<td></td>
 		{% endif %}
 		{% if not(filters.show_future_payments) %}
