@@ -142,6 +142,7 @@ def preprocess_mt940_content(content: str) -> str:
 	return processed_content
 
 
+@frappe.whitelist()
 def convert_mt940_to_csv(data_import, mt940_file_path):
 	doc = frappe.get_doc("Bank Statement Import", data_import)
 
