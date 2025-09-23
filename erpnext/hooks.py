@@ -600,13 +600,6 @@ user_privacy_documents = [
 	},
 ]
 
-fixtures = [
-	{
-		"dt": "Letter Head",
-		"filters": [["name", "in", ["Sales Invoice Letter Head", "Print Format Letter Head"]]],
-	}
-]
-
 
 # ERPNext doctypes for Global Search
 global_search_doctypes = {

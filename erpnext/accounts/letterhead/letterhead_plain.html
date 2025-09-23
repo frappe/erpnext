@@ -1,0 +1,122 @@
+<style>
+    .letter-head {
+        border-radius: 18px;
+        padding-right: 12px;
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+
+    .letter-head td{
+        padding: 0px !important;
+    }
+    .invoice-header {
+        width: 100%;
+    }
+    .logo-cell {
+        width: 100px;
+        text-align: center;
+        position: relative;
+
+    }
+    .logo-container {
+        width: 90px;
+        border: 1px solid #EDEDED;
+        border-radius: 15px;
+        display: block;
+    }
+    .logo-container img {
+        max-width: 90px;
+        max-height: 90px;
+        display: inline-block;
+    }
+    .company-details {
+        width: 40%;
+    }
+    .company-name {
+        font-size: 14px;
+        font-weight: bold;
+        color: #171717;
+        margin-bottom: 4px;
+    }
+    .invoice-info-cell {
+        float: right;
+        vertical-align: top;
+    }
+    .invoice-info {
+        margin-bottom: 2px;
+    }
+    .invoice-label {
+        color: #7C7C7C;
+        display: inline-block;
+        width: 60px;
+        margin-right: 5px;
+    }
+</style>
+
+<table class="invoice-header">
+    <tbody>
+        <tr>
+            <td class="logo-cell" style="vertical-align: middle !important;">
+                <div class="logo-container">
+                    {% set company_logo = frappe.db.get_value("Company", doc.company, "company_logo") %}
+                    {% if company_logo %}
+                        <img src="{{ frappe.utils.get_url(company_logo) }}" alt="Company Logo">
+                    {% endif %}
+                </div>
+            </td>
+
+            <td class="company-details">
+                <div class="company-name">
+                    {{ doc.company }}
+                </div>
+                {% set company_address = frappe.get_all(
+                    "Dynamic Link",
+                    fields=["parent"],
+                    filters={
+                        "link_doctype": "Company",
+                        "link_name": doc.company,
+                        "parenttype": "Address"
+                    },
+                    limit=1
+                ) %}
+                {% if company_address %}
+                    {% set address = frappe.get_doc("Address", company_address[0].parent) %}
+                    {{ address.address_line1 or "" }}<br>
+                    {% if address.address_line2 %}
+                        {{ address.address_line2 }}<br>
+                    {% endif %}
+                    {{ address.city or "" }} {{ address.state or "" }} {{ address.pincode or "" }} {{ address.country or "" }}
+                {% endif %}
+            </td>
+
+            <td class="invoice-info-cell">
+                {% set website = frappe.db.get_value("Company", doc.company, "website") %}
+                {% set email = frappe.db.get_value("Company", doc.company, "email") %}
+                {% set phone_no = frappe.db.get_value("Company", doc.company, "phone_no") %}
+
+                <div class="invoice-info">
+                    <span class="invoice-label">{{ _("Invoice:") }}</span>
+                    <span>{{ doc.name }}</span>
+                </div>
+                {% if website %}
+                    <div class="invoice-info">
+                        <span class="invoice-label">{{ _("Website:") }}</span>
+                        <span>{{ website }}</span>
+                    </div>
+                {% endif %}
+                {% if email %}
+                    <div class="invoice-info">
+                        <span class="invoice-label">{{ _("Email:") }}</span>
+                        <span>{{ email }}</span>
+                    </div>
+                {% endif %}
+                {% if phone_no %}
+                    <div class="invoice-info">
+                        <span class="invoice-label">{{ _("Contact:") }}</span>
+                        <span>{{ phone_no }}</span>
+                    </div>
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
