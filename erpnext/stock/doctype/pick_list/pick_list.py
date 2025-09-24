@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_auto_batch_nos,
 	get_picked_serial_nos,
 )
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
@@ -73,6 +73,9 @@ class PickList(TransactionBase):
 
 		if self.has_reserved_stock():
 			self.set_onload("has_reserved_stock", True)
+
+		for item in self.get("locations"):
+			item.update(get_item_details(item.item_code, item.uom, item.warehouse, self.company))
 
 	def validate(self):
 		self.validate_expired_batches()
@@ -1434,13 +1437,27 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 
 
 @frappe.whitelist()
-def get_item_details(item_code, uom=None):
+def get_item_details(item_code, uom=None, warehouse=None, company=None):
 	details = frappe.db.get_value("Item", item_code, ["stock_uom", "name"], as_dict=1)
 	details.uom = uom or details.stock_uom
 	if uom:
 		details.update(get_conversion_factor(item_code, uom))
 
+	if warehouse:
+		details.actual_qty = flt(get_actual_qty(item_code, warehouse))
+
+	if company:
+		details.company_total_stock = get_company_total_stock(item_code, company)
+
 	return details
+
+
+def get_actual_qty(item_code, warehouse):
+	return frappe.db.get_value(
+		"Bin",
+		{"item_code": item_code, "warehouse": warehouse},
+		"actual_qty",
+	)
 
 
 def update_delivery_note_item(source, target, delivery_note):

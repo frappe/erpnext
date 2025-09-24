@@ -976,6 +976,7 @@ class ReceivablePayableReport:
 
 			if self.account_type == "Receivable":
 				self.add_customer_filters()
+				self.exclude_employee_transaction()
 
 			elif self.account_type == "Payable":
 				self.add_supplier_filters()
@@ -1054,6 +1055,9 @@ class ReceivablePayableReport:
 					.where(self.customer.default_sales_partner == self.filters.get("sales_partner"))
 				)
 			)
+
+	def exclude_employee_transaction(self):
+		self.qb_selection_filter.append(self.ple.party_type != "Employee")
 
 	def add_supplier_filters(self):
 		supplier = qb.DocType("Supplier")

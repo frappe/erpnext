@@ -38,6 +38,7 @@
   "column_break_17",
   "customers",
   "preferences",
+  "print_format",
   "orientation",
   "include_break",
   "include_ageing",
@@ -406,10 +407,16 @@
    "fieldname": "show_future_payments",
    "fieldtype": "Check",
    "label": "Show Future Payments"
+  },
+  {
+   "fieldname": "print_format",
+   "fieldtype": "Link",
+   "label": "Print Format",
+   "options": "Print Format"
   }
  ],
  "links": [],
- "modified": "2025-08-29 00:20:08.088189",
+ "modified": "2025-09-03 14:24:43.608565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

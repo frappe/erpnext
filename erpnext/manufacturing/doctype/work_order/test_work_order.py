@@ -3005,6 +3005,36 @@ class TestWorkOrder(IntegrationTestCase):
 			wo.operations[3].planned_start_time, add_to_date(wo.operations[1].planned_end_time, minutes=10)
 		)
 
+	def test_allow_additional_material_transfer(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		frappe.db.set_single_value("Manufacturing Settings", "transfer_extra_materials_percentage", 50)
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		for row in wo_order.required_items:
+			make_stock_entry_test_record(
+				item_code=row.item_code,
+				target=row.source_warehouse,
+				qty=row.required_qty * 2,
+				basic_rate=100,
+			)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 2))
+		stock_entry.insert()
+		stock_entry.submit()
+
+		wo_order.reload()
+		self.assertEqual(wo_order.material_transferred_for_manufacturing, 2)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 1))
+		stock_entry.insert()
+		stock_entry.submit()
+
+		wo_order.reload()
+		self.assertEqual(wo_order.material_transferred_for_manufacturing, 3)
+		frappe.db.set_single_value("Manufacturing Settings", "transfer_extra_materials_percentage", 0)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (

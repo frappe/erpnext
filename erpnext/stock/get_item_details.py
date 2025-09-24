@@ -118,6 +118,15 @@ def get_item_details(
 
 	out.update(get_price_list_rate(ctx, item))
 
+	if (
+		not out.price_list_rate
+		and ctx.transaction_type == "selling"
+		and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
+	):
+		fallback_args = ctx.copy()
+		fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+		out.update(get_price_list_rate(fallback_args, item))
+
 	ctx.customer = current_customer
 
 	if ctx.customer and cint(ctx.is_pos):
@@ -202,9 +211,10 @@ def update_stock(ctx, out, doc=None):
 				"item_code": ctx.item_code,
 				"warehouse": ctx.warehouse,
 				"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
-				"sabb_voucher_no": doc.get("name"),
+				"sabb_voucher_no": doc.get("name") if doc else None,
 				"sabb_voucher_detail_no": ctx.child_docname,
 				"sabb_voucher_type": ctx.doctype,
+				"pick_reserved_items": True,
 			}
 		)
 

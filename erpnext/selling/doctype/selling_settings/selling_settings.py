@@ -5,6 +5,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
 from frappe.utils import cint
@@ -34,6 +35,7 @@ class SellingSettings(Document):
 		editable_price_list_rate: DF.Check
 		enable_cutoff_date_on_bulk_delivery_note_creation: DF.Check
 		enable_discount_accounting: DF.Check
+		fallback_to_default_price_list: DF.Check
 		hide_tax_id: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		maintain_same_sales_rate: DF.Check
@@ -70,6 +72,25 @@ class SellingSettings(Document):
 			self.get("cust_master_name") == "Naming Series",
 			hide_name_field=False,
 		)
+
+		self.validate_fallback_to_default_price_list()
+
+	def validate_fallback_to_default_price_list(self):
+		if (
+			self.fallback_to_default_price_list
+			and self.has_value_changed("fallback_to_default_price_list")
+			and frappe.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")
+		):
+			stock_meta = frappe.get_meta("Stock Settings")
+			frappe.msgprint(
+				_(
+					"You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted into the transaction price list."
+				).format(
+					"<i>{}</i>".format(_(self.meta.get_label("fallback_to_default_price_list"))),
+					"<i>{}</i>".format(_(stock_meta.get_label("auto_insert_price_list_rate_if_missing"))),
+					frappe.bold(_("Stock Settings")),
+				)
+			)
 
 	def toggle_hide_tax_id(self):
 		_hide_tax_id = cint(self.hide_tax_id)

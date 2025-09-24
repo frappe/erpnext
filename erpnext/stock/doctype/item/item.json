@@ -116,7 +116,15 @@
   "customer_code",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
-  "total_projected_qty"
+  "total_projected_qty",
+  "lead_time_in_days_section",
+  "procurement_time",
+  "manufacturing_time",
+  "column_break_whvr",
+  "planning_buffer",
+  "cumulative_time",
+  "capacity_in_days_section",
+  "production_capacity"
  ],
  "fields": [
   {
@@ -888,6 +896,46 @@
    "fieldname": "deferred_accounting_section",
    "fieldtype": "Section Break",
    "label": "Deferred Accounting"
+  },
+  {
+   "fieldname": "lead_time_in_days_section",
+   "fieldtype": "Section Break",
+   "label": "Lead Time (In Days)"
+  },
+  {
+   "fieldname": "procurement_time",
+   "fieldtype": "Int",
+   "label": "Procurement Time"
+  },
+  {
+   "fieldname": "planning_buffer",
+   "fieldtype": "Int",
+   "label": "Planning Buffer"
+  },
+  {
+   "fieldname": "column_break_whvr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacturing_time",
+   "fieldtype": "Int",
+   "label": "Manufacturing Time"
+  },
+  {
+   "fieldname": "cumulative_time",
+   "fieldtype": "Int",
+   "label": "Cumulative Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "capacity_in_days_section",
+   "fieldtype": "Section Break",
+   "label": "Capacity (In Days)"
+  },
+  {
+   "fieldname": "production_capacity",
+   "fieldtype": "Int",
+   "label": "Production Capacity"
   }
  ],
  "icon": "fa fa-tag",
@@ -895,7 +943,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-08-08 14:58:48.674193",
+ "modified": "2025-08-14 23:35:56.293048",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2025-08-31 09:35+0000\n"
-"PO-Revision-Date: 2025-08-31 23:23\n"
+"POT-Creation-Date: 2025-09-21 09:35+0000\n"
+"PO-Revision-Date: 2025-09-22 02:53\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Esperanto\n"
 "MIME-Version: 1.0\n"
@@ -244,7 +244,7 @@ msgstr "crwdns62480:0crwdne62480:0"
 msgid "'Default {0} Account' in Company {1}"
 msgstr "crwdns62482:0{0}crwdnd62482:0{1}crwdne62482:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1273
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1276
 msgid "'Entries' cannot be empty"
 msgstr "crwdns62484:0crwdne62484:0"
 
@@ -270,8 +270,8 @@ msgstr "crwdns151814:0{0}crwdne151814:0"
 msgid "'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
 msgstr "crwdns151816:0{0}crwdne151816:0"
 
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:597
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:630
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:598
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:631
 msgid "'Opening'"
 msgstr "crwdns62492:0crwdne62492:0"
 
@@ -293,7 +293,7 @@ msgstr "crwdns62498:0{0}crwdne62498:0"
 msgid "'Update Stock' cannot be checked for fixed asset sale"
 msgstr "crwdns62500:0crwdne62500:0"
 
-#: erpnext/accounts/doctype/bank_account/bank_account.py:65
+#: erpnext/accounts/doctype/bank_account/bank_account.py:64
 msgid "'{0}' account is already used by {1}. Use another account."
 msgstr "crwdns111570:0{0}crwdnd111570:0{1}crwdne111570:0"
 
@@ -301,8 +301,8 @@ msgstr "crwdns111570:0{0}crwdnd111570:0{1}crwdne111570:0"
 msgid "'{0}' has been already added."
 msgstr "crwdns152414:0{0}crwdne152414:0"
 
-#: erpnext/setup/doctype/company/company.py:208
-#: erpnext/setup/doctype/company/company.py:219
+#: erpnext/setup/doctype/company/company.py:210
+#: erpnext/setup/doctype/company/company.py:221
 msgid "'{0}' should be in company currency {1}."
 msgstr "crwdns127446:0{0}crwdnd127446:0{1}crwdne127446:0"
 
@@ -401,7 +401,7 @@ msgid "* Will be calculated in the transaction."
 msgstr "crwdns132130:0crwdne132130:0"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:95
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:349
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:358
 msgid "0 - 30 Days"
 msgstr "crwdns148570:0crwdne148570:0"
 
@@ -478,7 +478,7 @@ msgid "3 Yearly"
 msgstr "crwdns132146:0crwdne132146:0"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:96
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:350
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:359
 msgid "30 - 60 Days"
 msgstr "crwdns148572:0crwdne148572:0"
 
@@ -519,7 +519,7 @@ msgid "6 hrs"
 msgstr "crwdns132154:0crwdne132154:0"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:97
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:351
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:360
 msgid "60 - 90 Days"
 msgstr "crwdns148574:0crwdne148574:0"
 
@@ -532,7 +532,7 @@ msgid "60-90 Days"
 msgstr "crwdns62598:0crwdne62598:0"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:98
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:352
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:361
 msgid "90 - 120 Days"
 msgstr "crwdns148576:0crwdne148576:0"
 
@@ -682,7 +682,7 @@ msgstr "crwdns155606:0{0}crwdnd155606:0{1}crwdnd155606:0{2}crwdne155606:0"
 msgid "<li>Payment document required for row(s): {0}</li>"
 msgstr "crwdns155780:0{0}crwdne155780:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:143
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:163
 msgid "<li>{}</li>"
 msgstr "crwdns155906:0crwdne155906:0"
 
@@ -690,7 +690,7 @@ msgstr "crwdns155906:0crwdne155906:0"
 msgid "<p>Cannot overbill for the following Items:</p>"
 msgstr "crwdns155608:0crwdne155608:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:137
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:157
 msgid "<p>Following {0}s doesn't belong to Company {1} :</p>"
 msgstr "crwdns155908:0{0}crwdnd155908:0{1}crwdne155908:0"
 
@@ -915,15 +915,15 @@ msgstr "crwdns111574:0crwdne111574:0"
 msgid "A Product or a Service that is bought, sold or kept in stock."
 msgstr "crwdns111576:0crwdne111576:0"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:547
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:560
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
 msgstr "crwdns62656:0{0}crwdne62656:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1802
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1805
 msgid "A Reverse Journal Entry {0} already exists for this Journal Entry."
 msgstr "crwdns158384:0{0}crwdne158384:0"
 
-#: erpnext/setup/doctype/company/company.py:946
+#: erpnext/setup/doctype/company/company.py:956
 msgid "A Transaction Deletion Document: {0} is triggered for {0}"
 msgstr "crwdns111578:0{0}crwdnd111578:0{0}crwdne111578:0"
 
@@ -1047,11 +1047,11 @@ msgstr "crwdns132216:0crwdne132216:0"
 msgid "Abbreviation"
 msgstr "crwdns132218:0crwdne132218:0"
 
-#: erpnext/setup/doctype/company/company.py:167
+#: erpnext/setup/doctype/company/company.py:169
 msgid "Abbreviation already used for another company"
 msgstr "crwdns62734:0crwdne62734:0"
 
-#: erpnext/setup/doctype/company/company.py:164
+#: erpnext/setup/doctype/company/company.py:166
 msgid "Abbreviation is mandatory"
 msgstr "crwdns62736:0crwdne62736:0"
 
@@ -1077,7 +1077,7 @@ msgid "About {0} seconds remaining"
 msgstr "crwdns62746:0{0}crwdne62746:0"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:99
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:353
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:362
 msgid "Above 120 Days"
 msgstr "crwdns148594:0crwdne148594:0"
 
@@ -1217,9 +1217,9 @@ msgstr "crwdns152084:0{0}crwdnd152084:0{1}crwdne152084:0"
 #: erpnext/accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 #: erpnext/accounts/report/account_balance/account_balance.py:21
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:83
-#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:286
-#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:201
-#: erpnext/accounts/report/financial_statements.py:649
+#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:287
+#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:202
+#: erpnext/accounts/report/financial_statements.py:650
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.js:30
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:190
 #: erpnext/accounts/report/general_ledger/general_ledger.js:38
@@ -1227,7 +1227,7 @@ msgstr "crwdns152084:0{0}crwdnd152084:0{1}crwdne152084:0"
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.js:30
 #: erpnext/accounts/report/payment_ledger/payment_ledger.js:30
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:152
-#: erpnext/accounts/report/trial_balance/trial_balance.py:436
+#: erpnext/accounts/report/trial_balance/trial_balance.py:437
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:70
 #: erpnext/regional/doctype/uae_vat_account/uae_vat_account.json
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -1336,8 +1336,8 @@ msgstr "crwdns62894:0crwdne62894:0"
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
 #: erpnext/accounts/doctype/ledger_merge_accounts/ledger_merge_accounts.json
-#: erpnext/accounts/report/financial_statements.py:660
-#: erpnext/accounts/report/trial_balance/trial_balance.py:443
+#: erpnext/accounts/report/financial_statements.py:661
+#: erpnext/accounts/report/trial_balance/trial_balance.py:444
 msgid "Account Name"
 msgstr "crwdns132254:0crwdne132254:0"
 
@@ -1348,8 +1348,8 @@ msgstr "crwdns62904:0crwdne62904:0"
 #. Label of the account_number (Data) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/doctype/account/account_tree.js:132
-#: erpnext/accounts/report/financial_statements.py:667
-#: erpnext/accounts/report/trial_balance/trial_balance.py:450
+#: erpnext/accounts/report/financial_statements.py:668
+#: erpnext/accounts/report/trial_balance/trial_balance.py:451
 msgid "Account Number"
 msgstr "crwdns62906:0crwdne62906:0"
 
@@ -1463,7 +1463,7 @@ msgstr "crwdns62964:0crwdne62964:0"
 msgid "Account {0} added multiple times"
 msgstr "crwdns62966:0{0}crwdne62966:0"
 
-#: erpnext/setup/doctype/company/company.py:190
+#: erpnext/setup/doctype/company/company.py:192
 msgid "Account {0} does not belong to company: {1}"
 msgstr "crwdns62968:0{0}crwdnd62968:0{1}crwdne62968:0"
 
@@ -1487,7 +1487,7 @@ msgstr "crwdns62976:0{0}crwdnd62976:0{1}crwdne62976:0"
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
 msgstr "crwdns62978:0{0}crwdnd62978:0{1}crwdnd62978:0{2}crwdne62978:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:118
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:138
 msgid "Account {0} doesn't belong to Company {1}"
 msgstr "crwdns155910:0{0}crwdnd155910:0{1}crwdne155910:0"
 
@@ -1503,7 +1503,7 @@ msgstr "crwdns62982:0{0}crwdne62982:0"
 msgid "Account {0} is added in the child company {1}"
 msgstr "crwdns62984:0{0}crwdnd62984:0{1}crwdne62984:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:403
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:430
 msgid "Account {0} is frozen"
 msgstr "crwdns62986:0{0}crwdne62986:0"
 
@@ -1632,12 +1632,12 @@ msgstr "crwdns132266:0crwdne132266:0"
 msgid "Accounting Dimension"
 msgstr "crwdns63052:0crwdne63052:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:207
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:215
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:151
 msgid "Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}."
 msgstr "crwdns63060:0{0}crwdnd63060:0{1}crwdne63060:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:193
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:201
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:138
 msgid "Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}."
 msgstr "crwdns63062:0{0}crwdnd63062:0{1}crwdne63062:0"
@@ -1916,7 +1916,7 @@ msgstr "crwdns132274:0crwdne132274:0"
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/company/company.json
-#: erpnext/setup/doctype/company/company.py:348
+#: erpnext/setup/doctype/company/company.py:350
 #: erpnext/setup/doctype/customer_group/customer_group.json
 #: erpnext/setup/doctype/email_digest/email_digest.json
 #: erpnext/setup/doctype/incoterm/incoterm.json
@@ -2207,7 +2207,7 @@ msgstr "crwdns63252:0crwdne63252:0"
 msgid "Accounts User"
 msgstr "crwdns63258:0crwdne63258:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1372
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1375
 msgid "Accounts table cannot be blank."
 msgstr "crwdns63260:0crwdne63260:0"
 
@@ -2246,7 +2246,7 @@ msgstr "crwdns63274:0crwdne63274:0"
 msgid "Accumulated Depreciation as on"
 msgstr "crwdns63278:0crwdne63278:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:251
+#: erpnext/accounts/doctype/budget/budget.py:253
 msgid "Accumulated Monthly"
 msgstr "crwdns63280:0crwdne63280:0"
 
@@ -2394,7 +2394,7 @@ msgstr "crwdns155136:0crwdne155136:0"
 #: erpnext/accounts/doctype/subscription/subscription.js:50
 #: erpnext/accounts/doctype/subscription/subscription.js:56
 #: erpnext/buying/doctype/supplier/supplier.js:133
-#: erpnext/buying/doctype/supplier/supplier.js:142
+#: erpnext/buying/doctype/supplier/supplier.js:145
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 #: erpnext/manufacturing/doctype/bom/bom.js:160
 #: erpnext/manufacturing/doctype/bom/bom.js:171
@@ -2408,7 +2408,7 @@ msgstr "crwdns155136:0crwdne155136:0"
 #: erpnext/quality_management/doctype/quality_feedback/quality_feedback.json
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.json
 #: erpnext/selling/doctype/customer/customer.js:190
-#: erpnext/selling/doctype/customer/customer.js:199
+#: erpnext/selling/doctype/customer/customer.js:202
 #: erpnext/stock/doctype/item/item.js:518 erpnext/templates/pages/order.html:20
 msgid "Actions"
 msgstr "crwdns63314:0crwdne63314:0"
@@ -2553,7 +2553,7 @@ msgstr "crwdns63388:0crwdne63388:0"
 msgid "Actual End Date (via Timesheet)"
 msgstr "crwdns132324:0crwdne132324:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:207
+#: erpnext/manufacturing/doctype/work_order/work_order.py:208
 msgid "Actual End Date cannot be before Actual Start Date"
 msgstr "crwdns155360:0crwdne155360:0"
 
@@ -2567,7 +2567,7 @@ msgstr "crwdns132326:0crwdne132326:0"
 msgid "Actual Expense"
 msgstr "crwdns63400:0crwdne63400:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:319
+#: erpnext/accounts/doctype/budget/budget.py:321
 msgid "Actual Expenses"
 msgstr "crwdns157444:0crwdne157444:0"
 
@@ -3363,7 +3363,7 @@ msgstr "crwdns132414:0crwdne132414:0"
 msgid "Address and Contacts"
 msgstr "crwdns132416:0crwdne132416:0"
 
-#: erpnext/accounts/custom/address.py:31
+#: erpnext/accounts/custom/address.py:33
 msgid "Address needs to be linked to a Company. Please add a row for Company in the Links table."
 msgstr "crwdns63806:0crwdne63806:0"
 
@@ -3514,7 +3514,7 @@ msgstr "crwdns132432:0crwdne132432:0"
 msgid "Advance amount cannot be greater than {0} {1}"
 msgstr "crwdns63854:0{0}crwdnd63854:0{1}crwdne63854:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:926
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:929
 msgid "Advance paid against {0} {1} cannot be greater than Grand Total {2}"
 msgstr "crwdns63856:0{0}crwdnd63856:0{1}crwdnd63856:0{2}crwdne63856:0"
 
@@ -3640,12 +3640,12 @@ msgstr "crwdns132454:0crwdne132454:0"
 msgid "Against Income Account"
 msgstr "crwdns132456:0crwdne132456:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:788
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:791
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:771
 msgid "Against Journal Entry {0} does not have any unmatched {1} entry"
 msgstr "crwdns63908:0{0}crwdnd63908:0{1}crwdne63908:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:368
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:395
 msgid "Against Journal Entry {0} is already adjusted against some other voucher"
 msgstr "crwdns63910:0{0}crwdne63910:0"
 
@@ -3753,7 +3753,7 @@ msgid "Ageing Range"
 msgstr "crwdns148758:0crwdne148758:0"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:87
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:341
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:350
 msgid "Ageing Report based on {0} up to {1}"
 msgstr "crwdns148596:0{0}crwdnd148596:0{1}crwdne148596:0"
 
@@ -3839,7 +3839,7 @@ msgstr "crwdns63986:0crwdne63986:0"
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:165
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:185
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:166
-#: erpnext/accounts/utils.py:1451 erpnext/public/js/setup_wizard.js:184
+#: erpnext/accounts/utils.py:1475 erpnext/public/js/setup_wizard.js:184
 msgid "All Accounts"
 msgstr "crwdns63990:0crwdne63990:0"
 
@@ -3895,21 +3895,21 @@ msgstr "crwdns64012:0crwdne64012:0"
 #: erpnext/patches/v11_0/update_department_lft_rgt.py:9
 #: erpnext/patches/v11_0/update_department_lft_rgt.py:11
 #: erpnext/patches/v11_0/update_department_lft_rgt.py:16
-#: erpnext/setup/doctype/company/company.py:341
-#: erpnext/setup/doctype/company/company.py:344
-#: erpnext/setup/doctype/company/company.py:349
-#: erpnext/setup/doctype/company/company.py:355
-#: erpnext/setup/doctype/company/company.py:361
-#: erpnext/setup/doctype/company/company.py:367
-#: erpnext/setup/doctype/company/company.py:373
-#: erpnext/setup/doctype/company/company.py:379
-#: erpnext/setup/doctype/company/company.py:385
-#: erpnext/setup/doctype/company/company.py:391
-#: erpnext/setup/doctype/company/company.py:397
-#: erpnext/setup/doctype/company/company.py:403
-#: erpnext/setup/doctype/company/company.py:409
-#: erpnext/setup/doctype/company/company.py:415
-#: erpnext/setup/doctype/company/company.py:421
+#: erpnext/setup/doctype/company/company.py:343
+#: erpnext/setup/doctype/company/company.py:346
+#: erpnext/setup/doctype/company/company.py:351
+#: erpnext/setup/doctype/company/company.py:357
+#: erpnext/setup/doctype/company/company.py:363
+#: erpnext/setup/doctype/company/company.py:369
+#: erpnext/setup/doctype/company/company.py:375
+#: erpnext/setup/doctype/company/company.py:381
+#: erpnext/setup/doctype/company/company.py:387
+#: erpnext/setup/doctype/company/company.py:393
+#: erpnext/setup/doctype/company/company.py:399
+#: erpnext/setup/doctype/company/company.py:405
+#: erpnext/setup/doctype/company/company.py:411
+#: erpnext/setup/doctype/company/company.py:417
+#: erpnext/setup/doctype/company/company.py:423
 msgid "All Departments"
 msgstr "crwdns64014:0crwdne64014:0"
 
@@ -3985,7 +3985,7 @@ msgstr "crwdns64028:0crwdne64028:0"
 msgid "All Territories"
 msgstr "crwdns64030:0crwdne64030:0"
 
-#: erpnext/setup/doctype/company/company.py:286
+#: erpnext/setup/doctype/company/company.py:288
 msgid "All Warehouses"
 msgstr "crwdns64032:0crwdne64032:0"
 
@@ -4011,7 +4011,7 @@ msgstr "crwdns64038:0crwdne64038:0"
 msgid "All items have already been received"
 msgstr "crwdns112194:0crwdne112194:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2674
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2685
 msgid "All items have already been transferred for this Work Order."
 msgstr "crwdns64040:0crwdne64040:0"
 
@@ -4029,7 +4029,7 @@ msgstr "crwdns132502:0crwdne132502:0"
 msgid "All the items have been already returned."
 msgstr "crwdns152571:0crwdne152571:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1099
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1136
 msgid "All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table."
 msgstr "crwdns64046:0crwdne64046:0"
 
@@ -4119,11 +4119,11 @@ msgstr "crwdns111614:0crwdne111614:0"
 msgid "Allocated amount"
 msgstr "crwdns132512:0crwdne132512:0"
 
-#: erpnext/accounts/utils.py:616
+#: erpnext/accounts/utils.py:617
 msgid "Allocated amount cannot be greater than unadjusted amount"
 msgstr "crwdns64086:0crwdne64086:0"
 
-#: erpnext/accounts/utils.py:614
+#: erpnext/accounts/utils.py:615
 msgid "Allocated amount cannot be negative"
 msgstr "crwdns64088:0crwdne64088:0"
 
@@ -5138,7 +5138,7 @@ msgstr "crwdns64582:0crwdne64582:0"
 msgid "An Item Group is a way to classify items based on types."
 msgstr "crwdns111618:0crwdne111618:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:425
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:446
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr "crwdns64584:0{0}crwdne64584:0"
 
@@ -5167,7 +5167,7 @@ msgstr "crwdns143340:0crwdne143340:0"
 msgid "Analytics"
 msgstr "crwdns148760:0crwdne148760:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:235
+#: erpnext/accounts/doctype/budget/budget.py:237
 msgid "Annual"
 msgstr "crwdns64592:0crwdne64592:0"
 
@@ -6153,12 +6153,12 @@ msgid "Asset {0} does not belong to company {1}"
 msgstr "crwdns65058:0{0}crwdnd65058:0{1}crwdne65058:0"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
-msgid "Asset {0} does not belongs to the custodian {1}"
-msgstr "crwdns65060:0{0}crwdnd65060:0{1}crwdne65060:0"
+msgid "Asset {0} does not belong to the custodian {1}"
+msgstr "crwdns159248:0{0}crwdnd159248:0{1}crwdne159248:0"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:64
-msgid "Asset {0} does not belongs to the location {1}"
-msgstr "crwdns65062:0{0}crwdnd65062:0{1}crwdne65062:0"
+msgid "Asset {0} does not belong to the location {1}"
+msgstr "crwdns159250:0{0}crwdnd159250:0{1}crwdne159250:0"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:669
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:761
@@ -6314,7 +6314,7 @@ msgstr "crwdns65110:0#{0}crwdnd65110:0{1}crwdnd65110:0{2}crwdne65110:0"
 msgid "At row #{0}: you have selected the Difference Account {1}, which is a Cost of Goods Sold type account. Please select a different account"
 msgstr "crwdns154856:0#{0}crwdnd154856:0{1}crwdne154856:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:914
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1004
 msgid "At row {0}: Batch No is mandatory for Item {1}"
 msgstr "crwdns65112:0{0}crwdnd65112:0{1}crwdne65112:0"
 
@@ -6322,11 +6322,11 @@ msgstr "crwdns65112:0{0}crwdnd65112:0{1}crwdne65112:0"
 msgid "At row {0}: Parent Row No cannot be set for item {1}"
 msgstr "crwdns132736:0{0}crwdnd132736:0{1}crwdne132736:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:899
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:989
 msgid "At row {0}: Qty is mandatory for the batch {1}"
 msgstr "crwdns127452:0{0}crwdnd127452:0{1}crwdne127452:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:906
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:996
 msgid "At row {0}: Serial No is mandatory for Item {1}"
 msgstr "crwdns65114:0{0}crwdnd65114:0{1}crwdne65114:0"
 
@@ -6895,7 +6895,7 @@ msgid "Avg Rate"
 msgstr "crwdns132848:0crwdne132848:0"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:154
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:287
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:288
 msgid "Avg Rate (Balance Stock)"
 msgstr "crwdns65342:0crwdne65342:0"
 
@@ -6976,7 +6976,7 @@ msgstr "crwdns65358:0crwdne65358:0"
 msgid "BOM 1"
 msgstr "crwdns65380:0crwdne65380:0"
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1612
+#: erpnext/manufacturing/doctype/bom/bom.py:1618
 msgid "BOM 1 {0} and BOM 2 {1} should not be same"
 msgstr "crwdns65382:0{0}crwdnd65382:0{1}crwdne65382:0"
 
@@ -7195,7 +7195,7 @@ msgstr "crwdns65480:0crwdne65480:0"
 msgid "BOM Website Operation"
 msgstr "crwdns65482:0crwdne65482:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.js:1214
+#: erpnext/stock/doctype/stock_entry/stock_entry.js:1215
 msgid "BOM and Manufacturing Quantity are required"
 msgstr "crwdns65484:0crwdne65484:0"
 
@@ -7321,7 +7321,7 @@ msgstr "crwdns132886:0crwdne132886:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:126
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:84
 #: erpnext/stock/report/stock_balance/stock_balance.py:443
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:250
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:251
 msgid "Balance Qty"
 msgstr "crwdns65526:0crwdne65526:0"
 
@@ -7367,11 +7367,11 @@ msgstr "crwdns132890:0crwdne132890:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:174
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
 #: erpnext/stock/report/stock_balance/stock_balance.py:450
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:307
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:308
 msgid "Balance Value"
 msgstr "crwdns65544:0crwdne65544:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:319
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:346
 msgid "Balance for Account {0} must always be {1}"
 msgstr "crwdns65546:0{0}crwdnd65546:0{1}crwdne65546:0"
 
@@ -7444,7 +7444,6 @@ msgstr "crwdns132896:0crwdne132896:0"
 #: erpnext/accounts/report/cheques_and_deposits_incorrectly_cleared/cheques_and_deposits_incorrectly_cleared.js:16
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/buying/doctype/supplier/supplier.js:113
-#: erpnext/setup/setup_wizard/operations/install_fixtures.py:523
 msgid "Bank Account"
 msgstr "crwdns65576:0crwdne65576:0"
 
@@ -7643,7 +7642,7 @@ msgstr "crwdns65688:0{0}crwdne65688:0"
 msgid "Bank Transaction {0} updated"
 msgstr "crwdns65690:0{0}crwdne65690:0"
 
-#: erpnext/setup/setup_wizard/operations/install_fixtures.py:556
+#: erpnext/setup/setup_wizard/operations/install_fixtures.py:558
 msgid "Bank account cannot be named as {0}"
 msgstr "crwdns65692:0{0}crwdne65692:0"
 
@@ -7896,7 +7895,7 @@ msgstr "crwdns132958:0crwdne132958:0"
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:34
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:80
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:158
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:329
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:330
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:171
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:80
 #: erpnext/stock/workspace/stock/stock.json
@@ -7995,19 +7994,19 @@ msgstr "crwdns65808:0crwdne65808:0"
 msgid "Batch No"
 msgstr "crwdns65810:0crwdne65810:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:917
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1007
 msgid "Batch No is mandatory"
 msgstr "crwdns65852:0crwdne65852:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2729
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2849
 msgid "Batch No {0} does not exists"
 msgstr "crwdns104540:0{0}crwdne104540:0"
 
-#: erpnext/stock/utils.py:639
+#: erpnext/stock/utils.py:640
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
 msgstr "crwdns65854:0{0}crwdnd65854:0{1}crwdne65854:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:381
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:383
 msgid "Batch No {0} is not present in the original {1} {2}, hence you can't return it against the {1} {2}"
 msgstr "crwdns151934:0{0}crwdnd151934:0{1}crwdnd151934:0{2}crwdnd151934:0{1}crwdnd151934:0{2}crwdne151934:0"
 
@@ -8022,7 +8021,7 @@ msgstr "crwdns132966:0crwdne132966:0"
 msgid "Batch Nos"
 msgstr "crwdns65858:0crwdne65858:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1481
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1571
 msgid "Batch Nos are created successfully"
 msgstr "crwdns65860:0crwdne65860:0"
 
@@ -8067,7 +8066,7 @@ msgstr "crwdns132974:0crwdne132974:0"
 msgid "Batch and Serial No"
 msgstr "crwdns132976:0crwdne132976:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:646
+#: erpnext/manufacturing/doctype/work_order/work_order.py:658
 msgid "Batch not created for item {} since it does not have a batch series."
 msgstr "crwdns65882:0crwdne65882:0"
 
@@ -8079,12 +8078,12 @@ msgstr "crwdns65884:0{0}crwdne65884:0"
 msgid "Batch {0} is not available in warehouse {1}"
 msgstr "crwdns132978:0{0}crwdnd132978:0{1}crwdne132978:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2837
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2859
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:286
 msgid "Batch {0} of Item {1} has expired."
 msgstr "crwdns65886:0{0}crwdnd65886:0{1}crwdne65886:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2843
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2865
 msgid "Batch {0} of Item {1} is disabled."
 msgstr "crwdns65888:0{0}crwdnd65888:0{1}crwdne65888:0"
 
@@ -8692,7 +8691,7 @@ msgstr "crwdns133064:0crwdne133064:0"
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:34
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:44
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:91
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:271
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:272
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:45
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:120
 #: erpnext/stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.py:100
@@ -8810,8 +8809,8 @@ msgstr "crwdns133074:0crwdne133074:0"
 msgid "Budget Detail"
 msgstr "crwdns133076:0crwdne133076:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:299
 #: erpnext/accounts/doctype/budget/budget.py:301
+#: erpnext/accounts/doctype/budget/budget.py:303
 #: erpnext/controllers/budget_controller.py:286
 #: erpnext/controllers/budget_controller.py:289
 msgid "Budget Exceeded"
@@ -9324,7 +9323,7 @@ msgstr "crwdns133124:0crwdne133124:0"
 msgid "Can be approved by {0}"
 msgstr "crwdns66390:0{0}crwdne66390:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2126
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2138
 msgid "Can not close Work Order. Since {0} Job Cards are in Work In Progress state."
 msgstr "crwdns66392:0{0}crwdne66392:0"
 
@@ -9352,7 +9351,7 @@ msgstr "crwdns66402:0crwdne66402:0"
 msgid "Can not filter based on Voucher No, if grouped by Voucher"
 msgstr "crwdns66404:0crwdne66404:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1431
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1434
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2940
 msgid "Can only make payment against unbilled {0}"
 msgstr "crwdns66406:0{0}crwdne66406:0"
@@ -9562,11 +9561,11 @@ msgstr "crwdns157450:0{0}crwdnd157450:0{1}crwdne157450:0"
 msgid "Cannot cancel POS Closing Entry"
 msgstr "crwdns155622:0crwdne155622:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:213
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:234
 msgid "Cannot cancel as processing of cancelled documents is pending."
 msgstr "crwdns66538:0crwdne66538:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:831
+#: erpnext/manufacturing/doctype/work_order/work_order.py:843
 msgid "Cannot cancel because submitted Stock Entry {0} exists"
 msgstr "crwdns66540:0{0}crwdne66540:0"
 
@@ -9602,7 +9601,7 @@ msgstr "crwdns66554:0{0}crwdne66554:0"
 msgid "Cannot change Variant properties after stock transaction. You will have to make a new Item to do this."
 msgstr "crwdns66556:0crwdne66556:0"
 
-#: erpnext/setup/doctype/company/company.py:235
+#: erpnext/setup/doctype/company/company.py:237
 msgid "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
 msgstr "crwdns66558:0crwdne66558:0"
 
@@ -9664,7 +9663,7 @@ msgstr "crwdns151892:0crwdne151892:0"
 msgid "Cannot delete Serial No {0}, as it is used in stock transactions"
 msgstr "crwdns66584:0{0}crwdne66584:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:517
+#: erpnext/manufacturing/doctype/work_order/work_order.py:529
 msgid "Cannot disassemble more than produced quantity."
 msgstr "crwdns155788:0crwdne155788:0"
 
@@ -9693,15 +9692,15 @@ msgstr "crwdns143360:0{0}crwdne143360:0"
 msgid "Cannot make any transactions until the deletion job is completed"
 msgstr "crwdns111642:0crwdne111642:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:406
+#: erpnext/manufacturing/doctype/work_order/work_order.py:411
 msgid "Cannot produce more Item {0} than Sales Order quantity {1}"
 msgstr "crwdns66594:0{0}crwdnd66594:0{1}crwdne66594:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1181
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1193
 msgid "Cannot produce more item for {0}"
 msgstr "crwdns66596:0{0}crwdne66596:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1185
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1197
 msgid "Cannot produce more than {0} items for {1}"
 msgstr "crwdns66598:0{0}crwdnd66598:0{1}crwdne66598:0"
 
@@ -9780,7 +9779,7 @@ msgstr "crwdns66626:0crwdne66626:0"
 msgid "Capacity Planning"
 msgstr "crwdns133134:0crwdne133134:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:817
+#: erpnext/manufacturing/doctype/work_order/work_order.py:829
 msgid "Capacity Planning Error, planned start time can not be same as end time"
 msgstr "crwdns66630:0crwdne66630:0"
 
@@ -10031,7 +10030,7 @@ msgstr "crwdns66722:0crwdne66722:0"
 msgid "Caution"
 msgstr "crwdns66724:0crwdne66724:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:148
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:169
 msgid "Caution: This might alter frozen accounts."
 msgstr "crwdns66726:0crwdne66726:0"
 
@@ -10187,11 +10186,11 @@ msgstr "crwdns104546:0crwdne104546:0"
 msgid "Charges Incurred"
 msgstr "crwdns133190:0crwdne133190:0"
 
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:34
+#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Charges are updated in Purchase Receipt against each item"
 msgstr "crwdns111646:0crwdne111646:0"
 
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:34
+#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Charges will be distributed proportionately based on item qty or amount, as per your selection"
 msgstr "crwdns111648:0crwdne111648:0"
 
@@ -10229,7 +10228,7 @@ msgstr "crwdns133198:0crwdne133198:0"
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:52
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/public/js/setup_wizard.js:43
-#: erpnext/setup/doctype/company/company.js:104
+#: erpnext/setup/doctype/company/company.js:107
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/workspace/home/home.json
 msgid "Chart of Accounts"
@@ -10628,7 +10627,7 @@ msgstr "crwdns66960:0crwdne66960:0"
 msgid "Closed Documents"
 msgstr "crwdns133254:0crwdne133254:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2049
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2061
 msgid "Closed Work Order can not be stopped or Re-opened"
 msgstr "crwdns66964:0crwdne66964:0"
 
@@ -10641,12 +10640,12 @@ msgstr "crwdns66966:0crwdne66966:0"
 msgid "Closing"
 msgstr "crwdns133256:0crwdne133256:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:499
+#: erpnext/accounts/report/trial_balance/trial_balance.py:500
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py:226
 msgid "Closing (Cr)"
 msgstr "crwdns66970:0crwdne66970:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:492
+#: erpnext/accounts/report/trial_balance/trial_balance.py:493
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py:219
 msgid "Closing (Dr)"
 msgstr "crwdns66972:0crwdne66972:0"
@@ -10661,7 +10660,7 @@ msgstr "crwdns66974:0crwdne66974:0"
 msgid "Closing Account Head"
 msgstr "crwdns133258:0crwdne133258:0"
 
-#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:122
+#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:124
 msgid "Closing Account {0} must be of type Liability / Equity"
 msgstr "crwdns66978:0{0}crwdne66978:0"
 
@@ -11319,7 +11318,7 @@ msgstr "crwdns133292:0crwdne133292:0"
 #: erpnext/stock/report/stock_balance/stock_balance.js:8
 #: erpnext/stock/report/stock_balance/stock_balance.py:504
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:8
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:357
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:358
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:18
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:8
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:8
@@ -11471,7 +11470,7 @@ msgstr "crwdns67398:0crwdne67398:0"
 msgid "Company Name cannot be Company"
 msgstr "crwdns67404:0crwdne67404:0"
 
-#: erpnext/accounts/custom/address.py:34
+#: erpnext/accounts/custom/address.py:36
 msgid "Company Not Linked"
 msgstr "crwdns67406:0crwdne67406:0"
 
@@ -11485,7 +11484,7 @@ msgstr "crwdns133318:0crwdne133318:0"
 msgid "Company Tax ID"
 msgstr "crwdns133320:0crwdne133320:0"
 
-#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:619
+#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:620
 msgid "Company and Posting Date is mandatory"
 msgstr "crwdns67420:0crwdne67420:0"
 
@@ -11502,7 +11501,7 @@ msgstr "crwdns67424:0crwdne67424:0"
 msgid "Company is mandatory"
 msgstr "crwdns148766:0crwdne148766:0"
 
-#: erpnext/accounts/doctype/bank_account/bank_account.py:73
+#: erpnext/accounts/doctype/bank_account/bank_account.py:72
 msgid "Company is mandatory for company account"
 msgstr "crwdns104548:0crwdne104548:0"
 
@@ -11510,7 +11509,7 @@ msgstr "crwdns104548:0crwdne104548:0"
 msgid "Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
 msgstr "crwdns111664:0crwdne111664:0"
 
-#: erpnext/setup/doctype/company/company.js:199
+#: erpnext/setup/doctype/company/company.js:206
 msgid "Company name not same"
 msgstr "crwdns67430:0crwdne67430:0"
 
@@ -11723,7 +11722,7 @@ msgstr "crwdns67552:0crwdne67552:0"
 msgid "Completed Qty"
 msgstr "crwdns133336:0crwdne133336:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1095
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1107
 msgid "Completed Qty cannot be greater than 'Qty to Manufacture'"
 msgstr "crwdns67562:0crwdne67562:0"
 
@@ -11926,7 +11925,7 @@ msgstr "crwdns133364:0crwdne133364:0"
 msgid "Consider Minimum Order Qty"
 msgstr "crwdns133366:0crwdne133366:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:920
+#: erpnext/manufacturing/doctype/work_order/work_order.js:941
 msgid "Consider Process Loss"
 msgstr "crwdns156056:0crwdne156056:0"
 
@@ -12076,7 +12075,7 @@ msgstr "crwdns154864:0crwdne154864:0"
 msgid "Consumed Qty"
 msgstr "crwdns67708:0crwdne67708:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1453
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1465
 msgid "Consumed Qty cannot be greater than Reserved Qty for item {0}"
 msgstr "crwdns152336:0{0}crwdne152336:0"
 
@@ -12895,11 +12894,11 @@ msgstr "crwdns68176:0crwdne68176:0"
 msgid "Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
 msgstr "crwdns68178:0crwdne68178:0"
 
-#: erpnext/accounts/report/financial_statements.py:640
+#: erpnext/accounts/report/financial_statements.py:641
 msgid "Cost Center: {0} does not exist"
 msgstr "crwdns68180:0{0}crwdne68180:0"
 
-#: erpnext/setup/doctype/company/company.js:94
+#: erpnext/setup/doctype/company/company.js:97
 msgid "Cost Centers"
 msgstr "crwdns68182:0crwdne68182:0"
 
@@ -13028,7 +13027,7 @@ msgstr "crwdns154868:0{0}crwdne154868:0"
 msgid "Could not find path for "
 msgstr "crwdns68242:0crwdne68242:0"
 
-#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:124
+#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:125
 #: erpnext/accounts/report/financial_statements.py:242
 msgid "Could not retrieve information for {0}."
 msgstr "crwdns68244:0{0}crwdne68244:0"
@@ -13197,7 +13196,7 @@ msgstr "crwdns68298:0crwdne68298:0"
 #: erpnext/manufacturing/doctype/work_order/work_order.js:220
 #: erpnext/manufacturing/doctype/work_order/work_order.js:235
 #: erpnext/manufacturing/doctype/work_order/work_order.js:385
-#: erpnext/manufacturing/doctype/work_order/work_order.js:965
+#: erpnext/manufacturing/doctype/work_order/work_order.js:986
 #: erpnext/projects/doctype/task/task_tree.js:81
 #: erpnext/public/js/communication.js:19 erpnext/public/js/communication.js:31
 #: erpnext/public/js/communication.js:41
@@ -13263,7 +13262,7 @@ msgstr "crwdns68298:0crwdne68298:0"
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:170
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:172
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:247
-#: erpnext/stock/doctype/stock_entry/stock_entry.js:1289
+#: erpnext/stock/doctype/stock_entry/stock_entry.js:1290
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:231
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:264
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:277
@@ -13349,8 +13348,8 @@ msgstr "crwdns68330:0crwdne68330:0"
 msgid "Create Ledger Entries for Change Amount"
 msgstr "crwdns133506:0crwdne133506:0"
 
-#: erpnext/buying/doctype/supplier/supplier.js:229
-#: erpnext/selling/doctype/customer/customer.js:263
+#: erpnext/buying/doctype/supplier/supplier.js:232
+#: erpnext/selling/doctype/customer/customer.js:266
 msgid "Create Link"
 msgstr "crwdns68334:0crwdne68334:0"
 
@@ -13392,7 +13391,7 @@ msgstr "crwdns68352:0crwdne68352:0"
 msgid "Create Payment Entry for Consolidated POS Invoices."
 msgstr "crwdns155628:0crwdne155628:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:737
+#: erpnext/manufacturing/doctype/work_order/work_order.js:750
 msgid "Create Pick List"
 msgstr "crwdns68354:0crwdne68354:0"
 
@@ -13459,7 +13458,7 @@ msgstr "crwdns68382:0crwdne68382:0"
 msgid "Create Supplier Quotation"
 msgstr "crwdns68384:0crwdne68384:0"
 
-#: erpnext/setup/doctype/company/company.js:138
+#: erpnext/setup/doctype/company/company.js:141
 msgid "Create Tax Template"
 msgstr "crwdns68386:0crwdne68386:0"
 
@@ -13500,7 +13499,7 @@ msgstr "crwdns148860:0crwdne148860:0"
 msgid "Create a variant with the template image."
 msgstr "crwdns142938:0crwdne142938:0"
 
-#: erpnext/stock/stock_ledger.py:1911
+#: erpnext/stock/stock_ledger.py:1929
 msgid "Create an incoming stock transaction for the Item."
 msgstr "crwdns68438:0crwdne68438:0"
 
@@ -13623,7 +13622,7 @@ msgstr "crwdns68496:0{0}crwdne68496:0"
 #: erpnext/accounts/report/general_ledger/general_ledger.html:87
 #: erpnext/accounts/report/purchase_register/purchase_register.py:241
 #: erpnext/accounts/report/sales_register/sales_register.py:277
-#: erpnext/accounts/report/trial_balance/trial_balance.py:485
+#: erpnext/accounts/report/trial_balance/trial_balance.py:486
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py:212
 #: erpnext/accounts/report/voucher_wise_balance/voucher_wise_balance.py:34
 msgid "Credit"
@@ -13656,6 +13655,15 @@ msgstr "crwdns133520:0crwdne133520:0"
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 msgid "Credit Amount in Account Currency"
 msgstr "crwdns133522:0crwdne133522:0"
+
+#. Label of the credit_in_reporting_currency (Currency) field in DocType
+#. 'Account Closing Balance'
+#. Label of the credit_in_reporting_currency (Currency) field in DocType 'GL
+#. Entry'
+#: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
+#: erpnext/accounts/doctype/gl_entry/gl_entry.json
+msgid "Credit Amount in Reporting Currency"
+msgstr "crwdns159252:0crwdne159252:0"
 
 #. Label of the credit_in_transaction_currency (Currency) field in DocType 'GL
 #. Entry'
@@ -13976,20 +13984,20 @@ msgstr "crwdns112294:0crwdne112294:0"
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:205
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:101
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:118
-#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:293
+#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:294
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:208
-#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:208
+#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:209
 #: erpnext/accounts/report/financial_statements.html:29
-#: erpnext/accounts/report/financial_statements.py:678
+#: erpnext/accounts/report/financial_statements.py:679
 #: erpnext/accounts/report/general_ledger/general_ledger.js:147
 #: erpnext/accounts/report/gross_profit/gross_profit.py:443
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:709
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:220
-#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:175
+#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:176
 #: erpnext/accounts/report/purchase_register/purchase_register.py:229
 #: erpnext/accounts/report/sales_register/sales_register.py:265
 #: erpnext/accounts/report/trial_balance/trial_balance.js:76
-#: erpnext/accounts/report/trial_balance/trial_balance.py:457
+#: erpnext/accounts/report/trial_balance/trial_balance.py:458
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py:233
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
@@ -14083,11 +14091,11 @@ msgstr "crwdns68708:0crwdne68708:0"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1665
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1733
-#: erpnext/accounts/utils.py:2326
+#: erpnext/accounts/utils.py:2350
 msgid "Currency for {0} must be {1}"
 msgstr "crwdns68710:0{0}crwdnd68710:0{1}crwdne68710:0"
 
-#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:129
+#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:131
 msgid "Currency of the Closing Account must be {0}"
 msgstr "crwdns68712:0{0}crwdne68712:0"
 
@@ -14367,7 +14375,7 @@ msgstr "crwdns133606:0crwdne133606:0"
 #: erpnext/accounts/workspace/receivables/receivables.json
 #: erpnext/assets/doctype/asset/asset.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
-#: erpnext/buying/doctype/supplier/supplier.js:197
+#: erpnext/buying/doctype/supplier/supplier.js:200
 #: erpnext/crm/doctype/contract/contract.json
 #: erpnext/crm/doctype/lead/lead.js:32
 #: erpnext/crm/doctype/opportunity/opportunity.js:99
@@ -14818,7 +14826,7 @@ msgstr "crwdns133644:0crwdne133644:0"
 msgid "Customer Provided"
 msgstr "crwdns133646:0crwdne133646:0"
 
-#: erpnext/setup/doctype/company/company.py:390
+#: erpnext/setup/doctype/company/company.py:392
 msgid "Customer Service"
 msgstr "crwdns69066:0crwdne69066:0"
 
@@ -14942,7 +14950,7 @@ msgstr "crwdns133664:0crwdne133664:0"
 msgid "Customers Without Any Sales Transactions"
 msgstr "crwdns69122:0crwdne69122:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:105
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:106
 msgid "Customers not selected."
 msgstr "crwdns69124:0crwdne69124:0"
 
@@ -15149,7 +15157,7 @@ msgstr "crwdns69182:0crwdne69182:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:91
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.js:16
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:89
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:204
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:205
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 #: erpnext/support/report/first_response_time_for_issues/first_response_time_for_issues.py:11
@@ -15195,7 +15203,7 @@ msgstr "crwdns69256:0crwdne69256:0"
 msgid "Date of Commencement"
 msgstr "crwdns133684:0crwdne133684:0"
 
-#: erpnext/setup/doctype/company/company.js:75
+#: erpnext/setup/doctype/company/company.js:78
 msgid "Date of Commencement should be greater than Date of Incorporation"
 msgstr "crwdns69260:0crwdne69260:0"
 
@@ -15350,7 +15358,7 @@ msgstr "crwdns69314:0crwdne69314:0"
 #: erpnext/accounts/report/general_ledger/general_ledger.html:86
 #: erpnext/accounts/report/purchase_register/purchase_register.py:240
 #: erpnext/accounts/report/sales_register/sales_register.py:276
-#: erpnext/accounts/report/trial_balance/trial_balance.py:478
+#: erpnext/accounts/report/trial_balance/trial_balance.py:479
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py:205
 #: erpnext/accounts/report/voucher_wise_balance/voucher_wise_balance.py:27
 msgid "Debit"
@@ -15389,6 +15397,15 @@ msgstr "crwdns133718:0crwdne133718:0"
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 msgid "Debit Amount in Account Currency"
 msgstr "crwdns133720:0crwdne133720:0"
+
+#. Label of the debit_in_reporting_currency (Currency) field in DocType
+#. 'Account Closing Balance'
+#. Label of the debit_in_reporting_currency (Currency) field in DocType 'GL
+#. Entry'
+#: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
+#: erpnext/accounts/doctype/gl_entry/gl_entry.json
+msgid "Debit Amount in Reporting Currency"
+msgstr "crwdns159254:0crwdne159254:0"
 
 #. Label of the debit_in_transaction_currency (Currency) field in DocType 'GL
 #. Entry'
@@ -15573,14 +15590,14 @@ msgstr "crwdns133754:0crwdne133754:0"
 
 #. Label of the default_advance_paid_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
-#: erpnext/setup/doctype/company/company.py:220
+#: erpnext/setup/doctype/company/company.py:222
 msgid "Default Advance Paid Account"
 msgstr "crwdns133756:0crwdne133756:0"
 
 #. Label of the default_advance_received_account (Link) field in DocType
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
-#: erpnext/setup/doctype/company/company.py:209
+#: erpnext/setup/doctype/company/company.py:211
 msgid "Default Advance Received Account"
 msgstr "crwdns133758:0crwdne133758:0"
 
@@ -15593,7 +15610,7 @@ msgstr "crwdns133760:0crwdne133760:0"
 msgid "Default BOM ({0}) must be active for this item or its template"
 msgstr "crwdns69414:0{0}crwdne69414:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1864
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1876
 msgid "Default BOM for {0} not found"
 msgstr "crwdns69416:0{0}crwdne69416:0"
 
@@ -15601,7 +15618,7 @@ msgstr "crwdns69416:0{0}crwdne69416:0"
 msgid "Default BOM not found for FG Item {0}"
 msgstr "crwdns69418:0{0}crwdne69418:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1861
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1873
 msgid "Default BOM not found for Item {0} and Project {1}"
 msgstr "crwdns69420:0{0}crwdnd69420:0{1}crwdne69420:0"
 
@@ -16000,7 +16017,7 @@ msgstr "crwdns133888:0crwdne133888:0"
 msgid "Default settings for your stock-related transactions"
 msgstr "crwdns111684:0crwdne111684:0"
 
-#: erpnext/setup/doctype/company/company.js:168
+#: erpnext/setup/doctype/company/company.js:175
 msgid "Default tax templates for sales, purchase and items are created."
 msgstr "crwdns69606:0crwdne69606:0"
 
@@ -16148,7 +16165,7 @@ msgstr "crwdns69668:0crwdne69668:0"
 msgid "Delayed Tasks Summary"
 msgstr "crwdns69670:0crwdne69670:0"
 
-#: erpnext/setup/doctype/company/company.js:215
+#: erpnext/setup/doctype/company/company.js:222
 msgid "Delete"
 msgstr "crwdns69672:0crwdne69672:0"
 
@@ -16182,12 +16199,12 @@ msgstr "crwdns133916:0crwdne133916:0"
 
 #. Label of the delete_transactions (Check) field in DocType 'Transaction
 #. Deletion Record'
-#: erpnext/setup/doctype/company/company.js:149
+#: erpnext/setup/doctype/company/company.js:152
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Delete Transactions"
 msgstr "crwdns69680:0crwdne69680:0"
 
-#: erpnext/setup/doctype/company/company.js:214
+#: erpnext/setup/doctype/company/company.js:221
 msgid "Delete all the Transactions for this Company"
 msgstr "crwdns69682:0crwdne69682:0"
 
@@ -16484,6 +16501,10 @@ msgstr "crwdns69808:0{0}crwdne69808:0"
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:233
 msgid "Demand"
 msgstr "crwdns152020:0crwdne152020:0"
+
+#: erpnext/setup/setup_wizard/operations/install_fixtures.py:525
+msgid "Demo Bank Account"
+msgstr "crwdns159012:0crwdne159012:0"
 
 #. Label of the demo_company (Link) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
@@ -16984,7 +17005,7 @@ msgstr "crwdns154183:0crwdne154183:0"
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:57
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.py:112
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:137
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:277
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:278
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:111
 #: erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py:59
 #: erpnext/stock/report/total_stock_summary/total_stock_summary.py:22
@@ -17391,7 +17412,7 @@ msgstr "crwdns70252:0crwdne70252:0"
 msgid "Disabled Account Selected"
 msgstr "crwdns70302:0crwdne70302:0"
 
-#: erpnext/stock/utils.py:445
+#: erpnext/stock/utils.py:446
 msgid "Disabled Warehouse {0} cannot be used for this transaction."
 msgstr "crwdns70304:0{0}crwdne70304:0"
 
@@ -17702,7 +17723,7 @@ msgstr "crwdns148774:0crwdne148774:0"
 msgid "Dislikes"
 msgstr "crwdns70438:0crwdne70438:0"
 
-#: erpnext/setup/doctype/company/company.py:384
+#: erpnext/setup/doctype/company/company.py:386
 msgid "Dispatch"
 msgstr "crwdns70442:0crwdne70442:0"
 
@@ -18397,7 +18418,7 @@ msgstr "crwdns152150:0{0}crwdne152150:0"
 msgid "Due Date cannot be before {0}"
 msgstr "crwdns152152:0{0}crwdne152152:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:108
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:129
 msgid "Due to stock closing entry {0}, you cannot repost item valuation before {1}"
 msgstr "crwdns152024:0{0}crwdnd152024:0{1}crwdne152024:0"
 
@@ -19079,10 +19100,10 @@ msgstr "crwdns71050:0{0}crwdne71050:0"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:79
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:100
-msgid "Employee {0} does not belongs to the company {1}"
-msgstr "crwdns71052:0{0}crwdnd71052:0{1}crwdne71052:0"
+msgid "Employee {0} does not belong to the company {1}"
+msgstr "crwdns159256:0{0}crwdnd159256:0{1}crwdne159256:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:314
+#: erpnext/manufacturing/doctype/job_card/job_card.py:315
 msgid "Employee {0} is currently working on another workstation. Please assign another employee."
 msgstr "crwdns152577:0{0}crwdne152577:0"
 
@@ -19507,7 +19528,7 @@ msgstr "crwdns71208:0crwdne71208:0"
 msgid "Enter the quantity of the Item that will be manufactured from this Bill of Materials."
 msgstr "crwdns71210:0crwdne71210:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1061
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1098
 msgid "Enter the quantity to manufacture. Raw material Items will be fetched only when this is set."
 msgstr "crwdns71212:0crwdne71212:0"
 
@@ -19576,9 +19597,9 @@ msgstr "crwdns112322:0crwdne112322:0"
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
 #: erpnext/accounts/doctype/payment_request/payment_request.py:443
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.json
-#: erpnext/manufacturing/doctype/job_card/job_card.py:891
+#: erpnext/manufacturing/doctype/job_card/job_card.py:889
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:314
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:316
 msgid "Error"
 msgstr "crwdns71236:0crwdne71236:0"
 
@@ -19634,7 +19655,7 @@ msgstr "crwdns71268:0crwdne71268:0"
 msgid "Error while processing deferred accounting for {0}"
 msgstr "crwdns71270:0{0}crwdne71270:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:421
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:442
 msgid "Error while reposting item valuation"
 msgstr "crwdns71272:0crwdne71272:0"
 
@@ -19710,7 +19731,7 @@ msgstr "crwdns134282:0crwdne134282:0"
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
 msgstr "crwdns134284:0crwdne134284:0"
 
-#: erpnext/stock/stock_ledger.py:2177
+#: erpnext/stock/stock_ledger.py:2195
 msgid "Example: Serial No {0} reserved in {1}."
 msgstr "crwdns71298:0{0}crwdnd71298:0{1}crwdne71298:0"
 
@@ -19724,7 +19745,7 @@ msgstr "crwdns134286:0crwdne134286:0"
 msgid "Excess Materials Consumed"
 msgstr "crwdns71302:0crwdne71302:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:985
+#: erpnext/manufacturing/doctype/job_card/job_card.py:983
 msgid "Excess Transfer"
 msgstr "crwdns71304:0crwdne71304:0"
 
@@ -19760,7 +19781,7 @@ msgstr "crwdns134292:0crwdne134292:0"
 #: erpnext/accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: erpnext/accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
-#: erpnext/setup/doctype/company/company.py:548
+#: erpnext/setup/doctype/company/company.py:558
 msgid "Exchange Gain/Loss"
 msgstr "crwdns71312:0crwdne71312:0"
 
@@ -19859,7 +19880,7 @@ msgstr "crwdns71376:0{0}crwdnd71376:0{1}crwdnd71376:0{2}crwdne71376:0"
 msgid "Excise Entry"
 msgstr "crwdns134298:0crwdne134298:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.js:1282
+#: erpnext/stock/doctype/stock_entry/stock_entry.js:1283
 msgid "Excise Invoice"
 msgstr "crwdns71382:0crwdne71382:0"
 
@@ -20035,7 +20056,7 @@ msgstr "crwdns134320:0crwdne134320:0"
 #: erpnext/accounts/report/account_balance/account_balance.js:28
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:89
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:178
-#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:189
+#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:190
 msgid "Expense"
 msgstr "crwdns71456:0crwdne71456:0"
 
@@ -20237,13 +20258,19 @@ msgstr "crwdns134334:0crwdne134334:0"
 msgid "Extra Consumed Qty"
 msgstr "crwdns71556:0crwdne71556:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:232
+#: erpnext/manufacturing/doctype/job_card/job_card.py:233
 msgid "Extra Job Card Quantity"
 msgstr "crwdns71558:0crwdne71558:0"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:258
 msgid "Extra Large"
 msgstr "crwdns71560:0crwdne71560:0"
+
+#. Label of the section_break_xhtl (Section Break) field in DocType
+#. 'Manufacturing Settings'
+#: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "Extra Material Transfer"
+msgstr "crwdns159168:0crwdne159168:0"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:254
 msgid "Extra Small"
@@ -20380,7 +20407,7 @@ msgstr "crwdns71638:0crwdne71638:0"
 msgid "Failed to setup defaults"
 msgstr "crwdns71640:0crwdne71640:0"
 
-#: erpnext/setup/doctype/company/company.py:730
+#: erpnext/setup/doctype/company/company.py:740
 msgid "Failed to setup defaults for country {0}. Please contact support."
 msgstr "crwdns71642:0{0}crwdne71642:0"
 
@@ -20766,9 +20793,9 @@ msgstr "crwdns71790:0crwdne71790:0"
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
 msgstr "crwdns134400:0crwdne134400:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:786
-#: erpnext/manufacturing/doctype/work_order/work_order.js:801
-#: erpnext/manufacturing/doctype/work_order/work_order.js:810
+#: erpnext/manufacturing/doctype/work_order/work_order.js:807
+#: erpnext/manufacturing/doctype/work_order/work_order.js:822
+#: erpnext/manufacturing/doctype/work_order/work_order.js:831
 msgid "Finish"
 msgstr "crwdns71794:0crwdne71794:0"
 
@@ -20868,7 +20895,7 @@ msgstr "crwdns71836:0{0}crwdne71836:0"
 msgid "Finished Good {0} must be a sub-contracted item."
 msgstr "crwdns71838:0{0}crwdne71838:0"
 
-#: erpnext/setup/doctype/company/company.py:289
+#: erpnext/setup/doctype/company/company.py:291
 msgid "Finished Goods"
 msgstr "crwdns71840:0crwdne71840:0"
 
@@ -21021,11 +21048,11 @@ msgstr "crwdns71894:0{0}crwdne71894:0"
 msgid "Fiscal Year {0} Does Not Exist"
 msgstr "crwdns71896:0{0}crwdne71896:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:47
+#: erpnext/accounts/report/trial_balance/trial_balance.py:48
 msgid "Fiscal Year {0} does not exist"
 msgstr "crwdns71898:0{0}crwdne71898:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:41
+#: erpnext/accounts/report/trial_balance/trial_balance.py:42
 msgid "Fiscal Year {0} is required"
 msgstr "crwdns71900:0{0}crwdne71900:0"
 
@@ -21206,7 +21233,7 @@ msgstr "crwdns71954:0crwdne71954:0"
 msgid "For Item"
 msgstr "crwdns111740:0crwdne111740:0"
 
-#: erpnext/controllers/stock_controller.py:1331
+#: erpnext/controllers/stock_controller.py:1333
 msgid "For Item {0} cannot be received more than {1} qty against the {2} {3}"
 msgstr "crwdns104576:0{0}crwdnd104576:0{1}crwdnd104576:0{2}crwdnd104576:0{3}crwdne104576:0"
 
@@ -21313,7 +21340,7 @@ msgstr "crwdns154774:0{0}crwdnd154774:0{1}crwdnd154774:0{2}crwdnd154774:0{3}crwd
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "crwdns71992:0{0}crwdnd71992:0{1}crwdnd71992:0{2}crwdne71992:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2196
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2208
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
 msgstr "crwdns104578:0{0}crwdnd104578:0{1}crwdnd104578:0{2}crwdne104578:0"
 
@@ -21688,7 +21715,7 @@ msgstr "crwdns72126:0crwdne72126:0"
 msgid "From Date and To Date lie in different Fiscal Year"
 msgstr "crwdns72128:0crwdne72128:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:62
+#: erpnext/accounts/report/trial_balance/trial_balance.py:63
 #: erpnext/buying/report/item_wise_purchase_history/item_wise_purchase_history.py:13
 #: erpnext/selling/report/item_wise_sales_history/item_wise_sales_history.py:14
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:29
@@ -21709,7 +21736,7 @@ msgstr "crwdns143442:0crwdne143442:0"
 msgid "From Date must be before To Date"
 msgstr "crwdns72132:0crwdne72132:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:66
+#: erpnext/accounts/report/trial_balance/trial_balance.py:67
 msgid "From Date should be within the Fiscal Year. Assuming From Date = {0}"
 msgstr "crwdns72134:0{0}crwdne72134:0"
 
@@ -22171,7 +22198,7 @@ msgstr "crwdns134598:0crwdne134598:0"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:74
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:98
-#: erpnext/setup/doctype/company/company.py:556
+#: erpnext/setup/doctype/company/company.py:566
 msgid "Gain/Loss on Asset Disposal"
 msgstr "crwdns72336:0crwdne72336:0"
 
@@ -22607,7 +22634,7 @@ msgstr "crwdns134662:0crwdne134662:0"
 msgid "Goods"
 msgstr "crwdns134664:0crwdne134664:0"
 
-#: erpnext/setup/doctype/company/company.py:290
+#: erpnext/setup/doctype/company/company.py:292
 #: erpnext/stock/doctype/stock_entry/stock_entry_list.js:21
 msgid "Goods In Transit"
 msgstr "crwdns72490:0crwdne72490:0"
@@ -22857,7 +22884,7 @@ msgstr "crwdns134684:0crwdne134684:0"
 msgid "Gross Profit"
 msgstr "crwdns72592:0crwdne72592:0"
 
-#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:196
+#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:197
 msgid "Gross Profit / Loss"
 msgstr "crwdns72598:0crwdne72598:0"
 
@@ -22963,7 +22990,7 @@ msgstr "crwdns72646:0crwdne72646:0"
 msgid "Group by Voucher"
 msgstr "crwdns72650:0crwdne72650:0"
 
-#: erpnext/stock/utils.py:439
+#: erpnext/stock/utils.py:440
 msgid "Group node warehouse is not allowed to select for transactions"
 msgstr "crwdns72658:0crwdne72658:0"
 
@@ -23263,7 +23290,7 @@ msgstr "crwdns111754:0crwdne111754:0"
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr "crwdns72768:0{0}crwdne72768:0"
 
-#: erpnext/stock/stock_ledger.py:1896
+#: erpnext/stock/stock_ledger.py:1914
 msgid "Here are the options to proceed:"
 msgstr "crwdns72770:0crwdne72770:0"
 
@@ -23291,7 +23318,7 @@ msgstr "crwdns72778:0crwdne72778:0"
 msgid "Hertz"
 msgstr "crwdns112384:0crwdne112384:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:423
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:444
 msgid "Hi,"
 msgstr "crwdns72786:0crwdne72786:0"
 
@@ -23475,7 +23502,7 @@ msgstr "crwdns134764:0crwdne134764:0"
 msgid "Hrs"
 msgstr "crwdns134766:0crwdne134766:0"
 
-#: erpnext/setup/doctype/company/company.py:396
+#: erpnext/setup/doctype/company/company.py:398
 msgid "Human Resources"
 msgstr "crwdns72870:0crwdne72870:0"
 
@@ -23509,11 +23536,6 @@ msgstr "crwdns72874:0crwdne72874:0"
 #: erpnext/setup/doctype/employee/employee.json
 msgid "IBAN"
 msgstr "crwdns134768:0crwdne134768:0"
-
-#: erpnext/accounts/doctype/bank_account/bank_account.py:99
-#: erpnext/accounts/doctype/bank_account/bank_account.py:102
-msgid "IBAN is not valid"
-msgstr "crwdns72884:0crwdne72884:0"
 
 #. Label of the id (Data) field in DocType 'Call Log'
 #: erpnext/manufacturing/report/downtime_analysis/downtime_analysis.py:71
@@ -23799,7 +23821,7 @@ msgstr "crwdns157466:0crwdne157466:0"
 msgid "If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template."
 msgstr "crwdns155632:0crwdne155632:0"
 
-#: erpnext/stock/stock_ledger.py:1906
+#: erpnext/stock/stock_ledger.py:1924
 msgid "If not, you can Cancel / Submit this entry"
 msgstr "crwdns72958:0crwdne72958:0"
 
@@ -23825,7 +23847,7 @@ msgstr "crwdns158698:0crwdne158698:0"
 msgid "If subcontracted to a vendor"
 msgstr "crwdns134834:0crwdne134834:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1094
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1131
 msgid "If the BOM results in Scrap material, the Scrap Warehouse needs to be selected."
 msgstr "crwdns72964:0crwdne72964:0"
 
@@ -23834,11 +23856,11 @@ msgstr "crwdns72964:0crwdne72964:0"
 msgid "If the account is frozen, entries are allowed to restricted users."
 msgstr "crwdns134836:0crwdne134836:0"
 
-#: erpnext/stock/stock_ledger.py:1899
+#: erpnext/stock/stock_ledger.py:1917
 msgid "If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table."
 msgstr "crwdns72968:0{0}crwdne72968:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1113
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1150
 msgid "If the selected BOM has Operations mentioned in it, the system will fetch all Operations from BOM, these values can be changed."
 msgstr "crwdns72970:0crwdne72970:0"
 
@@ -24398,7 +24420,7 @@ msgstr "crwdns73230:0crwdne73230:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:112
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:82
 #: erpnext/stock/report/stock_balance/stock_balance.py:471
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:236
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:237
 msgid "In Qty"
 msgstr "crwdns73250:0crwdne73250:0"
 
@@ -24759,9 +24781,9 @@ msgstr "crwdns134946:0crwdne134946:0"
 #: erpnext/accounts/doctype/process_deferred_accounting/process_deferred_accounting.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:407
 #: erpnext/accounts/report/account_balance/account_balance.js:27
-#: erpnext/accounts/report/financial_statements.py:755
+#: erpnext/accounts/report/financial_statements.py:756
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:176
-#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:182
+#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:183
 msgid "Income"
 msgstr "crwdns73406:0crwdne73406:0"
 
@@ -24815,7 +24837,7 @@ msgstr "crwdns73436:0crwdne73436:0"
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:146
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:167
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:279
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:280
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:193
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:96
 msgid "Incoming Rate"
@@ -24992,7 +25014,7 @@ msgstr "crwdns73520:0crwdne73520:0"
 msgid "Individual"
 msgstr "crwdns73524:0crwdne73524:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:300
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:327
 msgid "Individual GL Entry cannot be cancelled."
 msgstr "crwdns73530:0crwdne73530:0"
 
@@ -25054,13 +25076,13 @@ msgstr "crwdns134968:0crwdne134968:0"
 msgid "Inspected By"
 msgstr "crwdns73556:0crwdne73556:0"
 
-#: erpnext/controllers/stock_controller.py:1225
+#: erpnext/controllers/stock_controller.py:1227
 msgid "Inspection Rejected"
 msgstr "crwdns73560:0crwdne73560:0"
 
 #. Label of the inspection_required (Check) field in DocType 'Stock Entry'
-#: erpnext/controllers/stock_controller.py:1195
 #: erpnext/controllers/stock_controller.py:1197
+#: erpnext/controllers/stock_controller.py:1199
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Inspection Required"
 msgstr "crwdns73562:0crwdne73562:0"
@@ -25077,7 +25099,7 @@ msgstr "crwdns134970:0crwdne134970:0"
 msgid "Inspection Required before Purchase"
 msgstr "crwdns134972:0crwdne134972:0"
 
-#: erpnext/controllers/stock_controller.py:1210
+#: erpnext/controllers/stock_controller.py:1212
 msgid "Inspection Submission"
 msgstr "crwdns73570:0crwdne73570:0"
 
@@ -25165,12 +25187,12 @@ msgstr "crwdns73608:0crwdne73608:0"
 #: erpnext/stock/doctype/pick_list/pick_list.py:132
 #: erpnext/stock/doctype/pick_list/pick_list.py:1003
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:788
-#: erpnext/stock/serial_batch_bundle.py:1103 erpnext/stock/stock_ledger.py:1582
-#: erpnext/stock/stock_ledger.py:2068
+#: erpnext/stock/serial_batch_bundle.py:1116 erpnext/stock/stock_ledger.py:1600
+#: erpnext/stock/stock_ledger.py:2086
 msgid "Insufficient Stock"
 msgstr "crwdns73610:0crwdne73610:0"
 
-#: erpnext/stock/stock_ledger.py:2083
+#: erpnext/stock/stock_ledger.py:2101
 msgid "Insufficient Stock for Batch"
 msgstr "crwdns73612:0crwdne73612:0"
 
@@ -25372,7 +25394,7 @@ msgstr "crwdns73694:0crwdne73694:0"
 msgid "Internal Work History"
 msgstr "crwdns135024:0crwdne135024:0"
 
-#: erpnext/controllers/stock_controller.py:1292
+#: erpnext/controllers/stock_controller.py:1294
 msgid "Internal transfers can only be done in company's default currency"
 msgstr "crwdns73698:0crwdne73698:0"
 
@@ -25517,6 +25539,12 @@ msgstr "crwdns73754:0crwdne73754:0"
 #: erpnext/accounts/doctype/party_link/party_link.py:30
 msgid "Invalid Primary Role"
 msgstr "crwdns73756:0crwdne73756:0"
+
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:121
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:123
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:126
+msgid "Invalid Print Format"
+msgstr "crwdns159258:0crwdne159258:0"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:60
 msgid "Invalid Priority"
@@ -26615,7 +26643,7 @@ msgstr "crwdns74224:0crwdne74224:0"
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:15
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:29
 #: erpnext/stock/report/stock_balance/stock_balance.py:398
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:206
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:207
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:27
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:51
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:28
@@ -27082,7 +27110,7 @@ msgstr "crwdns111788:0crwdne111788:0"
 #: erpnext/stock/report/stock_balance/stock_balance.js:32
 #: erpnext/stock/report/stock_balance/stock_balance.py:406
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:71
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:264
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:265
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:39
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:113
 #: erpnext/stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.js:33
@@ -27317,7 +27345,7 @@ msgstr "crwdns74534:0crwdne74534:0"
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:136
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:31
 #: erpnext/stock/report/stock_balance/stock_balance.py:404
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:212
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:213
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:110
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:32
 #: erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py:58
@@ -27614,7 +27642,7 @@ msgstr "crwdns135226:0crwdne135226:0"
 msgid "Item and Warranty Details"
 msgstr "crwdns135228:0crwdne135228:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2816
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2838
 msgid "Item for row {0} does not match Material Request"
 msgstr "crwdns74796:0{0}crwdne74796:0"
 
@@ -27662,11 +27690,11 @@ msgstr "crwdns154385:0crwdne154385:0"
 msgid "Item to be manufactured or repacked"
 msgstr "crwdns135232:0crwdne135232:0"
 
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:34
+#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Item valuation rate is recalculated considering landed cost voucher amount"
 msgstr "crwdns111790:0crwdne111790:0"
 
-#: erpnext/stock/utils.py:554
+#: erpnext/stock/utils.py:555
 msgid "Item valuation reposting in progress. Report might show incorrect item valuation."
 msgstr "crwdns74814:0crwdne74814:0"
 
@@ -27779,7 +27807,7 @@ msgstr "crwdns74862:0{0}crwdnd74862:0{1}crwdnd74862:0{2}crwdne74862:0"
 msgid "Item {0}: {1} qty produced. "
 msgstr "crwdns74864:0{0}crwdnd74864:0{1}crwdne74864:0"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1433
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1435
 msgid "Item {} does not exist."
 msgstr "crwdns74866:0crwdne74866:0"
 
@@ -28008,7 +28036,7 @@ msgstr "crwdns135242:0crwdne135242:0"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
-#: erpnext/manufacturing/doctype/job_card/job_card.py:884
+#: erpnext/manufacturing/doctype/job_card/job_card.py:882
 #: erpnext/manufacturing/doctype/operation/operation.json
 #: erpnext/manufacturing/doctype/work_order/work_order.js:384
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -28069,7 +28097,7 @@ msgstr "crwdns75000:0crwdne75000:0"
 msgid "Job Card and Capacity Planning"
 msgstr "crwdns148798:0crwdne148798:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1299
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1297
 msgid "Job Card {0} has been completed"
 msgstr "crwdns135246:0{0}crwdne135246:0"
 
@@ -28138,7 +28166,7 @@ msgstr "crwdns142956:0crwdne142956:0"
 msgid "Job Worker Warehouse"
 msgstr "crwdns142958:0crwdne142958:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2247
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2259
 msgid "Job card {0} created"
 msgstr "crwdns75012:0{0}crwdne75012:0"
 
@@ -28165,7 +28193,7 @@ msgstr "crwdns112410:0crwdne112410:0"
 msgid "Journal Entries"
 msgstr "crwdns75020:0crwdne75020:0"
 
-#: erpnext/accounts/utils.py:1013
+#: erpnext/accounts/utils.py:1014
 msgid "Journal Entries {0} are un-linked"
 msgstr "crwdns75022:0{0}crwdne75022:0"
 
@@ -28237,7 +28265,7 @@ msgstr "crwdns135256:0crwdne135256:0"
 msgid "Journal Entry type should be set as Depreciation Entry for asset depreciation"
 msgstr "crwdns75054:0crwdne75054:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:776
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:779
 msgid "Journal Entry {0} does not have account {1} or already matched against other voucher"
 msgstr "crwdns75056:0{0}crwdnd75056:0{1}crwdne75056:0"
 
@@ -28367,7 +28395,7 @@ msgstr "crwdns112444:0crwdne112444:0"
 msgid "Kilowatt-Hour"
 msgstr "crwdns112446:0crwdne112446:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:886
+#: erpnext/manufacturing/doctype/job_card/job_card.py:884
 msgid "Kindly cancel the Manufacturing Entries first against the work order {0}."
 msgstr "crwdns75070:0{0}crwdne75070:0"
 
@@ -28853,7 +28881,7 @@ msgstr "crwdns135310:0crwdne135310:0"
 msgid "Legacy Fields"
 msgstr "crwdns154910:0crwdne154910:0"
 
-#: erpnext/setup/doctype/company/company.py:420
+#: erpnext/setup/doctype/company/company.py:422
 #: erpnext/setup/setup_wizard/data/industry_type.txt:30
 msgid "Legal"
 msgstr "crwdns75260:0crwdne75260:0"
@@ -29063,11 +29091,11 @@ msgstr "crwdns75422:0crwdne75422:0"
 msgid "Link to Material Requests"
 msgstr "crwdns75424:0crwdne75424:0"
 
-#: erpnext/buying/doctype/supplier/supplier.js:138
+#: erpnext/buying/doctype/supplier/supplier.js:141
 msgid "Link with Customer"
 msgstr "crwdns75426:0crwdne75426:0"
 
-#: erpnext/selling/doctype/customer/customer.js:195
+#: erpnext/selling/doctype/customer/customer.js:198
 msgid "Link with Supplier"
 msgstr "crwdns75428:0crwdne75428:0"
 
@@ -29092,16 +29120,16 @@ msgstr "crwdns75434:0crwdne75434:0"
 msgid "Linked with submitted documents"
 msgstr "crwdns75436:0crwdne75436:0"
 
-#: erpnext/buying/doctype/supplier/supplier.js:223
-#: erpnext/selling/doctype/customer/customer.js:257
+#: erpnext/buying/doctype/supplier/supplier.js:226
+#: erpnext/selling/doctype/customer/customer.js:260
 msgid "Linking Failed"
 msgstr "crwdns75438:0crwdne75438:0"
 
-#: erpnext/buying/doctype/supplier/supplier.js:222
+#: erpnext/buying/doctype/supplier/supplier.js:225
 msgid "Linking to Customer Failed. Please try again."
 msgstr "crwdns75440:0crwdne75440:0"
 
-#: erpnext/selling/doctype/customer/customer.js:256
+#: erpnext/selling/doctype/customer/customer.js:259
 msgid "Linking to Supplier Failed. Please try again."
 msgstr "crwdns75442:0crwdne75442:0"
 
@@ -29447,10 +29475,10 @@ msgstr "crwdns135388:0crwdne135388:0"
 msgid "Machine operator errors"
 msgstr "crwdns135390:0crwdne135390:0"
 
-#: erpnext/setup/doctype/company/company.py:594
-#: erpnext/setup/doctype/company/company.py:609
-#: erpnext/setup/doctype/company/company.py:610
-#: erpnext/setup/doctype/company/company.py:611
+#: erpnext/setup/doctype/company/company.py:604
+#: erpnext/setup/doctype/company/company.py:619
+#: erpnext/setup/doctype/company/company.py:620
+#: erpnext/setup/doctype/company/company.py:621
 msgid "Main"
 msgstr "crwdns75642:0crwdne75642:0"
 
@@ -29801,8 +29829,8 @@ msgstr "crwdns127494:0{0}crwdne127494:0"
 #: erpnext/assets/doctype/asset/asset.js:150
 #: erpnext/assets/doctype/asset/asset.js:160
 #: erpnext/assets/doctype/asset/asset.js:176
-#: erpnext/setup/doctype/company/company.js:142
-#: erpnext/setup/doctype/company/company.js:153
+#: erpnext/setup/doctype/company/company.js:145
+#: erpnext/setup/doctype/company/company.js:156
 msgid "Manage"
 msgstr "crwdns75780:0crwdne75780:0"
 
@@ -29815,7 +29843,7 @@ msgstr "crwdns135442:0crwdne135442:0"
 msgid "Manage your orders"
 msgstr "crwdns75788:0crwdne75788:0"
 
-#: erpnext/setup/doctype/company/company.py:402
+#: erpnext/setup/doctype/company/company.py:404
 msgid "Management"
 msgstr "crwdns75790:0crwdne75790:0"
 
@@ -30254,7 +30282,7 @@ msgstr "crwdns111810:0crwdne111810:0"
 msgid "Market Segment"
 msgstr "crwdns75988:0crwdne75988:0"
 
-#: erpnext/setup/doctype/company/company.py:354
+#: erpnext/setup/doctype/company/company.py:356
 msgid "Marketing"
 msgstr "crwdns76000:0crwdne76000:0"
 
@@ -30298,7 +30326,7 @@ msgstr "crwdns76012:0crwdne76012:0"
 msgid "Material"
 msgstr "crwdns76014:0crwdne76014:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:767
+#: erpnext/manufacturing/doctype/work_order/work_order.js:788
 msgid "Material Consumption"
 msgstr "crwdns76016:0crwdne76016:0"
 
@@ -30506,7 +30534,7 @@ msgid "Material Requested"
 msgstr "crwdns135490:0crwdne135490:0"
 
 #. Label of the material_requests (Table) field in DocType 'Production Plan'
-#: erpnext/accounts/doctype/budget/budget.py:337
+#: erpnext/accounts/doctype/budget/budget.py:339
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Material Requests"
 msgstr "crwdns135492:0crwdne135492:0"
@@ -30593,7 +30621,7 @@ msgstr "crwdns76170:0crwdne76170:0"
 msgid "Materials are already received against the {0} {1}"
 msgstr "crwdns76174:0{0}crwdnd76174:0{1}crwdne76174:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:737
+#: erpnext/manufacturing/doctype/job_card/job_card.py:738
 msgid "Materials needs to be transferred to the work in progress warehouse for the job card {0}"
 msgstr "crwdns76176:0{0}crwdne76176:0"
 
@@ -30657,7 +30685,7 @@ msgstr "crwdns135518:0crwdne135518:0"
 msgid "Max discount allowed for item: {0} is {1}%"
 msgstr "crwdns76202:0{0}crwdnd76202:0{1}crwdne76202:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:915
+#: erpnext/manufacturing/doctype/work_order/work_order.js:936
 #: erpnext/stock/doctype/pick_list/pick_list.js:199
 msgid "Max: {0}"
 msgstr "crwdns76204:0{0}crwdne76204:0"
@@ -30679,11 +30707,11 @@ msgstr "crwdns135522:0crwdne135522:0"
 msgid "Maximum Payment Amount"
 msgstr "crwdns135524:0crwdne135524:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3354
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3376
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
 msgstr "crwdns76212:0{0}crwdnd76212:0{1}crwdnd76212:0{2}crwdne76212:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3345
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3367
 msgid "Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}."
 msgstr "crwdns76214:0{0}crwdnd76214:0{1}crwdnd76214:0{2}crwdnd76214:0{3}crwdne76214:0"
 
@@ -30770,7 +30798,7 @@ msgstr "crwdns112464:0crwdne112464:0"
 msgid "Megawatt"
 msgstr "crwdns112466:0crwdne112466:0"
 
-#: erpnext/stock/stock_ledger.py:1912
+#: erpnext/stock/stock_ledger.py:1930
 msgid "Mention Valuation Rate in the Item master."
 msgstr "crwdns76238:0crwdne76238:0"
 
@@ -31169,7 +31197,7 @@ msgstr "crwdns76346:0crwdne76346:0"
 msgid "Mismatch"
 msgstr "crwdns76348:0crwdne76348:0"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1434
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1436
 msgid "Missing"
 msgstr "crwdns76350:0crwdne76350:0"
 
@@ -31186,7 +31214,7 @@ msgstr "crwdns76352:0crwdne76352:0"
 msgid "Missing Asset"
 msgstr "crwdns76354:0crwdne76354:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:178
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:186
 #: erpnext/assets/doctype/asset/asset.py:309
 msgid "Missing Cost Center"
 msgstr "crwdns76356:0crwdne76356:0"
@@ -31232,7 +31260,7 @@ msgid "Missing email template for dispatch. Please set one in Delivery Settings.
 msgstr "crwdns76374:0crwdne76374:0"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1092
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1198
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1210
 msgid "Missing value"
 msgstr "crwdns76376:0crwdne76376:0"
 
@@ -31720,7 +31748,7 @@ msgid "Music"
 msgstr "crwdns143476:0crwdne143476:0"
 
 #. Label of the must_be_whole_number (Check) field in DocType 'UOM'
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1154
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1166
 #: erpnext/setup/doctype/uom/uom.json
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:233
 #: erpnext/utilities/transaction_base.py:563
@@ -31858,7 +31886,7 @@ msgstr "crwdns135638:0crwdne135638:0"
 msgid "Naming Series and Price Defaults"
 msgstr "crwdns135640:0crwdne135640:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:91
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:93
 msgid "Naming Series is mandatory"
 msgstr "crwdns152587:0crwdne152587:0"
 
@@ -31897,7 +31925,7 @@ msgstr "crwdns135642:0crwdne135642:0"
 msgid "Needs Analysis"
 msgstr "crwdns76732:0crwdne76732:0"
 
-#: erpnext/stock/serial_batch_bundle.py:1397
+#: erpnext/stock/serial_batch_bundle.py:1410
 msgid "Negative Batch Quantity"
 msgstr "crwdns152340:0crwdne152340:0"
 
@@ -32009,7 +32037,7 @@ msgid "Net Change in Accounts Receivable"
 msgstr "crwdns76788:0crwdne76788:0"
 
 #: erpnext/accounts/report/cash_flow/cash_flow.py:128
-#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:253
+#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:254
 msgid "Net Change in Cash"
 msgstr "crwdns76790:0crwdne76790:0"
 
@@ -32476,8 +32504,8 @@ msgstr "crwdns135692:0crwdne135692:0"
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
 msgstr "crwdns77026:0{0}crwdne77026:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:144
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:406
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:164
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:430
 msgid "No Customers found with selected options."
 msgstr "crwdns77028:0crwdne77028:0"
 
@@ -32529,9 +32557,9 @@ msgstr "crwdns77044:0crwdne77044:0"
 msgid "No POS Profile found. Please create a New POS Profile first"
 msgstr "crwdns77046:0crwdne77046:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1617
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1677
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1691
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1620
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1680
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1694
 #: erpnext/stock/doctype/item/item.py:1363
 msgid "No Permission"
 msgstr "crwdns77048:0crwdne77048:0"
@@ -32607,7 +32635,7 @@ msgstr "crwdns77072:0crwdne77072:0"
 msgid "No available quantity to reserve for item {0} in warehouse {1}"
 msgstr "crwdns158396:0{0}crwdnd158396:0{1}crwdne158396:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:471
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:495
 msgid "No billing email found for customer: {0}"
 msgstr "crwdns77074:0{0}crwdne77074:0"
 
@@ -32737,11 +32765,11 @@ msgstr "crwdns111838:0crwdne111838:0"
 msgid "No open task"
 msgstr "crwdns111840:0crwdne111840:0"
 
-#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:329
+#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:330
 msgid "No outstanding invoices found"
 msgstr "crwdns77126:0crwdne77126:0"
 
-#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:327
+#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:328
 msgid "No outstanding invoices require exchange rate revaluation"
 msgstr "crwdns77128:0crwdne77128:0"
 
@@ -32753,7 +32781,7 @@ msgstr "crwdns77130:0{0}crwdnd77130:0{1}crwdnd77130:0{2}crwdne77130:0"
 msgid "No pending Material Requests found to link for the given items."
 msgstr "crwdns77132:0crwdne77132:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:478
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:502
 msgid "No primary email found for customer: {0}"
 msgstr "crwdns77134:0{0}crwdne77134:0"
 
@@ -32771,15 +32799,15 @@ msgstr "crwdns151908:0crwdne151908:0"
 msgid "No record found"
 msgstr "crwdns77138:0crwdne77138:0"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:698
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:711
 msgid "No records found in Allocation table"
 msgstr "crwdns77140:0crwdne77140:0"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:597
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:610
 msgid "No records found in the Invoices table"
 msgstr "crwdns77142:0crwdne77142:0"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:600
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:613
 msgid "No records found in the Payments table"
 msgstr "crwdns77144:0crwdne77144:0"
 
@@ -32841,7 +32869,7 @@ msgstr "crwdns154912:0crwdne154912:0"
 msgid "Non Profit"
 msgstr "crwdns77168:0crwdne77168:0"
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1460
+#: erpnext/manufacturing/doctype/bom/bom.py:1463
 msgid "Non stock items"
 msgstr "crwdns77170:0crwdne77170:0"
 
@@ -32860,8 +32888,8 @@ msgid "None of the items have any change in quantity or value."
 msgstr "crwdns77174:0crwdne77174:0"
 
 #. Name of a UOM
-#: erpnext/setup/setup_wizard/data/uom_data.json erpnext/stock/utils.py:704
-#: erpnext/stock/utils.py:706
+#: erpnext/setup/setup_wizard/data/uom_data.json erpnext/stock/utils.py:705
+#: erpnext/stock/utils.py:707
 msgid "Nos"
 msgstr "crwdns77176:0crwdne77176:0"
 
@@ -32964,7 +32992,7 @@ msgstr "crwdns77208:0{0}crwdne77208:0"
 msgid "Not authorized since {0} exceeds limits"
 msgstr "crwdns104614:0{0}crwdne104614:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:405
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:432
 msgid "Not authorized to edit frozen Account {0}"
 msgstr "crwdns77210:0{0}crwdne77210:0"
 
@@ -32977,9 +33005,9 @@ msgid "Not in stock"
 msgstr "crwdns77214:0crwdne77214:0"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:725
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1886
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2044
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2113
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1898
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2056
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2125
 #: erpnext/selling/doctype/sales_order/sales_order.py:826
 #: erpnext/selling/doctype/sales_order/sales_order.py:1712
 msgid "Not permitted"
@@ -33040,7 +33068,7 @@ msgstr "crwdns77236:0crwdne77236:0"
 msgid "Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 msgstr "crwdns77238:0{0}crwdne77238:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1080
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1083
 msgid "Note: {0}"
 msgstr "crwdns77240:0{0}crwdne77240:0"
 
@@ -33064,7 +33092,7 @@ msgstr "crwdns77240:0{0}crwdne77240:0"
 #: erpnext/crm/doctype/prospect/prospect.json
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/quality_management/doctype/quality_review/quality_review.json
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:34
+#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 #: erpnext/www/book_appointment/index.html:55
 msgid "Notes"
@@ -33682,12 +33710,12 @@ msgstr "crwdns77536:0crwdne77536:0"
 msgid "Opening & Closing"
 msgstr "crwdns135824:0crwdne135824:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:471
+#: erpnext/accounts/report/trial_balance/trial_balance.py:472
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py:198
 msgid "Opening (Cr)"
 msgstr "crwdns77540:0crwdne77540:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:464
+#: erpnext/accounts/report/trial_balance/trial_balance.py:465
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py:191
 msgid "Opening (Dr)"
 msgstr "crwdns77542:0crwdne77542:0"
@@ -33858,7 +33886,7 @@ msgstr "crwdns135838:0crwdne135838:0"
 msgid "Operating Cost Per BOM Quantity"
 msgstr "crwdns135840:0crwdne135840:0"
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1529
+#: erpnext/manufacturing/doctype/bom/bom.py:1535
 msgid "Operating Cost as per Work Order / BOM"
 msgstr "crwdns77608:0crwdne77608:0"
 
@@ -33970,7 +33998,7 @@ msgstr "crwdns135858:0crwdne135858:0"
 msgid "Operation Time"
 msgstr "crwdns135860:0crwdne135860:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1204
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1216
 msgid "Operation Time must be greater than 0 for Operation {0}"
 msgstr "crwdns77658:0{0}crwdne77658:0"
 
@@ -33989,7 +34017,7 @@ msgstr "crwdns135868:0crwdne135868:0"
 msgid "Operation {0} added multiple times in the work order {1}"
 msgstr "crwdns77664:0{0}crwdnd77664:0{1}crwdne77664:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1099
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1097
 msgid "Operation {0} does not belong to the work order {1}"
 msgstr "crwdns77666:0{0}crwdnd77666:0{1}crwdne77666:0"
 
@@ -34007,7 +34035,7 @@ msgstr "crwdns77668:0{0}crwdnd77668:0{1}crwdne77668:0"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/work_order/work_order.js:302
 #: erpnext/manufacturing/doctype/work_order/work_order.json
-#: erpnext/setup/doctype/company/company.py:372
+#: erpnext/setup/doctype/company/company.py:374
 #: erpnext/setup/doctype/email_digest/email_digest.json
 #: erpnext/templates/generators/bom.html:61
 msgid "Operations"
@@ -34452,7 +34480,7 @@ msgstr "crwdns112546:0crwdne112546:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:119
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:83
 #: erpnext/stock/report/stock_balance/stock_balance.py:479
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:243
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:244
 msgid "Out Qty"
 msgstr "crwdns77862:0crwdne77862:0"
 
@@ -34569,7 +34597,7 @@ msgstr "crwdns77914:0crwdne77914:0"
 msgid "Outstanding Cheques and Deposits to clear"
 msgstr "crwdns77916:0crwdne77916:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:380
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:407
 msgid "Outstanding for {0} cannot be less than zero ({1})"
 msgstr "crwdns77918:0{0}crwdnd77918:0{1}crwdne77918:0"
 
@@ -34611,7 +34639,7 @@ msgstr "crwdns135916:0crwdne135916:0"
 msgid "Over Picking Allowance"
 msgstr "crwdns142960:0crwdne142960:0"
 
-#: erpnext/controllers/stock_controller.py:1458
+#: erpnext/controllers/stock_controller.py:1460
 msgid "Over Receipt"
 msgstr "crwdns77934:0crwdne77934:0"
 
@@ -35063,7 +35091,7 @@ msgstr "crwdns78136:0crwdne78136:0"
 msgid "Packed Items"
 msgstr "crwdns135958:0crwdne135958:0"
 
-#: erpnext/controllers/stock_controller.py:1296
+#: erpnext/controllers/stock_controller.py:1298
 msgid "Packed Items cannot be transferred internally"
 msgstr "crwdns78146:0crwdne78146:0"
 
@@ -35342,7 +35370,7 @@ msgstr "crwdns136004:0crwdne136004:0"
 msgid "Parent Company"
 msgstr "crwdns136006:0crwdne136006:0"
 
-#: erpnext/setup/doctype/company/company.py:491
+#: erpnext/setup/doctype/company/company.py:493
 msgid "Parent Company must be a group company"
 msgstr "crwdns78298:0crwdne78298:0"
 
@@ -35843,7 +35871,7 @@ msgstr "crwdns78492:0crwdne78492:0"
 msgid "Party Type and Party can only be set for Receivable / Payable account<br><br>{0}"
 msgstr "crwdns152094:0{0}crwdne152094:0"
 
-#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:626
+#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:627
 msgid "Party Type and Party is mandatory for {0} account"
 msgstr "crwdns78526:0{0}crwdne78526:0"
 
@@ -36072,7 +36100,7 @@ msgstr "crwdns78612:0crwdne78612:0"
 msgid "Payment Entries"
 msgstr "crwdns136110:0crwdne136110:0"
 
-#: erpnext/accounts/utils.py:1101
+#: erpnext/accounts/utils.py:1102
 msgid "Payment Entries {0} are un-linked"
 msgstr "crwdns78622:0{0}crwdne78622:0"
 
@@ -36120,7 +36148,7 @@ msgstr "crwdns78638:0crwdne78638:0"
 msgid "Payment Entry already exists"
 msgstr "crwdns78640:0crwdne78640:0"
 
-#: erpnext/accounts/utils.py:608
+#: erpnext/accounts/utils.py:609
 msgid "Payment Entry has been modified after you pulled it. Please pull it again."
 msgstr "crwdns78642:0crwdne78642:0"
 
@@ -36165,7 +36193,7 @@ msgstr "crwdns136114:0crwdne136114:0"
 msgid "Payment Gateway Account"
 msgstr "crwdns78660:0crwdne78660:0"
 
-#: erpnext/accounts/utils.py:1345
+#: erpnext/accounts/utils.py:1369
 msgid "Payment Gateway Account not created, please create one manually."
 msgstr "crwdns78666:0crwdne78666:0"
 
@@ -36518,11 +36546,11 @@ msgstr "crwdns78820:0crwdne78820:0"
 msgid "Payment URL"
 msgstr "crwdns148816:0crwdne148816:0"
 
-#: erpnext/accounts/utils.py:1089
+#: erpnext/accounts/utils.py:1090
 msgid "Payment Unlink Error"
 msgstr "crwdns78822:0crwdne78822:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:948
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:951
 msgid "Payment against {0} {1} cannot be greater than Outstanding Amount {2}"
 msgstr "crwdns78824:0{0}crwdnd78824:0{1}crwdnd78824:0{2}crwdne78824:0"
 
@@ -36717,7 +36745,7 @@ msgstr "crwdns78898:0crwdne78898:0"
 msgid "Pending activities for today"
 msgstr "crwdns78900:0crwdne78900:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:215
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:236
 msgid "Pending processing"
 msgstr "crwdns78902:0crwdne78902:0"
 
@@ -37446,7 +37474,7 @@ msgstr "crwdns79202:0crwdne79202:0"
 msgid "Please add {1} role to user {0}."
 msgstr "crwdns79204:0{1}crwdnd79204:0{0}crwdne79204:0"
 
-#: erpnext/controllers/stock_controller.py:1469
+#: erpnext/controllers/stock_controller.py:1471
 msgid "Please adjust the qty or edit {0} to proceed."
 msgstr "crwdns79206:0{0}crwdne79206:0"
 
@@ -37458,16 +37486,16 @@ msgstr "crwdns79208:0crwdne79208:0"
 msgid "Please cancel and amend the Payment Entry"
 msgstr "crwdns79210:0crwdne79210:0"
 
-#: erpnext/accounts/utils.py:1088
+#: erpnext/accounts/utils.py:1089
 msgid "Please cancel payment entry manually first"
 msgstr "crwdns79212:0crwdne79212:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:301
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:328
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:344
 msgid "Please cancel related transaction."
 msgstr "crwdns79214:0crwdne79214:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1022
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1025
 msgid "Please check Multi Currency option to allow accounts with other currency"
 msgstr "crwdns79216:0crwdne79216:0"
 
@@ -37479,7 +37507,7 @@ msgstr "crwdns79218:0{0}crwdne79218:0"
 msgid "Please check either with operations or FG Based Operating Cost."
 msgstr "crwdns79220:0crwdne79220:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:429
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:450
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
 msgstr "crwdns79222:0crwdne79222:0"
 
@@ -37660,7 +37688,7 @@ msgstr "crwdns79302:0crwdne79302:0"
 msgid "Please enter Production Item first"
 msgstr "crwdns79304:0crwdne79304:0"
 
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:75
+#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:50
 msgid "Please enter Purchase Receipt first"
 msgstr "crwdns79306:0crwdne79306:0"
 
@@ -37668,7 +37696,7 @@ msgstr "crwdns79306:0crwdne79306:0"
 msgid "Please enter Receipt Document"
 msgstr "crwdns79308:0crwdne79308:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1086
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1089
 msgid "Please enter Reference date"
 msgstr "crwdns79310:0crwdne79310:0"
 
@@ -37692,10 +37720,6 @@ msgstr "crwdns79320:0crwdne79320:0"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1185
 msgid "Please enter Write Off Account"
 msgstr "crwdns79324:0crwdne79324:0"
-
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:26
-msgid "Please enter company first"
-msgstr "crwdns79326:0crwdne79326:0"
 
 #: erpnext/accounts/doctype/cost_center/cost_center.js:114
 msgid "Please enter company name first"
@@ -37729,7 +37753,7 @@ msgstr "crwdns79340:0crwdne79340:0"
 msgid "Please enter serial nos"
 msgstr "crwdns79342:0crwdne79342:0"
 
-#: erpnext/setup/doctype/company/company.js:191
+#: erpnext/setup/doctype/company/company.js:198
 msgid "Please enter the company name to confirm"
 msgstr "crwdns79344:0crwdne79344:0"
 
@@ -37785,7 +37809,7 @@ msgstr "crwdns79366:0crwdne79366:0"
 msgid "Please make sure the file you are using has 'Parent Account' column present in the header."
 msgstr "crwdns79368:0crwdne79368:0"
 
-#: erpnext/setup/doctype/company/company.js:193
+#: erpnext/setup/doctype/company/company.js:200
 msgid "Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."
 msgstr "crwdns79370:0crwdne79370:0"
 
@@ -37885,7 +37909,7 @@ msgstr "crwdns79412:0crwdne79412:0"
 msgid "Please select Customer first"
 msgstr "crwdns79414:0crwdne79414:0"
 
-#: erpnext/setup/doctype/company/company.py:438
+#: erpnext/setup/doctype/company/company.py:440
 msgid "Please select Existing Company for creating Chart of Accounts"
 msgstr "crwdns79416:0crwdne79416:0"
 
@@ -37991,7 +38015,7 @@ msgstr "crwdns79456:0crwdne79456:0"
 msgid "Please select a Warehouse"
 msgstr "crwdns111900:0crwdne111900:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1405
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1406
 msgid "Please select a Work Order first."
 msgstr "crwdns79458:0crwdne79458:0"
 
@@ -38056,7 +38080,7 @@ msgstr "crwdns155386:0crwdne155386:0"
 msgid "Please select atleast one operation to create Job Card"
 msgstr "crwdns157216:0crwdne157216:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1751
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1754
 msgid "Please select correct account"
 msgstr "crwdns79482:0crwdne79482:0"
 
@@ -38128,7 +38152,7 @@ msgid "Please select {0}"
 msgstr "crwdns79508:0{0}crwdne79508:0"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1195
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:593
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:606
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:93
 msgid "Please select {0} first"
 msgstr "crwdns79510:0{0}crwdne79510:0"
@@ -38223,7 +38247,7 @@ msgstr "crwdns79538:0crwdne79538:0"
 msgid "Please set Tax ID for the customer '%s'"
 msgstr "crwdns79540:0%scrwdne79540:0"
 
-#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:338
+#: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:339
 msgid "Please set Unrealized Exchange Gain/Loss Account in Company {0}"
 msgstr "crwdns79542:0{0}crwdne79542:0"
 
@@ -38296,7 +38320,7 @@ msgstr "crwdns79570:0crwdne79570:0"
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
 msgstr "crwdns79572:0crwdne79572:0"
 
-#: erpnext/accounts/utils.py:2321
+#: erpnext/accounts/utils.py:2345
 msgid "Please set default Exchange Gain/Loss Account in Company {}"
 msgstr "crwdns79574:0crwdne79574:0"
 
@@ -38313,7 +38337,7 @@ msgid "Please set default cost of goods sold account in company {0} for booking 
 msgstr "crwdns79580:0{0}crwdne79580:0"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:274
-#: erpnext/accounts/utils.py:1110
+#: erpnext/accounts/utils.py:1111
 msgid "Please set default {0} in Company {1}"
 msgstr "crwdns79582:0{0}crwdnd79582:0{1}crwdne79582:0"
 
@@ -38349,15 +38373,15 @@ msgstr "crwdns79596:0{0}crwdne79596:0"
 msgid "Please set the Item Code first"
 msgstr "crwdns79598:0crwdne79598:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1467
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1468
 msgid "Please set the Target Warehouse in the Job Card"
 msgstr "crwdns154391:0crwdne154391:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1471
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1472
 msgid "Please set the WIP Warehouse in the Job Card"
 msgstr "crwdns154393:0crwdne154393:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:174
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:182
 msgid "Please set the cost center field in {0} or setup a default Cost Center for the Company."
 msgstr "crwdns79602:0{0}crwdne79602:0"
 
@@ -38444,7 +38468,7 @@ msgstr "crwdns79632:0crwdne79632:0"
 msgid "Please supply the specified items at the best possible rates"
 msgstr "crwdns79634:0crwdne79634:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:214
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:235
 msgid "Please try again in an hour."
 msgstr "crwdns79636:0crwdne79636:0"
 
@@ -38891,7 +38915,7 @@ msgid "Preview Required Materials"
 msgstr "crwdns151912:0crwdne151912:0"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:175
-#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:138
+#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:139
 msgid "Previous Financial Year is not closed"
 msgstr "crwdns79820:0crwdne79820:0"
 
@@ -38901,7 +38925,7 @@ msgstr "crwdns79820:0crwdne79820:0"
 msgid "Previous Work Experience"
 msgstr "crwdns136302:0crwdne136302:0"
 
-#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:98
+#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:100
 msgid "Previous Year is not closed, please close it first"
 msgstr "crwdns79824:0crwdne79824:0"
 
@@ -39350,9 +39374,12 @@ msgstr "crwdns80078:0crwdne80078:0"
 
 #. Label of the print_format (Select) field in DocType 'Payment Request'
 #. Label of the print_format (Link) field in DocType 'POS Profile'
+#. Label of the print_format (Link) field in DocType 'Process Statement Of
+#. Accounts'
 #. Label of a Link in the Settings Workspace
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Print Format"
 msgstr "crwdns136342:0crwdne136342:0"
@@ -39361,6 +39388,14 @@ msgstr "crwdns136342:0crwdne136342:0"
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Print Format Builder"
 msgstr "crwdns80086:0crwdne80086:0"
+
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:123
+msgid "Print Format Type should be Jinja."
+msgstr "crwdns159260:0crwdne159260:0"
+
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:127
+msgid "Print Format must be an enabled Report Print Format matching the selected Report."
+msgstr "crwdns159262:0crwdne159262:0"
 
 #. Label of the select_print_heading (Link) field in DocType 'Journal Entry'
 #. Label of the print_heading (Link) field in DocType 'Payment Entry'
@@ -39514,7 +39549,7 @@ msgstr "crwdns80188:0crwdne80188:0"
 msgid "Print taxes with zero amount"
 msgstr "crwdns80190:0crwdne80190:0"
 
-#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:372
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:381
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:285
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.html:46
 #: erpnext/accounts/report/financial_statements.html:70
@@ -39898,7 +39933,7 @@ msgstr "crwdns136392:0crwdne136392:0"
 #. Reservation Entry'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
-#: erpnext/setup/doctype/company/company.py:378
+#: erpnext/setup/doctype/company/company.py:380
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgid "Production"
 msgstr "crwdns80386:0crwdne80386:0"
@@ -40092,12 +40127,16 @@ msgid "Progress (%)"
 msgstr "crwdns80480:0crwdne80480:0"
 
 #. Label of the project (Link) field in DocType 'Account Closing Balance'
+#. Label of the project (Link) field in DocType 'Advance Taxes and Charges'
 #. Label of the project (Link) field in DocType 'Bank Guarantee'
 #. Option for the 'Budget Against' (Select) field in DocType 'Budget'
 #. Label of the project (Link) field in DocType 'Budget'
 #. Label of the project (Link) field in DocType 'GL Entry'
 #. Label of the project (Link) field in DocType 'Journal Entry Account'
+#. Label of the project (Link) field in DocType 'Loyalty Program'
+#. Label of the project (Link) field in DocType 'Opening Invoice Creation Tool'
 #. Label of the project (Link) field in DocType 'Payment Entry'
+#. Label of the project (Link) field in DocType 'Payment Reconciliation'
 #. Label of the project (Link) field in DocType 'Payment Request'
 #. Label of the project (Link) field in DocType 'POS Invoice'
 #. Label of the project (Link) field in DocType 'POS Invoice Item'
@@ -40107,8 +40146,14 @@ msgstr "crwdns80480:0crwdne80480:0"
 #. Label of the project_name (Link) field in DocType 'PSOA Project'
 #. Label of the project (Link) field in DocType 'Purchase Invoice'
 #. Label of the project (Link) field in DocType 'Purchase Invoice Item'
+#. Label of the project (Link) field in DocType 'Purchase Taxes and Charges'
 #. Label of the project (Link) field in DocType 'Sales Invoice'
 #. Label of the project (Link) field in DocType 'Sales Invoice Item'
+#. Label of the project (Link) field in DocType 'Sales Taxes and Charges'
+#. Label of the project (Link) field in DocType 'Shipping Rule'
+#. Label of the project (Link) field in DocType 'Asset Capitalization'
+#. Label of the project (Link) field in DocType 'Asset Capitalization Asset
+#. Item'
 #. Label of the project (Link) field in DocType 'Asset Repair'
 #. Label of the project (Link) field in DocType 'Purchase Order'
 #. Label of the project (Link) field in DocType 'Purchase Order Item'
@@ -40148,11 +40193,15 @@ msgstr "crwdns80480:0crwdne80480:0"
 #. Label of the project (Link) field in DocType 'Subcontracting Receipt Item'
 #. Label of the project (Link) field in DocType 'Issue'
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
+#: erpnext/accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
 #: erpnext/accounts/doctype/budget/budget.json
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
+#: erpnext/accounts/doctype/loyalty_program/loyalty_program.json
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/pos_invoice_item/pos_invoice_item.json
@@ -40161,9 +40210,12 @@ msgstr "crwdns80480:0crwdne80480:0"
 #: erpnext/accounts/doctype/psoa_project/psoa_project.json
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
+#: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.js:1069
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
+#: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
+#: erpnext/accounts/doctype/shipping_rule/shipping_rule.json
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:109
 #: erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:74
 #: erpnext/accounts/report/general_ledger/general_ledger.js:164
@@ -40177,6 +40229,8 @@ msgstr "crwdns80480:0crwdne80480:0"
 #: erpnext/accounts/report/sales_register/sales_register.py:230
 #: erpnext/accounts/report/supplier_ledger_summary/supplier_ledger_summary.js:90
 #: erpnext/accounts/report/trial_balance/trial_balance.js:64
+#: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
+#: erpnext/assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
@@ -40232,7 +40286,7 @@ msgstr "crwdns80480:0crwdne80480:0"
 #: erpnext/stock/report/reserved_stock/reserved_stock.js:130
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:184
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:102
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:350
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:351
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
@@ -40551,7 +40605,7 @@ msgstr "crwdns136420:0crwdne136420:0"
 msgid "Providing"
 msgstr "crwdns136422:0crwdne136422:0"
 
-#: erpnext/setup/doctype/company/company.py:461
+#: erpnext/setup/doctype/company/company.py:463
 msgid "Provisional Account"
 msgstr "crwdns143506:0crwdne143506:0"
 
@@ -40615,7 +40669,7 @@ msgstr "crwdns143508:0crwdne143508:0"
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
 #: erpnext/manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: erpnext/projects/doctype/project/project_dashboard.py:16
-#: erpnext/setup/doctype/company/company.py:366
+#: erpnext/setup/doctype/company/company.py:368
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -41075,7 +41129,7 @@ msgstr "crwdns80956:0crwdne80956:0"
 
 #. Label of the purchase_tax_template (Link) field in DocType 'Tax Rule'
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
-#: erpnext/setup/doctype/company/company.js:126
+#: erpnext/setup/doctype/company/company.js:129
 msgid "Purchase Tax Template"
 msgstr "crwdns80958:0crwdne80958:0"
 
@@ -41384,7 +41438,7 @@ msgstr "crwdns81106:0crwdne81106:0"
 msgid "Qty To Manufacture"
 msgstr "crwdns81108:0crwdne81108:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1150
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1162
 msgid "Qty To Manufacture ({0}) cannot be a fraction for the UOM {2}. To allow this, disable '{1}' in the UOM {2}."
 msgstr "crwdns127510:0{0}crwdnd127510:0{2}crwdnd127510:0{1}crwdnd127510:0{2}crwdne127510:0"
 
@@ -41435,7 +41489,7 @@ msgstr "crwdns136470:0crwdne136470:0"
 msgid "Qty for which recursion isn't applicable."
 msgstr "crwdns136472:0crwdne136472:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:913
+#: erpnext/manufacturing/doctype/work_order/work_order.js:934
 msgid "Qty for {0}"
 msgstr "crwdns81138:0{0}crwdne81138:0"
 
@@ -41493,7 +41547,7 @@ msgid "Qty to Fetch"
 msgstr "crwdns81162:0crwdne81162:0"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:288
-#: erpnext/manufacturing/doctype/job_card/job_card.py:773
+#: erpnext/manufacturing/doctype/job_card/job_card.py:774
 msgid "Qty to Manufacture"
 msgstr "crwdns81164:0crwdne81164:0"
 
@@ -41713,7 +41767,7 @@ msgstr "crwdns136490:0crwdne136490:0"
 msgid "Quality Inspection(s)"
 msgstr "crwdns81282:0crwdne81282:0"
 
-#: erpnext/setup/doctype/company/company.py:408
+#: erpnext/setup/doctype/company/company.py:410
 msgid "Quality Management"
 msgstr "crwdns81284:0crwdne81284:0"
 
@@ -41960,7 +42014,7 @@ msgstr "crwdns111924:0crwdne111924:0"
 msgid "Quantity must be greater than zero, and less or equal to {0}"
 msgstr "crwdns81396:0{0}crwdne81396:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:958
+#: erpnext/manufacturing/doctype/work_order/work_order.js:979
 #: erpnext/stock/doctype/pick_list/pick_list.js:205
 msgid "Quantity must not be more than {0}"
 msgstr "crwdns81398:0{0}crwdne81398:0"
@@ -41989,11 +42043,11 @@ msgstr "crwdns81406:0crwdne81406:0"
 msgid "Quantity to Manufacture"
 msgstr "crwdns81408:0crwdne81408:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2189
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2201
 msgid "Quantity to Manufacture can not be zero for the operation {0}"
 msgstr "crwdns81410:0{0}crwdne81410:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1142
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1154
 msgid "Quantity to Manufacture must be greater than 0."
 msgstr "crwdns81412:0crwdne81412:0"
 
@@ -43381,7 +43435,7 @@ msgstr "crwdns82028:0crwdne82028:0"
 msgid "Reference"
 msgstr "crwdns82030:0crwdne82030:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1084
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1087
 msgid "Reference #{0} dated {1}"
 msgstr "crwdns82078:0#{0}crwdnd82078:0{1}crwdne82078:0"
 
@@ -43519,7 +43573,7 @@ msgstr "crwdns82118:0crwdne82118:0"
 msgid "Reference No"
 msgstr "crwdns136710:0crwdne136710:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:698
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:701
 msgid "Reference No & Reference Date is required for {0}"
 msgstr "crwdns82150:0{0}crwdne82150:0"
 
@@ -43527,7 +43581,7 @@ msgstr "crwdns82150:0{0}crwdne82150:0"
 msgid "Reference No and Reference Date is mandatory for Bank transaction"
 msgstr "crwdns82152:0crwdne82152:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:703
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:706
 msgid "Reference No is mandatory if you entered Reference Date"
 msgstr "crwdns82154:0crwdne82154:0"
 
@@ -43910,7 +43964,7 @@ msgstr "crwdns136752:0crwdne136752:0"
 msgid "Remove SABB Entry"
 msgstr "crwdns152386:0crwdne152386:0"
 
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:34
+#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Remove item if charges is not applicable to that item"
 msgstr "crwdns111940:0crwdne111940:0"
 
@@ -44116,6 +44170,25 @@ msgstr "crwdns104642:0crwdne104642:0"
 #: erpnext/setup/install.py:154
 msgid "Report an Issue"
 msgstr "crwdns127512:0crwdne127512:0"
+
+#. Label of the reporting_currency (Link) field in DocType 'Company'
+#: erpnext/setup/doctype/company/company.json
+msgid "Reporting Currency"
+msgstr "crwdns159264:0crwdne159264:0"
+
+#: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.py:164
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:313
+msgid "Reporting Currency Exchange Not Found"
+msgstr "crwdns159266:0crwdne159266:0"
+
+#. Label of the reporting_currency_exchange_rate (Float) field in DocType
+#. 'Account Closing Balance'
+#. Label of the reporting_currency_exchange_rate (Float) field in DocType 'GL
+#. Entry'
+#: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
+#: erpnext/accounts/doctype/gl_entry/gl_entry.json
+msgid "Reporting Currency Exchange Rate"
+msgstr "crwdns159268:0crwdne159268:0"
 
 #. Label of the reports_tab (Tab Break) field in DocType 'Accounts Settings'
 #. Label of a Card Break in the Payables Workspace
@@ -44485,7 +44558,7 @@ msgstr "crwdns136812:0crwdne136812:0"
 msgid "Research"
 msgstr "crwdns82586:0crwdne82586:0"
 
-#: erpnext/setup/doctype/company/company.py:414
+#: erpnext/setup/doctype/company/company.py:416
 msgid "Research & Development"
 msgstr "crwdns82588:0crwdne82588:0"
 
@@ -44530,7 +44603,7 @@ msgstr "crwdns154934:0crwdne154934:0"
 msgid "Reservation Based On"
 msgstr "crwdns82600:0crwdne82600:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:827
+#: erpnext/manufacturing/doctype/work_order/work_order.js:848
 #: erpnext/selling/doctype/sales_order/sales_order.js:76
 #: erpnext/stock/doctype/pick_list/pick_list.js:149
 msgid "Reserve"
@@ -44626,14 +44699,14 @@ msgstr "crwdns82636:0crwdne82636:0"
 msgid "Reserved Quantity for Production"
 msgstr "crwdns82638:0crwdne82638:0"
 
-#: erpnext/stock/stock_ledger.py:2183
+#: erpnext/stock/stock_ledger.py:2201
 msgid "Reserved Serial No."
 msgstr "crwdns82640:0crwdne82640:0"
 
 #. Label of the reserved_stock (Float) field in DocType 'Bin'
 #. Name of a report
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:24
-#: erpnext/manufacturing/doctype/work_order/work_order.js:843
+#: erpnext/manufacturing/doctype/work_order/work_order.js:864
 #: erpnext/public/js/stock_reservation.js:235
 #: erpnext/selling/doctype/sales_order/sales_order.js:99
 #: erpnext/selling/doctype/sales_order/sales_order.js:434
@@ -44642,11 +44715,11 @@ msgstr "crwdns82640:0crwdne82640:0"
 #: erpnext/stock/doctype/pick_list/pick_list.js:169
 #: erpnext/stock/report/reserved_stock/reserved_stock.json
 #: erpnext/stock/report/stock_balance/stock_balance.py:497
-#: erpnext/stock/stock_ledger.py:2167
+#: erpnext/stock/stock_ledger.py:2185
 msgid "Reserved Stock"
 msgstr "crwdns82642:0crwdne82642:0"
 
-#: erpnext/stock/stock_ledger.py:2213
+#: erpnext/stock/stock_ledger.py:2231
 msgid "Reserved Stock for Batch"
 msgstr "crwdns82646:0crwdne82646:0"
 
@@ -45503,7 +45576,7 @@ msgstr "crwdns83038:0{0}crwdnd83038:0{1}crwdnd83038:0{2}crwdne83038:0"
 msgid "Row # {0}: Returned Item {1} does not exist in {2} {3}"
 msgstr "crwdns83040:0{0}crwdnd83040:0{1}crwdnd83040:0{2}crwdnd83040:0{3}crwdne83040:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:242
+#: erpnext/manufacturing/doctype/work_order/work_order.py:243
 msgid "Row #1: Sequence ID must be 1 for Operation {0}."
 msgstr "crwdns156066:0{0}crwdne156066:0"
 
@@ -45603,7 +45676,7 @@ msgstr "crwdns83082:0#{0}crwdnd83082:0{1}crwdne83082:0"
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
 msgstr "crwdns154952:0#{0}crwdnd154952:0{1}crwdne154952:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:980
+#: erpnext/manufacturing/doctype/job_card/job_card.py:978
 msgid "Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
 msgstr "crwdns83088:0#{0}crwdnd83088:0{1}crwdnd83088:0{2}crwdnd83088:0{3}crwdne83088:0"
 
@@ -45683,11 +45756,11 @@ msgstr "crwdns136954:0#{0}crwdnd136954:0{1}crwdne136954:0"
 msgid "Row #{0}: Finished Good reference is mandatory for Scrap Item {1}."
 msgstr "crwdns83124:0#{0}crwdnd83124:0{1}crwdne83124:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:746
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:749
 msgid "Row #{0}: For {1}, you can select reference document only if account gets credited"
 msgstr "crwdns83126:0#{0}crwdnd83126:0{1}crwdne83126:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:756
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:759
 msgid "Row #{0}: For {1}, you can select reference document only if account gets debited"
 msgstr "crwdns83128:0#{0}crwdnd83128:0{1}crwdne83128:0"
 
@@ -45695,7 +45768,7 @@ msgstr "crwdns83128:0#{0}crwdnd83128:0{1}crwdne83128:0"
 msgid "Row #{0}: From Date cannot be before To Date"
 msgstr "crwdns83130:0#{0}crwdne83130:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:763
+#: erpnext/manufacturing/doctype/job_card/job_card.py:764
 msgid "Row #{0}: From Time and To Time fields are required"
 msgstr "crwdns154780:0#{0}crwdne154780:0"
 
@@ -45788,15 +45861,15 @@ msgstr "crwdns83168:0#{0}crwdne83168:0"
 msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
 msgstr "crwdns83170:0#{0}crwdnd83170:0{1}crwdnd83170:0{2}crwdnd83170:0{3}crwdnd83170:0{4}crwdne83170:0"
 
-#: erpnext/controllers/stock_controller.py:1191
+#: erpnext/controllers/stock_controller.py:1193
 msgid "Row #{0}: Quality Inspection is required for Item {1}"
 msgstr "crwdns151832:0#{0}crwdnd151832:0{1}crwdne151832:0"
 
-#: erpnext/controllers/stock_controller.py:1206
+#: erpnext/controllers/stock_controller.py:1208
 msgid "Row #{0}: Quality Inspection {1} is not submitted for the item: {2}"
 msgstr "crwdns151834:0#{0}crwdnd151834:0{1}crwdnd151834:0{2}crwdne151834:0"
 
-#: erpnext/controllers/stock_controller.py:1221
+#: erpnext/controllers/stock_controller.py:1223
 msgid "Row #{0}: Quality Inspection {1} was rejected for item {2}"
 msgstr "crwdns151836:0#{0}crwdnd151836:0{1}crwdnd151836:0{2}crwdne151836:0"
 
@@ -45851,7 +45924,7 @@ msgid "Row #{0}: Selling rate for item {1} is lower than its {2}.\n"
 "\t\t\t\t\tthis validation."
 msgstr "crwdns83194:0#{0}crwdnd83194:0{1}crwdnd83194:0{2}crwdnd83194:0{3}crwdnd83194:0{4}crwdnd83194:0{5}crwdne83194:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:248
+#: erpnext/manufacturing/doctype/work_order/work_order.py:249
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
 msgstr "crwdns156068:0#{0}crwdnd156068:0{1}crwdnd156068:0{2}crwdnd156068:0{3}crwdne156068:0"
 
@@ -46089,7 +46162,7 @@ msgstr "crwdns111972:0crwdne111972:0"
 msgid "Row {0}"
 msgstr "crwdns111974:0{0}crwdne111974:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:691
+#: erpnext/manufacturing/doctype/job_card/job_card.py:692
 msgid "Row {0} : Operation is required against the raw material item {1}"
 msgstr "crwdns83286:0{0}crwdnd83286:0{1}crwdne83286:0"
 
@@ -46109,7 +46182,7 @@ msgstr "crwdns83292:0{0}crwdnd83292:0{1}crwdnd83292:0{2}crwdnd83292:0{3}crwdne83
 msgid "Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time."
 msgstr "crwdns83294:0{0}crwdne83294:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:661
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:664
 msgid "Row {0}: Account {1} and Party Type {2} have different account types"
 msgstr "crwdns83296:0{0}crwdnd83296:0{1}crwdnd83296:0{2}crwdne83296:0"
 
@@ -46117,19 +46190,19 @@ msgstr "crwdns83296:0{0}crwdnd83296:0{1}crwdnd83296:0{2}crwdne83296:0"
 msgid "Row {0}: Activity Type is mandatory."
 msgstr "crwdns83300:0{0}crwdne83300:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:727
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:730
 msgid "Row {0}: Advance against Customer must be credit"
 msgstr "crwdns83302:0{0}crwdne83302:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:729
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:732
 msgid "Row {0}: Advance against Supplier must be debit"
 msgstr "crwdns83304:0{0}crwdne83304:0"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:692
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:705
 msgid "Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2}"
 msgstr "crwdns83306:0{0}crwdnd83306:0{1}crwdnd83306:0{2}crwdne83306:0"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:684
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:697
 msgid "Row {0}: Allocated amount {1} must be less than or equal to remaining payment amount {2}"
 msgstr "crwdns83308:0{0}crwdnd83308:0{1}crwdnd83308:0{2}crwdne83308:0"
 
@@ -46141,7 +46214,7 @@ msgstr "crwdns111976:0{0}crwdnd111976:0{1}crwdnd111976:0{2}crwdnd111976:0{3}crwd
 msgid "Row {0}: Bill of Materials not found for the Item {1}"
 msgstr "crwdns83310:0{0}crwdnd83310:0{1}crwdne83310:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:980
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:983
 msgid "Row {0}: Both Debit and Credit values cannot be zero"
 msgstr "crwdns83312:0{0}crwdne83312:0"
 
@@ -46157,7 +46230,7 @@ msgstr "crwdns83316:0{0}crwdnd83316:0{1}crwdnd83316:0{2}crwdne83316:0"
 msgid "Row {0}: Cost center is required for an item {1}"
 msgstr "crwdns83318:0{0}crwdnd83318:0{1}crwdne83318:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:826
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:829
 msgid "Row {0}: Credit entry can not be linked with a {1}"
 msgstr "crwdns83320:0{0}crwdnd83320:0{1}crwdne83320:0"
 
@@ -46165,7 +46238,7 @@ msgstr "crwdns83320:0{0}crwdnd83320:0{1}crwdne83320:0"
 msgid "Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}"
 msgstr "crwdns83322:0{0}crwdnd83322:0#{1}crwdnd83322:0{2}crwdne83322:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:821
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:824
 msgid "Row {0}: Debit entry can not be linked with a {1}"
 msgstr "crwdns83324:0{0}crwdnd83324:0{1}crwdne83324:0"
 
@@ -46181,7 +46254,7 @@ msgstr "crwdns83330:0{0}crwdne83330:0"
 msgid "Row {0}: Either Delivery Note Item or Packed Item reference is mandatory."
 msgstr "crwdns83332:0{0}crwdne83332:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1071
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1074
 #: erpnext/controllers/taxes_and_totals.py:1203
 msgid "Row {0}: Exchange Rate is mandatory"
 msgstr "crwdns83336:0{0}crwdne83336:0"
@@ -46210,16 +46283,16 @@ msgstr "crwdns83346:0{0}crwdnd83346:0{1}crwdne83346:0"
 msgid "Row {0}: From Time and To Time is mandatory."
 msgstr "crwdns83348:0{0}crwdne83348:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:263
+#: erpnext/manufacturing/doctype/job_card/job_card.py:264
 #: erpnext/projects/doctype/timesheet/timesheet.py:212
 msgid "Row {0}: From Time and To Time of {1} is overlapping with {2}"
 msgstr "crwdns83350:0{0}crwdnd83350:0{1}crwdnd83350:0{2}crwdne83350:0"
 
-#: erpnext/controllers/stock_controller.py:1287
+#: erpnext/controllers/stock_controller.py:1289
 msgid "Row {0}: From Warehouse is mandatory for internal transfers"
 msgstr "crwdns83352:0{0}crwdne83352:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:254
+#: erpnext/manufacturing/doctype/job_card/job_card.py:255
 msgid "Row {0}: From time must be less than to time"
 msgstr "crwdns83354:0{0}crwdne83354:0"
 
@@ -46227,7 +46300,7 @@ msgstr "crwdns83354:0{0}crwdne83354:0"
 msgid "Row {0}: Hours value must be greater than zero."
 msgstr "crwdns83356:0{0}crwdne83356:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:846
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:849
 msgid "Row {0}: Invalid reference {1}"
 msgstr "crwdns83358:0{0}crwdnd83358:0{1}crwdne83358:0"
 
@@ -46259,11 +46332,11 @@ msgstr "crwdns83368:0{0}crwdnd83368:0{1}crwdne83368:0"
 msgid "Row {0}: Packing Slip is already created for Item {1}."
 msgstr "crwdns83370:0{0}crwdnd83370:0{1}crwdne83370:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:872
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:875
 msgid "Row {0}: Party / Account does not match with {1} / {2} in {3} {4}"
 msgstr "crwdns83372:0{0}crwdnd83372:0{1}crwdnd83372:0{2}crwdnd83372:0{3}crwdnd83372:0{4}crwdne83372:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:650
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:653
 msgid "Row {0}: Party Type and Party is required for Receivable / Payable account {1}"
 msgstr "crwdns83374:0{0}crwdnd83374:0{1}crwdne83374:0"
 
@@ -46271,11 +46344,11 @@ msgstr "crwdns83374:0{0}crwdnd83374:0{1}crwdne83374:0"
 msgid "Row {0}: Payment Term is mandatory"
 msgstr "crwdns83376:0{0}crwdne83376:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:720
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:723
 msgid "Row {0}: Payment against Sales/Purchase Order should always be marked as advance"
 msgstr "crwdns83378:0{0}crwdne83378:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:713
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:716
 msgid "Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry."
 msgstr "crwdns83380:0{0}crwdnd83380:0{1}crwdne83380:0"
 
@@ -46343,7 +46416,7 @@ msgstr "crwdns83408:0{0}crwdne83408:0"
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
 msgstr "crwdns83410:0{0}crwdnd83410:0{1}crwdne83410:0"
 
-#: erpnext/controllers/stock_controller.py:1278
+#: erpnext/controllers/stock_controller.py:1280
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
 msgstr "crwdns83412:0{0}crwdne83412:0"
 
@@ -46368,7 +46441,7 @@ msgid "Row {0}: UOM Conversion Factor is mandatory"
 msgstr "crwdns83420:0{0}crwdne83420:0"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1112
-#: erpnext/manufacturing/doctype/work_order/work_order.py:277
+#: erpnext/manufacturing/doctype/work_order/work_order.py:278
 msgid "Row {0}: Workstation or Workstation Type is mandatory for an operation {1}"
 msgstr "crwdns151454:0{0}crwdnd151454:0{1}crwdne151454:0"
 
@@ -46388,7 +46461,7 @@ msgstr "crwdns83426:0{0}crwdnd83426:0{1}crwdne83426:0"
 msgid "Row {0}: {1} {2} cannot be same as {3} (Party Account) {4}"
 msgstr "crwdns83428:0{0}crwdnd83428:0{1}crwdnd83428:0{2}crwdnd83428:0{3}crwdnd83428:0{4}crwdne83428:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:886
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:889
 msgid "Row {0}: {1} {2} does not match with {3}"
 msgstr "crwdns83430:0{0}crwdnd83430:0{1}crwdnd83430:0{2}crwdnd83430:0{3}crwdne83430:0"
 
@@ -46600,8 +46673,8 @@ msgstr "crwdns136980:0crwdne136980:0"
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:185
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
-#: erpnext/setup/doctype/company/company.py:360
-#: erpnext/setup/doctype/company/company.py:523
+#: erpnext/setup/doctype/company/company.py:362
+#: erpnext/setup/doctype/company/company.py:533
 #: erpnext/setup/doctype/company/company_dashboard.py:9
 #: erpnext/setup/doctype/sales_person/sales_person_dashboard.py:12
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:280
@@ -46609,7 +46682,7 @@ msgstr "crwdns136980:0crwdne136980:0"
 msgid "Sales"
 msgstr "crwdns83534:0crwdne83534:0"
 
-#: erpnext/setup/doctype/company/company.py:523
+#: erpnext/setup/doctype/company/company.py:533
 msgid "Sales Account"
 msgstr "crwdns83546:0crwdne83546:0"
 
@@ -47024,12 +47097,12 @@ msgstr "crwdns83694:0{0}crwdnd83694:0{1}crwdnd83694:0{2}crwdnd83694:0{3}crwdne83
 msgid "Sales Order {0} is not submitted"
 msgstr "crwdns83696:0{0}crwdne83696:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:328
+#: erpnext/manufacturing/doctype/work_order/work_order.py:329
 msgid "Sales Order {0} is not valid"
 msgstr "crwdns83698:0{0}crwdne83698:0"
 
 #: erpnext/controllers/selling_controller.py:485
-#: erpnext/manufacturing/doctype/work_order/work_order.py:333
+#: erpnext/manufacturing/doctype/work_order/work_order.py:334
 msgid "Sales Order {0} is {1}"
 msgstr "crwdns83700:0{0}crwdnd83700:0{1}crwdne83700:0"
 
@@ -47285,7 +47358,7 @@ msgstr "crwdns83798:0crwdne83798:0"
 
 #. Label of the sales_tax_template (Link) field in DocType 'Tax Rule'
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
-#: erpnext/setup/doctype/company/company.js:114
+#: erpnext/setup/doctype/company/company.js:117
 msgid "Sales Tax Template"
 msgstr "crwdns83800:0crwdne83800:0"
 
@@ -47483,7 +47556,7 @@ msgstr "crwdns137022:0crwdne137022:0"
 msgid "Sample Size"
 msgstr "crwdns83884:0crwdne83884:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3336
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3358
 msgid "Sample quantity {0} cannot be more than received quantity {1}"
 msgstr "crwdns83888:0{0}crwdnd83888:0{1}crwdne83888:0"
 
@@ -47863,7 +47936,7 @@ msgstr "crwdns137084:0crwdne137084:0"
 msgid "Secretary"
 msgstr "crwdns143524:0crwdne143524:0"
 
-#: erpnext/accounts/report/financial_statements.py:649
+#: erpnext/accounts/report/financial_statements.py:650
 msgid "Section"
 msgstr "crwdns148628:0crwdne148628:0"
 
@@ -47905,7 +47978,7 @@ msgstr "crwdns111986:0crwdne111986:0"
 msgid "Select"
 msgstr "crwdns84082:0crwdne84082:0"
 
-#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:21
+#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:22
 msgid "Select Accounting Dimension."
 msgstr "crwdns84084:0crwdne84084:0"
 
@@ -48047,7 +48120,7 @@ msgstr "crwdns84138:0crwdne84138:0"
 msgid "Select Possible Supplier"
 msgstr "crwdns84140:0crwdne84140:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:964
+#: erpnext/manufacturing/doctype/work_order/work_order.js:985
 #: erpnext/stock/doctype/pick_list/pick_list.js:215
 msgid "Select Quantity"
 msgstr "crwdns84142:0crwdne84142:0"
@@ -48110,7 +48183,7 @@ msgstr "crwdns84166:0crwdne84166:0"
 msgid "Select a Company this Employee belongs to."
 msgstr "crwdns84168:0crwdne84168:0"
 
-#: erpnext/buying/doctype/supplier/supplier.js:193
+#: erpnext/buying/doctype/supplier/supplier.js:196
 msgid "Select a Customer"
 msgstr "crwdns84170:0crwdne84170:0"
 
@@ -48122,7 +48195,7 @@ msgstr "crwdns84172:0crwdne84172:0"
 msgid "Select a Payment Method."
 msgstr "crwdns155794:0crwdne155794:0"
 
-#: erpnext/selling/doctype/customer/customer.js:227
+#: erpnext/selling/doctype/customer/customer.js:230
 msgid "Select a Supplier"
 msgstr "crwdns84174:0crwdne84174:0"
 
@@ -48185,7 +48258,7 @@ msgstr "crwdns137098:0crwdne137098:0"
 msgid "Select the Default Workstation where the Operation will be performed. This will be fetched in BOMs and Work Orders."
 msgstr "crwdns84200:0crwdne84200:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1049
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1086
 msgid "Select the Item to be manufactured."
 msgstr "crwdns84202:0crwdne84202:0"
 
@@ -48240,6 +48313,10 @@ msgstr "crwdns84222:0crwdne84222:0"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2395
 msgid "Selected Price List should have buying and selling fields checked."
 msgstr "crwdns84224:0crwdne84224:0"
+
+#: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:121
+msgid "Selected Print Format does not exist."
+msgstr "crwdns159270:0crwdne159270:0"
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:107
 msgid "Selected Serial and Batch Bundle entries have been removed."
@@ -48550,7 +48627,7 @@ msgstr "crwdns84330:0crwdne84330:0"
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:442
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:38
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:60
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:336
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:337
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
@@ -48588,7 +48665,7 @@ msgstr "crwdns84384:0crwdne84384:0"
 msgid "Serial No Range"
 msgstr "crwdns149104:0crwdne149104:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1954
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2044
 msgid "Serial No Reserved"
 msgstr "crwdns152348:0crwdne152348:0"
 
@@ -48635,7 +48712,7 @@ msgstr "crwdns137146:0crwdne137146:0"
 msgid "Serial No and Batch Traceability"
 msgstr "crwdns157486:0crwdne157486:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:909
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:999
 msgid "Serial No is mandatory"
 msgstr "crwdns84400:0crwdne84400:0"
 
@@ -48664,7 +48741,7 @@ msgstr "crwdns84410:0{0}crwdnd84410:0{1}crwdne84410:0"
 msgid "Serial No {0} does not exist"
 msgstr "crwdns84412:0{0}crwdne84412:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2723
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2843
 msgid "Serial No {0} does not exists"
 msgstr "crwdns104656:0{0}crwdne104656:0"
 
@@ -48676,7 +48753,7 @@ msgstr "crwdns84416:0{0}crwdne84416:0"
 msgid "Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1}"
 msgstr "crwdns156072:0{0}crwdnd156072:0{1}crwdnd156072:0{1}crwdne156072:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:374
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:376
 msgid "Serial No {0} is not present in the {1} {2}, hence you can't return it against the {1} {2}"
 msgstr "crwdns151940:0{0}crwdnd151940:0{1}crwdnd151940:0{2}crwdnd151940:0{1}crwdnd151940:0{2}crwdne151940:0"
 
@@ -48713,11 +48790,11 @@ msgstr "crwdns84428:0crwdne84428:0"
 msgid "Serial Nos and Batches"
 msgstr "crwdns137150:0crwdne137150:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1430
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1520
 msgid "Serial Nos are created successfully"
 msgstr "crwdns84434:0crwdne84434:0"
 
-#: erpnext/stock/stock_ledger.py:2173
+#: erpnext/stock/stock_ledger.py:2191
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
 msgstr "crwdns84436:0crwdne84436:0"
 
@@ -48785,23 +48862,27 @@ msgstr "crwdns137154:0crwdne137154:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:188
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:28
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:80
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:343
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:344
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:177
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Serial and Batch Bundle"
 msgstr "crwdns84444:0crwdne84444:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1651
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1741
 msgid "Serial and Batch Bundle created"
 msgstr "crwdns84476:0crwdne84476:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1717
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1807
 msgid "Serial and Batch Bundle updated"
 msgstr "crwdns84478:0crwdne84478:0"
 
 #: erpnext/controllers/stock_controller.py:147
 msgid "Serial and Batch Bundle {0} is already used in {1} {2}."
 msgstr "crwdns111996:0{0}crwdnd111996:0{1}crwdnd111996:0{2}crwdne111996:0"
+
+#: erpnext/stock/serial_batch_bundle.py:351
+msgid "Serial and Batch Bundle {0} is not submitted"
+msgstr "crwdns159170:0{0}crwdne159170:0"
 
 #. Label of the section_break_45 (Section Break) field in DocType
 #. 'Subcontracting Receipt Item'
@@ -48847,7 +48928,7 @@ msgstr "crwdns137162:0crwdne137162:0"
 msgid "Serial and Batch Summary"
 msgstr "crwdns84496:0crwdne84496:0"
 
-#: erpnext/stock/utils.py:418
+#: erpnext/stock/utils.py:419
 msgid "Serial number {0} entered more than once"
 msgstr "crwdns84498:0{0}crwdne84498:0"
 
@@ -49365,11 +49446,11 @@ msgstr "crwdns84766:0crwdne84766:0"
 msgid "Set by Item Tax Template"
 msgstr "crwdns151704:0crwdne151704:0"
 
-#: erpnext/setup/doctype/company/company.py:450
+#: erpnext/setup/doctype/company/company.py:452
 msgid "Set default inventory account for perpetual inventory"
 msgstr "crwdns84768:0crwdne84768:0"
 
-#: erpnext/setup/doctype/company/company.py:460
+#: erpnext/setup/doctype/company/company.py:462
 msgid "Set default {0} account for non stock items"
 msgstr "crwdns84770:0{0}crwdne84770:0"
 
@@ -49395,7 +49476,7 @@ msgstr "crwdns137238:0crwdne137238:0"
 msgid "Set targets Item Group-wise for this Sales Person."
 msgstr "crwdns137240:0crwdne137240:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1106
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1143
 msgid "Set the Planned Start Date (an Estimated Date at which you want the Production to begin)"
 msgstr "crwdns84780:0crwdne84780:0"
 
@@ -49485,7 +49566,7 @@ msgid "Setting up company"
 msgstr "crwdns84818:0crwdne84818:0"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1091
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1197
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1209
 msgid "Setting {0} is required"
 msgstr "crwdns155928:0{0}crwdne155928:0"
 
@@ -50098,7 +50179,7 @@ msgstr "crwdns85078:0crwdne85078:0"
 msgid "Show only the Immediate Upcoming Term"
 msgstr "crwdns85080:0crwdne85080:0"
 
-#: erpnext/stock/utils.py:578
+#: erpnext/stock/utils.py:579
 msgid "Show pending entries"
 msgstr "crwdns85082:0crwdne85082:0"
 
@@ -50188,6 +50269,10 @@ msgstr "crwdns137356:0crwdne137356:0"
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:537
 msgid "Since there is a process loss of {0} units for the finished good {1}, you should reduce the quantity by {0} units for the finished good {1} in the Items Table."
 msgstr "crwdns85116:0{0}crwdnd85116:0{1}crwdnd85116:0{0}crwdnd85116:0{1}crwdne85116:0"
+
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:96
+msgid "Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
+msgstr "crwdns159014:0{0}crwdne159014:0"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -50660,7 +50745,7 @@ msgstr "crwdns112018:0crwdne112018:0"
 msgid "Standing Name"
 msgstr "crwdns137414:0crwdne137414:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:741
+#: erpnext/manufacturing/doctype/work_order/work_order.js:754
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:57
 #: erpnext/public/js/projects/timer.js:35
 msgid "Start"
@@ -51283,11 +51368,11 @@ msgstr "crwdns85592:0crwdne85592:0"
 msgid "Stock Entry {0} created"
 msgstr "crwdns85594:0{0}crwdne85594:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1331
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1332
 msgid "Stock Entry {0} has created"
 msgstr "crwdns137448:0{0}crwdne137448:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1359
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1362
 msgid "Stock Entry {0} is not submitted"
 msgstr "crwdns85596:0{0}crwdne85596:0"
 
@@ -51326,7 +51411,7 @@ msgstr "crwdns137452:0crwdne137452:0"
 msgid "Stock Ledger"
 msgstr "crwdns85608:0crwdne85608:0"
 
-#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:34
+#: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:9
 msgid "Stock Ledger Entries and GL Entries are reposted for the selected Purchase Receipts"
 msgstr "crwdns112032:0crwdne112032:0"
 
@@ -51495,9 +51580,9 @@ msgstr "crwdns85662:0crwdne85662:0"
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:284
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:292
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:298
-#: erpnext/manufacturing/doctype/work_order/work_order.js:829
-#: erpnext/manufacturing/doctype/work_order/work_order.js:838
-#: erpnext/manufacturing/doctype/work_order/work_order.js:845
+#: erpnext/manufacturing/doctype/work_order/work_order.js:850
+#: erpnext/manufacturing/doctype/work_order/work_order.js:859
+#: erpnext/manufacturing/doctype/work_order/work_order.js:866
 #: erpnext/manufacturing/doctype/work_order/work_order_dashboard.py:14
 #: erpnext/public/js/stock_reservation.js:12
 #: erpnext/selling/doctype/sales_order/sales_order.js:78
@@ -51530,7 +51615,7 @@ msgid "Stock Reservation Entries Cancelled"
 msgstr "crwdns85668:0crwdne85668:0"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:2156
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1741
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1753
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1699
 msgid "Stock Reservation Entries Created"
 msgstr "crwdns85670:0crwdne85670:0"
@@ -51687,7 +51772,7 @@ msgstr "crwdns137458:0crwdne137458:0"
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:35
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:110
 #: erpnext/stock/report/stock_balance/stock_balance.py:436
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:214
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:215
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
@@ -51842,7 +51927,7 @@ msgstr "crwdns137468:0crwdne137468:0"
 msgid "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Request for Sales Order."
 msgstr "crwdns137470:0crwdne137470:0"
 
-#: erpnext/stock/utils.py:569
+#: erpnext/stock/utils.py:570
 msgid "Stock/Accounts can not be frozen as processing of backdated entries is going on. Please try again later."
 msgstr "crwdns85800:0crwdne85800:0"
 
@@ -51904,11 +51989,11 @@ msgstr "crwdns85812:0crwdne85812:0"
 msgid "Stopped"
 msgstr "crwdns85816:0crwdne85816:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:821
+#: erpnext/manufacturing/doctype/work_order/work_order.py:833
 msgid "Stopped Work Order cannot be cancelled, Unstop it first to cancel"
 msgstr "crwdns85824:0crwdne85824:0"
 
-#: erpnext/setup/doctype/company/company.py:287
+#: erpnext/setup/doctype/company/company.py:289
 #: erpnext/setup/setup_wizard/operations/defaults_setup.py:33
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:511
 #: erpnext/stock/doctype/item/item.py:285
@@ -52449,7 +52534,7 @@ msgstr "crwdns137522:0crwdne137522:0"
 msgid "Successful"
 msgstr "crwdns137524:0crwdne137524:0"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:555
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:568
 msgid "Successfully Reconciled"
 msgstr "crwdns86058:0crwdne86058:0"
 
@@ -52481,11 +52566,11 @@ msgstr "crwdns86072:0{0}crwdnd86072:0{1}crwdne86072:0"
 msgid "Successfully imported {0} records."
 msgstr "crwdns86074:0{0}crwdne86074:0"
 
-#: erpnext/buying/doctype/supplier/supplier.js:215
+#: erpnext/buying/doctype/supplier/supplier.js:218
 msgid "Successfully linked to Customer"
 msgstr "crwdns86076:0crwdne86076:0"
 
-#: erpnext/selling/doctype/customer/customer.js:249
+#: erpnext/selling/doctype/customer/customer.js:252
 msgid "Successfully linked to Supplier"
 msgstr "crwdns86078:0crwdne86078:0"
 
@@ -52670,7 +52755,7 @@ msgstr "crwdns86128:0crwdne86128:0"
 #: erpnext/public/js/purchase_trends_filters.js:63
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 #: erpnext/regional/report/irs_1099/irs_1099.py:77
-#: erpnext/selling/doctype/customer/customer.js:231
+#: erpnext/selling/doctype/customer/customer.js:234
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:160
 #: erpnext/selling/doctype/sales_order/sales_order.js:1235
@@ -53573,7 +53658,7 @@ msgstr "crwdns137634:0crwdne137634:0"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
-#: erpnext/manufacturing/doctype/work_order/work_order.js:938
+#: erpnext/manufacturing/doctype/work_order/work_order.js:959
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/stock/dashboard/item_dashboard.js:234
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -53594,11 +53679,11 @@ msgstr "crwdns137636:0crwdne137636:0"
 msgid "Target Warehouse Address Link"
 msgstr "crwdns143542:0crwdne143542:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:222
+#: erpnext/manufacturing/doctype/work_order/work_order.py:223
 msgid "Target Warehouse Reservation Error"
 msgstr "crwdns152360:0crwdne152360:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:573
+#: erpnext/manufacturing/doctype/work_order/work_order.py:585
 msgid "Target Warehouse is required before Submit"
 msgstr "crwdns137638:0crwdne137638:0"
 
@@ -54575,9 +54660,9 @@ msgstr "crwdns87056:0crwdne87056:0"
 msgid "The BOM which will be replaced"
 msgstr "crwdns137726:0crwdne137726:0"
 
-#: erpnext/stock/serial_batch_bundle.py:1394
-msgid "The Batch {0} has negative quantity {1} in warehouse {2}. Please correct the quantity."
-msgstr "crwdns152362:0{0}crwdnd152362:0{1}crwdnd152362:0{2}crwdne152362:0"
+#: erpnext/stock/serial_batch_bundle.py:1407
+msgid "The Batch {0} has negative quantity {1}. Please correct the quantity."
+msgstr "crwdns159172:0{0}crwdnd159172:0{1}crwdne159172:0"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:71
 msgid "The Campaign '{0}' already exists for the {1} '{2}'"
@@ -54591,11 +54676,11 @@ msgstr "crwdns87070:0{0}crwdne87070:0"
 msgid "The Document Type {0} must have a Status field to configure Service Level Agreement"
 msgstr "crwdns87072:0{0}crwdne87072:0"
 
-#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:154
+#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:156
 msgid "The GL Entries and closing balances will be processed in the background, it can take a few minutes."
 msgstr "crwdns151142:0crwdne151142:0"
 
-#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:427
+#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:429
 msgid "The GL Entries will be cancelled in the background, it can take a few minutes."
 msgstr "crwdns87074:0crwdne87074:0"
 
@@ -54627,7 +54712,7 @@ msgstr "crwdns152328:0{0}crwdne152328:0"
 msgid "The Serial No at Row #{0}: {1} is not available in warehouse {2}."
 msgstr "crwdns142842:0#{0}crwdnd142842:0{1}crwdnd142842:0{2}crwdne142842:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1951
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2041
 msgid "The Serial No {0} is reserved against the {1} {2} and cannot be used for any other transaction."
 msgstr "crwdns152364:0{0}crwdnd152364:0{1}crwdnd152364:0{2}crwdne152364:0"
 
@@ -54665,7 +54750,7 @@ msgstr "crwdns87100:0crwdne87100:0"
 msgid "The current POS opening entry is outdated. Please close it and create a new one."
 msgstr "crwdns155674:0crwdne155674:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1054
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1091
 msgid "The default BOM for that item will be fetched by the system. You can also change the BOM."
 msgstr "crwdns87102:0crwdne87102:0"
 
@@ -54853,12 +54938,12 @@ msgstr "crwdns87164:0crwdne87164:0"
 msgid "The seller and the buyer cannot be the same"
 msgstr "crwdns87168:0crwdne87168:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:143
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:155
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:145
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:157
 msgid "The serial and batch bundle {0} not linked to {1} {2}"
 msgstr "crwdns152366:0{0}crwdnd152366:0{1}crwdnd152366:0{2}crwdne152366:0"
 
-#: erpnext/stock/doctype/batch/batch.py:406
+#: erpnext/stock/doctype/batch/batch.py:408
 msgid "The serial no {0} does not belong to item {1}"
 msgstr "crwdns87170:0{0}crwdnd87170:0{1}crwdne87170:0"
 
@@ -54925,6 +55010,12 @@ msgstr "crwdns151706:0crwdne151706:0"
 msgid "The user cannot submit the Serial and Batch Bundle manually"
 msgstr "crwdns152368:0crwdne152368:0"
 
+#. Description of the 'Transfer Extra Raw Materials to WIP (%)' (Percent) field
+#. in DocType 'Manufacturing Settings'
+#: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "The user will be able to transfer additional materials from the store to the Work in Progress (WIP) warehouse."
+msgstr "crwdns159174:0crwdne159174:0"
+
 #. Description of the 'Role Allowed to Edit Frozen Stock' (Link) field in
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -54939,19 +55030,19 @@ msgstr "crwdns87196:0{0}crwdnd87196:0{1}crwdnd87196:0{2}crwdne87196:0"
 msgid "The value {0} is already assigned to an existing Item {1}."
 msgstr "crwdns87198:0{0}crwdnd87198:0{1}crwdne87198:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1082
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1119
 msgid "The warehouse where you store finished Items before they are shipped."
 msgstr "crwdns87200:0crwdne87200:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1075
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1112
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
 msgstr "crwdns87202:0crwdne87202:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1087
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1124
 msgid "The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse."
 msgstr "crwdns87204:0crwdne87204:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:776
+#: erpnext/manufacturing/doctype/job_card/job_card.py:777
 msgid "The {0} ({1}) must be equal to {2} ({3})"
 msgstr "crwdns87206:0{0}crwdnd87206:0{1}crwdnd87206:0{2}crwdnd87206:0{3}crwdne87206:0"
 
@@ -54967,7 +55058,7 @@ msgstr "crwdns104670:0{0}crwdnd104670:0{1}crwdne104670:0"
 msgid "The {0} {1} does not match with the {0} {2} in the {3} {4}"
 msgstr "crwdns156074:0{0}crwdnd156074:0{1}crwdnd156074:0{0}crwdnd156074:0{2}crwdnd156074:0{3}crwdnd156074:0{4}crwdne156074:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:882
+#: erpnext/manufacturing/doctype/job_card/job_card.py:880
 msgid "The {0} {1} is used to calculate the valuation cost for the finished good {2}."
 msgstr "crwdns87210:0{0}crwdnd87210:0{1}crwdnd87210:0{2}crwdne87210:0"
 
@@ -55027,7 +55118,7 @@ msgstr "crwdns87232:0{0}crwdnd87232:0{1}crwdnd87232:0{2}crwdne87232:0"
 msgid "There is already an active Subcontracting BOM {0} for the Finished Good {1}."
 msgstr "crwdns87234:0{0}crwdnd87234:0{1}crwdne87234:0"
 
-#: erpnext/stock/doctype/batch/batch.py:414
+#: erpnext/stock/doctype/batch/batch.py:416
 msgid "There is no batch found against the {0}: {1}"
 msgstr "crwdns87236:0{0}crwdnd87236:0{1}crwdne87236:0"
 
@@ -55056,7 +55147,7 @@ msgstr "crwdns87250:0crwdne87250:0"
 msgid "There were errors while sending email. Please try again."
 msgstr "crwdns87252:0crwdne87252:0"
 
-#: erpnext/accounts/utils.py:1086
+#: erpnext/accounts/utils.py:1087
 msgid "There were issues unlinking payment entry {0}."
 msgstr "crwdns87254:0{0}crwdne87254:0"
 
@@ -55205,7 +55296,7 @@ msgstr "crwdns87318:0crwdne87318:0"
 msgid "This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice"
 msgstr "crwdns87320:0crwdne87320:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1068
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1105
 msgid "This is enabled by default. If you want to plan materials for sub-assemblies of the Item you're manufacturing leave this enabled. If you plan and manufacture the sub-assemblies separately, you can disable this checkbox."
 msgstr "crwdns87322:0crwdne87322:0"
 
@@ -55446,7 +55537,7 @@ msgstr "crwdns137794:0crwdne137794:0"
 msgid "Time in mins."
 msgstr "crwdns137796:0crwdne137796:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:755
+#: erpnext/manufacturing/doctype/job_card/job_card.py:756
 msgid "Time logs are required for {0} {1}"
 msgstr "crwdns87440:0{0}crwdnd87440:0{1}crwdne87440:0"
 
@@ -55773,7 +55864,7 @@ msgstr "crwdns143556:0crwdne143556:0"
 msgid "To Date must be greater than From Date"
 msgstr "crwdns87604:0crwdne87604:0"
 
-#: erpnext/accounts/report/trial_balance/trial_balance.py:75
+#: erpnext/accounts/report/trial_balance/trial_balance.py:76
 msgid "To Date should be within the Fiscal Year. Assuming To Date = {0}"
 msgstr "crwdns87606:0{0}crwdne87606:0"
 
@@ -56049,9 +56140,9 @@ msgstr "crwdns87734:0{0}crwdnd87734:0{1}crwdnd87734:0{2}crwdne87734:0"
 msgid "To use a different finance book, please uncheck 'Include Default FB Assets'"
 msgstr "crwdns87736:0crwdne87736:0"
 
-#: erpnext/accounts/report/financial_statements.py:603
+#: erpnext/accounts/report/financial_statements.py:604
 #: erpnext/accounts/report/general_ledger/general_ledger.py:310
-#: erpnext/accounts/report/trial_balance/trial_balance.py:292
+#: erpnext/accounts/report/trial_balance/trial_balance.py:293
 msgid "To use a different finance book, please uncheck 'Include Default FB Entries'"
 msgstr "crwdns87738:0crwdne87738:0"
 
@@ -56141,15 +56232,15 @@ msgstr "crwdns112648:0crwdne112648:0"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:74
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:235
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:273
-#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:229
-#: erpnext/accounts/report/financial_statements.py:699
+#: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:230
+#: erpnext/accounts/report/financial_statements.py:700
 #: erpnext/accounts/report/general_ledger/general_ledger.html:132
 #: erpnext/accounts/report/general_ledger/general_ledger.py:398
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:701
-#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:93
-#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:98
-#: erpnext/accounts/report/trial_balance/trial_balance.py:358
+#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:94
+#: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:99
 #: erpnext/accounts/report/trial_balance/trial_balance.py:359
+#: erpnext/accounts/report/trial_balance/trial_balance.py:360
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 #: erpnext/crm/doctype/opportunity/opportunity.json
@@ -56372,7 +56463,7 @@ msgstr "crwdns87878:0crwdne87878:0"
 
 #. Label of the total_completed_qty (Float) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
-#: erpnext/manufacturing/doctype/job_card/job_card.py:772
+#: erpnext/manufacturing/doctype/job_card/job_card.py:773
 #: erpnext/manufacturing/report/job_card_summary/job_card_summary.py:174
 msgid "Total Completed Qty"
 msgstr "crwdns87888:0crwdne87888:0"
@@ -56429,7 +56520,7 @@ msgstr "crwdns87912:0crwdne87912:0"
 msgid "Total Debit"
 msgstr "crwdns137888:0crwdne137888:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:986
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:989
 msgid "Total Debit must be equal to Total Credit. The difference is {0}"
 msgstr "crwdns87916:0{0}crwdne87916:0"
 
@@ -56962,8 +57053,8 @@ msgstr "crwdns88160:0crwdne88160:0"
 msgid "Total percentage against cost centers should be 100"
 msgstr "crwdns88162:0crwdne88162:0"
 
-#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:745
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:746
+#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:747
 #: erpnext/accounts/report/financial_statements.py:346
 #: erpnext/accounts/report/financial_statements.py:347
 msgid "Total {0} ({1})"
@@ -57176,7 +57267,7 @@ msgstr "crwdns88256:0crwdne88256:0"
 msgid "Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
 msgstr "crwdns104678:0{0}crwdnd104678:0{1}crwdnd104678:0{2}crwdne104678:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:748
+#: erpnext/manufacturing/doctype/job_card/job_card.py:749
 msgid "Transaction not allowed against stopped Work Order {0}"
 msgstr "crwdns88258:0{0}crwdne88258:0"
 
@@ -57226,6 +57317,16 @@ msgstr "crwdns88268:0crwdne88268:0"
 #: erpnext/assets/doctype/asset/asset.js:90
 msgid "Transfer Asset"
 msgstr "crwdns88278:0crwdne88278:0"
+
+#: erpnext/manufacturing/doctype/work_order/work_order.js:762
+msgid "Transfer Extra Material"
+msgstr "crwdns159176:0crwdne159176:0"
+
+#. Label of the transfer_extra_materials_percentage (Percent) field in DocType
+#. 'Manufacturing Settings'
+#: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "Transfer Extra Raw Materials to WIP (%)"
+msgstr "crwdns159178:0crwdne159178:0"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:453
 msgid "Transfer From Warehouses"
@@ -57700,7 +57801,7 @@ msgstr "crwdns88542:0{0}crwdne88542:0"
 msgid "UOM Name"
 msgstr "crwdns138022:0crwdne138022:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3258
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3280
 msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr "crwdns88546:0{0}crwdnd88546:0{1}crwdne88546:0"
 
@@ -57758,11 +57859,16 @@ msgstr "crwdns154433:0crwdne154433:0"
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
 msgstr "crwdns88566:0{0}crwdnd88566:0{1}crwdnd88566:0{2}crwdne88566:0"
 
+#: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.py:165
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:314
+msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+msgstr "crwdns159272:0{0}crwdnd159272:0{1}crwdnd159272:0{2}crwdne159272:0"
+
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:78
 msgid "Unable to find score starting at {0}. You need to have standing scores covering 0 to 100"
 msgstr "crwdns88568:0{0}crwdne88568:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:779
+#: erpnext/manufacturing/doctype/work_order/work_order.py:791
 msgid "Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
 msgstr "crwdns112094:0{0}crwdnd112094:0{1}crwdnd112094:0{2}crwdne112094:0"
 
@@ -57783,7 +57889,7 @@ msgstr "crwdns88574:0crwdne88574:0"
 msgid "Unassigned Qty"
 msgstr "crwdns88580:0crwdne88580:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:360
+#: erpnext/accounts/doctype/budget/budget.py:362
 msgid "Unbilled Orders"
 msgstr "crwdns157502:0crwdne157502:0"
 
@@ -57793,8 +57899,8 @@ msgstr "crwdns88582:0crwdne88582:0"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:77
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:78
-#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:86
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:87
+#: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:88
 msgid "Unclosed Fiscal Years Profit / Loss (Credit)"
 msgstr "crwdns88584:0crwdne88584:0"
 
@@ -57979,7 +58085,7 @@ msgstr "crwdns138066:0crwdne138066:0"
 msgid "Unreconciled Entries"
 msgstr "crwdns138068:0crwdne138068:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:836
+#: erpnext/manufacturing/doctype/work_order/work_order.js:857
 #: erpnext/selling/doctype/sales_order/sales_order.js:90
 #: erpnext/stock/doctype/pick_list/pick_list.js:157
 msgid "Unreserve"
@@ -58308,7 +58414,7 @@ msgstr "crwdns156078:0crwdne156078:0"
 msgid "Updating Variants..."
 msgstr "crwdns88788:0crwdne88788:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1030
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1067
 msgid "Updating Work Order status"
 msgstr "crwdns88790:0crwdne88790:0"
 
@@ -58325,6 +58431,11 @@ msgstr "crwdns88794:0crwdne88794:0"
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgid "Upload XML Invoices"
 msgstr "crwdns138114:0crwdne138114:0"
+
+#. Description of the 'Submit ERR Journals?' (Check) field in DocType 'Company'
+#: erpnext/setup/doctype/company/company.json
+msgid "Upon enabling this, the JV will be submitted for a different exchange rate."
+msgstr "crwdns159016:0crwdne159016:0"
 
 #. Description of the 'Auto Reserve Stock' (Check) field in DocType 'Stock
 #. Settings'
@@ -58854,7 +58965,7 @@ msgstr "crwdns88988:0crwdne88988:0"
 #: erpnext/stock/report/item_prices/item_prices.py:57
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:67
 #: erpnext/stock/report/stock_balance/stock_balance.py:487
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:297
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:298
 msgid "Valuation Rate"
 msgstr "crwdns88992:0crwdne88992:0"
 
@@ -58862,11 +58973,11 @@ msgstr "crwdns88992:0crwdne88992:0"
 msgid "Valuation Rate (In / Out)"
 msgstr "crwdns89020:0crwdne89020:0"
 
-#: erpnext/stock/stock_ledger.py:1915
+#: erpnext/stock/stock_ledger.py:1933
 msgid "Valuation Rate Missing"
 msgstr "crwdns89022:0crwdne89022:0"
 
-#: erpnext/stock/stock_ledger.py:1893
+#: erpnext/stock/stock_ledger.py:1911
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
 msgstr "crwdns89024:0{0}crwdnd89024:0{1}crwdnd89024:0{2}crwdne89024:0"
 
@@ -58957,7 +59068,7 @@ msgid "Value Based Inspection"
 msgstr "crwdns138194:0crwdne138194:0"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:181
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:314
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:315
 msgid "Value Change"
 msgstr "crwdns89060:0crwdne89060:0"
 
@@ -59235,10 +59346,10 @@ msgstr "crwdns89146:0crwdne89146:0"
 #: erpnext/public/js/utils.js:137
 #: erpnext/selling/doctype/customer/customer.js:166
 #: erpnext/selling/doctype/customer/customer.js:178
-#: erpnext/setup/doctype/company/company.js:98
-#: erpnext/setup/doctype/company/company.js:108
-#: erpnext/setup/doctype/company/company.js:120
-#: erpnext/setup/doctype/company/company.js:132
+#: erpnext/setup/doctype/company/company.js:101
+#: erpnext/setup/doctype/company/company.js:111
+#: erpnext/setup/doctype/company/company.js:123
+#: erpnext/setup/doctype/company/company.js:135
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:84
 #: erpnext/stock/doctype/item/item.js:97 erpnext/stock/doctype/item/item.js:107
 #: erpnext/stock/doctype/item/item.js:117
@@ -59349,7 +59460,7 @@ msgstr "crwdns89190:0crwdne89190:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.js:56
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:196
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:97
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:322
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:323
 msgid "Voucher #"
 msgstr "crwdns89192:0crwdne89192:0"
 
@@ -59439,7 +59550,7 @@ msgstr "crwdns138236:0crwdne138236:0"
 msgid "Voucher No"
 msgstr "crwdns89206:0crwdne89206:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1135
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1225
 msgid "Voucher No is mandatory"
 msgstr "crwdns127524:0crwdne127524:0"
 
@@ -59507,7 +59618,7 @@ msgstr "crwdns89230:0crwdne89230:0"
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:478
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:27
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:114
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:320
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:321
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:159
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:68
 msgid "Voucher Type"
@@ -59716,7 +59827,7 @@ msgstr "crwdns143564:0crwdne143564:0"
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:157
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:49
 #: erpnext/stock/report/stock_balance/stock_balance.py:413
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:257
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:258
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:38
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:57
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:15
@@ -59853,11 +59964,11 @@ msgstr "crwdns89412:0{0}crwdnd89412:0{1}crwdne89412:0"
 msgid "Warehouse {0} does not belong to Company {1}."
 msgstr "crwdns89414:0{0}crwdnd89414:0{1}crwdne89414:0"
 
-#: erpnext/stock/utils.py:432
+#: erpnext/stock/utils.py:433
 msgid "Warehouse {0} does not belong to company {1}"
 msgstr "crwdns89416:0{0}crwdnd89416:0{1}crwdne89416:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:219
+#: erpnext/manufacturing/doctype/work_order/work_order.py:220
 msgid "Warehouse {0} is not allowed for Sales Order {1}, it should be {2}"
 msgstr "crwdns152376:0{0}crwdnd152376:0{1}crwdnd152376:0{2}crwdne152376:0"
 
@@ -59982,7 +60093,7 @@ msgstr "crwdns143566:0crwdne143566:0"
 msgid "Warning!"
 msgstr "crwdns89462:0crwdne89462:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1365
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1368
 msgid "Warning: Another {0} # {1} exists against stock entry {2}"
 msgstr "crwdns89464:0{0}crwdnd89464:0{1}crwdnd89464:0{2}crwdne89464:0"
 
@@ -60423,7 +60534,7 @@ msgstr "crwdns138328:0crwdne138328:0"
 #: erpnext/assets/doctype/asset/asset_list.js:12
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/job_card_operation/job_card_operation.json
-#: erpnext/setup/doctype/company/company.py:288
+#: erpnext/setup/doctype/company/company.py:290
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Work In Progress"
 msgstr "crwdns89678:0crwdne89678:0"
@@ -60524,12 +60635,12 @@ msgstr "crwdns89720:0crwdne89720:0"
 msgid "Work Order cannot be created for following reason: <br> {0}"
 msgstr "crwdns89722:0{0}crwdne89722:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1135
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1147
 msgid "Work Order cannot be raised against a Item Template"
 msgstr "crwdns89724:0crwdne89724:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2053
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2133
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2065
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2145
 msgid "Work Order has been {0}"
 msgstr "crwdns89726:0{0}crwdne89726:0"
 
@@ -60567,7 +60678,7 @@ msgstr "crwdns138332:0crwdne138332:0"
 msgid "Work-in-Progress Warehouse"
 msgstr "crwdns138334:0crwdne138334:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:571
+#: erpnext/manufacturing/doctype/work_order/work_order.py:583
 msgid "Work-in-Progress Warehouse is required before Submit"
 msgstr "crwdns89744:0crwdne89744:0"
 
@@ -60720,7 +60831,7 @@ msgstr "crwdns89798:0crwdne89798:0"
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
-#: erpnext/setup/doctype/company/company.py:541
+#: erpnext/setup/doctype/company/company.py:551
 msgid "Write Off"
 msgstr "crwdns89800:0crwdne89800:0"
 
@@ -60823,7 +60934,7 @@ msgstr "crwdns138368:0crwdne138368:0"
 msgid "Wrong Company"
 msgstr "crwdns89862:0crwdne89862:0"
 
-#: erpnext/setup/doctype/company/company.js:210
+#: erpnext/setup/doctype/company/company.js:217
 msgid "Wrong Password"
 msgstr "crwdns89864:0crwdne89864:0"
 
@@ -60992,7 +61103,7 @@ msgstr "crwdns89940:0crwdne89940:0"
 msgid "You can change the parent account to a Balance Sheet account or select a different account."
 msgstr "crwdns89942:0crwdne89942:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:762
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:765
 msgid "You can not enter current voucher in 'Against Journal Entry' column"
 msgstr "crwdns89946:0crwdne89946:0"
 
@@ -61017,11 +61128,11 @@ msgstr "crwdns89954:0{0}crwdne89954:0"
 msgid "You can set it as a machine name or operation type. For example, stiching machine 12"
 msgstr "crwdns89956:0crwdne89956:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1182
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1180
 msgid "You can't make any changes to Job Card since Work Order is closed."
 msgstr "crwdns89960:0crwdne89960:0"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:186
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:188
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
 msgstr "crwdns151954:0{0}crwdnd151954:0{1}crwdnd151954:0{2}crwdnd151954:0{3}crwdne151954:0"
 
@@ -61045,7 +61156,7 @@ msgstr "crwdns89968:0{0}crwdne89968:0"
 msgid "You cannot create/amend any accounting entries till this date."
 msgstr "crwdns89970:0crwdne89970:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:995
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:998
 msgid "You cannot credit and debit same account at the same time"
 msgstr "crwdns89972:0crwdne89972:0"
 
@@ -61065,7 +61176,7 @@ msgstr "crwdns155682:0{0}crwdnd155682:0{1}crwdne155682:0"
 msgid "You cannot redeem more than {0}."
 msgstr "crwdns89978:0{0}crwdne89978:0"
 
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:150
+#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:171
 msgid "You cannot repost item valuation before {}"
 msgstr "crwdns89980:0crwdne89980:0"
 
@@ -61081,7 +61192,7 @@ msgstr "crwdns89984:0crwdne89984:0"
 msgid "You cannot submit the order without payment."
 msgstr "crwdns89986:0crwdne89986:0"
 
-#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:105
+#: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:107
 msgid "You cannot {0} this document because another Period Closing Entry {1} exists after {2}"
 msgstr "crwdns151146:0{0}crwdnd151146:0{1}crwdnd151146:0{2}crwdne151146:0"
 
@@ -61206,7 +61317,7 @@ msgstr "crwdns90044:0crwdne90044:0"
 msgid "`Allow Negative rates for Items`"
 msgstr "crwdns90046:0crwdne90046:0"
 
-#: erpnext/stock/stock_ledger.py:1907
+#: erpnext/stock/stock_ledger.py:1925
 msgid "after"
 msgstr "crwdns112160:0crwdne112160:0"
 
@@ -61319,7 +61430,7 @@ msgstr "crwdns112170:0crwdne112170:0"
 msgid "image"
 msgstr "crwdns138406:0crwdne138406:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:273
+#: erpnext/accounts/doctype/budget/budget.py:275
 msgid "is already"
 msgstr "crwdns90076:0crwdne90076:0"
 
@@ -61417,7 +61528,7 @@ msgstr "crwdns90126:0crwdne90126:0"
 msgid "per hour"
 msgstr "crwdns138414:0crwdne138414:0"
 
-#: erpnext/stock/stock_ledger.py:1908
+#: erpnext/stock/stock_ledger.py:1926
 msgid "performing either one below:"
 msgstr "crwdns90134:0crwdne90134:0"
 
@@ -61531,7 +61642,7 @@ msgstr "crwdns155016:0crwdne155016:0"
 msgid "via BOM Update Tool"
 msgstr "crwdns90190:0crwdne90190:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:276
+#: erpnext/accounts/doctype/budget/budget.py:278
 msgid "will be"
 msgstr "crwdns90192:0crwdne90192:0"
 
@@ -61548,11 +61659,11 @@ msgstr "crwdns90196:0{0}crwdne90196:0"
 msgid "{0} '{1}' is disabled"
 msgstr "crwdns90198:0{0}crwdnd90198:0{1}crwdne90198:0"
 
-#: erpnext/accounts/utils.py:186
+#: erpnext/accounts/utils.py:187
 msgid "{0} '{1}' not in Fiscal Year {2}"
 msgstr "crwdns90200:0{0}crwdnd90200:0{1}crwdnd90200:0{2}crwdne90200:0"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:491
+#: erpnext/manufacturing/doctype/work_order/work_order.py:503
 msgid "{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}"
 msgstr "crwdns90202:0{0}crwdnd90202:0{1}crwdnd90202:0{2}crwdnd90202:0{3}crwdne90202:0"
 
@@ -61568,7 +61679,7 @@ msgstr "crwdns90208:0{0}crwdnd90208:0{1}crwdne90208:0"
 msgid "{0} Account: {1} ({2}) must be in either customer billing currency: {3} or Company default currency: {4}"
 msgstr "crwdns138432:0{0}crwdnd138432:0{1}crwdnd138432:0{2}crwdnd138432:0{3}crwdnd138432:0{4}crwdne138432:0"
 
-#: erpnext/accounts/doctype/budget/budget.py:281
+#: erpnext/accounts/doctype/budget/budget.py:283
 msgid "{0} Budget for Account {1} against {2} {3} is {4}. It {5} exceed by {6}"
 msgstr "crwdns90210:0{0}crwdnd90210:0{1}crwdnd90210:0{2}crwdnd90210:0{3}crwdnd90210:0{4}crwdnd90210:0{5}crwdnd90210:0{6}crwdne90210:0"
 
@@ -61580,11 +61691,11 @@ msgstr "crwdns90212:0{0}crwdnd90212:0{1}crwdne90212:0"
 msgid "{0} Digest"
 msgstr "crwdns90214:0{0}crwdne90214:0"
 
-#: erpnext/accounts/utils.py:1405
+#: erpnext/accounts/utils.py:1429
 msgid "{0} Number {1} is already used in {2} {3}"
 msgstr "crwdns90216:0{0}crwdnd90216:0{1}crwdnd90216:0{2}crwdnd90216:0{3}crwdne90216:0"
 
-#: erpnext/manufacturing/doctype/bom/bom.py:1497
+#: erpnext/manufacturing/doctype/bom/bom.py:1503
 msgid "{0} Operating Cost for operation {1}"
 msgstr "crwdns158412:0{0}crwdnd158412:0{1}crwdne158412:0"
 
@@ -61616,19 +61727,19 @@ msgstr "crwdns90226:0{0}crwdnd90226:0{1}crwdne90226:0"
 msgid "{0} account not found while submitting purchase receipt"
 msgstr "crwdns90228:0{0}crwdne90228:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1115
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1118
 msgid "{0} against Bill {1} dated {2}"
 msgstr "crwdns90230:0{0}crwdnd90230:0{1}crwdnd90230:0{2}crwdne90230:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1124
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1127
 msgid "{0} against Purchase Order {1}"
 msgstr "crwdns90232:0{0}crwdnd90232:0{1}crwdne90232:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1091
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1094
 msgid "{0} against Sales Invoice {1}"
 msgstr "crwdns90234:0{0}crwdnd90234:0{1}crwdne90234:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1098
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:1101
 msgid "{0} against Sales Order {1}"
 msgstr "crwdns90236:0{0}crwdnd90236:0{1}crwdne90236:0"
 
@@ -61670,7 +61781,7 @@ msgstr "crwdns148886:0{0}crwdne148886:0"
 msgid "{0} created"
 msgstr "crwdns90250:0{0}crwdne90250:0"
 
-#: erpnext/setup/doctype/company/company.py:196
+#: erpnext/setup/doctype/company/company.py:198
 msgid "{0} currency must be same as company's default currency. Please select another account."
 msgstr "crwdns90252:0{0}crwdne90252:0"
 
@@ -61695,7 +61806,7 @@ msgstr "crwdns90260:0{0}crwdne90260:0"
 msgid "{0} entered twice {1} in Item Taxes"
 msgstr "crwdns90262:0{0}crwdnd90262:0{1}crwdne90262:0"
 
-#: erpnext/accounts/utils.py:123
+#: erpnext/accounts/utils.py:124
 #: erpnext/projects/doctype/activity_cost/activity_cost.py:40
 msgid "{0} for {1}"
 msgstr "crwdns90264:0{0}crwdnd90264:0{1}crwdne90264:0"
@@ -61800,7 +61911,7 @@ msgstr "crwdns90300:0{0}crwdnd90300:0{1}crwdne90300:0"
 msgid "{0} is open. Close the POS or cancel the existing POS Opening Entry to create a new POS Opening Entry."
 msgstr "crwdns155684:0{0}crwdne155684:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:130
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:136
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:172
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:195
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:214
@@ -61843,7 +61954,7 @@ msgstr "crwdns90314:0{0}crwdne90314:0"
 msgid "{0} payment entries can not be filtered by {1}"
 msgstr "crwdns90316:0{0}crwdnd90316:0{1}crwdne90316:0"
 
-#: erpnext/controllers/stock_controller.py:1461
+#: erpnext/controllers/stock_controller.py:1463
 msgid "{0} qty of Item {1} is being received into Warehouse {2} with capacity {3}."
 msgstr "crwdns90318:0{0}crwdnd90318:0{1}crwdnd90318:0{2}crwdnd90318:0{3}crwdne90318:0"
 
@@ -61867,16 +61978,16 @@ msgstr "crwdns90324:0{0}crwdnd90324:0{1}crwdne90324:0"
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} ({4}) on {5} {6} for {7} to complete the transaction."
 msgstr "crwdns151148:0{0}crwdnd151148:0{1}crwdnd151148:0{2}crwdnd151148:0{3}crwdnd151148:0{4}crwdnd151148:0{5}crwdnd151148:0{6}crwdnd151148:0{7}crwdne151148:0"
 
-#: erpnext/stock/stock_ledger.py:1555 erpnext/stock/stock_ledger.py:2059
-#: erpnext/stock/stock_ledger.py:2073
+#: erpnext/stock/stock_ledger.py:1573 erpnext/stock/stock_ledger.py:2077
+#: erpnext/stock/stock_ledger.py:2091
 msgid "{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 msgstr "crwdns90328:0{0}crwdnd90328:0{1}crwdnd90328:0{2}crwdnd90328:0{3}crwdnd90328:0{4}crwdnd90328:0{5}crwdne90328:0"
 
-#: erpnext/stock/stock_ledger.py:2160 erpnext/stock/stock_ledger.py:2206
+#: erpnext/stock/stock_ledger.py:2178 erpnext/stock/stock_ledger.py:2224
 msgid "{0} units of {1} needed in {2} on {3} {4} to complete this transaction."
 msgstr "crwdns90330:0{0}crwdnd90330:0{1}crwdnd90330:0{2}crwdnd90330:0{3}crwdnd90330:0{4}crwdne90330:0"
 
-#: erpnext/stock/stock_ledger.py:1549
+#: erpnext/stock/stock_ledger.py:1567
 msgid "{0} units of {1} needed in {2} to complete this transaction."
 msgstr "crwdns90332:0{0}crwdnd90332:0{1}crwdnd90332:0{2}crwdne90332:0"
 
@@ -61884,7 +61995,7 @@ msgstr "crwdns90332:0{0}crwdnd90332:0{1}crwdnd90332:0{2}crwdne90332:0"
 msgid "{0} until {1}"
 msgstr "crwdns148638:0{0}crwdnd148638:0{1}crwdne148638:0"
 
-#: erpnext/stock/utils.py:423
+#: erpnext/stock/utils.py:424
 msgid "{0} valid serial nos for Item {1}"
 msgstr "crwdns90334:0{0}crwdnd90334:0{1}crwdne90334:0"
 
@@ -61900,7 +62011,7 @@ msgstr "crwdns90338:0{0}crwdne90338:0"
 msgid "{0} will be set as the {1} in subsequently scanned items"
 msgstr "crwdns158360:0{0}crwdnd158360:0{1}crwdne158360:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:891
+#: erpnext/manufacturing/doctype/job_card/job_card.py:889
 msgid "{0} {1}"
 msgstr "crwdns90340:0{0}crwdnd90340:0{1}crwdne90340:0"
 
@@ -61973,7 +62084,7 @@ msgstr "crwdns90366:0{0}crwdnd90366:0{1}crwdne90366:0"
 msgid "{0} {1} is cancelled so the action cannot be completed"
 msgstr "crwdns90368:0{0}crwdnd90368:0{1}crwdne90368:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:910
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:913
 msgid "{0} {1} is closed"
 msgstr "crwdns90370:0{0}crwdnd90370:0{1}crwdne90370:0"
 
@@ -61985,7 +62096,7 @@ msgstr "crwdns90372:0{0}crwdnd90372:0{1}crwdne90372:0"
 msgid "{0} {1} is frozen"
 msgstr "crwdns90374:0{0}crwdnd90374:0{1}crwdne90374:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:907
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:910
 msgid "{0} {1} is fully billed"
 msgstr "crwdns90376:0{0}crwdnd90376:0{1}crwdne90376:0"
 
@@ -61997,12 +62108,12 @@ msgstr "crwdns90378:0{0}crwdnd90378:0{1}crwdne90378:0"
 msgid "{0} {1} is not associated with {2} {3}"
 msgstr "crwdns90380:0{0}crwdnd90380:0{1}crwdnd90380:0{2}crwdnd90380:0{3}crwdne90380:0"
 
-#: erpnext/accounts/utils.py:119
+#: erpnext/accounts/utils.py:120
 msgid "{0} {1} is not in any active Fiscal Year"
 msgstr "crwdns90382:0{0}crwdnd90382:0{1}crwdne90382:0"
 
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:904
-#: erpnext/accounts/doctype/journal_entry/journal_entry.py:943
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:907
+#: erpnext/accounts/doctype/journal_entry/journal_entry.py:946
 msgid "{0} {1} is not submitted"
 msgstr "crwdns90384:0{0}crwdnd90384:0{1}crwdne90384:0"
 
@@ -62026,26 +62137,26 @@ msgstr "crwdns90394:0{0}crwdnd90394:0{1}crwdnd90394:0{2}crwdne90394:0"
 msgid "{0} {1} via CSV File"
 msgstr "crwdns90396:0{0}crwdnd90396:0{1}crwdne90396:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:219
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:227
 msgid "{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry"
 msgstr "crwdns90398:0{0}crwdnd90398:0{1}crwdnd90398:0{2}crwdne90398:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:245
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:253
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:85
 msgid "{0} {1}: Account {2} does not belong to Company {3}"
 msgstr "crwdns90400:0{0}crwdnd90400:0{1}crwdnd90400:0{2}crwdnd90400:0{3}crwdne90400:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:233
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:241
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:73
 msgid "{0} {1}: Account {2} is a Group Account and group accounts cannot be used in transactions"
 msgstr "crwdns90402:0{0}crwdnd90402:0{1}crwdnd90402:0{2}crwdne90402:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:240
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:248
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:80
 msgid "{0} {1}: Account {2} is inactive"
 msgstr "crwdns90404:0{0}crwdnd90404:0{1}crwdnd90404:0{2}crwdne90404:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:286
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:294
 msgid "{0} {1}: Accounting Entry for {2} can only be made in currency: {3}"
 msgstr "crwdns90406:0{0}crwdnd90406:0{1}crwdnd90406:0{2}crwdnd90406:0{3}crwdne90406:0"
 
@@ -62053,27 +62164,27 @@ msgstr "crwdns90406:0{0}crwdnd90406:0{1}crwdnd90406:0{2}crwdnd90406:0{3}crwdne90
 msgid "{0} {1}: Cost Center is mandatory for Item {2}"
 msgstr "crwdns90408:0{0}crwdnd90408:0{1}crwdnd90408:0{2}crwdne90408:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:170
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:178
 msgid "{0} {1}: Cost Center is required for 'Profit and Loss' account {2}."
 msgstr "crwdns90410:0{0}crwdnd90410:0{1}crwdnd90410:0{2}crwdne90410:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:258
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:266
 msgid "{0} {1}: Cost Center {2} does not belong to Company {3}"
 msgstr "crwdns90412:0{0}crwdnd90412:0{1}crwdnd90412:0{2}crwdnd90412:0{3}crwdne90412:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:265
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:273
 msgid "{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot be used in transactions"
 msgstr "crwdns90414:0{0}crwdnd90414:0{1}crwdnd90414:0{2}crwdne90414:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:136
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:144
 msgid "{0} {1}: Customer is required against Receivable account {2}"
 msgstr "crwdns90416:0{0}crwdnd90416:0{1}crwdnd90416:0{2}crwdne90416:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:158
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:166
 msgid "{0} {1}: Either debit or credit amount is required for {2}"
 msgstr "crwdns90418:0{0}crwdnd90418:0{1}crwdnd90418:0{2}crwdne90418:0"
 
-#: erpnext/accounts/doctype/gl_entry/gl_entry.py:142
+#: erpnext/accounts/doctype/gl_entry/gl_entry.py:150
 msgid "{0} {1}: Supplier is required against Payable account {2}"
 msgstr "crwdns90420:0{0}crwdnd90420:0{1}crwdnd90420:0{2}crwdne90420:0"
 
@@ -62098,8 +62209,8 @@ msgstr "crwdns90428:0{0}crwdne90428:0"
 msgid "{0}'s {1} cannot be after {2}'s Expected End Date."
 msgstr "crwdns90430:0{0}crwdnd90430:0{1}crwdnd90430:0{2}crwdne90430:0"
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1156
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1164
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1154
+#: erpnext/manufacturing/doctype/job_card/job_card.py:1162
 msgid "{0}, complete the operation {1} before the operation {2}."
 msgstr "crwdns90432:0{0}crwdnd90432:0{1}crwdnd90432:0{2}crwdne90432:0"
 
@@ -62127,7 +62238,7 @@ msgstr "crwdns154280:0{doctype}crwdnd154280:0{name}crwdne154280:0"
 msgid "{field_label} is mandatory for sub-contracted {doctype}."
 msgstr "crwdns154282:0{field_label}crwdnd154282:0{doctype}crwdne154282:0"
 
-#: erpnext/controllers/stock_controller.py:1742
+#: erpnext/controllers/stock_controller.py:1744
 msgid "{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})"
 msgstr "crwdns90442:0{item_name}crwdnd90442:0{sample_size}crwdnd90442:0{accepted_quantity}crwdne90442:0"
 

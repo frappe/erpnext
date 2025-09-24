@@ -503,6 +503,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	}
 
 	onload() {
+		super.onload();
 		this.frm.set_query("supplier", function () {
 			return {
 				filters: {

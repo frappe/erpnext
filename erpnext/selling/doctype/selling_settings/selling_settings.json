@@ -17,6 +17,7 @@
   "role_to_override_stop_action",
   "column_break_15",
   "maintain_same_sales_rate",
+  "fallback_to_default_price_list",
   "editable_price_list_rate",
   "validate_selling_price",
   "editable_bundle_item_rates",
@@ -236,6 +237,12 @@
    "fieldname": "allow_zero_qty_in_quotation",
    "fieldtype": "Check",
    "label": "Allow Quotation with Zero Quantity"
+  },
+  {
+   "default": "0",
+   "fieldname": "fallback_to_default_price_list",
+   "fieldtype": "Check",
+   "label": "Use Prices from Default Price List as Fallback"
   }
  ],
  "grid_page_length": 50,
@@ -244,7 +251,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-06 15:23:14.332971",
+ "modified": "2025-09-23 21:10:14.826653",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

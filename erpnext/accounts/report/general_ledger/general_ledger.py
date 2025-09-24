@@ -667,7 +667,7 @@ def get_columns(filters):
 			"options": "GL Entry",
 			"hidden": 1,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		{
 			"label": _("Account"),
 			"fieldname": "account",

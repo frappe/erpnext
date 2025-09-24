@@ -101,6 +101,7 @@ class WorkOrder(Document):
 		material_request: DF.Link | None
 		material_request_item: DF.Data | None
 		material_transferred_for_manufacturing: DF.Float
+		mps: DF.Link | None
 		naming_series: DF.Literal["MFG-WO-.YYYY.-"]
 		operations: DF.Table[WorkOrderOperation]
 		planned_end_date: DF.Datetime | None
@@ -149,6 +150,7 @@ class WorkOrder(Document):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
+		self.set_onload("transfer_extra_materials_percentage", ms.transfer_extra_materials_percentage)
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
 			"enable_stock_reservation",
@@ -354,6 +356,10 @@ class WorkOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
+			if not d.hour_rate:
+				if d.workstation:
+					d.hour_rate = get_hour_rate(d.workstation)
+
 			d.planned_operating_cost = flt(
 				flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
 			)
@@ -484,6 +490,13 @@ class WorkOrder(Document):
 				continue
 
 			qty = self.get_transferred_or_manufactured_qty(purpose)
+
+			if not allowance_percentage and purpose == "Material Transfer for Manufacture":
+				allowance_percentage = flt(
+					frappe.db.get_single_value(
+						"Manufacturing Settings", "transfer_extra_materials_percentage"
+					)
+				)
 
 			completed_qty = self.qty + (allowance_percentage / 100 * self.qty)
 			if qty > completed_qty:
@@ -2424,3 +2437,8 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 			details.batch_nos[entry.batch_no] += abs(entry.qty)
 
 	return row_wise_serial_batch
+
+
+@frappe.request_cache
+def get_hour_rate(workstation):
+	return frappe.get_cached_value("Workstation", workstation, "hour_rate") or 0.0

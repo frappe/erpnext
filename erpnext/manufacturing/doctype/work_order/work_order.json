@@ -14,6 +14,7 @@
   "item_name",
   "image",
   "bom_no",
+  "mps",
   "sales_order",
   "column_break1",
   "company",
@@ -601,6 +602,13 @@
    "label": "Disassembled Qty",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "mps",
+   "fieldtype": "Link",
+   "label": "MPS",
+   "options": "Master Production Schedule",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -609,7 +617,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-21 00:55:45.916224",
+ "modified": "2025-08-28 11:01:48.719824",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

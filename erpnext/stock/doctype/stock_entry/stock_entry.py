@@ -2120,7 +2120,7 @@ class StockEntry(StockController):
 			key = (d.item_code, d.s_warehouse)
 			if details := reservation_entries.get(key):
 				if details.get("serial_no"):
-					d.serial_no = "\n".join(details.get("serial_no"))
+					d.serial_no = "\n".join(details.get("serial_no")[: cint(d.qty)])
 
 				if batches := details.get("batch_no"):
 					for batch_no, qty in batches.items():
@@ -2180,7 +2180,12 @@ class StockEntry(StockController):
 				doctype.transferred_qty,
 				doctype.consumed_qty,
 			)
-			.where((doctype.docstatus == 1) & (doctype.voucher_no == self.work_order))
+			.where(
+				(doctype.docstatus == 1)
+				& (doctype.voucher_no == self.work_order)
+				& (serial_batch_doc.delivered_qty < serial_batch_doc.qty)
+			)
+			.orderby(serial_batch_doc.idx)
 		)
 
 		return query.run(as_dict=True)
@@ -2340,9 +2345,12 @@ class StockEntry(StockController):
 					"Work Order", self.work_order, "allow_alternative_item"
 				)
 
-			skip_transfer, from_wip_warehouse = frappe.get_value(
-				"Work Order", self.work_order, ["skip_transfer", "from_wip_warehouse"]
+			skip_transfer, from_wip_warehouse = (
+				frappe.get_value("Work Order", self.work_order, ["skip_transfer", "from_wip_warehouse"])
+				if self.work_order
+				else [None, None]
 			)
+
 			item.from_warehouse = (
 				frappe.get_value(
 					"Work Order Item",
@@ -2640,10 +2648,16 @@ class StockEntry(StockController):
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 
+		transfer_extra_materials_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
+		)
+
 		to_transfer_qty = flt(self.pro_doc.material_transferred_for_manufacturing) + flt(
 			self.fg_completed_qty
 		)
 		transfer_limit_qty = max_qty + ((max_qty * overproduction_percentage) / 100)
+		if transfer_extra_materials_percentage:
+			transfer_limit_qty = max_qty + ((max_qty * transfer_extra_materials_percentage) / 100)
 
 		if transfer_limit_qty >= to_transfer_qty:
 			allow_overproduction = True
@@ -2693,11 +2707,22 @@ class StockEntry(StockController):
 		else:
 			wip_warehouse = None
 
+		transfer_extra_materials_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
+		)
+
 		for d in work_order.get("required_items"):
 			if consider_job_card and (d.item_code not in job_card_items):
 				continue
 
+			additional_qty = 0.0
+			if transfer_extra_materials_percentage:
+				additional_qty = transfer_extra_materials_percentage * flt(d.required_qty) / 100
+
 			transfer_pending = flt(d.required_qty) > flt(d.transferred_qty)
+			if additional_qty:
+				transfer_pending = (flt(d.required_qty) + additional_qty) > flt(d.transferred_qty)
+
 			can_transfer = transfer_pending or (backflush_based_on == "Material Transferred for Manufacture")
 
 			if not can_transfer:

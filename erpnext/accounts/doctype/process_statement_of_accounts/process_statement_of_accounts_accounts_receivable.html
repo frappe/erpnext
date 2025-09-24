@@ -159,7 +159,7 @@
 				{% else %}
 					<th style="width: 24%">{{ _("Reference") }}</th>
 				{% endif %}
-				{% if not(filters.show_future_payments) %}
+				{% if not(filters.show_future_payments) and filters.show_remarks %}
 					<th style="width: 20%">
 					{% if (filters.customer or filters.supplier or filters.customer_name) %}
 						{{ _("Remarks") }}
@@ -228,7 +228,7 @@
 					<td>{{ data[i]["sales_person"] }}</td>
 					{% endif %}
 
-					{% if not (filters.show_future_payments) %}
+					{% if not (filters.show_future_payments) and filters.show_remarks %}
 					<td>
 						{% if(not(filters.customer or filters.supplier or filters.customer_name)) %}
 							{{ data[i]["party"] }}
@@ -327,12 +327,23 @@
 		{% endfor %}
 		<td></td>
 		<td></td>
-		<td></td>
-		<td></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="invoiced"), currency=data[0]["currency"]) }}</b></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="paid"), currency=data[0]["currency"]) }}</b></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="credit_note"), currency=data[0]["currency"]) }}</b></td>
-		<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="outstanding"), currency=data[0]["currency"]) }}</b></td>
+		{% if (filters.show_future_payments) or filters.show_remarks %}
+			<td></td>
+		{% endif %}
+		{% if not(filters.show_future_payments) %}
+			<td></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="invoiced"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="paid"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="credit_note"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="outstanding"), currency=data[0]["currency"]) }}</b></td>
+		{% else %}
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="invoiced"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="outstanding"), currency=data[0]["currency"]) }}</b></td>
+			<td></td>
+			<td></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="future_amount"), currency=data[0]["currency"]) }}</b></td>
+			<td style="text-align: right"><b>{{ frappe.utils.fmt_money(data|sum(attribute="remaining_balance"), currency=data[0]["currency"]) }}</b></td>
+		{% endif %}
 	</tbody>
 </table>
 <br>

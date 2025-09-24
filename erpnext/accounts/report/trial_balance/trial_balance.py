@@ -18,6 +18,7 @@ from erpnext.accounts.report.financial_statements import (
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = (
 	"opening_debit",
@@ -412,7 +413,7 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
 
-			if abs(row[key]) >= 0.005:
+			if abs(row[key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
 

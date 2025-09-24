@@ -22,6 +22,7 @@
   "domain",
   "date_of_establishment",
   "parent_company",
+  "reporting_currency",
   "company_info",
   "company_logo",
   "date_of_incorporation",
@@ -835,6 +836,14 @@
    "fieldtype": "Select",
    "label": "Reconciliation Takes Effect On",
    "options": "Advance Payment Date\nOldest Of Invoice Or Advance\nReconciliation Date"
+  },
+  {
+   "fieldname": "reporting_currency",
+   "fieldtype": "Link",
+   "label": "Reporting Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-building",
