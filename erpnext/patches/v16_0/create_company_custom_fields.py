@@ -1,4 +1,5 @@
-def execute():
-	from erpnext.setup.install import create_company_custom_fields
+from erpnext.setup.install import create_custom_company_links
 
-	create_company_custom_fields()
+
+def execute():
+	create_custom_company_links()

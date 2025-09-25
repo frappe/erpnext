@@ -23,7 +23,7 @@ def after_install():
 	set_single_defaults()
 	create_print_setting_custom_fields()
 	create_marketgin_campagin_custom_fields()
-	create_company_custom_fields()
+	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
 	create_incoterms()
@@ -140,7 +140,7 @@ def create_default_success_action():
 			doc.insert(ignore_permissions=True)
 
 
-def create_company_custom_fields():
+def create_custom_company_links():
 	create_custom_fields(
 		{
 			"Email Account": [
