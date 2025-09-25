@@ -283,7 +283,7 @@ def update_pegged_currencies():
 
 
 def create_letter_head():
-	base_path = frappe.get_app_path("erpnext", "letterhead")
+	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
 	letterhead_with_background_colour = frappe.read_file(
 		os.path.join(base_path, "letterhead_with_background_colour.html")
 	)
