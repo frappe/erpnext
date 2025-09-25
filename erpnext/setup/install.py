@@ -284,34 +284,26 @@ def update_pegged_currencies():
 
 def create_letter_head():
 	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
-	letterhead_with_background_colour = frappe.read_file(
-		os.path.join(base_path, "letterhead_with_background_colour.html")
-	)
-	letterhead_plain = frappe.read_file(os.path.join(base_path, "letterhead_plain.html"))
 
-	if not frappe.db.exists("Letter Head", "Letterhead with background colour"):
-		doc = frappe.get_doc(
-			{
-				"doctype": "Letter Head",
-				"letter_head_name": "Letterhead with background colour",
-				"source": "HTML",
-				"content": letterhead_with_background_colour,
-			}
-		)
-		doc.insert(ignore_permissions=True)
-		frappe.db.commit()
+	letterheads = {
+		"Letterhead with background colour": "letterhead_with_background_colour.html",
+		"Letterhead Plain": "letterhead_plain.html",
+	}
 
-	if not frappe.db.exists("Letter Head", "Letterhead Plain"):
-		doc = frappe.get_doc(
-			{
-				"doctype": "Letter Head",
-				"letter_head_name": "Letterhead plain",
-				"source": "HTML",
-				"content": letterhead_plain,
-			}
-		)
-		doc.insert(ignore_permissions=True)
-		frappe.db.commit()
+	for name, filename in letterheads.items():
+		if not frappe.db.exists("Letter Head", name):
+			content = frappe.read_file(os.path.join(base_path, filename))
+			doc = frappe.get_doc(
+				{
+					"doctype": "Letter Head",
+					"letter_head_name": name,
+					"source": "HTML",
+					"content": content,
+				}
+			)
+			doc.insert(ignore_permissions=True)
+
+	frappe.db.commit()
 
 
 DEFAULT_ROLE_PROFILES = {
