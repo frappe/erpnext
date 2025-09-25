@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-21 09:35+0000\n"
-"PO-Revision-Date: 2025-09-22 02:52\n"
+"PO-Revision-Date: 2025-09-25 03:09\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "MIME-Version: 1.0\n"
@@ -6258,11 +6258,11 @@ msgstr "Имовина {0} не припада компанији {1}"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 msgid "Asset {0} does not belong to the custodian {1}"
-msgstr ""
+msgstr "Имовина {0} не припада одговорном лицу {1}"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:64
 msgid "Asset {0} does not belong to the location {1}"
-msgstr ""
+msgstr "Имовина {0} не припада локацији {1}"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:669
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:761
@@ -13769,7 +13769,7 @@ msgstr "Потражни износ у валути рачуна"
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 msgid "Credit Amount in Reporting Currency"
-msgstr ""
+msgstr "Износ потраживања у извештајној валути"
 
 #. Label of the credit_in_transaction_currency (Currency) field in DocType 'GL
 #. Entry'
@@ -14357,7 +14357,7 @@ msgstr "Криве"
 #. Label of the custodian (Link) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Custodian"
-msgstr "Одговоран"
+msgstr "Одговорно лице"
 
 #. Label of the custody (Float) field in DocType 'Cashier Closing'
 #: erpnext/accounts/doctype/cashier_closing/cashier_closing.json
@@ -15511,7 +15511,7 @@ msgstr "Дуговни износ у валути рачуна"
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 msgid "Debit Amount in Reporting Currency"
-msgstr ""
+msgstr "Износ дуговања у извештајној валути"
 
 #. Label of the debit_in_transaction_currency (Currency) field in DocType 'GL
 #. Entry'
@@ -19207,7 +19207,7 @@ msgstr "Запослено лице је обавезно при издавањ�
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:79
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:100
 msgid "Employee {0} does not belong to the company {1}"
-msgstr ""
+msgstr "Запослено лице {0} не припада компанији {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:315
 msgid "Employee {0} is currently working on another workstation. Please assign another employee."
@@ -25658,7 +25658,7 @@ msgstr "Неважећа примарна улога"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:123
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:126
 msgid "Invalid Print Format"
-msgstr ""
+msgstr "Неважећи формат штампе"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:60
 msgid "Invalid Priority"
@@ -39507,11 +39507,11 @@ msgstr "Алат за креирање формата штампе"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:123
 msgid "Print Format Type should be Jinja."
-msgstr ""
+msgstr "Врста формата штампе треба бити Jinja."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:127
 msgid "Print Format must be an enabled Report Print Format matching the selected Report."
-msgstr ""
+msgstr "Формат штампе мора бити омогућен формат извештаја који одговара изабраном извештају."
 
 #. Label of the select_print_heading (Link) field in DocType 'Journal Entry'
 #. Label of the print_heading (Link) field in DocType 'Payment Entry'
@@ -44291,12 +44291,12 @@ msgstr "Пријави проблем"
 #. Label of the reporting_currency (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Reporting Currency"
-msgstr ""
+msgstr "Извештајна валута"
 
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.py:164
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:313
 msgid "Reporting Currency Exchange Not Found"
-msgstr ""
+msgstr "Извештајни девизни курс није пронађен"
 
 #. Label of the reporting_currency_exchange_rate (Float) field in DocType
 #. 'Account Closing Balance'
@@ -44305,7 +44305,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 msgid "Reporting Currency Exchange Rate"
-msgstr ""
+msgstr "Извештајни девизни курс"
 
 #. Label of the reports_tab (Tab Break) field in DocType 'Accounts Settings'
 #. Label of a Card Break in the Payables Workspace
@@ -48439,7 +48439,7 @@ msgstr "Изабрани ценовник треба да има означен�
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:121
 msgid "Selected Print Format does not exist."
-msgstr ""
+msgstr "Изабрани формат штампе не постоји."
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:107
 msgid "Selected Serial and Batch Bundle entries have been removed."
