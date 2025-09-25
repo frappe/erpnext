@@ -160,6 +160,7 @@ def create_company_custom_fields():
 					"options": "Company",
 					"insert_after": "email_account",
 					"fetch_from": "email_account.company",
+					"read_only": 1,
 				},
 			],
 		},
