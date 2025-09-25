@@ -141,6 +141,12 @@ def create_default_success_action():
 
 
 def create_custom_company_links():
+	"""Add link fields to Company in Email Account and Communication.
+
+	These DocTypes are provided by the Frappe Framework but need to be associated
+	with a company in ERPNext to allow for multitenancy. I.e. one company should
+	not be able to access emails and communications from another company.
+	"""
 	create_custom_fields(
 		{
 			"Email Account": [
