@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-21 09:35+0000\n"
-"PO-Revision-Date: 2025-09-24 02:56\n"
+"PO-Revision-Date: 2025-09-25 03:09\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -31978,7 +31978,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Naming Series"
-msgstr ""
+msgstr "Nummerserie"
 
 #. Label of the naming_series_prefix (Data) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
