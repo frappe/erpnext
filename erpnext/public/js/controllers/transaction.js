@@ -2488,14 +2488,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function (r) {
 					if (!r.exc) {
+						let taxes = r.message;
+						taxes.forEach((tax) => {
+							if (me.frm.doc?.cost_center && !tax.cost_center) {
+								tax.cost_center = me.frm.doc.cost_center;
+							}
+						});
 						if (me.frm.doc.shipping_rule && me.frm.doc.taxes) {
-							for (let tax of r.message) {
+							for (let tax of taxes) {
 								me.frm.add_child("taxes", tax);
 							}
 
 							refresh_field("taxes");
 						} else {
-							me.frm.set_value("taxes", r.message);
+							me.frm.set_value("taxes", taxes);
 							me.calculate_taxes_and_totals();
 						}
 					}
