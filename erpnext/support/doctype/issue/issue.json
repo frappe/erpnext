@@ -413,8 +413,6 @@
   }
  ],
  "quick_entry": 1,
- "recipient_account_field": "email_account",
- "row_format": "Dynamic",
  "search_fields": "status,customer,subject,raised_by",
  "sender_field": "raised_by",
  "sort_field": "creation",
