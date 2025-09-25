@@ -23,6 +23,7 @@ def after_install():
 	set_single_defaults()
 	create_print_setting_custom_fields()
 	create_marketgin_campagin_custom_fields()
+	create_company_custom_fields()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
 	create_incoterms()
@@ -137,6 +138,32 @@ def create_default_success_action():
 		if not frappe.db.exists("Success Action", success_action.get("ref_doctype")):
 			doc = frappe.get_doc(success_action)
 			doc.insert(ignore_permissions=True)
+
+
+def create_company_custom_fields():
+	create_custom_fields(
+		{
+			"Email Account": [
+				{
+					"label": _("Company"),
+					"fieldname": "company",
+					"fieldtype": "Link",
+					"options": "Company",
+					"insert_after": "email_id",
+				},
+			],
+			"Communication": [
+				{
+					"label": _("Company"),
+					"fieldname": "company",
+					"fieldtype": "Link",
+					"options": "Company",
+					"insert_after": "email_account",
+					"fetch_from": "email_account.company",
+				},
+			],
+		},
+	)
 
 
 def add_company_to_session_defaults():
