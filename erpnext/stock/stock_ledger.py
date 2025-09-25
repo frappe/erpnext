@@ -26,7 +26,7 @@ import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_available_batches,
+	get_auto_batch_nos,
 )
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_batch_nos_details,
@@ -725,32 +725,16 @@ class update_entries_after:
 			self.distinct_item_warehouses[key] = val
 			self.new_items_found = True
 		else:
-			# Check if the dependent voucher is reposted
-			# If not, then do not add it to the list
-			if not self.is_dependent_voucher_reposted(dependant_sle):
-				return
-
-			existing_sle_posting_date = self.distinct_item_warehouses[key].get("sle", {}).get("posting_date")
-
-			dependent_voucher_detail_nos = self.get_dependent_voucher_detail_nos(key)
-			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
-				if dependent_voucher_detail_nos and dependant_sle.voucher_detail_no in set(
-					dependent_voucher_detail_nos
-				):
-					return
-
-				val.sle_changed = True
-				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
-				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
+			existing_sle = self.distinct_item_warehouses[key].get("sle", {})
+			if getdate(existing_sle.get("posting_date")) > getdate(dependant_sle.posting_date):
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
-			elif dependant_sle.voucher_detail_no not in set(dependent_voucher_detail_nos):
-				# Future dependent voucher needs to be repost to get the correct stock value
-				# If dependent voucher has not reposted, then add it to the list
-				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
-				self.new_items_found = True
-				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
+			elif dependant_sle.voucher_type == "Stock Entry" and is_transfer_stock_entry(
+				dependant_sle.voucher_no
+			):
+				print(dependant_sle.voucher_no)
 				self.distinct_item_warehouses[key] = val
+				self.new_items_found = True
 
 	def is_dependent_voucher_reposted(self, dependant_sle) -> bool:
 		# Return False if the dependent voucher is not reposted
@@ -817,7 +801,7 @@ class update_entries_after:
 
 		if (
 			sle.voucher_type == "Stock Reconciliation"
-			and (sle.batch_no or sle.serial_no or sle.serial_and_batch_bundle)
+			and (sle.serial_and_batch_bundle)
 			and sle.voucher_detail_no
 			and not self.args.get("sle_id")
 			and sle.is_cancelled == 0
@@ -883,10 +867,7 @@ class update_entries_after:
 						self.wh_data.valuation_rate
 					)
 
-					if (
-						sle.actual_qty < 0
-						and flt(self.wh_data.qty_after_transaction, self.flt_precision) != 0
-					):
+					if flt(self.wh_data.qty_after_transaction, self.flt_precision) != 0:
 						self.wh_data.valuation_rate = flt(
 							self.wh_data.stock_value, self.currency_precision
 						) / flt(self.wh_data.qty_after_transaction, self.flt_precision)
@@ -1041,6 +1022,15 @@ class update_entries_after:
 			doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
 			doc.set_incoming_rate(save=True, allow_negative_stock=self.allow_negative_stock)
 			doc.calculate_qty_and_amount(save=True)
+
+		if stock_queue := frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": sle.serial_and_batch_bundle, "stock_queue": ("is", "set")},
+			pluck="stock_queue",
+			order_by="idx desc",
+			limit=1,
+		):
+			self.wh_data.stock_queue = json.loads(stock_queue[0]) if stock_queue else []
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
 		self.wh_data.qty_after_transaction += flt(doc.total_qty, self.flt_precision)
@@ -1766,6 +1756,8 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 			"posting_time",
 			"voucher_detail_no",
 			"posting_datetime as timestamp",
+			"voucher_type",
+			"voucher_no",
 		],
 		as_dict=1,
 	)
@@ -2207,7 +2199,7 @@ def validate_reserved_serial_nos(item_code, warehouse, serial_nos):
 
 def validate_reserved_batch_nos(item_code, warehouse, batch_nos):
 	if reserved_batches_map := get_sre_reserved_batch_nos_details(item_code, warehouse, batch_nos):
-		available_batches = get_available_batches(
+		available_batches = get_auto_batch_nos(
 			frappe._dict(
 				{
 					"item_code": item_code,
@@ -2297,3 +2289,10 @@ def get_stock_value_difference(item_code, warehouse, posting_date, posting_time,
 
 	difference_amount = query.run()
 	return flt(difference_amount[0][0]) if difference_amount else 0
+
+
+@frappe.request_cache
+def is_transfer_stock_entry(voucher_no):
+	purpose = frappe.get_cached_value("Stock Entry", voucher_no, "purpose")
+
+	return purpose in ["Material Transfer", "Material Transfer for Manufacture", "Send to Subcontractor"]

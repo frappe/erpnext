@@ -962,6 +962,7 @@ frappe.ui.form.on("Stock Entry Detail", {
 			});
 		}
 
+		frm.events.set_basic_rate(frm, cdt, cdn);
 		validate_sample_quantity(frm, cdt, cdn);
 	},
 

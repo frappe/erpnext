@@ -369,6 +369,10 @@ class AssetDepreciationSchedule(Document):
 					original_schedule_date=schedule_date,
 				)
 				depreciation_amount = flt(depreciation_amount, asset_doc.precision("gross_purchase_amount"))
+
+				if depreciation_amount > row.value_after_depreciation - row.expected_value_after_useful_life:
+					depreciation_amount = row.value_after_depreciation - row.expected_value_after_useful_life
+
 				if depreciation_amount > 0:
 					self.add_depr_schedule_row(date_of_disposal, depreciation_amount, n)
 
@@ -654,6 +658,7 @@ def _get_pro_rata_amt(
 		total_days = get_total_days(original_schedule_date or to_date, 12)
 	else:
 		total_days = get_total_days(original_schedule_date or to_date, row.frequency_of_depreciation)
+
 	return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
 

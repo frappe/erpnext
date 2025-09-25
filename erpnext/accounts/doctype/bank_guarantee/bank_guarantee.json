@@ -217,10 +217,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-01 16:17:30.678409",
+ "modified": "2025-09-26 00:38:17.584694",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Guarantee",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

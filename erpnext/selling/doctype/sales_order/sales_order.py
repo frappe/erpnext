@@ -1762,6 +1762,11 @@ def create_pick_list(source_name, target_doc=None):
 		target.qty = qty_to_be_picked
 		target.stock_qty = qty_to_be_picked * flt(source.conversion_factor)
 
+		# update available qty
+		bin_details = get_bin_details(source.item_code, source.warehouse, source_parent.company)
+		target.actual_qty = bin_details.get("actual_qty")
+		target.company_total_stock = bin_details.get("company_total_stock")
+
 	def update_packed_item_qty(source, target, source_parent) -> None:
 		qty = flt(source.qty)
 		for item in source_parent.items:

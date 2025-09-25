@@ -1,4 +1,5 @@
 import datetime
+import json
 from collections import defaultdict
 
 import frappe
@@ -197,6 +198,9 @@ class DeprecatedBatchNoValuation:
 	@deprecated
 	def set_balance_value_for_non_batchwise_valuation_batches(self):
 		self.last_sle = self.get_last_sle_for_non_batch()
+		if self.last_sle and self.last_sle.stock_queue:
+			self.stock_queue = json.loads(self.last_sle.stock_queue or "[]") or []
+
 		self.set_balance_value_from_sl_entries()
 		self.set_balance_value_from_bundle()
 
@@ -271,6 +275,7 @@ class DeprecatedBatchNoValuation:
 			.select(
 				sle.stock_value,
 				sle.qty_after_transaction,
+				sle.stock_queue,
 			)
 			.where(
 				(sle.item_code == self.sle.item_code)

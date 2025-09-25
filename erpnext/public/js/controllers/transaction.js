@@ -931,7 +931,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				party_name = me.frm.doc.party_name
 			}
 			else{
-				party_type = frappe.meta.has_field(me.frm.doc.doctype, "customer") ? "Customer" : "Supplier";
+				party_type = frappe.meta.has_field(me.frm.doc.doctype, "supplier") ? "Supplier" : "Customer";
 				party_name = me.frm.doc[party_type.toLowerCase()];
 			}
 			if (party_name) {

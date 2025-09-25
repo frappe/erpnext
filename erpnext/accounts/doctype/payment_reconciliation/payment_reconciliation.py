@@ -5,6 +5,7 @@
 import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
+from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
@@ -392,6 +393,12 @@ class PaymentReconciliation(Document):
 			inv.outstanding_amount = flt(entry.get("outstanding_amount"))
 
 	def get_difference_amount(self, payment_entry, invoice, allocated_amount):
+		allocated_amount_precision = get_field_precision(
+			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
+		)
+		difference_amount_precision = get_field_precision(
+			frappe.get_meta("Payment Reconciliation Allocation").get_field("difference_amount")
+		)
 		difference_amount = 0
 		if frappe.get_cached_value(
 			"Account", self.receivable_payable_account, "account_currency"
@@ -399,8 +406,14 @@ class PaymentReconciliation(Document):
 			if invoice.get("exchange_rate") and payment_entry.get("exchange_rate", 1) != invoice.get(
 				"exchange_rate", 1
 			):
-				allocated_amount_in_ref_rate = payment_entry.get("exchange_rate", 1) * allocated_amount
-				allocated_amount_in_inv_rate = invoice.get("exchange_rate", 1) * allocated_amount
+				allocated_amount_in_ref_rate = flt(
+					payment_entry.get("exchange_rate", 1) * flt(allocated_amount, allocated_amount_precision),
+					difference_amount_precision,
+				)
+				allocated_amount_in_inv_rate = flt(
+					invoice.get("exchange_rate", 1) * flt(allocated_amount, allocated_amount_precision),
+					difference_amount_precision,
+				)
 				difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
 
 		return difference_amount
