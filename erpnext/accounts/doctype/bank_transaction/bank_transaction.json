@@ -116,7 +116,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "reference_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Reference Number"
   },
   {
@@ -239,7 +239,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-29 11:53:45.908169",
+ "modified": "2025-09-26 17:06:29.207673",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
