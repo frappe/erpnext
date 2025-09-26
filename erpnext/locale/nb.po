@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-21 09:35+0000\n"
-"PO-Revision-Date: 2025-09-25 03:09\n"
+"PO-Revision-Date: 2025-09-26 03:12\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -85,15 +85,15 @@ msgstr "Sammendrag"
 
 #: erpnext/stock/doctype/item/item.py:238
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
-msgstr "Objekt levert fra kunde kan ikke også være innkjøpsvare"
+msgstr "Artikkel levert fra kunde kan ikke også være innkjøpsartikkel"
 
 #: erpnext/stock/doctype/item/item.py:240
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr "Objekt levert fra kunde kan ikke ha verdisats"
+msgstr "Artikkel levert fra kunde kan ikke ha verdisats"
 
 #: erpnext/stock/doctype/item/item.py:316
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
-msgstr "\"Er anleggsmiddel\" kan ikke fjernes, siden det finnes en anleggsmiddelpost for varen"
+msgstr "\"Er anleggsmiddel\" kan ikke fjernes, siden det finnes en anleggsmiddelpost for artikkelen"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:262
 msgid "\"SN-01::10\" for \"SN-01\" to \"SN-10\""
@@ -105,7 +105,7 @@ msgstr "# På Lager"
 
 #: erpnext/manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
-msgstr "# Påkrevde varer"
+msgstr "# Påkrevde artikler"
 
 #. Label of the per_delivered (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
@@ -260,15 +260,15 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.py:399
 msgid "'Has Serial No' can not be 'Yes' for non-stock item"
-msgstr "\"Har serienummer\" kan ikke være \"Ja\" for varer som ikke er på lager"
+msgstr "\"Har serienummer\" kan ikke være \"Ja\" for artikler som ikke er på lager"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:139
 msgid "'Inspection Required before Delivery' has disabled for the item {0}, no need to create the QI"
-msgstr "\"Inspeksjon påkrevd før levering\" er deaktivert for varen {0}, det er ikke nødvendig å opprette QI"
+msgstr "\"Inspeksjon påkrevd før levering\" er deaktivert for artikkelen {0}, det er ikke nødvendig å opprette QI"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:130
 msgid "'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
-msgstr "\"Inspeksjon påkrevd før kjøp\" er deaktivert for varen {0}, det er ikke nødvendig å opprette QI"
+msgstr "\"Inspeksjon påkrevd før kjøp\" er deaktivert for artikkelen {0}, det er ikke nødvendig å opprette QI"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:598
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:631
@@ -287,7 +287,7 @@ msgstr "\"Til pakkenr.\" kan ikke være mindre enn \"Fra pakkenr.\""
 
 #: erpnext/controllers/sales_and_purchase_return.py:81
 msgid "'Update Stock' can not be checked because items are not delivered via {0}"
-msgstr ""
+msgstr "\"Oppdater lager\" kan ikke sjekkes fordi artiklene ikke leveres via {0}"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:381
 msgid "'Update Stock' cannot be checked for fixed asset sale"
@@ -616,11 +616,11 @@ msgid "<h3>About Product Bundle</h3>\n\n"
 "<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>\n"
 "<h4>Example:</h4>\n"
 "<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>"
-msgstr "<h3>Om produktbunt</h3>\n\n"
-"<p>Samle en gruppe <b>varer</b> i en annen <b>vare</b>. Dette er nyttig hvis du samler en bestemt <b>vare</b> i en pakke og du har lager av de pakkede <b>varene</b>, men ikke den samlede <b>varen</b>.</p>\n"
-"<p><b>Pakkevaren</b> vil ha <code>Er lagervare</code> som <b>Nei</b> og <code>Er salgsvare</code> som <b>Ja.</b></p>\n"
+msgstr "<h3>Om buntartikkel</h3>\n\n"
+"<p>Samle en gruppe <b>artikler</b> i en annen <b>artikkel</b>. Dette er nyttig hvis du samler en bestemt <b>artikkel</b> i en pakke og du har lager av de pakkede <b>artiklene</b>, men ikke den samlede <b>artikkelen</b>.</p>\n"
+"<p><b>Buntartikkelen</b> vil ha <code>Er lagerartikkel</code> som <b>Nei</b> og <code>Er salgsartikkel</code> som <b>Ja.</b></p>\n"
 "<h4>Eksempel:</h4>\n"
-"<p>Hvis du selger bærbare datamaskiner og ryggsekker hver for seg og har en spesialpris hvis kunden kjøper begge deler, vil den bærbare datamaskinen + ryggsekken være en ny produktpakkevare.</p>"
+"<p>Hvis du selger bærbare datamaskiner og ryggsekker hver for seg og har en spesialpris hvis kunden kjøper begge deler, vil den bærbare datamaskinen + ryggsekken være en ny buntartikkel.</p>"
 
 #. Content of the 'Help' (HTML) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -721,7 +721,7 @@ msgstr "<li>Klareringsdato må være etter sjekkdato for rad(er): {0}</li>"
 
 #: erpnext/controllers/accounts_controller.py:2186
 msgid "<li>Item {0} in row(s) {1} billed more than {2}</li>"
-msgstr ""
+msgstr "<li>Artikkel {0} i rad(er) {1} fakturert mer enn {2}</li>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:118
 msgid "<li>Payment document required for row(s): {0}</li>"
@@ -733,7 +733,7 @@ msgstr "<li>{}</li>"
 
 #: erpnext/controllers/accounts_controller.py:2183
 msgid "<p>Cannot overbill for the following Items:</p>"
-msgstr ""
+msgstr "<p>Kan ikke overfakturere for følgende artikler:</p>"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:157
 msgid "<p>Following {0}s doesn't belong to Company {1} :</p>"
@@ -792,7 +792,7 @@ msgstr "<p>Registringsdato {0} kan ikke være før bestillingsdatoen for følgen
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:69
 msgid "<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?"
-msgstr "<p>Prislisteprisen er ikke angitt som redigerbar i salgsinnstillingene. I dette scenariet vil det å sette <strong>Oppdater prisliste basert på</strong> til <strong>Prislistepris</strong> forhindre automatisk oppdatering av vareprisen.</p>Er du sikker på at du vil fortsette?"
+msgstr "<p>Listeprisen er ikke angitt som redigerbar i salgsinnstillingene. I dette scenariet vil det å sette <strong>Oppdater prisliste basert på</strong> til <strong>Listepris</strong> forhindre automatisk oppdatering av artikkelprisen.</p>Er du sikker på at du vil fortsette?"
 
 #: erpnext/controllers/accounts_controller.py:2195
 msgid "<p>To allow over-billing, please set allowance in Accounts Settings.</p>"
@@ -1012,7 +1012,7 @@ msgstr "En pakkseddel kan bare opprettes for utkast til følgeseddel."
 #. Description of a DocType
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "A Price List is a collection of Item Prices either Selling, Buying, or both"
-msgstr "En prisliste er en samling av varepriser for enten salg, kjøp eller begge deler"
+msgstr "En prisliste er en samling av artikkelpriser for enten salg, kjøp eller begge deler"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/item/item.json
@@ -1265,7 +1265,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:817
 msgid "According to the BOM {0}, the Item '{1}' is missing in the stock entry."
-msgstr ""
+msgstr "I henhold til stykklisten (BOM) {0} mangler artikkelen '{1}' i lageroppføringen."
 
 #. Name of a DocType
 #. Label of the account (Link) field in DocType 'Account Closing Balance'
@@ -2849,7 +2849,7 @@ msgstr "Legg til artikkel"
 #: erpnext/public/js/utils/item_selector.js:20
 #: erpnext/public/js/utils/item_selector.js:35
 msgid "Add Items"
-msgstr ""
+msgstr "Legg til artikler"
 
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py:56
 msgid "Add Items in the Purpose Table"
@@ -4031,11 +4031,11 @@ msgstr ""
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:67
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:73
 msgid "All Item Groups"
-msgstr ""
+msgstr "Alle artikkelgrupper"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:25
 msgid "All Items"
-msgstr ""
+msgstr "Alle artikler"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -4105,15 +4105,15 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:926
 msgid "All items are already requested"
-msgstr ""
+msgstr "Alle artikler er allerede etterspurt"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:1342
 msgid "All items have already been Invoiced/Returned"
-msgstr ""
+msgstr "Alle artikler er allerede fakturert/returnert"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:1196
 msgid "All items have already been received"
-msgstr ""
+msgstr "Alle artikler er allerede mottatt"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2685
 msgid "All items have already been transferred for this Work Order."
@@ -6061,7 +6061,7 @@ msgstr ""
 #. Label of the asset_naming_series (Select) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Asset Naming Series"
-msgstr ""
+msgstr "Nummerserie for eiendeler"
 
 #. Label of the asset_owner (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -19833,7 +19833,7 @@ msgstr ""
 #. Description of the 'Batch Number Series' (Data) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
-msgstr ""
+msgstr "Eksempel: ABCD.#####. Hvis serien er angitt og batchnummeret ikke er nevnt i transaksjonene, vil det automatisk opprettes et batchnummer basert på denne serien. Hvis du alltid vil oppgi batchnummeret eksplisitt for denne varen, lar du dette feltet stå tomt. Merk: Denne innstillingen vil prioriteres over prefikset for nummerserie i lagerinnstillingene."
 
 #: erpnext/stock/stock_ledger.py:2195
 msgid "Example: Serial No {0} reserved in {1}."
@@ -23298,7 +23298,7 @@ msgstr ""
 #. Label of the use_naming_series (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Have Default Naming Series for Batch ID?"
-msgstr ""
+msgstr "Bruke standard nummerserie for batch-ID?"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:19
 msgid "Head of Marketing and Sales"
@@ -25722,7 +25722,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.py:409
 msgid "Invalid naming series (. missing) for {0}"
-msgstr ""
+msgstr "Ugyldig nummerserie (punktum mangler) for {0}"
 
 #: erpnext/utilities/transaction_base.py:68
 msgid "Invalid reference {0} {1}"
@@ -31978,22 +31978,22 @@ msgstr ""
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Naming Series"
-msgstr "Nummerserie"
+msgstr "Nummerserier"
 
 #. Label of the naming_series_prefix (Data) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Naming Series Prefix"
-msgstr ""
+msgstr "Prefiks for nummerserie"
 
 #. Label of the supplier_and_price_defaults_section (Tab Break) field in
 #. DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Naming Series and Price Defaults"
-msgstr ""
+msgstr "Nummerserier og prisstandarder"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:93
 msgid "Naming Series is mandatory"
-msgstr ""
+msgstr "Nummerserie er påkrevet"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -46580,7 +46580,7 @@ msgstr ""
 
 #: erpnext/controllers/buying_controller.py:958
 msgid "Row {idx}: Asset Naming Series is mandatory for the auto creation of assets for item {item_code}."
-msgstr ""
+msgstr "Rad {idx}: Nummerserie for eiendeler er påkrevet for automatisk oppretting av eiendeler for artikkel {item_code}."
 
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.py:84
 msgid "Row({0}): Outstanding Amount cannot be greater than actual Outstanding Amount {1} in {2}"
