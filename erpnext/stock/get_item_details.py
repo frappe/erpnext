@@ -1577,7 +1577,7 @@ def get_valuation_rate(item_code, company, warehouse=None):
 
 		return frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
-		) or {"valuation_rate": 0}
+		) or {"valuation_rate": item.get("valuation_rate") or 0}
 
 	elif not item.get("is_stock_item"):
 		pi_item = frappe.qb.DocType("Purchase Invoice Item")
