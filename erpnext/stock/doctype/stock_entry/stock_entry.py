@@ -2263,7 +2263,7 @@ class StockEntry(StockController):
 			to_warehouse = item.get("default_warehouse")
 
 		expense_account = item.get("expense_account")
-		if self.purpose == "Manufacture" or not expense_account:
+		if not expense_account:
 			expense_account = frappe.get_cached_value("Company", self.company, "stock_adjustment_account")
 		args = {
 			"to_warehouse": to_warehouse,
