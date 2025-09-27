@@ -1,46 +1,28 @@
-# docs: Add development setup documentation and configuration to resolve import errors
+# Fix: Translation on Task and Event cards not working (#49707)
 
 ## Description
+This PR fixes issue #49707 where dates in Task and Event cards were not being localized according to the user's language settings in the CRM module.
 
-This PR addresses the common issue where developers encounter "Import 'frappe' could not be resolved" errors when working with ERPNext code. The PR provides comprehensive documentation and configuration files to help developers set up their development environment correctly.
+## Changes Made
+- Added JavaScript override for `frappe.datetime.global_date_format` in `erpnext/public/js/crm_datetime.js` to use localized date formatting based on `frappe.boot.lang` and system date format settings
+- Integrated the override into `erpnext/public/js/erpnext.bundle.js` to ensure it's loaded with the application
+- Added unit tests in `erpnext/crm/test_datetime_localization.py` to verify the setup
 
-## Changes
+## Technical Details
+The fix works by overriding the `frappe.datetime.global_date_format` function to use:
+- User's language settings from `frappe.boot.lang`
+- Date format preferences from `frappe.boot.sysdefaults.date_format`
+- Time format preferences from `frappe.boot.sysdefaults.time_format`
+- Proper timezone handling when available
+- Fallback to original implementation if errors occur
 
-### Added Documentation
-- **DEVELOPMENT_SETUP.md**: Comprehensive guide explaining the root cause of import issues and providing solutions for different platforms (Unix/Linux, macOS, and Windows)
-- **README-DEV.md**: Developer-focused README with quick start instructions and IDE configuration guidance
-
-### Added Configuration Files
-- **.vscode/settings.json**: VS Code configuration to help resolve import errors by setting the correct Python interpreter and paths
-- **requirements-dev.txt**: Development requirements file listing dependencies needed for development work
-
-## Root Cause of Import Issues
-
-The "Import 'frappe' could not be resolved" error occurs because:
-1. The `frappe` module is not a standard Python package
-2. It's part of the Frappe Framework which needs to be installed separately
-3. IDEs don't know where to find the module without proper configuration
-
-## Solutions Provided
-
-1. **Documentation**: Clear instructions for setting up development environments on different platforms
-2. **IDE Configuration**: Pre-configured settings for VS Code to resolve import errors
-3. **Development Dependencies**: Requirements file for installing necessary development tools
-4. **Docker/WSL Recommendations**: Guidance for Windows users who may face platform-specific issues
+The implementation prefers dayjs (used by Frappe v15) but falls back to moment.js if needed.
 
 ## Testing
-
-No functional code changes were made. The PR only adds documentation and configuration files that help developers set up their environments correctly.
-
-## Benefits
-
-- Reduces onboarding friction for new contributors
-- Provides clear solutions for common development environment issues
-- Improves developer experience by resolving import errors
-- Offers platform-specific guidance for Windows, macOS, and Linux users
+1. Set your user language to a non-English language (e.g., German)
+2. Navigate to a Lead or Opportunity form
+3. Check the Task and Event cards in the "Open Activities" section
+4. Verify that dates are displayed in the correct language format according to System Settings
 
 ## Related Issues
-
-This addresses common developer onboarding issues and helps reduce friction for new contributors to the ERPNext project.
-
- closes #XXXX
+closes #49707

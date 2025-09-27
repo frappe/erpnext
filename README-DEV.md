@@ -1,76 +1,49 @@
 # ERPNext Development Setup
 
-This document provides instructions for setting up a development environment for ERPNext.
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-- Python 3.10 or higher
-- Node.js and npm
-- Git
-- A code editor (VS Code recommended)
+This document provides quick setup instructions for ERPNext development.
 
 ## Quick Start
 
-1. **Clone the repository**:
+1. Install Frappe Bench:
    ```bash
-   git clone https://github.com/frappe/erpnext.git
-   cd erpnext
+   pip install frappe-bench
    ```
 
-2. **Set up a virtual environment**:
+2. Initialize bench with ERPNext:
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   bench init frappe-bench --frappe-branch version-15
+   cd frappe-bench
+   bench get-app erpnext --branch version-15
    ```
 
-3. **Install development dependencies**:
+3. Create and setup site:
    ```bash
-   pip install -r requirements-dev.txt
+   bench new-site erpnext.local
+   bench --site erpnext.local install-app erpnext
    ```
 
-4. **Install frappe framework**:
-   The frappe framework needs to be installed separately. See [DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md) for detailed instructions.
+4. Start development server:
+   ```bash
+   bench start
+   ```
 
-## Resolving Import Errors
+## IDE Setup
 
-If you see "Import 'frappe' could not be resolved" errors:
+Configure your IDE to use the Python interpreter from your bench environment. For VS Code:
+- Install the Python extension
+- Select the correct Python interpreter from your virtual environment or bench setup
 
-1. Make sure you have installed the frappe framework
-2. Configure your IDE to use the correct Python interpreter
-3. Refer to [DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md) for detailed instructions
+## Running Tests
 
-## IDE Configuration
-
-### VS Code
-
-1. Install the Python extension
-2. Open the workspace settings (`.vscode/settings.json`)
-3. Select the Python interpreter from the virtual environment
-
-### Other IDEs
-
-Configure your IDE to:
-1. Use the Python interpreter from the virtual environment
-2. Include the frappe directory in the Python path
-
-## Testing
-
-To run tests:
 ```bash
-# Run all tests
-python -m pytest
-
-# Run specific tests
-python -m pytest erpnext/accounts/test/test_accounts.py
+bench run-tests --app erpnext
 ```
 
-## Contributing
+Or for specific modules:
+```bash
+bench run-tests --module erpnext.accounts.tests.test_accounts
+```
 
-Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+## Additional Documentation
 
-## Additional Resources
-
-- [Frappe Framework Documentation](https://frappeframework.com/docs)
-- [ERPNext Documentation](https://docs.erpnext.com/)
-- [Development Setup Guide](DEVELOPMENT_SETUP.md)
+See [DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md) for detailed setup instructions.
