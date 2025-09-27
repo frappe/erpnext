@@ -693,6 +693,9 @@ class FilterExpressionParser:
 	def build_conditions(self, report_rows, table):
 		conditions = []
 		for row in report_rows:
+			if isinstance(row, str):
+				row = frappe.parse_json(row)
+
 			condition = self.build_condition(row, table)
 			if condition:
 				conditions.append(condition)
@@ -726,8 +729,6 @@ class FilterExpressionParser:
 		Returns:
 		        SQL condition object or None if invalid
 		"""
-		report_row = frappe._dict(report_row)
-
 		filter_formula = report_row.calculation_formula
 		if not filter_formula:
 			return None
@@ -1383,13 +1384,13 @@ class RowFormatterBase(ABC):
 
 	def _get_values(self, row_data: RowData) -> dict[str, Any]:
 		# TODO: can be commonify COA? @abdeali
-		chart_of_accounts = []
+		child_accounts = []
 
 		if row_data.account_details:
-			chart_of_accounts = list(row_data.account_details.keys())
+			child_accounts = list(row_data.account_details.keys())
 
 		values = {
-			"chart_of_accounts": chart_of_accounts,
+			"child_accounts": child_accounts,
 			"account": getattr(row_data.row, "display_name", "") or "",
 			"indent": getattr(row_data.row, "indentation_level", 0),
 			"account_name": getattr(row_data.row, "account", "") or "",
