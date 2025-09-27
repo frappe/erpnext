@@ -37,12 +37,16 @@ def copy_comments(doctype, docname, doc):
 		filters={"reference_doctype": doctype, "reference_name": docname, "comment_type": "Comment"},
 		fieldname="*",
 	)
-	for comment in comments:
-		comment = frappe.get_doc(comment.update({"doctype": "Comment"}))
-		comment.name = None
-		comment.reference_doctype = doc.doctype
-		comment.reference_name = doc.name
-		comment.insert()
+	if comments:
+		for comment in comments:
+			if comment:
+				comment_dict = dict(comment)
+				comment_dict.update({"doctype": "Comment"})
+				comment_doc = frappe.get_doc(comment_dict)
+				comment_doc.name = None
+				comment_doc.reference_doctype = doc.doctype
+				comment_doc.reference_name = doc.name
+				comment_doc.insert()
 
 
 def link_communications(doctype, docname, doc):
@@ -104,13 +108,15 @@ def get_linked_prospect(reference_doctype, reference_name):
 		prospect = frappe.db.get_value("Prospect Lead", {"lead": reference_name}, "parent")
 
 	elif reference_doctype == "Opportunity":
-		opportunity_from, party_name = frappe.db.get_value(
+		result = frappe.db.get_value(
 			"Opportunity", reference_name, ["opportunity_from", "party_name"]
 		)
-		if opportunity_from == "Lead":
-			prospect = frappe.db.get_value("Prospect Opportunity", {"opportunity": reference_name}, "parent")
-		if opportunity_from == "Prospect":
-			prospect = party_name
+		if result:
+			opportunity_from, party_name = result
+			if opportunity_from == "Lead":
+				prospect = frappe.db.get_value("Prospect Opportunity", {"opportunity": reference_name}, "parent")
+			if opportunity_from == "Prospect":
+				prospect = party_name
 
 	return prospect
 
@@ -261,3 +267,31 @@ class CRMNote(Document):
 				self.remove(d)
 				break
 		self.save()
+
+
+@frappe.whitelist()
+def get_localized_date(date):
+	"""Return date formatted according to user's locale settings."""
+	if not date:
+		return ""
+	
+	# Get user's language and date format settings
+	user_language = frappe.local.lang or "en"
+	system_settings = frappe.get_single("System Settings")
+	date_format = system_settings.date_format or "yyyy-mm-dd"
+	
+	# Convert date to moment.js format
+	moment_format = date_format.replace("yyyy", "YYYY").replace("mm", "MM").replace("dd", "DD")
+	
+	# Create moment object and format according to user's locale
+	try:
+		if isinstance(date, str):
+			# Parse the date string
+			parsed_date = frappe.utils.getdate(date)
+			formatted_date = frappe.utils.momentjs.moment(parsed_date).locale(user_language).format(moment_format)
+		else:
+			formatted_date = frappe.utils.momentjs.moment(date).locale(user_language).format(moment_format)
+		return formatted_date
+	except Exception:
+		# If formatting fails, return original date
+		return str(date)
