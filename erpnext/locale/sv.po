@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-21 09:35+0000\n"
-"PO-Revision-Date: 2025-09-22 02:52\n"
+"PO-Revision-Date: 2025-09-28 04:34\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -23952,7 +23952,7 @@ msgstr "Om vald prissättningsregel är angiven för \"Pris\" kommer den att skr
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "If set, the system does not use the user's Email or the standard outgoing Email account for sending request for quotations."
-msgstr "Om angiven kommer system inte använda användarens e-post eller standard konto för utgående e-post för att skicka offertförfrågningar."
+msgstr "Om angiven kommer system inte använda användarens e-post eller standard konto för utgående e-post för att skicka offert begäran."
 
 #. Description of the 'Supply Raw Materials for Purchase' (Check) field in
 #. DocType 'Item'
@@ -49496,7 +49496,7 @@ msgstr "Ange Svarstid för Prioritet {0} i rad {1}."
 #. (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Set Serial and Batch Bundle Naming Based on Naming Series"
-msgstr "Ange namn på Serie och Parti paket baserat på Namngivning Serie"
+msgstr "Ange namn på Serie och Parti Paket baserad på Namngivning Serie"
 
 #. Label of the set_warehouse (Link) field in DocType 'Sales Order'
 #. Label of the set_warehouse (Link) field in DocType 'Delivery Note'
@@ -52445,7 +52445,7 @@ msgstr "Godkänn efter Import"
 #. Label of the submit_err_jv (Check) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Submit ERR Journals?"
-msgstr "Godkänn ERR Journaler ?"
+msgstr "Godkänn Felaktiga Journaler?"
 
 #. Label of the submit_invoice (Check) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -55022,7 +55022,7 @@ msgstr "Procentandel man får fakturera mer mot order belopp. Till exempel, om o
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "The percentage you are allowed to pick more items in the pick list than the ordered quantity."
-msgstr "Procentandel artiklar du får plocka utöver artiklar i plocklista."
+msgstr "Procentandel artiklar som får plockas utöver artiklar i plocklista."
 
 #. Description of the 'Over Delivery/Receipt Allowance (%)' (Float) field in
 #. DocType 'Stock Settings'
