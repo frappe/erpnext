@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-21 09:35+0000\n"
-"PO-Revision-Date: 2025-09-22 02:52\n"
+"PO-Revision-Date: 2025-09-28 04:34\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -5165,7 +5165,7 @@ msgstr ""
 #: erpnext/crm/doctype/lead/lead.json
 #: erpnext/crm/doctype/opportunity/opportunity.json
 msgid "Analytics"
-msgstr ""
+msgstr "Analitika"
 
 #: erpnext/accounts/doctype/budget/budget.py:237
 msgid "Annual"
@@ -6362,7 +6362,7 @@ msgstr ""
 #. Label of the attachment (Attach) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Attachment"
-msgstr ""
+msgstr "Csatolmány"
 
 #: erpnext/templates/pages/order.html:136
 #: erpnext/templates/pages/projects.html:81
