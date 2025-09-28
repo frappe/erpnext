@@ -13,7 +13,7 @@
  "report_type": "Profit and Loss Statement",
  "rows": [
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\":[[\"account_category\",\"=\",\"Revenue from Operations\"]]}",
@@ -29,7 +29,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Cost of Goods Sold\"]",
@@ -45,7 +45,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Direct Costs\"]",
@@ -61,7 +61,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "REV100 + COGS100 + COGS200",
@@ -77,7 +77,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -90,7 +90,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Operating Income\"]",
@@ -106,7 +106,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Operating Expenses\"], [\"account_name\", \"like\", \"Sales\"]]}",
@@ -122,7 +122,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Operating Expenses\"], [\"account_name\", \"like\", \"Administrative\"]]}",
@@ -138,7 +138,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Operating Expenses\"], [\"account_name\", \"not like\", \"Sales\"], [\"account_name\", \"not like\", \"Administrative\"]]}",
@@ -154,7 +154,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "GROSS_PROFIT + OPIN100 + OPEX100 + OPEX200 + OPEX300",
@@ -170,7 +170,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -183,7 +183,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Investment Income\"]",
@@ -199,7 +199,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Finance Costs\"]",
@@ -215,7 +215,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "EBIT + FIN100 + FIN200",
@@ -231,7 +231,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -244,7 +244,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Tax Expense\"]",
@@ -260,7 +260,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -273,7 +273,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "PBT + TAX",
@@ -289,7 +289,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "NET_PROFIT - ACT_NET_PROFIT",
@@ -306,7 +306,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -319,7 +319,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "(GROSS_PROFIT / REV100) * 100 if REV100 != 0 else 0",
@@ -335,7 +335,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "(EBIT / REV100) * 100 if REV100 != 0 else 0",
@@ -351,7 +351,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "(NET_PROFIT / REV100) * 100 if REV100 != 0 else 0",
@@ -367,7 +367,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"root_type\", \"=\", \"Income\"]",
@@ -383,7 +383,7 @@
    "reverse_sign": 1
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"root_type\", \"=\", \"Expense\"]",
@@ -399,7 +399,7 @@
    "reverse_sign": 0
   },
   {
-   "advance_filtering": 0,
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "ACT_TOTAL_INCOME - ACT_TOTAL_EXPENSES",

@@ -48,21 +48,16 @@ frappe.ui.form.on("Financial Report Row", {
 	form_render(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 
+		update_advanced_formula_property(frm, cdt, cdn);
 		set_up_filters_editor(frm, cdt, cdn);
 		update_formula_description(frm, row.data_source);
 	},
 
-	view_filtered_accounts(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		show_accounts_tree([row], false);
+	calculation_formula(frm, cdt, cdn) {
+		update_advanced_formula_property(frm, cdt, cdn);
 	},
 
-	view_missing_accounts(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		show_accounts_tree([row], true);
-	},
-
-	advance_filtering(frm, cdt, cdn) {
+	advanced_filtering(frm, cdt, cdn) {
 		set_up_filters_editor(frm, cdt, cdn);
 	},
 });
@@ -75,13 +70,13 @@ function update_formula_description(frm, data_source) {
 	if (!field) return;
 
 	// Common CSS styles and elements
-	const container_style = `style='padding: var(--padding-md); border: 1px solid var(--border-color); border-radius: var(--border-radius); margin-top: var(--margin-sm);'`;
-	const title_style = `style='margin-top: 0; color: var(--text-color);'`;
-	const subtitle_style = `style='color: var(--text-color); margin-bottom: var(--margin-xs);'`;
-	const text_style = `style='margin-bottom: var(--margin-sm); color: var(--text-muted);'`;
-	const list_style = `style='margin-bottom: var(--margin-sm); color: var(--text-muted); font-size: 0.9em;'`;
-	const note_style = `style='margin-bottom: 0; color: var(--text-muted); font-size: 0.9em;'`;
-	const tip_style = `style='margin-bottom: 0; color: var(--text-color); font-size: 0.85em;'`;
+	const container_style = `style="padding: var(--padding-md); border: 1px solid var(--border-color); border-radius: var(--border-radius); margin-top: var(--margin-sm);"`;
+	const title_style = `style="margin-top: 0; color: var(--text-color);"`;
+	const subtitle_style = `style="color: var(--text-color); margin-bottom: var(--margin-xs);"`;
+	const text_style = `style="margin-bottom: var(--margin-sm); color: var(--text-muted);"`;
+	const list_style = `style="margin-bottom: var(--margin-sm); color: var(--text-muted); font-size: 0.9em;"`;
+	const note_style = `style="margin-bottom: 0; color: var(--text-muted); font-size: 0.9em;"`;
+	const tip_style = `style="margin-bottom: 0; color: var(--text-color); font-size: 0.85em;"`;
 
 	let description_html = "";
 
@@ -128,7 +123,7 @@ function update_formula_description(frm, data_source) {
 					<li><code>min(val1, val2)</code> - Smaller of two values</li>
 				</ul>
 
-				<p ${note_style}><strong>Required:</strong> Use 'Reference Code' from other rows in your formulas.</p>
+				<p ${note_style}><strong>Required:</strong> Use "Reference Code" from other rows in your formulas.</p>
 			</div>`;
 	} else if (data_source === "Custom API") {
 		description_html = `
@@ -197,9 +192,7 @@ function update_formula_description(frm, data_source) {
 function set_up_filters_editor(frm, cdt, cdn) {
 	const row = locals[cdt][cdn];
 
-	if (row.data_source !== "Account Data" || row.advance_filtering) {
-		return;
-	}
+	if (row.data_source !== "Account Data" || row.advanced_filtering) return;
 
 	const grid_row = frm.fields_dict["rows"].grid.get_row(cdn);
 	const wrapper = grid_row.get_field("filters_editor").$wrapper;
@@ -214,23 +207,16 @@ function set_up_filters_editor(frm, cdt, cdn) {
 	let saved_filters = [];
 
 	if (row.calculation_formula) {
-		try {
-			const parsed = JSON.parse(row.calculation_formula);
+		const parsed = JSON.parse(row.calculation_formula);
 
-			if (Array.isArray(parsed)) {
-				saved_filters = [parsed]; // array of array needed
-			} else if (parsed.and) {
-				saved_filters = parsed.and;
-			}
-		} catch (e) {
-			console.warn("Invalid calculation_formula JSON:", e);
-		}
+		if (Array.isArray(parsed)) saved_filters = [parsed];
+		// TODO: handle nested and/or
+		else if (parsed.and) saved_filters = parsed.and;
 	}
 
-	// Ensure every filter starts with "Account"
-	if (saved_filters.length) {
+	if (saved_filters.length)
+		// Ensure every filter starts with "Account"
 		saved_filters = saved_filters.map((f) => [ACCOUNT, ...f]);
-	}
 
 	frappe.model.with_doctype(ACCOUNT, () => {
 		const filter_group = new frappe.ui.FilterGroup({
@@ -242,44 +228,37 @@ function set_up_filters_editor(frm, cdt, cdn) {
 					.get_filters()
 					.map((f) => [f[FIELD_IDX], f[OPERATOR_IDX], f[VALUE_IDX]]);
 
-				update_account_filter_for_and_conditions(cdt, cdn, filters);
+				const current = filters.length > 1 ? { and: filters } : filters[0];
+				frappe.model.set_value(cdt, cdn, "calculation_formula", JSON.stringify(current));
 			},
 		});
 
-		try {
-			filter_group.add_filters_to_filter_group(saved_filters);
-		} catch (error) {
-			frappe.show_alert({
-				message: __("Failed to add filters to filter group: {0}", [error.message]),
-				indicator: "red",
-			});
-		}
+		filter_group.add_filters_to_filter_group(saved_filters);
 	});
 }
 
-function update_account_filter_for_and_conditions(cdt, cdn, filters) {
+function update_advanced_formula_property(frm, cdt, cdn) {
 	const row = locals[cdt][cdn];
+	const is_advanced = is_advanced_formula(row);
 
-	let previous = {};
+	frm.set_df_property("rows", "read_only", is_advanced, frm.doc.name, "advanced_filtering", cdn);
 
-	// TODO: `or` conditions are not handled
-	// TODO: default set {"and": []}
-	if (row.account_filters) {
-		try {
-			previous = JSON.parse(row.account_filters);
-		} catch {
-			previous = {};
-		}
+	if (is_advanced && !row.advanced_filtering) {
+		row.advanced_filtering = 1;
+		frm.refresh_field("rows");
 	}
+}
 
-	// Always overwrite AND, preserve OR if present
-	const current = { and: filters };
+function is_advanced_formula(row) {
+	if (!row || row.data_source !== "Account Data") return false;
 
-	if (typeof previous === "object" && previous.or) {
-		current.or = previous.or;
-	}
+	const parsed = row.calculation_formula ? JSON.parse(row.calculation_formula) : null;
 
-	frappe.model.set_value(cdt, cdn, "calculation_formula", JSON.stringify(current));
+	if (Array.isArray(parsed)) return false;
+	if (parsed?.or) return true;
+	if (parsed?.and) return parsed.and.some((cond) => !Array.isArray(cond));
+
+	return false;
 }
 
 function show_accounts_tree(template_rows, missed = false) {
