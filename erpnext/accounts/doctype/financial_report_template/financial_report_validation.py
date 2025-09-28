@@ -430,13 +430,9 @@ class AccountFilterValidator(Validator):
 	"""Validates account filter expressions used in Account Data rows"""
 
 	def __init__(self, account_fields: set | None = None):
-		# TODO: should be add default fields too? because in UI filters all field are available
-		self.account_fields = account_fields or {
-			field.fieldname for field in frappe.get_meta("Account").fields
-		}
+		self.account_fields = account_fields or set(frappe.get_meta("Account")._valid_columns)
 
 	def validate(self, row) -> ValidationResult:
-		"""Validate account filter for a single row"""
 		result = ValidationResult()
 
 		if row.data_source != "Account Data":
@@ -477,7 +473,7 @@ class AccountFilterValidator(Validator):
 		return result
 
 	def _validate_filter_structure(self, filter_config, account_fields: set) -> str | None:
-		"""Recursively validate filter structure"""
+		# simple condition: [field, operator, value]
 		if isinstance(filter_config, list):
 			if len(filter_config) != 3:
 				return "Filter must be [field, operator, value]"
@@ -496,8 +492,8 @@ class AccountFilterValidator(Validator):
 			if operator in ["in", "not in"] and not isinstance(value, list):
 				return f"Operator '{operator}' requires a list value"
 
+		# logical condition: {"and": [condition1, condition2]}
 		elif isinstance(filter_config, dict):
-			# TODO: `and` and `or` both are not supported at same time
 			if len(filter_config) != 1:
 				return "Logical condition must have exactly one operator"
 
@@ -509,6 +505,7 @@ class AccountFilterValidator(Validator):
 			if not isinstance(conditions, list) or len(conditions) < 1:
 				return "Logical conditions need at least 1 sub-condition"
 
+			# recursive
 			for condition in conditions:
 				error = self._validate_filter_structure(condition, account_fields)
 				if error:
