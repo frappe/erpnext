@@ -72,6 +72,7 @@ class JournalEntry(AccountsController):
 		mode_of_payment: DF.Link | None
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
+		party_not_required: DF.Check
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
 		periodic_entry_difference_account: DF.Link | None
@@ -647,7 +648,7 @@ class JournalEntry(AccountsController):
 
 			if account_type in ["Receivable", "Payable"]:
 				if (
-					not (d.party_type and d.party) and not d.party_not_required
+					not (d.party_type and d.party) and not self.party_not_required
 				):  # skipping validation if party_not_required is passed via payroll entry
 					frappe.throw(
 						_(
@@ -1242,7 +1243,7 @@ class JournalEntry(AccountsController):
 
 				# set flag to skip party validation
 				account_type = frappe.get_cached_value("Account", d.account, "account_type")
-				if account_type in ["Receivable", "Payable"] and d.party_not_required:
+				if account_type in ["Receivable", "Payable"] and self.party_not_required:
 					frappe.flags.party_not_required = True
 
 				gl_map.append(
