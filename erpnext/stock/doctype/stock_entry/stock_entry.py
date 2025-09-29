@@ -110,6 +110,7 @@ class StockEntry(StockController):
 		from_bom: DF.Check
 		from_warehouse: DF.Link | None
 		inspection_required: DF.Check
+		is_additional_transfer_entry: DF.Check
 		is_opening: DF.Literal["No", "Yes"]
 		is_return: DF.Check
 		items: DF.Table[StockEntryDetail]
