@@ -251,64 +251,58 @@ print_heading_template=None) -%}
 			</tbody>
 		</table>
 
-		<table class="totals mt-16" style="width: 100%">
-			<tr>
-				<td style="width: 65%">&nbsp;</td>
+		<div class="test" style="float: right; margin-top: 15px; margin-bottom: 5px;">
+			<table style="width: 100%; border-collapse: collapse">
+				<tr class="row-divider">
+					<td class="text-right text-muted" style="padding-right: 30px !important;">{{ _("Sub Total:") }}</td>
+					<td class="text-right">{{ doc.get_formatted("total", doc) }}</td>
+				</tr>
 
-				<td
-					style="
-						width: 35%;
-						vertical-align: top;
-						text-align: right;
-						padding: 0px 0px 6px 0px !important;
-					"
-				>
-					<table style="width: 100%; border-collapse: collapse">
+				{%- if doc.apply_discount_on == "Net Total" -%}
+					<tr class="row-divider">
+						<td class="text-right text-muted" style="padding-right: 30px !important;">
+							{{ _("Discount") }} ({{ doc.additional_discount_percentage }}%):
+						</td>
+						<td class="text-right">{{ doc.get_formatted("discount_amount", doc) }}</td>
+					</tr>
+				{%- endif -%}
+				{%- for tax in doc.taxes -%}
+					{%- if (tax.tax_amount or print_settings.print_taxes_with_zero_amount) and (not tax.included_in_print_rate or doc.flags.show_inclusive_tax_in_print) -%}
 						<tr class="row-divider">
-							<td class="text-right title">{{ _("Sub Total:") }}</td>
-							<td class="text-right">{{ doc.get_formatted("total", doc) }}</td>
+							<td class="text-right text-muted" style="padding-right: 30px !important;">{{ tax.get_formatted("description") }} ({{ tax.get_formatted("rate") }}%):</td>
+							<td class="text-right">{{ tax.get_formatted("tax_amount") }}</td>
 						</tr>
-						<tr class="row-divider">
-							<td class="text-right title">
-								{{ _("Discount") }} ({{ doc.additional_discount_percentage or 0 }}%):
-							</td>
-							<td class="text-right">{{ doc.get_formatted("discount_amount", doc) }}</td>
-						</tr>
-						{% set tax_rate = doc.taxes | selectattr("tax_amount") | sum(attribute="rate") %} {%
-						if tax_rate > 0 %}
-						<tr class="row-divider">
-							<td class="text-right title">{{ _("Tax") }} ({{ tax_rate }}%):</td>
-							<td class="text-right">
-								{{ doc.get_formatted("total_taxes_and_charges", doc) }}
-							</td>
-						</tr>
-						{% endif %}
-					</table>
-				</td>
-			</tr>
+					{%- endif -%}
+				{%- endfor -%}
+				{%- if doc.apply_discount_on == "Grand Total" -%}
+					<tr class="row-divider">
+						<td class="text-right text-muted" style="padding-right: 30px !important;">
+							{{ _("Discount") }} ({{ doc.additional_discount_percentage }}%):
+						</td>
+						<td class="text-right">{{ doc.get_formatted("discount_amount", doc) }}</td>
+					</tr>
+				{%- endif -%}
+			</table>
+		</div>
 
-			<tr style="border-bottom: 1px solid #ededed">
-				<td colspan="2" style="padding: 0 0 6px 0 !important">
-					<div class="highlight-bg" style="border-radius: 12px">
-						<table style="width: 100%; border-collapse: collapse">
-							<tr>
-								<td class="text-left mw-400">
-									<div class="text-capitalize">
-										<span class="title"> {{ _("In Words: ") }}</span>{{ doc.in_words }}
-									</div>
-								</td>
-								<td class="text-right"><b>{{ _("Grand Total:") }}</b></td>
-								<td class="text-right">
-									<span style="font-weight: 700">
-										{{ doc.get_formatted("grand_total", doc) }}
-									</span>
-								</td>
-							</tr>
-						</table>
-					</div>
-				</td>
-			</tr>
-		</table>
+		<div class="highlight-bg" style="border-radius: 12px; clear: both">
+			<table style="width: 100%; border-collapse: collapse">
+				<tr>
+					<td class="text-left mw-400">
+						<div class="text-capitalize">
+							<span class="title"> {{ _("In Words: ") }}</span>{{ doc.in_words }}
+						</div>
+					</td>
+					<td class="text-right"><b>{{ _("Grand Total:") }}</b></td>
+					<td class="text-right">
+						<span style="font-weight: 700">
+							{{ doc.get_formatted("grand_total", doc) }}
+						</span>
+					</td>
+				</tr>
+			</table>
+		</div>
+
 
 		<!-- Terms -->
 		{% if doc.terms %}
