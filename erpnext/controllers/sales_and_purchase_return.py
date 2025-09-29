@@ -202,7 +202,11 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			current_stock_qty = args.get(column)
 		elif args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
-			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
+			current_stock_qty = (
+				args.get(column) * args.get("conversion_factor", 1.0)
+				if column != "stock_qty"
+				else args.get(column)
+			)
 		else:
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
