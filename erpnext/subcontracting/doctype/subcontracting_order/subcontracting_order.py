@@ -257,13 +257,13 @@ class SubcontractingOrder(SubcontractingController):
 					si.purchase_order_item,
 					["qty", "subcontracted_quantity", "fg_item_qty"],
 				)
-				available_qty = qty - subcontracted_quantity
+				available_qty = flt(qty) - flt(subcontracted_quantity)
 
 				if available_qty == 0:
 					continue
 
 				si.qty = available_qty
-				conversion_factor = qty / fg_item_qty
+				conversion_factor = flt(qty) / flt(fg_item_qty)
 				si.fg_item_qty = flt(
 					available_qty / conversion_factor, frappe.get_precision("Purchase Order Item", "qty")
 				)
@@ -342,8 +342,10 @@ class SubcontractingOrder(SubcontractingController):
 
 	def update_subcontracted_quantity_in_po(self, cancel=False):
 		for service_item in self.service_items:
-			subcontracted_quantity = frappe.db.get_value(
-				"Purchase Order Item", service_item.purchase_order_item, "subcontracted_quantity"
+			subcontracted_quantity = flt(
+				frappe.db.get_value(
+					"Purchase Order Item", service_item.purchase_order_item, "subcontracted_quantity"
+				)
 			)
 
 			subcontracted_quantity = (
