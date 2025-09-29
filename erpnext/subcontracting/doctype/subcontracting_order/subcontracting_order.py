@@ -338,13 +338,22 @@ class SubcontractingOrder(SubcontractingController):
 
 	def update_subcontracted_quantity_in_po(self, cancel=False):
 		for service_item in self.service_items:
-			doc = frappe.get_doc("Purchase Order Item", service_item.purchase_order_item)
-			doc.subcontracted_quantity = (
-				(doc.subcontracted_quantity + service_item.qty)
-				if not cancel
-				else (doc.subcontracted_quantity - service_item.qty)
+			subcontracted_quantity = frappe.db.get_value(
+				"Purchase Order Item", service_item.purchase_order_item, "subcontracted_quantity"
 			)
-			doc.save()
+
+			subcontracted_quantity = (
+				(subcontracted_quantity + service_item.qty)
+				if not cancel
+				else (subcontracted_quantity - service_item.qty)
+			)
+
+			frappe.db.set_value(
+				"Purchase Order Item",
+				service_item.purchase_order_item,
+				"subcontracted_quantity",
+				subcontracted_quantity,
+			)
 
 
 @frappe.whitelist()
