@@ -1871,8 +1871,8 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 					dr_or_cr *= -1
 					dr_or_cr_account_currency *= -1
 
-				against_voucher_type = gle.against_voucher_type
-				against_voucher_no = gle.against_voucher
+				against_voucher_type = gle.against_voucher_type or gle.voucher_type
+				against_voucher_no = gle.against_voucher or gle.voucher_no
 
 				if gle.against_voucher:
 					if gle.against_voucher == gle.voucher_no and gle.advance_voucher_no:
