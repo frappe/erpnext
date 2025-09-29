@@ -1289,7 +1289,10 @@ class AccountsController(TransactionBase):
 			"Payment Entry",
 		]:
 			set_balance_in_account_currency(
-				gl_dict, account_currency, self.get("conversion_rate"), self.company_currency
+				gl_dict,
+				account_currency,
+				args.get("transaction_exchange_rate") or self.get("conversion_rate"),
+				self.company_currency,
 			)
 
 		# Update details in transaction currency
@@ -1297,7 +1300,8 @@ class AccountsController(TransactionBase):
 			gl_dict.update(
 				{
 					"transaction_currency": self.get("currency") or self.company_currency,
-					"transaction_exchange_rate": self.get("conversion_rate", 1),
+					"transaction_exchange_rate": args.get("transaction_exchange_rate")
+					or self.get("conversion_rate", 1),
 					"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 						account_currency, gl_dict, "debit"
 					),

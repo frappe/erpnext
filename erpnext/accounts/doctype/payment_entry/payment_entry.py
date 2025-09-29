@@ -196,6 +196,9 @@ class PaymentEntry(AccountsController):
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
 
+	def before_submit(self):
+		self.set_exchange_rate_in_advance()
+
 	def on_submit(self):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
@@ -921,6 +924,18 @@ class PaymentEntry(AccountsController):
 			self.status = "Draft"
 
 		self.db_set("status", self.status, update_modified=True)
+
+	def set_exchange_rate_in_advance(self):
+		if self.references:
+			for reference_doc in self.references:
+				if reference_doc.reference_doctype == "Employee Advance" and self.target_exchange_rate:
+					frappe.db.set_value(
+						"Employee Advance",
+						reference_doc.reference_name,
+						"exchange_rate",
+						self.target_exchange_rate,
+						update_modified=False,
+					)
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
