@@ -252,14 +252,18 @@ class SubcontractingOrder(SubcontractingController):
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
 
-				po_item = frappe.get_doc("Purchase Order Item", si.purchase_order_item)
-				available_qty = po_item.qty - po_item.subcontracted_quantity
+				qty, subcontracted_quantity, fg_item_qty = frappe.db.get_value(
+					"Purchase Order Item",
+					si.purchase_order_item,
+					["qty", "subcontracted_quantity", "fg_item_qty"],
+				)
+				available_qty = qty - subcontracted_quantity
 
 				if available_qty == 0:
 					continue
 
 				si.qty = available_qty
-				conversion_factor = po_item.qty / po_item.fg_item_qty
+				conversion_factor = qty / fg_item_qty
 				si.fg_item_qty = flt(
 					available_qty / conversion_factor, frappe.get_precision("Purchase Order Item", "qty")
 				)
