@@ -150,9 +150,14 @@ def _get_pricing_rules(apply_on, args, values):
 			conditions = conditions), values, as_dict=1) or []
 
 	# dont not apply rule for the main item in pricing rule for POS Page, this will be managed from POS Page
-	if len(pricing_rules) >= 1 and pricing_rules[0].get('apply_rule_on_other'):
-		if pricing_rules[0].get(apply_on_field) == args.get(apply_on_field) or args.get('parenttype') == 'POS Invoice':
-			return []
+	if len(pricing_rules) >= 1:
+		pr_r = pricing_rules[0]
+		if pr_r.get('apply_rule_on_other', None):
+			if pr_r.get(apply_on_field) == args.get(apply_on_field) or args.get('parenttype') == 'POS Invoice':
+				pricing_rules = []
+
+		if pr_r.get('usable_count', 0) > 0 and args.get('parenttype') == 'POS Invoice':
+			pricing_rules = []
 
 	return pricing_rules
 
