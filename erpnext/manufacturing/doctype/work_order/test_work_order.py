@@ -3107,6 +3107,39 @@ class TestWorkOrder(IntegrationTestCase):
 				self.assertLessEqual(row.qty, 20)
 				self.assertGreaterEqual(row.qty, 0)
 
+	def test_overproduction_allowed_qty(self):
+		"""Test overproduction allowed qty in work order"""
+		allow_overproduction("overproduction_percentage_for_work_order", 50)
+
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=10)
+
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=100, basic_rate=100
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC",
+			qty=100,
+			basic_rate=1000.0,
+		)
+
+		mt_stock_entry = frappe.get_doc(
+			make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 10)
+		)
+		mt_stock_entry.submit()
+
+		fg_stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		fg_stock_entry.items[2].qty = 15
+		fg_stock_entry.fg_completed_qty = 15
+		fg_stock_entry.submit()
+
+		wo_order.reload()
+
+		self.assertEqual(wo_order.produced_qty, 15)
+		self.assertEqual(wo_order.status, "Completed")
+
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
