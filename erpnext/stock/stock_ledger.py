@@ -1023,7 +1023,9 @@ class update_entries_after:
 			)
 		else:
 			doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
-			doc.set_incoming_rate(save=True, allow_negative_stock=self.allow_negative_stock)
+			doc.set_incoming_rate(
+				save=True, allow_negative_stock=self.allow_negative_stock, prev_sle=self.wh_data
+			)
 			doc.calculate_qty_and_amount(save=True)
 
 		if stock_queue := frappe.get_all(
