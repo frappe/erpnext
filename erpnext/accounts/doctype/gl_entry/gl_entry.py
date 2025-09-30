@@ -256,7 +256,7 @@ class GLEntry(Document):
 			)
 
 	def validate_cost_center(self):
-		if not self.cost_center:
+		if not self.cost_center or self.is_cancelled:
 			return
 
 		is_group, company = frappe.get_cached_value("Cost Center", self.cost_center, ["is_group", "company"])
