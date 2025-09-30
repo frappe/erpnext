@@ -1388,12 +1388,6 @@ class StockEntry(StockController):
 							d.item_code, self.work_order
 						)
 					)
-				elif flt(d.transfer_qty) > flt(self.fg_completed_qty):
-					frappe.throw(
-						_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}").format(
-							d.idx, d.transfer_qty, self.fg_completed_qty
-						)
-					)
 
 				finished_items.append(d.item_code)
 
