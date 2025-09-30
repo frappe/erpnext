@@ -799,13 +799,6 @@ erpnext.asset.scrap_asset = function (frm) {
 				fieldtype: "Date",
 				reqd: 1,
 			},
-<<<<<<< HEAD
-			method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
-			callback: function (r) {
-				cur_frm.reload_doc();
-			},
-		});
-=======
 		],
 		size: "medium",
 		primary_action_label: "Submit",
@@ -822,7 +815,6 @@ erpnext.asset.scrap_asset = function (frm) {
 				},
 			});
 		},
->>>>>>> e07bc5af41 (feat: validating asset scrap date (#43093))
 	});
 	scrap_dialog.show();
 };
