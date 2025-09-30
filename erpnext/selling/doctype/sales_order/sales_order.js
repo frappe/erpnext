@@ -831,7 +831,6 @@ frappe.ui.form.on("Sales Order Item", {
 		}
 	},
 
-
 	delivery_date: function (frm, cdt, cdn) {
 		if (!frm.doc.delivery_date) {
 			erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "delivery_date");

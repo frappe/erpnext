@@ -357,8 +357,8 @@ class SubcontractingOrder(SubcontractingController):
 			frappe.db.set_value(
 				"Purchase Order Item",
 				service_item.purchase_order_item,
-				"subcontracted_quantity",
-				subcontracted_quantity,
+				"subcontracted_qty",
+				subcontracted_qty,
 			)
 
 
