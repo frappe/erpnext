@@ -165,7 +165,7 @@ def add_solvency_ratios(
 	data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
 ):
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
-	data.append({"ratio": _("Solvency Ratios"}))
+	data.append({"ratio": _("Solvency Ratios")})
 
 	debt_equity_ratio = {"ratio": _("Debt Equity Ratio")}
 	gross_profit_ratio = {"ratio": _("Gross Profit Ratio")}
