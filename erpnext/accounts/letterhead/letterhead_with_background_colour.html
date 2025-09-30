@@ -1,124 +1,122 @@
 <style>
-    .letter-head {
-        border-radius: 18px;
-        background: #F8F8F8;
-        padding: 12px;
-        margin-left: 12px;
-        margin-right: 12px;
-    }
-    .letterhead-container {
-        width: 100%;
-    }
-    .letterhead-container .other-details {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-    }
-    .logo-address{
-        width: 65%;
-        vertical-align: top;
-    }
+	.letter-head {
+		border-radius: 18px;
+		background: #f8f8f8;
+		padding: 12px;
+		margin-left: 12px;
+		margin-right: 12px;
+	}
+	.letterhead-container {
+		width: 100%;
+	}
+	.letterhead-container .other-details {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+	}
+	.logo-address {
+		width: 65%;
+		vertical-align: top;
+	}
 
-    .logo {
-        width: 90px;
-        display: block;
-        margin-bottom: 10px;
-    }
+	.logo {
+		width: 90px;
+		display: block;
+		margin-bottom: 10px;
+	}
 
-    .logo img {
-        border-radius: 15px;
-        border: 1px solid #EDEDED;
-    }
+	.logo img {
+		border-radius: 15px;
+		border: 1px solid #ededed;
+	}
 
-    .company-name {
-        color: #171717;
-        font-weight: bold;
-        line-height: 23px;
-        margin-bottom: 5px;
-    }
+	.company-name {
+		color: #171717;
+		font-weight: bold;
+		line-height: 23px;
+		margin-bottom: 5px;
+	}
 
-    .company-address {
-        color: #171717;
-        width: 300px;
-    }
+	.company-address {
+		color: #171717;
+		width: 300px;
+	}
 
-    .invoice-title {
-        font-weight: bold;
-    }
+	.invoice-title {
+		font-weight: bold;
+	}
 
-    .invoice-number {
-        color: #7C7C7C;
-    }
+	.invoice-number {
+		color: #7c7c7c;
+	}
 
-    .contact-title {
-        color: #7C7C7C;
-        width: 60px;
-        display: inline-block;
-        vertical-align: top;
-        margin-right: 10px;
-    }
+	.contact-title {
+		color: #7c7c7c;
+		width: 60px;
+		display: inline-block;
+		vertical-align: top;
+		margin-right: 10px;
+	}
 
-    .contact-value {
-        color: #171717;
-        display: inline-block;
-    }
-    .letterhead-container td {
-        padding: 0px !important;
-        position: relative;
-    }
+	.contact-value {
+		color: #171717;
+		display: inline-block;
+	}
+	.letterhead-container td {
+		padding: 0px !important;
+		position: relative;
+	}
 </style>
 
 <table class="letterhead-container">
-    <tbody><tr>
-        <td class="logo-address">
-            {% set company_logo = frappe.db.get_value("Company", doc.company, "company_logo") %}
-            {% if company_logo %}
-                <div class="logo">
-                    <img src="{{ frappe.utils.get_url(company_logo) }}">
-                </div>
-            {% endif %}
-            <div class="company-name">{{ doc.company }}</div>
-            <div class="company-address">
-                {% set company_address = frappe.get_all(
-                    "Dynamic Link",
-                    fields=["parent"],
-                    filters={
-                      "link_doctype": "Company",
-                      "link_name": doc.company,
-                      "parenttype": "Address"
-                    },
-                    limit=1
-                ) %}
-                {% if company_address %}
-                  {% set address = frappe.get_doc("Address", company_address[0].parent) %}
-                  {{ address.address_line1 or "" }}<br>
-                  {% if address.address_line2 %}{{ address.address_line2 }}<br>{% endif %}
-                  {{ address.city or "" }} {{ address.state or "" }} {{ address.pincode or "" }} {{ address.country or "" }}<br>
-                {% endif %}
-            </div>
-        </td>
+	<tbody>
+		<tr>
+			<td class="logo-address">
+				{% set company_logo = frappe.db.get_value("Company", doc.company, "company_logo") %} {% if
+				company_logo %}
+				<div class="logo">
+					<img src="{{ frappe.utils.get_url(company_logo) }}" />
+				</div>
+				{% endif %}
+				<div class="company-name">{{ doc.company }}</div>
+				<div class="company-address">
+					{% if doc.company_address %} {% set company_address_display = frappe.get_doc("Address",
+					doc.company_address) %} {{ company_address_display.address_line1 or "" }} {% if
+					company_address_display.address_line2 %}{{ company_address_display.address_line2 }}<br />{%
+					endif %} {{ company_address_display.city or "" }} {{ company_address_display.state or ""
+					}} {{ company_address_display.pincode or "" }} {{ company_address_display.country or ""
+					}}<br />
+					{% endif %}
+				</div>
+			</td>
 
-        <td style="vertical-align: top;">
-            <div style="height: 90px; margin-bottom: 10px; text-align: right;">
-                <div class="invoice-title">{{ _("Sales Invoice") }}</div>
-                <div class="invoice-number">{{ doc.name }}</div>
-                <br>
-            </div>
-            <div style="text-align: left; float: right;" class="other-details">
-                {% set website = frappe.db.get_value("Company", doc.company, "website") %}
-                {% set email = frappe.db.get_value("Company", doc.company, "email") %}
-                {% set phone_no = frappe.db.get_value("Company", doc.company, "phone_no") %}
-
-                {% if website %}
-                    <div><span class="contact-title">{{ _("Website:") }}</span><span class="contact-value">{{ website }}</span></div>
-                {% endif %}
-                {% if email %}
-                    <div><span class="contact-title">{{ _("Email:") }}</span><span class="contact-value">{{ email }}</span></div>
-                {% endif %}
-                {% if phone_no %}
-                    <div><span class="contact-title">{{ _("Contact:") }}</span><span class="contact-value">{{ phone_no }}</span></div>
-                {% endif %}
-            </div>
-        </td>
-    </tr>
-</tbody></table>
+			<td style="vertical-align: top">
+				<div style="height: 90px; margin-bottom: 10px; text-align: right">
+					<div class="invoice-title">{{ _("Sales Invoice") }}</div>
+					<div class="invoice-number">{{ doc.name }}</div>
+					<br />
+				</div>
+				<div style="text-align: left; float: right" class="other-details">
+					{% set website = frappe.db.get_value("Company", doc.company, "website") %} {% set email =
+					frappe.db.get_value("Company", doc.company, "email") %} {% set phone_no =
+					frappe.db.get_value("Company", doc.company, "phone_no") %} {% if website %}
+					<div>
+						<span class="contact-title">{{ _("Website:") }}</span
+						><span class="contact-value">{{ website }}</span>
+					</div>
+					{% endif %} {% if email %}
+					<div>
+						<span class="contact-title">{{ _("Email:") }}</span
+						><span class="contact-value">{{ email }}</span>
+					</div>
+					{% endif %} {% if phone_no %}
+					<div>
+						<span class="contact-title">{{ _("Contact:") }}</span
+						><span class="contact-value">{{ phone_no }}</span>
+					</div>
+					{% endif %}
+				</div>
+			</td>
+		</tr>
+	</tbody>
+</table>

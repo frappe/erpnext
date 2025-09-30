@@ -32,6 +32,7 @@
     }
     .company-details {
         width: 40%;
+        align-content: center;
     }
     .company-name {
         font-size: 14px;
@@ -70,23 +71,11 @@
                 <div class="company-name">
                     {{ doc.company }}
                 </div>
-                {% set company_address = frappe.get_all(
-                    "Dynamic Link",
-                    fields=["parent"],
-                    filters={
-                        "link_doctype": "Company",
-                        "link_name": doc.company,
-                        "parenttype": "Address"
-                    },
-                    limit=1
-                ) %}
-                {% if company_address %}
-                    {% set address = frappe.get_doc("Address", company_address[0].parent) %}
-                    {{ address.address_line1 or "" }}<br>
-                    {% if address.address_line2 %}
-                        {{ address.address_line2 }}<br>
-                    {% endif %}
-                    {{ address.city or "" }} {{ address.state or "" }} {{ address.pincode or "" }} {{ address.country or "" }}
+                {% if doc.company_address %}
+                    {% set company_address_display = frappe.get_doc("Address", doc.company_address) %}
+                    {{ company_address_display.address_line1 or "" }}
+                    {% if company_address_display.address_line2 %}{{ company_address_display.address_line2 }}{% endif %}<br>
+                    {{ company_address_display.city or "" }} {{ company_address_display.state or "" }} {{ company_address_display.pincode or "" }} {{ company_address_display.country or "" }}<br>
                 {% endif %}
             </td>
 

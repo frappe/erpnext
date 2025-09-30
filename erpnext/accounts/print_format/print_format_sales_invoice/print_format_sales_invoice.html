@@ -172,7 +172,15 @@ print_heading_template=None) -%}
 					</div>
 					<div class="col-xs-7">
 						<div class="info-text">{{ doc.customer_name }}</div>
-						<div class="info-text">{{ doc.address_display or "" }}</div>
+						<div class="info-text">
+							{% if doc.customer_address %}
+								{% set customer_address = frappe.get_doc("Address", doc.customer_address) %}
+								{{ customer_address.address_line1 or "" }}<br>
+								{% if customer_address.address_line2 %}{{ customer_address.address_line2 }}<br>{% endif %}
+								{{ customer_address.city or "" }} {{ customer_address.state or "" }} {{ customer_address.pincode or "" }} {{ customer_address.country or "" }}<br>
+							{% endif %}
+						</div>
+
 					</div>
 				</td>
 
