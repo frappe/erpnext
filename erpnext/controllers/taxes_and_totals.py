@@ -208,12 +208,18 @@ class calculate_taxes_and_totals:
 						if item.discount_amount and not item.discount_percentage:
 							item.rate = item.rate_with_margin - item.discount_amount
 						else:
-							item.discount_amount = item.rate_with_margin - item.rate
+							item.discount_amount = flt(
+								item.rate_with_margin - item.rate, item.precision("discount_amount")
+							)
 
 					elif flt(item.price_list_rate) > 0:
-						item.discount_amount = item.price_list_rate - item.rate
+						item.discount_amount = flt(
+							item.price_list_rate - item.rate, item.precision("discount_amount")
+						)
 				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
-					item.discount_amount = item.price_list_rate - item.rate
+					item.discount_amount = flt(
+						item.price_list_rate - item.rate, item.precision("discount_amount")
+					)
 
 				item.net_rate = item.rate
 
