@@ -224,6 +224,9 @@ class MasterProductionSchedule(Document):
 			if ignore_orders:
 				names = [name for name in names if name not in ignore_orders]
 
+			if not names:
+				return []
+
 			query = query.where(doctype.parent.isin(names))
 
 		return query.run(as_dict=True)
