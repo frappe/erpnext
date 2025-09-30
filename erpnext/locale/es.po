@@ -19618,6 +19618,62 @@ msgstr ""
 msgid "End Year"
 msgstr "Fin de año"
 
+#: erpnext/accounts/report/financial_ratios/financial_ratios.js:58
+msgid "Liquidity Ratios"
+msgstr "Ratios de Liquidez"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.js:58
+msgid "Solvency Ratios"
+msgstr "Ratios de Solvencia"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.js:58
+msgid "Turnover Ratios"
+msgstr "Ratios de Rotación"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:152
+msgid "Current Ratio"
+msgstr "Ratio de Liquidez Corriente"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:152
+msgid "Quick Ratio"
+msgstr "Ratio de Liquidez Inmediata"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:170
+msgid "Debt Equity Ratio"
+msgstr "Ratio Deuda-Patrimonio"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:171
+msgid "Gross Profit Ratio"
+msgstr "Ratio de Margen Bruto"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:172
+msgid "Net Profit Ratio"
+msgstr "Ratio de Margen Neto"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:173
+msgid "Return on Asset Ratio"
+msgstr "Ratio de Rentabilidad sobre Activos"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:174
+msgid "Return on Equity Ratio"
+msgstr "Ratio de Rentabilidad sobre Patrimonio"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:211
+msgid "Fixed Asset Turnover Ratio"
+msgstr "Ratio de Rotación de Activos Fijos"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:212
+msgid "Debtor Turnover Ratio"
+msgstr "Ratio de Rotación de Deudores"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:213
+msgid "Creditor Turnover Ratio"
+msgstr "Ratio de Rotación de Acreedores"
+
+#: erpnext/accounts/report/financial_ratios/financial_ratios.py:214
+msgid "Inventory Turnover Ratio"
+msgstr "Ratio de Rotación de Inventario"
+
 #: erpnext/accounts/report/financial_statements.py:133
 msgid "End Year cannot be before Start Year"
 msgstr "Año de finalización no puede ser anterior al Año de Inicio"
