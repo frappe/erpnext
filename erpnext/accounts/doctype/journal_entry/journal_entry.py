@@ -193,8 +193,8 @@ class JournalEntry(AccountsController):
 
 	def on_submit(self):
 		self.validate_cheque_info()
-		self.check_credit_limit()
 		self.make_gl_entries()
+		self.check_credit_limit()
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
