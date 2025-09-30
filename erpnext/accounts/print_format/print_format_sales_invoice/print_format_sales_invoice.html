@@ -165,7 +165,7 @@ print_heading_template=None) -%}
 	<div class="print-format-body">
 		<table class="info-table col-xs-12" style="width: 100%; margin-left: 12px">
 			<tr>
-				<td class="col-xs-7" style="padding: 0 !important">
+				<td class="col-xs-6" style="padding: 0 !important">
 					<div class="title col-xs-5 p-0">
 						<div class="info-text">Customer Name:</div>
 						<div class="info-text">Bill to:</div>
@@ -176,15 +176,23 @@ print_heading_template=None) -%}
 					</div>
 				</td>
 
-				<td class="col-xs-5" style="padding: 0 !important">
-					<div class="title col-xs-6 p-0">
+				<td class="col-xs-6" style="padding: 0 !important">
+					<div class="title col-xs-5 p-0">
 						<div class="info-text">Invoice Number:</div>
+					</div>
+					<div class="col-xs-7">
+						<div class="info-text">{{ doc.name }}</div>
+					</div>
+					<div class="title col-xs-5 p-0">
 						<div class="info-text">Invoice Date:</div>
+					</div>
+					<div class="col-xs-7">
+						<div class="info-text">{{ frappe.utils.format_date(doc.posting_date) }}</div>
+					</div>
+					<div class="title col-xs-5 p-0">
 						<div class="info-text">Payment Due Date:</div>
 					</div>
-					<div class="col-xs-6">
-						<div class="info-text">{{ doc.name }}</div>
-						<div class="info-text">{{ frappe.utils.format_date(doc.posting_date) }}</div>
+					<div class="col-xs-7">
 						<div class="info-text">{{ frappe.utils.format_date(doc.due_date) }}</div>
 					</div>
 				</td>
