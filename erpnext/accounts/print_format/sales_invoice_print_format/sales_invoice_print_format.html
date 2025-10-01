@@ -204,6 +204,7 @@ print_heading_template=None) -%}
 				<td><span class="heading">{{ _("Bill From") }}:</span><br />
 					{% if doc.customer_address %}
 						{% set customer_address = frappe.get_doc("Address", doc.customer_address) %}
+						{{ doc.customer_name }}<br>
 						{{ customer_address.address_line1 or "" }}
 						{% if customer_address.address_line2 %}{{ customer_address.address_line2 }}{% endif %}<br>
 						{{ customer_address.city or "" }} {{ customer_address.state or "" }} {{ customer_address.pincode or "" }} {{ customer_address.country or "" }}<br>
@@ -212,6 +213,7 @@ print_heading_template=None) -%}
 				<td><span class="heading">{{ _("Bill To") }}:</span><br />
 					{% if doc.company_address %}
 						{% set company_address_display = frappe.get_doc("Address", doc.company_address) %}
+						{{ doc.company }}<br>
 						{{ company_address_display.address_line1 or "" }}
 						{% if company_address_display.address_line2 %}{{ company_address_display.address_line2 }}{% endif %}<br>
 						{{ company_address_display.city or "" }} {{ company_address_display.state or "" }} {{ company_address_display.pincode or "" }} {{ company_address_display.country or "" }}<br>
