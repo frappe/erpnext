@@ -282,18 +282,30 @@ class SalesInvoice(SellingController):
 	def before_print(self, settings=None):
 		from frappe.contacts.doctype.address.address import get_address_display_list
 
-		company_logo = frappe.get_value("Company", self.company, ["company_logo"])
+		company_details = frappe.get_value(
+			"Company", self.company, ["company_logo", "website", "phone_no", "email"], as_dict=True
+		)
+
 		address_display_list = get_address_display_list("Company", self.company)
+		address_line = address_display_list[0] if address_display_list else ""
 
-		address_line = ""
-		if address_display_list and len(address_display_list) > 0:
-			address_line = address_display_list[0]["address_line1"]
+		required_fields = [
+			company_details.get("company_logo"),
+			company_details.get("website"),
+			company_details.get("phone_no"),
+			company_details.get("email"),
+			self.company_address,
+			address_line,
+		]
 
-		if not address_line or not company_logo or not self.company_address:
+		if not all(required_fields):
 			frappe.publish_realtime(
 				"sales_invoice_before_print",
 				{
-					"company_logo": company_logo,
+					"company_logo": company_details.get("company_logo"),
+					"website": company_details.get("website"),
+					"phone_no": company_details.get("phone_no"),
+					"email": company_details.get("email"),
 					"address_line": address_line,
 					"company": self.company,
 					"company_address_display": self.company_address,
@@ -2830,18 +2842,15 @@ def save_company_master_details(name, company, details):
 	if isinstance(details, str):
 		details = frappe.parse_json(details)
 
-	if details.get("company_logo"):
-		frappe.db.set_value(
-			"Company",
-			company,
-			{
-				"company_logo": details.get("company_logo"),
-			},
-		)
+	company_fields = ["company_logo", "website", "phone_no", "email"]
+	updated_fields = {field: details.get(field) for field in company_fields if details.get(field)}
 
-	company_address = None
+	if updated_fields:
+		frappe.db.set_value("Company", company, updated_fields)
+
+	company_address = details.get("company_address")
 	if details.get("address_line1"):
-		address = frappe.get_doc(
+		address_doc = frappe.get_doc(
 			{
 				"doctype": "Address",
 				"address_title": details.get("address_title"),
@@ -2854,11 +2863,9 @@ def save_company_master_details(name, company, details):
 				"is_your_company_address": 1,
 				"links": [{"link_doctype": "Company", "link_name": company}],
 			}
-		).insert(ignore_permissions=True)
-
-		company_address = address.name
-	else:
-		company_address = details.get("company_address")
+		)
+		address_doc.insert(ignore_permissions=True)
+		company_address = address_doc.name
 
 	if company_address:
 		current_display = frappe.db.get_value("Sales Invoice", name, "company_address_display")
