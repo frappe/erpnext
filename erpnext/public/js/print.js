@@ -64,10 +64,6 @@ frappe.realtime.on("sales_invoice_before_print", (data) => {
 					hidden: data.address_line ? 1 : 0,
 				},
 				{
-					fieldname: "column_break_1",
-					fieldtype: "Column Break",
-				},
-				{
 					label: "City",
 					fieldname: "city",
 					fieldtype: "Data",
@@ -122,7 +118,7 @@ frappe.realtime.on("sales_invoice_before_print", (data) => {
 					},
 					callback: function () {
 						companyDetailsDialog.hide();
-						frappe.msgprint(__("Saving document..."));
+						frappe.msgprint(__("Updating details."));
 						setTimeout(() => {
 							window.location.reload();
 						}, 1000);
