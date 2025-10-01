@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-28 09:35+0000\n"
-"PO-Revision-Date: 2025-09-29 05:08\n"
+"PO-Revision-Date: 2025-10-01 05:07\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1511,7 +1511,7 @@ msgstr "حساب {0} با شرکت {1} در حالت حساب مطابقت ند�
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:138
 msgid "Account {0} doesn't belong to Company {1}"
-msgstr ""
+msgstr "حساب {0} متعلق به شرکت {1} نیست"
 
 #: erpnext/accounts/doctype/account/account.py:509
 msgid "Account {0} exists in parent company {1}."
@@ -2564,7 +2564,7 @@ msgstr "تاریخ تحویل واقعی"
 #. Production Schedule'
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.json
 msgid "Actual Demand"
-msgstr ""
+msgstr "تقاضای واقعی"
 
 #. Label of the actual_end_date (Datetime) field in DocType 'Job Card'
 #. Label of the actual_end_date (Datetime) field in DocType 'Work Order'
@@ -2840,7 +2840,7 @@ msgstr "افزودن مواد خام"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:72
 msgid "Add Safety Stock"
-msgstr ""
+msgstr "افزودن موجودی ایمنی"
 
 #: erpnext/public/js/event.js:48
 msgid "Add Sales Partners"
@@ -2850,7 +2850,7 @@ msgstr "افزودن شرکای فروش"
 #: erpnext/selling/doctype/sales_order/sales_order.js:627
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Add Schedule"
-msgstr ""
+msgstr "افزودن زمان‌بندی"
 
 #. Label of the add_serial_batch_bundle (Button) field in DocType
 #. 'Subcontracting Receipt Item'
@@ -9845,7 +9845,7 @@ msgstr "ظرفیت"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Capacity (In Days)"
-msgstr ""
+msgstr "ظرفیت (بر حسب روز)"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:69
 msgid "Capacity (Stock UOM)"
@@ -16559,7 +16559,7 @@ msgstr "یادداشت های تحویل {0} به روز شد"
 #: erpnext/selling/doctype/sales_order/sales_order.js:597
 #: erpnext/selling/doctype/sales_order/sales_order.js:624
 msgid "Delivery Schedule"
-msgstr ""
+msgstr "زمان‌بندی تحویل"
 
 #. Name of a DocType
 #: erpnext/selling/doctype/delivery_schedule_item/delivery_schedule_item.json
@@ -21591,7 +21591,7 @@ msgstr ""
 #. Label of the forecast_qty (Float) field in DocType 'Sales Forecast Item'
 #: erpnext/manufacturing/doctype/sales_forecast_item/sales_forecast_item.json
 msgid "Forecast Qty"
-msgstr ""
+msgstr "مقدار پیش‌بینی"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
@@ -21601,7 +21601,7 @@ msgstr "پیش بینی"
 #. Label of the forecasting_method (Select) field in DocType 'Sales Forecast'
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
 msgid "Forecasting Method"
-msgstr ""
+msgstr "روش پیش‌بینی"
 
 #. Label of the foreign_trade_details (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -22497,7 +22497,7 @@ msgstr "عدم تطابق دفتر کل و دفتر پرداخت"
 #. Label of the generate_demand (Button) field in DocType 'Sales Forecast'
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
 msgid "Generate Demand"
-msgstr ""
+msgstr "ایجاد تقاضا"
 
 #: erpnext/public/js/setup_wizard.js:54
 msgid "Generate Demo Data for Exploration"
@@ -33087,11 +33087,11 @@ msgstr "دیگر هیچ فرزندی در سمت راست وجود ندارد"
 #. Label of the no_of_days (Int) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "No of Days"
-msgstr ""
+msgstr "تعداد روزها"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:578
 msgid "No of Deliveries"
-msgstr ""
+msgstr "تعداد تحویل‌ها"
 
 #. Label of the no_of_docs (Int) field in DocType 'Transaction Deletion Record
 #. Details'
@@ -33132,7 +33132,7 @@ msgstr "تعداد سهام"
 #. Label of the no_of_shift (Int) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "No of Shift"
-msgstr ""
+msgstr "تعداد شیفت"
 
 #. Label of the no_of_units_produced (Int) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
@@ -33617,7 +33617,7 @@ msgstr "تعداد سفارش"
 #. Label of the demand_number (Int) field in DocType 'Sales Forecast'
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
 msgid "Number of Weeks / Months"
-msgstr ""
+msgstr "تعداد هفته‌ها/ماه‌ها"
 
 #. Description of the 'Grace Period' (Int) field in DocType 'Subscription
 #. Settings'
@@ -34071,7 +34071,7 @@ msgstr "اعلان ها را باز کنید"
 #. Production Schedule'
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.json
 msgid "Open Orders"
-msgstr ""
+msgstr "سفارش‌های باز"
 
 #. Label of a chart in the Projects Workspace
 #. Label of the project (Check) field in DocType 'Email Digest'
@@ -37188,7 +37188,7 @@ msgstr "صندوق های بازنشستگی"
 #. Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "Per Day"
-msgstr ""
+msgstr "در هر روز"
 
 #. Option for the 'Evaluation Period' (Select) field in DocType 'Supplier
 #. Scorecard'
@@ -47259,7 +47259,7 @@ msgstr "هزینه های فروش"
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.json
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
 msgid "Sales Forecast"
-msgstr ""
+msgstr "پیش‌بینی فروش"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/sales_forecast_item/sales_forecast_item.json
@@ -47637,7 +47637,7 @@ msgstr "مرجع سفارش فروش"
 #. 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Sales Order Schedule"
-msgstr ""
+msgstr "زمان‌بندی سفارش فروش"
 
 #. Label of the sales_order_status (Select) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
@@ -49219,7 +49219,7 @@ msgstr "شماره سریال"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:140
 msgid "Serial No (In/Out)"
-msgstr ""
+msgstr "شماره سریال (ورودی/خروجی)"
 
 #. Label of the serial_no_batch (Section Break) field in DocType 'Stock Entry
 #. Detail'
@@ -53804,7 +53804,7 @@ msgstr "لوازم مشمول ارائه شارژ معکوس"
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:315
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:380
 msgid "Supply"
-msgstr ""
+msgstr "تامین"
 
 #. Label of the is_sub_contracted_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -59132,7 +59132,7 @@ msgstr "از مرکز هزینه پیش‌فرض شرکت برای گرد کرد
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:136
 msgid "Use Default Warehouse"
-msgstr ""
+msgstr "استفاده از انبار پیش‌فرض"
 
 #. Description of the 'Calculate Estimated Arrival Times' (Button) field in
 #. DocType 'Delivery Trip'
@@ -60034,7 +60034,7 @@ msgstr "مشاهده نمودار حساب‌ها"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:83
 msgid "View Data Based on"
-msgstr ""
+msgstr "مشاهده داده‌ها بر اساس"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:247
 msgid "View Exchange Gain/Loss Journals"
@@ -60060,7 +60060,7 @@ msgstr "مشاهده دفتر ها"
 
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.js:55
 msgid "View MRP"
-msgstr ""
+msgstr "مشاهده MRP"
 
 #: erpnext/setup/doctype/email_digest/email_digest.js:7
 msgid "View Now"
@@ -61330,7 +61330,7 @@ msgstr "دستور کار ایجاد نشد"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1350
 msgid "Work Order {0} created"
-msgstr ""
+msgstr "دستور کار {0} ایجاد شد"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:692
 msgid "Work Order {0}: Job Card not found for the operation {1}"
@@ -61909,11 +61909,11 @@ msgstr "شما برای همکاری در پروژه {0} دعوت شده اید.
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:235
 msgid "You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted in the transaction price list."
-msgstr ""
+msgstr "شما {0} و {1} را در {2} فعال کرده‌اید. این می‌تواند منجر به درج قیمت‌های لیست قیمت پیش‌فرض در لیست قیمت تراکنش شود."
 
 #: erpnext/selling/doctype/selling_settings/selling_settings.py:86
 msgid "You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted into the transaction price list."
-msgstr ""
+msgstr "شما {0} و {1} را در {2} فعال کرده‌اید. این می‌تواند منجر به درج قیمت‌های لیست قیمت پیش‌فرض در لیست قیمت تراکنش شود."
 
 #: erpnext/stock/doctype/shipment/shipment.js:442
 msgid "You have entered a duplicate Delivery Note on Row"

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-28 09:35+0000\n"
-"PO-Revision-Date: 2025-09-29 05:08\n"
+"PO-Revision-Date: 2025-10-01 05:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -19205,7 +19205,7 @@ msgstr "Formation de l'Employé"
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Employee Exit"
-msgstr ""
+msgstr "Sortie de l’employé"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/employee_external_work_history/employee_external_work_history.json
