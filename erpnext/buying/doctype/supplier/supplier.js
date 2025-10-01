@@ -109,10 +109,6 @@ frappe.ui.form.on("Supplier", {
 				__("View")
 			);
 
-			frm.add_custom_button(__("Bank Account"), () => frm.make_methods["Bank Account"](), __("Create"));
-
-			frm.add_custom_button(__("Pricing Rule"), () => frm.make_methods["Pricing Rule"](), __("Create"));
-
 			frm.add_custom_button(
 				__("Get Supplier Group Details"),
 				function () {
