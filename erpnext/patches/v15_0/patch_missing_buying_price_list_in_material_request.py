@@ -9,5 +9,8 @@ def execute():
 		docs = frappe.get_all(
 			"Material Request", filters={"buying_price_list": ["is", "not set"], "docstatus": 1}, pluck="name"
 		)
+		old_limit = frappe.db.MAX_WRITES_PER_TRANSACTION
+		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 		for doc in docs:
 			frappe.db.set_value("Material Request", doc, "buying_price_list", default_buying_price_list)
+		frappe.db.MAX_WRITES_PER_TRANSACTION = old_limit
