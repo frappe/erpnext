@@ -18,7 +18,7 @@ from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_conversion_factor, get_item_defaults
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -313,6 +313,60 @@ class BuyingController(SubcontractingController):
 				self.set(
 					address_display_field, render_address(self.get(address_field), check_permissions=False)
 				)
+
+	def set_gl_entry_for_purchase_expense(self, gl_entries):
+		if self.doctype == "Purchase Invoice" and not self.update_stock:
+			return
+
+		for row in self.items:
+			details = get_purchase_expense_account(row.item_code, self.company)
+
+			if not details.purchase_expense_account:
+				details.purchase_expense_account = frappe.get_cached_value(
+					"Company", self.company, "purchase_expense_account"
+				)
+
+			if not details.purchase_expense_account:
+				return
+
+			if not details.purchase_expense_contra_account:
+				details.purchase_expense_contra_account = frappe.get_cached_value(
+					"Company", self.company, "purchase_expense_contra_account"
+				)
+
+			if not details.purchase_expense_contra_account:
+				frappe.throw(
+					_("Please set Purchase Expense Contra Account in Company {0}").format(self.company)
+				)
+
+			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=details.purchase_expense_account,
+				cost_center=row.cost_center,
+				debit=amount,
+				credit=0.0,
+				remarks=_("Purchase Expense for Item {0}").format(row.item_code),
+				against_account=details.purchase_expense_contra_account,
+				account_currency=frappe.get_cached_value(
+					"Account", details.purchase_expense_account, "account_currency"
+				),
+				item=row,
+			)
+
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=details.purchase_expense_contra_account,
+				cost_center=row.cost_center,
+				debit=0.0,
+				credit=amount,
+				remarks=_("Purchase Expense for Item {0}").format(row.item_code),
+				against_account=details.purchase_expense_account,
+				account_currency=frappe.get_cached_value(
+					"Account", details.purchase_expense_contra_account, "account_currency"
+				),
+				item=row,
+			)
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -1178,3 +1232,33 @@ def validate_item_type(doc, fieldname, message):
 @erpnext.allow_regional
 def update_regional_item_valuation_rate(doc):
 	pass
+
+
+@frappe.request_cache
+def get_purchase_expense_account(item_code, company):
+	defaults = get_item_defaults(item_code, company)
+
+	details = frappe._dict(
+		{
+			"purchase_expense_account": defaults.get("purchase_expense_account"),
+			"purchase_expense_contra_account": defaults.get("purchase_expense_contra_account"),
+		}
+	)
+
+	if not details.purchase_expense_account:
+		details = frappe.db.get_value(
+			"Item Default",
+			{"parent": defaults.item_group, "company": company},
+			["purchase_expense_account", "purchase_expense_contra_account"],
+			as_dict=1,
+		) or frappe._dict({})
+
+	if not details.purchase_expense_account:
+		details = frappe.db.get_value(
+			"Item Default",
+			{"parent": defaults.brand, "company": company},
+			["purchase_expense_account", "purchase_expense_contra_account"],
+			as_dict=1,
+		)
+
+	return details or frappe._dict({})

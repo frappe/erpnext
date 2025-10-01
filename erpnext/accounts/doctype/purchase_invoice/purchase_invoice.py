@@ -884,6 +884,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
 		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
+		self.set_gl_entry_for_purchase_expense(gl_entries)
 		return gl_entries
 
 	def check_asset_cwip_enabled(self):

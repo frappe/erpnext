@@ -106,6 +106,10 @@
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
+  "purchase_expense_section",
+  "purchase_expense_account",
+  "column_break_ereg",
+  "purchase_expense_contra_account",
   "stock_tab",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
@@ -844,6 +848,27 @@
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Expense"
+  },
+  {
+   "fieldname": "column_break_ereg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_expense_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_expense_contra_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Contra Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -851,7 +876,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-08-25 18:34:03.602046",
+ "modified": "2025-10-01 17:34:10.971627",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

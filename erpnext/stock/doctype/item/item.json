@@ -16,20 +16,22 @@
   "item_name",
   "item_group",
   "stock_uom",
+  "opening_stock",
+  "valuation_rate",
+  "standard_rate",
   "column_break0",
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
   "has_variants",
-  "opening_stock",
-  "valuation_rate",
-  "standard_rate",
   "is_fixed_asset",
   "auto_create_assets",
   "is_grouped_asset",
   "asset_category",
   "asset_naming_series",
+  "section_break_znra",
   "over_delivery_receipt_allowance",
+  "column_break_wugd",
   "over_billing_allowance",
   "image",
   "section_break_11",
@@ -63,6 +65,8 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+  "defaults_tab",
+  "item_defaults",
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -74,8 +78,6 @@
   "column_break_9s9o",
   "enable_deferred_revenue",
   "no_of_months",
-  "section_break_avcp",
-  "item_defaults",
   "purchasing_tab",
   "purchase_uom",
   "min_order_qty",
@@ -888,10 +890,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_avcp",
-   "fieldtype": "Section Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "deferred_accounting_section",
    "fieldtype": "Section Break",
@@ -936,6 +934,19 @@
    "fieldname": "production_capacity",
    "fieldtype": "Int",
    "label": "Production Capacity"
+  },
+  {
+   "fieldname": "defaults_tab",
+   "fieldtype": "Tab Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "section_break_znra",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wugd",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-tag",
@@ -943,7 +954,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-08-14 23:35:56.293048",
+ "modified": "2025-10-01 16:58:40.946604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
