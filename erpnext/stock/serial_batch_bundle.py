@@ -1465,7 +1465,9 @@ def get_serial_batch_list_from_item(item):
 			if row.batch_no and row.batch_no not in batch_list:
 				batch_list.append(row.batch_no)
 	else:
-		serial_list = item.serial_no.split("\n") if item.serial_no else []
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		serial_list = get_serial_nos(item.serial_no) if item.serial_no else []
 		batch_list = [item.batch_no] if item.batch_no else []
 
 	return serial_list, batch_list

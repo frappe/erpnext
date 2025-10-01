@@ -1012,8 +1012,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					if (
 						flt(doc.per_delivered) < 100 &&
 						(order_is_a_sale || order_is_a_custom_sale) &&
-						allow_delivery &&
-						!doc.is_subcontracted
+						allow_delivery
 					) {
 						if (frappe.model.can_create("Delivery Note")) {
 							this.frm.add_custom_button(
