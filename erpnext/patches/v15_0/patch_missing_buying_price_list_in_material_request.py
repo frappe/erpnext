@@ -11,6 +11,8 @@ def execute():
 		)
 		old_limit = frappe.db.MAX_WRITES_PER_TRANSACTION
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
-		for doc in docs:
-			frappe.db.set_value("Material Request", doc, "buying_price_list", default_buying_price_list)
-		frappe.db.MAX_WRITES_PER_TRANSACTION = old_limit
+		try:
+			for doc in docs:
+				frappe.db.set_value("Material Request", doc, "buying_price_list", default_buying_price_list)
+		finally:
+			frappe.db.MAX_WRITES_PER_TRANSACTION = old_limit
