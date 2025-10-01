@@ -17,7 +17,7 @@ class PartySpecificItem(Document):
 
 		based_on_value: DF.DynamicLink
 		party: DF.DynamicLink
-		party_type: DF.Literal["Customer", "Supplier"]
+		party_type: DF.Literal["Customer", "Customer Group", "Supplier", "Supplier Group"]
 		restrict_based_on: DF.Literal["Item", "Item Group", "Brand"]
 	# end: auto-generated types
 

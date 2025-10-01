@@ -17,15 +17,15 @@
    "fieldname": "party_type",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Party Type",
-   "options": "Customer\nSupplier",
+   "label": "Party / Group Type",
+   "options": "Customer\nCustomer Group\nSupplier\nSupplier Group",
    "reqd": 1
   },
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Party Name",
+   "label": "Party / Group Name",
    "options": "party_type",
    "reqd": 1
   },
@@ -52,7 +52,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:08.752476",
+ "modified": "2025-10-01 14:52:57.939916",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Party Specific Item",
@@ -71,6 +71,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

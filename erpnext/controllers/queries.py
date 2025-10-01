@@ -210,20 +210,33 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
 			party = filters.get("customer") or filters.get("supplier")
+			party_doctype = "Customer" if filters.get("customer") else "Supplier"
+			group_field = "customer_group" if party_doctype == "Customer" else "supplier_group"
+			group_name = frappe.db.get_value(party_doctype, party, group_field) or None
+
+			parties_to_check = [party]
+			if group_name:
+				parties_to_check.append(group_name)
+
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
-				filters={"party": party},
+				filters={"party": ["in", parties_to_check]},
 				fields=["restrict_based_on", "based_on_value"],
 			)
 
 			filters_dict = {}
 			for rule in item_rules_list:
-				if rule["restrict_based_on"] == "Item":
-					rule["restrict_based_on"] = "name"
-				filters_dict[rule.restrict_based_on] = []
+				r_based = rule["restrict_based_on"]
+				if r_based == "Item":
+					r_based = "name"
+				if r_based not in filters_dict:
+					filters_dict[r_based] = []
 
 			for rule in item_rules_list:
-				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
+				r_based = rule["restrict_based_on"]
+				if r_based == "Item":
+					r_based = "name"
+				filters_dict[r_based].append(rule["based_on_value"])
 
 			for filter in filters_dict:
 				filters[scrub(filter)] = ["in", filters_dict[filter]]
@@ -238,7 +251,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	description_cond = ""
 	if frappe.db.estimate_count(doctype) < 50000:
-		# scan description only if items are less than 50000
 		description_cond = "or tabItem.description LIKE %(txt)s"
 
 	return frappe.db.sql(
