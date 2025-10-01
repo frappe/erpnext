@@ -765,7 +765,7 @@ erpnext.work_order = {
 
 						if (qty > 0) {
 							frm.add_custom_button(
-								__("Additional Transfer"),
+								__("Additional Material Transfer"),
 								function () {
 									erpnext.work_order.make_se(
 										frm,
@@ -807,7 +807,8 @@ erpnext.work_order = {
 										frm,
 										backflush_raw_materials_based_on
 									);
-								}
+								},
+								__("Make")
 							);
 						}
 					}
