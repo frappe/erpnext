@@ -303,8 +303,6 @@ def create_letter_head():
 			)
 			doc.insert(ignore_permissions=True)
 
-	frappe.db.commit()
-
 
 DEFAULT_ROLE_PROFILES = {
 	"Inventory": [
