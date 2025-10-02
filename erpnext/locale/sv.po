@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-28 09:35+0000\n"
-"PO-Revision-Date: 2025-09-29 05:07\n"
+"PO-Revision-Date: 2025-10-02 05:19\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -2798,7 +2798,7 @@ msgstr "Faktisk Moms/Avgift kan inte inkluderas i Artikel Pris på rad {0}"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:988
 msgid "Ad-hoc Qty"
-msgstr "Ad hoc Kvantitet"
+msgstr "Ändamål Kvantitet"
 
 #. Option for the 'Add Or Deduct' (Select) field in DocType 'Advance Taxes and
 #. Charges'
