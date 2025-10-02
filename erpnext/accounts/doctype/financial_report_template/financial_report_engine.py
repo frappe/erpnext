@@ -693,7 +693,7 @@ class FilterExpressionParser:
 	def build_conditions(self, report_rows, table):
 		conditions = []
 		for row in report_rows:
-			if isinstance(row, str):
+			if isinstance(row, str | dict):
 				row = frappe.parse_json(row)
 
 			condition = self.build_condition(row, table)
@@ -799,10 +799,21 @@ class FilterExpressionParser:
 
 
 @frappe.whitelist()
+def get_filtered_accounts(company: str, account_rows: str | list):
+	frappe.has_permission("Financial Report Template", ptype="read", throw=True)
+
+	if isinstance(account_rows, str):
+		account_rows = frappe.parse_json(account_rows)
+
+	return DataCollector.get_filtered_accounts(company, account_rows)
+
+
+@frappe.whitelist()
 def get_children_accounts(
+	doctype: str,
 	parent: str,
 	company: str,
-	account_rows: str | list,
+	filtered_accounts: list[str] | str | None = None,
 	missed: bool = False,
 	is_root: bool = False,
 	include_disabled: bool = False,
@@ -840,23 +851,20 @@ def get_children_accounts(
 	]
 	```
 	"""
-	frappe.has_permission("Account", ptype="read", throw=True)
+	frappe.has_permission(doctype, ptype="read", throw=True)
 
 	children_accounts = get_children(
-		"Account", parent, company, is_root=is_root, include_disabled=include_disabled
+		doctype, parent, company, is_root=is_root, include_disabled=include_disabled
 	)
 
 	if not children_accounts:
 		return []
 
-	if isinstance(account_rows, str):
-		account_rows = frappe.parse_json(account_rows)
-
-	# TODO: need caching??
-	filtered_accounts = DataCollector.get_filtered_accounts(company, account_rows)
+	if isinstance(filtered_accounts, str):
+		filtered_accounts = frappe.parse_json(filtered_accounts)
 
 	if not filtered_accounts:
-		return children_accounts if missed else [acc for acc in children_accounts if acc.expandable]
+		return children_accounts if missed else []
 
 	valid_accounts = []
 

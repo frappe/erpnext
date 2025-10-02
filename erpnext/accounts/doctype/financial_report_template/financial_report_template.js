@@ -14,11 +14,13 @@ frappe.ui.form.on("Financial Report Template", {
 		}
 
 		// add custom button to view missed accounts
-		if (!frm.is_new() && frm.doc.rows.length > 0) {
-			frm.add_custom_button(__("View Missing Accounts"), function () {
-				show_accounts_tree(frm.doc.rows, true);
-			});
-		}
+		frm.add_custom_button(__("View Accounts"), function () {
+			let selected_rows = frm.get_field("rows").grid.get_selected_children();
+			const has_selection = selected_rows.length > 0;
+			if (selected_rows.length === 0) selected_rows = frm.doc.rows;
+
+			show_accounts_tree(selected_rows, !has_selection);
+		});
 	},
 
 	validate(frm) {
@@ -37,7 +39,6 @@ frappe.ui.form.on("Financial Report Row", {
 			frappe.model.set_value(cdt, cdn, "balance_type", "");
 		}
 
-		// TODO: should  do it on server side?
 		if (["Blank Line", "Column Break", "Section Break"].includes(row.data_source)) {
 			frappe.model.set_value(cdt, cdn, "calculation_formula", "");
 		}
@@ -61,6 +62,218 @@ frappe.ui.form.on("Financial Report Row", {
 		set_up_filters_editor(frm, cdt, cdn);
 	},
 });
+
+// FILTERS EDITOR
+
+function set_up_filters_editor(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+
+	if (row.data_source !== "Account Data" || row.advanced_filtering) return;
+
+	const grid_row = frm.fields_dict["rows"].grid.get_row(cdn);
+	const wrapper = grid_row.get_field("filters_editor").$wrapper;
+	wrapper.empty();
+
+	const ACCOUNT = "Account";
+	const FIELD_IDX = 1;
+	const OPERATOR_IDX = 2;
+	const VALUE_IDX = 3;
+
+	// Parse saved filters
+	let saved_filters = [];
+
+	if (row.calculation_formula) {
+		const parsed = JSON.parse(row.calculation_formula);
+
+		if (Array.isArray(parsed)) saved_filters = [parsed];
+		else if (parsed.and) saved_filters = parsed.and;
+	}
+
+	if (saved_filters.length)
+		// Ensure every filter starts with "Account"
+		saved_filters = saved_filters.map((f) => [ACCOUNT, ...f]);
+
+	frappe.model.with_doctype(ACCOUNT, () => {
+		const filter_group = new frappe.ui.FilterGroup({
+			parent: wrapper,
+			doctype: ACCOUNT,
+			on_change: () => {
+				// only need [[field, operator, value]]
+				const filters = filter_group
+					.get_filters()
+					.map((f) => [f[FIELD_IDX], f[OPERATOR_IDX], f[VALUE_IDX]]);
+
+				const current = filters.length > 1 ? { and: filters } : filters[0];
+				frappe.model.set_value(cdt, cdn, "calculation_formula", JSON.stringify(current));
+			},
+		});
+
+		filter_group.add_filters_to_filter_group(saved_filters);
+	});
+}
+
+function update_advanced_formula_property(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	const is_advanced = is_advanced_formula(row);
+
+	frm.set_df_property("rows", "read_only", is_advanced, frm.doc.name, "advanced_filtering", cdn);
+
+	if (is_advanced && !row.advanced_filtering) {
+		row.advanced_filtering = 1;
+		frm.refresh_field("rows");
+	}
+}
+
+function is_advanced_formula(row) {
+	if (!row || row.data_source !== "Account Data") return false;
+
+	const parsed = row.calculation_formula ? JSON.parse(row.calculation_formula) : null;
+
+	if (Array.isArray(parsed)) return false;
+	if (parsed?.or) return true;
+	if (parsed?.and) return parsed.and.some((cond) => !Array.isArray(cond));
+
+	return false;
+}
+
+// ACCOUNTS TREE VIEW
+
+function show_accounts_tree(template_rows, show_alert) {
+	// filtered rows
+	const account_rows = template_rows.filter((row) => row.data_source === "Account Data");
+
+	if (account_rows.length === 0) {
+		frappe.show_alert(__("No <strong>Account Data</strong> row found"));
+		return;
+	}
+
+	const dialog = new frappe.ui.Dialog({
+		title: __("Accounts Missing from Report"),
+		fields: [
+			{
+				fieldname: "company",
+				fieldtype: "Link",
+				options: "Company",
+				label: "Company",
+				reqd: 1,
+				default: frappe.defaults.get_user_default("company"),
+				onchange: () => {
+					const company_field = dialog.get_field("company");
+					if (!company_field.value || company_field.value === company_field.last_value) return;
+					refresh_tree_view(dialog, account_rows);
+				},
+			},
+			{
+				fieldname: "view_type",
+				fieldtype: "Select",
+				options: ["Missing Accounts", "Filtered Accounts"],
+				label: "View",
+				default: "Missing Accounts",
+				reqd: 1,
+				onchange: () => {
+					dialog.set_title(
+						dialog.get_value("view_type") === "Missing Accounts"
+							? __("Accounts Missing from Report")
+							: __("Accounts Included in Report")
+					);
+
+					refresh_tree_view(dialog, account_rows);
+				},
+			},
+			{
+				fieldname: "tip",
+				fieldtype: "HTML",
+				label: "Tip",
+				options: `
+					<div class="alert alert-success" role="alert">
+							Tip: Select report lines to view their accounts
+					</div>
+				`,
+				depends_on: show_alert ? "eval: true" : "eval: false",
+			},
+			{
+				fieldname: "tree_area",
+				fieldtype: "HTML",
+				label: "Chart of Accounts",
+				read_only: 1,
+				depends_on: "eval: doc.company",
+			},
+		],
+		primary_action_label: __("Done"),
+		primary_action() {
+			dialog.hide();
+		},
+	});
+
+	dialog.show();
+	refresh_tree_view(dialog, account_rows);
+}
+
+async function refresh_tree_view(dialog, account_rows) {
+	const missed = dialog.get_value("view_type") === "Missing Accounts";
+	const company = dialog.get_value("company");
+
+	const wrapper = dialog.get_field("tree_area").$wrapper;
+	wrapper.empty();
+
+	// get filtered accounts
+	const { message: filtered_accounts } = await frappe.call({
+		method: "erpnext.accounts.doctype.financial_report_template.financial_report_engine.get_filtered_accounts",
+		args: { company: company, account_rows: account_rows },
+	});
+
+	// render tree
+	const tree = new FilteredTree({
+		parent: wrapper,
+		label: company,
+		root_value: company,
+		method: "erpnext.accounts.doctype.financial_report_template.financial_report_engine.get_children_accounts",
+		args: { doctype: "Account", company: company, filtered_accounts: filtered_accounts, missed: missed },
+		toolbar: [],
+	});
+
+	tree.load_children(tree.root_node, true);
+}
+
+class FilteredTree extends frappe.ui.Tree {
+	render_children_of_all_nodes(data_list) {
+		data_list = this.get_filtered_data_list(data_list);
+		super.render_children_of_all_nodes(data_list);
+	}
+
+	get_filtered_data_list(data_list) {
+		let removed_nodes = new Set();
+
+		// Filter nodes with no data
+		data_list = data_list.filter((d) => {
+			if (d.data.length === 0) {
+				removed_nodes.add(d.parent);
+				return false;
+			}
+			return true;
+		});
+
+		// Remove references to removed nodes and iteratively remove empty parents
+		while (removed_nodes.size > 0) {
+			const current_removed = [...removed_nodes];
+			removed_nodes.clear();
+
+			data_list = data_list.filter((d) => {
+				d.data = d.data.filter((a) => !current_removed.includes(a.value));
+
+				if (d.data.length === 0) {
+					removed_nodes.add(d.parent);
+					return false;
+				}
+				return true;
+			});
+		}
+
+		return data_list;
+	}
+}
+
+// FORMULA DESCRIPTION
 
 function update_formula_description(frm, data_source) {
 	if (!data_source) return;
@@ -187,130 +400,4 @@ function update_formula_description(frm, data_source) {
 	}
 
 	grid.update_docfield_property("formula_description", "options", description_html);
-}
-
-function set_up_filters_editor(frm, cdt, cdn) {
-	const row = locals[cdt][cdn];
-
-	if (row.data_source !== "Account Data" || row.advanced_filtering) return;
-
-	const grid_row = frm.fields_dict["rows"].grid.get_row(cdn);
-	const wrapper = grid_row.get_field("filters_editor").$wrapper;
-	wrapper.empty();
-
-	const ACCOUNT = "Account";
-	const FIELD_IDX = 1;
-	const OPERATOR_IDX = 2;
-	const VALUE_IDX = 3;
-
-	// Parse saved filters
-	let saved_filters = [];
-
-	if (row.calculation_formula) {
-		const parsed = JSON.parse(row.calculation_formula);
-
-		if (Array.isArray(parsed)) saved_filters = [parsed];
-		// TODO: handle nested and/or
-		else if (parsed.and) saved_filters = parsed.and;
-	}
-
-	if (saved_filters.length)
-		// Ensure every filter starts with "Account"
-		saved_filters = saved_filters.map((f) => [ACCOUNT, ...f]);
-
-	frappe.model.with_doctype(ACCOUNT, () => {
-		const filter_group = new frappe.ui.FilterGroup({
-			parent: wrapper,
-			doctype: ACCOUNT,
-			on_change: () => {
-				// only need [[field, operator, value]]
-				const filters = filter_group
-					.get_filters()
-					.map((f) => [f[FIELD_IDX], f[OPERATOR_IDX], f[VALUE_IDX]]);
-
-				const current = filters.length > 1 ? { and: filters } : filters[0];
-				frappe.model.set_value(cdt, cdn, "calculation_formula", JSON.stringify(current));
-			},
-		});
-
-		filter_group.add_filters_to_filter_group(saved_filters);
-	});
-}
-
-function update_advanced_formula_property(frm, cdt, cdn) {
-	const row = locals[cdt][cdn];
-	const is_advanced = is_advanced_formula(row);
-
-	frm.set_df_property("rows", "read_only", is_advanced, frm.doc.name, "advanced_filtering", cdn);
-
-	if (is_advanced && !row.advanced_filtering) {
-		row.advanced_filtering = 1;
-		frm.refresh_field("rows");
-	}
-}
-
-function is_advanced_formula(row) {
-	if (!row || row.data_source !== "Account Data") return false;
-
-	const parsed = row.calculation_formula ? JSON.parse(row.calculation_formula) : null;
-
-	if (Array.isArray(parsed)) return false;
-	if (parsed?.or) return true;
-	if (parsed?.and) return parsed.and.some((cond) => !Array.isArray(cond));
-
-	return false;
-}
-
-function show_accounts_tree(template_rows, missed = false) {
-	// filtered rows
-	const account_rows = template_rows.filter((row) => row.data_source === "Account Data");
-
-	if (account_rows.length === 0) {
-		frappe.show_alert(__("No <strong>Account Data</strong> row found"));
-		return;
-	}
-
-	const dialog = new frappe.ui.Dialog({
-		title: missed ? __("Missing Accounts") : __("Filtered Accounts"),
-		fields: [
-			{
-				fieldname: "company",
-				fieldtype: "Link",
-				options: "Company",
-				label: "Company",
-				reqd: 1,
-				onchange: function () {
-					const company = dialog.get_value("company");
-
-					if (!company) return;
-
-					// render tree
-					const wrapper = dialog.get_field("tree_area").$wrapper;
-					wrapper.empty();
-
-					new frappe.ui.Tree({
-						parent: wrapper,
-						label: company,
-						root_value: company,
-						method: "erpnext.accounts.doctype.financial_report_template.financial_report_engine.get_children_accounts",
-						args: { company: company, account_rows: account_rows, missed: missed },
-						toolbar: [],
-					});
-				},
-			},
-			{
-				fieldname: "tree_area",
-				fieldtype: "HTML",
-				label: "Chart of Accounts",
-				read_only: 1,
-				depends_on: "eval: doc.company",
-			},
-		],
-		primary_action_label: __("Done"),
-		primary_action() {
-			dialog.hide();
-		},
-	});
-
-	dialog.show();
 }
