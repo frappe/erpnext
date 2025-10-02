@@ -219,6 +219,7 @@ def get_batch_qty(
 	warehouse=None,
 	item_code=None,
 	creation=None,
+	posting_datetime=None,
 	posting_date=None,
 	posting_time=None,
 	ignore_voucher_nos=None,
@@ -237,6 +238,7 @@ def get_batch_qty(
 	:param for_stock_levels: True consider expired batches"""
 
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		combine_datetime,
 		get_auto_batch_nos,
 	)
 
@@ -246,8 +248,6 @@ def get_batch_qty(
 			"item_code": item_code,
 			"warehouse": warehouse,
 			"creation": creation,
-			"posting_date": posting_date,
-			"posting_time": posting_time,
 			"batch_no": batch_no,
 			"ignore_voucher_nos": ignore_voucher_nos,
 			"for_stock_levels": for_stock_levels,
@@ -255,6 +255,10 @@ def get_batch_qty(
 			"do_not_check_future_batches": do_not_check_future_batches,
 		}
 	)
+
+	kwargs["posting_datetime"] = posting_datetime
+	if not kwargs.get("posting_datetime") and posting_date:
+		kwargs["posting_datetime"] = combine_datetime(posting_date, posting_time)
 
 	batches = get_auto_batch_nos(kwargs)
 
@@ -337,6 +341,7 @@ def make_batch_bundle(
 ):
 	from frappe.utils import nowtime, today
 
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 	return (
@@ -344,8 +349,7 @@ def make_batch_bundle(
 			{
 				"item_code": item_code,
 				"warehouse": warehouse,
-				"posting_date": today(),
-				"posting_time": nowtime(),
+				"posting_datetime": combine_datetime(today(), nowtime()),
 				"voucher_type": "Stock Entry",
 				"qty": qty,
 				"type_of_transaction": type_of_transaction,
@@ -456,8 +460,12 @@ def get_pos_reserved_batch_qty(filters):
 
 def get_available_batches(kwargs):
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		combine_datetime,
 		get_auto_batch_nos,
 	)
+
+	if kwargs.get("posting_date"):
+		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 
 	batchwise_qty = OrderedDict()
 

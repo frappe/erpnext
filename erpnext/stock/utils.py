@@ -10,9 +10,7 @@ from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
 import erpnext
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_available_serial_nos,
-)
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -139,8 +137,7 @@ def get_stock_balance(
 					{
 						"item_code": item_code,
 						"warehouse": warehouse,
-						"posting_date": posting_date,
-						"posting_time": posting_time,
+						"posting_datetime": get_combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 					}
 				)
@@ -246,6 +243,9 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 
 	if isinstance(args, str):
 		args = json.loads(args)
+
+	if not args.get("posting_datetime") and args.get("posting_date"):
+		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
 	in_rate = None
 

@@ -437,3 +437,4 @@ erpnext.patches.v16_0.set_invoice_type_in_pos_settings
 erpnext.patches.v15_0.update_fieldname_in_accounting_dimension_filter
 erpnext.patches.v16_0.make_workstation_operating_components #1
 erpnext.patches.v16_0.set_reporting_currency
+erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes

@@ -212,7 +212,7 @@ def get_data(
 		company_currency,
 		accumulated_values=filters.accumulated_values,
 	)
-	out = filter_out_zero_value_rows(out, parent_children_map)
+	out = filter_out_zero_value_rows(out, parent_children_map, filters.show_zero_values)
 
 	if out and total:
 		add_total_row(out, root_type, balance_must_be, period_list, company_currency)

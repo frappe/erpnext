@@ -212,6 +212,7 @@ frappe.ui.form.on("Sales Order", {
 			"Purchase Order",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
+			"Delivery Schedule Item",
 		];
 	},
 
@@ -545,6 +546,209 @@ frappe.ui.form.on("Sales Order", {
 		};
 		frappe.set_route("query-report", "Reserved Stock");
 	},
+
+	prepare_delivery_schedule(frm, row, data) {
+		let fields = [
+			{
+				fieldtype: "Date",
+				fieldname: "delivery_date",
+				label: __("First Delivery Date"),
+				reqd: 1,
+				default: row.delivery_date || frm.doc.delivery_date || frappe.datetime.get_today(),
+			},
+			{
+				fieldtype: "Float",
+				fieldname: "qty",
+				label: __("Qty"),
+				read_only: 1,
+				default: row.qty || 0,
+			},
+			{
+				fieldtype: "Column Break",
+			},
+			{
+				fieldtype: "Select",
+				fieldname: "frequency",
+				label: __("Frequency"),
+				options: "\nWeekly\nMonthly\nQuarterly\nHalf Yearly\nYearly",
+			},
+			{
+				fieldtype: "Int",
+				fieldname: "no_of_deliveries",
+				label: __("No of Deliveries"),
+			},
+			{
+				fieldtype: "Section Break",
+			},
+			{
+				fieldtype: "Button",
+				fieldname: "get_delivery_schedule",
+				label: __("Get Delivery Schedule"),
+				click: () => {
+					frappe.db.get_value("UOM", row.uom, "must_be_whole_number", (r) => {
+						frm.events.add_delivery_schedule(frm, row, r.must_be_whole_number);
+					});
+				},
+			},
+			{
+				fieldtype: "Table",
+				data: [],
+				fieldname: "delivery_schedule",
+				label: __("Delivery Schedule"),
+				fields: [
+					{
+						fieldtype: "Date",
+						fieldname: "delivery_date",
+						label: __("Delivery Date"),
+						reqd: 1,
+						in_list_view: 1,
+					},
+					{
+						fieldtype: "Float",
+						fieldname: "qty",
+						label: __("Qty"),
+						reqd: 1,
+						in_list_view: 1,
+					},
+					{
+						fieldtype: "Data",
+						fieldname: "Name",
+						label: __("name"),
+						read_only: 1,
+					},
+				],
+			},
+		];
+
+		frm.schedule_dialog = new frappe.ui.Dialog({
+			title: __("Delivery Schedule"),
+			fields: fields,
+			size: "large",
+			primary_action_label: __("Add Schedule"),
+			primary_action: (data) => {
+				if (!data.delivery_schedule || !data.delivery_schedule.length) {
+					frappe.throw(__("Please enter at least one delivery date and quantity"));
+				}
+
+				let total_qty = 0;
+				data.delivery_schedule.forEach((d) => {
+					if (!d.qty) {
+						frappe.throw(__("Please enter a valid quantity"));
+					}
+					total_qty += flt(d.qty);
+				});
+
+				if (total_qty > flt(row.qty)) {
+					frappe.throw(
+						__("Total quantity in delivery schedule cannot be greater than the item quantity")
+					);
+				}
+
+				frappe.call({
+					doc: frm.doc,
+					method: "create_delivery_schedule",
+					args: {
+						child_row: row,
+						schedules: data.delivery_schedule,
+					},
+					freeze: true,
+					freeze_message: __("Creating Delivery Schedule..."),
+					callback: function () {
+						frm.refresh_field("items");
+						frm.schedule_dialog.hide();
+					},
+				});
+			},
+		});
+
+		frm.schedule_dialog.show();
+
+		if (data?.length) {
+			data.forEach((d) => {
+				if (d.delivery_date && d.qty) {
+					frm.schedule_dialog.fields_dict.delivery_schedule.df.data.push({
+						delivery_date: d.delivery_date,
+						qty: d.qty,
+						name: d.name,
+					});
+				}
+			});
+
+			frm.schedule_dialog.fields_dict.delivery_schedule.refresh();
+		}
+	},
+
+	add_delivery_schedule(frm, row, must_be_whole_number) {
+		let first_delivery_date = frm.schedule_dialog.get_value("delivery_date");
+		let frequency = frm.schedule_dialog.get_value("frequency");
+		let no_of_deliveries = cint(frm.schedule_dialog.get_value("no_of_deliveries"));
+
+		if (!frequency) {
+			frappe.throw(__("Please select a frequency for delivery schedule"));
+		}
+
+		if (!first_delivery_date) {
+			frappe.throw(__("Please enter the first delivery date"));
+		}
+
+		if (no_of_deliveries <= 0) {
+			frappe.throw(__("Please enter a valid number of deliveries"));
+		}
+
+		frm.schedule_dialog.fields_dict.delivery_schedule.df.data = [];
+		let qty_to_deliver = row.qty;
+		let qty_per_delivery = qty_to_deliver / no_of_deliveries;
+		for (let i = 0; i < no_of_deliveries; i++) {
+			let qty = qty_per_delivery;
+			if (must_be_whole_number) {
+				qty = cint(qty);
+			}
+
+			if (i === no_of_deliveries - 1) {
+				// Last delivery, adjust the quantity to deliver the remaining amount
+				qty = qty_to_deliver;
+				qty_to_deliver = 0;
+			} else {
+				qty_to_deliver -= qty;
+			}
+
+			frm.schedule_dialog.fields_dict.delivery_schedule.df.data.push({
+				delivery_date: first_delivery_date,
+				qty: qty,
+			});
+
+			if (frequency === "Weekly") {
+				first_delivery_date = frappe.datetime.add_days(first_delivery_date, i + 1 * 7);
+			} else {
+				let month_mapper = {
+					Monthly: 1,
+					Quarterly: 3,
+					Half_Yearly: 6,
+					Yearly: 12,
+				};
+
+				first_delivery_date = frappe.datetime.add_months(
+					first_delivery_date,
+					month_mapper[frequency] * i + 1
+				);
+			}
+		}
+
+		frm.schedule_dialog.fields_dict.delivery_schedule.refresh();
+	},
+
+	set_delivery_schedule(frm, row, data) {
+		data.forEach((d) => {
+			if (d.delivery_date && d.qty) {
+				frm.schedule_dialog.fields_dict.delivery_schedule.df.data.push({
+					delivery_date: d.delivery_date,
+					qty: d.qty,
+				});
+			}
+		});
+
+		frm.schedule_dialog.fields_dict.delivery_schedule.refresh();
+	},
 });
 
 frappe.ui.form.on("Sales Order Item", {
@@ -557,10 +761,26 @@ frappe.ui.form.on("Sales Order Item", {
 			frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
 		}
 	},
+
 	delivery_date: function (frm, cdt, cdn) {
 		if (!frm.doc.delivery_date) {
 			erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "delivery_date");
 		}
+	},
+
+	add_schedule(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		frappe.call({
+			method: "get_delivery_schedule",
+			doc: frm.doc,
+			args: {
+				sales_order_item: row.name,
+			},
+			callback: function (r) {
+				frm.events.prepare_delivery_schedule(frm, row, r.message);
+			},
+		});
 	},
 });
 

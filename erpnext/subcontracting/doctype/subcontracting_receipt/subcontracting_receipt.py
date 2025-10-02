@@ -117,7 +117,13 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_items_qty()
 		self.set_items_bom()
 		self.set_items_cost_center()
-		self.set_items_expense_account()
+
+		if self.company:
+			default_expense_account = self.get_company_default(
+				"default_expense_account", ignore_validation=True
+			)
+			self.set_service_expense_account(default_expense_account)
+			self.set_expense_account_for_subcontracted_items(default_expense_account)
 
 	def validate(self):
 		self.reset_supplied_items()
@@ -205,6 +211,39 @@ class SubcontractingReceipt(SubcontractingController):
 				doc = frappe.get_doc("Job Card", row.job_card)
 				doc.set_manufactured_qty()
 
+	def set_service_expense_account(self, default_expense_account):
+		for row in self.get("items"):
+			if not row.service_expense_account and row.purchase_order_item:
+				service_item = frappe.db.get_value(
+					"Purchase Order Item", row.purchase_order_item, "item_code"
+				)
+
+				if service_item:
+					if default := (
+						get_item_defaults(service_item, self.company)
+						or get_item_group_defaults(service_item, self.company)
+						or get_brand_defaults(service_item, self.company)
+					):
+						if service_expense_account := default.get("expense_account"):
+							row.service_expense_account = service_expense_account
+
+			if not row.service_expense_account:
+				row.service_expense_account = default_expense_account
+
+	def set_expense_account_for_subcontracted_items(self, default_expense_account):
+		for row in self.get("items"):
+			if not row.expense_account:
+				if default := (
+					get_item_defaults(row.item_code, self.company)
+					or get_item_group_defaults(row.item_code, self.company)
+					or get_brand_defaults(row.item_code, self.company)
+				):
+					if expense_account := default.get("expense_account"):
+						row.expense_account = expense_account
+
+			if not row.expense_account:
+				row.expense_account = default_expense_account
+
 	def get_manufactured_qty(self, job_card):
 		table = frappe.qb.DocType("Subcontracting Receipt Item")
 		query = (
@@ -261,14 +300,6 @@ class SubcontractingReceipt(SubcontractingController):
 					get_brand_defaults(item.rm_item_code, self.company),
 					self.company,
 				)
-
-	def set_items_expense_account(self):
-		if self.company:
-			expense_account = self.get_company_default("default_expense_account", ignore_validation=True)
-
-			for item in self.items:
-				if not item.expense_account:
-					item.expense_account = expense_account
 
 	def set_supplied_items_expense_account(self):
 		for item in self.supplied_items:
@@ -625,16 +656,35 @@ class SubcontractingReceipt(SubcontractingController):
 						project=item.project,
 						item=item,
 					)
+
+					service_cost = flt(
+						item.service_cost_per_qty, item.precision("service_cost_per_qty")
+					) * flt(item.qty, item.precision("qty"))
 					# Expense Account (Credit)
 					self.add_gl_entry(
 						gl_entries=gl_entries,
 						account=item.expense_account,
 						cost_center=item.cost_center,
 						debit=0.0,
-						credit=stock_value_diff,
+						credit=flt(stock_value_diff) - service_cost,
 						remarks=remarks,
 						against_account=accepted_warehouse_account,
 						account_currency=get_account_currency(item.expense_account),
+						project=item.project,
+						item=item,
+					)
+
+					service_account = item.service_expense_account or item.expense_account
+					# Expense Account (Credit)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=service_account,
+						cost_center=item.cost_center,
+						debit=0.0,
+						credit=service_cost,
+						remarks=remarks,
+						against_account=accepted_warehouse_account,
+						account_currency=get_account_currency(service_account),
 						project=item.project,
 						item=item,
 					)

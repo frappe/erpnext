@@ -592,7 +592,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		frappe.flags.dialog_set = false;
 
 		// Experimental: This will be removed once stability is achieved.
-		if (frappe.boot.sysdefaults.use_server_side_reactivity) {
+		if (!frappe.boot.sysdefaults.use_legacy_js_reactivity) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.call({
 				doc: doc,
@@ -1069,7 +1069,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if (me.frm.doc.doctype == "Quotation" && me.frm.doc.quotation_to == "Customer") {
 				(party_type = "Customer"), (party_name = me.frm.doc.party_name);
 			} else {
-				party_type = frappe.meta.has_field(me.frm.doc.doctype, "customer") ? "Customer" : "Supplier";
+				party_type = frappe.meta.has_field(me.frm.doc.doctype, "supplier") ? "Supplier" : "Customer";
 				party_name = me.frm.doc[party_type.toLowerCase()];
 			}
 			if (party_name) {
@@ -2488,14 +2488,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function (r) {
 					if (!r.exc) {
+						let taxes = r.message;
+						taxes.forEach((tax) => {
+							if (me.frm.doc?.cost_center && !tax.cost_center) {
+								tax.cost_center = me.frm.doc.cost_center;
+							}
+						});
 						if (me.frm.doc.shipping_rule && me.frm.doc.taxes) {
-							for (let tax of r.message) {
+							for (let tax of taxes) {
 								me.frm.add_child("taxes", tax);
 							}
 
 							refresh_field("taxes");
 						} else {
-							me.frm.set_value("taxes", r.message);
+							me.frm.set_value("taxes", taxes);
 							me.calculate_taxes_and_totals();
 						}
 					}

@@ -335,10 +335,12 @@ frappe.ui.form.on("Pick List Item", {
 	item_code: (frm, cdt, cdn) => {
 		let row = frappe.get_doc(cdt, cdn);
 		if (row.item_code) {
-			get_item_details(row.item_code).then((data) => {
+			get_item_details(row.item_code, row.uom, row.warehouse, frm.doc.company).then((data) => {
 				frappe.model.set_value(cdt, cdn, "uom", data.stock_uom);
 				frappe.model.set_value(cdt, cdn, "stock_uom", data.stock_uom);
 				frappe.model.set_value(cdt, cdn, "conversion_factor", 1);
+				frappe.model.set_value(cdt, cdn, "actual_qty", data.actual_qty);
+				frappe.model.set_value(cdt, cdn, "company_total_stock", data.company_total_stock);
 			});
 		}
 	},
@@ -350,6 +352,15 @@ frappe.ui.form.on("Pick List Item", {
 				frappe.model.set_value(cdt, cdn, "conversion_factor", data.conversion_factor);
 			});
 		}
+	},
+
+	warehouse: (frm, cdt, cdn) => {
+		const row = frappe.get_doc(cdt, cdn);
+		if (!row.item_code || !row.warehouse) return;
+		get_item_details(row.item_code, row.uom, row.warehouse, frm.doc.company).then((data) => {
+			frappe.model.set_value(cdt, cdn, "actual_qty", data.actual_qty);
+			frappe.model.set_value(cdt, cdn, "company_total_stock", data.company_total_stock);
+		});
 	},
 
 	qty: (frm, cdt, cdn) => {
@@ -393,11 +404,13 @@ frappe.ui.form.on("Pick List Item", {
 	},
 });
 
-function get_item_details(item_code, uom = null) {
+function get_item_details(item_code, uom = null, warehouse = null, company = null) {
 	if (item_code) {
 		return frappe.xcall("erpnext.stock.doctype.pick_list.pick_list.get_item_details", {
 			item_code,
 			uom,
+			warehouse,
+			company,
 		});
 	}
 }

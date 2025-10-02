@@ -98,7 +98,7 @@
   "payment_request_settings",
   "create_pr_in_draft_status",
   "budget_settings",
-  "use_new_budget_controller"
+  "use_legacy_budget_controller"
  ],
  "fields": [
   {
@@ -600,12 +600,6 @@
   },
   {
    "default": "1",
-   "fieldname": "use_new_budget_controller",
-   "fieldtype": "Check",
-   "label": "Use New Budget Controller"
-  },
-  {
-   "default": "1",
    "description": "If enabled, user will be alerted before resetting posting date to current date in relevant transactions",
    "fieldname": "confirm_before_resetting_posting_date",
    "fieldtype": "Check",
@@ -651,6 +645,12 @@
    "fieldname": "fetch_valuation_rate_for_internal_transaction",
    "fieldtype": "Check",
    "label": "Fetch Valuation Rate for Internal Transaction"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_legacy_budget_controller",
+   "fieldtype": "Check",
+   "label": "Use Legacy Budget Controller"
   }
  ],
  "grid_page_length": 50,
@@ -659,7 +659,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-07-18 13:56:47.192437",
+ "modified": "2025-09-24 16:08:08.515254",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

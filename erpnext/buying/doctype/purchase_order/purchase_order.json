@@ -16,6 +16,7 @@
   "order_confirmation_no",
   "order_confirmation_date",
   "get_items_from_open_material_requests",
+  "mps",
   "column_break_7",
   "transaction_date",
   "schedule_date",
@@ -1315,6 +1316,13 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "mps",
+   "fieldtype": "Link",
+   "label": "MPS",
+   "options": "Master Production Schedule",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -1322,7 +1330,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-31 17:19:40.816883",
+ "modified": "2025-08-28 11:00:56.635116",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

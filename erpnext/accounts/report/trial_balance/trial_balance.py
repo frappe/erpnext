@@ -212,7 +212,7 @@ def get_opening_balance(
 	ignore_is_opening=0,
 ):
 	closing_balance = frappe.qb.DocType(doctype)
-	account = frappe.qb.DocType("Account")
+	accounts = frappe.db.get_all("Account", filters={"report_type": report_type}, pluck="name")
 
 	opening_balance = (
 		frappe.qb.from_(closing_balance)
@@ -224,14 +224,7 @@ def get_opening_balance(
 			Sum(closing_balance.debit_in_account_currency).as_("debit_in_account_currency"),
 			Sum(closing_balance.credit_in_account_currency).as_("credit_in_account_currency"),
 		)
-		.where(
-			(closing_balance.company == filters.company)
-			& (
-				closing_balance.account.isin(
-					frappe.qb.from_(account).select("name").where(account.report_type == report_type)
-				)
-			)
-		)
+		.where((closing_balance.company == filters.company) & (closing_balance.account.isin(accounts)))
 		.groupby(closing_balance.account)
 	)
 
@@ -286,21 +279,24 @@ def get_opening_balance(
 	if filters.project:
 		opening_balance = opening_balance.where(closing_balance.project == filters.project)
 
-	if filters.get("include_default_book_entries"):
-		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+	if frappe.db.count("Finance Book"):
+		if filters.get("include_default_book_entries"):
+			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 
-		if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
-			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
+			if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default FB Entries'")
+				)
 
-		opening_balance = opening_balance.where(
-			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
-			| (closing_balance.finance_book.isnull())
-		)
-	else:
-		opening_balance = opening_balance.where(
-			(closing_balance.finance_book.isin([cstr(filters.finance_book), ""]))
-			| (closing_balance.finance_book.isnull())
-		)
+			opening_balance = opening_balance.where(
+				(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
+				| (closing_balance.finance_book.isnull())
+			)
+		else:
+			opening_balance = opening_balance.where(
+				(closing_balance.finance_book.isin([cstr(filters.finance_book), ""]))
+				| (closing_balance.finance_book.isnull())
+			)
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
