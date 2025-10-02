@@ -775,6 +775,7 @@ class ProductionPlan(Document):
 			work_order_data = {
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
+				"scrap_warehouse": default_warehouses.get("scrap_warehouse"),
 				"company": self.get("company"),
 			}
 
@@ -1909,7 +1910,7 @@ def get_sub_assembly_items(
 
 
 def set_default_warehouses(row, default_warehouses):
-	for field in ["wip_warehouse", "fg_warehouse"]:
+	for field in ["wip_warehouse", "fg_warehouse", "scrap_warehouse"]:
 		if not row.get(field):
 			row[field] = default_warehouses.get(field)
 
