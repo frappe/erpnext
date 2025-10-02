@@ -352,8 +352,6 @@ function update_formula_description(frm, data_source) {
 
 				<h6 ${subtitle_style}>Return Format:</h6>
 				<p ${text_style}>Numbers for each period: <code>[1000.0, 1200.0, 1150.0]</code></p>
-
-				<p ${note_style}><strong>Note:</strong> Method must be decorated with <code>@frappe.whitelist()</code></p>
 			</div>`;
 	} else if (data_source === "Blank Line") {
 		description_html = `
