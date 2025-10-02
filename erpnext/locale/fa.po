@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-28 09:35+0000\n"
-"PO-Revision-Date: 2025-10-01 05:07\n"
+"PO-Revision-Date: 2025-10-02 05:20\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -62,7 +62,7 @@ msgstr " نرخ"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
-msgstr " ماده خام"
+msgstr " مواد اولیه"
 
 #. Label of the reserve_stock (Check) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -2836,7 +2836,7 @@ msgstr "افزودن نقل قول"
 #: erpnext/manufacturing/doctype/bom/bom.js:948
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Add Raw Materials"
-msgstr "افزودن مواد خام"
+msgstr "افزودن مواد اولیه"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:72
 msgid "Add Safety Stock"
@@ -4538,7 +4538,7 @@ msgstr "اجازه دهید پس از خرید/تحویل، بازرسی کیف�
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Allow transferring raw materials even after the Required Quantity is fulfilled"
-msgstr "اجازه انتقال مواد خام حتی پس از برآورده شدن مقدار مورد نیاز"
+msgstr "اجازه انتقال مواد اولیه حتی پس از برآورده شدن مقدار مورد نیاز"
 
 #. Label of the allowed (Check) field in DocType 'Repost Allowed Types'
 #: erpnext/accounts/doctype/repost_allowed_types/repost_allowed_types.json
@@ -19254,7 +19254,7 @@ msgstr "هنگام صدور دارایی {0} به کارمند نیاز است"
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:79
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:100
 msgid "Employee {0} does not belong to the company {1}"
-msgstr ""
+msgstr "کارمند {0} متعلق به شرکت {1} نیست"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:315
 msgid "Employee {0} is currently working on another workstation. Please assign another employee."
@@ -25797,7 +25797,7 @@ msgstr "نقش اصلی نامعتبر است"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:123
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:126
 msgid "Invalid Print Format"
-msgstr ""
+msgstr "قالب چاپ نامعتبر"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:60
 msgid "Invalid Priority"
@@ -27958,7 +27958,7 @@ msgstr "عملیات آیتم"
 
 #: erpnext/controllers/accounts_controller.py:3689
 msgid "Item qty can not be updated as raw materials are already processed."
-msgstr "تعداد مورد را نمی‌توان به روز کرد زیرا مواد خام قبلاً پردازش شده است."
+msgstr "تعداد مورد را نمی‌توان به روز کرد زیرا مواد اولیه قبلاً پردازش شده است."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:904
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
@@ -28077,7 +28077,7 @@ msgstr "مورد {0} باید یک کالای غیر موجودی باشد"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1203
 msgid "Item {0} not found in 'Raw Materials Supplied' table in {1} {2}"
-msgstr "مورد {0} در جدول \"مواد خام تامین شده\" در {1} {2} یافت نشد"
+msgstr "مورد {0} در جدول \"مواد اولیه تامین شده\" در {1} {2} یافت نشد"
 
 #: erpnext/stock/doctype/item_price/item_price.py:56
 msgid "Item {0} not found."
@@ -28250,7 +28250,7 @@ msgstr "آیتم‌ها را نمی‌توان به روز کرد زیرا سف�
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1249
 msgid "Items for Raw Material Request"
-msgstr "آیتم‌ها برای درخواست مواد خام"
+msgstr "آیتم‌ها برای درخواست مواد اولیه"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:900
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -28264,7 +28264,7 @@ msgstr "مواردی که باید بازنشر شوند"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1617
 msgid "Items to Manufacture are required to pull the Raw Materials associated with it."
-msgstr "آیتم برای تولید برای دریافت مواد خام مرتبط با آن مورد نیاز است."
+msgstr "آیتم برای تولید برای دریافت مواد اولیه مرتبط با آن مورد نیاز است."
 
 #. Label of a Link in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -30864,7 +30864,7 @@ msgstr "نوع درخواست مواد"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1805
 msgid "Material Request not created, as quantity for Raw Materials already available."
-msgstr "درخواست مواد ایجاد نشد، زیرا مقدار مواد خام از قبل موجود است."
+msgstr "درخواست مواد ایجاد نشد، زیرا مقدار مواد اولیه از قبل موجود است."
 
 #: erpnext/stock/doctype/material_request/material_request.py:121
 msgid "Material Request of maximum {0} can be made for Item {1} against Sales Order {2}"
@@ -42054,7 +42054,7 @@ msgstr "تعداد کالاهای تمام شده باید بیشتر از 0 ب�
 #. 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
 msgid "Qty of raw materials will be decided based on the qty of the Finished Goods Item"
-msgstr "تعداد مواد خام بر اساس تعداد کالاهای نهایی تعیین می‌شود"
+msgstr "تعداد مواد اولیه بر اساس تعداد کالاهای نهایی تعیین می‌شود"
 
 #. Label of the consumed_qty (Float) field in DocType 'Purchase Receipt Item
 #. Supplied'
@@ -43175,7 +43175,7 @@ msgstr "نسبت ها"
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:53
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:199
 msgid "Raw Material"
-msgstr "ماده خام"
+msgstr "مواد اولیه"
 
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:395
 msgid "Raw Material Code"
@@ -43198,11 +43198,11 @@ msgstr "هزینه مواد اولیه (ارز شرکت)"
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Raw Material Cost Per Qty"
-msgstr "هزینه مواد خام به ازای هر تعداد"
+msgstr "هزینه مواد اولیه به ازای هر تعداد"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:132
 msgid "Raw Material Item"
-msgstr "مورد مواد خام"
+msgstr "مورد مواد اولیه"
 
 #. Label of the rm_item_code (Link) field in DocType 'Purchase Order Item
 #. Supplied'
@@ -43225,7 +43225,7 @@ msgstr "نام ماده اولیه"
 
 #: erpnext/manufacturing/report/process_loss_report/process_loss_report.py:112
 msgid "Raw Material Value"
-msgstr "ارزش مواد خام"
+msgstr "ارزش مواد اولیه"
 
 #: erpnext/stock/report/landed_cost_report/landed_cost_report.js:36
 msgid "Raw Material Voucher No"
@@ -43250,7 +43250,7 @@ msgstr "انبار مواد اولیه"
 #: erpnext/manufacturing/doctype/workstation/workstation.js:462
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:353
 msgid "Raw Materials"
-msgstr "مواد خام"
+msgstr "مواد اولیه"
 
 #. Label of the raw_materials_consumed_section (Section Break) field in DocType
 #. 'Subcontracting Receipt'
@@ -43299,7 +43299,7 @@ msgstr "هزینه تامین مواد اولیه"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:652
 msgid "Raw Materials cannot be blank."
-msgstr "مواد خام نمی‌تواند خالی باشد."
+msgstr "مواد اولیه نمی‌تواند خالی باشد."
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -45269,7 +45269,7 @@ msgstr "موجودی رزرو شده برای زیر مونتاژ"
 
 #: erpnext/controllers/buying_controller.py:571
 msgid "Reserved Warehouse is mandatory for the Item {item_code} in Raw Materials supplied."
-msgstr "انبار رزرو شده برای آیتم {item_code} در مواد خام عرضه شده الزامی است."
+msgstr "انبار رزرو شده برای آیتم {item_code} در مواد اولیه عرضه شده الزامی است."
 
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:197
 msgid "Reserved for POS Transactions"
@@ -46587,7 +46587,7 @@ msgstr "ردیف #{1}: انبار برای کالای موجودی {0} اجبا�
 
 #: erpnext/controllers/buying_controller.py:291
 msgid "Row #{idx}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor."
-msgstr "ردیف #{idx}: هنگام تامین مواد خام به پیمانکار فرعی، نمی‌توان انبار تامین کننده را انتخاب کرد."
+msgstr "ردیف #{idx}: هنگام تامین مواد اولیه به پیمانکار فرعی، نمی‌توان انبار تامین کننده را انتخاب کرد."
 
 #: erpnext/controllers/buying_controller.py:502
 msgid "Row #{idx}: Item rate has been updated as per valuation rate since its an internal stock transfer."
@@ -46700,7 +46700,7 @@ msgstr "ردیف {0}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:692
 msgid "Row {0} : Operation is required against the raw material item {1}"
-msgstr "ردیف {0} : عملیات در برابر ماده خام {1} مورد نیاز است"
+msgstr "ردیف {0} : عملیات در برابر مواد اولیه {1} مورد نیاز است"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:211
 msgid "Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
@@ -46712,7 +46712,7 @@ msgstr "ردیف {0}# مورد {1} را نمی‌توان بیش از {2} در �
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1279
 msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
-msgstr "ردیف {0}# آیتم {1} در جدول «مواد خام تامین شده» در {2} {3} یافت نشد"
+msgstr "ردیف {0}# آیتم {1} در جدول «مواد اولیه تامین شده» در {2} {3} یافت نشد"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:262
 msgid "Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time."
@@ -46950,7 +46950,7 @@ msgstr "ردیف {0}: Shift را نمی‌توان تغییر داد زیرا ا
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1292
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
-msgstr "ردیف {0}: آیتم قرارداد فرعی شده برای مواد خام اجباری است {1}"
+msgstr "ردیف {0}: آیتم قرارداد فرعی شده برای مواد اولیه اجباری است {1}"
 
 #: erpnext/controllers/stock_controller.py:1280
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
@@ -48864,7 +48864,7 @@ msgstr "تاریخ و منطقه زمانی خود را انتخاب کنید"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:905
 msgid "Select the raw materials (Items) required to manufacture the Item"
-msgstr "مواد خام (آیتم‌ها) مورد نیاز برای تولید آیتم را انتخاب کنید"
+msgstr "مواد اولیه (آیتم‌ها) مورد نیاز برای تولید آیتم را انتخاب کنید"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:452
 msgid "Select variant item code for the template item {0}"
@@ -48896,7 +48896,7 @@ msgstr "لیست قیمت انتخاب شده باید دارای فیلدهای
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:121
 msgid "Selected Print Format does not exist."
-msgstr ""
+msgstr "قالب چاپ انتخاب شده وجود ندارد."
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:107
 msgid "Selected Serial and Batch Bundle entries have been removed."
@@ -52763,7 +52763,7 @@ msgstr "مقدار قرارداد فرعی شده"
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Subcontracted Raw Materials To Be Transferred"
-msgstr "مواد خام قرارداد فرعی شده برای انتقال"
+msgstr "مواد اولیه قرارداد فرعی شده برای انتقال"
 
 #. Option for the 'Type' (Select) field in DocType 'Material Request Plan Item'
 #. Label of the subcontracting_section (Section Break) field in DocType
@@ -55347,7 +55347,7 @@ msgstr "باندل سریال و دسته {0} برای این تراکنش مع�
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
-msgstr "ثبت موجودی از نوع \"ساخت\" به عنوان کسر خودکار شناخته می‌شود. مواد اولیه ای که برای تولید کالاهای نهایی مصرف می‌شود به عنوان کسر خودکار شناخته می‌شود. <br><br> هنگام ایجاد ثبت ساخت، آیتم‌های مواد خام بر اساس BOM آیتم تولیدی، کسر خودکار می‌شوند. اگر می‌خواهید آیتم‌های مواد خام بر اساس ثبت انتقال مواد که در مقابل آن دستور کار انجام شده است، کسر خودکار شوند، می‌توانید آن را در این قسمت تنظیم کنید."
+msgstr "ثبت موجودی از نوع \"ساخت\" به عنوان کسر خودکار شناخته می‌شود. مواد اولیه ای که برای تولید کالاهای نهایی مصرف می‌شود به عنوان کسر خودکار شناخته می‌شود. <br><br> هنگام ایجاد ثبت ساخت، آیتم‌های مواد اولیه بر اساس BOM آیتم تولیدی، کسر خودکار می‌شوند. اگر می‌خواهید آیتم‌های مواد اولیه بر اساس ثبت انتقال مواد که در مقابل آن دستور کار انجام شده است، کسر خودکار شوند، می‌توانید آن را در این قسمت تنظیم کنید."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1934
 msgid "The Work Order is mandatory for Disassembly Order"
@@ -55927,7 +55927,7 @@ msgstr "این به طور پیش‌فرض فعال است. اگر می‌خوا
 
 #: erpnext/stock/doctype/item/item.js:993
 msgid "This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked."
-msgstr "این برای آیتم‌های مواد خام است که برای ایجاد کالاهای نهایی استفاده می‌شود. اگر آیتم یک سرویس اضافی مانند \"شستن\" است که در BOM استفاده می‌شود، این مورد را علامت نزنید."
+msgstr "این برای آیتم‌های مواد اولیه است که برای ایجاد کالاهای نهایی استفاده می‌شود. اگر آیتم یک سرویس اضافی مانند \"شستن\" است که در BOM استفاده می‌شود، این مورد را علامت نزنید."
 
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.py:35
 msgid "This item filter has already been applied for the {0}"
@@ -56688,7 +56688,7 @@ msgstr "برای افزودن عملیات، کادر \"با عملیات\" را
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:735
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
-msgstr "افزودن مواد خام قرارداد فرعی شده در صورت وجود آیتم‌های گسترده شده غیرفعال است."
+msgstr "افزودن مواد اولیه قرارداد فرعی شده در صورت وجود آیتم‌های گسترده شده غیرفعال است."
 
 #: erpnext/controllers/status_updater.py:386
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
@@ -58886,7 +58886,7 @@ msgstr "به‌روزرسانی هزینه BOM به صورت خودکار"
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Update BOM cost automatically via scheduler, based on the latest Valuation Rate/Price List Rate/Last Purchase Rate of raw materials"
-msgstr "به‌روزرسانی هزینه BOM به‌طور خودکار از طریق زمان‌بندی، بر اساس آخرین نرخ ارزش‌گذاری/نرخ لیست قیمت/آخرین نرخ خرید مواد خام"
+msgstr "به‌روزرسانی هزینه BOM به‌طور خودکار از طریق زمان‌بندی، بر اساس آخرین نرخ ارزش‌گذاری/نرخ لیست قیمت/آخرین نرخ خرید مواد اولیه"
 
 #. Label of the update_billed_amount_in_delivery_note (Check) field in DocType
 #. 'POS Invoice'
@@ -62158,7 +62158,7 @@ msgstr "ft"
 #. Item'
 #: erpnext/manufacturing/doctype/production_plan_item/production_plan_item.json
 msgid "material_request_item"
-msgstr "ماده_درخواست_آیتم"
+msgstr "آیتم_درخواست_مواد"
 
 #: erpnext/controllers/selling_controller.py:195
 msgid "must be between 0 and 100"
