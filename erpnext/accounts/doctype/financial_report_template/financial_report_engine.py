@@ -621,7 +621,16 @@ class FinancialQueryBuilder:
 		for account_data in balances_data.values():
 			account_data: AccountData
 
-			if self.filters.get("accumulated_values"):
+			accumulated_values = self.filters.get("accumulated_values")
+
+			if accumulated_values is None:
+				# respect user setting if not in filters
+				# closing = accumulated
+				# movement = unaccumulated
+				continue
+
+			# for legacy reports
+			elif accumulated_values:
 				account_data.accumulate_values()
 			else:
 				account_data.unaccumulate_values()
@@ -1178,7 +1187,7 @@ class DataFormatter:
 		base_columns = get_columns(
 			self.context.filters.get("periodicity"),
 			self.context.period_list,
-			self.context.filters.get("accumulated_values"),
+			self.context.filters.get("accumulated_values") in (1, None),
 			self.context.filters.get("company"),
 		)
 
@@ -1412,11 +1421,11 @@ class RowFormatterBase(ABC):
 			period_value = self._get_period_value(row_data, i)
 			values[period["key"]] = period_value
 
-			if not self.context.filters.get("accumulated_values"):
+			if self.context.filters.get("accumulated_values") == 0:
 				values["total"] += flt(period_value)
 
 		# avg for percent
-		if not self.context.filters.get("accumulated_values") and row_data.row.fieldtype == "Percent":
+		if self.context.filters.get("accumulated_values") == 0 and row_data.row.fieldtype == "Percent":
 			values["total"] = values["total"] / len(self.period_list)
 
 		return values
