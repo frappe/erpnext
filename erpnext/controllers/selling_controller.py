@@ -525,11 +525,7 @@ class SellingController(StockController):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
 
-				if (
-					not d.incoming_rate
-					or self.is_internal_transfer()
-					or (get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return"))
-				):
+				if (not d.incoming_rate and not self.get("return_against")) or self.is_internal_transfer():
 					d.incoming_rate = get_incoming_rate(
 						{
 							"item_code": d.item_code,
