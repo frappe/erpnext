@@ -8,9 +8,10 @@
  "field_order": [
   "party_type",
   "party",
-  "column_break_3",
+  "column_break_syzu",
   "restrict_based_on",
-  "based_on_value"
+  "based_on_value",
+  "inclusion_type"
  ],
  "fields": [
   {
@@ -38,21 +39,28 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "based_on_value",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "label": "Based On Value",
    "options": "restrict_based_on",
    "reqd": 1
+  },
+  {
+   "fieldname": "inclusion_type",
+   "fieldtype": "Select",
+   "label": "Inclusion Type",
+   "options": "Inclusive\nExclusive",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_syzu",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-01 14:52:57.939916",
+ "modified": "2025-10-03 13:31:49.490973",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Party Specific Item",

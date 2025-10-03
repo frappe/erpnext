@@ -221,25 +221,31 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
 				filters={"party": ["in", parties_to_check]},
-				fields=["restrict_based_on", "based_on_value"],
+				fields=["restrict_based_on", "based_on_value", "inclusion_type"],
 			)
 
-			filters_dict = {}
+			include_filters = {}
+			exclude_filters = {}
 			for rule in item_rules_list:
 				r_based = rule["restrict_based_on"]
 				if r_based == "Item":
 					r_based = "name"
-				if r_based not in filters_dict:
-					filters_dict[r_based] = []
 
-			for rule in item_rules_list:
-				r_based = rule["restrict_based_on"]
-				if r_based == "Item":
-					r_based = "name"
-				filters_dict[r_based].append(rule["based_on_value"])
+				if (rule.get("inclusion_type") or "Inclusive") == "Exclusive":
+					exclude_filters.setdefault(r_based, []).append(rule["based_on_value"])
+				else:
+					include_filters.setdefault(r_based, []).append(rule["based_on_value"])
 
-			for filter in filters_dict:
-				filters[scrub(filter)] = ["in", filters_dict[filter]]
+			for d in (include_filters, exclude_filters):
+				for k, v in list(d.items()):
+					d[k] = list(dict.fromkeys(v))
+
+			for r_based, values in include_filters.items():
+				filters[scrub(r_based)] = ["in", values]
+
+			for r_based, values in exclude_filters.items():
+				if r_based not in include_filters:
+					filters[scrub(r_based)] = ["not in", values]
 
 			if filters.get("customer"):
 				del filters["customer"]

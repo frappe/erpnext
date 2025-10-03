@@ -16,6 +16,7 @@ class PartySpecificItem(Document):
 		from frappe.types import DF
 
 		based_on_value: DF.DynamicLink
+		inclusion_type: DF.Literal["Inclusive", "Exclusive"]
 		party: DF.DynamicLink
 		party_type: DF.Literal["Customer", "Customer Group", "Supplier", "Supplier Group"]
 		restrict_based_on: DF.Literal["Item", "Item Group", "Brand"]
@@ -29,6 +30,7 @@ class PartySpecificItem(Document):
 				"party": self.party,
 				"restrict_based_on": self.restrict_based_on,
 				"based_on_value": self.based_on_value,
+				"inclusion_type": self.inclusion_type
 			},
 		)
 		if exists:
