@@ -131,8 +131,11 @@ class PeriodClosingVoucher(AccountsController):
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
 
 	def on_submit(self):
-		self.db_set("gle_processing_status", "In Progress")
-		self.make_gl_entries()
+		if frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
+			self.db_set("gle_processing_status", "In Progress")
+			self.make_gl_entries()
+		else:
+			print("submit")
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -141,9 +144,12 @@ class PeriodClosingVoucher(AccountsController):
 			"Payment Ledger Entry",
 			"Account Closing Balance",
 		)
-		self.block_if_future_closing_voucher_exists()
-		self.db_set("gle_processing_status", "In Progress")
-		self.cancel_gl_entries()
+		if frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
+			self.block_if_future_closing_voucher_exists()
+			self.db_set("gle_processing_status", "In Progress")
+			self.cancel_gl_entries()
+		else:
+			print("cancel")
 
 	def make_gl_entries(self):
 		if frappe.db.estimate_count("GL Entry") > 100_000:

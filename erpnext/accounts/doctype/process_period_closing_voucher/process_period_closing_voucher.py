@@ -14,6 +14,8 @@ class ProcessPeriodClosingVoucher(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		parent_pcv: DF.Link | None
+		status: DF.Literal["Queued", "Running", "Completed"]
 	# end: auto-generated types
 
 	pass

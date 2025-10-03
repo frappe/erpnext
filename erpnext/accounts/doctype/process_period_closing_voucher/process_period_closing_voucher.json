@@ -5,18 +5,28 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_zqqu"
+  "parent_pcv",
+  "status"
  ],
  "fields": [
   {
-   "fieldname": "section_break_zqqu",
-   "fieldtype": "Section Break"
+   "fieldname": "parent_pcv",
+   "fieldtype": "Link",
+   "label": "PCV",
+   "options": "Period Closing Voucher"
+  },
+  {
+   "default": "Queued",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Queued\nRunning\nCompleted"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-25 15:44:03.534699",
+ "modified": "2025-10-01 15:57:36.832943",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",
