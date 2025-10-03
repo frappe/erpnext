@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-09-28 09:35+0000\n"
-"PO-Revision-Date: 2025-10-02 05:19\n"
+"PO-Revision-Date: 2025-10-03 05:34\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -6452,7 +6452,7 @@ msgstr "Rad # {0}: sekvens nummer {1} får inte vara lägre än föregående rad
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:579
 msgid "At row #{0}: you have selected the Difference Account {1}, which is a Cost of Goods Sold type account. Please select a different account"
-msgstr "På rad #{0}: har du valt Differens Konto {1}, som är konto av typ Kostnad för Sålda Artiklar. Välj ett annat konto"
+msgstr "På rad #{0}: Differens Konto {1} är vald, som är konto av typ Kostnad för Sålda Artiklar. Välj ett annat konto"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:999
 msgid "At row {0}: Batch No is mandatory for Item {1}"
@@ -33936,7 +33936,7 @@ msgstr "Vid aktivering av denna kommer annullering poster att registreras på fa
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:721
 msgid "On expanding a row in the Items to Manufacture table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
-msgstr "Vid utvidgning av rad i Artiklar att Producera Tabell, kommer du att se alternativ \"Inkludera Utvidgade Artiklar\". Genom att välja detta ingår råvaror från underkomponenter i produktion process."
+msgstr "Vid utvidgning av rad i Artiklar att Producera Tabell, kommer du att se alternativ \"Inkludera Utvidgade Artiklar\". Genom att välja detta ingår råmaterial från underkomponenter i produktion process."
 
 #. Description of the 'Use Serial / Batch Fields' (Check) field in DocType
 #. 'Stock Settings'
@@ -45263,7 +45263,7 @@ msgstr "Reserv Lager"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:282
 msgid "Reserve for Raw Materials"
-msgstr "Reservera för Råvaror"
+msgstr "Reservera för Råmaterial"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:256
 msgid "Reserve for Sub-assembly"
@@ -45357,7 +45357,7 @@ msgstr "Reserverad för Parti"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:296
 msgid "Reserved Stock for Raw Materials"
-msgstr "Reserverad Lager för Råvaror"
+msgstr "Reserverad Lager för Råmaterial"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:270
 msgid "Reserved Stock for Sub-assembly"
@@ -45365,7 +45365,7 @@ msgstr "Reserverad Lager för Undermontering"
 
 #: erpnext/controllers/buying_controller.py:571
 msgid "Reserved Warehouse is mandatory for the Item {item_code} in Raw Materials supplied."
-msgstr "Reserverat Lager erfordras för artikel {item_code} i levererade Råvaror."
+msgstr "Reserverad Lager erfordras för artikel {item_code} i levererad råmaterial."
 
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:197
 msgid "Reserved for POS Transactions"
@@ -46686,7 +46686,7 @@ msgstr "Rad # {1}: Lager erfordras för lager artikel {0}"
 
 #: erpnext/controllers/buying_controller.py:291
 msgid "Row #{idx}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor."
-msgstr "Rad #{idx}: Kan inte välja Leverantör Lager medan råvaror levereras till underleverantör."
+msgstr "Rad #{idx}: Kan inte välja Leverantör Lager medan råmaterial levereras till underleverantör."
 
 #: erpnext/controllers/buying_controller.py:502
 msgid "Row #{idx}: Item rate has been updated as per valuation rate since its an internal stock transfer."
@@ -58854,7 +58854,7 @@ msgstr "Ångra Lager Reservation"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:290
 msgid "Unreserve for Raw Materials"
-msgstr "Ångra Reservera för Råvaror"
+msgstr "Ångra Reservera för Råmaterial"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:264
 msgid "Unreserve for Sub-assembly"
@@ -59466,7 +59466,7 @@ msgstr "Användare"
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can consume raw materials and add semi-finished goods or final finished goods against the operation using job cards."
-msgstr "Användare kan förbruka råvaror och lägga till halvfärdiga eller färdiga artiklar mot åtgärd med hjälp av jobbkort."
+msgstr "Användare kan förbruka råmaterial och lägga till halvfärdiga eller färdiga artiklar mot åtgärd med hjälp av jobbkort."
 
 #. Description of the 'Set Landed Cost Based on Purchase Invoice Rate' (Check)
 #. field in DocType 'Buying Settings'
@@ -62035,7 +62035,7 @@ msgstr "Du har ändringar som inte är sparade. Vill du spara faktura?"
 
 #: erpnext/templates/pages/projects.html:132
 msgid "You haven't created a {0} yet"
-msgstr "Du har inte skapat {0} än"
+msgstr "Ingen {0} skapad än"
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:767
 msgid "You must select a customer before adding an item."
