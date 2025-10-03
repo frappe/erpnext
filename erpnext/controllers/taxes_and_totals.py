@@ -174,7 +174,8 @@ class calculate_taxes_and_totals:
 			for item in self.doc.items:
 				self.doc.round_floats_in(item)
 
-				if item.discount_percentage == 100:
+				# if item.discount_percentage == 100:
+				if item.discount_percentage == 100 or self.doc.additional_discount_percentage == 100:
 					item.rate = 0.0
 				elif item.price_list_rate:
 					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
