@@ -413,7 +413,7 @@ execute:frappe.db.set_single_value("Accounts Settings", "receivable_payable_fetc
 erpnext.patches.v14_0.set_update_price_list_based_on
 erpnext.patches.v15_0.update_journal_entry_type
 erpnext.patches.v15_0.set_grand_total_to_default_mop
-execute:frappe.db.set_single_value("Accounts Settings", "use_new_budget_controller", True)
+execute:frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
 erpnext.patches.v15_0.set_cancelled_status_to_cancelled_pos_invoice
 erpnext.patches.v15_0.rename_group_by_to_categorize_by_in_custom_reports
 erpnext.patches.v15_0.remove_agriculture_roles
