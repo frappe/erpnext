@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class ProcessPeriodClosingVoucher(Document):
+class ProcessPeriodClosingVoucherDetail(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,12 +14,10 @@ class ProcessPeriodClosingVoucher(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.process_period_closing_voucher_detail.process_period_closing_voucher_detail import (
-			ProcessPeriodClosingVoucherDetail,
-		)
-
-		dates_to_process: DF.Table[ProcessPeriodClosingVoucherDetail]
-		parent_pcv: DF.Link | None
+		parent: DF.Data
+		parentfield: DF.Data
+		parenttype: DF.Data
+		processing_date: DF.Date | None
 		status: DF.Literal["Queued", "Running", "Completed"]
 	# end: auto-generated types
 

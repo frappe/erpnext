@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "parent_pcv",
-  "status"
+  "status",
+  "dates_to_process"
  ],
  "fields": [
   {
@@ -21,12 +22,18 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Queued\nRunning\nCompleted"
+  },
+  {
+   "fieldname": "dates_to_process",
+   "fieldtype": "Table",
+   "label": "Dates to Process",
+   "options": "Process Period Closing Voucher Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-01 15:57:36.832943",
+ "modified": "2025-10-03 14:29:55.584225",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",
