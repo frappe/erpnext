@@ -548,7 +548,7 @@ def create_bank_account(args, demo=False):
 			return doc
 
 		except RootNotEditable:
-			frappe.throw(_("Bank account cannot be named as {0}").format(args.get("bank_account")))
+			frappe.throw(frappe._("Bank account cannot be named as {0}").format(args.get("bank_account")))
 		except frappe.DuplicateEntryError:
 			# bank account same as a CoA entry
 			pass
