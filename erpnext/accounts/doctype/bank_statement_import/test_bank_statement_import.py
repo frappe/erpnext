@@ -4,8 +4,8 @@
 import unittest
 
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
-	preprocess_mt940_content,
 	is_mt940_format,
+	preprocess_mt940_content,
 )
 
 

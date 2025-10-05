@@ -123,13 +123,13 @@ def preprocess_mt940_content(content: str) -> str:
 		return content
 
 	# Match :28C: at start of line, capture digits and optional /seq, preserve whitespace
-	pattern = re.compile(r'(?m)^(:28C:)(\d{6,})(/\d+)?(\s*)$')
+	pattern = re.compile(r"(?m)^(:28C:)(\d{6,})(/\d+)?(\s*)$")
 
 	def replace_statement_number(match):
 		prefix = match.group(1)  # ':28C:'
 		statement_num = match.group(2)  # The statement number
-		sequence_part = match.group(3) or ''  # The sequence part like '/1'
-		trailing_space = match.group(4) or ''  # Preserve trailing whitespace
+		sequence_part = match.group(3) or ""  # The sequence part like '/1'
+		trailing_space = match.group(4) or ""  # Preserve trailing whitespace
 
 		# If statement number is longer than 5 digits, truncate to last 5 digits
 		if len(statement_num) > 5:
@@ -146,7 +146,7 @@ def preprocess_mt940_content(content: str) -> str:
 def convert_mt940_to_csv(data_import, mt940_file_path):
 	doc = frappe.get_doc("Bank Statement Import", data_import)
 
-	file_doc, content = get_file(mt940_file_path)
+	_file_doc, content = get_file(mt940_file_path)
 
 	is_mt940 = is_mt940_format(content)
 	if not is_mt940:
