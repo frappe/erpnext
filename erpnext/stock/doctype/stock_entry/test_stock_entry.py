@@ -1317,9 +1317,18 @@ class TestStockEntry(IntegrationTestCase):
 				posting_date="2021-07-02",  # Illegal SE
 				purpose="Material Transfer",
 			),
+			dict(
+				item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[0],
+				to_warehouse=warehouse_names[1],
+				batch_no=batch_no,
+				posting_date="2021-07-02",  # Illegal SE
+				purpose="Material Transfer",
+			),
 		]
 
-		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
+		self.assertRaises(frappe.ValidationError, create_stock_entries, sequence_of_entries)
 
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle_batch(self):

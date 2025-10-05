@@ -1014,13 +1014,12 @@ class update_entries_after:
 		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
 			return
 
-		if self.args.get("sle_id") and sle.actual_qty < 0:
-			doc = frappe.db.get_value(
-				"Serial and Batch Bundle",
-				sle.serial_and_batch_bundle,
-				["total_amount", "total_qty"],
-				as_dict=1,
-			)
+		if sle.actual_qty < 0 and (
+			sle.voucher_type in ["Stock Reconciliation", "Asset Capitalization"]
+			or not frappe.db.get_value(sle.voucher_type, sle.voucher_no, "is_return")
+		):
+			doc = frappe._dict({})
+			self.update_serial_batch_no_valuation(sle, doc, prev_sle=self.wh_data)
 		else:
 			doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
 			doc.set_incoming_rate(
@@ -1043,6 +1042,88 @@ class update_entries_after:
 			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, self.flt_precision) / flt(
 				self.wh_data.qty_after_transaction, self.flt_precision
 			)
+
+	def update_serial_batch_no_valuation(self, sle, doc, prev_sle=None):
+		from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
+
+		sabb_data = get_serial_from_sabb(sle.serial_and_batch_bundle)
+		if not sabb_data:
+			doc.update({"total_amount": 0.0, "total_qty": 0.0, "avg_rate": 0.0})
+			return
+
+		serial_nos = [d.serial_no for d in sabb_data if d.serial_no]
+		if serial_nos:
+			sle["serial_nos"] = get_serial_nos_data(",".join(serial_nos))
+			sn_obj = SerialNoValuation(
+				sle=sle,
+				item_code=self.item_code,
+				warehouse=sle.warehouse,
+			)
+		else:
+			sle["batch_nos"] = {row.batch_no: row for row in sabb_data if row.batch_no}
+			sn_obj = BatchNoValuation(
+				sle=sle,
+				item_code=self.item_code,
+				warehouse=sle.warehouse,
+				prev_sle=prev_sle,
+			)
+
+		tot_amt = 0.0
+		total_qty = 0.0
+		avg_rate = 0.0
+
+		for d in sabb_data:
+			incoming_rate = get_incoming_rate_for_serial_and_batch(self.item_code, d, sn_obj)
+
+			if flt(incoming_rate, self.currency_precision) == flt(
+				d.valuation_rate, self.currency_precision
+			) and not getattr(d, "stock_queue", None):
+				continue
+
+			amount = incoming_rate * flt(d.qty)
+			tot_amt += flt(amount)
+			total_qty += flt(d.qty)
+
+			values_to_update = {
+				"incoming_rate": incoming_rate,
+				"stock_value_difference": amount,
+			}
+
+			if d.stock_queue:
+				values_to_update["stock_queue"] = d.stock_queue
+
+			frappe.db.set_value(
+				"Serial and Batch Entry",
+				d.name,
+				values_to_update,
+				update_modified=False,
+			)
+
+		if total_qty:
+			avg_rate = tot_amt / total_qty
+
+		doc.update(
+			{
+				"total_amount": tot_amt,
+				"total_qty": total_qty,
+				"avg_rate": avg_rate,
+			}
+		)
+
+		frappe.db.set_value(
+			"Serial and Batch Bundle",
+			sle.serial_and_batch_bundle,
+			{
+				"total_qty": total_qty,
+				"avg_rate": avg_rate,
+				"total_amount": tot_amt,
+			},
+			update_modified=False,
+		)
+
+		for key in ("serial_nos", "batch_nos"):
+			if key in sle:
+				del sle[key]
 
 	def get_outgoing_rate_for_batched_item(self, sle):
 		if self.wh_data.qty_after_transaction == 0:
@@ -2285,3 +2366,45 @@ def is_transfer_stock_entry(voucher_no):
 	purpose = frappe.get_cached_value("Stock Entry", voucher_no, "purpose")
 
 	return purpose in ["Material Transfer", "Material Transfer for Manufacture", "Send to Subcontractor"]
+
+
+@frappe.request_cache
+def get_serial_from_sabb(serial_and_batch_bundle):
+	return frappe.get_all(
+		"Serial and Batch Entry",
+		filters={"parent": serial_and_batch_bundle},
+		fields=["serial_no", "batch_no", "name", "qty", "incoming_rate"],
+		order_by="idx",
+	)
+
+
+def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj):
+	if row.serial_no:
+		return abs(sn_obj.serial_no_incoming_rate.get(row.serial_no, 0.0))
+	else:
+		stock_queue = []
+		if hasattr(sn_obj, "stock_queue") and sn_obj.stock_queue:
+			stock_queue = parse_json(sn_obj.stock_queue)
+
+		val_method = get_valuation_method(item_code)
+
+		actual_qty = row.qty
+		if stock_queue and val_method == "FIFO" and row.batch_no in sn_obj.non_batchwise_valuation_batches:
+			if actual_qty < 0:
+				stock_queue = FIFOValuation(stock_queue)
+				_prev_qty, prev_stock_value = stock_queue.get_total_stock_and_value()
+
+				stock_queue.remove_stock(qty=abs(actual_qty))
+				_qty, stock_value = stock_queue.get_total_stock_and_value()
+
+				stock_value_difference = stock_value - prev_stock_value
+				incoming_rate = abs(flt(stock_value_difference) / abs(flt(actual_qty)))
+				stock_queue = stock_queue.state
+			else:
+				incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(row.batch_no)))
+				stock_queue.append([row.qty, incoming_rate])
+			row.stock_queue = json.dumps(stock_queue)
+		else:
+			incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(row.batch_no)))
+
+	return incoming_rate
