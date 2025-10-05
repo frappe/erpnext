@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.core.doctype.installed_applications.installed_applications import get_setup_wizard_completed_apps
+# from frappe.core.doctype.installed_applications.installed_applications import get_setup_wizard_completed_apps
 
 import erpnext
 
