@@ -357,7 +357,9 @@ class SubcontractingInwardController(StockController):
 		if self.purpose == "Receive from Customer":
 			for item in self.items:
 				item.valuation_rate = 0
-				item.customer_provided_item_cost = item.basic_rate
+				item.customer_provided_item_cost = item.basic_rate + (
+					item.additional_cost / item.transfer_qty
+				)
 
 	def update_sre_for_subcontracting_delivery(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
