@@ -1247,7 +1247,7 @@ class SerialBatchCreation:
 	def create_batch(self):
 		from erpnext.stock.doctype.batch.batch import make_batch
 
-		if self.is_rejected:
+		if hasattr(self, "is_rejected") and self.is_rejected:
 			bundle = frappe.db.get_value(
 				"Serial and Batch Bundle",
 				{
