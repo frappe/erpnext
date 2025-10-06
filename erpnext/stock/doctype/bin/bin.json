@@ -1,0 +1,238 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2013-01-10 16:34:25",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "column_break_yreo",
+  "warehouse",
+  "section_break_stag",
+  "actual_qty",
+  "planned_qty",
+  "indented_qty",
+  "ordered_qty",
+  "projected_qty",
+  "column_break_xn5j",
+  "reserved_qty",
+  "reserved_qty_for_production",
+  "reserved_qty_for_sub_contract",
+  "reserved_qty_for_production_plan",
+  "reserved_stock",
+  "section_break_pmrs",
+  "stock_uom",
+  "column_break_0slj",
+  "valuation_rate",
+  "stock_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "oldfieldname": "warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "reserved_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Reserved Qty",
+   "oldfieldname": "reserved_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Actual Qty",
+   "oldfieldname": "actual_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Ordered Qty",
+   "oldfieldname": "ordered_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "indented_qty",
+   "fieldtype": "Float",
+   "label": "Requested Qty",
+   "oldfieldname": "indented_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_qty",
+   "fieldtype": "Float",
+   "label": "Planned Qty",
+   "oldfieldname": "planned_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "projected_qty",
+   "fieldtype": "Float",
+   "label": "Projected Qty",
+   "oldfieldname": "projected_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_production",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Production",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_sub_contract",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Subcontract",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "UOM",
+   "oldfieldname": "stock_uom",
+   "oldfieldtype": "Data",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "valuation_rate",
+   "fieldtype": "Float",
+   "label": "Valuation Rate",
+   "oldfieldname": "valuation_rate",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_value",
+   "fieldtype": "Float",
+   "label": "Stock Value",
+   "oldfieldname": "stock_value",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_production_plan",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Production Plan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_stag",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_yreo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xn5j",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_pmrs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_0slj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "reserved_stock",
+   "fieldtype": "Float",
+   "label": "Reserved Stock",
+   "read_only": 1
+  }
+ ],
+ "hide_toolbar": 1,
+ "idx": 1,
+ "in_create": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:39.414036",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Bin",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager"
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "item_code,warehouse",
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

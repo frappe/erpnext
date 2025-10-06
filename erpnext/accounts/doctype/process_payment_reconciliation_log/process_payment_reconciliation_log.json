@@ -1,0 +1,148 @@
+{
+ "actions": [],
+ "autoname": "format:PPR-LOG-{##}",
+ "creation": "2023-03-13 15:00:09.149681",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "process_pr",
+  "section_break_fvdw",
+  "status",
+  "tasks_section",
+  "allocated",
+  "reconciled",
+  "column_break_yhin",
+  "total_allocations",
+  "reconciled_entries",
+  "section_break_4ywv",
+  "error_log",
+  "allocations_section",
+  "allocations"
+ ],
+ "fields": [
+  {
+   "fieldname": "allocations",
+   "fieldtype": "Table",
+   "label": "Allocations",
+   "options": "Process Payment Reconciliation Log Allocations",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "All allocations have been successfully reconciled",
+   "fieldname": "reconciled",
+   "fieldtype": "Check",
+   "label": "Reconciled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_allocations",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Allocations",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Invoices and Payments have been Fetched and Allocated",
+   "fieldname": "allocated",
+   "fieldtype": "Check",
+   "label": "Allocated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reconciled_entries",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Reconciled Entries",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tasks_section",
+   "fieldtype": "Section Break",
+   "label": "Tasks"
+  },
+  {
+   "fieldname": "allocations_section",
+   "fieldtype": "Section Break",
+   "label": "Allocations"
+  },
+  {
+   "fieldname": "column_break_yhin",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_4ywv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.error_log",
+   "fieldname": "error_log",
+   "fieldtype": "Long Text",
+   "label": "Reconciliation Error Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "process_pr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parent Document",
+   "options": "Process Payment Reconciliation",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_fvdw",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Running\nPaused\nReconciled\nPartially Reconciled\nFailed\nCancelled",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-01-08 08:22:19.104975",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Process Payment Reconciliation Log",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "allocated, reconciled, total_allocations, reconciled_entries",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

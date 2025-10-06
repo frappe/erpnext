@@ -1,0 +1,49 @@
+{% var visible_columns = row.get_visible_columns(["item_code", "warehouse",
+	"item_name", "amount", "stock_uom", "uom", "qty", "schedule_date"]); %}
+
+{% if(!doc) { %}
+	<div class="row">
+		<div class="col-sm-4">{%= __("Item") %}</div>
+		<div class="col-sm-3">{%= __("Required On") %}</div>
+		<div class="col-sm-3">{%= __("Warehouse") %}</div>
+		<div class="col-sm-2 text-right">{%= __("Qty") %}</div>
+	</div>
+{% } else { %}
+	<div class="row">
+		<div class="col-sm-4">
+            <span class="indicator {%= (doc.qty<=doc.ordered_qty) ? "green" : "orange" %}">{%= doc.item_code %}</strong>
+			{% if(doc.item_name != doc.item_code) { %}
+				<br>{%= doc.item_name %}{% } %}
+            <!-- {% if(doc.item_name != doc.description) { %}
+                <p>{%= doc.description %}</p>{% } %} -->
+			{% include "templates/form_grid/includes/visible_cols.html" %}
+		</div>
+
+
+		<div class="col-sm-3">
+			{% if(doc.schedule_date) { %}
+                <span title="{%= __("Reqd By Date") %}" class="{%=
+				(frappe.datetime.get_diff(doc.schedule_date, frappe.datetime.get_today()) < 0
+					&& doc.ordered_qty < doc.qty)
+					? "text-danger" : "text-muted" %}">
+					{%= doc.get_formatted("schedule_date") %}</span>
+			{% } %}
+        </div>
+
+        <!-- warehouse -->
+		<div class="col-sm-3">
+			{% if(doc.warehouse) { %}
+				<span class="label label-default" title="{%= __("For Warehouse") %}"
+                    style="margin-right: 10px;">
+					{%= doc.warehouse %}
+				</span>
+			{% } %}
+        </div>
+
+		<!-- qty -->
+		<div class="col-sm-2 text-right">
+			{%= doc.get_formatted("qty") %}
+			<span class="small">{%= doc.uom || doc.stock_uom %}</span>
+		</div>
+	</div>
+{% } %}

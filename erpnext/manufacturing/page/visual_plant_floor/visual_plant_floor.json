@@ -1,0 +1,29 @@
+{
+ "content": null,
+ "creation": "2023-10-06 15:17:39.215300",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2023-10-06 15:18:00.622073",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "visual-plant-floor",
+ "owner": "Administrator",
+ "page_name": "visual-plant-floor",
+ "roles": [
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Operator"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Visual Plant Floor"
+}

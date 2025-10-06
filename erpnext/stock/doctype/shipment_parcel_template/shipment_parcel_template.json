@@ -1,0 +1,79 @@
+{
+ "actions": [],
+ "autoname": "field:parcel_template_name",
+ "creation": "2020-07-09 11:43:43.470339",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parcel_template_name",
+  "length",
+  "width",
+  "height",
+  "weight"
+ ],
+ "fields": [
+  {
+   "fieldname": "length",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Length (cm)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "width",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Width (cm)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Height (cm)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weight (kg)",
+   "precision": "1",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parcel_template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parcel Template Name",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "links": [],
+ "modified": "2024-03-27 13:10:41.521126",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Shipment Parcel Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

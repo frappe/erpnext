@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "field:finance_book_name",
+ "creation": "2018-04-13 17:42:43.252224",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "finance_book_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "finance_book_name",
+   "fieldtype": "Data",
+   "label": "Name",
+   "unique": 1
+  }
+ ],
+ "icon": "fa fa-book",
+ "links": [],
+ "modified": "2024-03-27 13:09:44.514241",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Finance Book",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "finance_book_name",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

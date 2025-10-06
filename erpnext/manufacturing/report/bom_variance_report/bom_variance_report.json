@@ -1,0 +1,31 @@
+{
+ "add_total_row": 0, 
+ "creation": "2018-05-28 16:22:24.040106", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2018-06-28 16:22:24.040106", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "BOM Variance Report", 
+ "owner": "Administrator", 
+ "ref_doctype": "Stock Entry", 
+ "report_name": "BOM Variance Report", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Manufacturing Manager"
+  }, 
+  {
+   "role": "Stock Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Manufacturing User"
+  }
+ ]
+}

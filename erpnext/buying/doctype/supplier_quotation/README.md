@@ -1,0 +1,1 @@
+Quotation sent by Supplier with price, qty and terms.

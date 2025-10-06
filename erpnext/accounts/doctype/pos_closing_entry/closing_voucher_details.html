@@ -1,0 +1,88 @@
+<div class="clearfix"></div>
+<div class="box">
+		<div class="grid-body" style="background-color: transparent;">
+			<div class="rows text-center">
+
+				<!-- Sales summary section -->
+				<div>
+						<h6 class="text-center uppercase">{{ _("Sales Summary") }}</h6>
+						<div class="tax-break-up" style="overflow-x: auto;">
+							<table class="table table-bordered table-hover">
+								<thead>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="text-left font-bold">{{ _("Grand Total") }}</td>
+										<td class='text-right'> {{ frappe.utils.fmt_money(data.grand_total or '', currency=currency) }}</td>
+									</tr>
+									<tr>
+										<td class="text-left font-bold">{{ _("Net Total") }}</td>
+										<td class='text-right'> {{ frappe.utils.fmt_money(data.net_total or '', currency=currency) }}</td>
+									</tr>
+									<tr>
+										<td class="text-left font-bold">{{ _("Total Quantity") }}</td>
+										<td class='text-right'>{{ data.total_quantity or '' }}</td>
+									</tr>
+
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Section end -->
+
+				<!-- Mode of payment section -->
+				<div>
+						<h6 class="text-center uppercase">{{ _("Mode of Payments") }}</h6>
+						<div class="tax-break-up" style="overflow-x: auto;">
+							<table class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th class="text-left">{{ _("Mode of Payment") }}</th>
+										<th class="text-right">{{ _("Amount") }}</th>
+									</tr>
+								</thead>
+								<tbody>
+								{% for d in data.payment_reconciliation %}
+									<tr>
+										<td class="text-left">{{ _(d.mode_of_payment) }}</td>
+										<td class='text-right'> {{ frappe.utils.fmt_money(d.expected_amount - d.opening_amount, currency=currency) }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Section end -->
+
+				<!-- Taxes section -->
+				{% if data.taxes %}
+				<div>
+						<h6 class="text-center uppercase">{{ _("Taxes") }}</h6>
+						<div class="tax-break-up" style="overflow-x: auto;">
+							<table class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th class="text-left">{{ _("Account") }}</th>
+										<th class="text-left">{{ _("Tax Rate") }}</th>
+										<th class="text-right">{{ _("Amount") }}</th>
+									</tr>
+								</thead>
+								<tbody>
+								{% for d in data.taxes %}
+									<tr>
+										<td class="text-left">{{ d.account_head }}</td>
+										<td class="text-left">{{ d.rate }} %</td>
+										<td class='text-right'> {{ frappe.utils.fmt_money(d.amount, currency=currency) }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				{% endif %}
+				<!-- Section end -->
+
+			</div>
+		</div>
+	</div>
+</div>

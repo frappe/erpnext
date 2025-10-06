@@ -1,0 +1,1656 @@
+{
+  "country_code": "hu", 
+  "name": "Hungary - Chart of Accounts for Microenterprises", 
+  "tree": {
+    "SZ\u00c1MLAOSZT\u00c1LY BEFEKTETETT ESZK\u00d6Z\u00d6K": {
+      "account_number": 1,
+      "root_type": "Asset",
+      "is_group": 1,
+      "IMMATERI\u00c1LIS JAVAK": {
+        "account_number": 11,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Vagyoni \u00e9rt\u00e9k\u0171 jogok": {
+          "account_number": 113,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Vagyoni \u00e9rt\u00e9k\u0171 jogok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1131,
+            "root_type": "Asset"
+          },
+          "Vagyoni \u00e9rt\u00e9k\u0171 jogok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1138,
+            "root_type": "Asset"
+          },
+          "Vagyoni \u00e9rt\u00e9k\u0171 jogok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1139,
+            "root_type": "Asset"
+          }
+        },
+        "Szellemi term\u00e9kek": {
+          "account_number": 114,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Szellemi term\u00e9kek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1141,
+            "root_type": "Asset"
+          },
+          "Szellemi term\u00e9kek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1148,
+            "root_type": "Asset"
+          },
+          "Szellemi term\u00e9kek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1149,
+            "root_type": "Asset"
+          }
+        },
+        "Kis \u00e9rt\u00e9k\u0171 immateri\u00e1lis javak": {
+          "account_number": 119,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Kis \u00e9rt\u00e9k\u0171 immateri\u00e1lis javak brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1191,
+            "root_type": "Asset"
+          },
+          "Kis \u00e9rt\u00e9k\u0171 immateri\u00e1lis javak terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1199,
+            "root_type": "Asset"
+          }
+        }
+      },
+      "INGATLANOK \u00c9S KAPCSOL\u00d3D\u00d3 VAGYONI \u00c9RT\u00c9K\u0170 JOGOK": {
+        "account_number": 12,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Telkek, f\u00f6ldter\u00fcletek": {
+          "account_number": 121,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Telkek, f\u00f6ldter\u00fcletek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1211,
+            "root_type": "Asset"
+          },
+          "Telkek, f\u00f6ldter\u00fcletek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1218,
+            "root_type": "Asset"
+          },
+          "Telkek, f\u00f6ldter\u00fcletek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1219,
+            "root_type": "Asset"
+          }
+        },
+        "Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok": {
+          "account_number": 122,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1221,
+            "root_type": "Asset"
+          },
+          "Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1228,
+            "root_type": "Asset"
+          },
+          "Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1229,
+            "root_type": "Asset"
+          }
+        },
+        "\u00c9p\u00fcletek, \u00e9p\u00fcletr\u00e9szek, tulajdoni h\u00e1nyadok": {
+          "account_number": 123,
+          "root_type": "Asset",
+          "is_group": 1,
+          "\u00c9p\u00fcletek, \u00e9p\u00fcletr\u00e9szek, tulajdoni h\u00e1nyadok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1231,
+            "root_type": "Asset"
+          },
+          "\u00c9p\u00fcletek, \u00e9p\u00fcletr\u00e9szek, tulajdoni h\u00e1nyadok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1238,
+            "root_type": "Asset"
+          },
+          "\u00c9p\u00fcletek, \u00e9p\u00fcletr\u00e9szek, tulajdoni h\u00e1nyadok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1239,
+            "root_type": "Asset"
+          }
+        },
+        "Egy\u00e9b ingatlanok": {
+          "account_number": 124,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Egy\u00e9b ingatlanok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1241,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b ingatlanok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1248,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b ingatlanok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1249,
+            "root_type": "Asset"
+          }
+        },
+        "Kis \u00e9rt\u00e9k\u0171 ingatlanok": {
+          "account_number": 129,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Kis \u00e9rt\u00e9k\u0171 ingatlanok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1291,
+            "root_type": "Asset"
+          },
+          "Kis \u00e9rt\u00e9k\u0171 ingatlanok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1299,
+            "root_type": "Asset"
+          }
+        }
+      },
+      "M\u0170SZAKI BERENDEZ\u00c9SEK, G\u00c9PEK, J\u00c1RM\u0170VEK": {
+        "account_number": 13,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Termel\u0151 g\u00e9pek, berendez\u00e9sek": {
+          "account_number": 131,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Termel\u0151 g\u00e9pek, berendez\u00e9sek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1311,
+            "root_type": "Asset"
+          },
+          "Termel\u0151 g\u00e9pek, berendez\u00e9sek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1318,
+            "root_type": "Asset"
+          },
+          "Termel\u0151 g\u00e9pek, berendez\u00e9sek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1319,
+            "root_type": "Asset"
+          }
+        },
+        "M\u0171szaki j\u00e1rm\u0171vek": {
+          "account_number": 132,
+          "root_type": "Asset",
+          "is_group": 1,
+          "M\u0171szaki j\u00e1rm\u0171vek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1321,
+            "root_type": "Asset"
+          },
+          "M\u0171szaki j\u00e1rm\u0171vek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1328,
+            "root_type": "Asset"
+          },
+          "M\u0171szaki j\u00e1rm\u0171vek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1329,
+            "root_type": "Asset"
+          }
+        },
+        "Ki nem emelt m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek": {
+          "account_number": 133,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Ki nem emelt m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1331,
+            "root_type": "Asset"
+          },
+          "Ki nem emelt m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1338,
+            "root_type": "Asset"
+          },
+          "Ki nem emelt m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1339,
+            "root_type": "Asset"
+          }
+        },
+        "Kis \u00e9rt\u00e9k\u0171 m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek": {
+          "account_number": 139,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Kis \u00e9rt\u00e9k\u0171 m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1391,
+            "root_type": "Asset"
+          },
+          "Kis \u00e9rt\u00e9k\u0171 m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1399,
+            "root_type": "Asset"
+          }
+        }
+      },
+      "EGY\u00c9B BERENDEZ\u00c9SEK, FELSZEREL\u00c9SEK, J\u00c1RM\u0170VEK": {
+        "account_number": 14,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Egy\u00e9b (\u00fczemi  \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek": {
+          "account_number": 141,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Egy\u00e9b (\u00fczemi  \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1411,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b (\u00fczemi  \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1418,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b (\u00fczemi  \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1419,
+            "root_type": "Asset"
+          }
+        },
+        "Egy\u00e9b j\u00e1rm\u0171vek": {
+          "account_number": 142,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Egy\u00e9b j\u00e1rm\u0171vek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1421,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b j\u00e1rm\u0171vek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1428,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b j\u00e1rm\u0171vek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1429,
+            "root_type": "Asset"
+          }
+        },
+        "Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek": {
+          "account_number": 143,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1431,
+            "root_type": "Asset"
+          },
+          "Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1438,
+            "root_type": "Asset"
+          },
+          "Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1439,
+            "root_type": "Asset"
+          }
+        },
+        "Ki nem emelt egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek": {
+          "account_number": 144,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Ki nem emelt egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1441,
+            "root_type": "Asset"
+          },
+          "Ki nem emelt egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1448,
+            "root_type": "Asset"
+          },
+          "Ki nem emelt egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1449,
+            "root_type": "Asset"
+          }
+        },
+        "Kis \u00e9rt\u00e9k\u0171 egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek, j\u00e1rm\u0171vek": {
+          "account_number": 149,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Kis \u00e9rt\u00e9k\u0171 egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek, j\u00e1rm\u0171vek brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1491,
+            "root_type": "Asset"
+          },
+          "Kis \u00e9rt\u00e9k\u0171 egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek, j\u00e1rm\u0171vek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1499,
+            "root_type": "Asset"
+          }
+        }
+      },
+      "TENY\u00c9SZ\u00c1LLATOK": {
+        "account_number": 15,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Teny\u00e9szt\u00e9sben hasznos\u00edtott \u00e1llatok": {
+          "account_number": 151,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Teny\u00e9szt\u00e9sben hasznos\u00edtott \u00e1llatok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1511,
+            "root_type": "Asset"
+          },
+          "Teny\u00e9szt\u00e9sben hasznos\u00edtott \u00e1llatok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1518,
+            "root_type": "Asset"
+          },
+          "Teny\u00e9szt\u00e9sben hasznos\u00edtott \u00e1llatok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1519,
+            "root_type": "Asset"
+          }
+        },
+        "Ig\u00e1s\u00e1llatok": {
+          "account_number": 152,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Ig\u00e1s\u00e1llatok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1521,
+            "root_type": "Asset"
+          },
+          "Ig\u00e1s\u00e1llatok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1528,
+            "root_type": "Asset"
+          },
+          "Ig\u00e1s\u00e1llatok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1529,
+            "root_type": "Asset"
+          }
+        },
+        "Egy\u00e9b teny\u00e9sz\u00e1llatok": {
+          "account_number": 153,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Egy\u00e9b teny\u00e9sz\u00e1llatok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1531,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b teny\u00e9sz\u00e1llatok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+            "account_number": 1538,
+            "root_type": "Asset"
+          },
+          "Egy\u00e9b teny\u00e9sz\u00e1llatok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1539,
+            "root_type": "Asset"
+          }
+        },
+        "Kis \u00e9rt\u00e9k\u0171 teny\u00e9sz\u00e1llatok": {
+          "account_number": 159,
+          "root_type": "Asset",
+          "is_group": 1,
+          "Kis \u00e9rt\u00e9k\u0171 teny\u00e9sz\u00e1llatok brutt\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 1591,
+            "root_type": "Asset"
+          },
+          "Kis \u00e9rt\u00e9k\u0171 teny\u00e9sz\u00e1llatok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 1599,
+            "root_type": "Asset"
+          }
+        }
+      },
+      "BERUH\u00c1Z\u00c1SOK, FEL\u00daJ\u00cdT\u00c1SOK": {
+        "account_number": 16,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Beruh\u00e1z\u00e1sok": {
+          "account_number": 161,
+          "root_type": "Asset"
+        },
+        "Fel\u00faj\u00edt\u00e1sok": {
+          "account_number": 162,
+          "root_type": "Asset"
+        },
+        "Beruh\u00e1z\u00e1sok, fel\u00faj\u00edt\u00e1sok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 168,
+          "root_type": "Asset"
+        }
+      },
+      "TULAJDONI R\u00c9SZESED\u00c9ST JELENT\u0150 BEFEKTET\u00c9SEK (R\u00c9SZESED\u00c9SEK)": {
+        "account_number": 17,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Tart\u00f3s r\u00e9szesed\u00e9sek": {
+          "account_number": 171,
+          "root_type": "Asset"
+        },
+        "R\u00e9szesed\u00e9sek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 179,
+          "root_type": "Asset"
+        }
+      },
+      "HITELVISZONYT MEGTESTES\u00cdT\u0150 \u00c9RT\u00c9KPAP\u00cdROK": {
+        "account_number": 18,
+        "root_type": "Asset",
+        "is_group": 1,
+        "\u00c1llamk\u00f6tv\u00e9nyek": {
+          "account_number": 181,
+          "root_type": "Asset"
+        },
+        "Tart\u00f3s diszkont \u00e9rt\u00e9kpap\u00edrok": {
+          "account_number": 182,
+          "root_type": "Asset"
+        },
+        "V\u00e1llalkoz\u00e1sok \u00e1ltal kibocs\u00e1tott tart\u00f3s \u00e9rt\u00e9kpap\u00edrok": {
+          "account_number": 183,
+          "root_type": "Asset"
+        },
+        "Egy\u00e9b hitelviszonyt megtestes\u00edt\u0151 \u00e9rt\u00e9kpap\u00edrok": {
+          "account_number": 184,
+          "root_type": "Asset"
+        },
+        "Tart\u00f3s \u00e9rt\u00e9kpap\u00edrok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 189,
+          "root_type": "Asset"
+        }
+      },
+      "TART\u00d3SAN ADOTT K\u00d6LCS\u00d6N\u00d6K (tart\u00f3s bankbet\u00e9tek)": {
+        "account_number": 19,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Tart\u00f3san adott k\u00f6lcs\u00f6n\u00f6k": {
+          "account_number": 191,
+          "root_type": "Asset"
+        },
+        "Tart\u00f3s bankbet\u00e9tek": {
+          "account_number": 192,
+          "root_type": "Asset"
+        },
+        "Tart\u00f3san adott k\u00f6lcs\u00f6n\u00f6k (\u00e9s bankbet\u00e9tek) \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 199,
+          "root_type": "Asset"
+        }
+      }
+    },
+    "SZ\u00c1MLAOSZT\u00c1LY K\u00c9SZLETEK": {
+      "account_number": 2,
+      "root_type": "Asset",
+      "is_group": 1,
+      "ANYAGOK": {
+        "account_number": "21-22",
+        "root_type": "Asset",
+        "is_group": 1,
+        "Nyers \u00e9s alapanyagok": {
+          "account_number": 211,
+          "root_type": "Asset"
+        },
+        "Seg\u00e9danyagok": {
+          "account_number": 221,
+          "root_type": "Asset"
+        },
+        "\u00dczem \u00e9s f\u0171t\u0151anyagok": {
+          "account_number": 222,
+          "root_type": "Asset"
+        },
+        "Fenntart\u00e1si anyagok": {
+          "account_number": 223,
+          "root_type": "Asset"
+        },
+        "\u00c9p\u00edt\u00e9si anyagok": {
+          "account_number": 224,
+          "root_type": "Asset"
+        },
+        "Egy \u00e9ven bel\u00fcl elhaszn\u00e1l\u00f3d\u00f3 anyagi eszk\u00f6z\u00f6k": {
+          "account_number": 225,
+          "root_type": "Asset"
+        },
+        "T\u00e1rgyi eszk\u00f6z\u00f6k k\u00f6z\u00fcl \u00e1tsorolt anyagok": {
+          "account_number": 226,
+          "root_type": "Asset"
+        },
+        "Egy\u00e9b anyagok": {
+          "account_number": 227,
+          "root_type": "Asset"
+        },
+        "Anyagok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 229,
+          "root_type": "Asset"
+        }
+      },
+      "BEFEJEZETLEN TERMEL\u00c9S \u00c9S F\u00c9LK\u00c9SZ TERM\u00c9KEK": {
+        "account_number": 23,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Befejezetlen termel\u00e9s": {
+          "account_number": 231,
+          "root_type": "Asset"
+        },
+        "F\u00e9lk\u00e9sz term\u00e9kek": {
+          "account_number": 232,
+          "root_type": "Asset"
+        },
+        "Befejezetlen termel\u00e9s \u00e9s f\u00e9lk\u00e9sz term\u00e9kek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 239,
+          "root_type": "Asset"
+        }
+      },
+      "N\u00d6VEND\u00c9K, H\u00cdZ\u00d3 \u00c9S EGY\u00c9B \u00c1LLATOK": {
+        "account_number": 24,
+        "root_type": "Asset",
+        "is_group": 1,
+        "N\u00f6vend\u00e9k\u00e1llatok": {
+          "account_number": 241,
+          "root_type": "Asset"
+        },
+        "H\u00edz\u00f3\u00e1llatok": {
+          "account_number": 242,
+          "root_type": "Asset"
+        },
+        "Egy\u00e9b \u00e1llatok": {
+          "account_number": 243,
+          "root_type": "Asset"
+        },
+        "B\u00e9rbevett \u00e1llatok": {
+          "account_number": 244,
+          "root_type": "Asset"
+        },
+        "\u00c1llatok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 249,
+          "root_type": "Asset"
+        }
+      },
+      "K\u00c9SZTERM\u00c9KEK": {
+        "account_number": 25,
+        "root_type": "Asset",
+        "is_group": 1,
+        "K\u00e9szterm\u00e9kek": {
+          "account_number": 251,
+          "root_type": "Asset"
+        },
+        "K\u00e9szterm\u00e9kek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 259,
+          "root_type": "Asset"
+        }
+      },
+      "KERESKEDELMI \u00c1RUK": {
+        "account_number": 26,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Kereskedelmi \u00e1ruk": {
+          "account_number": 261,
+          "root_type": "Asset"
+        },
+        "Idegen helyen t\u00e1rolt, bizom\u00e1nyba \u00e1tadott \u00e1ruk": {
+          "account_number": 262,
+          "root_type": "Asset"
+        },
+        "T\u00e1rgyi eszk\u00f6z\u00f6k k\u00f6z\u00fcl \u00e1tsorolt \u00e1ruk": {
+          "account_number": 263,
+          "root_type": "Asset"
+        },
+        "Bels\u0151 (egys\u00e9gek, tev\u00e9kenys\u00e9gek k\u00f6z\u00f6tti) \u00e1tad\u00e1s\u00e1tv\u00e9tel \u00fctk\u00f6z\u0151sz\u00e1mla": {
+          "account_number": 264,
+          "root_type": "Asset"
+        },
+        "Kereskedelmi \u00e1ruk \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 269,
+          "root_type": "Asset"
+        }
+      },
+      "K\u00d6ZVET\u00cdTETT SZOLG\u00c1LTAT\u00c1SOK": {
+        "account_number": 27,
+        "root_type": "Asset",
+        "is_group": 1,
+        "K\u00f6zvet\u00edtett szolg\u00e1ltat\u00e1sok": {
+          "account_number": 271,
+          "root_type": "Asset"
+        },
+        "K\u00f6zvet\u00edtett szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 279,
+          "root_type": "Asset"
+        }
+      },
+      "BET\u00c9TD\u00cdJAS G\u00d6NGY\u00d6LEGEK": {
+        "account_number": 28,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Bet\u00e9td\u00edjas g\u00f6ngy\u00f6legek": {
+          "account_number": 281,
+          "root_type": "Asset"
+        },
+        "Bet\u00e9td\u00edjas g\u00f6ngy\u00f6legek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+          "account_number": 289,
+          "root_type": "Asset"
+        }
+      }
+    },
+    "SZ\u00c1MLAOSZT\u00c1LY K\u00d6VETEL\u00c9SEK, P\u00c9NZ\u00dcGYI ESZK\u00d6Z\u00d6K \u00c9S AKT\u00cdV ID\u0150BELI ELHAT\u00c1ROL\u00c1SOK": {
+      "account_number": 3,
+      "root_type": "Asset",
+      "is_group": 1,
+      "K\u00d6VETEL\u00c9SEK \u00c1RUSZ\u00c1LL\u00cdT\u00c1SB\u00d3L \u00c9S SZOLG\u00c1LTAT\u00c1SB\u00d3L (VEV\u0150K)": {
+        "account_number": 31,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Vev\u0151k\u00f6vetel\u00e9sek": {
+          "account_number": 311,
+          "root_type": "Asset"
+        },
+        "Vev\u0151k\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se": {
+          "account_number": 319,
+          "root_type": "Asset"
+        }
+      },
+      "K\u00d6VETEL\u00c9SEK TULAJDONOSSAL SZEMBEN": {
+        "account_number": 33,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Jegyzett, de m\u00e9g be nem fizetett t\u0151ke": {
+          "account_number": 331,
+          "root_type": "Asset"
+        }
+      },
+      "V\u00c1LT\u00d3K\u00d6VETEL\u00c9SEK": {
+        "account_number": 34,
+        "root_type": "Asset",
+        "is_group": 1,
+        "V\u00e1lt\u00f3k\u00f6vetel\u00e9sek": {
+          "account_number": 341,
+          "root_type": "Asset"
+        },
+        "V\u00e1lt\u00f3k\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se": {
+          "account_number": 349,
+          "root_type": "Asset"
+        }
+      },
+      "ADOTT EL\u0150LEGEK": {
+        "account_number": 35,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Immateri\u00e1lis javakra adott el\u0151legek": {
+          "account_number": 351,
+          "root_type": "Asset"
+        },
+        "Beruh\u00e1z\u00e1sokra adott el\u0151legek": {
+          "account_number": 352,
+          "root_type": "Asset"
+        },
+        "K\u00e9szletekre adott el\u0151legek": {
+          "account_number": 353,
+          "root_type": "Asset"
+        },
+        "Egy\u00e9b c\u00e9lra adott el\u0151legek": {
+          "account_number": 354,
+          "root_type": "Asset"
+        },
+        "Adott el\u0151legek \u00e9rt\u00e9kveszt\u00e9se": {
+          "account_number": 359,
+          "root_type": "Asset"
+        }
+      },
+      "EGY\u00c9B K\u00d6VETEL\u00c9SEK": {
+        "account_number": 36,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Munkav\u00e1llal\u00f3kkal szembeni k\u00f6vetel\u00e9sek": {
+          "account_number": 361,
+          "root_type": "Asset"
+        },
+        "K\u00f6lts\u00e9gvet\u00e9ssel szembeni k\u00f6vetel\u00e9sek": {
+          "account_number": 362,
+          "root_type": "Asset"
+        },
+        "R\u00f6vid lej\u00e1ratra k\u00f6lcs\u00f6nadott p\u00e9nzeszk\u00f6z\u00f6k": {
+          "account_number": 363,
+          "root_type": "Asset"
+        },
+        "R\u00e9szesed\u00e9sekkel, \u00e9rt\u00e9kpap\u00edrokkal kapcsolatos k\u00f6vetel\u00e9sek": {
+          "account_number": 364,
+          "root_type": "Asset"
+        },
+        "K\u00fcl\u00f6nf\u00e9le egy\u00e9b k\u00f6vetel\u00e9sek": {
+          "account_number": 365,
+          "root_type": "Asset"
+        },
+        "Egy\u00e9b k\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se": {
+          "account_number": 369,
+          "root_type": "Asset"
+        }
+      },
+      "\u00c9RT\u00c9KPAP\u00cdROK": {
+        "account_number": 37,
+        "root_type": "Asset",
+        "is_group": 1,
+        "R\u00e9szesed\u00e9sek": {
+          "account_number": 371,
+          "root_type": "Asset"
+        },
+        "Saj\u00e1t r\u00e9szv\u00e9nyek, saj\u00e1t \u00fczletr\u00e9szek": {
+          "account_number": 372,
+          "root_type": "Asset"
+        },
+        "Forgat\u00e1si c\u00e9l\u00fa hitelviszonyt megtestes\u00edt\u0151 \u00e9rt\u00e9kpap\u00edrok": {
+          "account_number": 373,
+          "root_type": "Asset"
+        },
+        "\u00c9rt\u00e9kpap\u00edr elsz\u00e1mol\u00e1si sz\u00e1mla": {
+          "account_number": 378,
+          "root_type": "Asset"
+        },
+        "\u00c9rt\u00e9kpap\u00edrok \u00e9rt\u00e9kveszt\u00e9se": {
+          "account_number": 379,
+          "root_type": "Asset"
+        }
+      },
+      "P\u00c9NZESZK\u00d6Z\u00d6K": {
+        "account_number": 38,
+        "root_type": "Asset",
+        "is_group": 1,
+        "P\u00e9nzt\u00e1r": {
+          "account_number": 381,
+          "root_type": "Asset"
+        },
+        "Valutap\u00e9nzt\u00e1r": {
+          "account_number": 382,
+          "root_type": "Asset"
+        },
+        "Csekkek": {
+          "account_number": 383,
+          "root_type": "Asset"
+        },
+        "Elsz\u00e1mol\u00e1si bet\u00e9tsz\u00e1mla": {
+          "account_number": 384,
+          "root_type": "Asset"
+        },
+        "Elk\u00fcl\u00f6n\u00edtett bet\u00e9tsz\u00e1mla": {
+          "account_number": 385,
+          "root_type": "Asset"
+        },
+        "Devizabet\u00e9tsz\u00e1mla": {
+          "account_number": 386,
+          "root_type": "Asset"
+        },
+        "Elektronikus p\u00e9nz": {
+          "account_number": 387,
+          "root_type": "Asset"
+        },
+        "\u00c1tvezet\u00e9si sz\u00e1mla": {
+          "account_number": 389,
+          "root_type": "Asset"
+        }
+      },
+      "AKT\u00cdV ID\u0150BELI ELHAT\u00c1ROL\u00c1SOK": {
+        "account_number": 39,
+        "root_type": "Asset",
+        "is_group": 1,
+        "Akt\u00edv id\u0151beli elhat\u00e1rol\u00e1sok": {
+          "account_number": 391,
+          "root_type": "Asset"
+        }
+      }
+    },
+    "SZ\u00c1MLAOSZT\u00c1LY FORR\u00c1SOK": {
+      "account_number": 4,
+      "root_type": "Liability",
+      "is_group": 1,
+      "SAJ\u00c1T T\u0150KE": {
+        "account_number": 41,
+        "root_type": "Liability",
+        "is_group": 1,
+        "account_type": "Equity",
+        "Jegyzett t\u0151ke": {
+          "account_number": 411,
+          "root_type": "Liability",
+          "account_type": "Equity"
+        },
+        "T\u0151ketartal\u00e9k": {
+          "account_number": 412,
+          "root_type": "Liability",
+          "account_type": "Equity"
+        },
+        "Eredm\u00e9nytartal\u00e9k": {
+          "account_number": 413,
+          "root_type": "Liability",
+          "account_type": "Equity"
+        },
+        "Lek\u00f6t\u00f6tt tartal\u00e9k": {
+          "account_number": 414,
+          "root_type": "Liability",
+          "account_type": "Equity"
+        },
+        "Ad\u00f3zott eredm\u00e9ny": {
+          "account_number": 419,
+          "root_type": "Liability",
+          "account_type": "Equity"
+        }
+      },
+      "C\u00c9LTARTAL\u00c9KOK": {
+        "account_number": 42,
+        "root_type": "Liability",
+        "is_group": 1,
+        "C\u00e9ltartal\u00e9k a v\u00e1rhat\u00f3 k\u00f6telezetts\u00e9gekre": {
+          "account_number": 421,
+          "root_type": "Liability"
+        }
+      },
+      "H\u00c1TRASOROLT K\u00d6TELEZETTS\u00c9GEK": {
+        "account_number": 43,
+        "root_type": "Liability",
+        "is_group": 1,
+        "H\u00e1trasorolt k\u00f6telezetts\u00e9gek": {
+          "account_number": 431,
+          "root_type": "Liability"
+        }
+      },
+      "HOSSZ\u00da LEJ\u00c1RAT\u00da K\u00d6TELEZETTS\u00c9GEK": {
+        "account_number": 44,
+        "root_type": "Liability",
+        "is_group": 1,
+        "Hossz\u00fa lej\u00e1ratra kapott k\u00f6lcs\u00f6n\u00f6k": {
+          "account_number": 441,
+          "root_type": "Liability"
+        },
+        "\u00c1tv\u00e1ltoztathat\u00f3 k\u00f6tv\u00e9nyek": {
+          "account_number": 442,
+          "root_type": "Liability"
+        },
+        "Tartoz\u00e1sok k\u00f6tv\u00e9nykibocs\u00e1t\u00e1sb\u00f3l": {
+          "account_number": 443,
+          "root_type": "Liability"
+        },
+        "Beruh\u00e1z\u00e1si \u00e9s fejleszt\u00e9si hitelek": {
+          "account_number": 444,
+          "root_type": "Liability"
+        },
+        "Egy\u00e9b hossz\u00fa lej\u00e1rat\u00fa hitelek": {
+          "account_number": 445,
+          "root_type": "Liability"
+        },
+        "P\u00e9nz\u00fcgyi l\u00edzing miatti k\u00f6telezetts\u00e9gek": {
+          "account_number": 446,
+          "root_type": "Liability"
+        },
+        "Egy\u00e9b hossz\u00fa lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek": {
+          "account_number": 449,
+          "root_type": "Liability"
+        }
+      },
+      "R\u00d6VID LEJ\u00c1RAT\u00da K\u00d6TELEZETTS\u00c9GEK": {
+        "account_number": "45-47",
+        "root_type": "Liability",
+        "is_group": 1,
+        "R\u00f6vid lej\u00e1rat\u00fa k\u00f6lcs\u00f6n\u00f6k": {
+          "account_number": 451,
+          "root_type": "Liability"
+        },
+        "R\u00f6vid lej\u00e1rat\u00fa hitelek": {
+          "account_number": 452,
+          "root_type": "Liability"
+        },
+        "Vev\u0151kt\u0151l kapott el\u0151legek": {
+          "account_number": 453,
+          "root_type": "Liability"
+        },
+        "K\u00f6telezetts\u00e9gek \u00e1rusz\u00e1ll\u00edt\u00e1sb\u00f3l \u00e9s szolg\u00e1ltat\u00e1sb\u00f3l (sz\u00e1ll\u00edt\u00f3k)": {
+          "account_number": 454,
+          "root_type": "Liability"
+        },
+        "Beruh\u00e1z\u00e1si sz\u00e1ll\u00edt\u00f3k": {
+          "account_number": 455,
+          "root_type": "Liability"
+        },
+        "Nem sz\u00e1ml\u00e1zott sz\u00e1ll\u00edt\u00f3k": {
+          "account_number": 456,
+          "root_type": "Liability"
+        },
+        "V\u00e1lt\u00f3tartoz\u00e1sok": {
+          "account_number": 457,
+          "root_type": "Liability"
+        },
+        "Eredm\u00e9nyt terhel\u0151 ad\u00f3k elsz\u00e1mol\u00e1sa": {
+          "account_number": 461,
+          "root_type": "Liability"
+        },
+        "Szem\u00e9lyi j\u00f6vedelemad\u00f3 (SZJA) elsz\u00e1mol\u00e1sa": {
+          "account_number": 462,
+          "root_type": "Liability"
+        },
+        "J\u00f6ved\u00e9ki ad\u00f3 elsz\u00e1mol\u00e1sa": {
+          "account_number": 463,
+          "root_type": "Liability"
+        },
+        "G\u00e9pj\u00e1rm\u0171 ad\u00f3 (c\u00e9gaut\u00f3ad\u00f3) elsz\u00e1mol\u00e1sa": {
+          "account_number": 464,
+          "root_type": "Liability"
+        },
+        "V\u00e1melsz\u00e1mol\u00e1si sz\u00e1mla": {
+          "account_number": 465,
+          "root_type": "Liability"
+        },
+        "El\u0151zetesen felsz\u00e1m\u00edtott \u00e1ltal\u00e1nos forgalmi ad\u00f3": {
+          "account_number": 466,
+          "root_type": "Liability"
+        },
+        "Fizetend\u0151 \u00e1ltal\u00e1nos forgalmi ad\u00f3": {
+          "account_number": 467,
+          "root_type": "Liability"
+        },
+        "\u00c1ltal\u00e1nos forgalmi ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla": {
+          "account_number": 468,
+          "root_type": "Liability"
+        },
+        "Helyi ad\u00f3k elsz\u00e1mol\u00e1si sz\u00e1mla": {
+          "account_number": 469,
+          "root_type": "Liability"
+        },
+        "J\u00f6vedelemelsz\u00e1mol\u00e1si sz\u00e1mla": {
+          "account_number": 471,
+          "root_type": "Liability"
+        },
+        "Fel nem vett j\u00e1rand\u00f3s\u00e1gok": {
+          "account_number": 472,
+          "root_type": "Liability"
+        },
+        "Szoci\u00e1lis hozz\u00e1j\u00e1rul\u00e1si ad\u00f3": {
+          "account_number": 473,
+          "root_type": "Liability"
+        },
+        "Szakk\u00e9pz\u00e9si hozz\u00e1j\u00e1rul\u00e1s": {
+          "account_number": 474,
+          "root_type": "Liability"
+        },
+        "Egy\u00e9b \u00e1llami ad\u00f3hat\u00f3s\u00e1ggal szembeni k\u00f6telezetts\u00e9g elsz\u00e1mol\u00e1sa": {
+          "account_number": 476,
+          "root_type": "Liability"
+        },
+        "R\u00f6vid lej\u00e1rat\u00fa egy\u00e9b k\u00f6telezetts\u00e9gek munkav\u00e1llal\u00f3kkal \u00e9s tulajdonosokkal szemben": {
+          "account_number": 477,
+          "root_type": "Liability"
+        },
+        "R\u00e9szesed\u00e9sekkel, \u00e9rt\u00e9kpap\u00edrokkal kapcsolatos k\u00f6telezetts\u00e9gek": {
+          "account_number": 478,
+          "root_type": "Liability"
+        },
+        "K\u00fcl\u00f6nf\u00e9le egy\u00e9b r\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek": {
+          "account_number": 479,
+          "root_type": "Liability"
+        }
+      },
+      "PASSZ\u00cdV ID\u0150BELI ELHAT\u00c1ROL\u00c1SOK": {
+        "account_number": 48,
+        "root_type": "Liability",
+        "is_group": 1,
+        "Passz\u00edv id\u0151beli elhat\u00e1rol\u00e1sok": {
+          "account_number": 481,
+          "root_type": "Liability"
+        }
+      },
+      "\u00c9VI M\u00c9RLEGSZ\u00c1ML\u00c1K": {
+        "account_number": 49,
+        "root_type": "Liability",
+        "is_group": 1,
+        "Nyit\u00f3m\u00e9rleg sz\u00e1mla": {
+          "account_number": 491,
+          "root_type": "Liability"
+        },
+        "Z\u00e1r\u00f3m\u00e9rleg sz\u00e1mla": {
+          "account_number": 492,
+          "root_type": "Liability"
+        },
+        "Ad\u00f3zott eredm\u00e9ny elsz\u00e1mol\u00e1si sz\u00e1mla": {
+          "account_number": 493,
+          "root_type": "Liability"
+        }
+      }
+    },
+    "SZ\u00c1MLAOSZT\u00c1LY K\u00d6LTS\u00c9GNEMEK": {
+      "account_number": 5,
+      "root_type": "Expense",
+      "is_group": 1,
+      "ANYAGK\u00d6LTS\u00c9G": {
+        "account_number": 51,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Alapanyagok k\u00f6lts\u00e9gei": {
+          "account_number": 511,
+          "root_type": "Expense"
+        },
+        "Egy \u00e9ven bel\u00fcl elhaszn\u00e1l\u00f3d\u00f3 anyagi eszk\u00f6z\u00f6k k\u00f6lts\u00e9gei": {
+          "account_number": 512,
+          "root_type": "Expense"
+        },
+        "Egy\u00e9b anyagk\u00f6lts\u00e9g": {
+          "account_number": 513,
+          "root_type": "Expense"
+        },
+        "Anyagk\u00f6lts\u00e9g megt\u00e9r\u00fcl\u00e9s": {
+          "account_number": 519,
+          "root_type": "Expense"
+        }
+      },
+      "IG\u00c9NYBE VETT SZOLG\u00c1LTAT\u00c1SOK K\u00d6LTS\u00c9GEI": {
+        "account_number": 52,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Sz\u00e1ll\u00edt\u00e1srakod\u00e1s, rakt\u00e1roz\u00e1s k\u00f6lts\u00e9gei": {
+          "account_number": 521,
+          "root_type": "Expense"
+        },
+        "B\u00e9rleti d\u00edjak": {
+          "account_number": 522,
+          "root_type": "Expense"
+        },
+        "Karbantart\u00e1si k\u00f6lts\u00e9gek": {
+          "account_number": 523,
+          "root_type": "Expense"
+        },
+        "Hirdet\u00e9s, rekl\u00e1m, propaganda k\u00f6lts\u00e9gek": {
+          "account_number": 524,
+          "root_type": "Expense"
+        },
+        "Oktat\u00e1s \u00e9s tov\u00e1bbk\u00e9pz\u00e9s k\u00f6lts\u00e9gei": {
+          "account_number": 525,
+          "root_type": "Expense"
+        },
+        "Utaz\u00e1si \u00e9s kik\u00fcldet\u00e9si k\u00f6lts\u00e9gek (napid\u00edj n\u00e9lk\u00fcl)": {
+          "account_number": 526,
+          "root_type": "Expense"
+        },
+        "Ig\u00e9nybe vett egy\u00e9b szolg\u00e1ltat\u00e1sok k\u00f6lts\u00e9gei": {
+          "account_number": 529,
+          "root_type": "Expense"
+        }
+      },
+      "EGY\u00c9B SZOLG\u00c1LTAT\u00c1SOK K\u00d6LTS\u00c9GEI": {
+        "account_number": 53,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Hat\u00f3s\u00e1gi igazgat\u00e1si, szolg\u00e1ltat\u00e1si d\u00edjak, illet\u00e9kek": {
+          "account_number": 531,
+          "root_type": "Expense"
+        },
+        "P\u00e9nz\u00fcgyi, befektet\u00e9si szolg\u00e1ltat\u00e1si d\u00edjak": {
+          "account_number": 532,
+          "root_type": "Expense"
+        },
+        "Biztos\u00edt\u00e1si d\u00edjak": {
+          "account_number": 533,
+          "root_type": "Expense"
+        },
+        "K\u00f6lts\u00e9gk\u00e9nt elsz\u00e1moland\u00f3 ad\u00f3k, j\u00e1rul\u00e9kok, term\u00e9kd\u00edjak": {
+          "account_number": 534,
+          "root_type": "Expense"
+        },
+        "K\u00fcl\u00f6nf\u00e9le egy\u00e9b szolg\u00e1ltat\u00e1sok k\u00f6lts\u00e9gei": {
+          "account_number": 539,
+          "root_type": "Expense"
+        }
+      },
+      "B\u00c9RK\u00d6LTS\u00c9G": {
+        "account_number": 54,
+        "root_type": "Expense",
+        "is_group": 1,
+        "B\u00e9rk\u00f6lts\u00e9g": {
+          "account_number": 541,
+          "root_type": "Expense"
+        }
+      },
+      "SZEM\u00c9LYI JELLEG\u0170 EGY\u00c9B KIFIZET\u00c9SEK": {
+        "account_number": 55,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Munkav\u00e1llal\u00f3knak, tagoknak fizetett szem\u00e9lyi jelleg\u0171 kifizet\u00e9sek": {
+          "account_number": 551,
+          "root_type": "Expense"
+        },
+        "J\u00f3l\u00e9ti \u00e9s kultur\u00e1lis k\u00f6lts\u00e9gek": {
+          "account_number": 552,
+          "root_type": "Expense"
+        },
+        "Reprezent\u00e1ci\u00f3s k\u00f6lts\u00e9gek": {
+          "account_number": 553,
+          "root_type": "Expense"
+        },
+        "Egy\u00e9b szem\u00e9lyi jelleg\u0171 kifizet\u00e9sek": {
+          "account_number": 559,
+          "root_type": "Expense"
+        }
+      },
+      "B\u00c9RJ\u00c1RUL\u00c9KOK": {
+        "account_number": 56,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Szoci\u00e1lis hozz\u00e1j\u00e1rul\u00e1si ad\u00f3": {
+          "account_number": 561,
+          "root_type": "Expense"
+        },
+        "Szakk\u00e9pz\u00e9si hozz\u00e1j\u00e1rul\u00e1s": {
+          "account_number": 563,
+          "root_type": "Expense"
+        },
+        "Egy\u00e9b b\u00e9rj\u00e1rul\u00e9kok": {
+          "account_number": 569,
+          "root_type": "Expense"
+        }
+      },
+      "\u00c9RT\u00c9KCS\u00d6KKEN\u00c9SI LE\u00cdR\u00c1S": {
+        "account_number": 57,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1s": {
+          "account_number": 571,
+          "root_type": "Expense"
+        },
+        "Kis \u00e9rt\u00e9k\u0171 eszk\u00f6z\u00f6k egy \u00f6sszegben elsz\u00e1molt \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1sa": {
+          "account_number": 572,
+          "root_type": "Expense"
+        }
+      },
+      "AKTIV\u00c1LT SAJ\u00c1T TELJES\u00cdTM\u00c9NYEK \u00c9RT\u00c9KE": {
+        "account_number": 58,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Saj\u00e1t termel\u00e9s\u0171 k\u00e9szletek \u00e1llom\u00e1nyv\u00e1ltoz\u00e1sa": {
+          "account_number": 581,
+          "root_type": "Expense"
+        },
+        "Saj\u00e1t el\u0151\u00e1ll\u00edt\u00e1s\u00fa eszk\u00f6z\u00f6k aktiv\u00e1lt \u00e9rt\u00e9ke": {
+          "account_number": 582,
+          "root_type": "Expense"
+        },
+        "Aktiv\u00e1lt saj\u00e1t teljes\u00edtm\u00e9nyek \u00e1tvezet\u00e9si sz\u00e1mla": {
+          "account_number": 589,
+          "root_type": "Expense"
+        }
+      },
+      "K\u00d6LTS\u00c9GNEMEK \u00c1TVEZET\u00c9SE": {
+        "account_number": 59,
+        "root_type": "Expense",
+        "is_group": 1,
+        "K\u00f6lts\u00e9gnemek \u00e1tvezet\u00e9si sz\u00e1mla": {
+          "account_number": 599,
+          "root_type": "Expense"
+        }
+      }
+    },
+    "SZ\u00c1MLAOSZT\u00c1LY R\u00c1FORD\u00cdT\u00c1SOK": {
+      "account_number": 8,
+      "root_type": "Expense",
+      "is_group": 1,
+      "ANYAGJELLEG\u0170 R\u00c1FORD\u00cdT\u00c1SOK": {
+        "account_number": 81,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Anyagk\u00f6lts\u00e9g": {
+          "account_number": 811,
+          "root_type": "Expense"
+        },
+        "Ig\u00e9nybe vett szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {
+          "account_number": 812,
+          "root_type": "Expense"
+        },
+        "Egy\u00e9b szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {
+          "account_number": 813,
+          "root_type": "Expense"
+        },
+        "Eladott \u00e1ruk beszerz\u00e9si \u00e9rt\u00e9ke": {
+          "account_number": 814,
+          "root_type": "Expense"
+        },
+        "Eladott (k\u00f6zvet\u00edtett) szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {
+          "account_number": 815,
+          "root_type": "Expense"
+        }
+      },
+      "SZEM\u00c9LYI JELLEG\u0170 R\u00c1FORD\u00cdT\u00c1SOK": {
+        "account_number": 82,
+        "root_type": "Expense",
+        "is_group": 1,
+        "B\u00e9rk\u00f6lts\u00e9g": {
+          "account_number": 821,
+          "root_type": "Expense"
+        },
+        "Szem\u00e9lyi jelleg\u0171 egy\u00e9b kifizet\u00e9sek": {
+          "account_number": 822,
+          "root_type": "Expense"
+        },
+        "B\u00e9rj\u00e1rul\u00e9kok": {
+          "account_number": 823,
+          "root_type": "Expense"
+        }
+      },
+      "\u00c9RT\u00c9KCS\u00d6KKEN\u00c9SI LE\u00cdR\u00c1S": {
+        "account_number": 83,
+        "root_type": "Expense",
+        "is_group": 1,
+        "\u00c9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1s": {
+          "account_number": 831,
+          "root_type": "Expense"
+        }
+      },
+      "EGY\u00c9B R\u00c1FORD\u00cdT\u00c1SOK": {
+        "account_number": 86,
+        "root_type": "Expense",
+        "is_group": 1,
+        "Egy\u00e9b r\u00e1ford\u00edt\u00e1snak min\u0151s\u00fcl\u0151 \u00e9rt\u00e9kes\u00edt\u00e9sek": {
+          "account_number": 861,
+          "root_type": "Expense",
+          "is_group": 1,
+          "\u00c9rt\u00e9kes\u00edtett immateri\u00e1lis javak, t\u00e1rgyi eszk\u00f6z\u00f6k k\u00f6nyv szerinti \u00e9rt\u00e9ke": {
+            "account_number": 8611,
+            "root_type": "Expense"
+          },
+          "\u00c9rt\u00e9kes\u00edtett, \u00e1truh\u00e1zott (engedm\u00e9nyezett) k\u00f6vetel\u00e9sek k\u00f6nyv szerinti \u00e9rt\u00e9ke": {
+            "account_number": 8612,
+            "root_type": "Expense"
+          }
+        },
+        "Egy\u00e9b r\u00e1ford\u00edt\u00e1snak min\u0151s\u00fcl\u0151 eszk\u00f6z kivezet\u00e9sek": {
+          "account_number": 862,
+          "root_type": "Expense",
+          "is_group": 1,
+          "Hi\u00e1nyz\u00f3, megsemmis\u00fclt, kiselejtezett immateri\u00e1lis javak, t\u00e1rgyi eszk\u00f6z\u00f6k nett\u00f3 \u00e9rt\u00e9ke": {
+            "account_number": 8621,
+            "root_type": "Expense"
+          },
+          "Hi\u00e1nyz\u00f3, megsemmis\u00fclt, \u00e1llom\u00e1nyb\u00f3l kivezetett k\u00e9szletek k\u00f6nyv szerinti \u00e9rt\u00e9ke": {
+            "account_number": 8622,
+            "root_type": "Expense"
+          }
+        },
+        "Behajthatatlan k\u00f6vetel\u00e9sek le\u00edrt \u00f6sszege": {
+          "account_number": 863,
+          "root_type": "Expense"
+        },
+        "C\u00e9ltartal\u00e9k k\u00e9pz\u00e9s": {
+          "account_number": 864,
+          "root_type": "Expense"
+        },
+        "Ut\u00f3lag adott, nem sz\u00e1ml\u00e1zott engedm\u00e9ny": {
+          "account_number": 865,
+          "root_type": "Expense"
+        },
+        "Egy\u00e9b r\u00e1ford\u00edt\u00e1sk\u00e9nt elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {
+          "account_number": 866,
+          "root_type": "Expense",
+          "is_group": 1,
+          "K\u00f6zponti k\u00f6lts\u00e9gvet\u00e9ssel elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {
+            "account_number": 8661,
+            "root_type": "Expense"
+          },
+          "Helyi \u00f6nkorm\u00e1nyzatokkal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {
+            "account_number": 8662,
+            "root_type": "Expense"
+          },
+          "Elk\u00fcl\u00f6n\u00edtett \u00e1llami p\u00e9nzalapokkal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {
+            "account_number": 8663,
+            "root_type": "Expense"
+          },
+          "T\u00e1rsadalombiztos\u00edt\u00e1ssal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {
+            "account_number": 8664,
+            "root_type": "Expense"
+          },
+          "EU p\u00e9nz\u00fcgyi alapokkal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {
+            "account_number": 8665,
+            "root_type": "Expense"
+          },
+          "R\u00e1ford\u00edt\u00e1sk\u00e9nt elsz\u00e1molt egy\u00e9b ad\u00f3k \u00e9s ad\u00f3jelleg\u0171 t\u00e9telek": {
+            "account_number": 8666,
+            "root_type": "Expense"
+          }
+        },
+        "Egy\u00e9b r\u00e1ford\u00edt\u00e1sk\u00e9nt elsz\u00e1molt, ad\u00f3nak nem min\u0151s\u00fcl\u0151 kifizet\u00e9sek": {
+          "account_number": 867,
+          "root_type": "Expense",
+          "is_group": 1,
+          "K\u00e1resem\u00e9nnyel kapcsolatos fizetett, fizetend\u0151 \u00f6sszegek": {
+            "account_number": 8671,
+            "root_type": "Expense"
+          },
+          "K\u00f6lts\u00e9gek (r\u00e1f.) ellent\u00e9telez\u00e9s\u00e9re visszafizet\u00e9si k\u00f6telezetts\u00e9g n\u00e9lk\u00fcl adott t\u00e1mogat\u00e1s, v\u00e9glegesen \u00e1tadott p\u00e9nzeszk\u00f6z, juttat\u00e1s": {
+            "account_number": 8672,
+            "root_type": "Expense"
+          },
+          "Fejleszt\u00e9si c\u00e9lra, visszafizet\u00e9si k\u00f6telezetts\u00e9g n\u00e9lk\u00fcl adott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+            "account_number": 8673,
+            "root_type": "Expense"
+          },
+          "Fejleszt\u00e9si c\u00e9lra kapott t\u00e1mogat\u00e1s visszafizetend\u0151 \u00f6sszege": {
+            "account_number": 8674,
+            "root_type": "Expense"
+          },
+          "Tao \u00e1ltal elismert b\u00edrs\u00e1gok, k\u00f6tb\u00e9rek, k\u00e9sedelmi kamatok, p\u00f3tl\u00e9kok, k\u00e1rt\u00e9r\u00edt\u00e9sek, s\u00e9relemd\u00edjak": {
+            "account_number": 8675,
+            "root_type": "Expense"
+          },
+          "Tao \u00e1ltal el nem ismert b\u00edrs\u00e1gok, k\u00f6tb\u00e9rek, k\u00e9sedelmi kamatok, p\u00f3tl\u00e9kok, k\u00e1rt\u00e9r\u00edt\u00e9sek, s\u00e9relemd\u00edjak": {
+            "account_number": 8676,
+            "root_type": "Expense"
+          }
+        },
+        "Terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9sek, \u00e9rt\u00e9kveszt\u00e9sek": {
+          "account_number": 868,
+          "root_type": "Expense",
+          "is_group": 1,
+          "Immateri\u00e1lis javak terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 8681,
+            "root_type": "Expense"
+          },
+          "T\u00e1rgyi eszk\u00f6z\u00f6k terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {
+            "account_number": 8682,
+            "root_type": "Expense"
+          },
+          "K\u00e9szletek \u00e9rt\u00e9kveszt\u00e9se": {
+            "account_number": 8683,
+            "root_type": "Expense"
+          },
+          "K\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se": {
+            "account_number": 8684,
+            "root_type": "Expense"
+          }
+        },
+        "K\u00fcl\u00f6nf\u00e9le egy\u00e9b r\u00e1ford\u00edt\u00e1sok": {
+          "account_number": 869,
+          "root_type": "Expense",
+          "is_group": 1,
+          "T\u00e1rsas\u00e1gba bevitt, \u00e9rt\u00e9kp. v. r\u00e9sz. nem min\u0151s\u00fcl\u0151 vagyont. k\u00f6nyv sz. \u00e9s l\u00e9tes\u00edt\u0151 o. meghat. \u00e9rt\u00e9k\u00e9nek vesztes\u00e9gjelleg\u0171 k\u00fcl.": {
+            "account_number": 8691,
+            "root_type": "Expense"
+          },
+          "Ellent\u00e9telez\u00e9s n\u00e9lk\u00fcl \u00e1tv\u00e1llalt k\u00f6telezetts\u00e9g szerz\u0151d\u00e9s szerinti \u00f6sszege": {
+            "account_number": 8692,
+            "root_type": "Expense"
+          },
+          "T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl \u00e1tadott, r\u00e9szesed\u00e9snek vagy \u00e9rt\u00e9kpap\u00edrnak nem min\u0151s\u00fcl\u0151 eszk\u00f6z\u00f6k nyilv\u00e1ntart\u00e1s szerinti \u00e9rt\u00e9ke": {
+            "account_number": 8693,
+            "root_type": "Expense"
+          },
+          "T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl ny\u00fajtott szolg\u00e1ltat\u00e1sok beker\u00fcl\u00e9si \u00e9rt\u00e9ke": {
+            "account_number": 8694,
+            "root_type": "Expense"
+          },
+          "Elengedett k\u00f6vetel\u00e9sek k\u00f6nyv szerinti \u00e9rt\u00e9ke": {
+            "account_number": 8695,
+            "root_type": "Expense"
+          },
+          "Egy\u00e9b, vagyoncs\u00f6kken\u00e9ssel j\u00e1r\u00f3 r\u00e1ford\u00edt\u00e1sok": {
+            "account_number": 8696,
+            "root_type": "Expense"
+          }
+        }
+      },
+      "P\u00c9NZ\u00dcGYI M\u0170VELETEK R\u00c1FORD\u00cdT\u00c1SAI": {
+        "account_number": 87,
+        "root_type": "Expense",
+        "is_group": 1,
+        "R\u00e9szesed\u00e9sekb\u0151l sz\u00e1rmaz\u00f3 r\u00e1ford\u00edt\u00e1sok, \u00e1rfolyamvesztes\u00e9gek": {
+          "account_number": 871,
+          "root_type": "Expense"
+        },
+        "Befektetett p\u00e9nz\u00fcgyi eszk\u00f6z\u00f6kb\u0151l (\u00e9rt\u00e9kpap\u00edrokb\u00f3l, k\u00f6lcs\u00f6n\u00f6kb\u0151l) sz\u00e1rmaz\u00f3 r\u00e1ford\u00edt\u00e1sok \u00e1rfolyamvesztes\u00e9gek": {
+          "account_number": 872,
+          "root_type": "Expense"
+        },
+        "Hitelint\u00e9zetnek fizetend\u0151 kamatok \u00e9s kamatjelleg\u0171 r\u00e1ford\u00edt\u00e1sok": {
+          "account_number": 873,
+          "root_type": "Expense"
+        },
+        "Nem hitelint\u00e9zetnek fizetend\u0151 kamatok \u00e9s kamatjelleg\u0171 r\u00e1ford\u00edt\u00e1sok": {
+          "account_number": 874,
+          "root_type": "Expense"
+        },
+        "R\u00e9szesed\u00e9sek, \u00e9rt\u00e9kpap\u00edrok, bankbet\u00e9tek \u00e9rt\u00e9kveszt\u00e9se \u00e9s vissza\u00edr\u00e1sa": {
+          "account_number": 875,
+          "root_type": "Expense",
+          "is_group": 1,
+          "R\u00e9szesed\u00e9sek, \u00e9rt\u00e9kpap\u00edrok, bankbet\u00e9tek \u00e9rt\u00e9kveszt\u00e9se": {
+            "account_number": 8751,
+            "root_type": "Expense"
+          },
+          "R\u00e9szesed\u00e9sek, \u00e9rt\u00e9kpap\u00edrok, bankbet\u00e9tek \u00e9rt\u00e9kveszt\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {
+            "account_number": 8752,
+            "root_type": "Expense"
+          }
+        },
+        "K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek \u00e1rfolyamvesztes\u00e9gei": {
+          "account_number": 876,
+          "root_type": "Expense",
+          "is_group": 1,
+          "Deviza \u00e9s valutak\u00e9szletek forintra \u00e1tv\u00e1lt\u00e1s\u00e1nak \u00e1rfolyamvesztes\u00e9ge": {
+            "account_number": 8761,
+            "root_type": "Expense"
+          },
+          "K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek p\u00e9nz\u00fcgyileg rendezett \u00e1rfolyamvesztes\u00e9ge": {
+            "account_number": 8762,
+            "root_type": "Expense"
+          }
+        },
+        "P\u00e9nz\u00fcgyi m\u0171veletek egy\u00e9b r\u00e1ford\u00edt\u00e1sai": {
+          "account_number": 877,
+          "root_type": "Expense"
+        },
+        "P\u00e9nz\u00fcgyi rendez\u00e9shez kapcsol\u00f3d\u00f3an adott engedm\u00e9ny": {
+          "account_number": 878,
+          "root_type": "Expense"
+        },
+        "Egy\u00e9b vagyoncs\u00f6kken\u00e9ssel j\u00e1r\u00f3 p\u00e9nz\u00fcgyi r\u00e1ford\u00edt\u00e1sok": {
+          "account_number": 879,
+          "root_type": "Expense"
+        }
+      },
+      "EREDM\u00c9NYT TERHEL\u0150 AD\u00d3K": {
+        "account_number": 89,
+        "root_type": "Expense",
+        "is_group": 1,
+        "T\u00e1rsas\u00e1gi ad\u00f3": {
+          "account_number": 891,
+          "root_type": "Expense"
+        },
+        "Kisv\u00e1llalati ad\u00f3": {
+          "account_number": 893,
+          "root_type": "Expense"
+        },
+        "Eredm\u00e9nyt terhel\u0151 egy\u00e9b ad\u00f3k": {
+          "account_number": 899,
+          "root_type": "Expense"
+        }
+      }
+    },
+    "SZ\u00c1MLAOSZT\u00c1LY BEV\u00c9TELEK": {
+      "account_number": 9,
+      "root_type": "Income",
+      "is_group": 1,
+      "BELF\u00d6LDI \u00c9RT\u00c9KES\u00cdT\u00c9S \u00c1RBEV\u00c9TELE": {
+        "account_number": 91,
+        "root_type": "Income",
+        "is_group": 1,
+        "Belf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett saj\u00e1t termel\u00e9s\u0171 k\u00e9szletek \u00e1rbev\u00e9tele": {
+          "account_number": 911,
+          "root_type": "Income"
+        },
+        "Belf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett v\u00e1s\u00e1rolt k\u00e9szletek \u00e1rbev\u00e9tele": {
+          "account_number": 912,
+          "root_type": "Income"
+        },
+        "Belf\u00f6ldinek ny\u00fajtott szolg\u00e1ltat\u00e1sok \u00e1rbev\u00e9tele": {
+          "account_number": 913,
+          "root_type": "Income"
+        },
+        "Belf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9ssel kapcsolatos \u00e1rt\u00e1mogat\u00e1s": {
+          "account_number": 918,
+          "root_type": "Income"
+        },
+        "Egy\u00e9b belf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9s \u00e1rbev\u00e9tele": {
+          "account_number": 919,
+          "root_type": "Income"
+        }
+      },
+      "EXPORT\u00c9RT\u00c9KES\u00cdT\u00c9S \u00c1RBEV\u00c9TELE": {
+        "account_number": 92,
+        "root_type": "Income",
+        "is_group": 1,
+        "K\u00fclf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett saj\u00e1t termel\u00e9s\u0171 k\u00e9szletek \u00e1rbev\u00e9tele": {
+          "account_number": 921,
+          "root_type": "Income"
+        },
+        "K\u00fclf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett v\u00e1s\u00e1rolt k\u00e9szletek \u00e1rbev\u00e9tele": {
+          "account_number": 922,
+          "root_type": "Income"
+        },
+        "K\u00fclf\u00f6ldinek ny\u00fajtott szolg\u00e1ltat\u00e1sok \u00e1rbev\u00e9tele": {
+          "account_number": 923,
+          "root_type": "Income"
+        },
+        "K\u00fclf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9ssel kapcsolatos \u00e1rt\u00e1mogat\u00e1s": {
+          "account_number": 928,
+          "root_type": "Income"
+        },
+        "Egy\u00e9b k\u00fclf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9s \u00e1rbev\u00e9tele": {
+          "account_number": 929,
+          "root_type": "Income"
+        }
+      },
+      "EGY\u00c9B BEV\u00c9TELEK": {
+        "account_number": 96,
+        "root_type": "Income",
+        "is_group": 1,
+        "Egy\u00e9b bev\u00e9telnek min\u0151s\u00fcl\u0151 \u00e9rt\u00e9kes\u00edt\u00e9sek": {
+          "account_number": 961,
+          "root_type": "Income",
+          "is_group": 1,
+          "\u00c9rt\u00e9kes\u00edtett immateri\u00e1lis javak, t\u00e1rgyi eszk\u00f6z\u00f6k ellen\u00e9rt\u00e9ke": {
+            "account_number": 9611,
+            "root_type": "Income"
+          },
+          "\u00c9rt\u00e9kes\u00edtett, \u00e1truh\u00e1zott (engedm\u00e9nyezett) k\u00f6vetel\u00e9sek ellen\u00e9rt\u00e9ke": {
+            "account_number": 9612,
+            "root_type": "Income"
+          }
+        },
+        "K\u00f6vetel\u00e9s k\u00f6nyv szerinti \u00e9rt\u00e9k\u00e9t meghalad\u00f3an realiz\u00e1lt \u00f6sszeg": {
+          "account_number": 963,
+          "root_type": "Income"
+        },
+        "C\u00e9ltartal\u00e9k felold\u00e1s": {
+          "account_number": 964,
+          "root_type": "Income"
+        },
+        "Ut\u00f3lag kapott, nem sz\u00e1ml\u00e1zott engedm\u00e9ny": {
+          "account_number": 965,
+          "root_type": "Income"
+        },
+        "M\u0171k\u00f6d\u00e9si c\u00e9lra kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+          "account_number": 966,
+          "root_type": "Income",
+          "is_group": 1,
+          "K\u00f6zponti k\u00f6lts\u00e9gvet\u00e9sb\u0151l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+            "account_number": 9661,
+            "root_type": "Income"
+          },
+          "Helyi \u00f6nkorm\u00e1nyzatokt\u00f3l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+            "account_number": 9662,
+            "root_type": "Income"
+          },
+          "Eur\u00f3pai Uni\u00f3t\u00f3l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+            "account_number": 9663,
+            "root_type": "Income"
+          },
+          "Egy\u00e9b forr\u00e1sb\u00f3l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+            "account_number": 9664,
+            "root_type": "Income"
+          }
+        },
+        "Egy\u00e9b bev\u00e9telk\u00e9nt elsz\u00e1molt p\u00e9nzbev\u00e9telek": {
+          "account_number": 967,
+          "root_type": "Income",
+          "is_group": 1,
+          "K\u00e1resem\u00e9nnyel kapcsolatos t\u00e9r\u00edt\u00e9sek": {
+            "account_number": 9671,
+            "root_type": "Income"
+          },
+          "K\u00f6lts\u00e9gek (r\u00e1ford\u00edt\u00e1sok) ellent\u00e9telez\u00e9s\u00e9re kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+            "account_number": 9672,
+            "root_type": "Income"
+          },
+          "Fejleszt\u00e9si c\u00e9lra kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {
+            "account_number": 9673,
+            "root_type": "Income"
+          },
+          "Kapott b\u00edrs\u00e1gok, k\u00f6tb\u00e9rek, fekb\u00e9rek, k\u00e9sedelmi kamatok, k\u00e1rt\u00e9r\u00edt\u00e9sek": {
+            "account_number": 9674,
+            "root_type": "Income"
+          }
+        },
+        "Terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9sek, \u00e9rt\u00e9kveszt\u00e9sek vissza\u00edr\u00e1sa": {
+          "account_number": 968,
+          "root_type": "Income",
+          "is_group": 1,
+          "Immateri\u00e1lis javak terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {
+            "account_number": 9681,
+            "root_type": "Income"
+          },
+          "T\u00e1rgyi eszk\u00f6z\u00f6k terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {
+            "account_number": 9682,
+            "root_type": "Income"
+          },
+          "K\u00e9szletek \u00e9rt\u00e9kveszt\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {
+            "account_number": 9683,
+            "root_type": "Income"
+          },
+          "R\u00e9szesed\u00e9sek \u00e9rt\u00e9kveszt\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {
+            "account_number": 9684,
+            "root_type": "Income"
+          }
+        },
+        "K\u00fcl\u00f6nf\u00e9le egy\u00e9b bev\u00e9telek": {
+          "account_number": 969,
+          "root_type": "Income",
+          "is_group": 1,
+          "Gazd. t\u00e1rs. bevitt, \u00e9rt\u00e9kp. v. r\u00e9sz. nem min\u0151s\u00fcl\u0151 vagyont. nyilv. sz. \u00e9rt. \u00e9s l\u00e9tes\u00edt\u0151 o. meghat. \u00e9rt. nyeres\u00e9gjelleg\u0171 k\u00fcl.": {
+            "account_number": 9691,
+            "root_type": "Income"
+          },
+          "El\u00e9v\u00fclt k\u00f6telezetts\u00e9g k\u00f6nyv szerinti \u00e9rt\u00e9ke": {
+            "account_number": 9692,
+            "root_type": "Income"
+          },
+          "T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl \u00e1tvett, aj\u00e1nd\u00e9kk\u00e9nt, hagyat\u00e9kk\u00e9nt kapott, fellelt eszk\u00f6z\u00f6k piaci vagy jogszab\u00e1ly szerinti \u00e9rt\u00e9ke": {
+            "account_number": 9693,
+            "root_type": "Income"
+          },
+          "T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl kapott szolg\u00e1ltat\u00e1sok piaci vagy jogszab\u00e1ly szerinti \u00e9rt\u00e9ke": {
+            "account_number": 9694,
+            "root_type": "Income"
+          },
+          "Elengedett \u00e9s ellent\u00e9telez\u00e9s n\u00e9lk\u00fcl \u00e1tv\u00e1llalt k\u00f6telezetts\u00e9g \u00e9rt\u00e9ke": {
+            "account_number": 9695,
+            "root_type": "Income"
+          },
+          "Egy\u00e9b, vagyonn\u00f6veked\u00e9ssel j\u00e1r\u00f3 bev\u00e9telek": {
+            "account_number": 9696,
+            "root_type": "Income"
+          }
+        }
+      },
+      "P\u00c9NZ\u00dcGYI M\u0170VELETEK BEV\u00c9TELEI": {
+        "account_number": 97,
+        "root_type": "Income",
+        "is_group": 1,
+        "R\u00e9szesed\u00e9sekb\u0151l sz\u00e1rmaz\u00f3 bev\u00e9telek, \u00e1rfolyamnyeres\u00e9gek": {
+          "account_number": 971,
+          "root_type": "Income"
+        },
+        "Befektetett p\u00e9nz\u00fcgyi eszk\u00f6z\u00f6kb\u0151l (\u00e9rt\u00e9kpap\u00edrokb\u00f3l, k\u00f6lcs\u00f6n\u00f6kb\u0151l) sz\u00e1rmaz\u00f3 bev\u00e9telek, \u00e1rfolyamnyeres\u00e9gek": {
+          "account_number": 972,
+          "root_type": "Income"
+        },
+        "Hitelint\u00e9zett\u0151l kapott kamatok \u00e9s kamatjelleg\u0171 bev\u00e9telek": {
+          "account_number": 973,
+          "root_type": "Income"
+        },
+        "Nem hitelint\u00e9zett\u0151l kapott kamatok \u00e9s kamatjelleg\u0171 bev\u00e9telek": {
+          "account_number": 974,
+          "root_type": "Income"
+        },
+        "Kapott (j\u00e1r\u00f3) osztal\u00e9k \u00e9s r\u00e9szesed\u00e9s": {
+          "account_number": 975,
+          "root_type": "Income"
+        },
+        "K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek \u00e1rfolyamnyeres\u00e9gei": {
+          "account_number": 976,
+          "root_type": "Income",
+          "is_group": 1,
+          "Deviza \u00e9s valutak\u00e9szletek forintra \u00e1tv\u00e1lt\u00e1s\u00e1nak \u00e1rfolyamnyeres\u00e9ge": {
+            "account_number": 9761,
+            "root_type": "Income"
+          },
+          "K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek p\u00e9nz\u00fcgyileg rendezett \u00e1rfolyamnyeres\u00e9ge": {
+            "account_number": 9762,
+            "root_type": "Income"
+          }
+        },
+        "P\u00e9nz\u00fcgyi m\u0171veletek egy\u00e9b bev\u00e9telei": {
+          "account_number": 977,
+          "root_type": "Income"
+        },
+        "P\u00e9nz\u00fcgyi rendez\u00e9shez kapcsol\u00f3d\u00f3an kapott engedm\u00e9ny": {
+          "account_number": 978,
+          "root_type": "Income"
+        },
+        "Egy\u00e9b vagyonn\u00f6veked\u00e9ssel j\u00e1r\u00f3 p\u00e9nz\u00fcgyi bev\u00e9telek": {
+          "account_number": 979,
+          "root_type": "Income"
+        }
+      }
+    }
+  }
+}

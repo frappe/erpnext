@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2012-12-06 12:10:10",
+ "description": "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM.\nIt also updates latest price in all the BOMs.",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "engine": "InnoDB",
+ "field_order": [
+  "replace_bom_section",
+  "current_bom",
+  "new_bom",
+  "replace",
+  "update_cost_section",
+  "update_latest_price_in_all_boms"
+ ],
+ "fields": [
+  {
+   "fieldname": "replace_bom_section",
+   "fieldtype": "Section Break",
+   "label": "Replace BOM"
+  },
+  {
+   "description": "The BOM which will be replaced",
+   "fieldname": "current_bom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Current BOM",
+   "options": "BOM",
+   "reqd": 1
+  },
+  {
+   "description": "The new BOM after replacement",
+   "fieldname": "new_bom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "New BOM",
+   "options": "BOM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "replace",
+   "fieldtype": "Button",
+   "label": "Replace"
+  },
+  {
+   "fieldname": "update_cost_section",
+   "fieldtype": "Section Break",
+   "label": "Update Cost"
+  },
+  {
+   "fieldname": "update_latest_price_in_all_boms",
+   "fieldtype": "Button",
+   "label": "Update latest price in all BOMs"
+  }
+ ],
+ "hide_toolbar": 1,
+ "icon": "icon-magic",
+ "idx": 1,
+ "in_create": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:41.828828",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Update Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "read_only": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

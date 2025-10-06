@@ -1,0 +1,169 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2018-10-17 05:47:13.087395",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "provider",
+  "url",
+  "youtube_video_id",
+  "column_break_4",
+  "publish_date",
+  "duration",
+  "youtube_tracking_section",
+  "like_count",
+  "view_count",
+  "col_break",
+  "dislike_count",
+  "comment_count",
+  "section_break_7",
+  "description",
+  "image"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Provider",
+   "options": "YouTube\nVimeo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "label": "URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "publish_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Publish Date"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Duration",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "like_count",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Likes",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "view_count",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Views",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dislike_count",
+   "fieldtype": "Float",
+   "label": "Dislikes",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "comment_count",
+   "fieldtype": "Float",
+   "label": "Comments",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "eval:doc.provider==\"YouTube\"",
+   "fieldname": "youtube_tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Youtube Statistics"
+  },
+  {
+   "fieldname": "youtube_video_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Youtube ID",
+   "read_only": 1
+  }
+ ],
+ "image_field": "image",
+ "links": [],
+ "modified": "2024-03-27 13:10:58.743905",
+ "modified_by": "Administrator",
+ "module": "Utilities",
+ "name": "Video",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

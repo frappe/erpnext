@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2013-01-10 16:34:05",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "account",
+  "account_currency",
+  "from_date",
+  "to_date",
+  "column_break_5",
+  "bank_account",
+  "include_reconciled_entries",
+  "include_pos_transactions",
+  "section_break_10",
+  "payment_entries"
+ ],
+ "fields": [
+  {
+   "fetch_from": "bank_account.account",
+   "fetch_if_empty": 1,
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Account Currency",
+   "options": "Currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Select the Bank Account to reconcile.",
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_reconciled_entries",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Include Reconciled Entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_pos_transactions",
+   "fieldtype": "Check",
+   "label": "Include POS Transactions"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "payment_entries",
+   "fieldtype": "Table",
+   "label": "Payment Entries",
+   "options": "Bank Clearance Detail"
+  }
+ ],
+ "hide_toolbar": 1,
+ "icon": "fa fa-check",
+ "idx": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:37.477927",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Clearance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "read_only": 1,
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

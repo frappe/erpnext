@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "creation": "2020-08-02 03:50:21.339609",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable_youtube_tracking",
+  "api_key",
+  "frequency"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enable_youtube_tracking",
+   "fieldtype": "Check",
+   "label": "Enable YouTube Tracking"
+  },
+  {
+   "depends_on": "eval:doc.enable_youtube_tracking",
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "API Key",
+   "mandatory_depends_on": "eval:doc.enable_youtube_tracking"
+  },
+  {
+   "default": "1 hr",
+   "depends_on": "eval:doc.enable_youtube_tracking",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "mandatory_depends_on": "eval:doc.enable_youtube_tracking",
+   "options": "30 mins\n1 hr\n6 hrs\nDaily"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:58.942609",
+ "modified_by": "Administrator",
+ "module": "Utilities",
+ "name": "Video Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

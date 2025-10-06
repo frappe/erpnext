@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "creation": "2019-03-24 14:48:59.649168",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_group",
+  "uom"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:parent.apply_on == 'Item Code'",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "search_index": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:18.221095",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Pricing Rule Item Group",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

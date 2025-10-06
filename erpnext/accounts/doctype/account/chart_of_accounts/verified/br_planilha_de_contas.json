@@ -1,0 +1,825 @@
+{
+    "country_code": "br", 
+    "name": "Brasileira - Planilha de Contas", 
+    "tree": {
+        "ATIVO": {
+            "CIRCULANTE 1": {
+                "CONTAS RETIFICADORAS": {
+                    "(-) Duplicatas Descontadas": {}, 
+                    "(-) Outras Contas Retificadoras": {}, 
+                    "(-) Provis\u00e3o para Ajuste do Estoque ao Valor de Mercado": {}, 
+                    "(-) Provis\u00f5es para Ajuste ao Valor Prov\u00e1vel de Realiza\u00e7\u00e3o": {}, 
+                    "(-) Provis\u00f5es para Cr\u00e9ditos de Liquida\u00e7\u00e3o Duvidosa": {}
+                }, 
+                "CR\u00c9DITOS": {
+                    "Adiantamentos a Fornecedores": {}, 
+                    "CSLL a Recuperar": {}, 
+                    "Clientes": {
+                        "account_type": "Receivable"
+                    }, 
+                    "Cr\u00e9ditos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias e Base de C\u00e1lculo Negativa": {}, 
+                    "Cr\u00e9ditos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias e Preju\u00edzos Fiscais": {}, 
+                    "Cr\u00e9ditos por Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es": {}, 
+                    "ICMS e Contribui\u00e7\u00f5es a Recuperar": {}, 
+                    "IPI a Recuperar": {}, 
+                    "Imposto de Renda a Recuperar": {}, 
+                    "Outras 9": {}, 
+                    "Outros Impostos e Contribui\u00e7\u00f5es a Recuperar": {}, 
+                    "PIS e COFINS a Recuperar": {}, 
+                    "Tributos Municipais a Recuperar": {}
+                }, 
+                "DESPESAS DO EXERC\u00cdCIO SEGUINTE": {
+                    "Despesas do Exerc\u00edcio Seguinte 1": {}, 
+                    "Outras Contas 4": {}
+                }, 
+                "DISPONIBILIDADES": {
+                    "Bancos": {
+                        "account_type": "Bank"
+                    }, 
+                    "Caixa": {
+                        "account_type": "Bank"
+                    }, 
+                    "Contas Banc\u00e1rias \u2013 Doa\u00e7\u00f5es": {
+                        "account_type": "Bank"
+                    }, 
+                    "account_type": "Bank"
+                }, 
+                "Dinheiro": {
+                    "account_type": "Cash", 
+                    "is_group": 1
+                }, 
+                "ESTOQUES": {
+                    "All Warehouses": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
+                    "Constru\u00e7\u00f5es em Andamento de Im\u00f3veis Destinados \u00e0 Venda": {}, 
+                    "Estoques Destinados \u00e0 Doa\u00e7\u00e3o": {}, 
+                    "Im\u00f3veis Destinados \u00e0 Venda": {}, 
+                    "Insumos (materiais diretos)": {
+                        "account_type": "Stock"
+                    }, 
+                    "Insumos Agropecu\u00e1rios": {}, 
+                    "Mercadorias para Revenda": {}, 
+                    "Outras 11": {}, 
+                    "Produtos Acabados": {}, 
+                    "Produtos Agropecu\u00e1rios Acabados": {}, 
+                    "Produtos Agropecu\u00e1rios em Forma\u00e7\u00e3o": {}, 
+                    "Produtos em Elabora\u00e7\u00e3o": {}, 
+                    "Servi\u00e7os em andamento": {}, 
+                    "account_type": "Stock"
+                }
+            }, 
+            "N\u00c3O CIRCULANTE": {
+                "DIFERIDO": {
+                    "(-) Amortiza\u00e7\u00e3o do Diferido": {}, 
+                    "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991) 1": {}, 
+                    "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991) 1": {}, 
+                    "Demais Aplica\u00e7\u00f5es em Despesas Amortiz\u00e1veis": {}, 
+                    "Despesas Pr\u00e9-Operacionais ou Pr\u00e9-Industriais": {}, 
+                    "Despesas com Pesquisas Cient\u00edficas ou Tecnol\u00f3gicas": {}
+                }, 
+                "IMOBILIZADO": {
+                    "(-) Deprecia\u00e7\u00f5es, Amortiza\u00e7\u00f5es e Quotas de Exaust\u00e3o": {}, 
+                    "(-) Outras Contas Redutoras do Imobilizado": {}, 
+                    "Aeronaves": {}, 
+                    "Constru\u00e7\u00f5es em Andamento": {}, 
+                    "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991)": {}, 
+                    "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991)": {}, 
+                    "Direitos Contratuais de Explora\u00e7\u00e3o de Florestas": {}, 
+                    "Edif\u00edcios e Constru\u00e7\u00f5es": {
+                        "account_type": "Fixed Asset"
+                    }, 
+                    "Embarca\u00e7\u00f5es": {
+                        "account_type": "Fixed Asset"
+                    }, 
+                    "Equipamentos, M\u00e1quinas e Instala\u00e7\u00f5es Industriais": {}, 
+                    "Florestamento e Reflorestamento": {}, 
+                    "M\u00f3veis, Utens\u00edlios e Instala\u00e7\u00f5es Comerciais": {
+                        "account_type": "Fixed Asset"
+                    }, 
+                    "Outras Imobiliza\u00e7\u00f5es": {}, 
+                    "Recursos Minerais": {}, 
+                    "Terrenos": {}, 
+                    "Ve\u00edculos": {
+                        "account_type": "Fixed Asset"
+                    }
+                }, 
+                "INTANG\u00cdVEL": {
+                    "(-) Amortiza\u00e7\u00e3o do Intang\u00edvel": {}, 
+                    "(-) Outras Contas Redutoras do Intang\u00edvel": {}, 
+                    "Concess\u00f5es": {}, 
+                    "Desenvolvimento de Produtos": {}, 
+                    "Direitos Autorais": {}, 
+                    "Franquias": {}, 
+                    "Fundo de Com\u00e9rcio": {}, 
+                    "Marcas e Patentes": {}, 
+                    "Outras 12": {}, 
+                    "Software ou Programas de Computador": {}
+                }, 
+                "INVESTIMENTOS": {
+                    "(-) Des\u00e1gios e Provis\u00e3o para Perdas Prov\u00e1veis em Investimentos": {}, 
+                    "(-) Outras Contas Retificadoras 1": {}, 
+                    "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991) 2": {}, 
+                    "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991) 2": {}, 
+                    "Investimentos Decorrentes de Incentivos Fiscais": {}, 
+                    "Outras Contas 5": {}, 
+                    "Outros Investimentos": {}, 
+                    "Participa\u00e7\u00f5es Permanentes em Coligadas ou Controladas": {}, 
+                    "\u00c1gios em Investimentos": {}
+                }, 
+                "REALIZ\u00c1VEL A LONGO PRAZO": {
+                    "(-) Duplicatas Descontadas 1": {}, 
+                    "(-) Outras Contas Retificadoras 2": {}, 
+                    "(-) Provis\u00f5es para Ajuste ao Valor Prov\u00e1vel de Realiza\u00e7\u00e3o 1": {}, 
+                    "(-) Provis\u00f5es para Cr\u00e9ditos de Liquida\u00e7\u00e3o Duvidosa 1": {}, 
+                    "Clientes 1": {
+                        "account_type": "Receivable"
+                    }, 
+                    "Cr\u00e9ditos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias e Base de C\u00e1lculo Negativa 1": {}, 
+                    "Cr\u00e9ditos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias e Preju\u00edzos Fiscais 1": {}, 
+                    "Cr\u00e9ditos com Pessoas Ligadas (F\u00edsicas/Jur\u00eddicas)": {}, 
+                    "Cr\u00e9ditos por Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es 1": {}, 
+                    "Dep\u00f3sitos Judiciais": {}, 
+                    "Outras Contas 6": {}, 
+                    "Valores Mobili\u00e1rios": {}
+                }
+            }, 
+            "root_type": "Asset"
+        }, 
+        "CUSTOS DE PRODU\u00c7\u00c3O": {
+            "CUSTO DOS PRODUTOS E SERVI\u00c7OS VENDIDOS": {
+                "CUSTO DOS PRODUTOS VENDIDOS": {
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA AS DEMAIS ATIVIDADES": {
+                        "Custos dos Produtos Vendidos em Geral": {
+                            "account_type": "Cost of Goods Sold"
+                        }, 
+                        "Outros Custos 4": {}, 
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA ASSIST\u00caNCIA SOCIAL": {
+                        "Custos dos Produtos para Assist\u00eancia Social - Gratuidades": {}, 
+                        "Custos dos Produtos para Assist\u00eancia Social - Vendidos": {}, 
+                        "Outras": {}
+                    }, 
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA EDUCA\u00c7\u00c3O": {
+                        "Custos dos Produtos para Educa\u00e7\u00e3o - Gratuidades": {}, 
+                        "Custos dos Produtos para Educa\u00e7\u00e3o - Vendidos": {}, 
+                        "Outros Custos 6": {}
+                    }, 
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA SA\u00daDE": {
+                        "Custos dos Produtos para Sa\u00fade - Gratuidades": {}, 
+                        "Custos dos Produtos para Sa\u00fade \u2013 Vendidos": {}, 
+                        "Outros Custos 5": {}
+                    }, 
+                    "account_type": "Cost of Goods Sold"
+                }, 
+                "CUSTO DOS SERVI\u00c7OS PRESTADOS": {
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA AS DEMAIS ATIVIDADES": {
+                        "Custo dos Servi\u00e7os Prestados em Geral": {}, 
+                        "Outros Custos": {}
+                    }, 
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA ASSIST\u00caNCIA SOCIAL": {
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Gratuidade 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Pacientes Particulares": {}, 
+                        "Outros Custos 2": {}
+                    }, 
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA EDUCA\u00c7\u00c3O": {
+                        "Custo dos Servi\u00e7os Prestados a Alunos N\u00e3o Bolsistas": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias (Exceto PROUNI)": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Gratuidade": {}, 
+                        "Custo dos Servi\u00e7os Prestados ao PROUNI": {}, 
+                        "Outros Custos 1": {}
+                    }, 
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA SA\u00daDE": {
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios SUS": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es 2": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 2": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Gratuidade 2": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Pacientes Particulares 1": {}, 
+                        "Outros Custos 3": {}
+                    }
+                }
+            }, 
+            "CUSTO DOS BENS E SERVI\u00c7OS PRODUZIDOS": {
+                "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA PRODUZIDOS": {
+                    "Alimenta\u00e7\u00e3o do Trabalhador": {}, 
+                    "Arrendamento Mercantil 1": {}, 
+                    "Constitui\u00e7\u00e3o de Provis\u00f5es": {}, 
+                    "Consumo de Insumos": {}, 
+                    "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o": {}, 
+                    "Encargos Sociais \u2013 FGTS": {}, 
+                    "Encargos Sociais \u2013 Outros": {}, 
+                    "Encargos Sociais \u2013 Previd\u00eancia Social": {}, 
+                    "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o": {}, 
+                    "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o": {}, 
+                    "Loca\u00e7\u00e3o de M\u00e3o-de-obra": {}, 
+                    "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o": {}, 
+                    "Outros Custos 7": {
+                        "account_type": "Expenses Included In Valuation"
+                    }, 
+                    "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o": {}, 
+                    "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o": {}, 
+                    "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o": {}, 
+                    "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica": {}, 
+                    "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio 1": {}, 
+                    "Remunera\u00e7\u00e3o a Dirigentes de Ligados \u00e0 Produ\u00e7\u00e3o": {}, 
+                    "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR": {}, 
+                    "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS": {}, 
+                    "Servi\u00e7os Prestados Pessoa Jur\u00eddica": {}, 
+                    "Servi\u00e7os Prestados por Cooperativa de Trabalho": {}, 
+                    "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio": {}
+                }, 
+                "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA PRODUZIDOS DA ATIVIDADE RURAL": {
+                    "Alimenta\u00e7\u00e3o do Trabalhador 2": {}, 
+                    "Arrendamento Mercantil 3": {}, 
+                    "Constitui\u00e7\u00e3o de Provis\u00f5es 2": {}, 
+                    "Consumo de Insumos 1": {}, 
+                    "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o 1": {}, 
+                    "Encargos Sociais \u2013 FGTS 2": {}, 
+                    "Encargos Sociais \u2013 Outros 2": {}, 
+                    "Encargos Sociais \u2013 Previd\u00eancia Social 2": {}, 
+                    "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o 2": {}, 
+                    "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o 1": {}, 
+                    "Loca\u00e7\u00e3o de M\u00e3o-de-obra 2": {}, 
+                    "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o 1": {}, 
+                    "Outros Custos 9": {}, 
+                    "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o 1": {}, 
+                    "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o 1": {}, 
+                    "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o 1": {}, 
+                    "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica 2": {}, 
+                    "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio 3": {}, 
+                    "Remunera\u00e7\u00e3o a Dirigentes de Ligados \u00e0 Produ\u00e7\u00e3o 1": {}, 
+                    "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR 2": {}, 
+                    "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS 2": {}, 
+                    "Servi\u00e7os Prestados Pessoa Jur\u00eddica 2": {}, 
+                    "Servi\u00e7os Prestados por Cooperativa de Trabalho 2": {}, 
+                    "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio 2": {}
+                }, 
+                "CUSTO DOS SERVI\u00c7OS PRODUZIDOS": {
+                    "Alimenta\u00e7\u00e3o do Trabalhador 1": {}, 
+                    "Arrendamento Mercantil 2": {}, 
+                    "Constitui\u00e7\u00e3o de Provis\u00f5es 1": {}, 
+                    "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Encargos Sociais \u2013 FGTS 1": {}, 
+                    "Encargos Sociais \u2013 Outros 1": {}, 
+                    "Encargos Sociais \u2013 Previd\u00eancia Social 1": {}, 
+                    "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o 1": {}, 
+                    "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Loca\u00e7\u00e3o de M\u00e3o-de-obra 1": {}, 
+                    "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Material Aplicado na Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Outros Custos 8": {}, 
+                    "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica 1": {}, 
+                    "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio 2": {}, 
+                    "Remunera\u00e7\u00e3o a Dirigentes ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os": {}, 
+                    "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR 1": {}, 
+                    "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS 1": {}, 
+                    "Servi\u00e7os Prestados Pessoa Jur\u00eddica 1": {}, 
+                    "Servi\u00e7os Prestados por Cooperativa de Trabalho 1": {}, 
+                    "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio 1": {}
+                }
+            }, 
+            "root_type": "Expense"
+        }, 
+        "PASSIVO": {
+            "CIRCULANTE": {
+                "OBRIGA\u00c7\u00d5ES DE CURTO PRAZO": {
+                    " Gastos incluidos en la valoraci\u00f3n": {
+                        "account_type": "Stock Received But Not Billed"
+                    }, 
+                    "(-) Contas Retificadoras": {}, 
+                    "Adiantamentos de Clientes": {}, 
+                    "Arrendamento Mercantil (Financeiro) a Curto Prazo - Exterior": {}, 
+                    "Arrendamento Mercantil (Financeiro) a Curto Prazo - Sistema Financeiro Nacional": {}, 
+                    "Contribui\u00e7\u00f5es Previdenci\u00e1rias a Recolher": {}, 
+                    "Dividendos Propostos ou Lucros Creditados": {}, 
+                    "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos": {}, 
+                    "D\u00e9bitos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias": {}, 
+                    "D\u00e9bitos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias": {}, 
+                    "FGTS a Recolher": {}, 
+                    "Financiamentos a Curto Prazo - Exterior": {}, 
+                    "Financiamentos a Curto Prazo - Outros": {}, 
+                    "Financiamentos a Curto Prazo - Sistema Financeiro Nacional": {}, 
+                    "Fornecedores": {
+                        "account_type": "Payable"
+                    }, 
+                    "ICMS e Contribui\u00e7\u00f5es a Recolher": {}, 
+                    "IPI a Recolher": {}, 
+                    "Outras Contas": {}, 
+                    "Outros tributos a recolher": {}, 
+                    "PIS e COFINS a Recolher": {}, 
+                    "Provis\u00e3o para a Contribui\u00e7\u00e3o Social sobre o Lucro L\u00edquido": {}, 
+                    "Provis\u00e3o para o Imposto de Renda": {}, 
+                    "Provis\u00f5es de Natureza C\u00edvel": {}, 
+                    "Provis\u00f5es de Natureza Fiscal": {}, 
+                    "Provis\u00f5es de Natureza Trabalhista": {}, 
+                    "Sal\u00e1rios a Pagar": {}, 
+                    "Tributos Municipais a Recolher": {}
+                }
+            }, 
+            "N\u00c3O-CIRCULANTE": {
+                "OBRIGA\u00c7\u00d5ES A LONGO PRAZO": {
+                    "(-) Contas Retificadoras 1": {}, 
+                    "Arrendamento Mercantil (Financeiro) a Longo Prazo - Sistema Financeiro Nacional": {}, 
+                    "Arrendamento Mercantil (Financeiro) a Longo Prazo \u2013 Exterior": {}, 
+                    "Cr\u00e9ditos de Pessoas Ligadas (F\u00edsicas/Jur\u00eddicas)": {}, 
+                    "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos 1": {}, 
+                    "D\u00e9bitos Fiscais CSLL - Diferen\u00e7as Tempor\u00e1rias 1": {}, 
+                    "D\u00e9bitos Fiscais IRPJ - Diferen\u00e7as Tempor\u00e1rias 1": {}, 
+                    "Empr\u00e9stimos de S\u00f3cios/Acionistas N\u00e3o Administradores": {}, 
+                    "Financiamentos a Longo Prazo - Sistema Financeiro Nacional": {}, 
+                    "Financiamentos a Longo Prazo \u2013 Brasil - Outros": {}, 
+                    "Financiamentos a Longo Prazo \u2013 Exterior": {}, 
+                    "Fornecedores 1": {
+                        "account_type": "Payable"
+                    }, 
+                    "Outras Contas 1": {}, 
+                    "Outras Provis\u00f5es de Natureza C\u00edvel": {}, 
+                    "Outras Provis\u00f5es de Natureza Fiscal": {}, 
+                    "Outras Provis\u00f5es de Natureza Trabalhista": {}, 
+                    "Provis\u00e3o para o Imposto de Renda sobre Lucros Diferidos": {}
+                }, 
+                "RECEITAS DIFERIDAS": {
+                    "(-) Custos Correspondentes \u00e0s Receitas Diferidas": {}, 
+                    "Receitas Diferidas 1": {}
+                }
+            }, 
+            "PATRIM\u00d4NIO L\u00cdQUIDO": {
+                "AJUSTES DE AVALIA\u00c7\u00c3O PATRIMONIAL": {
+                    "(-) Ajustes \u00e0s Normas Internacionais de Contabilidade": {}, 
+                    "Ajustes \u00e0s Normas Internacionais de Contabilidade": {}
+                }, 
+                "CAPITAL REALIZADO": {
+                    "(-) Capital a Integralizar de Domiciliados e Residentes no Exterior": {}, 
+                    "(-) Capital a Integralizar de Domiciliados e Residentes no Pa\u00eds": {}, 
+                    "Capital Subscrito de Domiciliados e Residentes no Exterior": {}, 
+                    "Capital Subscrito de Domiciliados e Residentes no Pa\u00eds": {}
+                }, 
+                "OUTRAS CONTAS 2": {
+                    "(-) A\u00e7\u00f5es em Tesouraria": {}, 
+                    "(-) Preju\u00edzos Acumulados": {}, 
+                    "Lucros Acumulados e/ou Saldo \u00e0 Disposi\u00e7\u00e3o da Assembl\u00e9ia": {}, 
+                    "Outras 8": {}
+                }, 
+                "RESERVAS": {
+                    "Outras Reservas": {}, 
+                    "Reserva para Aumento de Capital (Lei no 9.249/1995, art. 9o, \u00a7 9o)": {}, 
+                    "Reservas de Capital": {}, 
+                    "Reservas de Lucros": {}, 
+                    "Reservas de Lucros - Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos": {}, 
+                    "Reservas de Lucros - Pr\u00eamio na Emiss\u00e3o de Deb\u00eantures": {}, 
+                    "Reservas de Reavalia\u00e7\u00e3o": {}
+                }
+            }, 
+            "PATRIM\u00d4NIO SOCIAL": {
+                "FUNDO PATRIMONIAL": {
+                    "Fundo Patrimonial 1": {}
+                }, 
+                "OUTRAS CONTAS 3": {
+                    "D\u00e9ficits Acumulados": {}, 
+                    "Super\u00e1vits Acumulados": {}
+                }, 
+                "RESERVAS 1": {
+                    "Reservas Estatut\u00e1rias": {}, 
+                    "Reservas Patrimoniais": {}
+                }
+            }, 
+            "root_type": "Liability"
+        }, 
+        "RESULTADO L\u00cdQUIDO DO PER\u00cdODO": {
+            "PROVIS\u00c3O PARA CSLL E IRPJ (ATIVIDADE RURAL)": {
+                "PROVIS\u00c3O PARA CSLL E IRPJ 3": {
+                    "PROVIS\u00c3O PARA CSLL E IRPJ 4": {
+                        "PROVIS\u00c3O PARA CSLL E IRPJ 5": {
+                            "(-) Contribui\u00e7\u00e3o Social sobre o Lucro L\u00edquido 1": {}, 
+                            "(-) Provis\u00e3o para Imposto de Renda - Pessoa Jur\u00eddica 1": {}
+                        }
+                    }
+                }
+            }, 
+            "PROVIS\u00c3O PARA CSLL E IRPJ (ATIVIDADES EM GERAL)": {
+                "PROVIS\u00c3O PARA CSLL E IRPJ": {
+                    "PROVIS\u00c3O PARA CSLL E IRPJ 1": {
+                        "PROVIS\u00c3O PARA CSLL E IRPJ 2": {
+                            "(-) Contribui\u00e7\u00e3o Social sobre o Lucro L\u00edquido": {}, 
+                            "(-) Provis\u00e3o para Imposto de Renda - Pessoa Jur\u00eddica": {}
+                        }
+                    }
+                }
+            }, 
+            "RESULTADO ANTES DO IRPJ E DA CSLL - ATIVIDADE RURAL": {
+                "PARTICIPA\u00c7\u00d5ES": {
+                    "PARTICIPA\u00c7\u00d5ES NOS LUCROS": {
+                        "OUTRAS PARTICIPA\u00c7\u00d5ES": {
+                            "(-) Outras": {}, 
+                            "(-) Participa\u00e7\u00f5es de Administradores e Partes Benefici\u00e1rias": {}, 
+                            "(-) Participa\u00e7\u00f5es de Deb\u00eantures": {}
+                        }, 
+                        "PARTICIPA\u00c7\u00d5ES DE EMPREGADOS": {
+                            "(-) Contribui\u00e7\u00f5es para Assist\u00eancia ou Previd\u00eancia de Empregados": {}, 
+                            "(-) Outras Participa\u00e7\u00f5es de Empregados": {}, 
+                            "(-) Participa\u00e7\u00f5es de Empregados": {}
+                        }
+                    }
+                }, 
+                "RESULTADO OPERACIONAL DA ATIVIDADE RURAL": {
+                    "CUSTO DOS BENS E SERVI\u00c7OS VENDIDOS": {
+                        "CUSTO DOS PRODUTOS DA ATIVIDADE RURAL VENDIDOS": {
+                            "AJUSTES DE ESTOQUES DECORRENTES DE ARBITRAMENTO": {
+                                "account_type": "Stock Adjustment"
+                            }, 
+                            "Custo dos Produtos Vendidos da Atividade Rural": {}
+                        }
+                    }, 
+                    "DESPESAS OPERACIONAIS 3": {
+                        "DESPESAS OPERACIONAIS DA ATIVIDADE RURAL": {
+                            "Alimenta\u00e7\u00e3o do Trabalhador 3": {}, 
+                            "Alugu\u00e9is 1": {}, 
+                            "Arrendamento Mercantil 4": {}, 
+                            "Assist\u00eancia M\u00e9dica, Odontol\u00f3gica e Farmac\u00eautica a Empregados": {}, 
+                            "Bens de Natureza Permanente Deduzidos como Despesa": {}, 
+                            "CPMF 1": {}, 
+                            "Cofins 1": {}, 
+                            "Demais Impostos, Taxas e Contribui\u00e7\u00f5es, exceto IR e CSLL": {}, 
+                            "Demais Provis\u00f5es 1": {}, 
+                            "Despesas com Ve\u00edculos e de Conserva\u00e7\u00e3o de Bens e Instala\u00e7\u00f5es 1": {}, 
+                            "Despesas com viagens, di\u00e1rias e ajusta de custo": {}, 
+                            "Doa\u00e7\u00f5es a Entidades Civis 1": {}, 
+                            "Doa\u00e7\u00f5es a Institui\u00e7\u00f5es de Ensino e Pesquisa (Lei no 9.249/1995, art.13, \u00a7 2o) 1": {}, 
+                            "Doa\u00e7\u00f5es e Patroc\u00ednios de Car\u00e1ter Cultural e Art\u00edstico (Lei no 8.313/1991) 1": {}, 
+                            "Encargos Sociais - Previd\u00eancia Social 3": {}, 
+                            "Encargos Sociais \u2013 FGTS 3": {}, 
+                            "Encargos Sociais \u2013 Outros 3": {}, 
+                            "Encargos de Deprecia\u00e7\u00e3o e Amortiza\u00e7\u00e3o 1": {
+                                "account_type": "Depreciation"
+                            }, 
+                            "Fundo de Aposentadoria Programada Individual de Empregados": {}, 
+                            "Gratifica\u00e7\u00f5es a Administradores": {}, 
+                            "Loca\u00e7\u00e3o de M\u00e3o-de-obra 3": {}, 
+                            "Multas 1": {}, 
+                            "Ordenados, Sal\u00e1rios Gratifica\u00e7\u00f5es e Outras Remunera\u00e7\u00f5es a Empregados": {}, 
+                            "Outras Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es 1": {}, 
+                            "Outras Despesas Operacionais 5": {}, 
+                            "Outros Gastos com Pessoal": {}, 
+                            "PIS/Pasep 1": {}, 
+                            "Perdas em Opera\u00e7\u00f5es de Cr\u00e9dito": {}, 
+                            "Pesquisas Cient\u00edficas e Tecnol\u00f3gicas": {}, 
+                            "Plano de Previd\u00eancia Privada de Empregados": {}, 
+                            "Planos de Poupan\u00e7a e Investimentos de Empregados": {}, 
+                            "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica 3": {}, 
+                            "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio 4": {}, 
+                            "Propaganda, Publicidade e Patroc\u00ednio": {}, 
+                            "Propaganda, Publicidade e Patroc\u00ednio (Associa\u00e7\u00f5es Desportivas que Mantenham Equipe de Futebol Profissional)": {}, 
+                            "Provis\u00e3o para Perda de Estoque": {}, 
+                            "Provis\u00f5es para F\u00e9rias e 13o Sal\u00e1rio de Empregados 1": {}, 
+                            "Remunera\u00e7\u00e3o a Dirigentes e a Conselho de Administra\u00e7\u00e3o": {}, 
+                            "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR 3": {}, 
+                            "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS 3": {}, 
+                            "Servi\u00e7os Prestados por Cooperativa de Trabalho 3": {}
+                        }
+                    }, 
+                    "OUTRAS DESPESAS OPERACIONAIS 6": {
+                        "OUTRAS DESPESAS OPERACIONAIS 7": {
+                            "(-) Amortiza\u00e7\u00e3o de \u00c1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido": {}, 
+                            "(-) Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade": {}, 
+                            "(-) Contrapartida dos Ajustes ao Valor Presente": {}, 
+                            "(-) Contrapartida dos ajustes de valor do imobilizado e intang\u00edvel": {}, 
+                            "(-) Juros sobre o Capital Pr\u00f3prio": {}, 
+                            "(-) Outras Despesas Financeiras": {}, 
+                            "(-) Perdas Incorridas no Mercado de Renda Vari\u00e1vel, exceto Day-Trade 1": {}, 
+                            "(-) Perdas em Opera\u00e7\u00f5es Day-Trade 1": {}, 
+                            "(-) Perdas em Opera\u00e7\u00f5es Realizadas no Exterior 1": {}, 
+                            "(-) Preju\u00edzos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente 1": {}, 
+                            "(-) Resultados Negativos em Participa\u00e7\u00f5es Societ\u00e1rias 1": {}, 
+                            "(-) Resultados Negativos em SCP": {}, 
+                            "(-) Varia\u00e7\u00f5es Cambiais Passivas 1": {}
+                        }
+                    }, 
+                    "OUTRAS RECEITAS OPERACIONAIS 4": {
+                        "OUTRAS RECEITAS OPERACIONAIS 5": {
+                            "Amortiza\u00e7\u00e3o de Des\u00e1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido": {}, 
+                            "Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade": {}, 
+                            "Contrapartida dos Ajustes ao Valor Presente": {}, 
+                            "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos 2": {}, 
+                            "Ganhos Auferidos no Mercado de Renda Vari\u00e1vel, exceto Day-Trade 1": {}, 
+                            "Ganhos em Opera\u00e7\u00f5es Day-Trade 1": {}, 
+                            "Ganhos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente 1": {}, 
+                            "Outras Receitas Financeiras": {}, 
+                            "Outras Receitas Operacionais 6": {}, 
+                            "Pr\u00eamios Recebidos na Emiss\u00e3o de Deb\u00eantures": {}, 
+                            "Receitas de Juros sobre o Capital Pr\u00f3prio": {}, 
+                            "Rendimentos e Ganhos de Capital Auferidos no Exterior 1": {}, 
+                            "Resultados Positivos em Participa\u00e7\u00f5es Societ\u00e1rias 1": {}, 
+                            "Resultados Positivos em SCP": {}, 
+                            "Revers\u00e3o dos Saldos das Provis\u00f5es Operacionais 1": {}, 
+                            "Varia\u00e7\u00f5es Cambiais Ativas 1": {}
+                        }
+                    }, 
+                    "RECEITA OPERACIONAL L\u00cdQUIDA DA ATIVIDADE RURAL": {
+                        "DEDU\u00c7\u00d5ES DA RECEITA BRUTA 1": {
+                            "(-) Cofins": {}, 
+                            "(-) Demais Impostos e Contribui\u00e7\u00f5es Incidentes sobre Vendas e Servi\u00e7os": {}, 
+                            "(-) ICMS": {}, 
+                            "(-) ISS": {}, 
+                            "(-) PIS/Pasep": {}, 
+                            "(-) Vendas Canceladas, Devolu\u00e7\u00f5es e Descontos Incondicionais": {}
+                        }, 
+                        "RECEITA BRUTA DA ATIVIDADE RURAL": {
+                            "Receita da Atividade Rural": {}
+                        }
+                    }
+                }
+            }, 
+            "RESULTADO L\u00cdQUIDO DO PER\u00cdODO ANTES DO IRPJ E DA CSLL - ATIVIDADE GERAL": {
+                "OUTRAS RECEITAS E OUTRAS DESPESAS": {
+                    "RECEITAS E DESPESAS N\u00c3O OPERACIONAIS 2": {
+                        "DESPESAS N\u00c3O OPERACIONAIS 1": {
+                            "(-) Outras Despesas N\u00e3o Operacionais 1": {}, 
+                            "(-) Perdas de Capital por Varia\u00e7\u00e3o Percentual em Participa\u00e7\u00e3o Societ\u00e1ria Avaliada pelo Patrim\u00f4nio L\u00edquido": {}, 
+                            "(-) Valor Cont\u00e1bil dos Bens e Direitos Alienados 1": {}
+                        }, 
+                        "RECEITAS N\u00c3O OPERACIONAIS 1": {
+                            "Ganhos de Capital por Varia\u00e7\u00e3o Percentual em Participa\u00e7\u00e3o Societ\u00e1ria Avaliada pelo Patrim\u00f4nio L\u00edquido": {}, 
+                            "Outras Receitas N\u00e3o Operacionais 1": {}, 
+                            "Receitas de Aliena\u00e7\u00f5es de Bens e Direitos do Ativo Permanente": {}
+                        }
+                    }
+                }, 
+                "PARTICIPA\u00c7\u00d5ES 1": {
+                    "PARTICIPA\u00c7\u00d5ES NOS LUCROS 1": {
+                        "OUTRAS PARTICIPA\u00c7\u00d5ES 1": {
+                            "(-) Outras 1": {}, 
+                            "(-) Participa\u00e7\u00f5es de Administradores e Partes Benefici\u00e1rias 1": {}, 
+                            "(-) Participa\u00e7\u00f5es de Deb\u00eantures 1": {}
+                        }, 
+                        "PARTICIPA\u00c7\u00d5ES DE EMPREGADOS 1": {
+                            "(-) Contribui\u00e7\u00f5es para Assist\u00eancia ou Previd\u00eancia de Empregados 1": {}, 
+                            "(-) Outras Participa\u00e7\u00f5es de Empregados 1": {}, 
+                            "(-) Participa\u00e7\u00f5es de Empregados 1": {}
+                        }
+                    }
+                }, 
+                "RESULTADO OPERACIONAL 1": {
+                    "CUSTO DOS BENS E SERVI\u00c7OS VENDIDOS 1": {
+                        "AJUSTES DE ESTOQUES DECORRENTES DE ARBITRAMENTO 1": {}, 
+                        "CUSTO DAS MERCADORIAS REVENDIDAS": {
+                            "Custo das Mercadorias Revendidas 1": {}, 
+                            "Custo dos Servi\u00e7os Vendidos": {}
+                        }, 
+                        "CUSTO DAS UNIDADES IMOBILI\u00c1RIAS VENDIDAS": {
+                            "Custo das Unidades Imobili\u00e1rias Vendidas 1": {}
+                        }, 
+                        "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA VENDIDOS": {
+                            "Custo dos Produtos de Fabrica\u00e7\u00e3o Pr\u00f3pria Vendidos 1": {}
+                        }
+                    }, 
+                    "DESPESAS OPERACIONAIS 4": {
+                        "DESPESAS OPERACIONAIS DAS ATIVIDADES EM GERAL": {
+                            "Alimenta\u00e7\u00e3o do Trabalhador 4": {}, 
+                            "Alugu\u00e9is 2": {}, 
+                            "Arrendamento Mercantil 5": {}, 
+                            "Assist\u00eancia M\u00e9dica, Odontol\u00f3gica e Farmac\u00eautica a Empregados 1": {}, 
+                            "Bens de Natureza Permanente Deduzidos como Despesa 1": {}, 
+                            "CPMF 2": {}, 
+                            "Cofins 2": {}, 
+                            "Demais Impostos, Taxas e Contribui\u00e7\u00f5es, exceto IR e CSLL 1": {}, 
+                            "Demais Provis\u00f5es 2": {}, 
+                            "Despesas com Ve\u00edculos e de Conserva\u00e7\u00e3o de Bens e Instala\u00e7\u00f5es 2": {}, 
+                            "Despesas com viagens, di\u00e1rias e ajusta de custo 1": {}, 
+                            "Doa\u00e7\u00f5es a Entidades Civis 2": {}, 
+                            "Doa\u00e7\u00f5es a Institui\u00e7\u00f5es de Ensino e Pesquisa (Lei n\u00ba 9.249/1995, art.13, \u00a7 2\u00ba) 2": {}, 
+                            "Doa\u00e7\u00f5es e Patroc\u00ednios de Car\u00e1ter Cultural e Art\u00edstico (Lei no 8.313/1991) 2": {}, 
+                            "Encargos Sociais \u2013 FGTS 4": {}, 
+                            "Encargos Sociais \u2013 Outros 4": {}, 
+                            "Encargos Sociais \u2013 Previd\u00eancia Social 4": {}, 
+                            "Encargos de Deprecia\u00e7\u00e3o e Amortiza\u00e7\u00e3o 2": {}, 
+                            "Fundo de Aposentadoria Programada Individual de Empregados 1": {}, 
+                            "Gratifica\u00e7\u00f5es a Administradores 1": {}, 
+                            "Loca\u00e7\u00e3o de M\u00e3o-de-obra 4": {}, 
+                            "Multas 2": {}, 
+                            "Ordenados, Sal\u00e1rios Gratifica\u00e7\u00f5es e Outras Remunera\u00e7\u00f5es a Empregados 1": {}, 
+                            "Outras Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es 2": {}, 
+                            "Outras Despesas Operacionais 8": {}, 
+                            "Outros Gastos com Pessoal 1": {}, 
+                            "PIS/Pasep 2": {}, 
+                            "Perdas em Opera\u00e7\u00f5es de Cr\u00e9dito 1": {}, 
+                            "Pesquisas Cient\u00edficas e Tecnol\u00f3gicas 1": {}, 
+                            "Plano de Previd\u00eancia Privada de Empregados 1": {}, 
+                            "Planos de Poupan\u00e7a e Investimentos de Empregados 1": {}, 
+                            "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica 4": {}, 
+                            "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio 5": {}, 
+                            "Propaganda, Publicidade e Patroc\u00ednio (Associa\u00e7\u00f5es Desportivas que Mantenham Equipe de Futebol Profissional) 1": {}, 
+                            "Propaganda, Publicidade e Patroc\u00ednio 1": {}, 
+                            "Provis\u00e3o para Perda de Estoque 1": {}, 
+                            "Provis\u00f5es para F\u00e9rias e 13o Sal\u00e1rio de Empregados 2": {}, 
+                            "Remunera\u00e7\u00e3o a Dirigentes e a Conselho de Administra\u00e7\u00e3o 1": {}, 
+                            "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR 4": {}, 
+                            "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS 4": {}, 
+                            "Servi\u00e7os Prestados por Cooperativa de Trabalho 4": {}
+                        }
+                    }, 
+                    "OUTRAS DESPESAS OPERACIONAIS 9": {
+                        "OUTRAS DESPESAS OPERACIONAIS 10": {
+                            "(-) Amortiza\u00e7\u00e3o de \u00c1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido 1": {}, 
+                            "(-) Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade 1": {}, 
+                            "(-) Contrapartida dos Ajustes ao Valor Presente 1": {}, 
+                            "(-) Contrapartida dos Ajustes de Valor do Imobilizado e Intang\u00edvel 1": {}, 
+                            "(-) Juros sobre o Capital Pr\u00f3prio 1": {}, 
+                            "(-) Outras Despesas Financeiras 1": {}, 
+                            "(-) Perdas Incorridas no Mercado de Renda Vari\u00e1vel, exceto Day-Trade 2": {}, 
+                            "(-) Perdas em Opera\u00e7\u00f5es Day-Trade 2": {}, 
+                            "(-) Perdas em Opera\u00e7\u00f5es Realizadas no Exterior 2": {}, 
+                            "(-) Preju\u00edzos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente 2": {}, 
+                            "(-) Resultados Negativos em Participa\u00e7\u00f5es Societ\u00e1rias 2": {}, 
+                            "(-) Resultados Negativos em SCP 1": {}, 
+                            "(-) Varia\u00e7\u00f5es Cambiais Passivas 2": {}
+                        }
+                    }, 
+                    "OUTRAS RECEITAS OPERACIONAIS 7": {
+                        "OUTRAS RECEITAS OPERACIONAIS 8": {
+                            "Amortiza\u00e7\u00e3o de Des\u00e1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido 1": {}, 
+                            "Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade 1": {}, 
+                            "Contrapartida dos Ajustes ao Valor Presente 1": {}, 
+                            "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos 3": {}, 
+                            "Ganhos Auferidos no Mercado de Renda Vari\u00e1vel, exceto Day-Trade 2": {}, 
+                            "Ganhos em Opera\u00e7\u00f5es Day-Trade 2": {}, 
+                            "Ganhos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente 2": {}, 
+                            "Outras Receitas Financeiras 1": {}, 
+                            "Outras Receitas Operacionais 9": {}, 
+                            "Pr\u00eamios Recebidos na Emiss\u00e3o de Deb\u00eantures 1": {}, 
+                            "Receitas de Juros sobre o Capital Pr\u00f3prio 1": {}, 
+                            "Rendimentos e Ganhos de Capital Auferidos no Exterior 2": {}, 
+                            "Resultados Positivos em Participa\u00e7\u00f5es Societ\u00e1rias 2": {}, 
+                            "Resultados Positivos em SCP 1": {}, 
+                            "Revers\u00e3o dos Saldos das Provis\u00f5es Operacionais 2": {}, 
+                            "Varia\u00e7\u00f5es Cambiais Ativas 2": {}
+                        }
+                    }, 
+                    "RECEITA LIQUIDA": {
+                        "DEDU\u00c7\u00d5ES DA RECEITA BRUTA 2": {
+                            "(-) Cofins 1": {}, 
+                            "(-) Demais Impostos e Contribui\u00e7\u00f5es Incidentes sobre Vendas e Servi\u00e7os 1": {}, 
+                            "(-) ICMS 1": {}, 
+                            "(-) ISS 1": {}, 
+                            "(-) PIS/Pasep 1": {}, 
+                            "(-) Vendas Canceladas, Devolu\u00e7\u00f5es e Descontos Incondicionais 1": {}
+                        }, 
+                        "RECEITA BRUTA 1": {
+                            "Outras 13": {}, 
+                            "Receita da Presta\u00e7\u00e3o de Servi\u00e7os \u2013 Mercado Interno": {}, 
+                            "Receita da Revenda de Mercadorias no Mercado Interno": {}, 
+                            "Receita da Venda no Mercado Interno de Produtos de Fabrica\u00e7\u00e3o Pr\u00f3pria": {}, 
+                            "Receita das Unidades Imobili\u00e1rias Vendidas": {}, 
+                            "Receita de Exporta\u00e7\u00e3o Direta de Mercadorias e Produtos": {}, 
+                            "Receita de Exporta\u00e7\u00e3o de Servi\u00e7os": {}, 
+                            "Receita de Loca\u00e7\u00e3o de Bens M\u00f3veis e Im\u00f3veis": {
+                                "account_type": "Income Account"
+                            }, 
+                            "Receita de Vendas de Mercadorias e Produtos a Comercial Exportadora com Fim Espec\u00edfico de Exporta\u00e7\u00e3o": {}
+                        }
+                    }
+                }
+            }, 
+            "root_type": "Income"
+        }, 
+        "SUPER\u00c1VIT/D\u00c9FICIT L\u00cdQUIDO DO PER\u00cdODO": {
+            "OUTRAS RECEITAS E DESPESAS": {
+                "RECEITAS E DESPESAS N\u00c3O OPERACIONAIS": {
+                    "RECEITAS E DESPESAS N\u00c3O OPERACIONAIS 1": {
+                        "DESPESAS N\u00c3O OPERACIONAIS": {
+                            "(-) Outras Despesas N\u00e3o Operacionais": {}, 
+                            "(-) Valor Cont\u00e1bil dos Bens e Direitos Alienados": {}
+                        }, 
+                        "RECEITAS N\u00c3O OPERACIONAIS": {
+                            "Outras Receitas N\u00e3o Operacionais": {}, 
+                            "Receitas de Aliena\u00e7\u00f5es de Bens e Direitos do Ativo Permanente.": {}
+                        }
+                    }
+                }
+            }, 
+            "RESULTADO OPERACIONAL": {
+                "DESPESAS OPERACIONAIS": {
+                    "DESPESAS OPERACIONAIS 1": {
+                        "DESPESAS OPERACIONAIS 2": {
+                            "Alugu\u00e9is": {}, 
+                            "Arrendamento Mercantil": {}, 
+                            "Assist\u00eancia M\u00e9dica, Odontol\u00f3gica, Medicamentos, Aparelhos Ortop\u00e9dicos e Similares": {}, 
+                            "COFINS": {}, 
+                            "CPMF": {}, 
+                            "CSLL": {}, 
+                            "Contribui\u00e7\u00f5es Previdenci\u00e1rias Patronais": {}, 
+                            "Demais Impostos, Taxas e Contribui\u00e7\u00f5es, exceto as citadas acima.": {}, 
+                            "Demais Provis\u00f5es": {}, 
+                            "Despesas com Ve\u00edculos e de Conserva\u00e7\u00e3o de Bens e Instala\u00e7\u00f5es": {}, 
+                            "Doa\u00e7\u00f5es a Entidades Civis": {}, 
+                            "Doa\u00e7\u00f5es a Institui\u00e7\u00f5es de Ensino e Pesquisa (Lei no 9.249/1995, art.13, \u00a7 2o)": {}, 
+                            "Doa\u00e7\u00f5es e Patroc\u00ednios de Car\u00e1ter Cultural e Art\u00edstico (Lei no 8.313/1991)": {}, 
+                            "Encargos de Deprecia\u00e7\u00e3o e Amortiza\u00e7\u00e3o": {}, 
+                            "FGTS (sem indeniza\u00e7\u00e3o 40%)": {}, 
+                            "Indeniza\u00e7\u00f5es Trabalhistas": {}, 
+                            "Multas": {}, 
+                            "Outras Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es": {}, 
+                            "Outras Despesas Operacionais 4": {}, 
+                            "PIS/PASEP": {}, 
+                            "Presta\u00e7\u00e3o de Servi\u00e7o por Pessoa Jur\u00eddica": {}, 
+                            "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio": {}, 
+                            "Propaganda e Publicidade": {}, 
+                            "Provis\u00f5es para F\u00e9rias e 13o Sal\u00e1rio de Empregados": {}, 
+                            "Remunera\u00e7\u00e3o a Dirigentes e a Conselho de Administra\u00e7\u00e3o/Fiscal": {}, 
+                            "Remunera\u00e7\u00f5es a Empregados": {}, 
+                            "Repasses para Outras Entidades (Sindicatos/Federa\u00e7\u00f5es/Confedera\u00e7\u00f5es)": {}
+                        }
+                    }
+                }, 
+                "OUTRAS DESPESAS OPERACIONAIS": {
+                    "OUTRAS DESPESAS OPERACIONAIS 1": {
+                        "OUTRAS DESPESAS OPERACIONAIS 2": {
+                            "(-) Outras Despesas de Aplica\u00e7\u00f5es": {}, 
+                            "(-) Perdas Incorridas no Mercado de Renda Vari\u00e1vel, exceto Day-Trade": {}, 
+                            "(-) Perdas em Opera\u00e7\u00f5es Day-Trade": {}, 
+                            "(-) Perdas em Opera\u00e7\u00f5es Realizadas no Exterior": {}, 
+                            "(-) Preju\u00edzos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente": {}, 
+                            "(-) Resultados Negativos em Participa\u00e7\u00f5es Societ\u00e1rias": {}, 
+                            "(-) Varia\u00e7\u00f5es Cambiais Passivas": {}, 
+                            "Outras Despesas Operacionais 3": {}
+                        }
+                    }
+                }, 
+                "OUTRAS RECEITAS OPERACIONAIS": {
+                    "OUTRAS RECEITAS OPERACIONAIS 1": {
+                        "OUTRAS RECEITAS OPERACIONAIS 2": {
+                            "Ganhos Auferidos no Mercado de Renda Vari\u00e1vel, exceto Day-Trade": {}, 
+                            "Ganhos em Opera\u00e7\u00f5es Day-Trade": {}, 
+                            "Ganhos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente": {}, 
+                            "Outras 7": {}, 
+                            "Outras Receitas Operacionais 3": {}, 
+                            "Outras Receitas de Aplica\u00e7\u00f5es Financeiras": {}, 
+                            "Rendimentos e Ganhos de Capital Auferidos no Exterior": {}, 
+                            "Resultados Positivos em Participa\u00e7\u00f5es Societ\u00e1rias": {}, 
+                            "Revers\u00e3o dos Saldos das Provis\u00f5es Operacionais": {}, 
+                            "Varia\u00e7\u00f5es Cambiais Ativas": {}
+                        }
+                    }
+                }, 
+                "RECEITA OPERACIONAL L\u00cdQUIDA": {
+                    "RECEITA BRUTA": {
+                        "DEDU\u00c7\u00d5ES DA RECEITA BRUTA": {
+                            "(-) Devolu\u00e7\u00f5es e Descontos Incondicionais": {}, 
+                            "(-) Vendas Canceladas": {}, 
+                            "Outras 5": {}
+                        }, 
+                        "RECEITA DE PRESTA\u00c7\u00c3O DOS SERVI\u00c7OS": {
+                            "Contribui\u00e7\u00f5es 2": {}, 
+                            "Doa\u00e7\u00f5es 2": {}, 
+                            "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 2": {}, 
+                            "Outras 6": {}, 
+                            "Servi\u00e7os Educacionais": {}
+                        }, 
+                        "RECEITA DE SERVI\u00c7OS DE SA\u00daDE": {
+                            "Contribui\u00e7\u00f5es": {}, 
+                            "Conv\u00eanios \u2013 Outros": {}, 
+                            "Conv\u00eanios \u2013 SUS": {}, 
+                            "Doa\u00e7\u00f5es": {}, 
+                            "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas": {}, 
+                            "Outras 2": {}, 
+                            "Pacientes Particulares": {}
+                        }, 
+                        "RECEITA DE VENDA DE PRODUTOS": {
+                            "Da atividade de Assist\u00eancia Social": {}, 
+                            "Da atividade de Educa\u00e7\u00e3o": {}, 
+                            "Da atividade de Sa\u00fade": {}, 
+                            "Outras 1": {}
+                        }, 
+                        "RECEITAS DE OUTRAS ATIVIDADES": {
+                            "Contribui\u00e7\u00f5es Confederativas/Associativas": {}, 
+                            "Contribui\u00e7\u00f5es Sindicais": {}, 
+                            "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es": {}, 
+                            "Mensalidades": {}, 
+                            "Outras 4": {}, 
+                            "Outras Contribui\u00e7\u00f5es": {}
+                        }, 
+                        "RECEITAS DE SERVI\u00c7OS DE ASSIST\u00caNCIA SOCIAL": {
+                            "Contribui\u00e7\u00f5es 1": {}, 
+                            "Conv\u00eanios - Outros 1": {}, 
+                            "Doa\u00e7\u00f5es 1": {}, 
+                            "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 1": {}, 
+                            "Outras 3": {}, 
+                            "Pacientes Particulares 1": {}
+                        }
+                    }
+                }
+            }, 
+            "root_type": "Asset"
+        }
+    }
+}

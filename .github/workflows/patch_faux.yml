@@ -1,0 +1,28 @@
+# Tests are skipped for these files but github doesn't allow "passing" hence this is required.
+
+name: Skipped Patch Test
+
+on:
+  pull_request:
+    paths:
+      - "**.js"
+      - "**.css"
+      - "**.md"
+      - "**.html"
+      - "**.csv"
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    name: Patch Test
+
+    steps:
+      - name: Pass skipped tests unconditionally
+        run: "echo Skipped"

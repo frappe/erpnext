@@ -1,0 +1,1 @@
+Item detail in parent Purchase Invoice.

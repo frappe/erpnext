@@ -1,0 +1,34 @@
+<div class="web-list-item blog-list-item">
+	<a href="/announcements?announcement={{doc.name}}">
+		<div class="row">
+			<a href="/announcements?announcement={{doc.name}}">
+				<div class="col-xs-12">
+					<h1>{{ doc.subject }}</h1>
+					<p class="post-description more">{{ doc.description }}</p>
+					<p class="post-by text-muted small">
+						<i>{{ doc.posted_by }}</i>
+						<i class="spacer-dot"></i> {{ frappe.format_date(doc.modified) }}
+						<i class="spacer-dot"></i> {{ doc.num_attachments }} attachments
+					</p>
+				</div>
+			</a>
+		</div>
+	</a>
+</div>
+
+<script type="text/javascript">
+	frappe.ready(function() {
+		var show_char = 150;
+		$('.more').each(function() {
+			var content = $(this).text();
+			if(content.length > show_char) {
+
+				var c = content.substr(0, show_char)
+				var h = content.substr(show_char, content.length - show_char);
+
+				html = c + '&nbsp;&nbsp;...'
+				$(this).html(html);
+			}
+		});
+	});
+</script>

@@ -1,0 +1,197 @@
+{
+ "actions": [],
+ "autoname": "field:supplier",
+ "creation": "2017-05-29 01:40:54.786555",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "supplier",
+  "supplier_score",
+  "indicator_color",
+  "status",
+  "column_break_2",
+  "period",
+  "scoring_setup",
+  "weighting_function",
+  "standings",
+  "criteria_setup",
+  "load_criteria",
+  "criteria",
+  "scorecard_actions",
+  "warn_rfqs",
+  "warn_pos",
+  "prevent_rfqs",
+  "prevent_pos",
+  "column_break_16",
+  "notify_supplier",
+  "notify_employee",
+  "employee"
+ ],
+ "fields": [
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "unique": 1
+  },
+  {
+   "fieldname": "supplier_score",
+   "fieldtype": "Data",
+   "label": "Supplier Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "indicator_color",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Indicator Color"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Status"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Per Month",
+   "fieldname": "period",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Evaluation Period",
+   "options": "Per Week\nPer Month\nPer Year",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "scoring_setup",
+   "fieldtype": "Section Break",
+   "label": "Scoring Setup"
+  },
+  {
+   "default": "{total_score} * max( 0, min ( 1 , (12 - {period_number}) / 12) )",
+   "description": "Scorecard variables can be used, as well as:\n{total_score} (the total score from that period),\n{period_number} (the number of periods to present day)\n",
+   "fieldname": "weighting_function",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Weighting Function",
+   "reqd": 1
+  },
+  {
+   "fieldname": "standings",
+   "fieldtype": "Table",
+   "label": "Scoring Standings",
+   "options": "Supplier Scorecard Scoring Standing",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "criteria_setup",
+   "fieldtype": "Section Break",
+   "label": "Criteria Setup"
+  },
+  {
+   "fieldname": "load_criteria",
+   "fieldtype": "Button",
+   "label": "Load All Criteria"
+  },
+  {
+   "fieldname": "criteria",
+   "fieldtype": "Table",
+   "label": "Scoring Criteria",
+   "options": "Supplier Scorecard Scoring Criteria",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.status != 'Unknown'",
+   "fieldname": "scorecard_actions",
+   "fieldtype": "Section Break",
+   "label": "Scorecard Actions"
+  },
+  {
+   "default": "0",
+   "fieldname": "warn_rfqs",
+   "fieldtype": "Check",
+   "label": "Warn for new Request for Quotations",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "warn_pos",
+   "fieldtype": "Check",
+   "label": "Warn for new Purchase Orders",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "prevent_rfqs",
+   "fieldtype": "Check",
+   "label": "Prevent RFQs",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "prevent_pos",
+   "fieldtype": "Check",
+   "label": "Prevent POs",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "notify_supplier",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Notify Supplier",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "notify_employee",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Notify Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2024-03-27 13:10:49.727302",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier Scorecard",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
