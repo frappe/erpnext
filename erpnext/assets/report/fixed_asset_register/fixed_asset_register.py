@@ -268,6 +268,7 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		.where(gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account))
 		.where(gle.debit != 0)
 		.where(gle.is_cancelled == 0)
+		.where(gle.is_opening == "No")
 		.where(company.name == filters.company)
 		.where(asset.docstatus == 1)
 	)
