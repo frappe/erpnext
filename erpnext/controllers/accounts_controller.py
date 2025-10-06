@@ -228,6 +228,11 @@ class AccountsController(TransactionBase):
 
 		self.validate_date_with_fiscal_year()
 		self.validate_party_accounts()
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if self.is_return:
+				self.validate_qty()
+			else:
+				self.validate_deferred_start_and_end_date()
 
 		self.validate_inter_company_reference()
 		# validate inter  company transaction rate
@@ -278,11 +283,6 @@ class AccountsController(TransactionBase):
 				self.set_advances()
 
 			self.set_advance_gain_or_loss()
-
-			if self.is_return:
-				self.validate_qty()
-			else:
-				self.validate_deferred_start_and_end_date()
 
 			self.validate_deferred_income_expense_account()
 			self.set_inter_company_account()
