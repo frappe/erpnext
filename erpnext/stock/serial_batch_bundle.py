@@ -1400,7 +1400,7 @@ def throw_negative_batch_validation(batch_no, qty):
 def get_batchwise_qty(voucher_type, voucher_no):
 	bundles = frappe.get_all(
 		"Serial and Batch Bundle",
-		filters={"voucher_no": voucher_no, "voucher_type": voucher_type},
+		filters={"voucher_no": voucher_no, "voucher_type": voucher_type, "docstatus": (">", 0)},
 		pluck="name",
 	)
 	if not bundles:
