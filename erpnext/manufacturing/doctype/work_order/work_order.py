@@ -706,8 +706,32 @@ class WorkOrder(Document):
 		self.update_subcontracting_inward_order_received_items()
 
 	def update_stock_reservation(self):
+		self.set_qty_change()
 		make_stock_reservation_entries(self)
 		self.db_set("status", self.get_status())
+
+	def set_qty_change(self):
+		if scio_item_name := self.get("subcontracting_inward_order_item"):
+			scio_rm_item_names = frappe.db.get_all(
+				"Subcontracting Inward Order Received Item",
+				filters={"reference_name": scio_item_name, "docstatus": 1, "is_customer_provided_item": 1},
+				fields=["name"],
+			)
+			self.qty_change = frappe._dict()
+			for scio_rm_item_name in scio_rm_item_names:
+				rm_item_code, bom_qty, work_order_qty, received_qty = frappe.get_value(
+					"Subcontracting Inward Order Received Item",
+					scio_rm_item_name,
+					["rm_item_code", "required_qty", "work_order_qty", "received_qty"],
+				)
+				wo_item = next(
+					wo_item for wo_item in self.get("required_items") if wo_item.item_code == rm_item_code
+				)
+
+				if (
+					work_order_qty + (wo_item.required_qty if self._action == "submit" else 0)
+				) == bom_qty and received_qty > bom_qty:
+					self.qty_change[wo_item.name] = received_qty - bom_qty
 
 	def update_subcontracting_inward_order_received_items(self):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
@@ -1888,6 +1912,7 @@ def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=Fal
 				from_doctype="Subcontracting Inward Order",
 				to_doctype="Work Order",
 				against_fg_item=doc.subcontracting_inward_order_item,
+				qty_change=doc.qty_change,
 			)
 		else:
 			sre_created = sre.make_stock_reservation_entries()

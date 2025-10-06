@@ -1223,11 +1223,21 @@ class StockReservation:
 
 		return available_qty
 
-	def transfer_reservation_entries_to(self, docnames, from_doctype, to_doctype, against_fg_item=None):
+	def transfer_reservation_entries_to(
+		self, docnames, from_doctype, to_doctype, against_fg_item=None, qty_change=None
+	):
 		if isinstance(docnames, str):
 			docnames = [docnames]
 
 		items_to_reserve = self.get_items_to_reserve(docnames, from_doctype, to_doctype)
+
+		if qty_change:
+			for key, value in qty_change.items():
+				row = next((item for item in items_to_reserve if item.voucher_detail_no == key), None)
+				if row:
+					row.qty += value
+					row.required_qty += value
+
 		if not items_to_reserve:
 			return
 
