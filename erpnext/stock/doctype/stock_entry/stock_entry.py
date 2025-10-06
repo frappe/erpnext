@@ -54,7 +54,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_serial_or_batch_items,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import get_bin, get_incoming_rate
+from erpnext.stock.utils import get_bin, get_combine_datetime, get_incoming_rate
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -110,6 +110,7 @@ class StockEntry(StockController):
 		from_bom: DF.Check
 		from_warehouse: DF.Link | None
 		inspection_required: DF.Check
+		is_additional_transfer_entry: DF.Check
 		is_opening: DF.Literal["No", "Yes"]
 		is_return: DF.Check
 		items: DF.Table[StockEntryDetail]
@@ -1122,8 +1123,7 @@ class StockEntry(StockController):
 					{
 						"item_code": row.item_code,
 						"warehouse": row.s_warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
+						"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 						"voucher_type": self.doctype,
 						"voucher_detail_no": row.name,
 						"qty": row.transfer_qty * -1,
@@ -1386,12 +1386,6 @@ class StockEntry(StockController):
 					frappe.throw(
 						_("Finished Item {0} does not match with Work Order {1}").format(
 							d.item_code, self.work_order
-						)
-					)
-				elif flt(d.transfer_qty) > flt(self.fg_completed_qty):
-					frappe.throw(
-						_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}").format(
-							d.idx, d.transfer_qty, self.fg_completed_qty
 						)
 					)
 
@@ -2120,7 +2114,7 @@ class StockEntry(StockController):
 			key = (d.item_code, d.s_warehouse)
 			if details := reservation_entries.get(key):
 				if details.get("serial_no"):
-					d.serial_no = "\n".join(details.get("serial_no"))
+					d.serial_no = "\n".join(details.get("serial_no")[: cint(d.qty)])
 
 				if batches := details.get("batch_no"):
 					for batch_no, qty in batches.items():
@@ -2180,7 +2174,12 @@ class StockEntry(StockController):
 				doctype.transferred_qty,
 				doctype.consumed_qty,
 			)
-			.where((doctype.docstatus == 1) & (doctype.voucher_no == self.work_order))
+			.where(
+				(doctype.docstatus == 1)
+				& (doctype.voucher_no == self.work_order)
+				& (serial_batch_doc.delivered_qty < serial_batch_doc.qty)
+			)
+			.orderby(serial_batch_doc.idx)
 		)
 
 		return query.run(as_dict=True)
@@ -2258,6 +2257,9 @@ class StockEntry(StockController):
 			# in case of BOM
 			to_warehouse = item.get("default_warehouse")
 
+		expense_account = item.get("expense_account")
+		if not expense_account:
+			expense_account = frappe.get_cached_value("Company", self.company, "stock_adjustment_account")
 		args = {
 			"to_warehouse": to_warehouse,
 			"from_warehouse": "",
@@ -2265,7 +2267,7 @@ class StockEntry(StockController):
 			"item_name": item.item_name,
 			"description": item.description,
 			"stock_uom": item.stock_uom,
-			"expense_account": item.get("expense_account"),
+			"expense_account": expense_account,
 			"cost_center": item.get("buying_cost_center"),
 			"is_finished_item": 1,
 		}
@@ -2493,10 +2495,12 @@ class StockEntry(StockController):
 
 			wo_item_qty = item.transferred_qty or item.required_qty
 
-			wo_qty_consumed = flt(wo_item_qty) - flt(item.consumed_qty)
+			wo_qty_unconsumed = flt(wo_item_qty) - flt(item.consumed_qty)
 			wo_qty_to_produce = flt(work_order_qty) - flt(wo.produced_qty)
+			bom_qty_per_unit = item.required_qty / wo.qty  # per-unit BOM qty
 
-			req_qty_each = (wo_qty_consumed) / (wo_qty_to_produce or 1)
+			req_qty_each = (wo_qty_unconsumed) / (wo_qty_to_produce or 1)
+			req_qty_each = min(req_qty_each, bom_qty_per_unit)
 
 			qty = req_qty_each * flt(self.fg_completed_qty)
 

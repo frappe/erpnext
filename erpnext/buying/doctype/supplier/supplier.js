@@ -110,22 +110,6 @@ frappe.ui.form.on("Supplier", {
 			);
 
 			frm.add_custom_button(
-				__("Bank Account"),
-				function () {
-					erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name);
-				},
-				__("Create")
-			);
-
-			frm.add_custom_button(
-				__("Pricing Rule"),
-				function () {
-					frm.trigger("make_pricing_rule");
-				},
-				__("Create")
-			);
-
-			frm.add_custom_button(
 				__("Get Supplier Group Details"),
 				function () {
 					frm.trigger("get_supplier_group_details");

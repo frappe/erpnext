@@ -1487,7 +1487,9 @@ def add_operating_cost_component_wise(
 		)
 
 		for wc in workstation_cost:
-			expense_account = get_component_account(wc.operating_component) or op_expense_account
+			expense_account = (
+				get_component_account(wc.operating_component, stock_entry.company) or op_expense_account
+			)
 			actual_cp_operating_cost = flt(
 				flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0),
 				row.precision("actual_operating_cost"),
@@ -1513,8 +1515,10 @@ def add_operating_cost_component_wise(
 
 
 @frappe.request_cache
-def get_component_account(parent):
-	return frappe.db.get_value("Workstation Operating Component Account", parent, "expense_account")
+def get_component_account(parent, company):
+	return frappe.db.get_value(
+		"Workstation Operating Component Account", {"parent": parent, "company": company}, "expense_account"
+	)
 
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_card=None):

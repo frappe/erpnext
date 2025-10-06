@@ -252,14 +252,18 @@ class SubcontractingOrder(SubcontractingController):
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
 
-				po_item = frappe.get_doc("Purchase Order Item", si.purchase_order_item)
-				available_qty = po_item.qty - po_item.subcontracted_quantity
+				qty, subcontracted_quantity, fg_item_qty = frappe.db.get_value(
+					"Purchase Order Item",
+					si.purchase_order_item,
+					["qty", "subcontracted_quantity", "fg_item_qty"],
+				)
+				available_qty = flt(qty) - flt(subcontracted_quantity)
 
 				if available_qty == 0:
 					continue
 
 				si.qty = available_qty
-				conversion_factor = po_item.qty / po_item.fg_item_qty
+				conversion_factor = flt(qty) / flt(fg_item_qty)
 				si.fg_item_qty = flt(
 					available_qty / conversion_factor, frappe.get_precision("Purchase Order Item", "qty")
 				)
@@ -338,13 +342,24 @@ class SubcontractingOrder(SubcontractingController):
 
 	def update_subcontracted_quantity_in_po(self, cancel=False):
 		for service_item in self.service_items:
-			doc = frappe.get_doc("Purchase Order Item", service_item.purchase_order_item)
-			doc.subcontracted_quantity = (
-				(doc.subcontracted_quantity + service_item.qty)
-				if not cancel
-				else (doc.subcontracted_quantity - service_item.qty)
+			subcontracted_quantity = flt(
+				frappe.db.get_value(
+					"Purchase Order Item", service_item.purchase_order_item, "subcontracted_quantity"
+				)
 			)
-			doc.save()
+
+			subcontracted_quantity = (
+				(subcontracted_quantity + service_item.qty)
+				if not cancel
+				else (subcontracted_quantity - service_item.qty)
+			)
+
+			frappe.db.set_value(
+				"Purchase Order Item",
+				service_item.purchase_order_item,
+				"subcontracted_quantity",
+				subcontracted_quantity,
+			)
 
 
 @frappe.whitelist()

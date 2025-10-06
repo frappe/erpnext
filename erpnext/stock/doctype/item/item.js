@@ -517,6 +517,16 @@ $.extend(erpnext.item, {
 			},
 			__("Actions")
 		);
+
+		frm.add_custom_button(
+			__("Make Lead Time"),
+			function () {
+				frm.make_new("Item Lead Time", {
+					item_code: frm.doc.name,
+				});
+			},
+			__("Actions")
+		);
 	},
 
 	weight_to_validate: function (frm) {

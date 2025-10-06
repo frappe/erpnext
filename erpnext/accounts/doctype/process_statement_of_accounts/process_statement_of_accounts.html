@@ -34,11 +34,13 @@
 		<thead>
 			<tr>
 				<th style="width: 12%">{{ _("Date") }}</th>
-				<th style="width: 15%">{{ _("Reference") }}</th>
-				<th style="width: 25%">{{ _("Remarks") }}</th>
+				<th style="width: 20%">{{ _("Reference") }}</th>
 				<th style="width: 15%">{{ _("Debit") }}</th>
 				<th style="width: 15%">{{ _("Credit") }}</th>
 				<th style="width: 18%">{{ _("Balance (Dr - Cr)") }}</th>
+				{% if filters.show_remarks %}
+				<th style="width: 20%">{{ _("Remarks") }}</th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody>
@@ -47,36 +49,51 @@
 			{% if(row.posting_date) %}
 				<td>{{ frappe.format(row.posting_date, 'Date') }}</td>
 				<td>{{ row.voucher_type }}
-					<br>{{ row.voucher_no }}</td>
-				<td>
-					{% if not (filters.party or filters.account)  %}
+					<br>{{ row.voucher_no }}
+					{% if not (filters.party or filters.account) %}
 						{{ row.party or row.account }}
 						<br>
 					{% endif %}
-
-					<br>{{ _("Remarks:") }} {{ row.remarks }}
 					{% if row.bill_no %}
-						<br>{{ _("Supplier Invoice No") }}: {{ row.bill_no }}
+						{{ _("Supplier Invoice No") }}: {{ row.bill_no }}
 					{% endif %}
 					</td>
 					<td style="text-align: right">
 						{{ frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}</td>
 					<td style="text-align: right">
 						{{ frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}</td>
+					<td style="text-align: right">
+						{{ frappe.utils.fmt_money(row.balance, currency=filters.presentation_currency) }}
+					</td>
+					{% if filters.show_remarks %}
+					<td>
+						{% if row.remarks  %}
+							{{ _("Remarks:") }} {{ row.remarks }}
+						{% endif %}
+					</td>
+					{% endif %}
 			{% else %}
 				<td></td>
-				<td></td>
-				<td><b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b></td>
+				<td>
+					<b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b>
+				</td>
 				<td style="text-align: right">
 					{{ row.get('account', '') and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
 				</td>
 				<td style="text-align: right">
 					{{ row.get('account', '') and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
 				</td>
-			{% endif %}
 				<td style="text-align: right">
 					{{ frappe.utils.fmt_money(row.balance, currency=filters.presentation_currency) }}
 				</td>
+				{% if filters.show_remarks %}
+				<td>
+					{% if row.remarks  %}
+						{{ _("Remarks:") }} {{ row.remarks }}
+					{% endif %}
+				</td>
+				{% endif %}
+			{% endif %}
 			</tr>
 		{% endfor %}
 		</tbody>

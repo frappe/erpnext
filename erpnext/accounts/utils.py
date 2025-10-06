@@ -964,19 +964,28 @@ def update_accounting_ledgers_after_reference_removal(
 	adv_ple.run()
 
 
-def remove_ref_from_advance_section(ref_doc: object = None):
+def remove_ref_from_advance_section(ref_doc: object = None, payment_name: str | None = None):
 	# TODO: this might need some testing
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
-		ref_doc.set("advances", [])
-		adv_type = qb.DocType(f"{ref_doc.doctype} Advance")
-		qb.from_(adv_type).delete().where(adv_type.parent == ref_doc.name).run()
+		row_names = []
+		for adv in ref_doc.get("advances") or []:
+			if adv.get("reference_name", None) == payment_name:
+				row_names.append(adv.name)
+
+		if not row_names:
+			return
+
+		child_table = (
+			"Sales Invoice Advance" if ref_doc.doctype == "Sales Invoice" else "Purchase Invoice Advance"
+		)
+		frappe.db.delete(child_table, {"name": ("in", row_names)})
 
 
 def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: str | None = None):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name, payment_name)
 	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name, payment_name)
 	update_accounting_ledgers_after_reference_removal(ref_doc.doctype, ref_doc.name, payment_name)
-	remove_ref_from_advance_section(ref_doc)
+	remove_ref_from_advance_section(ref_doc, payment_name)
 
 
 def remove_ref_doc_link_from_jv(
@@ -1043,7 +1052,6 @@ def remove_ref_doc_link_from_pe(
 		query = query.where(per.parent == payment_name)
 
 	reference_rows = query.run(as_dict=True)
-
 	if not reference_rows:
 		return
 

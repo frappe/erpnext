@@ -13,6 +13,7 @@ from erpnext.controllers.stock_controller import StockController, create_repost_
 from erpnext.stock.doctype.batch.batch import get_available_batches, get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	combine_datetime,
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -135,8 +136,7 @@ class StockReconciliation(StockController):
 					{
 						"item_code": row.item_code,
 						"warehouse": row.warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
+						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
 						"voucher_detail_no": row.name,
@@ -242,8 +242,7 @@ class StockReconciliation(StockController):
 						"doctype": "Serial and Batch Bundle",
 						"item_code": item.item_code,
 						"warehouse": item.warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
+						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 						"voucher_type": self.doctype,
 						"type_of_transaction": "Outward",
 					}
@@ -261,8 +260,7 @@ class StockReconciliation(StockController):
 						{
 							"item_code": item.item_code,
 							"warehouse": item.warehouse,
-							"posting_date": self.posting_date,
-							"posting_time": self.posting_time,
+							"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 							"ignore_warehouse": 1,
 						}
 					)
@@ -1154,8 +1152,7 @@ class StockReconciliation(StockController):
 				{
 					"item_code": doc.item_code,
 					"warehouse": doc.warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_datetime": doc.posting_datetime,
 					"creation": sle_creation,
 					"voucher_no": self.name,
 					"ignore_warehouse": 1,
@@ -1195,8 +1192,7 @@ class StockReconciliation(StockController):
 					d.batch_no,
 					doc.warehouse,
 					creation=sle_creation,
-					posting_date=doc.posting_date,
-					posting_time=doc.posting_time,
+					posting_datetime=doc.posting_datetime,
 					ignore_voucher_nos=[doc.voucher_no],
 					for_stock_levels=True,
 					consider_negative_batches=True,
