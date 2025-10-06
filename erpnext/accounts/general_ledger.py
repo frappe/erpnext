@@ -159,6 +159,7 @@ def validate_accounting_period(gl_map):
 		WHERE
 			ap.name = cd.parent
 			AND ap.company = %(company)s
+			AND ap.disabled = 0
 			AND cd.closed = 1
 			AND cd.document_type = %(voucher_type)s
 			AND %(date)s between ap.start_date and ap.end_date
