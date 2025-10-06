@@ -286,6 +286,19 @@ class SerialandBatchBundle(Document):
 			return
 
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
+
+		deliver_serials = frappe.get_all(
+			"Serial No",
+			filters={"name":("in", serial_nos), "status":"Delivered"},
+			pluck="name",
+		)
+		if deliver_serials:
+			for serial_no in deliver_serials:
+				self.throw_error_message(
+					f"Serial No {bold(serial_no)} is already delivered.",
+					SerialNoDuplicateError,
+				)
+
 		kwargs = frappe._dict(
 			{
 				"item_code": self.item_code,
