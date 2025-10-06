@@ -41,6 +41,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		cls.unlink_setting = int(
 			frappe.db.get_single_value("Accounts Settings", "unlink_advance_payment_on_cancelation_of_order")
 		)
+		create_subcontracting_test_data()
 
 	@classmethod
 	def tearDownClass(cls) -> None:
@@ -2613,6 +2614,7 @@ def make_sales_order(**args):
 	so.customer = args.customer or "_Test Customer"
 	so.currency = args.currency or "INR"
 	so.po_no = args.po_no or ""
+	so.is_subcontracted = args.is_subcontracted or 0
 	if args.selling_price_list:
 		so.selling_price_list = args.selling_price_list
 
