@@ -269,10 +269,13 @@ def filter_batches(batches, doc):
 				del batches[row.get("batch_no")]
 
 
-def get_filtered_serial_nos(serial_nos, doc):
+def get_filtered_serial_nos(serial_nos, doc, table=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	for row in doc.get("items"):
+	if not table:
+		table = "items"
+
+	for row in doc.get(table):
 		if row.get("serial_no"):
 			for serial_no in get_serial_nos(row.get("serial_no")):
 				if serial_no in serial_nos:

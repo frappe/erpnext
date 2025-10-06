@@ -15,6 +15,7 @@ from frappe.utils import (
 	is_last_day_of_the_month,
 	nowdate,
 )
+from frappe.utils.data import add_to_date
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -218,6 +219,31 @@ class TestAsset(AssetSetup):
 			asset.precision("gross_purchase_amount"),
 		)
 		self.assertEqual(accumulated_depr_amount, 18000.0)
+
+		asset_depreciation = frappe.db.get_value(
+			"Asset Depreciation Schedule", {"asset": asset.name, "docstatus": 1}, "name"
+		)
+		last_booked_depreciation_date = frappe.db.get_value(
+			"Depreciation Schedule",
+			{
+				"parent": asset_depreciation,
+				"docstatus": 1,
+				"journal_entry": ["!=", ""],
+			},
+			"schedule_date",
+			order_by="schedule_date desc",
+		)
+
+		before_purchase_date = add_to_date(asset.purchase_date, days=-1)
+		future_date = add_to_date(nowdate(), days=1)
+		if last_booked_depreciation_date:
+			before_last_booked_depreciation_date = add_to_date(last_booked_depreciation_date, days=-1)
+
+		self.assertRaises(frappe.ValidationError, scrap_asset, asset.name, scrap_date=before_purchase_date)
+		self.assertRaises(frappe.ValidationError, scrap_asset, asset.name, scrap_date=future_date)
+		self.assertRaises(
+			frappe.ValidationError, scrap_asset, asset.name, scrap_date=before_last_booked_depreciation_date
+		)
 
 		scrap_asset(asset.name)
 		asset.load_from_db()

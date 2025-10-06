@@ -290,6 +290,25 @@ class TestSerialandBatchBundle(FrappeTestCase):
 			target="_Test Warehouse - _TC",
 			qty=10,
 			rate=100,
+			batch_no=batch_id,
+			use_serial_batch_fields=True,
+		)
+
+		sle = frappe.db.get_value(
+			"Serial and Batch Entry",
+			{"parent": se.items[0].serial_and_batch_bundle, "docstatus": 1},
+			["stock_value_difference", "stock_queue"],
+			as_dict=True,
+		)
+
+		self.assertEqual(flt(sle.stock_value_difference), 1000.00)
+		self.assertEqual(json.loads(sle.stock_queue), [[20, 200], [10, 100]])
+
+		se = make_stock_entry(
+			item_code=batch_item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			rate=100,
 			use_serial_batch_fields=True,
 		)
 
@@ -301,7 +320,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		)
 
 		self.assertEqual(flt(sle.stock_value_difference), 1000.00)
-		self.assertEqual(json.loads(sle.stock_queue), [[20, 200]])
+		self.assertEqual(json.loads(sle.stock_queue), [[20, 200], [10, 100]])
 
 		se = make_stock_entry(
 			item_code=batch_item_code,
@@ -318,6 +337,24 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		)
 
 		self.assertEqual(flt(sle.stock_value_difference), 5000.00 * -1)
+		self.assertFalse(json.loads(sle.stock_queue or "[]"))
+		self.assertEqual(flt(sle.stock_value), 1000.0)
+
+		se = make_stock_entry(
+			item_code=batch_item_code,
+			source="_Test Warehouse - _TC",
+			qty=10,
+			use_serial_batch_fields=False,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"item_code": batch_item_code, "is_cancelled": 0, "voucher_no": se.name},
+			["stock_value_difference", "stock_queue", "stock_value"],
+			as_dict=True,
+		)
+
+		self.assertEqual(flt(sle.stock_value_difference), 1000.00 * -1)
 		self.assertFalse(json.loads(sle.stock_queue or "[]"))
 		self.assertEqual(flt(sle.stock_value), 0.0)
 

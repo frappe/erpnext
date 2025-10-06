@@ -2828,6 +2828,111 @@ class TestWorkOrder(FrappeTestCase):
 			wo.operations[3].planned_start_time, add_to_date(wo.operations[1].planned_end_time, minutes=10)
 		)
 
+	def test_req_qty_clamping_in_manufacture_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg_item = "Test Unconsumed RM FG Item"
+		rm_item_1 = "Test Unconsumed RM Item 1"
+		rm_item_2 = "Test Unconsumed RM Item 2"
+
+		source_warehouse = "_Test Warehouse - _TC"
+		wip_warehouse = "Stores - _TC"
+		fg_warehouse = create_warehouse("_Test Finished Goods Warehouse", company="_Test Company")
+
+		make_item(fg_item, {"is_stock_item": 1})
+		make_item(rm_item_1, {"is_stock_item": 1})
+		make_item(rm_item_2, {"is_stock_item": 1})
+
+		# create a BOM: 1 FG = 1 RM1 + 1 RM2
+		bom = make_bom(
+			item=fg_item,
+			source_warehouse=source_warehouse,
+			raw_materials=[rm_item_1, rm_item_2],
+			operating_cost_per_bom_quantity=1,
+			do_not_submit=True,
+		)
+
+		for row in bom.exploded_items:
+			make_stock_entry_test_record(
+				item_code=row.item_code,
+				target=source_warehouse,
+				qty=100,
+				basic_rate=100,
+			)
+
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=50,
+			source_warehouse=source_warehouse,
+			wip_warehouse=wip_warehouse,
+		)
+		wo.submit()
+
+		# first partial transfer & manufacture (6 units)
+		se_transfer_1 = frappe.get_doc(
+			make_stock_entry(wo.name, "Material Transfer for Manufacture", 6, wip_warehouse)
+		)
+		se_transfer_1.insert()
+		se_transfer_1.submit()
+
+		stock_entry_1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 6, fg_warehouse))
+
+		# remove rm_2 from the items to simulate unconsumed RM scenario
+		stock_entry_1.items = [row for row in stock_entry_1.items if row.item_code != rm_item_2]
+		stock_entry_1.save()
+		stock_entry_1.submit()
+
+		wo.reload()
+
+		se_transfer_2 = frappe.get_doc(
+			make_stock_entry(wo.name, "Material Transfer for Manufacture", 20, wip_warehouse)
+		)
+		se_transfer_2.insert()
+		se_transfer_2.submit()
+
+		stock_entry_2 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 20, fg_warehouse))
+
+		# validate rm_item_2 quantity is clamped correctly (per-unit BOM = 1 → max 20)
+		for row in stock_entry_2.items:
+			if row.item_code == rm_item_2:
+				self.assertLessEqual(row.qty, 20)
+				self.assertGreaterEqual(row.qty, 0)
+
+	def test_overproduction_allowed_qty(self):
+		"""Test overproduction allowed qty in work order"""
+		allow_overproduction("overproduction_percentage_for_work_order", 50)
+
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=10)
+
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=100, basic_rate=100
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC",
+			qty=100,
+			basic_rate=1000.0,
+		)
+
+		mt_stock_entry = frappe.get_doc(
+			make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 10)
+		)
+		mt_stock_entry.submit()
+
+		fg_stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		fg_stock_entry.items[2].qty = 15
+		fg_stock_entry.fg_completed_qty = 15
+		fg_stock_entry.submit()
+
+		wo_order.reload()
+
+		self.assertEqual(wo_order.produced_qty, 15)
+		self.assertEqual(wo_order.status, "Completed")
+
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (

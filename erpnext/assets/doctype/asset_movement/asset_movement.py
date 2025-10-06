@@ -142,10 +142,18 @@ class AssetMovement(Document):
 	def update_asset_location_and_custodian(self, asset_id, location, employee):
 		asset = frappe.get_doc("Asset", asset_id)
 
+		updates = {}
 		if employee and employee != asset.custodian:
-			frappe.db.set_value("Asset", asset_id, "custodian", employee)
+			updates["custodian"] = employee
+
+		elif not employee and asset.custodian:
+			updates["custodian"] = ""
+
 		if location and location != asset.location:
-			frappe.db.set_value("Asset", asset_id, "location", location)
+			updates["location"] = location
+
+		if updates:
+			frappe.db.set_value("Asset", asset_id, updates)
 
 	def log_asset_activity(self, asset_id, location, employee):
 		if location and employee:
