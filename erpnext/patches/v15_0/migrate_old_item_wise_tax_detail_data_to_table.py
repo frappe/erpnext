@@ -205,7 +205,7 @@ class ItemTax:
 						if not item.get("apply_tds") or not doc.get("base_tax_withholding_net_total"):
 							item_proportion = 0
 						else:
-							item_proportion = item.base_net_amount / doc.tax_withholding_net_total
+							item_proportion = item.base_net_amount / doc.base_tax_withholding_net_total
 
 					tax_amount = tax_row.base_tax_amount_after_discount_amount * item_proportion
 
