@@ -5,6 +5,7 @@ frappe.realtime.on("sales_invoice_before_print", (data) => {
 
 	if (!beforePrintHandled && route[0] === "print" && route[1] === "Sales Invoice") {
 		beforePrintHandled = true;
+
 		let companyDetailsDialog = new frappe.ui.Dialog({
 			title: "Enter Company Details",
 			fields: [
@@ -33,6 +34,7 @@ frappe.realtime.on("sales_invoice_before_print", (data) => {
 					label: "Email",
 					fieldname: "email",
 					fieldtype: "Data",
+					options: "Email",
 					reqd: data.email ? 0 : 1,
 					hidden: data.email ? 1 : 0,
 				},

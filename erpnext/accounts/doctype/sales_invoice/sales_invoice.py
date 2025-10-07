@@ -308,7 +308,7 @@ class SalesInvoice(SellingController):
 					"email": company_details.get("email"),
 					"address_line": address_line,
 					"company": self.company,
-					"company_address_display": self.company_address,
+					"company_address": self.company_address,
 					"name": self.name,
 				},
 				user=frappe.session.user,
@@ -2839,8 +2839,13 @@ def get_loyalty_programs(customer):
 
 @frappe.whitelist()
 def save_company_master_details(name, company, details):
+	from frappe.utils import validate_email_address
+
 	if isinstance(details, str):
 		details = frappe.parse_json(details)
+
+	if details.get("email"):
+		validate_email_address(details.email, throw=True)
 
 	company_fields = ["company_logo", "website", "phone_no", "email"]
 	updated_fields = {field: details.get(field) for field in company_fields if details.get(field)}
