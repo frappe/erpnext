@@ -45,7 +45,7 @@ def execute():
 			if not total_docs:
 				continue
 
-			chunk_size = 100
+			chunk_size = 1000
 
 			with click.progressbar(
 				range(0, total_docs, chunk_size), label=f"Migrating {total_docs} {doctype}s"
@@ -143,9 +143,21 @@ def compile_docs(doc_info, taxes, items, doctype, tax_doctype):
 
 class ItemTax:
 	def get_item_wise_tax_details(self, doc):
+		"""
+		This method calculates tax amounts for each item-tax combination.
+		"""
 		item_wise_tax_details = []
 		company_currency = frappe.get_cached_value("Company", doc.company, "default_currency")
 		precision = frappe.get_precision(doc.tax_doctype, "tax_amount", currency=company_currency)
+
+		tax_differences = frappe._dict()
+		last_taxable_items = frappe._dict()
+
+		# Initialize tax differences with expected amounts
+		for tax_row in doc.taxes:
+			if tax_row.base_tax_amount_after_discount_amount:
+				multiplier = -1 if tax_row.get("add_deduct_tax") == "Deduct" else 1
+				tax_differences[tax_row.name] = tax_row.base_tax_amount_after_discount_amount * multiplier
 
 		idx = 1
 		for item in doc.get("items"):
@@ -185,12 +197,34 @@ class ItemTax:
 				if tax_row.get("add_deduct_tax") == "Deduct":
 					tax_amount *= -1
 
-				item_wise_tax_details.append(
-					get_item_tax_doc(item, tax_row, tax_rate, tax_amount, idx, precision)
-				)
+				tax_doc = get_item_tax_doc(item, tax_row, tax_rate, tax_amount, idx, precision)
+				item_wise_tax_details.append(tax_doc)
+
+				# Update tax differences and track last taxable item
+				if tax_amount:
+					tax_differences[tax_row.name] -= tax_amount
+					last_taxable_items[tax_row.name] = tax_doc
+
 				idx += 1
 
+		# Handle rounding errors by applying differences to last taxable items
+		self._handle_rounding_differences(tax_differences, last_taxable_items, precision)
+
 		return item_wise_tax_details
+
+	def _handle_rounding_differences(self, tax_differences, last_taxable_items, precision):
+		"""
+		Handle rounding errors by applying the difference to the last taxable item
+		"""
+		for tax_row, diff in tax_differences.items():
+			if not diff or tax_row not in last_taxable_items:
+				continue
+
+			rounded_difference = flt(diff, 5)
+
+			if abs(rounded_difference) <= 0.5:
+				last_item_tax_doc = last_taxable_items[tax_row]
+				last_item_tax_doc.amount = flt(last_item_tax_doc.amount + rounded_difference, 5)
 
 	def _get_item_tax_details(self, tax_row):
 		# temp cache
