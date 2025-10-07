@@ -98,9 +98,16 @@ class VATAuditReport:
 		)
 
 		taxes_and_charges = frappe.qb.DocType(self.tax_doctype)
-		tax_details = get_tax_details_query(doctype, self.tax_doctype)
-		tax_details = tax_details.where(taxes_and_charges.account_head.isin(self.sa_vat_accounts)).run(
-			as_dict=True
+		item_wise_tax = frappe.qb.DocType("Item Wise Tax Detail")
+		invoice_names = list(self.invoices.keys())
+		if not invoice_names:
+			return
+
+		tax_details = (
+			get_tax_details_query(doctype, self.tax_doctype)
+			.where(item_wise_tax.parent.isin(invoice_names))
+			.where(taxes_and_charges.account_head.isin(self.sa_vat_accounts))
+			.run(as_dict=True)
 		)
 
 		for row in tax_details:
