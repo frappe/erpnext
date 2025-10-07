@@ -2147,19 +2147,16 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(rate, 500)
 
+	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
 			create_purchase_order,
 		)
-		from erpnext.selling.doctype.sales_order.test_sales_order import (
-			automatically_fetch_payment_terms,
-		)
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_invoice as make_pi_from_pr,
 		)
 
-		automatically_fetch_payment_terms()
 		frappe.db.set_value(
 			"Payment Terms Template",
 			"_Test Payment Term Template",
@@ -2185,7 +2182,6 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pi = make_pi_from_pr(pr.name)
 		self.assertEqual(pi.payment_schedule[0].payment_amount, 1000)
 
-		automatically_fetch_payment_terms(enable=0)
 		frappe.db.set_value(
 			"Payment Terms Template",
 			"_Test Payment Term Template",

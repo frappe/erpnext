@@ -1229,12 +1229,25 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	due_date(doc, cdt) {
+	discount_date(doc, cdt, cdn) {
+		// Remove fields as discount_date is auto-managed by payment terms
+		const row = locals[cdt][cdn];
+		["discount_validity", "discount_validity_based_on"].forEach((field) => {
+			row[field] = "";
+		});
+		this.frm.refresh_field("payment_schedule");
+	}
+
+	due_date(doc, cdt, cdn) {
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
 		if (doc.doctype !== cdt) {
-			// triggered by change to the due_date field in payment schedule child table
-			// do nothing to avoid infinite clearing loop
+			// Remove fields as due_date is auto-managed by payment terms
+			const row = locals[cdt][cdn];
+			["due_date_based_on", "credit_days", "credit_months"].forEach((field) => {
+				row[field] = "";
+			});
+			this.frm.refresh_field("payment_schedule");
 			return;
 		}
 
@@ -2990,6 +3003,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	payment_term(doc, cdt, cdn) {
 		const me = this;
 		var row = locals[cdt][cdn];
+		// empty date condition fields
+		[
+			"due_date_based_on",
+			"credit_days",
+			"credit_months",
+			"discount_validity",
+			"discount_validity_based_on",
+		].forEach(function (field) {
+			row[field] = "";
+		});
+
 		if (row.payment_term) {
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
@@ -3002,14 +3026,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
-						for (var d in r.message) {
-							frappe.model.set_value(cdt, cdn, d, r.message[d]);
-							const company_currency = me.get_company_currency();
-							me.update_payment_schedule_grid_labels(company_currency);
+						const company_currency = me.get_company_currency();
+						for (let d in r.message) {
+							row[d] = r.message[d];
 						}
+						me.update_payment_schedule_grid_labels(company_currency);
+						me.frm.refresh_field("payment_schedule");
 					}
 				},
 			});
+		} else {
+			me.frm.refresh_field("payment_schedule");
 		}
 	}
 
