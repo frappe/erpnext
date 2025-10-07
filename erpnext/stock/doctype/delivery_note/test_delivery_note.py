@@ -13,7 +13,6 @@ from erpnext.accounts.utils import get_balance_on
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
-	automatically_fetch_payment_terms,
 	compare_payment_schedules,
 	create_dn_against_so,
 	make_sales_order,
@@ -1026,13 +1025,12 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertTrue("TESTBATCH" in dn.packed_items[0].batch_no, "Batch number not added in packed item")
 
+	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		automatically_fetch_payment_terms()
 
 		so = make_sales_order(uom="Nos", do_not_save=1)
 		create_payment_terms_template()
@@ -1052,8 +1050,6 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
-
-		automatically_fetch_payment_terms(enable=0)
 
 	def test_returned_qty_in_return_dn(self):
 		# SO ---> SI ---> DN
