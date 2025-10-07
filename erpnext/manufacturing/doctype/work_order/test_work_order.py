@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe.tests import IntegrationTestCase, timeout
 from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, today
@@ -3139,6 +3141,184 @@ class TestWorkOrder(IntegrationTestCase):
 		self.assertEqual(wo_order.status, "Completed")
 
 		allow_overproduction("overproduction_percentage_for_work_order", 0)
+
+	def test_reserved_serial_batch(self):
+		raw_materials = []
+		for item_code, properties in {
+			"Test Reserved FG Item": {"is_stock_item": 1},
+			"Test Reserved Serial Item": {"has_serial_no": 1, "serial_no_series": "TSNN-RSI-.####"},
+			"Test Reserved Batch Item": {
+				"has_batch_no": 1,
+				"batch_number_series": "BCH-RBI-.####",
+				"create_new_batch": 1,
+			},
+			"Test Reserved Serial Batch Item": {
+				"has_serial_no": 1,
+				"serial_no_series": "TSNB-RSBI-.####",
+				"has_batch_no": 1,
+				"batch_number_series": "BCH-RSBI-.####",
+				"create_new_batch": 1,
+			},
+		}.items():
+			make_item(item_code, properties=properties)
+			if item_code != "Test Reserved FG Item":
+				raw_materials.append(item_code)
+				test_stock_entry.make_stock_entry(
+					item_code=item_code,
+					target="Stores - _TC",
+					qty=5,
+					basic_rate=100,
+				)
+
+		original_auto_reserve = frappe.db.get_single_value("Stock Settings", "auto_reserve_serial_and_batch")
+		original_backflush = frappe.db.get_single_value(
+			"Manufacturing Settings", "backflush_raw_materials_based_on"
+		)
+		frappe.db.set_single_value(
+			"Manufacturing Settings",
+			"backflush_raw_materials_based_on",
+			"Material Transferred for Manufacture",
+		)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_serial_and_batch", 1)
+
+		make_bom(
+			item="Test Reserved FG Item",
+			source_warehouse="Stores - _TC",
+			raw_materials=raw_materials,
+		)
+
+		wo = make_wo_order_test_record(
+			item="Test Reserved FG Item",
+			qty=5,
+			source_warehouse="Stores - _TC",
+			reserve_stock=1,
+		)
+
+		_reserved_item = get_reserved_entries(wo.name)
+		for key, value in _reserved_item.items():
+			self.assertEqual(key[1], "Stores - _TC")
+			self.assertEqual(value.reserved_qty, 5)
+			if value.serial_nos:
+				self.assertEqual(len(value.serial_nos), 5)
+
+			if value.batch_nos:
+				self.assertEqual(sum(value.batch_nos.values()), 5)
+
+		# Transfer 5 qty
+		mt_stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 5))
+		mt_stock_entry.submit()
+
+		for row in mt_stock_entry.items:
+			value = _reserved_item[(row.item_code, row.s_warehouse)]
+			self.assertEqual(row.qty, value.reserved_qty)
+			if value.serial_nos:
+				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
+
+			if value.batch_nos:
+				self.assertTrue(row.batch_no in value.batch_nos)
+
+		_before_reserved_item = get_reserved_entries(wo.name, mt_stock_entry.items[0].t_warehouse)
+
+		# Manufacture 2 qty
+		fg_stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 2))
+		fg_stock_entry.submit()
+
+		for row in fg_stock_entry.items:
+			if not row.s_warehouse:
+				continue
+
+			value = _before_reserved_item[(row.item_code, row.s_warehouse)]
+			if row.serial_no:
+				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				for sn in serial_nos:
+					self.assertTrue(sn in value.serial_nos)
+					value.serial_nos.remove(sn)
+
+			if row.batch_no:
+				self.assertTrue(row.batch_no in value.batch_nos)
+				value.batch_nos[row.batch_no] -= row.qty
+				if row.serial_no:
+					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+					for sn in sns:
+						self.assertTrue(sn in value.serial_batches[row.batch_no])
+						value.serial_batches[row.batch_no].remove(sn)
+
+		# Manufacture 3 qty
+		fg_stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		fg_stock_entry.submit()
+
+		for row in fg_stock_entry.items:
+			if not row.s_warehouse:
+				continue
+
+			value = _before_reserved_item[(row.item_code, row.s_warehouse)]
+
+			if row.serial_no:
+				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
+
+			if row.batch_no:
+				self.assertTrue(row.batch_no in value.batch_nos)
+				self.assertEqual(value.batch_nos[row.batch_no], row.qty)
+				if row.serial_no:
+					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+					self.assertEqual(sorted(sns), sorted(value.serial_batches[row.batch_no]))
+
+		frappe.db.set_single_value(
+			"Manufacturing Settings", "backflush_raw_materials_based_on", original_backflush
+		)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_serial_and_batch", original_auto_reserve)
+
+
+def get_reserved_entries(voucher_no, warehouse=None):
+	doctype = frappe.qb.DocType("Stock Reservation Entry")
+	sabb = frappe.qb.DocType("Serial and Batch Entry")
+
+	query = (
+		frappe.qb.from_(doctype)
+		.left_join(sabb)
+		.on(doctype.name == sabb.parent)
+		.select(
+			doctype.name,
+			doctype.item_code,
+			doctype.warehouse,
+			doctype.reserved_qty,
+			sabb.serial_no,
+			sabb.batch_no,
+			sabb.qty,
+			sabb.delivered_qty,
+		)
+		.where((doctype.voucher_no == voucher_no) & (doctype.docstatus == 1))
+	)
+
+	if warehouse:
+		query = query.where(doctype.warehouse == warehouse)
+
+	reservation_entries = query.run(as_dict=True)
+
+	_reserved_item = frappe._dict({})
+	for entry in reservation_entries:
+		key = (entry.item_code, entry.warehouse)
+		if key not in _reserved_item:
+			_reserved_item[key] = frappe._dict(
+				{
+					"reserved_qty": 0,
+					"serial_nos": [],
+					"batch_nos": defaultdict(int),
+					"serial_batches": defaultdict(list),
+				}
+			)
+
+		_reserved_item[key].reserved_qty += entry.qty
+		if entry.batch_no:
+			_reserved_item[key].batch_nos[entry.batch_no] += entry.qty
+			if entry.serial_no:
+				_reserved_item[key].serial_batches[entry.batch_no].append(entry.serial_no)
+		if entry.serial_no:
+			_reserved_item[key].serial_nos.append(entry.serial_no)
+
+	return _reserved_item
 
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
