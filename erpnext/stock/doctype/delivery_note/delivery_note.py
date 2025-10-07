@@ -602,6 +602,49 @@ class DeliveryNote(SellingController):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
 
 		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
+
+		for dn_item in self.items:
+			if (
+				dn_item.against_pick_list
+				and dn_item.so_detail
+				and frappe.db.exists("Product Bundle", dn_item.item_code)
+			):
+				delivered_bundle_qty = flt(dn_item.stock_qty)
+				if self.docstatus == 2:  # cancelled
+					delivered_bundle_qty = -delivered_bundle_qty
+
+				components = frappe.get_all(
+					"Product Bundle Item",
+					filters={"parent": dn_item.item_code},
+					fields=["item_code", "qty"],
+				)
+
+				if not components:
+					continue
+
+				pl_items = frappe.get_all(
+					"Pick List Item",
+					filters={
+						"parent": dn_item.against_pick_list,
+						"sales_order_item": dn_item.so_detail,
+					},
+					fields=["name", "item_code"],
+				)
+
+				for comp in components:
+					for pl_item in pl_items:
+						if pl_item.item_code == comp.item_code:
+							delivered_component_qty = delivered_bundle_qty * comp.qty
+							frappe.db.sql(
+								"""
+								UPDATE `tabPick List Item`
+								SET delivered_qty = delivered_qty + %s
+								WHERE name = %s
+							""",
+								(delivered_component_qty, pl_item.name),
+							)
+							break
+
 		for pick_list in pick_lists:
 			update_pick_list_status(pick_list)
 

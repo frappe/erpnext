@@ -1878,8 +1878,15 @@ def create_pick_list(source_name, target_doc=None):
 		for item in source_parent.items:
 			if source.parent_detail_docname == item.name:
 				picked_qty = flt(item.picked_qty) / (flt(item.conversion_factor) or 1)
-				pending_percent = (item.qty - max(picked_qty, item.delivered_qty)) / item.qty
-				target.qty = target.stock_qty = qty * pending_percent
+
+				if not item.qty:
+					target.qty = target.stock_qty = 0
+					return
+
+				pending_qty = item.qty - max(picked_qty, item.delivered_qty)
+
+				target.qty = qty * pending_qty
+				target.stock_qty = target.qty * (flt(source.conversion_factor) or 1.0)
 				return
 
 	def should_pick_order_item(item) -> bool:
@@ -1903,7 +1910,12 @@ def create_pick_list(source_name, target_doc=None):
 			},
 			"Sales Order Item": {
 				"doctype": "Pick List Item",
-				"field_map": {"parent": "sales_order", "name": "sales_order_item"},
+				"field_map": {
+					"parent": "sales_order",
+					"name": "sales_order_item",
+					"item_name": "item_name",
+					"warehouse": "warehouse",
+				},
 				"postprocess": update_item_quantity,
 				"condition": should_pick_order_item,
 			},

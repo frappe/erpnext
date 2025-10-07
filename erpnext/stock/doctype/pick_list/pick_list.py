@@ -500,11 +500,16 @@ class PickList(TransactionBase):
 		for item_doc in items:
 			item_code = item_doc.item_code
 
+			warehouses = from_warehouses
+			if item_doc.warehouse:
+				warehouses = [item_doc.warehouse]
+				warehouses.extend(get_descendants_of("Warehouse", item_doc.warehouse))
+
 			self.item_location_map.setdefault(
 				item_code,
 				get_available_item_locations(
 					item_code,
-					from_warehouses,
+					warehouses,
 					self.item_count_map.get(item_code),
 					self.company,
 					picked_item_details=picked_items_details.get(item_code),
