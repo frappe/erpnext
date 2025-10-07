@@ -247,50 +247,67 @@ class PayrollEntry(Document):
 			payable_amount = 0
 			multi_currency = 0
 			company_currency = erpnext.get_company_currency(self.company)
-
-			# Earnings (Debit)
-			for acc_cc, amount in earnings.items():
-				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
-				payable_amount += flt(amount, precision)
-				accounts.append(self.update_accounting_dimensions({
-					"account": acc_cc[0],
-					"debit_in_account_currency": flt(amt, precision),
-					"exchange_rate": flt(exchange_rate),
-					"cost_center": acc_cc[1] or self.cost_center,
-					"project": self.project
-				}, accounting_dimensions))
-
-			# Deductions (Credit)
-			for acc_cc, amount in deductions.items():
-				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
-				payable_amount -= flt(amount, precision)
-				accounts.append(self.update_accounting_dimensions({
-					"account": acc_cc[0],
-					"credit_in_account_currency": flt(amt, precision),
-					"exchange_rate": flt(exchange_rate),
-					"cost_center": acc_cc[1] or self.cost_center,
-					"project": self.project
-				}, accounting_dimensions))
-
-			# Payable amount split per employee
+			# Get all salary slips once
 			salary_slips = frappe.get_all(
 				"Salary Slip",
 				filters={"payroll_entry": self.name, "docstatus": 1},
 				fields=["name", "employee", "net_pay"]
 			)
-			for ss in salary_slips:
-				if flt(ss.net_pay) > 0:
-					exchange_rate, emp_amt = self.get_amount_and_exchange_rate_for_journal_entry(
-						payroll_payable_account, ss.net_pay, company_currency, currencies
+
+			# --- Earnings (Debit)
+			for acc_cc, amount in earnings.items():
+				# Split total amount equally or proportionally among employees
+				total_net_pay = sum(flt(ss.net_pay) for ss in salary_slips)
+				for ss in salary_slips:
+					emp_share = (flt(ss.net_pay) / total_net_pay) * flt(amount) if total_net_pay else 0
+					exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(
+						acc_cc[0], emp_share, company_currency, currencies
 					)
+					payable_amount += flt(emp_share, precision)
 					accounts.append(self.update_accounting_dimensions({
-						"account": payroll_payable_account,
-						"credit_in_account_currency": flt(emp_amt, precision),
+						"account": acc_cc[0],
+						"debit_in_account_currency": flt(amt, precision),
 						"exchange_rate": flt(exchange_rate),
-						"cost_center": self.cost_center,
+						"cost_center": acc_cc[1] or self.cost_center,
+						"project": self.project,
 						"party_type": "Employee",
 						"party": ss.employee
 					}, accounting_dimensions))
+
+			# --- Deductions (Credit)
+			for acc_cc, amount in deductions.items():
+				total_net_pay = sum(flt(ss.net_pay) for ss in salary_slips)
+				for ss in salary_slips:
+					emp_share = (flt(ss.net_pay) / total_net_pay) * flt(amount) if total_net_pay else 0
+					exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(
+						acc_cc[0], emp_share, company_currency, currencies
+					)
+					payable_amount -= flt(emp_share, precision)
+					accounts.append(self.update_accounting_dimensions({
+						"account": acc_cc[0],
+						"credit_in_account_currency": flt(amt, precision),
+						"exchange_rate": flt(exchange_rate),
+						"cost_center": acc_cc[1] or self.cost_center,
+						"project": self.project,
+						"party_type": "Employee",
+						"party": ss.employee
+					}, accounting_dimensions))
+
+			# --- Payable amount (Single Line, accumulated total)
+			total_net_pay = sum(flt(ss.net_pay) for ss in salary_slips if flt(ss.net_pay) > 0)
+
+			if total_net_pay > 0:
+				exchange_rate, emp_amt = self.get_amount_and_exchange_rate_for_journal_entry(
+					payroll_payable_account, total_net_pay, company_currency, currencies
+				)
+				accounts.append(self.update_accounting_dimensions({
+					"account": payroll_payable_account,
+					"credit_in_account_currency": flt(emp_amt, precision),
+					"exchange_rate": flt(exchange_rate),
+					"cost_center": self.cost_center
+				}, accounting_dimensions))
+
+
 
 			journal_entry.set("accounts", accounts)
 
