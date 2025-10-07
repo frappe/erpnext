@@ -1180,7 +1180,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
-	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
@@ -1211,13 +1211,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
-<<<<<<< HEAD
-		automatically_fetch_payment_terms(enable=0)
-
 	@change_settings("Stock Settings", {"allow_negative_stock": 1})
-=======
-	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 1})
->>>>>>> 3c70cbbaf8 (feat: dynamic due date in payment terms when fetched from order (#48864))
 	def test_neg_to_positive(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
