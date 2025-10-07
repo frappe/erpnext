@@ -661,7 +661,6 @@ def get_tax_details_query(doctype, tax_doctype):
 			taxes_and_charges.description,
 		)
 		.where(tax.parenttype == doctype)
-		.where(tax.docstatus == 1)
 	)
 
 	return query
