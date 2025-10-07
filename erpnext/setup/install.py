@@ -23,6 +23,7 @@ def after_install():
 	set_single_defaults()
 	create_print_setting_custom_fields()
 	create_marketgin_campagin_custom_fields()
+	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
 	create_incoterms()
@@ -137,6 +138,39 @@ def create_default_success_action():
 		if not frappe.db.exists("Success Action", success_action.get("ref_doctype")):
 			doc = frappe.get_doc(success_action)
 			doc.insert(ignore_permissions=True)
+
+
+def create_custom_company_links():
+	"""Add link fields to Company in Email Account and Communication.
+
+	These DocTypes are provided by the Frappe Framework but need to be associated
+	with a company in ERPNext to allow for multitenancy. I.e. one company should
+	not be able to access emails and communications from another company.
+	"""
+	create_custom_fields(
+		{
+			"Email Account": [
+				{
+					"label": _("Company"),
+					"fieldname": "company",
+					"fieldtype": "Link",
+					"options": "Company",
+					"insert_after": "email_id",
+				},
+			],
+			"Communication": [
+				{
+					"label": _("Company"),
+					"fieldname": "company",
+					"fieldtype": "Link",
+					"options": "Company",
+					"insert_after": "email_account",
+					"fetch_from": "email_account.company",
+					"read_only": 1,
+				},
+			],
+		},
+	)
 
 
 def add_company_to_session_defaults():
