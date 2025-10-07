@@ -89,7 +89,7 @@ def get_items_for_docs(parents, doctype):
 	additional_fields = []
 
 	if doctype in TAX_WITHHOLDING_DOCS:
-		additional_fields.append("apply_tds")
+		additional_fields.append(item.apply_tds)
 
 	return (
 		frappe.qb.from_(item)
@@ -113,7 +113,7 @@ def get_doc_details(parents, doctype):
 	inv = frappe.qb.DocType(doctype)
 	additional_fields = []
 	if doctype in TAX_WITHHOLDING_DOCS:
-		additional_fields.append("base_tax_withholding_net_total")
+		additional_fields.append(inv.base_tax_withholding_net_total)
 
 	return (
 		frappe.qb.from_(inv)
