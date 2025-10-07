@@ -721,19 +721,12 @@ erpnext.utils.update_child_items = function (opts) {
 									item_name: item_name,
 									bom_no: bom_no,
 								});
-								row.item_name = r.message.item_name;
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
 						}
 					},
 				});
 			},
-		},
-		{
-			fieldtype: "Data",
-			fieldname: "item_name",
-			label: __("Item Name"),
-			read_only: 1,
 		},
 		{
 			fieldtype: "Link",
