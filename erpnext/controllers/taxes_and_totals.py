@@ -1248,7 +1248,7 @@ def process_item_wise_tax_details(doc):
 		docs.append(tax_details)
 
 	bulk_insert("Item Wise Tax Detail", docs)
-	doc._updated_item_wise_tax_details = False
+	doc.update_item_wise_tax_details = False
 
 
 def validate_item_wise_tax_details(doc):

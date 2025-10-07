@@ -1,9 +1,7 @@
 {
  "actions": [],
- "allow_rename": 1,
  "creation": "2025-07-17 12:24:05.609186",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "item_row",
@@ -52,7 +50,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-23 03:39:41.632664",
+ "modified": "2025-09-26 15:54:19.750714",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Item Wise Tax Detail",
