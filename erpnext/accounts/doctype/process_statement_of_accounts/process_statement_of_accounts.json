@@ -70,7 +70,7 @@
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Weekly\nMonthly\nQuarterly"
+   "options": "Daily\nWeekly\nBiweekly\nMonthly\nQuarterly"
   },
   {
    "fieldname": "company",
@@ -417,7 +417,7 @@
   }
  ],
  "links": [],
- "modified": "2025-10-07 11:17:05.444394",
+ "modified": "2025-10-07 12:19:20.719898",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
