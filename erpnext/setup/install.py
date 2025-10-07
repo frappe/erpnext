@@ -8,7 +8,7 @@ from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.utils import cint
 
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
-from erpnext.setup.utils import _
+from erpnext.setup.utils import identity as _
 
 from .default_success_action import get_default_success_action
 
