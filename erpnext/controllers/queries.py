@@ -6,7 +6,7 @@ import json
 from collections import OrderedDict, defaultdict
 
 import frappe
-from frappe import qb, scrub
+from frappe import _, qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
 from frappe.query_builder import Criterion, CustomFunction
@@ -207,26 +207,60 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
+	# Get party and its group for item rules
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
 			party = filters.get("customer") or filters.get("supplier")
+			party_doctype = "Customer" if filters.get("customer") else "Supplier"
+			group_field = "customer_group" if party_doctype == "Customer" else "supplier_group"
+
+			if party and not frappe.db.exists(party_doctype, party):
+				frappe.throw(_("Invalid {0}: {1}").format(party_doctype, party))
+
+			group_name = frappe.db.get_value(party_doctype, party, group_field) or None
+
+			parties_to_check = [party]
+			if group_name:
+				parties_to_check.append(group_name)
+
+			party_types = []
+			if filters.get("customer"):
+				party_types.extend(["Customer", "Customer Group"])
+			else:
+				party_types.extend(["Supplier", "Supplier Group"])
+
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
-				filters={"party": party},
-				fields=["restrict_based_on", "based_on_value"],
+				filters={
+					"party": ["in", parties_to_check],
+					"party_type": ["in", party_types],
+				},
+				fields=["restrict_based_on", "based_on_value", "inclusion_type"],
 			)
 
-			filters_dict = {}
+			# Apply include or exclude filters based on rules
+			include_filters = {}
+			exclude_filters = {}
 			for rule in item_rules_list:
-				if rule["restrict_based_on"] == "Item":
-					rule["restrict_based_on"] = "name"
-				filters_dict[rule.restrict_based_on] = []
+				r_based = rule["restrict_based_on"]
+				if r_based == "Item":
+					r_based = "name"
 
-			for rule in item_rules_list:
-				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
+				if rule.get("inclusion_type", "Inclusive") == "Exclusive":
+					exclude_filters.setdefault(r_based, []).append(rule["based_on_value"])
+				else:
+					include_filters.setdefault(r_based, []).append(rule["based_on_value"])
 
-			for filter in filters_dict:
-				filters[scrub(filter)] = ["in", filters_dict[filter]]
+			for d in (include_filters, exclude_filters):
+				for k, v in list(d.items()):
+					d[k] = list(dict.fromkeys(v))
+
+			for r_based, values in include_filters.items():
+				filters[scrub(r_based)] = ["in", values]
+
+			for r_based, values in exclude_filters.items():
+				if r_based not in include_filters:
+					filters[scrub(r_based)] = ["not in", values]
 
 			if filters.get("customer"):
 				del filters["customer"]
