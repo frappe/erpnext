@@ -488,6 +488,21 @@ $.extend(erpnext.item, {
 				},
 			};
 		});
+
+		let fields = ["purchase_expense_account", "purchase_expense_contra_account", "default_cogs_account"];
+
+		fields.forEach((field) => {
+			frm.set_query(field, "item_defaults", (doc, cdt, cdn) => {
+				let row = locals[cdt][cdn];
+				return {
+					filters: {
+						company: row.company,
+						root_type: "Expense",
+						is_group: 0,
+					},
+				};
+			});
+		});
 	},
 
 	make_dashboard: function (frm) {
@@ -514,6 +529,16 @@ $.extend(erpnext.item, {
 			__("Add / Edit Prices"),
 			function () {
 				frappe.set_route("List", "Item Price", { item_code: frm.doc.name });
+			},
+			__("Actions")
+		);
+
+		frm.add_custom_button(
+			__("Make Lead Time"),
+			function () {
+				frm.make_new("Item Lead Time", {
+					item_code: frm.doc.name,
+				});
 			},
 			__("Actions")
 		);

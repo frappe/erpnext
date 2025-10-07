@@ -92,6 +92,7 @@ frappe.ui.form.on("Material Request", {
 
 	company: function (frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		erpnext.utils.set_letter_head(frm);
 	},
 
 	onload_post_render: function (frm) {

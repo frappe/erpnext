@@ -25,7 +25,7 @@ from frappe.utils.caching import redis_cache
 from frappe.utils.nestedset import get_ancestors_of
 from frappe.utils.safe_exec import get_safe_globals
 
-from erpnext.support.doctype.issue.issue import get_holidays
+from erpnext.support.doctype.issue.issue import calculate_first_response_time, get_holidays
 
 
 class ServiceLevelAgreement(Document):
@@ -552,6 +552,8 @@ def handle_status_change(doc, apply_sla_for_resolution):
 	def set_first_response():
 		if doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
 			doc.first_responded_on = now_time
+			if doc.meta.has_field("first_response_time"):
+				doc.first_response_time = calculate_first_response_time(doc, doc.first_responded_on)
 			if get_datetime(doc.get("first_responded_on")) > get_datetime(doc.get("response_by")):
 				record_assigned_users_on_failure(doc)
 

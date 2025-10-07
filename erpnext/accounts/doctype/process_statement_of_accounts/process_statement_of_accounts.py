@@ -67,11 +67,13 @@ class ProcessStatementOfAccounts(Document):
 		pdf_name: DF.Data | None
 		posting_date: DF.Date | None
 		primary_mandatory: DF.Check
+		print_format: DF.Link | None
 		project: DF.TableMultiSelect[PSOAProject]
 		report: DF.Literal["General Ledger", "Accounts Receivable"]
 		sales_partner: DF.Link | None
 		sales_person: DF.Link | None
 		sender: DF.Link | None
+		show_future_payments: DF.Check
 		show_net_values_in_party_account: DF.Check
 		show_remarks: DF.Check
 		start_date: DF.Date | None
@@ -107,6 +109,25 @@ class ProcessStatementOfAccounts(Document):
 			if self.start_date and getdate(self.start_date) >= getdate(today()):
 				self.to_date = self.start_date
 				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
+
+		if self.print_format:
+			pf = frappe.db.get_value(
+				"Print Format",
+				self.print_format,
+				["print_format_type", "print_format_for", "report", "disabled"],
+				as_dict=True,
+			)
+			if not pf:
+				frappe.throw(title=_("Invalid Print Format"), msg=_("Selected Print Format does not exist."))
+			if pf.print_format_type != "Jinja":
+				frappe.throw(title=_("Invalid Print Format"), msg=_("Print Format Type should be Jinja."))
+			if pf.print_format_for != "Report" or pf.report != self.report or pf.disabled:
+				frappe.throw(
+					title=_("Invalid Print Format"),
+					msg=_(
+						"Print Format must be an enabled Report Print Format matching the selected Report."
+					),
+				)
 
 	def validate_account(self):
 		if not self.account:
@@ -266,6 +287,7 @@ def get_ar_filters(doc, entry):
 		"sales_person": doc.sales_person if doc.sales_person else None,
 		"territory": doc.territory if doc.territory else None,
 		"based_on_payment_terms": doc.based_on_payment_terms,
+		"show_future_payments": doc.show_future_payments,
 		"report_name": "Accounts Receivable",
 		"ageing_based_on": doc.ageing_based_on,
 		"range1": 30,
@@ -287,6 +309,10 @@ def get_html(doc, filters, entry, col, res, ageing):
 	# fetching custom print format for Process Statement of Accounts
 	if process_soa_html and process_soa_html.get(doc.report):
 		template_path = process_soa_html[doc.report][-1]
+
+	if doc.print_format:
+		custom_html, custom_css = frappe.db.get_value("Print Format", doc.print_format, ["html", "css"])
+		template_path = f"<style>{custom_css}</style> {custom_html}"
 
 	if doc.letter_head:
 		from frappe.www.printview import get_letter_head
@@ -550,7 +576,7 @@ def send_auto_email():
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
 		filters={"enable_auto_email": 1},
-		or_filters={"to_date": format_date(today()), "posting_date": format_date(today())},
+		or_filters={"to_date": today(), "posting_date": today()},
 	)
 	for entry in selected:
 		send_emails(entry.name, from_scheduler=True)

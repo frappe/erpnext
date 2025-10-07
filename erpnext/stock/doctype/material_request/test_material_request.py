@@ -916,6 +916,23 @@ class TestMaterialRequest(IntegrationTestCase):
 		for perm in permissions:
 			perm.delete()
 
+	def test_manufacture_type_status_over_wo(self):
+		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
+
+		mr = make_material_request(
+			item_code="_Test FG Item", material_request_type="Manufacture", do_not_submit=False
+		)
+
+		work_order = raise_work_orders(mr.name)
+		wo = frappe.get_doc("Work Order", work_order[0])
+		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
+		wo.submit()
+
+		mr.reload()
+
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.status, "Ordered")
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):

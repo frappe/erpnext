@@ -26,7 +26,7 @@ erpnext.accounts.bank_reconciliation.NumberCardManager = class NumberCardManager
 				currency: this.currency,
 			},
 			{
-				value: this.bank_statement_closing_balance - this.cleared_balance,
+				value: flt(this.bank_statement_closing_balance) - flt(this.cleared_balance),
 				label: __("Difference"),
 				datatype: "Currency",
 				currency: this.currency,

@@ -1,10 +1,12 @@
 import datetime
+import json
 from collections import defaultdict
 
 import frappe
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import flt, nowtime
 from pypika import Order
+from pypika.functions import Coalesce
 
 from erpnext.deprecation_dumpster import deprecated
 
@@ -52,6 +54,11 @@ class DeprecatedSerialNoValuation:
 
 		# get rate from serial nos within same company
 		incoming_values = 0.0
+		posting_datetime = self.sle.posting_datetime
+
+		if not posting_datetime and self.sle.posting_date:
+			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+
 		for serial_no in serial_nos:
 			sn_details = frappe.db.get_value("Serial No", serial_no, ["purchase_rate", "company"], as_dict=1)
 			if sn_details and sn_details.purchase_rate and sn_details.company == self.sle.company:
@@ -76,7 +83,7 @@ class DeprecatedSerialNoValuation:
 					& (table.actual_qty > 0)
 					& (table.is_cancelled == 0)
 					& table.posting_datetime
-					<= get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+					<= posting_datetime
 				)
 				.orderby(table.posting_datetime, order=Order.desc)
 				.limit(1)
@@ -131,11 +138,8 @@ class DeprecatedBatchNoValuation:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
 		timestamp_condition = None
-		if self.sle.posting_date:
-			if self.sle.posting_time is None:
-				self.sle.posting_time = nowtime()
-
-			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+		if self.sle.posting_datetime:
+			posting_datetime = self.sle.posting_datetime
 			if not self.sle.creation:
 				posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
 
@@ -160,6 +164,7 @@ class DeprecatedBatchNoValuation:
 				& (sle.batch_no.isnotnull())
 				& (sle.is_cancelled == 0)
 			)
+			.for_update()
 			.groupby(sle.batch_no)
 		)
 
@@ -224,7 +229,16 @@ class DeprecatedBatchNoValuation:
 		"No known instructions.",
 	)
 	def set_balance_value_for_non_batchwise_valuation_batches(self):
-		self.last_sle = self.get_last_sle_for_non_batch()
+		if hasattr(self, "prev_sle"):
+			self.last_sle = self.prev_sle
+		else:
+			self.last_sle = self.get_last_sle_for_non_batch()
+
+		if self.last_sle and self.last_sle.stock_queue:
+			self.stock_queue = self.last_sle.stock_queue
+			if isinstance(self.stock_queue, str):
+				self.stock_queue = json.loads(self.stock_queue) or []
+
 		self.set_balance_value_from_sl_entries()
 		self.set_balance_value_from_bundle()
 
@@ -240,7 +254,11 @@ class DeprecatedBatchNoValuation:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
 
-		posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+		posting_datetime = self.sle.posting_datetime
+
+		if not posting_datetime and self.sle.posting_date:
+			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+
 		if not self.sle.creation:
 			posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
 
@@ -266,6 +284,7 @@ class DeprecatedBatchNoValuation:
 				& (sle.is_cancelled == 0)
 				& (sle.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
+			.for_update()
 			.where(timestamp_condition)
 			.groupby(sle.batch_no)
 		)
@@ -287,7 +306,10 @@ class DeprecatedBatchNoValuation:
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
-		posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+		posting_datetime = self.sle.posting_datetime
+		if not posting_datetime and self.sle.posting_date:
+			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+
 		if not self.sle.creation:
 			posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
 
@@ -303,6 +325,7 @@ class DeprecatedBatchNoValuation:
 			.select(
 				sle.stock_value,
 				sle.qty_after_transaction,
+				sle.stock_queue,
 			)
 			.where(
 				(sle.item_code == self.sle.item_code)
@@ -312,6 +335,7 @@ class DeprecatedBatchNoValuation:
 			.where(timestamp_condition)
 			.orderby(sle.posting_datetime, order=Order.desc)
 			.orderby(sle.creation, order=Order.desc)
+			.for_update()
 			.limit(1)
 		)
 
@@ -319,10 +343,7 @@ class DeprecatedBatchNoValuation:
 			query = query.where(sle.name != self.sle.name)
 
 		if self.sle.serial_and_batch_bundle:
-			query = query.where(
-				(sle.serial_and_batch_bundle != self.sle.serial_and_batch_bundle)
-				| (sle.serial_and_batch_bundle.isnull())
-			)
+			query = query.where(Coalesce(sle.serial_and_batch_bundle, "") != self.sle.serial_and_batch_bundle)
 
 		data = query.run(as_dict=True)
 
@@ -335,19 +356,22 @@ class DeprecatedBatchNoValuation:
 		"No known instructions.",
 	)
 	def set_balance_value_from_bundle(self) -> None:
+		from erpnext.stock.utils import get_combine_datetime
+
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
-		timestamp_condition = CombineDatetime(bundle.posting_date, bundle.posting_time) < CombineDatetime(
-			self.sle.posting_date, self.sle.posting_time
-		)
+		posting_datetime = self.sle.posting_datetime
+		if not posting_datetime and self.sle.posting_date:
+			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+
+		timestamp_condition = bundle.posting_datetime < posting_datetime
 
 		if self.sle.creation:
-			timestamp_condition |= (
-				CombineDatetime(bundle.posting_date, bundle.posting_time)
-				== CombineDatetime(self.sle.posting_date, self.sle.posting_time)
-			) & (bundle.creation < self.sle.creation)
+			timestamp_condition |= (bundle.posting_datetime == posting_datetime) & (
+				bundle.creation < self.sle.creation
+			)
 
 		query = (
 			frappe.qb.from_(bundle)
@@ -369,6 +393,7 @@ class DeprecatedBatchNoValuation:
 				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
 				& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
+			.for_update()
 			.where(timestamp_condition)
 			.groupby(bundle_child.batch_no)
 		)

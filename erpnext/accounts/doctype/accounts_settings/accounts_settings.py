@@ -49,6 +49,7 @@ class AccountsSettings(Document):
 		enable_immutable_ledger: DF.Check
 		enable_party_matching: DF.Check
 		exchange_gain_loss_posting_date: DF.Literal["Invoice", "Payment", "Reconciliation Date"]
+		fetch_valuation_rate_for_internal_transaction: DF.Check
 		frozen_accounts_modifier: DF.Link | None
 		general_ledger_remarks_length: DF.Int
 		ignore_account_closing_balance: DF.Check
@@ -73,7 +74,7 @@ class AccountsSettings(Document):
 		submit_journal_entries: DF.Check
 		unlink_advance_payment_on_cancelation_of_order: DF.Check
 		unlink_payment_on_cancellation_of_invoice: DF.Check
-		use_new_budget_controller: DF.Check
+		use_legacy_budget_controller: DF.Check
 	# end: auto-generated types
 
 	def validate(self):

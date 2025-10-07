@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
@@ -10,6 +12,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt
 
+from erpnext.accounts.party import get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
 from erpnext.controllers.selling_controller import SellingController
 
@@ -827,6 +830,11 @@ def get_returned_qty_map(delivery_note):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	doc = frappe.get_doc("Delivery Note", source_name)
 
 	to_make_invoice_qty_map = {}
@@ -879,6 +887,11 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 		return pending_qty
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	doc = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -901,6 +914,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 				"filter": lambda d: get_pending_qty(d) <= 0
 				if not doc.get("is_return")
 				else get_pending_qty(d) > 0,
+				"condition": select_item,
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
@@ -920,8 +934,25 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 	automatically_fetch_payment_terms = cint(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
-	if automatically_fetch_payment_terms and not doc.is_return:
-		doc.set_payment_schedule()
+
+	if not doc.is_return:
+		so, doctype, fieldname = doc.get_order_details()
+		if (
+			doc.linked_order_has_payment_terms(so, fieldname, doctype)
+			and not automatically_fetch_payment_terms
+		):
+			payment_terms_template = frappe.db.get_value(doctype, so, "payment_terms_template")
+			doc.payment_terms_template = payment_terms_template
+			doc.due_date = get_due_date(
+				doc.posting_date,
+				"Customer",
+				doc.customer,
+				doc.company,
+				template_name=doc.payment_terms_template,
+			)
+
+		elif automatically_fetch_payment_terms:
+			doc.set_payment_schedule()
 
 	return doc
 

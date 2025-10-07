@@ -1828,7 +1828,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		wo.reload()
 		so.reload()
 		self.assertEqual(so.items[0].work_order_qty, wo.produced_qty)
-		self.assertEqual(mr.status, "Manufactured")
+		self.assertEqual(mr.status, "Ordered")
 
 	def test_sales_order_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
@@ -2567,6 +2567,30 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		po.items[0].rate = 100
 		po.submit()
 		self.assertEqual(po.taxes[0].tax_amount, 2)
+
+	def test_pending_quantity_after_update_item_during_invoice_creation(self):
+		so = make_sales_order(qty=30, rate=100)
+
+		si1 = make_sales_invoice(so.name)
+		si1.get("items")[0].qty = 10
+		si1.insert()
+		si1.submit()
+
+		first_item_of_so = so.get("items")[0]
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": first_item_of_so.item_code,
+					"rate": 1000,
+					"qty": first_item_of_so.qty,
+					"docname": first_item_of_so.name,
+				},
+			]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
+
+		si2 = make_sales_invoice(so.name)
+		self.assertEqual(si2.items[0].qty, 20)
 
 
 def automatically_fetch_payment_terms(enable=1):

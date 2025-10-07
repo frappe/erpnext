@@ -12,6 +12,9 @@ from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	combine_datetime,
+	get_auto_batch_nos,
+	get_available_serial_nos,
 	get_voucher_wise_serial_batch_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -52,8 +55,41 @@ class SubcontractingController(StockController):
 		if self.doctype in ["Subcontracting Order", "Subcontracting Receipt"]:
 			self.validate_items()
 			self.create_raw_materials_supplied()
+			self.set_valuation_rate_for_rm()
 		else:
 			super().validate()
+
+	def set_valuation_rate_for_rm(self):
+		rate_changed = False
+		if self.doctype == "Subcontracting Receipt":
+			for row in self.supplied_items:
+				kwargs = frappe._dict(
+					{
+						"item_code": row.rm_item_code,
+						"warehouse": self.supplier_warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"qty": flt(row.consumed_qty) * (-1 if not self.is_return else 1),
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"company": self.company,
+						"serial_and_batch_bundle": row.serial_and_batch_bundle,
+						"voucher_detail_no": row.name,
+						"batch_no": row.batch_no,
+						"serial_no": row.serial_no,
+						"use_serial_batch_fields": row.use_serial_batch_fields,
+					}
+				)
+
+				rate = get_incoming_rate(kwargs)
+				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
+				if flt(rate, precision) != flt(row.rate, precision):
+					row.rate = rate
+					row.amount = flt(row.consumed_qty) * flt(rate)
+					rate_changed = True
+
+		if rate_changed:
+			self.calculate_items_qty_and_amount()
 
 	def validate_rejected_warehouse(self):
 		for item in self.get("items"):
@@ -537,8 +573,7 @@ class SubcontractingController(StockController):
 					"qty": qty,
 					"serial_nos": serial_nos,
 					"batches": batches,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": "Subcontracting Receipt",
 					"do_not_submit": True,
 					"type_of_transaction": "Outward" if qty > 0 else "Inward",
@@ -616,6 +651,64 @@ class SubcontractingController(StockController):
 				self.set_rate_for_supplied_items(rm_obj, item_row)
 			elif self.backflush_based_on == "BOM":
 				self.update_rate_for_supplied_items()
+				self.set_batch_for_supplied_items()
+
+	def set_batch_for_supplied_items(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+		from erpnext.stock.get_item_details import get_filtered_serial_nos
+
+		for row in self.supplied_items:
+			item_details = frappe.get_cached_value(
+				"Item", row.rm_item_code, ["has_batch_no", "has_serial_no"], as_dict=1
+			)
+
+			if not item_details.has_batch_no and not item_details.has_serial_no:
+				continue
+
+			if not row.use_serial_batch_fields:
+				continue
+
+			kwargs = frappe._dict(
+				{
+					"item_code": row.rm_item_code,
+					"warehouse": self.supplier_warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time,
+					"qty": flt(row.consumed_qty),
+				}
+			)
+
+			if item_details.has_serial_no and not row.serial_and_batch_bundle and not row.serial_no:
+				serial_nos = get_available_serial_nos(kwargs)
+				if serial_nos:
+					serial_nos = [sn.get("serial_no") for sn in serial_nos]
+					serial_nos = get_filtered_serial_nos(serial_nos, self, "supplied_items")
+					row.serial_no = "\n".join(serial_nos)
+
+			elif item_details.has_batch_no and not row.serial_and_batch_bundle and not row.batch_no:
+				batches = get_auto_batch_nos(kwargs)
+				if batches:
+					consumed_qty = row.consumed_qty
+					for index, d in enumerate(batches):
+						if consumed_qty <= 0:
+							break
+
+						if index == 0:
+							row.batch_no = d.get("batch_no")
+							row.consumed_qty = d.get("qty")
+							consumed_qty -= d.get("qty")
+						else:
+							new_row = self.append("supplied_items", {})
+							new_row.update(frappe.copy_doc(row).as_dict())
+							new_row.update(
+								{
+									"consumed_qty": d.get("qty"),
+									"batch_no": d.get("batch_no"),
+									"rate": row.rate,
+									"amount": flt(d.get("qty")) * flt(row.rate),
+								}
+							)
+							consumed_qty -= d.get("qty")
 
 	def update_rate_for_supplied_items(self):
 		if self.doctype != "Subcontracting Receipt":

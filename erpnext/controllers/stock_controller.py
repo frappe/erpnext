@@ -27,6 +27,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	combine_datetime,
 	get_type_of_transaction,
 )
 from erpnext.stock.stock_ledger import get_items_to_be_repost
@@ -267,8 +268,7 @@ class StockController(AccountsController):
 			):
 				bundle_details = {
 					"item_code": row.get("rm_item_code") or row.item_code,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"voucher_detail_no": row.name,
@@ -664,7 +664,9 @@ class StockController(AccountsController):
 						).format(wh, self.company)
 					)
 
-		return process_gl_map(gl_list, precision=precision)
+		return process_gl_map(
+			gl_list, precision=precision, from_repost=frappe.flags.through_repost_item_valuation
+		)
 
 	def get_debit_field_precision(self):
 		if not frappe.flags.debit_field_precision:
@@ -1069,10 +1071,13 @@ class StockController(AccountsController):
 		from erpnext.stock.stock_ledger import make_sl_entries
 
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
-		update_batch_qty(self.doctype, self.name, via_landed_cost_voucher=via_landed_cost_voucher)
+		update_batch_qty(
+			self.doctype, self.name, self.docstatus, via_landed_cost_voucher=via_landed_cost_voucher
+		)
 
-	def make_gl_entries_on_cancel(self):
-		cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+	def make_gl_entries_on_cancel(self, from_repost=False):
+		if not from_repost:
+			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 		if frappe.db.sql(
 			"""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""",
@@ -1961,6 +1966,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 		row.warehouse = kwargs.warehouse
 
+	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()
 	bundle_doc.flags.ignore_permissions = True
 	bundle_doc.flags.ignore_validate = True

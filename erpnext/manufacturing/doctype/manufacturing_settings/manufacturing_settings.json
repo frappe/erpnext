@@ -24,6 +24,9 @@
   "overproduction_percentage_for_sales_order",
   "column_break_16",
   "overproduction_percentage_for_work_order",
+  "section_break_xhtl",
+  "transfer_extra_materials_percentage",
+  "column_break_kemp",
   "job_card_section",
   "add_corrective_operation_cost_in_finished_good_valuation",
   "enforce_time_logs",
@@ -243,13 +246,28 @@
    "fieldname": "enforce_time_logs",
    "fieldtype": "Check",
    "label": "Enforce Time Logs"
+  },
+  {
+   "fieldname": "section_break_xhtl",
+   "fieldtype": "Section Break",
+   "label": "Extra Material Transfer"
+  },
+  {
+   "fieldname": "column_break_kemp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The user will be able to transfer additional materials from the store to the Work in Progress (WIP) warehouse.",
+   "fieldname": "transfer_extra_materials_percentage",
+   "fieldtype": "Percent",
+   "label": "Transfer Extra Raw Materials to WIP (%)"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-16 11:23:16.916512",
+ "modified": "2025-09-08 19:48:31.726126",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

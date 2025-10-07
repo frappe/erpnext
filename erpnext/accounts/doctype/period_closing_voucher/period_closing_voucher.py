@@ -75,6 +75,17 @@ class PeriodClosingVoucher(AccountsController):
 			return
 
 		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
+		previous_fiscal_year_closed = frappe.db.exists(
+			"Period Closing Voucher",
+			{
+				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
+				"docstatus": 1,
+				"company": self.company,
+			},
+		)
+		if previous_fiscal_year_closed:
+			return
+
 		gle_exists_in_previous_year = frappe.db.exists(
 			"GL Entry",
 			{
@@ -86,16 +97,7 @@ class PeriodClosingVoucher(AccountsController):
 		if not gle_exists_in_previous_year:
 			return
 
-		previous_fiscal_year_closed = frappe.db.exists(
-			"Period Closing Voucher",
-			{
-				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
-				"docstatus": 1,
-				"company": self.company,
-			},
-		)
-		if not previous_fiscal_year_closed:
-			frappe.throw(_("Previous Year is not closed, please close it first"))
+		frappe.throw(_("Previous Year is not closed, please close it first"))
 
 	def block_if_future_closing_voucher_exists(self):
 		future_closing_voucher = self.get_future_closing_voucher()

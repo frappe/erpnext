@@ -83,6 +83,8 @@
   "actual_qty",
   "column_break_jpky",
   "company_total_stock",
+  "sales_order_schedule_section",
+  "add_schedule",
   "manufacturing_section_section",
   "bom_no",
   "planning_section",
@@ -965,18 +967,29 @@
    "label": "Project",
    "options": "Project",
    "search_index": 1
+  },
+  {
+   "fieldname": "sales_order_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Sales Order Schedule"
+  },
+  {
+   "fieldname": "add_schedule",
+   "fieldtype": "Button",
+   "label": "Add Schedule"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-02-28 09:45:43.934947",
+ "modified": "2025-08-21 17:01:54.269105",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

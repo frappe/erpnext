@@ -167,7 +167,7 @@ class Account(NestedSet):
 			if par.root_type:
 				self.root_type = par.root_type
 
-		if self.is_group:
+		if cint(self.is_group):
 			db_value = self.get_doc_before_save()
 			if db_value:
 				if self.report_type != db_value.report_type:
@@ -210,7 +210,7 @@ class Account(NestedSet):
 		if doc_before_save and not doc_before_save.parent_account:
 			throw(_("Root cannot be edited."), RootNotEditable)
 
-		if not self.parent_account and not self.is_group:
+		if not self.parent_account and not cint(self.is_group):
 			throw(_("The root account {0} must be a group").format(frappe.bold(self.name)))
 
 	def validate_root_company_and_sync_account_to_children(self):
@@ -259,7 +259,7 @@ class Account(NestedSet):
 
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction cannot be converted to ledger"))
-		elif self.is_group:
+		elif cint(self.is_group):
 			if self.account_type and not self.flags.exclude_account_type_check:
 				throw(_("Cannot covert to Group because Account Type is selected."))
 		elif self.check_if_child_exists():
@@ -302,7 +302,9 @@ class Account(NestedSet):
 			self.account_currency = frappe.get_cached_value("Company", self.company, "default_currency")
 			self.currency_explicitly_specified = False
 
-		gl_currency = frappe.db.get_value("GL Entry", {"account": self.name}, "account_currency")
+		gl_currency = frappe.db.get_value(
+			"GL Entry", {"account": self.name, "is_cancelled": 0}, "account_currency"
+		)
 
 		if gl_currency and self.account_currency != gl_currency:
 			if frappe.db.get_value("GL Entry", {"account": self.name}):

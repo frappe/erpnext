@@ -316,9 +316,12 @@ class TransactionBase(StatusUpdater):
 				setattr(item_obj, k, v)
 
 	def handle_internal_parties(self, item_obj: object, item_details: dict) -> None:
+		fetch_valuation_rate_for_internal_transaction = cint(
+			frappe.get_single_value("Accounts Settings", "fetch_valuation_rate_for_internal_transaction")
+		)
 		if (
 			self.get("is_internal_customer") or self.get("is_internal_supplier")
-		) and self.represents_company == self.company:
+		) and fetch_valuation_rate_for_internal_transaction:
 			args = frappe._dict(
 				{
 					"item_code": item_obj.item_code,

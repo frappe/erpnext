@@ -305,6 +305,7 @@ class TestItem(IntegrationTestCase):
 						"company": "_Test Company",
 						"default_warehouse": "_Test Warehouse 2 - _TC",  # no override
 						"expense_account": "_Test Account Stock Expenses - _TC",  # override brand default
+						"default_cogs_account": "_Test Account Cost for Goods Sold - _TC",  # override brand default
 						"buying_cost_center": "_Test Write Off Cost Center - _TC",  # override item group default
 					}
 				],
@@ -315,7 +316,7 @@ class TestItem(IntegrationTestCase):
 			"item_code": "Test Item With Defaults",
 			"warehouse": "_Test Warehouse 2 - _TC",  # from item
 			"income_account": "_Test Account Sales - _TC",  # from brand
-			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",  # from item
 			"cost_center": "_Test Cost Center 2 - _TC",  # from item group
 		}
 		sales_item_details = get_item_details(

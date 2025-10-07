@@ -4171,6 +4171,36 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		self.assertTrue(sles)
 
+	def test_validate_recreate_stock_ledgers_for_sn_item(self):
+		item_code = "Test SN Item for Recreate Stock Ledgers"
+		make_item(item_code, {"has_serial_no": 1, "serial_no_series": "SN-TRSLR-.#####"})
+
+		pr = make_purchase_receipt(item_code=item_code, qty=10, rate=100)
+		pr.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": pr.doctype, "voucher_no": pr.name},
+			pluck="name",
+		)
+
+		self.assertTrue(sles)
+
+		repost_doc = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Transaction",
+				"voucher_type": pr.doctype,
+				"voucher_no": pr.name,
+				"posting_date": pr.posting_date,
+				"posting_time": pr.posting_time,
+				"company": pr.company,
+				"recreate_stock_ledgers": 1,
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, repost_doc.save)
+
 	def test_internal_pr_qty_change_only_single_batch(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -4384,6 +4414,69 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		)
 
 		self.assertEqual(srbnb_cost, 1000)
+
+	def test_purchase_expense_account(self):
+		item = "Test Item with Purchase Expense Account"
+		make_item(item, {"is_stock_item": 1})
+		company = "_Test Company with perpetual inventory"
+
+		expense_account = "_Test Account Purchase Expense - TCP1"
+		expense_contra_account = "_Test Account Purchase Contra Expense - TCP1"
+		if not frappe.db.exists("Account", expense_account):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Account Purchase Expense",
+					"parent_account": "Stock Expenses - TCP1",
+					"company": company,
+					"is_group": 0,
+					"root_type": "Expense",
+				}
+			).insert()
+
+		if not frappe.db.exists("Account", expense_contra_account):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Account Purchase Contra Expense",
+					"parent_account": "Stock Expenses - TCP1",
+					"company": company,
+					"is_group": 0,
+					"root_type": "Expense",
+				}
+			).insert()
+
+		item_doc = frappe.get_doc("Item", item)
+		item_doc.append(
+			"item_defaults",
+			{
+				"company": company,
+				"default_warehouse": "Stores - TCP1",
+				"purchase_expense_account": expense_account,
+				"purchase_expense_contra_account": expense_contra_account,
+			},
+		)
+
+		item_doc.save()
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=10,
+			rate=100,
+			company=company,
+			warehouse="Stores - TCP1",
+		)
+
+		gl_entries = get_gl_entries(pr.doctype, pr.name)
+		accounts = [d.account for d in gl_entries]
+		self.assertTrue(expense_account in accounts)
+		self.assertTrue(expense_contra_account in accounts)
+
+		for row in gl_entries:
+			if row.account == expense_account:
+				self.assertEqual(row.debit, 1000)
+			if row.account == expense_contra_account:
+				self.assertEqual(row.credit, 1000)
 
 
 def prepare_data_for_internal_transfer():

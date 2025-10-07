@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -350,7 +352,7 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-def make_sales_order(source_name: str, target_doc=None):
+def make_sales_order(source_name: str, target_doc=None, args=None):
 	if not frappe.db.get_singles_value(
 		"Selling Settings", "allow_sales_order_creation_for_expired_quotation"
 	):
@@ -362,10 +364,15 @@ def make_sales_order(source_name: str, target_doc=None):
 		):
 			frappe.throw(_("Validity period of this quotation has ended."))
 
-	return _make_sales_order(source_name, target_doc)
+	return _make_sales_order(source_name, target_doc, args=args)
 
 
-def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	customer = _make_customer(source_name, ignore_permissions)
 	ordered_items = get_ordered_items(source_name)
 
@@ -433,6 +440,11 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		# Simple row
 		return True
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	doclist = get_mapped_doc(
 		"Quotation",
 		source_name,
@@ -442,7 +454,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"doctype": "Sales Order Item",
 				"field_map": {"parent": "prevdoc_docname", "name": "quotation_item"},
 				"postprocess": update_item,
-				"condition": can_map_row,
+				"condition": lambda d: can_map_row(d) and select_item(d),
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
@@ -479,11 +491,16 @@ def set_expired_status():
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None):
-	return _make_sales_invoice(source_name, target_doc)
+def make_sales_invoice(source_name, target_doc=None, args=None):
+	return _make_sales_invoice(source_name, target_doc, args=args)
 
 
-def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	customer = _make_customer(source_name, ignore_permissions)
 
 	def set_missing_values(source, target):
@@ -499,6 +516,11 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.cost_center = None
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	doclist = get_mapped_doc(
 		"Quotation",
 		source_name,
@@ -507,7 +529,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"Quotation Item": {
 				"doctype": "Sales Invoice Item",
 				"postprocess": update_item,
-				"condition": lambda row: not row.is_alternative,
+				"condition": lambda row: not row.is_alternative and select_item(row),
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},

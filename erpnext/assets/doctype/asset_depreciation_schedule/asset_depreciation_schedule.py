@@ -86,7 +86,23 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 				)
 
 	def on_submit(self):
+		self.validate_asset()
 		self.db_set("status", "Active")
+
+	def validate_asset(self):
+		asset = frappe.get_doc("Asset", self.asset)
+		if not asset.calculate_depreciation:
+			frappe.throw(
+				_("Asset {0} is not set to calculate depreciation.").format(
+					get_link_to_form("Asset", self.asset)
+				)
+			)
+		if asset.docstatus != 1:
+			frappe.throw(
+				_("Asset {0} is not submitted. Please submit the asset before proceeding.").format(
+					get_link_to_form("Asset", self.asset)
+				)
+			)
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
@@ -96,6 +112,13 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 	def cancel_depreciation_entries(self):
 		for d in self.get("depreciation_schedule"):
 			if d.journal_entry:
+				je_status = frappe.db.get_value("Journal Entry", d.journal_entry, "docstatus")
+				if je_status == 0:
+					frappe.throw(
+						_(
+							"Cannot cancel Asset Depreciation Schedule {0} as it has a draft journal entry {1}."
+						).format(self.name, d.journal_entry)
+					)
 				frappe.get_doc("Journal Entry", d.journal_entry).cancel()
 
 	def update_shift_depr_schedule(self):

@@ -43,6 +43,7 @@
   "items_section",
   "update_stock",
   "scan_barcode",
+  "last_scanned_warehouse",
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -297,6 +298,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1596,6 +1598,13 @@
    "label": "More Info"
   },
   {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+  },
+  {
    "fieldname": "item_wise_tax_details",
    "fieldtype": "Table",
    "hidden": 1,
@@ -1607,7 +1616,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-23 02:21:48.073957",
+ "modified": "2025-08-04 22:22:31.471752",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

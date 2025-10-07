@@ -86,11 +86,14 @@ class Company(NestedSet):
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
+		purchase_expense_account: DF.Link | None
+		purchase_expense_contra_account: DF.Link | None
 		reconcile_on_advance_payment_date: DF.Check
 		reconciliation_takes_effect_on: DF.Literal[
 			"Advance Payment Date", "Oldest Of Invoice Or Advance", "Reconciliation Date"
 		]
 		registration_details: DF.Code | None
+		reporting_currency: DF.Link | None
 		rgt: DF.Int
 		round_off_account: DF.Link | None
 		round_off_cost_center: DF.Link | None
@@ -153,6 +156,7 @@ class Company(NestedSet):
 		self.check_parent_changed()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
+		self.set_reporting_currency()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -490,6 +494,14 @@ class Company(NestedSet):
 			if not is_group:
 				frappe.throw(_("Parent Company must be a group company"))
 
+	def set_reporting_currency(self):
+		self.reporting_currency = self.default_currency
+		if self.parent_company:
+			parent_reporting_currency = frappe.db.get_value(
+				"Company", self.parent_company, ["reporting_currency"]
+			)
+			self.reporting_currency = parent_reporting_currency
+
 	def set_default_accounts(self):
 		default_accounts = {
 			"default_cash_account": "Cash",
@@ -681,7 +693,7 @@ class Company(NestedSet):
 			frappe.db.sql("delete from tabBOM where company=%s", self.name)
 			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
 				frappe.db.sql(
-					"delete from `tab{}` where parent in ({})" "".format(dt, ", ".join(["%s"] * len(boms))),
+					"delete from `tab{}` where parent in ({})".format(dt, ", ".join(["%s"] * len(boms))),
 					tuple(boms),
 				)
 

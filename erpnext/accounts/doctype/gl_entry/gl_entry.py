@@ -18,8 +18,9 @@ from erpnext.accounts.party import (
 	validate_party_frozen_disabled,
 	validate_party_gle_currency,
 )
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year
-from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.accounts.utils import OUTSTANDING_DOCTYPES, get_account_currency, get_fiscal_year
+from erpnext.exceptions import InvalidAccountCurrency, ReportingCurrencyExchangeNotFoundError
+from erpnext.setup.utils import get_exchange_rate
 
 exclude_from_linked_with = True
 
@@ -42,9 +43,11 @@ class GLEntry(Document):
 		cost_center: DF.Link | None
 		credit: DF.Currency
 		credit_in_account_currency: DF.Currency
+		credit_in_reporting_currency: DF.Currency
 		credit_in_transaction_currency: DF.Currency
 		debit: DF.Currency
 		debit_in_account_currency: DF.Currency
+		debit_in_reporting_currency: DF.Currency
 		debit_in_transaction_currency: DF.Currency
 		due_date: DF.Date | None
 		finance_book: DF.Link | None
@@ -57,6 +60,7 @@ class GLEntry(Document):
 		posting_date: DF.Date | None
 		project: DF.Link | None
 		remarks: DF.Text | None
+		reporting_currency_exchange_rate: DF.Float
 		to_rename: DF.Check
 		transaction_currency: DF.Link | None
 		transaction_date: DF.Date | None
@@ -87,6 +91,8 @@ class GLEntry(Document):
 			self.check_pl_account()
 			self.validate_party()
 			self.validate_currency()
+
+		self.set_amount_in_reporting_currency()
 
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
@@ -131,18 +137,20 @@ class GLEntry(Document):
 
 		if not self.is_cancelled and not (self.party_type and self.party):
 			account_type = frappe.get_cached_value("Account", self.account, "account_type")
-			if account_type == "Receivable":
-				frappe.throw(
-					_("{0} {1}: Customer is required against Receivable account {2}").format(
-						self.voucher_type, self.voucher_no, self.account
+
+			if not frappe.flags.party_not_required:  # skipping validation if party is not required
+				if account_type == "Receivable":
+					frappe.throw(
+						_("{0} {1}: Customer is required against Receivable account {2}").format(
+							self.voucher_type, self.voucher_no, self.account
+						)
 					)
-				)
-			elif account_type == "Payable":
-				frappe.throw(
-					_("{0} {1}: Supplier is required against Payable account {2}").format(
-						self.voucher_type, self.voucher_no, self.account
+				elif account_type == "Payable":
+					frappe.throw(
+						_("{0} {1}: Supplier is required against Payable account {2}").format(
+							self.voucher_type, self.voucher_no, self.account
+						)
 					)
-				)
 
 		# Zero value transaction is not allowed
 		if not (
@@ -224,26 +232,23 @@ class GLEntry(Document):
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
 
-		ret = frappe.db.sql(
-			"""select is_group, docstatus, company
-			from tabAccount where name=%s""",
-			self.account,
-			as_dict=1,
-		)[0]
+		account = frappe.get_cached_value(
+			"Account", self.account, fieldname=["is_group", "docstatus", "company"], as_dict=True
+		)
 
-		if ret.is_group == 1:
+		if account.is_group == 1:
 			frappe.throw(
 				_(
 					"""{0} {1}: Account {2} is a Group Account and group accounts cannot be used in transactions"""
 				).format(self.voucher_type, self.voucher_no, self.account)
 			)
 
-		if ret.docstatus == 2:
+		if account.docstatus == 2:
 			frappe.throw(
 				_("{0} {1}: Account {2} is inactive").format(self.voucher_type, self.voucher_no, self.account)
 			)
 
-		if ret.company != self.company:
+		if account.company != self.company:
 			frappe.throw(
 				_("{0} {1}: Account {2} does not belong to Company {3}").format(
 					self.voucher_type, self.voucher_no, self.account, self.company
@@ -251,7 +256,7 @@ class GLEntry(Document):
 			)
 
 	def validate_cost_center(self):
-		if not self.cost_center:
+		if not self.cost_center or self.is_cancelled:
 			return
 
 		is_group, company = frappe.get_cached_value("Cost Center", self.cost_center, ["is_group", "company"])
@@ -295,6 +300,25 @@ class GLEntry(Document):
 		if self.party_type and self.party:
 			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
 
+	def set_amount_in_reporting_currency(self):
+		default_currency, reporting_currency = frappe.get_cached_value(
+			"Company", self.company, ["default_currency", "reporting_currency"]
+		)
+		transaction_date = self.transaction_date or self.posting_date
+		self.reporting_currency_exchange_rate = get_exchange_rate(
+			default_currency, reporting_currency, transaction_date
+		)
+		if not self.reporting_currency_exchange_rate:
+			frappe.throw(
+				title=_("Reporting Currency Exchange Not Found"),
+				msg=_(
+					"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+				).format(default_currency, reporting_currency, transaction_date),
+				exc=ReportingCurrencyExchangeNotFoundError,
+			)
+		self.debit_in_reporting_currency = flt(self.debit * self.reporting_currency_exchange_rate)
+		self.credit_in_reporting_currency = flt(self.credit * self.reporting_currency_exchange_rate)
+
 	def validate_and_set_fiscal_year(self):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
@@ -311,7 +335,7 @@ def validate_balance_type(account, adv_adj=False):
 		if balance_must_be:
 			balance = frappe.db.sql(
 				"""select sum(debit) - sum(credit)
-				from `tabGL Entry` where account = %s""",
+				from `tabGL Entry` where is_cancelled = 0 and account = %s""",
 				account,
 			)[0][0]
 
@@ -385,7 +409,7 @@ def update_outstanding_amt(
 				)
 			)
 
-	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
+	if against_voucher_type in OUTSTANDING_DOCTYPES:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 
 		# Didn't use db_set for optimization purpose
@@ -462,4 +486,9 @@ def rename_temporarily_named_docs(doctype):
 				f"UPDATE `tab{doctype}` SET name = %s, to_rename = 0, modified = %s where name = %s",
 				(newname, now(), oldname),
 			)
+
+			for hook_type in ("on_gle_rename", "on_sle_rename"):
+				for hook in frappe.get_hooks(hook_type):
+					frappe.call(hook, newname=newname, oldname=oldname)
+
 		frappe.db.commit()

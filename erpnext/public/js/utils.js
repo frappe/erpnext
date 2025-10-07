@@ -213,17 +213,9 @@ $.extend(erpnext.utils, {
 	},
 
 	make_bank_account: function (doctype, docname) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
-			args: {
-				doctype: doctype,
-				docname: docname,
-			},
-			freeze: true,
-			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
+		frappe.new_doc("Bank Account", {
+			party_type: doctype,
+			party: docname,
 		});
 	},
 
@@ -290,20 +282,6 @@ $.extend(erpnext.utils, {
 	make_subscription: function (doctype, docname) {
 		frappe.call({
 			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
-			args: {
-				doctype: doctype,
-				docname: docname,
-			},
-			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			},
-		});
-	},
-
-	make_pricing_rule: function (doctype, docname) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.make_pricing_rule",
 			args: {
 				doctype: doctype,
 				docname: docname,
@@ -463,6 +441,16 @@ $.extend(erpnext.utils, {
 			});
 		}
 		return fiscal_year;
+	},
+
+	set_letter_head: function (frm) {
+		if (frm.fields_dict.letter_head) {
+			frappe.db.get_value("Company", frm.doc.company, "default_letter_head").then((res) => {
+				if (res.message?.default_letter_head) {
+					frm.set_value("letter_head", res.message.default_letter_head);
+				}
+			});
+		}
 	},
 });
 

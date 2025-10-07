@@ -30,6 +30,7 @@
   "set_posting_time",
   "inspection_required",
   "apply_putaway_rule",
+  "is_additional_transfer_entry",
   "bom_info_section",
   "from_bom",
   "use_multi_level_bom",
@@ -51,6 +52,7 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+  "last_scanned_warehouse",
   "items_section",
   "items",
   "get_stock_and_rate",
@@ -218,6 +220,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -690,6 +693,22 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.purpose == \"Material Transfer for Manufacture\"",
+   "fieldname": "is_additional_transfer_entry",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Additional Transfer Entry",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -697,7 +716,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-08-13 19:05:42.386955",
+ "modified": "2025-09-29 15:56:21.344296",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -763,6 +782,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

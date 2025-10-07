@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _, qb, throw
 from frappe.model.mapper import get_mapped_doc
@@ -105,6 +107,7 @@ class PurchaseInvoice(BuyingController):
 		billing_address_display: DF.TextEditor | None
 		buying_price_list: DF.Link | None
 		cash_bank_account: DF.Link | None
+		claimed_landed_cost_amount: DF.Currency
 		clearance_date: DF.Date | None
 		company: DF.Link | None
 		contact_display: DF.SmallText | None
@@ -342,7 +345,12 @@ class PurchaseInvoice(BuyingController):
 			)
 		if not self.due_date:
 			self.due_date = get_due_date(
-				self.posting_date, "Supplier", self.supplier, self.company, self.bill_date
+				self.posting_date,
+				"Supplier",
+				self.supplier,
+				self.company,
+				self.bill_date,
+				template_name=self.payment_terms_template,
 			)
 
 		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
@@ -878,6 +886,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
 		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
+		self.set_gl_entry_for_purchase_expense(gl_entries)
 		return gl_entries
 
 	def check_asset_cwip_enabled(self):
@@ -974,7 +983,7 @@ class PurchaseInvoice(BuyingController):
 			self.get_provisional_accounts()
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount):
+			if flt(item.base_net_amount) or (self.get("update_stock") and item.valuation_rate):
 				if item.item_code:
 					frappe.get_cached_value("Item", item.item_code, "asset_category")
 
@@ -2074,7 +2083,12 @@ def make_inter_company_sales_invoice(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None):
+def make_purchase_receipt(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
 		target.received_qty = flt(obj.qty) - flt(obj.received_qty)
@@ -2083,6 +2097,11 @@ def make_purchase_receipt(source_name, target_doc=None):
 		target.base_amount = (
 			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
 		)
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
 
 	doc = get_mapped_doc(
 		"Purchase Invoice",
@@ -2107,7 +2126,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty),
+				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and select_item(doc),
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
 		},

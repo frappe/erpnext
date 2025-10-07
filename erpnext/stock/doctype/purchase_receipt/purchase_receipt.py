@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
@@ -479,9 +481,10 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
+		self.set_gl_entry_for_purchase_expense(gl_entries)
 		update_regional_gl_entries(gl_entries, self)
 
-		return process_gl_map(gl_entries)
+		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
@@ -1326,6 +1329,11 @@ def get_item_wise_returned_qty(pr_doc):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("Purchase Receipt", source_name)
@@ -1381,6 +1389,11 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 
 		return pending_qty, returned_qty
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	doclist = get_mapped_doc(
 		"Purchase Receipt",
 		source_name,
@@ -1410,9 +1423,10 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
-				"filter": lambda d: get_pending_qty(d)[0] <= 0
-				if not doc.get("is_return")
-				else get_pending_qty(d)[0] > 0,
+				"filter": lambda d: (
+					get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
+				),
+				"condition": select_item,
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
