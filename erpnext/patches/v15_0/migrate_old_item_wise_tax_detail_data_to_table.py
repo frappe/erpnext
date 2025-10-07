@@ -54,6 +54,10 @@ def execute():
 					chunk = docnames[index : index + chunk_size]
 					doc_info = get_doc_details(chunk, doctype)
 					docs = [d.name for d in doc_info]  # valid invoices
+
+					# Delete existing item-wise tax details to avoid duplicates
+					delete_existing_tax_details(docs, doctype)
+
 					taxes = get_taxes_for_docs(docs, tax_doctype, doctype)
 					items = get_items_for_docs(docs, doctype)
 					compiled_docs = compile_docs(doc_info, taxes, items, doctype, tax_doctype)
@@ -139,6 +143,17 @@ def compile_docs(doc_info, taxes, items, doctype, tax_doctype):
 		response[item.parent]["items"].append(item)
 
 	return response.values()
+
+
+def delete_existing_tax_details(doc_names, doctype):
+	"""
+	Delete existing Item Wise Tax Detail records for the given documents
+	to avoid duplicates when re-running the migration.
+	"""
+	if not doc_names:
+		return
+
+	frappe.db.delete("Item Wise Tax Detail", {"parent": ["in", doc_names], "parenttype": doctype})
 
 
 class ItemTax:
