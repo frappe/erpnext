@@ -1389,11 +1389,12 @@ def get_batch_current_qty(batch):
 
 
 def throw_negative_batch_validation(batch_no, qty):
-	frappe.throw(
-		_("The Batch {0} has negative quantity {1}. Please correct the quantity.").format(
-			bold(batch_no), bold(qty)
-		),
-		title=_("Negative Batch Quantity"),
+	frappe.msgprint(
+		_(
+			"The Batch {0} has negative batch quantity {1}. To fix this, go to the batch and click on Recalculate Batch Qty. If the issue still persists, create an inward entry."
+		).format(bold(get_link_to_form("Batch", batch_no)), bold(qty)),
+		title=_("Warning!"),
+		indicator="orange",
 	)
 
 
