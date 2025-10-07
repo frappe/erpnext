@@ -489,10 +489,7 @@ class calculate_taxes_and_totals:
 		self.adjust_rounding_in_item_wise_tax_details()
 
 	def adjust_rounding_in_item_wise_tax_details(self):
-		if self.doc.flags.ignore_validate:
-			return
-
-		if ignore_item_wise_tax_details:
+		if ignore_item_wise_tax_details(self.doc):
 			return
 
 		if not self.doc.get("_item_wise_tax_details"):
@@ -530,6 +527,9 @@ class calculate_taxes_and_totals:
 
 			else:
 				invalid_rows.append(f"Row {tax.idx} (Difference: {diff})")
+
+		if self.doc.flags.ignore_validate:
+			return
 
 		if invalid_rows:
 			message = (
