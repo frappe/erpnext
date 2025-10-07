@@ -3019,7 +3019,6 @@ def get_payment_term_details(
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
 	term_details.base_payment_amount = flt(term.invoice_portion) * flt(base_grand_total) / 100
 	term_details.outstanding = term_details.payment_amount
-	term_details.base_outstanding = term_details.base_payment_amount
 
 	if bill_date:
 		term_details.due_date = get_due_date(term, bill_date)

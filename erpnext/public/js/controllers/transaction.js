@@ -878,17 +878,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-<<<<<<< HEAD
-	due_date() {
-		// due_date is to be changed, payment terms template and/or payment schedule must
-		// be removed as due_date is automatically changed based on payment terms
-		if (this.frm.doc.due_date && !this.frm.updating_party_details && !this.frm.doc.is_pos) {
-			if (this.frm.doc.payment_terms_template ||
-				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
-				var message1 = "";
-				var message2 = "";
-				var final_message = __("Please clear the") + " ";
-=======
 	discount_date(doc, cdt, cdn) {
 		// Remove fields as discount_date is auto-managed by payment terms
 		const row = locals[cdt][cdn];
@@ -898,19 +887,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.refresh_field("payment_schedule");
 	}
 
-	due_date(doc, cdt, cdn) {
+	due_date() {
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
-		if (doc.doctype !== cdt) {
-			// Remove fields as due_date is auto-managed by payment terms
-			const row = locals[cdt][cdn];
-			["due_date_based_on", "credit_days", "credit_months"].forEach((field) => {
-				row[field] = "";
-			});
-			this.frm.refresh_field("payment_schedule");
-			return;
-		}
->>>>>>> 3c70cbbaf8 (feat: dynamic due date in payment terms when fetched from order (#48864))
+		if (this.frm.doc.due_date && !this.frm.updating_party_details && !this.frm.doc.is_pos) {
+			if (this.frm.doc.payment_terms_template ||
+				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
+				var message1 = "";
+				var message2 = "";
+				var final_message = __("Please clear the") + " ";
 
 				if (this.frm.doc.payment_terms_template) {
 					message1 = __("selected Payment Terms Template");
@@ -2269,9 +2254,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	payment_term(doc, cdt, cdn) {
 		const me = this;
 		var row = locals[cdt][cdn];
-<<<<<<< HEAD
-		if(row.payment_term) {
-=======
 		// empty date condition fields
 		[
 			"due_date_based_on",
@@ -2284,7 +2266,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		if (row.payment_term) {
->>>>>>> 3c70cbbaf8 (feat: dynamic due date in payment terms when fetched from order (#48864))
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
@@ -2294,33 +2275,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total,
 					base_grand_total: this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total
 				},
-<<<<<<< HEAD
-				callback: function(r) {
-					if(r.message && !r.exc) {
-						for (var d in r.message) {
-							frappe.model.set_value(cdt, cdn, d, r.message[d]);
-							const company_currency = me.get_company_currency();
-							me.update_payment_schedule_grid_labels(company_currency);
-=======
 				callback: function (r) {
 					if (r.message && !r.exc) {
 						const company_currency = me.get_company_currency();
 						for (let d in r.message) {
 							row[d] = r.message[d];
->>>>>>> 3c70cbbaf8 (feat: dynamic due date in payment terms when fetched from order (#48864))
 						}
 						me.update_payment_schedule_grid_labels(company_currency);
 						me.frm.refresh_field("payment_schedule");
 					}
-<<<<<<< HEAD
-				}
-			})
-=======
 				},
 			});
 		} else {
 			me.frm.refresh_field("payment_schedule");
->>>>>>> 3c70cbbaf8 (feat: dynamic due date in payment terms when fetched from order (#48864))
 		}
 	}
 

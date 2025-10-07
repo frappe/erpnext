@@ -160,23 +160,6 @@
    "fieldtype": "Currency",
    "label": "Payment Amount (Company Currency)",
    "options": "Company:company:default_currency"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fieldname": "base_outstanding",
-   "fieldtype": "Currency",
-   "label": "Outstanding (Company Currency)",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "depends_on": "base_paid_amount",
-   "fieldname": "base_paid_amount",
-   "fieldtype": "Currency",
-   "label": "Paid Amount (Company Currency)",
-   "options": "Company:company:default_currency",
-   "read_only": 1
   },
   {
    "fieldname": "due_date_based_on",
@@ -215,17 +198,12 @@
    "fieldtype": "Int",
    "label": "Discount Validity",
    "read_only": 1
->>>>>>> 3c70cbbaf8 (feat: dynamic due date in payment terms when fetched from order (#48864))
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-09-16 13:57:06.382859",
-=======
  "modified": "2025-07-31 08:38:25.820701",
->>>>>>> 3c70cbbaf8 (feat: dynamic due date in payment terms when fetched from order (#48864))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
