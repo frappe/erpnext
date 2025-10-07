@@ -19,10 +19,10 @@ class DeprecatedSerialNoValuation:
 		"No known instructions.",
 	)
 	def calculate_stock_value_from_deprecarated_ledgers(self):
-		if not has_sle_for_serial_nos(self.sle.item_code):
-			return
+		serial_nos = []
+		if hasattr(self, "old_serial_nos"):
+			serial_nos = self.old_serial_nos
 
-		serial_nos = self.get_filterd_serial_nos()
 		if not serial_nos:
 			return
 
@@ -31,17 +31,6 @@ class DeprecatedSerialNoValuation:
 			stock_value_change = self.get_incoming_value_for_serial_nos(serial_nos)
 
 		self.stock_value_change += flt(stock_value_change)
-
-	def get_filterd_serial_nos(self):
-		serial_nos = []
-		non_filtered_serial_nos = self.get_serial_nos()
-
-		# If the serial no inwarded using the Serial and Batch Bundle, then the serial no should not be considered
-		for serial_no in non_filtered_serial_nos:
-			if serial_no and serial_no not in self.serial_no_incoming_rate:
-				serial_nos.append(serial_no)
-
-		return serial_nos
 
 	@deprecated(
 		"erpnext.stock.serial_batch_bundle.SerialNoValuation.get_incoming_value_for_serial_nos",
@@ -94,20 +83,6 @@ class DeprecatedSerialNoValuation:
 				incoming_values += self.serial_no_incoming_rate[serial_no]
 
 		return incoming_values
-
-
-@frappe.request_cache
-def has_sle_for_serial_nos(item_code):
-	serial_nos = frappe.db.get_all(
-		"Stock Ledger Entry",
-		fields=["name"],
-		filters={"serial_no": ("is", "set"), "is_cancelled": 0, "item_code": item_code},
-		limit=1,
-	)
-	if serial_nos:
-		return True
-
-	return False
 
 
 class DeprecatedBatchNoValuation:
