@@ -365,7 +365,6 @@ scheduler_events = {
 		"erpnext.hr.doctype.employee.employee_reminders.send_work_anniversary_reminders",
 		"erpnext.hr.doctype.employee.employee_reminders.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
-		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
@@ -394,7 +393,8 @@ scheduler_events = {
 		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
-		"erpnext.crm.doctype.lead.lead.daily_open_lead"
+		"erpnext.crm.doctype.lead.lead.daily_open_lead",
+        "erpnext.assets.doctype.asset.depreciation.post_depreciation_entries"
 	],
 	"weekly": [
 		"erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"
