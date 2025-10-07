@@ -50,8 +50,7 @@
    "fieldname": "inclusion_type",
    "fieldtype": "Select",
    "label": "Inclusion Type",
-   "options": "Inclusive\nExclusive",
-   "reqd": 1
+   "options": "Inclusive\nExclusive"
   },
   {
    "fieldname": "column_break_syzu",
@@ -60,7 +59,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-03 13:31:49.490973",
+ "modified": "2025-10-07 12:52:25.146368",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Party Specific Item",
