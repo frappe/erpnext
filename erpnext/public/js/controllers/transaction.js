@@ -1170,7 +1170,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		if (
 			frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
-			["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)
+			["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype) &&
+			!this.frm.doc.shipping_address
 		) {
 			let is_drop_ship = me.frm.doc.items.some((item) => item.delivered_by_supplier);
 
