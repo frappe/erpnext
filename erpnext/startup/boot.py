@@ -85,3 +85,5 @@ def bootinfo(bootinfo):
 		if employee:
 			bootinfo["user"]["employee"] = employee
 			frappe.session.data.employee = employee
+		else:
+			frappe.session.data.employee = ""
