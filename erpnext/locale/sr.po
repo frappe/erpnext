@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-06 10:13\n"
+"PO-Revision-Date: 2025-10-08 10:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "MIME-Version: 1.0\n"
@@ -14063,7 +14063,7 @@ msgstr "Ограничење потраживања премашено за ку
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:213
 msgid "Creditor Turnover Ratio"
-msgstr ""
+msgstr "Коефицијент обрта добављача"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:87
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:118
@@ -14460,7 +14460,7 @@ msgstr "Тренутна количина"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:152
 msgid "Current Ratio"
-msgstr ""
+msgstr "Рацио опште ликвидности"
 
 #. Label of the current_serial_and_batch_bundle (Link) field in DocType 'Stock
 #. Reconciliation Item'
@@ -15752,11 +15752,11 @@ msgstr "Дугује-Потражује нису у равнотежи"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:170
 msgid "Debt Equity Ratio"
-msgstr ""
+msgstr "Рацио структуре капитала"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:212
 msgid "Debtor Turnover Ratio"
-msgstr ""
+msgstr "Коефицијент обрта купаца"
 
 #: erpnext/accounts/party.py:617
 msgid "Debtor/Creditor"
@@ -21451,7 +21451,7 @@ msgstr "Регистар основних средстава"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:211
 msgid "Fixed Asset Turnover Ratio"
-msgstr ""
+msgstr "Коефицијент обрта основних средстава"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:668
 msgid "Fixed Asset item {0} cannot be used in BOMs."
@@ -23320,7 +23320,7 @@ msgstr "Проценат бруто профита"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:171
 msgid "Gross Profit Ratio"
-msgstr ""
+msgstr "Стопа пословног добитка"
 
 #. Label of the gross_purchase_amount (Currency) field in DocType 'Asset
 #. Depreciation Schedule'
@@ -26130,7 +26130,7 @@ msgstr "Поставке инвентара"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:214
 msgid "Inventory Turnover Ratio"
-msgstr ""
+msgstr "Коефицијент обрта залиха"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
@@ -29648,7 +29648,7 @@ msgstr "Линк за дневник позива"
 #: erpnext/accounts/report/financial_ratios/financial_ratios.js:55
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:150
 msgid "Liquidity Ratios"
-msgstr ""
+msgstr "Показатељи ликвидности"
 
 #. Description of the 'Items' (Section Break) field in DocType 'Product Bundle'
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
@@ -32659,7 +32659,7 @@ msgstr "Нето профит"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:172
 msgid "Net Profit Ratio"
-msgstr ""
+msgstr "Стопа нето добитка"
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:180
 msgid "Net Profit/Loss"
@@ -42969,7 +42969,7 @@ msgstr "Брзи налог књижења"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:152
 msgid "Quick Ratio"
-msgstr ""
+msgstr "Рацио редуциране ликвидности"
 
 #. Name of a DocType
 #. Label of a Link in the Stock Workspace
@@ -45949,11 +45949,11 @@ msgstr "Повраћај компоненти"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:173
 msgid "Return on Asset Ratio"
-msgstr ""
+msgstr "Стопа приноса на имовину"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:174
 msgid "Return on Equity Ratio"
-msgstr ""
+msgstr "Стопа приноса на капитал"
 
 #. Option for the 'Tracking Status' (Select) field in DocType 'Shipment'
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:138
@@ -51297,7 +51297,7 @@ msgstr "Продато од"
 #: erpnext/accounts/report/financial_ratios/financial_ratios.js:55
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:168
 msgid "Solvency Ratios"
-msgstr ""
+msgstr "Показатељи солвентности"
 
 #: erpnext/www/book_appointment/index.js:248
 msgid "Something went wrong please try again"
@@ -58524,7 +58524,7 @@ msgstr "Уторак"
 #: erpnext/accounts/report/financial_ratios/financial_ratios.js:55
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:198
 msgid "Turnover Ratios"
-msgstr ""
+msgstr "Показатељи обртаја"
 
 #. Option for the 'Frequency To Collect Progress' (Select) field in DocType
 #. 'Project'
