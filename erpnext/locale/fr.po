@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-06 10:14\n"
+"PO-Revision-Date: 2025-10-08 10:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -41601,7 +41601,7 @@ msgstr "Analyse des bons de commande"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:76
 msgid "Purchase Order Date"
-msgstr "Date du de la Commande d'Achat"
+msgstr "Date de la commande d'achat"
 
 #. Label of the po_detail (Data) field in DocType 'Purchase Invoice Item'
 #. Label of the purchase_order_item (Data) field in DocType 'Sales Invoice
