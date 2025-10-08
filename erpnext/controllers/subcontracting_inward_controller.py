@@ -10,7 +10,7 @@ class SubcontractingInwardController(StockController):
 	def validate_subcontracting_inward(self):
 		self.validate_inward_order()
 		self.validate_customer_provided_item_for_inward()
-		self.validate_warehouse()
+		self.validate_warehouse_()
 		self.validate_serial_batch_for_return_or_delivery()
 		self.validate_delivery()
 		self.update_customer_provided_item_cost()
@@ -184,7 +184,11 @@ class SubcontractingInwardController(StockController):
 	def validate_customer_provided_item_for_inward(self):
 		if self.subcontracting_inward_order:
 			for item in self.items:
-				if (item.is_finished_item or item.is_scrap_item) and item.valuation_rate == 0:
+				if (
+					item.is_finished_item
+					or item.is_scrap_item
+					or self.purpose in ["Subcontracting Delivery", "Subcontracting Return"]
+				) and item.valuation_rate == 0:
 					item.allow_zero_valuation_rate = 1
 				elif self.purpose == "Receive from Customer" and not frappe.get_value(
 					"Item", item.item_code, "is_customer_provided_item"
@@ -195,7 +199,7 @@ class SubcontractingInwardController(StockController):
 						)
 					)
 
-	def validate_warehouse(self):
+	def validate_warehouse_(self):
 		if self.subcontracting_inward_order:
 			if self.purpose in [
 				"Receive from Customer",
