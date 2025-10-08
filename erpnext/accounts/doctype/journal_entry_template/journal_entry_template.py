@@ -12,7 +12,7 @@ class JournalEntryTemplate(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.journal_entry_template_account.journal_entry_template_account import (

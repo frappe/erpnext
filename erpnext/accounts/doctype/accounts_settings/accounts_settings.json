@@ -38,6 +38,11 @@
   "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
+  "item_price_settings_section",
+  "maintain_same_internal_transaction_rate",
+  "column_break_feyo",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
   "currency_exchange_section",
   "allow_stale",
   "section_break_jpd0",
@@ -478,13 +483,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "description": "If enabled, Sales Invoice will be generated instead of POS Invoice in POS Transactions for real-time update of G/L and Stock Ledger.",
-   "fieldname": "use_sales_invoice_in_pos",
-   "fieldtype": "Check",
-   "label": "Use Sales Invoice"
-  },
-  {
    "default": "Buffered Cursor",
    "fieldname": "receivable_payable_fetch_method",
    "fieldtype": "Select",
@@ -500,6 +498,37 @@
    "fieldname": "legacy_section",
    "fieldtype": "Section Break",
    "label": "Legacy Fields"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_internal_transaction_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout Internal Transaction"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_internal_transaction_rate",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action if Same Rate is Not Maintained Throughout  Internal Transaction",
+   "mandatory_depends_on": "maintain_same_internal_transaction_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval: doc.maintain_same_internal_transaction_rate && doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "column_break_feyo",
+   "fieldtype": "Column Break"
   },
   {
    "default": "1",

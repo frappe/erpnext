@@ -46,7 +46,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			warehouse_name="_Test Warehouse",
 			company="_Test Company",
 		)
-
+		setup_defaults_data()
 		create_batch_or_serial_no_items()
 		super().setUpClass()
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
@@ -2650,3 +2650,25 @@ def set_valuation_method(item_code, valuation_method):
 
 
 test_dependencies = ["Item", "Warehouse"]
+
+
+def setup_defaults_data():
+	from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+	from erpnext.accounts.doctype.account.test_account import create_account
+	from erpnext.stock import get_warehouse_account_map
+	create_company()
+	acc = create_account(
+		account_name="Stock Assets",
+		account_type="Stock",
+		company="_Test Company",
+		is_group=1,
+		parent_account = "Current Assets - _TC",
+		account_currency="INR",
+		do_not_save=True,
+	)
+	acc.report_type = "Balance Sheet"
+	acc.root_type = "Asset"
+	acc.save()
+	company_doc = frappe.get_doc("Company", "_Test Company")
+	frappe._set_document_in_cache("Company", company_doc)
+	get_warehouse_account_map(company=company_doc.name)

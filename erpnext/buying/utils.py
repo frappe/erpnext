@@ -20,6 +20,9 @@ def update_last_purchase_rate(doc, is_submit) -> None:
 	this_purchase_date = getdate(doc.get("posting_date") or doc.get("transaction_date"))
 
 	for d in doc.get("items"):
+		if d.get("is_free_item"):
+			continue
+
 		# get last purchase details
 		last_purchase_details = get_last_purchase_details(d.item_code, doc.name)
 
@@ -46,11 +49,6 @@ def update_last_purchase_rate(doc, is_submit) -> None:
 def validate_for_items(doc) -> None:
 	items = []
 	for d in doc.get("items"):
-		if not d.qty:
-			if doc.doctype == "Purchase Receipt" and d.rejected_qty:
-				continue
-			frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
-
 		set_stock_levels(row=d)  # update with latest quantities
 		item = validate_item_and_get_basic_data(row=d)
 		validate_stock_item_warehouse(row=d, item=item)

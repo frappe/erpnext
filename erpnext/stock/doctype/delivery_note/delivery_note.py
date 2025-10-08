@@ -651,16 +651,20 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	from frappe.query_builder.functions import Sum
 
 	# Billed against Sales Order directly
+	si = frappe.qb.DocType("Sales Invoice").as_("si")
 	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
 	sum_amount = Sum(si_item.amount).as_("amount")
 
 	billed_against_so = (
 		frappe.qb.from_(si_item)
+		.join(si)
+		.on(si.name == si_item.parent)
 		.select(sum_amount)
 		.where(
 			(si_item.so_detail == so_detail)
 			& ((si_item.dn_detail.isnull()) | (si_item.dn_detail == ""))
 			& (si_item.docstatus == 1)
+			& (si.update_stock == 0)
 		)
 		.run()
 	)
@@ -1123,6 +1127,18 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			frappe.throw(_("All items have already been received"))
 
 	def update_details(source_doc, target_doc, source_parent):
+		def _validate_address_link(address, link_doctype, link_name):
+			return frappe.db.get_value(
+				"Dynamic Link",
+				{
+					"parent": address,
+					"parenttype": "Address",
+					"link_doctype": link_doctype,
+					"link_name": link_name,
+				},
+				"parent",
+			)
+
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype == "Purchase Receipt":
 			target_doc.company = details.get("company")
@@ -1132,16 +1148,34 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.inter_company_reference = source_doc.name
 
 			# Invert the address on target doc creation
-			update_address(target_doc, "supplier_address", "address_display", source_doc.company_address)
-			update_address(
-				target_doc, "dispatch_address", "dispatch_address_display", source_doc.dispatch_address_name
-			)
-			update_address(
-				target_doc, "shipping_address", "shipping_address_display", source_doc.shipping_address_name
-			)
-			update_address(
-				target_doc, "billing_address", "billing_address_display", source_doc.customer_address
-			)
+			if source_doc.company_address and _validate_address_link(
+				source_doc.company_address, "Supplier", details.get("party")
+			):
+				update_address(target_doc, "supplier_address", "address_display", source_doc.company_address)
+			if source_doc.dispatch_address_name and _validate_address_link(
+				source_doc.dispatch_address_name, "Company", details.get("company")
+			):
+				update_address(
+					target_doc,
+					"dispatch_address",
+					"dispatch_address_display",
+					source_doc.dispatch_address_name,
+				)
+			if source_doc.shipping_address_name and _validate_address_link(
+				source_doc.shipping_address_name, "Company", details.get("company")
+			):
+				update_address(
+					target_doc,
+					"shipping_address",
+					"shipping_address_display",
+					source_doc.shipping_address_name,
+				)
+			if source_doc.customer_address and _validate_address_link(
+				source_doc.customer_address, "Company", details.get("company")
+			):
+				update_address(
+					target_doc, "billing_address", "billing_address_display", source_doc.customer_address
+				)
 
 			update_taxes(
 				target_doc,
@@ -1161,13 +1195,22 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.inter_company_reference = source_doc.name
 
 			# Invert the address on target doc creation
-			update_address(
-				target_doc, "company_address", "company_address_display", source_doc.supplier_address
-			)
-			update_address(
-				target_doc, "shipping_address_name", "shipping_address", source_doc.shipping_address
-			)
-			update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
+			if source_doc.supplier_address and _validate_address_link(
+				source_doc.supplier_address, "Company", details.get("company")
+			):
+				update_address(
+					target_doc, "company_address", "company_address_display", source_doc.supplier_address
+				)
+			if source_doc.shipping_address and _validate_address_link(
+				source_doc.shipping_address, "Customer", details.get("party")
+			):
+				update_address(
+					target_doc, "shipping_address_name", "shipping_address", source_doc.shipping_address
+				)
+			if source_doc.shipping_address and _validate_address_link(
+				source_doc.shipping_address, "Customer", details.get("party")
+			):
+				update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
 
 			update_taxes(
 				target_doc,

@@ -21,6 +21,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 class TestMaintenanceSchedule(unittest.TestCase):
 	def setUp(self):
+		frappe.set_user("Administrator")
 		import random
 		import string
 

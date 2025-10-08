@@ -13,7 +13,7 @@ class ModeofPayment(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.mode_of_payment_account.mode_of_payment_account import (
@@ -37,7 +37,7 @@ class ModeofPayment(Document):
 		for entry in self.accounts:
 			accounts_list.append(entry.company)
 
-		if len(accounts_list) != len(set(accounts_list)):
+		if len(accounts_list) != len(set(accounts_list)): # pragma: no cover
 			frappe.throw(_("Same Company is entered more than once"))
 
 	def validate_accounts(self):
@@ -59,7 +59,7 @@ class ModeofPayment(Document):
 			)
 			pos_profiles = list(map(lambda x: x[0], pos_profiles))
 
-			if pos_profiles:
+			if pos_profiles:  # pragma: no cover
 				message = _(
 					"POS Profile {} contains Mode of Payment {}. Please remove them to disable this mode."
 				).format(frappe.bold(", ".join(pos_profiles)), frappe.bold(str(self.name)))

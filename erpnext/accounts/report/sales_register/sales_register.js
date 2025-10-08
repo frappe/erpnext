@@ -52,12 +52,28 @@ frappe.query_reports["Sales Register"] = {
 			label: __("Cost Center"),
 			fieldtype: "Link",
 			options: "Cost Center",
+			get_query: () => {
+				let company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: {
+						company: company,
+					},
+				};
+			},
 		},
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
 			fieldtype: "Link",
 			options: "Warehouse",
+			get_query: () => {
+				let company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: {
+						company: company,
+					},
+				};
+			},
 		},
 		{
 			fieldname: "brand",

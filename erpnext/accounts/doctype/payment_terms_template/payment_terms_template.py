@@ -14,7 +14,7 @@ class PaymentTermsTemplate(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.payment_terms_template_detail.payment_terms_template_detail import (

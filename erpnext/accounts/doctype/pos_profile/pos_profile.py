@@ -9,8 +9,9 @@ from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
- 	get_checks_for_pl_and_bs_accounts,
- )
+	get_checks_for_pl_and_bs_accounts,
+)
+
 
 class POSProfile(Document):
 	# begin: auto-generated types
@@ -18,12 +19,13 @@ class POSProfile(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
+		from frappe.types import DF
+
 		from erpnext.accounts.doctype.pos_customer_group.pos_customer_group import POSCustomerGroup
 		from erpnext.accounts.doctype.pos_item_group.pos_item_group import POSItemGroup
 		from erpnext.accounts.doctype.pos_payment_method.pos_payment_method import POSPaymentMethod
 		from erpnext.accounts.doctype.pos_profile_user.pos_profile_user import POSProfileUser
-		from frappe.types import DF
 
 		account_for_change_amount: DF.Link | None
 		allow_discount_change: DF.Check
@@ -75,10 +77,10 @@ class POSProfile(Document):
 		acc_dims = get_checks_for_pl_and_bs_accounts()
 		for acc_dim in acc_dims:
 			if (
- 				self.company == acc_dim.company
- 				and not self.get(acc_dim.fieldname)
- 				and (acc_dim.mandatory_for_pl or acc_dim.mandatory_for_bs)
- 			):
+				self.company == acc_dim.company
+				and not self.get(acc_dim.fieldname)
+				and (acc_dim.mandatory_for_pl or acc_dim.mandatory_for_bs)
+			):
 				frappe.throw(
 					_(
 						"{0} is a mandatory Accounting Dimension. <br>"
@@ -209,16 +211,17 @@ def get_item_groups(pos_profile):
 		for data in pos_profile.get("item_groups"):
 			item_groups.extend(
 				[
- 					"%s" % frappe.db.escape(d.name)
- 					for d in get_child_nodes("Item Group", data.item_group)
- 					if not permitted_item_groups or d.name in permitted_item_groups
- 				]
+					"%s" % frappe.db.escape(d.name)
+					for d in get_child_nodes("Item Group", data.item_group)
+					if not permitted_item_groups or d.name in permitted_item_groups
+				]
 			)
-		
+
 	if not item_groups and permitted_item_groups:
 		item_groups = ["%s" % frappe.db.escape(d) for d in permitted_item_groups]
 
 	return list(set(item_groups))
+
 
 def get_permitted_nodes(group_type):
 	nodes = []

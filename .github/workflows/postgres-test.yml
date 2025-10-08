@@ -95,6 +95,7 @@ jobs:
           bench --site test_site install-app payments
           bench --site test_site install-app sales_commission
           bench --site test_site install-app india_compliance
+          bench --site test_site migrate
       - name: Set Permissions & Configs
         working-directory: /home/runner/frappe-bench
         run: |

@@ -146,41 +146,27 @@ class TestSupplierScorecardPeriod(FrappeTestCase):
 			invalid_doc.validate_criteria_weights()
 
 	def test_calculate_variables_TC_B_206(self):
-		supplier_scorecard_criteria = frappe.get_doc(
+		supplier_scorecard_criteria = create_or_get_doc(
+			"Supplier Scorecard Criteria",
+			{"criteria_name": "_Test Criteria"},
 			{
 				"doctype": "Supplier Scorecard Criteria",
 				"max_score": "100",
 				"formula": "max(0,10)*100",
 				"criteria_name": "_Test Criteria",
-			}
-		).insert(ignore_permissions=True, ignore_if_duplicate=True)
+			},
+		)
 		supplier_doc = frappe.get_doc(
 			{
 				"doctype": "Supplier",
 				"supplier_name": "Test Supplier for RFQ",
 			}
 		).insert(ignore_permissions=True, ignore_if_duplicate=True)
-		supplier_scorecard = frappe.get_doc(
-			{
-				"doctype": "Supplier Scorecard",
-				"supplier": supplier_doc.name,
-				"period": "Per Month",
-				"criteria": [{"criteria_name": supplier_scorecard_criteria.name, "weight": 100}],
-				"standings": [
-					{"min_grade": 0, "max_grade": 49, "standing": "Poor"},
-					{"min_grade": 49, "max_grade": 74, "standing": "Average"},
-					{"min_grade": 74, "max_grade": 100, "standing": "Excellent"},
-				],
-			}
-		).insert(ignore_permissions=True, ignore_if_duplicate=True)
-		supplier_scorecard_variable = frappe.get_doc(
-			{
-				"doctype": "Supplier Scorecard Variable",
-				"variable_label": "Test",
-				"param_name": "Test",
-				"path": "get_ordered_qty",
-			}
-		).insert(ignore_permissions=True, ignore_if_duplicate=True)
+		supplier_scorecard = supplier_scorecard = create_or_get_supplier_scorecard(
+			supplier_doc.name, supplier_scorecard_criteria.name
+		)
+		supplier_scorecard_variable = create_or_get_supplier_scorecard_variable()
+
 		doc = frappe.get_doc(
 			{
 				"doctype": "Supplier Scorecard Period",
@@ -280,7 +266,7 @@ class TestSupplierScorecardPeriod(FrappeTestCase):
 			make_supplier_scorecard,
 		)
 
-		result = make_supplier_scorecard(self.scorecard.name)
+		result = make_supplier_scorecard(self.scorecard)
 		self.assertEqual(result.doctype, "Supplier Scorecard Period")
 
 		if len(result.variables) > 0:
@@ -376,7 +362,7 @@ def create_supplier_related_records():
 				{"min_grade": 74, "max_grade": 100, "standing": "Excellent"},
 			],
 		}
-	).insert(ignore_permissions=True, ignore_if_duplicate=True)
+	)
 
 	return {
 		"criteria": criteria,
@@ -384,3 +370,45 @@ def create_supplier_related_records():
 		"supplier_document": supplier_name,
 		"scorecard": scorecard,
 	}
+
+
+def create_or_get_doc(doctype, filters, doc_data):
+	existing = frappe.db.exists(doctype, filters)
+	if existing:
+		return frappe.get_doc(doctype, existing)
+	return frappe.get_doc(doc_data).insert(ignore_permissions=True)
+
+
+def create_or_get_supplier_scorecard(supplier_name, criteria_name):
+	existing = frappe.db.exists("Supplier Scorecard", {"supplier": supplier_name})
+	if existing:
+		return frappe.get_doc("Supplier Scorecard", existing)
+
+	return frappe.get_doc(
+		{
+			"doctype": "Supplier Scorecard",
+			"supplier": supplier_name,
+			"period": "Per Month",
+			"criteria": [{"criteria_name": criteria_name, "weight": 100}],
+			"standings": [
+				{"min_grade": 0, "max_grade": 49, "standing": "Poor"},
+				{"min_grade": 49, "max_grade": 74, "standing": "Average"},
+				{"min_grade": 74, "max_grade": 100, "standing": "Excellent"},
+			],
+		}
+	).insert(ignore_permissions=True)
+
+
+def create_or_get_supplier_scorecard_variable(label="Test", param="Test", path="get_ordered_qty"):
+	existing = frappe.db.exists("Supplier Scorecard Variable", {"variable_label": label})
+	if existing:
+		return frappe.get_doc("Supplier Scorecard Variable", existing)
+
+	return frappe.get_doc(
+		{
+			"doctype": "Supplier Scorecard Variable",
+			"variable_label": label,
+			"param_name": param,
+			"path": path,
+		}
+	).insert(ignore_permissions=True)

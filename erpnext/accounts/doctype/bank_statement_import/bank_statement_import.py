@@ -277,7 +277,7 @@ def get_import_status(docname):
 
 @frappe.whitelist()
 def get_import_logs(docname: str):
-	frappe.has_permission("Bank Statement Import")
+	frappe.has_permission("Bank Statement Import", throw=True)
 
 	return frappe.get_all(
 		"Data Import Log",

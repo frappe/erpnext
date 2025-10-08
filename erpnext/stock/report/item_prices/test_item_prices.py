@@ -9,17 +9,18 @@ class TestItemPrices(FrappeTestCase):
 	def setUp(self):
 		self.test_items = []
 		for i in range(1, 3):
-			item = frappe.get_doc(
-				{
-					"doctype": "Item",
-					"item_code": f"Test Item {i}",
-					"item_name": f"Test Item Name {i}",
-					"description": f"Test Description {i}",
-					"stock_uom": "Nos",
-					"item_group": "Products",
-					"disabled": 0 if i == 1 else 1,
-				}
-			)
+			item_data = {
+				"doctype": "Item",
+				"item_code": f"Test Item 1 {i}",
+				"item_name": f"Test Item Name 1 {i}",
+				"description": f"Test Description 1 {i}",
+				"stock_uom": "Nos",
+				"item_group": "Products",
+				"disabled": 0 if i == 1 else 1,
+			}
+			if frappe.db.has_column("Item", "gst_hsn_code"):
+				item_data["gst_hsn_code"] = "01011010"
+			item = frappe.get_doc(item_data)
 			item.insert(ignore_permissions=True, ignore_if_duplicate=True)
 			self.test_items.append(item.name)
 
@@ -30,6 +31,7 @@ class TestItemPrices(FrappeTestCase):
 				"item_group": "Products",
 				"description": "Test Description 1",
 				"stock_uom": "Nos",
+				"brand": "",
 			}
 		}
 		item_prices.get_price_list = lambda: {}
@@ -105,14 +107,11 @@ class TestItemPrices(FrappeTestCase):
 	def test_get_last_purchase_rate_T_IP_006(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		supplier = frappe.get_doc({"doctype": "Supplier", "supplier_name": "Test Supplier"}).insert(
-			ignore_permissions=True, ignore_if_duplicate=True
-		)
-
 		frappe.get_doc(
 			{
 				"doctype": "Purchase Order",
-				"supplier": supplier.name,
+				"company": "_Test Company",
+				"supplier": "Test Supplier",
 				"transaction_date": frappe.utils.nowdate(),
 				"schedule_date": frappe.utils.nowdate(),
 				"docstatus": 1,

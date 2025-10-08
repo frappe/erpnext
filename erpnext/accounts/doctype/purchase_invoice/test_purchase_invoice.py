@@ -9,6 +9,7 @@ from frappe.utils import (
 	add_days,
 	cint,
 	flt,
+	formatdate,
 	get_quarter_start,
 	get_year_ending,
 	get_year_start,
@@ -23,7 +24,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-from erpnext.controllers.accounts_controller import get_payment_terms
+from erpnext.controllers.accounts_controller import InvalidQtyError, get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.item.test_item import create_item
@@ -61,6 +62,16 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def tearDown(self):
 		frappe.db.rollback()
+
+	def test_purchase_invoice_qty(self):
+		pi = make_purchase_invoice(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			pi.save()
+
+		# No error with qty=1
+		pi.items[0].qty = 1
+		pi.save()
+		self.assertEqual(pi.items[0].qty, 1)
 
 	def test_purchase_invoice_received_qty(self):
 		"""
@@ -1506,7 +1517,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		pi = create_purchase_invoice_from_receipt(pr.name)
 		pi.set_posting_time = 1
-		pi.posting_date = add_days(pr.posting_date, -1)
+		pi.posting_date = add_days(pr.posting_date, 1)
 		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
 		pi.save()
 		pi.submit()
@@ -1515,8 +1526,8 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# Check GLE for Purchase Invoice
 		expected_gle = [
-			["Cost of Goods Sold - _TC", 250, 0, add_days(pr.posting_date, -1)],
-			["Creditors - _TC", 0, 250, add_days(pr.posting_date, -1)],
+			["Cost of Goods Sold - _TC", 250, 0, add_days(pr.posting_date, 1)],
+			["Creditors - _TC", 0, 250, add_days(pr.posting_date, 1)],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
@@ -1547,6 +1558,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# Configure Buying Settings to allow rate change
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		# Configure Accounts Settings to allow 300% over billingAdd commentMore actions
+		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 300)
 
 		# Create PR: rate = 1000, qty = 5
 		pr = make_purchase_receipt(
@@ -2446,7 +2460,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_purchase_invoice_payment_and_cancel_invoice_TC_ACC_019(self):
 		"""Test payment against Purchase Invoices with advance adjustment."""
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		today = nowdate()
@@ -2546,7 +2560,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			make_test_item,
 		)
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_records as records_for_pi
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		records_for_pi("_Test Supplier TDS")
@@ -2787,140 +2801,53 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 
 	def test_advance_payment_TC_ACC_028(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
-			create_payment_entry,
-			create_purchase_invoice,
-			make_test_item,
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		pe = create_payment_entry(paid_amount=2500, save=True)
+		pe.submit()
+
+		pi = make_purchase_invoice(rate=1000, do_not_save=True)
+		pi.append(
+			"advances",
+			{
+				"reference_type": "Payment Entry",
+				"reference_name": pe.name,
+				"advance_amount": 2500,
+				"allocated_amount": 2500,
+			},
 		)
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_records as records_for_pi
+		pi.insert(ignore_permissions=True)
+		pi.submit()
+		self.assertEqual(pi.status, "Partly Paid")
+		self.assertEqual(pi.docstatus, 1)
+		self.assertEqual(pi.outstanding_amount, 2500)
 
-		records_for_pi("_Test Supplier USD")
-		supplier = frappe.get_doc("Supplier", "_Test Supplier USD")
-		tds_account = frappe.get_doc("Account", "_Test TDS Payable - _TC")
-		if tds_account.account_currency != "INR":
-			tds_account.account_currency = "INR"
-			tds_account.save()
-		if supplier:
-			pe = create_payment_entry(
-				party_type="Supplier",
-				party=supplier.name,
-				company="_Test Company",
-				payment_type="Pay",
-				paid_from="_Test Cash - _TC",
-				paid_to="_Test Payable USD - _TC",
-				paid_amount=6000,
-				save=True,
-			)
+		expected_entries = [
+			{"account": "Stock Received But Not Billed - _TC", "debit": 5000.0, "credit": 0.0},
+			{"account": "Creditors - _TC", "debit": 0.0, "credit": 5000.0},
+		]
 
-			pe.target_exchange_rate = 60
-			pe.received_amount = 100
-			pe.tax_withholding_category = "Test - TDS - 194C - Company"
+		pi_gle_entries = frappe.get_all(
+			"GL Entry", filters={"voucher_no": pi.name}, fields=["account", "debit", "credit"]
+		)
 
-			pe.append(
-				"taxes",
-				{
-					"account_head": "_Test TDS Payable - _TC",
-					"charge_type": "On Paid Amount",
-					"rate": 0,
-					"add_deduct_tax": "Deduct",
-					"description": "Cash",
-				},
-			)
+		self.assertCountEqual(pi_gle_entries, expected_entries)
 
-			pe.save()
-			pe.submit()
+		pe_1 = get_payment_entry(pi.doctype, pi.name)
+		pe_1.insert()
+		pe_1.submit()
 
-			item = make_test_item()
+		pi.load_from_db()
+		self.assertEqual(pi.status, "Paid")
+		self.assertEqual(pi.outstanding_amount, 0.0)
 
-			pi = create_purchase_invoice(
-				supplier=supplier.name,
-				currency="USD",
-				rate=120,
-				item_code=item.name,
-				credit_to="_Test Payable USD - _TC",
-			)
+		pe_1_gl_entry = frappe.get_all(
+			"GL Entry", filters={"voucher_no": pe_1.name}, fields=["account", "debit", "credit"]
+		)
+		actual_set = {(entry["account"], entry["debit"], entry["credit"]) for entry in pe_1_gl_entry}
+		expected_set = {("Bank - _TC", 0.0, 2500.0), ("Creditors - _TC", 2500.0, 0.0)}
 
-			pe.apply_tds = 1
-			pi.tax_withholding_category = "Test - TDS - 194C - Company"
-			pi.conversion_rate = 63
-
-			pi.append(
-				"advances",
-				{
-					"reference_type": "Payment Entry",
-					"reference_name": pe.name,
-					"advance_amount": 100,
-					"allocated_amount": 100,
-					"ref_exchange_rate": 60,
-				},
-			)
-
-			pi.save()
-			pi.submit()
-
-			jea_parent = get_jv_entry_account(
-				credit_to=pi.credit_to,
-				reference_name=pi.name,
-				party_type="Supplier",
-				party=supplier.name,
-				debit=300,
-			)
-			jv_doc = frappe.get_doc("Journal Entry", jea_parent.parent)
-			self.assertEqual(
-				frappe.db.get_value("Journal Entry", jea_parent.parent, "voucher_type"),
-				"Exchange Gain Or Loss",
-			)
-
-			gle_entries = frappe.get_all(
-				"GL Entry",
-				filters={"voucher_no": jv_doc.name, "voucher_type": "Journal Entry", "is_cancelled": 0},
-				fields=["account", "debit", "credit", "posting_date"],
-				order_by="posting_date, account, creation",
-			)
-			expected_jv_entries = [
-				[gle.account, gle.debit, gle.credit, gle.posting_date] for gle in gle_entries
-			]
-
-			check_gl_entries(
-				doc=self,
-				voucher_no=jv_doc.name,
-				expected_gle=expected_jv_entries,
-				posting_date=pi.posting_date,
-				voucher_type="Journal Entry",
-			)
-
-			_pe = get_payment_entry("Purchase Invoice", pi.name)
-			_pe.target_exchange_rate = 62
-			_pe.payment_type = "Pay"
-			_pe.paid_from = "Cash - _TC"
-			_pe.save()
-			_pe.submit()
-
-			jea_parent = get_jv_entry_account(
-				credit_to=pi.credit_to,
-				reference_name=pi.name,
-				party_type="Supplier",
-				party=supplier.name,
-				debit=20,
-			)
-			_jv_doc = frappe.get_doc("Journal Entry", jea_parent.parent)
-			gl_entries = frappe.get_all(
-				"GL Entry",
-				filters={"voucher_type": "Journal Entry", "voucher_no": _jv_doc.name, "is_cancelled": 0},
-				fields=["account", "debit", "credit", "posting_date"],
-				order_by="posting_date, account, creation",
-			)
-			expected_jv_entries = [
-				[gle.account, gle.debit, gle.credit, gle.posting_date] for gle in gl_entries
-			]
-
-			check_gl_entries(
-				doc=self,
-				voucher_no=jea_parent.parent,
-				expected_gle=expected_jv_entries,
-				posting_date=pi.posting_date,
-				voucher_type="Journal Entry",
-			)
+		self.assertSetEqual(actual_set, expected_set)
 
 	def test_single_payment_request_for_purchase_invoice_TC_ACC_035(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
@@ -2931,7 +2858,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			create_records as records_for_pi,
 		)
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		records_for_pi("_Test Supplier")
@@ -2989,7 +2916,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			create_records as records_for_pi,
 		)
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		records_for_pi("_Test Supplier")
@@ -3351,12 +3278,14 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			get_linked_payments_for_doc,
 		)
 
+		frappe.set_value("Supplier", "_Test Supplier", "payment_terms", None)
 		add_purchase_invoice_in_account_reposting_setting()
 		pi = make_purchase_invoice(
 			qty=1, item_code="_Test Item", supplier="_Test Supplier", company="_Test Company", rate=30
 		)
 
 		pi.save()
+		pi.reload()
 		pi.submit()
 		pi_status_before = frappe.db.get_value("Purchase Invoice", pi.name, "status")
 		self.assertEqual(pi_status_before, "Unpaid")
@@ -3392,7 +3321,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(return_pi.status, "Return")
 
 		pi.reload()
-		self.assertEqual(pi.status, "Debit Note Issued")
+		self.assertEqual(pi.status, "Paid")
 
 		get_linked_payments_for_doc(pe.company, pe.doctype, pe.name)
 
@@ -3401,7 +3330,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			create_company,
 			create_payment_entry,
 		)
-		from erpnext.selling.doctype.sales_order.test_sales_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		warehouse = frappe.db.get_all("Warehouse", {"company": "_Test Company", "is_group": 0}, ["name"])
@@ -3578,7 +3507,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			create_company,
 			create_payment_entry,
 		)
-		from erpnext.selling.doctype.sales_order.test_sales_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		warehouse = frappe.db.get_all("Warehouse", {"company": "_Test Company", "is_group": 0}, ["name"])
@@ -3666,7 +3595,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	def test_fully_paid_of_pi_to_pr_to_pe_with_gst_TC_B_084(self):
 		frappe.set_user("Administrator")
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
+		frappe.set_value("Supplier", "_Test Supplier", "payment_terms", None)
 		template = frappe.get_all(
 			"Purchase Taxes and Charges Template",
 			filters={
@@ -3814,13 +3745,13 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_standalone_pi_is_fully_paid_TC_B_088(self):
 		frappe.set_user("Administrator")
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		purchase_tax = frappe.new_doc("Purchase Taxes and Charges Template")
 		purchase_tax.title = "TEST"
 		purchase_tax.company = "_Test Company"
-		purchase_tax.tax_category = "_Test Tax Category 1"
+		purchase_tax.tax_category = "_Test Tax Category 2"
 
 		purchase_tax.append(
 			"taxes",
@@ -3859,13 +3790,13 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_standalone_pi_is_partly_paid_TC_B_090(self):
 		frappe.set_user("Administrator")
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		purchase_tax = frappe.new_doc("Purchase Taxes and Charges Template")
 		purchase_tax.title = "TEST"
 		purchase_tax.company = "_Test Company"
-		purchase_tax.tax_category = "_Test Tax Category 1"
+		purchase_tax.tax_category = "_Test Tax Category 2"
 
 		purchase_tax.append(
 			"taxes",
@@ -3903,7 +3834,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(pi_status, "Partly Paid")
 
 	def test_pi_with_additional_discount_TC_B_054(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		pi_data = {
@@ -3953,7 +3884,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(pi_total, 10080)
 
 	def test_pi_with_additional_discount_TC_B_060(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		# Scenario : PI [With Additional Discount on Grand Total][StandAlone]
@@ -4006,7 +3937,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	@if_app_installed("india_compliance")
 	def test_pi_standalone_pi_with_deferred_expense_TC_B_095(self):
 		gst_hsn_code = "11112222"
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		from erpnext.accounts.doctype.account.test_account import create_account
@@ -4161,8 +4092,8 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			make_test_item,
 		)
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.get_item_details import calculate_service_end_date
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 
@@ -4326,7 +4257,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
 			update_repost_settings,
 		)
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		update_repost_settings()
@@ -4538,8 +4469,8 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	def test_direct_purchase_invoice_via_update_stock_TC_SCK_131(self):
 		# Create Purchase Invoice with Update Stock
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.selling.doctype.sales_order.test_sales_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		parent_warehouse = frappe.db.get_value(
@@ -4602,7 +4533,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_supplier_invoice_number_uniqueness_validation_TC_ACC_136(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		account_setting = frappe.get_doc("Accounts Settings")
@@ -4857,7 +4788,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_payment_term_discount_for_pi_at_fully_paid_TC_ACC_098(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		if not frappe.db.exists("Payment Term", "_Test Discount Term"):
@@ -4915,7 +4846,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_payment_term_discount_for_pi_at_partially_paid_TC_ACC_100(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		if not frappe.db.exists("Payment Term", "_Test partially Discount Term"):
@@ -4978,7 +4909,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	def test_stop_pi_creation_when_value_exceeds_budget_TC_ACC_133(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.utils import get_fiscal_year
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		year = get_fiscal_year(date=nowdate(), company="_Test Company")[0]
@@ -5041,7 +4972,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	def test_warn_pi_creation_when_value_exceeds_budget_TC_ACC_145(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.utils import get_fiscal_year
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		year = get_fiscal_year(date=nowdate(), company="_Test Company")[0]
@@ -5220,6 +5151,425 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(invoice.grand_total, 300)
 
+	def test_pr_pi_over_billing(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as make_purchase_invoice_from_pr,
+		)
+
+		# Configure Buying Settings to allow rate change
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		pr = make_purchase_receipt(qty=10, rate=10)
+		pi = make_purchase_invoice_from_pr(pr.name)
+
+		pi.items[0].rate = 12
+
+		# Test 1 - This will fail because over billing is not allowed
+		self.assertRaises(frappe.ValidationError, pi.submit)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+		# Test 2 - This will now submit because over billing allowance is ignored when set_landed_cost_based_on_purchase_invoice_rate is checked
+		pi.submit()
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 20)
+		pi.cancel()
+		pi = make_purchase_invoice_from_pr(pr.name)
+		pi.items[0].rate = 12
+
+		# Test 3 - This will now submit because over billing is allowed upto 20%
+		pi.submit()
+
+		pi.reload()
+		pi.cancel()
+		pi = make_purchase_invoice_from_pr(pr.name)
+		pi.items[0].rate = 13
+
+		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
+		self.assertRaises(frappe.ValidationError, pi.submit)
+
+	def test_discount_percentage_not_set_when_amount_is_manually_set(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		discount_amount = 7
+		pi.discount_amount = discount_amount
+		pi.save()
+		self.assertEqual(pi.additional_discount_percentage, None)
+		pi.set_posting_time = 1
+		pi.posting_date = add_days(today(), -1)
+		pi.save()
+		self.assertEqual(pi.discount_amount, discount_amount)
+
+	@if_app_installed("projects")
+	def test_validate_available_budget_TC_ACC_292(self):
+		from unittest.mock import patch
+
+		project_name = "test_project" + frappe.generate_hash(length=5)
+		if not frappe.db.exists("Project", {"project_name": project_name}):
+			frappe.get_doc(
+				{"doctype": "Project", "company": "_Test Company", "project_name": project_name, "is_wbs": 1}
+			).insert(ignore_permissions=True)
+
+		project = frappe.db.get_value("Project", {"project_name": project_name})
+
+		wbs = frappe.get_doc(
+			{
+				"doctype": "Work Breakdown Structure",
+				"project": project,
+				"wbs_name": "test_wbs",
+				"company": "_Test Company",
+				"gl_account": "Cash - _TC",
+			}
+		)
+		wbs.insert(ignore_permissions=True)
+		wbs.submit()
+
+		self.assertEqual(wbs.docstatus, 1)
+
+		zero_budget = frappe.get_doc(
+			{
+				"doctype": "Zero Budget",
+				"project": project,
+				"posting_date": today(),
+				"zero_budget_item": [{"wbs_element": wbs.name, "zero_budget": 100}],
+			}
+		)
+		zero_budget.insert(ignore_permissions=True)
+		zero_budget.submit()
+
+		self.assertEqual(wbs.docstatus, 1)
+
+		wbs.load_from_db()
+
+		wbs_1 = frappe.copy_doc(wbs)
+		wbs_1.insert(ignore_permissions=True)
+		wbs_1.submit()
+
+		with patch("frappe.msgprint") as mock_msgprint:
+			args = {"qty": 1, "rate": 200, "do_not_submit": True}
+			pi = make_purchase_invoice(**args)
+			pi.items[0].work_breakdown_structure = wbs.name
+			pi.save()
+
+			self.assertTrue(mock_msgprint.called)
+			msg_args, _ = mock_msgprint.call_args
+			self.assertIn("Available Budget Limit Exceeded", msg_args[0])
+
+			pi.append(
+				"items",
+				{
+					"item_code": "_Test Item",
+					"rate": 200,
+					"qty": 1,
+					"warehouse": "_Test Warehouse - _TC",
+					"work_breakdown_structure": wbs_1.name,
+				},
+			)
+			pi.save()
+			self.assertTrue(mock_msgprint.called)
+			msg_args, _ = mock_msgprint.call_args
+			self.assertIn("Available Budget Limit Exceeded", msg_args[0])
+
+	@if_app_installed("projects")
+	def test_update_actual_overall_budget_TC_ACC_293(self):
+		project_name = "test_project" + frappe.generate_hash(length=5)
+		if not frappe.db.exists("Project", {"project_name": project_name}):
+			frappe.get_doc(
+				{"doctype": "Project", "company": "_Test Company", "project_name": project_name, "is_wbs": 1}
+			).insert()
+
+		project = frappe.db.get_value("Project", {"project_name": project_name})
+
+		wbs = frappe.get_doc(
+			{
+				"doctype": "Work Breakdown Structure",
+				"project": project,
+				"wbs_name": "test_wbs",
+				"company": "_Test Company",
+				"gl_account": "Cash - _TC",
+			}
+		)
+		wbs.insert()
+		wbs.submit()
+
+		self.assertEqual(wbs.docstatus, 1)
+
+		zero_budget = frappe.get_doc(
+			{
+				"doctype": "Zero Budget",
+				"project": project,
+				"posting_date": today(),
+				"zero_budget_item": [{"wbs_element": wbs.name, "zero_budget": 100}],
+			}
+		)
+		zero_budget.insert()
+		zero_budget.submit()
+
+		self.assertEqual(wbs.docstatus, 1)
+
+		args = {"qty": 1, "rate": 200, "do_not_submit": True}
+		pi = make_purchase_invoice(**args)
+		pi.items[0].work_breakdown_structure = wbs.name
+		pi.save()
+		pi.submit()
+		self.assertEqual(pi.docstatus, 1)
+
+		pi.load_from_db()
+		pi.cancel()
+
+	@if_app_installed("projects")
+	def test_update_locked_actual_overall_budgets_TC_ACC_294(self):
+		project_name = "test_project" + frappe.generate_hash(length=5)
+		if not frappe.db.exists("Project", {"project_name": project_name}):
+			frappe.get_doc(
+				{"doctype": "Project", "company": "_Test Company", "project_name": project_name, "is_wbs": 1}
+			).insert()
+
+		project = frappe.db.get_value("Project", {"project_name": project_name})
+
+		wbs = frappe.get_doc(
+			{
+				"doctype": "Work Breakdown Structure",
+				"project": project,
+				"wbs_name": "test_wbs",
+				"company": "_Test Company",
+				"gl_account": "Cash - _TC",
+			}
+		)
+		wbs.insert()
+		wbs.submit()
+
+		self.assertEqual(wbs.docstatus, 1)
+
+		zero_budget = frappe.get_doc(
+			{
+				"doctype": "Zero Budget",
+				"project": project,
+				"posting_date": today(),
+				"zero_budget_item": [{"wbs_element": wbs.name, "zero_budget": 100}],
+			}
+		)
+		zero_budget.insert()
+		zero_budget.submit()
+
+		self.assertEqual(wbs.docstatus, 1)
+		frappe.db.set_value("Work Breakdown Structure", wbs.name, "locked", 1)
+
+		args = {"qty": 1, "rate": 100, "do_not_submit": True}
+		pi = make_purchase_invoice(**args)
+		pi.items[0].work_breakdown_structure = wbs.name
+		pi.save()
+		with self.assertRaises(frappe.exceptions.ValidationError) as cm:
+			pi.submit()
+
+		self.assertIn("this WBS is locked", str(cm.exception))
+
+		frappe.db.set_value("Work Breakdown Structure", wbs.name, "locked", 0)
+		pi.submit()
+		self.assertEqual(pi.docstatus, 1)
+
+		frappe.db.set_value("Work Breakdown Structure", wbs.name, "locked", 1)
+		with self.assertRaises(frappe.exceptions.ValidationError) as cm:
+			pi.cancel()
+
+		self.assertIn("this WBS is locked", str(cm.exception))
+
+	@if_app_installed("projects")
+	def test_locked_committed_overall_budget_po_to_pi_TC_ACC_295(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		project_name = "test_project" + frappe.generate_hash(length=5)
+		if not frappe.db.exists("Project", {"project_name": project_name}):
+			frappe.get_doc(
+				{"doctype": "Project", "company": "_Test Company", "project_name": project_name, "is_wbs": 1}
+			).insert()
+
+		project = frappe.db.get_value("Project", {"project_name": project_name})
+
+		wbs = frappe.get_doc(
+			{
+				"doctype": "Work Breakdown Structure",
+				"project": project,
+				"wbs_name": "test_wbs",
+				"company": "_Test Company",
+				"gl_account": "Cash - _TC",
+			}
+		)
+		wbs.insert()
+		wbs.submit()
+
+		self.assertEqual(wbs.docstatus, 1)
+
+		zero_budget = frappe.get_doc(
+			{
+				"doctype": "Zero Budget",
+				"project": project,
+				"posting_date": today(),
+				"zero_budget_item": [{"wbs_element": wbs.name, "zero_budget": 100}],
+			}
+		)
+		zero_budget.insert()
+		zero_budget.submit()
+
+		args = {"qty": 1, "rate": 100, "do_not_save": True}
+		po = create_purchase_order(**args)
+		po.insert(ignore_permissions=True)
+		po.submit()
+		self.assertEqual(po.docstatus, 1)
+
+		frappe.db.set_value("Work Breakdown Structure", wbs.name, "locked", 1)
+		po = make_purchase_invoice(po.name)
+		po.items[0].work_breakdown_structure = wbs.name
+		po.save()
+		with self.assertRaises(frappe.exceptions.ValidationError) as cm:
+			po.submit()
+
+		self.assertIn("this WBS is locked", str(cm.exception))
+
+		frappe.db.set_value("Work Breakdown Structure", wbs.name, "locked", 0)
+		po.submit()
+		self.assertEqual(po.docstatus, 1)
+
+		frappe.db.set_value("Work Breakdown Structure", wbs.name, "locked", 1)
+		with self.assertRaises(frappe.exceptions.ValidationError) as cm:
+			po.cancel()
+
+		self.assertIn("this WBS is locked", str(cm.exception))
+
+	@change_settings("Buying Settings", {"po_required": "Yes"})
+	def test_po_required_in_pi_TC_ACC_319(self):
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pi.insert(ignore_permissions=True)
+		self.assertIn(
+			"Purchase Order Required for item _Test ItemTo submit the invoice without purchase order please set Purchase Order Required as No in Buying Settings",
+			str(cm.exception),
+		)
+
+	@change_settings("Buying Settings", {"pr_required": "Yes"})
+	def test_pr_required_in_pi_TC_ACC_309(self):
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pi.insert(ignore_permissions=True)
+		self.assertIn(
+			"Purchase Receipt Required for item _Test ItemTo submit the invoice without purchase receipt please set Purchase Receipt Required as No in Buying Settings",
+			str(cm.exception),
+		)
+
+	def test_validate_write_off_account_TC_ACC_310(self):
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		pi.write_off_amount = 100
+		pi.write_off_account = ""
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pi.save()
+		self.assertIn("Please enter Write Off Account", str(cm.exception))
+
+	def test_validate_supplier_invoice_date_TC_ACC_311(self):
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		pi.posting_date = today()
+		pi.bill_date = add_days(today(), 1)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pi.save()
+		self.assertIn("Supplier Invoice Date cannot be greater than Posting Date", str(cm.exception))
+
+	def test_block_and_unblock_purchase_invoice_TC_ACC_312(self):
+		from .purchase_invoice import block_invoice, change_release_date, unblock_invoice
+
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		pi.insert(ignore_permissions=True)
+		pi.submit()
+
+		block_invoice(pi.name, release_date=today(), hold_comment="Test Comment")
+		pi.load_from_db()
+
+		self.assertEqual(pi.on_hold, 1)
+		self.assertEqual(pi.docstatus, 1)
+
+		unblock_invoice(pi.name)
+		pi.load_from_db()
+
+		self.assertEqual(pi.on_hold, 0)
+		self.assertEqual(pi.docstatus, 1)
+
+		change_release_date(name=pi.name, release_date=add_days(today(), 1))
+		pi.load_from_db()
+		self.assertEqual(getdate(pi.release_date), getdate(add_days(today(), 1)))
+
+	def test_get_list_context_313(self):
+		from .purchase_invoice import get_list_context
+
+		data = get_list_context()
+		self.assertTrue(data.get("title"), "Purchase Invoices")
+		self.assertTrue(data.get("no_breadcrumbs"), True)
+		self.assertTrue(data.get("show_sidebar"), True)
+		self.assertTrue(data.get("show_search"), True)
+
+	def test_check_prev_docstatus_314(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		po = create_purchase_order(do_not_save=True)
+		po.insert(ignore_permissions=True)
+
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.items[0].purchase_order = po.name
+		pi.insert(ignore_permissions=True)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pi.submit()
+		self.assertIn(f"{po.doctype} {po.name} is not submitted", str(cm.exception))
+
+		pr = make_purchase_receipt(do_not_save=True)
+		pr.insert(ignore_permissions=True)
+
+		pi_1 = make_purchase_invoice(do_not_save=True)
+		pi_1.items[0].purchase_receipt = pr.name
+		pi_1.insert(ignore_permissions=True)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pi_1.submit()
+		self.assertIn(f"{pr.doctype} {pr.name} is not submitted", str(cm.exception))
+
+	def test_make_write_off_gl_entry_with_writeoff_account_TC_ACC_315(self):
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		pi.write_off_amount = 100
+		pi.write_off_account = "Cash - _TC"
+		pi.insert(ignore_permissions=True)
+		pi.submit()
+
+		self.assertEqual(pi.status, "Partly Paid")
+		self.assertEqual(pi.docstatus, 1)
+
+	def test_create_remarks_TC_ACC_316(self):
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		pi.remarks = ""
+		pi.bill_no = "test-1122"
+		pi.bill_date = today()
+		pi.insert(ignore_permissions=True)
+		pi.submit()
+		self.assertEqual(pi.remarks, f"Against Supplier Invoice {pi.bill_no} dated {formatdate(today())}")
+
+	def test_validate_credit_to_acc_TC_ACC_317(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		account = create_account(
+			account_name="Deferred Expense", parent_account="Current Assets - _TC", company="_Test Company"
+		)
+		args = {"qty": 1, "rate": 200, "do_not_save": True}
+		pi = make_purchase_invoice(**args)
+		pi.credit_to = account
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pi.insert(ignore_mandatory=True)
+		self.assertIn(
+			"Please ensure that the Credit To account Deferred Expense - _TC is a Payable account. You can change the account type to Payable or select a different account.",
+			str(cm.exception),
+		)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
@@ -5330,7 +5680,7 @@ def make_purchase_invoice(**args):
 	bundle_id = None
 	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
 		batches = {}
-		qty = args.qty or 5
+		qty = args.qty if args.qty is not None else 5
 		item_code = args.item or args.item_code or "_Test Item"
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -5359,7 +5709,7 @@ def make_purchase_invoice(**args):
 			"item_code": args.item or args.item_code or "_Test Item",
 			"item_name": args.item_name,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
-			"qty": args.qty or 5,
+			"qty": args.qty if args.qty is not None else 5,
 			"received_qty": args.received_qty or 0,
 			"rejected_qty": args.rejected_qty or 0,
 			"rate": args.rate or 50,

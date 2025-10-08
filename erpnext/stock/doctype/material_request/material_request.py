@@ -648,7 +648,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 		target_doc,
 		postprocess,
 	)
-
+	doclist.set_onload("load_after_mapping", False)
 	return doclist
 
 

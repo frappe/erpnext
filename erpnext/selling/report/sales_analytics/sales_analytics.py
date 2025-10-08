@@ -172,14 +172,19 @@ class Analytics:
 			entity = "supplier as entity"
 			entity_name = "supplier_name as entity_name"
 
+		filters = {
+			"docstatus": 1,
+			"company": ["in", self.filters.company],
+			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		}
+
+		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+			filters.update({"is_opening": "No"})
+
 		self.entries = frappe.get_all(
 			self.filters.doc_type,
 			fields=[entity, entity_name, value_field, self.date_field],
-			filters={
-				"docstatus": 1,
-				"company": ["in", self.filters.company],
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
+			filters=filters,
 		)
 
 		self.entity_names = {}
@@ -275,15 +280,18 @@ class Analytics:
 
 		entity = "project as entity"
 
+		filters = {
+			"docstatus": 1,
+			"company": ["in", self.filters.company],
+			"project": ["!=", ""],
+			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		}
+
+		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+			filters.update({"is_opening": "No"})
+
 		self.entries = frappe.get_all(
-			self.filters.doc_type,
-			fields=[entity, value_field, self.date_field],
-			filters={
-				"docstatus": 1,
-				"company": ["in", self.filters.company],
-				"project": ["!=", ""],
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
+			self.filters.doc_type, fields=[entity, value_field, self.date_field], filters=filters
 		)
 
 	def get_rows(self):

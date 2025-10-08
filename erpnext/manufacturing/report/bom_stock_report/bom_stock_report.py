@@ -23,6 +23,7 @@ def get_columns():
 	"""return columns"""
 	columns = [
 		_("Item") + ":Link/Item:150",
+		_("Item Name") + "::240",
 		_("Description") + "::300",
 		_("BOM Qty") + ":Float:160",
 		_("BOM UoM") + "::160",
@@ -73,18 +74,22 @@ def get_bom_stock(filters):
 		.on((BOM_ITEM.item_code == BIN.item_code) & (CONDITIONS))
 		.select(
 			BOM_ITEM.item_code,
+			BOM_ITEM.item_name,
 			BOM_ITEM.description,
 			BOM_ITEM.stock_qty,
 			BOM_ITEM.stock_uom,
 			BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity,
-			Sum(BIN.actual_qty).as_("actual_qty"),
+			BIN.actual_qty.as_("actual_qty"),
 			Sum(Floor(BIN.actual_qty / (BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity))),
 		)
 		.where((BOM_ITEM.parent == filters.get("bom")) & (BOM_ITEM.parenttype == "BOM"))
-		.groupby(BOM_ITEM.item_code,BOM_ITEM.description,
+		.groupby(
+			BOM_ITEM.item_code,
+			BOM_ITEM.description,
 			BOM_ITEM.stock_qty,
 			BOM_ITEM.stock_uom,
-			(BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity))
+			(BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity),
+		)
 	)
 
 	return QUERY.run()

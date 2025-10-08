@@ -75,7 +75,11 @@ def execute(filters=None):
 			# add first net income in operations section
 			if net_profit_loss:
 				net_profit_loss.update(
-					{"indent": 1, "parent_section": cash_flow_sections[0]["section_header"]}
+					{
+						"indent": 1,
+						"parent_section": cash_flow_sections[0]["section_header"],
+						"section": net_profit_loss["account"],
+					}
 				)
 				data.append(net_profit_loss)
 				section_data.append(net_profit_loss)

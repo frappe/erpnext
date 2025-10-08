@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cstr, flt
+from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.xlsxutils import handle_html
 from pypika import Order
 
@@ -356,11 +357,11 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 		sales_invoice = frappe.db.get_all(
 			"Sales Invoice Payment", {"mode_of_payment": filters.get("mode_of_payment")}, pluck="parent"
 		)
-		
+
 		if sales_invoice:
 			query = query.where(si.name.isin(sales_invoice))
 		else:
-			query = query.where(si.name == '')
+			query = query.where(si.name == "")
 
 	if filters.get("warehouse"):
 		if frappe.db.get_value("Warehouse", filters.get("warehouse"), "is_group"):
@@ -379,7 +380,12 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 		query = query.where(sii.item_code == filters.get("item_code"))
 
 	if filters.get("item_group"):
-		query = query.where(sii.item_group == filters.get("item_group"))
+		if frappe.db.get_value("Item Group", filters.get("item_group"), "is_group"):
+			item_groups = get_descendants_of("Item Group", filters.get("item_group"))
+			item_groups.append(filters.get("item_group"))
+			query = query.where(sii.item_group.isin(item_groups))
+		else:
+			query = query.where(sii.item_group == filters.get("item_group"))
 
 	if filters.get("income_account"):
 		query = query.where(
@@ -532,15 +538,12 @@ def get_grand_total(filters, doctype):
 		FROM `tab{0}`
 		WHERE docstatus = 1
 			AND posting_date BETWEEN '{1}' AND '{2}'
-		"""
-		.format(
-			doctype,
-			filters.get("from_date"),
-			filters.get("to_date")
-		),as_list = 1
+		""".format(doctype, filters.get("from_date"), filters.get("to_date")),
+		as_list=1,
 	)
 	if grand_total:
 		return flt(grand_total[0][0])
+
 
 def get_tax_accounts(
 	item_list,
@@ -826,4 +829,3 @@ def add_sub_total_row(item, total_row_map, group_by_value, tax_columns):
 	for tax in tax_columns:
 		total_row.setdefault(frappe.scrub(tax + " Amount"), 0.0)
 		total_row[frappe.scrub(tax + " Amount")] += flt(item[frappe.scrub(tax + " Amount")])
-

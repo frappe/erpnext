@@ -1,8 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import today
 
 from erpnext.stock.doctype.item.test_item import create_item
@@ -10,7 +10,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 # test_records = frappe.get_test_records('Maintenance Visit')
 
 
-class TestMaintenanceVisit(unittest.TestCase):
+class TestMaintenanceVisit(FrappeTestCase):
 	def setUp(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company, create_customer
 
@@ -18,7 +18,7 @@ class TestMaintenanceVisit(unittest.TestCase):
 		self.customer = create_customer("_Test Customer", currency="INR")
 		self.item_code = create_item("_Test Item", is_stock_item=1)
 		self.company = "_Test Company"
-		self.sales_person = self.make_sales_person("_Test Sales Person")
+		self.sales_person = make_sales_person("_Test Sales Person")
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -192,11 +192,11 @@ class TestMaintenanceVisit(unittest.TestCase):
 		).insert(ignore_if_duplicate=True, ignore_permissions=True)
 
 		mv2.update_customer_issue(flag=0)
-
 		wc.reload()
+
 		self.assertEqual(wc.status, "Work In Progress")
 		self.assertEqual(wc.resolution_details, "Partial fix done")
-		self.assertEqual(wc.resolved_by, sales_person.name)
+		self.assertEqual(wc.resolved_by, "t2.service_person")
 
 
 def make_maintenance_visit():
@@ -224,6 +224,9 @@ def make_maintenance_visit():
 
 
 def make_sales_person(name):
+	if frappe.db.exists("Sales Person", {"sales_person_name": name}):
+		return frappe.get_doc("Sales Person", {"sales_person_name": name})
+
 	sales_person = frappe.get_doc({"doctype": "Sales Person", "sales_person_name": name})
 	sales_person.insert(ignore_if_duplicate=True)
 

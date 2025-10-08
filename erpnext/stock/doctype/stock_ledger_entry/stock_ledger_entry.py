@@ -345,5 +345,4 @@ class StockLedgerEntry(Document):
 def on_doctype_update():
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
-	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")
-	frappe.db.add_index("Stock Ledger Entry", ["posting_datetime", "creation"])
+	frappe.db.add_index("Stock Ledger Entry", ["item_code", "warehouse", "posting_datetime", "creation"])

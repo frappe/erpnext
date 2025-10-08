@@ -3,9 +3,9 @@ from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.stock_entry.test_stock_entry import get_or_create_fiscal_year
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison import execute
+from erpnext.stock.utils import get_or_create_fiscal_year
 
 
 class TestStockAndAccountValueComparison(FrappeTestCase):
@@ -22,7 +22,7 @@ class TestStockAndAccountValueComparison(FrappeTestCase):
 		self.create_stock_ledger_entry()
 		self.create_gl_entry()
 
-	def test_report_execute_and_columns_and_data_T_SAAVC_001(self):
+	def test_report_execute_and_columns_and_data_TC_SCK_511(self):
 		filters = frappe._dict({"company": self.company, "as_on_date": self.posting_date})
 		columns, data = execute(filters)
 		# Columns structure
@@ -50,7 +50,7 @@ class TestStockAndAccountValueComparison(FrappeTestCase):
 				row["difference_value"], row["stock_value"] - row["account_value"], places=2
 			)
 
-	def test_report_execute_with_account_filter_T_SAAVC_002(self):
+	def test_report_execute_with_account_filter_TC_SCK_512(self):
 		filters = frappe._dict(
 			{"company": self.company, "as_on_date": self.posting_date, "account": self.account}
 		)
@@ -60,7 +60,7 @@ class TestStockAndAccountValueComparison(FrappeTestCase):
 			self.assertIn("account_value", row)
 			self.assertIn("stock_value", row)
 
-	def test_report_perpetual_inventory_disabled_T_SAAVC_003(self):
+	def test_report_perpetual_inventory_disabled_TC_SCK_513(self):
 		import erpnext
 
 		filters = frappe._dict({"company": self.company, "as_on_date": self.posting_date})
@@ -70,7 +70,7 @@ class TestStockAndAccountValueComparison(FrappeTestCase):
 			execute(filters)
 		erpnext.is_perpetual_inventory_enabled = original
 
-	def test_data_difference_filtering_T_SAAVC_004(self):
+	def test_data_difference_filtering_TC_SCK_514(self):
 		# Manipulate GL Entry to force a difference > 0.1
 		frappe.db.set_value(
 			"GL Entry",
@@ -82,7 +82,7 @@ class TestStockAndAccountValueComparison(FrappeTestCase):
 		_, data = execute(filters)
 		self.assertTrue(any(abs(row["difference_value"]) > 0.1 for row in data))
 
-	def test_posting_time_conversion_T_SAAVC_005(self):
+	def test_posting_time_conversion_TC_SCK_515(self):
 		filters = frappe._dict({"company": self.company, "as_on_date": self.posting_date})
 		_, data = execute(filters)
 		for row in data:
@@ -91,7 +91,7 @@ class TestStockAndAccountValueComparison(FrappeTestCase):
 
 				self.assertIsInstance(row["posting_time"], timedelta)
 
-	def test_create_reposting_entries_T_SAAVC_006(self):
+	def test_create_reposting_entries_TC_SCK_516(self):
 		from unittest.mock import patch
 
 		from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison import (

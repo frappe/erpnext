@@ -14,7 +14,7 @@ class BuyingSettings(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING: # pragma: no cover
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
 
 		allow_multiple_items: DF.Check
@@ -35,6 +35,7 @@ class BuyingSettings(Document):
 		project_update_frequency: DF.Literal["Each Transaction", "Manual"]
 		role_to_override_stop_action: DF.Link | None
 		set_landed_cost_based_on_purchase_invoice_rate: DF.Check
+		set_valuation_rate_for_rejected_materials: DF.Check
 		show_pay_button: DF.Check
 		supp_master_name: DF.Literal["Supplier Name", "Naming Series", "Auto Name"]
 		supplier_group: DF.Link | None
@@ -53,6 +54,9 @@ class BuyingSettings(Document):
 			self.get("supp_master_name") == "Naming Series",
 			hide_name_field=False,
 		)
+
+		if not self.bill_for_rejected_quantity_in_purchase_invoice:
+			self.set_valuation_rate_for_rejected_materials = 0
 
 	def before_save(self):
 		self.check_maintain_same_rate()

@@ -5,8 +5,9 @@
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, getdate, nowdate
 from frappe.tests.utils import if_app_installed
+from frappe.utils import flt, getdate, nowdate
+
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -18,14 +19,19 @@ class Quotation(SellingController):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING: # pragma: no cover 
+	if TYPE_CHECKING:  # pragma: no cover
+		from frappe.types import DF
+
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import SalesTaxesandCharges
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
+			SalesTaxesandCharges,
+		)
 		from erpnext.selling.doctype.quotation_item.quotation_item import QuotationItem
-		from erpnext.setup.doctype.quotation_lost_reason_detail.quotation_lost_reason_detail import QuotationLostReasonDetail
+		from erpnext.setup.doctype.quotation_lost_reason_detail.quotation_lost_reason_detail import (
+			QuotationLostReasonDetail,
+		)
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
-		from frappe.types import DF
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.SmallText | None
@@ -87,7 +93,9 @@ class Quotation(SellingController):
 		shipping_address: DF.SmallText | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
-		status: DF.Literal["Draft", "Open", "Replied", "Partially Ordered", "Ordered", "Lost", "Cancelled", "Expired"]
+		status: DF.Literal[
+			"Draft", "Open", "Replied", "Partially Ordered", "Ordered", "Lost", "Cancelled", "Expired"
+		]
 		supplier_quotation: DF.Link | None
 		tax_category: DF.Link | None
 		taxes: DF.Table[SalesTaxesandCharges]
@@ -144,28 +152,22 @@ class Quotation(SellingController):
 				row.has_alternative_item = 1
 
 	def get_ordered_status(self):
-		status = "Open"
-		ordered_items = frappe._dict(frappe.db.sql(
-			"""
-				SELECT item_code,sum(qty) 
-				FROM `tabSales Order Item` 
-				WHERE prevdoc_docname = '{docname}' and docstatus = 1
-				Group BY item_code;
-			""".format(docname=self.name),
-		debug=True))
+		ordered_items = get_ordered_items(self.name)
 
 		if not ordered_items:
-			return status
+			return "Open"
 
-		has_alternatives = any(row.is_alternative for row in self.get("items"))
-		self._items = self.get_valid_items() if has_alternatives else self.get("items")
+		self._items = (
+			self.get_valid_items()
+			if any(row.is_alternative for row in self.get("items"))
+			else self.get("items")
+		)
 
-		if any(row.qty > ordered_items.get(row.item_code, 0.0) for row in self._items):
-			status = "Partially Ordered"
-		else:
-			status = "Ordered"
+		for row in self._items:
+			if row.name not in ordered_items or row.qty > ordered_items[row.name]:
+				return "Partially Ordered"
 
-		return status
+		return "Ordered"
 
 	def get_valid_items(self):
 		"""
@@ -258,8 +260,6 @@ class Quotation(SellingController):
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 
-		
-
 	def on_submit(self):
 		# Check for Approving Authority
 		frappe.get_doc("Authorization Control").validate_approving_authority(
@@ -343,48 +343,45 @@ def make_sales_order(source_name: str, target_doc=None):
 
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	customer = _make_customer(source_name, ignore_permissions)
-	ordered_items = frappe._dict(
-		frappe.db.sql(
-		"""
-		SELECT item_code, SUM(qty)
-		FROM "tabSales Order Item"
-		WHERE prevdoc_docname = %s AND docstatus = 1
-		GROUP BY item_code
-		""",
-		(source_name,),
-		as_list=True
-	)
-) 
+	ordered_items = get_ordered_items(source_name)
+
 	selected_rows = [x.get("name") for x in frappe.flags.get("args", {}).get("selected_items", [])]
+
+	# 0 qty is accepted, as the qty uncertain for some items
+	has_unit_price_items = frappe.db.get_value("Quotation", source_name, "has_unit_price_items")
+
+	def is_unit_price_row(source) -> bool:
+		return has_unit_price_items and source.qty == 0
 
 	def set_missing_values(source, target):
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
+
+			# sales team
+			if not target.get("sales_team"):
+				for d in customer.get("sales_team") or []:
+					target.append(
+						"sales_team",
+						{
+							"sales_person": d.sales_person,
+							"allocated_percentage": d.allocated_percentage or None,
+							"commission_rate": d.commission_rate,
+						},
+					)
+
 		if source.referral_sales_partner:
 			target.sales_partner = source.referral_sales_partner
 			target.commission_rate = frappe.get_value(
 				"Sales Partner", source.referral_sales_partner, "commission_rate"
 			)
 
-		# sales team
-		if not target.get("sales_team"):
-			for d in customer.get("sales_team") or []:
-				target.append(
-					"sales_team",
-					{
-						"sales_person": d.sales_person,
-						"allocated_percentage": d.allocated_percentage or None,
-						"commission_rate": d.commission_rate,
-					},
-				)
-
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		balance_qty = obj.qty - ordered_items.get(obj.item_code, 0.0)
+		balance_qty = obj.qty if is_unit_price_row(obj) else obj.qty - ordered_items.get(obj.name, 0.0)
 		target.qty = balance_qty if balance_qty > 0 else 0
 		target.stock_qty = flt(target.qty) * flt(obj.conversion_factor)
 
@@ -398,21 +395,19 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		Row mapping from Quotation to Sales order:
 		1. If no selections, map all non-alternative rows (that sum up to the grand total)
 		2. If selections: Is Alternative Item/Has Alternative Item: Map if selected and adequate qty
-		3. If selections: Simple row: Map if adequate qty
+		3. If no selections: Simple row: Map if adequate qty
 		"""
-		balance_qty = item.qty - ordered_items.get(item.item_code, 0.0)
-		if balance_qty <= 0:
+		if not ((item.qty > ordered_items.get(item.name, 0.0)) or is_unit_price_row(item)):
 			return False
-		has_qty = balance_qty
 
 		if not selected_rows:
 			return not item.is_alternative
 
 		if selected_rows and (item.is_alternative or item.has_alternative_item):
-			return (item.name in selected_rows) and has_qty
+			return item.name in selected_rows
 
 		# Simple row
-		return has_qty
+		return True
 
 	doclist = get_mapped_doc(
 		"Quotation",
@@ -530,6 +525,7 @@ def _make_customer(source_name, ignore_permissions=False):
 
 	return None
 
+
 @if_app_installed("erpnext_crm")
 def create_customer_from_lead(lead_name, ignore_permissions=False):
 	from erpnext_crm.erpnext_crm.doctype.lead.lead import _make_customer
@@ -542,6 +538,7 @@ def create_customer_from_lead(lead_name, ignore_permissions=False):
 		return customer
 	except frappe.MandatoryError as e:
 		handle_mandatory_error(e, customer, lead_name)
+
 
 @if_app_installed("erpnext_crm")
 def create_customer_from_prospect(prospect_name, ignore_permissions=False):
@@ -571,35 +568,60 @@ def handle_mandatory_error(e, customer, lead_name):
 	frappe.throw(message, title=_("Mandatory Missing"))
 
 
+def get_ordered_items(quotation: str):
+	"""
+	Returns a dict of ordered items with their total qty based on quotation row name.
+
+	In `Sales Order Item`, `quotation_item` is the row name of `Quotation Item`.
+
+	Example:
+	```
+	{
+	    "refsdjhd2": 10,
+	    "ygdhdshrt": 5,
+	}
+	```
+	"""
+	return frappe._dict(
+		frappe.get_all(
+			"Sales Order Item",
+			filters={"prevdoc_docname": quotation, "docstatus": 1},
+			fields=["quotation_item", "sum(qty)"],
+			group_by="quotation_item",
+			as_list=1,
+		)
+	)
+
+
 @frappe.whitelist()
 def get_field_for_lost(doctype):
 	options = "Quotation Lost Reason Detail"
 	competitor = None
-	
-	if "crm" in frappe.get_installed_apps():		
-		if doctype == "Opportunity" : options = "Opportunity Lost Reason Detail"
+
+	if "crm" in frappe.get_installed_apps():
+		if doctype == "Opportunity":
+			options = "Opportunity Lost Reason Detail"
 		competitor = {
-				"fieldtype": "Table MultiSelect",
-				"label": _("Competitors"),
-				"fieldname": "competitors",
-				"options": "Competitor Detail",
-			} 
+			"fieldtype": "Table MultiSelect",
+			"label": _("Competitors"),
+			"fieldname": "competitors",
+			"options": "Competitor Detail",
+		}
 
 	fields = [
-				{
-					"fieldtype": "Table MultiSelect",
-					"label": _("Lost Reasons"),
-					"fieldname": "lost_reason",
-					"options": options ,  
-					"reqd": 1,
-				},
-				
-				{
-					"fieldtype": "Small Text",
-					"label": _("Detailed Reason"),
-					"fieldname": "detailed_reason",
-				}
-			]
+		{
+			"fieldtype": "Table MultiSelect",
+			"label": _("Lost Reasons"),
+			"fieldname": "lost_reason",
+			"options": options,
+			"reqd": 1,
+		},
+		{
+			"fieldtype": "Small Text",
+			"label": _("Detailed Reason"),
+			"fieldname": "detailed_reason",
+		},
+	]
 	if competitor:
 		fields.append(competitor)
 

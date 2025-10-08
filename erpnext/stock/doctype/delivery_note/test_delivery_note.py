@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account,
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_customer, make_test_item
 from erpnext.accounts.utils import get_balance_on
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import (
@@ -48,6 +49,16 @@ from erpnext.stock.stock_ledger import get_previous_sle
 
 
 class TestDeliveryNote(FrappeTestCase):
+	def test_delivery_note_qty(self):
+		dn = create_delivery_note(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			dn.save()
+
+		# No error with qty=1
+		dn.items[0].qty = 1
+		dn.save()
+		self.assertEqual(dn.items[0].qty, 1)
+
 	def test_over_billing_against_dn(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
@@ -1815,6 +1826,28 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+	def test_dn_billing_status_case5(self):
+		# SO -> SI(with update stock partial invoice)
+		# SO -> DN
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+
+		so = make_sales_order(po_no="12345")
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].qty = 5
+		si.update_stock = 1
+		si.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, si.po_no)
+
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		self.assertEqual(dn.get("items")[0].billed_amt, 0)
+		self.assertEqual(dn.per_billed, 0)
+		self.assertEqual(dn.status, "To Bill")
+
 	def test_delivery_trip(self):
 		dn = create_delivery_note()
 		dt = make_delivery_trip(dn.name)
@@ -3552,11 +3585,10 @@ class TestDeliveryNote(FrappeTestCase):
 
 	@if_app_installed("erpnext_crm")
 	def test_dn_submission_TC_SCK_148(self):
-		from erpnext.selling.doctype.sales_order.test_sales_order import get_or_create_fiscal_year
-
 		# from erpnext_crm.erpnext_crm.doctype.lead.lead import make_customer
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		"""Test Purchase Receipt Creation, Submission, and Stock Ledger Update"""
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company, create_customer
@@ -3701,7 +3733,7 @@ def create_delivery_note(**args):
 		if dn.is_return:
 			type_of_transaction = "Inward"
 
-		qty = args.get("qty") or 1
+		qty = args.qty if args.get("qty") is not None else 1
 		qty *= -1 if type_of_transaction == "Outward" else 1
 		batches = {}
 		if args.get("batch_no"):
@@ -3732,7 +3764,7 @@ def create_delivery_note(**args):
 		{
 			"item_code": args.item or args.item_code or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
-			"qty": args.qty or 1,
+			"qty": args.qty if args.get("qty") is not None else 1,
 			"rate": args.rate if args.get("rate") is not None else 100,
 			"conversion_factor": 1.0,
 			"serial_and_batch_bundle": bundle_id,

@@ -92,7 +92,6 @@ def make_maintenance_visit(source_name, target_doc=None):
 		and t1.docstatus=1 and t1.completion_status='Fully Completed'""",
 		source_name,
 	)
-
 	if not visit:
 		target_doc = get_mapped_doc(
 			"Warranty Claim",
@@ -107,3 +106,5 @@ def make_maintenance_visit(source_name, target_doc=None):
 			map_child_doc(source_doc, target_doc, table_map, source_doc)
 
 		return target_doc
+	else :
+		frappe.throw(_("Maintenance Visit {0} already exists").format(visit[0][0]))

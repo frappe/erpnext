@@ -874,7 +874,7 @@ class StockController(AccountsController):
 						or sl_dict.actual_qty < 0
 						and self.get("is_return")
 					)
-					and self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+					and self.doctype in ["Purchase Invoice", "Purchase Receipt", "Stock Entry"]
 				) or (
 					(
 						sl_dict.actual_qty < 0
@@ -884,6 +884,14 @@ class StockController(AccountsController):
 					)
 					and self.doctype in ["Sales Invoice", "Delivery Note", "Stock Entry"]
 				):
+					if self.doctype == "Stock Entry":
+						if row.get("t_warehouse") == sl_dict.warehouse and sl_dict.get("actual_qty") > 0:
+							fieldname = f"to_{dimension.source_fieldname}"
+							if dimension.source_fieldname.startswith("to_"):
+								fieldname = f"{dimension.source_fieldname}"
+
+							sl_dict[dimension.target_fieldname] = row.get(fieldname)
+							return
 					sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 				else:
 					fieldname_start_with = "to"

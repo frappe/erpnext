@@ -1064,3 +1064,136 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])
+	
+
+	def test_build_delivery_note_map_TC_ACC_366(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as so_make_delivery_note
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as dn_make_sales_invoice
+		from erpnext.accounts.report.accounts_receivable import accounts_receivable
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+
+		# 1) Create Sales Order
+		so = make_sales_order(
+			company=self.company,
+			customer=self.customer,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			items=[{"item_code": "_Test Item", "qty": 10, "rate": 100}],
+		).save().submit()
+
+		# 2) Seed stock
+		make_stock_entry(item_code="_Test Item", target=self.warehouse, qty=10, company=self.company)
+
+		# 3) Delivery Note
+		dn = so_make_delivery_note(so.name)
+		dn.posting_date = today()
+		dn = dn.save().submit()
+
+		# 4) Sales Invoice from DN
+		si = dn_make_sales_invoice(dn.name)
+		si.posting_date = today()
+		si = si.save().submit()
+
+		# 5) Build report manually
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"show_delivery_notes": 1,
+		}
+		report = accounts_receivable.ReceivablePayableReport(filters)
+
+		# force invoices list so build_delivery_note_map() will run
+		report.invoices = [si.name]
+		report.build_delivery_note_map()
+
+		# now manually inject delivery_notes into row like set_delivery_notes would
+		si_row = frappe._dict(voucher_no=si.name, voucher_type="Sales Invoice")
+		report.set_delivery_notes(si_row)
+
+		self.assertTrue(si_row.delivery_notes)
+		self.assertIn(dn.name, si_row.delivery_notes)
+
+	def test_add_accounting_dimensions_filters_TC_ACC_367(self):
+		import erpnext.accounts.report.accounts_receivable.accounts_receivable as ar
+
+		# patch dimensions to only use cost_center (PLE always has this)
+		ar.get_accounting_dimensions = lambda as_list=False: [
+			frappe._dict(fieldname="cost_center", document_type="Cost Center")
+		]
+		ar.get_dimension_with_children = lambda doctype, value: [value] if isinstance(value, str) else value
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"cost_center": self.cost_center,
+		}
+
+		columns, data, *_ = execute(filters)
+		
+		self.assertIsInstance(columns, list)
+		self.assertIsInstance(data, list)
+
+	def test_fetch_ple_in_unbuffered_cursor_TC_ACC_368(self):
+		from contextlib import contextmanager
+		from collections import OrderedDict
+		from erpnext.accounts.report.accounts_receivable import accounts_receivable
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		si = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			items=[{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": self.warehouse}],
+		).save().submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		pe.posting_date = today()
+		pe = pe.save().submit()
+
+		# Build report, force UnBuffered mode
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"account_type": "Receivable",
+		}
+		report = accounts_receivable.ReceivablePayableReport(filters)
+		report.ple_fetch_method = "UnBuffered Cursor"
+		report.set_defaults()    
+		report.prepare_ple_query()      
+		report.voucher_balance = OrderedDict()
+		report.data = []
+		report.return_entries = {}
+
+		# Monkey-patch unbuffered_cursor (not implemented on Postgres)
+		@contextmanager
+		def _fake_unbuffered_cursor():
+			yield
+
+		original_unbuffered = frappe.db.unbuffered_cursor
+		try:
+			frappe.db.unbuffered_cursor = _fake_unbuffered_cursor
+			report.fetch_ple_in_unbuffered_cursor()
+		finally:
+			frappe.db.unbuffered_cursor = original_unbuffered
+		self.assertFalse(hasattr(report, "ple_entries"), "ple_entries should be deleted after processing")
+
+		si_row = next(
+			(rb for rb in report.voucher_balance.values()
+			if rb.voucher_type == "Sales Invoice" and rb.voucher_no == si.name),
+			None
+		)
+		self.assertIsNotNone(si_row, "Expected voucher_balance to contain the Sales Invoice row")
+		self.assertTrue(
+			abs(si_row.invoiced) > 0 or abs(si_row.paid) > 0 or abs(si_row.credit_note) > 0,
+			"Expected invoiced/paid/credit_note to be updated for the SI row",
+		)

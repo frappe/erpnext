@@ -46,7 +46,7 @@ class TestProductBundleBalance(FrappeTestCase):
 			posting_date=nowdate(),
 		)
 
-	def test_bundle_balance_report_T_PBB_001(self):
+	def test_bundle_balance_report_TC_SCK_508(self):
 		filters = {
 			"company": self.company,
 			"warehouse": self.warehouse,

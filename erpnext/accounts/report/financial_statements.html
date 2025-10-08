@@ -47,12 +47,12 @@
 		{% for(let j=0, k=data.length; j<k; j++) { %}
 			{%
 				var row = data[j];
-				var row_class = data[j].parent_account ? "" : "financial-statements-important";
-				row_class += data[j].account_name ? "" : " financial-statements-blank-row";
+				var row_class = data[j].parent_account || data[j].parent_section ? "" : "financial-statements-important";
+				row_class += data[j].account_name || data[j].section ? "" : " financial-statements-blank-row";
 			%}
 			<tr class="{%= row_class %}">
 				<td>
-					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name %}</span>
+					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name || row.section %}</span>
 				</td>
 				{% for(let i=1, l=report_columns.length; i<l; i++) { %}
 					<td class="text-right">

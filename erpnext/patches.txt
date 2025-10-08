@@ -255,6 +255,7 @@ erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Details", force=True)
 erpnext.patches.v14_0.update_proprietorship_to_individual
 erpnext.patches.v15_0.rename_subcontracting_fields
+erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
  
 
 [post_model_sync]
@@ -367,7 +368,6 @@ erpnext.patches.v15_0.enable_allow_existing_serial_no
 erpnext.patches.v15_0.update_cc_in_process_statement_of_accounts
 erpnext.patches.v15_0.update_asset_status_to_work_in_progress
 erpnext.patches.v15_0.rename_manufacturing_settings_field
-erpnext.patches.v15_0.migrate_checkbox_to_select_for_reconciliation_effect
 erpnext.patches.v15_0.sync_auto_reconcile_config
 execute:frappe.db.set_single_value("Accounts Settings", "exchange_gain_loss_posting_date", "Payment")
 erpnext.patches.v14_0.disable_add_row_in_gross_profit
@@ -381,3 +381,7 @@ erpnext.patches.v15_0.update_payment_schedule_fields_in_invoices
 erpnext.patches.v15_0.rename_group_by_to_categorize_by
 execute:frappe.db.set_single_value("Accounts Settings", "receivable_payable_fetch_method", "Buffered Cursor")
 erpnext.patches.v14_0.set_update_price_list_based_on
+erpnext.patches.v15_0.set_cancelled_status_to_cancelled_pos_invoice
+erpnext.patches.v15_0.rename_group_by_to_categorize_by_in_custom_reports
+erpnext.patches.v14_0.update_full_name_in_contract
+erpnext.patches.v15_0.drop_sle_indexes

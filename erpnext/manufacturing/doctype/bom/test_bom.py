@@ -2,35 +2,42 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import copy
 from collections import deque
 from functools import partial
 
 import frappe
-from frappe.tests.utils import FrappeTestCase, timeout, if_app_installed
+from frappe.tests.utils import FrappeTestCase, if_app_installed, timeout
 from frappe.utils import cstr, flt
 
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_receipt,
+	make_subcontracting_order,
+)
+from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+	create_purchase_order,
+	make_payment_entry,
+)
 from erpnext.controllers.tests.test_subcontracting_controller import (
+	get_rm_items,
+	make_stock_in_entry,
+	make_stock_transfer_entry,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
 )
-from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-import copy
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, make_payment_entry
-from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-from erpnext.controllers.tests.test_subcontracting_controller import get_rm_items, make_stock_in_entry, make_stock_transfer_entry
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice 
-from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import make_subcontracting_receipt
-
+from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	make_subcontracting_receipt,
+)
 
 test_records = frappe.get_test_records("BOM")
 test_dependencies = ["Item", "Quality Inspection Template"]
@@ -766,9 +773,10 @@ class TestBOM(FrappeTestCase):
 		self.assertTrue("_Test RM Item 1 Do Not Include In Manufacture" not in items)
 		self.assertTrue("_Test RM Item 2 Fixed Asset Item" not in items)
 		self.assertTrue("_Test RM Item 3 Manufacture Item" in items)
-	
+
 	def test_subcontrcting_supply_raw_material_TC_B_100(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
+
 		get_or_create_fiscal_year("_Test Company")
 		item_1 = create_item(item_code="Testing Service", is_stock_item=0)
 		item_1.item_group = "Services"
@@ -798,12 +806,19 @@ class TestBOM(FrappeTestCase):
 				item.qty = 2
 		bom.insert(ignore_permissions=True)
 		bom.submit()
-		po = create_purchase_order(item_code=item_1.item_code, qty=1, rate=1000, is_subcontracted=1, supplier_warehouse=supplier_warehouse, do_not_save=True)
+		po = create_purchase_order(
+			item_code=item_1.item_code,
+			qty=1,
+			rate=1000,
+			is_subcontracted=1,
+			supplier_warehouse=supplier_warehouse,
+			do_not_save=True,
+		)
 		po.items[0].fg_item = fg_item.item_code
 		po.items[0].fg_item_qty = 1
 		po.save()
 		po.submit()
-		sco = make_subcontracting_order(po.name) 
+		sco = make_subcontracting_order(po.name)
 		sco.supplier_warehouse = supplier_warehouse
 		sco.set_warehouse = create_warehouse("Stores - _TC")
 		sco.save()
@@ -830,9 +845,10 @@ class TestBOM(FrappeTestCase):
 		pi.save()
 		pi.submit()
 		self.assertEqual(pi.status, "Paid")
-	
+
 	def test_subcontrcting_supply_raw_material_TC_B_101(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
+
 		get_or_create_fiscal_year("_Test Company")
 		item_1 = create_item(item_code="Testing Service", is_stock_item=0)
 		item_1.item_group = "Services"
@@ -862,12 +878,19 @@ class TestBOM(FrappeTestCase):
 				item.qty = 2
 		bom.insert(ignore_permissions=True)
 		bom.submit()
-		po = create_purchase_order(item_code=item_1.item_code, qty=1, rate=1000, is_subcontracted=1, supplier_warehouse=supplier_warehouse, do_not_save=True)
+		po = create_purchase_order(
+			item_code=item_1.item_code,
+			qty=1,
+			rate=1000,
+			is_subcontracted=1,
+			supplier_warehouse=supplier_warehouse,
+			do_not_save=True,
+		)
 		po.items[0].fg_item = fg_item.item_code
 		po.items[0].fg_item_qty = 1
 		po.save()
 		po.submit()
-		sco = make_subcontracting_order(po.name) 
+		sco = make_subcontracting_order(po.name)
 		sco.supplier_warehouse = supplier_warehouse
 		sco.set_warehouse = create_warehouse("Stores - _TC")
 		sco.save()
@@ -889,19 +912,18 @@ class TestBOM(FrappeTestCase):
 		pi = make_purchase_invoice(pr.name)
 		pi.save()
 		pi.submit()
-		args = {
-			"mode_of_payment" : "Cash",
-			"reference_no" : "For Testing"
-		}
-		make_payment_entry(pi.doctype, pi.name, pi.grand_total, args )
+		args = {"mode_of_payment": "Cash", "reference_no": "For Testing"}
+		make_payment_entry(pi.doctype, pi.name, pi.grand_total, args)
 		pi.reload()
 		self.assertEqual(pi.status, "Paid")
+
 
 def make_subcontracting_receipt_against_sco(sco, quantity=1):
 	scr = make_subcontracting_receipt(sco)
 	scr.items[0].qty = quantity
 	scr.insert()
 	scr.submit()
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

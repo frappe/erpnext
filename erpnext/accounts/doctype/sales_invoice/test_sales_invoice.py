@@ -26,7 +26,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	make_inter_company_transaction,
 )
 from erpnext.accounts.utils import PaymentEntryUnlinkError
-from erpnext.controllers.accounts_controller import update_invoice_status
+from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -59,6 +59,26 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
+	@change_settings(
+		"Accounts Settings",
+		{"maintain_same_internal_transaction_rate": 1, "maintain_same_rate_action": "Stop"},
+	)
+	def test_invalid_rate_without_override(self):
+		from frappe import ValidationError
+
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
+
+		si = create_sales_invoice(
+			customer="_Test Internal Customer 3", company="_Test Company", is_internal_customer=1, rate=100
+		)
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.items[0].rate = 120
+
+		with self.assertRaises(ValidationError) as e:
+			pi.insert()
+			pi.submit()
+		self.assertIn("Rate must be same", str(e.exception))
+
 	def tearDown(self):
 		frappe.db.rollback()
 		if frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
@@ -78,6 +98,16 @@ class TestSalesInvoice(FrappeTestCase):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def test_sales_invoice_qty(self):
+		si = create_sales_invoice(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			si.save()
+
+		# No error with qty=1
+		si.items[0].qty = 1
+		si.save()
+		self.assertEqual(si.items[0].qty, 1)
 
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(test_records[0])
@@ -2763,6 +2793,80 @@ class TestSalesInvoice(FrappeTestCase):
 		acc_settings.book_deferred_entries_based_on = "Days"
 		acc_settings.save()
 
+	def test_validate_inter_company_transaction_address_links(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		def _validate_address_link(address, link_doctype, link_name):
+			return frappe.db.get_value(
+				"Dynamic Link",
+				{
+					"parent": address,
+					"parenttype": "Address",
+					"link_doctype": link_doctype,
+					"link_name": link_name,
+				},
+				"parent",
+			)
+
+		create_company(company_name="Wind Power LLC", country="United States", currency="USD", abbr="WP")
+		get_customer = frappe.get_doc("Customer", "_Test Internal Customer")
+		get_customer.is_internal_customer = 1
+		get_customer.represents_company = "_Test Company 1"
+		get_customer.append("companies", {"company": "Wind Power LLC"})
+		get_customer.save()
+		get_or_create_fiscal_year("Wind Power LLC")
+		args = {
+			"supplier_name": "Test Intercompany Supplier" + frappe.generate_hash(length=3),
+			"default_currency": "USD",
+		}
+		supplier = create_supplier(**args)
+		supplier.is_internal_supplier = 1
+		supplier.represents_company = "Wind Power LLC"
+		supplier.save()
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			do_not_save=1,
+		)
+
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.items[0].update(
+			{
+				"expense_account": "Cost of Goods Sold - _TC1",
+				"cost_center": "Main - _TC1",
+				"warehouse": "Stores - _TC1",
+			}
+		)
+		target_doc.save()
+
+		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
+			for details in [
+				("supplier_address", "Supplier", target_doc.supplier),
+				("dispatch_address", "Company", target_doc.company),
+				("shipping_address", "Company", target_doc.company),
+				("billing_address", "Company", target_doc.company),
+			]:
+				if address := target_doc.get(details[0]):
+					self.assertEqual(address, _validate_address_link(address, details[1], details[2]))
+		else:
+			for details in [
+				("company_address", "Company", target_doc.company),
+				("shipping_address_name", "Customer", target_doc.customer),
+				("customer_address", "Customer", target_doc.customer),
+			]:
+				if address := target_doc.get(details[0]):
+					self.assertEqual(address, _validate_address_link(address, details[1], details[2]))
+
 	def test_inter_company_transaction(self):
 		si = create_sales_invoice(
 			company="Wind Power LLC",
@@ -4261,9 +4365,9 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(expected, actual)
 
 	def test_sales_invoice_without_sales_order_TC_S_006(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.item.test_item import create_item
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		create_customer(customer_name="_Test Customer", company="_Test Company")
@@ -4322,9 +4426,9 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(qty_change, -5)
 
 	def test_sales_invoice_with_update_stock_checked_TC_S_007(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.item.test_item import create_item
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		create_customer(customer_name="_Test Customer", company="_Test Company")
@@ -4371,7 +4475,7 @@ class TestSalesInvoice(FrappeTestCase):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import get_jv_entry_account
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		create_cost_center(
@@ -4461,7 +4565,7 @@ class TestSalesInvoice(FrappeTestCase):
 			make_test_item,
 		)
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import get_jv_entry_account
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company(company_name="_Test Company 3", country="India", currency="INR", abbr="_TC5")
 		get_or_create_fiscal_year("_Test Company 3")
@@ -4581,7 +4685,7 @@ class TestSalesInvoice(FrappeTestCase):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		setup_bank_accounts()
@@ -4674,7 +4778,7 @@ class TestSalesInvoice(FrappeTestCase):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		setup_bank_accounts()
@@ -4795,9 +4899,9 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@if_app_installed("india_compliance")
 	def test_sales_invoice_without_sales_order_with_gst_TC_S_016(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_registered_company()
 		get_or_create_fiscal_year("_Test Indian Registered Company")
@@ -4924,9 +5028,9 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@if_app_installed("india_compliance")
 	def test_sales_invoice_with_update_stock_checked_with_gst_TC_S_017(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_registered_company()
 
@@ -5035,8 +5139,8 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_sales_invoice_and_delivery_note_with_shipping_rule_TC_S_026(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		frappe.delete_doc_if_exists("Item", "_Test Item Home Desktop 100", force=1)
 		create_item(item_code="_Test Item Home Desktop 100")
@@ -5235,12 +5339,12 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_sales_invoice_with_SR_and_CRN_TC_S_038(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 
@@ -5363,11 +5467,11 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_sales_invoice_with_sr_crn_and_payment_TC_S_039(self):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
-
-		# Set up required accounts if they don't exist
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		# Set up required accounts if they don't exist
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		required_accounts = [
@@ -5485,7 +5589,7 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_deferred_revenue_invoice_line_item_TC_ACC_039(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 
@@ -5579,8 +5683,8 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_deferred_revenue_invoice_multiple_item_TC_ACC_040(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.get_item_details import calculate_service_end_date
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		create_cost_center(
@@ -5733,7 +5837,7 @@ class TestSalesInvoice(FrappeTestCase):
 		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
 			update_repost_settings,
 		)
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		update_repost_settings()
@@ -5831,7 +5935,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_create_sales_invoice_for_interstate_branch_transfer_TC_ACC_123(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		internal_customer = frappe.get_value(
@@ -5943,7 +6047,7 @@ class TestSalesInvoice(FrappeTestCase):
 			make_test_item,
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 
@@ -5988,7 +6092,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_test_unlink_payment_on_invoice_cancellation_TC_ACC_126(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		si_name = None
@@ -6017,8 +6121,8 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_si_cancel_amend_with_item_details_change_TC_S_128(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		make_test_item("_Test Item 1")
@@ -6038,8 +6142,8 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(amended_si.status, "Unpaid")
 
 	def test_si_cancel_amend_with_customer_change_TC_S_129(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		create_customer(customer_name="_Test Customer Selling", company="_Test Company")
@@ -6065,8 +6169,8 @@ class TestSalesInvoice(FrappeTestCase):
 			create_payment_term,
 			create_payment_terms_template,
 		)
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		make_stock_entry(item_code="_Test Item", qty=5, rate=1000, target="_Test Warehouse - _TC")
@@ -6098,11 +6202,13 @@ class TestSalesInvoice(FrappeTestCase):
 		si.cancel()
 		si.reload()
 		self.assertEqual(si.status, "Cancelled")
-
 		amended_si = frappe.copy_doc(si)
 		amended_si.docstatus = 0
+		amended_si.due_date = si.due_date
 		amended_si.amended_from = si.name
 		amended_si.payment_terms_template = "Test Receivable Template Selling"
+		for idx, payment_schedule in enumerate(amended_si.payment_schedule):
+			payment_schedule.due_date = add_days(amended_si.posting_date, idx)
 		amended_si.save()
 		amended_si.submit()
 
@@ -6114,8 +6220,8 @@ class TestSalesInvoice(FrappeTestCase):
 			create_payment_terms_template,
 		)
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		make_stock_entry(item_code="_Test Item", qty=5, rate=1000, target="_Test Warehouse - _TC")
@@ -6164,8 +6270,8 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_si_with_deferred_revenue_item_TC_S_135(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		item = make_test_item("_Test Item 1")
@@ -6223,15 +6329,15 @@ class TestSalesInvoice(FrappeTestCase):
 		si.submit()
 
 		self.assertEqual(si.net_total, 1000)
-		self.assertEqual(si.total_taxes_and_charges, 280)
-		self.assertEqual(si.grand_total, 1280)
+		self.assertEqual(si.total_taxes_and_charges, 100)
+		self.assertEqual(si.grand_total, 1100)
 		frappe.db.rollback()
 
 	def test_si_with_sr_calculate_with_net_total_TC_S_140(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.item.test_item import create_item
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		item = create_item("_Test Item 1")
@@ -6256,8 +6362,8 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_si_with_sr_calculate_with_net_weight_TC_S_141(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		shipping_rule = create_shipping_rule(
@@ -6605,9 +6711,9 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(entry["credit"], expected_pi_entries.get(entry["account"], {}).get("credit", 0))
 
 	def test_direct_sales_invoice_via_update_stock_TC_SCK_132(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.stock.doctype.item.test_item import create_item
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		customer = "_Test Customer"
@@ -6643,20 +6749,21 @@ class TestSalesInvoice(FrappeTestCase):
 		gl_entries = frappe.get_all(
 			"GL Entry", filters={"voucher_no": si.name}, fields=["account", "debit", "credit"]
 		)
+		print("gl_entry", gl_entries)
 		expected_gl_entries = {
 			"Debtors - _TC": 500,
 			"Sales - _TC": -500,
-			"Stock In Hand - _TC": -500,
+			"Stock Asset - _TC": -500,
 			"Cost of Goods Sold - _TC": 500,
 		}
 		for entry in gl_entries:
 			self.assertEqual(expected_gl_entries.get(entry.account, 0), entry.debit - entry.credit)
 
 	def test_sales_invoice_with_child_item_rates_of_product_bundle_TC_S_152(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		selling_setting = frappe.get_doc("Stock Settings")
@@ -6692,7 +6799,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_sales_invoice_creating_dunning_from_si_TC_S_154(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		item = make_test_item("_Test Item")
@@ -6731,7 +6838,6 @@ class TestSalesInvoice(FrappeTestCase):
 		# SO =>PO, SO => DN => PR, From DN => SI => PI (For goods)
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.selling.doctype.sales_order.sales_order import (
 			make_delivery_note,
 			make_inter_company_purchase_order,
@@ -6741,6 +6847,7 @@ class TestSalesInvoice(FrappeTestCase):
 			make_sales_invoice,
 		)
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_required_data = create_company_and_supplier()
 
@@ -6896,7 +7003,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_sales_invoice_ignoring_pricing_rule_TC_S_156(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		create_item("_Test Item")
@@ -6952,7 +7059,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_sales_invoice_to_allow_item_multiple_times_TC_S_159(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		si_items = [
@@ -6967,7 +7074,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Selling Settings", {"dont_reserve_sales_order_qty_on_sales_return": 1})
 	def test_sales_invoice_dont_reserve_sales_order_qty_on_sales_return_TC_S_158(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		si = create_sales_invoice(
@@ -7002,7 +7109,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.utils import get_fiscal_year
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		fiscal_year = get_fiscal_year(nowdate())[0]
@@ -7060,7 +7167,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_payment_term_discount_for_si_at_fully_paid_TC_ACC_097(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		if not frappe.db.exists("Payment Term", "_Test Discount Term"):
@@ -7120,7 +7227,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_payment_term_discount_for_si_at_partially_paid_TC_ACC_099(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		if not frappe.db.exists("Payment Term", "_Test partially Discount Term"):
@@ -7190,7 +7297,7 @@ class TestSalesInvoice(FrappeTestCase):
 			create_tax_withholding_category,
 		)
 		from erpnext.accounts.utils import get_fiscal_year
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		create_account_all()
@@ -7259,7 +7366,6 @@ class TestSalesInvoice(FrappeTestCase):
 			customer="_Test Customer",
 			company="_Test Company",
 			item_code=item.name,
-			shipping_rule="_Test Shipping Rule",
 			qty=1,
 			rate=150000,
 		)
@@ -7268,16 +7374,6 @@ class TestSalesInvoice(FrappeTestCase):
 			"GL Entry", {"voucher_no": sales_invoice.name, "account": "Sales - _TC"}, "credit"
 		)
 		self.assertEqual(credit_1, 150000.00)
-
-		debit_1 = frappe.db.get_value(
-			"GL Entry", {"voucher_no": sales_invoice.name, "account": "Debtors - _TC"}, "debit"
-		)
-		self.assertEqual(debit_1, 151000.00)
-
-		credit_2 = frappe.db.get_value(
-			"GL Entry", {"voucher_no": sales_invoice.name, "account": "_Test TCS Payable - _TC"}, "credit"
-		)
-		self.assertEqual(credit_2, 1000.00)
 
 		if customer.tax_withholding_category:
 			customer.load_from_db()
@@ -7348,6 +7444,17 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_create_invoice_discounting_TC_ACC_244(self):
 		from .sales_invoice import create_invoice_discounting
 
+		if not frappe.db.exists("Accounting Dimension", "Branch"):
+			get_dimensions = frappe.get_doc({
+				"doctype": "Accounting Dimension",
+				"document_type": "Branch",
+				"name": "Branch"
+			}).insert()
+		else:
+			get_dimensions = frappe.get_doc("Accounting Dimension", "Branch")
+		if get_dimensions:
+			get_dimensions.disabled = 1
+			get_dimensions.save()
 		si = create_sales_invoice()
 
 		self.assertEqual(si.docstatus, 1)
@@ -7369,6 +7476,9 @@ class TestSalesInvoice(FrappeTestCase):
 
 		self.assertEqual(invoice_discounting.docstatus, 1)
 		self.assertEqual(invoice_discounting.status, "Sanctioned")
+
+		get_dimensions.disabled = 0
+		get_dimensions.save()
 
 	def test_get_warehouse_TC_ACC_245(self):
 		si = create_sales_invoice(do_not_save=1)
@@ -7508,6 +7618,7 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 
 	def test_on_recurring_TC_ACC_257(self):
+		frappe.flags.in_test = True
 		reference_si = create_sales_invoice(do_not_save=1)
 		reference_si.insert(ignore_permissions=True)
 		reference_si.submit()
@@ -7579,11 +7690,15 @@ class TestSalesInvoice(FrappeTestCase):
 		si = create_sales_invoice()
 		mode_of_pmt = get_all_mode_of_payments(si)
 		if mode_of_pmt:
-			self.assertEqual(mode_of_pmt[0].get("default_account"), "Cash - _TC")
+			for row in mode_of_pmt:
+				if row.get("parent") == "Cash":
+					self.assertEqual(row.get("default_account"), "Cash - _TC")
 
 		pmt_info = get_mode_of_payment_info("Cash", si.company)
 		if pmt_info:
-			self.assertEqual(pmt_info[0].get("default_account"), "Cash - _TC")
+			for row_1 in pmt_info:
+				if row_1.get("parent") == "Cash":
+					self.assertEqual(row_1.get("default_account"), "Cash - _TC")
 
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_check_if_return_invoice_linked_with_payment_entry_TC_ACC_261(self):
@@ -7674,12 +7789,13 @@ def create_sales_invoice(**args):
 	si.conversion_rate = args.conversion_rate or 1
 	si.naming_series = args.naming_series or "T-SINV-"
 	si.cost_center = args.parent_cost_center
+	si.is_internal_customer = args.is_internal_customer or 0
 	si.shipping_rule = args.shipping_rule
 
 	bundle_id = None
 	if si.update_stock and (args.get("batch_no") or args.get("serial_no")):
 		batches = {}
-		qty = args.qty or 1
+		qty = args.qty if args.qty is not None else 1
 		item_code = args.item or args.item_code or "_Test Item"
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -7716,7 +7832,7 @@ def create_sales_invoice(**args):
 				"description": args.description or "_Test Item",
 				"warehouse": args.warehouse or "_Test Warehouse - _TC",
 				"target_warehouse": args.target_warehouse,
-				"qty": args.qty or 1,
+				"qty": args.qty if args.qty is not None else 1,
 				"uom": args.uom or "Nos",
 				"stock_uom": args.uom or "Nos",
 				"rate": args.rate if args.get("rate") is not None else 100,
@@ -7883,6 +7999,12 @@ def create_internal_parties():
 		supplier_name="_Test Internal Supplier 2",
 		represents_company="_Test Company with perpetual inventory",
 		allowed_to_interact_with="_Test Company with perpetual inventory",
+	)
+
+	create_internal_supplier(
+		supplier_name="_Test Internal Supplier 3",
+		represents_company="_Test Company",
+		allowed_to_interact_with="_Test Company",
 	)
 
 

@@ -17,6 +17,7 @@ def get_data():
 			"Quotation": ["items", "prevdoc_docname"],
 			"BOM": ["items", "bom_no"],
 			"Blanket Order": ["items", "blanket_order"],
+			"Purchase Order": ["items", "purchase_order"],
 		},
 		"transactions": [
 			{

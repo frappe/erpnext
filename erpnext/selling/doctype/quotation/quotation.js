@@ -305,7 +305,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				},
 			},
 			{
-				fieldtype: "Data",
+				fieldtype: "Text Editor",
 				fieldname: "description",
 				label: __("Description"),
 				in_list_view: 1,

@@ -8,10 +8,15 @@ from frappe.query_builder import Criterion, Tuple
 from frappe.query_builder.functions import IfNull
 from frappe.utils import getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
+from pypika.terms import LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
+)
+
+TREE_DOCTYPES = frozenset(
+	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
 )
 
 
@@ -21,15 +26,10 @@ class PartyLedgerSummaryReport:
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
 
-		if not self.filters.get("company"):
-			self.filters["company"] = frappe.db.get_single_value("Global Defaults", "default_company")
-
 	def run(self, args):
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date must be before To Date"))
-
 		self.filters.party_type = args.get("party_type")
 
+		self.validate_filters()
 		self.get_party_details()
 
 		if not self.parties:
@@ -39,51 +39,26 @@ class PartyLedgerSummaryReport:
 		self.get_return_invoices()
 		self.get_party_adjustment_amounts()
 
+		self.party_naming_by = frappe.db.get_single_value(args.get("naming_by")[0], args.get("naming_by")[1])
 		columns = self.get_columns()
 		data = self.get_data()
 
 		return columns, data
 
-	def get_additional_fields(self):
-		additional_fields = []
+	def validate_filters(self):
+		if not self.filters.get("company"):
+			frappe.throw(_("{0} is mandatory").format(_("Company")))
 
-		if self.filters.party_type == "Customer":
-			additional_fields = ["customer_name", "territory", "customer_group", "default_sales_partner"]
-		else:
-			additional_fields = ["supplier_name", "supplier_group"]
+		if self.filters.from_date > self.filters.to_date:
+			frappe.throw(_("From Date must be before To Date"))
 
-		return additional_fields
+		self.update_hierarchical_filters()
 
-	def prepare_party_conditions(self, doctype):
-		conditions = []
-		group_field = "customer_group" if self.filters.party_type == "Customer" else "supplier_group"
-
-		if self.filters.party:
-			conditions.append(doctype.name == self.filters.party)
-
-		if self.filters.territory:
-			conditions.append(doctype.territory == self.filters.territory)
-
-		if self.filters.get(group_field):
-			conditions.append(doctype[group_field].isin(self.filters.get(group_field)))
-
-		if self.filters.payment_terms_template:
-			conditions.append(doctype.payment_terms == self.filters.payment_terms_template)
-
-		if self.filters.sales_partner:
-			conditions.append(doctype.default_sales_partner == self.filters.sales_partner)
-
-		if self.filters.sales_person:
-			sales_team = qb.DocType("Sales Team")
-			conditions.append(
-				(doctype.name).isin(
-					qb.from_(sales_team)
-					.select(sales_team.parent)
-					.where(sales_team.sales_person == self.filters.sales_person)
-				)
-			)
-
-		return conditions
+	def update_hierarchical_filters(self):
+		for doctype in TREE_DOCTYPES:
+			key = scrub(doctype)
+			if self.filters.get(key):
+				self.filters[key] = get_children(doctype, self.filters[key])
 
 	def get_party_details(self):
 		"""
@@ -92,21 +67,68 @@ class PartyLedgerSummaryReport:
 		self.parties = []
 		self.party_details = frappe._dict()
 		party_type = self.filters.party_type
-		additional_fields = self.get_additional_fields()
 
 		doctype = qb.DocType(party_type)
-		conditions = self.prepare_party_conditions(doctype)
-		party_details = (
+		conditions = self.get_party_conditions(doctype)
+		query = (
 			qb.from_(doctype)
-			.select(doctype.name.as_("party"), *additional_fields)
+			.select(doctype.name.as_("party"), f"{scrub(party_type)}_name")
 			.where(Criterion.all(conditions))
-			.run(as_dict=True)
 		)
+
+		from frappe.desk.reportview import build_match_conditions
+
+		match_conditions = build_match_conditions(party_type)
+
+		if match_conditions:
+			query = query.where(LiteralValue(match_conditions))
+
+		party_details = query.run(as_dict=True)
 
 		for row in party_details:
 			self.parties.append(row.party)
 			self.party_details[row.party] = row
 
+	def get_party_conditions(self, doctype):
+		conditions = []
+		group_field = "customer_group" if self.filters.party_type == "Customer" else "supplier_group"
+
+		if self.filters.party:
+			conditions.append(doctype.name == self.filters.party)
+
+		if self.filters.territory:
+			conditions.append(doctype.territory.isin(self.filters.territory))
+
+		if self.filters.get(group_field):
+			conditions.append(doctype[group_field].isin(self.filters.get(group_field)))
+
+		if self.filters.payment_terms_template:
+			conditions.append(doctype.payment_terms == self.filters.payment_terms_template)
+
+		if self.filters.sales_partner:
+			conditions.append(doctype.default_sales_partner.isin(self.filters.sales_partner))
+
+		if self.filters.sales_person:
+			sales_team = qb.DocType("Sales Team")
+			sales_invoice = qb.DocType("Sales Invoice")
+
+			customers = (
+				qb.from_(sales_team)
+				.select(sales_team.parent)
+				.where(sales_team.sales_person.isin(self.filters.sales_person))
+				.where(sales_team.parenttype == "Customer")
+			) + (
+				qb.from_(sales_team)
+				.join(sales_invoice)
+				.on(sales_team.parent == sales_invoice.name)
+				.select(sales_invoice.customer)
+				.where(sales_team.sales_person.isin(self.filters.sales_person))
+				.where(sales_team.parenttype == "Sales Invoice")
+			)
+
+			conditions.append(doctype.name.isin(customers))
+
+		return conditions
 
 	def get_columns(self):
 		columns = [
@@ -383,7 +405,9 @@ class PartyLedgerSummaryReport:
 		gl = qb.DocType("GL Entry")
 		query = (
 			qb.from_(gl)
-			.select(gl.voucher_type, gl.voucher_no)
+			.select(
+				gl.posting_date, gl.account, gl.party, gl.voucher_type, gl.voucher_no, gl.debit, gl.credit
+			)
 			.where(
 				(gl.docstatus < 2)
 				& (gl.is_cancelled == 0)
@@ -433,9 +457,23 @@ class PartyLedgerSummaryReport:
 						self.party_adjustment_details[party][account] += amount
 
 
+def get_children(doctype, value):
+	if not isinstance(value, list):
+		value = [d.strip() for d in value.strip().split(",") if d]
+
+	all_children = []
+
+	for d in value:
+		all_children += get_descendants_of(doctype, value)
+		all_children.append(d)
+
+	return list(set(all_children))
+
+
 def execute(filters=None):
 	args = {
 		"party_type": "Customer",
 		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
+
 	return PartyLedgerSummaryReport(filters).run(args)

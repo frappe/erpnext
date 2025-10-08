@@ -20,7 +20,7 @@ class BankClearance(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.bank_clearance_detail.bank_clearance_detail import (
@@ -157,7 +157,6 @@ def get_payment_entries_for_bank_clearance(
 		{"account": account, "from": from_date, "to": to_date},
 		as_dict=1,
 	)
-
 
 	payment_entries = frappe.db.sql(
 		f"""

@@ -52,47 +52,9 @@ frappe.query_reports["Available Serial No"] = {
 			},
 		},
 		{
-			fieldname: "item_group",
-			label: __("Item Group"),
-			fieldtype: "Link",
-			options: "Item Group",
-		},
-		{
-			fieldname: "batch_no",
-			label: __("Batch No"),
-			fieldtype: "Link",
-			options: "Batch",
-			on_change() {
-				const batch_no = frappe.query_report.get_filter_value("batch_no");
-				if (batch_no) {
-					frappe.query_report.set_filter_value("segregate_serial_batch_bundle", 1);
-				} else {
-					frappe.query_report.set_filter_value("segregate_serial_batch_bundle", 0);
-				}
-			},
-		},
-		{
-			fieldname: "brand",
-			label: __("Brand"),
-			fieldtype: "Link",
-			options: "Brand",
-		},
-		{
 			fieldname: "voucher_no",
 			label: __("Voucher #"),
 			fieldtype: "Data",
-		},
-		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project",
-		},
-		{
-			fieldname: "include_uom",
-			label: __("Include UOM"),
-			fieldtype: "Link",
-			options: "UOM",
 		},
 		{
 			fieldname: "valuation_field_type",

@@ -60,6 +60,20 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 				},
 			};
 		});
+		frm.set_query("cost_center", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
+		frm.set_query("project", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
 		if (frm.doc.__islocal) {
 			frm.set_value("from_date", frappe.datetime.add_months(frappe.datetime.get_today(), -1));
 			frm.set_value("to_date", frappe.datetime.get_today());

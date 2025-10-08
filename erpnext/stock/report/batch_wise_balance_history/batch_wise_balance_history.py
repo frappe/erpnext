@@ -18,7 +18,6 @@ def execute(filters=None):
 		filters = {}
 
 	sle_count = frappe.db.estimate_count("Stock Ledger Entry")
-	
 
 	if (
 		sle_count > SLE_COUNT_LIMIT
@@ -116,7 +115,6 @@ def get_stock_ledger_entries_for_batch_no(filters):
 			& (sle.posting_datetime < posting_datetime)
 		)
 		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse, sle.posting_date)
-		.orderby(sle.item_code, sle.warehouse)
 	)
 
 	query = apply_warehouse_filter(query, sle, filters)
@@ -160,14 +158,7 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 			& (sle.has_batch_no == 1)
 			& (sle.posting_datetime <= to_date)
 		)
-		.groupby(
-			sle.voucher_no,
-			batch_package.batch_no,
-			sle.item_code,
-			sle.warehouse,
-			sle.posting_date
-		)
-		.orderby(sle.item_code, sle.warehouse)
+		.groupby(sle.voucher_no, batch_package.batch_no, sle.item_code, sle.warehouse, sle.posting_date)
 	)
 
 	query = apply_warehouse_filter(query, sle, filters)

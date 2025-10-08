@@ -163,6 +163,9 @@ class TransactionBase(StatusUpdater):
 		child_table_values = set()
 
 		for row in self.get(child_table):
+			if default_field == "set_warehouse" and row.get("delivered_by_supplier"):
+				continue
+
 			child_table_values.add(row.get(child_table_field))
 
 		if len(child_table_values) > 1:

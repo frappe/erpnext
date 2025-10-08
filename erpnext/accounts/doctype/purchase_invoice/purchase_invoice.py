@@ -57,7 +57,7 @@ class PurchaseInvoice(BuyingController):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from erpnext.accounts.doctype.advance_tax.advance_tax import AdvanceTax
 		from erpnext.accounts.doctype.discount_terms.discount_terms import DiscountTerms
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule

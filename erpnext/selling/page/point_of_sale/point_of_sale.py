@@ -147,10 +147,8 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 	bin_join_selection, bin_join_condition = "", ""
 	if hide_unavailable_items:
-		bin_join_selection = ", `tabBin` bin"
-		bin_join_condition = (
-			"AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
-		)
+		bin_join_selection = "LEFT JOIN `tabBin` bin ON bin.item_code = item.name"
+		bin_join_condition = "AND (item.is_stock_item = 0 OR (item.is_stock_item = 1 AND bin.warehouse = %(warehouse)s AND bin.actual_qty > 0))"
 
 	items_data = frappe.db.sql(
 		"""

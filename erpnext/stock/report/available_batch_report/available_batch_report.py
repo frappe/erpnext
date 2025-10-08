@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, today
+from frappe.utils import flt, get_datetime, today
 
 
 def execute(filters=None):
@@ -138,7 +138,14 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 			Sum(ch_table.qty).as_("balance_qty"),
 		)
 		.where((table.is_cancelled == 0) & (table.docstatus == 1))
-		.groupby(ch_table.batch_no, table.item_code, ch_table.warehouse, table.warehouse, batch.expiry_date, batch.item_name)
+		.groupby(
+			ch_table.batch_no,
+			table.item_code,
+			ch_table.warehouse,
+			table.warehouse,
+			batch.expiry_date,
+			batch.item_name,
+		)
 	)
 
 	query = get_query_based_on_filters(query, batch, table, filters)
@@ -167,7 +174,8 @@ def get_query_based_on_filters(query, batch, table, filters):
 		query = query.where(batch.batch_qty > 0)
 
 	else:
-		query = query.where(table.posting_date <= filters.to_date)
+		to_date = get_datetime(str(filters.to_date) + " 23:59:59")
+		query = query.where(table.posting_datetime <= to_date)
 
 	if filters.warehouse:
 		lft, rgt = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"])

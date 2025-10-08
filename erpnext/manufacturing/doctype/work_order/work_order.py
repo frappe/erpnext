@@ -617,19 +617,30 @@ class WorkOrder(Document):
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
 
-		for index, row in enumerate(self.operations):
+		if all([op.sequence_id for op in self.operations]):
+			self.operations = sorted(self.operations, key=lambda op: op.sequence_id)
+			for idx, op in enumerate(self.operations):
+				op.idx = idx + 1
+		elif any([op.sequence_id for op in self.operations]):
+			frappe.throw(
+				_(
+					"Row #{0}: Incorrect Sequence ID. If any single operation has a Sequence ID then all other operations must have one too."
+				).format(next((op.idx for op in self.operations if not op.sequence_id), None))
+			)
+
+		for idx, row in enumerate(self.operations):
 			qty = self.qty
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self, row, qty)
 				if row.job_card_qty > 0:
-					self.prepare_data_for_job_card(row, index, plan_days, enable_capacity_planning)
+					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
 
 		planned_end_date = self.operations and self.operations[-1].planned_end_time
 		if planned_end_date:
 			self.db_set("planned_end_date", planned_end_date)
 
-	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning):
-		self.set_operation_start_end_time(index, row)
+	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
+		self.set_operation_start_end_time(row, idx)
 
 		job_card_doc = create_job_card(
 			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
@@ -654,12 +665,24 @@ class WorkOrder(Document):
 
 			row.db_update()
 
-	def set_operation_start_end_time(self, idx, row):
+	def set_operation_start_end_time(self, row, idx):
 		"""Set start and end time for given operation. If first operation, set start as
 		`planned_start_date`, else add time diff to end time of earlier operation."""
 		if idx == 0:
 			# first operation at planned_start date
 			row.planned_start_time = self.planned_start_date
+		elif self.operations[idx - 1].sequence_id:
+			if self.operations[idx - 1].sequence_id == row.sequence_id:
+				row.planned_start_time = self.operations[idx - 1].planned_start_time
+			else:
+				last_ops_with_same_sequence_ids = sorted(
+					[op for op in self.operations if op.sequence_id == self.operations[idx - 1].sequence_id],
+					key=lambda op: get_datetime(op.planned_end_time),
+				)
+				row.planned_start_time = (
+					get_datetime(last_ops_with_same_sequence_ids[-1].planned_end_time)
+					+ get_mins_between_operations()
+				)
 		else:
 			row.planned_start_time = (
 				get_datetime(self.operations[idx - 1].planned_end_time) + get_mins_between_operations()
@@ -732,22 +755,34 @@ class WorkOrder(Document):
 		)
 
 	def update_ordered_qty(self):
-		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
+		if self.production_plan and (self.production_plan_item or self.production_plan_sub_assembly_item):
 			table = frappe.qb.DocType("Work Order")
 
 			query = (
 				frappe.qb.from_(table)
 				.select(Sum(table.qty))
-				.where(
-					(table.production_plan == self.production_plan)
-					& (table.production_plan_item == self.production_plan_item)
-					& (table.docstatus == 1)
-				)
-			).run()
+				.where((table.production_plan == self.production_plan) & (table.docstatus == 1))
+			)
 
+			if self.production_plan_item:
+				query = query.where(table.production_plan_item == self.production_plan_item)
+			elif self.production_plan_sub_assembly_item:
+				query = query.where(
+					table.production_plan_sub_assembly_item == self.production_plan_sub_assembly_item
+				)
+
+			query = query.run()
 			qty = flt(query[0][0]) if query else 0
 
-			frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
+			if self.production_plan_item:
+				frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
+			elif self.production_plan_sub_assembly_item:
+				frappe.db.set_value(
+					"Production Plan Sub Assembly Item",
+					self.production_plan_sub_assembly_item,
+					"ordered_qty",
+					qty,
+				)
 
 			doc = frappe.get_doc("Production Plan", self.production_plan)
 			doc.set_status()
@@ -951,9 +986,7 @@ class WorkOrder(Document):
 
 			if data:
 				dates = [
-					f"{d.posting_date} {d.posting_time}"
-					for d in data
-					if d.posting_date and d.posting_time
+					f"{d.posting_date} {d.posting_time}" for d in data if d.posting_date and d.posting_time
 				]
 				dates = [frappe.utils.get_datetime(date) for date in dates]
 
@@ -1145,7 +1178,7 @@ class WorkOrder(Document):
 			.where(
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
-				& (ste.purpose == 'Material Transfer for Manufacture')
+				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
 			)
 			.groupby(ste_child.item_code, ste_child.original_item)
@@ -1175,7 +1208,7 @@ class WorkOrder(Document):
 			.where(
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
-				& (ste.purpose == 'Material Transfer for Manufacture')
+				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 1)
 			)
 			.groupby(ste_child.item_code, ste_child.original_item)
@@ -1298,7 +1331,7 @@ def get_item_details(item, project=None, skip_bom_info=False, throw=True):
 			frappe.msgprint(msg, raise_exception=throw, indicator="yellow", alert=(not throw))
 
 			return res
-		
+
 	fields = ["allow_alternative_item", "transfer_material_against", "item_name"]
 	if "projects" in frappe.get_installed_apps():
 		fields.append("project")
@@ -1384,6 +1417,8 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 			existing_row.update(args)
 		else:
 			wo_doc.append(table_name, args)
+
+
 def get_template_rm_item(wo_doc, item_code):
 	for row in wo_doc.required_items:
 		if row.item_code == item_code:
@@ -1490,20 +1525,19 @@ def stop_unstop(work_order, status):
 	return pro_order.status
 
 
-@frappe.whitelist()
-def query_sales_order(production_item):
-	out = frappe.db.sql_list(
-		"""
-		select distinct so.name from `tabSales Order` so, `tabSales Order Item` so_item
-		where so_item.parent=so.name and so_item.item_code=%s and so.docstatus=1
-	union
-		select distinct so.name from `tabSales Order` so, `tabPacked Item` pi_item
-		where pi_item.parent=so.name and pi_item.item_code=%s and so.docstatus=1
-	""",
-		(production_item, production_item),
+def query_sales_order(production_item: str) -> list[str]:
+	return frappe.get_list(
+		"Sales Order",
+		filters=[
+			["Sales Order", "docstatus", "=", 1],
+		],
+		or_filters=[
+			["Sales Order Item", "item_code", "=", production_item],
+			["Packed Item", "item_code", "=", production_item],
+		],
+		pluck="name",
+		distinct=True,
 	)
-
-	return out
 
 
 @frappe.whitelist()
@@ -1635,11 +1669,11 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
 			"time_required": row.get("time_in_mins"),
- 			"source_warehouse": row.get("source_warehouse"),
- 			"target_warehouse": row.get("fg_warehouse"),
+			"source_warehouse": row.get("source_warehouse"),
+			"target_warehouse": row.get("fg_warehouse"),
 			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse")
- 			if not work_order.skip_transfer or work_order.from_wip_warehouse
- 			else work_order.source_warehouse or row.get("source_warehouse"),
+			if not work_order.skip_transfer or work_order.from_wip_warehouse
+			else work_order.source_warehouse or row.get("source_warehouse"),
 		}
 	)
 

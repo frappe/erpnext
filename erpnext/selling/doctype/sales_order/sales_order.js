@@ -171,7 +171,7 @@ frappe.ui.form.on("Sales Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
 			return {
 				filters: {
-					company:frm.doc.company,
+					company: frm.doc.company,
 				},
 			};
 		});
@@ -179,11 +179,11 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_query("warehouse", "items", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 			let query = {
-				filters: {company:frm.doc.company},
+				filters: { company: frm.doc.company },
 			};
 			if (row.item_code) {
 				query.query = "erpnext.controllers.queries.warehouse_query";
-				query.filters.item_code =  row.item_code;
+				query.filters.item_code = row.item_code;
 			}
 			return query;
 		});
@@ -196,8 +196,8 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_query("set_warehouse", function () {
 			return {
 				filters: {
-					"company": frm.doc.company,
-					"is_group" : ["!=", 1]
+					company: frm.doc.company,
+					is_group: ["!=", 1],
 				},
 			};
 		});
@@ -876,8 +876,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						fields: fields,
 						primary_action: function () {
 							var data = { items: d.fields_dict.items.grid.get_selected_children() };
-							if (!data) {
-								frappe.throw(__("Please select items"));
+							if (!data.items.length) {
+								frappe.throw(__("Please select atleast one item to continue"));
 							}
 							me.frm.call({
 								method: "make_work_orders",
@@ -1027,7 +1027,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						items: data,
 						company: me.frm.doc.company,
 						sales_order: me.frm.docname,
-						project: me.frm.project,
+						project: me.frm.doc.project,
 					},
 					freeze: true,
 					callback: function (r) {

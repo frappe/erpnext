@@ -558,7 +558,7 @@ class TestSubscription(FrappeTestCase):
 			company_doc.stock_received_but_not_billed = "Stock Received But Not Billed - _TC"
 			company_doc.save()
 		create_plan(plan_name="_Test Plan For PI", cost=900, currency="INR")
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		subscription = create_subscription(
@@ -579,7 +579,7 @@ class TestSubscription(FrappeTestCase):
 
 	def test_subscription_plan_with_template_for_si_TC_ACC_087(self):
 		create_plan(plan_name="_Test Plan For SI", cost=900, currency="INR")
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 		subscription = create_subscription(

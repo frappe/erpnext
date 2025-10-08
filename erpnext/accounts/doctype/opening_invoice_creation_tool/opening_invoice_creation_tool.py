@@ -19,7 +19,7 @@ class OpeningInvoiceCreationTool(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.opening_invoice_creation_tool_item.opening_invoice_creation_tool_item import (

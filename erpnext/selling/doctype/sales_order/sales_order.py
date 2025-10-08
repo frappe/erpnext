@@ -14,6 +14,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
+
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
@@ -50,13 +51,16 @@ class SalesOrder(SellingController):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING: # pragma: no cover
+	if TYPE_CHECKING:  # pragma: no cover
+		from frappe.types import DF
+
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import SalesTaxesandCharges
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
+			SalesTaxesandCharges,
+		)
 		from erpnext.selling.doctype.sales_order_item.sales_order_item import SalesOrderItem
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
-		from frappe.types import DF
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.SmallText | None
@@ -91,7 +95,9 @@ class SalesOrder(SellingController):
 		customer_group: DF.Link | None
 		customer_name: DF.Data | None
 		delivery_date: DF.Date | None
-		delivery_status: DF.Literal["Not Delivered", "Fully Delivered", "Partly Delivered", "Closed", "Not Applicable"]
+		delivery_status: DF.Literal[
+			"Not Delivered", "Fully Delivered", "Partly Delivered", "Closed", "Not Applicable"
+		]
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
 		dispatch_address: DF.SmallText | None
@@ -139,7 +145,17 @@ class SalesOrder(SellingController):
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		skip_delivery_note: DF.Check
-		status: DF.Literal["", "Draft", "On Hold", "To Deliver and Bill", "To Bill", "To Deliver", "Completed", "Cancelled", "Closed"]
+		status: DF.Literal[
+			"",
+			"Draft",
+			"On Hold",
+			"To Deliver and Bill",
+			"To Bill",
+			"To Deliver",
+			"Completed",
+			"Cancelled",
+			"Closed",
+		]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		taxes: DF.Table[SalesTaxesandCharges]
@@ -161,7 +177,7 @@ class SalesOrder(SellingController):
 
 	def onload(self) -> None:
 		super().onload()
-		
+
 		if frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			if self.has_unreserved_stock():
 				self.set_onload("has_unreserved_stock", True)
@@ -586,7 +602,7 @@ class SalesOrder(SellingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
 			delivery_date = auto_repeat_doc.get_next_schedule_date(schedule_date=ref_doc_delivery_date)
-   
+
 			if type(transaction_date) == str:
 				transaction_date = getdate(transaction_date)
 
@@ -1282,6 +1298,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 			{
 				"Sales Order": {
 					"doctype": "Purchase Order",
+					"field_map": {"dispatch_address_name": "dispatch_address"},
 					"field_no_map": [
 						"address_display",
 						"contact_display",
@@ -1397,6 +1414,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		{
 			"Sales Order": {
 				"doctype": "Purchase Order",
+				"field_map": {"dispatch_address_name": "dispatch_address"},
 				"field_no_map": [
 					"address_display",
 					"contact_display",
@@ -1538,6 +1556,11 @@ def make_raw_material_request(items, company, sales_order, project=None):
 
 	items.update({"company": company, "sales_order": sales_order})
 
+	item_wh = {}
+	for item in items.get("items"):
+		if item.get("warehouse"):
+			item_wh[item.get("item_code")] = item.get("warehouse")
+
 	raw_materials = get_items_for_material_requests(items)
 	if not raw_materials:
 		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
@@ -1562,7 +1585,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 				"item_code": item.get("item_code"),
 				"qty": item.get("quantity"),
 				"schedule_date": schedule_date,
-				"warehouse": item.get("warehouse"),
+				"warehouse": item_wh.get(item.get("main_bom_item")) or item.get("warehouse"),
 				"sales_order": sales_order,
 				"project": project,
 			},

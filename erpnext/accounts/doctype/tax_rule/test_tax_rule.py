@@ -4,12 +4,11 @@
 import unittest
 
 import frappe
-
-from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import  create_sales_invoice
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from frappe.tests.utils import FrappeTestCase, change_settings, if_app_installed
 
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
 
 test_records = frappe.get_test_records("Tax Rule")
 
@@ -33,7 +32,7 @@ class TestTaxRule(unittest.TestCase):
 			priority=1,
 		)
 		tax_rule1.save()
-		
+
 		tax_rule2 = make_tax_rule(
 			customer="_Test Customer",
 			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
@@ -296,7 +295,8 @@ class TestTaxRule(unittest.TestCase):
 		self.assertTrue(len(quotation.taxes) > 0)
 
 	def test_create_tax_rule_and_apply_to_sales_invoice_TC_ACC_101(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
+
 		get_or_create_fiscal_year("_Test Company")
 		# Step 1: Create a tax rule for a customer with a sales tax template
 		make_tax_rule(
@@ -313,13 +313,13 @@ class TestTaxRule(unittest.TestCase):
 
 		# Step 4: Fetch the sales tax based on the created tax rule and check the tax rate applied
 		applied_tax_template = sales_invoice.taxes_and_charges
-		
+
 		# Step 5: Assert that the correct tax template is applied based on the customer's tax rule
 		self.assertEqual(
 			applied_tax_template,
 			"_Test Sales Taxes and Charges Template - _TC",
 		)
-	
+
 	def test_create_tax_rule_and_apply_to_purchase_invoice_TC_ACC_102(self):
 		company = "_Test Company"
 		company_doc = frappe.get_doc("Company", company)
@@ -327,7 +327,8 @@ class TestTaxRule(unittest.TestCase):
 			company_doc.stock_received_but_not_billed = "Stock Received But Not Billed - _TC"
 			company_doc.save()
 		# Step 1: Create a tax rule for a supplier with a sales tax template
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
+
 		get_or_create_fiscal_year("_Test Company")
 		if frappe.db.exists("Purchase Taxes and Charges Template", "GST 1 - _TC"):
 			existing_templates = "GST 1 - _TC"
@@ -336,20 +337,23 @@ class TestTaxRule(unittest.TestCase):
 			purchase_tax_template.company = "_Test Company"
 			purchase_tax_template.title = "GST 1"
 			purchase_tax_template.tax_category = "_Test Tax Category 1"
-			purchase_tax_template.append("taxes", {
-				"category":"Total",
-				"add_deduct_tax":"Add",
-				"charge_type":"On Net Total",
-				"account_head":"Stock In Hand - _TC",
-				"rate":100,
-				"description":"GST"
-			})
+			purchase_tax_template.append(
+				"taxes",
+				{
+					"category": "Total",
+					"add_deduct_tax": "Add",
+					"charge_type": "On Net Total",
+					"account_head": "Stock In Hand - _TC",
+					"rate": 100,
+					"description": "GST",
+				},
+			)
 			purchase_tax_template.flags.ignore_permissions = True
 			purchase_tax_template.save()
 			existing_templates = purchase_tax_template.name
 
 		make_tax_rule(
-			tax_type= "Purchase",
+			tax_type="Purchase",
 			supplier="_Test Supplier",
 			purchase_tax_template=existing_templates,
 			save=1,
@@ -359,11 +363,14 @@ class TestTaxRule(unittest.TestCase):
 		purchase_invoice = frappe.new_doc("Purchase Invoice")
 		purchase_invoice.supplier = "_Test Supplier"
 		purchase_invoice.company = "_Test Company"
-		purchase_invoice.append("items", {
-			"item_code": "_Test Item",
-			"qty": 1,
-			"rate": 100,
-		})
+		purchase_invoice.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 100,
+			},
+		)
 		purchase_invoice.credit_to = "Creditors - _TC"
 		purchase_invoice.currency = "INR"
 		purchase_invoice.save()
@@ -377,8 +384,6 @@ class TestTaxRule(unittest.TestCase):
 			applied_tax_template,
 			existing_templates,
 		)
-
-
 
 
 def make_tax_rule(**args):

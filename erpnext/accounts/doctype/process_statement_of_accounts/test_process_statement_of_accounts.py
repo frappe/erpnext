@@ -97,6 +97,7 @@ def create_process_soa(**args):
 		company=args.company or "_Test Company",
 		customers=args.customers or [{"customer": "_Test Customer"}],
 		enable_auto_email=1 if args.enable_auto_email else 0,
+		currency=args.currency or "",
 		frequency=args.frequency or "Weekly",
 		report=args.report or "General Ledger",
 		from_date=args.from_date or getdate(today()),

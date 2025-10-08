@@ -691,7 +691,11 @@ class ProductionPlan(Document):
 				key = (d.name, d.item_code, d.warehouse)
 
 			if not item_details["project"] and d.sales_order:
-				item_details["project"] = frappe.get_cached_value("Sales Order", d.sales_order, "project") if "projects" in frappe.get_installed_apps() else ""
+				item_details["project"] = (
+					frappe.get_cached_value("Sales Order", d.sales_order, "project")
+					if "projects" in frappe.get_installed_apps()
+					else ""
+				)
 
 			if self.get_items_from == "Material Request":
 				item_details.update({"qty": d.planned_qty})
@@ -751,7 +755,14 @@ class ProductionPlan(Document):
 				"company": self.get("company"),
 			}
 
+			if flt(row.qty) <= flt(row.ordered_qty):
+				continue
+
 			self.prepare_data_for_sub_assembly_items(row, work_order_data)
+
+			if work_order_data.get("qty") <= 0:
+				continue
+
 			work_order = self.create_work_order(work_order_data)
 			if work_order:
 				wo_list.append(work_order)
@@ -770,6 +781,8 @@ class ProductionPlan(Document):
 		]:
 			if row.get(field):
 				wo_data[field] = row.get(field)
+
+		wo_data["qty"] = flt(row.get("qty")) - flt(row.get("ordered_qty"))
 
 		wo_data.update(
 			{
@@ -1181,7 +1194,15 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			& (bom.name == bom_no)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
-		.groupby(item.item_name,item.name,bei.description,bei.stock_uom,bei.source_warehouse,item_default.default_warehouse,item_uom.conversion_factor)
+		.groupby(
+			item.item_name,
+			item.name,
+			bei.description,
+			bei.stock_uom,
+			bei.source_warehouse,
+			item_default.default_warehouse,
+			item_uom.conversion_factor,
+		)
 	).run(as_dict=True)
 
 	for d in data:
@@ -1242,6 +1263,7 @@ def get_subitems(
 			item_default.default_warehouse,
 			item.purchase_uom,
 			item_uom.conversion_factor,
+			bom.item.as_("main_bom_item"),
 		)
 		.where(
 			(bom.name == bom_no)
@@ -1261,7 +1283,7 @@ def get_subitems(
 			item.safety_stock,
 			item_default.default_warehouse,
 			item.purchase_uom,
-			item_uom.conversion_factor
+			item_uom.conversion_factor,
 		)
 	).run(as_dict=True)
 
@@ -1369,6 +1391,7 @@ def get_material_request_items(
 			"sales_order": sales_order,
 			"description": row.get("description"),
 			"uom": row.get("purchase_uom") or row.get("stock_uom"),
+			"main_bom_item": row.get("main_bom_item"),
 		}
 
 
@@ -1936,7 +1959,16 @@ def get_raw_materials_of_sub_assembly_items(
 			& (bom.name == bom_no)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
-		.groupby(bei.item_code, bei.stock_uom,item.name,bei.description,bei.bom_no,bei.source_warehouse,item_default.default_warehouse,item_uom.conversion_factor)
+		.groupby(
+			bei.item_code,
+			bei.stock_uom,
+			item.name,
+			bei.description,
+			bei.bom_no,
+			bei.source_warehouse,
+			item_default.default_warehouse,
+			item_uom.conversion_factor,
+		)
 	).run(as_dict=True)
 
 	for item in items:

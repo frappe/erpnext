@@ -86,7 +86,7 @@ def get_stock_value_on(
 
 	if item_code:
 		query = query.where(sle.item_code == item_code)
-	
+
 	if company:
 		query = query.where(sle.company == company)
 
@@ -108,6 +108,8 @@ def get_stock_balance(
 	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
 
 	from erpnext.stock.stock_ledger import get_previous_sle
+
+	frappe.has_permission("Item", "read", throw=True)
 
 	if posting_date is None:
 		posting_date = nowdate()
@@ -665,3 +667,56 @@ def get_combine_datetime(posting_date, posting_time):
 		posting_time = (datetime.datetime.min + posting_time).time()
 
 	return datetime.datetime.combine(posting_date, posting_time)
+
+
+def get_or_create_fiscal_year(company="_Test Company"):
+	from datetime import date, datetime
+
+	import frappe
+
+	current_date = datetime.today().date()
+
+	matching_fy_list = frappe.get_all(
+		"Fiscal Year",
+		filters={
+			"disabled": 0,
+			"year_start_date": ["<=", current_date],
+			"year_end_date": [">=", current_date],
+		},
+		fields=["name", "year_start_date", "year_end_date"],
+	)
+	is_company = False
+	if len(matching_fy_list) > 0:
+		for fy in matching_fy_list:
+			fiscal_year = frappe.get_doc("Fiscal Year", fy["name"])
+			for years in fiscal_year.companies:
+				if years.company == company:
+					is_company = True
+					break
+			if is_company:
+				break
+
+		if not is_company:
+			for rows in matching_fy_list:
+				try:
+					fiscal_year = frappe.get_doc("Fiscal Year", rows.name)
+					fiscal_year.append("companies", {"company": company})
+					fiscal_year.save()
+					break
+				except Exception as e:
+					print(f"Failed to get Fiscal Year {fy['name']}: {e}")
+					continue
+
+	else:
+		# No fiscal year includes current date — create a new one
+		current_year = current_date.year
+		first_date = date(current_year, 1, 1)
+		last_date = date(current_year, 12, 31)
+
+		fiscal_year = frappe.new_doc("Fiscal Year")
+		fiscal_year.year = f"{current_year}-{company}"
+		fiscal_year.year_start_date = first_date
+		fiscal_year.year_end_date = last_date
+		fiscal_year.company = company  # Required to avoid overlap error
+		fiscal_year.append("companies", {"company": company})
+		fiscal_year.save()

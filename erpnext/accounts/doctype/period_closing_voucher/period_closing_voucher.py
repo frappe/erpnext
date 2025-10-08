@@ -132,7 +132,12 @@ class PeriodClosingVoucher(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Account Closing Balance",
+		)
 		self.block_if_future_closing_voucher_exists()
 		self.db_set("gle_processing_status", "In Progress")
 		self.cancel_gl_entries()

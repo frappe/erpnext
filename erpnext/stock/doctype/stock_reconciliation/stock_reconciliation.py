@@ -165,6 +165,12 @@ class StockReconciliation(StockController):
 			if not frappe.db.exists("Item", item.item_code):
 				frappe.throw(_("Item {0} does not exist").format(item.item_code))
 
+			if voucher_detail_no and voucher_detail_no != item.name:
+				continue
+
+			if not item.item_code:
+				continue
+
 			item_details = frappe.get_cached_value(
 				"Item", item.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
@@ -202,9 +208,19 @@ class StockReconciliation(StockController):
 							)
 						)
 
-					if self.docstatus == 1:
-						bundle.voucher_no = self.name
-						bundle.submit()
+					if (
+						self.docstatus == 1
+						and item.current_serial_and_batch_bundle
+						and frappe.db.get_value(
+							"Serial and Batch Bundle", item.current_serial_and_batch_bundle, "docstatus"
+						)
+						== 0
+					):
+						sabb_doc = frappe.get_doc(
+							"Serial and Batch Bundle", item.current_serial_and_batch_bundle
+						)
+						sabb_doc.voucher_no = self.name
+						sabb_doc.submit()
 
 					item.db_set(
 						{
@@ -219,9 +235,6 @@ class StockReconciliation(StockController):
 				continue
 
 			if not save and item.use_serial_batch_fields:
-				continue
-
-			if voucher_detail_no and voucher_detail_no != item.name:
 				continue
 
 			item_details = frappe.get_cached_value(
@@ -282,6 +295,7 @@ class StockReconciliation(StockController):
 							"warehouse": item.warehouse,
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
+							"for_stock_levels": True,
 							"ignore_voucher_nos": [self.name],
 						}
 					)
@@ -857,6 +871,10 @@ class StockReconciliation(StockController):
 			data.incoming_rate = flt(row.valuation_rate)
 
 		self.update_inventory_dimensions(row, data)
+
+		if self.docstatus == 1 and has_dimensions and (not row.batch_no or not row.serial_and_batch_bundle):
+			data.qty_after_transaction = data.actual_qty
+			data.actual_qty = 0.0
 
 		return data
 

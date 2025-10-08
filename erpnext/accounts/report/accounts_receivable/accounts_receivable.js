@@ -90,6 +90,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			default: "Due Date",
 		},
 		{
+			fieldname: "calculate_ageing_with",
+			label: __("Calculate Ageing With"),
+			fieldtype: "Select",
+			options: "Report Date\nToday Date",
+			default: "Report Date",
+		},
+		{
 			fieldname: "range",
 			label: __("Ageing Range"),
 			fieldtype: "Data",

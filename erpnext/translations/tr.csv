@@ -2271,9 +2271,8 @@ Row {0}: Party Type and Party is required for Receivable / Payable account {1},S
 Row {0}: Payment against Sales/Purchase Order should always be marked as advance,Satır {0}: Satış / Satınalma Siparişi karşı Ödeme hep avans olarak işaretlenmiş olmalıdır,
 Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,Satır {0}: Kontrol edin Hesabı karşı 'Advance mı' {1} Bu bir avans girişi ise.,
 Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges,{0} Satırı: Lütfen Satış Vergileri ve Masraflarında Vergi Muafiyeti Nedeni ayarını yapın,
-Row {0}: Please set the Mode of Payment in Payment Schedule,Satır {0} : Lütfen Ödeme Planında Ödeme Şeklini ayarlayın,
-Row {0}: Please set the correct code on Mode of Payment {1},Satır {0} : Lütfen {1} Ödeme Şeklinde doğru kodu ayarlayın,
-Row {0}: Qty is mandatory,Satır {0}: Miktar zorunludur,
+Row {0}: Please set the Mode of Payment in Payment Schedule,{0} Satırı: Lütfen Ödeme Planında Ödeme Modu ayarı,
+Row {0}: Please set the correct code on Mode of Payment {1},{0} Satırı: Lütfen {1} Ödeme Modunda doğru kodu ayarı,
 Row {0}: Quality Inspection rejected for item {1},{0} Satırı: {1} kalem için Kalite Denetimi reddedildi,
 Row {0}: UOM Conversion Factor is mandatory,Satır {0}: Ölçü Birimi Dönüşüm Faktörü Hizmetleri,
 Row {0}: select the workstation against the operation {1},{0} bilgisi: {1} işlemine karşı iş istasyonunu seçin,
@@ -3460,7 +3459,6 @@ Issue Type.,Sorun Tipi.,
 "It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account.","Sunucunun şerit çevresinde bir sorun var gibi görünüyor. Arıza durumunda, tutarları iade edilir.",
 Item Reported,Öğe Bildirildi,
 Item listing removed,öğe listesi kaldırıldı,
-Item quantity can not be zero,Ürün miktarı sıfır olamaz,
 Item taxes updated,Öğe vergileri güncellendi,
 Item {0}: {1} qty produced. ,Öğe {0}: {1} adet oluşturma.,
 Joining Date can not be greater than Leaving Date,Katılım Tarihi Ayrılık Tarihinden daha büyük olamaz,
@@ -3632,6 +3630,7 @@ Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subco
 Row #{0}: Cost Center {1} does not belong to company {2},"Satır # {0}: Maliyet Merkezi {1}, {2} işletme ait değil",
 Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.,Satır # {0}: {3} İş Emri'nde {2} işlenmiş ürün adedi için {1} işlemi tamamlanmadı. Lütfen çalışma halindeyken {4} Job Card ile güncelleyin.,
 Row #{0}: Payment document is required to complete the transaction,Satır # {0}: İşlemi gizlemek için ödeme belgesi gereklidir,
+Row #{0}: Quantity for Item {1} cannot be zero.,Satır # {0}: Ürün {1} miktarı sıfır olamaz.,
 Row #{0}: Serial No {1} does not belong to Batch {2},"Satır # {0}: Seri No {1}, Parti {2} &#39;ye ait değil",
 Row #{0}: Service End Date cannot be before Invoice Posting Date,"Satır # {0}: Hizmet Bitiş Tarihi, Fatura Kayıt Tarihinden önce olamaz",
 Row #{0}: Service Start Date cannot be greater than Service End Date,"Satır # {0}: Hizmet Başlangıç Tarihi, Hizmet Bitiş Tarihinden fazla olamaz",
@@ -9809,7 +9808,7 @@ Dinamik değerler için <b>Konu</b> ve <b>Gövde</b> alanlarında <a href=""http
 
 <pre>Contract for Customer {{ party_name }}
 
--Valid From : {{ start_date }} 
+-Valid From : {{ start_date }}
 -Valid To : {{ end_date }}
 </pre>
 
@@ -9823,7 +9822,7 @@ Dinamik değerler için <b>Konu</b> ve <b>Gövde</b> alanlarında <a href=""http
 
 <pre>Müşteri için Sözleşme {{ party_name }}
 
--Geçerli Başlangıç : {{ start_date }} 
+-Geçerli Başlangıç : {{ start_date }}
 -Geçerli Bitiş : {{ end_date }}
 </pre>
 
@@ -9838,7 +9837,7 @@ Dinamik değerler için <b>Konu</b> ve <b>Gövde</b> alanlarında <a href=""http
 
 <pre>Delivery Terms for Order number {{ name }}
 
--Order Date : {{ transaction_date }} 
+-Order Date : {{ transaction_date }}
 -Expected Delivery Date : {{ delivery_date }}
 </pre>
 
@@ -9852,7 +9851,7 @@ Dinamik değerler için <b>Konu</b> ve <b>Gövde</b> alanlarında <a href=""http
 
 <pre>Sipariş numarası için Teslimat Koşulları {{ name }}
 
--Sipariş Tarihi: {{ transaction_date }} 
+-Sipariş Tarihi: {{ transaction_date }}
 -Beklenen Teslimat Tarihi: {{ delivery_date }}
 </pre>
 
@@ -9955,17 +9954,17 @@ Dinamik değerler için <b>Konu</b> ve <b>Gövde</b> alanlarında <a href=""http
 "<span class=""h4""><b>Settings</b></span>","<span class=""h4""><b>Ayarlar</b></span>",
 "<span class=""h4""><b>Shortcuts</b></span>","<span class=""h4""><b>Kısayollar</b></span>",
 "<span class=""h4""><b>Your Shortcuts
-			
-		
-			
-		
-			
+
+
+
+
+
 		</b></span>","<span class=""h4""><b>Kısayollar
-			
-		
-			
-		
-			
+
+
+
+
+
 		</b></span>",
 "<span class=""h4""><b>Your Shortcuts</b></span>","<span class=""h4""><b>Kısayollar</b></span>",
 <strong>Grand Total:</strong> {0},<strong>Genel Toplam:</strong> {0},
@@ -9993,7 +9992,7 @@ Dinamik değerler için <b>Konu</b> ve <b>Gövde</b> alanlarında <a href=""http
 
         </td>
          <td>
-                   <p><b>Example: </b> doc.doctype == ""Stock Entry"" and doc.purpose == ""Manufacture""</p>    
+                   <p><b>Example: </b> doc.doctype == ""Stock Entry"" and doc.purpose == ""Manufacture""</p>
           </td>
 </tr>
 
@@ -10028,7 +10027,7 @@ Dinamik değerler için <b>Konu</b> ve <b>Gövde</b> alanlarında <a href=""http
 
         </td>
          <td>
-                   <p><b>Örnek: </b> doc.doctype == ""Stok Girişi"" ve doc.purpose == ""Üretim""</p>    
+                   <p><b>Örnek: </b> doc.doctype == ""Stok Girişi"" ve doc.purpose == ""Üretim""</p>
           </td>
 </tr>
 
@@ -10891,8 +10890,8 @@ If enabled then system won't apply the pricing rule on the delivery note which w
 If enabled then system won't override the picked qty / batches / serial numbers.,"Etkinleştirilirse, sistem seçilen adet / parti / seri numaralarını geçersiz kılmaz.",
 "If enabled, a print of this document will be attached to each email","Etkinleştirilirse, bu belgenin bir çıktısı her e-postaya eklenecektir",
 "If enabled, all files attached to this document will be attached to each email",B belgeye eklenen tüm dosyalar her e-postaya da eklenir.,
-"If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial 
- / Batch Bundle. ","Etkinleştirildiğinde, otomatik Seri 
+"If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial
+ / Batch Bundle. ","Etkinleştirildiğinde, otomatik Seri
  / Toplu Paket oluşturulması durumunda stok hareketlerindeki seri / toplu değerleri güncellemez. ",
 "If enabled, the consolidated invoices will have rounded total disabled","Etkinleştirilirse, konsolide faturalarda yuvarlanmış toplam devre dışı bırakılır",
 "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate.","İç transferler sırasında ürün fiyatı, değerleme oranına göre ayarlanmaz ancak muhasebe işlemleri yine de değerleme oranını kullanır.",

@@ -499,7 +499,6 @@ class SerialandBatchBundle(Document):
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
 				"serial_and_batch_bundle": self.name,
-				"actual_qty": self.total_qty,
 				"company": self.company,
 				"serial_nos": [row.serial_no for row in self.entries if row.serial_no],
 				"batch_nos": {row.batch_no: row for row in self.entries if row.batch_no},
@@ -705,19 +704,19 @@ class SerialandBatchBundle(Document):
 
 	def reset_qty(self, row, qty_field=None):
 		qty_field = self.get_qty_field(row, qty_field=qty_field)
-		qty = abs(row.get(qty_field))
+		qty = abs(flt(row.get(qty_field), self.precision("total_qty")))
 
 		idx = None
 		while qty > 0:
 			for d in self.entries:
-				row_qty = abs(d.qty)
+				row_qty = abs(flt(d.qty, d.precision("qty")))
 				if row_qty >= qty:
 					d.db_set("qty", qty if self.type_of_transaction == "Inward" else qty * -1)
 					qty = 0
 					idx = d.idx
 					break
 				else:
-					qty -= row_qty
+					qty = flt(qty - row_qty, d.precision("qty"))
 					idx = d.idx
 
 		if idx and len(self.entries) > idx:

@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
-from frappe.utils import flt, fmt_money, now
+from frappe.utils import create_batch, flt, fmt_money, now
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -31,8 +31,11 @@ class GLEntry(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.accounts.doctype.gl_entry_reconciliation_details.gl_entry_reconciliation_details import GLEntryReconciliationDetails
 		from frappe.types import DF
+
+		from erpnext.accounts.doctype.gl_entry_reconciliation_details.gl_entry_reconciliation_details import (
+			GLEntryReconciliationDetails,
+		)
 
 		account: DF.Link | None
 		account_currency: DF.Link | None
@@ -93,19 +96,17 @@ class GLEntry(Document):
 			self.validate_party()
 			self.validate_currency()
 
-
-	def after_insert(self): #For Open Item Reconciliation Feature
+	def after_insert(self):  # For Open Item Reconciliation Feature
 		total_amt = 0.0
 		if self.debit_in_account_currency > 0.0:
 			total_amt = self.debit_in_account_currency
 		elif self.credit_in_account_currency > 0.0:
 			total_amt = self.credit_in_account_currency
-		
+
 		reconciled_amt = self.reconciled_amount if self.reconciled_amount else 0.0
 		unreconciled_amount = total_amt - reconciled_amt
 
 		self.unreconciled_amount = unreconciled_amount
-
 
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
@@ -296,7 +297,7 @@ class GLEntry(Document):
 	def validate_currency(self):
 		if self.is_cancelled:
 			return
-		
+
 		company_currency = erpnext.get_company_currency(self.company)
 		account_currency = get_account_currency(self.account)
 
@@ -470,33 +471,37 @@ def rename_gle_sle_docs():
 def rename_temporarily_named_docs(doctype):
 	"""Rename temporarily named docs using autoname options"""
 	docs_to_rename = frappe.get_all(doctype, {"to_rename": "1"}, order_by="creation", limit=50000)
-	for doc in docs_to_rename:
-		oldname = doc.name
-		set_name_from_naming_options(frappe.get_meta(doctype).autoname, doc)
-		newname = doc.name
-		frappe.db.sql(
-			f"UPDATE `tab{doctype}` SET name = %s, to_rename = 0, modified = %s where name = %s",
- 			(newname, now(), oldname),
-			auto_commit=True,
-		)
+	autoname = frappe.get_meta(doctype).autoname
+
+	for batch in create_batch(docs_to_rename, 100):
+		for doc in batch:
+			oldname = doc.name
+			set_name_from_naming_options(autoname, doc)
+			newname = doc.name
+			frappe.db.sql(
+				f"UPDATE `tab{doctype}` SET name = %s, to_rename = 0, modified = %s where name = %s",
+				(newname, now(), oldname),
+			)
+		frappe.db.commit()
+
 
 @frappe.whitelist()
-def update_gl_entry_once(): #For Open Item reconciliation Feature. 
-    get_gl_ac = frappe.db.get_all("Account",{"is_open_item":1},["name"])
-    for row in get_gl_ac:
-        all_gle = frappe.db.get_all("GL Entry",{"account":row.name,"is_cancelled":0},["name"])
-        if all_gle:
-            for gle in all_gle:
-                if gle.get("name"):
-                    self = frappe.get_doc("GL Entry",gle.get("name"))
-                    total_amt = 0.0
-                    if self.debit_in_account_currency > 0.0:
-                        total_amt = self.debit_in_account_currency
-                    elif self.credit_in_account_currency > 0.0:
-                        total_amt = self.credit_in_account_currency
-                    
-                    reconciled_amt = self.reconciled_amount if self.reconciled_amount else 0.0
-                    unreconciled_amount = total_amt - reconciled_amt
+def update_gl_entry_once():  # For Open Item reconciliation Feature.
+	get_gl_ac = frappe.db.get_all("Account", {"is_open_item": 1}, ["name"])
+	for row in get_gl_ac:
+		all_gle = frappe.db.get_all("GL Entry", {"account": row.name, "is_cancelled": 0}, ["name"])
+		if all_gle:
+			for gle in all_gle:
+				if gle.get("name"):
+					self = frappe.get_doc("GL Entry", gle.get("name"))
+					total_amt = 0.0
+					if self.debit_in_account_currency > 0.0:
+						total_amt = self.debit_in_account_currency
+					elif self.credit_in_account_currency > 0.0:
+						total_amt = self.credit_in_account_currency
 
-                    frappe.db.set_value(self.doctype,self.name,"unreconciled_amount",unreconciled_amount)
-                    frappe.db.commit()
+					reconciled_amt = self.reconciled_amount if self.reconciled_amount else 0.0
+					unreconciled_amount = total_amt - reconciled_amt
+
+					frappe.db.set_value(self.doctype, self.name, "unreconciled_amount", unreconciled_amount)
+					frappe.db.commit()

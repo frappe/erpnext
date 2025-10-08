@@ -28,11 +28,16 @@ class ProcessStatementOfAccounts(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
-		from erpnext.accounts.doctype.process_statement_of_accounts_cc.process_statement_of_accounts_cc import ProcessStatementOfAccountsCC
-		from erpnext.accounts.doctype.process_statement_of_accounts_customer.process_statement_of_accounts_customer import ProcessStatementOfAccountsCustomer
-		from erpnext.accounts.doctype.psoa_cost_center.psoa_cost_center import PSOACostCenter
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
+
+		from erpnext.accounts.doctype.process_statement_of_accounts_cc.process_statement_of_accounts_cc import (
+			ProcessStatementOfAccountsCC,
+		)
+		from erpnext.accounts.doctype.process_statement_of_accounts_customer.process_statement_of_accounts_customer import (
+			ProcessStatementOfAccountsCustomer,
+		)
+		from erpnext.accounts.doctype.psoa_cost_center.psoa_cost_center import PSOACostCenter
 
 		account: DF.Link | None
 		ageing_based_on: DF.Literal["Due Date", "Posting Date"]
@@ -120,8 +125,8 @@ def get_statement_dict(doc, get_statement_dict=False):
 
 		tax_id = frappe.get_doc("Customer", entry.customer).tax_id
 		presentation_currency = (
-			get_party_account_currency("Customer", entry.customer, doc.company)
-			or doc.currency
+			doc.currency
+			or get_party_account_currency("Customer", entry.customer, doc.company)
 			or get_company_currency(doc.company)
 		)
 
@@ -208,7 +213,7 @@ def get_gl_filters(doc, entry, tax_id, presentation_currency):
 
 
 def get_ar_filters(doc, entry):
-	filters =  {
+	filters = {
 		"report_date": doc.posting_date if doc.posting_date else None,
 		"party_type": "Customer",
 		"party": [entry.customer],
@@ -226,9 +231,8 @@ def get_ar_filters(doc, entry):
 	if frappe.db.has_column("Process Statement Of Accounts", "sales_partner"):
 		filters["sales_partner"] = doc.sales_partner if doc.sales_partner else None
 	if frappe.db.has_column("Process Statement Of Accounts", "sales_person"):
-		filters["sales_person"] = doc.sales_person if doc.sales_person else None,
+		filters["sales_person"] = (doc.sales_person if doc.sales_person else None,)
 	return filters
-
 
 
 def get_html(doc, filters, entry, col, res, ageing):
@@ -324,7 +328,7 @@ def get_recipients_and_cc(customer, doc):
 			if clist.billing_email:
 				for email in clist.billing_email.split(","):
 					recipients.append(email.strip())
-					
+
 			if doc.primary_mandatory and clist.primary_email:
 				for email in clist.primary_email.split(","):
 					recipients.append(email.strip())

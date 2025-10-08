@@ -172,7 +172,7 @@ def _get_party_details(
 				"allocated_percentage": d.allocated_percentage or None,
 				"commission_rate": d.commission_rate,
 			}
-			for d in (party.get("sales_team") or []) 
+			for d in (party.get("sales_team") or [])
 		]
 
 	if party_type == "Supplier" and party:
@@ -182,6 +182,7 @@ def _get_party_details(
 		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
 	return party_details
+
 
 def set_address_details(
 	party_details,
@@ -289,6 +290,7 @@ def set_address_details(
 
 	return party_billing, party_shipping
 
+
 @erpnext.allow_regional
 def get_regional_address_details(party_details, doctype, company):
 	pass
@@ -321,6 +323,7 @@ def complete_contact_details(party_details):
 		contact_details = frappe.db.get_value("Contact", party_details.contact_person, fields, as_dict=True)
 
 		party_details.update(contact_details)
+
 
 def set_contact_details(party_details, party, party_type):
 	party_details.contact_person = get_default_contact(party_type, party.name)
@@ -437,6 +440,12 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
+	# get default account on the basis of party typeAdd commentMore actions
+	if not account:
+		account_type = frappe.get_cached_value("Party Type", party_type, "account_type")
+		default_account_name = "default_" + account_type.lower() + "_account"
+		account = frappe.get_cached_value("Company", company, default_account_name)
+
 	if include_advance and party_type in ["Customer", "Supplier", "Student"]:
 		advance_account = get_party_advance_account(party_type, party, company)
 		if advance_account:
@@ -527,38 +536,25 @@ def get_party_gle_account(party_type, party, company):
 
 def validate_party_gle_currency(party_type, party, company, party_account_currency=None):
 	"""Validate party account currency with existing GL Entry's currency"""
-	if not party_account_currency:
-		party_account_currency = get_party_account_currency(party_type, party, company)
-
-	existing_gle_currency = get_party_gle_currency(party_type, party, company)
-
-	if existing_gle_currency and party_account_currency != existing_gle_currency:
-		frappe.throw(
-			_(
-				"{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}."
-			).format(
-				frappe.bold(party_type),
-				frappe.bold(party),
-				frappe.bold(existing_gle_currency),
-				frappe.bold(company),
-			),
-			InvalidAccountCurrency,
-		)
+	# Removed validation for party account currency for multicurrency support 
+	return
 
 
 def validate_party_accounts(doc):
 	from erpnext.controllers.accounts_controller import validate_account_head
 
 	companies = []
+	accounts_by_company = {}
 
 	for account in doc.get("accounts"):
 		if account.company in companies:
-			frappe.throw(
-				_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name),
-				DuplicatePartyAccountError,
-			)
+			# Allow multiple accounts per company for multi-currency support
+			if account.company not in accounts_by_company:
+				accounts_by_company[account.company] = []
+			accounts_by_company[account.company].append(account.account)
 		else:
 			companies.append(account.company)
+			accounts_by_company[account.company] = [account.account]
 
 		party_account_currency = frappe.get_cached_value("Account", account.account, "account_currency")
 		if frappe.db.get_default("Company"):
@@ -586,6 +582,20 @@ def validate_party_accounts(doc):
 			validate_account_head(account.idx, account.account, account.company)
 		if account.advance_account:
 			validate_account_head(account.idx, account.advance_account, account.company)
+
+	# Validate account currencies are different for same company
+	for company, accounts in accounts_by_company.items():
+		if len(accounts) > 1:
+			currencies = []
+			for account in accounts:
+				currency = frappe.get_cached_value("Account", account, "account_currency")
+				if currency in currencies:
+					frappe.throw(
+						_("Multiple accounts with same currency ({0}) not allowed for company {1}").format(
+							currency, company
+						)
+					)
+				currencies.append(currency)
 
 
 @frappe.whitelist()
@@ -662,6 +672,7 @@ def validate_due_date_with_template(posting_date, due_date, bill_date, template_
 
 		else:
 			frappe.throw(_("Due / Reference Date cannot be after {0}").format(formatdate(default_due_date)))
+
 
 @frappe.whitelist()
 def get_address_tax_category(tax_category=None, billing_address=None, shipping_address=None):
@@ -776,8 +787,6 @@ def validate_party_frozen_disabled(party_type, party_name):
 				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
 
 
-
-
 def validate_account_party_type(self):
 	if self.party_type and self.party:
 		account_type = frappe.get_cached_value("Account", self.account, "account_type")
@@ -789,7 +798,6 @@ def validate_account_party_type(self):
 			)
 
 
-			
 def get_dashboard_info(party_type, party, loyalty_program=None):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 
@@ -821,18 +829,21 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 	loyalty_point_details = []
 	if party_type == "Customer":
-		loyalty_point_details = frappe._dict({
-			d[0]: d[1] for d in frappe.get_all(
-				"Loyalty Point Entry",
-				filters={
-					"customer": party,
-					"expiry_date": (">=", getdate()),
-				},
-				group_by="company",
-				fields=["company", "sum(loyalty_points) as loyalty_points"],
-				as_list=1,
-			)
-	})
+		loyalty_point_details = frappe._dict(
+			{
+				d[0]: d[1]
+				for d in frappe.get_all(
+					"Loyalty Point Entry",
+					filters={
+						"customer": party,
+						"expiry_date": (">=", getdate()),
+					},
+					group_by="company",
+					fields=["company", "sum(loyalty_points) as loyalty_points"],
+					as_list=1,
+				)
+			}
+		)
 
 	company_wise_billing_this_year = frappe._dict()
 
@@ -866,7 +877,6 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 		if loyalty_point_details:
 			loyalty_points = loyalty_point_details.get(d.company)
-
 
 		info = {}
 		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0

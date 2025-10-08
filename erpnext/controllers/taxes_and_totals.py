@@ -9,6 +9,7 @@ from frappe import _, scrub
 from frappe.model.document import Document
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from frappe.utils.deprecations import deprecated
+
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
@@ -17,9 +18,9 @@ from erpnext.controllers.accounts_controller import (
 	validate_inclusive_tax,
 	validate_taxes_and_charges,
 )
-from erpnext.stock.get_item_details import _get_item_tax_template
-from erpnext.utilities.regional import temporary_flag
 from erpnext.stock.get_item_details import _get_item_tax_template, get_item_tax_map
+from erpnext.utilities.regional import temporary_flag
+
 
 class calculate_taxes_and_totals:
 	def __init__(self, doc: Document):
@@ -81,7 +82,7 @@ class calculate_taxes_and_totals:
 		self.calculate_tax_withholding_net_total()
 		self.calculate_taxes()
 		self.adjust_grand_total_for_inclusive_tax()
-		
+
 		self.calculate_totals()
 		self._cleanup()
 		self.calculate_total_net_weight()
@@ -108,7 +109,9 @@ class calculate_taxes_and_totals:
 				if tax_company != self.doc.get("company"):
 					frappe.throw(
 						_("Row {0}: Item Tax Template {1} does not belong to company {2}").format(
-							item.idx, frappe.bold(item.item_tax_template), frappe.bold(self.doc.get("company"))
+							item.idx,
+							frappe.bold(item.item_tax_template),
+							frappe.bold(self.doc.get("company")),
 						)
 					)
 
@@ -143,10 +146,10 @@ class calculate_taxes_and_totals:
 					if item.item_tax_template not in taxes:
 						if frappe.flags.in_import:
 							frappe.throw(
-							_("Row {0}: Item Tax template not match for Item {1}").format(
-								item.idx, frappe.bold(item.item_code)
+								_("Row {0}: Item Tax template not match for Item {1}").format(
+									item.idx, frappe.bold(item.item_code)
+								)
 							)
-						)
 						item.item_tax_template = taxes[0]
 						frappe.msgprint(
 							_("Row {0}: Item Tax template updated as per validity and rate applied").format(
@@ -161,8 +164,6 @@ class calculate_taxes_and_totals:
 				item_tax_template=item.item_tax_template,
 				as_json=True,
 			)
-
-
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
@@ -477,7 +478,6 @@ class calculate_taxes_and_totals:
 
 			self._set_in_company_currency(tax, ["total"])
 
-
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
 		# if tax/charges is for deduction, multiply by -1
@@ -570,7 +570,6 @@ class calculate_taxes_and_totals:
 		if tax.account_head in frappe.flags.round_off_applicable_accounts:
 			tax.base_tax_amount = round(tax.base_tax_amount, 0)
 			tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
-
 
 	@deprecated
 	def manipulate_grand_total_for_inclusive_tax(self):

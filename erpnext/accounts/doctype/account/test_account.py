@@ -598,11 +598,13 @@ class TestAccount(unittest.TestCase):
 			account.save(ignore_permissions=True)
 
 	def test_validate_frozen_accounts_modifier_TC_ACC_180(self):
+		frappe.set_user("Guest")
 		make_company(company_name="_Test Company")
 		account = frappe.get_doc("Account", "Current Assets - _TC")
 		account.freeze_account = "Yes"
 		with self.assertRaises(frappe.ValidationError, msg="You are not authorized to set Frozen value"):
 			account.save(ignore_permissions=True)
+		frappe.set_user("Administrator")
 
 	def test_validate_balance_must_be_credit_TC_ACC_181(self):
 		make_company(company_name="_Test Company")
@@ -865,9 +867,38 @@ class TestAccount(unittest.TestCase):
 	def test_update_account_number_TC_ACC_193(self):
 		frappe.set_user("Administrator")
 
-		parent = make_company(company_name="Test Parent Company", is_group=True)
-		company = make_company(company_name="Test Child Company", parent_company=parent.name)
-		if not frappe.db.exists("Account", "Root Account"):
+		# Create parent company if not exists
+		if frappe.db.exists("Company", "Test Parent Company"):
+			parent = frappe.get_doc("Company", "Test Parent Company")
+		else:
+			parent = frappe.get_doc(
+				{
+					"doctype": "Company",
+					"company_name": "Test Parent Company",
+					"is_group": 1,
+					"abbr": "TPC1",
+					"default_currency": "INR",
+				}
+			)
+			parent.insert()
+
+		# Create child company if not exists
+		if frappe.db.exists("Company", "Test Child Company"):
+			company = frappe.get_doc("Company", "Test Child Company")
+		else:
+			company = frappe.get_doc(
+				{
+					"doctype": "Company",
+					"company_name": "Test Child Company",
+					"parent_company": parent.name,
+					"abbr": "TCC1",
+					"default_currency": "INR",
+				}
+			)
+			company.insert()
+
+		# Create root account if not exists
+		if not frappe.db.exists("Account", {"account_name": "root", "company": company.name}):
 			root_account = frappe.new_doc("Account")
 			root_account.account_name = "root"
 			root_account.is_group = 1
@@ -875,9 +906,10 @@ class TestAccount(unittest.TestCase):
 			root_account.company = company.name
 			root_account.insert(ignore_mandatory=True)
 		else:
-			root_account = frappe.get_doc("Account", {"account_name": "root"})
+			root_account = frappe.get_doc("Account", {"account_name": "root", "company": company.name})
 
-		if not frappe.db.exists("Account", "1210 - Debtors - TPC"):
+		# Create parent account in parent company
+		if not frappe.db.exists("Account", {"name": "1210 - Debtors - TPC"}):
 			par_acc = frappe.new_doc("Account")
 			par_acc.account_name = "Debtors"
 			par_acc.account_number = "1210"
@@ -886,7 +918,8 @@ class TestAccount(unittest.TestCase):
 			par_acc.root_type = "Asset"
 			par_acc.insert(ignore_mandatory=True)
 
-		if not frappe.db.exists("Account", "1210 - Debtors - TCC"):
+		# Create account in child company
+		if not frappe.db.exists("Account", {"name": "1210 - Debtors - TCC"}):
 			acc = frappe.new_doc("Account")
 			acc.account_name = "Debtors"
 			acc.parent_account = root_account.name
@@ -894,20 +927,22 @@ class TestAccount(unittest.TestCase):
 			acc.company = company.name
 			acc.insert(ignore_permissions=True)
 
-			account_number, account_name = frappe.db.get_value(
-				"Account", "1210 - Debtors - TCC", ["account_number", "account_name"]
-			)
-			self.assertEqual(account_number, "1210")
-			self.assertEqual(account_name, "Debtors")
+		account_details = frappe.db.get_value(
+			"Account", "1210 - Debtors - TCC1", ["account_number", "account_name"]
+		)
+		self.assertIsNotNone(account_details, "Account '1210 - Debtors - TCC1' not found")
+		account_number, account_name = account_details
+
+		self.assertEqual(account_number, "1210")
+		self.assertEqual(account_name, "Debtors")
 
 		new_account_number = "1211-11-4 - 6 - "
 		new_account_name = "Debtors 1 - Test - "
 
-		new_account_name = "Debtors 1 - Test - "
 		msg = "Account Debtors exists in parent company Test Parent Company.Renaming it is only allowed via parent company Test Parent Company, to avoid mismatch.To overrule this, enable 'Allow Account Creation Against Child Company' in company Test Child Company"
 		with self.assertRaises(frappe.ValidationError, msg=msg):
 			update_account_number(
-				name="1210 - Debtors - TCC", account_name=new_account_name, account_number=new_account_number
+				name="1210 - Debtors - TCC1", account_name=new_account_name, account_number=new_account_number
 			)
 
 	def test_get_coa_TC_ACC_194(self):

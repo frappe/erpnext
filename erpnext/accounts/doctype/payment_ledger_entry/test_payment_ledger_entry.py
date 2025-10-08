@@ -15,7 +15,8 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 class TestPaymentLedgerEntry(FrappeTestCase):
 	def setUp(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
+
 		self.ple = qb.DocType("Payment Ledger Entry")
 		self.create_company()
 		self.create_item()
@@ -536,3 +537,239 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		# with references removed, deletion should be possible
 		so.delete()
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, so.doctype, so.name)
+  
+	def test_validate_account_details_TC_ACC_334(self):
+		from frappe.exceptions import ValidationError
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from frappe.utils import nowdate
+
+		create_company("_Test Company")
+		create_company("_Another Test Company", abbr="_ATC")
+
+		ledger_account = create_account(
+			account_name="_Test Ledger Account",
+			is_group=0,
+			account_type=None,
+			parent_account=frappe.db.get_value(
+				"Account", {"company": "_Test Company", "is_group": 1}
+			),
+			company="_Test Company",
+			account_currency="USD",
+			do_not_save=True,
+		)
+		ledger_account.save(ignore_permissions=True)
+  
+		ple = frappe.new_doc("Payment Ledger Entry")
+		ple.voucher_type = "Journal Entry"
+		ple.voucher_no = "TEST-JE-0001"
+		ple.account = ledger_account.name
+		ple.company = "_Test Company"
+		ple.posting_date = nowdate()
+
+		ple.validate_account_details()
+
+		ledger_account.is_group = 1
+		ledger_account.save(ignore_permissions=True)
+		with self.assertRaises(ValidationError) as e:
+			ple.validate_account_details()
+   
+		self.assertEqual(
+			str(e.exception).strip(),
+			f"Journal Entry {ple.voucher_no}: Account {ple.account} is a Group Account and group accounts cannot be used in transactions"
+		)
+
+		ledger_account.is_group = 0
+		ledger_account.save(ignore_permissions=True)
+
+		ple.company = "_Another Test Company"
+		ledger_account.save()
+		with self.assertRaises(ValidationError) as e:
+			ple.validate_account_details()
+
+		self.assertEqual(
+			str(e.exception).strip(),
+			f"Journal Entry {ple.voucher_no}: Account {ple.account} does not belong to Company {ple.company}"
+		)
+
+	def test_validate_allowed_dimensions_TC_ACC_335(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import validate_fiscal_year
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		create_company("_Test Company", abbr="_TC", currency="INR")
+		validate_fiscal_year("_Test Company")
+		create_cost_center(cost_center_name="Test Cost Center", company="_Test Company")
+		create_supplier(supplier_name="_Test Supplier", default_currency="INR")
+		parent_acc = frappe.db.get_value("Account", {"company": "_Test Company", "is_group": 1}, "name")
+		account_name = create_account(
+			account_name="_Test Ledger Account",
+			is_group=0,
+			company="_Test Company",
+			account_currency="INR",
+			account_type="Payable",
+			parent_account=parent_acc,
+		)
+		account_name_1 = create_account(
+			account_name="_Test Ledger Account 1",
+			is_group=0,
+			company="_Test Company",
+			account_currency="INR",
+			parent_account=parent_acc,
+		)
+
+		acc_f = frappe.get_doc({
+			"doctype":"Accounting Dimension Filter",
+			"company":"_Test Company",
+			"accounting_dimension":"Cost Center",
+			"allow_or_restrict":"Allow",
+			"apply_restriction_on_values":1,
+			"accounts":[{
+				"applicable_on_account":account_name,
+				"is_mandatory":1
+			}],
+			"dimensions":[{
+				"accounting_dimension":"Cost Center",
+				"dimension_value":"Test Cost Center - _TC"
+			}],
+			"disabled":0
+		}).insert(ignore_permissions=True)
+
+		jv = make_journal_entry(
+			account1=account_name,
+			account2=account_name_1,
+			amount=100,
+			cost_center="Test Cost Center - _TC",
+			save=False
+		)
+		jv.accounts[0].party_type = "Supplier"
+		jv.accounts[0].party = "_Test Supplier"
+		jv.save(ignore_permissions=True)
+		jv.submit()	
+
+		ple = frappe.get_doc({
+			"doctype":"Payment Ledger Entry",
+			"voucher_type":"Journal Entry",
+			"voucher_no":jv.name,
+			"account_type":"Payable",
+			"company":"_Test Company",
+			"against_voucher_type":"Journal Entry",
+			"party_type":"Supplier",
+			"party":"_Test Supplier",
+			"against_voucher_no":jv.name,
+			# "cost_center":"Test Cost Center - _TC",
+			"account":account_name,
+			"amount":100,
+			"currency":"INR",
+		})
+		with self.assertRaises(frappe.ValidationError) as e:
+			ple.validate_allowed_dimensions()
+		#validate cost center
+		self.assertEqual(
+			str(e.exception).strip(),
+			f"Cost Center is mandatory for account _Test Ledger Account - _TC"
+		)
+		ple.cost_center = "Test Cost Center - _TC1"
+		with self.assertRaises(frappe.ValidationError) as e:
+			ple.validate_allowed_dimensions()
+
+		self.assertEqual(
+			str(e.exception).strip(),
+			f"Invalid value Test Cost Center - _TC1 for Cost Center against account _Test Ledger Account - _TC"
+		)
+	
+	def test_validate_dimensions_for_pl_and_bs_TC_ACC_347(self):
+		
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import validate_fiscal_year
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from .payment_ledger_entry import on_doctype_update
+
+		create_company("_Test Company", abbr="_TC", currency="INR")
+		validate_fiscal_year("_Test Company")
+		create_cost_center(cost_center_name="Test Cost Center", company="_Test Company")
+		create_supplier(supplier_name="_Test Supplier", default_currency="INR")
+		parent_acc = frappe.db.get_value("Account", {"company": "_Test Company", "is_group": 1}, "name")
+		account_name = create_account(
+			account_name="_Test Ledger Account",
+			is_group=0,
+			company="_Test Company",
+			account_currency="INR",
+			account_type="Payable",
+			parent_account=parent_acc,
+			do_not_save=True
+		)
+		account_name.save(ignore_permissions=True)
+		account_name.db_set("report_type", "Profit and Loss")
+		frappe._set_document_in_cache(account_name.doctype, account_name)
+		account_name_1 = create_account(
+			account_name="_Test Ledger Account 1",
+			is_group=0,
+			company="_Test Company",
+			account_currency="INR",
+			parent_account=parent_acc,
+		)
+
+		jv = make_journal_entry(
+			account1=account_name.name,
+			account2=account_name_1,
+			amount=100,
+			cost_center="Test Cost Center - _TC",
+			save=False
+		)
+		jv.accounts[0].party_type = "Supplier"
+		jv.accounts[0].party = "_Test Supplier"
+		jv.save(ignore_permissions=True)
+		jv.submit()	
+		
+  
+		ple = frappe.get_doc({
+			"doctype":"Payment Ledger Entry",
+			"voucher_type":"Journal Entry",
+			"voucher_no":jv.name,
+			"account_type":"Payable",
+			"company":"_Test Company",
+			"against_voucher_type":"Journal Entry",
+			"party_type":"Supplier",
+			"party":"_Test Supplier",
+			"against_voucher_no":jv.name,
+			"cost_center":"Test Cost Center - _TC",
+			"account":account_name.name,
+			"amount":100,
+			"currency":"INR",
+		}).insert(ignore_permissions=True)
+  
+		ad = frappe.get_doc({
+			"doctype":"Accounting Dimension",
+			"document_type":"Payment Ledger Entry",
+			"label":"Payment Ledger Entry",
+			"dimension_defaults":[{
+				"company":"_Test Company",
+				"reference_document":"Payment Ledger Entry",
+				"default_dimension":ple.name,
+				"offsetting_account":account_name.name,
+				"mandatory_for_pl":1,
+				"mandatory_for_bs":1
+			}]
+		}).insert(ignore_permissions=True)
+		with self.assertRaises(frappe.ValidationError) as e:
+			ple.validate_dimensions_for_pl_and_bs()
+		self.assertEqual(
+			str(e.exception).strip(),
+			f"Accounting Dimension {ad.label} is required for 'Profit and Loss' account {account_name.name}."
+		)
+
+		account_name.db_set("report_type", "Balance Sheet")
+		frappe._set_document_in_cache(account_name.doctype, account_name)
+		with self.assertRaises(frappe.ValidationError) as e:
+			ple.validate_dimensions_for_pl_and_bs()
+		self.assertEqual(
+			str(e.exception).strip(),
+			f"Accounting Dimension {ad.label} is required for 'Balance Sheet' account {account_name.name}."
+		)
+		

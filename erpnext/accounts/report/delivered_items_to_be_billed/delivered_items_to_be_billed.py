@@ -87,5 +87,5 @@ def get_args():
 		"date": "posting_date",
 		"order": "name",
 		"order_by": Order.desc,
- 		"reference_field": "delivery_note","order_by": "desc",
+ 		"reference_field": "delivery_note"
 	}

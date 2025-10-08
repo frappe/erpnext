@@ -121,7 +121,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		and (args.get("use_serial_batch_fields") or args.get("doctype") == "POS Invoice")
 	):
 		update_stock(args, out, doc)
-	
+
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date, item.lead_time_days)
 
@@ -189,7 +189,7 @@ def update_stock(ctx, out, doc=None):
 	):
 		if doc and isinstance(doc, dict):
 			doc = frappe._dict(doc)
-			 
+
 		kwargs = frappe._dict(
 			{
 				"item_code": ctx.item_code,
@@ -664,13 +664,17 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 	return out
 
 
+@frappe.whitelist()
 def get_item_tax_template(args, item, out):
-	"""
-	args = {
-	        "tax_category": None
-	        "item_tax_template": None
-	}
-	"""
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	if not item:
+		if not args.get("item_code"):
+			frappe.throw(_("Item/Item Code required to get Item Tax Template."))
+		else:
+			item = frappe.get_cached_doc("Item", args.get("item_code"))
+
 	item_tax_template = None
 	if item.taxes:
 		item_tax_template = _get_item_tax_template(args, item.taxes, out)
@@ -682,7 +686,7 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-	if args.get("child_doctype") and item_tax_template:
+	if out and args.get("child_doctype") and item_tax_template:
 		out.update(get_fetch_values(args.get("child_doctype"), "item_tax_template", item_tax_template))
 
 
@@ -1010,8 +1014,10 @@ def insert_item_price(args):
 			alert=True,
 		)
 
+
 def _get_stock_uom_rate(rate, args):
 	return rate / args.conversion_factor if args.conversion_factor else rate
+
 
 def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) -> list[dict]:
 	"""
@@ -1069,10 +1075,10 @@ def get_batch_based_item_price(params, item_code) -> float:
 		item_price = get_item_price(params, item_code, ignore_party=True, force_batch_no=True)
 
 	if (
- 		item_price
- 		and item_price[0][2] == params.get("uom")
- 		and not params.get("items", [{}])[0].get("is_free_item", 0)
- 	):
+		item_price
+		and item_price[0][2] == params.get("uom")
+		and not params.get("items", [{}])[0].get("is_free_item", 0)
+	):
 		return item_price[0][1]
 
 	return 0.0

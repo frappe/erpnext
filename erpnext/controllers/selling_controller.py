@@ -4,8 +4,9 @@
 
 import frappe
 from frappe import _, bold, throw
-from frappe.utils import cint, flt, get_link_to_form, nowtime
 from frappe.tests.utils import if_app_installed
+from frappe.utils import cint, flt, get_link_to_form, nowtime
+
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -30,6 +31,14 @@ class SellingController(StockController):
 					)
 				)
 
+		if self.docstatus == 1 and self.doctype in ["Delivery Note", "Sales Invoice"]:
+			self.set_onload(
+				"allow_to_make_qc_after_submission",
+				frappe.db.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				),
+			)
+
 	def validate(self):
 		super().validate()
 		self.validate_items()
@@ -52,7 +61,9 @@ class SellingController(StockController):
 		super().set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
-		if hasattr(self, "set_missing_lead_customer_details") and callable(self.set_missing_lead_customer_details):
+		if hasattr(self, "set_missing_lead_customer_details") and callable(
+			self.set_missing_lead_customer_details
+		):
 			self.set_missing_lead_customer_details(for_validate=for_validate)
 
 		self.set_price_list_and_item_details(for_validate=for_validate)
@@ -75,7 +86,6 @@ class SellingController(StockController):
 
 		if customer:
 			from erpnext.accounts.party import _get_party_details
-
 
 			party_details = _get_party_details(
 				customer,
@@ -314,9 +324,6 @@ class SellingController(StockController):
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
-			if d.qty is None:
-				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
-
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
@@ -379,7 +386,7 @@ class SellingController(StockController):
 		if item_code not in product_bundle_items:
 			self._fetch_product_bundle_items(item_code)
 		return product_bundle_items[item_code]
-	
+
 	def _fetch_product_bundle_items(self, item_code):
 		product_bundle_items = self._product_bundle_items
 		items_to_fetch = {row.item_code for row in self.items if row.item_code not in product_bundle_items}
@@ -923,6 +930,7 @@ class SellingController(StockController):
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
+
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):
 		if d.item_code:
@@ -964,8 +972,3 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 	child.db_set("serial_and_batch_bundle", doc.name)
 
 	return doc.name
-
-
-
-	
-

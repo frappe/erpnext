@@ -10,6 +10,7 @@ from frappe.utils import add_to_date, flt, get_time, now
 from erpnext.accounts.doctype.account.test_account import make_company
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_address
 from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
+from erpnext.stock.doctype.item.test_item import get_hsn
 
 
 class TestShipment(FrappeTestCase):
@@ -410,5 +411,7 @@ def create_shipment_item(item_name, company_name):
 	item.stock_uom = "Nos"
 	item.standard_rate = 50
 	item.append("item_defaults", {"company": company_name, "default_warehouse": "Stores - _TC"})
+	if "india_compliance" in frappe.get_installed_apps():
+		item.gst_hsn_code = get_hsn()
 	item.insert()
 	return item

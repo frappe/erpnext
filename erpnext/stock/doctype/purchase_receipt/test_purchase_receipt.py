@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from datetime import datetime
+from datetime import date, datetime
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -11,6 +11,7 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.controllers.stock_controller import get_stock_ledger_preview
 from erpnext.stock import get_warehouse_account_map
@@ -44,6 +45,23 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		create_uom("_Test UOM")
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
+
+	def test_purchase_receipt_qty(self):
+		pr = make_purchase_receipt(qty=0, rejected_qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			pr.save()
+
+		# No error with qty=1
+		pr.items[0].qty = 1
+		pr.save()
+		self.assertEqual(pr.items[0].qty, 1)
+
+		# No error with rejected_qty=1
+		pr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.items[0].rejected_qty = 1
+		pr.items[0].qty = 0
+		pr.save()
+		self.assertEqual(pr.items[0].rejected_qty, 1)
 
 	def test_purchase_receipt_received_qty(self):
 		"""
@@ -3310,7 +3328,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.status, "Completed")
 
 	def test_internal_transfer_for_batch_items_with_cancel(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
@@ -3426,7 +3443,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_internal_transfer_for_batch_items_with_cancel_use_serial_batch_fields(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
@@ -3937,7 +3953,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			make_purchase_receipt as _make_purchase_receipt,
 		)
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
-			create_pr_against_po,
 			create_purchase_order,
 		)
 
@@ -4060,6 +4075,126 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# Test 3 - OverAllowanceError should be thrown as qty is greater than qty in DN
 		self.assertRaises(erpnext.controllers.status_updater.OverAllowanceError, pr.submit)
 
+	def test_valuation_rate_for_rejected_materials(self):
+		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
+		company = "_Test Company with perpetual inventory"
+
+		warehouse = create_warehouse(
+			"_Test In-ward Warehouse",
+			company="_Test Company with perpetual inventory",
+		)
+
+		rej_warehouse = create_warehouse(
+			"_Test Warehouse - Rejected Material",
+			company="_Test Company with perpetual inventory",
+		)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 1)
+
+		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 1)
+
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			company=company,
+			warehouse=warehouse,
+			rejected_qty=5,
+			rejected_warehouse=rej_warehouse,
+		)
+
+		stock_received_but_not_billed_account = frappe.get_value(
+			"Company",
+			company,
+			"stock_received_but_not_billed",
+		)
+
+		rejected_item_cost = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"warehouse": rej_warehouse,
+			},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(rejected_item_cost, 500)
+
+		srbnb_cost = frappe.db.get_value(
+			"GL Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"account": stock_received_but_not_billed_account,
+			},
+			"credit",
+		)
+
+		self.assertEqual(srbnb_cost, 1500)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
+
+		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 0)
+
+	def test_no_valuation_rate_for_rejected_materials(self):
+		item = make_item("Test Item with Rej Material No Valuation", {"is_stock_item": 1})
+		company = "_Test Company with perpetual inventory"
+
+		warehouse = create_warehouse(
+			"_Test In-ward Warehouse",
+			company="_Test Company with perpetual inventory",
+		)
+
+		rej_warehouse = create_warehouse(
+			"_Test Warehouse - Rejected Material",
+			company="_Test Company with perpetual inventory",
+		)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
+
+		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 0)
+
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			company=company,
+			warehouse=warehouse,
+			rejected_qty=5,
+			rejected_warehouse=rej_warehouse,
+		)
+
+		stock_received_but_not_billed_account = frappe.get_value(
+			"Company",
+			company,
+			"stock_received_but_not_billed",
+		)
+
+		rejected_item_cost = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"warehouse": rej_warehouse,
+			},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(rejected_item_cost, 0.0)
+
+		srbnb_cost = frappe.db.get_value(
+			"GL Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"account": stock_received_but_not_billed_account,
+			},
+			"credit",
+		)
+
+		self.assertEqual(srbnb_cost, 1000)
+
 	def test_purchase_order_and_receipt_TC_SCK_072(self):
 		company = "_Test Company"
 		company_doc = frappe.get_doc("Company", company)
@@ -4126,7 +4261,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_purchase_order_and_receipt_TC_SCK_073(self):
 		from datetime import datetime, timedelta
 
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_supplier(supplier_name="_Test Supplier", default_currency="INR")
 		company = "_Test Indian Registered Company"
@@ -4209,7 +4344,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_purchase_order_and_receipt_TC_SCK_074(self):
 		from datetime import datetime, timedelta
 
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_supplier(supplier_name="_Test Supplier", default_currency="INR")
 		company = "_Test Indian Registered Company"
@@ -4415,7 +4550,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_purchase_receipt_with_serialized_item_TC_SCK_145(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		supplier = create_supplier(supplier_name="Test Supplier 1")
@@ -5168,7 +5303,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		# Create Purchase Receipt
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		create_warehouse(
@@ -5255,7 +5390,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_stock_ledger_report_TC_SCK_225(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		item = []
@@ -5310,7 +5445,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_stock_ledger_report_TC_SCK_226(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		item = []
@@ -5969,12 +6104,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.set_value("Purchase Order Item", po_item.name, "billed_amt", 800)
 
 		# Debug: Check PR items linked to PO
-		pr_items = frappe.get_all(
+		frappe.get_all(
 			"Purchase Receipt Item",
 			filters={"purchase_order_item": po_item.name},
 			fields=["name", "parent", "purchase_order_item"],
 		)
-		print("PR Items linked to PO:", pr_items)
 
 		po_details = [po_item.name]
 
@@ -6168,15 +6302,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 			item.purchase_receipt = pr.name
 		pi2.save().submit()
 
-		# Debug: Check PI items linked to PR
-		pi_items = frappe.get_all(
-			"Purchase Invoice Item", filters={"pr_detail": pr_item.name}, fields=["name", "qty", "parent"]
-		)
-		print("PI Items linked to PR:", pi_items)
-
 		# Run the method under test
 		invoiced_qty_map = get_invoiced_qty_map(pr.name)
-		print("Invoiced Qty Map:", invoiced_qty_map)
 
 		# Assert the PR detail was added and quantity was aggregated (4 + 6 = 10)
 		self.assertIn(pr_item.name, invoiced_qty_map)
@@ -6334,6 +6461,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 			item.purchase_receipt = pr.name
 			item.pr_detail = pr.items[0].name
 		pi.save().submit()
+
+		pr.submit_rv = frappe.db.sql(
+			"""SELECT t1.name
+			FROM `tabPurchase Invoice` t1, `tabPurchase Invoice Item` t2
+			WHERE t1.name = t2.parent
+			AND t2.purchase_receipt = %s
+			AND t1.docstatus = 1""",
+			(pr.name,),
+		)
 
 		# This should now raise ValidationError due to linked submitted PI
 		with self.assertRaises(frappe.ValidationError) as cm:
@@ -6888,34 +7024,53 @@ def setup_fy_gls_cost_center():
 			}
 		).insert()
 
-	# Setup Fiscal Year
-	fiscal_year = frappe.get_all(
+	current_date = datetime.today().date()
+
+	matching_fy_list = frappe.get_all(
 		"Fiscal Year",
-		filters={"year_start_date": ["<=", today()], "year_end_date": [">=", today()], "disabled": 0},
-		fields=["name"],
-		limit=1,
+		filters={
+			"disabled": 0,
+			"year_start_date": ["<=", current_date],
+			"year_end_date": [">=", current_date],
+		},
+		fields=["name", "year_start_date", "year_end_date"],
 	)
+	is_company = False
+	if len(matching_fy_list) > 0:
+		for fy in matching_fy_list:
+			fiscal_year = frappe.get_doc("Fiscal Year", fy["name"])
+			for years in fiscal_year.companies:
+				if years.company == company:
+					is_company = True
+					break
+			if is_company:
+				break
 
-	if fiscal_year:
-		fy_doc = frappe.get_doc("Fiscal Year", fiscal_year[0]["name"])
-		linked_companies = [d.company for d in fy_doc.companies]
+		if not is_company:
+			for rows in matching_fy_list:
+				try:
+					fiscal_year = frappe.get_doc("Fiscal Year", rows.name)
+					fiscal_year.append("companies", {"company": company})
+					fiscal_year.save()
+					break
+				except Exception as e:
+					print(f"Failed to get Fiscal Year {fy['name']}: {e}")
+					continue
 
-		if company.name not in linked_companies:
-			fy_doc.append("companies", {"company": company.name})
-			fy_doc.save()
 	else:
-		# If not exists create new FY
-		fy_doc = frappe.get_doc(
-			{
-				"doctype": "Fiscal Year",
-				"year": f"FY {today()[:4]}",
-				"year_start_date": today(),
-				"year_end_date": add_days(today(), 364),
-				"disabled": 0,
-			}
-		)
-		fy_doc.append("fiscal_year_company", {"company": company.name})
-		fy_doc.insert()
+		# No fiscal year includes current date — create a new one
+		current_year = current_date.year
+		first_date = date(current_year, 1, 1)
+		last_date = date(current_year, 12, 31)
+
+		fiscal_year = frappe.new_doc("Fiscal Year")
+		fiscal_year.year = f"{current_year}-{company}"
+		fiscal_year.year_start_date = first_date
+		fiscal_year.year_end_date = last_date
+		fiscal_year.company = company  # Required to avoid overlap error
+		fiscal_year.append("companies", {"company": company})
+		fiscal_year.save()
+
 	expense_account = f"T Cost of Goods Sold - {company_abbr}"
 	cost_center = f"_Test Cost Center - {company_abbr}"
 	return fiscal_year, expense_account, cost_center
@@ -7096,7 +7251,7 @@ def make_purchase_receipt(**args):
 	pr.apply_putaway_rule = args.apply_putaway_rule
 	pr.additional_discount_percentage = args.additional_discount_percentage or None
 	pr.apply_discount_on = args.apply_discount_on or None
-	qty = args.qty or 5
+	qty = args.qty if args.qty is not None else 5
 	rejected_qty = args.rejected_qty or 0
 	received_qty = args.received_qty or flt(rejected_qty) + flt(qty)
 
@@ -7227,41 +7382,6 @@ def create_company(company):
 		company_doc.country = ("India",)
 		company_doc.default_currency = ("INR",)
 		company_doc.insert()
-
-
-def get_or_create_fiscal_year(company):
-	from datetime import datetime
-
-	current_date = datetime.today()
-	formatted_date = current_date.strftime("%d-%m-%Y")
-	existing_fy = frappe.get_all(
-		"Fiscal Year",
-		filters={
-			"year_start_date": ["<=", formatted_date],
-			"year_end_date": [">=", formatted_date],
-			"disabled": 0,
-		},
-		fields=["name"],
-	)
-
-	if existing_fy:
-		fiscal_year = frappe.get_doc("Fiscal Year", existing_fy[0].name)
-		for years in fiscal_year.companies:
-			if years.company == company:
-				pass
-			else:
-				fiscal_year.append("companies", {"company": company})
-				fiscal_year.save()
-	else:
-		current_year = datetime.now().year
-		first_date = f"01-01-{current_year}"
-		last_date = f"31-12-{current_year}"
-		fiscal_year = frappe.new_doc("Fiscal Year")
-		fiscal_year.year = f"{current_year}"
-		fiscal_year.year_start_date = first_date
-		fiscal_year.year_end_date = last_date
-		fiscal_year.append("companies", {"company": company})
-		fiscal_year.save()
 
 
 def ensure_parent_account(account_name, company, abbr, root_type="Asset", currency="INR"):
