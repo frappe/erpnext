@@ -1265,7 +1265,7 @@ def process_item_wise_tax_details(doc):
 			"item_wise_tax_details",
 			{
 				**row,
-				"docstatus": 1,
+				"docstatus": doc.docstatus,
 				"item_row": row.item.name,
 				"tax_row": row.tax.name,
 			},
