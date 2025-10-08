@@ -295,12 +295,22 @@ class SubcontractingInwardController(StockController):
 					allow_delivery_of_overproduced_qty = frappe.get_single_value(
 						"Selling Settings", "allow_delivery_of_overproduced_qty"
 					)
+
+					from frappe.query_builder import Case
+					from pypika.terms import ValueWrapper
+
 					table = frappe.qb.DocType("Subcontracting Inward Order Item")
 					query = (
 						frappe.qb.from_(table)
 						.select(
 							(
-								(table.produced_qty if allow_delivery_of_overproduced_qty else table.qty)
+								Case()
+								.when(
+									(table.produced_qty < table.qty)
+									| ValueWrapper(allow_delivery_of_overproduced_qty),
+									table.produced_qty,
+								)
+								.else_(table.qty)
 								- table.delivered_qty
 								- table.returned_qty
 							).as_("max_allowed_qty")

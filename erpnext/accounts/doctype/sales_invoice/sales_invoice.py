@@ -2427,7 +2427,7 @@ def make_delivery_note(source_name, target_doc=None):
 					"cost_center": "cost_center",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.delivered_by_supplier != 1,
+				"condition": lambda doc: doc.delivered_by_supplier != 1 and not doc.scio_detail,
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {

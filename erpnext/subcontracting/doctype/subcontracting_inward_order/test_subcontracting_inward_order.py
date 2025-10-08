@@ -182,7 +182,7 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		manufacture.save()
 		manufacture.fg_completed_qty = 5
 		manufacture.process_loss_qty = 1
-		manufacture.items[-1].qty = 4
+		manufacture.items[0].qty = 4
 		manufacture.submit()
 
 		scio.reload()
@@ -225,7 +225,7 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		wo.submit()
 
 		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
-		manufacture.items[-1].qty = 6
+		manufacture.items[0].qty = 6
 		manufacture.fg_completed_qty = 6
 		manufacture.submit()
 
