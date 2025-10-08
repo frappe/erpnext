@@ -273,56 +273,52 @@ class JournalEntry(AccountsController):
 				)
 
 	def apply_tax_withholding(self):
-		from erpnext.accounts.report.general_ledger.general_ledger import get_account_type_map
-
 		if not self.apply_tds or self.voucher_type not in ("Debit Note", "Credit Note"):
 			return
 
-		parties = [d.party for d in self.get("accounts") if d.party]
-		parties = list(set(parties))
+		party = None
+		party_type = None
+		party_account = None
 
-		if len(parties) > 1:
-			frappe.throw(_("Cannot apply TDS against multiple parties in one entry"))
+		for d in self.get("accounts"):
+			if d.party and party and d.party != party:
+				frappe.throw(_("Cannot apply TDS against multiple parties in one entry"))
 
-		account_type_map = get_account_type_map(self.company)
-		party_type = "supplier" if self.voucher_type == "Credit Note" else "customer"
-		doctype = "Purchase Invoice" if self.voucher_type == "Credit Note" else "Sales Invoice"
-		debit_or_credit = (
-			"debit_in_account_currency"
-			if self.voucher_type == "Credit Note"
-			else "credit_in_account_currency"
+			if d.party_type in ("Customer", "Supplier") and d.party:
+				party = d.party
+				party_type = d.party_type
+				party_account = d.account
+				break
+
+		# debit or credit based on party type
+		dr_or_cr = "credit_in_account_currency" if party_type == "Supplier" else "debit_in_account_currency"
+		rev_dr_or_cr = (
+			"debit_in_account_currency" if party_type == "Supplier" else "credit_in_account_currency"
 		)
-		rev_debit_or_credit = (
-			"credit_in_account_currency"
-			if debit_or_credit == "debit_in_account_currency"
-			else "debit_in_account_currency"
-		)
-
-		party_account = get_party_account(party_type.title(), parties[0], self.company)
 
 		net_total = sum(
-			d.get(debit_or_credit)
+			d.get(dr_or_cr) - d.get(rev_dr_or_cr)
 			for d in self.get("accounts")
-			if account_type_map.get(d.account) not in ("Tax", "Chargeable")
+			if d.party == party and d.party_type == party_type
 		)
 
-		party_amount = sum(
-			d.get(rev_debit_or_credit) for d in self.get("accounts") if d.account == party_account
-		)
+		# only apply tds if net total is positive
+		if net_total <= 0:
+			return
 
 		inv = frappe._dict(
 			{
-				party_type: parties[0],
-				"doctype": doctype,
+				"party_type": party_type,
+				"party": party,
+				"doctype": self.doctype,
 				"company": self.company,
 				"posting_date": self.posting_date,
-				"net_total": net_total,
+				"tax_withholding_net_total": net_total,
+				"base_tax_withholding_net_total": net_total,
 			}
 		)
 
-		tax_withholding_details, advance_taxes, voucher_wise_amount = get_party_tax_withholding_details(
-			inv, self.tax_withholding_category
-		)
+		tax_withholding_details = get_party_tax_withholding_details(inv, self.tax_withholding_category)
 
 		if not tax_withholding_details:
 			return
@@ -333,29 +329,36 @@ class JournalEntry(AccountsController):
 				d.update(
 					{
 						"account": tax_withholding_details.get("account_head"),
-						debit_or_credit: tax_withholding_details.get("tax_amount"),
+						dr_or_cr: tax_withholding_details.get("tax_amount"),
+						rev_dr_or_cr: 0,
 					}
 				)
 
 			accounts.append(d.get("account"))
 
 			if d.get("account") == party_account:
-				d.update({rev_debit_or_credit: party_amount - tax_withholding_details.get("tax_amount")})
+				party_field = dr_or_cr
+				amount = net_total - tax_withholding_details.get("tax_amount")
+				if not d.get(party_field):
+					party_field = rev_dr_or_cr
+					amount = -1 * amount
+
+				d.update({party_field: amount})
 
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append(
 				"accounts",
 				{
 					"account": tax_withholding_details.get("account_head"),
-					rev_debit_or_credit: tax_withholding_details.get("tax_amount"),
-					"against_account": parties[0],
+					dr_or_cr: tax_withholding_details.get("tax_amount"),
+					"against_account": party,
 				},
 			)
 
 		to_remove = [
 			d
 			for d in self.get("accounts")
-			if not d.get(rev_debit_or_credit) and d.account == tax_withholding_details.get("account_head")
+			if not d.get(dr_or_cr) and d.account == tax_withholding_details.get("account_head")
 		]
 
 		for d in to_remove:

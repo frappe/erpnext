@@ -85,6 +85,9 @@ def get_party_details(inv):
 	if inv.doctype == "Sales Invoice":
 		party_type = "Customer"
 		party = inv.customer
+	elif inv.doctype == "Journal Entry":
+		party_type = inv.party_type
+		party = inv.party
 	else:
 		party_type = "Supplier"
 		party = inv.supplier
