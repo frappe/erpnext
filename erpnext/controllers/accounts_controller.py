@@ -3976,8 +3976,8 @@ def merge_taxes(source_doc, target_doc):
 			tax.charge_type = "Actual"
 			tax.included_in_print_rate = 0
 			tax.dont_recompute_tax = 1
-			tax.row_id = ""
-			tax.idx = ""
+			tax.row_id = None
+			tax.idx = None
 			tax.tax_amount = tax.tax_amount_after_discount_amount
 			tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
 			tax_map[tax.name] = target_doc.append("taxes", tax)
