@@ -14,6 +14,7 @@ class ProcessPeriodClosingVoucherDetail(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		closing_balance: DF.JSON | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
