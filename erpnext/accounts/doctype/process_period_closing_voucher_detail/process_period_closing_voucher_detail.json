@@ -13,18 +13,21 @@
   {
    "fieldname": "processing_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Processing Date"
   },
   {
    "default": "Queued",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "options": "Queued\nRunning\nCompleted"
   },
   {
    "fieldname": "closing_balance",
    "fieldtype": "JSON",
+   "in_list_view": 1,
    "label": "Closing Balance"
   }
  ],
@@ -32,7 +35,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-08 10:19:29.928526",
+ "modified": "2025-10-08 10:47:50.050341",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher Detail",

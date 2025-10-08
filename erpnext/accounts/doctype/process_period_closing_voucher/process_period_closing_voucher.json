@@ -7,14 +7,17 @@
  "field_order": [
   "parent_pcv",
   "status",
-  "dates_to_process"
+  "dates_to_process",
+  "amended_from"
  ],
  "fields": [
   {
    "fieldname": "parent_pcv",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "PCV",
-   "options": "Period Closing Voucher"
+   "options": "Period Closing Voucher",
+   "reqd": 1
   },
   {
    "default": "Queued",
@@ -28,12 +31,23 @@
    "fieldtype": "Table",
    "label": "Dates to Process",
    "options": "Process Period Closing Voucher Detail"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Process Period Closing Voucher",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-10-03 14:29:55.584225",
+ "modified": "2025-10-08 10:33:43.742974",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",
