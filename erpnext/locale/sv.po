@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-06 10:13\n"
+"PO-Revision-Date: 2025-10-08 10:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -62170,7 +62170,7 @@ msgstr "Du kan inte göra några ändringar i Jobbkort eftersom Arbetsorder är 
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:187
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
-msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} Om du vill leverera in samma serienummer flera gånger aktiverar du \"Tillåt att befintligt serienummer produceras/tas emot igen\" i {3}"
+msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} Om du vill leverera in samma serienummer flera gånger aktiverar du \"Tillåt att befintligt serienummer Produceras/Tas Emot igen\" i {3}"
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.py:192
 msgid "You can't redeem Loyalty Points having more value than the Total Amount."
