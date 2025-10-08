@@ -223,11 +223,11 @@ class ItemTax:
 				idx += 1
 
 		# Handle rounding errors by applying differences to last taxable items
-		self._handle_rounding_differences(tax_differences, last_taxable_items, precision)
+		self._handle_rounding_differences(tax_differences, last_taxable_items)
 
 		return item_wise_tax_details
 
-	def _handle_rounding_differences(self, tax_differences, last_taxable_items, precision):
+	def _handle_rounding_differences(self, tax_differences, last_taxable_items):
 		"""
 		Handle rounding errors by applying the difference to the last taxable item
 		"""
