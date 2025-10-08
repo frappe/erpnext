@@ -2337,15 +2337,15 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 
 	if kwargs.batch_no:
 		if isinstance(kwargs.batch_no, list):
-			query = query.where(sb_entry.batch_no.notin(kwargs.batch_no))
+			query = query.where(sb_entry.batch_no.isin(kwargs.batch_no))
 		else:
-			query = query.where(sb_entry.batch_no != kwargs.batch_no)
+			query = query.where(sb_entry.batch_no == kwargs.batch_no)
 
 	if kwargs.warehouse:
 		if isinstance(kwargs.warehouse, list):
-			query = query.where(sre.warehouse.notin(kwargs.warehouse))
+			query = query.where(sre.warehouse.isin(kwargs.warehouse))
 		else:
-			query = query.where(sre.warehouse != kwargs.warehouse)
+			query = query.where(sre.warehouse == kwargs.warehouse)
 
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
