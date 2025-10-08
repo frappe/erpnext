@@ -273,12 +273,15 @@ class JournalEntry(AccountsController):
 				)
 
 	def apply_tax_withholding(self):
+		from erpnext.setup.utils import get_exchange_rate
+
 		if not self.apply_tds or self.voucher_type not in ("Debit Note", "Credit Note"):
 			return
 
 		party = None
 		party_type = None
 		party_account = None
+		party_row = None
 
 		for d in self.get("accounts"):
 			if d.party and party and d.party != party:
@@ -288,22 +291,25 @@ class JournalEntry(AccountsController):
 				party = d.party
 				party_type = d.party_type
 				party_account = d.account
+				party_row = d
 				break
 
-		# debit or credit based on party type
-		dr_or_cr = "credit_in_account_currency" if party_type == "Supplier" else "debit_in_account_currency"
-		rev_dr_or_cr = (
-			"debit_in_account_currency" if party_type == "Supplier" else "credit_in_account_currency"
-		)
+		if not (party and party_type):
+			return
 
-		net_total = sum(
+		# debit or credit based on party type
+		dr_or_cr = "credit" if party_type == "Supplier" else "debit"
+		rev_dr_or_cr = "debit" if party_type == "Supplier" else "credit"
+
+		# net total in company currency.
+		net_total_in_company_currency = sum(
 			d.get(dr_or_cr) - d.get(rev_dr_or_cr)
 			for d in self.get("accounts")
 			if d.party == party and d.party_type == party_type
 		)
 
 		# only apply tds if net total is positive
-		if net_total <= 0:
+		if net_total_in_company_currency <= 0:
 			return
 
 		inv = frappe._dict(
@@ -313,8 +319,8 @@ class JournalEntry(AccountsController):
 				"doctype": self.doctype,
 				"company": self.company,
 				"posting_date": self.posting_date,
-				"tax_withholding_net_total": net_total,
-				"base_tax_withholding_net_total": net_total,
+				"tax_withholding_net_total": net_total_in_company_currency,
+				"base_tax_withholding_net_total": net_total_in_company_currency,
 			}
 		)
 
@@ -323,47 +329,77 @@ class JournalEntry(AccountsController):
 		if not tax_withholding_details:
 			return
 
-		accounts = []
+		tds_account = tax_withholding_details.get("account_head")
+		company_default_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+		tds_account_currency = get_account_currency(tds_account)
+
+		tds_exch_rate = get_exchange_rate(tds_account_currency, company_default_currency, self.posting_date)
+
+		tds_amt_in_company_currency = tax_withholding_details.get("tax_amount")
+		tds_amt_in_account_currency = tds_amt_in_company_currency / tds_exch_rate
+		tds_amt_in_party_currency = tds_amt_in_company_currency / party_row.get("exchange_rate", 1)
+
+		# Update or create tax account row
+		tax_row = None
 		for d in self.get("accounts"):
-			if d.get("account") == tax_withholding_details.get("account_head"):
-				d.update(
-					{
-						"account": tax_withholding_details.get("account_head"),
-						dr_or_cr: tax_withholding_details.get("tax_amount"),
-						rev_dr_or_cr: 0,
-					}
-				)
+			if d.account == tds_account:
+				tax_row = d
+				break
 
-			accounts.append(d.get("account"))
-
-			if d.get("account") == party_account:
-				party_field = dr_or_cr
-				amount = net_total - tax_withholding_details.get("tax_amount")
-				if not d.get(party_field):
-					party_field = rev_dr_or_cr
-					amount = -1 * amount
-
-				d.update({party_field: amount})
-
-		if not accounts or tax_withholding_details.get("account_head") not in accounts:
-			self.append(
+		if not tax_row:
+			tax_row = self.append(
 				"accounts",
 				{
-					"account": tax_withholding_details.get("account_head"),
-					dr_or_cr: tax_withholding_details.get("tax_amount"),
-					"against_account": party,
+					"account": tds_account,
+					"account_currency": tds_account_currency,
+					"exchange_rate": tds_exch_rate,
+					"is_tax_withholding_account": 1,
+					"against_account": party_account,
 				},
 			)
 
-		to_remove = [
-			d
-			for d in self.get("accounts")
-			if not d.get(dr_or_cr) and d.account == tax_withholding_details.get("account_head")
-		]
+		# TDS will always be credit
+		tax_row.update(
+			{
+				"credit": flt(tds_amt_in_company_currency, self.precision("credit")),
+				"credit_in_account_currency": flt(
+					tds_amt_in_account_currency, self.precision("credit_in_account_currency")
+				),
+				"debit": 0,
+				"debit_in_account_currency": 0,
+			}
+		)
 
-		for d in to_remove:
-			self.remove(d)
+		party_field = dr_or_cr
+		if not party_row.get(party_field):
+			party_field = rev_dr_or_cr
+			tds_amt_in_company_currency = -1 * tds_amt_in_company_currency
+			tds_amt_in_party_currency = -1 * tds_amt_in_party_currency
 
+		if dr_or_cr == "debit":
+			# for customer,increase the receivable amount
+			party_row.update(
+				{
+					party_field: flt(party_row.get(party_field, 0)) + tds_amt_in_company_currency,
+					f"{party_field}_in_account_currency": flt(
+						party_row.get(f"{party_field}_in_account_currency", 0)
+					)
+					+ tds_amt_in_party_currency,
+				}
+			)
+		else:
+			# for supplier,decrease the payable amount
+			party_row.update(
+				{
+					party_field: flt(party_row.get(party_field, 0)) - tds_amt_in_company_currency,
+					f"{party_field}_in_account_currency": flt(
+						party_row.get(f"{party_field}_in_account_currency", 0)
+					)
+					- tds_amt_in_party_currency,
+				}
+			)
+
+		# Recalculate totals
 		self.set_amounts_in_company_currency()
 		self.set_total_debit_credit()
 		self.set_against_account()
