@@ -364,6 +364,10 @@ class JournalEntry(AccountsController):
 		for d in to_remove:
 			self.remove(d)
 
+		self.set_amounts_in_company_currency()
+		self.set_total_debit_credit()
+		self.set_against_account()
+
 	def update_asset_value(self):
 		if self.flags.planned_depr_entry or self.voucher_type != "Depreciation Entry":
 			return
