@@ -3801,6 +3801,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2
 
+		prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
+		rate_unchanged = prev_rate == new_rate
 		if not rate_unchanged and is_allowed_zero_qty():
 			frappe.throw(_("Rate of '{}' items cannot be changed").format(frappe.bold(_("Unit Price"))))
 
