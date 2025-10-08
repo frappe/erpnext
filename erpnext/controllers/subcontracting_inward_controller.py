@@ -1,5 +1,6 @@
 import frappe
 from frappe import _, bold
+from frappe.utils import flt
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
@@ -280,7 +281,7 @@ class SubcontractingInwardController(StockController):
 
 	def validate_delivery(self):
 		if self.purpose == "Subcontracting Delivery":
-			if self._action == "submit":
+			if self._action in ["save", "submit"]:
 				for item in self.items:
 					if not item.scio_detail:
 						frappe.throw(
@@ -299,9 +300,9 @@ class SubcontractingInwardController(StockController):
 						frappe.qb.from_(table)
 						.select(
 							(
-								table.produced_qty
-								if allow_delivery_of_overproduced_qty
-								else table.produced_qty - table.delivered_qty - table.returned_qty
+								(table.produced_qty if allow_delivery_of_overproduced_qty else table.qty)
+								- table.delivered_qty
+								- table.returned_qty
 							).as_("max_allowed_qty")
 						)
 						.where(table.name == item.scio_detail)
@@ -357,8 +358,8 @@ class SubcontractingInwardController(StockController):
 		if self.purpose == "Receive from Customer":
 			for item in self.items:
 				item.valuation_rate = 0
-				item.customer_provided_item_cost = item.basic_rate + (
-					item.additional_cost / item.transfer_qty
+				item.customer_provided_item_cost = flt(
+					item.basic_rate + (item.additional_cost / item.transfer_qty), item.precision("basic_rate")
 				)
 
 	def update_sre_for_subcontracting_delivery(self) -> None:
@@ -576,6 +577,10 @@ class SubcontractingInwardController(StockController):
 							parent=scio,
 							parenttype="Subcontracting Inward Order",
 							parentfield="received_items",
+							idx=frappe.db.count(
+								"Subcontracting Inward Order Received Item", {"parent": scio, "docstatus": 1}
+							)
+							+ 1,
 							rm_item_code=item.item_code,
 							stock_uom=item.stock_uom,
 							reserve_warehouse=item.t_warehouse,
@@ -607,6 +612,7 @@ class SubcontractingInwardController(StockController):
 							parent_doc=scio,
 							parentfield="received_items",
 						)
+						doc.idx = len(scio.received_items) + 1
 						doc.main_item_code = next(fg for fg in self.items if fg.is_finished_item).item_code
 						doc.rm_item_code = item.item_code
 						doc.stock_uom = item.stock_uom
@@ -794,6 +800,37 @@ class SubcontractingInwardController(StockController):
 							sre_doc.delivered_qty + (qty if self._action == "submit" else -qty),
 						)
 						sre_doc.update_status()
+						sre_doc.update_reserved_stock_in_bin()
+				else:
+					table = frappe.qb.DocType("Stock Reservation Entry")
+					query = (
+						frappe.qb.from_(table)
+						.select(
+							table.name,
+							(table.reserved_qty - table.delivered_qty).as_("qty"),
+						)
+						.where(
+							(table.docstatus == 1)
+							& (table.voucher_detail_no == item.scio_detail)
+							& (table.delivered_qty < table.reserved_qty)
+						)
+						.orderby(table.creation)
+					)
+					sre_list = query.run(as_dict=True)
+
+					voucher_qty = item.transfer_qty
+					for sre in sre_list:
+						qty = min(sre.qty, voucher_qty)
+						sre_doc = frappe.get_doc("Stock Reservation Entry", sre.name)
+						sre_doc.db_set(
+							"delivered_qty",
+							sre_doc.delivered_qty + (qty if self._action == "submit" else -qty),
+						)
+						sre_doc.update_status()
+						sre_doc.update_reserved_stock_in_bin()
+						voucher_qty -= qty
+						if voucher_qty <= 0:
+							break
 
 	def update_inward_order_status(self):
 		if self.subcontracting_inward_order:

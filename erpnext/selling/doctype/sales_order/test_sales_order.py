@@ -41,7 +41,6 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		cls.unlink_setting = int(
 			frappe.db.get_single_value("Accounts Settings", "unlink_advance_payment_on_cancelation_of_order")
 		)
-		create_subcontracting_test_data()
 
 	@classmethod
 	def tearDownClass(cls) -> None:
@@ -2589,6 +2588,12 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 
 		si2 = make_sales_invoice(so.name)
 		self.assertEqual(si2.items[0].qty, 20)
+
+
+def automatically_fetch_payment_terms(enable=1):
+	accounts_settings = frappe.get_doc("Accounts Settings")
+	accounts_settings.automatically_fetch_payment_terms = enable
+	accounts_settings.save()
 
 
 def compare_payment_schedules(doc, doc1, doc2):

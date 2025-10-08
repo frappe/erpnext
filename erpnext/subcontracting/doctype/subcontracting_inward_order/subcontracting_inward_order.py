@@ -152,9 +152,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 		]
 
 		for service_item in self.service_items:
-			if frappe.get_value("Item", service_item.item_code, "is_stock_item"):
-				frappe.throw(_("Service Item {0} must be a non-stock item.").format(service_item.item_code))
-
 			item = next(item for item in self.items if item.sales_order_item == service_item.sales_order_item)
 			service_item.qty = item.qty * item.subcontracting_conversion_factor
 			service_item.fg_item_qty = item.qty
@@ -246,6 +243,8 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 		if not wo_list:
 			frappe.msgprint(_("No Work Orders were created"))
+
+		return wo_list
 
 	def get_production_items(self):
 		item_list = []

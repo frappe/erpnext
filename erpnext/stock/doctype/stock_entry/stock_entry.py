@@ -1218,7 +1218,7 @@ class StockEntry(SubcontractingInwardController):
 						if serial_nos_list and not row.serial_no:
 							row.serial_no = "\n".join(serial_nos_list)
 						if batch_nos_list and not row.batch_no:
-							row.batch_no = batch_nos_list[0]
+							row.batch_no = next(iter(batch_nos_list.keys()))
 
 					serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
 

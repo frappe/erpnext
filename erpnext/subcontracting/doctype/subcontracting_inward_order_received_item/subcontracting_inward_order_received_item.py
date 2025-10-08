@@ -27,7 +27,6 @@ class SubcontractingInwardOrderReceivedItem(Document):
 		reference_name: DF.Data | None
 		required_qty: DF.Float
 		reserve_warehouse: DF.Link | None
-		reserved_qty: DF.Float
 		returned_qty: DF.Float
 		rm_item_code: DF.Link
 		stock_uom: DF.Link

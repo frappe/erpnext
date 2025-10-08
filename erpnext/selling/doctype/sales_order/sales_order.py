@@ -281,7 +281,7 @@ class SalesOrder(SellingController):
 						"Subcontracting BOM",
 						{"finished_good": item.fg_item, "is_active": 1},
 						"finished_good_bom",
-					) or not frappe.get_value("Item", item.fg_item, "default_bom"):
+					) and not frappe.get_value("Item", item.fg_item, "default_bom"):
 						frappe.throw(
 							_("Row #{0}: BOM not found for FG Item {1}").format(item.idx, item.fg_item)
 						)
