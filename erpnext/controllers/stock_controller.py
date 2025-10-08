@@ -27,6 +27,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	combine_datetime,
 	get_type_of_transaction,
 )
 from erpnext.stock.stock_ledger import get_items_to_be_repost
@@ -266,8 +267,7 @@ class StockController(AccountsController):
 			):
 				bundle_details = {
 					"item_code": row.get("rm_item_code") or row.item_code,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"voucher_detail_no": row.name,

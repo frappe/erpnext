@@ -29,8 +29,7 @@
   "voucher_no",
   "voucher_detail_no",
   "column_break_aouy",
-  "posting_date",
-  "posting_time",
+  "posting_datetime",
   "returned_against",
   "section_break_wzou",
   "is_cancelled",
@@ -50,8 +49,7 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
-   "reqd": 1,
-   "search_index": 1
+   "reqd": 1
   },
   {
    "fetch_from": "item_code.item_group",
@@ -80,8 +78,7 @@
    "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item",
-   "reqd": 1,
-   "search_index": 1
+   "reqd": 1
   },
   {
    "fetch_from": "item_code.item_name",
@@ -118,8 +115,7 @@
    "in_standard_filter": 1,
    "label": "Voucher No",
    "no_copy": 1,
-   "options": "voucher_type",
-   "search_index": 1
+   "options": "voucher_type"
   },
   {
    "default": "0",
@@ -189,8 +185,7 @@
    "in_standard_filter": 1,
    "label": "Warehouse",
    "mandatory_depends_on": "eval:doc.type_of_transaction != \"Maintenance\"",
-   "options": "Warehouse",
-   "search_index": 1
+   "options": "Warehouse"
   },
   {
    "fieldname": "type_of_transaction",
@@ -211,18 +206,6 @@
   {
    "fieldname": "section_break_wzou",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "label": "Posting Date",
-   "no_copy": 1
-  },
-  {
-   "fieldname": "posting_time",
-   "fieldtype": "Time",
-   "label": "Posting Time",
-   "no_copy": 1
   },
   {
    "fieldname": "voucher_detail_no",
@@ -258,13 +241,18 @@
    "fieldname": "is_packed",
    "fieldtype": "Check",
    "label": "Is Packed"
+  },
+  {
+   "fieldname": "posting_datetime",
+   "fieldtype": "Datetime",
+   "label": "Posting Datetime"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-15 14:37:26.441742",
+ "modified": "2025-09-24 16:24:48.154853",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

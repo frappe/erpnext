@@ -1272,7 +1272,7 @@ class ReceivablePayableReport:
 	def setup_ageing_columns(self):
 		# for charts
 		self.ageing_column_labels = []
-		ranges = [*self.ranges, "Above"]
+		ranges = [*self.ranges, _("Above")]
 
 		prev_range_value = 0
 		for idx, curr_range_value in enumerate(ranges):

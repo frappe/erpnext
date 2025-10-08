@@ -479,6 +479,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
+		self.set_gl_entry_for_purchase_expense(gl_entries)
 		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
@@ -930,7 +931,7 @@ class PurchaseReceipt(BuyingController):
 				"Asset",
 				asset.name,
 				{
-					"gross_purchase_amount": purchase_amount,
+					"net_purchase_amount": purchase_amount,
 					"purchase_amount": purchase_amount,
 				},
 			)

@@ -13,7 +13,7 @@ from frappe.utils import cint, flt, format_datetime, get_datetime
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
-from erpnext.stock.utils import get_incoming_rate, get_valuation_method
+from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -202,7 +202,11 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			current_stock_qty = args.get(column)
 		elif args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
-			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
+			current_stock_qty = (
+				args.get(column) * args.get("conversion_factor", 1.0)
+				if column != "stock_qty"
+				else args.get(column)
+			)
 		else:
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
@@ -1082,8 +1086,7 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 			"batches": data.get("batches"),
 			"serial_nos_valuation": data.get("serial_nos_valuation"),
 			"batches_valuation": data.get("batches_valuation"),
-			"posting_date": parent_doc.posting_date,
-			"posting_time": parent_doc.posting_time,
+			"posting_datetime": get_combine_datetime(parent_doc.posting_date, parent_doc.posting_time),
 			"voucher_type": parent_doc.doctype,
 			"voucher_no": parent_doc.name,
 			"voucher_detail_no": child_doc.name,

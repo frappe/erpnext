@@ -255,6 +255,13 @@ class BOMCreator(Document):
 			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
 				frappe.throw(_("Please set Parent Row No for item {0}").format(row.fg_item))
 
+			key = (row.fg_item, row.fg_reference_id)
+			if key not in production_item_wise_rm:
+				production_item_wise_rm.setdefault(
+					key,
+					frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
+				)
+
 			production_item_wise_rm[(row.fg_item, row.fg_reference_id)]["items"].append(row)
 
 		reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))

@@ -26,7 +26,7 @@ class TestAssetShiftAllocation(IntegrationTestCase):
 			calculate_depreciation=1,
 			available_for_use_date="2023-01-01",
 			purchase_date="2023-01-01",
-			gross_purchase_amount=120000,
+			net_purchase_amount=120000,
 			depreciation_start_date="2023-01-31",
 			total_number_of_depreciations=12,
 			frequency_of_depreciation=1,

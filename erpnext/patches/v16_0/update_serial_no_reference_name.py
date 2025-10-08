@@ -16,7 +16,7 @@ def execute():
 		.on(sabb.name == sabb_entry.parent)
 		.set(serial_no.reference_name, serial_no.purchase_document_no)
 		.set(serial_no.reference_doctype, sabb.voucher_type)
-		.set(serial_no.posting_date, sabb.posting_date)
+		.set(serial_no.posting_date, sabb.posting_datetime)
 		.where(
 			(sabb.voucher_no == serial_no.purchase_document_no)
 			& (sabb.is_cancelled == 0)

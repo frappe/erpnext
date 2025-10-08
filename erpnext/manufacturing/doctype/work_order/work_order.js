@@ -756,12 +756,26 @@ erpnext.work_order = {
 						});
 						start_btn.addClass("btn-primary");
 					} else if (transfer_extra_materials && allowed_qty) {
-						let qty = allowed_qty - flt(frm.doc.material_transferred_for_manufacturing);
+						let qty =
+							allowed_qty -
+							flt(
+								flt(frm.doc.material_transferred_for_manufacturing) +
+									flt(frm.doc.additional_transferred_qty)
+							);
 
 						if (qty > 0) {
-							frm.add_custom_button(__("Transfer Extra Material"), function () {
-								erpnext.work_order.make_se(frm, "Material Transfer for Manufacture", qty);
-							});
+							frm.add_custom_button(
+								__("Additional Material Transfer"),
+								function () {
+									erpnext.work_order.make_se(
+										frm,
+										"Material Transfer for Manufacture",
+										qty,
+										1
+									);
+								},
+								__("Make")
+							);
 						}
 					}
 				}
@@ -793,7 +807,8 @@ erpnext.work_order = {
 										frm,
 										backflush_raw_materials_based_on
 									);
-								}
+								},
+								__("Make")
 							);
 						}
 					}
@@ -988,13 +1003,14 @@ erpnext.work_order = {
 		});
 	},
 
-	make_se: function (frm, purpose, qty) {
+	make_se: function (frm, purpose, qty, is_additional_transfer_entry) {
 		if (qty) {
 			frappe
 				.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: purpose,
 					qty: qty,
+					is_additional_transfer_entry: is_additional_transfer_entry || 0,
 				})
 				.then((stock_entry) => {
 					frappe.model.sync(stock_entry);

@@ -81,6 +81,7 @@ class Item(Document):
 		brand: DF.Link | None
 		country_of_origin: DF.Link | None
 		create_new_batch: DF.Check
+		cumulative_time: DF.Int
 		customer: DF.Link | None
 		customer_code: DF.SmallText | None
 		customer_items: DF.Table[ItemCustomerDetail]
@@ -119,6 +120,7 @@ class Item(Document):
 		item_name: DF.Data | None
 		last_purchase_rate: DF.Float
 		lead_time_days: DF.Int
+		manufacturing_time: DF.Int
 		max_discount: DF.Float
 		min_order_qty: DF.Float
 		naming_series: DF.Literal["STO-ITEM-.YYYY.-"]
@@ -127,6 +129,9 @@ class Item(Document):
 		opening_stock: DF.Float
 		over_billing_allowance: DF.Float
 		over_delivery_receipt_allowance: DF.Float
+		planning_buffer: DF.Int
+		procurement_time: DF.Int
+		production_capacity: DF.Int
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
@@ -216,9 +221,15 @@ class Item(Document):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.validate_item_tax_net_rate_range()
+		self.set_cumulative_time()
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
+
+	def set_cumulative_time(self):
+		self.cumulative_time = (
+			cint(self.procurement_time) + cint(self.manufacturing_time) + cint(self.planning_buffer)
+		)
 
 	def on_update(self):
 		self.update_variants()

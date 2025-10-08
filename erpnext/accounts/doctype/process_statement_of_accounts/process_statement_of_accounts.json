@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
@@ -69,7 +70,7 @@
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Weekly\nMonthly\nQuarterly"
+   "options": "Daily\nWeekly\nBiweekly\nMonthly\nQuarterly"
   },
   {
    "fieldname": "company",
@@ -416,7 +417,7 @@
   }
  ],
  "links": [],
- "modified": "2025-09-03 14:24:43.608565",
+ "modified": "2025-10-07 12:19:20.719898",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

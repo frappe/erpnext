@@ -10,7 +10,8 @@
   "sales_order_date",
   "col_break1",
   "customer",
-  "grand_total"
+  "grand_total",
+  "status"
  ],
  "fields": [
   {
@@ -58,17 +59,25 @@
    "print_width": "120px",
    "read_only": 1,
    "width": "120px"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:20.746852",
+ "modified": "2025-08-21 15:16:13.828240",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sales Order",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
