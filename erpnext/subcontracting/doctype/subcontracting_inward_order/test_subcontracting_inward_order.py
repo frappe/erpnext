@@ -312,12 +312,14 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		rm_in.items[-2].qty = 7
 		rm_in.submit()
 
+		wo_list = []
 		scio.reload()
 		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
 		wo.skip_transfer = 1
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.qty = 3
 		wo.submit()
+		wo_list.append(wo.name)
 		self.assertEqual(wo.required_items[-2].stock_reserved_qty, 3)
 
 		scio.reload()
@@ -328,6 +330,7 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.qty = 2
 		wo.submit()
+		wo_list.append(wo.name)
 
 		from frappe.query_builder.functions import Sum
 
@@ -335,7 +338,11 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		query = (
 			frappe.qb.from_(table)
 			.select(Sum(table.reserved_qty))
-			.where((table.voucher_type == "Work Order") & (table.item_code == rm_in.items[-2].item_code))
+			.where(
+				(table.voucher_type == "Work Order")
+				& (table.item_code == rm_in.items[-2].item_code)
+				& (table.voucher_no.isin(wo_list))
+			)
 		)
 		reserved_qty = query.run()[0][0]
 		self.assertEqual(reserved_qty, 7)
