@@ -158,7 +158,9 @@ class Batch(Document):
 
 	@frappe.whitelist()
 	def recalculate_batch_qty(self):
-		batches = get_batch_qty(batch_no=self.name, item_code=self.item, for_stock_levels=True)
+		batches = get_batch_qty(
+			batch_no=self.name, item_code=self.item, for_stock_levels=True, consider_negative_batches=True
+		)
 		batch_qty = 0.0
 		if batches:
 			for row in batches:
