@@ -26,7 +26,6 @@ apply_on_table = {"Item Code": "items", "Item Group": "item_groups", "Brand": "b
 
 def get_pricing_rules(args, doc=None):
 	pricing_rules = []
-	pricing_rule = {}
 	values = {}
 	has_multiple_pricing_rule = False
 
@@ -35,17 +34,18 @@ def get_pricing_rules(args, doc=None):
 
 	for apply_on in ["Item Code", "Item Group", "Brand"]:
 		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
-		if pricing_rules and pricing_rules[0].has_priority:
-			continue
 
 		# check apply_multiple_pricing_rules is enabled
 		if pricing_rules and apply_multiple_pricing_rules(pricing_rules):
 			has_multiple_pricing_rule = True
 
+		if pricing_rules and pricing_rules[0].has_priority:
+			continue
+
 		if pricing_rules and not has_multiple_pricing_rule:
 			# filter pricing rule
 			pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
-			if pricing_rule := filter_pricing_rules(args, pricing_rules, doc):
+			if filter_pricing_rules(args, pricing_rules, doc):
 				break
 
 	rules = []
@@ -53,16 +53,19 @@ def get_pricing_rules(args, doc=None):
 	if not pricing_rules:
 		return []
 
+	pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
+
 	if has_multiple_pricing_rule:
-		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 		pricing_rules = sorted_by_priority(pricing_rules, args, doc)
 		for pricing_rule in pricing_rules:
 			if isinstance(pricing_rule, list):
 				rules.extend(pricing_rule)
 			else:
 				rules.append(pricing_rule)
-	elif pricing_rule:
-		rules.append(pricing_rule)
+	else:
+		pricing_rule = filter_pricing_rules(args, pricing_rules, doc)
+		if pricing_rule:
+			rules.append(pricing_rule)
 
 	return rules
 
