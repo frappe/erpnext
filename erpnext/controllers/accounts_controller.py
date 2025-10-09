@@ -303,6 +303,7 @@ class AccountsController(TransactionBase):
 		self.set_default_letter_head()
 		self.validate_company_in_accounting_dimension()
 		self.validate_party_address_and_contact()
+		self.validate_company_address()
 
 	def set_default_letter_head(self):
 		if hasattr(self, "letter_head") and not self.letter_head:
@@ -474,7 +475,6 @@ class AccountsController(TransactionBase):
 
 	def validate_party_address_and_contact(self):
 		party_type, party = self.get_party()
-
 		if not (party_type and party):
 			return
 
@@ -2328,6 +2328,29 @@ class AccountsController(TransactionBase):
 
 		return party_type, party
 
+	def get_company_address(self):
+		field = None
+		if self.doctype in ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+			field = "company_address"
+
+		elif self.doctype in (
+			"Supplier Quotation",
+			"Purchase Order",
+			"Purchase Receipt",
+			"Purchase Invoice",
+		):
+			field = "billing_address"
+
+		elif self.meta.get_field("customer"):
+			field = "company_address"
+
+		elif self.meta.get_field("supplier"):
+			field = "billing_address"
+
+		address = self.get(field) if field else None
+
+		return address
+
 	def validate_currency(self):
 		if self.get("currency"):
 			party_type, party = self.get_party()
@@ -2932,6 +2955,19 @@ class AccountsController(TransactionBase):
 		for x in gl_entries:
 			x["transaction_currency"] = self.currency
 			x["transaction_exchange_rate"] = self.get("conversion_rate") or 1
+
+	def validate_company_address(self):
+		company_address = self.get_company_address()
+		if company_address and not frappe.db.exists(
+			{
+				"doctype": "Dynamic Link",
+				"parent": company_address,
+				"parenttype": "Address",
+				"link_doctype": "Company",
+				"link_name": self.company,
+			}
+		):
+			frappe.throw("The selected Company Address does not belong to the selected Company.")
 
 
 @frappe.whitelist()
