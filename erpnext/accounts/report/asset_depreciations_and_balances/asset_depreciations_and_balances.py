@@ -354,7 +354,7 @@ def get_asset_details_for_grouped_by_category(filters):
 	# nosemgrep
 	return frappe.db.sql(
 		f"""
-		SELECT a.name,
+		SELECT a.name, a.asset_name,
 			   ifnull(sum(case when a.purchase_date < %(from_date)s then
 							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
 									a.net_purchase_amount
@@ -581,6 +581,14 @@ def get_columns(filters):
 				"fieldtype": "Link",
 				"options": "Asset",
 				"width": 120,
+			}
+		)
+		columns.append(
+			{
+				"label": _("Asset Name"),
+				"fieldname": "asset_name",
+				"fieldtype": "Data",
+				"width": 140,
 			}
 		)
 
