@@ -329,6 +329,7 @@ class JournalEntry(AccountsController):
 				"posting_date": self.posting_date,
 				"tax_withholding_net_total": net_total,
 				"base_tax_withholding_net_total": net_total,
+				"grand_total": net_total,
 			}
 		)
 

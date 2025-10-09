@@ -724,7 +724,7 @@ def get_advance_adjusted_in_invoice(inv):
 
 
 def get_invoice_total_without_tcs(inv, tax_details):
-	tcs_tax_row = [d for d in inv.taxes if d.account_head == tax_details.account_head]
+	tcs_tax_row = [d for d in inv.get("taxes") or [] if d.account_head == tax_details.account_head]
 	tcs_tax_row_amount = tcs_tax_row[0].base_tax_amount if tcs_tax_row else 0
 
 	return inv.grand_total - tcs_tax_row_amount
