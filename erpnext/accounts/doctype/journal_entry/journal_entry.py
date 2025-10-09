@@ -280,36 +280,39 @@ class JournalEntry(AccountsController):
 
 		party = None
 		party_type = None
-		party_account = None
 		party_row = None
 
-		for d in self.get("accounts"):
-			if d.party and party and d.party != party:
-				frappe.throw(_("Cannot apply TDS against multiple parties in one entry"))
+		for row in self.get("accounts"):
+			if row.party_type in ("Customer", "Supplier") and row.party:
+				if party and row.party != party:
+					frappe.throw(_("Cannot apply TDS against multiple parties in one entry"))
 
-			if d.party_type in ("Customer", "Supplier") and d.party:
-				party = d.party
-				party_type = d.party_type
-				party_account = d.account
-				party_row = d
-				break
+				if not party:
+					party = row.party
+					party_type = row.party_type
+					party_row = row
 
-		if not (party and party_type):
+		if not party:
 			return
 
 		# debit or credit based on party type
-		dr_or_cr = "credit" if party_type == "Supplier" else "debit"
-		rev_dr_or_cr = "debit" if party_type == "Supplier" else "credit"
+		dr_cr = "credit" if party_type == "Supplier" else "debit"
+		rev_dr_cr = "debit" if party_type == "Supplier" else "credit"
+
+		precision = self.precision(dr_cr, party_row)
 
 		# net total in company currency.
-		net_total_in_company_currency = sum(
-			d.get(dr_or_cr) - d.get(rev_dr_or_cr)
-			for d in self.get("accounts")
-			if d.party == party and d.party_type == party_type
+		net_total = flt(
+			sum(
+				d.get(dr_cr) - d.get(rev_dr_cr)
+				for d in self.get("accounts")
+				if d.party == party and d.party_type == party_type
+			),
+			precision,
 		)
 
 		# only apply tds if net total is positive
-		if net_total_in_company_currency <= 0:
+		if net_total <= 0:
 			return
 
 		inv = frappe._dict(
@@ -319,87 +322,94 @@ class JournalEntry(AccountsController):
 				"doctype": self.doctype,
 				"company": self.company,
 				"posting_date": self.posting_date,
-				"tax_withholding_net_total": net_total_in_company_currency,
-				"base_tax_withholding_net_total": net_total_in_company_currency,
+				"tax_withholding_net_total": net_total,
+				"base_tax_withholding_net_total": net_total,
 			}
 		)
 
-		tax_withholding_details = get_party_tax_withholding_details(inv, self.tax_withholding_category)
+		tax_details = get_party_tax_withholding_details(inv, self.tax_withholding_category)
 
-		if not tax_withholding_details:
+		if not tax_details:
 			return
 
-		tds_account = tax_withholding_details.get("account_head")
-		company_default_currency = frappe.get_cached_value("Company", self.company, "default_currency")
-		tds_account_currency = get_account_currency(tds_account)
+		tax_acc = tax_details.get("account_head")
+		acc_curr = get_account_currency(tax_acc)
+		comp_curr = frappe.get_cached_value("Company", self.company, "default_currency")
 
-		tds_exch_rate = get_exchange_rate(tds_account_currency, company_default_currency, self.posting_date)
+		exch_rate = get_exchange_rate(acc_curr, comp_curr, self.posting_date)
 
-		tds_amt_in_company_currency = tax_withholding_details.get("tax_amount")
-		tds_amt_in_account_currency = tds_amt_in_company_currency / tds_exch_rate
-		tds_amt_in_party_currency = tds_amt_in_company_currency / party_row.get("exchange_rate", 1)
+		tax_amt_in_comp_curr = flt(tax_details.get("tax_amount"), precision)
+		tax_amt_in_acc_curr = flt(tax_amt_in_comp_curr / exch_rate, precision)
+		tax_amt_in_party_curr = flt(tax_amt_in_comp_curr / party_row.get("exchange_rate", 1), precision)
 
 		# Update or create tax account row
 		tax_row = None
-		for d in self.get("accounts"):
-			if d.account == tds_account:
-				tax_row = d
+
+		for row in self.get("accounts"):
+			if row.account == tax_acc:
+				tax_row = row
 				break
 
 		if not tax_row:
 			tax_row = self.append(
 				"accounts",
 				{
-					"account": tds_account,
-					"account_currency": tds_account_currency,
-					"exchange_rate": tds_exch_rate,
+					"account": tax_acc,
+					"account_currency": acc_curr,
+					"exchange_rate": exch_rate,
 					"is_tax_withholding_account": 1,
-					"against_account": party_account,
+					"debit": 0,
+					"credit": 0,
+					"debit_in_account_currency": 0,
+					"credit_in_account_currency": 0,
 				},
 			)
 
 		# TDS will always be credit
 		tax_row.update(
 			{
-				"credit": flt(tds_amt_in_company_currency, self.precision("credit")),
-				"credit_in_account_currency": flt(
-					tds_amt_in_account_currency, self.precision("credit_in_account_currency")
-				),
+				"credit": tax_amt_in_comp_curr,
+				"credit_in_account_currency": tax_amt_in_acc_curr,
 				"debit": 0,
 				"debit_in_account_currency": 0,
 			}
 		)
 
-		party_field = dr_or_cr
+		# update party row
+		party_field = dr_cr
+
+		# sometime user may enter amount in opposite field as negative value
 		if not party_row.get(party_field):
-			party_field = rev_dr_or_cr
-			tds_amt_in_company_currency = -1 * tds_amt_in_company_currency
-			tds_amt_in_party_currency = -1 * tds_amt_in_party_currency
+			party_field = rev_dr_cr
+			tax_amt_in_comp_curr *= -1
+			tax_amt_in_party_curr *= -1
 
-		if dr_or_cr == "debit":
-			# for customer,increase the receivable amount
-			party_row.update(
-				{
-					party_field: flt(party_row.get(party_field, 0)) + tds_amt_in_company_currency,
-					f"{party_field}_in_account_currency": flt(
-						party_row.get(f"{party_field}_in_account_currency", 0)
-					)
-					+ tds_amt_in_party_currency,
-				}
-			)
-		else:
-			# for supplier,decrease the payable amount
-			party_row.update(
-				{
-					party_field: flt(party_row.get(party_field, 0)) - tds_amt_in_company_currency,
-					f"{party_field}_in_account_currency": flt(
-						party_row.get(f"{party_field}_in_account_currency", 0)
-					)
-					- tds_amt_in_party_currency,
-				}
-			)
+		# for customer amount will be added.
+		if dr_cr == "debit":
+			tax_amt_in_comp_curr *= -1
+			tax_amt_in_party_curr *= -1
 
-		# Recalculate totals
+		party_field_in_acc_curr = f"{party_field}_in_account_currency"
+		party_amt_in_comp_curr = flt(party_row.get(party_field) - tax_amt_in_comp_curr, precision)
+		party_amt_in_acc_curr = flt(party_row.get(party_field_in_acc_curr) - tax_amt_in_party_curr, precision)
+
+		party_row.update(
+			{
+				party_field: party_amt_in_comp_curr,
+				party_field_in_acc_curr: party_amt_in_acc_curr,
+			}
+		)
+
+		# remove other tds rows if any
+		dup_rows = []
+		for row in self.get("accounts"):
+			if row.account == tax_acc and row != tax_row:
+				dup_rows.append(row)
+
+		for row in dup_rows:
+			self.remove(row)
+
+		# recalculate totals
 		self.set_amounts_in_company_currency()
 		self.set_total_debit_credit()
 		self.set_against_account()
