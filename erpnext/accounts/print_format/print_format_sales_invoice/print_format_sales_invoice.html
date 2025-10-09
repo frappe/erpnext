@@ -208,18 +208,15 @@ print_heading_template=None) -%}
 		</table>
 
 		<!-- Items Table -->
+		{% set item_naming_by = frappe.db.get_single_value("Stock Settings", "item_naming_by") %}
 		<table class="items-table mt-15">
-			<colgroup>
-				<col style="width: 5%" />
-				<col style="width: 35%" />
-				<col style="width: 10%" />
-				<col style="width: 20%" />
-				<col style="width: 15%" />
-			</colgroup>
 			<thead class="highlight-bg">
 				<tr>
-					<td class="text-center">{{ _("No") }}</td>
+					<td class="	text-center">{{ _("No") }}</td>
 					<td class="text-left">{{ _("Item") }}</td>
+					{% if item_naming_by != "Item Code" %}
+						<td class="text-left">{{ _("Item Code") }}</td>
+					{% endif %}
 					<td class="text-right">{{ _("Quantity") }}</td>
 					<td class="text-right">{{ _("Rate") }}</td>
 					<td class="text-right">{{ _("Amount") }}</td>
@@ -239,10 +236,8 @@ print_heading_template=None) -%}
 										alt="{{ item.item_name }}"
 										style="
 											border-radius: 6px;
-											max-height: 24px;
-											min-height: 24px;
-											max-width: 24px;
-											min-width: 24px;
+											height: 24px;
+											width: 24px !important;
 											margin-right: 8px;
                                             vertical-align: middle;
 										"
@@ -258,6 +253,9 @@ print_heading_template=None) -%}
 							</tr>
 						</table>
 					</td>
+					{% if item_naming_by != "Item Code" %}
+						<td class="text-left">{{ item.item_code }}</td>
+					{% endif %}
 
 					<td class="text-right">{{ item.get_formatted("qty", 0) }} {{ item.uom }}</td>
 					<td class="text-right">{{ item.get_formatted("net_rate", doc) }}</td>
