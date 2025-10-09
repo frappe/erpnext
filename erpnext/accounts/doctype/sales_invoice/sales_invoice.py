@@ -291,7 +291,6 @@ class SalesInvoice(SellingController):
 
 		required_fields = [
 			company_details.get("company_logo"),
-			company_details.get("website"),
 			company_details.get("phone_no"),
 			company_details.get("email"),
 			self.company_address,
@@ -2861,6 +2860,7 @@ def save_company_master_details(name, company, details):
 				"address_title": details.get("address_title"),
 				"address_type": details.get("address_type"),
 				"address_line1": details.get("address_line1"),
+				"address_line2": details.get("address_line2"),
 				"city": details.get("city"),
 				"state": details.get("state"),
 				"pincode": details.get("pincode"),
@@ -2869,7 +2869,7 @@ def save_company_master_details(name, company, details):
 				"links": [{"link_doctype": "Company", "link_name": company}],
 			}
 		)
-		address_doc.insert(ignore_permissions=True)
+		address_doc.insert()
 		company_address = address_doc.name
 
 	if company_address:

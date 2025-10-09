@@ -131,6 +131,19 @@ print_heading_template=None) -%}
 		}
 		.totals-table tr {
 			border-bottom: 1px solid #ededed;
+			position: relative;
+		}
+		.totals-table tr td {
+			position: relative;
+		}
+		.totals-table tr td div {
+			width: 12%;
+			height: 14px;
+			background-color: white;
+			position: absolute;
+			bottom: -6px;
+			left: 0%;
+			color: white;
 		}
 		.totals-table tr:last-child {
 			border-bottom: none;
@@ -205,8 +218,8 @@ print_heading_template=None) -%}
 					{% if doc.customer_address %}
 						{% set customer_address = frappe.get_doc("Address", doc.customer_address) %}
 						{{ doc.customer_name }}<br>
-						{{ customer_address.address_line1 or "" }}
-						{% if customer_address.address_line2 %}{{ customer_address.address_line2 }}{% endif %}<br>
+						{{ customer_address.address_line1 or "" }}<br>
+						{% if customer_address.address_line2 %}{{ customer_address.address_line2 }}<br>{% endif %}
 						{{ customer_address.city or "" }} {{ customer_address.state or "" }} {{ customer_address.pincode or "" }} {{ customer_address.country or "" }}<br>
 					{% endif %}
 				</td>
@@ -214,8 +227,8 @@ print_heading_template=None) -%}
 					{% if doc.company_address %}
 						{% set company_address_display = frappe.get_doc("Address", doc.company_address) %}
 						{{ doc.company }}<br>
-						{{ company_address_display.address_line1 or "" }}
-						{% if company_address_display.address_line2 %}{{ company_address_display.address_line2 }}{% endif %}<br>
+						{{ company_address_display.address_line1 or "" }}<br>
+						{% if company_address_display.address_line2 %}{{ company_address_display.address_line2 }}<br>{% endif %}
 						{{ company_address_display.city or "" }} {{ company_address_display.state or "" }} {{ company_address_display.pincode or "" }} {{ company_address_display.country or "" }}<br>
 					{% endif %}
 				</td>
@@ -257,20 +270,23 @@ print_heading_template=None) -%}
 
 		<!-- Totals Section -->
 		<table style="width:100%; margin-top: 15px">
-			<td style="vertical-align: bottom !important;">
+			<td style="vertical-align: bottom !important; width: 60%;">
 				<p class="title">{{ _("Total in words") }}</p>
 				<div class="words-box text-uppercase">{{ doc.in_words }}</div>
 			</td>
 			<td>
+				&nbsp;
+			</td>
+			<td style="width: 38%;">
 				<table class="totals-table">
 					<tr>
-						<td class="text-right text-muted">{{ _("Sub Total:") }}</td>
+						<td class="text-right text-muted"><div></div>{{ _("Sub Total:") }}</td>
 						<td class="text-right amount-width">{{ doc.get_formatted("total", doc) }}</td>
 					</tr>
 					{%- if doc.apply_discount_on == "Net Total" -%}
 						<tr>
 							<td class="text-right text-muted">
-								{{ _("Discount") }} ({{ doc.additional_discount_percentage }}%):
+								<div></div>{{ _("Discount") }} ({{ doc.additional_discount_percentage }}%):
 							</td>
 							<td class="text-right amount-width">{{ doc.get_formatted("discount_amount", doc) }}</td>
 						</tr>
@@ -278,7 +294,7 @@ print_heading_template=None) -%}
 					{%- for tax in doc.taxes -%}
 						{%- if (tax.tax_amount or print_settings.print_taxes_with_zero_amount) and (not tax.included_in_print_rate or doc.flags.show_inclusive_tax_in_print) -%}
 							<tr>
-								<td class="text-right text-muted">{{ tax.get_formatted("description") }} ({{ tax.get_formatted("rate") }}%):</td>
+								<td class="text-right text-muted"><div></div>{{ tax.get_formatted("description") }} ({{ tax.get_formatted("rate") }}%):</td>
 								<td class="text-right amount-width">{{ tax.get_formatted("tax_amount") }}</td>
 							</tr>
 						{%- endif -%}
@@ -286,7 +302,7 @@ print_heading_template=None) -%}
 					{%- if doc.apply_discount_on == "Grand Total" -%}
 						<tr>
 							<td class="text-right text-muted">
-								{{ _("Discount") }} ({{ doc.additional_discount_percentage }}%):
+								<div></div>{{ _("Discount") }} ({{ doc.additional_discount_percentage }}%):
 							</td>
 							<td class="text-right amount-width">{{ doc.get_formatted("discount_amount", doc) }}</td>
 						</tr>

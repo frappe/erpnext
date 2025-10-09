@@ -30,7 +30,6 @@
 
 	.logo img {
 		border-radius: 15px;
-		border: 1px solid #ededed;
 	}
 
 	.company-name {
@@ -84,10 +83,10 @@
 				<div class="company-name">{{ doc.company }}</div>
 				<div class="company-address">
 					{% if doc.company_address %} {% set company_address_display = frappe.get_doc("Address",
-					doc.company_address) %} {{ company_address_display.address_line1 or "" }} {% if
+					doc.company_address) %} {{ company_address_display.address_line1 or "" }}<br /> {% if
 					company_address_display.address_line2 %}{{ company_address_display.address_line2 }}<br />{%
-					endif %} {{ company_address_display.city or "" }} {{ company_address_display.state or ""
-					}} {{ company_address_display.pincode or "" }} {{ company_address_display.country or ""
+					endif %} {{ company_address_display.city or "" }}, {{ company_address_display.state or ""
+					}} {{ company_address_display.pincode or "" }}, {{ company_address_display.country or ""
 					}}<br />
 					{% endif %}
 				</div>

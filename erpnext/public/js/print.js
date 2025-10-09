@@ -20,7 +20,6 @@ frappe.realtime.on("sales_invoice_before_print", (data) => {
 					label: "Website",
 					fieldname: "website",
 					fieldtype: "Data",
-					reqd: data.website ? 0 : 1,
 					hidden: data.website ? 1 : 0,
 				},
 				{
@@ -59,10 +58,16 @@ frappe.realtime.on("sales_invoice_before_print", (data) => {
 					hidden: data.address_line ? 1 : 0,
 				},
 				{
-					label: "Address Line",
+					label: "Address Line 1",
 					fieldname: "address_line1",
 					fieldtype: "Data",
 					reqd: data.address_line ? 0 : 1,
+					hidden: data.address_line ? 1 : 0,
+				},
+				{
+					label: "Address Line 2",
+					fieldname: "address_line2",
+					fieldtype: "Data",
 					hidden: data.address_line ? 1 : 0,
 				},
 				{

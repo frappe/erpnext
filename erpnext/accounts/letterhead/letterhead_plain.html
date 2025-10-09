@@ -16,12 +16,9 @@
         width: 100px;
         text-align: center;
         position: relative;
-
     }
     .logo-container {
         width: 90px;
-        border: 1px solid #EDEDED;
-        border-radius: 15px;
         display: block;
     }
     .logo-container img {
@@ -73,9 +70,9 @@
                 </div>
                 {% if doc.company_address %}
                     {% set company_address_display = frappe.get_doc("Address", doc.company_address) %}
-                    {{ company_address_display.address_line1 or "" }}
-                    {% if company_address_display.address_line2 %}{{ company_address_display.address_line2 }}{% endif %}<br>
-                    {{ company_address_display.city or "" }} {{ company_address_display.state or "" }} {{ company_address_display.pincode or "" }} {{ company_address_display.country or "" }}<br>
+                    {{ company_address_display.address_line1 or "" }}<br>
+                    {% if company_address_display.address_line2 %}{{ company_address_display.address_line2 }}<br>{% endif %}
+                    {{ company_address_display.city or "" }}, {{ company_address_display.state or "" }} {{ company_address_display.pincode or "" }}, {{ company_address_display.country or "" }}<br>
                 {% endif %}
             </td>
 
