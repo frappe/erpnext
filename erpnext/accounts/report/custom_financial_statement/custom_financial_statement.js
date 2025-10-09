@@ -1,7 +1,7 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
+// For license information, please see license.txt
 
-const REPORT_NAME = "Profit and Loss Statement";
+const REPORT_NAME = "Custom Financial Statement";
 
 frappe.query_reports[REPORT_NAME] = $.extend({}, erpnext.financial_statements);
 
@@ -13,7 +13,8 @@ frappe.query_reports[REPORT_NAME]["filters"].push(
 		label: __("Report Template"),
 		fieldtype: "Link",
 		options: "Financial Report Template",
-		get_query: { filters: { report_type: REPORT_NAME, disabled: 0 } },
+		get_query: { filters: { disabled: 0 } },
+		reqd: 1,
 	},
 	{
 		fieldname: "show_account_details",
@@ -22,24 +23,6 @@ frappe.query_reports[REPORT_NAME]["filters"].push(
 		options: ["Summary", "Account Breakdown"],
 		default: "Summary",
 		depends_on: "eval:!!frappe.query_report.get_filter_value('report_template')",
-	},
-	{
-		fieldname: "selected_view",
-		label: __("Select View"),
-		fieldtype: "Select",
-		options: [
-			{ value: "Report", label: __("Report View") },
-			{ value: "Growth", label: __("Growth View") },
-			{ value: "Margin", label: __("Margin View") },
-		],
-		default: "Report",
-		reqd: 1,
-	},
-	{
-		fieldname: "accumulated_values",
-		label: __("Accumulated Values"),
-		fieldtype: "Check",
-		default: 1,
 	},
 	{
 		fieldname: "include_default_book_entries",

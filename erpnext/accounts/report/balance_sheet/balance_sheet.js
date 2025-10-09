@@ -13,7 +13,7 @@ frappe.query_reports[REPORT_NAME]["filters"].push(
 		label: __("Report Template"),
 		fieldtype: "Link",
 		options: "Financial Report Template",
-		get_query: { filters: { report_type: REPORT_NAME } },
+		get_query: { filters: { report_type: REPORT_NAME, disabled: 0 } },
 	},
 	{
 		fieldname: "show_account_details",
