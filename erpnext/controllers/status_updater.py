@@ -358,18 +358,25 @@ class StatusUpdater(Document):
 							self.check_overflow_with_allowance(item, args)
 
 	def fetch_items_with_pending_qty(self, args, item_field, items):
-		return frappe.db.sql(
-			"""select name,`{item_code}` as item_code, `{target_ref_field}`,
-			`{target_field}`, parenttype, parent from `tab{target_dt}`
-			where `{target_ref_field}` < `{target_field}`
-			and name in %(names)s and docstatus=1""".format(
-				item_code=item_field,
-				target_ref_field=args["target_ref_field"],
-				target_field=args["target_field"],
-				target_dt=args["target_dt"],
-			),
-			{"names": items},
-			as_dict=1,
+		doctype = frappe.qb.DocType(args["target_dt"])
+		item_field = doctype[item_field]
+		target_ref_field = doctype[args["target_ref_field"]]
+		target_field = doctype[args["target_field"]]
+
+		return (
+			frappe.qb.from_(doctype)
+			.select(
+				doctype.name,
+				item_field.as_("item_code"),
+				target_ref_field,
+				target_field,
+				doctype.parenttype,
+				doctype.parent,
+			)
+			.where(target_ref_field < target_field)
+			.where(doctype.name.isin(items))
+			.where(doctype.docstatus == 1)
+			.run(as_dict=True)
 		)
 
 	def check_overflow_with_allowance(self, item, args):
