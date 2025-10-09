@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-08 10:45\n"
+"PO-Revision-Date: 2025-10-09 11:15\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -4127,7 +4127,7 @@ msgstr "همه این آیتم‌ها قبلاً صورتحساب/بازگردا
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:85
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:92
 msgid "Allocate"
-msgstr "اختصاص دهید"
+msgstr ""
 
 #. Label of the allocate_advances_automatically (Check) field in DocType 'POS
 #. Invoice'
@@ -24763,7 +24763,7 @@ msgstr "در تولید"
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.json
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "In Progress"
-msgstr "در حال پیش رفت"
+msgstr "در حال انجام"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:112
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:82
