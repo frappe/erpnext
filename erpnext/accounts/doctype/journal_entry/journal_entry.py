@@ -362,6 +362,7 @@ class JournalEntry(AccountsController):
 					"account": tax_acc,
 					"account_currency": acc_curr,
 					"exchange_rate": exch_rate,
+					"cost_center": tax_details.get("cost_center"),
 					"debit": 0,
 					"credit": 0,
 					"debit_in_account_currency": 0,
