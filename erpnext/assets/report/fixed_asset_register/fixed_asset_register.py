@@ -319,6 +319,7 @@ def get_asset_value_adjustment_map(filters, finance_book):
 		.select(asset.name.as_("asset"), Sum(gle.debit - gle.credit).as_("adjustment_amount"))
 		.where(gle.account == aca.fixed_asset_account)
 		.where(gle.is_cancelled == 0)
+		.where(gle.is_opening == "No")
 		.where(company.name == filters.company)
 		.where(asset.docstatus == 1)
 	)
