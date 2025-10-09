@@ -854,6 +854,7 @@ def available_serial_batch_for_return(field, doctype, reference_ids, is_rejected
 
 def get_available_serial_batches(field, doctype, reference_ids, is_rejected=False):
 	_bundle_ids = get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=is_rejected)
+
 	if not _bundle_ids:
 		return frappe._dict({})
 
@@ -887,6 +888,13 @@ def get_serial_batches_based_on_bundle(doctype, field, _bundle_ids):
 			key = frappe.get_cached_value(row.voucher_type + " Item", row.voucher_detail_no, field)
 
 		if doctype == "Packed Item":
+			if key is None:
+				key = frappe.get_cached_value("Packed Item", row.voucher_detail_no, field)
+				if row.voucher_type == "Delivery Note":
+					key = frappe.get_cached_value("Delivery Note Item", key, "dn_detail")
+				elif row.voucher_type == "Sales Invoice":
+					key = frappe.get_cached_value("Sales Invoice Item", key, "sales_invoice_item")
+
 			key = (row.item_code, key)
 
 		if row.voucher_type in ["Sales Invoice", "Delivery Note"]:
@@ -918,7 +926,7 @@ def get_serial_batches_based_on_bundle(doctype, field, _bundle_ids):
 def get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=False):
 	filters = {"docstatus": 1, "name": ("in", reference_ids), "serial_and_batch_bundle": ("is", "set")}
 	if doctype == "Packed Item":
-		filters = {"docstatus": 1, field: ("in", reference_ids), "serial_and_batch_bundle": ("is", "set")}
+		filters = get_filters_for_packed_item(field, reference_ids)
 
 	pluck_field = "serial_and_batch_bundle"
 	if is_rejected:
@@ -980,6 +988,22 @@ def get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=False
 				_bundle_ids.append(d.get("serial_and_batch_bundle"))
 
 	return _bundle_ids
+
+
+def get_filters_for_packed_item(field, reference_ids):
+	names = []
+	filters = {"docstatus": 1, "dn_detail": ("in", reference_ids)}
+	if dns := frappe.get_all("Delivery Note Item", filters=filters, pluck="name"):
+		names.extend(dns)
+
+	filters = {"docstatus": 1, "sales_invoice_item": ("in", reference_ids)}
+	if sis := frappe.get_all("Sales Invoice Item", filters=filters, pluck="name"):
+		names.extend(sis)
+
+	if names:
+		reference_ids.extend(names)
+
+	return {"docstatus": 1, field: ("in", reference_ids), "serial_and_batch_bundle": ("is", "set")}
 
 
 def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field=None):

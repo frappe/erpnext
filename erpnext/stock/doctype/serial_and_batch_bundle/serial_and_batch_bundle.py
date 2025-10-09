@@ -639,7 +639,7 @@ class SerialandBatchBundle(Document):
 			rate = frappe.db.get_value(child_table, self.voucher_detail_no, valuation_field)
 
 		is_packed_item = False
-		if rate is None and child_table == "Delivery Note Item":
+		if rate is None and child_table in ["Delivery Note Item", "Sales Invoice Item"]:
 			rate = frappe.db.get_value(
 				"Packed Item",
 				self.voucher_detail_no,

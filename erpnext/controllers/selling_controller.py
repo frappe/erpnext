@@ -1006,6 +1006,9 @@ def set_default_income_account_for_item(obj):
 def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
+	if parent.get("is_return") and parent.get("packed_items"):
+		return
+
 	if child.get("use_serial_batch_fields"):
 		return
 
