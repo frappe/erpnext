@@ -846,12 +846,21 @@ class SalesInvoice(SellingController):
 				timesheet.db_update_all()
 
 	def update_billed_qty_in_scio(self):
-		for item in [item for item in self.items if item.scio_detail]:
-			doc = frappe.get_doc("Subcontracting Inward Order Received Item", item.scio_detail)
-			doc.db_set(
-				"billed_qty",
-				doc.billed_qty + (item.stock_qty if self._action == "submit" else -item.stock_qty),
-			)
+		if self.is_return:
+			return
+
+		data = frappe._dict(
+			{
+				item.scio_detail: item.stock_qty if self._action == "submit" else -item.stock_qty
+				for item in self.items
+				if item.scio_detail
+			}
+		)
+		for name, qty in data.items():
+			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+			frappe.qb.update(table).set(table.billed_qty, table.billed_qty + qty).where(
+				(table.name == name) & (table.docstatus == 1)
+			).run()
 
 	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
 		for data in timesheet.time_logs:

@@ -2524,7 +2524,7 @@ def make_bom(**args):
 		if not args.do_not_submit:
 			bom.submit()
 
-	if args.set_as_default_bom:
+	if args.set_as_default_bom and not args.do_not_save:
 		frappe.set_value("Item", args.item, "default_bom", bom.name)
 
 	return bom

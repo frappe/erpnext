@@ -626,7 +626,7 @@
    "fieldname": "customer_provided_item_cost",
    "fieldtype": "Currency",
    "label": "Customer Provided Item Cost",
-   "mandatory_depends_on": "eval:parent.purpose == \"Receive from Customer\"",
+   "options": "Company:company:default_currency",
    "no_copy": 1,
    "non_negative": 1,
    "print_hide": 1,

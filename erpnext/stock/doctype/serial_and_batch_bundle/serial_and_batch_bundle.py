@@ -2457,8 +2457,18 @@ def get_auto_batch_nos(kwargs):
 
 
 def get_batch_nos_from_sre(kwargs):
+	from frappe.query_builder.functions import Max, Min, Sum
+
 	table = frappe.qb.DocType("Stock Reservation Entry")
 	child_table = frappe.qb.DocType("Serial and Batch Entry")
+
+	if kwargs.based_on == "LIFO":
+		creation_field = Max(child_table.creation).as_("sort_creation")
+		order = frappe.query_builder.Order.desc
+	else:
+		creation_field = Min(child_table.creation).as_("sort_creation")
+		order = frappe.query_builder.Order.asc
+
 	query = (
 		frappe.qb.from_(table)
 		.join(child_table)
@@ -2466,25 +2476,21 @@ def get_batch_nos_from_sre(kwargs):
 		.select(
 			child_table.batch_no,
 			child_table.warehouse,
-			frappe.query_builder.functions.Sum(child_table.qty - child_table.delivered_qty).as_("qty"),
+			Sum(child_table.qty - child_table.delivered_qty).as_("qty"),
+			creation_field,
 		)
 		.where(
 			(table.docstatus == 1)
 			& (table.voucher_detail_no == kwargs.scio_detail)
 			& (child_table.qty != child_table.delivered_qty)
 		)
-		.groupby(child_table.batch_no)
+		.groupby(child_table.batch_no, child_table.warehouse)
+		.orderby("sort_creation", order=order)
+		.orderby(child_table.batch_no, order=frappe.query_builder.Order.asc)
 	)
-	if kwargs.based_on == "LIFO":
-		query = query.orderby(child_table.creation, order=frappe.query_builder.Order.desc)
-	else:
-		query = query.orderby(child_table.creation)
-	result = query.run(as_dict=True)
 
-	if flt(kwargs.qty):
-		return get_qty_based_available_batches(result, flt(kwargs.qty))
-	else:
-		return result
+	result = query.run(as_dict=True)
+	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
 def get_batches_to_be_considered(sales_order_name):

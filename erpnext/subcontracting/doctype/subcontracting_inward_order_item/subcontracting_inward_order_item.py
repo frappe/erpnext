@@ -41,7 +41,6 @@ class SubcontractingInwardOrderItem(Document):
 		query = (
 			frappe.qb.from_(table)
 			.select(
-				table.name,
 				Sum(table.produced_qty).as_("produced_qty"),
 				Sum(table.process_loss_qty).as_("process_loss_qty"),
 			)

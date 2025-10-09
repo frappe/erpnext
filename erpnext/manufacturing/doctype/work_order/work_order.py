@@ -268,8 +268,17 @@ class WorkOrder(Document):
 	def validate_subcontracting_inward_order(self):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			data = frappe.get_value(
-				"Subcontracting Inward Order Item", scio_item_name, ["qty", "produced_qty"], as_dict=True
+				"Subcontracting Inward Order Item",
+				{"name": scio_item_name, "docstatus": 1},
+				["qty", "produced_qty"],
+				as_dict=True,
 			)
+			if not data:
+				frappe.throw(
+					_("Subcontracting Inward Order Item {0} is invalid/cancelled/not submitted.").format(
+						scio_item_name
+					)
+				)
 			if self.qty > data.qty - data.produced_qty:
 				frappe.throw(
 					_(
@@ -738,7 +747,7 @@ class WorkOrder(Document):
 			scio_rm_item_names = frappe.db.get_all(
 				"Subcontracting Inward Order Received Item",
 				filters={"reference_name": scio_item_name, "docstatus": 1},
-				fields=["name"],
+				pluck="name",
 			)
 			for scio_rm_item_name in scio_rm_item_names:
 				scio_rm_item = frappe.get_doc("Subcontracting Inward Order Received Item", scio_rm_item_name)

@@ -423,14 +423,16 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.events.set_route_options_for_new_doc(frm);
 
-		if (
+		frm.set_df_property(
+			"items",
+			"cannot_add_rows",
 			frm.doc.subcontracting_inward_order &&
-			["Return Raw Material to Customer", "Subcontracting Return", "Subcontracting Delivery"].includes(
-				frm.doc.purpose
-			)
-		) {
-			frm.set_df_property("items", "cannot_add_rows", true);
-		}
+				[
+					"Return Raw Material to Customer",
+					"Subcontracting Return",
+					"Subcontracting Delivery",
+				].includes(frm.doc.purpose)
+		);
 	},
 
 	set_route_options_for_new_doc(frm) {

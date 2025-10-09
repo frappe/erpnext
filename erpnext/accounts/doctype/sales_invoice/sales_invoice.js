@@ -1102,10 +1102,8 @@ frappe.ui.form.on("Sales Invoice", {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
 
-		if (frm.doc.has_subcontracted) {
-			frm.set_df_property("update_stock", "read_only", 1);
-			frm.toggle_display("update_stock", 0);
-		}
+		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
+		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
 	},
 });
 

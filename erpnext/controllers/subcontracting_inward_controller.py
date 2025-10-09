@@ -356,17 +356,18 @@ class SubcontractingInwardController(StockController):
 						)
 			else:
 				for item in self.items:
-					delivered_qty, returned_qty = frappe.get_value(
-						"Subcontracting Inward Order Item",
-						item.scio_detail,
-						["delivered_qty", "returned_qty"],
-					)
-					if returned_qty > delivered_qty:
-						frappe.throw(
-							_(
-								"Row #{0}: Cannot cancel this Stock Entry as returned quantity cannot be greater than delivered quantity for Item {1} in the linked Subcontracting Inward Order"
-							).format(item.idx, bold(item.item_code))
+					if not item.is_scrap_item:
+						delivered_qty, returned_qty = frappe.get_value(
+							"Subcontracting Inward Order Item",
+							item.scio_detail,
+							["delivered_qty", "returned_qty"],
 						)
+						if returned_qty > delivered_qty:
+							frappe.throw(
+								_(
+									"Row #{0}: Cannot cancel this Stock Entry as returned quantity cannot be greater than delivered quantity for Item {1} in the linked Subcontracting Inward Order"
+								).format(item.idx, bold(item.item_code))
+							)
 
 	def update_customer_provided_item_cost(self):
 		if self.purpose == "Receive from Customer":
