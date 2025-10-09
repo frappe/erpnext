@@ -273,6 +273,7 @@ class JournalEntry(AccountsController):
 				)
 
 	def apply_tax_withholding(self):
+		from erpnext.accounts.report.general_ledger.general_ledger import get_account_type_map
 		from erpnext.setup.utils import get_exchange_rate
 
 		if not self.apply_tds or self.voucher_type not in ("Debit Note", "Credit Note"):
@@ -281,6 +282,7 @@ class JournalEntry(AccountsController):
 		party = None
 		party_type = None
 		party_row = None
+		party_account = None
 
 		for row in self.get("accounts"):
 			if row.party_type in ("Customer", "Supplier") and row.party:
@@ -290,6 +292,7 @@ class JournalEntry(AccountsController):
 				if not party:
 					party = row.party
 					party_type = row.party_type
+					party_account = row.account
 					party_row = row
 
 		if not party:
@@ -301,12 +304,14 @@ class JournalEntry(AccountsController):
 
 		precision = self.precision(dr_cr, party_row)
 
+		account_type_map = get_account_type_map(self.company)
+
 		# net total in company currency.
 		net_total = flt(
 			sum(
-				d.get(dr_cr) - d.get(rev_dr_cr)
+				d.get(rev_dr_cr) - d.get(dr_cr)
 				for d in self.get("accounts")
-				if d.party == party and d.party_type == party_type
+				if account_type_map.get(d.account) not in ("Tax", "Chargeable") and d.account != party_account
 			),
 			precision,
 		)
