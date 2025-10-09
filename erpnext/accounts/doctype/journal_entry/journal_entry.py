@@ -357,7 +357,6 @@ class JournalEntry(AccountsController):
 					"account": tax_acc,
 					"account_currency": acc_curr,
 					"exchange_rate": exch_rate,
-					"is_tax_withholding_account": 1,
 					"debit": 0,
 					"credit": 0,
 					"debit_in_account_currency": 0,
