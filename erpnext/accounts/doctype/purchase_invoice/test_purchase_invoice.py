@@ -2629,6 +2629,38 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
+	@IntegrationTestCase.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_pr_status_rate_adjusted_from_pi(self):
+		pr = make_purchase_receipt(qty=5, rate=100)
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+		pr.reload()
+
+		# Inital check
+		self.assertEqual(pr.status, "Completed")
+
+		pi.reload()
+		pi.cancel()
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.items[0].rate = 80
+		pi.submit()
+		pr.reload()
+
+		# Test 1 : Adjustment amount is negative
+		self.assertEqual(pr.status, "Completed")
+
+		pi.reload()
+		pi.cancel()
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.items[0].rate = 120
+		pi.submit()
+		pr.reload()
+
+		# Test 2 : Adjustment amount is positive
+		self.assertEqual(pr.status, "Completed")
+
 	def test_opening_invoice_rounding_adjustment_validation(self):
 		pi = make_purchase_invoice(do_not_save=1)
 		pi.items[0].rate = 99.98
