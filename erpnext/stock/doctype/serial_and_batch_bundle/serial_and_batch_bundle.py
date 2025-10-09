@@ -1918,15 +1918,9 @@ def get_serial_and_batch_ledger(**kwargs):
 def get_auto_data(**kwargs):
 	kwargs = frappe._dict(kwargs)
 	if cint(kwargs.has_serial_no):
-		if not kwargs.scio_detail:
-			return get_available_serial_nos(kwargs)
-		else:
-			return get_serial_nos_from_sre(kwargs)
+		return get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
 	elif cint(kwargs.has_batch_no):
-		if not kwargs.scio_detail:
-			return get_auto_batch_nos(kwargs)
-		else:
-			return get_batch_nos_from_sre(kwargs)
+		return get_batch_nos_from_sre(kwargs) if kwargs.scio_detail else get_auto_batch_nos(kwargs)
 
 
 def get_available_batches_qty(available_batches):

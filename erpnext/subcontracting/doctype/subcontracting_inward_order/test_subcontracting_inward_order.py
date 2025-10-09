@@ -168,6 +168,44 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 			sorted(list(get_batch_nos(rm_return.items[-1].serial_and_batch_bundle).keys())), sorted(batch_nos)
 		)
 
+	def test_subcontracting_delivery(self):
+		from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+
+		extra_serial, _ = get_serial_batch_list_from_item(
+			make_stock_entry(
+				item_code="FG Item with Serial",
+				qty=1,
+				to_warehouse="Stores - _TC",
+				purpose="Material Receipt",
+			).items[0]
+		)
+		so, scio = create_so_scio(service_item="Service Item 2", fg_item="FG Item with Serial")
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.submit()
+
+		serial_list, _ = get_serial_batch_list_from_item(
+			next(item for item in manufacture.items if item.is_finished_item)
+		)
+
+		scio.reload()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.items[0].use_serial_batch_fields = 1
+		delivery.save()
+		delivery_serial_list, _ = get_serial_batch_list_from_item(delivery.items[0])
+		self.assertEqual(sorted(serial_list), sorted(delivery_serial_list))
+
+		delivery_serial_list[-1] = extra_serial[0]
+		delivery.items[0].serial_no = "\n".join(delivery_serial_list)
+		self.assertRaises(frappe.ValidationError, delivery.submit)
+
 	def test_fg_item_fields(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
@@ -348,8 +386,8 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		self.assertEqual(reserved_qty, 7)
 
 
-def create_so_scio():
-	item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}]
+def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
+	item_list = [{"item_code": service_item, "qty": 5, "fg_item": fg_item, "fg_item_qty": 5}]
 	so = make_sales_order(is_subcontracted=1, item_list=item_list)
 	scio = make_subcontracting_inward_order(so.name)
 	scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"

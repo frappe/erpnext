@@ -52,7 +52,6 @@ class StockEntryType(Document):
 			"Manufacture",
 			"Repack",
 			"Send to Subcontractor",
-			"Receive from Customer",
 			"Disassemble",
 			"Receive from Customer",
 			"Return Raw Material to Customer",

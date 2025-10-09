@@ -618,13 +618,9 @@ frappe.ui.form.on("Stock Entry", {
 	show_bom_custom_button: function (frm) {
 		if (
 			frm.doc.docstatus === 0 &&
-			[
-				"Material Issue",
-				"Material Receipt",
-				"Material Transfer",
-				"Send to Subcontractor",
-				"Receive from Customer",
-			].includes(frm.doc.purpose) &&
+			["Material Issue", "Material Receipt", "Material Transfer", "Send to Subcontractor"].includes(
+				frm.doc.purpose
+			) &&
 			!frm.doc.subcontracting_inward_order
 		) {
 			frm.add_custom_button(
@@ -1080,10 +1076,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 				},
 			};
 		});
-
-		if (me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
-			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-		}
 
 		this.frm.fields_dict.items.grid.get_field("expense_account").get_query = function () {
 			if (erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {

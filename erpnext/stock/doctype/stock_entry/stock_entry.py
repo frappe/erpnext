@@ -100,16 +100,12 @@ class StockEntry(SubcontractingInwardController):
 		add_to_transit: DF.Check
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
 		address_display: DF.TextEditor | None
-		address_display_customer: DF.TextEditor | None
 		amended_from: DF.Link | None
 		apply_putaway_rule: DF.Check
 		asset_repair: DF.Link | None
 		bom_no: DF.Link | None
 		company: DF.Link
 		credit_note: DF.Link | None
-		customer: DF.Link | None
-		customer_address: DF.Link | None
-		customer_name: DF.Data | None
 		delivery_note_no: DF.Link | None
 		fg_completed_qty: DF.Float
 		from_bom: DF.Check

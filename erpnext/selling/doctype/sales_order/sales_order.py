@@ -1351,6 +1351,46 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 		child_filter = d.name in filtered_items if filtered_items else True
 		return child_filter
 
+	def add_self_rm(doclist):
+		parent = frappe.qb.DocType("Subcontracting Inward Order")
+		child = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+		query = (
+			frappe.qb.from_(parent)
+			.join(child)
+			.on(parent.name == child.parent)
+			.select(
+				child.required_qty,
+				child.consumed_qty,
+				child.billed_qty,
+				child.rm_item_code,
+				child.stock_uom,
+				child.name,
+			)
+			.where(
+				(parent.docstatus == 1)
+				& (parent.sales_order == source_name)
+				& (child.is_customer_provided_item == 0)
+			)
+		)
+		result = query.run(as_dict=True)
+
+		if result:
+			idx = len(doclist.items) + 1
+			for item in result:
+				if (qty := max(item.required_qty, item.consumed_qty) - item.billed_qty) > 0:
+					doclist.append(
+						"items",
+						{
+							"item_code": item.rm_item_code,
+							"qty": qty,
+							"uom": item.stock_uom,
+							"scio_detail": item.name,
+						},
+					)
+					doclist.process_item_selection(idx)
+					idx += 1
+		doclist.has_subcontracted = 1
+
 	doclist = get_mapped_doc(
 		"Sales Order",
 		source_name,
@@ -1390,44 +1430,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 	)
 
 	if frappe.get_value("Sales Order", source_name, "is_subcontracted"):
-		parent = frappe.qb.DocType("Subcontracting Inward Order")
-		child = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-		query = (
-			frappe.qb.from_(parent)
-			.join(child)
-			.on(parent.name == child.parent)
-			.select(
-				child.required_qty,
-				child.consumed_qty,
-				child.billed_qty,
-				child.rm_item_code,
-				child.stock_uom,
-				child.name,
-			)
-			.where(
-				(parent.docstatus == 1)
-				& (parent.sales_order == source_name)
-				& (child.is_customer_provided_item == 0)
-			)
-		)
-		result = query.run(as_dict=True)
-
-		if result:
-			idx = len(doclist.items) + 1
-			for item in result:
-				if (qty := max(item.required_qty, item.consumed_qty) - item.billed_qty) > 0:
-					doclist.append(
-						"items",
-						{
-							"item_code": item.rm_item_code,
-							"qty": qty,
-							"uom": item.stock_uom,
-							"scio_detail": item.name,
-						},
-					)
-					doclist.process_item_selection(idx)
-					idx += 1
-		doclist.has_subcontracted = 1
+		add_self_rm(doclist)
 
 	automatically_fetch_payment_terms = cint(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
@@ -2109,29 +2112,9 @@ def get_stock_reservation_status():
 
 
 @frappe.whitelist()
-def make_subcontracting_inward_order(source_name, target_doc=None, save=False, submit=False, notify=False):
+def make_subcontracting_inward_order(source_name, target_doc=None):
 	if not is_so_fully_subcontracted(source_name):
-		target_doc = get_mapped_subcontracting_inward_order(source_name, target_doc)
-
-		if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
-			target_doc.save()
-
-			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
-				try:
-					target_doc.submit()
-				except Exception as e:
-					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
-
-			if notify:
-				frappe.msgprint(
-					_("Subcontracting Inward Order {0} created.").format(
-						get_link_to_form(target_doc.doctype, target_doc.name)
-					),
-					indicator="green",
-					alert=True,
-				)
-
-		return target_doc
+		return get_mapped_subcontracting_inward_order(source_name, target_doc)
 	else:
 		frappe.throw(_("This Sales Order has been fully subcontracted."))
 
