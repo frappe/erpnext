@@ -372,9 +372,7 @@ class PaymentRequest(Document):
 				"mode_of_payment": self.mode_of_payment,
 				"reference_no": self.name,  # to prevent validation error
 				"reference_date": nowdate(),
-				"remarks": "Payment Entry against {} {} via Payment Request {}".format(
-					self.reference_doctype, self.reference_name, self.name
-				),
+				"remarks": f"Payment Entry against {self.reference_doctype} {self.reference_name} via Payment Request {self.name}",
 			}
 		)
 
