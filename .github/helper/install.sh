@@ -27,7 +27,7 @@ bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frapp
 mkdir ~/frappe-bench/sites/test_site
 
 if [ "$DB" == "mariadb" ];then
-    cp -r "${GITHUB_WORKSPACE}/.github/helper/site_config_mariadb.json" ~/frappe-bench/sites/test_site/site_config.json
+    cp -r "${GITHUB_WORKSPACE}/.github/helper/site_config_mariadb.json" ~/xc   r/sites/test_site/site_config.json
 else
     cp -r "${GITHUB_WORKSPACE}/.github/helper/site_config_postgres.json" ~/frappe-bench/sites/test_site/site_config.json
 fi

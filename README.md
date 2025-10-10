@@ -127,7 +127,7 @@ To setup the repository locally follow the steps mentioned below:
    bench --site erpnext.localhost install-app erpnext
    ```
 
-4. Open the URL `http://erpnext.localhost:8000/app` in your browser, you should see the app running
+4. Open the URL `http://erpnext.localhost:8080/app` in your browser, you should see the app running
 
 ## Learning and community
 
