@@ -108,6 +108,7 @@
   "transactions_annual_history",
   "purchase_expense_section",
   "purchase_expense_account",
+  "service_expense_account",
   "column_break_ereg",
   "purchase_expense_contra_account",
   "stock_tab",
@@ -869,6 +870,13 @@
    "fieldtype": "Link",
    "label": "Purchase Expense Contra Account",
    "options": "Account"
+  },
+  {
+   "description": "For service item",
+   "fieldname": "service_expense_account",
+   "fieldtype": "Link",
+   "label": "Service Expense Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -876,7 +884,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-10-01 17:34:10.971627",
+ "modified": "2025-10-10 15:12:37.941251",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

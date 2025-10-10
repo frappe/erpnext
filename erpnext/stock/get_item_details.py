@@ -502,6 +502,9 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 		}
 	)
 
+	if not item.is_stock_item and not out.expense_account:
+		out.expense_account = frappe.get_cached_value("Company", ctx.company, "service_expense_account")
+
 	default_supplier = get_default_supplier(ctx, item_defaults, item_group_defaults, brand_defaults)
 	if default_supplier:
 		out.supplier = default_supplier
