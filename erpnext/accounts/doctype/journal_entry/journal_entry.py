@@ -189,8 +189,8 @@ class JournalEntry(AccountsController):
 
 	def on_submit(self):
 		self.validate_cheque_info()
-		self.check_credit_limit()
 		self.make_gl_entries()
+		self.check_credit_limit()
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
@@ -542,8 +542,11 @@ class JournalEntry(AccountsController):
 	def validate_party(self):
 		for d in self.get("accounts"):
 			account_type = frappe.get_cached_value("Account", d.account, "account_type")
+
+			# skipping validation for payroll entry creation
+			skip_validation = frappe.flags.party_not_required_for_receivable_payable
 			if account_type in ["Receivable", "Payable"]:
-				if not (d.party_type and d.party):
+				if not (d.party_type and d.party) and not skip_validation:
 					frappe.throw(
 						_(
 							"Row {0}: Party Type and Party is required for Receivable / Payable account {1}"

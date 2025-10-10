@@ -15,7 +15,6 @@ from erpnext.accounts.utils import get_balance_on
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
-	automatically_fetch_payment_terms,
 	compare_payment_schedules,
 	create_dn_against_so,
 	make_sales_order,
@@ -1300,13 +1299,12 @@ class TestDeliveryNote(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 0)
 
+	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		automatically_fetch_payment_terms()
 
 		so = make_sales_order(uom="Nos", do_not_save=1)
 		create_payment_terms_template()
@@ -1326,8 +1324,6 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
-
-		automatically_fetch_payment_terms(enable=0)
 
 	def test_returned_qty_in_return_dn(self):
 		# SO ---> SI ---> DN
@@ -2599,6 +2595,129 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.load_from_db()
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.per_returned, 100)
+
+	def test_sales_return_for_product_bundle(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		rm_items = []
+		for item_code, properties in {
+			"_Packed Service Item": {"is_stock_item": 0},
+			"_Packed FG Item New 1": {
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SN-PACKED-1-.#####",
+			},
+			"_Packed FG Item New 2": {
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-PACKED-2-.#####",
+			},
+			"_Packed FG Item New 3": {
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-PACKED-3-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "SN-PACKED-3-.#####",
+			},
+		}.items():
+			if not frappe.db.exists("Item", item_code):
+				make_item(item_code, properties)
+
+			if item_code != "_Packed Service Item":
+				rm_items.append(item_code)
+
+				for rate in [100, 200]:
+					make_stock_entry(item=item_code, target="_Test Warehouse - _TC", qty=5, rate=rate)
+
+		make_product_bundle("_Packed Service Item", rm_items)
+		dn = create_delivery_note(
+			item_code="_Packed Service Item",
+			warehouse="_Test Warehouse - _TC",
+			qty=5,
+		)
+
+		dn.reload()
+
+		serial_batch_map = {}
+		for row in dn.packed_items:
+			self.assertTrue(row.serial_and_batch_bundle)
+			if row.item_code not in serial_batch_map:
+				serial_batch_map[row.item_code] = frappe._dict(
+					{
+						"serial_nos": [],
+						"batches": defaultdict(int),
+						"serial_no_valuation": defaultdict(float),
+						"batch_no_valuation": defaultdict(float),
+					}
+				)
+
+			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+			for entry in doc.entries:
+				if entry.serial_no:
+					serial_batch_map[row.item_code].serial_nos.append(entry.serial_no)
+					serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no] = entry.incoming_rate
+				if entry.batch_no:
+					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
+					serial_batch_map[row.item_code].batch_no_valuation[entry.batch_no] = entry.incoming_rate
+
+		dn1 = make_sales_return(dn.name)
+		dn1.items[0].qty = -2
+		dn1.submit()
+		dn1.reload()
+
+		for row in dn1.packed_items:
+			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+			for entry in doc.entries:
+				if entry.serial_no:
+					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertEqual(
+						entry.incoming_rate,
+						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
+					)
+					serial_batch_map[row.item_code].serial_nos.remove(entry.serial_no)
+					serial_batch_map[row.item_code].serial_no_valuation.pop(entry.serial_no)
+
+				elif entry.batch_no:
+					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
+					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+					self.assertEqual(entry.qty, 2.0)
+					self.assertEqual(
+						entry.incoming_rate,
+						serial_batch_map[row.item_code].batch_no_valuation[entry.batch_no],
+					)
+
+		dn2 = make_sales_return(dn.name)
+		dn2.items[0].qty = -3
+		dn2.submit()
+		dn2.reload()
+
+		for row in dn2.packed_items:
+			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+			for entry in doc.entries:
+				if entry.serial_no:
+					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertEqual(
+						entry.incoming_rate,
+						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
+					)
+					serial_batch_map[row.item_code].serial_nos.remove(entry.serial_no)
+					serial_batch_map[row.item_code].serial_no_valuation.pop(entry.serial_no)
+
+				elif entry.batch_no:
+					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
+					self.assertEqual(serial_batch_map[row.item_code].batches[entry.batch_no], 0.0)
+
+					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+
+					self.assertEqual(entry.qty, 3.0)
+					self.assertEqual(
+						entry.incoming_rate,
+						serial_batch_map[row.item_code].batch_no_valuation[entry.batch_no],
+					)
 
 
 def create_delivery_note(**args):

@@ -171,7 +171,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.add_column(_("Difference"), fieldname="diff")
 
 		self.setup_ageing_columns()
-		self.add_column(label="Total Amount Due", fieldname="total_due")
+		self.add_column(label=_("Total Amount Due"), fieldname="total_due")
 
 		if self.filters.show_future_payments:
 			self.add_column(label=_("Future Payment Amount"), fieldname="future_amount")

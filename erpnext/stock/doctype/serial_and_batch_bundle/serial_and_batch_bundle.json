@@ -108,7 +108,8 @@
    "in_list_view": 1,
    "label": "Voucher Type",
    "options": "DocType",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "voucher_no",
@@ -195,8 +196,7 @@
    "fieldtype": "Select",
    "label": "Type of Transaction",
    "options": "\nInward\nOutward\nMaintenance\nAsset Repair",
-   "reqd": 1,
-   "search_index": 1
+   "reqd": 1
   },
   {
    "default": "0",
@@ -256,7 +256,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-02-17 18:22:36.056205",
+ "modified": "2025-09-15 14:37:26.441742",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

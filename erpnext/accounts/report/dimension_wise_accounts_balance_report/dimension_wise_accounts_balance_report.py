@@ -12,6 +12,7 @@ from erpnext.accounts.report.financial_statements import (
 	filter_out_zero_value_rows,
 )
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.utils import get_zero_cutoff
 
 
 def execute(filters=None):
@@ -154,7 +155,7 @@ def prepare_data(accounts, filters, company_currency, dimension_list):
 		for dimension in dimension_list:
 			row[frappe.scrub(dimension)] = flt(d.get(frappe.scrub(dimension), 0.0), 3)
 
-			if abs(row[frappe.scrub(dimension)]) >= 0.005:
+			if abs(row[frappe.scrub(dimension)]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
 				total += flt(d.get(frappe.scrub(dimension), 0.0), 3)
