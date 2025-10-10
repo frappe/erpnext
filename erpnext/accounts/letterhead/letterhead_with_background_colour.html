@@ -22,13 +22,13 @@
 		vertical-align: top;
 	}
 
-	.logo {
+	.letter-head .logo {
 		width: 90px;
 		display: block;
 		margin-bottom: 10px;
 	}
 
-	.logo img {
+	.letter-head .logo img {
 		border-radius: 15px;
 	}
 
@@ -82,12 +82,12 @@
 				{% endif %}
 				<div class="company-name">{{ doc.company }}</div>
 				<div class="company-address">
-					{% if doc.company_address %} {% set company_address_display = frappe.get_doc("Address",
-					doc.company_address) %} {{ company_address_display.address_line1 or "" }}<br /> {% if
-					company_address_display.address_line2 %}{{ company_address_display.address_line2 }}<br />{%
-					endif %} {{ company_address_display.city or "" }}, {{ company_address_display.state or ""
-					}} {{ company_address_display.pincode or "" }}, {{ company_address_display.country or ""
-					}}<br />
+					{% if doc.company_address %}
+						{% set company_address = frappe.db.get_value("Address", doc.company_address, ["address_line1", "address_line2", "city", "state", "pincode", "country"], as_dict=True) %}
+						{{ company_address.address_line1 or "" }}<br />
+						{% if company_address.address_line2 %} {{ company_address.address_line2 }}<br /> {% endif %}
+						{{ company_address.city or "" }}, {{ company_address.state or "" }}
+						{{ company_address.pincode or "" }}, {{ company_address.country or ""}}<br />
 					{% endif %}
 				</div>
 			</td>
@@ -99,9 +99,8 @@
 					<br />
 				</div>
 				<div style="text-align: left; float: right" class="other-details">
-					{% set website = frappe.db.get_value("Company", doc.company, "website") %} {% set email =
-					frappe.db.get_value("Company", doc.company, "email") %} {% set phone_no =
-					frappe.db.get_value("Company", doc.company, "phone_no") %} {% if website %}
+					{% set company_details = frappe.db.get_value("Company", doc.company, ["website", "email", "phone_no"], as_dict=True) %}
+					{% set website = company_details.website %} {% set email = company_details.email %} {% set phone_no = company_details.phone_no %} {% if website %}
 					<div>
 						<span class="contact-title">{{ _("Website:") }}</span
 						><span class="contact-value">{{ website }}</span>

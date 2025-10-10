@@ -69,17 +69,19 @@
                     {{ doc.company }}
                 </div>
                 {% if doc.company_address %}
-                    {% set company_address_display = frappe.get_doc("Address", doc.company_address) %}
-                    {{ company_address_display.address_line1 or "" }}<br>
-                    {% if company_address_display.address_line2 %}{{ company_address_display.address_line2 }}<br>{% endif %}
-                    {{ company_address_display.city or "" }}, {{ company_address_display.state or "" }} {{ company_address_display.pincode or "" }}, {{ company_address_display.country or "" }}<br>
+                    {% set company_address = frappe.db.get_value("Address", doc.company_address, ["address_line1", "address_line2", "city", "state", "pincode", "country"], as_dict=True) %}
+
+                    {{ company_address.get("address_line1") or "" }}<br>
+                    {% if company_address.get("address_line2") %}{{ company_address.get("address_line2") }}<br>{% endif %}
+                    {{ company_address.get("city") or "" }}, {{ company_address.get("state") or "" }} {{ company_address.get("pincode") or "" }}, {{ company_address.get("country") or "" }}<br>
                 {% endif %}
             </td>
 
             <td class="invoice-info-cell">
-                {% set website = frappe.db.get_value("Company", doc.company, "website") %}
-                {% set email = frappe.db.get_value("Company", doc.company, "email") %}
-                {% set phone_no = frappe.db.get_value("Company", doc.company, "phone_no") %}
+                {% set company_details = frappe.db.get_value("Company", doc.company, ["website", "email", "phone_no"], as_dict=True) %}
+                {% set website = company_details.website %}
+                {% set email = company_details.email %}
+                {% set phone_no = company_details.phone_no %}
 
                 <div class="invoice-info">
                     <span class="invoice-label">{{ _("Invoice:") }}</span>

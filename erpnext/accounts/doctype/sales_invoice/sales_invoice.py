@@ -2857,10 +2857,10 @@ def save_company_master_details(name, company, details):
 		validate_email_address(details.email, throw=True)
 
 	company_fields = ["company_logo", "website", "phone_no", "email"]
-	updated_fields = {field: details.get(field) for field in company_fields if details.get(field)}
+	company_fields_to_update = {field: details.get(field) for field in company_fields if details.get(field)}
 
-	if updated_fields:
-		frappe.db.set_value("Company", company, updated_fields)
+	if company_fields_to_update:
+		frappe.db.set_value("Company", company, company_fields_to_update)
 
 	company_address = details.get("company_address")
 	if details.get("address_line1"):
@@ -2883,8 +2883,8 @@ def save_company_master_details(name, company, details):
 		company_address = address_doc.name
 
 	if company_address:
-		current_display = frappe.db.get_value("Sales Invoice", name, "company_address_display")
-		if not current_display or details.get("address_line1"):
+		company_address_display = frappe.db.get_value("Sales Invoice", name, "company_address_display")
+		if not company_address_display or details.get("address_line1"):
 			frappe.db.set_value(
 				"Sales Invoice",
 				name,
