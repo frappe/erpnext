@@ -1,5 +1,6 @@
 import frappe
 from frappe import _, bold
+from frappe.query_builder import Case
 from frappe.utils import flt
 
 from erpnext.controllers.stock_controller import StockController
@@ -300,7 +301,6 @@ class SubcontractingInwardController(StockController):
 						"Selling Settings", "allow_delivery_of_overproduced_qty"
 					)
 
-					from frappe.query_builder import Case
 					from pypika.terms import ValueWrapper
 
 					table = frappe.qb.DocType("Subcontracting Inward Order Item")
@@ -573,19 +573,12 @@ class SubcontractingInwardController(StockController):
 		"""Update received items in Subcontracting Inward Order"""
 		if scio := self.get("subcontracting_inward_order"):
 			if self.purpose == "Receive from Customer":
+				data = frappe._dict()
 				for item in self.items:
 					if item.scio_detail:
-						scio_rm = frappe.get_doc(
-							"Subcontracting Inward Order Received Item", item.scio_detail
+						data[item.scio_detail] = (
+							item.transfer_qty if self._action == "submit" else -item.transfer_qty
 						)
-						scio_rm.db_set(
-							"received_qty",
-							scio_rm.received_qty
-							+ (item.transfer_qty if self._action == "submit" else -item.transfer_qty),
-						)
-
-						if not scio_rm.required_qty and not scio_rm.received_qty:
-							frappe.delete_doc("Subcontracting Inward Order Received Item", scio_rm.name)
 					else:
 						scio_rm = frappe.new_doc(
 							"Subcontracting Inward Order Received Item",
@@ -605,98 +598,159 @@ class SubcontractingInwardController(StockController):
 							returned_qty=0,
 						)
 						scio_rm.insert()
-						scio_rm.save()
 						item.db_set("scio_detail", scio_rm.name)
+
+				if data:
+					result = frappe.get_all(
+						"Subcontracting Inward Order Received Item",
+						filters={"parent": scio, "name": ["in", list(data.keys())], "docstatus": 1},
+						fields=["name", "required_qty", "received_qty"],
+					)
+
+					deleted_docs = []
+					table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+					case_expr = Case()
+					for d in result:
+						d.received_qty += data[d.name]
+
+						if not d.required_qty and not d.received_qty:
+							deleted_docs.append(d.name)
+							frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
+						else:
+							case_expr = case_expr.when(table.name == d.name, d.received_qty)
+
+					if len(list(set(data.keys()) - set(deleted_docs))) > 0:
+						frappe.qb.update(table).set(table.received_qty, case_expr).where(
+							(table.name.isin(list(set(data.keys()) - set(deleted_docs))))
+							& (table.docstatus == 1)
+						).run()
 			elif self.purpose == "Manufacture":
-				scio = frappe.get_doc("Subcontracting Inward Order", scio)
-				for item in [item for item in self.items if item.s_warehouse]:
-					scio_rm = next(
-						(rm for rm in scio.received_items if item.item_code == rm.rm_item_code), None
-					)
-					if scio_rm:
-						qty = scio_rm.consumed_qty + (
-							item.transfer_qty if self._action == "submit" else -item.transfer_qty
-						)
-						if qty or scio_rm.is_customer_provided_item:
-							scio_rm.db_set("consumed_qty", qty)
-						elif not scio_rm.required_qty:
-							frappe.delete_doc("Subcontracting Inward Order Received Item", scio_rm.name)
-					else:
-						doc = frappe.new_doc(
+				items = [item for item in self.items if item.s_warehouse]
+				item_codes = {
+					item.item_code: item.transfer_qty if self._action == "submit" else -item.transfer_qty
+					for item in items
+				}
+				data = frappe.get_all(
+					"Subcontracting Inward Order Received Item",
+					{"parent": scio, "docstatus": 1, "rm_item_code": ["in", list(item_codes.keys())]},
+					["name", "rm_item_code", "is_customer_provided_item", "consumed_qty", "required_qty"],
+				)
+				if data:
+					deleted_docs = []
+					table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+					case_expr = Case()
+					for d in data:
+						qty = d.consumed_qty + item_codes[d.rm_item_code]
+						if qty or d.is_customer_provided_item:
+							case_expr = case_expr.when(table.name == d.name, qty)
+						else:
+							deleted_docs.append(d.name)
+							frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
+
+					if len(list(set([d.name for d in data]) - set(deleted_docs))) > 0:
+						frappe.qb.update(table).set(table.consumed_qty, case_expr).where(
+							(table.name.isin(list(set([d.name for d in data]) - set(deleted_docs))))
+							& (table.docstatus == 1)
+						).run()
+
+					for extra_item in [
+						item for item in items if item.item_code not in [d.rm_item_code for d in data]
+					]:
+						frappe.new_doc(
 							"Subcontracting Inward Order Received Item",
-							parent_doc=scio,
+							parent=scio,
+							parenttype="Subcontracting Inward Order",
 							parentfield="received_items",
-						)
-						doc.idx = len(scio.received_items) + 1
-						doc.main_item_code = next(fg for fg in self.items if fg.is_finished_item).item_code
-						doc.rm_item_code = item.item_code
-						doc.stock_uom = item.stock_uom
-						doc.reference_name = frappe.get_value(
-							"Work Order", self.work_order, "subcontracting_inward_order_item"
-						)
-						doc.required_qty = 0
-						doc.consumed_qty = item.transfer_qty
-						doc.is_additional_item = True
-						doc.insert()
-						doc.save()
+							idx=frappe.db.count(
+								"Subcontracting Inward Order Received Item", {"parent": scio, "docstatus": 1}
+							)
+							+ 1,
+							main_item_code=next(fg for fg in self.items if fg.is_finished_item).item_code,
+							rm_item_code=extra_item.item_code,
+							stock_uom=extra_item.stock_uom,
+							reference_name=frappe.get_value(
+								"Work Order", self.work_order, "subcontracting_inward_order_item"
+							),
+							required_qty=0,
+							consumed_qty=extra_item.transfer_qty,
+							is_additional_item=True,
+						).insert()
 			elif self.purpose == "Return Raw Material to Customer":
-				for item in self.items:
-					scio_rm = frappe.get_doc("Subcontracting Inward Order Received Item", item.scio_detail)
-					scio_rm.db_set(
-						"returned_qty",
-						scio_rm.returned_qty
-						+ (item.transfer_qty if self._action == "submit" else -item.transfer_qty),
-					)
+				scio_rm_names = {
+					item.scio_detail: item.transfer_qty if self._action == "submit" else -item.transfer_qty
+					for item in self.items
+					if item.scio_detail
+				}
+				case_expr = Case()
+				table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+				for scio_rm_name, qty in scio_rm_names.items():
+					case_expr = case_expr.when(table.name == scio_rm_name, table.returned_qty + qty)
+
+				frappe.qb.update(table).set(table.returned_qty, case_expr).where(
+					(table.name.isin(list(scio_rm_names.keys()))) & (table.docstatus == 1)
+				).run()
 
 	def update_inward_order_scrap_items(self):
 		if (scio := self.subcontracting_inward_order) and self.purpose == "Manufacture":
-			scrap_items = [item for item in self.items if item.is_scrap_item]
+			scrap_items_list = [item for item in self.items if item.is_scrap_item]
+			scrap_items = frappe._dict(
+				{
+					item.item_code: item.transfer_qty if self._action == "submit" else -item.transfer_qty
+					for item in scrap_items_list
+				}
+			)
 			if scrap_items:
-				scio_doc = frappe.get_doc("Subcontracting Inward Order", scio)
-				for scrap_item in scrap_items:
-					if scrap_item_name := frappe.get_value(
-						"Subcontracting Inward Order Scrap Item",
-						filters={
-							"item_code": scrap_item.item_code,
-							"reference_name": frappe.get_value(
-								"Work Order", self.work_order, "subcontracting_inward_order_item"
-							),
-						},
-						fieldname="name",
-					):
-						scrap_item_doc = frappe.get_doc(
-							"Subcontracting Inward Order Scrap Item", scrap_item_name
-						)
-						if (
-							self._action == "cancel"
-							and scrap_item_doc.produced_qty - scrap_item.transfer_qty == 0
-						):
-							frappe.delete_doc("Subcontracting Inward Order Scrap Item", scrap_item_doc.name)
-						else:
-							scrap_item_doc.db_set(
-								"produced_qty",
-								scrap_item_doc.produced_qty + scrap_item.transfer_qty
-								if self._action == "submit"
-								else -scrap_item.transfer_qty,
-							)
-					else:
-						scrap_item_doc = frappe.new_doc(
-							"Subcontracting Inward Order Scrap Item",
-							parent_doc=scio_doc,
-							parentfield="scrap_items",
-						)
-						scrap_item_doc.item_code = scrap_item.item_code
-						scrap_item_doc.fg_item_code = frappe.get_value(
-							"Work Order", self.work_order, "production_item"
-						)
-						scrap_item_doc.stock_uom = scrap_item.stock_uom
-						scrap_item_doc.warehouse = scrap_item.t_warehouse
-						scrap_item_doc.produced_qty = scrap_item.transfer_qty
-						scrap_item_doc.delivered_qty = 0
-						scrap_item_doc.reference_name = frappe.get_value(
+				result = frappe.get_all(
+					"Subcontracting Inward Order Scrap Item",
+					filters={
+						"item_code": ["in", list(scrap_items.keys())],
+						"reference_name": frappe.get_value(
 							"Work Order", self.work_order, "subcontracting_inward_order_item"
+						),
+						"docstatus": 1,
+					},
+					fields=["name", "item_code", "produced_qty"],
+				)
+				if result:
+					scrap_item_dict = frappe._dict({d.item_code: d.produced_qty for d in result})
+					deleted_docs = []
+					case_expr = Case()
+					table = frappe.qb.DocType("Subcontracting Inward Order Scrap Item")
+					for name, produced_qty in scrap_item_dict.items():
+						if self._action == "cancel" and produced_qty - abs(scrap_items[name]) == 0:
+							deleted_docs.append(name)
+							frappe.delete_doc("Subcontracting Inward Order Scrap Item", name)
+						else:
+							case_expr = case_expr.when(table.name == name, produced_qty + scrap_items[name])
+
+					if len(list(set(scrap_item_dict.keys()) - set(deleted_docs))) > 0:
+						frappe.qb.update(table).set(table.produced_qty, case_expr).where(
+							(table.name.isin(list(set(scrap_item_dict.keys()) - set(deleted_docs))))
+							& (table.docstatus == 1)
+						).run()
+
+				for scrap_item in [
+					item for item in scrap_items_list if item.item_code not in [d.item_code for d in result]
+				]:
+					frappe.new_doc(
+						"Subcontracting Inward Order Scrap Item",
+						parent=scio,
+						parenttype="Subcontracting Inward Order",
+						parentfield="scrap_items",
+						idx=frappe.db.count(
+							"Subcontracting Inward Order Scrap Item", {"parent": scio, "docstatus": 1}
 						)
-						scrap_item_doc.insert()
+						+ 1,
+						item_code=scrap_item.item_code,
+						fg_item_code=frappe.get_value("Work Order", self.work_order, "production_item"),
+						stock_uom=scrap_item.stock_uom,
+						warehouse=scrap_item.t_warehouse,
+						produced_qty=scrap_item.transfer_qty,
+						delivered_qty=0,
+						reference_name=frappe.get_value(
+							"Work Order", self.work_order, "subcontracting_inward_order_item"
+						),
+					).insert()
 
 	def cancel_stock_reservation_entries_for_inward(self):
 		if self.purpose == "Receive from Customer":

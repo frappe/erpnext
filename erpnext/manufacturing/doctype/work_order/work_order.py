@@ -724,40 +724,55 @@ class WorkOrder(Document):
 			scio_rm_item_names = frappe.db.get_all(
 				"Subcontracting Inward Order Received Item",
 				filters={"reference_name": scio_item_name, "docstatus": 1, "is_customer_provided_item": 1},
-				fields=["name"],
+				pluck="name",
 			)
 			self.qty_change = frappe._dict()
-			for scio_rm_item_name in scio_rm_item_names:
-				rm_item_code, bom_qty, work_order_qty, received_qty = frappe.get_value(
-					"Subcontracting Inward Order Received Item",
-					scio_rm_item_name,
-					["rm_item_code", "required_qty", "work_order_qty", "received_qty"],
-				)
+
+			data = frappe.get_all(
+				"Subcontracting Inward Order Received Item",
+				{"name": ["in", scio_rm_item_names]},
+				["rm_item_code", "required_qty as bom_qty", "work_order_qty", "received_qty"],
+			)
+			for d in data:
 				wo_item = next(
-					wo_item for wo_item in self.get("required_items") if wo_item.item_code == rm_item_code
+					wo_item for wo_item in self.get("required_items") if wo_item.item_code == d.rm_item_code
 				)
 
 				if (
-					work_order_qty + (wo_item.required_qty if self._action == "submit" else 0)
-				) == bom_qty and received_qty > bom_qty:
-					self.qty_change[wo_item.name] = received_qty - bom_qty
+					d.work_order_qty + (wo_item.required_qty if self._action == "submit" else 0)
+				) == d.bom_qty and d.received_qty > d.bom_qty:
+					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
 
 	def update_subcontracting_inward_order_received_items(self):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
-			scio_rm_item_names = frappe.db.get_all(
+			scio_rm_data = frappe.get_all(
 				"Subcontracting Inward Order Received Item",
 				filters={"reference_name": scio_item_name, "docstatus": 1},
-				pluck="name",
+				fields=["name", "rm_item_code"],
 			)
-			for scio_rm_item_name in scio_rm_item_names:
-				scio_rm_item = frappe.get_doc("Subcontracting Inward Order Received Item", scio_rm_item_name)
-				required_qty = next(
-					wo_item.required_qty
-					for wo_item in self.get("required_items")
-					if wo_item.item_code == scio_rm_item.rm_item_code
+
+			required_qty = {
+				wo_item.item_code: wo_item.required_qty
+				for wo_item in self.get("required_items")
+				if wo_item.item_code in [d.rm_item_code for d in scio_rm_data]
+			}
+
+			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+			case_expr = Case()
+			for item in scio_rm_data:
+				case_expr = case_expr.when(
+					table.rm_item_code == item.rm_item_code,
+					table.work_order_qty
+					+ (
+						required_qty[item.rm_item_code]
+						if self._action == "submit"
+						else -required_qty[item.rm_item_code]
+					),
 				)
-				scio_rm_item.work_order_qty += required_qty if self._action == "submit" else -required_qty
-				scio_rm_item.save()
+
+			frappe.qb.update(table).set(table.work_order_qty, case_expr).where(
+				(table.name.isin([d.name for d in scio_rm_data])) & (table.docstatus == 1)
+			).run()
 
 	def create_serial_no_batch_no(self):
 		if not (self.has_serial_no or self.has_batch_no):

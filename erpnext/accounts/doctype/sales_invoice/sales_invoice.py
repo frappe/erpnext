@@ -8,6 +8,7 @@ from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder import Case
 from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 from frappe.utils.data import comma_and
 
@@ -856,10 +857,14 @@ class SalesInvoice(SellingController):
 				if item.scio_detail
 			}
 		)
-		for name, qty in data.items():
+
+		if data:
 			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-			frappe.qb.update(table).set(table.billed_qty, table.billed_qty + qty).where(
-				(table.name == name) & (table.docstatus == 1)
+			case_expr = Case()
+			for name, qty in data.items():
+				case_expr = case_expr.when(table.name == name, table.billed_qty + qty)
+			frappe.qb.update(table).set(table.billed_qty, case_expr).where(
+				(table.name.isin(list(data.keys()))) & (table.docstatus == 1)
 			).run()
 
 	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
@@ -1266,7 +1271,6 @@ class SalesInvoice(SellingController):
 				frappe.get_all(
 					"Sales Order",
 					{"name": ["in", [item.sales_order for item in self.items if item.sales_order]]},
-					["is_subcontracted"],
 					pluck="is_subcontracted",
 				)
 			):

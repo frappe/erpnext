@@ -594,7 +594,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!parent.is_subcontracted",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
    "label": "Valuation Rate",
@@ -605,7 +604,6 @@
    "report_hide": 1
   },
   {
-   "depends_on": "eval:!parent.is_subcontracted",
    "fieldname": "gross_profit",
    "fieldtype": "Currency",
    "label": "Gross Profit",
@@ -772,7 +770,6 @@
    "report_hide": 1
   },
   {
-   "depends_on": "eval:!parent.is_subcontracted",
    "fieldname": "planning_section",
    "fieldtype": "Section Break",
    "label": "Planning"

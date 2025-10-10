@@ -109,7 +109,6 @@
   "column_break_vwhb",
   "pos_invoice",
   "pos_invoice_item",
-  "subcontracting_inward_section",
   "scio_detail",
   "internal_transfer_section",
   "purchase_order",
@@ -980,12 +979,6 @@
    "options": "POS Invoice",
    "print_hide": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "subcontracting_inward_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Subcontracting Inward"
   },
   {
    "fieldname": "scio_detail",

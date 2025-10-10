@@ -1026,7 +1026,9 @@ class SerialBatchCreation:
 		for d in remove_list:
 			package.remove(d)
 
-	def make_serial_and_batch_bundle(self, serial_nos=None, batch_nos=None):
+	def make_serial_and_batch_bundle(
+		self, serial_nos=None, batch_nos=None
+	):  # passing None instead of [] due to ruff linter error B006
 		serial_nos = serial_nos or []
 		batch_nos = batch_nos or []
 
@@ -1089,7 +1091,9 @@ class SerialBatchCreation:
 				self.batch_no = batches[0]
 				self.serial_nos = self.get_auto_created_serial_nos()
 
-	def update_serial_and_batch_entries(self, serial_nos=None, batch_nos=None):
+	def update_serial_and_batch_entries(
+		self, serial_nos=None, batch_nos=None
+	):  # passing None instead of [] due to ruff linter error B006
 		serial_nos = serial_nos or []
 		batch_nos = batch_nos or []
 

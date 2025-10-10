@@ -1036,8 +1036,8 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:!parent.is_subcontracted",
-   "depends_on": "eval:!parent.is_subcontracted",
+   "collapsible_depends_on": "eval:!doc.is_subcontracted && doc.packed_items",
+   "depends_on": "eval:!doc.is_subcontracted && doc.packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,

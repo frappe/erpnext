@@ -237,7 +237,7 @@
    "description": "Allows users to submit Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts.",
    "fieldname": "allow_zero_qty_in_quotation",
    "fieldtype": "Check",
-   "label": "Allow 0 Qty in Quotation (Unit Price Items)"
+   "label": "Allow Quotation with Zero Quantity"
   },
   {
    "fieldname": "section_break_zwh6",

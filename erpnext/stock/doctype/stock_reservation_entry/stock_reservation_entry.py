@@ -1449,7 +1449,7 @@ class StockReservation:
 				sre.voucher_detail_no.isin(
 					frappe.get_all(
 						"Subcontracting Inward Order Received Item",
-						filters={"reference_name": against_fg_item},
+						{"reference_name": against_fg_item, "docstatus": 1},
 						pluck="name",
 					)
 				)
