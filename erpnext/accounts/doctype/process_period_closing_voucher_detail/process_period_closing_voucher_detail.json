@@ -22,7 +22,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Queued\nRunning\nCompleted"
+   "options": "Queued\nRunning\nPaused\nCompleted"
   },
   {
    "fieldname": "closing_balance",
@@ -35,7 +35,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-08 10:47:50.050341",
+ "modified": "2025-10-09 16:46:37.778199",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher Detail",

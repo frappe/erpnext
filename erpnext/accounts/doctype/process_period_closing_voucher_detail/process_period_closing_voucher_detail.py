@@ -19,7 +19,7 @@ class ProcessPeriodClosingVoucherDetail(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		processing_date: DF.Date | None
-		status: DF.Literal["Queued", "Running", "Completed"]
+		status: DF.Literal["Queued", "Running", "Paused", "Completed"]
 	# end: auto-generated types
 
 	pass
