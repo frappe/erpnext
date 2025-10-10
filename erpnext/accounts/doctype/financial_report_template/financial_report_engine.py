@@ -110,9 +110,9 @@ class AccountData:
 
 	def reverse_values(self) -> None:
 		for period_value in self.period_values.values():
-			period_value.opening = -period_value.opening
-			period_value.closing = -period_value.closing
-			period_value.movement = -period_value.movement
+			period_value.opening = -period_value.opening if period_value.opening else 0.0
+			period_value.closing = -period_value.closing if period_value.closing else 0.0
+			period_value.movement = -period_value.movement if period_value.movement else 0.0
 
 
 @dataclass
@@ -211,6 +211,7 @@ class FinancialReportEngine:
 			self.collect_financial_data(context)
 			self.process_calculations(context)
 			self.format_report_data(context)
+			self.apply_view_transformation(context)
 
 			# Chart
 			self.generate_chart_data(context)
@@ -230,7 +231,10 @@ class FinancialReportEngine:
 		if filters.get("presentation_currency"):
 			frappe.msgprint(_("Currency filters are currently unsupported in Custom Financial Report."))
 
-		if (view := filters.get("selected_view")) and view not in ("Report",):
+		# Margin view is dependent on first row being an income account. Hence not supported.
+		# Way to implement this would be using calculated rows with formulas.
+		supported_views = ("Report", "Growth")
+		if (view := filters.get("selected_view")) and view not in supported_views:
 			frappe.msgprint(_("{0} view is currently unsupported in Custom Financial Report.").format(view))
 
 	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
@@ -295,6 +299,15 @@ class FinancialReportEngine:
 
 		context.raw_data["formatted_data"] = formatted_data
 		context.raw_data["columns"] = columns
+
+		return context
+
+	def apply_view_transformation(self, context: ReportContext) -> ReportContext:
+		if context.filters.get("selected_view") == "Growth":
+			transformer = GrowthViewTransformer(context)
+			transformer.transform()
+
+		# Default is "Report" view - no transformation needed
 
 		return context
 
@@ -455,7 +468,7 @@ class FinancialQueryBuilder:
 		Steps: get opening balances → fetch GL entries → calculate running totals
 
 		Returns:
-		                dict: {account: AccountData}
+		    dict: {account: AccountData}
 		"""
 		balances_data = self._get_opening_balances(accounts)
 		gl_data = self._get_gl_movements(accounts)
@@ -465,6 +478,9 @@ class FinancialQueryBuilder:
 		return balances_data
 
 	def _get_opening_balances(self, accounts: list[str]) -> dict[str, dict[str, dict[str, float]]]:
+		"""
+		Return opening balances for *all accounts* defaulting to zero.
+		"""
 		if frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance"):
 			return self._get_opening_balances_from_gl(accounts)
 
@@ -485,12 +501,13 @@ class FinancialQueryBuilder:
 			closing_voucher = last_closing_voucher[0]
 			closing_data = self._get_closing_balances(accounts, closing_voucher.name)
 
-			if closing_data:
+			if sum(closing_data.values()) != 0.0:
 				return self._rebase_closing_balances(closing_data, closing_voucher.period_end_date)
 
 		return self._get_opening_balances_from_gl(accounts)
 
 	def _get_closing_balances(self, account_names: list[str], closing_voucher: str) -> dict[str, float]:
+		closing_balances = {account: 0.0 for account in account_names}
 		acb_table = frappe.qb.DocType("Account Closing Balance")
 
 		query = (
@@ -507,7 +524,10 @@ class FinancialQueryBuilder:
 		query = self._apply_standard_filters(query, acb_table)
 		results = self._execute_with_permissions(query, "Account Closing Balance")
 
-		return {row["account"]: row["balance"] for row in results}
+		for row in results:
+			closing_balances[row["account"]] = row["balance"]
+
+		return closing_balances
 
 	def _rebase_closing_balances(
 		self, closing_data: dict[str, float], closing_date: str
@@ -616,6 +636,13 @@ class FinancialQueryBuilder:
 				account_data.add_period(PeriodValue(period_key, current_balance, closing_balance, movement))
 
 				current_balance = closing_balance
+
+		# Accounts with no movements
+		for account_data in balances_data.values():
+			for period in self.periods:
+				period_key = period["key"]
+				if period_key not in account_data.period_values:
+					account_data.add_period(PeriodValue(period_key, 0.0, 0.0, 0.0))
 
 	def _handle_balance_accumulation(self, balances_data):
 		for account_data in balances_data.values():
@@ -1618,3 +1645,41 @@ class ChartDataGenerator:
 			"options": "currency",
 			"currency": self.currency,
 		}
+
+
+class GrowthViewTransformer:
+	def __init__(self, context: ReportContext):
+		self.context = context
+		self.formatted_rows = context.raw_data.get("formatted_data", [])
+		self.period_list = context.period_list
+
+	def transform(self) -> None:
+		for row_data in self.formatted_rows:
+			if row_data.get("is_blank_line"):
+				continue
+
+			transformed_values = {}
+			for i in range(len(self.period_list)):
+				current_period = self.period_list[i]["key"]
+
+				current_value = row_data[current_period]
+				previous_value = row_data[self.period_list[i - 1]["key"]] if i != 0 else 0
+
+				if i == 0:
+					transformed_values[current_period] = current_value
+				else:
+					growth_percent = self._calculate_growth(previous_value, current_value)
+					transformed_values[current_period] = growth_percent
+
+			row_data.update(transformed_values)
+
+	def _calculate_growth(self, previous_value: float, current_value: float) -> float | None:
+		if current_value is None:
+			return None
+
+		if previous_value == 0 and current_value > 0:
+			return 100.0
+		elif previous_value == 0 and current_value <= 0:
+			return 0.0
+		else:
+			return flt(((current_value - previous_value) / abs(previous_value)) * 100, 2)

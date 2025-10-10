@@ -130,6 +130,7 @@ erpnext.financial_statements = {
 		if (selectedView === "Growth") {
 			const growthPercent = data[column.fieldname];
 			if (growthPercent == undefined) return "NA";
+			if (growthPercent === "") return "";
 
 			if (column.fieldname === "total") {
 				value = $(`<span>${growthPercent}</span>`);
