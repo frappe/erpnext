@@ -72,7 +72,7 @@ ignore = [
     "W191", # indentation contains tabs
     "RUF001", # string contains ambiguous unicode character
 ]
-typing-modules = ["frappe.types.DF"]
+typing-moydules = ["frappe.types.DF"]
 
 [tool.ruff.format]
 quote-style = "double"

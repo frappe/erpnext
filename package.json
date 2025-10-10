@@ -11,6 +11,9 @@
   "bugs": {
     "url": "https://github.com/frappe/erpnext/issues"
   },
+  "scripts": {
+    "dev": "node scripts/check_leap.js"
+  },
   "devDependencies": {},
   "dependencies": {
     "onscan.js": "^1.5.2"
