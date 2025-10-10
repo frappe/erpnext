@@ -282,6 +282,8 @@ class SalesInvoice(SellingController):
 	def before_print(self, settings=None):
 		from frappe.contacts.doctype.address.address import get_address_display_list
 
+		super().before_print(settings)
+
 		company_details = frappe.get_value(
 			"Company", self.company, ["company_logo", "website", "phone_no", "email"], as_dict=True
 		)
@@ -298,6 +300,14 @@ class SalesInvoice(SellingController):
 		]
 
 		if not all(required_fields):
+			if not frappe.has_permission("Company", "write", throw=False):
+				frappe.msgprint(
+					_(
+						"Some required Company details are missing. You don't have permission to update them. Please contact your System Manager."
+					)
+				)
+				return
+
 			frappe.publish_realtime(
 				"sales_invoice_before_print",
 				{
