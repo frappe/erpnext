@@ -91,11 +91,11 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		supplier = make_supplier("_Test Supplier", currency="INR")
 
 		# Step 1: Set dynamic dates (2 years back)
-		backdate = getdate(add_years(nowdate(), -2))
+		backdate = getdate(add_years(nowdate(), -1))
 		start_date = get_first_day(add_months(backdate, 4))
 		end_date = get_last_day(add_months(backdate, 6))
 		posting_date = get_first_day(add_months(backdate, 6))
-		create_fiscal_year("_Test Company", date(backdate.year, 1, 1), date(backdate.year, 12, 31))
+		create_fiscal_year("_Test Company", date(posting_date.year, 1, 1), date(posting_date.year, 12, 31))
 		# Step 2: Set Accounting Settings
 		change_acc_settings(acc_frozen_upto=start_date, book_deferred_entries_based_on="Months")
 
@@ -209,12 +209,12 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 
 		customer = create_customer("_Test Customer", currency="INR")
 
-		base_date = getdate(add_years(nowdate(), -2))
+		base_date = getdate(add_years(nowdate(), -1))
 		start_date = get_first_day(add_months(base_date, 4))
 		end_date = get_last_day(add_months(base_date, 6))
 		posting_date = get_first_day(add_months(base_date, 6))
 		acc_frozen_upto = get_last_day(add_months(base_date, 3))
-
+		create_fiscal_year("_Test Company",date(base_date.year,1,1),date(base_date.year,12,31))
 		# Step 2: Set Accounting Settings
 		change_acc_settings(acc_frozen_upto=acc_frozen_upto, book_deferred_entries_based_on="Months")
 

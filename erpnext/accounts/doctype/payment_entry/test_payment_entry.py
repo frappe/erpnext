@@ -3223,21 +3223,24 @@ class TestPaymentEntry(FrappeTestCase):
 		item = make_test_item("_Test Item")
 		get_or_create_fiscal_year(company)
 		# Step 1: Create a Sales Invoice with Payment Terms
-		si = create_sales_invoice(customer=customer, company=company, qty=2, rate=100)
-		si.payment_term = "_Test Payment Term"
+		si = create_sales_invoice(customer=customer, company=company, qty=2, rate=100, do_not_save = True)
+		si.payment_terms_template = "_Test Payment Term Template"
+		si.taxes_and_charges = ""
+		si.taxes = []
+		si.save()
 		si.submit()
 
 		# Step 2: Build references like Payment Entry would
 		references = [
 			frappe._dict(
-				reference_doctype="Sales Invoice", reference_name=si.name, payment_term="_Test Payment Term"
+				reference_doctype="Sales Invoice", reference_name=si.name, payment_term="_Test COD"
 			)
 		]
 		# Step 3: Call function
 		result = get_outstanding_of_references_with_payment_term(references)
 
 		# Step 4: Assert mapping exists and matches outstanding
-		expected_key = ("Sales Invoice", si.name, "_Test Payment Term")
+		expected_key = ("Sales Invoice", si.name, "_Test COD")
 		self.assertIn(expected_key, result)
 		self.assertEqual(result[expected_key], 100)
 
@@ -3557,6 +3560,7 @@ def create_purchase_invoice(**args):
 				{
 					"doctype": "Purchase Invoice Item",
 					"item_code": args.item_code,
+					"item_name": args.item_name or args.item_code,
 					"qty": args.qty or 1,
 					"rate": args.rate or 90000,
 					"cost_center": "Main - _TC",

@@ -19,7 +19,7 @@ class POSClosingEntry(StatusUpdater):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.pos_closing_entry_detail.pos_closing_entry_detail import (
