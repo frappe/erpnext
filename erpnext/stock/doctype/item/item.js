@@ -724,16 +724,32 @@ $.extend(erpnext.item, {
 
 		function get_selected_attributes() {
 			let selected_attributes = {};
-			me.multiple_variant_dialog.$wrapper.find(".form-column").each((i, col) => {
-				if (i === 0) return;
-				let attribute_name = $(col).find(".column-label").html().trim();
-				selected_attributes[attribute_name] = [];
-				let checked_opts = $(col).find(".checkbox input");
-				checked_opts.each((i, opt) => {
-					if ($(opt).is(":checked")) {
-						selected_attributes[attribute_name].push($(opt).attr("data-fieldname"));
+			
+			me.multiple_variant_dialog.fields.forEach((field, index) => {
+				if (field.fieldtype === "Column Break") {
+					// Get the original attribute name from the field definition
+					let attribute_name = field.label;
+					selected_attributes[attribute_name] = [];
+					
+					// Find all checkbox fields that belong to this attribute column
+					// by looking for fields that come after this column break
+					for (let i = index + 1; i < me.multiple_variant_dialog.fields.length; i++) {
+						let next_field = me.multiple_variant_dialog.fields[i];
+						
+						// Stop when we hit another column break or section break
+						if (next_field.fieldtype === "Column Break" || next_field.fieldtype === "Section Break") {
+							break;
+						}
+						
+						// If it's a checkbox field (attribute value), check if it's selected
+						if (next_field.fieldtype === "Check") {
+							let field_obj = me.multiple_variant_dialog.fields_dict[next_field.fieldname];
+							if (field_obj && field_obj.get_value()) {
+								selected_attributes[attribute_name].push(next_field.fieldname);
+							}
+						}
 					}
-				});
+				}
 			});
 
 			return selected_attributes;
