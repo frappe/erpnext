@@ -2640,7 +2640,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
-	@IntegrationTestCase.change_settings(
+	@change_settings(
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
 	)
 	def test_pr_status_rate_adjusted_from_pi(self):
