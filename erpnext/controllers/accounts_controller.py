@@ -2448,8 +2448,7 @@ class AccountsController(TransactionBase):
 		automatically_fetch_payment_terms = 0
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
-			base_write_off_amount = flt(self.base_write_off_amount) if self.base_write_off_amount is not None else 0.0
-			base_grand_total = base_grand_total - base_write_off_amount
+			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
 			grand_total = grand_total - flt(self.write_off_amount)
 			po_or_so, doctype, fieldname = self.get_order_details()
 			automatically_fetch_payment_terms = cint(
