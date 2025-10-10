@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-08 10:45\n"
+"PO-Revision-Date: 2025-10-10 11:13\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Burmese\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,7 @@ msgstr ""
 
 #: erpnext/selling/doctype/quotation/quotation.js:73
 msgid " Address"
-msgstr ""
+msgstr " လိပ်စာ"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:677
 msgid " Amount"
@@ -54,7 +54,7 @@ msgstr ""
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:107
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:128
 msgid " Name"
-msgstr ""
+msgstr " အမည်"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:668
 msgid " Rate"
