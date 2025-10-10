@@ -73,7 +73,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-07 22:35:57.312710",
+ "modified": "2025-10-10 06:41:46.205032",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Template",
@@ -88,9 +88,17 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Accounts Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "role": "Auditor"
   }
  ],
  "row_format": "Dynamic",
