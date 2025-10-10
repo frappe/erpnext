@@ -479,6 +479,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
+		self.set_gl_entry_for_purchase_expense(gl_entries)
 		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
@@ -930,7 +931,7 @@ class PurchaseReceipt(BuyingController):
 				"Asset",
 				asset.name,
 				{
-					"gross_purchase_amount": purchase_amount,
+					"net_purchase_amount": purchase_amount,
 					"purchase_amount": purchase_amount,
 				},
 			)
@@ -1214,7 +1215,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 	buying_settings = frappe.get_single("Buying Settings")
 	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
 
-	total_amount, total_billed_amount = 0, 0
+	total_amount, total_billed_amount, pi_landed_cost_amount = 0, 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
 
 	if adjust_incoming_rate:
@@ -1254,6 +1255,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 				) * item.qty
 
 			adjusted_amt = flt(adjusted_amt * flt(pr_doc.conversion_rate), item.precision("amount"))
+			pi_landed_cost_amount += adjusted_amt
 			item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 		elif amount and item.billed_amt > amount:
 			per_over_billed = (flt(item.billed_amt / amount, 2) * 100) - 100
@@ -1263,6 +1265,9 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 						item.name, frappe.bold(item.item_code), per_over_billed - over_billing_allowance
 					)
 				)
+
+	if pi_landed_cost_amount < 0:
+		total_billed_amount += abs(pi_landed_cost_amount)
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)

@@ -30,6 +30,7 @@
   "set_posting_time",
   "inspection_required",
   "apply_putaway_rule",
+  "is_additional_transfer_entry",
   "bom_info_section",
   "from_bom",
   "use_multi_level_bom",
@@ -699,6 +700,15 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.purpose == \"Material Transfer for Manufacture\"",
+   "fieldname": "is_additional_transfer_entry",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Additional Transfer Entry",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -706,7 +716,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 19:21:03.338958",
+ "modified": "2025-09-29 15:56:21.344296",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

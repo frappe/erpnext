@@ -39,8 +39,8 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 		finance_book: DF.Link | None
 		finance_book_id: DF.Int
 		frequency_of_depreciation: DF.Int
-		gross_purchase_amount: DF.Currency
 		naming_series: DF.Literal["ACC-ADS-.YYYY.-"]
+		net_purchase_amount: DF.Currency
 		notes: DF.SmallText | None
 		opening_accumulated_depreciation: DF.Currency
 		opening_number_of_booked_depreciations: DF.Int
@@ -149,7 +149,7 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 		self.opening_number_of_booked_depreciations = (
 			self.asset_doc.opening_number_of_booked_depreciations or 0
 		)
-		self.gross_purchase_amount = self.asset_doc.gross_purchase_amount
+		self.net_purchase_amount = self.asset_doc.net_purchase_amount
 		self.depreciation_method = self.fb_row.depreciation_method
 		self.total_number_of_depreciations = self.fb_row.total_number_of_depreciations
 		self.frequency_of_depreciation = self.fb_row.frequency_of_depreciation

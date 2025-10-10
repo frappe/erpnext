@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form
+from frappe.utils import cstr, get_link_to_form
 
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 
@@ -143,8 +143,8 @@ class AssetMovement(Document):
 	def update_asset_location_and_custodian(self, asset_id, location, employee):
 		asset = frappe.get_doc("Asset", asset_id)
 
-		if employee and employee != asset.custodian:
-			frappe.db.set_value("Asset", asset_id, "custodian", employee)
+		if cstr(employee) != asset.custodian:
+			frappe.db.set_value("Asset", asset_id, "custodian", cstr(employee))
 		if location and location != asset.location:
 			frappe.db.set_value("Asset", asset_id, "location", location)
 

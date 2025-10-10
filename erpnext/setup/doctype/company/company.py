@@ -86,6 +86,8 @@ class Company(NestedSet):
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
+		purchase_expense_account: DF.Link | None
+		purchase_expense_contra_account: DF.Link | None
 		reconcile_on_advance_payment_date: DF.Check
 		reconciliation_takes_effect_on: DF.Literal[
 			"Advance Payment Date", "Oldest Of Invoice Or Advance", "Reconciliation Date"

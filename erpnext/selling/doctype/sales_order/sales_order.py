@@ -13,7 +13,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, parse_json, strip_html
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -467,6 +467,7 @@ class SalesOrder(SellingController):
 		if self.status == "Closed":
 			frappe.throw(_("Closed order cannot be cancelled. Unclose to cancel."))
 
+		self.delete_delivery_schedule_items()
 		self.check_nextdoc_docstatus()
 		self.update_reserved_qty()
 		self.update_project()
@@ -790,6 +791,79 @@ class SalesOrder(SellingController):
 			for item in self.items:
 				if not item.delivery_date:
 					item.delivery_date = self.delivery_date
+
+	@frappe.whitelist()
+	def get_delivery_schedule(self, sales_order_item):
+		return frappe.get_all(
+			"Delivery Schedule Item",
+			filters={"sales_order_item": sales_order_item, "sales_order": self.name},
+			fields=["delivery_date", "qty", "name"],
+			order_by="delivery_date asc",
+		)
+
+	@frappe.whitelist()
+	def create_delivery_schedule(self, child_row, schedules):
+		if isinstance(child_row, dict):
+			child_row = frappe._dict(child_row)
+
+		if isinstance(schedules, str):
+			schedules = parse_json(schedules)
+
+		names = []
+		first_delivery_date = None
+		for row in schedules:
+			row = frappe._dict(row)
+
+			if not first_delivery_date:
+				first_delivery_date = row.delivery_date
+
+			data = {
+				"delivery_date": row.delivery_date,
+				"qty": row.qty,
+				"uom": child_row.uom,
+				"stock_uom": child_row.stock_uom,
+				"item_code": child_row.item_code,
+				"conversion_factor": child_row.conversion_factor or 1.0,
+				"warehouse": child_row.warehouse,
+				"sales_order_item": child_row.name,
+				"sales_order": self.name,
+				"stock_qty": row.qty * (child_row.conversion_factor or 1.0),
+			}
+
+			if frappe.db.exists("Delivery Schedule Item", row.name):
+				doc = frappe.get_doc("Delivery Schedule Item", row.name)
+			else:
+				doc = frappe.new_doc("Delivery Schedule Item")
+
+			doc.update(data)
+			doc.save(ignore_permissions=True)
+			names.append(doc.name)
+
+		if names:
+			self.delete_delivery_schedule_items(names)
+
+		if first_delivery_date:
+			self.update_delivery_date_based_on_schedule(child_row, first_delivery_date)
+
+	def update_delivery_date_based_on_schedule(self, child_row, first_delivery_date):
+		for row in self.items:
+			if row.name == child_row.name:
+				if first_delivery_date:
+					row.delivery_date = first_delivery_date
+				break
+
+		self.save()
+
+	def delete_delivery_schedule_items(self, ignore_names=None):
+		"""Delete delivery schedule items."""
+		doctype = frappe.qb.DocType("Delivery Schedule Item")
+
+		query = frappe.qb.from_(doctype).delete().where(doctype.sales_order == self.name)
+
+		if ignore_names:
+			query = query.where(doctype.name.notin(ignore_names))
+
+		query.run()
 
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
@@ -1793,6 +1867,11 @@ def create_pick_list(source_name, target_doc=None):
 
 		target.qty = qty_to_be_picked
 		target.stock_qty = qty_to_be_picked * flt(source.conversion_factor)
+
+		# update available qty
+		bin_details = get_bin_details(source.item_code, source.warehouse, source_parent.company)
+		target.actual_qty = bin_details.get("actual_qty")
+		target.company_total_stock = bin_details.get("company_total_stock")
 
 	def update_packed_item_qty(source, target, source_parent) -> None:
 		qty = flt(source.qty)

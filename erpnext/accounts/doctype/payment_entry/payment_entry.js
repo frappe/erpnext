@@ -585,6 +585,7 @@ frappe.ui.form.on("Payment Entry", {
 				if (frm.doc.payment_type == "Pay") {
 					frm.events.paid_amount(frm);
 				}
+				frm.events.paid_from_account_currency(frm);
 			}
 		);
 	},
@@ -607,6 +608,7 @@ frappe.ui.form.on("Payment Entry", {
 						frm.events.received_amount(frm);
 					}
 				}
+				frm.events.paid_to_account_currency(frm);
 			}
 		);
 	},

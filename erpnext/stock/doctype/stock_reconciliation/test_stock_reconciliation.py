@@ -25,7 +25,12 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
-from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
+from erpnext.stock.utils import (
+	get_combine_datetime,
+	get_incoming_rate,
+	get_stock_value_on,
+	get_valuation_method,
+)
 
 
 class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
@@ -714,6 +719,13 @@ class TestStockReconciliation(IntegrationTestCase, StockTestMixin):
 			batch_no=batch_no,
 			qty=100,
 			rate=100,
+		)
+
+		stock_reco.reload()
+		stock_reco_sabb = stock_reco.items[0].serial_and_batch_bundle
+		posting_datetime = frappe.db.get_value("Serial and Batch Bundle", stock_reco_sabb, "posting_datetime")
+		self.assertEqual(
+			posting_datetime, get_combine_datetime(stock_reco.posting_date, stock_reco.posting_time)
 		)
 
 		sle = frappe.get_all(
