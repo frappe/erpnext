@@ -1293,6 +1293,12 @@ class SerialBatchCreation:
 		if self.get("voucher_type"):
 			voucher_type = self.get("voucher_type")
 
+		posting_date = frappe.db.get_value(
+			voucher_type,
+			voucher_no,
+			"posting_date",
+		)
+
 		for _i in range(abs(cint(self.actual_qty))):
 			serial_no = make_autoname(self.serial_no_series, "Serial No")
 			sr_nos.append(serial_no)
@@ -1312,6 +1318,7 @@ class SerialBatchCreation:
 					"Active",
 					voucher_type,
 					voucher_no,
+					posting_date,
 					self.batch_no,
 				)
 			)
@@ -1332,6 +1339,7 @@ class SerialBatchCreation:
 				"status",
 				"reference_doctype",
 				"reference_name",
+				"posting_date",
 				"batch_no",
 			]
 
