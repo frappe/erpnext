@@ -336,6 +336,10 @@ frappe.ui.form.on("Subcontracting Receipt", {
 
 	reset_raw_materials_table: (frm) => {
 		frm.clear_table("supplied_items");
+		frm.doc.__unsaved = true;
+		if (!frm.doc.set_posting_time) {
+			frm.set_value("posting_time", frappe.datetime.now_time());
+		}
 
 		frm.call({
 			method: "reset_raw_materials",

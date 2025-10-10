@@ -261,8 +261,10 @@ execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Deta
 erpnext.patches.v14_0.update_proprietorship_to_individual
 erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
+erpnext.patches.v16_0.create_company_custom_fields
 
 [post_model_sync]
+erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
 erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
 erpnext.patches.v14_0.update_posting_datetime_and_dropped_indexes #22-02-2024

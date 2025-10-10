@@ -443,6 +443,7 @@ def set_gl_entries_by_account(
 	ignore_closing_entries=False,
 	ignore_opening_entries=False,
 	group_by_account=False,
+	ignore_reporting_currency=True,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
@@ -473,6 +474,7 @@ def set_gl_entries_by_account(
 				ignore_closing_entries,
 				last_period_closing_voucher[0].name,
 				group_by_account=group_by_account,
+				ignore_reporting_currency=ignore_reporting_currency,
 			)
 			from_date = add_days(last_period_closing_voucher[0].period_end_date, 1)
 			ignore_opening_entries = True
@@ -488,9 +490,10 @@ def set_gl_entries_by_account(
 		ignore_closing_entries,
 		ignore_opening_entries=ignore_opening_entries,
 		group_by_account=group_by_account,
+		ignore_reporting_currency=ignore_reporting_currency,
 	)
 
-	if filters and filters.get("presentation_currency"):
+	if filters and filters.get("presentation_currency") and ignore_reporting_currency:
 		convert_to_presentation_currency(gl_entries, get_currency(filters))
 
 	for entry in gl_entries:
@@ -511,6 +514,7 @@ def get_accounting_entries(
 	period_closing_voucher=None,
 	ignore_opening_entries=False,
 	group_by_account=False,
+	ignore_reporting_currency=True,
 ):
 	gl_entry = frappe.qb.DocType(doctype)
 	query = (
@@ -529,6 +533,16 @@ def get_accounting_entries(
 		)
 		.where(gl_entry.company == filters.company)
 	)
+
+	if not ignore_reporting_currency:
+		query = query.select(
+			gl_entry.debit_in_reporting_currency
+			if not group_by_account
+			else Sum(gl_entry.debit_in_reporting_currency).as_("debit_in_reporting_currency"),
+			gl_entry.credit_in_reporting_currency
+			if not group_by_account
+			else Sum(gl_entry.credit_in_reporting_currency).as_("credit_in_reporting_currency"),
+		)
 
 	ignore_is_opening = frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting")
 

@@ -100,6 +100,7 @@ class Company(NestedSet):
 		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
 		series_for_depreciation_entry: DF.Data | None
+		service_expense_account: DF.Link | None
 		stock_adjustment_account: DF.Link | None
 		stock_received_but_not_billed: DF.Link | None
 		submit_err_jv: DF.Check
@@ -569,6 +570,21 @@ class Company(NestedSet):
 			)
 
 			self.db_set("disposal_account", disposal_acct)
+
+		if not self.service_expense_account:
+			service_expense_acct = frappe.db.get_value(
+				"Account",
+				{
+					"account_name": _("Marketing Expenses"),
+					"company": self.name,
+					"is_group": 0,
+					"root_type": "Expense",
+				},
+				"name",
+			)
+
+			if service_expense_acct:
+				self.db_set("service_expense_account", service_expense_acct)
 
 	def _set_default_account(self, fieldname, account_type):
 		if self.get(fieldname):

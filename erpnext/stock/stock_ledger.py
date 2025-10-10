@@ -1074,15 +1074,14 @@ class update_entries_after:
 
 		for d in sabb_data:
 			incoming_rate = get_incoming_rate_for_serial_and_batch(self.item_code, d, sn_obj)
-
-			if flt(incoming_rate, self.currency_precision) == flt(
-				d.valuation_rate, self.currency_precision
-			) and not getattr(d, "stock_queue", None):
-				continue
-
 			amount = incoming_rate * flt(d.qty)
 			tot_amt += flt(amount)
 			total_qty += flt(d.qty)
+
+			if flt(incoming_rate, self.currency_precision) == flt(
+				d.incoming_rate, self.currency_precision
+			) and not getattr(d, "stock_queue", None):
+				continue
 
 			values_to_update = {
 				"incoming_rate": incoming_rate,

@@ -44,7 +44,7 @@ class SalesPartner(WebsiteGenerator):
 		load_address_and_contact(self)
 
 	def autoname(self):
-		self.name = self.partner_name
+		pass
 
 	def validate(self):
 		if not self.route:

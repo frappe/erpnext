@@ -265,6 +265,8 @@ class StatusUpdater(Document):
 				# if target_ref_field is not specified, the programmer does not want to validate qty / amount
 				continue
 
+			items_to_validate = []
+
 			# get unique transactions to update
 			for d in self.get_all_children():
 				if hasattr(d, "qty") and d.qty < 0 and not self.get("is_return"):
@@ -286,31 +288,63 @@ class StatusUpdater(Document):
 						)
 
 				if d.doctype == args["source_dt"] and d.get(args["join_field"]):
-					args["name"] = d.get(args["join_field"])
-
-					is_from_pp = (
-						hasattr(d, "production_plan_sub_assembly_item")
-						and frappe.db.get_value(
-							"Production Plan Sub Assembly Item",
-							d.production_plan_sub_assembly_item,
-							"type_of_manufacturing",
+					items_to_validate.append(
+						frappe._dict(
+							{
+								"name": d.get(args["join_field"]),
+								"production_plan_sub_assembly_item": d.get(
+									"production_plan_sub_assembly_item"
+								),
+								"idx": d.idx,
+								"child_doc": d,
+							}
 						)
-						== "Subcontract"
 					)
-					args["item_code"] = "production_item" if is_from_pp else "item_code"
 
-					# get all qty where qty > target_field
-					item = frappe.db.sql(
-						"""select `{item_code}` as item_code, `{target_ref_field}`,
-						`{target_field}`, parenttype, parent from `tab{target_dt}`
-						where `{target_ref_field}` < `{target_field}`
-						and name=%s and docstatus=1""".format(**args),
-						args["name"],
-						as_dict=1,
+			if items_to_validate:
+				pp_sub_assembly_items = [
+					item.production_plan_sub_assembly_item
+					for item in items_to_validate
+					if item.production_plan_sub_assembly_item
+				]
+
+				pp_subcontract_items = []
+				if pp_sub_assembly_items:
+					pp_subcontract_items = frappe.db.get_all(
+						"Production Plan Sub Assembly Item",
+						filters={
+							"name": ("in", pp_sub_assembly_items),
+							"type_of_manufacturing": "Subcontract",
+						},
+						pluck="name",
 					)
+
+				regular_items = []
+				pp_items = []
+
+				for item in items_to_validate:
+					if item.production_plan_sub_assembly_item in pp_subcontract_items:
+						pp_items.append(item.name)
+					else:
+						regular_items.append(item.name)
+
+				item_details = []
+
+				# Query regular items with item_code field
+				if regular_items:
+					item_details.extend(self.fetch_items_with_pending_qty(args, "item_code", regular_items))
+
+				# Query production plan items with production_item field
+				if pp_items:
+					item_details.extend(self.fetch_items_with_pending_qty(args, "production_item", pp_items))
+
+				item_lookup = {item.name: item for item in item_details}
+
+				for child_item in items_to_validate:
+					item = item_lookup.get(child_item.name)
+
 					if item:
-						item = item[0]
-						item["idx"] = d.idx
+						item["idx"] = child_item.idx
 						item["target_ref_field"] = args["target_ref_field"].replace("_", " ")
 
 						# if not item[args['target_ref_field']]:
@@ -322,6 +356,28 @@ class StatusUpdater(Document):
 
 						elif item[args["target_ref_field"]]:
 							self.check_overflow_with_allowance(item, args)
+
+	def fetch_items_with_pending_qty(self, args, item_field, items):
+		doctype = frappe.qb.DocType(args["target_dt"])
+		item_field = doctype[item_field]
+		target_ref_field = doctype[args["target_ref_field"]]
+		target_field = doctype[args["target_field"]]
+
+		return (
+			frappe.qb.from_(doctype)
+			.select(
+				doctype.name,
+				item_field.as_("item_code"),
+				target_ref_field,
+				target_field,
+				doctype.parenttype,
+				doctype.parent,
+			)
+			.where(target_ref_field < target_field)
+			.where(doctype.name.isin(items))
+			.where(doctype.docstatus == 1)
+			.run(as_dict=True)
+		)
 
 	def check_overflow_with_allowance(self, item, args):
 		"""

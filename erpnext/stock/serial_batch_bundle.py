@@ -613,11 +613,13 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		else:
 			self.serial_no_incoming_rate = defaultdict(float)
 			self.stock_value_change = 0.0
+			self.old_serial_nos = []
 
 			serial_nos = self.get_serial_nos()
 			for serial_no in serial_nos:
 				incoming_rate = self.get_incoming_rate_from_bundle(serial_no)
 				if incoming_rate is None:
+					self.old_serial_nos.append(serial_no)
 					continue
 
 				self.stock_value_change += incoming_rate
@@ -1291,6 +1293,12 @@ class SerialBatchCreation:
 		if self.get("voucher_type"):
 			voucher_type = self.get("voucher_type")
 
+		posting_date = frappe.db.get_value(
+			voucher_type,
+			voucher_no,
+			"posting_date",
+		)
+
 		for _i in range(abs(cint(self.actual_qty))):
 			serial_no = make_autoname(self.serial_no_series, "Serial No")
 			sr_nos.append(serial_no)
@@ -1310,6 +1318,7 @@ class SerialBatchCreation:
 					"Active",
 					voucher_type,
 					voucher_no,
+					posting_date,
 					self.batch_no,
 				)
 			)
@@ -1330,6 +1339,7 @@ class SerialBatchCreation:
 				"status",
 				"reference_doctype",
 				"reference_name",
+				"posting_date",
 				"batch_no",
 			]
 
@@ -1389,11 +1399,12 @@ def get_batch_current_qty(batch):
 
 
 def throw_negative_batch_validation(batch_no, qty):
-	frappe.throw(
-		_("The Batch {0} has negative quantity {1}. Please correct the quantity.").format(
-			bold(batch_no), bold(qty)
-		),
-		title=_("Negative Batch Quantity"),
+	frappe.msgprint(
+		_(
+			"The Batch {0} has negative batch quantity {1}. To fix this, go to the batch and click on Recalculate Batch Qty. If the issue still persists, create an inward entry."
+		).format(bold(get_link_to_form("Batch", batch_no)), bold(qty)),
+		title=_("Warning!"),
+		indicator="orange",
 	)
 
 

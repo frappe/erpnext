@@ -11,6 +11,7 @@
   "end_date",
   "column_break_4",
   "company",
+  "disabled",
   "section_break_7",
   "closed_documents"
  ],
@@ -50,6 +51,13 @@
    "reqd": 1
   },
   {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Disabled"
+  },
+  {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
   },
@@ -62,10 +70,11 @@
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:05:57.388109",
+ "modified": "2025-10-06 15:00:15.568067",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Period",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -105,6 +114,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

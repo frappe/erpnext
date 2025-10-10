@@ -70,7 +70,6 @@ class Asset(AccountsController):
 		disposal_date: DF.Date | None
 		finance_books: DF.Table[AssetFinanceBook]
 		frequency_of_depreciation: DF.Int
-		gross_purchase_amount: DF.Currency
 		image: DF.AttachImage | None
 		insurance_end_date: DF.Date | None
 		insurance_start_date: DF.Date | None
@@ -86,6 +85,7 @@ class Asset(AccountsController):
 		location: DF.Link
 		maintenance_required: DF.Check
 		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
+		net_purchase_amount: DF.Currency
 		next_depreciation_date: DF.Date | None
 		opening_accumulated_depreciation: DF.Currency
 		opening_number_of_booked_depreciations: DF.Int
@@ -129,7 +129,7 @@ class Asset(AccountsController):
 		self.set_missing_values()
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
-		self.total_asset_cost = self.gross_purchase_amount + self.additional_asset_cost
+		self.total_asset_cost = self.net_purchase_amount + self.additional_asset_cost
 		self.status = self.get_status()
 
 	def create_asset_depreciation_schedule(self):
@@ -159,7 +159,7 @@ class Asset(AccountsController):
 			return
 
 		self.value_after_depreciation = (
-			flt(self.gross_purchase_amount)
+			flt(self.net_purchase_amount)
 			- flt(self.opening_accumulated_depreciation)
 			+ flt(self.additional_asset_cost)
 		)
@@ -224,7 +224,7 @@ class Asset(AccountsController):
 		if self.is_existing_asset or self.is_composite_asset:
 			return
 
-		self.purchase_amount = self.gross_purchase_amount
+		self.purchase_amount = self.net_purchase_amount
 		purchase_doc_type = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
 		purchase_doc = self.purchase_receipt or self.purchase_invoice
 
@@ -244,12 +244,12 @@ class Asset(AccountsController):
 
 		for item in purchase_doc.items:
 			if self.asset_quantity > 1:
-				if item.base_net_amount == self.gross_purchase_amount and item.qty == self.asset_quantity:
+				if item.base_net_amount == self.net_purchase_amount and item.qty == self.asset_quantity:
 					return item.name
 				elif item.qty == self.asset_quantity:
 					return item.name
 			else:
-				if item.base_net_rate == self.gross_purchase_amount and item.qty == self.asset_quantity:
+				if item.base_net_rate == self.net_purchase_amount and item.qty == self.asset_quantity:
 					return item.name
 
 	def validate_asset_and_reference(self):
@@ -327,7 +327,7 @@ class Asset(AccountsController):
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
 		if self.item_code and not self.get("finance_books"):
-			finance_books = get_item_details(self.item_code, self.asset_category, self.gross_purchase_amount)
+			finance_books = get_item_details(self.item_code, self.asset_category, self.net_purchase_amount)
 			self.set("finance_books", finance_books)
 
 		if self.asset_owner == "Company" and not self.asset_owner_company:
@@ -366,10 +366,8 @@ class Asset(AccountsController):
 			)
 
 	def validate_precision(self):
-		if self.gross_purchase_amount:
-			self.gross_purchase_amount = flt(
-				self.gross_purchase_amount, self.precision("gross_purchase_amount")
-			)
+		if self.net_purchase_amount:
+			self.net_purchase_amount = flt(self.net_purchase_amount, self.precision("net_purchase_amount"))
 
 		if self.opening_accumulated_depreciation:
 			self.opening_accumulated_depreciation = flt(
@@ -380,8 +378,8 @@ class Asset(AccountsController):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
-		if not flt(self.gross_purchase_amount) and not self.is_composite_asset:
-			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
+		if not flt(self.net_purchase_amount) and not self.is_composite_asset:
+			frappe.throw(_("Net Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
 			if (
@@ -440,13 +438,13 @@ class Asset(AccountsController):
 		if self.is_existing_asset:
 			return
 
-		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_amount:
+		if self.net_purchase_amount and self.net_purchase_amount != self.purchase_amount:
 			error_message = _(
-				"Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
+				"Net Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
 			)
 			error_message += "<br>"
 			error_message += _("Please do not book expense of multiple assets against one single Asset.")
-			frappe.throw(error_message, title=_("Invalid Gross Purchase Amount"))
+			frappe.throw(error_message, title=_("Invalid Net Purchase Amount"))
 
 	def make_asset_movement(self):
 		reference_doctype = "Purchase Receipt" if self.purchase_receipt else "Purchase Invoice"
@@ -486,11 +484,11 @@ class Asset(AccountsController):
 
 	def validate_asset_finance_books(self, row):
 		row.expected_value_after_useful_life = flt(
-			row.expected_value_after_useful_life, self.precision("gross_purchase_amount")
+			row.expected_value_after_useful_life, self.precision("net_purchase_amount")
 		)
-		if flt(row.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
+		if flt(row.expected_value_after_useful_life) >= flt(self.net_purchase_amount):
 			frappe.throw(
-				_("Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount").format(
+				_("Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount").format(
 					row.idx
 				)
 			)
@@ -507,11 +505,11 @@ class Asset(AccountsController):
 
 	def validate_opening_depreciation_values(self, row):
 		row.expected_value_after_useful_life = flt(
-			row.expected_value_after_useful_life, self.precision("gross_purchase_amount")
+			row.expected_value_after_useful_life, self.precision("net_purchase_amount")
 		)
 		depreciable_amount = flt(
-			flt(self.gross_purchase_amount) - flt(row.expected_value_after_useful_life),
-			self.precision("gross_purchase_amount"),
+			flt(self.net_purchase_amount) - flt(row.expected_value_after_useful_life),
+			self.precision("net_purchase_amount"),
 		)
 		if flt(self.opening_accumulated_depreciation) > depreciable_amount:
 			frappe.throw(
@@ -576,8 +574,8 @@ class Asset(AccountsController):
 
 			if accumulated_depreciation_after_full_schedule:
 				asset_value_after_full_schedule = flt(
-					flt(self.gross_purchase_amount) - flt(accumulated_depreciation_after_full_schedule),
-					self.precision("gross_purchase_amount"),
+					flt(self.net_purchase_amount) - flt(accumulated_depreciation_after_full_schedule),
+					self.precision("net_purchase_amount"),
 				)
 
 				if (
@@ -631,7 +629,7 @@ class Asset(AccountsController):
 
 			self.db_set(
 				"value_after_depreciation",
-				(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)),
+				(flt(self.net_purchase_amount) - flt(self.opening_accumulated_depreciation)),
 			)
 
 	def set_status(self, status=None):
@@ -668,7 +666,7 @@ class Asset(AccountsController):
 						or self.is_fully_depreciated
 					):
 						status = "Fully Depreciated"
-					elif flt(value_after_depreciation) < flt(self.gross_purchase_amount):
+					elif flt(value_after_depreciation) < flt(self.net_purchase_amount):
 						status = "Partially Depreciated"
 		elif self.docstatus == 2:
 			status = "Cancelled"
@@ -676,16 +674,16 @@ class Asset(AccountsController):
 
 	def get_value_after_depreciation(self, finance_book=None):
 		if not self.calculate_depreciation:
-			return flt(self.value_after_depreciation, self.precision("gross_purchase_amount"))
+			return flt(self.value_after_depreciation, self.precision("net_purchase_amount"))
 
 		if not finance_book:
 			return flt(
-				self.get("finance_books")[0].value_after_depreciation, self.precision("gross_purchase_amount")
+				self.get("finance_books")[0].value_after_depreciation, self.precision("net_purchase_amount")
 			)
 
 		for row in self.get("finance_books"):
 			if finance_book == row.finance_book:
-				return flt(row.value_after_depreciation, self.precision("gross_purchase_amount"))
+				return flt(row.value_after_depreciation, self.precision("net_purchase_amount"))
 
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
@@ -889,7 +887,7 @@ class Asset(AccountsController):
 		if flt(args.get("value_after_depreciation")):
 			current_asset_value = flt(args.get("value_after_depreciation"))
 		else:
-			current_asset_value = flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)
+			current_asset_value = flt(self.net_purchase_amount) - flt(self.opening_accumulated_depreciation)
 
 		value = flt(args.get("expected_value_after_useful_life")) / current_asset_value
 
@@ -1058,7 +1056,7 @@ def transfer_asset(args):
 
 
 @frappe.whitelist()
-def get_item_details(item_code, asset_category, gross_purchase_amount):
+def get_item_details(item_code, asset_category, net_purchase_amount):
 	asset_category_doc = frappe.get_cached_doc("Asset Category", asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
@@ -1071,7 +1069,7 @@ def get_item_details(item_code, asset_category, gross_purchase_amount):
 				"daily_prorata_based": d.daily_prorata_based,
 				"shift_based": d.shift_based,
 				"salvage_value_percentage": d.salvage_value_percentage,
-				"expected_value_after_useful_life": flt(gross_purchase_amount)
+				"expected_value_after_useful_life": flt(net_purchase_amount)
 				* flt(d.salvage_value_percentage / 100),
 				"depreciation_start_date": d.depreciation_start_date or nowdate(),
 				"rate_of_depreciation": d.rate_of_depreciation,
@@ -1211,7 +1209,7 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 	return {
 		"company": purchase_doc.company,
 		"purchase_date": purchase_doc.get("bill_date") or purchase_doc.get("posting_date"),
-		"gross_purchase_amount": flt(first_item.base_net_amount),
+		"net_purchase_amount": flt(first_item.base_net_amount),
 		"asset_quantity": first_item.qty,
 		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
 		"asset_location": first_item.get("asset_location"),
@@ -1266,10 +1264,10 @@ def process_asset_split(existing_asset, split_qty, splitted_asset=None, is_new_a
 
 
 def set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset, is_new_asset):
-	asset_doc.gross_purchase_amount = existing_asset.gross_purchase_amount * scaling_factor
-	asset_doc.purchase_amount = existing_asset.gross_purchase_amount
+	asset_doc.net_purchase_amount = existing_asset.net_purchase_amount * scaling_factor
+	asset_doc.purchase_amount = existing_asset.net_purchase_amount
 	asset_doc.additional_asset_cost = existing_asset.additional_asset_cost * scaling_factor
-	asset_doc.total_asset_cost = asset_doc.gross_purchase_amount + asset_doc.additional_asset_cost
+	asset_doc.total_asset_cost = asset_doc.net_purchase_amount + asset_doc.additional_asset_cost
 	asset_doc.opening_accumulated_depreciation = (
 		existing_asset.opening_accumulated_depreciation * scaling_factor
 	)

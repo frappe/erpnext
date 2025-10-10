@@ -502,6 +502,9 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 		}
 	)
 
+	if not item.is_stock_item and not out.expense_account:
+		out.expense_account = frappe.get_cached_value("Company", ctx.company, "service_expense_account")
+
 	default_supplier = get_default_supplier(ctx, item_defaults, item_group_defaults, brand_defaults)
 	if default_supplier:
 		out.supplier = default_supplier
@@ -753,8 +756,10 @@ def _get_item_tax_template(
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		tax_company = frappe.get_cached_value("Item Tax Template", tax.item_tax_template, "company")
-		if tax_company == ctx["company"]:
+		disabled, tax_company = frappe.get_cached_value(
+			"Item Tax Template", tax.item_tax_template, ["disabled", "company"]
+		)
+		if not disabled and tax_company == ctx["company"]:
 			if tax.valid_from or tax.maximum_net_rate:
 				# In purchase Invoice first preference will be given to supplier invoice date
 				# if supplier date is not present then posting date
@@ -1577,7 +1582,7 @@ def get_valuation_rate(item_code, company, warehouse=None):
 
 		return frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
-		) or {"valuation_rate": 0}
+		) or {"valuation_rate": item.get("valuation_rate") or 0}
 
 	elif not item.get("is_stock_item"):
 		pi_item = frappe.qb.DocType("Purchase Invoice Item")

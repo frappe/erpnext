@@ -202,6 +202,9 @@ class SubcontractingController(StockController):
 			self.set(self.raw_material_table, [])
 			return
 
+		if not self.get(self.raw_material_table):
+			return
+
 		item_dict = self.__get_data_before_save()
 		if not item_dict:
 			return True
@@ -656,6 +659,9 @@ class SubcontractingController(StockController):
 	def set_batch_for_supplied_items(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 		from erpnext.stock.get_item_details import get_filtered_serial_nos
+
+		if self.is_return:
+			return
 
 		for row in self.supplied_items:
 			item_details = frappe.get_cached_value(

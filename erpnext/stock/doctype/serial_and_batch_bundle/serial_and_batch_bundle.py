@@ -638,6 +638,17 @@ class SerialandBatchBundle(Document):
 		if not rate and self.voucher_detail_no and self.voucher_no:
 			rate = frappe.db.get_value(child_table, self.voucher_detail_no, valuation_field)
 
+		is_packed_item = False
+		if rate is None and child_table in ["Delivery Note Item", "Sales Invoice Item"]:
+			rate = frappe.db.get_value(
+				"Packed Item",
+				self.voucher_detail_no,
+				"incoming_rate",
+			)
+
+			if rate is not None:
+				is_packed_item = True
+
 		stock_queue = []
 		batches = []
 		if prev_sle and prev_sle.stock_queue:
@@ -658,6 +669,9 @@ class SerialandBatchBundle(Document):
 				rate = 0.0
 			elif (d.incoming_rate == rate) and not stock_queue and d.qty and d.stock_value_difference:
 				continue
+
+			if is_packed_item and d.incoming_rate:
+				rate = d.incoming_rate
 
 			d.incoming_rate = flt(rate)
 			if d.qty:
@@ -2337,15 +2351,15 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 
 	if kwargs.batch_no:
 		if isinstance(kwargs.batch_no, list):
-			query = query.where(sb_entry.batch_no.notin(kwargs.batch_no))
+			query = query.where(sb_entry.batch_no.isin(kwargs.batch_no))
 		else:
-			query = query.where(sb_entry.batch_no != kwargs.batch_no)
+			query = query.where(sb_entry.batch_no == kwargs.batch_no)
 
 	if kwargs.warehouse:
 		if isinstance(kwargs.warehouse, list):
-			query = query.where(sre.warehouse.notin(kwargs.warehouse))
+			query = query.where(sre.warehouse.isin(kwargs.warehouse))
 		else:
-			query = query.where(sre.warehouse != kwargs.warehouse)
+			query = query.where(sre.warehouse == kwargs.warehouse)
 
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
