@@ -83,7 +83,7 @@
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "section_break_4",
@@ -239,7 +239,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-26 17:06:29.207673",
+ "modified": "2025-10-10 12:46:41.835513",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

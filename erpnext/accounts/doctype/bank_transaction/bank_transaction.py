@@ -27,7 +27,7 @@ class BankTransaction(Document):
 		bank_party_account_number: DF.Data | None
 		bank_party_iban: DF.Data | None
 		bank_party_name: DF.Data | None
-		company: DF.Link | None
+		company: DF.Link
 		currency: DF.Link | None
 		date: DF.Date | None
 		deposit: DF.Currency
@@ -48,8 +48,17 @@ class BankTransaction(Document):
 		self.update_allocated_amount()
 
 	def validate(self):
+		self.validate_company()
 		self.validate_duplicate_references()
 		self.validate_currency()
+
+	def validate_company(self):
+		if (
+			self.company
+			and self.bank_account
+			and frappe.get_cached_value("Bank Account", self.bank_account, "company") != self.company
+		):
+			frappe.throw(_("Bank Account company does not match with the Bank Transaction company."))
 
 	def validate_currency(self):
 		"""
