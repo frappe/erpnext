@@ -587,7 +587,7 @@ class SubcontractingController(StockController):
 		):
 			row.reserve_warehouse = self.set_reserve_warehouse or item.warehouse
 		elif frappe.get_value("Item", row.rm_item_code, "is_customer_provided_item"):
-			row.reserve_warehouse = self.customer_warehouse
+			row.warehouse = self.customer_warehouse
 
 	def __set_alternative_item(self, bom_item):
 		if self.alternative_item_details.get(bom_item.rm_item_code):

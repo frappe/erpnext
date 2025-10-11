@@ -142,9 +142,9 @@
   },
   {
    "depends_on": "eval:!doc.is_customer_provided_item",
-   "fieldname": "reserve_warehouse",
+   "fieldname": "warehouse",
    "fieldtype": "Link",
-   "label": "Reserve Warehouse",
+   "label": "Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
    "read_only": 1

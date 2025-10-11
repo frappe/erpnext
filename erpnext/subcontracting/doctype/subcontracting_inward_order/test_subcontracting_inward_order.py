@@ -74,7 +74,9 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		rm_in.submit()
 
 		scio.reload()
-		self.assertEqual(scio.received_items[-1].rm_item_code, "Basic RM 2")
+		self.assertTrue(
+			next((item for item in scio.received_items if item.rm_item_code == "Basic RM 2"), None)
+		)
 
 	def test_add_extra_item_during_manufacture(self):
 		make_stock_entry(
@@ -86,7 +88,9 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		scio.reload()
 		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
 		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		next(
+			item for item in wo.required_items if item.item_code == "Self RM"
+		).source_warehouse = "Stores - _TC"
 		wo.submit()
 
 		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
@@ -109,7 +113,9 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		manufacture.reload()
 		manufacture.submit()
 		scio.reload()
-		self.assertEqual(scio.received_items[-1].rm_item_code, "Self RM 2")
+		self.assertTrue(
+			next((item for item in scio.received_items if item.rm_item_code == "Self RM 2"), None)
+		)
 
 	def test_work_order_creation_qty(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))

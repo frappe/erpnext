@@ -108,6 +108,16 @@ class SubcontractingInwardController(StockController):
 								).format(item.idx, bold(item.item_code))
 							)
 			elif self.purpose == "Manufacture":
+				customer_warehouse = (
+					frappe.db.get_value(
+						"Subcontracting Inward Order",
+						self.subcontracting_inward_order,
+						"customer_warehouse",
+					)
+					if frappe.get_value("Work Order", self.work_order, "skip_transfer")
+					else frappe.get_value("Work Order", self.work_order, "wip_warehouse")
+				)
+
 				items = [
 					item
 					for item in self.get("items")
@@ -130,6 +140,7 @@ class SubcontractingInwardController(StockController):
 						(table.docstatus == 1)
 						& (table.parent == self.subcontracting_inward_order)
 						& (table.main_item_code == frappe.db.get_value("BOM", self.bom_no, "item"))
+						& (table.warehouse == customer_warehouse)
 					)
 				)
 				if item_codes:
@@ -144,33 +155,22 @@ class SubcontractingInwardController(StockController):
 
 				for item in items:
 					if rm := rm_item_dict.get(item.item_code):
-						rm.qty += item.transfer_qty
-						warehouse = (
-							frappe.db.get_value(
-								"Subcontracting Inward Order",
-								self.subcontracting_inward_order,
-								"customer_warehouse",
-							)
-							if frappe.get_value("Work Order", self.work_order, "skip_transfer")
-							else frappe.get_value("Work Order", self.work_order, "wip_warehouse")
-						)
-						if rm.qty > rm.total_qty:
+						if rm.qty + item.transfer_qty > rm.total_qty:
 							frappe.throw(
 								_(
 									"Row #{0}: Customer Provided Item {1} exceeds quantity available through Subcontracting Inward Order"
 								).format(item.idx, bold(item.item_code), item.transfer_qty)
 							)
-						elif item.s_warehouse != warehouse:
+						elif item.s_warehouse != customer_warehouse:
 							frappe.throw(
 								_(
 									"Row #{0}: For Customer Provided Item {1}, Source Warehouse must be {2}"
 								).format(
 									item.idx,
 									bold(item.item_code),
-									bold(warehouse),
+									bold(customer_warehouse),
 								)
 							)
-
 					else:
 						frappe.throw(
 							_(
@@ -591,7 +591,7 @@ class SubcontractingInwardController(StockController):
 							+ 1,
 							rm_item_code=item.item_code,
 							stock_uom=item.stock_uom,
-							reserve_warehouse=item.t_warehouse,
+							warehouse=item.t_warehouse,
 							received_qty=item.transfer_qty,
 							consumed_qty=0,
 							work_order_qty=0,
@@ -626,35 +626,88 @@ class SubcontractingInwardController(StockController):
 						).run()
 			elif self.purpose == "Manufacture":
 				items = [item for item in self.items if item.s_warehouse]
-				item_codes = {
-					item.item_code: item.transfer_qty if self._action == "submit" else -item.transfer_qty
-					for item in items
-				}
-				data = frappe.get_all(
-					"Subcontracting Inward Order Received Item",
-					{"parent": scio, "docstatus": 1, "rm_item_code": ["in", list(item_codes.keys())]},
-					["name", "rm_item_code", "is_customer_provided_item", "consumed_qty", "required_qty"],
+				item_code_wh = frappe._dict(
+					{
+						(item.item_code, item.s_warehouse): item.transfer_qty
+						if self._action == "submit"
+						else -item.transfer_qty
+						for item in items
+					}
 				)
-				if data:
+				item_codes, warehouses = zip(*list(item_code_wh.keys()), strict=True)
+				item_codes = list(item_codes)
+				warehouses = list(warehouses)
+
+				table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+				data = (
+					frappe.qb.from_(table)
+					.select(
+						table.name,
+						table.rm_item_code,
+						table.is_customer_provided_item,
+						table.consumed_qty,
+						table.required_qty,
+						table.warehouse,
+					)
+					.where(
+						(table.docstatus == 1)
+						& (table.rm_item_code.isin(item_codes))
+						& ((table.warehouse.isin(warehouses)) | (table.warehouse.isnull()))
+						& (table.parent == scio)
+						& (
+							(
+								table.reference_name
+								== frappe.get_value(
+									"Work Order", self.work_order, "subcontracting_inward_order_item"
+								)
+							)
+							| (table.reference_name.isnull())
+						)
+					)
+				)
+
+				if data := data.run(as_dict=True):
 					deleted_docs = []
-					table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 					case_expr = Case()
 					for d in data:
-						qty = d.consumed_qty + item_codes[d.rm_item_code]
+						qty = (
+							d.consumed_qty
+							+ item_code_wh[
+								(
+									d.rm_item_code,
+									d.warehouse
+									or next(
+										key[1] for key in item_code_wh.keys() if key[0] == d.rm_item_code
+									),
+								)
+							]
+						)
 						if qty or d.is_customer_provided_item:
-							case_expr = case_expr.when(table.name == d.name, qty)
+							case_expr = case_expr.when((table.name == d.name), qty)
 						else:
 							deleted_docs.append(d.name)
 							frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
 
-					if len(list(set([d.name for d in data]) - set(deleted_docs))) > 0:
+					final_name_list = list(set([d.name for d in data]) - set(deleted_docs))
+					if len(final_name_list) > 0:
 						frappe.qb.update(table).set(table.consumed_qty, case_expr).where(
-							(table.name.isin(list(set([d.name for d in data]) - set(deleted_docs))))
-							& (table.docstatus == 1)
+							(table.name.isin(final_name_list)) & (table.docstatus == 1)
 						).run()
 
 					for extra_item in [
-						item for item in items if item.item_code not in [d.rm_item_code for d in data]
+						item
+						for item in items
+						if (item.item_code, item.s_warehouse)
+						not in [
+							(
+								d.rm_item_code,
+								d.warehouse
+								or next(
+									item.s_warehouse for item in items if item.item_code == d.rm_item_code
+								),
+							)
+							for d in data
+						]
 					]:
 						frappe.new_doc(
 							"Subcontracting Inward Order Received Item",
@@ -673,6 +726,7 @@ class SubcontractingInwardController(StockController):
 							),
 							required_qty=0,
 							consumed_qty=extra_item.transfer_qty,
+							warehouse=extra_item.s_warehouse,
 							is_additional_item=True,
 						).insert()
 			elif self.purpose == "Return Raw Material to Customer":
@@ -695,42 +749,61 @@ class SubcontractingInwardController(StockController):
 			scrap_items_list = [item for item in self.items if item.is_scrap_item]
 			scrap_items = frappe._dict(
 				{
-					item.item_code: item.transfer_qty if self._action == "submit" else -item.transfer_qty
+					(item.item_code, item.t_warehouse): item.transfer_qty
+					if self._action == "submit"
+					else -item.transfer_qty
 					for item in scrap_items_list
 				}
 			)
 			if scrap_items:
+				item_codes, warehouses = zip(*list(scrap_items.keys()), strict=True)
+				item_codes = list(item_codes)
+				warehouses = list(warehouses)
+
 				result = frappe.get_all(
 					"Subcontracting Inward Order Scrap Item",
 					filters={
-						"item_code": ["in", list(scrap_items.keys())],
+						"item_code": ["in", item_codes],
+						"warehouse": ["in", warehouses],
 						"reference_name": frappe.get_value(
 							"Work Order", self.work_order, "subcontracting_inward_order_item"
 						),
 						"docstatus": 1,
 					},
-					fields=["name", "item_code", "produced_qty"],
+					fields=["name", "item_code", "warehouse", "produced_qty"],
 				)
+
 				if result:
-					scrap_item_dict = frappe._dict({d.item_code: d.produced_qty for d in result})
+					scrap_item_dict = frappe._dict(
+						{
+							(d.item_code, d.warehouse): frappe._dict(
+								{"name": d.name, "produced_qty": d.produced_qty}
+							)
+							for d in result
+						}
+					)
 					deleted_docs = []
 					case_expr = Case()
 					table = frappe.qb.DocType("Subcontracting Inward Order Scrap Item")
-					for name, produced_qty in scrap_item_dict.items():
-						if self._action == "cancel" and produced_qty - abs(scrap_items[name]) == 0:
-							deleted_docs.append(name)
-							frappe.delete_doc("Subcontracting Inward Order Scrap Item", name)
+					for key, value in scrap_item_dict.items():
+						if self._action == "cancel" and value.produced_qty - abs(scrap_items.get(key)) == 0:
+							deleted_docs.append(value.name)
+							frappe.delete_doc("Subcontracting Inward Order Scrap Item", value.name)
 						else:
-							case_expr = case_expr.when(table.name == name, produced_qty + scrap_items[name])
+							case_expr = case_expr.when(
+								table.name == value.name, value.produced_qty + scrap_items.get(key)
+							)
 
-					if len(list(set(scrap_item_dict.keys()) - set(deleted_docs))) > 0:
+					final_list = list(set([v.name for v in scrap_item_dict.values()]) - set(deleted_docs))
+					if len(final_list) > 0:
 						frappe.qb.update(table).set(table.produced_qty, case_expr).where(
-							(table.name.isin(list(set(scrap_item_dict.keys()) - set(deleted_docs))))
-							& (table.docstatus == 1)
+							(table.name.isin(final_list)) & (table.docstatus == 1)
 						).run()
 
 				for scrap_item in [
-					item for item in scrap_items_list if item.item_code not in [d.item_code for d in result]
+					item
+					for item in scrap_items_list
+					if (item.item_code, item.t_warehouse) not in [(d.item_code, d.warehouse) for d in result]
 				]:
 					frappe.new_doc(
 						"Subcontracting Inward Order Scrap Item",

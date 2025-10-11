@@ -375,7 +375,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 				rm_item.get("rm_item_code"): {
 					"scio_detail": rm_item.get("name"),
 					"qty": calculate_qty_as_per_bom(rm_item),
-					"to_warehouse": rm_item.get("reserve_warehouse"),
+					"to_warehouse": rm_item.get("warehouse"),
 					"stock_uom": rm_item.get("stock_uom"),
 				}
 			}
@@ -416,7 +416,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 				rm_item.get("rm_item_code"): {
 					"scio_detail": rm_item.get("name"),
 					"qty": rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty,
-					"from_warehouse": rm_item.get("reserve_warehouse"),
+					"from_warehouse": rm_item.get("warehouse"),
 					"stock_uom": rm_item.get("stock_uom"),
 				}
 			}
