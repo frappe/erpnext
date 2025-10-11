@@ -2885,14 +2885,16 @@ def save_company_master_details(name, company, details):
 	if company_address:
 		company_address_display = frappe.db.get_value("Sales Invoice", name, "company_address_display")
 		if not company_address_display or details.get("address_line1"):
-			frappe.db.set_value(
-				"Sales Invoice",
-				name,
-				{
-					"company_address": company_address,
-					"company_address_display": get_address_display(company_address),
-				},
-			)
+			from frappe.query_builder import DocType
+
+			SalesInvoice = DocType("Sales Invoice")
+
+			(
+				frappe.qb.update(SalesInvoice)
+				.set(SalesInvoice.company_address, company_address)
+				.set(SalesInvoice.company_address_display, get_address_display(company_address))
+				.where(SalesInvoice.name == name)
+			).run()
 
 	return True
 
