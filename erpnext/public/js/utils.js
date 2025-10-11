@@ -1060,17 +1060,11 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
-frappe.form.link_formatters["Item"] = function (value, doc, df) {
-	return add_link_title(value, doc, df, "item_name");
-};
-
-frappe.form.link_formatters["Employee"] = function (value, doc, df) {
-	return add_link_title(value, doc, df, "employee_name");
-};
-
-frappe.form.link_formatters["Project"] = function (value, doc, df) {
-	return add_link_title(value, doc, df, "project_name");
-};
+Object.entries(frappe.boot.link_formatters).forEach(([doctype, fieldname]) => {
+	frappe.form.link_formatters[doctype] = function (value, doc, df) {
+		return add_link_title(value, doc, df, fieldname);
+	};
+});
 
 /**
  * Add a title to a link value based on the provided document and field information.
@@ -1081,6 +1075,7 @@ frappe.form.link_formatters["Project"] = function (value, doc, df) {
  * @param {string} title_field - The field name for the title.
  * @returns {string} - The link value with the added title.
  */
+
 function add_link_title(value, doc, df, title_field) {
 	if (doc && value && doc[title_field] && doc[title_field] !== value && doc[df.fieldname] === value) {
 		return value + ": " + doc[title_field];
