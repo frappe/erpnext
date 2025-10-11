@@ -47,6 +47,7 @@ class StockReservationEntry(Document):
 			"Partially Reserved",
 			"Reserved",
 			"Partially Delivered",
+			"Partially Used",
 			"Delivered",
 			"Cancelled",
 			"Closed",
@@ -119,29 +120,20 @@ class StockReservationEntry(Document):
 			).run(as_list=True)[0][0] or 0
 
 			sres = self.get_from_voucher_reservation_entries()
-			index = 0
 			for row in sres:
+				if delivered_qty < 0.0:
+					break
+
 				status = "Reserved"
 
 				if self.has_batch_no or self.has_serial_no:
 					serial_batch_data = self.get_serial_batch_entries()
 					update_serial_batch_delivered_qty(serial_batch_data, row.name, is_cancelled=True)
 
-				if delivered_qty <= 0 or index == 0:
-					frappe.db.set_value(
-						"Stock Reservation Entry",
-						row.name,
-						{"delivered_qty": delivered_qty, "status": status},
-					)
-
-					continue
-
-				index += 1
 				if row.reserved_qty > delivered_qty:
 					frappe.db.set_value(
 						"Stock Reservation Entry",
 						row.name,
-						"delivered_qty",
 						{"delivered_qty": delivered_qty, "status": status},
 					)
 
@@ -150,7 +142,6 @@ class StockReservationEntry(Document):
 					frappe.db.set_value(
 						"Stock Reservation Entry",
 						row.name,
-						"delivered_qty",
 						{"delivered_qty": row.reserved_qty, "status": "Delivered"},
 					)
 
@@ -498,7 +489,12 @@ class StockReservationEntry(Document):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if self.reserved_qty == (self.delivered_qty or self.transferred_qty or self.consumed_qty):
+				if self.transferred_qty:
+					status = "Closed"
+					if self.transferred_qty < self.reserved_qty:
+						status = "Partially Used"
+
+				elif self.reserved_qty == (self.delivered_qty or self.consumed_qty):
 					status = "Delivered"
 				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
 					status = "Partially Delivered"
@@ -610,54 +606,19 @@ class StockReservationEntry(Document):
 
 	def consume_serial_batch_for_material_transfer(self, row_wise_serial_batch):
 		for entry in self.sb_entries:
-			if entry.reference_for_reservation:
-				entry.delete()
+			entry.delivered_qty = 0
 
-		qty_to_consume = self.reserved_qty
-		for (item_code, warehouse, reference_for_reservation), data in row_wise_serial_batch.items():
-			if item_code != self.item_code or warehouse != self.warehouse:
-				continue
+		for entry in self.sb_entries:
+			for row in row_wise_serial_batch:
+				data = row_wise_serial_batch[row]
 
-			remove_serial_nos = []
-			for serial_no in data.serial_nos:
-				if qty_to_consume <= 0:
-					break
+				if entry.serial_no in data.serial_nos:
+					entry.delivered_qty = 1
 
-				new_row = self.append(
-					"sb_entries",
-					{
-						"serial_no": serial_no,
-						"qty": -1,
-						"warehouse": self.warehouse,
-						"reference_for_reservation": reference_for_reservation,
-					},
-				)
+				elif entry.batch_no in data.batch_nos:
+					entry.delivered_qty = data.batch_nos[entry.batch_no]
 
-				new_row.insert()
-				qty_to_consume -= 1
-				remove_serial_nos.append(serial_no)
-
-			for sn in remove_serial_nos:
-				data.serial_nos.remove(sn)
-
-			for batch_no, batch_qty in data.batch_nos.items():
-				if qty_to_consume <= 0:
-					break
-
-				qty = batch_qty if batch_qty <= qty_to_consume else (qty_to_consume)
-				new_row = self.append(
-					"sb_entries",
-					{
-						"batch_no": batch_no,
-						"qty": qty * -1,
-						"warehouse": self.warehouse,
-						"reference_for_reservation": reference_for_reservation,
-					},
-				)
-
-				new_row.insert()
-				qty_to_consume -= qty
-				data.batch_nos[batch_no] -= qty
+			entry.db_update()
 
 
 def validate_stock_reservation_settings(voucher: object) -> None:
@@ -696,7 +657,7 @@ def get_available_qty_to_reserve(
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		query = (
 			frappe.qb.from_(sre)
-			.select(Sum(sre.reserved_qty - sre.delivered_qty))
+			.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
 			.where(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)

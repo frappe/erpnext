@@ -123,7 +123,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "reference_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Reference Number"
   },
   {
@@ -230,7 +230,8 @@
   {
    "fieldname": "bank_party_iban",
    "fieldtype": "Data",
-   "label": "Party IBAN (Bank Statement)"
+   "label": "Party IBAN (Bank Statement)",
+   "options": "IBAN"
   },
   {
    "fieldname": "bank_party_account_number",

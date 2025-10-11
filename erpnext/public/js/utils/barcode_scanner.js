@@ -113,12 +113,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			frappe.flags.trigger_from_barcode_scanner = true;
 
 			const { item_code, barcode, batch_no, serial_no, uom, default_warehouse } = data;
-
-			const warehouse = this.has_last_scanned_warehouse
-				? this.frm.doc.last_scanned_warehouse || default_warehouse
-				: null;
-
-			let row = this.get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, warehouse);
+			let row = this.get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, default_warehouse);
 			const is_new_row = !row?.item_code;
 			if (!row) {
 				if (this.dont_allow_new_row) {
@@ -151,7 +146,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				() => this.set_serial_no(row, serial_no),
 				() => this.set_batch_no(row, batch_no),
 				() => this.set_barcode(row, barcode),
-				() => this.set_warehouse(row, warehouse),
+				() => this.set_warehouse(row),
 				() => this.clean_up(),
 				() => this.revert_selector_flag(),
 				() => resolve(row),
@@ -412,12 +407,16 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
-	async set_warehouse(row, warehouse) {
-		const warehouse_field = this.get_warehouse_field();
+	async set_warehouse(row) {
+		if (!this.has_last_scanned_warehouse) return;
 
-		if (warehouse && frappe.meta.has_field(row.doctype, warehouse_field)) {
-			await frappe.model.set_value(row.doctype, row.name, warehouse_field, warehouse);
-		}
+		const last_scanned_warehouse = this.frm.doc.last_scanned_warehouse;
+		if (!last_scanned_warehouse) return;
+
+		const warehouse_field = this.get_warehouse_field();
+		if (!warehouse_field || !frappe.meta.has_field(row.doctype, warehouse_field)) return;
+
+		await frappe.model.set_value(row.doctype, row.name, warehouse_field, last_scanned_warehouse);
 	}
 
 	show_scan_message(idx, is_existing_row = false, qty = 1) {
@@ -438,15 +437,19 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return is_duplicate;
 	}
 
-	get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, warehouse) {
+	get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, default_warehouse) {
 		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
 		// Check if batch is scanned and table has batch no field
 		let is_batch_no_scan = batch_no && frappe.meta.has_field(cur_grid.doctype, this.batch_no_field);
 		let check_max_qty = this.max_qty_field && frappe.meta.has_field(cur_grid.doctype, this.max_qty_field);
 
-		const warehouse_field = this.get_warehouse_field();
-		let has_warehouse_field = frappe.meta.has_field(cur_grid.doctype, warehouse_field);
+		const warehouse_field = this.has_last_scanned_warehouse && this.get_warehouse_field();
+		const has_warehouse_field =
+			warehouse_field && frappe.meta.has_field(cur_grid.doctype, warehouse_field);
+		const warehouse = has_warehouse_field
+			? this.frm.doc.last_scanned_warehouse || default_warehouse
+			: null;
 
 		const matching_row = (row) => {
 			const item_match = row.item_code == item_code;
@@ -456,12 +459,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			const item_scanned = row.has_item_scanned;
 
 			let warehouse_match = true;
-			if (has_warehouse_field) {
-				if (warehouse) {
-					warehouse_match = row[warehouse_field] === warehouse;
-				} else {
-					warehouse_match = !row[warehouse_field];
-				}
+			if (has_warehouse_field && warehouse && row[warehouse_field]) {
+				warehouse_match = row[warehouse_field] === warehouse;
 			}
 
 			return (
@@ -509,7 +508,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	handle_warehouse_scan(data) {
 		const warehouse = data.warehouse;
 		const warehouse_field = this.get_warehouse_field();
-		const warehouse_field_label = frappe.meta.get_label(this.items_table_name, warehouse_field);
+		const cur_grid = this.frm.fields_dict[this.items_table_name].grid;
+		const warehouse_field_label = frappe.meta.get_label(cur_grid.doctype, warehouse_field);
 
 		if (!this.last_scanned_warehouse_initialized) {
 			this.setup_last_scanned_warehouse();

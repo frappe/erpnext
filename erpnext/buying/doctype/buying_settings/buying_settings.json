@@ -39,7 +39,9 @@
   "section_break_xcug",
   "auto_create_subcontracting_order",
   "column_break_izrr",
-  "auto_create_purchase_receipt"
+  "auto_create_purchase_receipt",
+  "request_for_quotation_tab",
+  "fixed_email"
  ],
  "fields": [
   {
@@ -255,6 +257,19 @@
    "fieldname": "set_valuation_rate_for_rejected_materials",
    "fieldtype": "Check",
    "label": "Set Valuation Rate for Rejected Materials"
+  },
+  {
+   "fieldname": "request_for_quotation_tab",
+   "fieldtype": "Tab Break",
+   "label": "Request for Quotation"
+  },
+  {
+   "description": "If set, the system does not use the user's Email or the standard outgoing Email account for sending request for quotations.",
+   "fieldname": "fixed_email",
+   "fieldtype": "Link",
+   "label": "Fixed Outgoing Email Account",
+   "link_filters": "[[\"Email Account\",\"enable_outgoing\",\"=\",1]]",
+   "options": "Email Account"
   }
  ],
  "grid_page_length": 50,
@@ -263,7 +278,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-16 15:56:38.321369",
+ "modified": "2025-08-20 22:13:38.506889",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

@@ -82,6 +82,7 @@ class WorkOrder(Document):
 		actual_operating_cost: DF.Currency
 		actual_start_date: DF.Datetime | None
 		additional_operating_cost: DF.Currency
+		additional_transferred_qty: DF.Float
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
 		batch_size: DF.Float
@@ -101,6 +102,7 @@ class WorkOrder(Document):
 		material_request: DF.Link | None
 		material_request_item: DF.Data | None
 		material_transferred_for_manufacturing: DF.Float
+		mps: DF.Link | None
 		naming_series: DF.Literal["MFG-WO-.YYYY.-"]
 		operations: DF.Table[WorkOrderOperation]
 		planned_end_date: DF.Datetime | None
@@ -149,6 +151,7 @@ class WorkOrder(Document):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
+		self.set_onload("transfer_extra_materials_percentage", ms.transfer_extra_materials_percentage)
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
 			"enable_stock_reservation",
@@ -354,6 +357,10 @@ class WorkOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
+			if not d.hour_rate:
+				if d.workstation:
+					d.hour_rate = get_hour_rate(d.workstation)
+
 			d.planned_operating_cost = flt(
 				flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
 			)
@@ -475,6 +482,7 @@ class WorkOrder(Document):
 		for purpose, fieldname in (
 			("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing"),
+			("Material Transfer for Manufacture", "additional_transferred_qty"),
 		):
 			if (
 				purpose == "Material Transfer for Manufacture"
@@ -483,7 +491,14 @@ class WorkOrder(Document):
 			):
 				continue
 
-			qty = self.get_transferred_or_manufactured_qty(purpose)
+			qty = self.get_transferred_or_manufactured_qty(purpose, fieldname)
+
+			if not allowance_percentage and purpose == "Material Transfer for Manufacture":
+				allowance_percentage = flt(
+					frappe.db.get_single_value(
+						"Manufacturing Settings", "transfer_extra_materials_percentage"
+					)
+				)
 
 			completed_qty = self.qty + (allowance_percentage / 100 * self.qty)
 			if qty > completed_qty:
@@ -506,6 +521,30 @@ class WorkOrder(Document):
 			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
 
+		if self.additional_transferred_qty:
+			self.validate_additional_transferred_qty()
+
+	def validate_additional_transferred_qty(self):
+		transfer_extra_materials_percentage = frappe.db.get_single_value(
+			"Manufacturing Settings", "transfer_extra_materials_percentage"
+		)
+
+		allowed_qty = flt(self.qty) + flt(flt(self.qty) * flt(transfer_extra_materials_percentage) / 100)
+
+		actual_qty = flt(self.material_transferred_for_manufacturing) + flt(self.additional_transferred_qty)
+
+		precision = frappe.get_precision("Work Order", "qty")
+		if flt(allowed_qty - actual_qty, precision) < 0:
+			frappe.throw(
+				_(
+					"""Additional Transferred Qty {0}
+					cannot be greater than {1}.
+					To fix this, increase the percentage value
+					of the field 'Transfer Extra Raw Materials to WIP'
+					in Manufacturing Settings."""
+				).format(actual_qty, allowed_qty),
+			)
+
 	def update_disassembled_qty(self, qty, is_cancel=False):
 		if is_cancel:
 			self.disassembled_qty = max(0, self.disassembled_qty - qty)
@@ -518,7 +557,7 @@ class WorkOrder(Document):
 
 		self.db_set("disassembled_qty", self.disassembled_qty)
 
-	def get_transferred_or_manufactured_qty(self, purpose):
+	def get_transferred_or_manufactured_qty(self, purpose, fieldname):
 		table = frappe.qb.DocType("Stock Entry")
 		query = frappe.qb.from_(table).where(
 			(table.work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose)
@@ -528,6 +567,10 @@ class WorkOrder(Document):
 			query = query.select(Sum(table.fg_completed_qty) - Sum(table.process_loss_qty))
 		else:
 			query = query.select(Sum(table.fg_completed_qty))
+
+		query = query.where(
+			table.is_additional_transfer_entry == cint(fieldname == "additional_transferred_qty")
+		)
 
 		return flt(query.run()[0][0])
 
@@ -1317,16 +1360,15 @@ class WorkOrder(Document):
 		data = query.run(as_dict=1) or []
 		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
+		row_wise_serial_batch = frappe._dict({})
+		if self.reserve_stock:
+			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
+
 		for row in self.required_items:
 			transferred_qty = transferred_items.get(row.item_code) or 0.0
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
-
-		if not self.reserve_stock:
-			return
-
-		row_wise_serial_batch = get_row_wise_serial_batch(self.name)
-		for row in self.required_items:
-			self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
+			if self.reserve_stock:
+				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
 		if names := frappe.get_all(
@@ -1342,7 +1384,7 @@ class WorkOrder(Document):
 			for name in names:
 				doc = frappe.get_doc("Stock Reservation Entry", name)
 				qty_to_update = 0.0
-				if transferred_qty <= 0:
+				if transferred_qty < 0:
 					continue
 
 				if transferred_qty > flt(doc.reserved_qty - doc.consumed_qty):
@@ -1352,12 +1394,16 @@ class WorkOrder(Document):
 					qty_to_update = transferred_qty
 					transferred_qty = 0.0
 
-				if qty_to_update <= 0:
+				if qty_to_update < 0:
 					continue
 
 				doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 					doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+
+				if doc.transferred_qty >= doc.reserved_qty:
+					doc.db_set("status", "Closed", update_modified=False)
+
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
 
@@ -1405,8 +1451,8 @@ class WorkOrder(Document):
 			if not self.reserve_stock:
 				continue
 
-			wip_warehouse = wip_warehouse or item.source_warehouse
-			self.update_consumed_qty_in_stock_reservation(item, consumed_qty, wip_warehouse)
+			warehouse = wip_warehouse or item.source_warehouse
+			self.update_consumed_qty_in_stock_reservation(item, consumed_qty, warehouse)
 
 	def update_consumed_qty_in_stock_reservation(self, item, consumed_qty, wip_warehouse):
 		filters = {
@@ -1975,7 +2021,9 @@ def set_work_order_ops(name):
 
 
 @frappe.whitelist()
-def make_stock_entry(work_order_id, purpose, qty=None, target_warehouse=None):
+def make_stock_entry(
+	work_order_id, purpose, qty=None, target_warehouse=None, is_additional_transfer_entry=False
+):
 	work_order = frappe.get_doc("Work Order", work_order_id)
 	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 		wip_warehouse = work_order.wip_warehouse
@@ -2014,6 +2062,7 @@ def make_stock_entry(work_order_id, purpose, qty=None, target_warehouse=None):
 		stock_entry.to_warehouse = target_warehouse or work_order.source_warehouse
 
 	stock_entry.set_stock_entry_type()
+	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
 	stock_entry.get_items(qty, work_order.production_item)
 
 	if purpose != "Disassemble":
@@ -2405,7 +2454,7 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 
 	row_wise_serial_batch = {}
 	for entry in serial_batch_entries:
-		key = (entry.item_code, entry.warehouse, entry.voucher_detail_no)
+		key = (entry.item_code, entry.warehouse)
 		if key not in row_wise_serial_batch:
 			row_wise_serial_batch[key] = frappe._dict(
 				{
@@ -2421,3 +2470,8 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 			details.batch_nos[entry.batch_no] += abs(entry.qty)
 
 	return row_wise_serial_batch
+
+
+@frappe.request_cache
+def get_hour_rate(workstation):
+	return frappe.get_cached_value("Workstation", workstation, "hour_rate") or 0.0

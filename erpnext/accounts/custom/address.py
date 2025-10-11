@@ -10,8 +10,10 @@ from frappe.contacts.doctype.address.address import (
 class ERPNextAddress(Address):
 	def validate(self):
 		self.validate_reference()
-		self.update_compnay_address()
-		super().validate()
+		self.update_company_address()
+
+		if hasattr(super(), "validate"):
+			super().validate()
 
 	def link_address(self):
 		"""Link address based on owner"""
@@ -20,7 +22,7 @@ class ERPNextAddress(Address):
 
 		return super().link_address()
 
-	def update_compnay_address(self):
+	def update_company_address(self):
 		for link in self.get("links"):
 			if link.link_doctype == "Company":
 				self.is_your_company_address = 1
@@ -38,6 +40,10 @@ class ERPNextAddress(Address):
 		"""
 		After Address is updated, update the related 'Primary Address' on Customer.
 		"""
+
+		if hasattr(super(), "on_update"):
+			super().on_update()
+
 		address_display = get_address_display(self.as_dict())
 		filters = {"customer_primary_address": self.name}
 		customers = frappe.db.get_all("Customer", filters=filters, as_list=True)

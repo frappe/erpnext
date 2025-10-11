@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
@@ -27,6 +28,7 @@
   "sales_person",
   "show_remarks",
   "based_on_payment_terms",
+  "show_future_payments",
   "section_break_3",
   "customer_collection",
   "collection_name",
@@ -37,6 +39,7 @@
   "column_break_17",
   "customers",
   "preferences",
+  "print_format",
   "orientation",
   "include_break",
   "include_ageing",
@@ -67,7 +70,7 @@
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Weekly\nMonthly\nQuarterly"
+   "options": "Daily\nWeekly\nBiweekly\nMonthly\nQuarterly"
   },
   {
    "fieldname": "company",
@@ -398,10 +401,23 @@
    "fieldtype": "Select",
    "label": "Categorize By",
    "options": "\nCategorize by Voucher\nCategorize by Voucher (Consolidated)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
+   "fieldname": "show_future_payments",
+   "fieldtype": "Check",
+   "label": "Show Future Payments"
+  },
+  {
+   "fieldname": "print_format",
+   "fieldtype": "Link",
+   "label": "Print Format",
+   "options": "Print Format"
   }
  ],
  "links": [],
- "modified": "2025-08-04 18:21:12.603623",
+ "modified": "2025-10-07 12:19:20.719898",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
