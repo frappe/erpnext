@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-10 11:13\n"
+"PO-Revision-Date: 2025-10-11 11:22\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Burmese\n"
 "MIME-Version: 1.0\n"
@@ -29,7 +29,7 @@ msgstr " လိပ်စာ"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:677
 msgid " Amount"
-msgstr ""
+msgstr " ပမာဏ"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"
@@ -47,7 +47,7 @@ msgstr ""
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:174
 msgid " Item"
-msgstr ""
+msgstr " ပစ္စည်း"
 
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:147
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:192
@@ -58,11 +58,11 @@ msgstr " အမည်"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:668
 msgid " Rate"
-msgstr ""
+msgstr " နှုန်း"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
-msgstr ""
+msgstr " ကုန်ကြမ်း"
 
 #. Label of the reserve_stock (Check) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -252,7 +252,7 @@ msgstr ""
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:127
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:313
 msgid "'From Date' is required"
-msgstr ""
+msgstr "'နေ့စွဲမှ' ကို ထည့်သွင်းရန် လိုအပ်သည်"
 
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:18
 msgid "'From Date' must be after 'To Date'"
@@ -273,13 +273,13 @@ msgstr ""
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:598
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:631
 msgid "'Opening'"
-msgstr ""
+msgstr "စာရင်းဖွင့်"
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:27
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:129
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:319
 msgid "'To Date' is required"
-msgstr ""
+msgstr "'နေ့စွဲအထိ' ကို ထည့်သွင်းရန် လိုအပ်သည်"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:95
 msgid "'To Package No.' cannot be less than 'From Package No.'"
@@ -459,13 +459,13 @@ msgstr ""
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:95
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:101
 msgid "1{0}"
-msgstr ""
+msgstr "၁ {0}"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Asset Maintenance
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "2 Yearly"
-msgstr ""
+msgstr "၂ နှစ်တိုင်း"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -480,25 +480,25 @@ msgstr ""
 #. Task'
 #: erpnext/assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "3 Yearly"
-msgstr ""
+msgstr "၃ နှစ်တိုင်း"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:113
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:361
 msgid "30 - 60 Days"
-msgstr ""
+msgstr "၃၀ - ၆၀ ရက်"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "30 mins"
-msgstr ""
+msgstr "၃၀ မိနစ်"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:115
 msgid "30-60"
-msgstr ""
+msgstr "၃၀ - ၆၀"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
-msgstr ""
+msgstr "၃၀ - ၆၀ ရက်"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -507,7 +507,7 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "501-1000"
-msgstr ""
+msgstr "၅၀၁ - ၁၀၀၀"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -516,21 +516,21 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "51-200"
-msgstr ""
+msgstr "၅၁ - ၂၀၀"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "6 hrs"
-msgstr ""
+msgstr "၆ နာရီ"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:114
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:362
 msgid "60 - 90 Days"
-msgstr ""
+msgstr "၆၀ - ၉၀ ရက်"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:116
 msgid "60-90"
-msgstr ""
+msgstr "၆၀ - ၉၀"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "60-90 Days"
@@ -539,12 +539,12 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:115
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:363
 msgid "90 - 120 Days"
-msgstr ""
+msgstr "၉၀ - ၁၂၀ ရက်"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "90 Above"
-msgstr ""
+msgstr "၉၀ အထက်"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:61
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
@@ -1088,7 +1088,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:116
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:364
 msgid "Above 120 Days"
-msgstr ""
+msgstr "ရက် ၁၂၀ အထက်"
 
 #. Name of a role
 #: erpnext/setup/doctype/department/department.json
@@ -4221,7 +4221,7 @@ msgstr ""
 #. 'Accounting Dimension Filter'
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Allow"
-msgstr ""
+msgstr "ခွင့်ပြုမည်"
 
 #. Label of the allow_account_creation_against_child_company (Check) field in
 #. DocType 'Company'
@@ -9097,12 +9097,12 @@ msgstr ""
 
 #: erpnext/accounts/print_format/sales_invoice_print/sales_invoice_print.html:11
 msgid "CANCELLED"
-msgstr ""
+msgstr "ပယ်ဖျက်ပြီး"
 
 #. Label of the cc (Link) field in DocType 'Process Statement Of Accounts CC'
 #: erpnext/accounts/doctype/process_statement_of_accounts_cc/process_statement_of_accounts_cc.json
 msgid "CC"
-msgstr ""
+msgstr "မိတ္တူ"
 
 #. Label of the cc_to (Table MultiSelect) field in DocType 'Process Statement
 #. Of Accounts'
@@ -9464,7 +9464,7 @@ msgstr ""
 
 #: erpnext/templates/pages/task_info.html:24
 msgid "Cancel"
-msgstr ""
+msgstr "ဖျက်မည်"
 
 #. Label of the cancel_at_period_end (Check) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -10114,7 +10114,7 @@ msgstr ""
 #. Label of the category (Link) field in DocType 'UOM Conversion Factor'
 #: erpnext/setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 msgid "Category"
-msgstr ""
+msgstr "အမျိုးအစား"
 
 #. Label of the category_details_section (Section Break) field in DocType 'Tax
 #. Withholding Category'
@@ -10884,7 +10884,7 @@ msgstr ""
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Color"
-msgstr ""
+msgstr "အရောင်"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:263
 msgid "Colour"
@@ -12300,7 +12300,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Contact"
-msgstr ""
+msgstr "အဆက်အသွယ်"
 
 #. Label of the contact_desc (HTML) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -12351,7 +12351,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Contact Email"
-msgstr ""
+msgstr "ဆက်သွယ်ရန် အီးမေးလ်"
 
 #. Label of the contact_html (HTML) field in DocType 'Bank'
 #. Label of the contact_html (HTML) field in DocType 'Bank Account'
@@ -14412,7 +14412,7 @@ msgstr ""
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "Custom"
-msgstr ""
+msgstr "စိတ်ကြိုက်ပုံစံ"
 
 #. Label of the custom_remarks (Check) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -15404,7 +15404,7 @@ msgstr ""
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Day"
-msgstr ""
+msgstr "နေ့"
 
 #. Label of the day_of_week (Select) field in DocType 'Appointment Booking
 #. Slots'
@@ -18286,7 +18286,7 @@ msgstr ""
 #. Option for the 'Shipment Type' (Select) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Documents"
-msgstr ""
+msgstr "စာရွက်စာတမ်းများ"
 
 #. Description of the 'Reconciliation Queue Size' (Int) field in DocType
 #. 'Accounts Settings'
