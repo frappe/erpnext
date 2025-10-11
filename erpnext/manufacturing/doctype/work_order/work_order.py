@@ -82,6 +82,7 @@ class WorkOrder(Document):
 		actual_operating_cost: DF.Currency
 		actual_start_date: DF.Datetime | None
 		additional_operating_cost: DF.Currency
+		additional_transferred_qty: DF.Float
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
 		batch_size: DF.Float
@@ -481,6 +482,7 @@ class WorkOrder(Document):
 		for purpose, fieldname in (
 			("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing"),
+			("Material Transfer for Manufacture", "additional_transferred_qty"),
 		):
 			if (
 				purpose == "Material Transfer for Manufacture"
@@ -489,7 +491,7 @@ class WorkOrder(Document):
 			):
 				continue
 
-			qty = self.get_transferred_or_manufactured_qty(purpose)
+			qty = self.get_transferred_or_manufactured_qty(purpose, fieldname)
 
 			if not allowance_percentage and purpose == "Material Transfer for Manufacture":
 				allowance_percentage = flt(
@@ -519,6 +521,30 @@ class WorkOrder(Document):
 			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
 
+		if self.additional_transferred_qty:
+			self.validate_additional_transferred_qty()
+
+	def validate_additional_transferred_qty(self):
+		transfer_extra_materials_percentage = frappe.db.get_single_value(
+			"Manufacturing Settings", "transfer_extra_materials_percentage"
+		)
+
+		allowed_qty = flt(self.qty) + flt(flt(self.qty) * flt(transfer_extra_materials_percentage) / 100)
+
+		actual_qty = flt(self.material_transferred_for_manufacturing) + flt(self.additional_transferred_qty)
+
+		precision = frappe.get_precision("Work Order", "qty")
+		if flt(allowed_qty - actual_qty, precision) < 0:
+			frappe.throw(
+				_(
+					"""Additional Transferred Qty {0}
+					cannot be greater than {1}.
+					To fix this, increase the percentage value
+					of the field 'Transfer Extra Raw Materials to WIP'
+					in Manufacturing Settings."""
+				).format(actual_qty, allowed_qty),
+			)
+
 	def update_disassembled_qty(self, qty, is_cancel=False):
 		if is_cancel:
 			self.disassembled_qty = max(0, self.disassembled_qty - qty)
@@ -531,7 +557,7 @@ class WorkOrder(Document):
 
 		self.db_set("disassembled_qty", self.disassembled_qty)
 
-	def get_transferred_or_manufactured_qty(self, purpose):
+	def get_transferred_or_manufactured_qty(self, purpose, fieldname):
 		table = frappe.qb.DocType("Stock Entry")
 		query = frappe.qb.from_(table).where(
 			(table.work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose)
@@ -541,6 +567,10 @@ class WorkOrder(Document):
 			query = query.select(Sum(table.fg_completed_qty) - Sum(table.process_loss_qty))
 		else:
 			query = query.select(Sum(table.fg_completed_qty))
+
+		query = query.where(
+			table.is_additional_transfer_entry == cint(fieldname == "additional_transferred_qty")
+		)
 
 		return flt(query.run()[0][0])
 
@@ -1991,7 +2021,9 @@ def set_work_order_ops(name):
 
 
 @frappe.whitelist()
-def make_stock_entry(work_order_id, purpose, qty=None, target_warehouse=None):
+def make_stock_entry(
+	work_order_id, purpose, qty=None, target_warehouse=None, is_additional_transfer_entry=False
+):
 	work_order = frappe.get_doc("Work Order", work_order_id)
 	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 		wip_warehouse = work_order.wip_warehouse
@@ -2030,6 +2062,7 @@ def make_stock_entry(work_order_id, purpose, qty=None, target_warehouse=None):
 		stock_entry.to_warehouse = target_warehouse or work_order.source_warehouse
 
 	stock_entry.set_stock_entry_type()
+	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
 	stock_entry.get_items(qty, work_order.production_item)
 
 	if purpose != "Disassemble":

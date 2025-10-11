@@ -421,6 +421,79 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
+	def test_subcontracting_receipt_for_service_expense_account(self):
+		service_expense_account = (
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Service Expense",
+					"account_type": "Expense Account",
+					"company": "_Test Company with perpetual inventory",
+					"is_group": 0,
+					"parent_account": "Indirect Expenses - TCP1",
+				}
+			)
+			.insert(ignore_if_duplicate=True)
+			.name
+		)
+
+		service_item_doc = frappe.get_doc("Item", "Subcontracted Service Item 10")
+		service_item_doc.append(
+			"item_defaults",
+			{
+				"company": "_Test Company with perpetual inventory",
+				"expense_account": service_expense_account,
+				"default_warehouse": "Stores - TCP1",
+			},
+		)
+
+		service_item_doc.save()
+
+		service_items = [
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": "Subcontracted Service Item 10",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA10",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		for item in scr.items:
+			self.assertEqual(item.service_expense_account, service_expense_account)
+
+		gl_entries = get_gl_entries("Subcontracting Receipt", scr.name)
+		self.assertTrue(gl_entries)
+
+		fg_warehouse_ac = get_inventory_account(scr.company, scr.items[0].warehouse)
+		expense_account = scr.items[0].expense_account
+		expected_values = {
+			fg_warehouse_ac: [2000, 1000],
+			expense_account: [1000, 1000],
+			service_expense_account: [0, 1000],
+		}
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
+
 	@IntegrationTestCase.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
@@ -739,13 +812,13 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		for row in scr.supplied_items:
 			self.assertEqual(row.rate, 300.00)
 			self.assertTrue(row.serial_and_batch_bundle)
-			auto_created_serial_batch = frappe.db.get_value(
+			serial_and_batch_bundle = frappe.db.get_value(
 				"Stock Ledger Entry",
 				{"voucher_no": scr.name, "voucher_detail_no": row.name},
-				"auto_created_serial_and_batch_bundle",
+				"serial_and_batch_bundle",
 			)
 
-			self.assertTrue(auto_created_serial_batch)
+			self.assertTrue(serial_and_batch_bundle)
 
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 900)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)

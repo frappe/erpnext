@@ -120,29 +120,20 @@ class StockReservationEntry(Document):
 			).run(as_list=True)[0][0] or 0
 
 			sres = self.get_from_voucher_reservation_entries()
-			index = 0
 			for row in sres:
+				if delivered_qty < 0.0:
+					break
+
 				status = "Reserved"
 
 				if self.has_batch_no or self.has_serial_no:
 					serial_batch_data = self.get_serial_batch_entries()
 					update_serial_batch_delivered_qty(serial_batch_data, row.name, is_cancelled=True)
 
-				if delivered_qty <= 0 or index == 0:
-					frappe.db.set_value(
-						"Stock Reservation Entry",
-						row.name,
-						{"delivered_qty": delivered_qty, "status": status},
-					)
-
-					continue
-
-				index += 1
 				if row.reserved_qty > delivered_qty:
 					frappe.db.set_value(
 						"Stock Reservation Entry",
 						row.name,
-						"delivered_qty",
 						{"delivered_qty": delivered_qty, "status": status},
 					)
 
@@ -151,7 +142,6 @@ class StockReservationEntry(Document):
 					frappe.db.set_value(
 						"Stock Reservation Entry",
 						row.name,
-						"delivered_qty",
 						{"delivered_qty": row.reserved_qty, "status": "Delivered"},
 					)
 

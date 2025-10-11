@@ -488,6 +488,21 @@ $.extend(erpnext.item, {
 				},
 			};
 		});
+
+		let fields = ["purchase_expense_account", "purchase_expense_contra_account", "default_cogs_account"];
+
+		fields.forEach((field) => {
+			frm.set_query(field, "item_defaults", (doc, cdt, cdn) => {
+				let row = locals[cdt][cdn];
+				return {
+					filters: {
+						company: row.company,
+						root_type: "Expense",
+						is_group: 0,
+					},
+				};
+			});
+		});
 	},
 
 	make_dashboard: function (frm) {

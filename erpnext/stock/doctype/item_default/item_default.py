@@ -16,6 +16,7 @@ class ItemDefault(Document):
 
 		buying_cost_center: DF.Link | None
 		company: DF.Link
+		default_cogs_account: DF.Link | None
 		default_discount_account: DF.Link | None
 		default_price_list: DF.Link | None
 		default_provisional_account: DF.Link | None
@@ -28,6 +29,8 @@ class ItemDefault(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		purchase_expense_account: DF.Link | None
+		purchase_expense_contra_account: DF.Link | None
 		selling_cost_center: DF.Link | None
 	# end: auto-generated types
 

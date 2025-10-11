@@ -74,8 +74,11 @@ class PickList(TransactionBase):
 		if self.has_reserved_stock():
 			self.set_onload("has_reserved_stock", True)
 
-		for item in self.get("locations"):
-			item.update(get_item_details(item.item_code, item.uom, item.warehouse, self.company))
+		if self.docstatus.is_draft() and not hasattr(self, "_action"):
+			company = self.company
+
+			for item in self.get("locations"):
+				item.update(get_item_details(item.item_code, item.uom, item.warehouse, company))
 
 	def validate(self):
 		self.validate_expired_batches()
@@ -1438,7 +1441,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 
 @frappe.whitelist()
 def get_item_details(item_code, uom=None, warehouse=None, company=None):
-	details = frappe.db.get_value("Item", item_code, ["stock_uom", "name"], as_dict=1)
+	details = frappe.db.get_value("Item", item_code, "stock_uom", as_dict=1)
 	details.uom = uom or details.stock_uom
 	if uom:
 		details.update(get_conversion_factor(item_code, uom))

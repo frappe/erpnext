@@ -829,7 +829,7 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		asset = frappe.get_doc("Asset", {"purchase_receipt": pr.name})
 		asset.available_for_use_date = frappe.utils.nowdate()
-		asset.gross_purchase_amount = 50.0
+		asset.net_purchase_amount = 50.0
 		asset.append(
 			"finance_books",
 			{
@@ -1201,6 +1201,7 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
+	@IntegrationTestCase.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
@@ -1211,11 +1212,8 @@ class TestPurchaseReceipt(IntegrationTestCase):
 			make_pr_against_po,
 		)
 		from erpnext.selling.doctype.sales_order.test_sales_order import (
-			automatically_fetch_payment_terms,
 			compare_payment_schedules,
 		)
-
-		automatically_fetch_payment_terms()
 
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
@@ -1233,8 +1231,6 @@ class TestPurchaseReceipt(IntegrationTestCase):
 
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
-
-		automatically_fetch_payment_terms(enable=0)
 
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 1})
 	def test_neg_to_positive(self):
@@ -4414,6 +4410,69 @@ class TestPurchaseReceipt(IntegrationTestCase):
 		)
 
 		self.assertEqual(srbnb_cost, 1000)
+
+	def test_purchase_expense_account(self):
+		item = "Test Item with Purchase Expense Account"
+		make_item(item, {"is_stock_item": 1})
+		company = "_Test Company with perpetual inventory"
+
+		expense_account = "_Test Account Purchase Expense - TCP1"
+		expense_contra_account = "_Test Account Purchase Contra Expense - TCP1"
+		if not frappe.db.exists("Account", expense_account):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Account Purchase Expense",
+					"parent_account": "Stock Expenses - TCP1",
+					"company": company,
+					"is_group": 0,
+					"root_type": "Expense",
+				}
+			).insert()
+
+		if not frappe.db.exists("Account", expense_contra_account):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Account Purchase Contra Expense",
+					"parent_account": "Stock Expenses - TCP1",
+					"company": company,
+					"is_group": 0,
+					"root_type": "Expense",
+				}
+			).insert()
+
+		item_doc = frappe.get_doc("Item", item)
+		item_doc.append(
+			"item_defaults",
+			{
+				"company": company,
+				"default_warehouse": "Stores - TCP1",
+				"purchase_expense_account": expense_account,
+				"purchase_expense_contra_account": expense_contra_account,
+			},
+		)
+
+		item_doc.save()
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=10,
+			rate=100,
+			company=company,
+			warehouse="Stores - TCP1",
+		)
+
+		gl_entries = get_gl_entries(pr.doctype, pr.name)
+		accounts = [d.account for d in gl_entries]
+		self.assertTrue(expense_account in accounts)
+		self.assertTrue(expense_contra_account in accounts)
+
+		for row in gl_entries:
+			if row.account == expense_account:
+				self.assertEqual(row.debit, 1000)
+			if row.account == expense_contra_account:
+				self.assertEqual(row.credit, 1000)
 
 
 def prepare_data_for_internal_transfer():

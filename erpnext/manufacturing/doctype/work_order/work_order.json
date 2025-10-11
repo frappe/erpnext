@@ -19,13 +19,15 @@
   "column_break1",
   "company",
   "qty",
-  "material_transferred_for_manufacturing",
-  "produced_qty",
-  "disassembled_qty",
-  "process_loss_qty",
   "project",
   "track_semi_finished_goods",
   "reserve_stock",
+  "column_break_agjv",
+  "material_transferred_for_manufacturing",
+  "additional_transferred_qty",
+  "produced_qty",
+  "disassembled_qty",
+  "process_loss_qty",
   "warehouses",
   "source_warehouse",
   "wip_warehouse",
@@ -609,6 +611,17 @@
    "label": "MPS",
    "options": "Master Production Schedule",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_agjv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "additional_transferred_qty",
+   "fieldtype": "Float",
+   "label": "Additional Transferred Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -617,7 +630,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-28 11:01:48.719824",
+ "modified": "2025-09-29 15:57:47.022616",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

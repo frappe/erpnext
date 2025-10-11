@@ -283,10 +283,13 @@ def filter_batches(batches, doc):
 				del batches[row.get("batch_no")]
 
 
-def get_filtered_serial_nos(serial_nos, doc):
+def get_filtered_serial_nos(serial_nos, doc, table=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	for row in doc.get("items"):
+	if not table:
+		table = "items"
+
+	for row in doc.get(table):
 		if row.get("serial_no"):
 			for serial_no in get_serial_nos(row.get("serial_no")):
 				if serial_no in serial_nos:
@@ -498,6 +501,9 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 			"grant_commission": item.get("grant_commission"),
 		}
 	)
+
+	if not item.is_stock_item and not out.expense_account:
+		out.expense_account = frappe.get_cached_value("Company", ctx.company, "service_expense_account")
 
 	default_supplier = get_default_supplier(ctx, item_defaults, item_group_defaults, brand_defaults)
 	if default_supplier:
@@ -750,8 +756,10 @@ def _get_item_tax_template(
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		tax_company = frappe.get_cached_value("Item Tax Template", tax.item_tax_template, "company")
-		if tax_company == ctx["company"]:
+		disabled, tax_company = frappe.get_cached_value(
+			"Item Tax Template", tax.item_tax_template, ["disabled", "company"]
+		)
+		if not disabled and tax_company == ctx["company"]:
 			if tax.valid_from or tax.maximum_net_rate:
 				# In purchase Invoice first preference will be given to supplier invoice date
 				# if supplier date is not present then posting date
@@ -865,6 +873,19 @@ def get_default_income_account(ctx: ItemDetailsCtx, item, item_group, brand):
 
 
 def get_default_expense_account(ctx: ItemDetailsCtx, item, item_group, brand):
+	if ctx.get("doctype") in ["Sales Invoice", "Delivery Note"]:
+		expense_account = (
+			item.get("default_cogs_account")
+			or item_group.get("default_cogs_account")
+			or brand.get("default_cogs_account")
+		)
+
+		if not expense_account:
+			expense_account = frappe.get_cached_value("Company", ctx.company, "default_expense_account")
+
+		if expense_account:
+			return expense_account
+
 	return (
 		item.get("expense_account")
 		or item_group.get("expense_account")
@@ -1561,7 +1582,7 @@ def get_valuation_rate(item_code, company, warehouse=None):
 
 		return frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
-		) or {"valuation_rate": 0}
+		) or {"valuation_rate": item.get("valuation_rate") or 0}
 
 	elif not item.get("is_stock_item"):
 		pi_item = frappe.qb.DocType("Purchase Invoice Item")

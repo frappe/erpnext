@@ -22,6 +22,17 @@ frappe.ui.form.on("Batch", {
 				frappe.set_route("query-report", "Stock Ledger");
 			});
 			frm.trigger("make_dashboard");
+
+			frm.add_custom_button(__("Recalculate Batch Qty"), () => {
+				frm.call({
+					method: "recalculate_batch_qty",
+					doc: frm.doc,
+					freeze: true,
+					callback: () => {
+						frm.reload_doc();
+					},
+				});
+			});
 		}
 	},
 	item: (frm) => {

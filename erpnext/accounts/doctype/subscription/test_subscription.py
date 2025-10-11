@@ -8,6 +8,7 @@ from frappe.utils.data import (
 	add_days,
 	add_months,
 	add_to_date,
+	add_years,
 	cint,
 	date_diff,
 	flt,
@@ -554,6 +555,33 @@ class TestSubscription(IntegrationTestCase):
 		subscription.force_fetch_subscription_updates()
 		subscription.reload()
 		self.assertEqual(len(subscription.invoices), 0)
+
+	def test_invoice_generation_days_before_subscription_period_with_prorate(self):
+		settings = frappe.get_single("Subscription Settings")
+		settings.prorate = 1
+		settings.save()
+
+		create_plan(
+			plan_name="_Test Plan Name 5",
+			cost=1000,
+			billing_interval="Year",
+			billing_interval_count=1,
+			currency="INR",
+		)
+
+		start_date = add_days(nowdate(), 2)
+
+		subscription = create_subscription(
+			start_date=start_date,
+			party_type="Supplier",
+			party="_Test Supplier",
+			generate_invoice_at="Days before the current subscription period",
+			generate_new_invoices_past_due_date=1,
+			number_of_days=2,
+			plans=[{"plan": "_Test Plan Name 5", "qty": 1}],
+		)
+		subscription.process(nowdate())
+		self.assertEqual(len(subscription.invoices), 1)
 
 
 def make_plans():
