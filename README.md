@@ -85,6 +85,7 @@ Run following commands:
 ```
 git clone https://github.com/frappe/frappe_docker
 cd frappe_docker
+cp example.env .env
 docker compose -f pwd.yml up -d
 ```
 
