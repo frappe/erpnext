@@ -667,21 +667,18 @@ class SubcontractingInwardController(StockController):
 				)
 
 				if data := data.run(as_dict=True):
-					deleted_docs = []
+					deleted_docs, used_item_wh = [], []
 					case_expr = Case()
 					for d in data:
-						qty = (
-							d.consumed_qty
-							+ item_code_wh[
-								(
-									d.rm_item_code,
-									d.warehouse
-									or next(
-										key[1] for key in item_code_wh.keys() if key[0] == d.rm_item_code
-									),
-								)
-							]
-						)
+						if not d.warehouse:
+							d.warehouse = next(
+								key[1]
+								for key in item_code_wh.keys()
+								if key[0] == d.rm_item_code and key not in used_item_wh
+							)
+							used_item_wh.append((d.rm_item_code, d.warehouse))
+
+						qty = d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)]
 						if qty or d.is_customer_provided_item:
 							case_expr = case_expr.when((table.name == d.name), qty)
 						else:
@@ -698,16 +695,7 @@ class SubcontractingInwardController(StockController):
 						item
 						for item in items
 						if (item.item_code, item.s_warehouse)
-						not in [
-							(
-								d.rm_item_code,
-								d.warehouse
-								or next(
-									item.s_warehouse for item in items if item.item_code == d.rm_item_code
-								),
-							)
-							for d in data
-						]
+						not in [(d.rm_item_code, d.warehouse) for d in data]
 					]:
 						frappe.new_doc(
 							"Subcontracting Inward Order Received Item",
