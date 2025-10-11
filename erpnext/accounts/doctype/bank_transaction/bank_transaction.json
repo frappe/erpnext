@@ -38,7 +38,14 @@
   "column_break_3czf",
   "bank_party_name",
   "bank_party_account_number",
-  "bank_party_iban"
+  "bank_party_iban",
+  "section_break_bhxo",
+  "included_fee",
+  "original_amount",
+  "exchange_rate",
+  "column_break_fgey",
+  "included_fee_currency",
+  "original_amount_currency"
  ],
  "fields": [
   {
@@ -233,12 +240,51 @@
   {
    "fieldname": "column_break_oufv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "included_fee",
+   "fieldtype": "Currency",
+   "label": "Included Fee",
+   "options": "included_fee_currency"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_bhxo",
+   "fieldtype": "Section Break",
+   "label": "Extended Bank Statement"
+  },
+  {
+   "fieldname": "column_break_fgey",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "included_fee_currency",
+   "fieldtype": "Link",
+   "label": "Included Fee Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "original_amount",
+   "fieldtype": "Currency",
+   "label": "Original Amount",
+   "options": "original_amount_currency"
+  },
+  {
+   "fieldname": "original_amount_currency",
+   "fieldtype": "Link",
+   "label": "Original Amount Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate"
   }
  ],
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-18 17:24:57.044666",
+ "modified": "2025-10-11 17:32:59.915990",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

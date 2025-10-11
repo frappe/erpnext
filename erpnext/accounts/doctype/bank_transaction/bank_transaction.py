@@ -32,7 +32,12 @@ class BankTransaction(Document):
 		date: DF.Date | None
 		deposit: DF.Currency
 		description: DF.SmallText | None
+		exchange_rate: DF.Float
+		included_fee: DF.Currency
+		included_fee_currency: DF.Link | None
 		naming_series: DF.Literal["ACC-BTN-.YYYY.-"]
+		original_amount: DF.Currency
+		original_amount_currency: DF.Link | None
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
 		payment_entries: DF.Table[BankTransactionPayments]
