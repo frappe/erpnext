@@ -79,30 +79,27 @@
 
             <td class="invoice-info-cell">
                 {% set company_details = frappe.db.get_value("Company", doc.company, ["website", "email", "phone_no"], as_dict=True) %}
-                {% set website = company_details.website %}
-                {% set email = company_details.email %}
-                {% set phone_no = company_details.phone_no %}
 
                 <div class="invoice-info">
                     <span class="invoice-label">{{ _("Invoice:") }}</span>
                     <span>{{ doc.name }}</span>
                 </div>
-                {% if website %}
+                {% if company_details.website %}
                     <div class="invoice-info">
                         <span class="invoice-label">{{ _("Website:") }}</span>
-                        <span>{{ website }}</span>
+                        <span>{{ company_details.website }}</span>
                     </div>
                 {% endif %}
-                {% if email %}
+                {% if company_details.email %}
                     <div class="invoice-info">
                         <span class="invoice-label">{{ _("Email:") }}</span>
-                        <span>{{ email }}</span>
+                        <span>{{ company_details.email }}</span>
                     </div>
                 {% endif %}
-                {% if phone_no %}
+                {% if company_details.phone_no %}
                     <div class="invoice-info">
                         <span class="invoice-label">{{ _("Contact:") }}</span>
-                        <span>{{ phone_no }}</span>
+                        <span>{{ company_details.phone_no }}</span>
                     </div>
                 {% endif %}
             </td>

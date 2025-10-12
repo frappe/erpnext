@@ -286,8 +286,8 @@ def create_letter_head():
 	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
 
 	letterheads = {
-		"Letterhead with background colour": "letterhead_with_background_colour.html",
-		"Letterhead Plain": "letterhead_plain.html",
+		"Company Letterhead": "company_letterhead.html",
+		"Company Letterhead - Grey": "company_letterhead_grey.html",
 	}
 
 	for name, filename in letterheads.items():

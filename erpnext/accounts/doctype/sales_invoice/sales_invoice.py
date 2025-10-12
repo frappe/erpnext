@@ -288,26 +288,35 @@ class SalesInvoice(SellingController):
 			"Company", self.company, ["company_logo", "website", "phone_no", "email"], as_dict=True
 		)
 
-		address_display_list = get_address_display_list("Company", self.company)
-		address_line = address_display_list[0] if address_display_list else ""
-
 		required_fields = [
 			company_details.get("company_logo"),
 			company_details.get("phone_no"),
 			company_details.get("email"),
-			self.company_address,
-			address_line,
 		]
 
-		if not all(required_fields):
-			if not frappe.has_permission("Company", "write", throw=False):
-				frappe.msgprint(
-					_(
-						"Some required Company details are missing. You don't have permission to update them. Please contact your System Manager."
-					)
+		if not all(required_fields) and not frappe.has_permission("Company", "write", throw=False):
+			frappe.msgprint(
+				_(
+					"Some required Company details are missing. You don't have permission to update them. Please contact your System Manager."
 				)
-				return
+			)
+			return
 
+		if not self.company_address and not frappe.has_permission("Sales Invoice", "write", throw=False):
+			frappe.msgprint(
+				_(
+					"Company Address is missing. You don't have permission to update it. Please contact your System Manager."
+				)
+			)
+			return
+
+		address_display_list = get_address_display_list("Company", self.company)
+		address_line = address_display_list[0].get("address_line1") if address_display_list else ""
+
+		required_fields.append(self.company_address)
+		required_fields.append(address_line)
+
+		if not all(required_fields):
 			frappe.publish_realtime(
 				"sales_invoice_before_print",
 				{

@@ -100,21 +100,23 @@
 				</div>
 				<div style="text-align: left; float: right" class="other-details">
 					{% set company_details = frappe.db.get_value("Company", doc.company, ["website", "email", "phone_no"], as_dict=True) %}
-					{% set website = company_details.website %} {% set email = company_details.email %} {% set phone_no = company_details.phone_no %} {% if website %}
-					<div>
-						<span class="contact-title">{{ _("Website:") }}</span
-						><span class="contact-value">{{ website }}</span>
-					</div>
-					{% endif %} {% if email %}
-					<div>
-						<span class="contact-title">{{ _("Email:") }}</span
-						><span class="contact-value">{{ email }}</span>
-					</div>
-					{% endif %} {% if phone_no %}
-					<div>
-						<span class="contact-title">{{ _("Contact:") }}</span
-						><span class="contact-value">{{ phone_no }}</span>
-					</div>
+					{% if company_details.website %}
+						<div>
+							<span class="contact-title">{{ _("Website:") }}</span
+							><span class="contact-value">{{ company_details.website }}</span>
+						</div>
+					{% endif %}
+					{% if company_details.email %}
+						<div>
+							<span class="contact-title">{{ _("Email:") }}</span
+							><span class="contact-value">{{ company_details.email }}</span>
+						</div>
+					{% endif %}
+					{% if company_details.phone_no %}
+						<div>
+							<span class="contact-title">{{ _("Contact:") }}</span
+							><span class="contact-value">{{ company_details.phone_no }}</span>
+						</div>
 					{% endif %}
 				</div>
 			</td>
