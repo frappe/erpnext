@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-06 10:13\n"
+"PO-Revision-Date: 2025-10-11 11:22\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -50930,7 +50930,7 @@ msgstr "Visa Bokföring Register Saldo"
 
 #: erpnext/accounts/report/trial_balance/trial_balance.js:116
 msgid "Show Group Accounts"
-msgstr "Visa Gruppkonton"
+msgstr "Visa Grupp Konto"
 
 #. Label of the show_in_website (Check) field in DocType 'Sales Partner'
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
@@ -58449,19 +58449,19 @@ msgstr "Kvalitet Procedur Träd"
 #: erpnext/accounts/workspace/accounting/accounting.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Trial Balance"
-msgstr "Aktuell Saldo"
+msgstr "Brutto Saldo"
 
 #. Name of a report
 #: erpnext/accounts/report/trial_balance_simple/trial_balance_simple.json
 msgid "Trial Balance (Simple)"
-msgstr "Aktuell Saldo (Enkel)"
+msgstr "Brutto Saldo (Enkel)"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Trial Balance for Party"
-msgstr "Aktuell Saldo för Parti"
+msgstr "Brutto Saldo för Parti"
 
 #. Label of the trial_period_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -58485,7 +58485,7 @@ msgstr "Prov Period Start Datum kan inte vara efter Prenumeration Start Datum"
 #: erpnext/accounts/doctype/subscription/subscription.json
 #: erpnext/accounts/doctype/subscription/subscription_list.js:4
 msgid "Trialing"
-msgstr "Prövning"
+msgstr "Prov Period"
 
 #. Description of the 'General Ledger' (Int) field in DocType 'Accounts
 #. Settings'
@@ -62170,7 +62170,7 @@ msgstr "Du kan inte göra några ändringar i Jobbkort eftersom Arbetsorder är 
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:187
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
-msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} Om du vill leverera in samma serienummer flera gånger aktiverar du \"Tillåt att befintligt serienummer produceras/tas emot igen\" i {3}"
+msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} Om du vill leverera in samma serienummer flera gånger aktiverar du \"Tillåt att befintligt serienummer Produceras/Tas Emot igen\" i {3}"
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.py:192
 msgid "You can't redeem Loyalty Points having more value than the Total Amount."

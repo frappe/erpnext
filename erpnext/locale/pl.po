@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-05 09:35+0000\n"
-"PO-Revision-Date: 2025-10-06 10:13\n"
+"PO-Revision-Date: 2025-10-12 11:20\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Polish\n"
 "MIME-Version: 1.0\n"
@@ -2525,7 +2525,7 @@ msgstr "Zajęcia"
 #: erpnext/projects/doctype/task/task_dashboard.py:8
 #: erpnext/support/doctype/issue/issue_dashboard.py:5
 msgid "Activity"
-msgstr ""
+msgstr "Aktywność"
 
 #. Name of a DocType
 #. Label of a Link in the Projects Workspace
@@ -7829,7 +7829,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Barcode"
-msgstr ""
+msgstr "Kod kreskowy"
 
 #. Label of the barcode_type (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -9425,7 +9425,7 @@ msgstr ""
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:9
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Campaign"
-msgstr ""
+msgstr "Kampania"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
@@ -10162,7 +10162,7 @@ msgstr ""
 #. Label of the category (Link) field in DocType 'UOM Conversion Factor'
 #: erpnext/setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 msgid "Category"
-msgstr ""
+msgstr "Kategoria"
 
 #. Label of the category_details_section (Section Break) field in DocType 'Tax
 #. Withholding Category'
@@ -10932,7 +10932,7 @@ msgstr "Poziom kolekcji"
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Color"
-msgstr ""
+msgstr "Kolor"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:263
 msgid "Colour"
@@ -14219,7 +14219,7 @@ msgstr ""
 #: erpnext/stock/doctype/price_list/price_list.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Currency"
-msgstr ""
+msgstr "Waluta"
 
 #. Label of a Link in the Accounting Workspace
 #. Name of a DocType
@@ -14461,7 +14461,7 @@ msgstr "Opieka"
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "Custom"
-msgstr ""
+msgstr "Niestandardowy"
 
 #. Label of the custom_remarks (Check) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -18261,7 +18261,7 @@ msgstr ""
 #: erpnext/accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 #: erpnext/setup/doctype/transaction_deletion_record_item/transaction_deletion_record_item.json
 msgid "DocType"
-msgstr ""
+msgstr "DocType"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:77
 msgid "DocTypes should not be added manually to the 'Excluded DocTypes' table. You are only allowed to remove entries from it."
@@ -19057,7 +19057,7 @@ msgstr ""
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:939
 #: erpnext/setup/doctype/company/company.json
 msgid "Email"
-msgstr ""
+msgstr "E-mail"
 
 #. Label of a Card Break in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
@@ -19071,7 +19071,7 @@ msgstr ""
 #: erpnext/setup/workspace/settings/settings.json
 #: erpnext/support/doctype/issue/issue.json
 msgid "Email Account"
-msgstr ""
+msgstr "Konto e-mail"
 
 #. Label of the email_id (Data) field in DocType 'Warehouse'
 #. Label of a field in the addresses Web Form
@@ -20838,7 +20838,7 @@ msgstr "Ujmujący..."
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:106
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:155
 msgid "Field"
-msgstr ""
+msgstr "Pole"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -20869,12 +20869,12 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_search_fields/pos_search_fields.json
 #: erpnext/portal/doctype/website_filter_field/website_filter_field.json
 msgid "Fieldname"
-msgstr ""
+msgstr "Nazwa pola"
 
 #. Label of the fields (Table) field in DocType 'Item Variant Settings'
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Fields"
-msgstr ""
+msgstr "Pola"
 
 #. Description of the 'Do not update variants on save' (Check) field in DocType
 #. 'Item Variant Settings'
@@ -20894,7 +20894,7 @@ msgstr "Plik to zmiany nazwy"
 
 #: erpnext/edi/doctype/code_list/code_list_import.js:65
 msgid "Filter"
-msgstr ""
+msgstr "Filtr"
 
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:16
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:16
@@ -23294,7 +23294,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_terms_template/payment_terms_template_dashboard.py:17
 msgid "Group"
-msgstr ""
+msgstr "Grupa"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.js:30
 #: erpnext/accounts/report/gross_profit/gross_profit.js:36
@@ -23620,7 +23620,7 @@ msgstr ""
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 #: erpnext/templates/pages/help.html:3 erpnext/templates/pages/help.html:5
 msgid "Help"
-msgstr ""
+msgstr "Pomoc"
 
 #. Label of the help_section (Tab Break) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
@@ -23806,7 +23806,7 @@ msgstr ""
 #. Name of a Workspace
 #: erpnext/setup/workspace/home/home.json
 msgid "Home"
-msgstr ""
+msgstr "Strona główna"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -28854,7 +28854,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_field/pos_field.json
 #: erpnext/stock/doctype/item_website_specification/item_website_specification.json
 msgid "Label"
-msgstr ""
+msgstr "Etykieta"
 
 #. Label of the taxes (Table) field in DocType 'Landed Cost Voucher'
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
@@ -28928,7 +28928,7 @@ msgstr "Krajobraz"
 #. Label of the language (Link) field in DocType 'Dunning Letter Text'
 #: erpnext/accounts/doctype/dunning_letter_text/dunning_letter_text.json
 msgid "Language"
-msgstr ""
+msgstr "Język"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -30348,7 +30348,7 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:254
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:101
 msgid "Mandatory"
-msgstr ""
+msgstr "Obowiązkowy"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:99
 msgid "Mandatory Accounting Dimension"
@@ -31393,7 +31393,7 @@ msgstr ""
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "Message"
-msgstr ""
+msgstr "Wiadomość"
 
 #. Label of the message_examples (HTML) field in DocType 'Payment Gateway
 #. Account'
@@ -32310,7 +32310,7 @@ msgstr ""
 #: erpnext/selling/doctype/quotation/quotation.js:274
 #: erpnext/setup/doctype/employee_group/employee_group.json
 msgid "Name"
-msgstr ""
+msgstr "Nazwa"
 
 #. Label of the name_and_employee_id (Section Break) field in DocType 'Sales
 #. Person'
@@ -32946,7 +32946,7 @@ msgstr ""
 
 #: erpnext/www/book_appointment/index.html:34
 msgid "Next"
-msgstr ""
+msgstr "Następny"
 
 #. Label of the next_depreciation_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -33010,7 +33010,7 @@ msgstr "Kolejny e-mali zostanie wysłany w dniu:"
 #: erpnext/stock/doctype/shipment/shipment.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "No"
-msgstr ""
+msgstr "Nie"
 
 #: erpnext/setup/doctype/company/test_company.py:99
 msgid "No Account matched these filters: {}"
@@ -33694,7 +33694,7 @@ msgstr ""
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Notification Settings"
-msgstr ""
+msgstr "Ustawienia powiadomień"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:45
 msgid "Notify Customers via Email"
@@ -34530,7 +34530,7 @@ msgstr ""
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:328
 msgid "Operation"
-msgstr ""
+msgstr "Operacja"
 
 #. Label of the production_section (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
@@ -34803,7 +34803,7 @@ msgstr ""
 #. Label of the options (Text) field in DocType 'POS Field'
 #: erpnext/accounts/doctype/pos_field/pos_field.json
 msgid "Options"
-msgstr ""
+msgstr "Opcje"
 
 #. Option for the 'Color' (Select) field in DocType 'Supplier Scorecard Scoring
 #. Standing'
@@ -36537,7 +36537,7 @@ msgstr ""
 #: erpnext/buying/doctype/supplier_scorecard_scoring_variable/supplier_scorecard_scoring_variable.json
 #: erpnext/buying/doctype/supplier_scorecard_variable/supplier_scorecard_variable.json
 msgid "Path"
-msgstr ""
+msgstr "Ścieżka"
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card Operation'
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:96
@@ -37687,7 +37687,7 @@ msgstr "Farmaceutyczne"
 #: erpnext/telephony/doctype/voice_call_settings/voice_call_settings.json
 #: erpnext/utilities/web_form/addresses/addresses.json
 msgid "Phone"
-msgstr ""
+msgstr "Telefon"
 
 #. Label of the phone_ext (Data) field in DocType 'Lead'
 #. Label of the phone_ext (Data) field in DocType 'Opportunity'
@@ -40258,7 +40258,7 @@ msgstr ""
 #. Label of a Card Break in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Printing"
-msgstr ""
+msgstr "Drukowanie"
 
 #. Label of the printing_details (Section Break) field in DocType 'Material
 #. Request'
@@ -48391,7 +48391,7 @@ msgstr ""
 #: erpnext/public/js/call_popup/call_popup.js:169
 #: erpnext/selling/page/point_of_sale/pos_payment.js:62
 msgid "Save"
-msgstr ""
+msgstr "Zapisz"
 
 #. Option for the 'Action on New Invoice' (Select) field in DocType 'POS
 #. Profile'
@@ -50398,7 +50398,7 @@ msgstr ""
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/support/workspace/support/support.json
 msgid "Settings"
-msgstr ""
+msgstr "Ustawienia"
 
 #. Description of a DocType
 #: erpnext/crm/doctype/crm_settings/crm_settings.json
@@ -51259,7 +51259,7 @@ msgstr ""
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/templates/form_grid/stock_entry_grid.html:29
 msgid "Source"
-msgstr ""
+msgstr "Źródło"
 
 #. Label of the source_doctype (Link) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
@@ -52007,7 +52007,7 @@ msgstr "Stan / prowincja"
 #: erpnext/templates/pages/task_info.html:69
 #: erpnext/templates/pages/timelog_info.html:40
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #. Label of the status_details (Section Break) field in DocType 'Service Level
 #. Agreement'
@@ -53161,7 +53161,7 @@ msgstr ""
 #: erpnext/support/web_form/issues/issues.json
 #: erpnext/templates/pages/task_info.html:44
 msgid "Subject"
-msgstr ""
+msgstr "Temat"
 
 #: erpnext/accounts/doctype/payment_order/payment_order.js:139
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:323
@@ -54289,7 +54289,7 @@ msgstr ""
 #: erpnext/utilities/doctype/video/video.json
 #: erpnext/utilities/doctype/video_settings/video_settings.json
 msgid "System Manager"
-msgstr ""
+msgstr "Menedżer systemu"
 
 #. Label of a Link in the Settings Workspace
 #. Label of a shortcut in the Settings Workspace
@@ -54384,7 +54384,7 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_review_objective/quality_review_objective.json
 #: erpnext/templates/form_grid/stock_entry_grid.html:36
 msgid "Target"
-msgstr ""
+msgstr "Cel"
 
 #. Label of the target_amount (Float) field in DocType 'Target Detail'
 #: erpnext/setup/doctype/target_detail/target_detail.json
@@ -55205,7 +55205,7 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_feedback/quality_feedback.json
 #: erpnext/stock/doctype/item/item_list.js:20
 msgid "Template"
-msgstr ""
+msgstr "Szablon"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:376
 msgid "Template Item"
@@ -56557,7 +56557,7 @@ msgstr "Szczeliny czasowe"
 #: erpnext/utilities/doctype/video/video.json
 #: erpnext/utilities/report/youtube_interactions/youtube_interactions.py:23
 msgid "Title"
-msgstr ""
+msgstr "Tytuł"
 
 #. Label of the email_to (Data) field in DocType 'Payment Request'
 #. Label of the to_uom (Link) field in DocType 'UOM Conversion Factor'
@@ -57082,7 +57082,7 @@ msgstr "Zbyt wiele kolumn. Wyeksportować raport i wydrukować go za pomocą ark
 #: erpnext/setup/doctype/email_digest/email_digest.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Tools"
-msgstr ""
+msgstr "Narzędzia"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -58491,7 +58491,7 @@ msgstr ""
 #: erpnext/stock/report/bom_search/bom_search.py:43
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 #. Label of the type_of_call (Link) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
@@ -58875,7 +58875,7 @@ msgstr ""
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_list.js:10
 #: erpnext/projects/doctype/project/project_dashboard.html:7
 msgid "Unknown"
-msgstr ""
+msgstr "Nieznany"
 
 #: erpnext/public/js/call_popup/call_popup.js:110
 msgid "Unknown Caller"
@@ -59541,7 +59541,7 @@ msgstr "Używane do Planu Produkcji"
 #: erpnext/telephony/doctype/voice_call_settings/voice_call_settings.json
 #: erpnext/utilities/doctype/portal_user/portal_user.json
 msgid "User"
-msgstr ""
+msgstr "Użytkownik"
 
 #. Label of the section_break_5 (Section Break) field in DocType 'POS Closing
 #. Entry'
@@ -59618,7 +59618,7 @@ msgstr ""
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/project_update/project_update.json
 msgid "Users"
-msgstr ""
+msgstr "Użytkownicy"
 
 #. Description of the 'Track Semi Finished Goods' (Check) field in DocType
 #. 'BOM'
@@ -59963,7 +59963,7 @@ msgstr ""
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:26
 #: erpnext/stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.py:101
 msgid "Value"
-msgstr ""
+msgstr "Wartość"
 
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:58
 msgid "Value (G - D)"
@@ -60214,7 +60214,7 @@ msgstr ""
 #. Label of the version (Data) field in DocType 'Code List'
 #: erpnext/edi/doctype/code_list/code_list.json
 msgid "Version"
-msgstr ""
+msgstr "Wersja"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -61156,7 +61156,7 @@ msgstr ""
 #: erpnext/setup/workspace/settings/settings.json
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Website"
-msgstr ""
+msgstr "Strona internetowa"
 
 #. Name of a DocType
 #: erpnext/portal/doctype/website_attribute/website_attribute.json
@@ -61197,7 +61197,7 @@ msgstr ""
 #. Label of a Link in the Settings Workspace
 #: erpnext/setup/workspace/settings/settings.json
 msgid "Website Settings"
-msgstr "Ustawienia witryny"
+msgstr ""
 
 #. Label of the sb_web_spec (Section Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -62018,7 +62018,7 @@ msgstr ""
 #: erpnext/stock/doctype/shipment/shipment.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Yes"
-msgstr ""
+msgstr "Tak"
 
 #: erpnext/edi/doctype/code_list/code_list_import.js:29
 msgid "You are importing data for the code list:"
