@@ -157,6 +157,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.subcontracting_inward_order",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow Alternative Item"
@@ -666,8 +667,8 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-08 09:44:32.684275",
- "modified_by": "mihir@frappe.io",
+ "modified": "2025-10-12 14:24:57.699749",
+ "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
  "naming_rule": "By \"Naming Series\" field",

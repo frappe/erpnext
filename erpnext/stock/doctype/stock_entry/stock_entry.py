@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import copy
 import json
 from collections import defaultdict
 
@@ -78,12 +77,13 @@ class MaxSampleAlreadyRetainedError(frappe.ValidationError):
 	pass
 
 
+from erpnext.controllers.stock_controller import StockController
 from erpnext.controllers.subcontracting_inward_controller import SubcontractingInwardController
 
 form_grid_templates = {"items": "templates/form_grid/stock_entry_grid.html"}
 
 
-class StockEntry(SubcontractingInwardController):
+class StockEntry(StockController, SubcontractingInwardController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

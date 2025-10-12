@@ -3,11 +3,10 @@ from frappe import _, bold
 from frappe.query_builder import Case
 from frappe.utils import flt
 
-from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 
 
-class SubcontractingInwardController(StockController):
+class SubcontractingInwardController:
 	def validate_subcontracting_inward(self):
 		self.validate_inward_order()
 		self.validate_customer_provided_item_for_inward()
@@ -531,7 +530,7 @@ class SubcontractingInwardController(StockController):
 			if produced_qty < delivered_qty:
 				frappe.throw(
 					_(
-						"Cannot cancel this Manufacturing Stock Entry as quantity of Finished Good produced cannot be less than quantity delivered in the linked Subcontracting Inward Order"
+						"Cannot cancel this Manufacturing Stock Entry as quantity of Finished Good produced cannot be less than quantity delivered in the linked Subcontracting Inward Order."
 					)
 				)
 

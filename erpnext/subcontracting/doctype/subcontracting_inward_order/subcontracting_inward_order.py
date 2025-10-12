@@ -71,18 +71,8 @@ class SubcontractingInwardOrder(SubcontractingController):
 		self.update_subcontracted_quantity_in_so()
 
 	def on_cancel(self):
-		self.check_if_self_rms_are_billed()
 		self.update_status()
 		self.update_subcontracted_quantity_in_so()
-
-	def check_if_self_rms_are_billed(self):
-		if any(item.billed_qty > 0 for item in self.received_items if not item.is_customer_provided_item):
-			frappe.throw(
-				_(
-					"Cannot cancel because some of the raw materials have been billed. Please check all Sales Invoices made against the Subcontracted Sales Order."
-				),
-				frappe.ValidationError,
-			)
 
 	def update_status(self, status=None, update_modified=True):
 		if self.status == "Closed" and self.status != status:
