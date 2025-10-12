@@ -104,6 +104,7 @@ frappe.realtime.on("sales_invoice_before_print", (data) => {
 					options: "Address",
 					get_query: function () {
 						return {
+							query: "frappe.contacts.doctype.address.address.address_query",
 							filters: {
 								link_doctype: "Company",
 								link_name: data.company,

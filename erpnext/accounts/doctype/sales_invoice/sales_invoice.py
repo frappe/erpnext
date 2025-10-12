@@ -2854,7 +2854,7 @@ def save_company_master_details(name, company, details):
 		details = frappe.parse_json(details)
 
 	if details.get("email"):
-		validate_email_address(details.email, throw=True)
+		validate_email_address(details.get("email"), throw=True)
 
 	company_fields = ["company_logo", "website", "phone_no", "email"]
 	company_fields_to_update = {field: details.get(field) for field in company_fields if details.get(field)}
