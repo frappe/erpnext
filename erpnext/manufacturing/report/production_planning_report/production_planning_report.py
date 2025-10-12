@@ -113,6 +113,12 @@ class ProductionPlanReport:
 		self.orders = query.run(as_dict=True)
 
 	def get_raw_materials(self):
+		"""Retrieve raw materials and source warehouses for production orders.
+	
+	    This method collects BOM or Work Order items depending on the selected
+	    filter and updates `self.raw_materials_dict`, `self.warehouses`,
+	    and `self.item_codes` accordingly.
+	    """
 		if not self.orders:
 			return
 		self.warehouses = [d.warehouse for d in self.orders]
