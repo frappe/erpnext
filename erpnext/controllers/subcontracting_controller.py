@@ -643,7 +643,8 @@ class SubcontractingController(StockController):
 
 			if use_serial_batch_fields:
 				rm_obj.use_serial_batch_fields = 1
-				self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
+				if not self.flags.get("reset_raw_materials"):
+					self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
 		if self.doctype == "Subcontracting Receipt":
 			if not use_serial_batch_fields:

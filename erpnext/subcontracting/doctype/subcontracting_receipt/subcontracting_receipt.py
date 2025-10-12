@@ -198,6 +198,7 @@ class SubcontractingReceipt(SubcontractingController):
 	@frappe.whitelist()
 	def reset_raw_materials(self):
 		self.supplied_items = []
+		self.flags.reset_raw_materials = True
 		self.create_raw_materials_supplied()
 
 	def validate_closed_subcontracting_order(self):
