@@ -1060,7 +1060,7 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
-Object.entries(frappe.boot.link_formatters).forEach(([doctype, fieldname]) => {
+Object.entries(frappe.boot.link_formatters || {}).forEach(([doctype, fieldname]) => {
 	frappe.form.link_formatters[doctype] = function (value, doc, df) {
 		return add_link_title(value, doc, df, fieldname);
 	};
