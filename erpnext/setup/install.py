@@ -253,6 +253,20 @@ def update_roles():
 
 def create_default_role_profiles():
 	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+		if frappe.db.exists("Role Profile", role_profile_name):
+			role_profile = frappe.get_doc("Role Profile", role_profile_name)
+			existing_roles = [row.role for row in role_profile.roles]
+
+			role_profile.roles = [row for row in role_profile.roles if row.role in roles]
+
+			for role in roles:
+				if role not in existing_roles:
+					role_profile.append("roles", {"role": role})
+
+			role_profile.save(ignore_permissions=True)
+
+			continue
+
 		role_profile = frappe.new_doc("Role Profile")
 		role_profile.role_profile = role_profile_name
 		for role in roles:
