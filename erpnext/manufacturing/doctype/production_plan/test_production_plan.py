@@ -1256,7 +1256,6 @@ class TestProductionPlan(IntegrationTestCase):
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty, before_qty)
-
 		completed_plans = get_non_completed_production_plans()
 		for plan in plans:
 			self.assertFalse(plan in completed_plans)
