@@ -135,7 +135,7 @@ class ProductionPlanReport:
 				)
 				or []
 			)
-			self.warehouses.extend([d.source_warehouse for d in raw_materials])
+			self.warehouses.extend([d.warehouse for d in raw_materials])
 
 		else:
 			bom_nos = []
