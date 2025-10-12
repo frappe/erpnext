@@ -721,7 +721,6 @@ erpnext.utils.update_child_items = function (opts) {
 									item_name: item_name,
 									bom_no: bom_no,
 								});
-								row.item_name = r.message.item_name;
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
 						}
@@ -785,7 +784,7 @@ erpnext.utils.update_child_items = function (opts) {
 	];
 
 	if (frm.doc.doctype == "Sales Order" || frm.doc.doctype == "Purchase Order") {
-		fields.splice(3, 0, {
+		fields.splice(2, 0, {
 			fieldtype: "Date",
 			fieldname: frm.doc.doctype == "Sales Order" ? "delivery_date" : "schedule_date",
 			in_list_view: 1,
@@ -793,21 +792,13 @@ erpnext.utils.update_child_items = function (opts) {
 			default: frm.doc.doctype == "Sales Order" ? frm.doc.delivery_date : frm.doc.schedule_date,
 			reqd: 1,
 		});
-		fields.splice(4, 0, {
+		fields.splice(3, 0, {
 			fieldtype: "Float",
 			fieldname: "conversion_factor",
 			label: __("Conversion Factor"),
 			precision: get_precision("conversion_factor"),
 		});
 	}
-	fields.splice(2, 0, {
-		fieldtype: "Data",
-		fieldname: "item_name",
-		read_only: 1,
-		in_list_view: 1,
-		fetch_from : "item_code.item_name",
-		label: __("Item Name")
-	});
 
 	if (
 		frm.doc.doctype == "Purchase Order" &&
