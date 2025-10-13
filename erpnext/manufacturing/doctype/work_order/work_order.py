@@ -1336,6 +1336,9 @@ class WorkOrder(Document):
 			self.set_available_qty()
 
 	def update_transferred_qty_for_required_items(self):
+		if self.skip_transfer:
+			return
+
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 

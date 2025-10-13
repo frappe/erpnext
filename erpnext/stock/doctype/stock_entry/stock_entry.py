@@ -2106,10 +2106,13 @@ class StockEntry(StockController):
 		if not frappe.get_cached_value("Work Order", self.work_order, "reserve_stock"):
 			return
 
+		skip_transfer = frappe.get_cached_value("Work Order", self.work_order, "skip_transfer")
+
 		if (
 			self.purpose not in ["Material Transfer for Manufacture"]
 			and frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
 			!= "BOM"
+			and not skip_transfer
 		):
 			return
 
@@ -2172,6 +2175,10 @@ class StockEntry(StockController):
 			self.append("items", new_row)
 
 		sorted_items = sorted(self.items, key=lambda x: x.item_code)
+		if self.purpose == "Manufacture":
+			# ensure finished item at last
+			sorted_items = sorted(sorted_items, key=lambda x: (x.t_warehouse))
+
 		idx = 0
 		for row in sorted_items:
 			idx += 1

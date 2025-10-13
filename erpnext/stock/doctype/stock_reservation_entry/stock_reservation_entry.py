@@ -613,10 +613,10 @@ class StockReservationEntry(Document):
 				data = row_wise_serial_batch[row]
 
 				if entry.serial_no in data.serial_nos:
-					entry.delivered_qty = 1
+					entry.delivered_qty = flt(1)
 
 				elif entry.batch_no in data.batch_nos:
-					entry.delivered_qty = data.batch_nos[entry.batch_no]
+					entry.delivered_qty = flt(data.batch_nos[entry.batch_no])
 
 			entry.db_update()
 
