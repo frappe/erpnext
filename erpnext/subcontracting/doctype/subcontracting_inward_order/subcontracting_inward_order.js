@@ -6,7 +6,6 @@
 frappe.ui.form.on("Subcontracting Inward Order Item", {
 	qty(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "amount", row.qty * row.rate);
 		const service_item = frm.doc.service_items[row.idx - 1];
 		frappe.model.set_value(
 			service_item.doctype,
@@ -15,12 +14,6 @@ frappe.ui.form.on("Subcontracting Inward Order Item", {
 			row.qty * row.subcontracting_conversion_factor
 		);
 		frappe.model.set_value(service_item.doctype, service_item.name, "fg_item_qty", row.qty);
-		frappe.model.set_value(
-			service_item.doctype,
-			service_item.name,
-			"amount",
-			row.qty * row.subcontracting_conversion_factor * service_item.rate
-		);
 	},
 	before_items_remove(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];

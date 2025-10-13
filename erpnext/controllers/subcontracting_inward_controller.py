@@ -252,7 +252,7 @@ class SubcontractingInwardController:
 					frappe.throw(
 						_(
 							"Row #{0}: Serial No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Serial No(s)."
-						).format(item.idx, ", ".join(bold(incorrect_serial_nos)))
+						).format(item.idx, ", ".join([bold(sn) for sn in incorrect_serial_nos]))
 					)
 				if batch_list and (
 					incorrect_batch_nos := [bn for bn in batch_list if bn not in list(batch_nos.keys())]
@@ -260,7 +260,7 @@ class SubcontractingInwardController:
 					frappe.throw(
 						_(
 							"Row #{0}: Batch No(s) {1} is not a part of the linked Subcontracting Inward Order. Please select valid Batch No(s)."
-						).format(item.idx, ", ".join(bold(incorrect_batch_nos)))
+						).format(item.idx, ", ".join([bold(bn) for bn in incorrect_batch_nos]))
 					)
 
 	def get_serial_nos_and_batches_from_sres(self, scio_detail, only_pending=True):
