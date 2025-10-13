@@ -11,7 +11,7 @@
   "is_additional_item",
   "column_break_3",
   "stock_uom",
-  "reserve_warehouse",
+  "warehouse",
   "column_break_6",
   "bom_detail_no",
   "reference_name",

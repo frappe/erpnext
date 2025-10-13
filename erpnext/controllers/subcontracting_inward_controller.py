@@ -57,7 +57,7 @@ class SubcontractingInwardController:
 		for item in self.items:
 			if (
 				item.scio_detail
-				and frappe.db.get_value(
+				and frappe.get_value(
 					"Subcontracting Inward Order Received Item", item.scio_detail, "rm_item_code"
 				)
 				!= item.item_code
@@ -79,7 +79,7 @@ class SubcontractingInwardController:
 					)
 				)
 			elif item.item_code != (
-				frappe.db.get_value(
+				frappe.get_value(
 					"Subcontracting Inward Order Received Item", item.scio_detail, "rm_item_code"
 				)
 				or frappe.get_value("Subcontracting Inward Order Item", item.scio_detail, "item_code")
@@ -309,6 +309,10 @@ class SubcontractingInwardController:
 							)
 
 	def validate_delivery_on_save(self):
+		allow_delivery_of_overproduced_qty = frappe.get_single_value(
+			"Selling Settings", "allow_delivery_of_overproduced_qty"
+		)
+
 		for item in self.items:
 			if not item.scio_detail:
 				frappe.throw(
@@ -318,10 +322,6 @@ class SubcontractingInwardController:
 						bold(self.subcontracting_inward_order),
 					)
 				)
-
-			allow_delivery_of_overproduced_qty = frappe.get_single_value(
-				"Selling Settings", "allow_delivery_of_overproduced_qty"
-			)
 
 			from pypika.terms import ValueWrapper
 
@@ -613,6 +613,7 @@ class SubcontractingInwardController:
 					consumed_qty=0,
 					work_order_qty=0,
 					returned_qty=0,
+					is_additional_item=True,
 				)
 				scio_rm.insert()
 				item.db_set("scio_detail", scio_rm.name)
