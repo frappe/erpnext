@@ -706,7 +706,6 @@
    "depends_on": "eval:doc.purpose == \"Material Transfer for Manufacture\"",
    "fieldname": "is_additional_transfer_entry",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Is Additional Transfer Entry",
    "read_only": 1
   }
@@ -716,7 +715,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-29 15:56:21.344296",
+ "modified": "2025-10-13 15:09:23.905118",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

@@ -767,12 +767,24 @@ erpnext.work_order = {
 							frm.add_custom_button(
 								__("Additional Material Transfer"),
 								function () {
-									erpnext.work_order.make_se(
-										frm,
-										"Material Transfer for Manufacture",
-										qty,
-										1
-									);
+									let purpose = "Material Transfer for Manufacture";
+									erpnext.work_order
+										.show_prompt_for_qty_input(frm, purpose, qty, 1)
+										.then((data) => {
+											return frappe.xcall(
+												"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+												{
+													work_order_id: frm.doc.name,
+													purpose: purpose,
+													qty: data.qty,
+													is_additional_transfer_entry: 1,
+												}
+											);
+										})
+										.then((stock_entry) => {
+											frappe.model.sync(stock_entry);
+											frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
+										});
 								},
 								__("Make")
 							);
@@ -940,8 +952,8 @@ erpnext.work_order = {
 		return flt(max, precision("qty"));
 	},
 
-	show_prompt_for_qty_input: function (frm, purpose) {
-		let max = this.get_max_transferable_qty(frm, purpose);
+	show_prompt_for_qty_input: function (frm, purpose, qty, additional_transfer_entry) {
+		let max = !additional_transfer_entry ? this.get_max_transferable_qty(frm, purpose) : qty;
 
 		let fields = [
 			{
@@ -951,7 +963,10 @@ erpnext.work_order = {
 				description: __("Max: {0}", [max]),
 				default: max,
 			},
-			{
+		];
+
+		if (!additional_transfer_entry) {
+			fields.push({
 				fieldtype: "Check",
 				label: __("Consider Process Loss"),
 				fieldname: "consider_process_loss",
@@ -963,8 +978,8 @@ erpnext.work_order = {
 						frm.qty_prompt.set_value("qty", max);
 					}
 				},
-			},
-		];
+			});
+		}
 
 		if (purpose === "Disassemble") {
 			fields.push({
