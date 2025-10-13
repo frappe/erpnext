@@ -1521,6 +1521,55 @@ class TestPricingRule(IntegrationTestCase):
 		debit_note.delete()
 		pi.cancel()
 
+	def test_item_group_rule_with_multiple_rules_present(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule for Item Group")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+
+		pr1_dict = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"discount_percentage": 10,
+			"margin_type": "Percentage",
+			"rate_or_discount": "Discount Percentage",
+			"min_qty": 10,
+			"max_qty": 15,
+			"company": "_Test Company",
+		}
+		pr1 = frappe.get_doc(pr1_dict)
+		pr1.insert()
+
+		pr2_dict = {
+			"doctype": "Pricing Rule",
+			"title": "_Test discount on item group",
+			"apply_on": "Item Group",
+			"item_groups": [
+				{
+					"item_group": "All Item Groups",
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"discount_percentage": 5,
+			"margin_type": "Percentage",
+			"rate_or_discount": "Discount Percentage",
+			"min_qty": 5,
+			"max_qty": 10,
+			"company": "_Test Company",
+		}
+		pr2 = frappe.get_doc(pr2_dict)
+		pr2.insert()
+
+		so = make_sales_order(item_code="_Test Item", qty=6)
+		self.assertEqual(so.pricing_rules[0].pricing_rule, pr2.name)
+
 
 EXTRA_TEST_RECORD_DEPENDENCIES = ["UTM Campaign"]
 
