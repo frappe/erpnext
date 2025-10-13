@@ -38,15 +38,14 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 		rm_in.save()
 		for item in rm_in.get("items"):
 			item.basic_rate = 10
-		additional_cost = frappe.new_doc(
-			"Landed Cost Taxes and Charges",
-			parent_doc=rm_in,
-			parentfield="additional_costs",
-			expense_account="Freight and Forwarding Charges - _TC",
-			description="Test",
-			amount=100,
-		).insert()
-		rm_in.additional_costs.append(additional_cost)
+		rm_in.append(
+			"additional_costs",
+			{
+				"expense_account": "Freight and Forwarding Charges - _TC",
+				"description": "Test",
+				"amount": 100,
+			},
+		)
 		rm_in.submit()
 
 		for item in rm_in.get("items"):
@@ -57,20 +56,18 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
 		rm_in.save()
-
-		extra_item = frappe.new_doc(
-			"Stock Entry Detail",
-			parent_doc=rm_in,
-			parentfield="items",
-			item_code="Basic RM 2",
-			qty=5,
-			t_warehouse=rm_in.items[0].t_warehouse,
-			basic_rate=10,
-			transfer_qty=5,
-			uom="Nos",
-			conversion_factor=1,
-		).insert()
-		rm_in.items.append(extra_item)
+		rm_in.append(
+			"items",
+			{
+				"item_code": "Basic RM 2",
+				"qty": 5,
+				"t_warehouse": rm_in.items[0].t_warehouse,
+				"basic_rate": 10,
+				"transfer_qty": 5,
+				"uom": "Nos",
+				"conversion_factor": 1,
+			},
+		)
 		rm_in.submit()
 
 		scio.reload()
