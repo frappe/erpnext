@@ -1859,11 +1859,17 @@ class TestProductionPlan(IntegrationTestCase):
 
 	def test_calculation_of_sub_assembly_items(self):
 		make_item("Sub Assembly Item ", properties={"is_stock_item": 1})
+		make_item("Sub Assembly Item 2", properties={"is_stock_item": 1})
 		make_item("RM Item 1", properties={"is_stock_item": 1})
 		make_item("RM Item 2", properties={"is_stock_item": 1})
+		make_item("_Test FG Item 3", properties={"is_stock_item": 1})
+		make_item("_Test FG Item 4", properties={"is_stock_item": 1})
 		make_bom(item="Sub Assembly Item", raw_materials=["RM Item 1", "RM Item 2"])
+		make_bom(item="Sub Assembly Item 2", raw_materials=["RM Item 2"])
 		make_bom(item="_Test FG Item", raw_materials=["Sub Assembly Item", "RM Item 1"])
 		make_bom(item="_Test FG Item 2", raw_materials=["Sub Assembly Item"])
+		make_bom(item="_Test FG Item 3", raw_materials=["RM Item 1"])
+		make_bom(item="_Test FG Item 4", raw_materials=["Sub Assembly Item 2"])
 
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -1899,13 +1905,40 @@ class TestProductionPlan(IntegrationTestCase):
 				"warehouse": "_Test Warehouse - _TC",
 			},
 		)
+		# Assembly item with similar RM item
+		plan.append(
+			"po_items",
+			{
+				"use_multi_level_bom": 1,
+				"item_code": "_Test FG Item 3",
+				"bom_no": frappe.db.get_value("Item", "_Test FG Item 3", "default_bom"),
+				"planned_qty": 10,
+				"planned_start_date": now_datetime(),
+				"stock_uom": "Nos",
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		)
+		# Sub-assembly item with similar RM item
+		plan.append(
+			"po_items",
+			{
+				"use_multi_level_bom": 1,
+				"item_code": "_Test FG Item 4",
+				"bom_no": frappe.db.get_value("Item", "_Test FG Item 4", "default_bom"),
+				"planned_qty": 10,
+				"planned_start_date": now_datetime(),
+				"stock_uom": "Nos",
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		)
 		plan.save()
 		plan.ignore_existing_ordered_qty = 1
 
 		plan.get_sub_assembly_items()
 
-		self.assertEqual(plan.sub_assembly_items[0].qty, 20)
-		self.assertEqual(plan.sub_assembly_items[1].qty, 50)
+		self.assertEqual(plan.sub_assembly_items[0].qty, 20)  # Sub Assembly For FG 1
+		self.assertEqual(plan.sub_assembly_items[1].qty, 50)  # Sub Assembly For FG 2
+		self.assertEqual(plan.sub_assembly_items[2].qty, 10)  # Sub Assembly For FG 4
 
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_items_for_material_requests,
@@ -1913,8 +1946,11 @@ class TestProductionPlan(IntegrationTestCase):
 
 		mr_items = get_items_for_material_requests(plan.as_dict())
 
-		self.assertEqual(mr_items[0].get("quantity"), 80)
-		self.assertEqual(mr_items[1].get("quantity"), 70)
+		# RM Item 1 (FG1 (100 + 100) + FG2 (50) + FG3 (10) - 90 in stock - 80 sub assembly stock)
+		self.assertEqual(mr_items[0].get("quantity"), 90)
+
+		# RM Item 2 (FG1 (100) + FG2 (50) + FG4 (10) - 80 sub assembly stock)
+		self.assertEqual(mr_items[1].get("quantity"), 80)
 
 	def test_stock_reservation_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
