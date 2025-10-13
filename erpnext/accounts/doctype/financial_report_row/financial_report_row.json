@@ -25,7 +25,7 @@
   "advanced_filtering",
   "filters_editor",
   "calculation_formula",
-  "column_break_swxd",
+  "section_break_pvro",
   "formula_description"
  ],
  "fields": [
@@ -157,10 +157,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_swxd",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "depends_on": "eval: doc.data_source === \"Account Data\"",
    "description": "Use <strong>Python</strong> filters to get Accounts",
@@ -168,13 +164,17 @@
    "fieldtype": "Check",
    "label": "Advanced Filtering",
    "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_pvro",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-27 22:53:04.322068",
+ "modified": "2025-10-10 06:52:20.513417",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",

@@ -14,7 +14,7 @@ frappe.ui.form.on("Financial Report Template", {
 		}
 
 		// add custom button to view missed accounts
-		frm.add_custom_button(__("View Accounts"), function () {
+		frm.add_custom_button(__("View Account Coverage"), function () {
 			let selected_rows = frm.get_field("rows").grid.get_selected_children();
 			const has_selection = selected_rows.length > 0;
 			if (selected_rows.length === 0) selected_rows = frm.doc.rows;
