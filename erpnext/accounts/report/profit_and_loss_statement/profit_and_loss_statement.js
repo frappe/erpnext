@@ -54,4 +54,4 @@ frappe.query_reports[PL_REPORT_NAME]["filters"].push(
 	}
 );
 
-frappe.query_reports["Profit and Loss Statement"]["export_hidden_cols"] = true;
+frappe.query_reports[PL_REPORT_NAME]["export_hidden_cols"] = true;
