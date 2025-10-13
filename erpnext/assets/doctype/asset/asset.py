@@ -130,7 +130,6 @@ class Asset(AccountsController):
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
 		self.total_asset_cost = self.net_purchase_amount + self.additional_asset_cost
-		self.status = self.get_status()
 
 	def create_asset_depreciation_schedule(self):
 		self.set_depr_rate_and_value_after_depreciation()
@@ -332,6 +331,8 @@ class Asset(AccountsController):
 
 		if self.asset_owner == "Company" and not self.asset_owner_company:
 			self.asset_owner_company = self.company
+
+		self.status = self.get_status()
 
 	def validate_finance_books(self):
 		if not self.calculate_depreciation or len(self.finance_books) == 1:
