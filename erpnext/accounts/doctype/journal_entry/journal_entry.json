@@ -544,8 +544,6 @@
    "label": "Is System Generated",
    "no_copy": 1,
    "read_only": 1
-<<<<<<< HEAD
-=======
   },
   {
    "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
@@ -590,7 +588,6 @@
    "hidden": 1,
    "label": "Party Not Required",
    "no_copy": 1
->>>>>>> 35474d997d (fix: skip party validation for payroll & it's journal & GL entry submission (#49638))
   }
  ],
  "icon": "fa fa-file-text",
@@ -605,11 +602,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
-<<<<<<< HEAD
- "modified": "2024-07-18 15:32:29.413598",
-=======
  "modified": "2025-09-29 13:05:46.982277",
->>>>>>> 35474d997d (fix: skip party validation for payroll & it's journal & GL entry submission (#49638))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

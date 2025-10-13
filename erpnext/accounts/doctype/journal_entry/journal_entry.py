@@ -71,11 +71,8 @@ class JournalEntry(AccountsController):
 		mode_of_payment: DF.Link | None
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
-<<<<<<< HEAD
 		paid_loan: DF.Data | None
-=======
 		party_not_required: DF.Check
->>>>>>> 35474d997d (fix: skip party validation for payroll & it's journal & GL entry submission (#49638))
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
 		posting_date: DF.Date
