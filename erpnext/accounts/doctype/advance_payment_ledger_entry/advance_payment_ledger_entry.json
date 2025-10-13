@@ -82,7 +82,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-13 13:23:21.205945",
+ "modified": "2025-10-13 15:11:58.300836",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Payment Ledger Entry",
@@ -116,7 +116,6 @@
    "share": 1
   }
  ],
- "read_only": 1,
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
