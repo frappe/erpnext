@@ -933,6 +933,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
    "fieldname": "subcontracted_qty",
    "fieldtype": "Float",
@@ -947,7 +948,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-04-16 16:22:16.464598",
+ "modified": "2025-10-12 10:57:31.552812",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

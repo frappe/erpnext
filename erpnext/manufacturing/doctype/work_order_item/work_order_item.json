@@ -93,7 +93,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.subcontracting_inward_order",
+   "depends_on": "eval:!parent.subcontracting_inward_order",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow Alternative Item"

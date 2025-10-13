@@ -987,6 +987,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "subcontracted_qty",
    "fieldtype": "Float",
@@ -1015,7 +1016,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-28 14:22:37.000490",
+ "modified": "2025-10-13 10:57:43.378448",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

@@ -560,7 +560,8 @@
    "default": "0",
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
-   "label": "Is Finished Item"
+   "label": "Is Finished Item",
+   "read_only_depends_on": "eval:in_list([\"Subcontracting Delivery\", \"Subcontracting Return\"], parent.purpose)"
   },
   {
    "fieldname": "job_card_item",
@@ -623,9 +624,9 @@
    "fieldname": "customer_provided_item_cost",
    "fieldtype": "Currency",
    "label": "Customer Provided Item Cost",
-   "options": "Company:company:default_currency",
    "no_copy": 1,
    "non_negative": 1,
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -635,7 +636,8 @@
    "hidden": 1,
    "label": "SCIO Detail",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -643,7 +645,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-06 16:04:17.360345",
+ "modified": "2025-10-13 12:13:43.389334",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

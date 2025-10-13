@@ -1,7 +1,7 @@
 import frappe
 from frappe import _, bold
 from frappe.query_builder import Case
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 
@@ -183,21 +183,27 @@ class SubcontractingInwardController:
 				)
 
 	def validate_customer_provided_item_for_inward(self):
-		if self.subcontracting_inward_order and self.purpose in [
-			"Subcontracting Delivery",
-			"Subcontracting Return",
-		]:
-			for item in self.items:
-				if (item.is_finished_item or item.is_scrap_item) and item.valuation_rate == 0:
-					item.allow_zero_valuation_rate = 1
-				elif self.purpose == "Receive from Customer" and not frappe.get_value(
-					"Item", item.item_code, "is_customer_provided_item"
-				):
-					frappe.throw(
-						_("Row #{0}: Item {1} is not a Customer Provided Item.").format(
-							item.idx, bold(item.item_code)
-						)
-					)
+		if self.subcontracting_inward_order:
+			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
+				for item in self.items:
+					if (item.is_finished_item or item.is_scrap_item) and item.valuation_rate == 0:
+						item.allow_zero_valuation_rate = 1
+			elif self.purpose == "Receive from Customer":
+				table = frappe.qb.DocType("Item")
+				query = (
+					frappe.qb.from_(table)
+					.select(table.item_code, table.is_customer_provided_item)
+					.where(table.item_code.isin([item.item_code for item in self.items]))
+				)
+				non_customer_provided_items = [
+					item for item in query.run(as_dict=True) if not item.is_customer_provided_item
+				]
+				if non_customer_provided_items:
+					msg = _("The following item(s) are not customer provided:<br><ul>")
+					for item in non_customer_provided_items:
+						msg += _("<li>{0}</li>").format(get_link_to_form("Item", item.item_code))
+					msg += "</ul>"
+					frappe.throw(msg)
 
 	def validate_warehouse_(self):
 		if self.subcontracting_inward_order and self.purpose in [
@@ -205,15 +211,15 @@ class SubcontractingInwardController:
 			"Return Raw Material to Customer",
 			"Material Transfer for Manufacture",
 		]:
+			customer_warehouse = frappe.get_value(
+				"Subcontracting Inward Order", self.subcontracting_inward_order, "customer_warehouse"
+			)
 			for item in self.items:
 				if self.purpose == "Material Transfer for Manufacture" and not frappe.get_value(
 					"Item", item.item_code, "is_customer_provided_item"
 				):
 					continue
 
-				customer_warehouse = frappe.get_value(
-					"Subcontracting Inward Order", self.subcontracting_inward_order, "customer_warehouse"
-				)
 				if (item.s_warehouse or item.t_warehouse) != customer_warehouse:
 					if item.t_warehouse:
 						frappe.throw(

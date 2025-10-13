@@ -528,6 +528,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 					"qty": qty,
 					"stock_uom": fg_item.stock_uom,
 					"scio_detail": fg_item.name,
+					"is_finished_item": 1,
 				}
 			}
 
