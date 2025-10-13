@@ -90,12 +90,13 @@ class SubcontractingInwardController:
 					)
 				)
 
-			if data := frappe.get_value(
-				"Subcontracting Inward Order Received Item",
-				item.scio_detail,
-				["received_qty", "returned_qty", "work_order_qty"],
-				as_dict=True,
-			):
+			if self.purpose == "Return Raw Material to Customer":
+				data = frappe.get_value(
+					"Subcontracting Inward Order Received Item",
+					item.scio_detail,
+					["received_qty", "returned_qty", "work_order_qty"],
+					as_dict=True,
+				)
 				if data.returned_qty + item.transfer_qty > data.received_qty - data.work_order_qty:
 					frappe.throw(
 						_(
@@ -603,7 +604,7 @@ class SubcontractingInwardController:
 					parentfield="received_items",
 					idx=frappe.db.count(
 						"Subcontracting Inward Order Received Item",
-						{"parent": self.subcontracting_inward_order, "docstatus": 1},
+						{"parent": self.subcontracting_inward_order},
 					)
 					+ 1,
 					rm_item_code=item.item_code,
@@ -723,7 +724,7 @@ class SubcontractingInwardController:
 					parentfield="received_items",
 					idx=frappe.db.count(
 						"Subcontracting Inward Order Received Item",
-						{"parent": self.subcontracting_inward_order, "docstatus": 1},
+						{"parent": self.subcontracting_inward_order},
 					)
 					+ 1,
 					main_item_code=next(fg for fg in self.items if fg.is_finished_item).item_code,
@@ -804,10 +805,7 @@ class SubcontractingInwardController:
 						parent=scio,
 						parenttype="Subcontracting Inward Order",
 						parentfield="scrap_items",
-						idx=frappe.db.count(
-							"Subcontracting Inward Order Scrap Item", {"parent": scio, "docstatus": 1}
-						)
-						+ 1,
+						idx=frappe.db.count("Subcontracting Inward Order Scrap Item", {"parent": scio}) + 1,
 						item_code=scrap_item.item_code,
 						fg_item_code=frappe.get_value("Work Order", self.work_order, "production_item"),
 						stock_uom=scrap_item.stock_uom,

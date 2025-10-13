@@ -549,7 +549,7 @@ class StockController(AccountsController):
 			batches = sorted(
 				frappe.get_all(
 					"Serial and Batch Entry",
-					filters={"parent": row.serial_and_batch_bundle},
+					filters={"parent": row.serial_and_batch_bundle, "batch_no": ("is", "set")},
 					pluck="batch_no",
 					distinct=True,
 				)

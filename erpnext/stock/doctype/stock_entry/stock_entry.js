@@ -1100,23 +1100,22 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: "supplier", doctype: "Supplier" };
 		this.frm.set_query("supplier_address", erpnext.queries.address_query);
 
-		if (!this.frm.doc.subcontracting_inward_order) {
-			this.frm.set_query("stock_entry_type", function () {
-				return {
-					filters: {
-						purpose: [
-							"not in",
-							[
-								"Receive from Customer",
-								"Return Raw Material to Customer",
-								"Subcontracting Delivery",
-								"Subcontracting Return",
-							],
+		const operator = this.frm.doc.subcontracting_inward_order ? "in" : "not in";
+		this.frm.set_query("stock_entry_type", function () {
+			return {
+				filters: {
+					purpose: [
+						operator,
+						[
+							"Receive from Customer",
+							"Return Raw Material to Customer",
+							"Subcontracting Delivery",
+							"Subcontracting Return",
 						],
-					},
-				};
-			});
-		}
+					],
+				},
+			};
+		});
 	}
 
 	onload_post_render() {

@@ -266,29 +266,11 @@ class WorkOrder(Document):
 				sequence_id = op.sequence_id
 
 	def validate_subcontracting_inward_order(self):
-		if scio_item_name := self.get("subcontracting_inward_order_item"):
-			data = frappe.get_value(
-				"Subcontracting Inward Order Item",
-				{"name": scio_item_name, "docstatus": 1},
-				["qty", "produced_qty"],
-				as_dict=True,
-			)
-			if not data:
-				frappe.throw(
-					_("Subcontracting Inward Order Item {0} is invalid/cancelled/not submitted.").format(
-						scio_item_name
-					)
-				)
-			if self.qty > data.qty - data.produced_qty:
-				frappe.throw(
-					_(
-						"Quantity to be manufactured cannot exceed quantity {0} in Subcontracting Inward Order"
-					).format(frappe.bold(data.qty - data.produced_qty))
-				)
+		if scio := self.subcontracting_inward_order:
 			if self.source_warehouse != (
 				rm_receipt_warehouse := frappe.db.get_value(
 					"Subcontracting Inward Order",
-					self.subcontracting_inward_order,
+					scio,
 					"customer_warehouse",
 				)
 			):
