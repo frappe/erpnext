@@ -36,6 +36,7 @@ def get():
 				_("Loans and Advances (Assets)"): {
 					_("Employee Advances"): {
 						"account_number": "1610",
+						"account_type": "Payable",
 						"account_category": "Other Receivables",
 					},
 					"account_number": "1600",

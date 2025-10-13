@@ -294,6 +294,10 @@ def install(country=None):
 		{"doctype": "Market Segment", "market_segment": _("Upper Income")},
 		# Warehouse Type
 		{"doctype": "Warehouse Type", "name": "Transit"},
+		{"doctype": "Workstation Operating Component", "component_name": _("Electricity")},
+		{"doctype": "Workstation Operating Component", "component_name": _("Consumables")},
+		{"doctype": "Workstation Operating Component", "component_name": _("Rent")},
+		{"doctype": "Workstation Operating Component", "component_name": _("Wages")},
 	]
 
 	for doctype, title_field, filename in (
@@ -481,14 +485,19 @@ def install_defaults(args=None):  # nosemgrep
 	create_bank_account(args)
 
 
-def set_global_defaults(args):
+def set_global_defaults(kwargs):
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
+	company = frappe.db.get_value(
+		"Company",
+		{"company_name": kwargs.get("company_name")},
+		"name",
+	)
 
 	global_defaults.update(
 		{
-			"default_currency": args.get("currency"),
-			"default_company": args.get("company_name"),
-			"country": args.get("country"),
+			"default_currency": kwargs.get("currency"),
+			"default_company": company,
+			"country": kwargs.get("country"),
 		}
 	)
 
@@ -509,9 +518,11 @@ def update_stock_settings():
 	stock_settings.save()
 
 
-def create_bank_account(args):
+def create_bank_account(args, demo=False):
 	if not args.get("bank_account"):
-		args["bank_account"] = _("Bank Account")
+		if not demo:
+			return
+		args["bank_account"] = _("Demo Bank Account")
 
 	company_name = args.get("company_name")
 	bank_account_group = frappe.db.get_value(

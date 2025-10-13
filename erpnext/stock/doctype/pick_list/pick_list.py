@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_auto_batch_nos,
 	get_picked_serial_nos,
 )
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
@@ -73,6 +73,12 @@ class PickList(TransactionBase):
 
 		if self.has_reserved_stock():
 			self.set_onload("has_reserved_stock", True)
+
+		if self.docstatus.is_draft() and not hasattr(self, "_action"):
+			company = self.company
+
+			for item in self.get("locations"):
+				item.update(get_item_details(item.item_code, item.uom, item.warehouse, company))
 
 	def validate(self):
 		self.validate_expired_batches()
@@ -1244,11 +1250,16 @@ def create_dn_wo_so(pick_list, delivery_note=None):
 @frappe.whitelist()
 def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
 	"""Get Items from Multiple Pick Lists and create a Delivery Note for filtered customer"""
+	if kwargs is None:
+		kwargs = {}
+	if isinstance(kwargs, str):
+		kwargs = json.loads(kwargs)
+
 	pick_list = frappe.get_doc("Pick List", source_name)
 	validate_item_locations(pick_list)
 
-	sales_order_arg = kwargs.get("sales_order") if kwargs else None
-	customer_arg = kwargs.get("customer") if kwargs else None
+	sales_order_arg = kwargs.get("sales_order")
+	customer_arg = kwargs.get("customer")
 
 	if sales_order_arg:
 		sales_orders = {sales_order_arg}
@@ -1262,7 +1273,7 @@ def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
 				pluck="name",
 			)
 
-	delivery_note = create_dn_from_so(pick_list, sales_orders, delivery_note=target_doc)
+	delivery_note = create_dn_from_so(pick_list, sales_orders, delivery_note=target_doc, kwargs=kwargs)
 
 	if not sales_order_arg and not all(item.sales_order for item in pick_list.locations):
 		if isinstance(delivery_note, str):
@@ -1288,9 +1299,14 @@ def create_dn_with_so(sales_dict, pick_list):
 	return delivery_note
 
 
-def create_dn_from_so(pick_list, sales_order_list, delivery_note=None):
+def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=None):
 	if not sales_order_list:
 		return delivery_note
+
+	def select_item(d):
+		filtered_items = kwargs.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
 
 	item_table_mapper = {
 		"doctype": "Delivery Note Item",
@@ -1299,7 +1315,9 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None):
 			"name": "so_detail",
 			"parent": "against_sales_order",
 		},
-		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1,
+		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
+		and doc.delivered_by_supplier != 1
+		and select_item(doc),
 	}
 
 	kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
@@ -1422,13 +1440,27 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 
 
 @frappe.whitelist()
-def get_item_details(item_code, uom=None):
-	details = frappe.db.get_value("Item", item_code, ["stock_uom", "name"], as_dict=1)
+def get_item_details(item_code, uom=None, warehouse=None, company=None):
+	details = frappe.db.get_value("Item", item_code, "stock_uom", as_dict=1)
 	details.uom = uom or details.stock_uom
 	if uom:
 		details.update(get_conversion_factor(item_code, uom))
 
+	if warehouse:
+		details.actual_qty = flt(get_actual_qty(item_code, warehouse))
+
+	if company:
+		details.company_total_stock = get_company_total_stock(item_code, company)
+
 	return details
+
+
+def get_actual_qty(item_code, warehouse):
+	return frappe.db.get_value(
+		"Bin",
+		{"item_code": item_code, "warehouse": warehouse},
+		"actual_qty",
+	)
 
 
 def update_delivery_note_item(source, target, delivery_note):

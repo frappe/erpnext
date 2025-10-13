@@ -279,6 +279,59 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	def before_print(self, settings=None):
+		from frappe.contacts.doctype.address.address import get_address_display_list
+
+		super().before_print(settings)
+
+		company_details = frappe.get_value(
+			"Company", self.company, ["company_logo", "website", "phone_no", "email"], as_dict=True
+		)
+
+		required_fields = [
+			company_details.get("company_logo"),
+			company_details.get("phone_no"),
+			company_details.get("email"),
+		]
+
+		if not all(required_fields) and not frappe.has_permission("Company", "write", throw=False):
+			frappe.msgprint(
+				_(
+					"Some required Company details are missing. You don't have permission to update them. Please contact your System Manager."
+				)
+			)
+			return
+
+		if not self.company_address and not frappe.has_permission("Sales Invoice", "write", throw=False):
+			frappe.msgprint(
+				_(
+					"Company Address is missing. You don't have permission to update it. Please contact your System Manager."
+				)
+			)
+			return
+
+		address_display_list = get_address_display_list("Company", self.company)
+		address_line = address_display_list[0].get("address_line1") if address_display_list else ""
+
+		required_fields.append(self.company_address)
+		required_fields.append(address_line)
+
+		if not all(required_fields):
+			frappe.publish_realtime(
+				"sales_invoice_before_print",
+				{
+					"company_logo": company_details.get("company_logo"),
+					"website": company_details.get("website"),
+					"phone_no": company_details.get("phone_no"),
+					"email": company_details.get("email"),
+					"address_line": address_line,
+					"company": self.company,
+					"company_address": self.company_address,
+					"name": self.name,
+				},
+				user=frappe.session.user,
+			)
+
 	def validate(self):
 		self.validate_auto_set_posting_time()
 		super().validate()
@@ -764,6 +817,7 @@ class SalesInvoice(SellingController):
 				"utm_campaign": pos.get("utm_campaign"),
 				"utm_medium": pos.get("utm_medium"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
+				"set_default_payment": pos.get("set_grand_total_to_default_mop", 1),
 			}
 
 	@frappe.whitelist()
@@ -1409,7 +1463,6 @@ class SalesInvoice(SellingController):
 
 				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
-				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
@@ -2800,6 +2853,59 @@ def get_loyalty_programs(customer):
 		return lp_details
 	else:
 		return lp_details
+
+
+@frappe.whitelist()
+def save_company_master_details(name, company, details):
+	from frappe.utils import validate_email_address
+
+	if isinstance(details, str):
+		details = frappe.parse_json(details)
+
+	if details.get("email"):
+		validate_email_address(details.get("email"), throw=True)
+
+	company_fields = ["company_logo", "website", "phone_no", "email"]
+	company_fields_to_update = {field: details.get(field) for field in company_fields if details.get(field)}
+
+	if company_fields_to_update:
+		frappe.db.set_value("Company", company, company_fields_to_update)
+
+	company_address = details.get("company_address")
+	if details.get("address_line1"):
+		address_doc = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": details.get("address_title"),
+				"address_type": details.get("address_type"),
+				"address_line1": details.get("address_line1"),
+				"address_line2": details.get("address_line2"),
+				"city": details.get("city"),
+				"state": details.get("state"),
+				"pincode": details.get("pincode"),
+				"country": details.get("country"),
+				"is_your_company_address": 1,
+				"links": [{"link_doctype": "Company", "link_name": company}],
+			}
+		)
+		address_doc.insert()
+		company_address = address_doc.name
+
+	if company_address:
+		company_address_display = frappe.db.get_value("Sales Invoice", name, "company_address_display")
+		if not company_address_display or details.get("address_line1"):
+			from frappe.query_builder import DocType
+
+			SalesInvoice = DocType("Sales Invoice")
+
+			(
+				frappe.qb.update(SalesInvoice)
+				.set(SalesInvoice.company_address, company_address)
+				.set(SalesInvoice.company_address_display, get_address_display(company_address))
+				.where(SalesInvoice.name == name)
+			).run()
+
+	return True
 
 
 @frappe.whitelist()

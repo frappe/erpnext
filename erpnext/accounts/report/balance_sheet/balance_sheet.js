@@ -45,6 +45,11 @@ frappe.query_reports[BS_REPORT_NAME]["filters"].push(
 		label: __("Include Default FB Entries"),
 		fieldtype: "Check",
 		default: 1,
+	},
+	{
+		fieldname: "show_zero_values",
+		label: __("Show zero values"),
+		fieldtype: "Check",
 	}
 );
 

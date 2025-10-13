@@ -15,6 +15,7 @@ class PaymentGatewayAccount(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		company: DF.Link
 		currency: DF.ReadOnly | None
 		is_default: DF.Check
 		message: DF.SmallText | None
@@ -24,7 +25,8 @@ class PaymentGatewayAccount(Document):
 	# end: auto-generated types
 
 	def autoname(self):
-		self.name = self.payment_gateway + " - " + self.currency
+		abbr = frappe.db.get_value("Company", self.company, "abbr")
+		self.name = self.payment_gateway + " - " + self.currency + " - " + abbr
 
 	def validate(self):
 		self.currency = frappe.get_cached_value("Account", self.payment_account, "account_currency")
@@ -34,13 +36,15 @@ class PaymentGatewayAccount(Document):
 
 	def update_default_payment_gateway(self):
 		if self.is_default:
-			frappe.db.sql(
-				"""update `tabPayment Gateway Account` set is_default = 0
-				where is_default = 1 """
+			frappe.db.set_value(
+				"Payment Gateway Account",
+				{"is_default": 1, "name": ["!=", self.name], "company": self.company},
+				"is_default",
+				0,
 			)
 
 	def set_as_default_if_not_set(self):
-		if not frappe.db.get_value(
-			"Payment Gateway Account", {"is_default": 1, "name": ("!=", self.name)}, "name"
+		if not frappe.db.exists(
+			"Payment Gateway Account", {"is_default": 1, "name": ("!=", self.name), "company": self.company}
 		):
 			self.is_default = 1

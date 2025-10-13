@@ -134,17 +134,6 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Newsletter",
-   "link_count": 0,
-   "link_to": "Newsletter",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Notification Settings",
    "link_count": 0,
    "link_to": "Notification Settings",

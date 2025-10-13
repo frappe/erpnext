@@ -23,7 +23,10 @@ def get():
 					"account_category": "Cash and Cash Equivalents",
 				},
 				_("Loans and Advances (Assets)"): {
-					_("Employee Advances"): {"account_category": "Other Receivables"},
+					_("Employee Advances"): {
+						"account_type": "Payable",
+						"account_category": "Other Receivables",
+					},
 				},
 				_("Securities and Deposits"): {
 					_("Earnest Money"): {"account_category": "Other Current Assets"}

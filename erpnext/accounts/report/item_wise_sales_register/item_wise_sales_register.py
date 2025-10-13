@@ -9,7 +9,6 @@ from frappe.query_builder import functions as fn
 from frappe.utils import cstr, flt
 from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.xlsxutils import handle_html
-from pypika import Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 from erpnext.accounts.report.utils import get_values_for_columns
@@ -356,7 +355,13 @@ def apply_conditions(query, si, sii, sip, filters, additional_conditions=None):
 		query = query.where(si.posting_date <= filters.get("to_date"))
 
 	if filters.get("mode_of_payment"):
-		query = query.where(sip.mode_of_payment == filters.get("mode_of_payment"))
+		subquery = (
+			frappe.qb.from_(sip)
+			.select(sip.parent)
+			.where(sip.mode_of_payment == filters.get("mode_of_payment"))
+			.groupby(sip.parent)
+		)
+		query = query.where(si.name.isin(subquery))
 
 	if filters.get("warehouse"):
 		if frappe.db.get_value("Warehouse", filters.get("warehouse"), "is_group"):
@@ -425,8 +430,6 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 		frappe.qb.from_(si)
 		.join(sii)
 		.on(si.name == sii.parent)
-		.left_join(sip)
-		.on(sip.parent == si.name)
 		.left_join(item)
 		.on(sii.item_code == item.name)
 		.select(
@@ -466,7 +469,6 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			si.update_stock,
 			sii.uom,
 			sii.qty,
-			sip.mode_of_payment,
 		)
 		.where(si.docstatus == 1)
 		.where(sii.parenttype == doctype)
