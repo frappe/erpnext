@@ -268,7 +268,7 @@ class WorkOrder(Document):
 	def validate_subcontracting_inward_order(self):
 		if scio := self.subcontracting_inward_order:
 			if self.source_warehouse != (
-				rm_receipt_warehouse := frappe.db.get_value(
+				rm_receipt_warehouse := frappe.get_cached_value(
 					"Subcontracting Inward Order",
 					scio,
 					"customer_warehouse",
@@ -358,7 +358,7 @@ class WorkOrder(Document):
 
 	def validate_self_rm_warehouse(self):
 		for item in [item for item in self.required_items if not item.is_customer_provided_item]:
-			if frappe.get_value("Warehouse", item.source_warehouse, "customer"):
+			if frappe.get_cached_value("Warehouse", item.source_warehouse, "customer"):
 				frappe.throw(
 					_("Row #{0}: Source Warehouse {1} for item {2} cannot be a customer warehouse.").format(
 						item.idx, frappe.bold(item.source_warehouse), frappe.bold(item.item_code)
@@ -1434,7 +1434,7 @@ class WorkOrder(Document):
 						},
 					)
 
-					if self.subcontracting_inward_order and not frappe.get_value(
+					if self.subcontracting_inward_order and not frappe.get_cached_value(
 						"Item", item.item_code, "is_customer_provided_item"
 					):
 						self.required_items[-1].source_warehouse = item.default_warehouse

@@ -2226,7 +2226,7 @@ class SalesInvoice(SellingController):
 	def is_subcontracted(self):
 		if not self.has_subcontracted:
 			self.has_subcontracted = bool(
-				frappe.get_value(
+				frappe.get_cached_value(
 					"Sales Order",
 					{
 						"name": ["in", [item.sales_order for item in self.items if item.sales_order]],

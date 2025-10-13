@@ -136,7 +136,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			doc.save()
 
 	def validate_customer_warehouse(self):
-		if frappe.get_value("Warehouse", self.customer_warehouse, "customer") != self.customer:
+		if frappe.get_cached_value("Warehouse", self.customer_warehouse, "customer") != self.customer:
 			frappe.throw(
 				_("Customer Warehouse {0} does not belong to Customer {1}.").format(
 					frappe.bold(self.customer_warehouse), frappe.bold(self.customer)
@@ -190,7 +190,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 					{
 						"item_code": item.name,
 						"item_name": item.item_name,
-						"expected_delivery_date": frappe.get_value(
+						"expected_delivery_date": frappe.get_cached_value(
 							"Sales Order Item", si.sales_order_item, "delivery_date"
 						),
 						"description": item.description,
@@ -225,7 +225,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def set_is_customer_provided_item(self):
 		for item in self.get("received_items"):
-			item.is_customer_provided_item = frappe.get_value(
+			item.is_customer_provided_item = frappe.get_cached_value(
 				"Item", item.rm_item_code, "is_customer_provided_item"
 			)
 
@@ -278,7 +278,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 					if item.reference_name == d.name and item.is_customer_provided_item
 				]
 			)
-			qty = int(qty) if frappe.get_value("UOM", d.stock_uom, "must_be_whole_number") else qty
+			qty = int(qty) if frappe.get_cached_value("UOM", d.stock_uom, "must_be_whole_number") else qty
 
 			item_details.update({"qty": qty, "max_producible_qty": qty})
 			item_list.append(item_details)

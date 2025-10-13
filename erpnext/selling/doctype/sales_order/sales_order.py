@@ -592,8 +592,8 @@ class SalesOrder(SellingController):
 		)
 
 		if self.is_subcontracted:
-			scio = frappe.db.get_value(
-				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}
+			scio = frappe.get_cached_value(
+				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}, "name"
 			)
 
 			if scio:
@@ -1429,7 +1429,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 		ignore_permissions=ignore_permissions,
 	)
 
-	if frappe.get_value("Sales Order", source_name, "is_subcontracted"):
+	if frappe.get_cached_value("Sales Order", source_name, "is_subcontracted"):
 		add_self_rm(doclist)
 
 	automatically_fetch_payment_terms = cint(
@@ -2137,8 +2137,10 @@ def get_mapped_subcontracting_inward_order(source_name, target_doc=None):
 			)
 			== 1
 		):
-			target_doc.customer_warehouse = frappe.db.get_value(
-				"Warehouse", {"customer": source_doc.customer, "disabled": 0, "is_rejected_warehouse": 0}
+			target_doc.customer_warehouse = frappe.get_cached_value(
+				"Warehouse",
+				{"customer": source_doc.customer, "disabled": 0, "is_rejected_warehouse": 0},
+				"name",
 			)
 		target_doc.populate_items_table()
 

@@ -2326,12 +2326,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			for item in scrap_item_dict.values():
 				if self.pro_doc and self.pro_doc.scrap_warehouse:
 					item["to_warehouse"] = self.pro_doc.scrap_warehouse
-				if self.work_order and (
-					scio_detail := frappe.get_value(
-						"Work Order", self.work_order, "subcontracting_inward_order_item"
-					)
-				):
-					item["scio_detail"] = scio_detail
 
 			self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
 
@@ -2460,9 +2454,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.add_finished_goods(args, item)
 
 	def add_finished_goods(self, args, item):
-		if scio_detail := frappe.get_value("Work Order", self.work_order, "subcontracting_inward_order_item"):
-			args["scio_detail"] = scio_detail
-
 		self.add_to_stock_entry_detail({item.name: args}, bom_no=self.bom_no)
 
 	def get_bom_raw_materials(self, qty):
