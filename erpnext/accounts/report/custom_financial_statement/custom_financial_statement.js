@@ -1,13 +1,13 @@
 // Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-const REPORT_NAME = "Custom Financial Statement";
+const CFS_REPORT_NAME = "Custom Financial Statement";
 
-frappe.query_reports[REPORT_NAME] = $.extend({}, erpnext.financial_statements);
+frappe.query_reports[CFS_REPORT_NAME] = $.extend({}, erpnext.financial_statements);
 
-erpnext.utils.add_dimensions(REPORT_NAME, 10);
+erpnext.utils.add_dimensions(CFS_REPORT_NAME, 10);
 
-frappe.query_reports[REPORT_NAME]["filters"].push(
+frappe.query_reports[CFS_REPORT_NAME]["filters"].push(
 	{
 		fieldname: "report_template",
 		label: __("Report Template"),
@@ -32,4 +32,4 @@ frappe.query_reports[REPORT_NAME]["filters"].push(
 	}
 );
 
-frappe.query_reports[REPORT_NAME]["export_hidden_cols"] = true;
+frappe.query_reports[CFS_REPORT_NAME]["export_hidden_cols"] = true;

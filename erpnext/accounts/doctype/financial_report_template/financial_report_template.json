@@ -30,7 +30,7 @@
    "fieldname": "report_type",
    "fieldtype": "Select",
    "label": "Report Type",
-   "options": "\nProfit and Loss Statement\nBalance Sheet\nCash Flow"
+   "options": "\nProfit and Loss Statement\nBalance Sheet\nCash Flow\nCustom Financial Statement"
   },
   {
    "depends_on": "eval:doc.is_standard",
@@ -73,7 +73,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-10 06:41:46.205032",
+ "modified": "2025-10-10 07:10:50.951954",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Template",

@@ -25,7 +25,9 @@ class FinancialReportTemplate(Document):
 		disabled: DF.Check
 		is_standard: DF.Check
 		module: DF.Link | None
-		report_type: DF.Literal["", "Profit and Loss Statement", "Balance Sheet", "Cash Flow"]
+		report_type: DF.Literal[
+			"", "Profit and Loss Statement", "Balance Sheet", "Cash Flow", "Custom Financial Statement"
+		]
 		rows: DF.Table[FinancialReportRow]
 		template_name: DF.Data
 	# end: auto-generated types

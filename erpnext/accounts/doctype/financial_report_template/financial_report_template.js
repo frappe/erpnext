@@ -21,6 +21,13 @@ frappe.ui.form.on("Financial Report Template", {
 
 			show_accounts_tree(selected_rows, !has_selection);
 		});
+
+		// add custom button to open the financial report
+		frm.add_custom_button(__("View Report"), function () {
+			frappe.set_route("query-report", frm.doc.report_type, {
+				report_template: frm.doc.name,
+			});
+		});
 	},
 
 	validate(frm) {

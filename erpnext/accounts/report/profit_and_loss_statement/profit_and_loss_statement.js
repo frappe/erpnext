@@ -1,19 +1,19 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-const REPORT_NAME = "Profit and Loss Statement";
+const PL_REPORT_NAME = "Profit and Loss Statement";
 
-frappe.query_reports[REPORT_NAME] = $.extend({}, erpnext.financial_statements);
+frappe.query_reports[PL_REPORT_NAME] = $.extend({}, erpnext.financial_statements);
 
-erpnext.utils.add_dimensions(REPORT_NAME, 10);
+erpnext.utils.add_dimensions(PL_REPORT_NAME, 10);
 
-frappe.query_reports[REPORT_NAME]["filters"].push(
+frappe.query_reports[PL_REPORT_NAME]["filters"].push(
 	{
 		fieldname: "report_template",
 		label: __("Report Template"),
 		fieldtype: "Link",
 		options: "Financial Report Template",
-		get_query: { filters: { report_type: REPORT_NAME, disabled: 0 } },
+		get_query: { filters: { report_type: PL_REPORT_NAME, disabled: 0 } },
 	},
 	{
 		fieldname: "show_account_details",
@@ -49,4 +49,4 @@ frappe.query_reports[REPORT_NAME]["filters"].push(
 	}
 );
 
-frappe.query_reports[REPORT_NAME]["export_hidden_cols"] = true;
+frappe.query_reports[PL_REPORT_NAME]["export_hidden_cols"] = true;
