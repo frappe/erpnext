@@ -26,8 +26,8 @@ class SubcontractingInwardController:
 		self.update_inward_order_item()
 		self.validate_manufacture_entry_cancel()
 		self.validate_delivery()
-		self.update_inward_order_received_items()
 		self.validate_receive_from_customer_cancel()
+		self.update_inward_order_received_items()
 		self.update_inward_order_scrap_items()
 		self.remove_reference_for_additional_items()
 		self.update_inward_order_status()
@@ -521,7 +521,9 @@ class SubcontractingInwardController:
 					["received_qty", "returned_qty", "work_order_qty"],
 					as_dict=True,
 				)
-				if (scio_rm_item.received_qty - scio_rm_item.returned_qty) < scio_rm_item.work_order_qty:
+				if (
+					scio_rm_item.received_qty - scio_rm_item.returned_qty - item.transfer_qty
+				) < scio_rm_item.work_order_qty:
 					frappe.throw(
 						_("Row #{0}: Work Order exists against full or partial quantity of Item {1}").format(
 							item.idx, bold(item.item_code)
@@ -540,6 +542,51 @@ class SubcontractingInwardController:
 						"Cannot cancel this Manufacturing Stock Entry as quantity of Finished Good produced cannot be less than quantity delivered in the linked Subcontracting Inward Order."
 					)
 				)
+
+			for item in [item for item in self.items if not item.is_finished_item]:
+				if item.is_scrap_item:
+					scio_scrap_item = frappe.get_value(
+						"Subcontracting Inward Order Scrap Item",
+						{
+							"docstatus": 1,
+							"item_code": item.item_code,
+							"warehouse": item.t_warehouse,
+							"reference_name": fg_item_name,
+						},
+						["produced_qty", "delivered_qty"],
+						as_dict=True,
+					)
+					if (
+						scio_scrap_item
+						and scio_scrap_item.delivered_qty > scio_scrap_item.produced_qty - item.transfer_qty
+					):
+						frappe.throw(
+							_(
+								"Row #{0}: Cannot cancel this Manufacturing Stock Entry as quantity of Scrap Item {1} produced cannot be less than quantity delivered."
+							).format(item.idx, bold(item.item_code))
+						)
+				else:
+					scio_rm_item = frappe.get_value(
+						"Subcontracting Inward Order Received Item",
+						{
+							"docstatus": 1,
+							"rm_item_code": item.item_code,
+							"warehouse": item.s_warehouse,
+							"reference_name": fg_item_name,
+							"is_additional_item": 1,
+						},
+						["consumed_qty", "billed_qty"],
+						as_dict=True,
+					)
+					if (
+						scio_rm_item
+						and scio_rm_item.billed_qty > scio_rm_item.consumed_qty - item.transfer_qty
+					):
+						frappe.throw(
+							_(
+								"Row #{0}: Cannot cancel this Manufacturing Stock Entry as billed quantity of Item {1} cannot be greater than consumed quantity."
+							).format(item.idx, bold(item.item_code))
+						)
 
 	def update_inward_order_item(self):
 		if self.purpose == "Manufacture" and (
@@ -580,7 +627,6 @@ class SubcontractingInwardController:
 						if self._action == "submit"
 						else -item.transfer_qty
 						for item in self.items
-						if item.scio_detail
 					}
 					case_expr = Case()
 					table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
@@ -648,7 +694,7 @@ class SubcontractingInwardController:
 				).run()
 
 	def update_inward_order_received_items_for_manufacture(self):
-		items = [item for item in self.items if item.s_warehouse]
+		items = [item for item in self.items if not item.is_finished_item and not item.is_scrap_item]
 		item_code_wh = frappe._dict(
 			{
 				(item.item_code, item.s_warehouse): item.transfer_qty
