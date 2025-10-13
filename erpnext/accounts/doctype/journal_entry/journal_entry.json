@@ -546,42 +546,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
-   "fieldname": "periodic_entry_difference_account",
-   "fieldtype": "Link",
-   "label": "Periodic Entry Difference Account",
-   "mandatory_depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:doc.voucher_type === \"Periodic Accounting Entry\"",
-   "fieldname": "section_break_tcvw",
-   "fieldtype": "Section Break",
-   "label": "Periodic Accounting"
-  },
-  {
-   "default": "1",
-   "fieldname": "for_all_stock_asset_accounts",
-   "fieldtype": "Check",
-   "label": "For All Stock Asset Accounts"
-  },
-  {
-   "depends_on": "eval:doc.for_all_stock_asset_accounts === 0",
-   "fieldname": "stock_asset_account",
-   "fieldtype": "Link",
-   "label": "Stock Asset Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "column_break_wpau",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "get_balance_for_periodic_accounting",
-   "fieldtype": "Button",
-   "label": "Get Balance"
-  },
-  {
    "default": "0",
    "fieldname": "party_not_required",
    "fieldtype": "Check",
