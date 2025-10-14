@@ -5,7 +5,7 @@
  "doctype": "Financial Report Template",
  "idx": 0,
  "is_standard": 1,
- "modified": "2025-09-07 07:40:23.410768",
+ "modified": "2025-10-14 03:35:49.918519",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Horizontal Profit and Loss (Columnar)",
@@ -13,6 +13,7 @@
  "report_type": "Profit and Loss Statement",
  "rows": [
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Section Break",
@@ -26,6 +27,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -39,6 +41,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -51,6 +54,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Opening Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Stock Assets\"]",
@@ -66,6 +70,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Cost of Goods Sold\"]",
@@ -81,6 +86,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "INC_CLOSING_STOCK + EXP_COGS - EXP_OPENING_STOCK",
@@ -96,6 +102,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Direct Costs\"]",
@@ -111,6 +118,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "EXP_OPENING_STOCK + EXP_PURCHASES + EXP_DIRECT",
@@ -126,6 +134,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -138,6 +147,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "max(0, RIGHT_SUBTOTAL_1 - LEFT_SUBTOTAL_1)",
@@ -154,6 +164,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -167,6 +178,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -179,9 +191,10 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
-   "calculation_formula": "[\"account_category\", \"=\", \"Revenue from Operations\"]",
+   "calculation_formula": "{\"and\":[[\"account_category\",\"=\",\"Revenue from Operations\"],[\"account_name\",\"not like\",\"%Service%\"]]}",
    "data_source": "Account Data",
    "display_name": "Sales",
    "fieldtype": "",
@@ -194,6 +207,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Stock Assets\"]",
@@ -209,9 +223,10 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
-   "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Revenue from Operations\"], [\"account_type\", \"like\", \"Service\"]]}",
+   "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Revenue from Operations\"], [\"account_name\", \"like\", \"Service\"]]}",
    "data_source": "Account Data",
    "display_name": "Service Income",
    "fieldtype": "",
@@ -224,6 +239,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "INC_SALES + INC_CLOSING_STOCK + INC_SERVICE",
@@ -239,6 +255,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -251,6 +268,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "max(0, LEFT_SUBTOTAL_1 - RIGHT_SUBTOTAL_1)",
@@ -267,6 +285,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Section Break",
@@ -279,6 +298,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -291,6 +311,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "LEFT_SUBTOTAL_1 + GP_CD_LEFT",
@@ -306,6 +327,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -318,6 +340,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -330,6 +353,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -342,6 +366,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "RIGHT_SUBTOTAL_1 + GL_CD_RIGHT",
@@ -357,6 +382,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -369,6 +395,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "LEFT_TOTAL_1 - RIGHT_TOTAL_1",
@@ -385,6 +412,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Section Break",
@@ -398,6 +426,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -411,6 +440,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -423,6 +453,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "GL_CD_RIGHT",
@@ -439,6 +470,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Operating Expenses\"], [\"account_name\", \"like\", \"Administrative\"]]}",
@@ -454,6 +486,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Operating Expenses\"], [\"account_name\", \"like\", \"Sales\"]]}",
@@ -469,6 +502,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Finance Costs\"]",
@@ -484,6 +518,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Depreciation\"]",
@@ -499,6 +534,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Operating Expenses\"], [\"account_name\", \"not like\", \"Administrative\"], [\"account_name\", \"not like\", \"Sales\"], [\"account_type\", \"not like\", \"Depreciation\"]]}",
@@ -514,6 +550,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Tax Expense\"]",
@@ -529,6 +566,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "GL_BD_LEFT + EXP_ADMIN + EXP_SELLING + EXP_FINANCE + EXP_DEPRECIATION + EXP_OTHER + EXP_TAX",
@@ -544,6 +582,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -556,6 +595,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "max(0, RIGHT_SUBTOTAL_2 - LEFT_SUBTOTAL_2)",
@@ -572,6 +612,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -585,6 +626,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -597,6 +639,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "GP_CD_LEFT",
@@ -613,6 +656,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Operating Income\"]",
@@ -628,6 +672,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Investment Income\"]",
@@ -643,6 +688,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "GP_BD_RIGHT + INC_OTHER + INC_INVESTMENT",
@@ -658,6 +704,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -670,6 +717,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "max(0, LEFT_SUBTOTAL_2 - RIGHT_SUBTOTAL_2)",
@@ -686,6 +734,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Section Break",
@@ -698,6 +747,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -710,6 +760,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "LEFT_SUBTOTAL_2 + NET_PROFIT_LEFT",
@@ -725,6 +776,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -737,6 +789,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -749,6 +802,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "RIGHT_SUBTOTAL_2 + NET_LOSS_RIGHT",
@@ -764,6 +818,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Section Break",
@@ -776,6 +831,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "LEFT_TOTAL_2 - RIGHT_TOTAL_2",
@@ -792,6 +848,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"root_type\", \"=\", \"Income\"]",
@@ -807,6 +864,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"root_type\", \"=\", \"Expense\"]",
@@ -822,6 +880,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "ACT_TOTAL_INCOME - ACT_TOTAL_EXPENSES",
@@ -837,6 +896,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "NET_PROFIT_LEFT - NET_LOSS_RIGHT",
@@ -852,6 +912,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CALC_NET_PROFIT - ACT_NET_PROFIT",
@@ -868,6 +929,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -880,6 +942,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -894,6 +957,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "((GP_CD_LEFT - GL_CD_RIGHT) / INC_SALES * 100) if INC_SALES != 0 else 0",
@@ -909,6 +973,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "(CALC_NET_PROFIT / INC_SALES * 100) if INC_SALES != 0 else 0",
@@ -924,6 +989,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "((EXP_ADMIN + EXP_SELLING + EXP_OTHER) / INC_SALES * 100) if INC_SALES != 0 else 0",
