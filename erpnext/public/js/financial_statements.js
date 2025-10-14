@@ -105,11 +105,12 @@ erpnext.financial_statements = {
 	_format_custom_value_column: function (value, data, formatting, column, default_formatter, row) {
 		if (formatting.is_blank_line) return "";
 
-		column.fieldtype = formatting.fieldtype || column.fieldtype;
+		const col = { ...column };
+		col.fieldtype = formatting.fieldtype || col.fieldtype;
 		// Avoid formatting as currency
-		if (column.fieldtype == "Float") column.options = null;
+		if (col.fieldtype == "Float") col.options = null;
 
-		let formattedValue = default_formatter(value, row, column, data);
+		let formattedValue = default_formatter(value, row, col, data);
 		return this._style_custom_value(formattedValue, formatting, value);
 	},
 
