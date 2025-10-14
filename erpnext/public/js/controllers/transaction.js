@@ -1022,19 +1022,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			} else {
 				set_pricing();
 			}
+		};
 
-		}
+		if (
+			frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
+			["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype) &&
+			!this.frm.doc.shipping_address
+		) {
+			let is_drop_ship = me.frm.doc.items.some((item) => item.delivered_by_supplier);
 
-		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
-			['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'].includes(this.frm.doctype)) {
-				let is_drop_ship = me.frm.doc.items.some(item => item.delivered_by_supplier);
-
-				if (!is_drop_ship) {
-					erpnext.utils.get_shipping_address(this.frm, function() {
-						set_party_account(set_pricing);
-					});
-				}
-
+			if (!is_drop_ship) {
+				erpnext.utils.get_shipping_address(this.frm, function() {
+					set_party_account(set_pricing);
+				});
+			}
 		} else {
 			set_party_account(set_pricing);
 		}

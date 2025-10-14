@@ -778,7 +778,8 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Material Request Item",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "expense_account",
@@ -1038,7 +1039,8 @@
    "fieldtype": "Link",
    "label": "Rejected Serial and Batch Bundle",
    "no_copy": 1,
-   "options": "Serial and Batch Bundle"
+   "options": "Serial and Batch Bundle",
+   "search_index": 1
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 0",
@@ -1147,7 +1149,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-12 17:10:43.780622",
+ "modified": "2025-10-14 12:59:20.384056",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

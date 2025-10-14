@@ -59,6 +59,7 @@
   "addtional_info",
   "mode_of_payment",
   "payment_order",
+  "party_not_required",
   "column_break3",
   "is_opening",
   "stock_entry",
@@ -543,6 +544,14 @@
    "label": "Is System Generated",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "party_not_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Party Not Required",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -557,7 +566,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-07-18 15:32:29.413598",
+ "modified": "2025-09-29 13:05:46.982277",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

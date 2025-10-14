@@ -72,6 +72,7 @@ class JournalEntry(AccountsController):
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
 		paid_loan: DF.Data | None
+		party_not_required: DF.Check
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
 		posting_date: DF.Date
@@ -543,10 +544,10 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			account_type = frappe.get_cached_value("Account", d.account, "account_type")
 
-			# skipping validation for payroll entry creation
-			skip_validation = frappe.flags.party_not_required_for_receivable_payable
 			if account_type in ["Receivable", "Payable"]:
-				if not (d.party_type and d.party) and not skip_validation:
+				if (
+					not (d.party_type and d.party) and not self.party_not_required
+				):  # skipping validation if party_not_required is passed via payroll entry
 					frappe.throw(
 						_(
 							"Row {0}: Party Type and Party is required for Receivable / Payable account {1}"
@@ -1139,6 +1140,11 @@ class JournalEntry(AccountsController):
 						}
 					)
 
+				# set flag to skip party validation
+				account_type = frappe.get_cached_value("Account", d.account, "account_type")
+				if account_type in ["Receivable", "Payable"] and self.party_not_required:
+					frappe.flags.party_not_required = True
+
 				gl_map.append(
 					self.get_gl_dict(
 						row,
@@ -1166,6 +1172,7 @@ class JournalEntry(AccountsController):
 				merge_entries=merge_entries,
 				update_outstanding=update_outstanding,
 			)
+			frappe.flags.party_not_required = False
 			if cancel:
 				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 

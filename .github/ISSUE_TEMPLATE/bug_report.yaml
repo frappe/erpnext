@@ -9,7 +9,7 @@ body:
         Welcome to ERPNext issue tracker! Before creating an issue, please heed the following:
 
         1. This tracker should only be used to report bugs and request features / enhancements to ERPNext
-            - For questions and general support, checkout the [user manual](https://docs.erpnext.com/) or use [forum](https://discuss.erpnext.com)
+            - For questions and general support, checkout the [user manual](https://docs.erpnext.com/) or use [forum](https://discuss.frappe.io/c/erpnext/6)
             - For documentation issues, propose edit on [documentation site](https://docs.erpnext.com/) directly.
         2. When making a bug report, make sure you provide all required information. The easier it is for
            maintainers to reproduce, the faster it'll be fixed.

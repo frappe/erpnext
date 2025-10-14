@@ -34,3 +34,15 @@ class AdvancePaymentLedgerEntry(Document):
 			and not frappe.flags.is_reverse_depr_entry
 		):
 			update_voucher_outstanding(self.against_voucher_type, self.against_voucher_no, None, None, None)
+
+
+def on_doctype_update():
+	frappe.db.add_index(
+		"Advance Payment Ledger Entry",
+		["against_voucher_type", "against_voucher_no"],
+	)
+
+	frappe.db.add_index(
+		"Advance Payment Ledger Entry",
+		["voucher_type", "voucher_no"],
+	)
