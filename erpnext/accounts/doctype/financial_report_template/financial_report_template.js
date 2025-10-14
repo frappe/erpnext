@@ -90,10 +90,17 @@ function set_up_filters_editor(frm, cdt, cdn) {
 	let saved_filters = [];
 
 	if (row.calculation_formula) {
-		const parsed = JSON.parse(row.calculation_formula);
+		try {
+			const parsed = JSON.parse(row.calculation_formula);
 
-		if (Array.isArray(parsed)) saved_filters = [parsed];
-		else if (parsed.and) saved_filters = parsed.and;
+			if (Array.isArray(parsed)) saved_filters = [parsed];
+			else if (parsed.and) saved_filters = parsed.and;
+		} catch (e) {
+			frappe.show_alert({
+				message: __("Invalid filter formula. Please check the syntax."),
+				indicator: "red",
+			});
+		}
 	}
 
 	if (saved_filters.length)
