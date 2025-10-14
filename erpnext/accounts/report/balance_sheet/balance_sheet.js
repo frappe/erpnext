@@ -21,7 +21,7 @@ frappe.query_reports[BS_REPORT_NAME]["filters"].push(
 		fieldtype: "Select",
 		options: ["Summary", "Account Breakdown"],
 		default: "Summary",
-		depends_on: "eval:!!frappe.query_report.get_filter_value('report_template')",
+		depends_on: "eval:doc.report_template",
 	},
 	{
 		fieldname: "selected_view",
