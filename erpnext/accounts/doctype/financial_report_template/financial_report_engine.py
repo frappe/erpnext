@@ -202,25 +202,20 @@ class FormattingRule:
 class FinancialReportEngine:
 	def execute(self, filters: dict[str, Any]) -> tuple[list[dict], list[dict]]:
 		"""Execute the complete report generation"""
-		try:
-			self._validate_filters(filters)
+		self._validate_filters(filters)
 
-			# Initialize context
-			context = self._initialize_context(filters)
+		# Initialize context
+		context = self._initialize_context(filters)
 
-			# Execute
-			self.collect_financial_data(context)
-			self.process_calculations(context)
-			self.format_report_data(context)
-			self.apply_view_transformation(context)
+		# Execute
+		self.collect_financial_data(context)
+		self.process_calculations(context)
+		self.format_report_data(context)
+		self.apply_view_transformation(context)
 
-			# Chart
-			self.generate_chart_data(context)
-			return context.get_result()
-
-		except Exception as e:
-			frappe.log_error(f"Financial Report Engine Error: {e!s}")
-			frappe.throw(_("Error generating financial report: {0}").format(str(e)))
+		# Chart
+		self.generate_chart_data(context)
+		return context.get_result()
 
 	def _validate_filters(self, filters: dict[str, Any]) -> None:
 		required_filters = ["report_template", "period_start_date", "period_end_date"]
