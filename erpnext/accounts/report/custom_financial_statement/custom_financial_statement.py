@@ -7,5 +7,5 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_engine 
 
 
 def execute(filters: dict | None = None):
-	if filters.report_template:
+	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)

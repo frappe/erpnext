@@ -28,7 +28,7 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
-	if filters.report_template:
+	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
 	period_list = get_period_list(
