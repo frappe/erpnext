@@ -118,9 +118,12 @@ class SubcontractingInwardController:
 					)
 
 	def validate_manufacture(self):
-		warehouse = frappe.get_cached_value(
-			"Subcontracting Inward Order", self.subcontracting_inward_order, "customer_warehouse"
+		skip_transfer, customer_warehouse, wip_warehouse = frappe.get_cached_value(
+			"Work Order",
+			self.work_order,
+			["skip_transfer", "source_warehouse", "wip_warehouse"],
 		)
+		warehouse = customer_warehouse if skip_transfer else wip_warehouse
 
 		items = [
 			item
