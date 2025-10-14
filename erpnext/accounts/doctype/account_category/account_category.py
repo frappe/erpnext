@@ -52,3 +52,4 @@ def create_account_categories(categories: list[dict], is_system_generated: bool 
 			}
 		)
 		doc.insert(ignore_permissions=True)
+		existing_categories.add(category_name)

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import ast
+import json
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -725,9 +726,6 @@ class FilterExpressionParser:
 	def build_conditions(self, report_rows, table):
 		conditions = []
 		for row in report_rows:
-			if isinstance(row, str | dict):
-				row = frappe.parse_json(row)
-
 			condition = self.build_condition(row, table)
 			if condition:
 				conditions.append(condition)
@@ -835,7 +833,7 @@ def get_filtered_accounts(company: str, account_rows: str | list):
 	frappe.has_permission("Financial Report Template", ptype="read", throw=True)
 
 	if isinstance(account_rows, str):
-		account_rows = frappe.parse_json(account_rows)
+		account_rows = json.loads(account_rows, object_hook=frappe._dict)
 
 	return DataCollector.get_filtered_accounts(company, account_rows)
 
