@@ -726,9 +726,9 @@ class FilterExpressionParser:
 
 	def build_conditions(self, report_rows, table):
 		conditions = []
-		for row in report_rows:
+		for row in report_rows or []:
 			condition = self.build_condition(row, table)
-			if condition:
+			if condition is not None:
 				conditions.append(condition)
 
 		# ensure brackets in or condition
