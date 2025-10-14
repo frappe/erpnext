@@ -108,7 +108,7 @@ erpnext.financial_statements = {
 		const col = { ...column };
 		col.fieldtype = formatting.fieldtype || col.fieldtype;
 		// Avoid formatting as currency
-		if (col.fieldtype == "Float") col.options = null;
+		if (col.fieldtype === "Float") col.options = null;
 
 		let formattedValue = default_formatter(value, row, col, data);
 		return this._style_custom_value(formattedValue, formatting, value);
@@ -119,7 +119,8 @@ erpnext.financial_statements = {
 
 		if (formatting.bold) $element.css("font-weight", "bold");
 		if (formatting.italic) $element.css("font-style", "italic");
-		if (formatting.warn_if_negative && value < 0) $element.addClass("text-danger");
+		if (formatting.warn_if_negative && typeof value === "number" && value < 0)
+			$element.addClass("text-danger");
 		if (formatting.color) $element.css("color", formatting.color);
 
 		return $element.wrap("<p></p>").parent().html();
@@ -130,7 +131,7 @@ erpnext.financial_statements = {
 
 		if (selectedView === "Growth") {
 			const growthPercent = data[column.fieldname];
-			if (growthPercent == undefined) return "NA";
+			if (growthPercent === undefined) return "NA";
 			if (growthPercent === "") return "";
 
 			if (column.fieldname === "total") {
@@ -146,7 +147,7 @@ erpnext.financial_statements = {
 			return $(value).wrap("<p></p>").parent().html();
 		} else {
 			const marginPercent = data[column.fieldname];
-			if (marginPercent == undefined) return "NA";
+			if (marginPercent === undefined) return "NA";
 
 			value = $(`<span>${marginPercent + "%"}</span>`);
 			if (marginPercent < 0) value = $(value).addClass("text-danger");
