@@ -880,9 +880,11 @@ class SubcontractingInwardController:
 			items = [
 				item
 				for item in self.items
-				if (
+				if item.scio_detail
+				and (
 					not frappe.db.exists("Subcontracting Inward Order Received Item", item.scio_detail)
 					and not frappe.db.exists("Subcontracting Inward Order Item", item.scio_detail)
+					and not frappe.db.exists("Subcontracting Inward Order Scrap Item", item.scio_detail)
 				)
 			]
 			for item in items:
