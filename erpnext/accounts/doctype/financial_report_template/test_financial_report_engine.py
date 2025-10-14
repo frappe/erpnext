@@ -800,6 +800,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 				self.reference_code = ref_code
 				self.data_source = "Calculated Amount"
 				self.idx = 1
+				self.reverse_sign = 0
 
 		return MockReportRow(formula, reference_code)
 
@@ -1298,6 +1299,7 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 				self.reference_code = ref_code
 				self.data_source = "Account Data"
 				self.idx = 1
+				self.reverse_sign = 0
 
 		return MockReportRow(formula, reference_code)
 
