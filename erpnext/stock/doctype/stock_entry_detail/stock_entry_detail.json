@@ -192,6 +192,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Basic Rate (as per Stock UOM)",
+   "non_negative": 1,
    "oldfieldname": "incoming_rate",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -450,7 +451,8 @@
    "no_copy": 1,
    "options": "Stock Entry",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "ste_detail",
@@ -458,7 +460,8 @@
    "label": "Stock Entry Child",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_51",
@@ -645,7 +648,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-13 12:13:43.389334",
+ "modified": "2025-10-14 14:10:38.373099",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
