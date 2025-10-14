@@ -154,17 +154,10 @@ frappe.ui.form.on("Production Plan", {
 					has_create_buttons = true;
 				}
 			}
-<<<<<<< HEAD
-=======
 
 			if (has_create_buttons && frm.doc.status !== "Closed") {
 				frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
->>>>>>> 0948358bb3 (fix: prevent empty Create dropdown when In Process)
-		}
-
-		if (frm.doc.status !== "Closed") {
-			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 		frm.trigger("material_requirement");
 
