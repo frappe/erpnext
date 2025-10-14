@@ -1433,7 +1433,7 @@ class RowFormatterBase(ABC):
 			"account": getattr(row_data.row, "display_name", "") or "",
 			"indent": getattr(row_data.row, "indentation_level", 0),
 			"account_name": getattr(row_data.row, "account", "") or "",
-			"currency": getattr(self.context.currency, "currency", "") or "",
+			"currency": self.context.currency or "",
 			"period_start_date": getattr(self.context.filters, "period_start_date", "") or "",
 			"period_end_date": getattr(self.context.filters, "period_end_date", "") or "",
 			"total": 0,
