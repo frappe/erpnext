@@ -421,9 +421,10 @@ class DataCollector:
 			query = query.where(account.company == company)
 
 		where_condition = filter_parser.build_condition(report_row, account)
-		if where_condition is not None:
-			query = query.where(where_condition)
+		if where_condition is None:
+			return []
 
+		query = query.where(where_condition)
 		query = query.orderby(account.name)
 		result = query.run(as_dict=True)
 		return [row.name for row in result]
