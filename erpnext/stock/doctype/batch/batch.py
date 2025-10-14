@@ -156,6 +156,19 @@ class Batch(Document):
 		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
 			frappe.throw(_("The selected item cannot have Batch"))
 
+	@frappe.whitelist()
+	def recalculate_batch_qty(self):
+		batches = get_batch_qty(
+			batch_no=self.name, item_code=self.item, for_stock_levels=True, consider_negative_batches=True
+		)
+		batch_qty = 0.0
+		if batches:
+			for row in batches:
+				batch_qty += row.get("qty")
+
+		self.db_set("batch_qty", batch_qty)
+		frappe.msgprint(_("Batch Qty updated to {0}").format(batch_qty), alert=True)
+
 	def set_batchwise_valuation(self):
 		from erpnext.stock.utils import get_valuation_method
 
@@ -249,6 +262,7 @@ def get_batch_qty(
 			"posting_date": posting_date,
 			"posting_time": posting_time,
 			"batch_no": batch_no,
+			"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			"ignore_voucher_nos": ignore_voucher_nos,
 			"for_stock_levels": for_stock_levels,
 			"consider_negative_batches": consider_negative_batches,

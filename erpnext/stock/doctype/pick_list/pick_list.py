@@ -74,8 +74,11 @@ class PickList(TransactionBase):
 		if self.has_reserved_stock():
 			self.set_onload("has_reserved_stock", True)
 
-		for item in self.get("locations"):
-			item.update(get_item_details(item.item_code, item.uom, item.warehouse, self.company))
+		if self.docstatus.is_draft() and not hasattr(self, "_action"):
+			company = self.company
+
+			for item in self.get("locations"):
+				item.update(get_item_details(item.item_code, item.uom, item.warehouse, company))
 
 	def validate(self):
 		self.validate_expired_batches()

@@ -76,9 +76,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		// Update paid amount on return/debit note creation
 		if (
-			this.frm.doc.doctype === "Purchase Invoice"
-			&& this.frm.doc.is_return
-			&& (this.frm.doc.grand_total > this.frm.doc.paid_amount)
+			this.frm.doc.doctype === "Purchase Invoice" &&
+			this.frm.doc.is_return &&
+			this.frm.doc.grand_total < 0 &&
+			this.frm.doc.grand_total > this.frm.doc.paid_amount
 		) {
 			this.frm.doc.paid_amount = flt(this.frm.doc.grand_total, precision("grand_total"));
 		}

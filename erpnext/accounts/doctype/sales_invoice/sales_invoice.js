@@ -798,6 +798,15 @@ frappe.ui.form.on("Sales Invoice", {
 				},
 			};
 		};
+
+		frm.set_query("sales_person", "sales_team", function () {
+			return {
+				filters: {
+					is_group: 0,
+					enabled: 1,
+				},
+			};
+		});
 	},
 	onload: function (frm) {
 		frm.redemption_conversion_factor = null;
