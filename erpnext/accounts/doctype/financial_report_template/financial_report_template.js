@@ -141,7 +141,15 @@ function update_advanced_formula_property(frm, cdt, cdn) {
 function is_advanced_formula(row) {
 	if (!row || row.data_source !== "Account Data") return false;
 
-	const parsed = row.calculation_formula ? JSON.parse(row.calculation_formula) : null;
+	let parsed = null;
+	if (row.calculation_formula) {
+		try {
+			parsed = JSON.parse(row.calculation_formula);
+		} catch (e) {
+			console.warn("Invalid JSON in calculation_formula:", e);
+			return false;
+		}
+	}
 
 	if (Array.isArray(parsed)) return false;
 	if (parsed?.or) return true;
