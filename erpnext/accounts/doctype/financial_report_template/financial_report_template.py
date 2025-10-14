@@ -55,4 +55,4 @@ class FinancialReportTemplate(Document):
 		module_path = frappe.get_module_path(self.module)
 		dir_path = os.path.join(module_path, "financial_report_template", frappe.scrub(self.name))
 
-		shutil.rmtree(dir_path)
+		shutil.rmtree(dir_path, ignore_errors=True)
