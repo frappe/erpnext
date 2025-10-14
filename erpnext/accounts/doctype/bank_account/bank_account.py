@@ -9,7 +9,8 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.document import Document
-from frappe.utils import comma_and, get_link_to_form
+from frappe.utils import comma_and, get_link_to_form, validate_iban
+from frappe.utils.deprecations import deprecated
 
 
 class BankAccount(Document):
@@ -70,6 +71,11 @@ class BankAccount(Document):
 	def validate_company(self):
 		if self.is_company_account and not self.company:
 			frappe.throw(_("Company is manadatory for company account"))
+
+	@deprecated
+	def validate_iban(self):
+		"""Kept for backward compatibility, will be removed in v16."""
+		validate_iban(self.iban, throw=True)
 
 	def update_default_bank_account(self):
 		if self.is_default and not self.disabled:
