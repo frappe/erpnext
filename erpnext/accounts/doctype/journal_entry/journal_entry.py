@@ -175,6 +175,7 @@ class JournalEntry(AccountsController):
 
 	def submit(self):
 		if len(self.accounts) > 100:
+			self.save()
 			msgprint(_("The task has been enqueued as a background job."), alert=True)
 			self.queue_action("submit", timeout=4600)
 		else:
