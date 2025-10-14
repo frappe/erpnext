@@ -1297,10 +1297,10 @@ def get_pending_subcontracted_quantity(doctype, name):
 	)
 	query = (
 		frappe.qb.from_(table)
-		.select(table.name, table.qty, table.subcontracted_qty)
+		.select(table.name, table.stock_qty, table.subcontracted_qty)
 		.where(table.parent == name)
 	)
-	return {item.name: item.qty - item.subcontracted_qty for item in query.run(as_dict=True)}
+	return {item.name: item.stock_qty - item.subcontracted_qty for item in query.run(as_dict=True)}
 
 
 @frappe.whitelist()

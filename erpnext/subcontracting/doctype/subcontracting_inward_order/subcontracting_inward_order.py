@@ -165,13 +165,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 				item = frappe.get_doc("Item", si.fg_item)
 
 				so_item = frappe.get_doc("Sales Order Item", si.sales_order_item)
-				available_qty = so_item.qty - so_item.subcontracted_qty
+				available_qty = so_item.stock_qty - so_item.subcontracted_qty
 
 				if available_qty == 0:
 					continue
 
-				si.qty = available_qty
-				conversion_factor = so_item.qty / so_item.fg_item_qty
+				si.required_qty = available_qty
+				conversion_factor = so_item.stock_qty / so_item.fg_item_qty
 				si.fg_item_qty = flt(
 					available_qty / conversion_factor, frappe.get_precision("Sales Order Item", "qty")
 				)

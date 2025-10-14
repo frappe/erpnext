@@ -82,6 +82,7 @@ class Item(Document):
 		country_of_origin: DF.Link | None
 		create_new_batch: DF.Check
 		cumulative_time: DF.Int
+		customer: DF.Link | None
 		customer_code: DF.SmallText | None
 		customer_items: DF.Table[ItemCustomerDetail]
 		customs_tariff_number: DF.Link | None
@@ -966,7 +967,6 @@ class Item(Document):
 
 		restricted_fields = (
 			"has_serial_no",
-			"is_customer_provided_item",
 			"is_stock_item",
 			"valuation_method",
 			"has_batch_no",

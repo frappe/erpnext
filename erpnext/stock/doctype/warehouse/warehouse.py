@@ -59,13 +59,13 @@ class Warehouse(NestedSet):
 		self.name = self.warehouse_name
 
 	def onload(self):
-		"""load account name for General Ledger Report"""
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
 			account = self.account or get_warehouse_account(self)
 
 			if account:
 				self.set_onload("account", account)
 		load_address_and_contact(self)
+		self.set_onload("stock_exists", self.check_if_sle_exists(non_cancelled_only=True))
 
 	def validate(self):
 		self.warn_about_multiple_warehouse_account()
@@ -151,8 +151,11 @@ class Warehouse(NestedSet):
 				indicator="orange",
 			)
 
-	def check_if_sle_exists(self):
-		return frappe.db.exists("Stock Ledger Entry", {"warehouse": self.name})
+	def check_if_sle_exists(self, non_cancelled_only=False):
+		filters = {"warehouse": self.name}
+		if non_cancelled_only:
+			filters["is_cancelled"] = 0
+		return frappe.db.exists("Stock Ledger Entry", filters)
 
 	def check_if_child_exists(self):
 		return frappe.db.exists("Warehouse", {"parent_warehouse": self.name})
