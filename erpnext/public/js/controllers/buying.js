@@ -17,9 +17,6 @@ erpnext.buying = {
 				this.setup_queries(doc, cdt, cdn);
 				super.onload();
 
-<<<<<<< HEAD
-				this.frm.set_query('shipping_rule', function() {
-=======
 				if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
 					this.frm.set_query("supplier", function () {
 						return {
@@ -31,7 +28,6 @@ erpnext.buying = {
 				}
 
 				this.frm.set_query("shipping_rule", function () {
->>>>>>> 108b108d64 (refactor: add supplier filter in buying)
 					return {
 						filters: {
 							"shipping_rule_type": "Buying"
