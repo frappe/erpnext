@@ -56,6 +56,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "0",
    "fieldname": "produced_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -64,6 +65,7 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "fieldname": "delivered_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -97,7 +99,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-31 20:28:58.649990",
+ "modified": "2025-10-14 10:28:30.192350",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order Scrap Item",

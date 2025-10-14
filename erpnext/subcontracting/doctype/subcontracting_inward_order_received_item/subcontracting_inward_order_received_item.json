@@ -78,6 +78,7 @@
   },
   {
    "columns": 2,
+   "default": "0",
    "depends_on": "eval:doc.required_qty",
    "fieldname": "required_qty",
    "fieldtype": "Float",
@@ -88,6 +89,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.is_customer_provided_item",
    "fieldname": "received_qty",
    "fieldtype": "Float",
@@ -103,6 +105,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "consumed_qty",
    "fieldtype": "Float",
    "label": "Consumed Qty",
@@ -112,7 +115,8 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.is_customer_provided_item",
+   "default": "0",
+   "depends_on": "eval:doc.returned_qty",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
    "label": "Returned Qty",
@@ -123,6 +127,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "depends_on": "eval:doc.work_order_qty",
    "fieldname": "work_order_qty",
    "fieldtype": "Float",
@@ -150,6 +155,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "depends_on": "eval:!doc.is_customer_provided_item",
    "fieldname": "billed_qty",
    "fieldtype": "Float",
@@ -172,7 +178,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-09 12:42:05.547576",
+ "modified": "2025-10-14 10:18:58.905093",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order Received Item",

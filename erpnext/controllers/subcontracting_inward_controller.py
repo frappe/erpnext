@@ -570,12 +570,11 @@ class SubcontractingInwardController:
 							"reference_name": fg_item_name,  # if this field is set then the additional item is NOT customer provided
 							"is_additional_item": 1,
 						},
-						["consumed_qty", "billed_qty"],
+						["consumed_qty", "billed_qty", "returned_qty"],
 						as_dict=True,
 					)
-					if (
-						scio_rm_item
-						and scio_rm_item.billed_qty > scio_rm_item.consumed_qty - item.transfer_qty
+					if scio_rm_item and (scio_rm_item.billed_qty - scio_rm_item.returned_qty) > (
+						scio_rm_item.consumed_qty - item.transfer_qty
 					):
 						frappe.throw(
 							_(
