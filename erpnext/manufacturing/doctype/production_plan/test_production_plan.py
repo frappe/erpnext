@@ -692,7 +692,6 @@ class TestProductionPlan(IntegrationTestCase):
 		mr = frappe.get_doc("Material Request", material_request)
 
 		self.assertTrue(mr.material_request_type, "Customer Provided")
-		self.assertTrue(mr.customer, "_Test Customer")
 
 	def test_production_plan_with_multi_level_bom(self):
 		"""
@@ -2523,5 +2522,8 @@ def make_bom(**args):
 
 		if not args.do_not_submit:
 			bom.submit()
+
+	if args.set_as_default_bom and not args.do_not_save and not args.do_not_submit:
+		frappe.set_value("Item", args.item, "default_bom", bom.name)
 
 	return bom

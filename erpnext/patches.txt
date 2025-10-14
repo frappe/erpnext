@@ -440,3 +440,5 @@ erpnext.patches.v16_0.make_workstation_operating_components #1
 erpnext.patches.v16_0.set_reporting_currency
 erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
 erpnext.patches.v16_0.update_serial_no_reference_name
+erpnext.patches.v16_0.rename_subcontracted_quantity
+erpnext.patches.v16_0.add_new_stock_entry_types

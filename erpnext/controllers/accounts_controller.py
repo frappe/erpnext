@@ -3804,9 +3804,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			any_qty_changed = True
 
 		if (
-			parent.doctype == "Purchase Order"
+			parent.doctype in ["Sales Order", "Purchase Order"]
 			and parent.is_subcontracted
-			and not parent.is_old_subcontracting_flow
+			and not parent.get("is_old_subcontracting_flow")
 		):
 			validate_fg_item_for_subcontracting(d, new_child_flag)
 			child_item.fg_item_qty = flt(d["fg_item_qty"])
@@ -3891,7 +3891,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
 	parent.set_total_in_words()
-	if parent_doctype == "Sales Order":
+	if parent_doctype == "Sales Order" and not parent.is_subcontracted:
 		make_packing_list(parent)
 		parent.set_gross_profit()
 	frappe.get_cached_doc("Authorization Control").validate_approving_authority(
@@ -3938,6 +3938,12 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 						).format(frappe.bold(parent.name))
 					)
 	else:  # Sales Order
+		if parent.is_subcontracted and not parent.can_update_items():
+			frappe.throw(
+				_(
+					"Items cannot be updated as Subcontracting Inward Order is created against the Sales Order {0}."
+				).format(frappe.bold(parent.name))
+			)
 		parent.validate_selling_price()
 		parent.validate_for_duplicate_items()
 		parent.validate_warehouse()
@@ -3957,7 +3963,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.validate_uom_is_integer("stock_uom", "stock_qty")
 
 	# Cancel and Recreate Stock Reservation Entries.
-	if parent_doctype == "Sales Order":
+	if parent_doctype == "Sales Order" and not parent.is_subcontracted:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 			has_reserved_stock,

@@ -87,7 +87,6 @@
   "lead_time_days",
   "last_purchase_rate",
   "is_customer_provided_item",
-  "customer",
   "supplier_details",
   "delivered_by_supplier",
   "column_break2",
@@ -206,9 +205,11 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_customer_provided_item",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
-   "label": "Allow Alternative Item"
+   "label": "Allow Alternative Item",
+   "read_only_depends_on": "eval:doc.is_customer_provided_item"
   },
   {
    "allow_in_quick_entry": 1,
@@ -586,13 +587,6 @@
    "label": "Is Customer Provided Item"
   },
   {
-   "depends_on": "eval:doc.is_customer_provided_item==1",
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Customer"
-  },
-  {
    "collapsible": 1,
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "supplier_details",
@@ -771,10 +765,9 @@
   },
   {
    "default": "0",
-   "description": "If subcontracted to a vendor",
    "fieldname": "is_sub_contracted_item",
    "fieldtype": "Check",
-   "label": "Supply Raw Materials for Purchase",
+   "label": "Is Subcontracted Item",
    "oldfieldname": "is_sub_contracted_item",
    "oldfieldtype": "Select"
   },
@@ -954,7 +947,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-10-01 16:58:40.946604",
+ "modified": "2025-10-12 16:58:40.946604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

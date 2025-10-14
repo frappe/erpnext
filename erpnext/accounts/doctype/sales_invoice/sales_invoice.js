@@ -256,6 +256,18 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	sales_order_btn() {
 		var me = this;
+
+		let filters = {
+			docstatus: 1,
+			status: ["not in", ["Closed", "On Hold"]],
+			per_billed: ["<", 99.99],
+			company: me.frm.doc.company,
+		};
+
+		if (me.frm.doc.has_subcontracted) {
+			filters.is_subcontracted = 1;
+		}
+
 		this.$sales_order_btn = this.frm.add_custom_button(
 			__("Sales Order"),
 			function () {
@@ -266,12 +278,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					setters: {
 						customer: me.frm.doc.customer || undefined,
 					},
-					get_query_filters: {
-						docstatus: 1,
-						status: ["not in", ["Closed", "On Hold"]],
-						per_billed: ["<", 99.99],
-						company: me.frm.doc.company,
-					},
+					get_query_filters: filters,
 					allow_child_item_selection: true,
 					child_fieldname: "items",
 					child_columns: ["item_code", "item_name", "qty", "amount", "billed_amt"],
@@ -1094,6 +1101,9 @@ frappe.ui.form.on("Sales Invoice", {
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
+
+		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
+		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
 	},
 });
 

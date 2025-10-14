@@ -1026,12 +1026,22 @@ class SerialBatchCreation:
 		for d in remove_list:
 			package.remove(d)
 
-	def make_serial_and_batch_bundle(self):
+	def make_serial_and_batch_bundle(
+		self, serial_nos=None, batch_nos=None
+	):  # passing None instead of [] due to ruff linter error B006
+		serial_nos = serial_nos or []
+		batch_nos = batch_nos or []
+
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		valid_columns = doc.meta.get_valid_columns()
 		for key, value in self.__dict__.items():
 			if key in valid_columns:
 				doc.set(key, value)
+
+		if serial_nos:
+			self.serial_nos = serial_nos
+		if batch_nos:
+			self.batches = batch_nos
 
 		if self.type_of_transaction == "Outward":
 			self.set_auto_serial_batch_entries_for_outward()
@@ -1081,10 +1091,21 @@ class SerialBatchCreation:
 				self.batch_no = batches[0]
 				self.serial_nos = self.get_auto_created_serial_nos()
 
-	def update_serial_and_batch_entries(self):
+	def update_serial_and_batch_entries(
+		self, serial_nos=None, batch_nos=None
+	):  # passing None instead of [] due to ruff linter error B006
+		serial_nos = serial_nos or []
+		batch_nos = batch_nos or []
+
 		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
 		doc.type_of_transaction = self.type_of_transaction
 		doc.set("entries", [])
+
+		if serial_nos:
+			self.serial_nos = serial_nos
+		if batch_nos:
+			self.batch_nos = batch_nos
+
 		self.set_auto_serial_batch_entries_for_outward()
 		self.set_serial_batch_entries(doc)
 		if not doc.get("entries"):
@@ -1429,3 +1450,28 @@ def get_batchwise_qty(voucher_type, voucher_no):
 		return frappe._dict({})
 
 	return frappe._dict(batches)
+
+
+def get_serial_batch_list_from_item(item):
+	serial_list, batch_list = [], []
+	if item.serial_and_batch_bundle:
+		table = frappe.qb.DocType("Serial and Batch Entry")
+		query = (
+			frappe.qb.from_(table)
+			.select(table.serial_no, table.batch_no)
+			.where(table.parent == item.serial_and_batch_bundle)
+		)
+		result = query.run(as_dict=True)
+
+		for row in result:
+			if row.serial_no and row.serial_no not in serial_list:
+				serial_list.append(row.serial_no)
+			if row.batch_no and row.batch_no not in batch_list:
+				batch_list.append(row.batch_no)
+	else:
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		serial_list = get_serial_nos(item.serial_no) if item.serial_no else []
+		batch_list = [item.batch_no] if item.batch_no else []
+
+	return serial_list, batch_list

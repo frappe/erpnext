@@ -87,15 +87,13 @@ frappe.ui.form.on("Stock Entry", {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
 				if (
-					in_list(
-						[
-							"Material Transfer for Manufacture",
-							"Manufacture",
-							"Repack",
-							"Send to Subcontractor",
-						],
-						doc.purpose
-					)
+					[
+						"Material Transfer for Manufacture",
+						"Manufacture",
+						"Repack",
+						"Send to Subcontractor",
+						"Receive from Customer",
+					].includes(doc.purpose)
 				) {
 					filters = {
 						item_code: item.item_code,
@@ -214,7 +212,7 @@ frappe.ui.form.on("Stock Entry", {
 	refresh: function (frm) {
 		frm.trigger("get_items_from_transit_entry");
 
-		if (!frm.doc.docstatus) {
+		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
 			frm.trigger("validate_purpose_consumption");
 			frm.add_custom_button(
 				__("Material Request"),
@@ -299,7 +297,7 @@ frappe.ui.form.on("Stock Entry", {
 			}
 		}
 
-		if (frm.doc.docstatus === 0) {
+		if (frm.doc.docstatus === 0 && !frm.doc.subcontracting_inward_order) {
 			frm.add_custom_button(
 				__("Purchase Invoice"),
 				function () {
@@ -367,7 +365,11 @@ frappe.ui.form.on("Stock Entry", {
 			);
 		}
 
-		if (frm.doc.docstatus === 0 && frm.doc.purpose == "Material Issue") {
+		if (
+			frm.doc.docstatus === 0 &&
+			frm.doc.purpose == "Material Issue" &&
+			!frm.doc.subcontracting_inward_order
+		) {
 			frm.add_custom_button(
 				__("Expired Batches"),
 				function () {
@@ -420,6 +422,17 @@ frappe.ui.form.on("Stock Entry", {
 		}
 
 		frm.events.set_route_options_for_new_doc(frm);
+
+		frm.set_df_property(
+			"items",
+			"cannot_add_rows",
+			frm.doc.subcontracting_inward_order &&
+				[
+					"Return Raw Material to Customer",
+					"Subcontracting Return",
+					"Subcontracting Delivery",
+				].includes(frm.doc.purpose)
+		);
 	},
 
 	set_route_options_for_new_doc(frm) {
@@ -445,7 +458,7 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	get_items_from_transit_entry: function (frm) {
-		if (frm.doc.docstatus === 0) {
+		if (frm.doc.docstatus === 0 && !frm.doc.subcontracting_inward_order) {
 			frm.add_custom_button(
 				__("Transit Entry"),
 				function () {
@@ -609,7 +622,8 @@ frappe.ui.form.on("Stock Entry", {
 			frm.doc.docstatus === 0 &&
 			["Material Issue", "Material Receipt", "Material Transfer", "Send to Subcontractor"].includes(
 				frm.doc.purpose
-			)
+			) &&
+			!frm.doc.subcontracting_inward_order
 		) {
 			frm.add_custom_button(
 				__("Bill of Materials"),
@@ -622,10 +636,6 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	get_items_from_bom: function (frm) {
-		let filters = function () {
-			return { filters: { docstatus: 1 } };
-		};
-
 		let fields = [
 			{
 				fieldname: "bom",
@@ -1084,10 +1094,28 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			this.frm.add_fetch("purchase_order", "supplier", "supplier");
 		} else {
 			this.frm.add_fetch("subcontracting_order", "supplier", "supplier");
+			this.frm.add_fetch("subcontracting_inward_order", "customer", "customer");
 		}
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: "supplier", doctype: "Supplier" };
 		this.frm.set_query("supplier_address", erpnext.queries.address_query);
+
+		const operator = this.frm.doc.subcontracting_inward_order ? "in" : "not in";
+		this.frm.set_query("stock_entry_type", function () {
+			return {
+				filters: {
+					purpose: [
+						operator,
+						[
+							"Receive from Customer",
+							"Return Raw Material to Customer",
+							"Subcontracting Delivery",
+							"Subcontracting Return",
+						],
+					],
+				},
+			};
+		});
 	}
 
 	onload_post_render() {
@@ -1100,7 +1128,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	refresh() {
-		var me = this;
 		erpnext.toggle_naming_series();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
@@ -1369,6 +1396,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 				doc.delivery_note_no =
 				doc.sales_invoice_no =
 					null;
+		} else if (doc.purpose === "Receive from Customer") {
+			doc.supplier = doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 		} else {
 			doc.customer =
 				doc.customer_name =

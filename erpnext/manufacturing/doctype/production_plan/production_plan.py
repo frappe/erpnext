@@ -936,7 +936,7 @@ class ProductionPlan(Document):
 			material_request_type = item.material_request_type or item_doc.default_material_request_type
 
 			# key for Sales Order:Material Request Type:Customer
-			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
+			key = "{}:{}:{}".format(item.sales_order, material_request_type, "")
 			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if key not in material_request_map:
@@ -949,7 +949,6 @@ class ProductionPlan(Document):
 						"status": "Draft",
 						"company": self.company,
 						"material_request_type": material_request_type,
-						"customer": item_doc.customer or "",
 					}
 				)
 				material_request_list.append(material_request)

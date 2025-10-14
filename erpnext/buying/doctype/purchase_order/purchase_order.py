@@ -972,7 +972,7 @@ def make_subcontracting_order(source_name, target_doc=None, save=False, submit=F
 
 		return target_doc
 	else:
-		frappe.throw(_("This PO has been fully subcontracted."))
+		frappe.throw(_("This Purchase Order has been fully subcontracted."))
 
 
 def is_po_fully_subcontracted(po_name):
@@ -980,7 +980,7 @@ def is_po_fully_subcontracted(po_name):
 	query = (
 		frappe.qb.from_(table)
 		.select(table.name)
-		.where((table.parent == po_name) & (table.qty != table.subcontracted_quantity))
+		.where((table.parent == po_name) & (table.qty != table.subcontracted_qty))
 	)
 	return not query.run(as_dict=True)
 
@@ -1035,7 +1035,7 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 					"material_request_item": "material_request_item",
 				},
 				"field_no_map": ["qty", "fg_item_qty", "amount"],
-				"condition": lambda item: item.qty != item.subcontracted_quantity,
+				"condition": lambda item: item.qty != item.subcontracted_qty,
 			},
 		},
 		target_doc,

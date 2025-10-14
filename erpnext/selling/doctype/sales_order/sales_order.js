@@ -54,7 +54,8 @@ frappe.ui.form.on("Sales Order", {
 				frm.doc.status !== "Closed" &&
 				flt(frm.doc.per_delivered) < 100 &&
 				flt(frm.doc.per_billed) < 100 &&
-				frm.has_perm("write")
+				frm.has_perm("write") &&
+				!frm.doc.is_subcontracted
 			) {
 				frm.add_custom_button(__("Update Items"), () => {
 					erpnext.utils.update_child_items({
@@ -84,7 +85,8 @@ frappe.ui.form.on("Sales Order", {
 			if (
 				frm.doc.__onload &&
 				frm.doc.__onload.has_reserved_stock &&
-				frappe.model.can_cancel("Stock Reservation Entry")
+				frappe.model.can_cancel("Stock Reservation Entry") &&
+				!frm.doc.is_subcontracted
 			) {
 				frm.add_custom_button(
 					__("Unreserve"),
@@ -93,16 +95,21 @@ frappe.ui.form.on("Sales Order", {
 				);
 			}
 
-			frm.doc.items.forEach((item) => {
-				if (flt(item.stock_reserved_qty) > 0 && frappe.model.can_read("Stock Reservation Entry")) {
-					frm.add_custom_button(
-						__("Reserved Stock"),
-						() => frm.events.show_reserved_stock(frm),
-						__("Stock Reservation")
-					);
-					return;
-				}
-			});
+			if (!frm.doc.is_subcontracted) {
+				frm.doc.items.forEach((item) => {
+					if (
+						flt(item.stock_reserved_qty) > 0 &&
+						frappe.model.can_read("Stock Reservation Entry")
+					) {
+						frm.add_custom_button(
+							__("Reserved Stock"),
+							() => frm.events.show_reserved_stock(frm),
+							__("Stock Reservation")
+						);
+						return;
+					}
+				});
+			}
 		}
 
 		if (frm.doc.docstatus === 0) {
@@ -112,7 +119,7 @@ frappe.ui.form.on("Sales Order", {
 				frm.events.get_items_from_internal_purchase_order(frm);
 			}
 
-			if (frm.doc.docstatus === 0) {
+			if (frm.doc.docstatus === 0 && !frm.doc.is_subcontracted) {
 				frappe.call({
 					method: "erpnext.selling.doctype.sales_order.sales_order.get_stock_reservation_status",
 					callback: function (r) {
@@ -749,16 +756,78 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.schedule_dialog.fields_dict.delivery_schedule.refresh();
 	},
+
+	get_subcontracting_boms_for_finished_goods: function (fg_item) {
+		return frappe.call({
+			method: "erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.get_subcontracting_boms_for_finished_goods",
+			args: {
+				fg_items: fg_item,
+			},
+		});
+	},
+
+	get_subcontracting_boms_for_service_item: function (service_item) {
+		return frappe.call({
+			method: "erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.get_subcontracting_boms_for_service_item",
+			args: {
+				service_item: service_item,
+			},
+		});
+	},
 });
 
 frappe.ui.form.on("Sales Order Item", {
-	item_code: function (frm, cdt, cdn) {
+	item_code: async function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (frm.doc.delivery_date) {
 			row.delivery_date = frm.doc.delivery_date;
 			refresh_field("delivery_date", cdn, "items");
 		} else {
 			frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
+		}
+
+		if (frm.doc.is_subcontracted) {
+			if (row.item_code && !row.fg_item) {
+				var result = await frm.events.get_subcontracting_boms_for_service_item(row.item_code);
+
+				if (result.message && Object.keys(result.message).length) {
+					var finished_goods = Object.keys(result.message);
+
+					// Set FG if only one active Subcontracting BOM is found
+					if (finished_goods.length === 1) {
+						row.fg_item = result.message[finished_goods[0]].finished_good;
+						row.uom = result.message[finished_goods[0]].finished_good_uom;
+						refresh_field("items");
+					} else {
+						const dialog = new frappe.ui.Dialog({
+							title: __("Select Finished Good"),
+							size: "small",
+							fields: [
+								{
+									fieldname: "finished_good",
+									fieldtype: "Autocomplete",
+									label: __("Finished Good"),
+									options: finished_goods,
+								},
+							],
+							primary_action_label: __("Select"),
+							primary_action: () => {
+								var subcontracting_bom = result.message[dialog.get_value("finished_good")];
+
+								if (subcontracting_bom) {
+									row.fg_item = subcontracting_bom.finished_good;
+									row.uom = subcontracting_bom.finished_good_uom;
+									refresh_field("items");
+								}
+
+								dialog.hide();
+							},
+						});
+
+						dialog.show();
+					}
+				}
+			}
 		}
 	},
 
@@ -782,6 +851,50 @@ frappe.ui.form.on("Sales Order Item", {
 			},
 		});
 	},
+
+	fg_item: async function (frm, cdt, cdn) {
+		if (frm.doc.is_subcontracted) {
+			var row = locals[cdt][cdn];
+
+			if (row.fg_item) {
+				var result = await frm.events.get_subcontracting_boms_for_finished_goods(row.fg_item);
+
+				if (result.message && Object.keys(result.message).length) {
+					frappe.model.set_value(cdt, cdn, "item_code", result.message.service_item);
+					frappe.model.set_value(
+						cdt,
+						cdn,
+						"qty",
+						flt(row.fg_item_qty) * flt(result.message.conversion_factor)
+					);
+					frappe.model.set_value(cdt, cdn, "uom", result.message.service_item_uom);
+				}
+			}
+		}
+	},
+
+	qty: async function (frm, cdt, cdn) {
+		if (frm.doc.is_subcontracted) {
+			var row = locals[cdt][cdn];
+
+			if (row.fg_item) {
+				var result = await frm.events.get_subcontracting_boms_for_finished_goods(row.fg_item);
+
+				if (
+					result.message &&
+					row.item_code == result.message.service_item &&
+					row.uom == result.message.service_item_uom
+				) {
+					frappe.model.set_value(
+						cdt,
+						cdn,
+						"fg_item_qty",
+						flt(row.qty) / flt(result.message.conversion_factor)
+					);
+				}
+			}
+		}
+	},
 });
 
 erpnext.selling.SalesOrderController = class SalesOrderController extends erpnext.selling.SellingController {
@@ -795,6 +908,22 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		let allow_delivery = false;
 
 		if (doc.docstatus == 1) {
+			if (
+				!["Closed", "Completed"].includes(doc.status) &&
+				flt(doc.per_delivered) < 100 &&
+				flt(doc.per_billed) < 100
+			) {
+				if (!doc.__onload || doc.__onload.can_update_items) {
+					this.frm.add_custom_button(__("Update Items"), () => {
+						erpnext.utils.update_child_items({
+							frm: this.frm,
+							child_docname: "items",
+							child_doctype: "Sales Order Detail",
+							cannot_add_row: false,
+						});
+					});
+				}
+			}
 			if (this.frm.has_perm("submit")) {
 				if (doc.status === "On Hold") {
 					// un-hold
@@ -847,11 +976,24 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						}
 					}
 
+					if (doc.is_subcontracted) {
+						if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
+							this.frm.add_custom_button(
+								__("Subcontracting Inward Order"),
+								() => {
+									me.make_subcontracting_inward_order();
+								},
+								__("Create")
+							);
+						}
+					}
+
 					if (
 						(!doc.__onload || !doc.__onload.has_reserved_stock) &&
 						flt(doc.per_picked) < 100 &&
 						flt(doc.per_delivered) < 100 &&
-						frappe.model.can_create("Pick List")
+						frappe.model.can_create("Pick List") &&
+						!doc.is_subcontracted
 					) {
 						this.frm.add_custom_button(
 							__("Pick List"),
@@ -880,7 +1022,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							);
 						}
 
-						if (frappe.model.can_create("Work Order")) {
+						if (frappe.model.can_create("Work Order") && !doc.is_subcontracted) {
 							this.frm.add_custom_button(
 								__("Work Order"),
 								() => this.make_work_order(),
@@ -890,7 +1032,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					// sales invoice
-					if (flt(doc.per_billed) < 100 && frappe.model.can_create("Sales Invoice")) {
+					if (
+						(flt(doc.per_billed) < 100 && frappe.model.can_create("Sales Invoice")) ||
+						doc.is_subcontracted
+					) {
 						this.frm.add_custom_button(
 							__("Sales Invoice"),
 							() => me.make_sales_invoice(),
@@ -902,13 +1047,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					if (
 						(!doc.order_type ||
 							((order_is_a_sale || order_is_a_custom_sale) && flt(doc.per_delivered) < 100)) &&
-						frappe.model.can_create("Material Request")
+						frappe.model.can_create("Material Request") &&
+						!doc.is_subcontracted
 					) {
-						this.frm.add_custom_button(
-							__("Material Request"),
-							() => this.make_material_request(),
-							__("Create")
-						);
+						if (!doc.is_subcontracted) {
+							this.frm.add_custom_button(
+								__("Material Request"),
+								() => this.make_material_request(),
+								__("Create")
+							);
+						}
 						this.frm.add_custom_button(
 							__("Request for Raw Materials"),
 							() => this.make_raw_material_request(),
@@ -917,7 +1065,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					// Make Purchase Order
-					if (!this.frm.doc.is_internal_customer && frappe.model.can_create("Purchase Order")) {
+					if (
+						!this.frm.doc.is_internal_customer &&
+						frappe.model.can_create("Purchase Order") &&
+						!doc.is_subcontracted
+					) {
 						this.frm.add_custom_button(
 							__("Purchase Order"),
 							() => this.make_purchase_order(),
@@ -991,7 +1143,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			}
 		}
 
-		if (this.frm.doc.docstatus === 0 && frappe.model.can_read("Quotation")) {
+		if (
+			this.frm.doc.docstatus === 0 &&
+			frappe.model.can_read("Quotation") &&
+			!this.frm.doc.is_subcontracted
+		) {
 			this.frm.add_custom_button(
 				__("Quotation"),
 				function () {
@@ -1604,6 +1760,14 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			always: function () {
 				frappe.ui.form.is_saving = false;
 			},
+		});
+	}
+
+	make_subcontracting_inward_order() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_subcontracting_inward_order",
+			frm: this.frm,
+			freeze_message: __("Creating Subcontracting Inward Order ..."),
 		});
 	}
 };
