@@ -55,6 +55,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 					is_rejected_warehouse: 0,
 					company: frm.doc.company,
 					disabled: 0,
+					customer: ["is", "not set"],
 				},
 			};
 		});
@@ -66,6 +67,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 					is_rejected_warehouse: 0,
 					company: frm.doc.company,
 					disabled: 0,
+					customer: ["is", "not set"],
 				},
 			};
 		});
