@@ -27,6 +27,9 @@ def update_account_categories():
 	for company in companies:
 		map_account_categories_for_company(company, account_mapping, mapped_account_categories)
 
+	if not mapped_account_categories:
+		return
+
 	frappe.db.bulk_update("Account", mapped_account_categories)
 
 

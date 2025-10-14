@@ -67,6 +67,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Balance Type",
+   "mandatory_depends_on": "eval:doc.data_source == 'Account Data'",
    "options": "\nOpening Balance\nClosing Balance\nPeriod Movement (Debits - Credits)"
   },
   {
@@ -174,7 +175,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-10 06:52:20.513417",
+ "modified": "2025-10-14 09:23:27.208072",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Row",
