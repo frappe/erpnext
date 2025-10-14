@@ -163,7 +163,7 @@ function show_accounts_tree(template_rows, show_alert) {
 				options: "Company",
 				label: "Company",
 				reqd: 1,
-				default: frappe.defaults.get_user_default("company"),
+				default: frappe.defaults.get_user_default("Company"),
 				onchange: () => {
 					const company_field = dialog.get_field("company");
 					if (!company_field.value || company_field.value === company_field.last_value) return;
