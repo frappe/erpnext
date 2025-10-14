@@ -1560,6 +1560,29 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 		condition = parser.build_condition(mock_row_wrong, account_table)
 		self.assertIsNone(condition)  # Should return None due to invalid logical operator
 
+	def test_build_condition_accepts_document_instance(self):
+		parser = FilterExpressionParser()
+		account_table = frappe.qb.DocType("Account")
+		row_obj = frappe._dict(
+			{
+				"doctype": "Financial Report Row",
+				"reference_code": "DOCROW1",
+				"display_name": "Doc Row",
+				"data_source": "Account Data",
+				"balance_type": "Closing Balance",
+				"calculation_formula": '["account_type", "=", "Income"]',
+			}
+		)
+
+		# Unsaved child doc is sufficient for validation
+		row_doc = frappe.get_doc(row_obj)
+		cond = parser.build_condition(row_doc, account_table)
+		self.assertIsNotNone(cond)
+
+		# Also accepts plain frappe._dict object
+		cond = parser.build_condition(row_obj, account_table)
+		self.assertIsNotNone(cond)
+
 	# 6. ERROR HANDLING
 	def test_parse_invalid_filter_expressions(self):
 		"""Test handling of invalid filter expressions"""
