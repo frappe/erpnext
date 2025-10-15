@@ -142,7 +142,6 @@ class TemplateStructureValidator(Validator):
 
 		result.merge(self._validate_reference_codes(template))
 		result.merge(self._validate_required_fields(template))
-		result.merge(self._validate_orphaned_references(template))
 
 		return result
 
@@ -199,28 +198,6 @@ class TemplateStructureValidator(Validator):
 							row_idx=row.idx,
 						)
 					)
-
-		return result
-
-	def _validate_orphaned_references(self, template) -> ValidationResult:
-		result = ValidationResult()
-		all_refs = {row.reference_code for row in template.rows if row.reference_code}
-		used_refs = set()
-
-		for row in template.rows:
-			if row.calculation_formula and row.data_source == "Calculated Amount":
-				used_refs.update(
-					extract_reference_codes_from_formula(row.calculation_formula, list(all_refs))
-				)
-
-		orphaned = all_refs - used_refs
-		if orphaned:
-			# Add as warning since orphaned references don't break functionality
-			result.add_warning(
-				ValidationIssue(
-					message=f"Orphaned Line Reference (not used in any formula): {', '.join(orphaned)}",
-				)
-			)
 
 		return result
 
