@@ -7,6 +7,7 @@
  "field_order": [
   "parent_pcv",
   "status",
+  "total",
   "dates_to_process",
   "amended_from"
  ],
@@ -24,12 +25,14 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
+   "no_copy": 1,
    "options": "Queued\nRunning\nCompleted"
   },
   {
    "fieldname": "dates_to_process",
    "fieldtype": "Table",
    "label": "Dates to Process",
+   "no_copy": 1,
    "options": "Process Period Closing Voucher Detail"
   },
   {
@@ -41,13 +44,19 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "JSON",
+   "label": "Total",
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-08 10:33:43.742974",
+ "modified": "2025-10-15 12:46:03.627166",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",

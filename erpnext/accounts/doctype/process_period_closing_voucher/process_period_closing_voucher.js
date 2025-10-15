@@ -38,5 +38,23 @@ frappe.ui.form.on("Process Period Closing Voucher", {
 				});
 			});
 		}
+
+		if (frm.doc.docstatus == 1 && ["Completed"].find((x) => x == frm.doc.status)) {
+			let execute_btn = __("Call Next");
+
+			frm.add_custom_button(execute_btn, () => {
+				frm.call({
+					method: "erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.call_next_date",
+					args: {
+						docname: frm.doc.name,
+					},
+				}).then((r) => {
+					if (!r.exc) {
+						frappe.show_alert(__("Call next date for processing"));
+						frm.reload_doc();
+					}
+				});
+			});
+		}
 	},
 });
