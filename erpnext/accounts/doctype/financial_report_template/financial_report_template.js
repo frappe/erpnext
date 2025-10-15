@@ -3,16 +3,6 @@
 
 frappe.ui.form.on("Financial Report Template", {
 	refresh(frm) {
-		if (frm.doc.is_standard) {
-			frm.dashboard.add_comment(
-				__(
-					"<strong>Warning:</strong> This template is system generated and may be overwritten by a future update. Duplicate it to customize."
-				),
-				"yellow",
-				true
-			);
-		}
-
 		// add custom button to view missed accounts
 		frm.add_custom_button(__("View Account Coverage"), function () {
 			let selected_rows = frm.get_field("rows").grid.get_selected_children();

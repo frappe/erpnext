@@ -23,7 +23,6 @@ class FinancialReportTemplate(Document):
 		from erpnext.accounts.doctype.financial_report_row.financial_report_row import FinancialReportRow
 
 		disabled: DF.Check
-		is_standard: DF.Check
 		module: DF.Link | None
 		report_type: DF.Literal[
 			"", "Profit and Loss Statement", "Balance Sheet", "Cash Flow", "Custom Financial Statement"
@@ -46,10 +45,13 @@ class FinancialReportTemplate(Document):
 	def _export_template(self):
 		from frappe.modules.utils import export_module_json
 
-		return export_module_json(self, self.is_standard == 1, self.module)
+		if not self.module:
+			return
+
+		return export_module_json(self, True, self.module)
 
 	def _delete_template(self):
-		if not self.is_standard or not frappe.conf.developer_mode:
+		if not self.module or not frappe.conf.developer_mode:
 			return
 
 		module_path = frappe.get_module_path(self.module)

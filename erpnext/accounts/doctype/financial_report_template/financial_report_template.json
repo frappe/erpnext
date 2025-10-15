@@ -10,7 +10,6 @@
   "report_type",
   "module",
   "column_break_lvnq",
-  "is_standard",
   "disabled",
   "section_break_fvlw",
   "rows"
@@ -33,11 +32,10 @@
    "options": "\nProfit and Loss Statement\nBalance Sheet\nCash Flow\nCustom Financial Statement"
   },
   {
-   "depends_on": "eval:doc.is_standard",
+   "depends_on": "eval:frappe.boot.developer_mode",
    "fieldname": "module",
    "fieldtype": "Link",
-   "label": "Module",
-   "mandatory_depends_on": "eval:doc.is_standard",
+   "label": "Module (for Export)",
    "options": "Module Def"
   },
   {
@@ -61,19 +59,12 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
-  },
-  {
-   "default": "0",
-   "description": "System template - cannot be modified",
-   "fieldname": "is_standard",
-   "fieldtype": "Check",
-   "label": "Is Standard"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-10 07:10:50.951954",
+ "modified": "2025-10-15 03:31:53.866694",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Template",

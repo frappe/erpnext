@@ -561,8 +561,6 @@ accounting_dimension_doctypes = [
 	"Asset Depreciation Schedule",
 ]
 
-importable_doctypes = ["Financial Report Template"]
-
 get_matching_queries = (
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
 )
