@@ -495,25 +495,22 @@ def apply(doc, method=None):
 	# Applies SLA to document on validate
 	flags = frappe.local.flags
 
-	try:
-		if (
-			flags.in_patch
-			or flags.in_migrate
-			or flags.in_install
-			or flags.in_setup_wizard
-			or doc.doctype not in get_documents_with_active_service_level_agreement()
-		):
-			return
-
-		sla = get_active_service_level_agreement_for(doc)
-
-		if not sla:
-			remove_sla_if_applied(doc)
-			return
-
-		process_sla(doc, sla)
-	except Exception:
+	if (
+		flags.in_patch
+		or flags.in_migrate
+		or flags.in_install
+		or flags.in_setup_wizard
+		or doc.doctype not in get_documents_with_active_service_level_agreement()
+	):
 		return
+
+	sla = get_active_service_level_agreement_for(doc)
+
+	if not sla:
+		remove_sla_if_applied(doc)
+		return
+
+	process_sla(doc, sla)
 
 
 def remove_sla_if_applied(doc):
