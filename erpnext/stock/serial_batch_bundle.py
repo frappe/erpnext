@@ -3,6 +3,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
+from frappe.query_builder import Case
 from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now, nowtime, today
 from pypika import Order
@@ -716,6 +717,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		for key, value in kwargs.items():
 			setattr(self, key, value)
 
+		self.total_qty = defaultdict(float)
 		self.stock_queue = []
 		self.batch_nos = self.get_batch_nos()
 		self.prepare_batches()
@@ -737,6 +739,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			for ledger in entries:
 				self.stock_value_differece[ledger.batch_no] += flt(ledger.incoming_rate)
 				self.available_qty[ledger.batch_no] += flt(ledger.qty)
+				self.total_qty[ledger.batch_no] += flt(ledger.total_qty)
 
 			self.calculate_avg_rate_from_deprecarated_ledgers()
 			self.calculate_avg_rate_for_non_batchwise_valuation()
@@ -764,13 +767,16 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			.on(parent.name == child.parent)
 			.select(
 				child.batch_no,
-				Sum(child.stock_value_difference).as_("incoming_rate"),
-				Sum(child.qty).as_("qty"),
+				Sum(Case().when(timestamp_condition, child.stock_value_difference).else_(0)).as_(
+					"incoming_rate"
+				),
+				Sum(Case().when(timestamp_condition, child.qty).else_(0)).as_("qty"),
+				Sum(child.qty).as_("total_qty"),
 			)
 			.where(
-				(child.batch_no.isin(self.batchwise_valuation_batches))
-				& (parent.warehouse == self.sle.warehouse)
+				(parent.warehouse == self.sle.warehouse)
 				& (parent.item_code == self.sle.item_code)
+				& (child.batch_no.isin(self.batchwise_valuation_batches))
 				& (parent.docstatus == 1)
 				& (parent.is_cancelled == 0)
 				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
@@ -786,8 +792,6 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			query = query.where(parent.voucher_no != self.sle.voucher_no)
 
 		query = query.where(parent.voucher_type != "Pick List")
-		if timestamp_condition:
-			query = query.where(timestamp_condition)
 
 		return query.run(as_dict=True)
 
