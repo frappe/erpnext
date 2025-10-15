@@ -16,8 +16,6 @@ class AccountCategory(Document):
 
 		account_category_name: DF.Data
 		description: DF.SmallText | None
-		is_system_generated: DF.Check
-		module: DF.Link | None
 	# end: auto-generated types
 
 	pass
@@ -30,10 +28,10 @@ def create_default_account_categories():
 		)
 	)
 
-	create_account_categories(default_categories, is_system_generated=True)
+	create_account_categories(default_categories)
 
 
-def create_account_categories(categories: list[dict], is_system_generated: bool = True):
+def create_account_categories(categories: list[dict]):
 	if not categories:
 		return
 
@@ -48,7 +46,6 @@ def create_account_categories(categories: list[dict], is_system_generated: bool 
 			{
 				"doctype": "Account Category",
 				**category_data,
-				"is_system_generated": is_system_generated,
 			}
 		)
 		doc.insert(ignore_permissions=True)

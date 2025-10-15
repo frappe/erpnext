@@ -7,10 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "account_category_name",
-  "module",
-  "description",
-  "column_break_alza",
-  "is_system_generated"
+  "description"
  ],
  "fields": [
   {
@@ -25,32 +22,12 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
-  },
-  {
-   "fieldname": "column_break_alza",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "System-provided category that cannot be modified",
-   "fieldname": "is_system_generated",
-   "fieldtype": "Check",
-   "label": "Is System Generated",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.is_system_generated",
-   "fieldname": "module",
-   "fieldtype": "Link",
-   "label": "Module",
-   "options": "Module Def",
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-10 06:41:31.017565",
+ "modified": "2025-10-15 03:19:47.171349",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",
