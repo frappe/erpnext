@@ -11,7 +11,7 @@ from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
-from frappe.utils import cint, formatdate, get_link_to_form, get_timestamp, today
+from frappe.utils import add_months, cint, formatdate, get_first_day, get_link_to_form, get_timestamp, today
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
@@ -762,27 +762,29 @@ def install_country_fixtures(company, country):
 
 
 def update_company_current_month_sales(company):
-	current_month_year = formatdate(today(), "MM-yyyy")
+	from_date = get_first_day(today())
+	to_date = get_first_day(add_months(from_date, 1))
 
 	results = frappe.db.sql(
-		f"""
+		"""
 		SELECT
 			SUM(base_grand_total) AS total,
-			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+			DATE_FORMAT(posting_date, '%%m-%%Y') AS month_year
 		FROM
 			`tabSales Invoice`
 		WHERE
-			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			posting_date >= %s
+			AND posting_date < %s
 			AND docstatus = 1
-			AND company = {frappe.db.escape(company)}
+			AND company = %s
 		GROUP BY
 			month_year
-	""",
+		""",
+		(from_date, to_date, company),
 		as_dict=True,
 	)
 
 	monthly_total = results[0]["total"] if len(results) > 0 else 0
-
 	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
 
 

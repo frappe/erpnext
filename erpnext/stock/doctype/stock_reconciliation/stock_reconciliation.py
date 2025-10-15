@@ -588,6 +588,10 @@ class StockReconciliation(StockController):
 				if row.get(field):
 					key.append(row.get(field))
 
+			for dimension in get_inventory_dimensions():
+				if row.get(dimension.get("fieldname")):
+					key.append(row.get(dimension.get("fieldname")))
+
 			if key in item_warehouse_combinations:
 				self.validation_messages.append(
 					_get_msg(row_num, _("Same item and warehouse combination already entered."))

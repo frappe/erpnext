@@ -337,7 +337,7 @@ def validate_item_details(ctx: ItemDetailsCtx, item):
 
 		throw(_(msg), title=_("Template Item Selected"))
 
-	elif ctx.transaction_type == "buying" and ctx.doctype != "Material Request":
+	elif ctx.doctype != "Material Request":
 		if ctx.is_subcontracted:
 			if ctx.is_old_subcontracting_flow:
 				if item.is_sub_contracted_item != 1:

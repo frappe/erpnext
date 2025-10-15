@@ -95,9 +95,11 @@ class StockController(AccountsController):
 			"Stock Reconciliation",
 		]:
 			for item in self.get("items"):
-				if (item.get("valuation_rate") == 0 or item.get("incoming_rate") == 0) and item.get(
-					"allow_zero_valuation_rate"
-				) == 0:
+				if (
+					(item.get("valuation_rate") == 0 or item.get("incoming_rate") == 0)
+					and item.get("allow_zero_valuation_rate") == 0
+					and frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+				):
 					frappe.toast(
 						_(
 							"Row #{0}: Item {1} has zero rate but 'Allow Zero Valuation Rate' is not enabled."
@@ -544,10 +546,14 @@ class StockController(AccountsController):
 						break
 
 		elif row.batch_no:
-			batches = frappe.get_all(
-				"Serial and Batch Entry", fields=["batch_no"], filters={"parent": row.serial_and_batch_bundle}
+			batches = sorted(
+				frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="batch_no",
+					distinct=True,
+				)
 			)
-			batches = sorted([d.batch_no for d in batches])
 
 			if batches != [row.batch_no]:
 				throw_error = True
@@ -1653,7 +1659,9 @@ def get_stock_ledger_preview(doc, filters):
 
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
 		doc.docstatus = 1
+		doc.make_bundle_using_old_serial_batch_fields()
 		doc.update_stock_ledger()
+
 		columns = get_sl_columns(filters)
 		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name, fields)
 

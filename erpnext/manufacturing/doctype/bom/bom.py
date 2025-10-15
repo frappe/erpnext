@@ -220,9 +220,9 @@ class BOM(WebsiteGenerator):
 	def onload(self):
 		super().onload()
 
-		self.set_onload_for_muulti_level_bom()
+		self.set_onload_for_multi_level_bom()
 
-	def set_onload_for_muulti_level_bom(self):
+	def set_onload_for_multi_level_bom(self):
 		use_multi_level_bom = frappe.db.get_value(
 			"Property Setter",
 			{"field_name": "use_multi_level_bom", "doc_type": "Work Order", "property": "default"},

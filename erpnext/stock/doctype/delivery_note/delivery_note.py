@@ -10,6 +10,8 @@ from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
 from erpnext.accounts.party import get_due_date
@@ -792,35 +794,39 @@ def get_list_context(context=None):
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
-	invoiced_qty_map = {}
+	sii = DocType("Sales Invoice Item")
 
-	for dn_detail, qty in frappe.db.sql(
-		"""select dn_detail, qty from `tabSales Invoice Item`
-		where delivery_note=%s and docstatus=1""",
-		delivery_note,
-	):
-		if not invoiced_qty_map.get(dn_detail):
-			invoiced_qty_map[dn_detail] = 0
-		invoiced_qty_map[dn_detail] += qty
+	invoiced_qty_map = frappe._dict(
+		(
+			frappe.qb.from_(sii)
+			.select(sii.dn_detail, Sum(sii.qty).as_("qty"))
+			.where((sii.delivery_note == delivery_note) & (sii.docstatus == 1))
+			.groupby(sii.dn_detail)
+		).run()
+	)
 
 	return invoiced_qty_map
 
 
 def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
+	dn = DocType("Delivery Note")
+	dni = DocType("Delivery Note Item")
+
 	returned_qty_map = frappe._dict(
-		frappe.db.sql(
-			"""select dn_item.dn_detail, sum(abs(dn_item.qty)) as qty
-		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name = dn_item.parent
-			and dn.docstatus = 1
-			and dn.is_return = 1
-			and dn.return_against = %s
-			and dn_item.qty <= 0
-			group by dn_item.item_code
-	""",
-			delivery_note,
-		)
+		(
+			frappe.qb.from_(dni)
+			.join(dn)
+			.on(dn.name == dni.parent)
+			.select(dni.dn_detail, Sum(Abs(dni.qty)).as_("qty"))
+			.where(
+				(dn.docstatus == 1)
+				& (dn.is_return == 1)
+				& (dn.return_against == delivery_note)
+				& (dni.qty <= 0)
+			)
+			.groupby(dni.dn_detail)
+		).run()
 	)
 
 	return returned_qty_map

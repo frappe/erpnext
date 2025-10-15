@@ -262,6 +262,7 @@ def get_batch_qty(
 			"warehouse": warehouse,
 			"creation": creation,
 			"batch_no": batch_no,
+			"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			"ignore_voucher_nos": ignore_voucher_nos,
 			"for_stock_levels": for_stock_levels,
 			"consider_negative_batches": consider_negative_batches,

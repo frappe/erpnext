@@ -72,7 +72,7 @@ class TestSubcontractingController(IntegrationTestCase):
 	def test_create_raw_materials_supplied(self):
 		sco = get_subcontracting_order()
 		sco.supplied_items = None
-		sco.create_raw_materials_supplied()
+		sco.create_raw_materials_supplied_or_received()
 		self.assertIsNotNone(sco.supplied_items)
 
 	def test_sco_with_bom(self):
