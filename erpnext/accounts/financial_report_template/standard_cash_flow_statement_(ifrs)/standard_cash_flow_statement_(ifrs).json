@@ -5,7 +5,7 @@
  "doctype": "Financial Report Template",
  "idx": 0,
  "is_standard": 1,
- "modified": "2025-09-08 03:17:08.524044",
+ "modified": "2025-10-15 03:12:57.947645",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Standard Cash Flow Statement (IFRS)",
@@ -13,6 +13,7 @@
  "report_type": "Cash Flow",
  "rows": [
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -27,6 +28,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"root_type\", \"in\", [\"Income\", \"Expense\"]], [\"account_category\", \"!=\", \"Tax Expense\"]]}",
@@ -42,6 +44,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -54,6 +57,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -68,6 +72,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"=\", \"Depreciation\"]",
@@ -83,6 +88,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Impairment\"]",
@@ -98,6 +104,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Disposal\"]",
@@ -113,6 +120,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Finance Costs\"]",
@@ -128,6 +136,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Investment Income\"]",
@@ -143,6 +152,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CF_OP100 + CF_ADJ100 + CF_ADJ200 + CF_ADJ300 + CF_ADJ400 + CF_ADJ500",
@@ -158,6 +168,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -170,6 +181,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -184,6 +196,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Trade Receivables\"]",
@@ -199,6 +212,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Stock Assets\"]",
@@ -214,6 +228,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"in\", [\"Other Receivables\", \"Other Current Assets\"]], [\"account_category\", \"!=\", \"Cash and Cash Equivalents\"]]}",
@@ -229,6 +244,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Trade Payables\"]",
@@ -244,6 +260,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"in\", [\"Other Payables\", \"Current Tax Liabilities\", \"Short-term Borrowings\", \"Short-term Provisions\", \"Other Current Liabilities\"]]",
@@ -259,6 +276,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CF_OP_BEFORE_WC + CF_WC100 + CF_WC200 + CF_WC300 + CF_WC400 + CF_WC500",
@@ -274,6 +292,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Finance Costs\"]",
@@ -289,6 +308,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Tax Expense\"]",
@@ -304,6 +324,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CF_CASH_GEN + CF_OP200 + CF_OP300",
@@ -319,6 +340,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -331,6 +353,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -345,6 +368,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Tangible Assets\"], [\"account_type\", \"!=\", \"Accumulated Depreciation\"]]}",
@@ -360,6 +384,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"=\", \"Accumulated Depreciation\"]",
@@ -375,6 +400,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "max(0, CF_ADJ100 - CF_INV101)",
@@ -390,6 +416,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Asset Sale\"]",
@@ -405,6 +432,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Intangible Assets\"]",
@@ -420,6 +448,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"in\", [\"Long-term Investments\", \"Short-term Investments\"]]",
@@ -435,6 +464,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Investment Income\"], [\"account_name\", \"not like\", \"dividend\"]]}",
@@ -450,6 +480,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Investment Income\"], [\"account_name\", \"like\", \"dividend\"]]}",
@@ -465,6 +496,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CF_INV100 + CF_INV102 + CF_INV200 + CF_INV300 + CF_INV400 + CF_INV500 + CF_INV600",
@@ -480,6 +512,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -492,6 +525,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -506,6 +540,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"in\", [\"Share Capital\", \"Reserves and Surplus\"]], [\"account_name\", \"not like\", \"Dividends Paid\"]]}",
@@ -521,6 +556,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"in\", [\"Long-term Borrowings\", \"Short-term Borrowings\"]]",
@@ -536,6 +572,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Loan Repayment\"]",
@@ -551,6 +588,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_name\", \"like\", \"Dividends Paid\"]",
@@ -566,6 +604,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Lease\"]",
@@ -581,6 +620,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CF_FIN100 + CF_FIN200 + CF_FIN300 + CF_FIN400 + CF_FIN500",
@@ -596,6 +636,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -608,6 +649,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -620,6 +662,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CF_OP_NET + CF_INV_NET + CF_FIN_NET",
@@ -635,6 +678,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -647,6 +691,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Opening Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Cash and Cash Equivalents\"]",
@@ -662,6 +707,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Exchange\"]",
@@ -677,6 +723,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 1,
    "calculation_formula": "[\"account_category\", \"=\", \"Cash and Cash Equivalents\"]",
@@ -692,6 +739,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -704,6 +752,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "CF_CASH_END - (CF_CASH_BEGIN + CF_NET_INCREASE + CF_FX_EFFECT)",
@@ -720,6 +769,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -732,6 +782,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -746,6 +797,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "CF_OP_NET + CF_INV100",
@@ -761,6 +813,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "(CF_OP_NET / (CF_FIN300 + CF_OP200)) if (CF_FIN300 + CF_OP200) != 0 else 0",

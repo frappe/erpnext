@@ -5,7 +5,7 @@
  "doctype": "Financial Report Template",
  "idx": 0,
  "is_standard": 1,
- "modified": "2025-09-07 23:33:36.081435",
+ "modified": "2025-10-15 03:12:19.165699",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Horizontal Balance Sheet (Columnar)",
@@ -13,6 +13,7 @@
  "report_type": "Balance Sheet",
  "rows": [
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Section Break",
@@ -26,6 +27,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Column Break",
@@ -39,6 +41,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -53,6 +56,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Share Capital\"]",
@@ -68,9 +72,10 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
-   "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Reserves and Surplus\"], [\"account_name\", \"not like\", \"Retained Earnings\"]]}",
+   "calculation_formula": "{\"and\":[[\"account_category\",\"=\",\"Reserves and Surplus\"],[\"account_name\",\"not like\",\"%Retained Earnings%\"]]}",
    "data_source": "Account Data",
    "display_name": "Reserves & Surplus",
    "fieldtype": "",
@@ -83,9 +88,10 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
-   "calculation_formula": "[\"account_name\", \"like\", \"Retained Earnings\"]",
+   "calculation_formula": "{\"and\":[[\"account_name\",\"like\",\"%Retained Earnings%\"],[\"account_category\",\"=\",\"Reserves and Surplus\"]]}",
    "data_source": "Account Data",
    "display_name": "Retained Earnings",
    "fieldtype": "",
@@ -98,6 +104,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "L_SHARE_CAPITAL + L_RESERVES + L_RETAINED_EARNINGS",
@@ -113,6 +120,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -125,6 +133,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -139,6 +148,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Long-term Borrowings\"], [\"account_name\", \"not like\", \"Unsecured\"]]}",
@@ -154,6 +164,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Long-term Borrowings\"], [\"account_name\", \"like\", \"Unsecured\"]]}",
@@ -169,6 +180,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Long-term Provisions\"]",
@@ -184,6 +196,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Non-current Liabilities\"]",
@@ -199,6 +212,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "L_SECURED_LOANS + L_UNSECURED_LOANS + L_LT_PROVISIONS + L_OTHER_NCL",
@@ -214,6 +228,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -226,6 +241,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -240,6 +256,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Short-term Borrowings\"]",
@@ -255,6 +272,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Trade Payables\"]",
@@ -270,6 +288,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Payables\"]",
@@ -285,6 +304,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Current Tax Liabilities\"]",
@@ -300,6 +320,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Short-term Provisions\"]",
@@ -315,6 +336,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Current Liabilities\"]",
@@ -330,6 +352,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "L_ST_BORROWINGS + L_TRADE_PAYABLES + L_OTHER_PAYABLES + L_TAX_LIABILITIES + L_PROVISIONS + L_OTHER_CL",
@@ -345,6 +368,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -357,6 +381,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -371,6 +396,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 1,
    "calculation_formula": "[\"root_type\", \"in\", [\"Income\", \"Expense\"]]",
@@ -387,6 +413,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -400,6 +427,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -414,6 +442,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "{\"and\": [[\"account_category\", \"=\", \"Tangible Assets\"], [\"account_type\", \"!=\", \"Accumulated Depreciation\"]]}",
@@ -429,6 +458,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_type\", \"like\", \"Accumulated Depreciation\"]",
@@ -444,6 +474,7 @@
    "reverse_sign": 1
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "A_TANGIBLE - A_ACC_DEPRECIATION",
@@ -459,6 +490,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Intangible Assets\"]",
@@ -474,6 +506,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Long-term Investments\"]",
@@ -489,6 +522,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Non-current Assets\"]",
@@ -504,6 +538,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "(A_NET_TANGIBLE if A_ACC_DEPRECIATION else A_TANGIBLE) + A_INTANGIBLE + A_LT_INVESTMENTS + A_OTHER_NCA",
@@ -519,6 +554,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -531,6 +567,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -545,6 +582,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Stock Assets\"]",
@@ -560,6 +598,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Trade Receivables\"]",
@@ -575,6 +614,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Receivables\"]",
@@ -590,6 +630,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Short-term Investments\"]",
@@ -605,6 +646,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Cash and Cash Equivalents\"]",
@@ -620,6 +662,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "Closing Balance",
    "bold_text": 0,
    "calculation_formula": "[\"account_category\", \"=\", \"Other Current Assets\"]",
@@ -635,6 +678,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "A_STOCK + A_TRADE_RECEIVABLES + A_OTHER_RECEIVABLES + A_ST_INVESTMENTS + A_CASH_BANK + A_OTHER_CA",
@@ -650,6 +694,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Section Break",
@@ -662,6 +707,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -674,6 +720,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "L_TOTAL_EQUITY + L_TOTAL_NCL + L_TOTAL_CL + L_CURRENT_PL",
@@ -689,6 +736,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -701,6 +749,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Column Break",
@@ -713,6 +762,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -725,6 +775,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "calculation_formula": "A_TOTAL_NCA + A_TOTAL_CA",
@@ -740,6 +791,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -752,6 +804,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Section Break",
@@ -764,6 +817,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "L_GRAND_TOTAL - A_GRAND_TOTAL",
@@ -780,6 +834,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "A_TOTAL_NCA + A_TOTAL_CA",
@@ -795,6 +850,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "L_TOTAL_NCL + L_TOTAL_CL",
@@ -810,6 +866,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "L_TOTAL_EQUITY + L_CURRENT_PL",
@@ -825,6 +882,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "data_source": "Blank Line",
@@ -837,6 +895,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 1,
    "data_source": "Blank Line",
@@ -851,6 +910,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "(A_TOTAL_CA / L_TOTAL_CL) if L_TOTAL_CL != 0 else 0",
@@ -866,6 +926,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "((A_TRADE_RECEIVABLES + A_ST_INVESTMENTS + A_CASH_BANK) / L_TOTAL_CL) if L_TOTAL_CL != 0 else 0",
@@ -881,6 +942,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "((L_SECURED_LOANS + L_UNSECURED_LOANS + L_ST_BORROWINGS) / TOTAL_EQUITY) if TOTAL_EQUITY != 0 else 0",
@@ -896,6 +958,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "A_TOTAL_CA - L_TOTAL_CL",
@@ -911,6 +974,7 @@
    "reverse_sign": 0
   },
   {
+   "advanced_filtering": 0,
    "balance_type": "",
    "bold_text": 0,
    "calculation_formula": "(TOTAL_EQUITY / TOTAL_ASSETS * 100) if TOTAL_ASSETS != 0 else 0",
