@@ -385,6 +385,16 @@ frappe.ui.form.on("Payment Reconciliation Allocation", {
 		// filter payment
 		let payment = frm.doc.payments.filter((x) => x.reference_name == row.reference_name);
 
+		let amount = payment[0].amount;
+		for (const d of frm.doc.allocation) {
+			if (row.reference_name == d.reference_name && amount) {
+				if (d.allocated_amount <= amount) {
+					d.amount = amount;
+					amount -= d.allocated_amount;
+				}
+			}
+		}
+
 		frm.call({
 			doc: frm.doc,
 			method: "calculate_difference_on_allocation_change",
