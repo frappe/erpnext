@@ -30,25 +30,17 @@ class TestFiscalYear(IntegrationTestCase):
 			if frappe.db.exists("Fiscal Year", name):
 				frappe.delete_doc("Fiscal Year", name)
 
-		global_fy = frappe.get_doc(
-			{
-				"doctype": "Fiscal Year",
-				"year": "_Test Global FY 2001",
-				"year_start_date": "2001-04-01",
-				"year_end_date": "2002-03-31",
-			}
-		)
+		global_fy = frappe.new_doc("Fiscal Year")
+		global_fy.year = "_Test Global FY 2001"
+		global_fy.year_start_date = "2001-04-01"
+		global_fy.year_end_date = "2002-03-31"
 		global_fy.insert()
 
-		company_fy = frappe.get_doc(
-			{
-				"doctype": "Fiscal Year",
-				"year": "_Test Company FY 2001",
-				"year_start_date": "2001-01-01",
-				"year_end_date": "2001-12-31",
-				"companies": [{"company": "_Test Company"}],
-			}
-		)
+		company_fy = frappe.new_doc("Fiscal Year")
+		company_fy.year = "_Test Company FY 2001"
+		company_fy.year_start_date = "2001-01-01"
+		company_fy.year_end_date = "2001-12-31"
+		company_fy.append("companies", {"company": "_Test Company"})
 
 		company_fy.insert()
 		self.assertTrue(frappe.db.exists("Fiscal Year", global_fy.name))
