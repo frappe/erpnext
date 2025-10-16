@@ -46,6 +46,9 @@ class ProcessPeriodClosingVoucher(Document):
 		for x in dates:
 			self.append("dates_to_process", {"processing_date": x, "status": "Queued"})
 
+	def on_submit(self):
+		start_pcv_processing(self.name)
+
 
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
