@@ -6,11 +6,11 @@ from datetime import timedelta
 import frappe
 from frappe import qb
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Count, Sum
 from frappe.utils import add_days, flt, get_datetime
 from frappe.utils.scheduler import is_scheduler_inactive
 
-BACKGROUND = False
+BACKGROUND = True
 
 
 class ProcessPeriodClosingVoucher(Document):
@@ -52,7 +52,7 @@ class ProcessPeriodClosingVoucher(Document):
 
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
-	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Paused"]:
+	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
 		# TODO: move this inside if block
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
 		if dates_to_process := frappe.db.get_all(
@@ -64,6 +64,13 @@ def start_pcv_processing(docname: str):
 		):
 			if not is_scheduler_inactive():
 				for x in dates_to_process:
+					frappe.db.set_value(
+						"Process Period Closing Voucher Detail",
+						{"processing_date": x.processing_date, "parent": docname},
+						"status",
+						"Running",
+					)
+
 					if BACKGROUND:
 						frappe.enqueue(
 							method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
@@ -84,13 +91,28 @@ def pause_pcv_processing(docname: str):
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Paused").where(ppcv.name.eq(docname)).run()
 
-	queued_dates = frappe.db.get_all(
+	if queued_dates := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
 		filters={"parent": docname, "status": "Queued"},
 		pluck="name",
-	)
-	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
-	qb.update(ppcvd).set(ppcvd.status, "Paused").where(ppcvd.name.isin(queued_dates)).run()
+	):
+		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+		qb.update(ppcvd).set(ppcvd.status, "Paused").where(ppcvd.name.isin(queued_dates)).run()
+
+
+@frappe.whitelist()
+def resume_pcv_processing(docname: str):
+	ppcv = qb.DocType("Process Period Closing Voucher")
+	qb.update(ppcv).set(ppcv.status, "Running").where(ppcv.name.eq(docname)).run()
+
+	if paused_dates := frappe.db.get_all(
+		"Process Period Closing Voucher Detail",
+		filters={"parent": docname, "status": "Paused"},
+		pluck="name",
+	):
+		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+		qb.update(ppcvd).set(ppcvd.status, "Queued").where(ppcvd.name.isin(paused_dates)).run()
+		start_pcv_processing(docname)
 
 
 def get_gle_for_pl_account(pcv, acc, balances, dimensions):
@@ -185,7 +207,18 @@ def schedule_next_date(docname: str):
 				process_individual_date(docname, next_date)
 	else:
 		# summarize, build and post GL
-		summarize_and_post_ledger_entries(docname)
+		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+		total_no_of_dates = (
+			qb.from_(ppcvd).select(Count(ppcvd.star)).where(ppcvd.parent.eq(docname)).run()[0][0]
+		)
+		completed = (
+			qb.from_(ppcvd)
+			.select(Count(ppcvd.star))
+			.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Completed"))
+			.run()[0][0]
+		)
+		if total_no_of_dates == completed:
+			summarize_and_post_ledger_entries(docname)
 
 
 def summarize_and_post_ledger_entries(docname):
@@ -305,7 +338,12 @@ def build_dimension_wise_balance_dict(gl_entries):
 
 
 def process_individual_date(docname: str, date: str):
-	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") != "Running":
+	current_date_status = frappe.db.get_value(
+		"Process Period Closing Voucher Detail",
+		{"processing_date": date, "parent": docname},
+		"status",
+	)
+	if current_date_status != "Running":
 		return
 
 	pcv_name = frappe.db.get_value("Process Period Closing Voucher", docname, "parent_pcv")
@@ -346,6 +384,7 @@ def process_individual_date(docname: str, date: str):
 		"closing_balance",
 		frappe.json.dumps(res),
 	)
+
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
 		{"processing_date": date, "parent": docname},
