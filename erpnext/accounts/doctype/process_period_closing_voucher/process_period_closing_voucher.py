@@ -190,45 +190,16 @@ def call_next_date(docname: str):
 		# TODO: ensure all dates are processed
 		if not running:
 			# Calculate total balances for PCV period
-			# Build dictionary back
-			dimension_wise_acc_balances = {}
-			ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
-			for x in [x.closing_balance for x in ppcv.dates_to_process]:
-				bal = frappe.json.loads(x)
-				for dimensions, account_balances in bal.items():
-					dim_key = tuple([None if x == "None" else x for x in dimensions.split(",")])
-					obj = dimension_wise_acc_balances.setdefault(dim_key, frappe._dict())
 
-					for acc, bal in account_balances.items():
-						if acc != "balances":
-							bal_dict = obj.setdefault(
-								acc,
-								frappe._dict(
-									{
-										"debit_in_account_currency": 0,
-										"credit_in_account_currency": 0,
-										"debit": 0,
-										"credit": 0,
-										"account_currency": bal["account_currency"],
-									}
-								),
-							)
-							bal_dict["debit_in_account_currency"] += bal["debit_in_account_currency"]
-							bal_dict["credit_in_account_currency"] += bal["credit_in_account_currency"]
-							bal_dict["debit"] += bal["debit"]
-							bal_dict["credit"] += bal["credit"]
-						else:
-							bal_dict = obj.setdefault(
-								"balances",
-								frappe._dict(
-									{
-										"balance_in_company_currency": 0,
-										"balance_in_account_currency": 0,
-									}
-								),
-							)
-							bal_dict["balance_in_company_currency"] += bal["balance_in_company_currency"]
-							bal_dict["balance_in_account_currency"] += bal["balance_in_account_currency"]
+			ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
+
+			gl_entries = []
+			for x in ppcv.dates_to_process:
+				closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
+				gl_entries.extend(closing_balances)
+
+			# Build dimension wise dictionary from all GLE's
+			dimension_wise_acc_balances = build_dimension_wise_balance_dict(gl_entries)
 
 			# convert dict keys to json compliant json dictionary keys
 			json_dict = {}
@@ -280,6 +251,53 @@ def get_dimension_key(res):
 	return tuple([res.get(dimension) for dimension in get_dimensions()])
 
 
+def build_dimension_wise_balance_dict(gl_entries):
+	dimension_balances = frappe._dict()
+	for x in gl_entries:
+		dimension_key = get_dimension_key(x)
+		dimension_balances.setdefault(dimension_key, frappe._dict()).setdefault(
+			x.account,
+			frappe._dict(
+				{
+					"debit_in_account_currency": 0,
+					"credit_in_account_currency": 0,
+					"debit": 0,
+					"credit": 0,
+					"account_currency": x.account_currency,
+				}
+			),
+		)
+		dimension_balances[dimension_key][x.account].debit_in_account_currency += flt(
+			x.debit_in_account_currency
+		)
+		dimension_balances[dimension_key][x.account].credit_in_account_currency += flt(
+			x.credit_in_account_currency
+		)
+		dimension_balances[dimension_key][x.account].debit += flt(x.debit)
+		dimension_balances[dimension_key][x.account].credit += flt(x.credit)
+
+		# dimension-wise total balances
+		dimension_balances[dimension_key].setdefault(
+			"balances",
+			frappe._dict(
+				{
+					"balance_in_account_currency": 0,
+					"balance_in_company_currency": 0,
+				}
+			),
+		)
+		balance_in_account_currency = flt(x.debit_in_account_currency) - flt(x.credit_in_account_currency)
+		balance_in_company_currency = flt(x.debit) - flt(x.credit)
+		dimension_balances[dimension_key][
+			"balances"
+		].balance_in_account_currency += balance_in_account_currency
+		dimension_balances[dimension_key][
+			"balances"
+		].balance_in_company_currency += balance_in_company_currency
+
+	return dimension_balances
+
+
 def process_individual_date(docname: str, date: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") == "Running":
 		pcv_name = frappe.db.get_value("Process Period Closing Voucher", docname, "parent_pcv")
@@ -315,51 +333,6 @@ def process_individual_date(docname: str, date: str):
 
 		res = query.run(as_dict=True)
 
-		dimension_wise_acc_balances = frappe._dict()
-		for x in res:
-			dimension_key = get_dimension_key(x)
-			dimension_wise_acc_balances.setdefault(dimension_key, frappe._dict()).setdefault(
-				x.account,
-				frappe._dict(
-					{
-						"debit_in_account_currency": 0,
-						"credit_in_account_currency": 0,
-						"debit": 0,
-						"credit": 0,
-						"account_currency": x.account_currency,
-					}
-				),
-			)
-			dimension_wise_acc_balances[dimension_key][x.account].debit_in_account_currency += flt(
-				x.debit_in_account_currency
-			)
-			dimension_wise_acc_balances[dimension_key][x.account].credit_in_account_currency += flt(
-				x.credit_in_account_currency
-			)
-			dimension_wise_acc_balances[dimension_key][x.account].debit += flt(x.debit)
-			dimension_wise_acc_balances[dimension_key][x.account].credit += flt(x.credit)
-
-			# dimension-wise total balances
-			dimension_wise_acc_balances[dimension_key].setdefault(
-				"balances",
-				frappe._dict(
-					{
-						"balance_in_account_currency": 0,
-						"balance_in_company_currency": 0,
-					}
-				),
-			)
-
-			balance_in_account_currency = flt(x.debit_in_account_currency) - flt(x.credit_in_account_currency)
-			balance_in_company_currency = flt(x.debit) - flt(x.credit)
-
-			dimension_wise_acc_balances[dimension_key][
-				"balances"
-			].balance_in_account_currency += balance_in_account_currency
-			dimension_wise_acc_balances[dimension_key][
-				"balances"
-			].balance_in_company_currency += balance_in_company_currency
-
 		frappe.db.set_value(
 			"Process Period Closing Voucher Detail",
 			{"processing_date": date, "parent": docname},
@@ -367,18 +340,11 @@ def process_individual_date(docname: str, date: str):
 			"Completed",
 		)
 
-		# convert dict keys to json compliant json dictionary keys
-		json_dict = {}
-		for k, v in dimension_wise_acc_balances.items():
-			str_key = [str(x) for x in k]
-			str_key = ",".join(str_key)
-			json_dict[str_key] = v
-
 		frappe.db.set_value(
 			"Process Period Closing Voucher Detail",
 			{"processing_date": date, "parent": docname},
 			"closing_balance",
-			frappe.json.dumps(json_dict),
+			frappe.json.dumps(res),
 		)
 
 		call_next_date(docname)
