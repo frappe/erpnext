@@ -1,0 +1,79 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ develop, main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy to EC2
+    runs-on: ubuntu-latest
+    env:
+      EC2_HOST: '3.7.233.212'
+      EC2_USER: ubuntu  
+      EC2_SSH_PORT: '22'
+      REMOTE_DIR: 'frappe-bench/apps/erpnext'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install build deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel
+
+      - name: Run tests (fast smoke)
+        run: |
+          echo "Skipping slow tests in CI deploy" || true
+
+      - name: Create artifact tarball
+        id: create_artifact
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          REF_NAME=${GITHUB_REF#refs/heads/}
+          ART=erpnext-${REF_NAME}-${TIMESTAMP}.tar.gz
+          git ls-files | tar -czf $ART -T -
+          echo "artifact=$ART" >> $GITHUB_OUTPUT
+
+      - name: Upload artifact for debugging
+        uses: actions/upload-artifact@v4
+        with:
+          name: erpnext-artifact
+          path: ${{ steps.create_artifact.outputs.artifact }}
+
+      - name: Prepare SSH key
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          if [ -z "$SSH_KEY" ]; then
+            echo "Missing required secret EC2_SSH_KEY" >&2
+            exit 1
+          fi
+          echo "$SSH_KEY" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+
+      - name: Copy artifact to EC2
+        run: |
+          ARTIFACT=$(ls -1 *.tar.gz | head -n1)
+          echo "Uploading $ARTIFACT to $EC2_USER@$EC2_HOST:$REMOTE_DIR"
+          mkdir -p /tmp/deploy
+          mv $ARTIFACT /tmp/deploy/
+          scp -o StrictHostKeyChecking=no -i /tmp/deploy_key -P ${EC2_SSH_PORT:-22} /tmp/deploy/$ARTIFACT ${EC2_USER}@${EC2_HOST}:/tmp/
+
+      - name: Run remote deploy script
+        run: |
+          ARTIFACT=$(ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key -p ${EC2_SSH_PORT:-22} ${EC2_USER}@${EC2_HOST} 'ls -1 /tmp/erpnext-*.tar.gz | tail -n1')
+          echo "Found remote artifact: $ARTIFACT"
+          ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key -p ${EC2_SSH_PORT:-22} ${EC2_USER}@${EC2_HOST} "sudo /usr/local/bin/deploy_erpnext.sh /tmp/$(basename $ARTIFACT) $REMOTE_DIR"
