@@ -273,18 +273,9 @@ def calculate_foreign_currency_translation_reserve(total_row, data):
 	opening_dr_cr_diff = total_row.get("opening_debit", 0) - total_row.get("opening_credit", 0)
 	dr_cr_diff = total_row.get("debit", 0) - total_row.get("credit", 0)
 
-	if not data or not isinstance(data, list):
-		return
-
 	idx = get_fctr_root_row_index(data)
 
-	if not isinstance(idx, int) or idx < 0 or idx >= len(data):
-		return
-
-	root_row = data[idx]
-
-	if not root_row:
-		return
+	root_row = data[idx] if data and len(data) > idx else {}
 
 	fctr_row = {
 		"account": _("Foreign Currency Translation Reserve"),
@@ -296,10 +287,10 @@ def calculate_foreign_currency_translation_reserve(total_row, data):
 		"credit": abs(dr_cr_diff) if dr_cr_diff > 0 else 0.0,
 		"closing_debit": 0.0,
 		"closing_credit": 0.0,
-		"root_type": root_row.get("root_type"),
+		"root_type": root_row.get("root_type", ""),
 		"account_type": "Equity",
 		"parent_account": root_row.get("account"),
-		"indent": root_row.get("indent", 0) + 1,
+		"indent": (root_row.get("indent") or 0) + 1,
 		"has_value": True,
 		"currency": total_row.get("currency"),
 	}

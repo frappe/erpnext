@@ -87,7 +87,7 @@ class TestConsolidatedTrialBalance(IntegrationTestCase):
 
 		fctr = [d for d in report[1] if d.get("account") == _("Foreign Currency Translation Reserve")]
 
-		if not fctr and len(report[1]) > 2:
+		if not fctr:
 			raise ForeignCurrencyTranslationReserveNotFoundError
 
 		ccu_total_credit = 1000 * flt(exchange_rate)
