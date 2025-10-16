@@ -44,7 +44,7 @@ frappe.ui.form.on("Process Period Closing Voucher", {
 
 			frm.add_custom_button(execute_btn, () => {
 				frm.call({
-					method: "erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.call_next_date",
+					method: "erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.schedule_next_date",
 					args: {
 						docname: frm.doc.name,
 					},

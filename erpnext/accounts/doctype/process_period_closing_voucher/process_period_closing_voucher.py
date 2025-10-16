@@ -50,6 +50,7 @@ class ProcessPeriodClosingVoucher(Document):
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Paused"]:
+		# TODO: move this inside if block
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
 		if dates_to_process := frappe.db.get_all(
 			"Process Period Closing Voucher Detail",
@@ -152,19 +153,19 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 
 
 @frappe.whitelist()
-def call_next_date(docname: str):
-	if next_date_to_process := frappe.db.get_all(
+def schedule_next_date(docname: str):
+	if to_process := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
 		filters={"parent": docname, "status": "Queued"},
 		fields=["processing_date"],
 		order_by="processing_date",
 		limit=1,
 	):
-		next_date_to_process = next_date_to_process[0].processing_date
+		next_date = to_process[0].processing_date
 		if not is_scheduler_inactive():
 			frappe.db.set_value(
 				"Process Period Closing Voucher Detail",
-				{"processing_date": next_date_to_process, "parent": docname},
+				{"processing_date": next_date, "parent": docname},
 				"status",
 				"Running",
 			)
@@ -175,66 +176,68 @@ def call_next_date(docname: str):
 					is_async=True,
 					enqueue_after_commit=True,
 					docname=docname,
-					date=next_date_to_process,
+					date=next_date,
 				)
 			else:
-				process_individual_date(docname, next_date_to_process)
+				process_individual_date(docname, next_date)
 	else:
-		running = frappe.db.get_all(
-			"Process Period Closing Voucher Detail",
-			filters={"parent": docname, "status": "Running"},
-			fields=["processing_date"],
-			order_by="processing_date",
-			limit=1,
-		)
-		# TODO: ensure all dates are processed
-		if not running:
-			# Calculate total balances for PCV period
+		# summarize, build and post GL
+		summarize_and_post_ledger_entries(docname)
 
-			ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
 
-			gl_entries = []
-			for x in ppcv.dates_to_process:
-				closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
-				gl_entries.extend(closing_balances)
+def summarize_and_post_ledger_entries(docname):
+	# TODO: ensure all dates are processed
+	running = frappe.db.get_all(
+		"Process Period Closing Voucher Detail",
+		filters={"parent": docname, "status": "Running"},
+		fields=["processing_date"],
+		order_by="processing_date",
+		limit=1,
+	)
+	if not running:
+		# calculate balances for whole PCV period
+		ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
 
-			# Build dimension wise dictionary from all GLE's
-			dimension_wise_acc_balances = build_dimension_wise_balance_dict(gl_entries)
+		gl_entries = []
+		for x in ppcv.dates_to_process:
+			closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
+			gl_entries.extend(closing_balances)
 
-			# convert dict keys to json compliant json dictionary keys
-			json_dict = {}
-			for k, v in dimension_wise_acc_balances.items():
-				str_key = [str(x) for x in k]
-				str_key = ",".join(str_key)
-				json_dict[str_key] = v
+		# build dimension wise dictionary from all GLE's
+		dimension_wise_acc_balances = build_dimension_wise_balance_dict(gl_entries)
 
-			frappe.db.set_value(
-				"Process Period Closing Voucher", docname, "total", frappe.json.dumps(json_dict)
+		# convert tuple key to str to make it json compliant
+		json_dict = {}
+		for k, v in dimension_wise_acc_balances.items():
+			str_key = [str(x) for x in k]
+			str_key = ",".join(str_key)
+			json_dict[str_key] = v
+
+		# save
+		frappe.db.set_value("Process Period Closing Voucher", docname, "total", frappe.json.dumps(json_dict))
+
+		# build gl map
+		pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
+		pl_accounts_reverse_gle = []
+		closing_account_gle = []
+
+		for dimensions, account_balances in dimension_wise_acc_balances.items():
+			for acc, balances in account_balances.items():
+				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
+				if balance_in_company_currency:
+					pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+
+			closing_account_gle.append(
+				get_gle_for_closing_account(pcv, account_balances["balances"], dimensions)
 			)
 
-			# Build GL map
-			pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
-			pl_accounts_reverse_gle = []
-			closing_account_gle = []
+		gl_entries = pl_accounts_reverse_gle + closing_account_gle
+		from erpnext.accounts.general_ledger import make_gl_entries
 
-			for dimensions, account_balances in dimension_wise_acc_balances.items():
-				for acc, balances in account_balances.items():
-					balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
-					if balance_in_company_currency:
-						pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+		if gl_entries:
+			make_gl_entries(gl_entries, merge_entries=False)
 
-				# closing liability account
-				closing_account_gle.append(
-					get_gle_for_closing_account(pcv, account_balances["balances"], dimensions)
-				)
-
-			gl_entries = pl_accounts_reverse_gle + closing_account_gle
-			from erpnext.accounts.general_ledger import make_gl_entries
-
-			if gl_entries:
-				make_gl_entries(gl_entries, merge_entries=False)
-
-			frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
+		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
 
 def get_dimensions():
@@ -299,52 +302,53 @@ def build_dimension_wise_balance_dict(gl_entries):
 
 
 def process_individual_date(docname: str, date: str):
-	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") == "Running":
-		pcv_name = frappe.db.get_value("Process Period Closing Voucher", docname, "parent_pcv")
-		pcv = frappe.get_doc("Period Closing Voucher", pcv_name)
+	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") != "Running":
+		return
 
-		dimensions = get_dimensions()
+	pcv_name = frappe.db.get_value("Process Period Closing Voucher", docname, "parent_pcv")
+	company = frappe.db.get_value("Period Closing Voucher", pcv_name, "company")
 
-		p_l_accounts = frappe.db.get_all(
-			"Account", filters={"company": pcv.company, "report_type": "Profit and Loss"}, pluck="name"
-		)
+	dimensions = get_dimensions()
 
-		gle = qb.DocType("GL Entry")
-		query = qb.from_(gle).select(gle.account)
-		for dim in dimensions:
-			query = query.select(gle[dim])
+	p_l_accounts = frappe.db.get_all(
+		"Account", filters={"company": company, "report_type": "Profit and Loss"}, pluck="name"
+	)
 
-		query = query.select(
-			Sum(gle.debit).as_("debit"),
-			Sum(gle.credit).as_("credit"),
-			Sum(gle.debit_in_account_currency).as_("debit_in_account_currency"),
-			Sum(gle.credit_in_account_currency).as_("credit_in_account_currency"),
-			gle.account_currency,
-		).where(
-			(gle.company.eq(pcv.company))
-			& (gle.is_cancelled.eq(0))
-			& (gle.posting_date.eq(date))
-			& (gle.account.isin(p_l_accounts))
-		)
+	# summarize
+	gle = qb.DocType("GL Entry")
+	query = qb.from_(gle).select(gle.account)
+	for dim in dimensions:
+		query = query.select(gle[dim])
+	query = query.select(
+		Sum(gle.debit).as_("debit"),
+		Sum(gle.credit).as_("credit"),
+		Sum(gle.debit_in_account_currency).as_("debit_in_account_currency"),
+		Sum(gle.credit_in_account_currency).as_("credit_in_account_currency"),
+		gle.account_currency,
+	).where(
+		(gle.company.eq(company))
+		& (gle.is_cancelled.eq(0))
+		& (gle.posting_date.eq(date))
+		& (gle.account.isin(p_l_accounts))
+	)
+	query = query.groupby(gle.account)
+	for dim in dimensions:
+		query = query.groupby(gle[dim])
+	res = query.run(as_dict=True)
 
-		query = query.groupby(gle.account)
-		for dim in dimensions:
-			query = query.groupby(gle[dim])
+	# save results
+	frappe.db.set_value(
+		"Process Period Closing Voucher Detail",
+		{"processing_date": date, "parent": docname},
+		"closing_balance",
+		frappe.json.dumps(res),
+	)
+	frappe.db.set_value(
+		"Process Period Closing Voucher Detail",
+		{"processing_date": date, "parent": docname},
+		"status",
+		"Completed",
+	)
 
-		res = query.run(as_dict=True)
-
-		frappe.db.set_value(
-			"Process Period Closing Voucher Detail",
-			{"processing_date": date, "parent": docname},
-			"status",
-			"Completed",
-		)
-
-		frappe.db.set_value(
-			"Process Period Closing Voucher Detail",
-			{"processing_date": date, "parent": docname},
-			"closing_balance",
-			frappe.json.dumps(res),
-		)
-
-		call_next_date(docname)
+	# chain call
+	schedule_next_date(docname)
