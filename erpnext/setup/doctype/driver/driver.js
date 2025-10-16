@@ -24,10 +24,15 @@ frappe.ui.form.on("Driver", {
 
 	transporter: function (frm, cdt, cdn) {
 		// this assumes that supplier's address has same title as supplier's name
+		if (!frm.doc.transporter) return;
 		frappe.db
-			.get_doc("Address", null, { address_title: frm.doc.transporter })
+			.get_value("Address", { address_title: frm.doc.transporter }, "name")
 			.then((r) => {
-				frappe.model.set_value(cdt, cdn, "address", r.name);
+				if (r && r.message && r.message.name) {
+					frappe.model.set_value(cdt, cdn, "address", r.message.name);
+				} else {
+					frappe.model.set_value(cdt, cdn, "address", "");
+				}
 			})
 			.catch((err) => {
 				console.log(err);
