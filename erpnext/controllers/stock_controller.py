@@ -280,6 +280,14 @@ class StockController(AccountsController):
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
+				if self.is_internal_transfer() and row.get("from_warehouse") and not self.is_return:
+					self.update_bundle_details(bundle_details, table_name, row)
+					bundle_details["type_of_transaction"] = "Outward"
+					bundle_details["warehouse"] = row.get("from_warehouse")
+					bundle_details["qty"] = row.get("stock_qty") or row.get("qty")
+					self.create_serial_batch_bundle(bundle_details, row)
+					continue
+
 				if row.get("qty") or row.get("consumed_qty") or row.get("stock_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, parent_details=parent_details)
 					self.create_serial_batch_bundle(bundle_details, row)
