@@ -300,14 +300,14 @@ def get_consolidated_gles(balances, report_type) -> list:
 	return gl_entries
 
 
-def summarize_and_post_ledger_entries(docname):
-	# calculate balances for whole PCV period
+def get_gl_entries(docname):
+	"""
+	Calculate total closing balance of all P&L accounts across PCV start and end date
+	"""
 	ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
 
-	# P&L Accounts
+	# calculate balance
 	gl_entries = get_consolidated_gles(ppcv.normal_balances, "Profit and Loss")
-
-	# build dimension wise dictionary from all GLE's
 	pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
 
 	# save
@@ -329,13 +329,15 @@ def summarize_and_post_ledger_entries(docname):
 
 		closing_account_gle.append(get_gle_for_closing_account(pcv, account_balances["balances"], dimensions))
 
-	gl_entries = pl_accounts_reverse_gle + closing_account_gle
-	from erpnext.accounts.general_ledger import make_gl_entries
+	return pl_accounts_reverse_gle, closing_account_gle
 
-	if gl_entries:
-		make_gl_entries(gl_entries, merge_entries=False)
 
-	# Balance Sheet Accounts
+def calculate_balance_sheet_balance(docname):
+	"""
+	Calculate total closing balance of all P&L accounts across PCV start and end date.
+	If it is first PCV, opening entries are also considered
+	"""
+	ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
 	gl_entries = get_consolidated_gles(ppcv.normal_balances + ppcv.z_opening_balances, "Balance Sheet")
 
 	# build dimension wise dictionary from all GLE's
@@ -346,10 +348,12 @@ def summarize_and_post_ledger_entries(docname):
 	frappe.db.set_value(
 		"Process Period Closing Voucher", docname, "bs_closing_balance", frappe.json.dumps(json_dict)
 	)
+	return bs_dimension_wise_acc_balance
 
-	# make closing entries
-	pl_closing_entries = copy.deepcopy(pl_accounts_reverse_gle)
-	for d in pl_accounts_reverse_gle:
+
+def get_p_l_closing_entries(pl_gles, pcv):
+	pl_closing_entries = copy.deepcopy(pl_gles)
+	for d in pl_gles:
 		# reverse debit and credit
 		gle_copy = copy.deepcopy(d)
 		gle_copy.debit = d.credit
@@ -360,18 +364,47 @@ def summarize_and_post_ledger_entries(docname):
 		gle_copy.period_closing_voucher = pcv.name
 		pl_closing_entries.append(gle_copy)
 
-	bs_closing_entries = []
-	for dimensions, account_balances in bs_dimension_wise_acc_balance.items():
+	return pl_closing_entries
+
+
+def get_bs_closing_entries(dimension_wise_balance, pcv):
+	closing_entries = []
+	for dimensions, account_balances in dimension_wise_balance.items():
 		for acc, balances in account_balances.items():
 			balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
 			if acc != "balances" and balance_in_company_currency:
-				bs_closing_entries.append(get_closing_entry(pcv, acc, balances, dimensions))
+				closing_entries.append(get_closing_entry(pcv, acc, balances, dimensions))
 
+	return closing_entries
+
+
+def get_closing_account_closing_entry(closing_account_gle, pcv):
 	closing_entries_for_closing_account = copy.deepcopy(closing_account_gle)
 	for d in closing_entries_for_closing_account:
 		d.period_closing_voucher = pcv.name
+	return closing_entries_for_closing_account
 
+
+def summarize_and_post_ledger_entries(docname):
+	# P&L accounts
+	pl_accounts_reverse_gle, closing_account_gle = get_gl_entries(docname)
+	gl_entries = pl_accounts_reverse_gle + closing_account_gle
+	from erpnext.accounts.general_ledger import make_gl_entries
+
+	if gl_entries:
+		make_gl_entries(gl_entries, merge_entries=False)
+
+	pcv_name = frappe.db.get_value("Process Period Closing Voucher", docname, "parent_pcv")
+	pcv = frappe.get_doc("Period Closing Voucher", pcv_name)
+
+	# Balance sheet accounts
+	bs_dimension_wise_acc_balance = calculate_balance_sheet_balance(docname)
+
+	pl_closing_entries = get_p_l_closing_entries(pl_accounts_reverse_gle, pcv)
+	bs_closing_entries = get_bs_closing_entries(bs_dimension_wise_acc_balance, pcv)
+	closing_entries_for_closing_account = get_closing_account_closing_entry(closing_account_gle, pcv)
 	closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
+
 	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
 	# TODO: Update processing status on PCV and Process document
