@@ -9,6 +9,7 @@
   "status",
   "p_l_closing_balance",
   "dates_to_process",
+  "opening_balances",
   "amended_from"
  ],
  "fields": [
@@ -50,13 +51,20 @@
    "fieldtype": "JSON",
    "label": "P&L Closing Balance",
    "no_copy": 1
+  },
+  {
+   "fieldname": "opening_balances",
+   "fieldtype": "Table",
+   "label": "Opening Balances",
+   "no_copy": 1,
+   "options": "Process Period Closing Voucher Detail"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-17 13:04:26.353250",
+ "modified": "2025-10-17 13:10:04.024903",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",

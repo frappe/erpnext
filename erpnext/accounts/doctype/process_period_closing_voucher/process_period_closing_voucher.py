@@ -6,7 +6,7 @@ from datetime import timedelta
 import frappe
 from frappe import qb
 from frappe.model.document import Document
-from frappe.query_builder.functions import Count, Sum
+from frappe.query_builder.functions import Count, Max, Min, Sum
 from frappe.utils import add_days, flt, get_datetime
 from frappe.utils.scheduler import is_scheduler_inactive
 
@@ -28,6 +28,7 @@ class ProcessPeriodClosingVoucher(Document):
 
 		amended_from: DF.Link | None
 		dates_to_process: DF.Table[ProcessPeriodClosingVoucherDetail]
+		opening_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
 		p_l_closing_balance: DF.JSON | None
 		parent_pcv: DF.Link
 		status: DF.Literal["Queued", "Running", "Completed"]
@@ -35,14 +36,20 @@ class ProcessPeriodClosingVoucher(Document):
 
 	def validate(self):
 		self.status = "Queued"
-		self.populate_processing_table()
+		self.populate_processing_tables()
 
-	def populate_processing_table(self):
+	def populate_processing_tables(self):
+		self.generate_pcv_dates()
+		self.generate_opening_balances_dates()
+
+	def get_dates(self, start, end):
+		return [start + timedelta(days=x) for x in range((end - start).days + 1)]
+
+	def generate_pcv_dates(self):
 		self.dates_to_process = []
 		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
-		start = get_datetime(pcv.period_start_date)
-		end = get_datetime(pcv.period_end_date)
-		dates = [start + timedelta(days=x) for x in range((end - start).days + 1)]
+
+		dates = self.get_dates(get_datetime(pcv.period_start_date), get_datetime(pcv.period_end_date))
 		for x in dates:
 			self.append(
 				"dates_to_process",
@@ -51,6 +58,22 @@ class ProcessPeriodClosingVoucher(Document):
 			self.append(
 				"dates_to_process", {"processing_date": x, "status": "Queued", "report_type": "Balance Sheet"}
 			)
+
+	def generate_opening_balances_dates(self):
+		self.opening_balances = []
+
+		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
+		if pcv.is_first_period_closing_voucher():
+			gl = qb.DocType("GL Entry")
+			min = qb.from_(gl).select(Min(gl.posting_date)).where(gl.company.eq(pcv.company)).run()[0][0]
+			max = qb.from_(gl).select(Max(gl.posting_date)).where(gl.company.eq(pcv.company)).run()[0][0]
+
+			dates = self.get_dates(get_datetime(min), get_datetime(max))
+			for x in dates:
+				self.append(
+					"opening_balances",
+					{"processing_date": x, "status": "Queued", "report_type": "Balance Sheet"},
+				)
 
 	def on_submit(self):
 		start_pcv_processing(self.name)
@@ -66,7 +89,7 @@ def start_pcv_processing(docname: str):
 			filters={"parent": docname, "status": "Queued"},
 			fields=["processing_date", "report_type"],
 			order_by="processing_date",
-			limit=1,
+			limit=4,
 		):
 			if not is_scheduler_inactive():
 				for x in dates_to_process:
