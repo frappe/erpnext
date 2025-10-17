@@ -9,6 +9,7 @@
   "status",
   "p_l_closing_balance",
   "normal_balances",
+  "bs_closing_balance",
   "z_opening_balances",
   "amended_from"
  ],
@@ -58,13 +59,18 @@
    "label": "Opening Balances",
    "no_copy": 1,
    "options": "Process Period Closing Voucher Detail"
+  },
+  {
+   "fieldname": "bs_closing_balance",
+   "fieldtype": "JSON",
+   "label": "Balance Sheet Closing Balance"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-17 13:44:33.397172",
+ "modified": "2025-10-17 15:16:26.324369",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",

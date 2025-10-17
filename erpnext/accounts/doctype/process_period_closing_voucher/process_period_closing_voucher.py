@@ -27,6 +27,7 @@ class ProcessPeriodClosingVoucher(Document):
 		)
 
 		amended_from: DF.Link | None
+		bs_closing_balance: DF.JSON | None
 		normal_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
 		p_l_closing_balance: DF.JSON | None
 		parent_pcv: DF.Link
@@ -258,6 +259,7 @@ def schedule_next_date(docname: str):
 		total_no_of_dates = (
 			qb.from_(ppcvd).select(Count(ppcvd.star)).where(ppcvd.parent.eq(docname)).run()[0][0]
 		)
+		# consider both normal and opening balance
 		completed = (
 			qb.from_(ppcvd)
 			.select(Count(ppcvd.star))
@@ -281,6 +283,7 @@ def summarize_and_post_ledger_entries(docname):
 		# calculate balances for whole PCV period
 		ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
 
+		# P&L Accounts
 		gl_entries = []
 		for x in ppcv.normal_balances:
 			if x.report_type == "Profit and Loss":
@@ -288,11 +291,11 @@ def summarize_and_post_ledger_entries(docname):
 				gl_entries.extend(closing_balances)
 
 		# build dimension wise dictionary from all GLE's
-		dimension_wise_acc_balances = build_dimension_wise_balance_dict(gl_entries)
+		pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
 
 		# convert tuple key to str to make it json compliant
 		json_dict = {}
-		for k, v in dimension_wise_acc_balances.items():
+		for k, v in pl_dimension_wise_acc_balance.items():
 			str_key = [str(x) for x in k]
 			str_key = ",".join(str_key)
 			json_dict[str_key] = v
@@ -302,12 +305,34 @@ def summarize_and_post_ledger_entries(docname):
 			"Process Period Closing Voucher", docname, "p_l_closing_balance", frappe.json.dumps(json_dict)
 		)
 
+		# Balance Sheet Accounts
+		gl_entries = []
+		for x in ppcv.normal_balances + ppcv.z_opening_balances:
+			if x.report_type == "Balance Sheet":
+				closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
+				gl_entries.extend(closing_balances)
+
+		# build dimension wise dictionary from all GLE's
+		bs_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
+
+		# convert tuple key to str to make it json compliant
+		json_dict = {}
+		for k, v in bs_dimension_wise_acc_balance.items():
+			str_key = [str(x) for x in k]
+			str_key = ",".join(str_key)
+			json_dict[str_key] = v
+
+		# save
+		frappe.db.set_value(
+			"Process Period Closing Voucher", docname, "bs_closing_balance", frappe.json.dumps(json_dict)
+		)
+
 		# build gl map
 		pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
 		pl_accounts_reverse_gle = []
 		closing_account_gle = []
 
-		for dimensions, account_balances in dimension_wise_acc_balances.items():
+		for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
 			for acc, balances in account_balances.items():
 				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
 				if balance_in_company_currency:
