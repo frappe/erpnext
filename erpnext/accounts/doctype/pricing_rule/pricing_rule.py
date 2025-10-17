@@ -727,3 +727,37 @@ def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 		fields=["distinct uom"],
 		as_list=1,
 	)
+
+
+def disable_expired_pricing_rules():
+	"""
+	Scheduled function to automatically disable pricing rules that have expired.
+	This should be run daily via a scheduled job.
+	"""
+	from frappe.utils import today
+
+	expired_rules = frappe.get_all(
+		"Pricing Rule",
+		filters={"valid_upto": ["<", today()], "disable": 0},
+		pluck="name",
+	)
+
+	if not expired_rules:
+		return
+
+	# Bulk update using ORM
+	frappe.db.set_value(
+		"Pricing Rule",
+		{"name": ["in", expired_rules]},
+		"disable",
+		1,
+		update_modified=True,
+	)
+
+	frappe.db.commit()
+
+	frappe.logger().info(
+		f"Auto-disabled {len(expired_rules)} expired pricing rule(s): "
+		f"{', '.join(expired_rules[:5])}"
+		+ (f" and {len(expired_rules) - 5} more" if len(expired_rules) > 5 else "")
+	)
