@@ -157,6 +157,11 @@ def resume_pcv_processing(docname: str):
 		start_pcv_processing(docname)
 
 
+def update_default_dimensions(dimension_fields, gl_entry, dimension_values):
+	for i, dimension in enumerate(dimension_fields):
+		gl_entry[dimension] = dimension_values[i]
+
+
 def get_gle_for_pl_account(pcv, acc, balances, dimensions):
 	balance_in_account_currency = flt(balances.debit_in_account_currency) - flt(
 		balances.credit_in_account_currency
@@ -185,8 +190,7 @@ def get_gle_for_pl_account(pcv, acc, balances, dimensions):
 		}
 	)
 	# update dimensions
-	for i, dimension in enumerate(dimensions):
-		gl_entry[dimension] = dimensions[i]
+	update_default_dimensions(get_dimensions(), gl_entry, dimensions)
 	return gl_entry
 
 
@@ -214,8 +218,7 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 		}
 	)
 	# update dimensions
-	for i, dimension in enumerate(dimensions):
-		gl_entry[dimension] = dimensions[i]
+	update_default_dimensions(get_dimensions(), gl_entry, dimensions)
 	return gl_entry
 
 
@@ -259,129 +262,117 @@ def schedule_next_date(docname: str):
 					to_process[0].parentfield,
 				)
 	else:
-		# summarize, build and post GL
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		total_no_of_dates = (
 			qb.from_(ppcvd).select(Count(ppcvd.star)).where(ppcvd.parent.eq(docname)).run()[0][0]
 		)
-		# consider both normal and opening balance
 		completed = (
 			qb.from_(ppcvd)
 			.select(Count(ppcvd.star))
 			.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Completed"))
 			.run()[0][0]
 		)
+		# Ensure both normal and opening balances are processed for all dates
 		if total_no_of_dates == completed:
 			summarize_and_post_ledger_entries(docname)
 
 
 def summarize_and_post_ledger_entries(docname):
-	# TODO: ensure all dates are processed
-	running = frappe.db.get_all(
-		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Running"},
-		fields=["processing_date"],
-		order_by="processing_date",
-		limit=1,
+	# calculate balances for whole PCV period
+	ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
+
+	# P&L Accounts
+	gl_entries = []
+	for x in ppcv.normal_balances:
+		if x.report_type == "Profit and Loss":
+			closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
+			gl_entries.extend(closing_balances)
+
+	# build dimension wise dictionary from all GLE's
+	pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
+
+	# convert tuple key to str to make it json compliant
+	json_dict = {}
+	for k, v in pl_dimension_wise_acc_balance.items():
+		str_key = [str(x) for x in k]
+		str_key = ",".join(str_key)
+		json_dict[str_key] = v
+
+	# save
+	frappe.db.set_value(
+		"Process Period Closing Voucher", docname, "p_l_closing_balance", frappe.json.dumps(json_dict)
 	)
-	if not running:
-		# calculate balances for whole PCV period
-		ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
 
-		# P&L Accounts
-		gl_entries = []
-		for x in ppcv.normal_balances:
-			if x.report_type == "Profit and Loss":
-				closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
-				gl_entries.extend(closing_balances)
+	# build gl map
+	pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
+	pl_accounts_reverse_gle = []
+	closing_account_gle = []
 
-		# build dimension wise dictionary from all GLE's
-		pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
+	for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
+		for acc, balances in account_balances.items():
+			balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
+			if balance_in_company_currency:
+				pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
 
-		# convert tuple key to str to make it json compliant
-		json_dict = {}
-		for k, v in pl_dimension_wise_acc_balance.items():
-			str_key = [str(x) for x in k]
-			str_key = ",".join(str_key)
-			json_dict[str_key] = v
+		closing_account_gle.append(get_gle_for_closing_account(pcv, account_balances["balances"], dimensions))
 
-		# save
-		frappe.db.set_value(
-			"Process Period Closing Voucher", docname, "p_l_closing_balance", frappe.json.dumps(json_dict)
-		)
+	gl_entries = pl_accounts_reverse_gle + closing_account_gle
+	from erpnext.accounts.general_ledger import make_gl_entries
 
-		# build gl map
-		pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
-		pl_accounts_reverse_gle = []
-		closing_account_gle = []
+	if gl_entries:
+		make_gl_entries(gl_entries, merge_entries=False)
 
-		for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
-			for acc, balances in account_balances.items():
-				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
-				if balance_in_company_currency:
-					pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+	# Balance Sheet Accounts
+	gl_entries = []
+	for x in ppcv.normal_balances + ppcv.z_opening_balances:
+		if x.report_type == "Balance Sheet":
+			closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
+			gl_entries.extend(closing_balances)
 
-			closing_account_gle.append(
-				get_gle_for_closing_account(pcv, account_balances["balances"], dimensions)
-			)
+	# build dimension wise dictionary from all GLE's
+	bs_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
 
-		gl_entries = pl_accounts_reverse_gle + closing_account_gle
-		from erpnext.accounts.general_ledger import make_gl_entries
+	# convert tuple key to str to make it json compliant
+	json_dict = {}
+	for k, v in bs_dimension_wise_acc_balance.items():
+		str_key = [str(x) for x in k]
+		str_key = ",".join(str_key)
+		json_dict[str_key] = v
 
-		if gl_entries:
-			make_gl_entries(gl_entries, merge_entries=False)
+	# save
+	frappe.db.set_value(
+		"Process Period Closing Voucher", docname, "bs_closing_balance", frappe.json.dumps(json_dict)
+	)
 
-		# Balance Sheet Accounts
-		gl_entries = []
-		for x in ppcv.normal_balances + ppcv.z_opening_balances:
-			if x.report_type == "Balance Sheet":
-				closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
-				gl_entries.extend(closing_balances)
+	# make closing entries
+	pl_closing_entries = copy.deepcopy(pl_accounts_reverse_gle)
+	for d in pl_accounts_reverse_gle:
+		# reverse debit and credit
+		gle_copy = copy.deepcopy(d)
+		gle_copy.debit = d.credit
+		gle_copy.credit = d.debit
+		gle_copy.debit_in_account_currency = d.credit_in_account_currency
+		gle_copy.credit_in_account_currency = d.debit_in_account_currency
+		gle_copy.is_period_closing_voucher_entry = 0
+		gle_copy.period_closing_voucher = pcv.name
+		pl_closing_entries.append(gle_copy)
 
-		# build dimension wise dictionary from all GLE's
-		bs_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
+	bs_closing_entries = []
+	for dimensions, account_balances in bs_dimension_wise_acc_balance.items():
+		for acc, balances in account_balances.items():
+			balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
+			if acc != "balances" and balance_in_company_currency:
+				bs_closing_entries.append(get_closing_entry(pcv, acc, balances, dimensions))
 
-		# convert tuple key to str to make it json compliant
-		json_dict = {}
-		for k, v in bs_dimension_wise_acc_balance.items():
-			str_key = [str(x) for x in k]
-			str_key = ",".join(str_key)
-			json_dict[str_key] = v
+	closing_entries_for_closing_account = copy.deepcopy(closing_account_gle)
+	for d in closing_entries_for_closing_account:
+		d.period_closing_voucher = pcv.name
 
-		# save
-		frappe.db.set_value(
-			"Process Period Closing Voucher", docname, "bs_closing_balance", frappe.json.dumps(json_dict)
-		)
+	closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
+	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
-		# make closing entries
-		pl_closing_entries = copy.deepcopy(pl_accounts_reverse_gle)
-		for d in pl_accounts_reverse_gle:
-			# reverse debit and credit
-			gle_copy = copy.deepcopy(d)
-			gle_copy.debit = d.credit
-			gle_copy.credit = d.debit
-			gle_copy.debit_in_account_currency = d.credit_in_account_currency
-			gle_copy.credit_in_account_currency = d.debit_in_account_currency
-			gle_copy.is_period_closing_voucher_entry = 0
-			gle_copy.period_closing_voucher = pcv.name
-			pl_closing_entries.append(gle_copy)
-
-		bs_closing_entries = []
-		for dimensions, account_balances in bs_dimension_wise_acc_balance.items():
-			for acc, balances in account_balances.items():
-				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
-				if acc != "balances" and balance_in_company_currency:
-					bs_closing_entries.append(get_closing_entry(pcv, acc, balances, dimensions))
-
-		closing_entries_for_closing_account = copy.deepcopy(closing_account_gle)
-		for d in closing_entries_for_closing_account:
-			d.period_closing_voucher = pcv.name
-
-		closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
-		make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
-
-		# TODO: Update processing status on PCV and Process document
-		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
+	# TODO: Update processing status on PCV and Process document
+	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
 
 def get_closing_entry(pcv, account, balances, dimensions):
@@ -400,8 +391,7 @@ def get_closing_entry(pcv, account, balances, dimensions):
 		}
 	)
 	# update dimensions
-	for i, dimension in enumerate(dimensions):
-		closing_entry[dimension] = dimensions[i]
+	update_default_dimensions(get_dimensions(), closing_entry, dimensions)
 	return closing_entry
 
 
