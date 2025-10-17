@@ -291,16 +291,21 @@ def make_dict_json_compliant(dimension_wise_balance) -> dict:
 	return converted_dict
 
 
+def get_consolidated_gles(balances, report_type) -> list:
+	gl_entries = []
+	for x in balances:
+		if x.report_type == report_type:
+			closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
+			gl_entries.extend(closing_balances)
+	return gl_entries
+
+
 def summarize_and_post_ledger_entries(docname):
 	# calculate balances for whole PCV period
 	ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
 
 	# P&L Accounts
-	gl_entries = []
-	for x in ppcv.normal_balances:
-		if x.report_type == "Profit and Loss":
-			closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
-			gl_entries.extend(closing_balances)
+	gl_entries = get_consolidated_gles(ppcv.normal_balances, "Profit and Loss")
 
 	# build dimension wise dictionary from all GLE's
 	pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
@@ -331,11 +336,7 @@ def summarize_and_post_ledger_entries(docname):
 		make_gl_entries(gl_entries, merge_entries=False)
 
 	# Balance Sheet Accounts
-	gl_entries = []
-	for x in ppcv.normal_balances + ppcv.z_opening_balances:
-		if x.report_type == "Balance Sheet":
-			closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
-			gl_entries.extend(closing_balances)
+	gl_entries = get_consolidated_gles(ppcv.normal_balances + ppcv.z_opening_balances, "Balance Sheet")
 
 	# build dimension wise dictionary from all GLE's
 	bs_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
