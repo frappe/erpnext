@@ -44,7 +44,13 @@ class ProcessPeriodClosingVoucher(Document):
 		end = get_datetime(pcv.period_end_date)
 		dates = [start + timedelta(days=x) for x in range((end - start).days + 1)]
 		for x in dates:
-			self.append("dates_to_process", {"processing_date": x, "status": "Queued"})
+			self.append(
+				"dates_to_process",
+				{"processing_date": x, "status": "Queued", "report_type": "Profit and Loss"},
+			)
+			self.append(
+				"dates_to_process", {"processing_date": x, "status": "Queued", "report_type": "Balance Sheet"}
+			)
 
 	def on_submit(self):
 		start_pcv_processing(self.name)
@@ -58,15 +64,19 @@ def start_pcv_processing(docname: str):
 		if dates_to_process := frappe.db.get_all(
 			"Process Period Closing Voucher Detail",
 			filters={"parent": docname, "status": "Queued"},
-			fields=["processing_date"],
+			fields=["processing_date", "report_type"],
 			order_by="processing_date",
-			limit=4,
+			limit=1,
 		):
 			if not is_scheduler_inactive():
 				for x in dates_to_process:
 					frappe.db.set_value(
 						"Process Period Closing Voucher Detail",
-						{"processing_date": x.processing_date, "parent": docname},
+						{
+							"processing_date": x.processing_date,
+							"parent": docname,
+							"report_type": x.report_type,
+						},
 						"status",
 						"Running",
 					)
@@ -79,9 +89,10 @@ def start_pcv_processing(docname: str):
 							enqueue_after_commit=True,
 							docname=docname,
 							date=x.processing_date,
+							report_type=x.report_type,
 						)
 					else:
-						process_individual_date(docname, x.processing_date)
+						process_individual_date(docname, x.processing_date, x.report_type)
 		else:
 			frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
@@ -182,15 +193,16 @@ def schedule_next_date(docname: str):
 	if to_process := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
 		filters={"parent": docname, "status": "Queued"},
-		fields=["processing_date"],
+		fields=["processing_date", "report_type"],
 		order_by="processing_date",
-		limit=1,
+		limit=4,
 	):
 		next_date = to_process[0].processing_date
+		report_type = to_process[0].report_type
 		if not is_scheduler_inactive():
 			frappe.db.set_value(
 				"Process Period Closing Voucher Detail",
-				{"processing_date": next_date, "parent": docname},
+				{"processing_date": next_date, "parent": docname, "report_type": report_type},
 				"status",
 				"Running",
 			)
@@ -202,9 +214,10 @@ def schedule_next_date(docname: str):
 					enqueue_after_commit=True,
 					docname=docname,
 					date=next_date,
+					report_type=report_type,
 				)
 			else:
-				process_individual_date(docname, next_date)
+				process_individual_date(docname, next_date, report_type)
 	else:
 		# summarize, build and post GL
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
@@ -236,8 +249,9 @@ def summarize_and_post_ledger_entries(docname):
 
 		gl_entries = []
 		for x in ppcv.dates_to_process:
-			closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
-			gl_entries.extend(closing_balances)
+			if x.report_type == "Profit and Loss":
+				closing_balances = [frappe._dict(gle) for gle in frappe.json.loads(x.closing_balance)]
+				gl_entries.extend(closing_balances)
 
 		# build dimension wise dictionary from all GLE's
 		dimension_wise_acc_balances = build_dimension_wise_balance_dict(gl_entries)
@@ -337,10 +351,10 @@ def build_dimension_wise_balance_dict(gl_entries):
 	return dimension_balances
 
 
-def process_individual_date(docname: str, date: str):
+def process_individual_date(docname: str, date: str, report_type):
 	current_date_status = frappe.db.get_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname},
+		{"processing_date": date, "parent": docname, "report_type": report_type},
 		"status",
 	)
 	if current_date_status != "Running":
@@ -351,8 +365,8 @@ def process_individual_date(docname: str, date: str):
 
 	dimensions = get_dimensions()
 
-	p_l_accounts = frappe.db.get_all(
-		"Account", filters={"company": company, "report_type": "Profit and Loss"}, pluck="name"
+	accounts = frappe.db.get_all(
+		"Account", filters={"company": company, "report_type": report_type}, pluck="name"
 	)
 
 	# summarize
@@ -370,7 +384,7 @@ def process_individual_date(docname: str, date: str):
 		(gle.company.eq(company))
 		& (gle.is_cancelled.eq(0))
 		& (gle.posting_date.eq(date))
-		& (gle.account.isin(p_l_accounts))
+		& (gle.account.isin(accounts))
 	)
 	query = query.groupby(gle.account)
 	for dim in dimensions:
@@ -380,14 +394,14 @@ def process_individual_date(docname: str, date: str):
 	# save results
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname},
+		{"processing_date": date, "parent": docname, "report_type": report_type},
 		"closing_balance",
 		frappe.json.dumps(res),
 	)
 
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname},
+		{"processing_date": date, "parent": docname, "report_type": report_type},
 		"status",
 		"Completed",
 	)
