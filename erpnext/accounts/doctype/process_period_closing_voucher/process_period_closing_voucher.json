@@ -7,7 +7,7 @@
  "field_order": [
   "parent_pcv",
   "status",
-  "total",
+  "p_l_closing_balance",
   "dates_to_process",
   "amended_from"
  ],
@@ -46,9 +46,9 @@
    "search_index": 1
   },
   {
-   "fieldname": "total",
+   "fieldname": "p_l_closing_balance",
    "fieldtype": "JSON",
-   "label": "Total",
+   "label": "P&L Closing Balance",
    "no_copy": 1
   }
  ],
@@ -56,7 +56,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-15 12:46:03.627166",
+ "modified": "2025-10-17 13:04:26.353250",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",

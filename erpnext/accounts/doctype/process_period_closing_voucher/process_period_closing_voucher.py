@@ -28,9 +28,9 @@ class ProcessPeriodClosingVoucher(Document):
 
 		amended_from: DF.Link | None
 		dates_to_process: DF.Table[ProcessPeriodClosingVoucherDetail]
+		p_l_closing_balance: DF.JSON | None
 		parent_pcv: DF.Link
 		status: DF.Literal["Queued", "Running", "Completed"]
-		total: DF.JSON | None
 	# end: auto-generated types
 
 	def validate(self):
@@ -264,7 +264,9 @@ def summarize_and_post_ledger_entries(docname):
 			json_dict[str_key] = v
 
 		# save
-		frappe.db.set_value("Process Period Closing Voucher", docname, "total", frappe.json.dumps(json_dict))
+		frappe.db.set_value(
+			"Process Period Closing Voucher", docname, "p_l_closing_balance", frappe.json.dumps(json_dict)
+		)
 
 		# build gl map
 		pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
