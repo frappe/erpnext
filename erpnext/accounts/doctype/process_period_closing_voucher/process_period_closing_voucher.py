@@ -277,6 +277,20 @@ def schedule_next_date(docname: str):
 			summarize_and_post_ledger_entries(docname)
 
 
+def make_dict_json_compliant(dimension_wise_balance) -> dict:
+	"""
+	convert tuple -> str
+	JSON doesn't support dictionary with tuple keys
+	"""
+	converted_dict = {}
+	for k, v in dimension_wise_balance.items():
+		str_key = [str(x) for x in k]
+		str_key = ",".join(str_key)
+		converted_dict[str_key] = v
+
+	return converted_dict
+
+
 def summarize_and_post_ledger_entries(docname):
 	# calculate balances for whole PCV period
 	ppcv = frappe.get_doc("Process Period Closing Voucher", docname)
@@ -291,14 +305,8 @@ def summarize_and_post_ledger_entries(docname):
 	# build dimension wise dictionary from all GLE's
 	pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
 
-	# convert tuple key to str to make it json compliant
-	json_dict = {}
-	for k, v in pl_dimension_wise_acc_balance.items():
-		str_key = [str(x) for x in k]
-		str_key = ",".join(str_key)
-		json_dict[str_key] = v
-
 	# save
+	json_dict = make_dict_json_compliant(pl_dimension_wise_acc_balance)
 	frappe.db.set_value(
 		"Process Period Closing Voucher", docname, "p_l_closing_balance", frappe.json.dumps(json_dict)
 	)
@@ -332,14 +340,8 @@ def summarize_and_post_ledger_entries(docname):
 	# build dimension wise dictionary from all GLE's
 	bs_dimension_wise_acc_balance = build_dimension_wise_balance_dict(gl_entries)
 
-	# convert tuple key to str to make it json compliant
-	json_dict = {}
-	for k, v in bs_dimension_wise_acc_balance.items():
-		str_key = [str(x) for x in k]
-		str_key = ",".join(str_key)
-		json_dict[str_key] = v
-
 	# save
+	json_dict = make_dict_json_compliant(bs_dimension_wise_acc_balance)
 	frappe.db.set_value(
 		"Process Period Closing Voucher", docname, "bs_closing_balance", frappe.json.dumps(json_dict)
 	)
