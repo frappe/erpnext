@@ -1,6 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import copy
 from datetime import timedelta
 
 import frappe
@@ -9,6 +10,10 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Count, Max, Min, Sum
 from frappe.utils import add_days, flt, get_datetime
 from frappe.utils.scheduler import is_scheduler_inactive
+
+from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
+	make_closing_entries,
+)
 
 BACKGROUND = True
 
@@ -305,6 +310,27 @@ def summarize_and_post_ledger_entries(docname):
 			"Process Period Closing Voucher", docname, "p_l_closing_balance", frappe.json.dumps(json_dict)
 		)
 
+		# build gl map
+		pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
+		pl_accounts_reverse_gle = []
+		closing_account_gle = []
+
+		for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
+			for acc, balances in account_balances.items():
+				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
+				if balance_in_company_currency:
+					pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+
+			closing_account_gle.append(
+				get_gle_for_closing_account(pcv, account_balances["balances"], dimensions)
+			)
+
+		gl_entries = pl_accounts_reverse_gle + closing_account_gle
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		if gl_entries:
+			make_gl_entries(gl_entries, merge_entries=False)
+
 		# Balance Sheet Accounts
 		gl_entries = []
 		for x in ppcv.normal_balances + ppcv.z_opening_balances:
@@ -327,28 +353,56 @@ def summarize_and_post_ledger_entries(docname):
 			"Process Period Closing Voucher", docname, "bs_closing_balance", frappe.json.dumps(json_dict)
 		)
 
-		# build gl map
-		pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
-		pl_accounts_reverse_gle = []
-		closing_account_gle = []
+		# make closing entries
+		pl_closing_entries = copy.deepcopy(pl_accounts_reverse_gle)
+		for d in pl_accounts_reverse_gle:
+			# reverse debit and credit
+			gle_copy = copy.deepcopy(d)
+			gle_copy.debit = d.credit
+			gle_copy.credit = d.debit
+			gle_copy.debit_in_account_currency = d.credit_in_account_currency
+			gle_copy.credit_in_account_currency = d.debit_in_account_currency
+			gle_copy.is_period_closing_voucher_entry = 0
+			gle_copy.period_closing_voucher = pcv.name
+			pl_closing_entries.append(gle_copy)
 
-		for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
+		bs_closing_entries = []
+		for dimensions, account_balances in bs_dimension_wise_acc_balance.items():
 			for acc, balances in account_balances.items():
 				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
-				if balance_in_company_currency:
-					pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+				if acc != "balances" and balance_in_company_currency:
+					bs_closing_entries.append(get_closing_entry(pcv, acc, balances, dimensions))
 
-			closing_account_gle.append(
-				get_gle_for_closing_account(pcv, account_balances["balances"], dimensions)
-			)
+		closing_entries_for_closing_account = copy.deepcopy(closing_account_gle)
+		for d in closing_entries_for_closing_account:
+			d.period_closing_voucher = pcv.name
 
-		gl_entries = pl_accounts_reverse_gle + closing_account_gle
-		from erpnext.accounts.general_ledger import make_gl_entries
+		closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
+		make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
-		if gl_entries:
-			make_gl_entries(gl_entries, merge_entries=False)
-
+		# TODO: Update processing status on PCV and Process document
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
+
+
+def get_closing_entry(pcv, account, balances, dimensions):
+	closing_entry = frappe._dict(
+		{
+			"company": pcv.company,
+			"closing_date": pcv.period_end_date,
+			"period_closing_voucher": pcv.name,
+			"account": account,
+			"account_currency": balances.account_currency,
+			"debit_in_account_currency": flt(balances.debit_in_account_currency),
+			"debit": flt(balances.debit),
+			"credit_in_account_currency": flt(balances.credit_in_account_currency),
+			"credit": flt(balances.credit),
+			"is_period_closing_voucher_entry": 0,
+		}
+	)
+	# update dimensions
+	for i, dimension in enumerate(dimensions):
+		closing_entry[dimension] = dimensions[i]
+	return closing_entry
 
 
 def get_dimensions():
