@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "processing_date",
+  "report_type",
   "status",
   "closing_balance"
  ],
@@ -29,13 +30,21 @@
    "fieldtype": "JSON",
    "in_list_view": 1,
    "label": "Closing Balance"
+  },
+  {
+   "default": "Profit and Loss",
+   "fieldname": "report_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Report Type",
+   "options": "Profit and Loss\nBalance Sheet"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-09 16:46:37.778199",
+ "modified": "2025-10-17 11:28:34.775743",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher Detail",

@@ -19,6 +19,7 @@ class ProcessPeriodClosingVoucherDetail(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		processing_date: DF.Date | None
+		report_type: DF.Literal["Profit and Loss", "Balance Sheet"]
 		status: DF.Literal["Queued", "Running", "Paused", "Completed"]
 	# end: auto-generated types
 
