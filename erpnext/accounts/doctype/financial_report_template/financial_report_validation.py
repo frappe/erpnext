@@ -86,7 +86,6 @@ class TemplateValidator:
 	def __init__(self, template):
 		self.template = template
 		self.validators = [
-			StandardTemplateValidator(),
 			TemplateStructureValidator(),
 			DependencyValidator(template),
 		]
