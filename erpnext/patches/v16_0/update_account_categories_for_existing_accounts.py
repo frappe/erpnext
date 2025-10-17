@@ -6,7 +6,9 @@ from frappe import _
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_chart_metadata_fields
 from erpnext.accounts.doctype.account.chart_of_accounts.verified import standard_chart_of_accounts
-from erpnext.accounts.doctype.account_category.account_category import create_default_account_categories
+from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+	sync_financial_report_templates,
+)
 
 
 def execute():
@@ -14,7 +16,7 @@ def execute():
 	Patch to create default account categories and update existing accounts
 	with appropriate account categories based on standard chart of accounts mapping
 	"""
-	create_default_account_categories()
+	sync_financial_report_templates()
 	update_account_categories()
 
 

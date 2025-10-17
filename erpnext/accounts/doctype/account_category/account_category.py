@@ -1,5 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+import json
+import os
 
 import frappe
 from frappe.model.document import Document
@@ -18,17 +20,17 @@ class AccountCategory(Document):
 		description: DF.SmallText | None
 	# end: auto-generated types
 
-	pass
 
+def import_account_categories(template_path: str):
+	categories_file = os.path.join(template_path, "account_categories.json")
 
-def create_default_account_categories():
-	default_categories = frappe.get_file_json(
-		frappe.get_app_path(
-			"erpnext", "accounts", "doctype", "account_category", "default_account_categories.json"
-		)
-	)
+	if not os.path.exists(categories_file):
+		return
 
-	create_account_categories(default_categories)
+	with open(categories_file) as f:
+		categories = json.load(f, object_hook=frappe._dict)
+
+	create_account_categories(categories)
 
 
 def create_account_categories(categories: list[dict]):

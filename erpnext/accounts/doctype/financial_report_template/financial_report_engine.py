@@ -829,6 +829,55 @@ class FilterExpressionParser:
 			return reduce(lambda a, b: a | b, built_conditions)
 
 
+class FormulaFieldExtractor:
+	"""Extract field values from filter formulas without SQL execution"""
+
+	def __init__(self, field_name: str, exclude_operators: list[str] | None = None):
+		"""
+		Initialize field extractor.
+
+		Args:
+		    field_name: The field to extract values for (e.g., "account_category")
+		    exclude_operators: List of operators to exclude (e.g., ["like"])
+		"""
+		self.field_name = field_name
+		self.exclude_operators = [op.lower() for op in (exclude_operators or [])]
+
+	def extract_from_rows(self, rows: list) -> set:
+		values = set()
+
+		for row in rows:
+			if not hasattr(row, "calculation_formula") or not row.calculation_formula:
+				continue
+
+			try:
+				parsed = ast.literal_eval(row.calculation_formula)
+				self._extract_recursive(parsed, values)
+			except (ValueError, SyntaxError):
+				continue  # Skip rows with invalid formulas
+
+		return values
+
+	def _extract_recursive(self, parsed, values: set):
+		if isinstance(parsed, list) and len(parsed) == 3:
+			# Simple condition: ["field", "operator", "value"]
+			field, operator, value = parsed
+
+			if field == self.field_name and operator.lower() not in self.exclude_operators:
+				if isinstance(value, str):
+					values.add(value)
+				elif isinstance(value, list):
+					# Handle "in" operator with list of values
+					values.update(v for v in value if isinstance(v, str))
+
+		elif isinstance(parsed, dict):
+			# Logical condition: {"and/or": [...]}
+			for sub_conditions in parsed.values():
+				if isinstance(sub_conditions, list):
+					for sub_condition in sub_conditions:
+						self._extract_recursive(sub_condition, values)
+
+
 @frappe.whitelist()
 def get_filtered_accounts(company: str, account_rows: str | list):
 	frappe.has_permission("Financial Report Template", ptype="read", throw=True)

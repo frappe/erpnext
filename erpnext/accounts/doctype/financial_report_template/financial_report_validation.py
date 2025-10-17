@@ -112,29 +112,6 @@ class Validator(ABC):
 		pass
 
 
-class StandardTemplateValidator(Validator):
-	PROTECTED_FIELDS: ClassVar[list[str]] = ["template_name", "report_type", "module"]
-
-	def validate(self, template) -> ValidationResult:
-		result = ValidationResult()
-
-		if not template.is_standard or not hasattr(template, "_doc_before_save"):
-			return result
-
-		if not template._doc_before_save or not template._doc_before_save.is_standard:
-			return result
-
-		for field_name in self.PROTECTED_FIELDS:
-			if template.get(field_name) != template._doc_before_save.get(field_name):
-				result.add_error(
-					ValidationIssue(
-						message=f"Cannot modify {field_name.replace('_', ' ').title()} in standard template",
-					)
-				)
-
-		return result
-
-
 class TemplateStructureValidator(Validator):
 	def validate(self, template) -> ValidationResult:
 		result = ValidationResult()

@@ -15,7 +15,9 @@ from frappe.utils import cint, formatdate, get_link_to_form, get_timestamp, toda
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
-from erpnext.accounts.doctype.account_category.account_category import create_default_account_categories
+from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+	sync_financial_report_templates,
+)
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 
@@ -252,7 +254,7 @@ class Company(NestedSet):
 		):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
-				create_default_account_categories()
+				sync_financial_report_templates()
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
