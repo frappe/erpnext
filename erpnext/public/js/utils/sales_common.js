@@ -119,6 +119,7 @@ erpnext.sales_common = {
 			company() {
 				super.company();
 				this.set_default_company_address();
+				this.set_default_company_contact_person();
 			}
 
 			set_default_company_address() {
@@ -140,6 +141,22 @@ erpnext.sales_common = {
 							}
 						},
 					});
+				}
+			}
+
+			set_default_company_contact_person() {
+				if (!frappe.meta.has_field(this.frm.doc.doctype, "company_contact_person")) {
+					return;
+				}
+
+				if (this.frm.doc.company) {
+					frappe.db
+						.get_value("Company", this.frm.doc.company, "default_sales_contact")
+						.then((r) => {
+							if (r.message?.default_sales_contact) {
+								this.frm.set_value("company_contact_person", r.message.default_sales_contact);
+							}
+						});
 				}
 			}
 

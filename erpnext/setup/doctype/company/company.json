@@ -103,6 +103,7 @@
   "total_monthly_sales",
   "column_break_goals",
   "default_selling_terms",
+  "default_sales_contact",
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
@@ -877,6 +878,12 @@
    "fieldtype": "Link",
    "label": "Service Expense Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "default_sales_contact",
+   "fieldtype": "Link",
+   "label": "Default Sales Contact",
+   "options": "Contact"
   }
  ],
  "icon": "fa fa-building",
@@ -884,7 +891,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-10-10 15:12:37.941251",
+ "modified": "2025-10-15 15:22:48.606569",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
