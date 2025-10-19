@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-12 09:34+0000\n"
-"PO-Revision-Date: 2025-10-13 11:29\n"
+"PO-Revision-Date: 2025-10-19 13:05\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -355,7 +355,7 @@ msgstr "(G) مجموع تغییر در ارزش موجودی"
 #. Description of the 'Daily Yield' (Percent) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "(Good Units Produced / Total Units Produced) × 100"
-msgstr ""
+msgstr "(واحدهای تولید شده‌ی بی‌نقص / کل واحدهای تولید شده) × ۱۰۰"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:263
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:166
@@ -391,7 +391,7 @@ msgstr "(K) ارزش‌گذاری = ارزش (D) ÷ مقدار (A)"
 #. DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "(Purchase Order + Material Request + Actual Expense)"
-msgstr ""
+msgstr "(سفارش خرید + درخواست مواد + هزینه واقعی)"
 
 #. Description of the 'From No' (Int) field in DocType 'Share Transfer'
 #. Description of the 'To No' (Int) field in DocType 'Share Transfer'
@@ -4615,7 +4615,7 @@ msgstr "مجاز به تراکنش با"
 
 #: erpnext/accounts/doctype/party_link/party_link.py:27
 msgid "Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only."
-msgstr "نقش‌های اصلی مجاز عبارتند از «مشتری» و «تامین‌کننده». لطفا فقط یکی از این نقش ها را انتخاب کنید."
+msgstr "نقش‌های اصلی مجاز عبارتند از «مشتری» و «تامین‌کننده». لطفا فقط یکی از این نقش‌ها را انتخاب کنید."
 
 #. Description of the 'Enable Stock Reservation' (Check) field in DocType
 #. 'Stock Settings'
@@ -6464,7 +6464,7 @@ msgstr "پیوست"
 #: erpnext/templates/pages/order.html:136
 #: erpnext/templates/pages/projects.html:81
 msgid "Attachments"
-msgstr "پیوست ها"
+msgstr "پیوست‌ها"
 
 #. Label of the attendance_and_leave_details (Tab Break) field in DocType
 #. 'Employee'
@@ -9444,7 +9444,7 @@ msgstr "نام‌گذاری کمپین توسط"
 #. Label of the campaign_schedules (Table) field in DocType 'Campaign'
 #: erpnext/crm/doctype/campaign/campaign.json
 msgid "Campaign Schedules"
-msgstr "برنامه های کمپین"
+msgstr "برنامه‌های کمپین"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -10352,7 +10352,7 @@ msgstr "الگوی نمودار حساب"
 #. Accounts Importer'
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgid "Chart Preview"
-msgstr "پیش نمایش نمودار"
+msgstr "پیش‌نمایش نمودار"
 
 #. Label of the chart_tree (HTML) field in DocType 'Chart of Accounts Importer'
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
@@ -22731,7 +22731,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.js:30
 msgid "Generating Preview"
-msgstr "ایجاد پیش نمایش"
+msgstr "ایجاد پیش‌نمایش"
 
 #. Label of the get_actual_demand (Button) field in DocType 'Master Production
 #. Schedule'
@@ -24697,7 +24697,7 @@ msgstr "لاگ درون‌بُرد"
 #. Import'
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import Log Preview"
-msgstr "پیش نمایش لاگ درون‌بُرد"
+msgstr "پیش‌نمایش لاگ درون‌بُرد"
 
 #. Label of the import_mt940_fromat (Check) field in DocType 'Bank Statement
 #. Import'
@@ -24708,7 +24708,7 @@ msgstr ""
 #. Label of the import_preview (HTML) field in DocType 'Bank Statement Import'
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import Preview"
-msgstr "پیش نمایش درون‌بُرد"
+msgstr "پیش‌نمایش درون‌بُرد"
 
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.js:51
 msgid "Import Progress"
@@ -25843,7 +25843,7 @@ msgstr "معرفی"
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:324
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:85
 msgid "Invalid"
-msgstr "بی اعتبار"
+msgstr "نامعتبر"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:377
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:385
@@ -29917,7 +29917,7 @@ msgstr "برنامه وفاداری"
 #. Name of a DocType
 #: erpnext/accounts/doctype/loyalty_program_collection/loyalty_program_collection.json
 msgid "Loyalty Program Collection"
-msgstr "مجموعه برنامه های وفاداری"
+msgstr "مجموعه برنامه‌های وفاداری"
 
 #. Label of the loyalty_program_help (HTML) field in DocType 'Loyalty Program'
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.json
@@ -31966,7 +31966,7 @@ msgstr "مدل"
 #. Entry'
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgid "Modes of Payment"
-msgstr "روش های پرداخت"
+msgstr "روش‌های پرداخت"
 
 #: erpnext/templates/pages/projects.html:69
 msgid "Modified By"
@@ -36904,7 +36904,7 @@ msgstr "روش پرداخت"
 #. Label of the payments (Table) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Payment Methods"
-msgstr "روش های پرداخت"
+msgstr "روش‌های پرداخت"
 
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.py:24
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.py:40
@@ -37231,7 +37231,7 @@ msgstr "مبلغ پرداختی نمی‌تواند کمتر یا مساوی 0 �
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:159
 msgid "Payment methods are mandatory. Please add at least one payment method."
-msgstr "روش های پرداخت اجباری است. لطفاً حداقل یک روش پرداخت اضافه کنید."
+msgstr "روش‌های پرداخت اجباری است. لطفاً حداقل یک روش پرداخت اضافه کنید."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:466
 #: erpnext/selling/page/point_of_sale/pos_payment.js:366
@@ -38546,7 +38546,7 @@ msgstr "لطفاً مطمئن شوید که کارمندان بالا به کا�
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:374
 msgid "Please make sure the file you are using has 'Parent Account' column present in the header."
-msgstr "لطفاً مطمئن شوید که فایلی که استفاده می‌کنید دارای ستون «حساب والد» در سرصفحه باشد."
+msgstr "لطفاً مطمئن شوید که فایلی که استفاده می‌کنید دارای ستون «حساب والد» در سربرگ باشد."
 
 #: erpnext/setup/doctype/company/company.js:200
 msgid "Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."
@@ -39673,19 +39673,19 @@ msgstr "تعمیر و نگهداری پیشگیرانه"
 #: erpnext/public/js/utils/ledger_preview.js:28
 #: erpnext/public/js/utils/ledger_preview.js:57
 msgid "Preview"
-msgstr "پیش نمایش"
+msgstr "پیش‌نمایش"
 
 #. Label of the preview (Button) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:253
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
 msgid "Preview Email"
-msgstr "پیش نمایش ایمیل"
+msgstr "پیش‌نمایش ایمیل"
 
 #. Label of the download_materials_request_plan_section_section (Section Break)
 #. field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Preview Required Materials"
-msgstr "پیش نمایش مواد مورد نیاز"
+msgstr "پیش‌نمایش مواد مورد نیاز"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:175
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:139
@@ -45819,7 +45819,7 @@ msgstr "کلید نتیجه"
 #. Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Result Preview Field"
-msgstr "فیلد پیش نمایش نتایج"
+msgstr "فیلد پیش‌نمایش نتایج"
 
 #. Label of the result_route_field (Data) field in DocType 'Support Search
 #. Source'
@@ -50941,7 +50941,7 @@ msgstr "نمایش موجودی بر اساس ابعاد"
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:29
 msgid "Show Disabled Items"
-msgstr ""
+msgstr "نمایش آیتم‌های غیرفعال"
 
 #: erpnext/stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.js:16
 msgid "Show Disabled Warehouses"
@@ -51047,7 +51047,7 @@ msgstr "نمایش برنامه پرداخت در چاپ"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.js:25
 msgid "Show Preview"
-msgstr "نمایش پیش نمایش"
+msgstr "نمایش پیش‌نمایش"
 
 #. Label of the show_remarks (Check) field in DocType 'Process Statement Of
 #. Accounts'
@@ -60458,7 +60458,7 @@ msgstr "نوع مشاهده"
 #. Label of the view_attachments (Check) field in DocType 'Project User'
 #: erpnext/projects/doctype/project_user/project_user.json
 msgid "View attachments"
-msgstr "مشاهده پیوست ها"
+msgstr "مشاهده پیوست‌ها"
 
 #: erpnext/public/js/call_popup/call_popup.js:186
 msgid "View call log"
