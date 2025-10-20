@@ -15,8 +15,6 @@ from erpnext.accounts.doctype.account_closing_balance.account_closing_balance im
 	make_closing_entries,
 )
 
-BACKGROUND = True
-
 
 class ProcessPeriodClosingVoucher(Document):
 	# begin: auto-generated types
@@ -91,7 +89,6 @@ class ProcessPeriodClosingVoucher(Document):
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
-		# TODO: move this inside if block
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
 		if normal_balances := frappe.db.get_all(
 			"Process Period Closing Voucher Detail",
@@ -113,20 +110,16 @@ def start_pcv_processing(docname: str):
 						"status",
 						"Running",
 					)
-
-					if BACKGROUND:
-						frappe.enqueue(
-							method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
-							queue="long",
-							is_async=True,
-							enqueue_after_commit=True,
-							docname=docname,
-							date=x.processing_date,
-							report_type=x.report_type,
-							parentfield=x.parentfield,
-						)
-					else:
-						process_individual_date(docname, x.processing_date, x.report_type, x.parentfield)
+					frappe.enqueue(
+						method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
+						queue="long",
+						is_async=True,
+						enqueue_after_commit=True,
+						docname=docname,
+						date=x.processing_date,
+						report_type=x.report_type,
+						parentfield=x.parentfield,
+					)
 		else:
 			frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
@@ -260,24 +253,16 @@ def schedule_next_date(docname: str):
 				"status",
 				"Running",
 			)
-			if BACKGROUND:
-				frappe.enqueue(
-					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
-					queue="long",
-					is_async=True,
-					enqueue_after_commit=True,
-					docname=docname,
-					date=to_process[0].processing_date,
-					report_type=to_process[0].report_type,
-					parentfield=to_process[0].parentfield,
-				)
-			else:
-				process_individual_date(
-					docname,
-					to_process[0].processing_date,
-					to_process[0].report_type,
-					to_process[0].parentfield,
-				)
+			frappe.enqueue(
+				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
+				queue="long",
+				is_async=True,
+				enqueue_after_commit=True,
+				docname=docname,
+				date=to_process[0].processing_date,
+				report_type=to_process[0].report_type,
+				parentfield=to_process[0].parentfield,
+			)
 	else:
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		total_no_of_dates = (
