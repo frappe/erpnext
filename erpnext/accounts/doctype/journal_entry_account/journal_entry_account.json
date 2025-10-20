@@ -271,7 +271,8 @@
    "label": "Advance Voucher Type",
    "no_copy": 1,
    "options": "DocType",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "advance_voucher_no",
@@ -279,13 +280,14 @@
    "label": "Advance Voucher No",
    "no_copy": 1,
    "options": "advance_voucher_type",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-29 13:01:48.916517",
+ "modified": "2025-10-20 17:46:47.344089",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
