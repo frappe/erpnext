@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "format:Process-PCV-{###}",
  "creation": "2025-09-25 15:44:03.534699",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -70,13 +70,15 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-17 15:16:26.324369",
+ "modified": "2025-10-20 08:06:26.786490",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -86,6 +88,21 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

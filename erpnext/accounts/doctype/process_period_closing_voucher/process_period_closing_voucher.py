@@ -407,7 +407,7 @@ def summarize_and_post_ledger_entries(docname):
 
 	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
-	# TODO: Update processing status on PCV and Process document
+	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
 	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
 
