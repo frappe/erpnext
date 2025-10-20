@@ -187,11 +187,12 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 
 	total_base_amount = 0
 	total_buying_amount = 0
-
+	total_qty = 0
 	for src in gross_profit_data.si_list:
 		if src.indent == 1:
 			total_base_amount += src.base_amount or 0.0
 			total_buying_amount += src.buying_amount or 0.0
+			total_qty += src.qty or 0.0
 
 		row = frappe._dict()
 		row.indent = src.indent
@@ -208,7 +209,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 		frappe._dict(
 			{
 				"sales_invoice": "Total",
-				"qty": None,
+				"qty": total_qty,
 				"avg._selling_rate": None,
 				"valuation_rate": None,
 				"selling_amount": total_base_amount,
@@ -228,12 +229,14 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_columns, data):
 	total_base_amount = 0
 	total_buying_amount = 0
+	total_qty = 0
 
 	group_columns = group_wise_columns.get(scrub(filters.group_by))
 
 	for src in gross_profit_data.grouped_data:
 		total_base_amount += src.base_amount or 0.00
 		total_buying_amount += src.buying_amount or 0.00
+		total_qty += src.qty or 0.0
 
 		row = [src.get(col) for col in group_columns] + [filters.currency]
 
@@ -245,6 +248,7 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 
 	total_row = {
 		group_columns[0]: "Total",
+		"qty": total_qty,
 		"base_amount": total_base_amount,
 		"buying_amount": total_buying_amount,
 		"gross_profit": total_gross_profit,
@@ -510,6 +514,7 @@ class GrossProfitGenerator:
 		if grouped_by_invoice:
 			buying_amount = 0
 			base_amount = 0
+			invoice_qty = 0
 
 		for row in reversed(self.si_list):
 			if self.filters.get("group_by") == "Monthly":
@@ -553,8 +558,10 @@ class GrossProfitGenerator:
 			if grouped_by_invoice and row.indent == 0.0:
 				row.buying_amount = buying_amount
 				row.base_amount = base_amount
+				row.qty = invoice_qty
 				buying_amount = 0
 				base_amount = 0
+				invoice_qty = 0
 
 			# get buying rate
 			if flt(row.qty):
@@ -570,6 +577,7 @@ class GrossProfitGenerator:
 			if grouped_by_invoice and row.indent == 1.0:
 				buying_amount += row.buying_amount
 				base_amount += row.base_amount
+				invoice_qty += row.qty or 0
 
 			# calculate gross profit
 			row.gross_profit = flt(row.base_amount - row.buying_amount, self.currency_precision)
