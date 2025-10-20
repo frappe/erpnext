@@ -36,7 +36,7 @@ class ProcessPeriodClosingVoucher(Document):
 		normal_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
 		p_l_closing_balance: DF.JSON | None
 		parent_pcv: DF.Link
-		status: DF.Literal["Queued", "Running", "Completed"]
+		status: DF.Literal["Queued", "Running", "Completed", "Cancelled"]
 		z_opening_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
 	# end: auto-generated types
 
@@ -83,6 +83,9 @@ class ProcessPeriodClosingVoucher(Document):
 
 	def on_submit(self):
 		start_pcv_processing(self.name)
+
+	def on_cancel(self):
+		cancel_pcv_processing(self.name)
 
 
 @frappe.whitelist()
@@ -140,6 +143,20 @@ def pause_pcv_processing(docname: str):
 	):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		qb.update(ppcvd).set(ppcvd.status, "Paused").where(ppcvd.name.isin(queued_dates)).run()
+
+
+@frappe.whitelist()
+def cancel_pcv_processing(docname: str):
+	ppcv = qb.DocType("Process Period Closing Voucher")
+	qb.update(ppcv).set(ppcv.status, "Cancelled").where(ppcv.name.eq(docname)).run()
+
+	if queued_dates := frappe.db.get_all(
+		"Process Period Closing Voucher Detail",
+		filters={"parent": docname, "status": "Queued"},
+		pluck="name",
+	):
+		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+		qb.update(ppcvd).set(ppcvd.status, "Cancelled").where(ppcvd.name.isin(queued_dates)).run()
 
 
 @frappe.whitelist()
