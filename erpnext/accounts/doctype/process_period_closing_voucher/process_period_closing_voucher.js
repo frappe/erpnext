@@ -56,5 +56,16 @@ frappe.ui.form.on("Process Period Closing Voucher", {
 				});
 			});
 		}
+		// progress bar
+		let progress = 0;
+
+		let normal_finished = frm.doc.normal_balances.filter((x) => x.status == "Completed").length;
+		let opening_finished = frm.doc.z_opening_balances.filter((x) => x.status == "Completed").length;
+
+		progress =
+			((normal_finished + opening_finished) /
+				(frm.doc.normal_balances.length + frm.doc.z_opening_balances.length)) *
+			100;
+		frm.dashboard.add_progress("Books closure progress", progress, "");
 	},
 });
