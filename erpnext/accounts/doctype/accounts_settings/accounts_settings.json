@@ -654,7 +654,7 @@
    "label": "Use Legacy Budget Controller"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "use_legacy_controller_for_pcv",
    "fieldtype": "Check",
    "label": "Use Legacy Controller For Period Closing Voucher"
@@ -666,7 +666,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-01 15:17:47.168354",
+ "modified": "2025-10-20 14:06:08.870427",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
