@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-19 09:35+0000\n"
-"PO-Revision-Date: 2025-10-20 13:11\n"
+"PO-Revision-Date: 2025-10-21 13:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -186,7 +186,7 @@ msgstr "% Prosess Tap"
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Produced"
-msgstr ""
+msgstr "% Produsert"
 
 #. Label of the progress (Percent) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -197,13 +197,13 @@ msgstr "% Fremgang"
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Raw Material Received"
-msgstr ""
+msgstr "% Råmateriale Mottatt"
 
 #. Label of the per_raw_material_returned (Percent) field in DocType
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Raw Material Returned"
-msgstr ""
+msgstr "% Råmateriale Returnert"
 
 #. Label of the per_received (Percent) field in DocType 'Purchase Order'
 #. Label of the per_received (Percent) field in DocType 'Material Request'
@@ -256,7 +256,7 @@ msgstr "\"Tillat flere salgsordrer mot en kundes innkjøpsordre"
 
 #: erpnext/controllers/trends.py:56
 msgid "'Based On' and 'Group By' can not be same"
-msgstr ""
+msgstr "«Basert på» og «Gruppér etter» kan ikke være det samme"
 
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:18
 msgid "'Days Since Last Order' must be greater than or equal to zero"
@@ -264,7 +264,7 @@ msgstr "\"Dager siden siste bestilling\" må være større enn eller lik null"
 
 #: erpnext/controllers/accounts_controller.py:2298
 msgid "'Default {0} Account' in Company {1}"
-msgstr ""
+msgstr "'Standard {0} konto' i Selskap {1}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1283
 msgid "'Entries' cannot be empty"
@@ -274,11 +274,11 @@ msgstr "\"Oppføringer\" kan ikke være tomme"
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:127
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:313
 msgid "'From Date' is required"
-msgstr ""
+msgstr "\"Fra dato\" er påkrevd"
 
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:18
 msgid "'From Date' must be after 'To Date'"
-msgstr ""
+msgstr "'Fra Dato' må være etter 'Til Date'"
 
 #: erpnext/stock/doctype/item/item.py:410
 msgid "'Has Serial No' can not be 'Yes' for non-stock item"
@@ -295,7 +295,7 @@ msgstr "\"Inspeksjon påkrevd før kjøp\" er deaktivert for artikkelen {0}, det
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:598
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:631
 msgid "'Opening'"
-msgstr ""
+msgstr "'Åpning'"
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:27
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:129
@@ -434,7 +434,7 @@ msgstr "0–30 dager"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:114
 msgid "0-30"
-msgstr ""
+msgstr "0-30"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "0-30 Days"
@@ -481,7 +481,7 @@ msgstr "11-50"
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:95
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:101
 msgid "1{0}"
-msgstr ""
+msgstr "1{0}"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Asset Maintenance
 #. Task'
@@ -516,7 +516,7 @@ msgstr "30 min"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:115
 msgid "30-60"
-msgstr ""
+msgstr "30-60"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
@@ -552,7 +552,7 @@ msgstr "60–90 dager"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:116
 msgid "60-90"
-msgstr ""
+msgstr "60-90"
 
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "60-90 Days"
@@ -566,7 +566,7 @@ msgstr "90–120 dager"
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "90 Above"
-msgstr ""
+msgstr "90 Over"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:61
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
@@ -1012,13 +1012,13 @@ msgstr "<table class=\"table table-bordered table-condensed\">\n"
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:213
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:116
 msgid "A - B"
-msgstr ""
+msgstr "A–B"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:189
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:228
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:131
 msgid "A - C"
-msgstr ""
+msgstr "A–C"
 
 #: erpnext/selling/doctype/customer/customer.py:314
 msgid "A Customer Group exists with same name please change the Customer name or rename the Customer Group"
@@ -1121,7 +1121,7 @@ msgstr "AB-"
 #. Invoice'
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgid "ACC-PINV-.YYYY.-"
-msgstr ""
+msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:544
 msgid "AMC Expiry (Serial)"
@@ -1171,12 +1171,12 @@ msgstr ""
 #. Label of the abbr (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Abbr"
-msgstr ""
+msgstr "Forkortelse"
 
 #. Label of the abbr (Data) field in DocType 'Item Attribute Value'
 #: erpnext/stock/doctype/item_attribute_value/item_attribute_value.json
 msgid "Abbreviation"
-msgstr ""
+msgstr "Forkortelse"
 
 #: erpnext/setup/doctype/company/company.py:172
 msgid "Abbreviation already used for another company"
@@ -1209,7 +1209,7 @@ msgstr ""
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1275
 msgid "Above"
-msgstr ""
+msgstr "Over"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:116
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:364
@@ -1245,7 +1245,7 @@ msgstr ""
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgid "Accepted"
-msgstr ""
+msgstr "Godkjent"
 
 #. Label of the qty (Float) field in DocType 'Purchase Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -1375,7 +1375,7 @@ msgstr "Konto"
 #. Name of a report
 #: erpnext/accounts/report/account_balance/account_balance.json
 msgid "Account Balance"
-msgstr ""
+msgstr "Konto Saldo"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
@@ -1413,19 +1413,19 @@ msgstr ""
 #: erpnext/accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 #: erpnext/stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 msgid "Account Currency"
-msgstr ""
+msgstr "Konto Valuta"
 
 #. Label of the paid_from_account_currency (Link) field in DocType 'Payment
 #. Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Currency (From)"
-msgstr ""
+msgstr "Konto Valuta (Fra)"
 
 #. Label of the paid_to_account_currency (Link) field in DocType 'Payment
 #. Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Currency (To)"
-msgstr ""
+msgstr "Konto Valuta (Til)"
 
 #. Label of the account_details_section (Section Break) field in DocType 'Bank
 #. Account'
@@ -1437,7 +1437,7 @@ msgstr ""
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Account Details"
-msgstr ""
+msgstr "Konto Detaljer"
 
 #. Label of the account_head (Link) field in DocType 'Advance Tax'
 #. Label of the account_head (Link) field in DocType 'Advance Taxes and
@@ -1452,7 +1452,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Account Head"
-msgstr ""
+msgstr "Konto"
 
 #. Label of the account_manager (Link) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -1462,7 +1462,7 @@ msgstr "Kundeansvarlig"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1033
 #: erpnext/controllers/accounts_controller.py:2302
 msgid "Account Missing"
-msgstr ""
+msgstr "Konto Mangler"
 
 #. Label of the account_name (Data) field in DocType 'Account'
 #. Label of the account_name (Data) field in DocType 'Bank Account'
@@ -1476,11 +1476,11 @@ msgstr ""
 #: erpnext/accounts/report/financial_statements.py:681
 #: erpnext/accounts/report/trial_balance/trial_balance.py:489
 msgid "Account Name"
-msgstr ""
+msgstr "Konto Navn"
 
 #: erpnext/accounts/doctype/account/account.py:338
 msgid "Account Not Found"
-msgstr ""
+msgstr "Konto Ikke Funnet"
 
 #. Label of the account_number (Data) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -1489,7 +1489,7 @@ msgstr ""
 #: erpnext/accounts/report/financial_statements.py:688
 #: erpnext/accounts/report/trial_balance/trial_balance.py:496
 msgid "Account Number"
-msgstr ""
+msgstr "Konto Nummer"
 
 #: erpnext/accounts/doctype/account/account.py:324
 msgid "Account Number {0} already used in account {1}"

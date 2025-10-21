@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-19 09:35+0000\n"
-"PO-Revision-Date: 2025-10-20 13:10\n"
+"PO-Revision-Date: 2025-10-21 13:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -4142,7 +4142,7 @@ msgstr ""
 #. in DocType 'CRM Settings'
 #: erpnext/crm/doctype/crm_settings/crm_settings.json
 msgid "All the Comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the CRM documents."
-msgstr "تمام دیدگاه‌ها و ایمیل ها از یک سند به سند جدید ایجاد شده دیگر (سرنخ -> فرصت -> پیش فاکتور) در سراسر اسناد CRM کپی می‌شوند."
+msgstr "تمام دیدگاه‌ها و ایمیل ها از یک سند به سند جدید ایجاد شده دیگر (سرنخ -> فرصت -> پیش‌فاکتور) در سراسر اسناد CRM کپی می‌شوند."
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:200
 msgid "All the items have been already returned."
@@ -9838,7 +9838,7 @@ msgstr "نمی‌توان BOM را غیرفعال یا لغو کرد زیرا ب
 
 #: erpnext/crm/doctype/opportunity/opportunity.py:282
 msgid "Cannot declare as lost, because Quotation has been made."
-msgstr "نمی‌توان به عنوان از دست رفته علام کرد، زیرا پیش فاکتور ساخته شده است."
+msgstr "نمی‌توان به عنوان از دست رفته علام کرد، زیرا پیش‌فاکتور ساخته شده است."
 
 #: erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js:16
 #: erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js:26
@@ -13692,7 +13692,7 @@ msgstr "ایجاد سفارش‌های خرید"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
-msgstr "پیش فاکتور ایجاد کنید"
+msgstr "پیش‌فاکتور ایجاد کنید"
 
 #. Label of the create_receiver_list (Button) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -13734,7 +13734,7 @@ msgstr "ایجاد ثبت موجودی"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:193
 msgid "Create Supplier Quotation"
-msgstr "ایجاد پیش فاکتور تامین کننده"
+msgstr "ایجاد پیش‌فاکتور تامین کننده"
 
 #: erpnext/setup/doctype/company/company.js:141
 msgid "Create Tax Template"
@@ -13783,7 +13783,7 @@ msgstr "یک تراکنش موجودی ورودی برای آیتم ایجاد �
 
 #: erpnext/utilities/activation.py:86
 msgid "Create customer quotes"
-msgstr "ایجاد پیش فاکتور های مشتری"
+msgstr "ایجاد پیش‌فاکتورهای مشتری"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -28997,7 +28997,7 @@ msgstr "نمودار کانبان"
 #. Description of a DocType
 #: erpnext/crm/doctype/campaign/campaign.json
 msgid "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. "
-msgstr "کمپین های فروش را پیگیری کنید. سرنخ ها، پیش فاکتور ها، سفارش فروش و غیره را از کمپین ها پیگیری کنید تا بازده سرمایه گذاری را اندازه گیری کنید. "
+msgstr "کمپین های فروش را پیگیری کنید. سرنخ ها، پیش‌فاکتورها، سفارش فروش و غیره را از کمپین ها پیگیری کنید تا بازده سرمایه گذاری را اندازه گیری کنید. "
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -30009,17 +30009,17 @@ msgstr "فرصت از دست رفته"
 #: erpnext/crm/doctype/lead/lead.json
 #: erpnext/crm/report/lead_details/lead_details.js:38
 msgid "Lost Quotation"
-msgstr "پیش فاکتور از دست رفته"
+msgstr "پیش‌فاکتور از دست رفته"
 
 #. Name of a report
 #: erpnext/selling/report/lost_quotations/lost_quotations.json
 #: erpnext/selling/report/lost_quotations/lost_quotations.py:31
 msgid "Lost Quotations"
-msgstr "پیش فاکتور های از دست رفته"
+msgstr "پیش‌فاکتورهای از دست رفته"
 
 #: erpnext/selling/report/lost_quotations/lost_quotations.py:37
 msgid "Lost Quotations %"
-msgstr "% پیش فاکتور های از دست رفته"
+msgstr "% پیش‌فاکتورهای از دست رفته"
 
 #. Label of the lost_reason (Data) field in DocType 'Opportunity Lost Reason'
 #: erpnext/crm/doctype/opportunity_lost_reason/opportunity_lost_reason.json
@@ -30527,7 +30527,7 @@ msgstr "فاکتور خرید تهیه کنید"
 
 #: erpnext/templates/pages/rfq.html:19
 msgid "Make Quotation"
-msgstr "پیش فاکتور ایجاد کنید"
+msgstr "پیش‌فاکتور ایجاد کنید"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:353
 msgid "Make Return Entry"
@@ -31345,7 +31345,7 @@ msgstr "درخواست مواد مورد نیاز است"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/stock/report/material_requests_for_which_supplier_quotations_are_not_created/material_requests_for_which_supplier_quotations_are_not_created.json
 msgid "Material Requests for which Supplier Quotations are not created"
-msgstr "درخواست‌های موادی که برای آنها پیش فاکتور های تامین‌کننده ایجاد نشده است"
+msgstr "درخواست‌های موادی که برای آنها پیش‌فاکتورهای تامین‌کننده ایجاد نشده است"
 
 #. Name of a report
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.json
@@ -33188,7 +33188,7 @@ msgstr "رویه کیفیت جدید"
 #. Label of the new_quotations (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "New Quotations"
-msgstr "پیش فاکتور های جدید"
+msgstr "پیش‌فاکتورهای جدید"
 
 #. Label of the sales_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -34588,7 +34588,7 @@ msgstr " پروژه‌های باز"
 #. Label of the pending_quotations (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Open Quotations"
-msgstr "پیش فاکتور های باز"
+msgstr "پیش‌فاکتورهای باز"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:110
 msgid "Open Sales Orders"
@@ -35239,7 +35239,7 @@ msgstr "ارزش سفارش"
 #: erpnext/crm/report/campaign_efficiency/campaign_efficiency.py:27
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:33
 msgid "Order/Quot %"
-msgstr "% سفارش/پیش فاکتور"
+msgstr "% سفارش/پیش‌فاکتور"
 
 #. Option for the 'Status' (Select) field in DocType 'Quotation'
 #. Option for the 'Status' (Select) field in DocType 'Material Request'
@@ -38443,7 +38443,7 @@ msgstr "لطفا نحوه پرداخت و جزئیات موجودی افتتاح
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:185
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
-msgstr "لطفاً درخواست برای پیش فاکتور را به نوار کناری در تنظیمات پورتال اضافه کنید."
+msgstr "لطفاً درخواست برای پیش‌فاکتور را به نوار کناری در تنظیمات پورتال اضافه کنید."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:416
 msgid "Please add Root Account for - {0}"
@@ -40892,7 +40892,7 @@ msgstr "تولید تعداد"
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Produced"
-msgstr ""
+msgstr "تولید شده"
 
 #: erpnext/manufacturing/report/production_plan_summary/production_plan_summary.py:178
 msgid "Produced / Received Qty"
@@ -41497,7 +41497,7 @@ msgstr "ردیابی موجودی از نظر پروژه "
 
 #: erpnext/controllers/trends.py:395
 msgid "Project-wise data is not available for Quotation"
-msgstr "داده های پروژه محور برای پیش فاکتور در دسترس نیست"
+msgstr "داده های پروژه محور برای پیش‌فاکتور در دسترس نیست"
 
 #. Label of the projected_qty (Float) field in DocType 'Material Request Plan
 #. Item'
@@ -41879,7 +41879,7 @@ msgstr "فاکتور خرید"
 #. Name of a DocType
 #: erpnext/accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
 msgid "Purchase Invoice Advance"
-msgstr "پیش فاکتور خرید"
+msgstr "پیش‌فاکتور خرید"
 
 #. Name of a DocType
 #. Label of the purchase_invoice_item (Data) field in DocType 'Purchase Invoice
@@ -43318,12 +43318,12 @@ msgstr "قنطار"
 #: erpnext/crm/report/campaign_efficiency/campaign_efficiency.py:22
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:28
 msgid "Quot Count"
-msgstr "تعداد پیش فاکتور"
+msgstr "تعداد پیش‌فاکتور"
 
 #: erpnext/crm/report/campaign_efficiency/campaign_efficiency.py:26
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:32
 msgid "Quot/Lead %"
-msgstr "% پیش فاکتور/سرنخ"
+msgstr "% پیش‌فاکتور/سرنخ"
 
 #. Option for the 'Document Type' (Select) field in DocType 'Contract'
 #. Label of the quotation_section (Section Break) field in DocType 'CRM
@@ -43350,16 +43350,16 @@ msgstr "% پیش فاکتور/سرنخ"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Quotation"
-msgstr "پیش فاکتور"
+msgstr "پیش‌فاکتور"
 
 #: erpnext/selling/report/territory_wise_sales/territory_wise_sales.py:36
 msgid "Quotation Amount"
-msgstr "مبلغ پیش فاکتور"
+msgstr "مبلغ پیش‌فاکتور"
 
 #. Name of a DocType
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 msgid "Quotation Item"
-msgstr "آیتم پیش فاکتور"
+msgstr "آیتم پیش‌فاکتور"
 
 #. Name of a DocType
 #. Label of the order_lost_reason (Data) field in DocType 'Quotation Lost
@@ -43369,42 +43369,42 @@ msgstr "آیتم پیش فاکتور"
 #: erpnext/setup/doctype/quotation_lost_reason/quotation_lost_reason.json
 #: erpnext/setup/doctype/quotation_lost_reason_detail/quotation_lost_reason_detail.json
 msgid "Quotation Lost Reason"
-msgstr "دلیل از دست رفتن پیش فاکتور"
+msgstr "دلیل از دست رفتن پیش‌فاکتور"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/quotation_lost_reason_detail/quotation_lost_reason_detail.json
 msgid "Quotation Lost Reason Detail"
-msgstr "جزئیات دلیل از دست رفتن پیش فاکتور"
+msgstr "جزئیات دلیل از دست رفتن پیش‌فاکتور"
 
 #. Label of the quotation_number (Data) field in DocType 'Supplier Quotation'
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 msgid "Quotation Number"
-msgstr "شماره پیش فاکتور"
+msgstr "شماره پیش‌فاکتور"
 
 #. Label of the quotation_to (Link) field in DocType 'Quotation'
 #: erpnext/selling/doctype/quotation/quotation.json
 msgid "Quotation To"
-msgstr "پیش فاکتور به"
+msgstr "پیش‌فاکتور به"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
 #: erpnext/selling/report/quotation_trends/quotation_trends.json
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Quotation Trends"
-msgstr "روند پیش فاکتور"
+msgstr "روند پیش‌فاکتور"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:471
 msgid "Quotation {0} is cancelled"
-msgstr "پیش فاکتور {0} لغو شده است"
+msgstr "پیش‌فاکتور {0} لغو شده است"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:384
 msgid "Quotation {0} not of type {1}"
-msgstr "پیش فاکتور {0} از نوع {1} نیست"
+msgstr "پیش‌فاکتور {0} از نوع {1} نیست"
 
 #: erpnext/selling/doctype/quotation/quotation.py:345
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:57
 msgid "Quotations"
-msgstr "پیش فاکتور ها"
+msgstr "پیش‌فاکتورها"
 
 #: erpnext/utilities/activation.py:87
 msgid "Quotations are proposals, bids you have sent to your customers"
@@ -43412,13 +43412,13 @@ msgstr "پیشنهادها، پیشنهادهایی هستند که شما بر�
 
 #: erpnext/templates/pages/rfq.html:73
 msgid "Quotations: "
-msgstr "پیش فاکتور ها: "
+msgstr "پیش‌فاکتورها: "
 
 #. Label of the quote_status (Select) field in DocType 'Request for Quotation
 #. Supplier'
 #: erpnext/buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
 msgid "Quote Status"
-msgstr "وضعیت پیش فاکتور"
+msgstr "وضعیت پیش‌فاکتور"
 
 #: erpnext/selling/report/quotation_trends/quotation_trends.py:57
 msgid "Quoted Amount"
@@ -43894,7 +43894,7 @@ msgstr "مصرف مواد اولیه"
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Raw Materials Required"
-msgstr ""
+msgstr "مواد اولیه مورد نیاز"
 
 #. Label of the raw_materials_supplied (Section Break) field in DocType
 #. 'Purchase Invoice'
@@ -43926,7 +43926,7 @@ msgstr "مواد اولیه نمی‌تواند خالی باشد."
 
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.js:128
 msgid "Raw Materials to Customer"
-msgstr ""
+msgstr "مواد اولیه به مشتری"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -44167,7 +44167,7 @@ msgstr "دریافت"
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Receive from Customer"
-msgstr ""
+msgstr "دریافت از مشتری"
 
 #. Option for the 'Quote Status' (Select) field in DocType 'Request for
 #. Quotation Supplier'
@@ -45542,7 +45542,7 @@ msgstr "مقدار مورد نیاز"
 
 #: erpnext/crm/doctype/opportunity/opportunity.js:89
 msgid "Request For Quotation"
-msgstr "درخواست برای پیش فاکتور"
+msgstr "درخواست برای پیش‌فاکتور"
 
 #. Label of the section_break_2 (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -45585,7 +45585,7 @@ msgstr "درخواست اطلاعات"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/stock/doctype/material_request/material_request.js:185
 msgid "Request for Quotation"
-msgstr "درخواست برای پیش فاکتور"
+msgstr "درخواست برای پیش‌فاکتور"
 
 #. Name of a DocType
 #. Label of the request_for_quotation_item (Data) field in DocType 'Supplier
@@ -45593,7 +45593,7 @@ msgstr "درخواست برای پیش فاکتور"
 #: erpnext/buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 #: erpnext/buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgid "Request for Quotation Item"
-msgstr "درخواست برای آیتم پیش فاکتور"
+msgstr "درخواست برای آیتم پیش‌فاکتور"
 
 #. Name of a DocType
 #: erpnext/buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
@@ -53922,7 +53922,7 @@ msgstr "این دستور کار را برای پردازش بیشتر ارسا�
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:281
 msgid "Submit your Quotation"
-msgstr "پیش فاکتور خود را ارسال کنید"
+msgstr "پیش‌فاکتور خود را ارسال کنید"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Entry'
 #. Option for the 'Status' (Select) field in DocType 'POS Closing Entry'
@@ -54629,7 +54629,7 @@ msgstr "تماس اصلی تامین کننده"
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/stock/doctype/material_request/material_request.js:191
 msgid "Supplier Quotation"
-msgstr "پیش فاکتور تامین کننده"
+msgstr "پیش‌فاکتور تامین کننده"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -54645,11 +54645,11 @@ msgstr "مقایسه قیمت عرضه کننده"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgid "Supplier Quotation Item"
-msgstr "آیتم پیش فاکتور تامین کننده"
+msgstr "آیتم پیش‌فاکتور تامین کننده"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:456
 msgid "Supplier Quotation {0} Created"
-msgstr "پیش فاکتور تامین کننده {0} ایجاد شد"
+msgstr "پیش‌فاکتور تامین کننده {0} ایجاد شد"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:6
 msgid "Supplier Reference"
@@ -56246,7 +56246,7 @@ msgstr "از بسته شماره. فیلد نه باید خالی باشد و ن
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:373
 msgid "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
-msgstr "دسترسی به درخواست پیش فاکتور از پورتال غیرفعال است. برای اجازه دسترسی، آن را در تنظیمات پورتال فعال کنید."
+msgstr "دسترسی به درخواست پیش‌فاکتور از پورتال غیرفعال است. برای اجازه دسترسی، آن را در تنظیمات پورتال فعال کنید."
 
 #. Description of the 'Current BOM' (Link) field in DocType 'BOM Update Tool'
 #: erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.json
@@ -60555,7 +60555,7 @@ msgstr "اعتبار به روز"
 
 #: erpnext/selling/doctype/quotation/quotation.py:363
 msgid "Validity period of this quotation has ended."
-msgstr "مدت اعتبار این پیش فاکتور به پایان رسیده است."
+msgstr "مدت اعتبار این پیش‌فاکتور به پایان رسیده است."
 
 #. Option for the 'Consider Tax or Charge for' (Select) field in DocType
 #. 'Purchase Taxes and Charges'
@@ -61755,7 +61755,7 @@ msgstr "برای سفارش های خرید جدید هشدار دهید"
 #. Label of the warn_rfqs (Check) field in DocType 'Supplier Scorecard'
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgid "Warn for new Request for Quotations"
-msgstr "هشدار برای درخواست جدید برای پیش فاکتور"
+msgstr "هشدار برای درخواست جدید برای پیش‌فاکتور"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:741
 #: erpnext/controllers/accounts_controller.py:820
@@ -61898,7 +61898,7 @@ msgstr "ما برای کمک اینجا هستیم!"
 #: erpnext/setup/workspace/settings/settings.json
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Website"
-msgstr "سایت اینترنتی"
+msgstr "وب‌سایت"
 
 #. Name of a DocType
 #: erpnext/portal/doctype/website_attribute/website_attribute.json
@@ -61954,7 +61954,7 @@ msgstr "تم وب سایت"
 #: erpnext/accounts/letterhead/company_letterhead.html:89
 #: erpnext/accounts/letterhead/company_letterhead_grey.html:105
 msgid "Website:"
-msgstr "سایت اینترنتی:"
+msgstr "وب‌سایت:"
 
 #. Option for the 'Day of Week' (Select) field in DocType 'Communication Medium
 #. Timeslot'
