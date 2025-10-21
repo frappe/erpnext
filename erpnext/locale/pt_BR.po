@@ -47767,7 +47767,7 @@ msgstr ""
 
 #: erpnext/utilities/transaction_base.py:558
 msgid "Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
-msgstr "Linha {1}: Quantidade ({0}) não pode ser uma fração. Para permitir isso, desative ';{2}'; no UOM {3}."
+msgstr "Linha {1}: Quantidade ({0}) não pode ser uma fração. Para permitir isso, desative '{2}' na Unidade de Medida {3}."
 
 #: erpnext/controllers/buying_controller.py:1012
 msgid "Row {idx}: Asset Naming Series is mandatory for the auto creation of assets for item {item_code}."
