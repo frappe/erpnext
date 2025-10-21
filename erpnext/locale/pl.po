@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-19 09:35+0000\n"
-"PO-Revision-Date: 2025-10-20 13:10\n"
+"PO-Revision-Date: 2025-10-21 13:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Polish\n"
 "MIME-Version: 1.0\n"
@@ -4031,7 +4031,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/email_digest/templates/default.html:113
 msgid "All Day"
-msgstr ""
+msgstr "Cały dzień"
 
 #: erpnext/patches/v11_0/create_department_records_for_each_company.py:23
 #: erpnext/patches/v11_0/update_department_lft_rgt.py:9
@@ -8693,7 +8693,7 @@ msgstr "Grupa Krwi"
 #: erpnext/buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:291
 msgid "Blue"
-msgstr ""
+msgstr "Niebieski"
 
 #. Label of the body (Text Editor) field in DocType 'Process Statement Of
 #. Accounts'
