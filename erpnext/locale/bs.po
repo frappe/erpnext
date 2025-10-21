@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-19 09:35+0000\n"
-"PO-Revision-Date: 2025-10-20 13:11\n"
+"PO-Revision-Date: 2025-10-21 13:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -4217,11 +4217,11 @@ msgstr "Svi Artiklie u ovom dokumentu već imaju povezanu Kontrolu Kvaliteta."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1265
 msgid "All items must be linked to a Sales Order or Subcontracting Inward Order for this Sales Invoice."
-msgstr "Svi artikli moraju biti povezane s Prodajnim Nalogom ili Podugovornim Nalogom za ovu Prodajnu Fakturu."
+msgstr "Svi artikli moraju biti povezane s Prodajnim Nalogom ili Podizvođačkom Nalogu za ovu Prodajnu Fakturu."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1276
 msgid "All linked Sales Orders must be subcontracted."
-msgstr "Svi povezani Prodajni Nalozi moraju biti podugovoreni."
+msgstr "Svi povezani Prodajni Nalozi moraju biti podizvođački."
 
 #. Description of the 'Carry Forward Communication and Comments' (Check) field
 #. in DocType 'CRM Settings'
@@ -6718,7 +6718,7 @@ msgstr "Automatsko Kreiranje Serijskog i Šarža paketa za Dostavu"
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Auto Create Subcontracting Order"
-msgstr "Automatsko Kreiranje Podugovornog Naloga"
+msgstr "Automatsko Kreiranje Podizvođačkom Naloga"
 
 #. Label of the auto_created (Check) field in DocType 'Fiscal Year'
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
@@ -7527,7 +7527,7 @@ msgstr "Povrat Sirovine iz Skladišta za Posao U Toku"
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Backflush Raw Materials of Subcontract Based On"
-msgstr "Povrati Sirovina iz Podugovora na osnovu"
+msgstr "Povrati Sirovina od Podizvođača na osnovu"
 
 #: erpnext/accounts/report/account_balance/account_balance.py:36
 #: erpnext/accounts/report/general_ledger/general_ledger.html:94
@@ -13943,15 +13943,15 @@ msgstr "Kreiranje Unosa Zaliha u toku..."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1779
 msgid "Creating Subcontracting Inward Order ..."
-msgstr "Kreiranje Podugovornog Naloga u toku..."
+msgstr "Kreiranje Podizvođaćkog Naloga u toku..."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:574
 msgid "Creating Subcontracting Order ..."
-msgstr "Kreiranje Podugovornog Naloga u toku..."
+msgstr "Kreiranje Podizvođačkog Naloga u toku..."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:315
 msgid "Creating Subcontracting Receipt ..."
-msgstr "Kreiranje Podugovorne Priznanice u toku..."
+msgstr "Kreiranje Podizvođačke Priznanice u toku..."
 
 #: erpnext/setup/doctype/employee/employee.js:86
 msgid "Creating User..."
@@ -21448,7 +21448,7 @@ msgstr "Količina Artikla Gotovog Proizvoda {0} ne može biti nula"
 
 #: erpnext/controllers/accounts_controller.py:3731
 msgid "Finished Good Item {0} must be a sub-contracted item"
-msgstr "Artikal Gotovog Proizvoda {0} mora biti podugovoreni artikal"
+msgstr "Artikal Gotovog Proizvoda {0} mora biti podizvođački artikal"
 
 #. Label of the fg_item_qty (Float) field in DocType 'Purchase Order Item'
 #. Label of the fg_item_qty (Float) field in DocType 'Sales Order Item'
@@ -24445,7 +24445,7 @@ msgstr "Ako je omogućeno, unosi registra će biti knjiženi za iznos promjene u
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will allow user to deliver the entire quantity of the finished goods produced against the Subcontracting Inward Order. If disabled, system will allow delivery of only the ordered quantity."
-msgstr "Ako je omogućeno, sistem će dozvoliti korisniku da isporuči cjelokupnu količinu gotovih proizvoda proizvedenih prema Podugovornom Nalogu. Ako je onemogućeno, sistem će dozvoliti isporuku samo naručene količine."
+msgstr "Ako je omogućeno, sistem će dozvoliti korisniku da isporuči cjelokupnu količinu gotovih proizvoda proizvedenih prema Podizvođačkom Nalogu. Ako je onemogućeno, sistem će dozvoliti isporuku samo naručene količine."
 
 #. Description of the 'Deliver Scrap Items' (Check) field in DocType 'Selling
 #. Settings'
@@ -28562,7 +28562,7 @@ msgstr "Artikal {0} nije artikal na zalihama"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:914
 msgid "Item {0} is not a subcontracted item"
-msgstr "Artikal {0} nije podugovoreni artikal"
+msgstr "Artikal {0} nije podizvođački artikal"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1900
 msgid "Item {0} is not active or end of life has been reached"
@@ -28578,7 +28578,7 @@ msgstr "Artikal {0} mora biti artikal koji nije na zalihama"
 
 #: erpnext/stock/get_item_details.py:344
 msgid "Item {0} must be a Sub-contracted Item"
-msgstr "Artikal {0} mora biti Podugovorni artikal"
+msgstr "Artikal {0} mora biti Podizvođački Artikal"
 
 #: erpnext/assets/doctype/asset/asset.py:281
 msgid "Item {0} must be a non-stock item"
@@ -28763,7 +28763,7 @@ msgstr "Artikli se ne mogu ažurirati jer je kreiran Podizvođački Nalog na osn
 
 #: erpnext/controllers/accounts_controller.py:3934
 msgid "Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
-msgstr "Artikal se ne mođe ažurirati jer je Podugovorni Nalog kreiran naspram Kupovnog Naloga {0}."
+msgstr "Artikal se ne mođe ažurirati jer je Podizvođački Nalog kreiran naspram Kupovnog Naloga {0}."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1414
 msgid "Items for Raw Material Request"
@@ -30645,7 +30645,7 @@ msgstr "Napravi Unos Zaliha"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:373
 msgid "Make Subcontracting PO"
-msgstr "Napravi Podugovorni Kupovni Nalog"
+msgstr "Napravi Podizvođački Kupovni Nalog"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:427
 msgid "Make Transfer Entry"
@@ -31057,7 +31057,7 @@ msgstr "Mapiranje Podizvođačkog Naloga ..."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:153
 msgid "Mapping Subcontracting Order ..."
-msgstr "Mapiranje Podugovornog Naloga..."
+msgstr "Mapiranje Podizvođačkog Naloga..."
 
 #: erpnext/public/js/utils.js:962
 msgid "Mapping {0} ..."
@@ -31506,7 +31506,7 @@ msgstr "Materijal Prenesen za Proizvodnju"
 #. field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Material Transferred for Subcontract"
-msgstr "Prenos Materijala za Podugovor"
+msgstr "Prenos Materijala za Podizvođača"
 
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.js:143
 msgid "Material from Customer"
@@ -39115,7 +39115,7 @@ msgstr "Odaberi Dostavnicu"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:148
 msgid "Please select a Subcontracting Purchase Order."
-msgstr "Odaberi Podugovorni Kupovni Nalog."
+msgstr "Odaberi Podizvođački Kupovni Nalog."
 
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.js:76
 msgid "Please select a Supplier"
@@ -39173,7 +39173,7 @@ msgstr "Odaberi važeći Kupovni Nalog koja sadrži servisne artikle."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:134
 msgid "Please select a valid Purchase Order that is configured for Subcontracting."
-msgstr "Odaberi važeći Kupovni Nalog koji je konfigurisan za Podugovor."
+msgstr "Odaberi važeći Kupovni Nalog koji je konfigurisan za Podizvođača."
 
 #: erpnext/selling/doctype/quotation/quotation.js:230
 msgid "Please select a value for {0} quotation_to {1}"
@@ -42147,7 +42147,7 @@ msgstr "Dostavljeni Artikal Kupovnog Naloga"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:888
 msgid "Purchase Order Item reference is missing in Subcontracting Receipt {0}"
-msgstr "Referenca Artikal Kupovnog Naloga nedostaje u Priznanici Podugovora {0}"
+msgstr "Referenca Artikal Kupovnog Naloga nedostaje u Priznanici Podizvođača {0}"
 
 #: erpnext/setup/doctype/email_digest/templates/default.html:186
 msgid "Purchase Order Items not received on time"
@@ -42265,7 +42265,7 @@ msgstr "Kupovni Račun"
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Purchase Receipt (Draft) will be auto-created on submission of Subcontracting Receipt."
-msgstr "Kupovni Račun (nacrt) će se automatski kreirati pri podnošenju Podugovornog Računa."
+msgstr "Kupovni Račun (nacrt) će se automatski kreirati pri podnošenju Podizvođačkog Računa."
 
 #. Label of the pr_detail (Data) field in DocType 'Purchase Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -45970,11 +45970,11 @@ msgstr "Rezervisana količina za Proizvodnju: Količina sirovina za proizvodnju 
 #. Label of the reserved_qty_for_sub_contract (Float) field in DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Reserved Qty for Subcontract"
-msgstr "Rezervisana Količina za Podugovor"
+msgstr "Rezervisana Količina za Podizvođača"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:179
 msgid "Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items."
-msgstr "Rezervisana količina za Podugovor: Količina sirovina za proizvodnju podugovorenih artikala."
+msgstr "Rezervisana količina za Podizvođača: Količina sirovina za proizvodnju podizvođačkih artikala."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:612
 msgid "Reserved Qty should be greater than Delivered Qty."
@@ -46042,7 +46042,7 @@ msgstr "Rezervisano za Plan Proizvodnje"
 
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:190
 msgid "Reserved for Sub Contracting"
-msgstr "Rezervirano za Podugovor"
+msgstr "Rezervirano za Podizvođača"
 
 #: erpnext/stock/page/stock_balance/stock_balance.js:53
 msgid "Reserved for manufacturing"
@@ -46054,7 +46054,7 @@ msgstr "Rezervirano za Prodaju"
 
 #: erpnext/stock/page/stock_balance/stock_balance.js:54
 msgid "Reserved for sub contracting"
-msgstr "Rezervirano za Podugovor"
+msgstr "Rezervirano za Podizvođača"
 
 #: erpnext/public/js/stock_reservation.js:203
 #: erpnext/selling/doctype/sales_order/sales_order.js:404
@@ -46972,7 +46972,7 @@ msgstr "Red #{0}: Broj Šarže {1} je već odabran."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:258
 msgid "Row #{0}: Batch No(s) {1} is not a part of the linked Subcontracting Inward Order. Please select valid Batch No(s)."
-msgstr ""
+msgstr "Red #{0}: Šaržni Broj(evi) {1} nije u povezanom Podugovaračkom Nalogu. Odaberi važeće Šaržne broj(eve)."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:863
 msgid "Row #{0}: Cannot allocate more than {1} against payment term {2}"
@@ -46980,15 +46980,15 @@ msgstr "Red #{0}: Ne može se dodijeliti više od {1} naspram uslova plaćanja {
 
 #: erpnext/controllers/subcontracting_inward_controller.py:583
 msgid "Row #{0}: Cannot cancel this Manufacturing Stock Entry as billed quantity of Item {1} cannot be greater than consumed quantity."
-msgstr ""
+msgstr "Red #{0}: Ne može se otkazati ovaj Unos Proizvodnih Zaliha jer fakturisana količina artikla {1} ne može biti veća od potrošene količine."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:562
 msgid "Row #{0}: Cannot cancel this Manufacturing Stock Entry as quantity of Scrap Item {1} produced cannot be less than quantity delivered."
-msgstr ""
+msgstr "Red #{0}: Ne može se poništiti ovaj Unos Proizvodnih Zaliha jer količina Proizvedenog Otpada {1} ne može biti manja od isporučene količine."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:303
 msgid "Row #{0}: Cannot cancel this Stock Entry as returned quantity cannot be greater than delivered quantity for Item {1} in the linked Subcontracting Inward Order"
-msgstr ""
+msgstr "Red #{0}: Ne može se otkazati ovaj Unos Zaliha jer vraćena količina ne može biti veća od isporučene količine za artikal {1} u povezanom Podizvođačkom Nalogu"
 
 #: erpnext/controllers/accounts_controller.py:3586
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -47052,11 +47052,11 @@ msgstr "Red #{0}: Kumulativni prag ne može biti manji od praga pojedinačne tra
 
 #: erpnext/controllers/subcontracting_inward_controller.py:166
 msgid "Row #{0}: Customer Provided Item {1} exceeds quantity available through Subcontracting Inward Order"
-msgstr ""
+msgstr "Red #{0}: Artikal koji je obezbijedio Klijent {1} premašuje količinu dostupnu putem Podizvođačkog Naloga"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:180
 msgid "Row #{0}: Customer Provided Item {1} is not a part of Subcontracting Inward Order {2}"
-msgstr ""
+msgstr "Red #{0}: Artikal koju je obezbijedio Klijent {1} nije u Podizvođačkom Nalogu {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:52
 msgid "Row #{0}: Dates overlapping with other row"
@@ -47095,7 +47095,7 @@ msgstr "Red #{0}: Gotov Proizvod artikla nije navedena zaservisni artikal {1}"
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:387
 #: erpnext/selling/doctype/sales_order/sales_order.py:276
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
-msgstr "Red #{0}: Gotov Proizvod Artikla {1} mora biti podugovorni artikal"
+msgstr "Red #{0}: Gotov Proizvod Artikla {1} mora biti podizvođačkiartikal"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:361
 msgid "Row #{0}: Finished Good must be {1}"
@@ -47107,7 +47107,7 @@ msgstr "Red #{0}: Gotov Proizvod referenca je obavezna za Otpadni Artikal {1}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:172
 msgid "Row #{0}: For Customer Provided Item {1}, Source Warehouse must be {2}"
-msgstr ""
+msgstr "Red #{0}: Za artikal koju je obezbijedio Klijent {1}, izvorno skladište mora biti {2}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:750
 msgid "Row #{0}: For {1}, you can select reference document only if account gets credited"
@@ -47147,12 +47147,12 @@ msgstr "Red #{0}: Artikal {1} nije Serijalizirani/Šaržirani Artikal. Ne može 
 
 #: erpnext/controllers/subcontracting_inward_controller.py:199
 msgid "Row #{0}: Item {1} is not a customer provided item."
-msgstr ""
+msgstr "Red #{0}: Artikal {1} nije artikal koju je obezbijedio Klijent."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:75
 #: erpnext/controllers/subcontracting_inward_controller.py:316
 msgid "Row #{0}: Item {1} is not a part of Subcontracting Inward Order {2}"
-msgstr ""
+msgstr "Red #{0}: Artikal {1} nije u Podizvođačkom Nalogu {2}"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:288
 msgid "Row #{0}: Item {1} is not a service item"
@@ -47164,11 +47164,11 @@ msgstr "Red #{0}: Artikal {1} nije artikal na zalihama"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:66
 msgid "Row #{0}: Item {1} mismatch. Changing of item code is not permitted, add another row instead."
-msgstr ""
+msgstr "Red #{0}: Artikal {1} se ne slaže. Promjena koda artikla nije dozvoljena, umjesto toga dodaj još jedan red."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:88
 msgid "Row #{0}: Item {1} mismatch. Changing of item code is not permitted."
-msgstr ""
+msgstr "Red #{0}: Artikla {1} se ne slaže. Promjena koda artikla nije dozvoljena."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:759
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
@@ -47254,7 +47254,7 @@ msgstr "Red #{0}: Količina za artikal {1} ne može biti nula."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:358
 msgid "Row #{0}: Quantity of Item {1} cannot be more than {2} {3} against Subcontracting Inward Order {4}"
-msgstr ""
+msgstr "Red #{0}: Količina artikla {1} ne može biti veća od {2} {3} u odnosu na Podizvođački Nalog {4}"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1637
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
@@ -47289,11 +47289,11 @@ msgstr "Red #{0}: Povrat Naspram za povrat imovine je obavezno"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:102
 msgid "Row #{0}: Returned quantity cannot be greater than available quantity for Item {1}"
-msgstr ""
+msgstr "Red #{0}: Vraćena količina ne može biti veća od dostupne količine za artikal {1}"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:115
 msgid "Row #{0}: Returned quantity cannot be greater than available quantity to return for Item {1}"
-msgstr ""
+msgstr "Red #{0}: Vraćena količina ne može biti veća od dostupne količine za povrat za Artikal {1}"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:493
 msgid "Row #{0}: Scrap Item Qty cannot be zero"
@@ -47327,7 +47327,7 @@ msgstr "Red #{0}: Serijski Broj {1} je već odabran."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:250
 msgid "Row #{0}: Serial No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Serial No(s)."
-msgstr ""
+msgstr "Red #{0}: Serijski Broj(evi) {1} nisu u povezanom Podizvođačkom Nalogu. Odaberi važeći serijski broj(eve)."
 
 #: erpnext/controllers/accounts_controller.py:572
 msgid "Row #{0}: Service End Date cannot be before Invoice Posting Date"
@@ -47351,11 +47351,11 @@ msgstr "Red #{0}: Pošto je omogućeno 'Praćenje Polugotovih Artikala', Sastavn
 
 #: erpnext/controllers/subcontracting_inward_controller.py:229
 msgid "Row #{0}: Source Warehouse must be same as Customer Warehouse {1} from the linked Subcontracting Inward Order"
-msgstr ""
+msgstr "Red #{0}: Izvorno skladište mora biti isto kao i skladište klijenta {1} iz povezanog Podizvođačkog Naloga"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:363
 msgid "Row #{0}: Source Warehouse {1} for item {2} cannot be a customer warehouse."
-msgstr ""
+msgstr "Red #{0}: Izvorno skladište {1} za artikal {2} ne može biti skladište klijenta."
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:105
 msgid "Row #{0}: Start Time and End Time are required"
@@ -47404,11 +47404,11 @@ msgstr "Red #{0}: Zaliha nije dostupna za rezervisanje za artikal {1} u skladiš
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1296
 msgid "Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}"
-msgstr ""
+msgstr "Red #{0}: Količina zaliha {1} ({2}) za artikal {3} ne može biti veća od {4}"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:223
 msgid "Row #{0}: Target Warehouse must be same as Customer Warehouse {1} from the linked Subcontracting Inward Order"
-msgstr ""
+msgstr "Red #{0}: Ciljano skladište mora biti isto kao i skladište klijenta {1} iz povezanog Podizvođačkog Naloga"
 
 #: erpnext/controllers/stock_controller.py:214
 msgid "Row #{0}: The batch {1} has already expired."
@@ -47428,7 +47428,7 @@ msgstr "Red #{0}: Ukupan broj amortizacija ne može biti manji ili jednak počet
 
 #: erpnext/controllers/subcontracting_inward_controller.py:524
 msgid "Row #{0}: Work Order exists against full or partial quantity of Item {1}"
-msgstr ""
+msgstr "Red #{0}: Radni Nalog postoji za punu ili djelomičnu količinu artiikla {1}"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:99
 msgid "Row #{0}: You cannot use the inventory dimension '{1}' in Stock Reconciliation to modify the quantity or valuation rate. Stock reconciliation with inventory dimensions is intended solely for performing opening entries."
@@ -47657,7 +47657,7 @@ msgstr "Red {0}: Skladište za Dostavu ({1}) i Skladište za Klijente ({2}) ne m
 
 #: erpnext/controllers/subcontracting_controller.py:157
 msgid "Row {0}: Delivery Warehouse cannot be same as Customer Warehouse for Item {1}."
-msgstr ""
+msgstr "Red {0}: Skladište isporuke ne može biti isto kao skladište klijenta za artikal {1}."
 
 #: erpnext/controllers/accounts_controller.py:2637
 msgid "Row {0}: Due Date in the Payment Terms table cannot be before Posting Date"
@@ -47731,7 +47731,7 @@ msgstr "Red {0}: Artikal {1} mora biti artikal na zalihama."
 
 #: erpnext/controllers/subcontracting_controller.py:165
 msgid "Row {0}: Item {1} must be a subcontracted item."
-msgstr "Red {0}: Artikal {1} mora biti podugovorni artikal."
+msgstr "Red {0}: Artikal {1} mora biti podizvođački artikal."
 
 #: erpnext/controllers/subcontracting_controller.py:186
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -47827,7 +47827,7 @@ msgstr "Red {0}: Smjena se ne može promijeniti jer je amortizacija već obrađe
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1368
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
-msgstr "Red {0}: Podugovorni Artikal je obavezan za sirovinu {1}"
+msgstr "Red {0}: Podizvođački Artikal je obavezan za sirovinu {1}"
 
 #: erpnext/controllers/stock_controller.py:1318
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
@@ -51936,7 +51936,7 @@ msgstr "Koeficijenti Solventnosti"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:300
 msgid "Some required Company details are missing. You don't have permission to update them. Please contact your System Manager."
-msgstr ""
+msgstr "Nedostaju neki obavezni podaci o kompaniji. Nemate dozvolu da ih ažurirate. Kontaktiraj Odgovornog Sistema."
 
 #: erpnext/www/book_appointment/index.js:248
 msgid "Something went wrong please try again"
@@ -52081,7 +52081,7 @@ msgstr "Izvorno Skladište je obavezno za Artikal {0}."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:278
 msgid "Source Warehouse {0} must be same as Customer Warehouse {1} in the Subcontracting Inward Order"
-msgstr ""
+msgstr "Izvorno skladište {0} mora biti isto kao i skladište klijenta {1} u Podizvođačkom Nalogu"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:72
 msgid "Source and Target Location cannot be same"
@@ -53725,7 +53725,7 @@ msgstr "Podizvođački Artikal"
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Subcontracted Item To Be Received"
-msgstr "Podugovoreni Artikal za Prijem"
+msgstr "Podizvođački Artikal za Prijem"
 
 #: erpnext/stock/doctype/material_request/material_request.js:207
 msgid "Subcontracted Purchase Order"
@@ -53818,28 +53818,28 @@ msgstr "Podizvođački Nalog"
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 msgid "Subcontracting Inward Order Item"
-msgstr ""
+msgstr "Artikal Podizvođačkog Naloga"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_received_item/subcontracting_inward_order_received_item.json
 msgid "Subcontracting Inward Order Received Item"
-msgstr ""
+msgstr "Primljeni Artikal Podizvođačkog Naloga"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_scrap_item/subcontracting_inward_order_scrap_item.json
 msgid "Subcontracting Inward Order Scrap Item"
-msgstr ""
+msgstr "Otpadni Artikal Podizvođačkog Naloga"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_service_item/subcontracting_inward_order_service_item.json
 msgid "Subcontracting Inward Order Service Item"
-msgstr ""
+msgstr "Servisni Artikal Podizvođačkog Naloga"
 
 #. Label of the section_break_zwh6 (Section Break) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Subcontracting Inward Settings"
-msgstr ""
+msgstr "Postavke Podizvođača"
 
 #. Label of a Link in the Manufacturing Workspace
 #. Label of the subcontracting_order (Link) field in DocType 'Stock Entry'
@@ -56868,11 +56868,11 @@ msgstr "Sažetak ovog Mjeseca"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:974
 msgid "This Purchase Order has been fully subcontracted."
-msgstr ""
+msgstr "Ovaj Kupovni Nalog je u potpunosti podugovoren."
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:2119
 msgid "This Sales Order has been fully subcontracted."
-msgstr ""
+msgstr "Ovaj Prodajnii Nalog je u potpunosti podugovoren."
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:31
 msgid "This Warehouse will be auto-updated in the Target Warehouse field of Work Order."
@@ -61891,7 +61891,7 @@ msgstr "Upozorenje: Količina Materijalnog Zahtjeva je manja od Minimalne Količ
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1329
 msgid "Warning: Quantity exceeds maximum producible quantity based on quantity of raw materials received through the Subcontracting Inward Order {0}."
-msgstr ""
+msgstr "Upozorenje: Količina prelazi maksimalnu proizvodnu količinu na osnovu količine sirovina primljenih putem Podizvođačkog Naloga {0}."
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:333
 msgid "Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
@@ -62388,7 +62388,7 @@ msgstr "Radni Nalog"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:144
 msgid "Work Order / Subcontract PO"
-msgstr "Radni Nalog / Podugovorni Kupovni Nalog"
+msgstr "Radni Nalog / Podizvođački Kupovni Nalog"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:93
 msgid "Work Order Analysis"
@@ -64062,7 +64062,7 @@ msgstr "{doctype} {name} je otkazan ili zatvoren."
 
 #: erpnext/controllers/buying_controller.py:608
 msgid "{field_label} is mandatory for sub-contracted {doctype}."
-msgstr "{field_label} je obavezan za podugovoren {doctype}."
+msgstr "{field_label} je obavezan za podizvođače {doctype}."
 
 #: erpnext/controllers/stock_controller.py:1784
 msgid "{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})"
