@@ -21,6 +21,7 @@
   "is_scrap_item",
   "quality_inspection",
   "subcontracted_item",
+  "against_fg",
   "section_break_8",
   "description",
   "column_break_10",
@@ -113,7 +114,8 @@
    "label": "Target Warehouse",
    "oldfieldname": "t_warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only_depends_on": "eval:parent.purpose === \"Receive from Customer\""
   },
   {
    "fieldname": "sec_break1",
@@ -641,6 +643,16 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "depends_on": "eval:parent.purpose === \"Receive from Customer\" && !doc.scio_detail",
+   "fieldname": "against_fg",
+   "fieldtype": "Link",
+   "label": "Against Finished Good",
+   "mandatory_depends_on": "eval:parent.purpose === \"Receive from Customer\" && !doc.scio_detail",
+   "no_copy": 1,
+   "options": "Subcontracting Inward Order Item",
+   "set_only_once": 1
   }
  ],
  "grid_page_length": 50,
@@ -648,7 +660,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-14 14:10:38.373099",
+ "modified": "2025-10-16 11:50:50.573443",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

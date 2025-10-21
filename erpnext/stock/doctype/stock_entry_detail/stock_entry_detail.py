@@ -16,6 +16,7 @@ class StockEntryDetail(Document):
 
 		actual_qty: DF.Float
 		additional_cost: DF.Currency
+		against_fg: DF.Link | None
 		against_stock_entry: DF.Link | None
 		allow_alternative_item: DF.Check
 		allow_zero_valuation_rate: DF.Check

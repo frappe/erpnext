@@ -22,7 +22,9 @@
   "column_break_16",
   "consumed_qty",
   "work_order_qty",
-  "returned_qty"
+  "returned_qty",
+  "section_break_yhve",
+  "rate"
  ],
  "fields": [
   {
@@ -32,7 +34,8 @@
    "in_list_view": 1,
    "label": "Item Code",
    "options": "Item",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "columns": 2,
@@ -70,7 +73,8 @@
    "fieldname": "reference_name",
    "fieldtype": "Data",
    "label": "Reference Name",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "section_break_13",
@@ -116,7 +120,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.returned_qty",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
    "label": "Returned Qty",
@@ -128,7 +131,7 @@
   {
    "allow_on_submit": 1,
    "default": "0",
-   "depends_on": "eval:doc.work_order_qty",
+   "depends_on": "eval:!(!doc.is_customer_provided_item && doc.is_additional_item)",
    "fieldname": "work_order_qty",
    "fieldtype": "Float",
    "label": "Work Order Qty",
@@ -146,7 +149,6 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:!doc.is_customer_provided_item",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
@@ -166,11 +168,27 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.bom_detail_no",
    "fieldname": "is_additional_item",
    "fieldtype": "Check",
    "label": "Is Additional Item",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_customer_provided_item",
+   "fieldname": "section_break_yhve",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "mandatory_depends_on": "eval:doc.is_customer_provided_item",
+   "no_copy": 1,
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1,
+   "read_only_depends_on": "eval:doc.is_customer_provided_item"
   }
  ],
  "grid_page_length": 50,
@@ -178,7 +196,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-14 10:18:58.905093",
+ "modified": "2025-10-21 23:44:18.302327",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order Received Item",

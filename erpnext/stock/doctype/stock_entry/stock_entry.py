@@ -904,10 +904,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
 
-			if d.allow_zero_valuation_rate and self.purpose != "Receive from Customer":
+			if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
 				d.basic_rate = 0.0
 				items.append(d.item_code)
-
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(

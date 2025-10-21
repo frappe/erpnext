@@ -1297,7 +1297,7 @@ class SalesInvoice(SellingController):
 							item.idx,
 							item.stock_qty,
 							item.stock_uom,
-							frappe.bold(item.item_code),
+							get_link_to_form("Item", item.item_code),
 							frappe.bold(max_qty),
 						)
 					)

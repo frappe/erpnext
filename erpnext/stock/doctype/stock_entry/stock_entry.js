@@ -151,6 +151,17 @@ frappe.ui.form.on("Stock Entry", {
 		if (!check_should_not_attach_bom_items(frm.doc.bom_no)) {
 			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 		}
+
+		if (frm.doc.purpose == "Receive from Customer") {
+			frm.set_query("against_fg", "items", function () {
+				return {
+					query: "erpnext.controllers.subcontracting_inward_controller.get_fg_reference_names",
+					filters: {
+						parent: frm.doc.subcontracting_inward_order,
+					},
+				};
+			});
+		}
 	},
 
 	setup_quality_inspection: function (frm) {
@@ -853,6 +864,10 @@ frappe.ui.form.on("Stock Entry Detail", {
 		let item = frappe.get_doc(cdt, cdn);
 		if (item.is_finished_item) {
 			frm.events.set_fg_completed_qty(frm);
+		}
+
+		if (frm.doc.purpose === "Receive from Customer") {
+			item.t_warehouse = frm.doc.items.find((item) => item.scio_detail).t_warehouse;
 		}
 	},
 	set_basic_rate_manually(frm, cdt, cdn) {
