@@ -394,6 +394,10 @@ erpnext.PointOfSale.Payment = class {
 		const payments = doc.payments;
 		const currency = doc.currency;
 
+		if (!this.$payment_modes.is(":visible")) {
+			return;
+		}
+
 		this.$payment_modes.html(
 			`${payments
 				.map((p, i) => {
@@ -611,6 +615,10 @@ erpnext.PointOfSale.Payment = class {
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
 		const currency = doc.currency;
 		const label = __("Change Amount");
+
+		if (!this.$totals.is(":visible")) {
+			return;
+		}
 
 		this.$totals.html(
 			`<div class="col">

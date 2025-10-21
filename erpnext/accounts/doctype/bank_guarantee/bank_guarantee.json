@@ -146,6 +146,7 @@
    "fieldname": "iban",
    "fieldtype": "Data",
    "label": "IBAN",
+   "options": "IBAN",
    "read_only": 1
   },
   {
@@ -216,7 +217,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-25 23:44:12.473583",
+ "modified": "2025-09-26 00:38:17.584694",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Guarantee",

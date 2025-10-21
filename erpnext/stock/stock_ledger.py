@@ -896,7 +896,11 @@ class update_entries_after:
 		if sle.is_adjustment_entry and flt(sle.qty_after_transaction, self.flt_precision) == 0:
 			sle.stock_value_difference = (
 				get_stock_value_difference(
-					sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time, sle.voucher_no
+					sle.item_code,
+					sle.warehouse,
+					sle.posting_date,
+					sle.posting_time,
+					voucher_detail_no=sle.voucher_detail_no,
 				)
 				* -1
 			)
@@ -2353,7 +2357,9 @@ def is_internal_transfer(sle):
 		return True
 
 
-def get_stock_value_difference(item_code, warehouse, posting_date, posting_time, voucher_no=None):
+def get_stock_value_difference(
+	item_code, warehouse, posting_date, posting_time, voucher_no=None, voucher_detail_no=None
+):
 	table = frappe.qb.DocType("Stock Ledger Entry")
 	posting_datetime = get_combine_datetime(posting_date, posting_time)
 
@@ -2368,7 +2374,10 @@ def get_stock_value_difference(item_code, warehouse, posting_date, posting_time,
 		)
 	)
 
-	if voucher_no:
+	if voucher_detail_no:
+		query = query.where(table.voucher_detail_no != voucher_detail_no)
+
+	elif voucher_no:
 		query = query.where(table.voucher_no != voucher_no)
 
 	difference_amount = query.run()
