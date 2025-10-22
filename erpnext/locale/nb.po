@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-19 09:35+0000\n"
-"PO-Revision-Date: 2025-10-21 13:36\n"
+"PO-Revision-Date: 2025-10-22 14:01\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -301,7 +301,7 @@ msgstr "'Åpning'"
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:129
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:319
 msgid "'To Date' is required"
-msgstr ""
+msgstr "'Til dato' er påkrevd"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:95
 msgid "'To Package No.' cannot be less than 'From Package No.'"
@@ -367,7 +367,7 @@ msgstr ""
 
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:192
 msgid "(Forecast)"
-msgstr ""
+msgstr "(Prognose)"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:253
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:156
@@ -1166,7 +1166,7 @@ msgstr "AWB-nummer"
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Abampere"
-msgstr ""
+msgstr "Abampere"
 
 #. Label of the abbr (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -1504,23 +1504,23 @@ msgstr ""
 #. Label of the paid_from (Link) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Paid From"
-msgstr ""
+msgstr "Konto betalt fra"
 
 #. Label of the paid_to (Link) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Paid To"
-msgstr ""
+msgstr "Konto betalt til"
 
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.py:118
 msgid "Account Pay Only"
-msgstr ""
+msgstr "Kun kontobetaling"
 
 #. Label of the account_subtype (Link) field in DocType 'Bank Account'
 #. Label of the account_subtype (Data) field in DocType 'Bank Account Subtype'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 #: erpnext/accounts/doctype/bank_account_subtype/bank_account_subtype.json
 msgid "Account Subtype"
-msgstr ""
+msgstr "Konto undertype"
 
 #. Label of the account_type (Select) field in DocType 'Account'
 #. Label of the account_type (Link) field in DocType 'Bank Account'
@@ -1540,11 +1540,11 @@ msgstr ""
 #: erpnext/accounts/report/account_balance/account_balance.js:34
 #: erpnext/setup/doctype/party_type/party_type.json
 msgid "Account Type"
-msgstr ""
+msgstr "Konto type"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:125
 msgid "Account Value"
-msgstr ""
+msgstr "Konto verdi"
 
 #: erpnext/accounts/doctype/account/account.py:293
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
