@@ -404,11 +404,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
-<<<<<<< HEAD
- "modified": "2024-01-08 16:00:41.296203",
-=======
  "modified": "2025-10-16 08:39:12.214577",
->>>>>>> 2a2e4b5423 (fix(Task): make Timesheet-dependent fields no_copy)
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
