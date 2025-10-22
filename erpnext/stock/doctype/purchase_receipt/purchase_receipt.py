@@ -472,19 +472,19 @@ class PurchaseReceipt(BuyingController):
 		for item in self.items:
 			item.amount_difference_with_purchase_invoice = 0
 
-	def get_gl_entries(self, warehouse_account=None, via_landed_cost_voucher=False):
+	def get_gl_entries(self, inventory_account_map=None, via_landed_cost_voucher=False):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		gl_entries = []
 
-		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
+		self.make_item_gl_entries(gl_entries, inventory_account_map=inventory_account_map)
 		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
 		self.set_gl_entry_for_purchase_expense(gl_entries)
 		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
-	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+	def make_item_gl_entries(self, gl_entries, inventory_account_map=None):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
@@ -526,9 +526,11 @@ class PurchaseReceipt(BuyingController):
 			):
 				return 0.0
 
-			account = (
-				warehouse_account[item.from_warehouse]["account"] if item.from_warehouse else stock_asset_rbnb
-			)
+			account = stock_asset_rbnb
+			if item.from_warehouse:
+				_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "from_warehouse")
+				account = _inv_dict["account"]
+
 			account_currency = get_account_currency(account)
 
 			# GL Entry for from warehouse or Stock Received but not billed
@@ -653,7 +655,7 @@ class PurchaseReceipt(BuyingController):
 
 		def make_sub_contracting_gl_entries(item):
 			# sub-contracting warehouse
-			if flt(item.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+			if flt(item.rm_supp_cost) and supplier_warehouse_account:
 				self.add_gl_entry(
 					gl_entries=gl_entries,
 					account=supplier_warehouse_account,
@@ -748,22 +750,25 @@ class PurchaseReceipt(BuyingController):
 					stock_value_diff = (
 						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
-				elif warehouse_account.get(d.warehouse):
+				elif inventory_account := self.get_inventory_account_dict(d, inventory_account_map):
 					stock_value_diff = get_stock_value_difference(self.name, d.name, d.warehouse)
-					stock_asset_account_name = warehouse_account[d.warehouse]["account"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account"
-					)
-					supplier_warehouse_account_currency = warehouse_account.get(
-						self.supplier_warehouse, {}
-					).get("account_currency")
+					stock_asset_account_name = inventory_account["account"]
+
+					supplier_warehouse_account = None
+					supplier_warehouse_account_currency = None
+					if self.supplier_warehouse:
+						if _inv_dict := self.get_inventory_account_dict(
+							d, inventory_account_map, "supplier_warehouse"
+						):
+							supplier_warehouse_account = _inv_dict["account"]
+							supplier_warehouse_account_currency = _inv_dict["account_currency"]
 
 					# If PR is sub-contracted and fg item rate is zero
 					# in that case if account for source and target warehouse are same,
 					# then GL entries should not be posted
 					if (
 						flt(stock_value_diff) == flt(d.rm_supp_cost)
-						and warehouse_account.get(self.supplier_warehouse)
+						and supplier_warehouse_account
 						and stock_asset_account_name == supplier_warehouse_account
 					):
 						continue
@@ -795,7 +800,9 @@ class PurchaseReceipt(BuyingController):
 				)
 
 				stock_value_diff = get_stock_value_difference(self.name, d.name, d.rejected_warehouse)
-				stock_asset_account_name = warehouse_account[d.rejected_warehouse]["account"]
+				_inv_dict = self.get_inventory_account_dict(d, inventory_account_map, "rejected_warehouse")
+
+				stock_asset_account_name = _inv_dict["account"]
 
 				make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
 				if not d.qty:

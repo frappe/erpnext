@@ -6,7 +6,7 @@ import json
 
 import frappe
 import frappe.defaults
-from frappe import _
+from frappe import _, bold
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
@@ -73,6 +73,7 @@ class Company(NestedSet):
 		disposal_account: DF.Link | None
 		domain: DF.Data | None
 		email: DF.Data | None
+		enable_item_wise_inventory_account: DF.Check
 		enable_perpetual_inventory: DF.Check
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		exception_budget_approver_role: DF.Link | None
@@ -158,6 +159,24 @@ class Company(NestedSet):
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
 		self.set_reporting_currency()
+		self.validate_inventory_account_settings()
+
+	def validate_inventory_account_settings(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if (
+			doc_before_save.enable_item_wise_inventory_account != self.enable_item_wise_inventory_account
+			and frappe.db.get_value("Stock Ledger Entry", {"is_cancelled": 0, "company": self.name}, "name")
+			and doc_before_save.enable_perpetual_inventory
+		):
+			frappe.throw(
+				_(
+					"Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
+				).format(bold(self.name)),
+				title=_("Cannot Change Inventory Account Setting"),
+			)
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -453,6 +472,22 @@ class Company(NestedSet):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
 				frappe.msgprint(
 					_("Set default inventory account for perpetual inventory"), alert=True, indicator="orange"
+				)
+
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if (
+			doc_before_save.enable_perpetual_inventory
+			and not self.enable_perpetual_inventory
+			and doc_before_save.enable_item_wise_inventory_account != self.enable_item_wise_inventory_account
+		):
+			if frappe.db.get_value("Stock Ledger Entry", {"is_cancelled": 0, "company": self.name}, "name"):
+				frappe.throw(
+					_(
+						"Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
+					).format(bold(self.name))
 				)
 
 	def validate_provisional_account_for_non_stock_items(self):

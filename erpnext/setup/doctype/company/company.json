@@ -114,10 +114,11 @@
   "stock_tab",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
+  "enable_item_wise_inventory_account",
   "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
-  "stock_adjustment_account",
   "column_break_32",
+  "stock_adjustment_account",
   "stock_received_but_not_billed",
   "default_provisional_account",
   "default_in_transit_warehouse",
@@ -877,6 +878,13 @@
    "fieldtype": "Link",
    "label": "Service Expense Account",
    "options": "Account"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will use the inventory account set in the Item Master or Item Group or Brand. Otherwise, it will use the inventory account set in the Warehouse.",
+   "fieldname": "enable_item_wise_inventory_account",
+   "fieldtype": "Check",
+   "label": "Enable Item-wise Inventory Account"
   }
  ],
  "icon": "fa fa-building",
@@ -884,7 +892,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-10-10 15:12:37.941251",
+ "modified": "2025-10-23 13:15:52.411984",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

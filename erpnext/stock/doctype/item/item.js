@@ -509,6 +509,17 @@ $.extend(erpnext.item, {
 				};
 			});
 		});
+
+		frm.set_query("default_inventory_account", "item_defaults", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					is_group: 0,
+					company: row.company,
+					account_type: "Stock",
+				},
+			};
+		});
 	},
 
 	make_dashboard: function (frm) {

@@ -1644,8 +1644,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 				sl_entries.append(sle)
 
-	def get_gl_entries(self, warehouse_account):
-		gl_entries = super().get_gl_entries(warehouse_account)
+	def get_gl_entries(self, inventory_account_map):
+		gl_entries = super().get_gl_entries(inventory_account_map)
 
 		if self.purpose in ("Repack", "Manufacture"):
 			total_basic_amount = sum(flt(t.basic_amount) for t in self.get("items") if t.is_finished_item)
@@ -1720,11 +1720,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 						)
 					)
 
-		self.set_gl_entries_for_landed_cost_voucher(gl_entries, warehouse_account)
+		self.set_gl_entries_for_landed_cost_voucher(gl_entries, inventory_account_map)
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
-	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, warehouse_account):
+	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, inventory_account_map):
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()
 		if not landed_cost_entries:
 			return
@@ -1742,11 +1742,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 						else flt(amount["amount"])
 					)
 
+					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")
 					gl_entries.append(
 						self.get_gl_dict(
 							{
 								"account": account,
-								"against": warehouse_account.get(item.t_warehouse)["account"],
+								"against": _inv_dict["account"],
 								"cost_center": item.cost_center,
 								"debit": 0.0,
 								"credit": credit_amount,
@@ -1766,7 +1767,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						self.get_gl_dict(
 							{
 								"account": item.expense_account,
-								"against": warehouse_account.get(item.t_warehouse)["account"],
+								"against": _inv_dict["account"],
 								"cost_center": item.cost_center,
 								"debit": 0.0,
 								"credit": credit_amount * -1,
