@@ -1854,7 +1854,7 @@ class AccountsController(TransactionBase):
 				for dim in active_dimensions:
 					if self.get(dim.fieldname):
 						x.update({dim.fieldname: self.get(dim.fieldname)})
-			reconcile_against_document(lst, active_dimensions=active_dimensions)
+			reconcile_against_document(lst, active_dimensions=active_dimensions, is_allocated=True)
 
 	def cancel_system_generated_credit_debit_notes(self):
 		# Cancel 'Credit/Debit' Note Journal Entries, if found.

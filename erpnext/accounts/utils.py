@@ -470,10 +470,11 @@ def _build_dimensions_dict_for_exc_gain_loss(
 
 
 def reconcile_against_document(
-	args, skip_ref_details_update_for_pe=False, active_dimensions=None
+	args, skip_ref_details_update_for_pe=False, active_dimensions=None, is_allocated=False
 ):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
+	is_allocated:  Ture if the target invoice already has allocated advances. Defaults to False.
 	"""
 	# To optimize making GL Entry for PE or JV with multiple references
 	reconciled_entries = {}
@@ -510,7 +511,8 @@ def reconcile_against_document(
 					skip_ref_details_update_for_pe=skip_ref_details_update_for_pe,
 					dimensions_dict=dimensions_dict,
 				)
-				if referenced_row.get("outstanding_amount"):
+				# avoid double deduction of outstanding amount if already allocated
+				if not is_allocated and referenced_row.get("outstanding_amount"):
 					referenced_row.outstanding_amount -= flt(entry.allocated_amount)
 
 				reposting_rows.append(referenced_row)
