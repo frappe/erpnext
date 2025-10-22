@@ -433,6 +433,10 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 				fieldname="fixed_asset_account", item=ctx.item_code, company=ctx.company
 			)
 
+	if ctx.uom not in [i.uom for i in item.uoms]:
+		ctx.uom = None
+		ctx.conversion_factor = 0
+
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not ctx.uom:
 		if ctx.doctype in sales_doctypes:
@@ -516,9 +520,7 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 	if item.stock_uom == ctx.uom:
 		out.conversion_factor = 1.0
 	else:
-		out.conversion_factor = ctx.conversion_factor or get_conversion_factor(item.name, ctx.uom).get(
-			"conversion_factor"
-		)
+		out.conversion_factor = get_conversion_factor(item.name, ctx.uom).get("conversion_factor")
 
 	ctx.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
