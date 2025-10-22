@@ -2453,6 +2453,30 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
 				self.assertEqual(row.rejected_serial_no, serial_nos[2])
 
+	def test_ensure_outstanding_in_pi_and_pe_same_after_advance_allocation(self):
+		"Ensure outstanding amounts in Purchase Invoice (PI) and Payment Entry (PE) remain the same after advance allocation."
+		po = create_purchase_order(rate=1000, qty=1)
+
+		pe = get_payment_entry(dt="Purchase Order", dn=po.name, party_amount=700)
+		pe.save()
+		pe.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.allocate_advances_automatically = True
+		pi.set_advances()
+		pi.save()
+		pi.submit()
+
+		po.reload()
+		pi.reload()
+		pe.reload()
+
+		self.assertEqual(
+			flt(pi.outstanding_amount),
+			flt(pe.references[0].outstanding_amount, pi.precision("outstanding_amount")),
+			"Outstanding amount in PI and PE doesn't match after advance allocation.",
+		)
+
 	def test_make_pr_and_pi_from_po(self):
 		from erpnext.assets.doctype.asset.test_asset import create_asset_category
 

@@ -2029,6 +2029,78 @@ class TestSalesInvoice(ERPNextTestSuite):
 			flt(si.rounded_total + si.total_advance, si.precision("outstanding_amount")),
 		)
 
+	def test_ensure_outstanding_in_si_and_pe_same_after_advance_allocation(self):
+		"""
+		Ensure outstanding amounts in Sales Invoice (SI) and Payment Entry (PE)
+		remain the same after advance allocation.
+		"""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		sales_order = make_sales_order(item_code="138-CMS Shoe", qty=1, price_list_rate=500)
+		pe = frappe.get_doc(
+			{
+				"doctype": "Payment Entry",
+				"payment_type": "Receive",
+				"party_type": "Customer",
+				"party": "_Test Customer",
+				"company": "_Test Company",
+				"paid_from_account_currency": "INR",
+				"paid_to_account_currency": "INR",
+				"source_exchange_rate": 1,
+				"target_exchange_rate": 1,
+				"reference_no": "1",
+				"reference_date": nowdate(),
+				"received_amount": 300,
+				"paid_amount": 300,
+				"paid_from": "Debtors - _TC",
+				"paid_to": "_Test Cash - _TC",
+			}
+		)
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": sales_order.name,
+				"total_amount": sales_order.grand_total,
+				"outstanding_amount": sales_order.grand_total,
+				"allocated_amount": 300,
+			},
+		)
+		pe.insert()
+		pe.submit()
+
+		sales_order.reload()
+		self.assertEqual(sales_order.advance_paid, 300)
+
+		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
+		si.items[0].sales_order = sales_order.name
+		si.items[0].so_detail = sales_order.get("items")[0].name
+		si.is_pos = 0
+		si.append(
+			"advances",
+			{
+				"doctype": "Sales Invoice Advance",
+				"reference_type": "Payment Entry",
+				"reference_name": pe.name,
+				"reference_row": pe.references[0].name,
+				"advance_amount": 300,
+				"allocated_amount": 300,
+				"remarks": pe.remarks,
+			},
+		)
+		si.insert()
+		si.submit()
+
+		si.reload()
+		pe.reload()
+		sales_order.reload()
+
+		self.assertEqual(
+			flt(si.outstanding_amount),
+			flt(pe.references[0].outstanding_amount, si.precision("outstanding_amount")),
+			"Outstanding amounts in SI and PE doesn't match after advance allocation",
+		)
+
 	def test_multiple_uom_in_selling(self):
 		frappe.db.sql(
 			"""delete from `tabItem Price`
