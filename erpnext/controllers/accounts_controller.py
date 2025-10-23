@@ -2220,6 +2220,7 @@ class AccountsController(TransactionBase):
 			.where(adv.delinked == 0)
 			.where(adv.against_voucher_type == self.doctype)
 			.where(adv.against_voucher_no == self.name)
+			.where(adv.event == "Submit")
 			.run(as_dict=True)
 		)
 
