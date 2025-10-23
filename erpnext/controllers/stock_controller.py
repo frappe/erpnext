@@ -601,9 +601,17 @@ class StockController(AccountsController):
 						self.check_expense_account(item_row)
 
 						# expense account/ target_warehouse / source_warehouse
+						expense_account = None
 						if item_row.get("target_warehouse"):
 							warehouse = item_row.get("target_warehouse")
-							expense_account = warehouse_account[warehouse]["account"]
+							# Ensure target warehouse has an account mapping
+							if warehouse_account.get(warehouse):
+								expense_account = warehouse_account[warehouse]["account"]
+							else:
+								if warehouse not in warehouse_with_no_account:
+									warehouse_with_no_account.append(warehouse)
+								# Skip creating GL entries for this SLE row; error will be thrown later
+								continue
 						else:
 							expense_account = item_row.expense_account
 
@@ -649,9 +657,20 @@ class StockController(AccountsController):
 			if abs(sle_rounding_diff) > (1.0 / (10**precision)) and self.is_internal_transfer():
 				warehouse_asset_account = ""
 				if self.get("is_internal_customer"):
-					warehouse_asset_account = warehouse_account[item_row.get("target_warehouse")]["account"]
+					_target_wh = item_row.get("target_warehouse")
+					if not _target_wh or not warehouse_account.get(_target_wh):
+						if _target_wh and _target_wh not in warehouse_with_no_account:
+							warehouse_with_no_account.append(_target_wh)
+						# Cannot proceed with rounding entries without a target warehouse account
+						continue
+					warehouse_asset_account = warehouse_account[_target_wh]["account"]
 				elif self.get("is_internal_supplier"):
-					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
+					_source_wh = item_row.get("warehouse")
+					if not _source_wh or not warehouse_account.get(_source_wh):
+						if _source_wh and _source_wh not in warehouse_with_no_account:
+							warehouse_with_no_account.append(_source_wh)
+						continue
+					warehouse_asset_account = warehouse_account[_source_wh]["account"]
 
 				expense_account = frappe.get_cached_value("Company", self.company, "default_expense_account")
 				if not expense_account:

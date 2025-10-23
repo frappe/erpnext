@@ -4695,6 +4695,42 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		doc.db_set("do_not_use_batchwise_valuation", original_value)
 
+	def test_internal_si_missing_target_warehouse_account_validation(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		customer = "_Test Internal Customer 2"
+
+		# Create a warehouse without an account link (no accounting settings); test setup ensures no default mapping
+		git_wh = create_warehouse("_Test Temp GIT No Account", company=company)
+
+		# Ensure there is stock at source to allow update_stock flow to proceed until GL stage
+		make_stock_entry(target="Stores - TCP1", company=company, qty=1, basic_rate=100)
+
+		si = create_sales_invoice(
+			company=company,
+			customer=customer,
+			debit_to="Debtors - TCP1",
+			warehouse="Stores - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			currency="INR",
+			do_not_save=1,
+		)
+
+		si.update_stock = 1
+		si.items[0].target_warehouse = git_wh
+		add_taxes(si)
+		si.save()
+
+		# Submitting should fail with user-facing missing account message, not raw 'Account is required'
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			si.submit()
+
+		self.assertIn("Warehouse", str(ctx.exception))
+		self.assertIn("not linked to any account", str(ctx.exception))
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
