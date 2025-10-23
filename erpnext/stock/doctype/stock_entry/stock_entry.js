@@ -563,7 +563,7 @@ frappe.ui.form.on("Stock Entry", {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
 
-		const args = {
+		let args = {
 			item_code: item.item_code,
 			posting_date: frm.doc.posting_date,
 			posting_time: frm.doc.posting_time,
@@ -576,6 +576,10 @@ frappe.ui.form.on("Stock Entry", {
 			voucher_no: item.name,
 			allow_zero_valuation: 1,
 		};
+
+		if (item.batch_no && frm.doc.purpose == "Material Receipt") {
+			args.qty = Math.abs(args.qty) * -1;
+		}
 
 		if (item.item_code || item.serial_no) {
 			frappe.call({
