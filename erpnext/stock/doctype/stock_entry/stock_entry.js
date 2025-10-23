@@ -1082,6 +1082,10 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.frm.set_query("uom", "items", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 
+			if (!row.item_code) {
+				return;
+			}
+
 			return {
 				query: "erpnext.controllers.queries.get_item_uom_query",
 				filters: {
