@@ -4702,7 +4702,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 
 		# Create a warehouse without an account link (no accounting settings); test setup ensures no default mapping
-		git_wh = create_warehouse("_Test Temp GIT No Account", company=company)
+		git_wh = create_warehouse("_Test Temp GIT No Account", company=company, properties={"account": None})
 
 		# Ensure there is stock at source to allow update_stock flow to proceed until GL stage
 		make_stock_entry(target="Stores - TCP1", company=company, qty=1, basic_rate=100)
