@@ -660,7 +660,7 @@ def make_reverse_gl_entries(
 	adv_adj=False,
 	update_outstanding="Yes",
 	partial_cancel=False,
-	posting_date=None
+	posting_date=None,
 ):
 	"""
 	Get original gl entries of the voucher
