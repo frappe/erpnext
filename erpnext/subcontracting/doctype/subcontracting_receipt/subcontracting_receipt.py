@@ -616,6 +616,7 @@ class SubcontractingReceipt(SubcontractingController):
 			supplied_items_details.setdefault(item.reference_name, []).append(
 				frappe._dict(
 					{
+						"item_code": item.rm_item_code,
 						"amount": item.amount,
 						"expense_account": item.expense_account,
 						"cost_center": item.cost_center,

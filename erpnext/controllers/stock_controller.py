@@ -155,7 +155,7 @@ class StockController(AccountsController):
 					)
 				)
 
-	def get_item_wise_inventory_account_map(self, company):
+	def get_item_wise_inventory_account_map(self):
 		inventory_account_map = frappe._dict()
 		for table in ["items", "packed_items", "supplied_items"]:
 			if not self.get(table):
@@ -190,8 +190,7 @@ class StockController(AccountsController):
 					).format(bold(item_code))
 				)
 
-			if account_dict:
-				return account_dict
+			return account_dict
 
 		if not warehouse_field:
 			warehouse_field = "warehouse"
@@ -207,7 +206,7 @@ class StockController(AccountsController):
 
 	def get_inventory_account_map(self):
 		if self.use_item_inventory_account:
-			return self.get_item_wise_inventory_account_map(self.company)
+			return self.get_item_wise_inventory_account_map()
 
 		return get_warehouse_account_map(self.company)
 
@@ -718,11 +717,11 @@ class StockController(AccountsController):
 						item_row, inventory_account_map, warehouse_field="target_warehouse"
 					)
 
-					warehouse_asset_account = _inv_dict["account"]
+					warehouse_asset_account = _inv_dict.get("account") if _inv_dict else None
 				elif self.get("is_internal_supplier"):
 					_inv_dict = self.get_inventory_account_dict(item_row, inventory_account_map)
 
-					warehouse_asset_account = _inv_dict["account"]
+					warehouse_asset_account = _inv_dict.get("account") if _inv_dict else None
 
 				expense_account = frappe.get_cached_value("Company", self.company, "default_expense_account")
 				if not expense_account:
@@ -2095,7 +2094,7 @@ def get_item_wise_inventory_account_map(rows, company):
 	inventory_map = frappe._dict()
 
 	for row in rows:
-		item_code = row.rm_item_code if hasattr(row, "rm_item_code") else row.item_code
+		item_code = row.rm_item_code if hasattr(row, "rm_item_code") and row.rm_item_code else row.item_code
 		if not item_code:
 			continue
 

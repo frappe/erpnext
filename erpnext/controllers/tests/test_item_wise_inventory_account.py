@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import cint
+from frappe.utils import add_days, cint, today
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -166,6 +166,98 @@ class TestItemWiseInventoryAccount(IntegrationTestCase):
 			)
 
 			self.assertEqual(sle_value, gl_value, f"GL Entry not created for {item_code} correctly")
+
+	def test_item_account_for_backdated_purchase_receipt(self):
+		items = {
+			"Bottle Item A": {"is_stock_item": 1},
+		}
+
+		for item_name, item_data in items.items():
+			item = make_item(
+				item_name,
+				properties=item_data,
+			)
+
+			account = self.add_inventory_account(item)
+			items[item_name]["account"] = account
+
+		make_purchase_receipt(
+			item_code="Bottle Item A",
+			qty=5,
+			rate=100,
+			warehouse=self.default_warehouse,
+			company=self.company,
+		)
+
+		dn = create_delivery_note(
+			item_code="Bottle Item A",
+			qty=5,
+			rate=200,
+			warehouse=self.default_warehouse,
+			company=self.company,
+			cost_center=frappe.db.get_value("Company", self.company, "cost_center"),
+			expense_account=frappe.db.get_value("Company", self.company, "default_expense_account"),
+		)
+
+		for row in items:
+			item_code = row
+			account = items[item_code]["account"]
+
+			sle_value = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_type": "Delivery Note", "voucher_no": dn.name, "item_code": item_code},
+				"stock_value_difference",
+			)
+
+			gl_value = (
+				frappe.db.get_value(
+					"GL Entry",
+					{
+						"voucher_type": "Delivery Note",
+						"voucher_no": dn.name,
+						"account": account,
+					},
+					"credit",
+				)
+				* -1
+			)
+
+			self.assertEqual(sle_value, gl_value, f"GL Entry not created for {item_code} correctly")
+
+		make_purchase_receipt(
+			item_code="Bottle Item A",
+			posting_date=add_days(today(), -1),
+			qty=5,
+			rate=200,
+			warehouse=self.default_warehouse,
+			company=self.company,
+		)
+
+		for row in items:
+			item_code = row
+			account = items[item_code]["account"]
+
+			sle_value = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_type": "Delivery Note", "voucher_no": dn.name, "item_code": item_code},
+				"stock_value_difference",
+			)
+
+			gl_value = (
+				frappe.db.get_value(
+					"GL Entry",
+					{
+						"voucher_type": "Delivery Note",
+						"voucher_no": dn.name,
+						"account": account,
+					},
+					"credit",
+				)
+				* -1
+			)
+
+			self.assertEqual(sle_value, gl_value, f"GL Entry not created for {item_code} correctly")
+			self.assertEqual(sle_value, 1000.0 * -1, f"GL Entry not created for {item_code} correctly")
 
 	def test_item_group_account_for_purchase_receipt_entry(self):
 		items = {
