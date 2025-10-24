@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-19 09:35+0000\n"
-"PO-Revision-Date: 2025-10-20 13:10\n"
+"PO-Revision-Date: 2025-10-23 14:15\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -31058,7 +31058,7 @@ msgstr "Mappar Inköp Följesedel..."
 
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.js:98
 msgid "Mapping Subcontracting Inward Order ..."
-msgstr "Mappar Underleverantör Order ..."
+msgstr "Mappar Intern Underleverantör Order ..."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:153
 msgid "Mapping Subcontracting Order ..."
@@ -34544,7 +34544,7 @@ msgstr "Endast Visa Artiklar från dessa Artikel Grupper"
 #. Description of the 'Customer' (Link) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Only to be used for Subcontracting Inward."
-msgstr "Endast för att användas för Underleverantörer."
+msgstr "Endast för att användas för Interna Underleverantörer."
 
 #. Description of the 'Rounding Loss Allowance' (Float) field in DocType
 #. 'Exchange Rate Revaluation'
@@ -46977,7 +46977,7 @@ msgstr "Rad # {0}: Parti Nummer {1} är redan vald."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:258
 msgid "Row #{0}: Batch No(s) {1} is not a part of the linked Subcontracting Inward Order. Please select valid Batch No(s)."
-msgstr "Rad #{0}: Parti Nummer {1} finns inte i länkade Underleverantör Order. Välj giltiga Parti Nummer."
+msgstr "Rad #{0}: Parti Nummer {1} finns inte i länkade Intern Underleverantör Order. Välj giltiga Parti Nummer."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:863
 msgid "Row #{0}: Cannot allocate more than {1} against payment term {2}"
@@ -46993,7 +46993,7 @@ msgstr "Rad #{0}: Kan inte avbryta denna Produktion Lager Post eftersom kvantite
 
 #: erpnext/controllers/subcontracting_inward_controller.py:303
 msgid "Row #{0}: Cannot cancel this Stock Entry as returned quantity cannot be greater than delivered quantity for Item {1} in the linked Subcontracting Inward Order"
-msgstr "Rad #{0}: Kan inte avbryta denna Lager Post eftersom returnerad kvantitet kan inte vara högre än levererad kvantitet för artikel {1} i länkad Underleverantör Order"
+msgstr "Rad #{0}: Kan inte avbryta denna Lager Post eftersom returnerad kvantitet kan inte vara högre än levererad kvantitet för artikel {1} i länkad Intern Underleverantör Order"
 
 #: erpnext/controllers/accounts_controller.py:3586
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -47057,11 +47057,11 @@ msgstr "Rad # {0}: Kumulativ tröskel får inte vara lägre än Enskild Transakt
 
 #: erpnext/controllers/subcontracting_inward_controller.py:166
 msgid "Row #{0}: Customer Provided Item {1} exceeds quantity available through Subcontracting Inward Order"
-msgstr "Rad #{0}: Kund Försedd Artikel {1} överstiger tillgänglig kvantitet via Underleverantör Order"
+msgstr "Rad #{0}: Kund Försedd Artikel {1} överstiger tillgänglig kvantitet via Intern Underleverantör Order"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:180
 msgid "Row #{0}: Customer Provided Item {1} is not a part of Subcontracting Inward Order {2}"
-msgstr "Rad #{0}: Kund Försedd Artikel {1} finns inte i Underleverantör Order {2}"
+msgstr "Rad #{0}: Kund Försedd Artikel {1} finns inte i Intern Underleverantör Order {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:52
 msgid "Row #{0}: Dates overlapping with other row"
@@ -47157,7 +47157,7 @@ msgstr "Rad #{0}: Artikel {1} är inte Kund Försedd Artikel."
 #: erpnext/controllers/subcontracting_inward_controller.py:75
 #: erpnext/controllers/subcontracting_inward_controller.py:316
 msgid "Row #{0}: Item {1} is not a part of Subcontracting Inward Order {2}"
-msgstr "Rad #{0}: Artikel {1} finns inte i Underleverantör Order {2}"
+msgstr "Rad #{0}: Artikel {1} finns inte i Intern Underleverantör Order {2}"
 
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:288
 msgid "Row #{0}: Item {1} is not a service item"
@@ -47169,7 +47169,7 @@ msgstr "Rad # {0}: Artikel {1} är inte service artikel"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:66
 msgid "Row #{0}: Item {1} mismatch. Changing of item code is not permitted, add another row instead."
-msgstr "Rad #{0}: Artikel {1} stämmer inte. Ändring av Artikel Kod är inte tillåten, lägg till en annan rad istället."
+msgstr "Rad #{0}: Artikel {1} stämmer inte. Ändring av Artikel Kod är inte tillåten, lägg till annan rad istället."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:88
 msgid "Row #{0}: Item {1} mismatch. Changing of item code is not permitted."
@@ -47259,7 +47259,7 @@ msgstr "Rad # {0}: Kvantitet för Artikel {1} kan inte vara noll."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:358
 msgid "Row #{0}: Quantity of Item {1} cannot be more than {2} {3} against Subcontracting Inward Order {4}"
-msgstr "Rad #{0}: Kvantitet för Artikel {1} kan inte vara mer än {2} {3} mot Underleverantör Order {4}"
+msgstr "Rad #{0}: Kvantitet för Artikel {1} kan inte vara mer än {2} {3} mot Intern Underleverantör Order {4}"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1637
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
@@ -47332,7 +47332,7 @@ msgstr "Rad # {0}: Serie Nummer {1} är redan vald."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:250
 msgid "Row #{0}: Serial No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Serial No(s)."
-msgstr "Rad #{0}: Serie Nummer {1} finns inte i länkad Underleverantör Order. Välj giltiga Serie Nummer."
+msgstr "Rad #{0}: Serie Nummer {1} finns inte i länkad Intern Underleverantör Order. Välj giltiga Serie Nummer."
 
 #: erpnext/controllers/accounts_controller.py:572
 msgid "Row #{0}: Service End Date cannot be before Invoice Posting Date"
@@ -47356,7 +47356,7 @@ msgstr "Rad #{0}: Eftersom \"Spåra Halvfärdiga Artiklar\" är aktiverat kan in
 
 #: erpnext/controllers/subcontracting_inward_controller.py:229
 msgid "Row #{0}: Source Warehouse must be same as Customer Warehouse {1} from the linked Subcontracting Inward Order"
-msgstr "Rad #{0}: Lager måste vara samma som Kund Lager {1} från länkad Underleverantör Order"
+msgstr "Rad #{0}: Lager måste vara samma som Kund Lager {1} från länkad Intern Underleverantör Order"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:363
 msgid "Row #{0}: Source Warehouse {1} for item {2} cannot be a customer warehouse."
@@ -47413,7 +47413,7 @@ msgstr "Rad #{0}: Lager kvantitet {1} ({2}) för artikel {3} får inte överstig
 
 #: erpnext/controllers/subcontracting_inward_controller.py:223
 msgid "Row #{0}: Target Warehouse must be same as Customer Warehouse {1} from the linked Subcontracting Inward Order"
-msgstr "Rad #{0}: Lager måste vara samma som Kund Lager {1} från länkad Underleverantör Order"
+msgstr "Rad #{0}: Lager måste vara samma som Kund Lager {1} från länkad Intern Underleverantör Order"
 
 #: erpnext/controllers/stock_controller.py:214
 msgid "Row #{0}: The batch {1} has already expired."
@@ -52087,7 +52087,7 @@ msgstr "Från Lager erfordras för artikel {0}."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:278
 msgid "Source Warehouse {0} must be same as Customer Warehouse {1} in the Subcontracting Inward Order"
-msgstr "Lager {0} måste vara samma som Kund Lager {1} i Underleverantör Order"
+msgstr "Lager {0} måste vara samma som Kund Lager {1} i Intern Underleverantör Order"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:72
 msgid "Source and Target Location cannot be same"
@@ -53816,7 +53816,7 @@ msgstr "Underleverantör Inleverans"
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Subcontracting Inward Order"
-msgstr "Underleverantör Order"
+msgstr "Intern Underleverantör Order"
 
 #. Label of the subcontracting_inward_order_item (Data) field in DocType 'Work
 #. Order'
@@ -53824,28 +53824,28 @@ msgstr "Underleverantör Order"
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 msgid "Subcontracting Inward Order Item"
-msgstr "Underleverantör Order Artikel"
+msgstr "Intern Underleverantör Order Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_received_item/subcontracting_inward_order_received_item.json
 msgid "Subcontracting Inward Order Received Item"
-msgstr "Underleverantör Order Mottagen Artikel"
+msgstr "Intern Underleverantör Order Mottagen Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_scrap_item/subcontracting_inward_order_scrap_item.json
 msgid "Subcontracting Inward Order Scrap Item"
-msgstr "Underleverantörer Order Skrot Artikel"
+msgstr "Intern Underleverantörer Order Skrot Artikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_service_item/subcontracting_inward_order_service_item.json
 msgid "Subcontracting Inward Order Service Item"
-msgstr "Underleverantör Order Service Artikel"
+msgstr "Intern Underleverantör Order Service Artikel"
 
 #. Label of the section_break_zwh6 (Section Break) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Subcontracting Inward Settings"
-msgstr "Underleverantör Inleverans Inställningar"
+msgstr "Intern Underleverantör Inställningar"
 
 #. Label of a Link in the Manufacturing Workspace
 #. Label of the subcontracting_order (Link) field in DocType 'Stock Entry'
@@ -56365,7 +56365,7 @@ msgstr "Stycklista före"
 
 #: erpnext/stock/serial_batch_bundle.py:1429
 msgid "The Batch {0} has negative batch quantity {1}. To fix this, go to the batch and click on Recalculate Batch Qty. If the issue still persists, create an inward entry."
-msgstr "Parti {0} har negativ parti kvantitet {1}. För att åtgärda detta, gå till Parti Inställningar och aktivera Räkna om Parti Kvantitet. Om problemet kvarstår, skapa inkommande post."
+msgstr "Parti {0} har negativ parti kvantitet {1}. För att åtgärda detta, gå till Parti Inställningar och aktivera Räkna om Parti Kvantitet. Om problemet kvarstår, skapa inleverans post."
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:71
 msgid "The Campaign '{0}' already exists for the {1} '{2}'"
@@ -61897,7 +61897,7 @@ msgstr "Varning: Inköp Förslag Kvantitet är mindre än Minimum Order Kvantite
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1329
 msgid "Warning: Quantity exceeds maximum producible quantity based on quantity of raw materials received through the Subcontracting Inward Order {0}."
-msgstr "Varning: Kvantitet överskrider maximal producerbar kvantitet baserat på kvantitet råmaterial som mottagits genom underleverantör order {0}."
+msgstr "Varning: Kvantitet överskrider maximal producerbar kvantitet baserat på kvantitet råmaterial som mottagits genom Intern Underleverantör Order {0}."
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:333
 msgid "Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
@@ -62953,7 +62953,7 @@ msgstr "Du kan inte göra några ändringar i Jobbkort eftersom Arbetsorder är 
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:189
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
-msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} Om du vill leverera in samma serienummer flera gånger aktiverar du \"Tillåt att befintligt serienummer Produceras/Tas Emot igen\" i {3}"
+msgstr "Du kan inte behandla serienummer {0} eftersom det redan har använts i Serienummer och Parti Paket {1}. {2} För att skapa inleverans av samma serienummer flera gånger aktivera \"Tillåt att befintligt serienummer Produceras/Tas Emot igen\" i {3}"
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.py:192
 msgid "You can't redeem Loyalty Points having more value than the Total Amount."
