@@ -231,6 +231,12 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 
 	group_columns = group_wise_columns.get(scrub(filters.group_by))
 
+	# removing customer_name from group columns
+	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+
+	if "customer_name" in group_columns and customer_master_name == "Customer Name":
+		group_columns.remove("customer_name")
+
 	for src in gross_profit_data.grouped_data:
 		total_base_amount += src.base_amount or 0.00
 		total_buying_amount += src.buying_amount or 0.00
