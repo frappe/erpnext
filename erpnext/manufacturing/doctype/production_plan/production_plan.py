@@ -1774,12 +1774,12 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 
-	stock_uom, purchase_uom = frappe.db.get_value(
-		"Item", item.get("item_code"), ["stock_uom", "purchase_uom"]
-	)
+	item_code = item.get("item_code")
+
+	purchase_uom = frappe.db.get_value("Item", item_code, "purchase_uom")
 
 	locations = get_available_item_locations(
-		item.get("item_code"),
+		item_code,
 		warehouses,
 		item.get("quantity") * item.get("conversion_factor"),
 		company,
