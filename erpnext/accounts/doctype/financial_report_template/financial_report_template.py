@@ -115,10 +115,31 @@ class FinancialReportTemplate(Document):
 			json.dump(sorted_categories, f, indent=2)
 
 
-def sync_financial_report_templates():
+def sync_financial_report_templates(chart_of_accounts=None, existing_company=None):
+	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_chart
+
+	# If COA is being created for an existing company,
+	# skip syncing templates as they are likely already present
+	if existing_company:
+		return
+
+	# Allow regional templates to completely override ERPNext
+	# templates based on the chart of accounts selected
+	disable_default_financial_report_template = False
+	if chart_of_accounts:
+		coa = get_chart(chart_of_accounts)
+		if coa.disable_default_financial_report_template:
+			disable_default_financial_report_template = True
+
+	if chart_of_accounts:
+		chart_of_accounts = frappe.get_doc("Chart of Accounts", chart_of_accounts)
+
 	installed_apps = frappe.get_installed_apps()
 
 	for app in installed_apps:
+		if disable_default_financial_report_template and app == "erpnext":
+			continue
+
 		_sync_templates_for(app)
 
 
