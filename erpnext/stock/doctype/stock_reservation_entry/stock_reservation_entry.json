@@ -84,7 +84,7 @@
    "no_copy": 1,
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Data",
-   "options": "\nSales Order\nWork Order\nSubcontracting Inward Order\nProduction Plan",
+   "options": "\nSales Order\nWork Order\nSubcontracting Inward Order\nProduction Plan\nSubcontracting Order",
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"
@@ -344,7 +344,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-12 19:48:33.170835",
+ "modified": "2025-10-22 15:32:52.667264",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

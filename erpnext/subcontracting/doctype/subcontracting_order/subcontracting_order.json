@@ -36,6 +36,7 @@
   "service_items",
   "raw_materials_supplied_section",
   "set_reserve_warehouse",
+  "reserve_stock",
   "supplied_items",
   "tab_address_and_contact",
   "supplier_address",
@@ -471,6 +472,14 @@
    "no_copy": 1,
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock",
+   "no_copy": 1,
+   "show_on_timeline": 1
   }
  ],
  "icon": "fa fa-file-text",

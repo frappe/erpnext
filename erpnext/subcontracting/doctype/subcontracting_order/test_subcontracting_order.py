@@ -700,6 +700,46 @@ class TestSubcontractingOrder(IntegrationTestCase):
 
 		self.assertEqual(sco.supplied_items[0].required_qty, 210.149)
 
+	def test_stock_reservation(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 4",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA4",
+				"fg_item_qty": 10,
+			}
+		]
+
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.reserve_stock = 1
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+
+		rm_items[0]["qty"] = 5
+		rm_items[1]["qty"] = 7
+		rm_items[2]["qty"] = 9
+		ste = make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		sco.reload()
+
+		self.assertEqual(sco.supplied_items[0].reserved_qty, 5)
+		self.assertEqual(sco.supplied_items[1].reserved_qty, 3)
+		self.assertEqual(sco.supplied_items[2].reserved_qty, 1)
+
+		ste.cancel()
+		sco.reload()
+
+		self.assertEqual(sco.supplied_items[0].reserved_qty, 10)
+		self.assertEqual(sco.supplied_items[1].reserved_qty, 10)
+		self.assertEqual(sco.supplied_items[2].reserved_qty, 10)
+
 
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)

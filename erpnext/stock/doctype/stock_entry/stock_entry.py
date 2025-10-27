@@ -202,6 +202,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
 
+	def before_insert(self):
+		if self.subcontracting_order and frappe.get_cached_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			self.set_serial_batch_from_reserved_entry()
+
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 
@@ -274,7 +280,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_work_order()
 		self.update_disassembled_order()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_subcontracting_delivery()
+		self.update_sre_for_submit()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
 
@@ -324,7 +330,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_subcontracting_delivery()
+		self.update_sre_for_cancel()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 
@@ -2230,21 +2236,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_serial_batch_from_reserved_entry(self):
-		if not self.work_order:
-			return
+		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "reserve_stock"):
+			skip_transfer = frappe.get_cached_value("Work Order", self.work_order, "skip_transfer")
 
-		if not frappe.get_cached_value("Work Order", self.work_order, "reserve_stock"):
-			return
-
-		skip_transfer = frappe.get_cached_value("Work Order", self.work_order, "skip_transfer")
-
-		if (
-			self.purpose not in ["Material Transfer for Manufacture"]
-			and frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
-			!= "BOM"
-			and not skip_transfer
-		):
-			return
+			if (
+				self.purpose not in ["Material Transfer for Manufacture"]
+				and frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
+				!= "BOM"
+				and not skip_transfer
+			):
+				return
 
 		reservation_entries = self.get_available_reserved_materials()
 		if not reservation_entries:
@@ -2363,7 +2364,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 			.where(
 				(doctype.docstatus == 1)
-				& (doctype.voucher_no == self.work_order)
+				& (doctype.voucher_no == (self.work_order or self.subcontracting_order))
 				& (serial_batch_doc.delivered_qty < serial_batch_doc.qty)
 			)
 			.orderby(serial_batch_doc.idx)

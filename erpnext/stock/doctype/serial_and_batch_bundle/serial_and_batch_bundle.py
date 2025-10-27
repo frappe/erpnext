@@ -2502,17 +2502,10 @@ def get_auto_batch_nos(kwargs):
 
 
 def get_batch_nos_from_sre(kwargs):
-	from frappe.query_builder.functions import Max, Min, Sum
+	from frappe.query_builder.functions import Sum
 
 	table = frappe.qb.DocType("Stock Reservation Entry")
 	child_table = frappe.qb.DocType("Serial and Batch Entry")
-
-	if kwargs.based_on == "LIFO":
-		creation_field = Max(child_table.creation).as_("sort_creation")
-		order = frappe.query_builder.Order.desc
-	else:
-		creation_field = Min(child_table.creation).as_("sort_creation")
-		order = frappe.query_builder.Order.asc
 
 	query = (
 		frappe.qb.from_(table)
@@ -2522,7 +2515,6 @@ def get_batch_nos_from_sre(kwargs):
 			child_table.batch_no,
 			child_table.warehouse,
 			Sum(child_table.qty - child_table.delivered_qty).as_("qty"),
-			creation_field,
 		)
 		.where(
 			(table.docstatus == 1)
@@ -2530,7 +2522,6 @@ def get_batch_nos_from_sre(kwargs):
 			& (child_table.qty != child_table.delivered_qty)
 		)
 		.groupby(child_table.batch_no, child_table.warehouse)
-		.orderby("sort_creation", order=order)
 		.orderby(child_table.batch_no, order=frappe.query_builder.Order.asc)
 	)
 

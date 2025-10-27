@@ -8,6 +8,7 @@ from frappe.utils import flt
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
 from erpnext.stock.stock_balance import update_bin_qty
 from erpnext.stock.utils import get_bin
 
@@ -52,6 +53,7 @@ class SubcontractingOrder(SubcontractingController):
 		per_received: DF.Percent
 		project: DF.Link | None
 		purchase_order: DF.Link
+		reserve_stock: DF.Check
 		schedule_date: DF.Date | None
 		select_print_heading: DF.Link | None
 		service_items: DF.Table[SubcontractingOrderServiceItem]
@@ -105,6 +107,13 @@ class SubcontractingOrder(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "over_transfer_allowance"),
 		)
 
+		if self.reserve_stock:
+			if self.has_unreserved_stock():
+				self.set_onload("has_unreserved_stock", True)
+
+			if has_reserved_stock(self.doctype, self.name):
+				self.set_onload("has_reserved_stock", True)
+
 	def before_validate(self):
 		super().before_validate()
 
@@ -121,6 +130,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.update_prevdoc_status()
 		self.update_status()
 		self.update_subcontracted_quantity_in_po()
+		self.reserve_raw_materials()
 
 	def on_cancel(self):
 		self.update_prevdoc_status()
@@ -361,6 +371,81 @@ class SubcontractingOrder(SubcontractingController):
 				"subcontracted_qty",
 				subcontracted_qty,
 			)
+
+	@frappe.whitelist()
+	def reserve_raw_materials(self, items=None):
+		if not items:
+			items = {}
+
+		if self.reserve_stock:
+			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+				get_available_qty_to_reserve,
+			)
+
+			stock_reserved = False
+
+			supplied_items = []
+			if items:
+				items = {item.get("name"): item.get("qty_to_reserve") for item in items}
+				supplied_items = [item for item in self.supplied_items if item.name in items]
+
+			for item in supplied_items or self.supplied_items:
+				available_qty = get_available_qty_to_reserve(item.rm_item_code, item.reserve_warehouse)
+				if not available_qty:
+					continue
+				sre = frappe.new_doc("Stock Reservation Entry")
+				sre.company = self.company
+				sre.voucher_type = "Subcontracting Order"
+				sre.voucher_no = self.name
+				sre.voucher_qty = item.required_qty
+				sre.voucher_detail_no = item.name
+				sre.item_code = item.rm_item_code
+				sre.stock_uom = item.stock_uom
+				sre.warehouse = item.reserve_warehouse
+				sre.has_batch_no, sre.has_serial_no = frappe.get_cached_value(
+					"Item", item.rm_item_code, ["has_batch_no", "has_serial_no"]
+				)
+				sre.available_qty = available_qty
+				sre.reserved_qty = min(items.get(item.name) or sre.voucher_qty, sre.available_qty)
+				sre.insert()
+				sre.submit()
+				item.db_set("reserved_qty", flt(item.reserved_qty) + sre.reserved_qty)
+				stock_reserved = True
+
+			if stock_reserved:
+				frappe.msgprint(_("Stock Reservation Entries created."), alert=True, indicator="green")
+
+	def has_unreserved_stock(self) -> bool:
+		for item in self.get("supplied_items"):
+			if item.required_qty - flt(item.supplied_qty) - flt(item.reserved_qty) > 0:
+				return True
+
+		return False
+
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
+		)
+
+		from frappe.query_builder.functions import Sum
+
+		table = frappe.qb.DocType("Stock Reservation Entry")
+		query = (
+			frappe.qb.from_(table)
+			.select(table.voucher_detail_no, Sum(table.reserved_qty - table.delivered_qty))
+			.where((table.docstatus == 2) & (table.name.isin(sre_list)))
+			.groupby(table.voucher_detail_no)
+		)
+		result = frappe._dict(query.run())
+
+		for item in self.get("supplied_items"):
+			if item.name in result:
+				item.db_set("reserved_qty", flt(item.reserved_qty) - flt(result[item.name]))
 
 
 @frappe.whitelist()
