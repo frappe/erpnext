@@ -33,7 +33,9 @@
   "dimension_col_break",
   "purchase_details_section",
   "purchase_receipt",
+  "purchase_receipt_item",
   "purchase_invoice",
+  "purchase_invoice_item",
   "available_for_use_date",
   "total_asset_cost",
   "additional_asset_cost",
@@ -550,6 +552,19 @@
    "label": "Additional Asset Cost",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Receipt Item"
+  },
+  {
+   "fieldname": "purchase_invoice_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Invoice Item",
+   "options": "Purchase Invoice Item"
   }
  ],
  "idx": 72,
@@ -583,7 +598,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2025-05-20 00:44:06.229177",
+ "modified": "2025-10-16 17:53:12.734384",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
