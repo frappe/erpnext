@@ -586,7 +586,7 @@
    "label": "Is Customer Provided Item"
   },
   {
-   "depends_on": "eval:doc.is_customer_provided_item==1",
+   "depends_on": "eval:doc.is_customer_provided_item",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -771,10 +771,9 @@
   },
   {
    "default": "0",
-   "description": "If subcontracted to a vendor",
    "fieldname": "is_sub_contracted_item",
    "fieldtype": "Check",
-   "label": "Supply Raw Materials for Purchase",
+   "label": "Is Subcontracted Item",
    "oldfieldname": "is_sub_contracted_item",
    "oldfieldtype": "Select"
   },
@@ -954,7 +953,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-10-01 16:58:40.946604",
+ "modified": "2025-10-13 16:58:40.946604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

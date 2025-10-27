@@ -652,7 +652,11 @@ frappe.ui.form.on("Work Order Item", {
 							required_qty: row.required_qty || 1,
 							item_name: r.message.item_name,
 							description: r.message.description,
-							source_warehouse: r.message.default_warehouse,
+							source_warehouse:
+								r.message.is_customer_provided_item &&
+								frm.doc.subcontracting_inward_order_item
+									? frm.doc.source_warehouse
+									: r.message.default_warehouse,
 							allow_alternative_item: r.message.allow_alternative_item,
 							include_item_in_manufacturing: r.message.include_item_in_manufacturing,
 						});

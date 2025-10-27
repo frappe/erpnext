@@ -17,6 +17,7 @@
   "job_card",
   "purchase_order",
   "subcontracting_order",
+  "subcontracting_inward_order",
   "delivery_note_no",
   "sales_invoice_no",
   "pick_list",
@@ -129,7 +130,7 @@
    "label": "Purpose",
    "oldfieldname": "purpose",
    "oldfieldtype": "Select",
-   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble",
+   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble\nReceive from Customer\nReturn Raw Material to Customer\nSubcontracting Delivery\nSubcontracting Return",
    "read_only": 1,
    "search_index": 1
   },
@@ -708,8 +709,17 @@
    "fieldtype": "Check",
    "label": "Is Additional Transfer Entry",
    "read_only": 1
+  },
+  {
+   "depends_on": "subcontracting_inward_order",
+   "fieldname": "subcontracting_inward_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Inward Order",
+   "options": "Subcontracting Inward Order",
+   "read_only": 1
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-file-text",
  "idx": 1,
  "index_web_pages_for_search": 1,

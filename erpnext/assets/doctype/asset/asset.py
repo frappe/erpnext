@@ -129,6 +129,8 @@ class Asset(AccountsController):
 		self.set_missing_values()
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
+
+	def before_save(self):
 		self.total_asset_cost = self.net_purchase_amount + self.additional_asset_cost
 		self.status = self.get_status()
 

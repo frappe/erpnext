@@ -199,17 +199,6 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 		super.setup(doc);
 	}
 
-	onload() {
-		super.onload();
-		this.frm.set_query("supplier", function () {
-			return {
-				filters: {
-					is_transporter: 0,
-				},
-			};
-		});
-	}
-
 	refresh() {
 		var me = this;
 		super.refresh();

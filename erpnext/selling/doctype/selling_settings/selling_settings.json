@@ -11,6 +11,7 @@
   "customer_group",
   "column_break_4",
   "territory",
+  "item_price_tab",
   "item_price_settings_section",
   "selling_price_list",
   "maintain_same_rate_action",
@@ -22,6 +23,7 @@
   "validate_selling_price",
   "editable_bundle_item_rates",
   "allow_negative_rates_for_items",
+  "transaction_tab",
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
@@ -38,7 +40,12 @@
   "allow_zero_qty_in_quotation",
   "allow_zero_qty_in_sales_order",
   "experimental_section",
-  "use_legacy_js_reactivity"
+  "use_legacy_js_reactivity",
+  "subcontracting_inward_tab",
+  "section_break_zwh6",
+  "allow_delivery_of_overproduced_qty",
+  "column_break_mla9",
+  "deliver_scrap_items"
  ],
  "fields": [
   {
@@ -233,6 +240,44 @@
    "label": "Allow Quotation with Zero Quantity"
   },
   {
+   "fieldname": "section_break_zwh6",
+   "fieldtype": "Section Break",
+   "label": "Subcontracting Inward Settings"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, system will allow user to deliver the entire quantity of the finished goods produced against the Subcontracting Inward Order. If disabled, system will allow delivery of only the ordered quantity.",
+   "fieldname": "allow_delivery_of_overproduced_qty",
+   "fieldtype": "Check",
+   "label": "Allow Delivery of Overproduced Qty"
+  },
+  {
+   "fieldname": "column_break_mla9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the Scrap Item generated against a Finished Good will also be added in the Stock Entry when delivering that Finished Good.",
+   "fieldname": "deliver_scrap_items",
+   "fieldtype": "Check",
+   "label": "Deliver Scrap Items"
+  },
+  {
+   "fieldname": "item_price_tab",
+   "fieldtype": "Tab Break",
+   "label": "Item Price"
+  },
+  {
+   "fieldname": "transaction_tab",
+   "fieldtype": "Tab Break",
+   "label": "Transaction"
+  },
+  {
+   "fieldname": "subcontracting_inward_tab",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting Inward"
+  },
+  {
    "default": "0",
    "fieldname": "fallback_to_default_price_list",
    "fieldtype": "Check",
@@ -251,7 +296,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-24 16:08:48.865885",
+ "modified": "2025-10-12 16:08:48.865885",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

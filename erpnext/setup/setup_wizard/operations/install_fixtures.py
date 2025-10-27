@@ -122,6 +122,30 @@ def install(country=None):
 			"purpose": "Material Consumption for Manufacture",
 			"is_standard": 1,
 		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Receive from Customer"),
+			"purpose": "Receive from Customer",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Return Raw Material to Customer"),
+			"purpose": "Return Raw Material to Customer",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Subcontracting Delivery"),
+			"purpose": "Subcontracting Delivery",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Subcontracting Return"),
+			"purpose": "Subcontracting Return",
+			"is_standard": 1,
+		},
 		# territory: with two default territories, one for home country and one named Rest of the World
 		{
 			"doctype": "Territory",
