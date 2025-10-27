@@ -716,24 +716,25 @@ class TestSubcontractingOrder(IntegrationTestCase):
 		sco.reserve_stock = 1
 
 		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_in_entry(rm_items=rm_items)
 		sco.submit()
 
-		rm_items[0]["qty"] = 5
-		rm_items[1]["qty"] = 7
-		rm_items[2]["qty"] = 9
-		ste = make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
+		se_dict = make_rm_stock_entry(sco.name)
+		se_dict["items"][0]["qty"] = 5
+		se_dict["items"][1]["qty"] = 7
+		se = frappe.get_doc(se_dict)
+		se.save()
+		se.items.pop(2)
+		se.items[-1].use_serial_batch_fields = 1
+		se.save()
+		se.submit()
 		sco.reload()
 
 		self.assertEqual(sco.supplied_items[0].reserved_qty, 5)
 		self.assertEqual(sco.supplied_items[1].reserved_qty, 3)
 		self.assertEqual(sco.supplied_items[2].reserved_qty, 1)
 
-		ste.cancel()
+		se.cancel()
 		sco.reload()
 
 		self.assertEqual(sco.supplied_items[0].reserved_qty, 10)
