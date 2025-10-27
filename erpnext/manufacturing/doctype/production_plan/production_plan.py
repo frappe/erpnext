@@ -5,11 +5,11 @@
 import copy
 import json
 from collections import defaultdict
+from urllib.parse import urlencode
 
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
@@ -19,6 +19,7 @@ from frappe.utils import (
 	comma_and,
 	flt,
 	get_link_to_form,
+	get_url_to_list,
 	getdate,
 	now_datetime,
 	nowdate,
@@ -868,14 +869,25 @@ class ProductionPlan(Document):
 			po.insert()
 			purchase_orders.append(po.name)
 
-	def show_list_created_message(self, doctype, doc_list=None):
-		if not doc_list:
+	def show_list_created_message(self, doctype, docnames=None):
+		if not docnames:
 			return
 
 		frappe.flags.mute_messages = False
-		if doc_list:
-			doc_list = [get_link_to_form(doctype, p) for p in doc_list]
-			msgprint(_("{0} created").format(comma_and(doc_list)))
+
+		list_url = "".join(
+			(
+				get_url_to_list(doctype),
+				"?",
+				urlencode({"name": json.dumps(["in", docnames])}),
+			)
+		)
+
+		frappe.msgprint(
+			msg=_("{0} <a href='{1}'><strong>{2}(s)</strong></a> created.", context=self.doctype).format(
+				len(docnames), list_url, doctype
+			),
+		)
 
 	def create_work_order(self, item):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
