@@ -128,11 +128,8 @@ def sync_financial_report_templates(chart_of_accounts=None, existing_company=Non
 	disable_default_financial_report_template = False
 	if chart_of_accounts:
 		coa = get_chart(chart_of_accounts)
-		if coa.disable_default_financial_report_template:
+		if coa.get("disable_default_financial_report_template", False):
 			disable_default_financial_report_template = True
-
-	if chart_of_accounts:
-		chart_of_accounts = frappe.get_doc("Chart of Accounts", chart_of_accounts)
 
 	installed_apps = frappe.get_installed_apps()
 
