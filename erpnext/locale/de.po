@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-26 09:35+0000\n"
-"PO-Revision-Date: 2025-10-26 15:11\n"
+"PO-Revision-Date: 2025-10-27 15:39\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -52517,7 +52517,7 @@ msgstr "Ausgangsposition von der Oberkante"
 #. Label of a field in the addresses Web Form
 #: erpnext/utilities/web_form/addresses/addresses.json
 msgid "State"
-msgstr ""
+msgstr "Zustand"
 
 #. Label of the state (Data) field in DocType 'Lead'
 #. Label of the state (Data) field in DocType 'Opportunity'
