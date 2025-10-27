@@ -4,6 +4,7 @@ import json
 import os
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -19,6 +20,37 @@ class AccountCategory(Document):
 		account_category_name: DF.Data
 		description: DF.SmallText | None
 	# end: auto-generated types
+
+	def after_rename(self, old_name, new_name, merge):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			FormulaFieldUpdater,
+		)
+
+		# get all template rows with this account category being used
+		row = frappe.qb.DocType("Financial Report Row")
+		rows = frappe._dict(
+			frappe.qb.from_(row)
+			.select(row.name, row.calculation_formula)
+			.where(row.calculation_formula.like(f"%{old_name}%"))
+			.run()
+		)
+
+		if not rows:
+			return
+
+		# Update formulas with new name
+		updater = FormulaFieldUpdater(
+			field_name="account_category",
+			value_mapping={old_name: new_name},
+			exclude_operators=["like", "not like"],
+		)
+
+		updated_formulas = updater.update_in_rows(rows)
+
+		if updated_formulas:
+			frappe.msgprint(
+				_("Updated {0} Financial Report Row(s) with new category name").format(len(updated_formulas))
+			)
 
 
 def import_account_categories(template_path: str):

@@ -878,6 +878,82 @@ class FormulaFieldExtractor:
 						self._extract_recursive(sub_condition, values)
 
 
+class FormulaFieldUpdater:
+	"""Update field values in filter formulas"""
+
+	def __init__(
+		self, field_name: str, value_mapping: dict[str, str], exclude_operators: list[str] | None = None
+	):
+		"""
+		Initialize field updater.
+
+		Args:
+		    field_name: The field to update values for (e.g., "account_category")
+		    value_mapping: Mapping of old values to new values (e.g., {"Old Name": "New Name"})
+		    exclude_operators: List of operators to exclude from updates (e.g., ["like", "not like"])
+		"""
+		self.field_name = field_name
+		self.value_mapping = value_mapping
+		self.exclude_operators = [op.lower() for op in (exclude_operators or [])]
+
+	def update_in_rows(self, rows: list) -> dict[str, dict[str, str]]:
+		updated_rows = {}
+
+		for row_name, formula in rows.items():
+			if not formula:
+				continue
+
+			try:
+				parsed = ast.literal_eval(formula)
+				updated = self._update_recursive(parsed)
+
+				if updated != parsed:
+					updated_formula = json.dumps(updated)
+					updated_rows[row_name] = {"calculation_formula": updated_formula}
+
+			except (ValueError, SyntaxError):
+				continue  # Skip rows with invalid formulas
+
+		if updated_rows:
+			frappe.db.bulk_update("Financial Report Row", updated_rows, update_modified=False)
+
+		return updated_rows
+
+	def _update_recursive(self, parsed):
+		if isinstance(parsed, list) and len(parsed) == 3:
+			# Simple condition: ["field", "operator", "value"]
+			field, operator, value = parsed
+
+			if field == self.field_name and operator.lower() not in self.exclude_operators:
+				updated_value = self._update_value(value)
+				return [field, operator, updated_value]
+
+			return parsed
+
+		elif isinstance(parsed, dict):
+			# Logical condition: {"and/or": [...]}
+			updated_dict = {}
+			for key, sub_conditions in parsed.items():
+				updated_conditions = [
+					self._update_recursive(sub_condition) for sub_condition in sub_conditions
+				]
+				updated_dict[key] = updated_conditions
+
+			return updated_dict
+
+		return parsed
+
+	def _update_value(self, value):
+		if isinstance(value, str):
+			return self.value_mapping.get(value, value)
+
+		elif isinstance(value, list):
+			# Handle "in" operator with list of values
+			return [self.value_mapping.get(v, v) if isinstance(v, str) else v for v in value]
+
+		return value
+
+
 @frappe.whitelist()
 def get_filtered_accounts(company: str, account_rows: str | list):
 	frappe.has_permission("Financial Report Template", ptype="read", throw=True)
