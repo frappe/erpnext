@@ -4,6 +4,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import today
 
 exclude_from_linked_with = True
@@ -39,28 +40,41 @@ def get_loyalty_point_entries(customer, loyalty_program, company, expiry_date=No
 	if not expiry_date:
 		expiry_date = today()
 
-	return frappe.db.sql(
-		"""
-		select name, loyalty_points, expiry_date, loyalty_program_tier, invoice_type, invoice
-		from `tabLoyalty Point Entry`
-		where customer=%s and loyalty_program=%s
-			and expiry_date>=%s and loyalty_points>0 and company=%s
-		order by expiry_date
-	""",
-		(customer, loyalty_program, expiry_date, company),
-		as_dict=1,
+	LPEntry = frappe.qb.DocType("Loyalty Point Entry")
+
+	return (
+		frappe.qb.from_(LPEntry)
+		.select(
+			LPEntry.name,
+			LPEntry.loyalty_points,
+			LPEntry.expiry_date,
+			LPEntry.loyalty_program_tier,
+			LPEntry.invoice_type,
+			LPEntry.invoice,
+		)
+		.where(
+			(LPEntry.customer == customer)
+			& (LPEntry.loyalty_program == loyalty_program)
+			& (LPEntry.expiry_date >= expiry_date)
+			& (LPEntry.loyalty_points > 0)
+			& (LPEntry.company == company)
+		)
+		.run(as_dict=True)
 	)
 
 
 def get_redemption_details(customer, loyalty_program, company):
-	return frappe._dict(
-		frappe.db.sql(
-			"""
-		select redeem_against, sum(loyalty_points)
-		from `tabLoyalty Point Entry`
-		where customer=%s and loyalty_program=%s and loyalty_points<0 and company=%s
-		group by redeem_against
-	""",
-			(customer, loyalty_program, company),
+	LPEntry = frappe.qb.DocType("Loyalty Point Entry")
+
+	return (
+		frappe.qb.from_(LPEntry)
+		.select(LPEntry.redeem_against, Sum(LPEntry.loyalty_points).as_("loyalty_points"))
+		.where(
+			(LPEntry.customer == customer)
+			& (LPEntry.loyalty_program == loyalty_program)
+			& (LPEntry.loyalty_points < 0)
+			& (LPEntry.company == company)
 		)
+		.groupby(LPEntry.redeem_against)
+		.run(as_dict=True)
 	)
