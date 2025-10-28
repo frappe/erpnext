@@ -55,16 +55,7 @@ frappe.ui.form.on("Loyalty Program", {
 			};
 		});
 
-		frm.set_value("company", frappe.defaults.get_user_default("Company"));
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-	},
-
-	refresh: function (frm) {
-		if (frm.doc.loyalty_program_type === "Single Tier Program" && frm.doc.collection_rules.length > 1) {
-			frappe.throw(
-				__("Please select the Multiple Tier Program type for more than one collection rules.")
-			);
-		}
 	},
 
 	company: function (frm) {

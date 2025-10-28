@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, today
 
+import erpnext
+
 
 class LoyaltyProgram(Document):
 	# begin: auto-generated types
@@ -38,7 +40,15 @@ class LoyaltyProgram(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_single_tier_program()
 		self.validate_lowest_tier()
+		self.validate_expense_account()
+
+	def validate_single_tier_program(self):
+		if self.loyalty_program_type == "Single Tier Program" and len(self.collection_rules) > 1:
+			frappe.throw(
+				_("Please select the Multiple Tier Program type for more than one collection rules.")
+			)
 
 	def validate_lowest_tier(self):
 		tiers = sorted(self.collection_rules, key=lambda x: x.min_spent)
@@ -137,20 +147,22 @@ def get_loyalty_program_details(
 			return frappe._dict({"loyalty_programs": None})
 
 	if not company:
-		company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
+		company = erpnext.get_default_company()
 
-	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
-	lp_details.update({"loyalty_program": loyalty_program.name})
+	lp_details.update({"loyalty_program": loyalty_program})
 	lp_details.update(loyalty_program.as_dict())
 	return lp_details
 
 
 @frappe.whitelist()
 def get_redeemption_factor(loyalty_program=None, customer=None):
-	customer_loyalty_program = None
 	if not loyalty_program:
-		customer_loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")
-		loyalty_program = customer_loyalty_program
+		if not customer:
+			frappe.throw(
+				_("Loyalty Program or Customer is required to get Redemption Factor of a Loyalty Point.")
+			)
+		loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")
+
 	if loyalty_program:
 		return frappe.db.get_value("Loyalty Program", loyalty_program, "conversion_factor")
 	else:
@@ -196,7 +208,7 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 		if not ref_doc.loyalty_points and ref_doc.loyalty_points != points_to_redeem:
 			ref_doc.loyalty_points = points_to_redeem
 
-		if ref_doc.doctype == "Sales Invoice":
+		if ref_doc.doctype in ["Sales Invoice", "POS Invoice"]:
 			ref_doc.loyalty_program = loyalty_program
 			if not ref_doc.loyalty_redemption_account:
 				ref_doc.loyalty_redemption_account = loyalty_program_details.expense_account
