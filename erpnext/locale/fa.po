@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-26 09:35+0000\n"
-"PO-Revision-Date: 2025-10-26 15:12\n"
+"PO-Revision-Date: 2025-10-29 16:26\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -203,7 +203,7 @@ msgstr ""
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Raw Material Returned"
-msgstr ""
+msgstr "% مواد اولیه برگشتی"
 
 #. Label of the per_received (Percent) field in DocType 'Purchase Order'
 #. Label of the per_received (Percent) field in DocType 'Material Request'
@@ -34628,7 +34628,7 @@ msgstr "دستور کارهای باز"
 
 #: erpnext/templates/pages/help.html:60
 msgid "Open a new ticket"
-msgstr "یک بلیط جدید باز کنید"
+msgstr "یک تیکت جدید باز کنید"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.py:397
 #: erpnext/public/js/stock_analytics.js:97
@@ -49391,7 +49391,7 @@ msgstr "مشاهده همه مقالات"
 
 #: erpnext/templates/pages/help.html:56
 msgid "See all open tickets"
-msgstr "همه بلیط های باز را ببینید"
+msgstr "مشاهده همه تیکت‌های باز"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:122
 msgid "Segregate Serial / Batch Bundle"
@@ -54866,7 +54866,7 @@ msgstr "تیم پشتیبانی"
 
 #: erpnext/crm/report/lead_conversion_time/lead_conversion_time.py:68
 msgid "Support Tickets"
-msgstr "بلیط های پشتیبانی"
+msgstr "تیکت‌های پشتیبانی"
 
 #: erpnext/accounts/report/calculated_discount_mismatch/calculated_discount_mismatch.py:64
 msgid "Suspected Discount Amount"
@@ -63047,7 +63047,7 @@ msgstr "سفارش شما آماده تحویل است!"
 
 #: erpnext/templates/pages/help.html:52
 msgid "Your tickets"
-msgstr "بلیط های شما"
+msgstr "تیکت‌های شما"
 
 #. Label of the youtube_video_id (Data) field in DocType 'Video'
 #: erpnext/utilities/doctype/video/video.json
