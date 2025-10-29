@@ -12,16 +12,7 @@ from erpnext.accounts.report.calculated_discount_mismatch.calculated_discount_mi
 
 def execute():
 	# run this patch only if erpnext version before update is v15.64.0 or higher
-	version, git_branch = frappe.db.get_value(
-		"Installed Application",
-		{"app_name": "erpnext"},
-		["app_version", "git_branch"],
-	)
-
-	semantic_version = get_semantic_version(version)
-	if semantic_version and (
-		semantic_version.major < 15 or (git_branch == "version-15" and semantic_version.minor < 64)
-	):
+	if not should_run_patch():
 		return
 
 	for doctype in AFFECTED_DOCTYPES:
@@ -85,3 +76,24 @@ def get_semantic_version(version):
 		return Version(version)
 	except Exception:
 		pass
+
+
+def should_run_patch():
+	installed_app = frappe.db.get_value(
+		"Installed Application",
+		{"app_name": "erpnext"},
+		["app_version", "git_branch"],
+	)
+
+	if not installed_app:
+		return True
+
+	version, git_branch = installed_app
+	semantic_version = get_semantic_version(version)
+	if not semantic_version:
+		return True
+
+	return not (
+		semantic_version.major < 15
+		or (git_branch == "version-15" and semantic_version.major == 15 and semantic_version.minor < 64)
+	)
