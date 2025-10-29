@@ -12,7 +12,7 @@ class OpenItemReconciliation(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from erpnext.accounts.doctype.gl_entry_allocation.gl_entry_allocation import GLEntryAllocation
 		from erpnext.accounts.doctype.gl_reconciliation_details.gl_reconciliation_details import GLReconciliationDetails
 		from frappe.types import DF

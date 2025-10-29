@@ -1,6 +1,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
-
+from frappe import _dict
 from erpnext.accounts.report.gross_and_net_profit_report import (
 	gross_and_net_profit_report as r,
 )
@@ -51,7 +51,7 @@ class TestProfitAndLossStatement(FrappeTestCase):
 			r.get_columns = orig_get_columns
 
 	def test_execute_full_flow_including_gross_and_net_profit_TC_ACC_408(self):
-		period_list = [dict(key="P1"), dict(key="P2")]
+		period_list = [_dict(key="P1"), _dict(key="P2")]
 
 		income_rows = [
 			{
@@ -186,7 +186,7 @@ class TestProfitAndLossStatement(FrappeTestCase):
 			r.get_columns = orig_get_columns
 
 	def test_get_revenue_removes_empty_group_and_adjusts_totals_TC_ACC_409(self):
-		plist = [dict(key="P1"), dict(key="P2")]
+		plist = [_dict(key="P1"), _dict(key="P2")]
 		rows = [
 			{
 				"account": "G",
@@ -260,7 +260,7 @@ class TestProfitAndLossStatement(FrappeTestCase):
 		orig_get_cached_value = frappe.get_cached_value
 		frappe.get_cached_value = lambda doctype, name, field: "EUR"
 		try:
-			plist = [dict(key="M1"), dict(key="M2")]
+			plist = [_dict(key="M1"), _dict(key="M2")]
 			gross_income = [{"M1": 100, "M2": 50, "total": 0}]
 			non_gross_income = [{"M1": 5, "M2": 5, "total": 0}]
 			gross_expense = [{"M1": 60, "M2": 70, "total": 0}]

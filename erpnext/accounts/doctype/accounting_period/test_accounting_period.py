@@ -65,6 +65,7 @@ class TestAccountingPeriod(unittest.TestCase):
 		frappe.flags.in_test = False
 
 	def test_bootstrap_doctypes_for_closing_TC_ACC_230(self):
+		from frappe import _dict
 		frappe.flags.in_test = True
 		try:
 			# Create test Accounting Period doc
@@ -77,10 +78,10 @@ class TestAccountingPeriod(unittest.TestCase):
 
 			# Patch get_doctypes_for_closing to return dict-like list
 			ap.get_doctypes_for_closing = lambda: [
-				dict(document_type="Sales Invoice", closed=1),
-				dict(document_type="Purchase Invoice", closed=1),
+				_dict(document_type="Sales Invoice", closed=1),
+				_dict(document_type="Purchase Invoice", closed=1),
 			]
-
+			
 			# Call bootstrap method
 			ap.bootstrap_doctypes_for_closing()
 

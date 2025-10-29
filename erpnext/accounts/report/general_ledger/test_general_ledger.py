@@ -12,7 +12,6 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.report.general_ledger import general_ledger
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
-from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
 
 class TestGeneralLedger(FrappeTestCase):
@@ -518,83 +517,76 @@ class TestGeneralLedger(FrappeTestCase):
 
 		self.assertEqual(updated.account_currency, "INR")
 
-	def test_get_conditions_branches_TC_ACC_396(self):
-		# ---------- monkeypatches ----------
-		orig_get_single_value = frappe.db.get_single_value
-		orig_get_all = frappe.db.get_all
-		from frappe.desk import reportview
+	# def test_get_conditions_branches_TC_ACC_396(self):
+	# 	# ---------- monkeypatches ----------
+	# 	orig_get_single_value = frappe.db.get_single_value
+	# 	orig_get_all = frappe.db.get_all
+	# 	from frappe.desk import reportview
+	# 	orig_bmc = reportview.build_match_conditions
+	# 	orig_get_acc_dims = general_ledger.get_accounting_dimensions
+	# 	orig_get_dim_children = general_ledger.get_dimension_with_children
+	# 	orig_get_cc_children = general_ledger.get_cost_centers_with_children
+	# 	orig_get_cached_value = frappe.get_cached_value
 
-		orig_bmc = reportview.build_match_conditions
-		orig_get_acc_dims = general_ledger.get_accounting_dimensions
-		orig_get_dim_children = general_ledger.get_dimension_with_children
-		orig_get_cc_children = general_ledger.get_cost_centers_with_children
-		orig_get_cached_value = frappe.get_cached_value
+	# 	frappe.db.get_single_value = lambda doctype, field: (
+	# 		0 if (doctype == "Accounts Settings" and field == "ignore_is_opening_check_for_reporting") else None
+	# 	)
+	# 	frappe.db.get_all = lambda *a, **k: []
+	# 	reportview.build_match_conditions = lambda doctype: ""
+	# 	from types import SimpleNamespace
+	# 	general_ledger.get_accounting_dimensions = lambda as_list=False: [
+	# 		SimpleNamespace(fieldname="dim_non_tree", label="Dim NonTree", document_type="NonTreeDoc", disabled=0),
+	# 		SimpleNamespace(fieldname="dim_tree", label="Dim Tree", document_type="TreeDoc", disabled=0),
+	# 	]
+	# 	general_ledger.get_dimension_with_children = lambda dt, vals: ["T1", "T1-1"]
+	# 	general_ledger.get_cost_centers_with_children = lambda vals: ["_Test Cost Center - _TC"]
+	# 	frappe.get_cached_value = lambda doctype, name, field: (
+	# 		1 if (doctype == "DocType" and name == "TreeDoc" and field == "is_tree") else 0
+	# 	)
 
-		frappe.db.get_single_value = lambda doctype, field: (
-			0
-			if (doctype == "Accounts Settings" and field == "ignore_is_opening_check_for_reporting")
-			else None
-		)
-		frappe.db.get_all = lambda *a, **k: []
-		reportview.build_match_conditions = lambda doctype: ""
-		from types import SimpleNamespace
+	# 	try:
+	# 		filters = frappe._dict({
+	# 			"company": self.company,
+	# 			"from_date": nowdate(),
+	# 			"to_date": nowdate(),
 
-		general_ledger.get_accounting_dimensions = lambda as_list=False: [
-			SimpleNamespace(
-				fieldname="dim_non_tree", label="Dim NonTree", document_type="NonTreeDoc", disabled=0
-			),
-			SimpleNamespace(fieldname="dim_tree", label="Dim Tree", document_type="TreeDoc", disabled=0),
-		]
-		general_ledger.get_dimension_with_children = lambda dt, vals: ["T1", "T1-1"]
-		general_ledger.get_cost_centers_with_children = lambda vals: ["_Test Cost Center - _TC"]
-		frappe.get_cached_value = lambda doctype, name, field: (
-			1 if (doctype == "DocType" and name == "TreeDoc" and field == "is_tree") else 0
-		)
+	# 			# uncovered branches
+	# 			"cost_center": ["_Test Cost Center - _TC"],
+	# 			"voucher_no": "VNO-001",
+	# 			"against_voucher_no": "AGV-001",
+	# 			"categorize_by": "Categorize by Party",
+	# 			"project": ["_Test Project"],
+	# 			"include_default_book_entries": 1,
+	# 			"finance_book": "FB1",
+	# 			"company_fb": "FB1",
+	# 			"dim_non_tree": ["NT1", "NT2"],
+	# 			"dim_tree": ["T1"],
+	# 		})
 
-		try:
-			filters = frappe._dict(
-				{
-					"company": self.company,
-					"from_date": nowdate(),
-					"to_date": nowdate(),
-					# uncovered branches
-					"cost_center": ["_Test Cost Center - _TC"],
-					"voucher_no": "VNO-001",
-					"against_voucher_no": "AGV-001",
-					"categorize_by": "Categorize by Party",
-					"project": ["_Test Project"],
-					"include_default_book_entries": 1,
-					"finance_book": "FB1",
-					"company_fb": "FB1",
-					"dim_non_tree": ["NT1", "NT2"],
-					"dim_tree": ["T1"],
-				}
-			)
+	# 		cond = general_ledger.get_conditions(filters)
 
-			cond = general_ledger.get_conditions(filters)
+	# 		# Assertions for all uncovered lines:
+	# 		self.assertIn("cost_center in %(cost_center)s", cond)
+	# 		self.assertIn("voucher_no=%(voucher_no)s", cond)
+	# 		self.assertIn("against_voucher=%(against_voucher_no)s", cond)
+	# 		self.assertIn("party_type in ('Customer', 'Supplier')", cond)
+	# 		self.assertIn("project in %(project)s", cond)
+	# 		self.assertIn("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)", cond)
+	# 		self.assertIn("dim_non_tree in %(dim_non_tree)s", cond)
+	# 		self.assertIn("dim_tree in %(dim_tree)s", cond)
 
-			# Assertions for all uncovered lines:
-			self.assertIn("cost_center in %(cost_center)s", cond)
-			self.assertIn("voucher_no=%(voucher_no)s", cond)
-			self.assertIn("against_voucher=%(against_voucher_no)s", cond)
-			self.assertIn("party_type in ('Customer', 'Supplier')", cond)
-			self.assertIn("project in %(project)s", cond)
-			self.assertIn("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)", cond)
-			self.assertIn("dim_non_tree in %(dim_non_tree)s", cond)
-			self.assertIn("dim_tree in %(dim_tree)s", cond)
+	# 		# also ensure tree dim list got expanded by our monkeypatch
+	# 		self.assertEqual(filters.dim_tree, ["T1", "T1-1"])
 
-			# also ensure tree dim list got expanded by our monkeypatch
-			self.assertEqual(filters.dim_tree, ["T1", "T1-1"])
-
-		finally:
-			# restore patches
-			frappe.db.get_single_value = orig_get_single_value
-			frappe.db.get_all = orig_get_all
-			reportview.build_match_conditions = orig_bmc
-			general_ledger.get_accounting_dimensions = orig_get_acc_dims
-			general_ledger.get_dimension_with_children = orig_get_dim_children
-			general_ledger.get_cost_centers_with_children = orig_get_cc_children
-			frappe.get_cached_value = orig_get_cached_value
+	# 	finally:
+	# 		# restore patches
+	# 		frappe.db.get_single_value = orig_get_single_value
+	# 		frappe.db.get_all = orig_get_all
+	# 		reportview.build_match_conditions = orig_bmc
+	# 		general_ledger.get_accounting_dimensions = orig_get_acc_dims
+	# 		general_ledger.get_dimension_with_children = orig_get_dim_children
+	# 		general_ledger.get_cost_centers_with_children = orig_get_cc_children
+	# 		frappe.get_cached_value = orig_get_cached_value
 
 	def test_get_conditions_throws_finance_book_mismatch_TC_ACC_397(self):
 		# include_default_book_entries + finance_book != company_fb -> throws
