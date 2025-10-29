@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-26 09:35+0000\n"
-"PO-Revision-Date: 2025-10-26 15:12\n"
+"PO-Revision-Date: 2025-10-27 15:40\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -6194,7 +6194,7 @@ msgstr "Vlasnik Imovine"
 #. Label of the asset_owner_company (Link) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Owner Company"
-msgstr "Kompanija Vlasnik Imovine"
+msgstr "Tvrtka Vlasnik Imovine"
 
 #. Label of the asset_quantity (Int) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -6377,7 +6377,7 @@ msgstr "Imovina {0} ne pripada Artiklu {1}"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:44
 msgid "Asset {0} does not belong to company {1}"
-msgstr "Imovina {0} ne pripada kompaniji {1}"
+msgstr "Imovina {0} ne pripada tvrtki {1}"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 msgid "Asset {0} does not belong to the custodian {1}"
@@ -7910,7 +7910,7 @@ msgstr "Bankovni/Gotovinski Račun"
 
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:57
 msgid "Bank/Cash Account {0} doesn't belong to company {1}"
-msgstr "Bankovni/Gotovinski Račun {0} ne pripada kompaniji {1}"
+msgstr "Bankovni/Gotovinski Račun {0} ne pripada tvrtki {1}"
 
 #. Label of the banking_tab (Tab Break) field in DocType 'Accounts Settings'
 #. Label of a Card Break in the Accounting Workspace
@@ -7987,14 +7987,14 @@ msgstr "Osnovni Iznos"
 #. Label of the base_amount (Currency) field in DocType 'Sales Invoice Payment'
 #: erpnext/accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgid "Base Amount (Company Currency)"
-msgstr "Osnovni Iznos (Valuta Kompanije)"
+msgstr "Osnovni Iznos (Valuta Tvrtke)"
 
 #. Label of the base_change_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the base_change_amount (Currency) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Base Change Amount (Company Currency)"
-msgstr "Osnovni Kusur Iznos (Valuta Kompanije)"
+msgstr "Osnovni Povratni Iznos (Valuta Tvrtke)"
 
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -8004,7 +8004,7 @@ msgstr "Osnovni Trošak po Jedinici"
 #. Label of the base_hour_rate (Currency) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Base Hour Rate(Company Currency)"
-msgstr "Osnovna Cijena po Satu (Valuta Kompanije)"
+msgstr "Osnovna Cijena po Satu (Valuta Tvrtke)"
 
 #. Label of the base_rate (Currency) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -8117,7 +8117,7 @@ msgstr "Osnovni Iznos"
 #. Label of the base_amount (Currency) field in DocType 'BOM Scrap Item'
 #: erpnext/manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 msgid "Basic Amount (Company Currency)"
-msgstr "Osnovni Iznos (Valuta Kompanije)"
+msgstr "Osnovni Iznos (Valuta Tvrtke)"
 
 #. Label of the base_rate (Currency) field in DocType 'BOM Item'
 #. Label of the base_rate (Currency) field in DocType 'BOM Scrap Item'
@@ -8126,7 +8126,7 @@ msgstr "Osnovni Iznos (Valuta Kompanije)"
 #: erpnext/manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Basic Rate (Company Currency)"
-msgstr "Osnovna Cijena(Valuta Kompanije)"
+msgstr "Osnovna Cijena(Valuta Tvrtke)"
 
 #. Label of the basic_rate (Currency) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -11801,7 +11801,7 @@ msgstr "Tvrtka nije povezana"
 #. Label of the shipping_address (Link) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Company Shipping Address"
-msgstr "Dostavna Adresa Kompanije"
+msgstr "Dostavna Adresa Tvrtke"
 
 #. Label of the company_tax_id (Data) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
@@ -11819,7 +11819,7 @@ msgstr "Valute obje tvrtke treba da se podudaraju sa transakcijama između tvrtk
 #: erpnext/stock/doctype/material_request/material_request.js:360
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:704
 msgid "Company field is required"
-msgstr "Polje Kompanije je obavezno"
+msgstr "Tvrtka je obavezna"
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:77
 msgid "Company is mandatory"
@@ -25971,7 +25971,7 @@ msgstr "ID Integracije"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Inter Company Invoice Reference"
-msgstr "Referenca Fakture među Kompanijama"
+msgstr "Referenca Fakture među Tvrtkama"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -26701,7 +26701,7 @@ msgstr "Gotovinski ili Netrgovčki Popust"
 #: erpnext/accounts/doctype/share_balance/share_balance.json
 #: erpnext/accounts/doctype/shareholder/shareholder.json
 msgid "Is Company"
-msgstr "Tvrtka"
+msgstr "Je Tvrtka"
 
 #. Label of the is_company_account (Check) field in DocType 'Bank Account'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
@@ -39373,7 +39373,7 @@ msgstr "Postavi Fiskalni Broj za Klijenta '%s'"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:339
 msgid "Please set Unrealized Exchange Gain/Loss Account in Company {0}"
-msgstr "Postavi Nerealizovani Račun Rezultata u Kompaniji {0}"
+msgstr "Postavi Nerealizovani Račun Rezultata u Tvrtki {0}"
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:56
 msgid "Please set VAT Accounts in {0}"
@@ -49028,7 +49028,7 @@ msgstr "Procentualna Vrijednosti Recikliže"
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:41
 msgid "Same Company is entered more than once"
-msgstr "Ista tvrtka se upisuje više puta"
+msgstr "Ista tvrtka se unosi više puta"
 
 #. Label of the same_item (Check) field in DocType 'Pricing Rule'
 #. Label of the same_item (Check) field in DocType 'Promotional Scheme Product
@@ -49763,7 +49763,7 @@ msgstr "Odaberi najmanje jednu vrijednost iz svakog od atributa."
 
 #: erpnext/public/js/utils/party.js:356
 msgid "Select company first"
-msgstr "Odaberi Kompaniju"
+msgstr "Odaberi Tvrtku"
 
 #. Description of the 'Parent Sales Person' (Link) field in DocType 'Sales
 #. Person'
@@ -49798,7 +49798,7 @@ msgstr "Odaberi Artikal za Proizvodnju."
 
 #: erpnext/manufacturing/doctype/bom/bom.js:886
 msgid "Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically."
-msgstr "Odaber Artikal za Proizvodnju. Naziv Artikla, Jedinica, Tvrtka i Valuta će se automatski preuzeti."
+msgstr "Odaberi Artikal za Proizvodnju. Naziv Artikla, Jedinica, Tvrtka i Valuta će se automatski preuzeti."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:432
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:445
@@ -51550,7 +51550,7 @@ msgstr "Količinski Nedostatak"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.js:103
 msgid "Show Aggregate Value from Subsidiary Companies"
-msgstr "Prikažite ukupnu vrijednost iz podružnica"
+msgstr "Prikažite ukupnu vrijednost iz Podružnica"
 
 #. Label of the show_balance_in_coa (Check) field in DocType 'Accounts
 #. Settings'
@@ -51819,7 +51819,7 @@ msgstr "Potpisnik"
 #. Label of the signee_company (Signature) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
 msgid "Signee (Company)"
-msgstr "Potpisnik (Kompanija)"
+msgstr "Potpisnik (Tvrtka)"
 
 #. Label of the sb_signee (Section Break) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json

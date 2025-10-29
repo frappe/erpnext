@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-26 09:35+0000\n"
-"PO-Revision-Date: 2025-10-26 15:12\n"
+"PO-Revision-Date: 2025-10-27 15:40\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -3830,7 +3830,7 @@ msgstr "Naspram Računa Troškova"
 #. Label of the against_fg (Link) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Against Finished Good"
-msgstr "Protiv Gotovog Proizvoda"
+msgstr "Naspram Gotovog Proizvoda"
 
 #. Label of the against_income_account (Small Text) field in DocType 'POS
 #. Invoice'

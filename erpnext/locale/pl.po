@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-26 09:35+0000\n"
-"PO-Revision-Date: 2025-10-26 15:12\n"
+"PO-Revision-Date: 2025-10-27 15:40\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Polish\n"
 "MIME-Version: 1.0\n"
@@ -51622,7 +51622,7 @@ msgstr "Pokaż harmonogram płatności w druku"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.js:25
 msgid "Show Preview"
-msgstr ""
+msgstr "Pokaż podgląd"
 
 #. Label of the show_remarks (Check) field in DocType 'Process Statement Of
 #. Accounts'
