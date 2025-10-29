@@ -24,7 +24,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.utils import get_currency_precision, get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 
@@ -244,11 +244,9 @@ class PayrollEntry(Document):
 
 			accounts = []
 			currencies = []
+			payable_amount = 0
 			multi_currency = 0
 			company_currency = erpnext.get_company_currency(self.company)
-			currency_precision = get_currency_precision() or 2
-			total_debit_company = 0
-			total_credit_company = 0
 			# Get all salary slips once
 			salary_slips = frappe.get_all(
 				"Salary Slip",
@@ -265,13 +263,11 @@ class PayrollEntry(Document):
 					exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(
 						acc_cc[0], emp_share, company_currency, currencies
 					)
-					account_currency_amount = flt(amt, precision)
-					ex_rate = flt(exchange_rate)
-					total_debit_company += flt(account_currency_amount * ex_rate, currency_precision)
+					payable_amount += flt(emp_share, precision)
 					accounts.append(self.update_accounting_dimensions({
 						"account": acc_cc[0],
-						"debit_in_account_currency": account_currency_amount,
-						"exchange_rate": ex_rate,
+						"debit_in_account_currency": flt(amt, precision),
+						"exchange_rate": flt(exchange_rate),
 						"cost_center": acc_cc[1] or self.cost_center,
 						"project": self.project,
 						"party_type": "Employee",
@@ -286,13 +282,11 @@ class PayrollEntry(Document):
 					exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(
 						acc_cc[0], emp_share, company_currency, currencies
 					)
-					account_currency_amount = flt(amt, precision)
-					ex_rate = flt(exchange_rate)
-					total_credit_company += flt(account_currency_amount * ex_rate, currency_precision)
+					payable_amount -= flt(emp_share, precision)
 					accounts.append(self.update_accounting_dimensions({
 						"account": acc_cc[0],
-						"credit_in_account_currency": account_currency_amount,
-						"exchange_rate": ex_rate,
+						"credit_in_account_currency": flt(amt, precision),
+						"exchange_rate": flt(exchange_rate),
 						"cost_center": acc_cc[1] or self.cost_center,
 						"project": self.project,
 						"party_type": "Employee",
@@ -300,25 +294,18 @@ class PayrollEntry(Document):
 					}, accounting_dimensions))
 
 			# --- Payable amount (Single Line, accumulated total)
-			net_pay_company = flt(total_debit_company - total_credit_company, currency_precision)
+			total_net_pay = sum(flt(ss.net_pay) for ss in salary_slips if flt(ss.net_pay) > 0)
 
-			if net_pay_company:
-				amount_param = flt(net_pay_company / (self.exchange_rate or 1), precision)
+			if total_net_pay > 0:
 				exchange_rate, emp_amt = self.get_amount_and_exchange_rate_for_journal_entry(
-					payroll_payable_account, amount_param, company_currency, currencies
+					payroll_payable_account, total_net_pay, company_currency, currencies
 				)
-				account_currency_amount = flt(emp_amt, precision)
-				ex_rate = flt(exchange_rate)
-				entry = {
+				accounts.append(self.update_accounting_dimensions({
 					"account": payroll_payable_account,
-					"exchange_rate": ex_rate,
+					"credit_in_account_currency": flt(emp_amt, precision),
+					"exchange_rate": flt(exchange_rate),
 					"cost_center": self.cost_center
-				}
-				if net_pay_company > 0:
-					entry["credit_in_account_currency"] = account_currency_amount
-				else:
-					entry["debit_in_account_currency"] = account_currency_amount
-				accounts.append(self.update_accounting_dimensions(entry, accounting_dimensions))
+				}, accounting_dimensions))
 
 
 
@@ -398,44 +385,36 @@ class PayrollEntry(Document):
 		currencies = []
 		multi_currency = 0
 		company_currency = erpnext.get_company_currency(self.company)
-		currency_precision = get_currency_precision() or 2
-		total_debit_company = 0
 
-		# Debit: Payroll Payable for each employee separately
-		for emp, emp_amount in employee_totals.items():
-			exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(
-				payroll_payable_account, emp_amount, company_currency, currencies
-			)
-			account_currency_amount = flt(amount, precision)
-			ex_rate = flt(exchange_rate)
-			total_debit_company += flt(account_currency_amount * ex_rate, currency_precision)
-			accounts.append({
-				"account": payroll_payable_account,
-				"debit_in_account_currency": account_currency_amount,
-				"exchange_rate": ex_rate,
-				"party_type": "Employee",
-				"party": emp,
-				"reference_type": self.doctype,
-				"reference_name": self.name,
-				"branch": self.branch,
-			})
+		total_amount = sum(employee_totals.values())
 
-		net_pay_company = flt(total_debit_company, currency_precision)
-		if not net_pay_company:
-			return
-
-		# Credit: Bank / Cash account (one line) aligned with summed debits
-		amount_param = flt(net_pay_company / (self.exchange_rate or 1), precision)
+		# Credit: Bank / Cash account (one line)
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(
-			self.payment_account, amount_param, company_currency, currencies
+			self.payment_account, total_amount, company_currency, currencies
 		)
-		accounts.insert(0, {
+		accounts.append({
 			"account": self.payment_account,
 			"bank_account": self.bank_account,
 			"credit_in_account_currency": flt(amount, precision),
 			"exchange_rate": flt(exchange_rate),
 			"branch": self.branch,
 		})
+
+		# Debit: Payroll Payable for each employee separately
+		for emp, emp_amount in employee_totals.items():
+			exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(
+				payroll_payable_account, emp_amount, company_currency, currencies
+			)
+			accounts.append({
+				"account": payroll_payable_account,
+				"debit_in_account_currency": flt(amount, precision),
+				"exchange_rate": flt(exchange_rate),
+				"party_type": "Employee",
+				"party": emp,
+				"reference_type": self.doctype,
+				"reference_name": self.name,
+				"branch": self.branch,
+			})
 
 		if len(currencies) > 1:
 			multi_currency = 1
