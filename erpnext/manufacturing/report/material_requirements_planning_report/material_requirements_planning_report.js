@@ -52,6 +52,23 @@ frappe.query_reports["Material Requirements Planning Report"] = {
 			fieldtype: "Link",
 			options: "Master Production Schedule",
 			reqd: 1,
+			on_change() {
+				let mps = frappe.query_report.get_filter_value("mps");
+				if (mps) {
+					frappe.call({
+						method: "erpnext.manufacturing.doctype.master_production_schedule.master_production_schedule.get_mps_details",
+						args: {
+							mps: mps,
+						},
+						callback: function (r) {
+							if (r.message) {
+								frappe.query_report.set_filter_value("from_date", r.message.from_date);
+								frappe.query_report.set_filter_value("to_date", r.message.to_date);
+							}
+						},
+					});
+				}
+			},
 		},
 		{
 			fieldname: "type_of_material",

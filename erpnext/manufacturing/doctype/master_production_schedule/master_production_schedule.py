@@ -457,3 +457,13 @@ def get_item_lead_time(item_code):
 		return result[0].cumulative_lead_time or 0
 
 	return 0
+
+
+@frappe.whitelist()
+def get_mps_details(mps):
+	return frappe.db.get_value(
+		"Master Production Schedule",
+		mps,
+		["name", "from_date", "to_date", "company", "posting_date"],
+		as_dict=True,
+	)
