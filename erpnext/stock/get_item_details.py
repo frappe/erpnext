@@ -872,6 +872,18 @@ def get_default_income_account(ctx: ItemDetailsCtx, item, item_group, brand):
 	)
 
 
+def get_default_inventory_account(ctx: ItemDetailsCtx, item, item_group, brand):
+	if not frappe.get_cached_value("Company", ctx.company, "enable_item_wise_inventory_account"):
+		return None
+
+	return (
+		ctx.inventory_account
+		or item.get("default_inventory_account")
+		or item_group.get("default_inventory_account")
+		or brand.get("default_inventory_account")
+	)
+
+
 def get_default_expense_account(ctx: ItemDetailsCtx, item, item_group, brand):
 	if ctx.get("doctype") in ["Sales Invoice", "Delivery Note"]:
 		expense_account = (

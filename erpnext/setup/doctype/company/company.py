@@ -6,12 +6,12 @@ import json
 
 import frappe
 import frappe.defaults
-from frappe import _
+from frappe import _, bold
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
-from frappe.utils import cint, formatdate, get_link_to_form, get_timestamp, today
+from frappe.utils import add_months, cint, formatdate, get_first_day, get_link_to_form, get_timestamp, today
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
@@ -73,6 +73,7 @@ class Company(NestedSet):
 		disposal_account: DF.Link | None
 		domain: DF.Data | None
 		email: DF.Data | None
+		enable_item_wise_inventory_account: DF.Check
 		enable_perpetual_inventory: DF.Check
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		exception_budget_approver_role: DF.Link | None
@@ -158,6 +159,24 @@ class Company(NestedSet):
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
 		self.set_reporting_currency()
+		self.validate_inventory_account_settings()
+
+	def validate_inventory_account_settings(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if (
+			doc_before_save.enable_item_wise_inventory_account != self.enable_item_wise_inventory_account
+			and frappe.db.get_value("Stock Ledger Entry", {"is_cancelled": 0, "company": self.name}, "name")
+			and doc_before_save.enable_perpetual_inventory
+		):
+			frappe.throw(
+				_(
+					"Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
+				).format(bold(self.name)),
+				title=_("Cannot Change Inventory Account Setting"),
+			)
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -453,6 +472,22 @@ class Company(NestedSet):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
 				frappe.msgprint(
 					_("Set default inventory account for perpetual inventory"), alert=True, indicator="orange"
+				)
+
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if (
+			doc_before_save.enable_perpetual_inventory
+			and not self.enable_perpetual_inventory
+			and doc_before_save.enable_item_wise_inventory_account != self.enable_item_wise_inventory_account
+		):
+			if frappe.db.get_value("Stock Ledger Entry", {"is_cancelled": 0, "company": self.name}, "name"):
+				frappe.throw(
+					_(
+						"Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
+					).format(bold(self.name))
 				)
 
 	def validate_provisional_account_for_non_stock_items(self):
@@ -762,39 +797,39 @@ def install_country_fixtures(company, country):
 
 
 def update_company_current_month_sales(company):
-	current_month_year = formatdate(today(), "MM-yyyy")
+	from_date = get_first_day(today())
+	to_date = get_first_day(add_months(from_date, 1))
 
 	results = frappe.db.sql(
-		f"""
+		"""
 		SELECT
 			SUM(base_grand_total) AS total,
-			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+			DATE_FORMAT(posting_date, '%%m-%%Y') AS month_year
 		FROM
 			`tabSales Invoice`
 		WHERE
-			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			posting_date >= %s
+			AND posting_date < %s
 			AND docstatus = 1
-			AND company = {frappe.db.escape(company)}
+			AND company = %s
 		GROUP BY
 			month_year
-	""",
+		""",
+		(from_date, to_date, company),
 		as_dict=True,
 	)
 
 	monthly_total = results[0]["total"] if len(results) > 0 else 0
-
 	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
 
 
 def update_company_monthly_sales(company):
 	"""Cache past year monthly sales of every company based on sales invoices"""
-	import json
-
 	from frappe.utils.goal import get_monthly_results
 
-	filter_str = f"company = {frappe.db.escape(company)} and status != 'Draft' and docstatus=1"
+	filter_dict = {"company": company, "status": ["!=", "Draft"], "docstatus": 1}
 	month_to_value_dict = get_monthly_results(
-		"Sales Invoice", "base_grand_total", "posting_date", filter_str, "sum"
+		"Sales Invoice", "base_grand_total", "posting_date", filter_dict, "sum"
 	)
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))

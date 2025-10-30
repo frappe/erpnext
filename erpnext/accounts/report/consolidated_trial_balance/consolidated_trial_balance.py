@@ -264,7 +264,8 @@ def calculate_total_row(data, reporting_currency):
 			for field in value_fields:
 				total_row[field] += d[field]
 
-	calculate_foreign_currency_translation_reserve(total_row, data)
+	if data:
+		calculate_foreign_currency_translation_reserve(total_row, data)
 
 	return total_row
 

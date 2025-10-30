@@ -1048,6 +1048,7 @@ class BuyingController(SubcontractingController):
 				"asset_category": item_data.get("asset_category"),
 				"location": row.asset_location,
 				"company": self.company,
+				"status": "Draft",
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
 				"calculate_depreciation": 0,

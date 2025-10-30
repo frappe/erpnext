@@ -596,19 +596,19 @@ class SubcontractingReceipt(SubcontractingController):
 				"Subcontracting Receipt", self.name, "status", status, update_modified=update_modified
 			)
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self, inventory_account_map=None):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		if not erpnext.is_perpetual_inventory_enabled(self.company):
 			return []
 
 		gl_entries = []
-		self.make_item_gl_entries(gl_entries, warehouse_account)
-		self.make_item_gl_entries_for_lcv(gl_entries, warehouse_account)
+		self.make_item_gl_entries(gl_entries, inventory_account_map)
+		self.make_item_gl_entries_for_lcv(gl_entries, inventory_account_map)
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
-	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+	def make_item_gl_entries(self, gl_entries, inventory_account_map=None):
 		warehouse_with_no_account = []
 
 		supplied_items_details = frappe._dict()
@@ -616,6 +616,7 @@ class SubcontractingReceipt(SubcontractingController):
 			supplied_items_details.setdefault(item.reference_name, []).append(
 				frappe._dict(
 					{
+						"item_code": item.rm_item_code,
 						"amount": item.amount,
 						"expense_account": item.expense_account,
 						"cost_center": item.cost_center,
@@ -625,7 +626,9 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for item in self.items:
 			if flt(item.rate) and flt(item.qty):
-				if warehouse_account.get(item.warehouse):
+				_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
+
+				if _inv_dict.get("account"):
 					stock_value_diff = frappe.db.get_value(
 						"Stock Ledger Entry",
 						{
@@ -638,22 +641,18 @@ class SubcontractingReceipt(SubcontractingController):
 						"stock_value_difference",
 					)
 
-					accepted_warehouse_account = warehouse_account[item.warehouse]["account"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account"
-					)
 					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
 					# Accepted Warehouse Account (Debit)
 					self.add_gl_entry(
 						gl_entries=gl_entries,
-						account=accepted_warehouse_account,
+						account=_inv_dict["account"],
 						cost_center=item.cost_center,
 						debit=stock_value_diff,
 						credit=0.0,
 						remarks=remarks,
 						against_account=item.expense_account,
-						account_currency=get_account_currency(accepted_warehouse_account),
+						account_currency=_inv_dict["account_currency"],
 						project=item.project,
 						item=item,
 					)
@@ -669,7 +668,7 @@ class SubcontractingReceipt(SubcontractingController):
 						debit=0.0,
 						credit=flt(stock_value_diff) - service_cost,
 						remarks=remarks,
-						against_account=accepted_warehouse_account,
+						against_account=_inv_dict["account"],
 						account_currency=get_account_currency(item.expense_account),
 						project=item.project,
 						item=item,
@@ -684,24 +683,28 @@ class SubcontractingReceipt(SubcontractingController):
 						debit=0.0,
 						credit=service_cost,
 						remarks=remarks,
-						against_account=accepted_warehouse_account,
+						against_account=_inv_dict["account"],
 						account_currency=get_account_currency(service_account),
 						project=item.project,
 						item=item,
 					)
 
-					if flt(item.rm_supp_cost) and supplier_warehouse_account:
+					if flt(item.rm_supp_cost):
 						for rm_item in supplied_items_details.get(item.name):
+							_inv_dict = self.get_inventory_account_dict(
+								rm_item, inventory_account_map, "supplier_warehouse"
+							)
+
 							# Supplier Warehouse Account (Credit)
 							self.add_gl_entry(
 								gl_entries=gl_entries,
-								account=supplier_warehouse_account,
+								account=_inv_dict.get("account"),
 								cost_center=rm_item.cost_center or item.cost_center,
 								debit=0.0,
 								credit=flt(rm_item.amount),
 								remarks=remarks,
 								against_account=rm_item.expense_account or item.expense_account,
-								account_currency=get_account_currency(supplier_warehouse_account),
+								account_currency=_inv_dict.get("account_currency"),
 								project=item.project,
 								item=item,
 							)
@@ -713,7 +716,7 @@ class SubcontractingReceipt(SubcontractingController):
 								debit=flt(rm_item.amount),
 								credit=0.0,
 								remarks=remarks,
-								against_account=supplier_warehouse_account,
+								against_account=_inv_dict.get("account"),
 								account_currency=get_account_currency(item.expense_account),
 								project=item.project,
 								item=item,
@@ -795,7 +798,7 @@ class SubcontractingReceipt(SubcontractingController):
 				+ "\n".join(warehouse_with_no_account)
 			)
 
-	def make_item_gl_entries_for_lcv(self, gl_entries, warehouse_account):
+	def make_item_gl_entries_for_lcv(self, gl_entries, inventory_account_map):
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()
 
 		if not landed_cost_entries:
@@ -805,6 +808,8 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.landed_cost_voucher_amount and landed_cost_entries:
 				remarks = _("Accounting Entry for Landed Cost Voucher for SCR {0}").format(self.name)
 				if (item.item_code, item.name) in landed_cost_entries:
+					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
+
 					for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
 						account_currency = get_account_currency(account)
 						credit_amount = (
@@ -820,7 +825,7 @@ class SubcontractingReceipt(SubcontractingController):
 							debit=0.0,
 							credit=credit_amount,
 							remarks=remarks,
-							against_account=warehouse_account.get(item.warehouse)["account"],
+							against_account=_inv_dict["account"],
 							credit_in_account_currency=flt(amount["amount"]),
 							account_currency=account_currency,
 							project=item.project,
@@ -837,7 +842,7 @@ class SubcontractingReceipt(SubcontractingController):
 							debit=0.0,
 							credit=credit_amount * -1,
 							remarks=remarks,
-							against_account=warehouse_account.get(item.warehouse)["account"],
+							against_account=_inv_dict["account"],
 							debit_in_account_currency=flt(amount["amount"]),
 							account_currency=account_currency,
 							project=item.project,

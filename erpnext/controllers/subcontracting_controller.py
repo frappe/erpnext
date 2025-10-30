@@ -156,7 +156,7 @@ class SubcontractingController(StockController):
 				frappe.throw(
 					_(
 						"Row {0}: Delivery Warehouse cannot be same as Customer Warehouse for Item {1}."
-					).format(item.idx, frappe.bold(item.item_name))
+					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
 			if not item.get("is_scrap_item"):
@@ -664,6 +664,8 @@ class SubcontractingController(StockController):
 
 	def __add_supplied_or_received_item(self, item_row, bom_item, qty):
 		bom_item.conversion_factor = item_row.conversion_factor
+		if self.subcontract_data.order_doctype == "Subcontracting Inward Order":
+			bom_item.pop("rate")
 		rm_obj = self.append(self.raw_material_table, bom_item)
 		if rm_obj.get("qty"):
 			# Qty field not exists

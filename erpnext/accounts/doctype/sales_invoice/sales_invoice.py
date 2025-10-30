@@ -1297,7 +1297,7 @@ class SalesInvoice(SellingController):
 							item.idx,
 							item.stock_qty,
 							item.stock_uom,
-							frappe.bold(item.item_code),
+							get_link_to_form("Item", item.item_code),
 							frappe.bold(max_qty),
 						)
 					)
@@ -1551,7 +1551,7 @@ class SalesInvoice(SellingController):
 		elif self.docstatus == 2 and cint(self.update_stock) and cint(auto_accounting_for_stock):
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self, inventory_account_map=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
@@ -2700,6 +2700,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		):
 			target.purchase_order = source.purchase_order
 			target.po_detail = source.purchase_order_item
+
+		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
+			target.use_serial_batch_fields = 1
 
 	item_field_map = {
 		"doctype": target_doctype + " Item",

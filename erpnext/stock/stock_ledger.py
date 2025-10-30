@@ -897,10 +897,19 @@ class update_entries_after:
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
 
 		sle.stock_value_difference = stock_value_difference
-		if sle.is_adjustment_entry and flt(sle.qty_after_transaction, self.flt_precision) == 0:
+		if (
+			sle.is_adjustment_entry
+			and flt(sle.qty_after_transaction, self.flt_precision) == 0
+			and flt(sle.stock_value, self.currency_precision) != 0
+		):
 			sle.stock_value_difference = (
 				get_stock_value_difference(
-					sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time, sle.voucher_no
+					sle.item_code,
+					sle.warehouse,
+					sle.posting_date,
+					sle.posting_time,
+					voucher_detail_no=sle.voucher_detail_no,
+					creation=sle.creation,
 				)
 				* -1
 			)
@@ -1923,9 +1932,6 @@ def get_valuation_rate(
 
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
-		sabb = frappe.db.get_value(
-			"Serial and Batch Bundle", serial_and_batch_bundle, ["posting_date", "posting_time"], as_dict=True
-		)
 		batch_obj = BatchNoValuation(
 			sle=frappe._dict(
 				{
@@ -1933,7 +1939,9 @@ def get_valuation_rate(
 					"warehouse": warehouse,
 					"actual_qty": -1,
 					"serial_and_batch_bundle": serial_and_batch_bundle,
-					"posting_datetime": get_combine_datetime(sabb.posting_date, sabb.posting_time),
+					"posting_datetime": frappe.get_value(
+						"Serial and Batch Bundle", serial_and_batch_bundle, "posting_datetime"
+					),
 				}
 			)
 		)
@@ -2341,23 +2349,31 @@ def is_internal_transfer(sle):
 		return True
 
 
-def get_stock_value_difference(item_code, warehouse, posting_date, posting_time, voucher_no=None):
+def get_stock_value_difference(
+	item_code, warehouse, posting_date, posting_time, voucher_no=None, voucher_detail_no=None, creation=None
+):
 	table = frappe.qb.DocType("Stock Ledger Entry")
 	posting_datetime = get_combine_datetime(posting_date, posting_time)
 
 	query = (
 		frappe.qb.from_(table)
 		.select(Sum(table.stock_value_difference).as_("value"))
-		.where(
-			(table.is_cancelled == 0)
-			& (table.item_code == item_code)
-			& (table.warehouse == warehouse)
-			& (table.posting_datetime <= posting_datetime)
-		)
+		.where((table.is_cancelled == 0) & (table.item_code == item_code) & (table.warehouse == warehouse))
 	)
 
-	if voucher_no:
+	if voucher_detail_no:
+		query = query.where(table.voucher_detail_no != voucher_detail_no)
+
+	elif voucher_no:
 		query = query.where(table.voucher_no != voucher_no)
+
+	if creation:
+		query = query.where(
+			(table.posting_datetime < posting_datetime)
+			| ((table.posting_datetime == posting_datetime) & (table.creation < creation))
+		)
+	else:
+		query = query.where(table.posting_datetime <= posting_datetime)
 
 	difference_amount = query.run()
 	return flt(difference_amount[0][0]) if difference_amount else 0

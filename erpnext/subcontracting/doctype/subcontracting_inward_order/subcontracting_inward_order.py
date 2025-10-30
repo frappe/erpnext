@@ -275,10 +275,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 						d.precision("qty"),
 					)
 					for item in self.get("received_items")
-					if item.reference_name == d.name and item.is_customer_provided_item
+					if item.reference_name == d.name and item.is_customer_provided_item and item.required_qty
 				]
 			)
-			qty = int(qty) if frappe.get_cached_value("UOM", d.stock_uom, "must_be_whole_number") else qty
+			qty = min(
+				int(qty) if frappe.get_cached_value("UOM", d.stock_uom, "must_be_whole_number") else qty,
+				d.qty - d.produced_qty,
+			)
 
 			item_details.update({"qty": qty, "max_producible_qty": qty})
 			item_list.append(item_details)

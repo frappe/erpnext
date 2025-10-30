@@ -185,8 +185,6 @@ class WorkOrder(Document):
 
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
-		else:
-			self.validate_self_rm_warehouse()
 
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
@@ -276,12 +274,99 @@ class WorkOrder(Document):
 			):
 				frappe.throw(
 					_(
-						"Source Warehouse {0} must be same as Customer Warehouse {1} in the Subcontracting Inward Order"
+						"Source Warehouse {0} must be same as Customer Warehouse {1} in the Subcontracting Inward Order."
 					).format(
-						frappe.bold(self.source_warehouse),
-						frappe.bold(rm_receipt_warehouse),
+						get_link_to_form("Warehouse", self.source_warehouse),
+						get_link_to_form("Warehouse", rm_receipt_warehouse),
 					)
 				)
+
+			if self.fg_warehouse != (
+				delivery_warehouse := frappe.get_cached_value(
+					"Subcontracting Inward Order Item",
+					self.subcontracting_inward_order_item,
+					"delivery_warehouse",
+				)
+			):
+				frappe.throw(
+					_(
+						"Target Warehouse {0} must be same as Delivery Warehouse {1} in the Subcontracting Inward Order Item."
+					).format(
+						get_link_to_form("Warehouse", self.fg_warehouse),
+						get_link_to_form(
+							"Warehouse",
+							delivery_warehouse,
+						),
+					)
+				)
+
+			possible_customer_provided_items = frappe.get_all(
+				"Subcontracting Inward Order Received Item",
+				{
+					"reference_name": self.subcontracting_inward_order_item,
+					"is_customer_provided_item": 1,
+					"docstatus": 1,
+				},
+				["rm_item_code", "received_qty", "returned_qty", "work_order_qty"],
+			)
+			item_codes = []
+			for item in self.required_items:
+				if item.is_customer_provided_item:
+					if item.source_warehouse != self.source_warehouse:
+						frappe.throw(
+							_(
+								"Row #{0}: Source Warehouse {1} for item {2} must be same as Source Warehouse {3} in the Work Order."
+							).format(
+								item.idx,
+								get_link_to_form("Warehouse", item.source_warehouse),
+								get_link_to_form("Item", item.item_code),
+								get_link_to_form("Warehouse", self.source_warehouse),
+							)
+						)
+					elif item.item_code in item_codes:
+						frappe.throw(
+							_("Row #{0}: Customer Provided Item {1} cannot be added multiple times.").format(
+								item.idx,
+								get_link_to_form("Item", item.item_code),
+							)
+						)
+					else:
+						row = next(
+							(i for i in possible_customer_provided_items if i.rm_item_code == item.item_code),
+							None,
+						)
+						if row:
+							if item.required_qty > row.received_qty - row.returned_qty - row.work_order_qty:
+								frappe.throw(
+									_(
+										"Row #{0}: Customer Provided Item {1} has insufficient quantity in the Subcontracting Inward Order. Available quantity is {2}."
+									).format(
+										item.idx,
+										get_link_to_form("Item", item.item_code),
+										frappe.bold(row.received_qty - row.returned_qty - row.work_order_qty),
+									)
+								)
+							else:
+								item_codes.append(item.item_code)
+						else:
+							frappe.throw(
+								_(
+									"Row #{0}: Customer Provided Item {1} does not exist in the Required Items table linked to the Subcontracting Inward Order."
+								).format(
+									item.idx,
+									get_link_to_form("Item", item.item_code),
+								)
+							)
+				elif frappe.get_cached_value("Warehouse", item.source_warehouse, "customer"):
+					frappe.throw(
+						_(
+							"Row #{0}: Source Warehouse {1} for item {2} cannot be a customer warehouse."
+						).format(
+							item.idx,
+							get_link_to_form("Warehouse", item.source_warehouse),
+							get_link_to_form("Item", item.item_code),
+						)
+					)
 
 	def set_warehouses(self):
 		for row in self.required_items:
@@ -355,15 +440,6 @@ class WorkOrder(Document):
 					self.validate_work_order_against_so()
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
-
-	def validate_self_rm_warehouse(self):
-		for item in [item for item in self.required_items if not item.is_customer_provided_item]:
-			if frappe.get_cached_value("Warehouse", item.source_warehouse, "customer"):
-				frappe.throw(
-					_("Row #{0}: Source Warehouse {1} for item {2} cannot be a customer warehouse.").format(
-						item.idx, frappe.bold(item.source_warehouse), frappe.bold(item.item_code)
-					)
-				)
 
 	def check_sales_order_on_hold_or_close(self):
 		status = frappe.db.get_value("Sales Order", self.sales_order, "status")
@@ -703,33 +779,40 @@ class WorkOrder(Document):
 
 	def set_qty_change(self):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
-			scio_rm_item_names = frappe.db.get_all(
-				"Subcontracting Inward Order Received Item",
-				filters={"reference_name": scio_item_name, "docstatus": 1, "is_customer_provided_item": 1},
-				pluck="name",
-			)
 			self.qty_change = frappe._dict()
 
 			data = frappe.get_all(
 				"Subcontracting Inward Order Received Item",
-				{"name": ["in", scio_rm_item_names]},
+				{"reference_name": scio_item_name, "docstatus": 1, "is_customer_provided_item": 1},
 				["rm_item_code", "required_qty as bom_qty", "work_order_qty", "received_qty"],
 			)
 			for d in data:
 				wo_item = next(
-					wo_item for wo_item in self.get("required_items") if wo_item.item_code == d.rm_item_code
+					(
+						wo_item
+						for wo_item in self.get("required_items")
+						if wo_item.item_code == d.rm_item_code
+					),
+					None,
 				)
 
 				if (
-					d.work_order_qty + (wo_item.required_qty if self._action == "submit" else 0)
-				) == d.bom_qty and d.received_qty > d.bom_qty:
+					wo_item
+					and (d.work_order_qty + (wo_item.required_qty if self._action == "submit" else 0))
+					== d.bom_qty
+					and d.received_qty > d.bom_qty
+				):
 					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
 
 	def update_subcontracting_inward_order_received_items(self):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			scio_rm_data = frappe.get_all(
 				"Subcontracting Inward Order Received Item",
-				filters={"reference_name": scio_item_name, "docstatus": 1},
+				filters={
+					"reference_name": scio_item_name,
+					"docstatus": 1,
+					"rm_item_code": ["in", [d.item_code for d in self.get("required_items")]],
+				},
 				fields=["name", "rm_item_code"],
 			)
 
@@ -1328,7 +1411,7 @@ class WorkOrder(Document):
 			frappe.msgprint(
 				_(
 					"Warning: Quantity exceeds maximum producible quantity based on quantity of raw materials received through the Subcontracting Inward Order {0}."
-				).format(frappe.bold(self.subcontracting_inward_order)),
+				).format(get_link_to_form("Subcontracting Inward Order", self.subcontracting_inward_order)),
 				alert=True,
 				indicator="orange",
 			)
@@ -2179,13 +2262,12 @@ def make_stock_entry(
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
+	if purpose in ["Material Transfer for Manufacture", "Manufacture"]:
+		stock_entry.subcontracting_inward_order = work_order.subcontracting_inward_order
 	# accept 0 qty as well
 	stock_entry.fg_completed_qty = (
 		qty if qty is not None else (flt(work_order.qty) - flt(work_order.produced_qty))
 	)
-
-	if purpose == "Manufacture" and work_order.subcontracting_inward_order:
-		stock_entry.subcontracting_inward_order = work_order.subcontracting_inward_order
 
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")

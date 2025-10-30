@@ -3088,9 +3088,7 @@ def set_balance_in_account_currency(
 			_("Account: {0} with currency: {1} can not be selected").format(gl_dict.account, account_currency)
 		)
 
-	gl_dict["account_currency"] = (
-		company_currency if account_currency == company_currency else account_currency
-	)
+	gl_dict["account_currency"] = account_currency
 
 	# set debit/credit in account currency if not provided
 	if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
@@ -3941,8 +3939,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		if parent.is_subcontracted and not parent.can_update_items():
 			frappe.throw(
 				_(
-					"Items cannot be updated as Subcontracting Inward Order is created against the Sales Order {0}."
-				).format(frappe.bold(parent.name))
+					"Items cannot be updated as Subcontracting Inward Order(s) exist against this Subcontracted Sales Order."
+				)
 			)
 		parent.validate_selling_price()
 		parent.validate_for_duplicate_items()

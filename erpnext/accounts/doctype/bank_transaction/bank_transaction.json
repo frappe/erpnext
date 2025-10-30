@@ -123,8 +123,7 @@
    "fieldname": "transaction_id",
    "fieldtype": "Data",
    "label": "Transaction ID",
-   "read_only": 1,
-   "unique": 1
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -239,7 +238,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-26 17:06:29.207673",
+ "modified": "2025-10-23 17:32:58.514807",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

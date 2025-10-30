@@ -66,6 +66,7 @@ class IntegrationTestSubcontractingInwardOrder(IntegrationTestCase):
 				"transfer_qty": 5,
 				"uom": "Nos",
 				"conversion_factor": 1,
+				"against_fg": scio.items[0].name,
 			},
 		)
 		rm_in.submit()
