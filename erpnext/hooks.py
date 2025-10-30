@@ -51,6 +51,8 @@ doctype_list_js = {
 	],
 }
 
+page_js = {"print": "public/js/print.js"}
+
 extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
 override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
@@ -599,6 +601,7 @@ user_privacy_documents = [
 		"personal_fields": ["contact_mobile", "contact_display", "customer_name"],
 	},
 ]
+
 
 # ERPNext doctypes for Global Search
 global_search_doctypes = {

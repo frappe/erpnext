@@ -221,7 +221,13 @@ frappe.ui.form.on("Item", {
 
 		const stock_exists = frm.doc.__onload && frm.doc.__onload.stock_exists ? 1 : 0;
 
-		["is_stock_item", "has_serial_no", "has_batch_no", "has_variants"].forEach((fieldname) => {
+		[
+			"is_stock_item",
+			"is_customer_provided_item",
+			"has_serial_no",
+			"has_batch_no",
+			"has_variants",
+		].forEach((fieldname) => {
 			frm.set_df_property(fieldname, "read_only", stock_exists);
 		});
 
@@ -349,6 +355,17 @@ $.extend(erpnext.item, {
 			return {
 				query: "erpnext.controllers.queries.get_income_account",
 				filters: { company: row.company },
+			};
+		};
+
+		frm.fields_dict["item_defaults"].grid.get_field("default_inventory_account").get_query = function (
+			doc,
+			cdt,
+			cdn
+		) {
+			const row = locals[cdt][cdn];
+			return {
+				filters: { company: row.company, account_type: "Stock", is_group: 0 },
 			};
 		};
 
@@ -502,6 +519,17 @@ $.extend(erpnext.item, {
 					},
 				};
 			});
+		});
+
+		frm.set_query("default_inventory_account", "item_defaults", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					is_group: 0,
+					company: row.company,
+					account_type: "Stock",
+				},
+			};
 		});
 	},
 

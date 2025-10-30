@@ -40,7 +40,6 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	update_billed_amount_based_on_po,
 )
@@ -460,11 +459,12 @@ class PurchaseInvoice(BuyingController):
 
 		self.asset_received_but_not_billed = None
 
+		inventory_account_map = {}
 		if self.update_stock:
 			self.validate_item_code()
 			self.validate_warehouse(for_validate)
 			if auto_accounting_for_stock:
-				warehouse_account = get_warehouse_account_map(self.company)
+				inventory_account_map = self.get_inventory_account_map()
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
@@ -481,21 +481,19 @@ class PurchaseInvoice(BuyingController):
 				)
 			):
 				if self.update_stock and item.warehouse and (not item.from_warehouse):
-					if (
-						for_validate
-						and item.expense_account
-						and item.expense_account != warehouse_account[item.warehouse]["account"]
-					):
+					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
+
+					if for_validate and item.expense_account and item.expense_account != _inv_dict["account"]:
 						msg = _(
 							"Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account"
 						).format(
 							item.idx,
-							frappe.bold(warehouse_account[item.warehouse]["account"]),
+							frappe.bold(_inv_dict["account"]),
 							frappe.bold(item.expense_account),
 							frappe.bold(item.warehouse),
 						)
 						frappe.msgprint(msg, title=_("Expense Head Changed"))
-					item.expense_account = warehouse_account[item.warehouse]["account"]
+					item.expense_account = _inv_dict["account"]
 				else:
 					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
 					if item.purchase_receipt:
@@ -857,7 +855,7 @@ class PurchaseInvoice(BuyingController):
 				party=self.supplier,
 			)
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self, inventory_account_map=None):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 
 		if self.auto_accounting_for_stock:
@@ -947,7 +945,7 @@ class PurchaseInvoice(BuyingController):
 		# item gl entries
 		stock_items = self.get_stock_items()
 		if self.update_stock and self.auto_accounting_for_stock:
-			warehouse_account = get_warehouse_account_map(self.company)
+			inventory_account_map = self.get_inventory_account_map()
 
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()
 
@@ -997,18 +995,24 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					if item.from_warehouse:
+						_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
+
+						_inv_dict_from_warehouse = self.get_inventory_account_dict(
+							item, inventory_account_map, "from_warehouse"
+						)
+
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": warehouse_account[item.warehouse]["account"],
-									"against": warehouse_account[item.from_warehouse]["account"],
+									"account": _inv_dict["account"],
+									"against": _inv_dict_from_warehouse["account"],
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 									"debit": warehouse_debit_amount,
 									"debit_in_transaction_currency": item.net_amount,
 								},
-								warehouse_account[item.warehouse]["account_currency"],
+								_inv_dict["account_currency"],
 								item=item,
 							)
 						)
@@ -1021,15 +1025,15 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": warehouse_account[item.from_warehouse]["account"],
-									"against": warehouse_account[item.warehouse]["account"],
+									"account": _inv_dict_from_warehouse["account"],
+									"against": _inv_dict["account"],
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 									"debit": -1 * flt(credit_amount, item.precision("base_net_amount")),
 									"debit_in_transaction_currency": item.net_amount,
 								},
-								warehouse_account[item.from_warehouse]["account_currency"],
+								_inv_dict_from_warehouse["account_currency"],
 								item=item,
 							)
 						)
@@ -1097,15 +1101,19 @@ class PurchaseInvoice(BuyingController):
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
-						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
-						if not supplier_warehouse_account:
+						supplier_wh_dict = self.get_inventory_account_dict(
+							item, inventory_account_map, "supplier_warehouse"
+						)
+
+						supplier_inventory_account = supplier_wh_dict["account"]
+						if not supplier_inventory_account:
 							frappe.throw(
 								_("Please set account in Warehouse {0}").format(self.supplier_warehouse)
 							)
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": supplier_warehouse_account,
+									"account": supplier_inventory_account,
 									"against": item.expense_account,
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
@@ -1113,7 +1121,7 @@ class PurchaseInvoice(BuyingController):
 									"credit": flt(item.rm_supp_cost),
 									"credit_in_transaction_currency": item.net_amount,
 								},
-								warehouse_account[self.supplier_warehouse]["account_currency"],
+								supplier_wh_dict["account_currency"],
 								item=item,
 							)
 						)

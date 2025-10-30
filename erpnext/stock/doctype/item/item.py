@@ -965,7 +965,12 @@ class Item(Document):
 		if self.is_new():
 			return
 
-		restricted_fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+		restricted_fields = (
+			"has_serial_no",
+			"is_stock_item",
+			"valuation_method",
+			"has_batch_no",
+		)
 
 		values = frappe.db.get_value("Item", self.name, restricted_fields, as_dict=True)
 		if not values:

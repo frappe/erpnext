@@ -138,7 +138,6 @@ class BOM(WebsiteGenerator):
 		item: DF.Link
 		item_name: DF.Data | None
 		items: DF.Table[BOMItem]
-		track_semi_finished_goods: DF.Check
 		operating_cost: DF.Currency
 		operating_cost_per_bom_quantity: DF.Currency
 		operations: DF.Table[BOMOperation]
@@ -161,6 +160,7 @@ class BOM(WebsiteGenerator):
 		show_operations: DF.Check
 		thumbnail: DF.Data | None
 		total_cost: DF.Currency
+		track_semi_finished_goods: DF.Check
 		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
 		uom: DF.Link | None
 		web_long_description: DF.TextEditor | None
@@ -220,9 +220,9 @@ class BOM(WebsiteGenerator):
 	def onload(self):
 		super().onload()
 
-		self.set_onload_for_muulti_level_bom()
+		self.set_onload_for_multi_level_bom()
 
-	def set_onload_for_muulti_level_bom(self):
+	def set_onload_for_multi_level_bom(self):
 		use_multi_level_bom = frappe.db.get_value(
 			"Property Setter",
 			{"field_name": "use_multi_level_bom", "doc_type": "Work Order", "property": "default"},

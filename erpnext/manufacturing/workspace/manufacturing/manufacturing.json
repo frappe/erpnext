@@ -16,69 +16,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Production",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "Item, BOM",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Work Order",
-   "link_count": 0,
-   "link_to": "Work Order",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, BOM",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Production Plan",
-   "link_count": 0,
-   "link_to": "Production Plan",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stock Entry",
-   "link_count": 0,
-   "link_to": "Stock Entry",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Job Card",
-   "link_count": 0,
-   "link_to": "Job Card",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Downtime Entry",
-   "link_count": 0,
-   "link_to": "Downtime Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Tools",
    "link_count": 0,
    "onboard": 0,
@@ -202,8 +139,87 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Subcontracting",
+   "link_count": 7,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "BOM",
+   "link_count": 0,
+   "link_to": "BOM",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Subcontracting BOM",
+   "link_count": 0,
+   "link_to": "Subcontracting BOM",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Subcontracting Order",
+   "link_count": 0,
+   "link_to": "Subcontracting Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Subcontracting Receipt",
+   "link_count": 0,
+   "link_to": "Subcontracting Receipt",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Subcontract Order Summary",
+   "link_count": 0,
+   "link_to": "Subcontract Order Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Subcontracted Raw Materials To Be Transferred",
+   "link_count": 0,
+   "link_to": "Subcontracted Raw Materials To Be Transferred",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Subcontracted Item To Be Received",
+   "link_count": 0,
+   "link_to": "Subcontracted Item To Be Received",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Reports",
-   "link_count": 10,
+   "link_count": 11,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -215,6 +231,16 @@
    "label": "Production Planning Report",
    "link_count": 0,
    "link_to": "Production Planning Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Material Requirements Planning",
+   "link_count": 0,
+   "link_to": "Material Requirements Planning Report",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -320,18 +346,73 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Subcontracting",
+   "label": "Production",
    "link_count": 7,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
   {
+   "dependencies": "Item, BOM",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "BOM",
+   "label": "Work Order",
    "link_count": 0,
-   "link_to": "BOM",
+   "link_to": "Work Order",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item, BOM",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Production Plan",
+   "link_count": 0,
+   "link_to": "Production Plan",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Entry",
+   "link_count": 0,
+   "link_to": "Stock Entry",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Production Schedule",
+   "link_count": 0,
+   "link_to": "Master Production Schedule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Job Card",
+   "link_count": 0,
+   "link_to": "Job Card",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Downtime Entry",
+   "link_count": 0,
+   "link_to": "Downtime Entry",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -339,65 +420,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Subcontracting BOM",
+   "label": "Sales Forecast",
    "link_count": 0,
-   "link_to": "Subcontracting BOM",
+   "link_to": "Sales Forecast",
    "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Subcontracting Order",
-   "link_count": 0,
-   "link_to": "Subcontracting Order",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Subcontracting Receipt",
-   "link_count": 0,
-   "link_to": "Subcontracting Receipt",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Subcontract Order Summary",
-   "link_count": 0,
-   "link_to": "Subcontract Order Summary",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Subcontracted Raw Materials To Be Transferred",
-   "link_count": 0,
-   "link_to": "Subcontracted Raw Materials To Be Transferred",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Subcontracted Item To Be Received",
-   "link_count": 0,
-   "link_to": "Subcontracted Item To Be Received",
-   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-01-06 10:43:08.754978",
+ "modified": "2025-10-30 11:49:35.589944",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -466,16 +497,19 @@
   {
    "label": "Forecasting",
    "link_to": "Exponential Smoothing Forecasting",
+   "report_ref_doctype": "Sales Order",
    "type": "Report"
   },
   {
    "label": "BOM Stock Report",
    "link_to": "BOM Stock Report",
+   "report_ref_doctype": "BOM",
    "type": "Report"
   },
   {
    "label": "Production Planning Report",
    "link_to": "Production Planning Report",
+   "report_ref_doctype": "Work Order",
    "type": "Report"
   }
  ],

@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import os
+
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
@@ -34,6 +36,7 @@ def after_install():
 	update_roles()
 	make_default_operations()
 	update_pegged_currencies()
+	create_letter_head()
 	frappe.db.commit()
 
 
@@ -250,6 +253,20 @@ def update_roles():
 
 def create_default_role_profiles():
 	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+		if frappe.db.exists("Role Profile", role_profile_name):
+			role_profile = frappe.get_doc("Role Profile", role_profile_name)
+			existing_roles = [row.role for row in role_profile.roles]
+
+			role_profile.roles = [row for row in role_profile.roles if row.role in roles]
+
+			for role in roles:
+				if role not in existing_roles:
+					role_profile.append("roles", {"role": role})
+
+			role_profile.save(ignore_permissions=True)
+
+			continue
+
 		role_profile = frappe.new_doc("Role Profile")
 		role_profile.role_profile = role_profile_name
 		for role in roles:
@@ -277,6 +294,28 @@ def update_pegged_currencies():
 			doc.append("pegged_currency_item", currency)
 
 	doc.save()
+
+
+def create_letter_head():
+	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
+
+	letterheads = {
+		"Company Letterhead": "company_letterhead.html",
+		"Company Letterhead - Grey": "company_letterhead_grey.html",
+	}
+
+	for name, filename in letterheads.items():
+		if not frappe.db.exists("Letter Head", name):
+			content = frappe.read_file(os.path.join(base_path, filename))
+			doc = frappe.get_doc(
+				{
+					"doctype": "Letter Head",
+					"letter_head_name": name,
+					"source": "HTML",
+					"content": content,
+				}
+			)
+			doc.insert(ignore_permissions=True)
 
 
 DEFAULT_ROLE_PROFILES = {

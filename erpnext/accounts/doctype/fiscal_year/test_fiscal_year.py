@@ -25,6 +25,27 @@ class TestFiscalYear(IntegrationTestCase):
 
 		self.assertRaises(frappe.exceptions.InvalidDates, fy.insert)
 
+	def test_company_fiscal_year_overlap(self):
+		for name in ["_Test Global FY 2001", "_Test Company FY 2001"]:
+			if frappe.db.exists("Fiscal Year", name):
+				frappe.delete_doc("Fiscal Year", name)
+
+		global_fy = frappe.new_doc("Fiscal Year")
+		global_fy.year = "_Test Global FY 2001"
+		global_fy.year_start_date = "2001-04-01"
+		global_fy.year_end_date = "2002-03-31"
+		global_fy.insert()
+
+		company_fy = frappe.new_doc("Fiscal Year")
+		company_fy.year = "_Test Company FY 2001"
+		company_fy.year_start_date = "2001-01-01"
+		company_fy.year_end_date = "2001-12-31"
+		company_fy.append("companies", {"company": "_Test Company"})
+
+		company_fy.insert()
+		self.assertTrue(frappe.db.exists("Fiscal Year", global_fy.name))
+		self.assertTrue(frappe.db.exists("Fiscal Year", company_fy.name))
+
 
 def test_record_generator():
 	test_records = [

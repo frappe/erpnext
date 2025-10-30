@@ -645,7 +645,7 @@ erpnext.utils.update_child_items = function (opts) {
 			get_query: function () {
 				let filters;
 				if (frm.doc.doctype == "Sales Order") {
-					filters = { is_sales_item: 1 };
+					filters = { is_sales_item: 1, is_stock_item: !frm.doc.is_subcontracted };
 				} else if (frm.doc.doctype == "Purchase Order") {
 					if (frm.doc.is_subcontracted) {
 						if (frm.doc.is_old_subcontracting_flow) {
@@ -801,7 +801,7 @@ erpnext.utils.update_child_items = function (opts) {
 	}
 
 	if (
-		frm.doc.doctype == "Purchase Order" &&
+		["Purchase Order", "Sales Order"].includes(frm.doc.doctype) &&
 		frm.doc.is_subcontracted &&
 		!frm.doc.is_old_subcontracting_flow
 	) {
@@ -857,7 +857,7 @@ erpnext.utils.update_child_items = function (opts) {
 			},
 		],
 		primary_action: function () {
-			if (frm.doctype == "Sales Order" && has_reserved_stock) {
+			if (frm.doctype == "Sales Order" && has_reserved_stock && frm.doc.is_subcontracted == 0) {
 				this.hide();
 				frappe.confirm(
 					__(
