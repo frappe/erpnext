@@ -1315,7 +1315,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			"Stock Ledger Entry",
 			fields=["*"],
 			filters=filters,
-			order_by="timestamp(posting_date, posting_time), creation",
+			order_by="posting_date asc, posting_time asc, creation asc",
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
