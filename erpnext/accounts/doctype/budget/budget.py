@@ -48,7 +48,7 @@ class Budget(Document):
 		cost_center: DF.Link | None
 		fiscal_year: DF.Link
 		monthly_distribution: DF.Link | None
-		naming_series: DF.Data | None
+		naming_series: DF.Literal["BUDGET-.YYYY.-"]
 		project: DF.Link | None
 	# end: auto-generated types
 
@@ -135,9 +135,6 @@ class Budget(Document):
 			or self.applicable_on_booking_actual_expenses
 		):
 			self.applicable_on_booking_actual_expenses = 1
-
-	def before_naming(self):
-		self.naming_series = f"{{{frappe.scrub(self.budget_against)}}}./.{self.fiscal_year}/.###"
 
 
 def validate_expense_against_budget(args, expense_amount=0):

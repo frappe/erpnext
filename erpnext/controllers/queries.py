@@ -10,9 +10,10 @@ from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
 from frappe.query_builder import Criterion, CustomFunction
-from frappe.query_builder.functions import Concat, Locate, Sum, Cast
+from frappe.query_builder.functions import Cast, Concat, Locate, Sum
 from frappe.utils import cint, nowdate, today, unique
 from pypika import Case, Order
+
 import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
 
@@ -69,6 +70,7 @@ def employee_query(
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
 	)
 
+
 def has_ignored_field(reference_doctype, doctype):
 	meta = frappe.get_meta(reference_doctype)
 	for field in meta.fields:
@@ -86,6 +88,7 @@ def has_ignored_field(reference_doctype, doctype):
 				return True
 
 	return False
+
 
 # searches for leads which are not converted
 @frappe.whitelist()
@@ -195,7 +198,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	if "description" in searchfields:
 		columns += """, (case when length(`tabItem`.description) > 40 then concat(substring(`tabItem`.description from 1 for 40), '...') else`tabItem`.description end) as description"""
-			
 
 	searchfields = searchfields + [
 		field
@@ -329,7 +331,9 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		q = q.select(proj[x])
 
 	# don't consider 'customer' and 'status' fields for pattern search, as they must be exactly matched
-	searchfields = [x for x in frappe.get_meta(doctype).get_search_fields() if x not in ["customer", "status"]]
+	searchfields = [
+		x for x in frappe.get_meta(doctype).get_search_fields() if x not in ["customer", "status"]
+	]
 
 	# pattern search
 	if txt:
@@ -344,9 +348,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	# Use PostgreSQL compatible CASE WHEN for ordering instead of IF
 	if txt:
 		q = q.orderby(
-			Case()
-			.when(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name))
-			.else_(99999)
+			Case().when(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name)).else_(99999)
 		)
 
 	q = q.orderby(proj.idx, order=Order.desc).orderby(proj.name)
@@ -359,6 +361,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		q = q.offset(start)
 
 	return q.run()
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -402,7 +405,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	doctype = "Batch"
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = meta.get_search_fields()
-	page_len = 30
+	page_len = 300
 
 	batches = get_batches_from_stock_ledger_entries(searchfields, txt, filters, start, page_len)
 	batches.extend(get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start, page_len))
@@ -476,7 +479,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 			stock_ledger_entry.warehouse,
 			batch_table.manufacturing_date,
 			batch_table.expiry_date,
-			batch_table.name
+			batch_table.name,
 		)
 		.having(Sum(stock_ledger_entry.actual_qty) != 0)
 		.offset(start)
@@ -535,7 +538,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 			bundle.warehouse,
 			batch_table.manufacturing_date,
 			batch_table.expiry_date,
-			batch_table.name
+			batch_table.name,
 		)
 		.having(Sum(bundle.qty) != 0)
 		.offset(start)
@@ -622,7 +625,7 @@ def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	
+
 	# income account can be any Credit account,
 	# but can also be a Asset account with account_type='Income Account' in special circumstances.
 	# Hence the first condition is an "OR"
@@ -638,14 +641,14 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	match_condition_str = get_match_cond(doctype)
 	if match_condition_str and frappe.db.db_type == "postgres":
 		if "ifnull" in match_condition_str:
-			match_condition_str = match_condition_str.replace('ifnull', 'COALESCE')
+			match_condition_str = match_condition_str.replace("ifnull", "COALESCE")
 
 		# Adjust match condition string to replace 'tabAccount' with alias 'account'
-		match_condition_str = match_condition_str.replace('tabAccount', 'account')
+		match_condition_str = match_condition_str.replace("tabAccount", "account")
 		match_condition_str = match_condition_str.replace("`", "")
 
 	return frappe.db.sql(
-		f"""SELECT account.name 
+		f"""SELECT account.name
 			FROM "tabAccount" AS account
 			WHERE (account.report_type = 'Profit and Loss'
 					OR account.account_type IN ('Income Account', 'Temporary'))
@@ -667,6 +670,7 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters,
 	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
 		get_dimension_filter_map,
 	)
+
 	dimension_filters = get_dimension_filter_map()
 	dimension_filters = dimension_filters.get((filters.get("dimension"), filters.get("account")))
 	query_filters = []
@@ -718,25 +722,25 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters,
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
-    from erpnext.controllers.queries import get_match_cond
+	from erpnext.controllers.queries import get_match_cond
 
-    if not filters:
-        filters = {}
+	if not filters:
+		filters = {}
 
-    condition = ""
-    if filters.get("company"):
-        condition += " AND account.company = %(company)s"
-	
-    match_condition_str = get_match_cond("Account")
-    if match_condition_str and frappe.db.db_type == "postgres":
-        if "ifnull" in match_condition_str:
-            match_condition_str = match_condition_str.replace('ifnull', 'COALESCE')
+	condition = ""
+	if filters.get("company"):
+		condition += " AND account.company = %(company)s"
 
-        match_condition_str = match_condition_str.replace('tabAccount', 'account')
-        match_condition_str = match_condition_str.replace("`", "")
-		
-    return frappe.db.sql(
-		f"""SELECT account.name 
+	match_condition_str = get_match_cond("Account")
+	if match_condition_str and frappe.db.db_type == "postgres":
+		if "ifnull" in match_condition_str:
+			match_condition_str = match_condition_str.replace("ifnull", "COALESCE")
+
+		match_condition_str = match_condition_str.replace("tabAccount", "account")
+		match_condition_str = match_condition_str.replace("`", "")
+
+	return frappe.db.sql(
+		f"""SELECT account.name
 			FROM tabAccount AS account
 			WHERE (account.report_type = 'Profit and Loss'
 					OR account.account_type IN ('Expense Account', 'Fixed Asset', 'Temporary', 'Asset Received But Not Billed', 'Capital Work in Progress'))
@@ -844,9 +848,7 @@ def get_purchase_receipts(doctype, txt, searchfield, start, page_len, filters):
 		)
 
 	if filters and filters.get("company"):
-		query += " and pr.company = {company}".format(
-			company=frappe.db.escape(filters.get("company"))
-		)
+		query += " and pr.company = {company}".format(company=frappe.db.escape(filters.get("company")))
 
 	return frappe.db.sql(query, filters)
 
@@ -973,10 +975,12 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 	if txt:
 		txt += "%"
 		query = query.where(
-			((Cast(table.idx, "text").like(txt.replace("#", ""))) | (table.item_code.like(txt))) | (table.name.like(txt))
+			((Cast(table.idx, "text").like(txt.replace("#", ""))) | (table.item_code.like(txt)))
+			| (table.name.like(txt))
 		)
 
 	return query.run(as_dict=False)
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
