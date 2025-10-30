@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-26 09:35+0000\n"
-"PO-Revision-Date: 2025-10-26 15:12\n"
+"PO-Revision-Date: 2025-10-30 16:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -62462,7 +62462,7 @@ msgstr "Arbetsorder Analys"
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.json
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Work Order Consumed Materials"
-msgstr "Arbetsorder Förbrukat Material"
+msgstr "Arbetsorder Förbrukad Material"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_item/work_order_item.json
