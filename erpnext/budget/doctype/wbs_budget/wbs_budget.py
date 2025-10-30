@@ -11,7 +11,7 @@ class WBSBudget(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from erpnext.budget.doctype.budget_account.budget_account import BudgetAccount
 		from erpnext.budget.doctype.wbs_budget_items.wbs_budget_items import WBSBudgetItems
 		from frappe.types import DF
