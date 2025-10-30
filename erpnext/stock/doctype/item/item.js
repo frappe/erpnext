@@ -358,6 +358,17 @@ $.extend(erpnext.item, {
 			};
 		};
 
+		frm.fields_dict["item_defaults"].grid.get_field("default_inventory_account").get_query = function (
+			doc,
+			cdt,
+			cdn
+		) {
+			const row = locals[cdt][cdn];
+			return {
+				filters: { company: row.company, account_type: "Stock", is_group: 0 },
+			};
+		};
+
 		frm.fields_dict["item_defaults"].grid.get_field("default_discount_account").get_query = function (
 			doc,
 			cdt,
