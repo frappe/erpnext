@@ -1,21 +1,44 @@
+# Python
 *.pyc
 *.py~
+__pycache__/
+*.egg-info
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+dist/
+dist-ssr/
+*.local
+
+# Environment
+.env
+.env.local
+
+# IDE
 .DS_Store
 conf.py
 latest_updates.json
 .wnf-lang-status
-*.egg-info
-dist/
-erpnext/public/dist
-erpnext/docs/current
 *.swp
 *.swo
-__pycache__
 *~
 .idea/
 .vscode/
 .helix/
-node_modules/
+
+# ERPNext legacy
+erpnext/public/dist
+erpnext/docs/current
 .backportrc.json
+
 # Aider AI Chat
 .aider*
