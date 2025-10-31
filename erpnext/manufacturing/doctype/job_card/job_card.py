@@ -605,7 +605,7 @@ class JobCard(Document):
 			op_row.employee.append(time_log.employee)
 			if time_log.time_in_mins:
 				op_row.completed_time += time_log.time_in_mins
-				op_row.completed_qty += time_log.completed_qty
+				op_row.completed_qty += flt(time_log.completed_qty)
 
 		for row in self.sub_operations:
 			operation_deatils = operation_wise_completed_time.get(row.sub_operation)
@@ -1092,6 +1092,156 @@ class JobCard(Document):
 
 		frappe.db.set_value("Workstation", self.workstation, "status", status)
 
+<<<<<<< HEAD
+=======
+	def add_time_logs(self, **kwargs):
+		row = None
+		kwargs = frappe._dict(kwargs)
+
+		update_status = False
+		for employee in kwargs.employees:
+			kwargs.employee = employee.get("employee")
+			if kwargs.from_time and not kwargs.to_time:
+				if kwargs.qty:
+					kwargs.completed_qty = kwargs.qty
+
+				row = self.append("time_logs", kwargs)
+				row.db_update()
+				self.db_set("status", "Work In Progress")
+			elif not kwargs.from_time and not kwargs.to_time and kwargs.completed_qty:
+				update_status = True
+				for row in self.time_logs:
+					if row.employee != kwargs.employee:
+						continue
+
+					row.completed_qty = kwargs.completed_qty
+					row.db_update()
+			else:
+				update_status = True
+				for row in self.time_logs:
+					if row.to_time or row.employee != kwargs.employee:
+						continue
+
+					row.to_time = kwargs.to_time
+					row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
+					if kwargs.get("sub_operation"):
+						row.operation = kwargs.get("sub_operation")
+
+					if kwargs.employees[-1].get("employee") == row.employee:
+						row.completed_qty = kwargs.completed_qty
+
+					row.db_update()
+
+			self.set_status(update_status=update_status)
+
+		if not self.employee and kwargs.employees:
+			self.set_employees(kwargs.employees)
+
+		self.validate_time_logs(save=True)
+
+	def update_workstation_status(self):
+		status_map = {
+			"Open": "Off",
+			"Work In Progress": "Production",
+			"Completed": "Off",
+			"On Hold": "Idle",
+		}
+
+		job_cards = frappe.get_all(
+			"Job Card",
+			fields=["name", "status"],
+			filters={"workstation": self.workstation, "docstatus": 0, "status": ("!=", "Completed")},
+			order_by="status desc",
+		)
+
+		if not job_cards:
+			frappe.db.set_value("Workstation", self.workstation, "status", "Off")
+
+		for row in job_cards:
+			frappe.db.set_value("Workstation", self.workstation, "status", status_map.get(row.status))
+			return
+
+	@frappe.whitelist()
+	def start_timer(self, **kwargs):
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		if isinstance(kwargs.employees, str):
+			kwargs.employees = [{"employee": kwargs.employees}]
+
+		if kwargs.start_time:
+			self.add_time_logs(from_time=kwargs.start_time, employees=kwargs.employees)
+
+	@frappe.whitelist()
+	def complete_job_card(self, **kwargs):
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		if kwargs.end_time:
+			self.add_time_logs(
+				to_time=kwargs.end_time,
+				completed_qty=kwargs.qty,
+				employees=self.employee,
+				sub_operation=kwargs.get("sub_operation"),
+			)
+
+			if kwargs.for_quantity:
+				self.for_quantity = kwargs.for_quantity
+
+			self.save()
+		else:
+			self.add_time_logs(completed_qty=kwargs.qty, employees=self.employee)
+			self.save()
+
+		if kwargs.auto_submit:
+			self.submit()
+
+			if not self.finished_good:
+				return
+
+			self.make_stock_entry_for_semi_fg_item(kwargs.auto_submit)
+			frappe.msgprint(
+				_("Job Card {0} has been completed").format(get_link_to_form("Job Card", self.name))
+			)
+
+	@frappe.whitelist()
+	def make_stock_entry_for_semi_fg_item(self, auto_submit=False):
+		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
+
+		ste = ManufactureEntry(
+			{
+				"for_quantity": self.for_quantity - self.manufactured_qty,
+				"job_card": self.name,
+				"skip_material_transfer": self.skip_material_transfer,
+				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
+				"work_order": self.work_order,
+				"purpose": "Manufacture",
+				"production_item": self.finished_good,
+				"company": self.company,
+				"wip_warehouse": self.wip_warehouse,
+				"fg_warehouse": self.target_warehouse,
+				"bom_no": self.semi_fg_bom,
+				"project": frappe.db.get_value("Work Order", self.work_order, "project"),
+			}
+		)
+
+		ste.make_stock_entry()
+		ste.stock_entry.flags.ignore_mandatory = True
+		wo_doc = frappe.get_doc("Work Order", self.work_order)
+		add_additional_cost(ste.stock_entry, wo_doc, self)
+
+		ste.stock_entry.save()
+
+		if auto_submit:
+			ste.stock_entry.submit()
+
+		frappe.msgprint(
+			_("Stock Entry {0} has created").format(get_link_to_form("Stock Entry", ste.stock_entry.name))
+		)
+
+		return ste.stock_entry.as_dict()
+
+>>>>>>> 1f183a7e06 (fix: pause button not working for sub-operation)
 
 @frappe.whitelist()
 def make_time_log(args):

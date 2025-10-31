@@ -105,6 +105,7 @@ frappe.ui.form.on("Job Card", {
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity) &&
 			(frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)
 		) {
+<<<<<<< HEAD
 			// if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
 			// and if stock mvt for WIP is required
 			if (frm.doc.work_order) {
@@ -121,6 +122,34 @@ frappe.ui.form.on("Job Card", {
 						) {
 							frm.trigger("prepare_timer_buttons");
 						}
+=======
+			let last_row = {};
+			if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+				last_row = get_last_row(frm.doc.time_logs);
+			}
+
+			if (
+				(!frm.doc.time_logs?.length || (frm.doc.sub_operations?.length && last_row?.to_time)) &&
+				!frm.doc.is_paused
+			) {
+				frm.add_custom_button(__("Start Job"), () => {
+					let from_time = frappe.datetime.now_datetime();
+					if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
+						frappe.prompt(
+							{
+								fieldtype: "Table MultiSelect",
+								label: __("Select Employees"),
+								options: "Job Card Time Log",
+								fieldname: "employees",
+							},
+							(d) => {
+								frm.events.start_timer(frm, from_time, d.employees);
+							},
+							__("Assign Job to Employee")
+						);
+					} else {
+						frm.events.start_timer(frm, from_time, frm.doc.employee);
+>>>>>>> 1f183a7e06 (fix: pause button not working for sub-operation)
 					}
 				);
 			} else {
@@ -150,6 +179,186 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
+<<<<<<< HEAD
+=======
+	complete_job_card(frm) {
+		let fields = [
+			{
+				fieldtype: "Float",
+				label: __("Qty to Manufacture"),
+				fieldname: "for_quantity",
+				reqd: 1,
+				default: frm.doc.for_quantity,
+				change() {
+					let doc = frm.job_completion_dialog;
+
+					doc.set_value("completed_qty", doc.get_value("for_quantity"));
+					doc.set_value("process_loss_qty", 0);
+				},
+			},
+			{
+				fieldtype: "Float",
+				label: __("Completed Quantity"),
+				fieldname: "completed_qty",
+				reqd: 1,
+				default: frm.doc.for_quantity - frm.doc.total_completed_qty,
+				change() {
+					let doc = frm.job_completion_dialog;
+
+					let process_loss_qty = doc.get_value("for_quantity") - doc.get_value("completed_qty");
+					if (process_loss_qty > 0 && process_loss_qty != doc.get_value("process_loss_qty")) {
+						doc.set_value("process_loss_qty", process_loss_qty);
+					}
+				},
+			},
+			{
+				fieldtype: "Float",
+				label: __("Process Loss Quantity"),
+				fieldname: "process_loss_qty",
+				onchange() {
+					let doc = frm.job_completion_dialog;
+
+					let completed_qty = doc.get_value("for_quantity") - doc.get_value("process_loss_qty");
+					doc.set_value("completed_qty", completed_qty);
+				},
+			},
+			{
+				fieldtype: "Section Break",
+			},
+		];
+
+		if (frm.doc.sub_operations?.length) {
+			fields.push({
+				fieldtype: "Link",
+				label: __("Sub Operation"),
+				fieldname: "sub_operation",
+				options: "Operation",
+				get_query() {
+					let non_completed_operations = frm.doc.sub_operations.filter(
+						(d) => d.status === "Pending"
+					);
+					return {
+						filters: {
+							name: ["in", non_completed_operations.map((d) => d.sub_operation)],
+						},
+					};
+				},
+				reqd: 1,
+			});
+		}
+
+		let last_completed_row = get_last_completed_row(frm.doc.time_logs);
+		let last_row = {};
+		if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+			last_row = get_last_row(frm.doc.time_logs);
+		}
+
+		if (!last_completed_row || !last_completed_row.to_time || !last_row.to_time) {
+			fields.push({
+				fieldtype: "Datetime",
+				label: __("End Time"),
+				fieldname: "end_time",
+				default: frappe.datetime.now_datetime(),
+			});
+		}
+
+		frm.job_completion_dialog = frappe.prompt(
+			fields,
+			(data) => {
+				if (data.qty <= 0) {
+					frappe.throw(__("Quantity should be greater than 0"));
+				}
+
+				frm.call({
+					method: "complete_job_card",
+					doc: frm.doc,
+					args: {
+						qty: data.completed_qty,
+						for_quantity: data.for_quantity,
+						end_time: data.end_time,
+						sub_operation: data.sub_operation,
+					},
+					callback: function (r) {
+						frm.reload_doc();
+					},
+				});
+			},
+			__("Enter Value"),
+			__("Update"),
+			__("Set Finished Good Quantity")
+		);
+	},
+
+	make_subcontracting_po(frm) {
+		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
+			frm.add_custom_button(__("Make Subcontracting PO"), () => {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
+					frm: frm,
+				});
+			}).addClass("btn-primary");
+		}
+	},
+
+	start_timer(frm, start_time, employees) {
+		frm.call({
+			method: "start_timer",
+			doc: frm.doc,
+			args: {
+				start_time: start_time,
+				employees: employees,
+			},
+			callback: function (r) {
+				frm.reload_doc();
+				frm.trigger("make_dashboard");
+			},
+		});
+	},
+
+	make_finished_good(frm) {
+		let fields = [
+			{
+				fieldtype: "Float",
+				label: __("Completed Quantity"),
+				fieldname: "qty",
+				reqd: 1,
+				default: frm.doc.for_quantity - frm.doc.manufactured_qty,
+			},
+			{
+				fieldtype: "Datetime",
+				label: __("End Time"),
+				fieldname: "end_time",
+				default: frappe.datetime.now_datetime(),
+			},
+		];
+
+		frappe.prompt(
+			fields,
+			(data) => {
+				if (data.qty <= 0) {
+					frappe.throw(__("Quantity should be greater than 0"));
+				}
+
+				frm.call({
+					method: "make_finished_good",
+					doc: frm.doc,
+					args: {
+						qty: data.qty,
+						end_time: data.end_time,
+					},
+					callback: function (r) {
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", doc[0].doctype, doc[0].name);
+					},
+				});
+			},
+			__("Enter Value"),
+			__("Update"),
+			__("Set Finished Good Quantity")
+		);
+	},
+
+>>>>>>> 1f183a7e06 (fix: pause button not working for sub-operation)
 	setup_quality_inspection: function (frm) {
 		let quality_inspection_field = frm.get_docfield("quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function (frm) {
