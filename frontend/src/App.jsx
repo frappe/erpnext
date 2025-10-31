@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -68,6 +69,9 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={
+          user ? <Navigate to="/dashboard" /> : <Landing />
+        } />
         <Route path="/login" element={
           user ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />
         } />
@@ -78,9 +82,8 @@ function App() {
           user ? <AdminDashboard /> : <Navigate to="/login" />
         } />
         <Route path="/" element={
-          user ? <Layout user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
+          user ? <Layout user={user} onLogout={handleLogout} /> : <Navigate to="/" />
         }>
-          <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="reports" element={<Reports />} />
           <Route path="employees" element={<Employees />} />
