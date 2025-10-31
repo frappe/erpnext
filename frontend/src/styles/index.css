@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0A1628;
+  color: #ffffff;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #0A1628 0%, #1E2A3A 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #00D9A3 0%, #00FFB8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card {
+  background: rgba(30, 42, 58, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 217, 163, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(0, 217, 163, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 217, 163, 0.15);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00D9A3 0%, #00FFB8 100%);
+  color: #0A1628;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 217, 163, 0.3);
+}
+
+.btn-secondary {
+  background: rgba(0, 217, 163, 0.1);
+  color: #00D9A3;
+  border: 1px solid #00D9A3;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 217, 163, 0.2);
+  transform: translateY(-2px);
+}
+
+.input-field {
+  background: rgba(30, 42, 58, 0.5);
+  border: 1px solid rgba(0, 217, 163, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #00D9A3;
+  box-shadow: 0 0 0 3px rgba(0, 217, 163, 0.1);
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
