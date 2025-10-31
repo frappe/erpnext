@@ -727,6 +727,400 @@ def admin_get_analytics(
     
     return {"analytics": analytics}
 
+@app.get("/api/mobile-money/providers", response_model=list[schemas.MobileMoneyProviderResponse])
+def get_mm_providers(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    providers = db.query(models.MobileMoneyProvider).filter(
+        models.MobileMoneyProvider.company_id == current_user.company_id
+    ).all()
+    return providers
+
+@app.post("/api/mobile-money/providers", response_model=schemas.MobileMoneyProviderResponse)
+def create_mm_provider(
+    provider: schemas.MobileMoneyProviderCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_provider = models.MobileMoneyProvider(
+        company_id=current_user.company_id,
+        **provider.dict()
+    )
+    db.add(new_provider)
+    db.commit()
+    db.refresh(new_provider)
+    return new_provider
+
+@app.get("/api/mobile-money/transactions", response_model=list[schemas.MobileMoneyTransactionResponse])
+def get_mm_transactions(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    transactions = db.query(models.MobileMoneyTransaction).filter(
+        models.MobileMoneyTransaction.company_id == current_user.company_id
+    ).order_by(models.MobileMoneyTransaction.created_at.desc()).all()
+    return transactions
+
+@app.post("/api/mobile-money/transactions", response_model=schemas.MobileMoneyTransactionResponse)
+def create_mm_transaction(
+    transaction: schemas.MobileMoneyTransactionCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    provider = db.query(models.MobileMoneyProvider).filter(
+        models.MobileMoneyProvider.id == transaction.provider_id,
+        models.MobileMoneyProvider.company_id == current_user.company_id
+    ).first()
+    if not provider:
+        raise HTTPException(status_code=400, detail="Provider not found")
+    
+    tx_count = db.query(models.MobileMoneyTransaction).filter(
+        models.MobileMoneyTransaction.company_id == current_user.company_id
+    ).count()
+    tx_ref = f"MM-{tx_count + 1:06d}"
+    
+    new_transaction = models.MobileMoneyTransaction(
+        company_id=current_user.company_id,
+        transaction_ref=tx_ref,
+        initiated_by=current_user.id,
+        **transaction.dict()
+    )
+    db.add(new_transaction)
+    db.commit()
+    db.refresh(new_transaction)
+    return new_transaction
+
+@app.put("/api/mobile-money/providers/{provider_id}")
+def update_mm_provider(
+    provider_id: str,
+    is_active: bool,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    provider = db.query(models.MobileMoneyProvider).filter(
+        models.MobileMoneyProvider.id == provider_id,
+        models.MobileMoneyProvider.company_id == current_user.company_id
+    ).first()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider not found")
+    
+    provider.is_active = is_active
+    db.commit()
+    return {"message": "Provider updated"}
+
+@app.delete("/api/mobile-money/providers/{provider_id}")
+def delete_mm_provider(
+    provider_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    provider = db.query(models.MobileMoneyProvider).filter(
+        models.MobileMoneyProvider.id == provider_id,
+        models.MobileMoneyProvider.company_id == current_user.company_id
+    ).first()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider not found")
+    
+    db.delete(provider)
+    db.commit()
+    return {"message": "Provider deleted"}
+
+@app.get("/api/branches", response_model=list[schemas.BranchResponse])
+def get_branches(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    branches = db.query(models.Branch).filter(
+        models.Branch.company_id == current_user.company_id
+    ).all()
+    return branches
+
+@app.post("/api/branches", response_model=schemas.BranchResponse)
+def create_branch(
+    branch: schemas.BranchCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    if branch.manager_id:
+        manager = db.query(models.Employee).filter(
+            models.Employee.id == branch.manager_id,
+            models.Employee.company_id == current_user.company_id
+        ).first()
+        if not manager:
+            raise HTTPException(status_code=400, detail="Manager not found")
+    
+    new_branch = models.Branch(
+        company_id=current_user.company_id,
+        **branch.dict()
+    )
+    db.add(new_branch)
+    db.commit()
+    db.refresh(new_branch)
+    return new_branch
+
+@app.put("/api/branches/{branch_id}")
+def update_branch(
+    branch_id: str,
+    is_active: bool,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    branch = db.query(models.Branch).filter(
+        models.Branch.id == branch_id,
+        models.Branch.company_id == current_user.company_id
+    ).first()
+    if not branch:
+        raise HTTPException(status_code=404, detail="Branch not found")
+    
+    branch.is_active = is_active
+    db.commit()
+    return {"message": "Branch updated"}
+
+@app.delete("/api/branches/{branch_id}")
+def delete_branch(
+    branch_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    branch = db.query(models.Branch).filter(
+        models.Branch.id == branch_id,
+        models.Branch.company_id == current_user.company_id
+    ).first()
+    if not branch:
+        raise HTTPException(status_code=404, detail="Branch not found")
+    
+    db.delete(branch)
+    db.commit()
+    return {"message": "Branch deleted"}
+
+@app.get("/api/branch-transfers", response_model=list[schemas.BranchTransferResponse])
+def get_branch_transfers(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    transfers = db.query(models.BranchTransfer).filter(
+        models.BranchTransfer.company_id == current_user.company_id
+    ).order_by(models.BranchTransfer.created_at.desc()).all()
+    return transfers
+
+@app.post("/api/branch-transfers", response_model=schemas.BranchTransferResponse)
+def create_branch_transfer(
+    transfer: schemas.BranchTransferCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    from_branch = db.query(models.Branch).filter(
+        models.Branch.id == transfer.from_branch_id,
+        models.Branch.company_id == current_user.company_id
+    ).first()
+    if not from_branch:
+        raise HTTPException(status_code=400, detail="From branch not found")
+    
+    to_branch = db.query(models.Branch).filter(
+        models.Branch.id == transfer.to_branch_id,
+        models.Branch.company_id == current_user.company_id
+    ).first()
+    if not to_branch:
+        raise HTTPException(status_code=400, detail="To branch not found")
+    
+    for line in transfer.lines:
+        product = db.query(models.Product).filter(
+            models.Product.id == line['product_id'],
+            models.Product.company_id == current_user.company_id
+        ).first()
+        if not product:
+            raise HTTPException(status_code=400, detail=f"Product {line['product_id']} not found")
+    
+    transfer_count = db.query(models.BranchTransfer).filter(
+        models.BranchTransfer.company_id == current_user.company_id
+    ).count()
+    transfer_number = f"BT-{transfer_count + 1:05d}"
+    
+    new_transfer = models.BranchTransfer(
+        company_id=current_user.company_id,
+        transfer_number=transfer_number,
+        from_branch_id=transfer.from_branch_id,
+        to_branch_id=transfer.to_branch_id,
+        transfer_date=transfer.transfer_date,
+        notes=transfer.notes,
+        initiated_by=current_user.id
+    )
+    db.add(new_transfer)
+    db.flush()
+    
+    for line in transfer.lines:
+        transfer_line = models.BranchTransferLine(
+            transfer_id=new_transfer.id,
+            product_id=line['product_id'],
+            quantity=line['quantity']
+        )
+        db.add(transfer_line)
+    
+    db.commit()
+    db.refresh(new_transfer)
+    return new_transfer
+
+@app.get("/api/pos/terminals", response_model=list[schemas.POSTerminalResponse])
+def get_pos_terminals(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    terminals = db.query(models.POSTerminal).filter(
+        models.POSTerminal.company_id == current_user.company_id
+    ).all()
+    return terminals
+
+@app.post("/api/pos/terminals", response_model=schemas.POSTerminalResponse)
+def create_pos_terminal(
+    terminal: schemas.POSTerminalCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    if terminal.branch_id:
+        branch = db.query(models.Branch).filter(
+            models.Branch.id == terminal.branch_id,
+            models.Branch.company_id == current_user.company_id
+        ).first()
+        if not branch:
+            raise HTTPException(status_code=400, detail="Branch not found")
+    
+    new_terminal = models.POSTerminal(
+        company_id=current_user.company_id,
+        **terminal.dict()
+    )
+    db.add(new_terminal)
+    db.commit()
+    db.refresh(new_terminal)
+    return new_terminal
+
+@app.put("/api/pos/terminals/{terminal_id}")
+def update_pos_terminal(
+    terminal_id: str,
+    is_active: bool,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    terminal = db.query(models.POSTerminal).filter(
+        models.POSTerminal.id == terminal_id,
+        models.POSTerminal.company_id == current_user.company_id
+    ).first()
+    if not terminal:
+        raise HTTPException(status_code=404, detail="Terminal not found")
+    
+    terminal.is_active = is_active
+    db.commit()
+    return {"message": "Terminal updated"}
+
+@app.delete("/api/pos/terminals/{terminal_id}")
+def delete_pos_terminal(
+    terminal_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    terminal = db.query(models.POSTerminal).filter(
+        models.POSTerminal.id == terminal_id,
+        models.POSTerminal.company_id == current_user.company_id
+    ).first()
+    if not terminal:
+        raise HTTPException(status_code=404, detail="Terminal not found")
+    
+    db.delete(terminal)
+    db.commit()
+    return {"message": "Terminal deleted"}
+
+@app.get("/api/pos/sales", response_model=list[schemas.POSSaleResponse])
+def get_pos_sales(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    sales = db.query(models.POSSale).filter(
+        models.POSSale.company_id == current_user.company_id
+    ).order_by(models.POSSale.sale_date.desc()).all()
+    return sales
+
+@app.post("/api/pos/sales", response_model=schemas.POSSaleResponse)
+def create_pos_sale(
+    sale: schemas.POSSaleCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    for line in sale.lines:
+        product = db.query(models.Product).filter(
+            models.Product.id == line['product_id'],
+            models.Product.company_id == current_user.company_id
+        ).first()
+        if not product:
+            raise HTTPException(status_code=400, detail=f"Product {line['product_id']} not found")
+    
+    sale_count = db.query(models.POSSale).filter(
+        models.POSSale.company_id == current_user.company_id
+    ).count()
+    receipt_number = f"RCT-{sale_count + 1:06d}"
+    
+    total = sum(line['quantity'] * line['unit_price'] for line in sale.lines)
+    
+    new_sale = models.POSSale(
+        company_id=current_user.company_id,
+        receipt_number=receipt_number,
+        branch_id=sale.branch_id,
+        terminal_id=sale.terminal_id,
+        customer_id=sale.customer_id,
+        total_amount=total,
+        payment_method=sale.payment_method,
+        payment_ref=sale.payment_ref,
+        cashier_id=current_user.id
+    )
+    db.add(new_sale)
+    db.flush()
+    
+    for line in sale.lines:
+        sale_line = models.POSSaleLine(
+            sale_id=new_sale.id,
+            product_id=line['product_id'],
+            quantity=line['quantity'],
+            unit_price=line['unit_price'],
+            subtotal=line['quantity'] * line['unit_price']
+        )
+        db.add(sale_line)
+    
+    db.commit()
+    db.refresh(new_sale)
+    return new_sale
+
+@app.get("/api/pos/sessions", response_model=list[schemas.CashierSessionResponse])
+def get_cashier_sessions(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    sessions = db.query(models.CashierSession).filter(
+        models.CashierSession.company_id == current_user.company_id
+    ).order_by(models.CashierSession.session_start.desc()).all()
+    return sessions
+
+@app.post("/api/pos/sessions", response_model=schemas.CashierSessionResponse)
+def create_cashier_session(
+    session: schemas.CashierSessionCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    terminal = db.query(models.POSTerminal).filter(
+        models.POSTerminal.id == session.terminal_id,
+        models.POSTerminal.company_id == current_user.company_id
+    ).first()
+    if not terminal:
+        raise HTTPException(status_code=400, detail="Terminal not found")
+    
+    new_session = models.CashierSession(
+        company_id=current_user.company_id,
+        cashier_id=current_user.id,
+        **session.dict()
+    )
+    db.add(new_session)
+    db.commit()
+    db.refresh(new_session)
+    return new_session
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)

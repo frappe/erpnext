@@ -314,3 +314,167 @@ class Payslip(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     employee = relationship("Employee")
+
+class MobileMoneyProvider(Base):
+    __tablename__ = "mobile_money_providers"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    provider_name = Column(String, nullable=False)
+    provider_code = Column(String, nullable=False)
+    api_key = Column(String)
+    api_secret = Column(String)
+    merchant_id = Column(String)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class MobileMoneyTransaction(Base):
+    __tablename__ = "mobile_money_transactions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    provider_id = Column(String, ForeignKey("mobile_money_providers.id"), nullable=False)
+    transaction_ref = Column(String, nullable=False, unique=True, index=True)
+    transaction_type = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False)
+    amount = Column(Float, nullable=False)
+    currency = Column(String, default="ZMW")
+    status = Column(String, default="pending")
+    external_ref = Column(String)
+    customer_name = Column(String)
+    description = Column(Text)
+    initiated_by = Column(String, ForeignKey("users.id"))
+    completed_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    provider = relationship("MobileMoneyProvider")
+
+class Branch(Base):
+    __tablename__ = "branches"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    branch_code = Column(String, nullable=False, index=True)
+    branch_name = Column(String, nullable=False)
+    address = Column(Text)
+    city = Column(String)
+    phone = Column(String)
+    email = Column(String)
+    manager_id = Column(String, ForeignKey("employees.id"))
+    is_active = Column(Boolean, default=True)
+    is_main_branch = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    manager = relationship("Employee", foreign_keys=[manager_id])
+
+class BranchStock(Base):
+    __tablename__ = "branch_stock"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    branch_id = Column(String, ForeignKey("branches.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Float, default=0.0)
+    reorder_level = Column(Float, default=0.0)
+    last_updated = Column(DateTime, default=datetime.utcnow)
+    
+    branch = relationship("Branch")
+    product = relationship("Product")
+
+class BranchTransfer(Base):
+    __tablename__ = "branch_transfers"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    transfer_number = Column(String, nullable=False, unique=True)
+    from_branch_id = Column(String, ForeignKey("branches.id"), nullable=False)
+    to_branch_id = Column(String, ForeignKey("branches.id"), nullable=False)
+    transfer_date = Column(Date, nullable=False)
+    status = Column(String, default="pending")
+    notes = Column(Text)
+    initiated_by = Column(String, ForeignKey("users.id"))
+    approved_by = Column(String, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    from_branch = relationship("Branch", foreign_keys=[from_branch_id])
+    to_branch = relationship("Branch", foreign_keys=[to_branch_id])
+
+class BranchTransferLine(Base):
+    __tablename__ = "branch_transfer_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    transfer_id = Column(String, ForeignKey("branch_transfers.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    received_quantity = Column(Float, default=0.0)
+    
+    transfer = relationship("BranchTransfer")
+    product = relationship("Product")
+
+class POSTerminal(Base):
+    __tablename__ = "pos_terminals"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    branch_id = Column(String, ForeignKey("branches.id"))
+    terminal_code = Column(String, nullable=False, unique=True)
+    terminal_name = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    branch = relationship("Branch")
+
+class POSSale(Base):
+    __tablename__ = "pos_sales"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    branch_id = Column(String, ForeignKey("branches.id"))
+    terminal_id = Column(String, ForeignKey("pos_terminals.id"))
+    receipt_number = Column(String, nullable=False, unique=True)
+    sale_date = Column(DateTime, default=datetime.utcnow)
+    customer_id = Column(String, ForeignKey("customers.id"))
+    total_amount = Column(Float, nullable=False)
+    tax_amount = Column(Float, default=0.0)
+    discount_amount = Column(Float, default=0.0)
+    payment_method = Column(String, nullable=False)
+    payment_ref = Column(String)
+    cashier_id = Column(String, ForeignKey("users.id"))
+    status = Column(String, default="completed")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    branch = relationship("Branch")
+    terminal = relationship("POSTerminal")
+    customer = relationship("Customer")
+
+class POSSaleLine(Base):
+    __tablename__ = "pos_sale_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    sale_id = Column(String, ForeignKey("pos_sales.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    unit_price = Column(Float, nullable=False)
+    discount = Column(Float, default=0.0)
+    subtotal = Column(Float, nullable=False)
+    
+    sale = relationship("POSSale")
+    product = relationship("Product")
+
+class CashierSession(Base):
+    __tablename__ = "cashier_sessions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    terminal_id = Column(String, ForeignKey("pos_terminals.id"), nullable=False)
+    cashier_id = Column(String, ForeignKey("users.id"), nullable=False)
+    session_start = Column(DateTime, default=datetime.utcnow)
+    session_end = Column(DateTime)
+    opening_cash = Column(Float, default=0.0)
+    closing_cash = Column(Float)
+    expected_cash = Column(Float)
+    variance = Column(Float)
+    status = Column(String, default="open")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    terminal = relationship("POSTerminal")

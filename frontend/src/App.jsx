@@ -15,6 +15,9 @@ import Suppliers from './pages/Suppliers';
 import SalesOrders from './pages/SalesOrders';
 import PurchaseOrders from './pages/PurchaseOrders';
 import AdminDashboard from './pages/AdminDashboard';
+import MobileMoney from './pages/MobileMoney';
+import Branches from './pages/Branches';
+import POS from './pages/POS';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -90,6 +93,9 @@ function App() {
           <Route path="sales-orders" element={<SalesOrders />} />
           <Route path="suppliers" element={<Suppliers />} />
           <Route path="purchase-orders" element={<PurchaseOrders />} />
+          <Route path="mobile-money" element={<MobileMoney />} />
+          <Route path="branches" element={<Branches />} />
+          <Route path="pos" element={<POS />} />
         </Route>
       </Routes>
     </Router>

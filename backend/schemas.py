@@ -331,3 +331,128 @@ class FinancialReport(BaseModel):
     report_type: str
     period: str
     sections: dict
+
+class MobileMoneyProviderCreate(BaseModel):
+    provider_name: str
+    provider_code: str
+    api_key: Optional[str] = None
+    api_secret: Optional[str] = None
+    merchant_id: Optional[str] = None
+
+class MobileMoneyProviderResponse(BaseModel):
+    id: str
+    provider_name: str
+    provider_code: str
+    is_active: bool
+    
+    class Config:
+        from_attributes = True
+
+class MobileMoneyTransactionCreate(BaseModel):
+    provider_id: str
+    transaction_type: str
+    phone_number: str
+    amount: float
+    customer_name: Optional[str] = None
+    description: Optional[str] = None
+
+class MobileMoneyTransactionResponse(BaseModel):
+    id: str
+    transaction_ref: str
+    provider_id: str
+    transaction_type: str
+    phone_number: str
+    amount: float
+    currency: str
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class BranchCreate(BaseModel):
+    branch_code: str
+    branch_name: str
+    address: Optional[str] = None
+    city: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    manager_id: Optional[str] = None
+    is_main_branch: bool = False
+
+class BranchResponse(BaseModel):
+    id: str
+    branch_code: str
+    branch_name: str
+    city: Optional[str]
+    is_active: bool
+    is_main_branch: bool
+    
+    class Config:
+        from_attributes = True
+
+class BranchTransferCreate(BaseModel):
+    from_branch_id: str
+    to_branch_id: str
+    transfer_date: date
+    lines: List[dict]
+    notes: Optional[str] = None
+
+class BranchTransferResponse(BaseModel):
+    id: str
+    transfer_number: str
+    from_branch_id: str
+    to_branch_id: str
+    transfer_date: date
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class POSTerminalCreate(BaseModel):
+    terminal_code: str
+    terminal_name: str
+    branch_id: Optional[str] = None
+
+class POSTerminalResponse(BaseModel):
+    id: str
+    terminal_code: str
+    terminal_name: str
+    is_active: bool
+    
+    class Config:
+        from_attributes = True
+
+class POSSaleCreate(BaseModel):
+    branch_id: Optional[str] = None
+    terminal_id: Optional[str] = None
+    customer_id: Optional[str] = None
+    lines: List[dict]
+    payment_method: str
+    payment_ref: Optional[str] = None
+
+class POSSaleResponse(BaseModel):
+    id: str
+    receipt_number: str
+    sale_date: datetime
+    total_amount: float
+    payment_method: str
+    status: str
+    
+    class Config:
+        from_attributes = True
+
+class CashierSessionCreate(BaseModel):
+    terminal_id: str
+    opening_cash: float
+
+class CashierSessionResponse(BaseModel):
+    id: str
+    terminal_id: str
+    session_start: datetime
+    opening_cash: float
+    status: str
+    
+    class Config:
+        from_attributes = True
