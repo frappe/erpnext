@@ -75,8 +75,14 @@ erpnext.financial_statements = {
 	},
 	open_general_ledger: function (data) {
 		if (!data.account && !data.accounts) return;
-		let project = $.grep(frappe.query_report.filters, function (e) {
+		let filters = frappe.query_report.filters;
+
+		let project = $.grep(filters, function (e) {
 			return e.df.fieldname == "project";
+		});
+
+		let cost_center = $.grep(filters, function (e) {
+			return e.df.fieldname == "cost_center";
 		});
 
 		frappe.route_options = {
@@ -84,8 +90,19 @@ erpnext.financial_statements = {
 			company: frappe.query_report.get_filter_value("company"),
 			from_date: data.from_date || data.year_start_date,
 			to_date: data.to_date || data.year_end_date,
-			project: project && project.length > 0 ? project[0].$input.val() : "",
+			project: project && project.length > 0 ? project[0].get_value() : "",
+			cost_center: cost_center && cost_center.length > 0 ? cost_center[0].get_value() : "",
 		};
+
+		filters.forEach((f) => {
+			if (f.df.fieldtype == "MultiSelectList") {
+				if (f.df.fieldname in frappe.route_options) return;
+				let value = f.get_value();
+				if (value && value.length > 0) {
+					frappe.route_options[f.df.fieldname] = value;
+				}
+			}
+		});
 
 		let report = "General Ledger";
 

@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import (
 	build_qb_match_conditions,
 	get_advance_payment_doctypes,
@@ -996,11 +997,7 @@ class ReceivablePayableReport:
 		self.add_accounting_dimensions_filters()
 
 	def get_cost_center_conditions(self):
-		lft, rgt = frappe.db.get_value("Cost Center", self.filters.cost_center, ["lft", "rgt"])
-		cost_center_list = [
-			center.name
-			for center in frappe.get_list("Cost Center", filters={"lft": (">=", lft), "rgt": ("<=", rgt)})
-		]
+		cost_center_list = get_cost_centers_with_children(self.filters.cost_center)
 		self.qb_selection_filter.append(self.ple.cost_center.isin(cost_center_list))
 
 	def add_common_filters(self):
