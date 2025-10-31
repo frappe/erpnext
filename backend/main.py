@@ -30,9 +30,13 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    trial_end_date = datetime.utcnow() + timedelta(days=7)
     company = models.Company(
         name=user.company_name,
-        currency="ZMW"
+        currency="ZMW",
+        subscription_plan="trial",
+        subscription_status="active",
+        trial_ends_at=trial_end_date
     )
     db.add(company)
     db.flush()
@@ -629,6 +633,99 @@ def generate_financial_report(
         )
     else:
         raise HTTPException(status_code=400, detail="Invalid report type")
+
+@app.get("/api/admin/companies", response_model=list[schemas.CompanyAdminResponse])
+def admin_get_all_companies(
+    admin: models.User = Depends(auth.get_super_admin),
+    db: Session = Depends(get_db)
+):
+    companies = db.query(models.Company).order_by(models.Company.created_at.desc()).all()
+    return companies
+
+@app.put("/api/admin/companies/{company_id}/toggle-status")
+def admin_toggle_company_status(
+    company_id: str,
+    admin: models.User = Depends(auth.get_super_admin),
+    db: Session = Depends(get_db)
+):
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    company.is_active = not company.is_active
+    db.commit()
+    return {"message": f"Company {'activated' if company.is_active else 'deactivated'} successfully"}
+
+@app.put("/api/admin/companies/{company_id}/subscription")
+def admin_update_subscription(
+    company_id: str,
+    plan: str,
+    status: str,
+    admin: models.User = Depends(auth.get_super_admin),
+    db: Session = Depends(get_db)
+):
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    company.subscription_plan = plan
+    company.subscription_status = status
+    if plan != "trial":
+        company.subscription_ends_at = datetime.utcnow() + timedelta(days=30)
+    db.commit()
+    return {"message": "Subscription updated successfully"}
+
+@app.get("/api/admin/stats", response_model=schemas.SystemStatsResponse)
+def admin_get_system_stats(
+    admin: models.User = Depends(auth.get_super_admin),
+    db: Session = Depends(get_db)
+):
+    total_companies = db.query(models.Company).count()
+    active_companies = db.query(models.Company).filter(models.Company.is_active == True).count()
+    trial_companies = db.query(models.Company).filter(models.Company.subscription_plan == "trial").count()
+    paid_companies = db.query(models.Company).filter(models.Company.subscription_plan != "trial").count()
+    total_users = db.query(models.User).filter(models.User.role != "super_admin").count()
+    total_employees = db.query(models.Employee).count()
+    total_transactions = db.query(models.JournalEntry).count()
+    
+    return {
+        "total_companies": total_companies,
+        "active_companies": active_companies,
+        "trial_companies": trial_companies,
+        "paid_companies": paid_companies,
+        "total_users": total_users,
+        "total_employees": total_employees,
+        "total_transactions": total_transactions,
+        "total_revenue": 0.0
+    }
+
+@app.get("/api/admin/analytics")
+def admin_get_analytics(
+    admin: models.User = Depends(auth.get_super_admin),
+    db: Session = Depends(get_db)
+):
+    companies = db.query(models.Company).all()
+    analytics = []
+    
+    for company in companies:
+        user_count = db.query(models.User).filter(models.User.company_id == company.id).count()
+        employee_count = db.query(models.Employee).filter(models.Employee.company_id == company.id).count()
+        transaction_count = db.query(models.JournalEntry).filter(models.JournalEntry.company_id == company.id).count()
+        
+        analytics.append({
+            "company_id": company.id,
+            "company_name": company.name,
+            "subscription_plan": company.subscription_plan,
+            "subscription_status": company.subscription_status,
+            "trial_ends_at": company.trial_ends_at,
+            "is_active": company.is_active,
+            "user_count": user_count,
+            "employee_count": employee_count,
+            "transaction_count": transaction_count,
+            "created_at": company.created_at
+        })
+    
+    return {"analytics": analytics}
 
 if __name__ == "__main__":
     import uvicorn

@@ -20,6 +20,9 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
+    # Bcrypt has a 72 byte password limit, truncate if necessary
+    if len(password.encode('utf-8')) > 72:
+        password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -54,3 +57,13 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+def get_super_admin(
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.role != "super_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized. Super admin access required."
+        )
+    return current_user
