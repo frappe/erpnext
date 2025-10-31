@@ -643,7 +643,7 @@ class JobCard(Document):
 			op_row.employee.append(time_log.employee)
 			if time_log.time_in_mins:
 				op_row.completed_time += time_log.time_in_mins
-				op_row.completed_qty += time_log.completed_qty
+				op_row.completed_qty += flt(time_log.completed_qty)
 
 		for row in self.sub_operations:
 			operation_deatils = operation_wise_completed_time.get(row.sub_operation)
@@ -1224,6 +1224,8 @@ class JobCard(Document):
 
 					row.to_time = kwargs.to_time
 					row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
+					if kwargs.get("sub_operation"):
+						row.operation = kwargs.get("sub_operation")
 
 					if kwargs.employees[-1].get("employee") == row.employee:
 						row.completed_qty = kwargs.completed_qty
@@ -1276,7 +1278,12 @@ class JobCard(Document):
 			kwargs = frappe._dict(kwargs)
 
 		if kwargs.end_time:
-			self.add_time_logs(to_time=kwargs.end_time, completed_qty=kwargs.qty, employees=self.employee)
+			self.add_time_logs(
+				to_time=kwargs.end_time,
+				completed_qty=kwargs.qty,
+				employees=self.employee,
+				sub_operation=kwargs.get("sub_operation"),
+			)
 
 			if kwargs.for_quantity:
 				self.for_quantity = kwargs.for_quantity

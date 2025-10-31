@@ -199,7 +199,10 @@ frappe.ui.form.on("Job Card", {
 				last_row = get_last_row(frm.doc.time_logs);
 			}
 
-			if (!frm.doc.time_logs?.length || (frm.doc.sub_operations?.length && last_row?.to_time)) {
+			if (
+				(!frm.doc.time_logs?.length || (frm.doc.sub_operations?.length && last_row?.to_time)) &&
+				!frm.doc.is_paused
+			) {
 				frm.add_custom_button(__("Start Job"), () => {
 					let from_time = frappe.datetime.now_datetime();
 					if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
@@ -327,6 +330,26 @@ frappe.ui.form.on("Job Card", {
 			},
 		];
 
+		if (frm.doc.sub_operations?.length) {
+			fields.push({
+				fieldtype: "Link",
+				label: __("Sub Operation"),
+				fieldname: "sub_operation",
+				options: "Operation",
+				get_query() {
+					let non_completed_operations = frm.doc.sub_operations.filter(
+						(d) => d.status === "Pending"
+					);
+					return {
+						filters: {
+							name: ["in", non_completed_operations.map((d) => d.sub_operation)],
+						},
+					};
+				},
+				reqd: 1,
+			});
+		}
+
 		let last_completed_row = get_last_completed_row(frm.doc.time_logs);
 		let last_row = {};
 		if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
@@ -356,6 +379,7 @@ frappe.ui.form.on("Job Card", {
 						qty: data.completed_qty,
 						for_quantity: data.for_quantity,
 						end_time: data.end_time,
+						sub_operation: data.sub_operation,
 					},
 					callback: function (r) {
 						frm.reload_doc();
