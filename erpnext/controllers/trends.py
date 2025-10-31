@@ -300,19 +300,6 @@ def get_period_wise_query(bet_dates, trans_date, query_details):
 		sd=bet_dates[0],
 		ed=bet_dates[1],
 	)
-# 	SUM(CASE 
-#         WHEN t1.transaction_date BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' 
-#         THEN t2.stock_qty 
-#         ELSE 0 
-#     END) AS jan_stock_qty,
-
-# SUM(CASE 
-#         WHEN t1.transaction_date BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' 
-#         THEN t2.base_net_amount 
-#         ELSE 0 
-#     END) AS jan_net_amount
-
-# 	frappe.msgprint(str(query_details))
 	return query_details
 
 
