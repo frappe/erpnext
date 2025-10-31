@@ -14,6 +14,7 @@ import Customers from './pages/Customers';
 import Suppliers from './pages/Suppliers';
 import SalesOrders from './pages/SalesOrders';
 import PurchaseOrders from './pages/PurchaseOrders';
+import AdminDashboard from './pages/AdminDashboard';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -69,6 +70,9 @@ function App() {
         } />
         <Route path="/register" element={
           user ? <Navigate to="/dashboard" /> : <Register onLogin={handleLogin} />
+        } />
+        <Route path="/admin" element={
+          user ? <AdminDashboard /> : <Navigate to="/login" />
         } />
         <Route path="/" element={
           user ? <Layout user={user} onLogout={handleLogout} /> : <Navigate to="/login" />

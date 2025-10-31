@@ -44,6 +44,34 @@ class CompanyResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class CompanyAdminResponse(BaseModel):
+    id: str
+    name: str
+    registration_no: Optional[str]
+    tax_id: Optional[str]
+    currency: str
+    email: Optional[str]
+    phone: Optional[str]
+    is_active: bool
+    subscription_plan: str
+    subscription_status: str
+    trial_ends_at: Optional[datetime]
+    subscription_ends_at: Optional[datetime]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class SystemStatsResponse(BaseModel):
+    total_companies: int
+    active_companies: int
+    trial_companies: int
+    paid_companies: int
+    total_users: int
+    total_employees: int
+    total_transactions: int
+    total_revenue: float
+
 class EmployeeCreate(BaseModel):
     employee_no: str
     first_name: str
