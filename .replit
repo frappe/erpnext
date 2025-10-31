@@ -1,0 +1,6 @@
+modules = ["python-3.10", "nodejs-20", "web"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
