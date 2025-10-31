@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import models
 import schemas
 import auth
+import utils
 from database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
@@ -255,6 +256,379 @@ def create_journal(
     db.commit()
     db.refresh(new_journal)
     return new_journal
+
+@app.get("/api/products", response_model=list[schemas.ProductResponse])
+def get_products(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    products = db.query(models.Product).filter(
+        models.Product.company_id == current_user.company_id
+    ).all()
+    return products
+
+@app.post("/api/products", response_model=schemas.ProductResponse)
+def create_product(
+    product: schemas.ProductCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_product = models.Product(
+        company_id=current_user.company_id,
+        **product.dict()
+    )
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
+    return new_product
+
+@app.get("/api/warehouses", response_model=list[schemas.WarehouseResponse])
+def get_warehouses(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    warehouses = db.query(models.Warehouse).filter(
+        models.Warehouse.company_id == current_user.company_id
+    ).all()
+    return warehouses
+
+@app.post("/api/warehouses", response_model=schemas.WarehouseResponse)
+def create_warehouse(
+    warehouse: schemas.WarehouseCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_warehouse = models.Warehouse(
+        company_id=current_user.company_id,
+        **warehouse.dict()
+    )
+    db.add(new_warehouse)
+    db.commit()
+    db.refresh(new_warehouse)
+    return new_warehouse
+
+@app.get("/api/customers", response_model=list[schemas.CustomerResponse])
+def get_customers(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    customers = db.query(models.Customer).filter(
+        models.Customer.company_id == current_user.company_id
+    ).all()
+    return customers
+
+@app.post("/api/customers", response_model=schemas.CustomerResponse)
+def create_customer(
+    customer: schemas.CustomerCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_customer = models.Customer(
+        company_id=current_user.company_id,
+        **customer.dict()
+    )
+    db.add(new_customer)
+    db.commit()
+    db.refresh(new_customer)
+    return new_customer
+
+@app.get("/api/suppliers", response_model=list[schemas.SupplierResponse])
+def get_suppliers(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    suppliers = db.query(models.Supplier).filter(
+        models.Supplier.company_id == current_user.company_id
+    ).all()
+    return suppliers
+
+@app.post("/api/suppliers", response_model=schemas.SupplierResponse)
+def create_supplier(
+    supplier: schemas.SupplierCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_supplier = models.Supplier(
+        company_id=current_user.company_id,
+        **supplier.dict()
+    )
+    db.add(new_supplier)
+    db.commit()
+    db.refresh(new_supplier)
+    return new_supplier
+
+@app.get("/api/purchase-orders", response_model=list[schemas.PurchaseOrderResponse])
+def get_purchase_orders(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    orders = db.query(models.PurchaseOrder).filter(
+        models.PurchaseOrder.company_id == current_user.company_id
+    ).order_by(models.PurchaseOrder.order_date.desc()).all()
+    return orders
+
+@app.post("/api/purchase-orders", response_model=schemas.PurchaseOrderResponse)
+def create_purchase_order(
+    po: schemas.PurchaseOrderCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    supplier = db.query(models.Supplier).filter(
+        models.Supplier.id == po.supplier_id,
+        models.Supplier.company_id == current_user.company_id
+    ).first()
+    if not supplier:
+        raise HTTPException(status_code=400, detail="Supplier not found")
+    
+    for line in po.lines:
+        product = db.query(models.Product).filter(
+            models.Product.id == line.product_id,
+            models.Product.company_id == current_user.company_id
+        ).first()
+        if not product:
+            raise HTTPException(status_code=400, detail=f"Product {line.product_id} not found")
+    
+    po_count = db.query(models.PurchaseOrder).filter(
+        models.PurchaseOrder.company_id == current_user.company_id
+    ).count()
+    po_number = f"PO-{po_count + 1:05d}"
+    
+    total = sum(line.quantity * line.unit_price for line in po.lines)
+    
+    new_po = models.PurchaseOrder(
+        company_id=current_user.company_id,
+        supplier_id=po.supplier_id,
+        po_number=po_number,
+        order_date=po.order_date,
+        expected_delivery=po.expected_delivery,
+        total_amount=total,
+        notes=po.notes,
+        created_by=current_user.id,
+        status="draft"
+    )
+    db.add(new_po)
+    db.flush()
+    
+    for line in po.lines:
+        po_line = models.PurchaseOrderLine(
+            purchase_order_id=new_po.id,
+            product_id=line.product_id,
+            quantity=line.quantity,
+            unit_price=line.unit_price,
+            subtotal=line.quantity * line.unit_price
+        )
+        db.add(po_line)
+    
+    db.commit()
+    db.refresh(new_po)
+    return new_po
+
+@app.get("/api/sales-orders", response_model=list[schemas.SalesOrderResponse])
+def get_sales_orders(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    orders = db.query(models.SalesOrder).filter(
+        models.SalesOrder.company_id == current_user.company_id
+    ).order_by(models.SalesOrder.order_date.desc()).all()
+    return orders
+
+@app.post("/api/sales-orders", response_model=schemas.SalesOrderResponse)
+def create_sales_order(
+    so: schemas.SalesOrderCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    customer = db.query(models.Customer).filter(
+        models.Customer.id == so.customer_id,
+        models.Customer.company_id == current_user.company_id
+    ).first()
+    if not customer:
+        raise HTTPException(status_code=400, detail="Customer not found")
+    
+    for line in so.lines:
+        product = db.query(models.Product).filter(
+            models.Product.id == line.product_id,
+            models.Product.company_id == current_user.company_id
+        ).first()
+        if not product:
+            raise HTTPException(status_code=400, detail=f"Product {line.product_id} not found")
+    
+    so_count = db.query(models.SalesOrder).filter(
+        models.SalesOrder.company_id == current_user.company_id
+    ).count()
+    so_number = f"SO-{so_count + 1:05d}"
+    
+    total = sum(line.quantity * line.unit_price for line in so.lines)
+    
+    new_so = models.SalesOrder(
+        company_id=current_user.company_id,
+        customer_id=so.customer_id,
+        so_number=so_number,
+        order_date=so.order_date,
+        delivery_date=so.delivery_date,
+        total_amount=total,
+        notes=so.notes,
+        created_by=current_user.id,
+        status="draft"
+    )
+    db.add(new_so)
+    db.flush()
+    
+    for line in so.lines:
+        so_line = models.SalesOrderLine(
+            sales_order_id=new_so.id,
+            product_id=line.product_id,
+            quantity=line.quantity,
+            unit_price=line.unit_price,
+            subtotal=line.quantity * line.unit_price
+        )
+        db.add(so_line)
+    
+    db.commit()
+    db.refresh(new_so)
+    return new_so
+
+@app.get("/api/leave-types", response_model=list[schemas.LeaveTypeResponse])
+def get_leave_types(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    leave_types = db.query(models.LeaveType).filter(
+        models.LeaveType.company_id == current_user.company_id
+    ).all()
+    return leave_types
+
+@app.post("/api/leave-types", response_model=schemas.LeaveTypeResponse)
+def create_leave_type(
+    leave_type: schemas.LeaveTypeCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_leave_type = models.LeaveType(
+        company_id=current_user.company_id,
+        **leave_type.dict()
+    )
+    db.add(new_leave_type)
+    db.commit()
+    db.refresh(new_leave_type)
+    return new_leave_type
+
+@app.get("/api/leave-applications", response_model=list[schemas.LeaveApplicationResponse])
+def get_leave_applications(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    applications = db.query(models.LeaveApplication).filter(
+        models.LeaveApplication.company_id == current_user.company_id
+    ).order_by(models.LeaveApplication.created_at.desc()).all()
+    return applications
+
+@app.post("/api/leave-applications", response_model=schemas.LeaveApplicationResponse)
+def create_leave_application(
+    application: schemas.LeaveApplicationCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    employee = db.query(models.Employee).filter(
+        models.Employee.id == application.employee_id,
+        models.Employee.company_id == current_user.company_id
+    ).first()
+    if not employee:
+        raise HTTPException(status_code=400, detail="Employee not found")
+    
+    leave_type = db.query(models.LeaveType).filter(
+        models.LeaveType.id == application.leave_type_id,
+        models.LeaveType.company_id == current_user.company_id
+    ).first()
+    if not leave_type:
+        raise HTTPException(status_code=400, detail="Leave type not found")
+    
+    app_count = db.query(models.LeaveApplication).filter(
+        models.LeaveApplication.company_id == current_user.company_id
+    ).count()
+    app_number = f"LA-{app_count + 1:05d}"
+    
+    new_application = models.LeaveApplication(
+        company_id=current_user.company_id,
+        application_number=app_number,
+        **application.dict()
+    )
+    db.add(new_application)
+    db.commit()
+    db.refresh(new_application)
+    return new_application
+
+@app.get("/api/payslips", response_model=list[schemas.PayslipResponse])
+def get_payslips(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    payslips = db.query(models.Payslip).filter(
+        models.Payslip.company_id == current_user.company_id
+    ).order_by(models.Payslip.period_year.desc(), models.Payslip.period_month.desc()).all()
+    return payslips
+
+@app.post("/api/payslips", response_model=schemas.PayslipResponse)
+def create_payslip(
+    payslip: schemas.PayslipCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    employee = db.query(models.Employee).filter(
+        models.Employee.id == payslip.employee_id,
+        models.Employee.company_id == current_user.company_id
+    ).first()
+    if not employee:
+        raise HTTPException(status_code=400, detail="Employee not found")
+    
+    payslip_count = db.query(models.Payslip).filter(
+        models.Payslip.company_id == current_user.company_id
+    ).count()
+    payslip_number = f"PAY-{payslip_count + 1:05d}"
+    
+    payslip_data = utils.generate_payslip_data(employee, payslip.period_month, payslip.period_year)
+    
+    new_payslip = models.Payslip(
+        company_id=current_user.company_id,
+        employee_id=payslip.employee_id,
+        payslip_number=payslip_number,
+        **payslip_data,
+        status="draft"
+    )
+    db.add(new_payslip)
+    db.commit()
+    db.refresh(new_payslip)
+    return new_payslip
+
+@app.post("/api/reports/financial", response_model=schemas.FinancialReport)
+def generate_financial_report(
+    report_request: schemas.FinancialReportRequest,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    if report_request.report_type == "income_statement":
+        return utils.generate_income_statement(
+            db, 
+            current_user.company_id, 
+            report_request.start_date, 
+            report_request.end_date
+        )
+    elif report_request.report_type == "balance_sheet":
+        return utils.generate_balance_sheet(
+            db, 
+            current_user.company_id, 
+            report_request.end_date
+        )
+    elif report_request.report_type == "cash_flow":
+        return utils.generate_cash_flow(
+            db, 
+            current_user.company_id, 
+            report_request.start_date, 
+            report_request.end_date
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Invalid report type")
 
 if __name__ == "__main__":
     import uvicorn
