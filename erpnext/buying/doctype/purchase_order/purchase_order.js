@@ -502,6 +502,17 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		}
 	}
 
+	onload() {
+		super.onload();
+		this.frm.set_query("supplier", function () {
+			return {
+				filters: {
+					is_transporter: 0,
+				},
+			};
+		});
+	}
+
 	get_items_from_open_material_requests() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
