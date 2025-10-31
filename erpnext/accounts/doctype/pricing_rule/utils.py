@@ -90,7 +90,7 @@ def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
 	return filtered_pricing_rules
 
 def _get_pricing_rules(apply_on, args, values):
-	from cstm_erpnext.utils import get_doc_from_main_server
+	from cstm_erpnext.main_server_utils import get_doc_from_main_server
 	from cstm_erpnext.custom_selling.page.easy_pos_plus.easy_pos_plus import get_pr_usage_count
 
 	apply_on_field = frappe.scrub(apply_on)
