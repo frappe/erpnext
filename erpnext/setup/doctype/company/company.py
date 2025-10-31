@@ -204,11 +204,35 @@ class Company(NestedSet):
 			["Default Income Account", "default_income_account"],
 			["Stock Received But Not Billed Account", "stock_received_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
+			["Write Off Account", "write_off_account"],
+			["Default Payment Discount Account", "default_discount_account"],
+			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
+			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
+			["Unrealized Exchange Gain / Loss Account", "unrealized_exchange_gain_loss_account"],
+			["Round Off Account", "round_off_account"],
+			["Default Deferred Revenue Account", "default_deferred_revenue_account"],
+			["Default Deferred Expense Account", "default_deferred_expense_account"],
+			["Accumulated Depreciation Account", "accumulated_depreciation_account"],
+			["Depreciation Expense Account", "depreciation_expense_account"],
+			["Gain/Loss Account on Asset Disposal", "disposal_account"],
 		]
 
 		for account in accounts:
 			if self.get(account[1]):
-				for_company = frappe.db.get_value("Account", self.get(account[1]), "company")
+				for_company, is_group, disabled = frappe.db.get_value(
+					"Account", self.get(account[1]), ["company", "is_group", "disabled"]
+				)
+
+				if disabled:
+					frappe.throw(_("Account {0} is disabled.").format(frappe.bold(self.get(account[1]))))
+
+				if is_group:
+					frappe.throw(
+						_("{0}: {1} is a group account.").format(
+							frappe.bold(account[0]), frappe.bold(self.get(account[1]))
+						)
+					)
+
 				if for_company != self.name:
 					frappe.throw(
 						_("Account {0} does not belong to company: {1}").format(
