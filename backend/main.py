@@ -63,7 +63,11 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
     accounts_map = {}
     for acc_data in default_accounts:
-        parent_id = accounts_map.get(acc_data.get("parent"))
+        parent_code = acc_data.get("parent")
+        parent_id = None
+        if parent_code and parent_code in accounts_map:
+            parent_id = accounts_map[parent_code]
+        
         account = models.Account(
             company_id=company.id,
             code=acc_data["code"],
@@ -72,7 +76,8 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
             parent_id=parent_id
         )
         db.add(account)
-        accounts_map[acc_data["code"]] = account
+        db.flush()
+        accounts_map[acc_data["code"]] = account.id
     
     db.commit()
     
@@ -165,6 +170,14 @@ def create_account(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
+    if account.parent_id:
+        parent = db.query(models.Account).filter(
+            models.Account.id == account.parent_id,
+            models.Account.company_id == current_user.company_id
+        ).first()
+        if not parent:
+            raise HTTPException(status_code=400, detail="Parent account not found or not accessible")
+    
     new_account = models.Account(
         company_id=current_user.company_id,
         **account.dict()
@@ -190,6 +203,29 @@ def create_journal(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
+    if len(journal.lines) < 2:
+        raise HTTPException(status_code=400, detail="Journal must have at least 2 lines (debit and credit)")
+    
+    total_debits = sum(line.amount for line in journal.lines if line.side == "debit")
+    total_credits = sum(line.amount for line in journal.lines if line.side == "credit")
+    
+    if abs(total_debits - total_credits) > 0.01:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Debits ({total_debits}) must equal credits ({total_credits})"
+        )
+    
+    for line in journal.lines:
+        account = db.query(models.Account).filter(
+            models.Account.id == line.account_id,
+            models.Account.company_id == current_user.company_id
+        ).first()
+        if not account:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Account {line.account_id} not found or not accessible"
+            )
+    
     journal_count = db.query(models.JournalEntry).filter(
         models.JournalEntry.company_id == current_user.company_id
     ).count()
@@ -202,7 +238,7 @@ def create_journal(
         date=journal.date,
         description=journal.description,
         currency=journal.currency,
-        total_amount=journal.total_amount,
+        total_amount=total_debits,
         created_by=current_user.id,
         status="posted"
     )

@@ -1,137 +1,264 @@
-# ERPNext Project
+# ERIK ERP - Enterprise Resource & Intelligence Kernel
 
 ## Overview
 
-This is the **ERPNext** application codebase - an open-source ERP (Enterprise Resource Planning) system built by Frappe Technologies. ERPNext is a comprehensive business management system that handles accounting, inventory, manufacturing, CRM, and more.
+ERIK ERP is a modern, multi-tenant SaaS enterprise resource planning system designed to manage Finance, HR, Payroll, Inventory, and more. Built with cutting-edge technologies and designed with a sleek teal/green color palette inspired by the ERIK brand.
 
-## Important Information
+**Project Status**: MVP Phase 1 - Core Foundation Complete ✅
 
-### What This Repository Contains
+## Vision
 
-This repository contains **only the ERPNext application code**, not a complete running system. ERPNext is built on top of the **Frappe Framework** and requires a full Frappe development environment to run.
+To build a comprehensive ERP system that competes with Odoo, SAP, and other enterprise solutions, specifically tailored for businesses in Zambia and beyond. This MVP provides the foundational architecture and core modules that can be expanded into a full-featured enterprise system.
 
-### Architecture
+## Current Features (MVP Phase 1)
 
-- **Language**: Python 3.10+
-- **Framework**: Frappe Framework (full-stack web framework)
-- **Database**: MariaDB/PostgreSQL
-- **Frontend**: JavaScript, Vue.js (via Frappe UI)
-- **Package Manager**: Python (pip/flit), Node.js (yarn)
+### ✅ Multi-Tenant SaaS Architecture
+- Each company has its own isolated data
+- Secure user authentication with JWT tokens
+- Role-based access control (RBAC)
+- Company registration with automatic setup
 
-### Why It Cannot Run Directly in Replit
+### ✅ Finance Module
+- **Chart of Accounts**: Hierarchical account structure (Assets, Liabilities, Equity, Revenue, Expenses)
+- **Journal Entries**: Double-entry bookkeeping with debit/credit lines
+- **Real-time Reporting**: View all financial transactions
+- **Multi-currency Support**: Default ZMW (Zambian Kwacha) with extensibility
 
-ERPNext is **not a standalone application**. It requires:
+### ✅ HR Module
+- **Employee Management**: Complete employee database
+- **Employee Records**: Personal info, position, department, salary
+- **Employment Status Tracking**: Active/Inactive status management
+- **Basic Payroll Structure**: Foundation for payroll calculations
 
-1. **Frappe Framework** - The underlying framework (not included in this repo)
-2. **Bench** - A CLI tool for managing Frappe sites and apps
-3. **MariaDB/PostgreSQL** - Database server
-4. **Redis** - For caching and job queues
-5. **A Frappe site** - ERPNext installs as an "app" on a Frappe site
+### ✅ Dashboard
+- Real-time statistics (employees, accounts, journal entries)
+- Quick actions for common tasks
+- Company overview and activity tracking
 
-The typical development setup involves:
-```bash
-# Install bench
-pip install frappe-bench
+### ✅ Modern UI/UX
+- Responsive design works on desktop, tablet, and mobile
+- Dark theme with ERIK teal/green branding (#00D9A3)
+- Gradient backgrounds and glassmorphic cards
+- Smooth animations and transitions
 
-# Create a new bench
-bench init frappe-bench
+## Technology Stack
 
-# Create a site
-bench new-site mysite.local
+### Backend
+- **Framework**: FastAPI (Python 3.11)
+- **Database**: PostgreSQL (Replit managed)
+- **ORM**: SQLAlchemy 2.0
+- **Authentication**: JWT tokens with bcrypt password hashing
+- **API**: RESTful with automatic OpenAPI/Swagger docs
 
-# Get ERPNext app
-bench get-app erpnext
+### Frontend
+- **Framework**: React 18 with Vite
+- **Routing**: React Router v6
+- **Styling**: Tailwind CSS with custom ERIK theme
+- **Icons**: Lucide React
+- **HTTP Client**: Axios
+- **Charts**: Recharts (for future analytics)
 
-# Install ERPNext on the site
-bench --site mysite.local install-app erpnext
-
-# Start the server
-bench start
-```
-
-### What Would Be Needed to Run This
-
-To run ERPNext in any environment (including Replit), you would need:
-
-1. **Full Frappe Framework installation**
-2. **Frappe Bench setup**
-3. **MariaDB or PostgreSQL database** (with specific configuration)
-4. **Redis server** (for background jobs and caching)
-5. **Node.js** (for building frontend assets)
-6. **System dependencies** (wkhtmltopdf for PDF generation, etc.)
-
-This would be a **very complex setup** requiring significant system resources and configuration.
-
-## Recommended Alternatives
-
-### For Development/Testing ERPNext:
-
-1. **Frappe Cloud** (https://frappecloud.com)
-   - Managed hosting specifically for Frappe/ERPNext
-   - Free trial available
-   - Handles all infrastructure
-
-2. **Local Docker Setup**
-   ```bash
-   git clone https://github.com/frappe/frappe_docker
-   cd frappe_docker
-   docker compose -f pwd.yml up -d
-   ```
-   - Complete development environment
-   - Accessible at localhost:8080
-   - Default credentials: Administrator/admin
-
-3. **Full Local Installation**
-   - Follow: https://frappeframework.com/docs/user/en/installation
-   - Requires more setup but gives full control
-
-### For Learning About This Codebase:
-
-This repository is useful for:
-- Understanding ERPNext's code structure
-- Contributing to ERPNext development
-- Building custom modules/extensions
-- Learning the Frappe framework patterns
+### Infrastructure
+- **Hosting**: Replit (development)
+- **Database**: PostgreSQL with automatic backups
+- **Deployment**: Ready for SaaS deployment
 
 ## Project Structure
 
 ```
-erpnext/
-├── accounts/          # Accounting module
-├── assets/           # Asset management
-├── buying/           # Purchase management
-├── crm/              # Customer relationship management
-├── manufacturing/    # Production and manufacturing
-├── projects/         # Project management
-├── selling/          # Sales management
-├── stock/            # Inventory management
-├── setup/            # Setup and configuration
-├── public/           # Static assets (CSS, JS, images)
-├── www/              # Web pages and portals
-└── hooks.py          # Frappe hooks configuration
+.
+├── backend/               # FastAPI backend
+│   ├── main.py           # API routes and endpoints
+│   ├── models.py         # SQLAlchemy database models
+│   ├── schemas.py        # Pydantic validation schemas
+│   ├── auth.py           # Authentication & authorization
+│   ├── database.py       # Database connection
+│   └── requirements.txt  # Python dependencies
+│
+├── frontend/             # React frontend
+│   ├── src/
+│   │   ├── components/  # Reusable React components
+│   │   │   └── Layout.jsx
+│   │   ├── pages/       # Page components
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Employees.jsx
+│   │   │   ├── Accounts.jsx
+│   │   │   └── Journals.jsx
+│   │   ├── services/    # API integration
+│   │   │   └── api.js
+│   │   ├── styles/      # Global styles
+│   │   │   └── index.css
+│   │   ├── App.jsx      # Main app component
+│   │   └── main.jsx     # Entry point
+│   ├── index.html
+│   ├── vite.config.js   # Vite configuration
+│   ├── tailwind.config.js
+│   └── package.json
+│
+└── erpnext/             # Legacy ERPNext code (for reference)
 ```
 
-## Dependencies
+## Database Schema
 
-### Python Dependencies (pyproject.toml)
-- Core: Unidecode, barcodenumber, rapidfuzz, holidays
-- Integrations: googlemaps, plaid-python, python-youtube
-- Data: pandas, statsmodels, mt-940
+### Multi-Tenant Design
 
-### JavaScript Dependencies (package.json)
-- onscan.js: Barcode scanner support
+All tables include `company_id` for data isolation:
 
-### Framework Dependency
-- Frappe Framework: >=16.0.0-dev,<17.0.0
+- **companies**: Multi-tenant company registry
+- **users**: User accounts linked to companies
+- **employees**: HR employee records
+- **accounts**: Chart of accounts (hierarchical)
+- **journal_entries**: Financial journal headers
+- **journal_lines**: Journal entry lines (debits/credits)
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register new company and admin user
+- `POST /api/auth/login` - Login and get JWT token
+- `GET /api/users/me` - Get current user profile
+
+### Dashboard
+- `GET /api/dashboard/stats` - Get company statistics
+
+### Finance
+- `GET /api/accounts` - List all accounts
+- `POST /api/accounts` - Create new account
+- `GET /api/journals` - List journal entries
+- `POST /api/journals` - Create journal entry
+
+### HR
+- `GET /api/employees` - List all employees
+- `POST /api/employees` - Create new employee
+
+## Color Palette (ERIK Branding)
+
+```css
+Primary:   #00D9A3  (Bright teal/green - from logo)
+Accent:    #00FFB8  (Light teal)
+Dark:      #0A1628  (Deep navy background)
+Light:     #1E2A3A  (Card/panel background)
+```
+
+## How to Use
+
+### 1. Register a Company
+- Click "Register here" on the login page
+- Enter your company name, full name, email, and password
+- System automatically creates default chart of accounts
+
+### 2. Add Employees
+- Navigate to "Employees" in the sidebar
+- Click "Add Employee"
+- Fill in employee details (number, name, position, department, salary, etc.)
+
+### 3. Manage Chart of Accounts
+- Navigate to "Accounts"
+- View the pre-loaded account structure
+- Add custom accounts as needed
+
+### 4. Record Transactions
+- Navigate to "Journals"
+- Click "New Entry"
+- Create double-entry journal with debits and credits
+
+## Development
+
+### Running Locally
+
+The project has two workflows:
+1. **Backend API** - Runs on `http://127.0.0.1:8000`
+2. **Frontend** - Runs on `http://0.0.0.0:5000` (automatically proxies API calls)
+
+Both workflows start automatically in Replit.
+
+### API Documentation
+
+Interactive API docs available at: `http://127.0.0.1:8000/docs`
+
+## Roadmap - Future Phases
+
+### Phase 2: Enhanced Finance
+- [ ] Bank reconciliation
+- [ ] Financial reports (P&L, Balance Sheet, Cash Flow)
+- [ ] Multi-currency with exchange rates
+- [ ] Tax calculations and reports
+- [ ] ZRA Smart Invoice integration
+
+### Phase 3: Advanced HR & Payroll
+- [ ] Complete payroll engine with PAYE, NAPSA, NHIMA
+- [ ] Leave management system
+- [ ] Attendance tracking
+- [ ] Performance appraisals
+- [ ] Payslip generation and distribution
+
+### Phase 4: Inventory & Procurement
+- [ ] Inventory management
+- [ ] Purchase orders and requisitions
+- [ ] Stock tracking and valuation
+- [ ] Supplier management
+
+### Phase 5: Manufacturing
+- [ ] Bill of Materials (BOM)
+- [ ] Production orders
+- [ ] Work-in-progress tracking
+- [ ] Industry-specific templates
+
+### Phase 6: AI & Automation
+- [ ] AI-powered financial insights
+- [ ] Automated journal entry suggestions
+- [ ] Predictive analytics
+- [ ] Document OCR and smart scanning
+
+### Phase 7: Compliance & Integrations
+- [ ] ZRA integration for tax filing
+- [ ] Bank API integrations
+- [ ] Mobile money integrations (MTN, Airtel, Zamtel)
+- [ ] WhatsApp business integration
 
 ## Recent Changes
 
-**October 31, 2025**: Repository imported into Replit. Documented that this is an ERPNext application that requires the Frappe Framework ecosystem to run.
+**October 31, 2025**: 
+- ✅ Initial MVP development complete
+- ✅ Multi-tenant architecture implemented
+- ✅ Finance module (Accounts, Journals) working
+- ✅ HR module (Employees) working  
+- ✅ Dashboard with real-time stats
+- ✅ Beautiful UI with ERIK branding
+- ✅ Both backend and frontend workflows running successfully
 
 ## User Preferences
 
-None set yet.
+- **Primary Color**: Teal/Green (#00D9A3) as shown in ERIK logo
+- **Goal**: Build a comprehensive ERP to compete with Odoo and SAP
+- **Target Market**: Initially Zambian businesses, expandable globally
+- **Business Model**: Multi-tier SaaS (Free, Basic, Premium, Enterprise)
 
 ## Notes
 
-This is a **reference/development repository only** in its current state. To actually run ERPNext, you need the complete Frappe infrastructure as described above.
+This MVP provides a solid foundation with:
+- ✅ Production-ready architecture
+- ✅ Scalable multi-tenant design
+- ✅ Modern tech stack
+- ✅ Professional UI/UX
+- ✅ Core finance and HR functionality
+
+The system is ready for:
+- Investor demonstrations
+- Initial client pilots
+- Feature expansion
+- Team collaboration
+
+## Next Steps
+
+1. **Test the MVP**: Register a company, add employees, create accounts and journals
+2. **Choose next module**: Based on business priority (Payroll? Inventory? Reports?)
+3. **Expand incrementally**: Build feature by feature
+4. **Get user feedback**: Deploy to pilot clients
+5. **Scale infrastructure**: Move to production hosting when ready
+
+---
+
+**Built with 💚 for ERIK ERP - Making enterprise management intelligent and accessible.**
