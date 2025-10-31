@@ -7,18 +7,57 @@ import {
   FileText, 
   Menu, 
   X, 
-  LogOut 
+  LogOut,
+  Package,
+  ShoppingCart,
+  TruckIcon,
+  DollarSign,
+  Calendar,
+  BarChart3
 } from 'lucide-react';
 
 function Layout({ user, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Employees', href: '/employees', icon: Users },
-    { name: 'Accounts', href: '/accounts', icon: BookOpen },
-    { name: 'Journals', href: '/journals', icon: FileText },
+  const navigationSections = [
+    {
+      title: 'Main',
+      items: [
+        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'Reports', href: '/reports', icon: BarChart3 },
+      ]
+    },
+    {
+      title: 'HR & Payroll',
+      items: [
+        { name: 'Employees', href: '/employees', icon: Users },
+        { name: 'Payroll', href: '/payroll', icon: DollarSign },
+        { name: 'Leave', href: '/leave', icon: Calendar },
+      ]
+    },
+    {
+      title: 'Finance',
+      items: [
+        { name: 'Accounts', href: '/accounts', icon: BookOpen },
+        { name: 'Journals', href: '/journals', icon: FileText },
+      ]
+    },
+    {
+      title: 'Inventory & Sales',
+      items: [
+        { name: 'Products', href: '/products', icon: Package },
+        { name: 'Customers', href: '/customers', icon: Users },
+        { name: 'Sales Orders', href: '/sales-orders', icon: ShoppingCart },
+      ]
+    },
+    {
+      title: 'Procurement',
+      items: [
+        { name: 'Suppliers', href: '/suppliers', icon: TruckIcon },
+        { name: 'Purchase Orders', href: '/purchase-orders', icon: ShoppingCart },
+      ]
+    }
   ];
 
   return (
@@ -51,26 +90,35 @@ function Layout({ user, onLogout }) {
 
       <div className="flex">
         {sidebarOpen && (
-          <aside className="w-64 min-h-screen bg-erik-light border-r border-erik-primary/20">
-            <nav className="mt-8 px-4 space-y-2">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`flex items-center px-4 py-3 rounded-lg transition-all ${
-                      isActive
-                        ? 'bg-erik-primary/20 text-erik-primary border border-erik-primary/30'
-                        : 'text-gray-300 hover:bg-erik-dark/50 hover:text-erik-primary'
-                    }`}
-                  >
-                    <Icon size={20} className="mr-3" />
-                    {item.name}
-                  </Link>
-                );
-              })}
+          <aside className="w-64 min-h-screen bg-erik-light border-r border-erik-primary/20 overflow-y-auto">
+            <nav className="mt-8 px-4 space-y-6 pb-8">
+              {navigationSections.map((section) => (
+                <div key={section.title}>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-4">
+                    {section.title}
+                  </h3>
+                  <div className="space-y-1">
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.href;
+                      return (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className={`flex items-center px-4 py-2 rounded-lg transition-all ${
+                            isActive
+                              ? 'bg-erik-primary/20 text-erik-primary border border-erik-primary/30'
+                              : 'text-gray-300 hover:bg-erik-dark/50 hover:text-erik-primary'
+                          }`}
+                        >
+                          <Icon size={18} className="mr-3" />
+                          <span className="text-sm">{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </nav>
           </aside>
         )}

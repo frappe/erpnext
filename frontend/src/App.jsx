@@ -6,6 +6,14 @@ import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
 import Accounts from './pages/Accounts';
 import Journals from './pages/Journals';
+import Reports from './pages/Reports';
+import Payroll from './pages/Payroll';
+import Leave from './pages/Leave';
+import Products from './pages/Products';
+import Customers from './pages/Customers';
+import Suppliers from './pages/Suppliers';
+import SalesOrders from './pages/SalesOrders';
+import PurchaseOrders from './pages/PurchaseOrders';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -67,9 +75,17 @@ function App() {
         }>
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="employees" element={<Employees />} />
+          <Route path="payroll" element={<Payroll />} />
+          <Route path="leave" element={<Leave />} />
           <Route path="accounts" element={<Accounts />} />
           <Route path="journals" element={<Journals />} />
+          <Route path="products" element={<Products />} />
+          <Route path="customers" element={<Customers />} />
+          <Route path="sales-orders" element={<SalesOrders />} />
+          <Route path="suppliers" element={<Suppliers />} />
+          <Route path="purchase-orders" element={<PurchaseOrders />} />
         </Route>
       </Routes>
     </Router>
