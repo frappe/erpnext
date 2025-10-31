@@ -685,6 +685,9 @@ class StockReconciliation(StockController):
 
 		item_code_list, warehouse_list = [], []
 		for item in self.items:
+			if item.qty == item.current_qty:
+				continue
+
 			item_code_list.append(item.item_code)
 			warehouse_list.append(item.warehouse)
 
