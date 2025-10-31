@@ -853,6 +853,12 @@ class SubcontractingReceipt(SubcontractingController):
 		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
 			make_purchase_receipt(self, save=True, notify=True)
 
+@frappe.whitelist()
+def make_subcontract_return_against_rejected_warehouse(source_name):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+	return make_return_doc("Subcontracting Receipt", source_name, return_against_rejected_qty=True)
+
 
 @frappe.whitelist()
 def make_subcontract_return(source_name, target_doc=None):
