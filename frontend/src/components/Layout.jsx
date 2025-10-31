@@ -13,7 +13,9 @@ import {
   TruckIcon,
   DollarSign,
   Calendar,
-  BarChart3
+  BarChart3,
+  Building,
+  Smartphone
 } from 'lucide-react';
 
 function Layout({ user, onLogout }) {
@@ -56,6 +58,14 @@ function Layout({ user, onLogout }) {
       items: [
         { name: 'Suppliers', href: '/suppliers', icon: TruckIcon },
         { name: 'Purchase Orders', href: '/purchase-orders', icon: ShoppingCart },
+      ]
+    },
+    {
+      title: 'Operations',
+      items: [
+        { name: 'Point of Sale', href: '/pos', icon: ShoppingCart },
+        { name: 'Branches', href: '/branches', icon: Building },
+        { name: 'Mobile Money', href: '/mobile-money', icon: Smartphone },
       ]
     }
   ];
