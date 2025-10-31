@@ -165,7 +165,7 @@ def get_data(filters, conditions):
 				row1 = frappe.db.sql(
 					"""
 					SELECT
-						t1.currency , {} , {}
+						MAX(t1.currency) AS currency,{} , {}
 					FROM
 						`tab{}` t1,
 						`tab{} Item` t2
@@ -300,6 +300,19 @@ def get_period_wise_query(bet_dates, trans_date, query_details):
 		sd=bet_dates[0],
 		ed=bet_dates[1],
 	)
+# 	SUM(CASE 
+#         WHEN t1.transaction_date BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' 
+#         THEN t2.stock_qty 
+#         ELSE 0 
+#     END) AS jan_stock_qty,
+
+# SUM(CASE 
+#         WHEN t1.transaction_date BETWEEN DATE '2025-01-01' AND DATE '2025-01-31' 
+#         THEN t2.base_net_amount 
+#         ELSE 0 
+#     END) AS jan_net_amount
+
+# 	frappe.msgprint(str(query_details))
 	return query_details
 
 
@@ -414,7 +427,8 @@ def based_wise_columns_query(based_on, trans):
 		else:
 			frappe.throw(_("Project-wise data is not available for Quotation"))
 
-	based_on_details["based_on_select"] += "t1.currency,"
+	
+	based_on_details["based_on_select"] += "MAX(t1.currency) AS currency,"
 	based_on_details["based_on_cols"].append("Currency:Link/Currency:120")
 
 	return based_on_details
