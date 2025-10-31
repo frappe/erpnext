@@ -626,6 +626,7 @@ frappe.ui.form.on("Job Card", {
 
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
+		var section = "";
 
 		function setCurrentIncrement() {
 			currentIncrement += 1;
@@ -635,7 +636,7 @@ frappe.ui.form.on("Job Card", {
 		function updateStopwatch(increment) {
 			var hours = Math.floor(increment / 3600);
 			var minutes = Math.floor((increment - hours * 3600) / 60);
-			var seconds = flt(increment - hours * 3600 - minutes * 60, 2);
+			var seconds = Math.floor(flt(increment - hours * 3600 - minutes * 60, 2));
 
 			$(section)
 				.find(".hours")
@@ -666,7 +667,13 @@ frappe.ui.form.on("Job Card", {
 				<span class="seconds">00</span>
 			</div>`;
 
-		var section = frm.toolbar.page.add_inner_message(timer);
+		if (frappe.utils.is_xs()) {
+			frm.dashboard.add_comment(timer, "white", true);
+			section = frm.layout.wrapper.find(".form-message-container");
+		} else {
+			section = frm.toolbar.page.add_inner_message(timer);
+		}
+
 		let currentIncrement = frm.events.get_current_time(frm);
 		if (frm.doc.time_logs?.length && frm.doc.time_logs[cint(frm.doc.time_logs.length) - 1].to_time) {
 			updateStopwatch(currentIncrement);
