@@ -4,34 +4,75 @@
 
 ERIK ERP is a modern, multi-tenant SaaS enterprise resource planning system designed to manage Finance, HR, Payroll, Inventory, and more. Built with cutting-edge technologies and designed with a sleek teal/green color palette inspired by the ERIK brand.
 
-**Project Status**: MVP Phase 1 - Core Foundation Complete ✅
+**Project Status**: Phase 2 - Comprehensive ERP Expansion Complete ✅
 
 ## Vision
 
 To build a comprehensive ERP system that competes with Odoo, SAP, and other enterprise solutions, specifically tailored for businesses in Zambia and beyond. This MVP provides the foundational architecture and core modules that can be expanded into a full-featured enterprise system.
 
-## Current Features (MVP Phase 1)
+## Current Features (Phase 2 - Comprehensive ERP)
 
 ### ✅ Multi-Tenant SaaS Architecture
 - Each company has its own isolated data
 - Secure user authentication with JWT tokens
 - Role-based access control (RBAC)
 - Company registration with automatic setup
+- **ALL endpoints validate company ownership on foreign keys for complete data isolation**
 
-### ✅ Finance Module
+### ✅ Finance & Accounting Module
 - **Chart of Accounts**: Hierarchical account structure (Assets, Liabilities, Equity, Revenue, Expenses)
-- **Journal Entries**: Double-entry bookkeeping with debit/credit lines
+- **Journal Entries**: Double-entry bookkeeping with debit/credit validation
+- **Financial Reports**: 
+  - Profit & Loss Statement (Income Statement) with date range filtering
+  - Balance Sheet (Assets = Liabilities + Equity) as of specific date
+  - Cash Flow Statement (Operating, Investing, Financing activities)
 - **Real-time Reporting**: View all financial transactions
 - **Multi-currency Support**: Default ZMW (Zambian Kwacha) with extensibility
 
-### ✅ HR Module
-- **Employee Management**: Complete employee database
-- **Employee Records**: Personal info, position, department, salary
+### ✅ HR & Payroll Module
+- **Employee Management**: Complete employee database with personal info, position, department, salary
 - **Employment Status Tracking**: Active/Inactive status management
-- **Basic Payroll Structure**: Foundation for payroll calculations
+- **Zambian Payroll Engine**: 
+  - PAYE tax calculation (progressive brackets: 0%, 20%, 30%, 37.5%)
+  - **Statutory Compliance**: PAYE calculated on gross salary minus NAPSA only
+  - NAPSA: 5% employee + 5% employer contributions
+  - NHIMA: 1% employee + 1% employer contributions
+  - Automated payslip generation with all statutory deductions
+  - Payslip numbering (PAY-00001, PAY-00002, etc.)
+- **Leave Management**:
+  - Leave Types (Annual, Sick, Maternity, Paternity, etc.) with day allowances
+  - Leave Applications with approval workflow
+  - Application numbering (LA-00001, LA-00002, etc.)
+  - Leave balance tracking per employee
+
+### ✅ Inventory Management
+- **Products**: Complete product catalog with SKU, descriptions, unit pricing
+- **Warehouses**: Multi-location inventory tracking across facilities
+- **Stock Items**: Real-time stock levels by warehouse and product combination
+- **Stock Movements**: Track all inventory transactions and adjustments
+
+### ✅ Sales & CRM
+- **Customer Management**: Customer database with contact info, addresses, credit limits
+- **Sales Orders**: 
+  - Multi-line sales orders with auto-numbering (SO-00001, SO-00002, etc.)
+  - Product selection with quantity and unit pricing
+  - Automatic total amount calculation
+  - Order status tracking (draft, confirmed, delivered)
+  - Delivery date tracking
+  - Order notes and special instructions
+
+### ✅ Procurement
+- **Supplier Management**: Supplier database with contact info and payment terms
+- **Purchase Orders**:
+  - Multi-line purchase orders with auto-numbering (PO-00001, PO-00002, etc.)
+  - Product selection with quantity and unit pricing
+  - Automatic total amount calculation
+  - Expected delivery date tracking
+  - Order status tracking (draft, approved, received)
+  - Order notes and special instructions
 
 ### ✅ Dashboard
-- Real-time statistics (employees, accounts, journal entries)
+- Real-time statistics (employees, accounts, journal entries, orders)
 - Quick actions for common tasks
 - Company overview and activity tracking
 
@@ -40,6 +81,12 @@ To build a comprehensive ERP system that competes with Odoo, SAP, and other ente
 - Dark theme with ERIK teal/green branding (#00D9A3)
 - Gradient backgrounds and glassmorphic cards
 - Smooth animations and transitions
+- Organized navigation with sections:
+  - **Main**: Dashboard, Reports
+  - **HR & Payroll**: Employees, Leave Types, Leave Applications, Payslips
+  - **Finance**: Accounts, Journals
+  - **Inventory & Sales**: Products, Warehouses, Stock, Customers, Sales Orders
+  - **Procurement**: Suppliers, Purchase Orders
 
 ## Technology Stack
 
