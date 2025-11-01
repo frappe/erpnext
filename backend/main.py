@@ -152,6 +152,15 @@ def create_employee(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Validate department_id belongs to same company
+    if employee.department_id:
+        dept = db.query(models.Department).filter(
+            models.Department.id == employee.department_id,
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not dept:
+            raise HTTPException(status_code=400, detail="Invalid department")
+    
     new_employee = models.Employee(
         company_id=current_user.company_id,
         **employee.dict()
@@ -213,6 +222,24 @@ def create_journal(
     if len(journal.lines) < 2:
         raise HTTPException(status_code=400, detail="Journal must have at least 2 lines (debit and credit)")
     
+    # Validate department_id belongs to same company
+    if journal.department_id:
+        dept = db.query(models.Department).filter(
+            models.Department.id == journal.department_id,
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not dept:
+            raise HTTPException(status_code=400, detail="Invalid department")
+    
+    # Validate branch_id belongs to same company
+    if journal.branch_id:
+        branch = db.query(models.Branch).filter(
+            models.Branch.id == journal.branch_id,
+            models.Branch.company_id == current_user.company_id
+        ).first()
+        if not branch:
+            raise HTTPException(status_code=400, detail="Invalid branch")
+    
     total_debits = sum(line.amount for line in journal.lines if line.side == "debit")
     total_credits = sum(line.amount for line in journal.lines if line.side == "credit")
     
@@ -246,6 +273,8 @@ def create_journal(
         description=journal.description,
         currency=journal.currency,
         total_amount=total_debits,
+        department_id=journal.department_id,
+        branch_id=journal.branch_id,
         created_by=current_user.id,
         status="posted"
     )
@@ -386,6 +415,24 @@ def create_purchase_order(
     if not supplier:
         raise HTTPException(status_code=400, detail="Supplier not found")
     
+    # Validate department_id belongs to same company
+    if po.department_id:
+        dept = db.query(models.Department).filter(
+            models.Department.id == po.department_id,
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not dept:
+            raise HTTPException(status_code=400, detail="Invalid department")
+    
+    # Validate branch_id belongs to same company
+    if po.branch_id:
+        branch = db.query(models.Branch).filter(
+            models.Branch.id == po.branch_id,
+            models.Branch.company_id == current_user.company_id
+        ).first()
+        if not branch:
+            raise HTTPException(status_code=400, detail="Invalid branch")
+    
     for line in po.lines:
         product = db.query(models.Product).filter(
             models.Product.id == line.product_id,
@@ -407,6 +454,8 @@ def create_purchase_order(
         po_number=po_number,
         order_date=po.order_date,
         expected_delivery=po.expected_delivery,
+        department_id=po.department_id,
+        branch_id=po.branch_id,
         total_amount=total,
         notes=po.notes,
         created_by=current_user.id,
@@ -452,6 +501,24 @@ def create_sales_order(
     if not customer:
         raise HTTPException(status_code=400, detail="Customer not found")
     
+    # Validate department_id belongs to same company
+    if so.department_id:
+        dept = db.query(models.Department).filter(
+            models.Department.id == so.department_id,
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not dept:
+            raise HTTPException(status_code=400, detail="Invalid department")
+    
+    # Validate branch_id belongs to same company
+    if so.branch_id:
+        branch = db.query(models.Branch).filter(
+            models.Branch.id == so.branch_id,
+            models.Branch.company_id == current_user.company_id
+        ).first()
+        if not branch:
+            raise HTTPException(status_code=400, detail="Invalid branch")
+    
     for line in so.lines:
         product = db.query(models.Product).filter(
             models.Product.id == line.product_id,
@@ -473,6 +540,8 @@ def create_sales_order(
         so_number=so_number,
         order_date=so.order_date,
         delivery_date=so.delivery_date,
+        department_id=so.department_id,
+        branch_id=so.branch_id,
         total_amount=total,
         notes=so.notes,
         created_by=current_user.id,
@@ -1325,6 +1394,306 @@ async def ai_generate_summary(
     )
     
     return result
+
+# Department Management Endpoints
+@app.get("/api/departments", response_model=List[schemas.DepartmentResponse])
+def get_departments(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all departments for the company"""
+    departments = db.query(models.Department).filter(
+        models.Department.company_id == current_user.company_id
+    ).order_by(models.Department.dept_code).all()
+    return departments
+
+@app.post("/api/departments", response_model=schemas.DepartmentResponse)
+def create_department(
+    department: schemas.DepartmentCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new department with multi-tenant security validation"""
+    # Check for duplicate dept_code
+    existing = db.query(models.Department).filter(
+        models.Department.company_id == current_user.company_id,
+        models.Department.dept_code == department.dept_code
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Department code already exists")
+    
+    # Validate parent_dept_id belongs to same company
+    if department.parent_dept_id:
+        parent = db.query(models.Department).filter(
+            models.Department.id == department.parent_dept_id,
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not parent:
+            raise HTTPException(status_code=400, detail="Invalid parent department")
+    
+    # Validate manager_id belongs to same company
+    if department.manager_id:
+        manager = db.query(models.User).filter(
+            models.User.id == department.manager_id,
+            models.User.company_id == current_user.company_id
+        ).first()
+        if not manager:
+            raise HTTPException(status_code=400, detail="Invalid manager user")
+    
+    new_dept = models.Department(
+        company_id=current_user.company_id,
+        **department.dict()
+    )
+    db.add(new_dept)
+    db.commit()
+    db.refresh(new_dept)
+    return new_dept
+
+@app.put("/api/departments/{dept_id}", response_model=schemas.DepartmentResponse)
+def update_department(
+    dept_id: str,
+    department: schemas.DepartmentUpdate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update a department with multi-tenant security validation"""
+    db_dept = db.query(models.Department).filter(
+        models.Department.id == dept_id,
+        models.Department.company_id == current_user.company_id
+    ).first()
+    
+    if not db_dept:
+        raise HTTPException(status_code=404, detail="Department not found")
+    
+    update_data = department.dict(exclude_unset=True, exclude_none=True)
+    
+    # Validate parent_dept_id belongs to same company
+    if 'parent_dept_id' in update_data and update_data['parent_dept_id']:
+        parent = db.query(models.Department).filter(
+            models.Department.id == update_data['parent_dept_id'],
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not parent:
+            raise HTTPException(status_code=400, detail="Invalid parent department")
+    
+    # Validate manager_id belongs to same company
+    if 'manager_id' in update_data and update_data['manager_id']:
+        manager = db.query(models.User).filter(
+            models.User.id == update_data['manager_id'],
+            models.User.company_id == current_user.company_id
+        ).first()
+        if not manager:
+            raise HTTPException(status_code=400, detail="Invalid manager user")
+    
+    for key, value in update_data.items():
+        setattr(db_dept, key, value)
+    
+    db.commit()
+    db.refresh(db_dept)
+    return db_dept
+
+# Consolidated Reporting Endpoints
+@app.get("/api/reports/consolidated-pl")
+def get_consolidated_pl_report(
+    start_date: date,
+    end_date: date,
+    group_by: str = "department",
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get consolidated Profit & Loss report by department/branch/company"""
+    from sqlalchemy import func
+    
+    query = db.query(
+        models.JournalLine.account_id,
+        models.Account.name.label("account_name"),
+        models.Account.account_type,
+        func.sum(models.JournalLine.amount).label("total_amount")
+    ).join(
+        models.JournalEntry, models.JournalLine.journal_id == models.JournalEntry.id
+    ).join(
+        models.Account, models.JournalLine.account_id == models.Account.id
+    ).filter(
+        models.JournalEntry.company_id == current_user.company_id,
+        models.JournalEntry.date >= start_date,
+        models.JournalEntry.date <= end_date,
+        models.JournalEntry.status == "posted",
+        models.Account.account_type.in_(["revenue", "expense"])
+    )
+    
+    if group_by == "department":
+        query = query.add_columns(
+            models.JournalEntry.department_id,
+            models.Department.dept_name
+        ).outerjoin(
+            models.Department, models.JournalEntry.department_id == models.Department.id
+        ).group_by(
+            models.JournalLine.account_id,
+            models.Account.name,
+            models.Account.account_type,
+            models.JournalEntry.department_id,
+            models.Department.dept_name
+        )
+    elif group_by == "branch":
+        query = query.add_columns(
+            models.JournalEntry.branch_id,
+            models.Branch.branch_name
+        ).outerjoin(
+            models.Branch, models.JournalEntry.branch_id == models.Branch.id
+        ).group_by(
+            models.JournalLine.account_id,
+            models.Account.name,
+            models.Account.account_type,
+            models.JournalEntry.branch_id,
+            models.Branch.branch_name
+        )
+    else:
+        query = query.group_by(
+            models.JournalLine.account_id,
+            models.Account.name,
+            models.Account.account_type
+        )
+    
+    results = query.all()
+    
+    report_data = {}
+    for row in results:
+        if group_by == "department":
+            group_key = f"{row.dept_name or 'Unassigned'}"
+        elif group_by == "branch":
+            group_key = f"{row.branch_name or 'Unassigned'}"
+        else:
+            group_key = "Company Total"
+        
+        if group_key not in report_data:
+            report_data[group_key] = {
+                "income": {},
+                "expenses": {},
+                "total_income": 0.0,
+                "total_expenses": 0.0,
+                "net_profit": 0.0
+            }
+        
+        if row.account_type == "revenue":
+            report_data[group_key]["income"][row.account_name] = float(row.total_amount)
+            report_data[group_key]["total_income"] += float(row.total_amount)
+        elif row.account_type == "expense":
+            report_data[group_key]["expenses"][row.account_name] = float(row.total_amount)
+            report_data[group_key]["total_expenses"] += float(row.total_amount)
+        
+        report_data[group_key]["net_profit"] = (
+            report_data[group_key]["total_income"] - report_data[group_key]["total_expenses"]
+        )
+    
+    return {
+        "start_date": start_date,
+        "end_date": end_date,
+        "group_by": group_by,
+        "report_data": report_data
+    }
+
+@app.get("/api/reports/consolidated-balance-sheet")
+def get_consolidated_balance_sheet(
+    as_of_date: date,
+    group_by: str = "department",
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get consolidated Balance Sheet by department/branch/company"""
+    from sqlalchemy import func
+    
+    query = db.query(
+        models.JournalLine.account_id,
+        models.Account.name.label("account_name"),
+        models.Account.account_type,
+        func.sum(
+            func.case(
+                (models.JournalLine.side == "debit", models.JournalLine.amount),
+                else_=-models.JournalLine.amount
+            )
+        ).label("balance")
+    ).join(
+        models.JournalEntry, models.JournalLine.journal_id == models.JournalEntry.id
+    ).join(
+        models.Account, models.JournalLine.account_id == models.Account.id
+    ).filter(
+        models.JournalEntry.company_id == current_user.company_id,
+        models.JournalEntry.date <= as_of_date,
+        models.JournalEntry.status == "posted",
+        models.Account.account_type.in_(["asset", "liability", "equity"])
+    )
+    
+    if group_by == "department":
+        query = query.add_columns(
+            models.JournalEntry.department_id,
+            models.Department.dept_name
+        ).outerjoin(
+            models.Department, models.JournalEntry.department_id == models.Department.id
+        ).group_by(
+            models.JournalLine.account_id,
+            models.Account.name,
+            models.Account.account_type,
+            models.JournalEntry.department_id,
+            models.Department.dept_name
+        )
+    elif group_by == "branch":
+        query = query.add_columns(
+            models.JournalEntry.branch_id,
+            models.Branch.branch_name
+        ).outerjoin(
+            models.Branch, models.JournalEntry.branch_id == models.Branch.id
+        ).group_by(
+            models.JournalLine.account_id,
+            models.Account.name,
+            models.Account.account_type,
+            models.JournalEntry.branch_id,
+            models.Branch.branch_name
+        )
+    else:
+        query = query.group_by(
+            models.JournalLine.account_id,
+            models.Account.name,
+            models.Account.account_type
+        )
+    
+    results = query.all()
+    
+    report_data = {}
+    for row in results:
+        if group_by == "department":
+            group_key = f"{row.dept_name or 'Unassigned'}"
+        elif group_by == "branch":
+            group_key = f"{row.branch_name or 'Unassigned'}"
+        else:
+            group_key = "Company Total"
+        
+        if group_key not in report_data:
+            report_data[group_key] = {
+                "assets": {},
+                "liabilities": {},
+                "equity": {},
+                "total_assets": 0.0,
+                "total_liabilities": 0.0,
+                "total_equity": 0.0
+            }
+        
+        balance = float(row.balance)
+        if row.account_type == "asset":
+            report_data[group_key]["assets"][row.account_name] = balance
+            report_data[group_key]["total_assets"] += balance
+        elif row.account_type == "liability":
+            report_data[group_key]["liabilities"][row.account_name] = balance
+            report_data[group_key]["total_liabilities"] += balance
+        elif row.account_type == "equity":
+            report_data[group_key]["equity"][row.account_name] = balance
+            report_data[group_key]["total_equity"] += balance
+    
+    return {
+        "as_of_date": as_of_date,
+        "group_by": group_by,
+        "report_data": report_data
+    }
 
 if __name__ == "__main__":
     import uvicorn

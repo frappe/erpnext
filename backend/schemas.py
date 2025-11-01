@@ -79,7 +79,7 @@ class EmployeeCreate(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     position: str
-    department: str
+    department_id: Optional[str] = None
     salary_base: float = 0.0
     date_joined: date
 
@@ -89,7 +89,7 @@ class EmployeeResponse(BaseModel):
     first_name: str
     last_name: str
     position: str
-    department: str
+    department_id: Optional[str]
     employment_status: str
     
     class Config:
@@ -122,6 +122,8 @@ class JournalEntryCreate(BaseModel):
     description: str
     currency: str = "ZMW"
     total_amount: float
+    department_id: Optional[str] = None
+    branch_id: Optional[str] = None
     lines: List[JournalLineCreate]
 
 class JournalEntryResponse(BaseModel):
@@ -225,6 +227,8 @@ class PurchaseOrderCreate(BaseModel):
     supplier_id: str
     order_date: date
     expected_delivery: Optional[date] = None
+    department_id: Optional[str] = None
+    branch_id: Optional[str] = None
     lines: List[PurchaseOrderLineCreate]
     notes: Optional[str] = None
 
@@ -248,6 +252,8 @@ class SalesOrderCreate(BaseModel):
     customer_id: str
     order_date: date
     delivery_date: Optional[date] = None
+    department_id: Optional[str] = None
+    branch_id: Optional[str] = None
     lines: List[SalesOrderLineCreate]
     notes: Optional[str] = None
 
@@ -492,6 +498,35 @@ class StatutoryObligationResponse(BaseModel):
     notes: Optional[str]
     created_at: datetime
     updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class DepartmentCreate(BaseModel):
+    dept_code: str
+    dept_name: str
+    parent_dept_id: Optional[str] = None
+    manager_id: Optional[str] = None
+    cost_center_code: Optional[str] = None
+
+class DepartmentUpdate(BaseModel):
+    dept_code: Optional[str] = None
+    dept_name: Optional[str] = None
+    parent_dept_id: Optional[str] = None
+    manager_id: Optional[str] = None
+    cost_center_code: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class DepartmentResponse(BaseModel):
+    id: str
+    company_id: str
+    dept_code: str
+    dept_name: str
+    parent_dept_id: Optional[str]
+    manager_id: Optional[str]
+    cost_center_code: Optional[str]
+    is_active: bool
+    created_at: datetime
     
     class Config:
         from_attributes = True

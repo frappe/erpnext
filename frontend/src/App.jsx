@@ -22,6 +22,8 @@ import POS from './pages/POS';
 import SecuritySettings from './pages/SecuritySettings';
 import AIAssistant from './pages/AIAssistant';
 import StatutoryObligations from './pages/StatutoryObligations';
+import Departments from './pages/Departments';
+import ConsolidatedReports from './pages/ConsolidatedReports';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -105,6 +107,8 @@ function App() {
           <Route path="security" element={<SecuritySettings />} />
           <Route path="ai-assistant" element={<AIAssistant />} />
           <Route path="statutory-obligations" element={<StatutoryObligations />} />
+          <Route path="departments" element={<Departments />} />
+          <Route path="consolidated-reports" element={<ConsolidatedReports />} />
         </Route>
       </Routes>
     </Router>
