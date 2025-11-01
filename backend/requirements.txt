@@ -10,3 +10,5 @@ python-multipart==0.0.6
 alembic==1.13.1
 python-dotenv==1.0.0
 email-validator==2.1.0
+anthropic==0.18.1
+httpx==0.27.0

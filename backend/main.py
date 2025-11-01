@@ -2,11 +2,13 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, date
+from typing import Optional, List, Dict, Any
 import models
 import schemas
 import auth
 import utils
 from database import engine, get_db
+from ai_assistant import ai_assistant
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -1120,6 +1122,209 @@ def create_cashier_session(
     db.commit()
     db.refresh(new_session)
     return new_session
+
+# Statutory Obligations Endpoints
+@app.get("/api/statutory-obligations")
+def get_statutory_obligations(
+    status: Optional[str] = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all statutory obligations for the company"""
+    query = db.query(models.StatutoryObligation).filter(
+        models.StatutoryObligation.company_id == current_user.company_id
+    )
+    
+    if status:
+        query = query.filter(models.StatutoryObligation.status == status)
+    
+    obligations = query.order_by(models.StatutoryObligation.due_date).all()
+    return obligations
+
+@app.post("/api/statutory-obligations", response_model=schemas.StatutoryObligationResponse)
+def create_statutory_obligation(
+    obligation: schemas.StatutoryObligationCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new statutory obligation"""
+    # Validate and create with only whitelisted fields
+    new_obligation = models.StatutoryObligation(
+        company_id=current_user.company_id,
+        **obligation.dict()
+    )
+    db.add(new_obligation)
+    db.commit()
+    db.refresh(new_obligation)
+    return new_obligation
+
+@app.put("/api/statutory-obligations/{obligation_id}", response_model=schemas.StatutoryObligationResponse)
+def update_statutory_obligation(
+    obligation_id: str,
+    obligation: schemas.StatutoryObligationUpdate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update statutory obligation with validated fields only"""
+    # Enforce multi-tenant security: verify company ownership
+    db_obligation = db.query(models.StatutoryObligation).filter(
+        models.StatutoryObligation.id == obligation_id,
+        models.StatutoryObligation.company_id == current_user.company_id
+    ).first()
+    
+    if not db_obligation:
+        raise HTTPException(status_code=404, detail="Obligation not found")
+    
+    # Only update fields that are present in the request (exclude None values)
+    update_data = obligation.dict(exclude_unset=True, exclude_none=True)
+    
+    # Apply validated fields only - Pydantic schema ensures no protected fields
+    for key, value in update_data.items():
+        setattr(db_obligation, key, value)
+    
+    db.commit()
+    db.refresh(db_obligation)
+    return db_obligation
+
+@app.get("/api/statutory-obligations/dashboard")
+def get_statutory_dashboard(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get statutory obligations dashboard data"""
+    from datetime import date, timedelta
+    
+    today = date.today()
+    next_30_days = today + timedelta(days=30)
+    
+    # Get all obligations
+    all_obligations = db.query(models.StatutoryObligation).filter(
+        models.StatutoryObligation.company_id == current_user.company_id
+    ).all()
+    
+    # Get upcoming obligations (next 30 days)
+    upcoming = db.query(models.StatutoryObligation).filter(
+        models.StatutoryObligation.company_id == current_user.company_id,
+        models.StatutoryObligation.due_date >= today,
+        models.StatutoryObligation.due_date <= next_30_days,
+        models.StatutoryObligation.status == "pending"
+    ).order_by(models.StatutoryObligation.due_date).all()
+    
+    # Get overdue obligations
+    overdue = db.query(models.StatutoryObligation).filter(
+        models.StatutoryObligation.company_id == current_user.company_id,
+        models.StatutoryObligation.due_date < today,
+        models.StatutoryObligation.status == "pending"
+    ).all()
+    
+    # Calculate total amounts
+    total_due = sum(o.amount or 0 for o in upcoming)
+    total_overdue = sum(o.amount or 0 for o in overdue)
+    
+    return {
+        "total_obligations": len(all_obligations),
+        "upcoming_count": len(upcoming),
+        "overdue_count": len(overdue),
+        "total_due_amount": total_due,
+        "total_overdue_amount": total_overdue,
+        "upcoming_obligations": upcoming,
+        "overdue_obligations": overdue
+    }
+
+# AI Assistant Endpoints
+@app.post("/api/ai/chat")
+async def ai_chat(
+    message: str,
+    conversation_history: Optional[List[Dict[str, str]]] = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Send a message to ERIK AI Assistant"""
+    company = db.query(models.Company).filter(models.Company.id == current_user.company_id).first()
+    
+    user_context = {
+        "company_name": company.name,
+        "user_name": current_user.full_name,
+        "role": current_user.role
+    }
+    
+    result = await ai_assistant.chat(
+        message=message,
+        conversation_history=conversation_history,
+        user_context=user_context
+    )
+    
+    return result
+
+@app.post("/api/ai/analyze-report")
+async def ai_analyze_report(
+    report_type: str,
+    data: Dict[str, Any],
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Analyze financial reports with AI"""
+    company = db.query(models.Company).filter(models.Company.id == current_user.company_id).first()
+    
+    user_context = {
+        "company_name": company.name,
+        "user_name": current_user.full_name,
+        "role": current_user.role
+    }
+    
+    result = await ai_assistant.analyze_financial_report(
+        report_type=report_type,
+        data=data,
+        user_context=user_context
+    )
+    
+    return result
+
+@app.post("/api/ai/explain-compliance")
+async def ai_explain_compliance(
+    compliance_type: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get explanation of Zambian statutory compliance requirements"""
+    company = db.query(models.Company).filter(models.Company.id == current_user.company_id).first()
+    
+    user_context = {
+        "company_name": company.name,
+        "user_name": current_user.full_name,
+        "role": current_user.role
+    }
+    
+    result = await ai_assistant.explain_statutory_compliance(
+        compliance_type=compliance_type,
+        user_context=user_context
+    )
+    
+    return result
+
+@app.post("/api/ai/generate-summary")
+async def ai_generate_summary(
+    data_type: str,
+    data: Dict[str, Any],
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate executive summary of business data"""
+    company = db.query(models.Company).filter(models.Company.id == current_user.company_id).first()
+    
+    user_context = {
+        "company_name": company.name,
+        "user_name": current_user.full_name,
+        "role": current_user.role
+    }
+    
+    result = await ai_assistant.generate_summary(
+        data_type=data_type,
+        data=data,
+        user_context=user_context
+    )
+    
+    return result
 
 if __name__ == "__main__":
     import uvicorn

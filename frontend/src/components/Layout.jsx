@@ -16,7 +16,9 @@ import {
   BarChart3,
   Building,
   Smartphone,
-  Shield
+  Shield,
+  Sparkles,
+  AlertCircle
 } from 'lucide-react';
 
 function Layout({ user, onLogout }) {
@@ -28,6 +30,7 @@ function Layout({ user, onLogout }) {
       title: 'Main',
       items: [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'AI Assistant', href: '/ai-assistant', icon: Sparkles },
         { name: 'Reports', href: '/reports', icon: BarChart3 },
         { name: 'Security', href: '/security', icon: Shield },
       ]
@@ -45,6 +48,7 @@ function Layout({ user, onLogout }) {
       items: [
         { name: 'Accounts', href: '/accounts', icon: BookOpen },
         { name: 'Journals', href: '/journals', icon: FileText },
+        { name: 'Statutory Obligations', href: '/statutory-obligations', icon: AlertCircle },
       ]
     },
     {

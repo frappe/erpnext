@@ -456,3 +456,42 @@ class CashierSessionResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class StatutoryObligationCreate(BaseModel):
+    obligation_type: str
+    description: Optional[str] = None
+    frequency: str  # monthly, quarterly, annually
+    due_day: Optional[int] = None
+    amount: Optional[float] = None
+    due_date: date
+    notes: Optional[str] = None
+
+class StatutoryObligationUpdate(BaseModel):
+    obligation_type: Optional[str] = None
+    description: Optional[str] = None
+    frequency: Optional[str] = None
+    due_day: Optional[int] = None
+    amount: Optional[float] = None
+    status: Optional[str] = None  # pending, paid, overdue
+    paid_date: Optional[date] = None
+    reference_no: Optional[str] = None
+    notes: Optional[str] = None
+
+class StatutoryObligationResponse(BaseModel):
+    id: str
+    company_id: str
+    obligation_type: str
+    description: Optional[str]
+    frequency: str
+    due_day: Optional[int]
+    amount: Optional[float]
+    status: str
+    due_date: date
+    paid_date: Optional[date]
+    reference_no: Optional[str]
+    notes: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
