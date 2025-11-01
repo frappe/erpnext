@@ -3,6 +3,31 @@
 ## Overview
 ERIK ERP is a modern, multi-tenant SaaS enterprise resource planning system designed to manage Finance, HR, Payroll, Inventory, and more. It aims to be a comprehensive ERP system competing with leading solutions, specifically tailored for businesses in Zambia and beyond. The project provides foundational architecture and core modules for future expansion.
 
+## Recent Changes
+
+### Phase 1 Completed (November 1, 2025)
+**Tasks 1-5: Foundation & AI Integration**
+1. ✅ **ERIK Logo Branding**: Replaced "Replit Agent" with custom ERIK logo throughout the application
+2. ✅ **Security Disclaimer**: Added comprehensive legal disclaimers about data security and multi-tenant architecture  
+3. ✅ **Claude AI Assistant**: Integrated Anthropic Claude AI for intelligent business insights and recommendations
+4. ✅ **Statutory Obligations Dashboard**: Real-time compliance monitoring for PAYE, NAPSA, NHIMA with ZRA integration readiness
+5. ✅ **Department-to-Company Reporting**: Hierarchical department structure with consolidated P&L and Balance Sheet reports
+
+**Key Implementation Details:**
+- **Department Model**: Hierarchical structure with parent-child relationships, manager assignment, and full multi-tenant security
+- **Dimensional Tracking**: All transactions (Journal Entry, Sales Order, Purchase Order) and Employees now track department_id and branch_id
+- **Consolidated Reports**: P&L and Balance Sheet aggregation by department/branch/company with revenue, expense, asset, liability, and equity categorization
+- **Multi-Tenant Security**: Comprehensive validation prevents cross-tenant references for departments, branches, managers, parents, and all foreign keys
+- **Employee Schema**: Updated to use department_id foreign key instead of string for proper relational integrity
+- **Beautiful UI**: Modern department management interface with CRUD operations and consolidated reports with drill-down capabilities
+
+**Security Enhancements:**
+- All transaction create endpoints validate department_id and branch_id ownership
+- Department CRUD validates parent_dept_id and manager_id ownership  
+- Employee creation validates department_id ownership
+- Lowercase account type taxonomy alignment across all queries
+- Production-ready with architect approval
+
 ## User Preferences
 - **Primary Color**: Teal/Green (#00D9A3) as shown in ERIK logo
 - **Goal**: Build a comprehensive ERP to compete with Odoo and SAP
