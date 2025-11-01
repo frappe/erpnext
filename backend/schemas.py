@@ -100,12 +100,16 @@ class AccountCreate(BaseModel):
     name: str
     account_type: str
     parent_id: Optional[str] = None
+    currency: Optional[str] = None
+    allow_fx_revaluation: bool = False
 
 class AccountResponse(BaseModel):
     id: str
     code: str
     name: str
     account_type: str
+    currency: Optional[str]
+    allow_fx_revaluation: bool
     is_active: bool
     
     class Config:
@@ -526,6 +530,152 @@ class DepartmentResponse(BaseModel):
     manager_id: Optional[str]
     cost_center_code: Optional[str]
     is_active: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class CurrencyCreate(BaseModel):
+    code: str
+    name: str
+    symbol: Optional[str] = None
+    decimal_places: int = 2
+    is_base_currency: bool = False
+
+class CurrencyResponse(BaseModel):
+    id: str
+    company_id: str
+    code: str
+    name: str
+    symbol: Optional[str]
+    decimal_places: int
+    is_active: bool
+    is_base_currency: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class ExchangeRateCreate(BaseModel):
+    from_currency: str
+    to_currency: str
+    rate: float
+    rate_date: date
+    rate_type: str = "spot"
+    source: Optional[str] = "manual"
+
+class ExchangeRateResponse(BaseModel):
+    id: str
+    company_id: str
+    from_currency: str
+    to_currency: str
+    rate: float
+    rate_date: date
+    rate_type: str
+    source: Optional[str]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class FXRevaluationRequest(BaseModel):
+    revaluation_date: date
+    currency: str
+
+class FXRevaluationLineResponse(BaseModel):
+    id: str
+    account_id: str
+    account_currency: str
+    original_balance: float
+    exchange_rate_old: float
+    exchange_rate_new: float
+    balance_base_old: float
+    balance_base_new: float
+    gain_loss: float
+    
+    class Config:
+        from_attributes = True
+
+class FXRevaluationResponse(BaseModel):
+    id: str
+    company_id: str
+    revaluation_date: date
+    currency: str
+    total_gain_loss: float
+    journal_entry_id: Optional[str]
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class BankAccountCreate(BaseModel):
+    account_id: str
+    bank_name: str
+    account_number: str
+    account_name: Optional[str] = None
+    branch: Optional[str] = None
+    currency: str = "ZMW"
+    swift_code: Optional[str] = None
+
+class BankAccountResponse(BaseModel):
+    id: str
+    company_id: str
+    account_id: str
+    bank_name: str
+    account_number: str
+    currency: str
+    is_active: bool
+    last_reconciled_date: Optional[date]
+    
+    class Config:
+        from_attributes = True
+
+class BankStatementLineCreate(BaseModel):
+    line_number: int
+    transaction_date: date
+    description: str
+    reference: Optional[str] = None
+    debit: float = 0.0
+    credit: float = 0.0
+    balance: Optional[float] = None
+
+class BankStatementCreate(BaseModel):
+    bank_account_id: str
+    statement_number: str
+    statement_date: date
+    opening_balance: float
+    closing_balance: float
+    lines: List[BankStatementLineCreate]
+
+class BankStatementResponse(BaseModel):
+    id: str
+    company_id: str
+    bank_account_id: str
+    statement_number: str
+    statement_date: date
+    opening_balance: float
+    closing_balance: float
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class BankReconciliationCreate(BaseModel):
+    bank_account_id: str
+    reconciliation_date: date
+    statement_id: Optional[str] = None
+
+class BankReconciliationResponse(BaseModel):
+    id: str
+    company_id: str
+    bank_account_id: str
+    reconciliation_number: str
+    reconciliation_date: date
+    status: str
+    total_matched_debits: float
+    total_matched_credits: float
     created_at: datetime
     
     class Config:

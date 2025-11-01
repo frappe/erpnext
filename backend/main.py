@@ -1695,6 +1695,773 @@ def get_consolidated_balance_sheet(
         "report_data": report_data
     }
 
+# Multi-Currency Management Endpoints
+@app.get("/api/currencies", response_model=list[schemas.CurrencyResponse])
+def get_currencies(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    currencies = db.query(models.Currency).filter(
+        models.Currency.company_id == current_user.company_id,
+        models.Currency.is_active == True
+    ).all()
+    return currencies
+
+@app.post("/api/currencies", response_model=schemas.CurrencyResponse)
+def create_currency(
+    currency: schemas.CurrencyCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Check if currency code already exists for this company
+    existing = db.query(models.Currency).filter(
+        models.Currency.company_id == current_user.company_id,
+        models.Currency.code == currency.code
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Currency already exists")
+    
+    # If this is set as base currency, unset other base currencies
+    if currency.is_base_currency:
+        db.query(models.Currency).filter(
+            models.Currency.company_id == current_user.company_id
+        ).update({"is_base_currency": False})
+    
+    new_currency = models.Currency(
+        company_id=current_user.company_id,
+        **currency.dict()
+    )
+    db.add(new_currency)
+    db.commit()
+    db.refresh(new_currency)
+    return new_currency
+
+@app.get("/api/exchange-rates", response_model=list[schemas.ExchangeRateResponse])
+def get_exchange_rates(
+    from_currency: str = None,
+    to_currency: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.ExchangeRate).filter(
+        models.ExchangeRate.company_id == current_user.company_id
+    )
+    
+    if from_currency:
+        query = query.filter(models.ExchangeRate.from_currency == from_currency)
+    if to_currency:
+        query = query.filter(models.ExchangeRate.to_currency == to_currency)
+    
+    rates = query.order_by(models.ExchangeRate.rate_date.desc()).all()
+    return rates
+
+@app.post("/api/exchange-rates", response_model=schemas.ExchangeRateResponse)
+def create_exchange_rate(
+    rate: schemas.ExchangeRateCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_rate = models.ExchangeRate(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **rate.dict()
+    )
+    db.add(new_rate)
+    db.commit()
+    db.refresh(new_rate)
+    return new_rate
+
+@app.get("/api/exchange-rates/latest")
+def get_latest_exchange_rate(
+    from_currency: str,
+    to_currency: str,
+    rate_date: date = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get the latest exchange rate for a currency pair as of a specific date"""
+    from datetime import date as date_type
+    if not rate_date:
+        rate_date = date_type.today()
+    
+    rate = db.query(models.ExchangeRate).filter(
+        models.ExchangeRate.company_id == current_user.company_id,
+        models.ExchangeRate.from_currency == from_currency,
+        models.ExchangeRate.to_currency == to_currency,
+        models.ExchangeRate.rate_date <= rate_date
+    ).order_by(models.ExchangeRate.rate_date.desc()).first()
+    
+    if not rate:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No exchange rate found for {from_currency}/{to_currency}"
+        )
+    
+    return {
+        "from_currency": rate.from_currency,
+        "to_currency": rate.to_currency,
+        "rate": rate.rate,
+        "rate_date": rate.rate_date,
+        "rate_type": rate.rate_type
+    }
+
+@app.post("/api/fx-revaluation/execute", response_model=schemas.FXRevaluationResponse)
+def execute_fx_revaluation(
+    request: schemas.FXRevaluationRequest,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Execute foreign exchange revaluation for accounts in a specific currency"""
+    from sqlalchemy import func
+    
+    # Get base currency
+    base_currency_obj = db.query(models.Currency).filter(
+        models.Currency.company_id == current_user.company_id,
+        models.Currency.is_base_currency == True
+    ).first()
+    
+    if not base_currency_obj:
+        raise HTTPException(status_code=400, detail="No base currency configured")
+    
+    base_currency = base_currency_obj.code
+    
+    # Get latest exchange rate for the currency
+    latest_rate = db.query(models.ExchangeRate).filter(
+        models.ExchangeRate.company_id == current_user.company_id,
+        models.ExchangeRate.from_currency == base_currency,
+        models.ExchangeRate.to_currency == request.currency,
+        models.ExchangeRate.rate_date <= request.revaluation_date
+    ).order_by(models.ExchangeRate.rate_date.desc()).first()
+    
+    if not latest_rate:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No exchange rate found for {base_currency}/{request.currency}"
+        )
+    
+    # Get all accounts in the foreign currency that allow FX revaluation
+    fx_accounts = db.query(models.Account).filter(
+        models.Account.company_id == current_user.company_id,
+        models.Account.currency == request.currency,
+        models.Account.allow_fx_revaluation == True,
+        models.Account.is_active == True
+    ).all()
+    
+    if not fx_accounts:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No accounts found for revaluation in currency {request.currency}"
+        )
+    
+    # Create FX Revaluation record
+    revaluation = models.FXRevaluation(
+        company_id=current_user.company_id,
+        revaluation_date=request.revaluation_date,
+        currency=request.currency,
+        total_gain_loss=0.0,
+        status="draft",
+        created_by=current_user.id
+    )
+    db.add(revaluation)
+    db.flush()
+    
+    total_gain_loss = 0.0
+    revaluation_lines = []
+    
+    # Calculate FX gain/loss for each account
+    for account in fx_accounts:
+        # Get account balance in foreign currency
+        balance_query = db.query(
+            func.sum(
+                func.case(
+                    (models.JournalLine.side == "debit", models.JournalLine.amount),
+                    else_=-models.JournalLine.amount
+                )
+            ).label("balance")
+        ).join(
+            models.JournalEntry, models.JournalLine.journal_id == models.JournalEntry.id
+        ).filter(
+            models.JournalLine.account_id == account.id,
+            models.JournalEntry.date <= request.revaluation_date,
+            models.JournalEntry.status == "posted"
+        ).first()
+        
+        foreign_balance = float(balance_query.balance or 0.0)
+        
+        if abs(foreign_balance) < 0.01:
+            continue
+        
+        # Get previous exchange rate (find last revaluation or use initial rate)
+        prev_revaluation_line = db.query(models.FXRevaluationLine).join(
+            models.FXRevaluation, models.FXRevaluationLine.revaluation_id == models.FXRevaluation.id
+        ).filter(
+            models.FXRevaluation.company_id == current_user.company_id,
+            models.FXRevaluation.currency == request.currency,
+            models.FXRevaluationLine.account_id == account.id,
+            models.FXRevaluation.revaluation_date < request.revaluation_date,
+            models.FXRevaluation.status == "posted"
+        ).order_by(models.FXRevaluation.revaluation_date.desc()).first()
+        
+        if prev_revaluation_line:
+            old_rate = prev_revaluation_line.exchange_rate_new
+        else:
+            # Get the first exchange rate before or on revaluation date
+            first_rate = db.query(models.ExchangeRate).filter(
+                models.ExchangeRate.company_id == current_user.company_id,
+                models.ExchangeRate.from_currency == base_currency,
+                models.ExchangeRate.to_currency == request.currency,
+                models.ExchangeRate.rate_date <= request.revaluation_date
+            ).order_by(models.ExchangeRate.rate_date.asc()).first()
+            old_rate = first_rate.rate if first_rate else latest_rate.rate
+        
+        new_rate = latest_rate.rate
+        
+        # Calculate balances in base currency
+        balance_base_old = foreign_balance * old_rate
+        balance_base_new = foreign_balance * new_rate
+        gain_loss = balance_base_new - balance_base_old
+        
+        # Create revaluation line
+        reval_line = models.FXRevaluationLine(
+            revaluation_id=revaluation.id,
+            account_id=account.id,
+            account_currency=request.currency,
+            original_balance=foreign_balance,
+            exchange_rate_old=old_rate,
+            exchange_rate_new=new_rate,
+            balance_base_old=balance_base_old,
+            balance_base_new=balance_base_new,
+            gain_loss=gain_loss
+        )
+        db.add(reval_line)
+        revaluation_lines.append(reval_line)
+        total_gain_loss += gain_loss
+    
+    revaluation.total_gain_loss = total_gain_loss
+    db.commit()
+    db.refresh(revaluation)
+    
+    return revaluation
+
+@app.get("/api/fx-revaluation", response_model=list[schemas.FXRevaluationResponse])
+def get_fx_revaluations(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    revaluations = db.query(models.FXRevaluation).filter(
+        models.FXRevaluation.company_id == current_user.company_id
+    ).order_by(models.FXRevaluation.revaluation_date.desc()).all()
+    return revaluations
+
+@app.get("/api/fx-revaluation/{revaluation_id}/lines", response_model=list[schemas.FXRevaluationLineResponse])
+def get_revaluation_lines(
+    revaluation_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Verify revaluation belongs to user's company
+    revaluation = db.query(models.FXRevaluation).filter(
+        models.FXRevaluation.id == revaluation_id,
+        models.FXRevaluation.company_id == current_user.company_id
+    ).first()
+    
+    if not revaluation:
+        raise HTTPException(status_code=404, detail="Revaluation not found")
+    
+    lines = db.query(models.FXRevaluationLine).filter(
+        models.FXRevaluationLine.revaluation_id == revaluation_id
+    ).all()
+    return lines
+
+@app.post("/api/fx-revaluation/{revaluation_id}/post")
+def post_fx_revaluation(
+    revaluation_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Post FX revaluation by creating a journal entry for the gain/loss"""
+    revaluation = db.query(models.FXRevaluation).filter(
+        models.FXRevaluation.id == revaluation_id,
+        models.FXRevaluation.company_id == current_user.company_id
+    ).first()
+    
+    if not revaluation:
+        raise HTTPException(status_code=404, detail="Revaluation not found")
+    
+    if revaluation.status == "posted":
+        raise HTTPException(status_code=400, detail="Revaluation already posted")
+    
+    # Get FX gain/loss accounts
+    fx_gain_account = db.query(models.Account).filter(
+        models.Account.company_id == current_user.company_id,
+        models.Account.code == "7100",  # FX Gain
+        models.Account.is_active == True
+    ).first()
+    
+    fx_loss_account = db.query(models.Account).filter(
+        models.Account.company_id == current_user.company_id,
+        models.Account.code == "8100",  # FX Loss
+        models.Account.is_active == True
+    ).first()
+    
+    if not fx_gain_account or not fx_loss_account:
+        raise HTTPException(
+            status_code=400,
+            detail="FX Gain (7100) or FX Loss (8100) accounts not configured"
+        )
+    
+    # Create journal entry
+    journal_count = db.query(models.JournalEntry).filter(
+        models.JournalEntry.company_id == current_user.company_id
+    ).count()
+    journal_number = f"JE-{journal_count + 1:06d}"
+    
+    journal = models.JournalEntry(
+        company_id=current_user.company_id,
+        journal_number=journal_number,
+        date=revaluation.revaluation_date,
+        description=f"FX Revaluation - {revaluation.currency}",
+        currency=db.query(models.Company).filter(
+            models.Company.id == current_user.company_id
+        ).first().currency,
+        total_amount=abs(revaluation.total_gain_loss),
+        status="posted",
+        created_by=current_user.id
+    )
+    db.add(journal)
+    db.flush()
+    
+    # Get revaluation lines
+    lines = db.query(models.FXRevaluationLine).filter(
+        models.FXRevaluationLine.revaluation_id == revaluation_id
+    ).all()
+    
+    # Create journal lines for each account
+    for line in lines:
+        if abs(line.gain_loss) < 0.01:
+            continue
+        
+        # Post to account
+        account_line = models.JournalLine(
+            journal_id=journal.id,
+            account_id=line.account_id,
+            description=f"FX Revaluation - {line.account_currency}",
+            amount=abs(line.gain_loss),
+            side="debit" if line.gain_loss > 0 else "credit"
+        )
+        db.add(account_line)
+        
+        # Post to FX gain/loss
+        fx_line = models.JournalLine(
+            journal_id=journal.id,
+            account_id=fx_gain_account.id if line.gain_loss > 0 else fx_loss_account.id,
+            description=f"FX Revaluation - {line.account_currency}",
+            amount=abs(line.gain_loss),
+            side="credit" if line.gain_loss > 0 else "debit"
+        )
+        db.add(fx_line)
+    
+    revaluation.journal_entry_id = journal.id
+    revaluation.status = "posted"
+    
+    db.commit()
+    
+    return {"message": "FX Revaluation posted successfully", "journal_number": journal_number}
+
+# Bank Reconciliation Endpoints
+@app.post("/api/bank-accounts", response_model=schemas.BankAccountResponse)
+def create_bank_account(
+    bank_account: schemas.BankAccountCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Validate account belongs to company
+    account = db.query(models.Account).filter(
+        models.Account.id == bank_account.account_id,
+        models.Account.company_id == current_user.company_id
+    ).first()
+    if not account:
+        raise HTTPException(status_code=400, detail="Invalid account")
+    
+    new_bank_account = models.BankAccount(
+        company_id=current_user.company_id,
+        **bank_account.dict()
+    )
+    db.add(new_bank_account)
+    db.commit()
+    db.refresh(new_bank_account)
+    return new_bank_account
+
+@app.get("/api/bank-accounts", response_model=list[schemas.BankAccountResponse])
+def get_bank_accounts(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    accounts = db.query(models.BankAccount).filter(
+        models.BankAccount.company_id == current_user.company_id,
+        models.BankAccount.is_active == True
+    ).all()
+    return accounts
+
+@app.post("/api/bank-statements", response_model=schemas.BankStatementResponse)
+def import_bank_statement(
+    statement: schemas.BankStatementCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Validate bank account belongs to company
+    bank_account = db.query(models.BankAccount).filter(
+        models.BankAccount.id == statement.bank_account_id,
+        models.BankAccount.company_id == current_user.company_id
+    ).first()
+    if not bank_account:
+        raise HTTPException(status_code=400, detail="Invalid bank account")
+    
+    new_statement = models.BankStatement(
+        company_id=current_user.company_id,
+        bank_account_id=statement.bank_account_id,
+        statement_number=statement.statement_number,
+        statement_date=statement.statement_date,
+        opening_balance=statement.opening_balance,
+        closing_balance=statement.closing_balance,
+        status="imported",
+        import_source="manual",
+        created_by=current_user.id
+    )
+    db.add(new_statement)
+    db.flush()
+    
+    # Add statement lines
+    for line_data in statement.lines:
+        line = models.BankStatementLine(
+            statement_id=new_statement.id,
+            **line_data.dict()
+        )
+        db.add(line)
+    
+    db.commit()
+    db.refresh(new_statement)
+    return new_statement
+
+@app.post("/api/bank-reconciliation/auto-match/{statement_id}")
+def auto_match_statement(
+    statement_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Auto-match bank statement lines with journal entries"""
+    from sqlalchemy import and_, or_
+    
+    # Verify statement belongs to company
+    statement = db.query(models.BankStatement).filter(
+        models.BankStatement.id == statement_id,
+        models.BankStatement.company_id == current_user.company_id
+    ).first()
+    if not statement:
+        raise HTTPException(status_code=404, detail="Statement not found")
+    
+    # Get bank account
+    bank_account = db.query(models.BankAccount).filter(
+        models.BankAccount.id == statement.bank_account_id
+    ).first()
+    
+    # Get unmatched statement lines
+    unmatched_lines = db.query(models.BankStatementLine).filter(
+        models.BankStatementLine.statement_id == statement_id,
+        models.BankStatementLine.is_matched == False
+    ).all()
+    
+    matches_found = 0
+    
+    for stmt_line in unmatched_lines:
+        # Get amount to match (debit or credit)
+        amount_to_match = stmt_line.debit if stmt_line.debit > 0 else stmt_line.credit
+        side_to_match = "debit" if stmt_line.debit > 0 else "credit"
+        
+        # Find matching journal lines
+        # Match by: same amount, same date (±3 days), same account, not already matched
+        potential_matches = db.query(models.JournalLine).join(
+            models.JournalEntry, models.JournalLine.journal_id == models.JournalEntry.id
+        ).filter(
+            models.JournalEntry.company_id == current_user.company_id,
+            models.JournalLine.account_id == bank_account.account_id,
+            models.JournalLine.amount == amount_to_match,
+            models.JournalLine.side == side_to_match,
+            models.JournalEntry.date >= stmt_line.transaction_date - timedelta(days=3),
+            models.JournalEntry.date <= stmt_line.transaction_date + timedelta(days=3),
+            models.JournalEntry.status == "posted"
+        ).all()
+        
+        # Check which ones are not already matched
+        for journal_line in potential_matches:
+            already_matched = db.query(models.BankReconciliationMatch).filter(
+                models.BankReconciliationMatch.journal_line_id == journal_line.id
+            ).first()
+            
+            if not already_matched:
+                # Create match
+                stmt_line.is_matched = True
+                stmt_line.matched_journal_line_id = journal_line.id
+                matches_found += 1
+                break
+    
+    db.commit()
+    
+    return {
+        "message": f"Auto-matching complete. {matches_found} matches found.",
+        "matches_found": matches_found,
+        "total_lines": len(unmatched_lines)
+    }
+
+# Fixed Assets Endpoints
+@app.post("/api/fixed-assets")
+def create_fixed_asset(
+    asset: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Validate accounts belong to company
+    for account_field in ['asset_account_id', 'depreciation_account_id', 'accumulated_depreciation_account_id']:
+        if account_field in asset and asset[account_field]:
+            acc = db.query(models.Account).filter(
+                models.Account.id == asset[account_field],
+                models.Account.company_id == current_user.company_id
+            ).first()
+            if not acc:
+                raise HTTPException(status_code=400, detail=f"Invalid {account_field}")
+    
+    new_asset = models.FixedAsset(
+        company_id=current_user.company_id,
+        **asset
+    )
+    db.add(new_asset)
+    db.commit()
+    db.refresh(new_asset)
+    return new_asset
+
+@app.get("/api/fixed-assets")
+def get_fixed_assets(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    assets = db.query(models.FixedAsset).filter(
+        models.FixedAsset.company_id == current_user.company_id
+    ).all()
+    return assets
+
+@app.post("/api/fixed-assets/{asset_id}/depreciate")
+def calculate_depreciation(
+    asset_id: str,
+    period_month: int,
+    period_year: int,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Calculate and post depreciation for an asset for a specific period"""
+    asset = db.query(models.FixedAsset).filter(
+        models.FixedAsset.id == asset_id,
+        models.FixedAsset.company_id == current_user.company_id
+    ).first()
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    
+    # Calculate depreciation based on method
+    if asset.depreciation_method == "straight_line":
+        monthly_depreciation = (asset.purchase_cost - asset.residual_value) / (asset.useful_life_years * 12)
+    else:  # reducing_balance
+        annual_rate = asset.depreciation_rate if asset.depreciation_rate else (1 / asset.useful_life_years)
+        monthly_rate = annual_rate / 12
+        current_book_value = asset.purchase_cost - asset.accumulated_depreciation
+        monthly_depreciation = current_book_value * monthly_rate
+    
+    # Create depreciation schedule entry
+    schedule = models.DepreciationSchedule(
+        asset_id=asset_id,
+        period_month=period_month,
+        period_year=period_year,
+        opening_book_value=asset.purchase_cost - asset.accumulated_depreciation,
+        depreciation_amount=monthly_depreciation,
+        closing_book_value=asset.purchase_cost - asset.accumulated_depreciation - monthly_depreciation,
+        status="posted"
+    )
+    db.add(schedule)
+    
+    # Update asset accumulated depreciation
+    asset.accumulated_depreciation += monthly_depreciation
+    asset.book_value = asset.purchase_cost - asset.accumulated_depreciation
+    
+    db.commit()
+    return {"message": "Depreciation calculated", "amount": monthly_depreciation}
+
+# Smart Invoice Endpoints
+@app.post("/api/invoices")
+def create_invoice(
+    invoice: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Validate customer belongs to company
+    customer = db.query(models.Customer).filter(
+        models.Customer.id == invoice['customer_id'],
+        models.Customer.company_id == current_user.company_id
+    ).first()
+    if not customer:
+        raise HTTPException(status_code=400, detail="Invalid customer")
+    
+    # Generate invoice number
+    invoice_count = db.query(models.Invoice).filter(
+        models.Invoice.company_id == current_user.company_id
+    ).count()
+    invoice_number = f"INV-{invoice_count + 1:06d}"
+    
+    # Generate QR code for ZRA compliance (placeholder)
+    import json
+    qr_data = json.dumps({
+        "invoice_number": invoice_number,
+        "customer": customer.name,
+        "amount": invoice.get('total_amount', 0),
+        "date": str(invoice.get('invoice_date'))
+    })
+    
+    new_invoice = models.Invoice(
+        company_id=current_user.company_id,
+        invoice_number=invoice_number,
+        customer_id=invoice['customer_id'],
+        invoice_date=invoice['invoice_date'],
+        due_date=invoice['due_date'],
+        currency=invoice.get('currency', 'ZMW'),
+        subtotal=invoice['subtotal'],
+        tax_amount=invoice.get('tax_amount', 0.0),
+        total_amount=invoice['total_amount'],
+        qr_code=qr_data,
+        status="draft",
+        created_by=current_user.id
+    )
+    db.add(new_invoice)
+    db.flush()
+    
+    # Add invoice lines
+    if 'lines' in invoice:
+        for line_data in invoice['lines']:
+            line = models.InvoiceLine(
+                invoice_id=new_invoice.id,
+                **line_data
+            )
+            db.add(line)
+    
+    db.commit()
+    db.refresh(new_invoice)
+    return new_invoice
+
+@app.get("/api/invoices")
+def get_invoices(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    invoices = db.query(models.Invoice).filter(
+        models.Invoice.company_id == current_user.company_id
+    ).order_by(models.Invoice.invoice_date.desc()).all()
+    return invoices
+
+@app.post("/api/invoices/{invoice_id}/zra-validate")
+def validate_with_zra(
+    invoice_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Validate invoice with ZRA (placeholder for actual ZRA API integration)"""
+    invoice = db.query(models.Invoice).filter(
+        models.Invoice.id == invoice_id,
+        models.Invoice.company_id == current_user.company_id
+    ).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    # Placeholder: In production, integrate with actual ZRA API
+    invoice.zra_validated = True
+    invoice.zra_validated_at = datetime.utcnow()
+    invoice.zra_reference = f"ZRA-{invoice.invoice_number}-{int(datetime.utcnow().timestamp())}"
+    
+    db.commit()
+    return {"message": "Invoice validated with ZRA", "zra_reference": invoice.zra_reference}
+
+# Accounting Period Endpoints
+@app.post("/api/accounting-periods")
+def create_accounting_period(
+    period: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    new_period = models.AccountingPeriod(
+        company_id=current_user.company_id,
+        **period
+    )
+    db.add(new_period)
+    db.commit()
+    db.refresh(new_period)
+    return new_period
+
+@app.get("/api/accounting-periods")
+def get_accounting_periods(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    periods = db.query(models.AccountingPeriod).filter(
+        models.AccountingPeriod.company_id == current_user.company_id
+    ).order_by(models.AccountingPeriod.start_date.desc()).all()
+    return periods
+
+@app.post("/api/accounting-periods/{period_id}/close")
+def close_accounting_period(
+    period_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Close an accounting period (prevents new transactions)"""
+    period = db.query(models.AccountingPeriod).filter(
+        models.AccountingPeriod.id == period_id,
+        models.AccountingPeriod.company_id == current_user.company_id
+    ).first()
+    if not period:
+        raise HTTPException(status_code=404, detail="Period not found")
+    
+    if period.is_closed:
+        raise HTTPException(status_code=400, detail="Period already closed")
+    
+    period.is_closed = True
+    period.closed_at = datetime.utcnow()
+    period.closed_by = current_user.id
+    
+    db.commit()
+    return {"message": f"Period {period.period_name} closed successfully"}
+
+@app.post("/api/accounting-periods/{period_id}/lock")
+def lock_accounting_period(
+    period_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Lock an accounting period (prevents any edits, including adjustments)"""
+    period = db.query(models.AccountingPeriod).filter(
+        models.AccountingPeriod.id == period_id,
+        models.AccountingPeriod.company_id == current_user.company_id
+    ).first()
+    if not period:
+        raise HTTPException(status_code=404, detail="Period not found")
+    
+    if not period.is_closed:
+        raise HTTPException(status_code=400, detail="Period must be closed before locking")
+    
+    if period.is_locked:
+        raise HTTPException(status_code=400, detail="Period already locked")
+    
+    period.is_locked = True
+    period.locked_at = datetime.utcnow()
+    period.locked_by = current_user.id
+    
+    db.commit()
+    return {"message": f"Period {period.period_name} locked successfully"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
