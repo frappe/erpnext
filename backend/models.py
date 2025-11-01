@@ -94,6 +94,8 @@ class Account(Base):
     name = Column(String, nullable=False)
     account_type = Column(String, nullable=False)
     parent_id = Column(String, ForeignKey("accounts.id"))
+    currency = Column(String)  # If set, this account is in foreign currency
+    allow_fx_revaluation = Column(Boolean, default=False)  # Enable FX revaluation
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
@@ -535,3 +537,278 @@ class StatutoryObligationTemplate(Base):
     authority = Column(String)  # ZRA, NAPSA, NHIMA, etc.
     enabled_by_default = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Currency(Base):
+    __tablename__ = "currencies"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    code = Column(String, nullable=False, index=True)  # ISO 4217 code (USD, EUR, GBP, ZMW)
+    name = Column(String, nullable=False)
+    symbol = Column(String)
+    decimal_places = Column(Integer, default=2)
+    is_active = Column(Boolean, default=True)
+    is_base_currency = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class ExchangeRate(Base):
+    __tablename__ = "exchange_rates"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    from_currency = Column(String, nullable=False)  # Base currency
+    to_currency = Column(String, nullable=False)  # Foreign currency
+    rate = Column(Float, nullable=False)  # 1 base = rate foreign
+    rate_date = Column(Date, nullable=False, index=True)
+    rate_type = Column(String, default="spot")  # spot, average, budget
+    source = Column(String)  # manual, bank_of_zambia, api
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+
+class FXRevaluation(Base):
+    __tablename__ = "fx_revaluations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    revaluation_date = Column(Date, nullable=False)
+    currency = Column(String, nullable=False)
+    total_gain_loss = Column(Float, default=0.0)
+    journal_entry_id = Column(String, ForeignKey("journal_entries.id"))
+    status = Column(String, default="draft")  # draft, posted, reversed
+    created_by = Column(String, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    journal_entry = relationship("JournalEntry")
+
+class FXRevaluationLine(Base):
+    __tablename__ = "fx_revaluation_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    revaluation_id = Column(String, ForeignKey("fx_revaluations.id"), nullable=False)
+    account_id = Column(String, ForeignKey("accounts.id"), nullable=False)
+    account_currency = Column(String, nullable=False)
+    original_balance = Column(Float, nullable=False)  # In foreign currency
+    exchange_rate_old = Column(Float, nullable=False)
+    exchange_rate_new = Column(Float, nullable=False)
+    balance_base_old = Column(Float, nullable=False)  # In base currency
+    balance_base_new = Column(Float, nullable=False)  # In base currency
+    gain_loss = Column(Float, nullable=False)  # Positive = gain, Negative = loss
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    revaluation = relationship("FXRevaluation")
+    account = relationship("Account")
+
+class BankAccount(Base):
+    __tablename__ = "bank_accounts"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    account_id = Column(String, ForeignKey("accounts.id"), nullable=False)  # Links to Chart of Accounts
+    bank_name = Column(String, nullable=False)
+    account_number = Column(String, nullable=False)
+    account_name = Column(String)
+    branch = Column(String)
+    currency = Column(String, default="ZMW")
+    swift_code = Column(String)
+    is_active = Column(Boolean, default=True)
+    last_reconciled_date = Column(Date)
+    last_reconciled_balance = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    account = relationship("Account")
+
+class BankStatement(Base):
+    __tablename__ = "bank_statements"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    bank_account_id = Column(String, ForeignKey("bank_accounts.id"), nullable=False)
+    statement_number = Column(String, nullable=False)
+    statement_date = Column(Date, nullable=False)
+    opening_balance = Column(Float, default=0.0)
+    closing_balance = Column(Float, default=0.0)
+    status = Column(String, default="draft")  # draft, imported, reconciled
+    import_source = Column(String)  # manual, csv, api, ocr
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    bank_account = relationship("BankAccount")
+    lines = relationship("BankStatementLine", back_populates="statement")
+
+class BankStatementLine(Base):
+    __tablename__ = "bank_statement_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    statement_id = Column(String, ForeignKey("bank_statements.id"), nullable=False)
+    line_number = Column(Integer, nullable=False)
+    transaction_date = Column(Date, nullable=False)
+    value_date = Column(Date)
+    description = Column(Text, nullable=False)
+    reference = Column(String)
+    debit = Column(Float, default=0.0)
+    credit = Column(Float, default=0.0)
+    balance = Column(Float)
+    is_matched = Column(Boolean, default=False)
+    matched_journal_line_id = Column(String, ForeignKey("journal_lines.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    statement = relationship("BankStatement", back_populates="lines")
+    matched_journal_line = relationship("JournalLine")
+
+class BankReconciliation(Base):
+    __tablename__ = "bank_reconciliations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    bank_account_id = Column(String, ForeignKey("bank_accounts.id"), nullable=False)
+    reconciliation_number = Column(String, nullable=False, unique=True)
+    reconciliation_date = Column(Date, nullable=False)
+    statement_id = Column(String, ForeignKey("bank_statements.id"))
+    opening_balance_bank = Column(Float, default=0.0)
+    closing_balance_bank = Column(Float, default=0.0)
+    opening_balance_book = Column(Float, default=0.0)
+    closing_balance_book = Column(Float, default=0.0)
+    total_matched_debits = Column(Float, default=0.0)
+    total_matched_credits = Column(Float, default=0.0)
+    total_unmatched_debits_bank = Column(Float, default=0.0)
+    total_unmatched_credits_bank = Column(Float, default=0.0)
+    total_unmatched_debits_book = Column(Float, default=0.0)
+    total_unmatched_credits_book = Column(Float, default=0.0)
+    status = Column(String, default="in_progress")  # in_progress, completed, approved
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    completed_at = Column(DateTime)
+    approved_at = Column(DateTime)
+    approved_by = Column(String, ForeignKey("users.id"))
+    
+    bank_account = relationship("BankAccount")
+    statement = relationship("BankStatement")
+    matches = relationship("BankReconciliationMatch", back_populates="reconciliation")
+
+class BankReconciliationMatch(Base):
+    __tablename__ = "bank_reconciliation_matches"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    reconciliation_id = Column(String, ForeignKey("bank_reconciliations.id"), nullable=False)
+    statement_line_id = Column(String, ForeignKey("bank_statement_lines.id"))
+    journal_line_id = Column(String, ForeignKey("journal_lines.id"))
+    match_type = Column(String, default="manual")  # auto, manual, suggested
+    match_confidence = Column(Float)  # 0.0 to 1.0 for auto-match confidence
+    amount = Column(Float, nullable=False)
+    matched_at = Column(DateTime, default=datetime.utcnow)
+    matched_by = Column(String, ForeignKey("users.id"))
+    
+    reconciliation = relationship("BankReconciliation", back_populates="matches")
+    statement_line = relationship("BankStatementLine")
+    journal_line = relationship("JournalLine")
+
+class FixedAsset(Base):
+    __tablename__ = "fixed_assets"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    asset_code = Column(String, nullable=False, index=True)
+    asset_name = Column(String, nullable=False)
+    asset_category = Column(String, nullable=False)  # Building, Vehicle, Equipment, Furniture, IT
+    description = Column(Text)
+    purchase_date = Column(Date, nullable=False)
+    purchase_cost = Column(Float, nullable=False)
+    residual_value = Column(Float, default=0.0)
+    useful_life_years = Column(Integer, nullable=False)
+    depreciation_method = Column(String, default="straight_line")  # straight_line, reducing_balance
+    depreciation_rate = Column(Float)  # For reducing balance method
+    accumulated_depreciation = Column(Float, default=0.0)
+    book_value = Column(Float)
+    location = Column(String)
+    custodian = Column(String)
+    serial_number = Column(String)
+    asset_account_id = Column(String, ForeignKey("accounts.id"))
+    depreciation_account_id = Column(String, ForeignKey("accounts.id"))
+    accumulated_depreciation_account_id = Column(String, ForeignKey("accounts.id"))
+    status = Column(String, default="active")  # active, disposed, written_off
+    disposal_date = Column(Date)
+    disposal_amount = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    asset_account = relationship("Account", foreign_keys=[asset_account_id])
+    depreciation_account = relationship("Account", foreign_keys=[depreciation_account_id])
+    accumulated_dep_account = relationship("Account", foreign_keys=[accumulated_depreciation_account_id])
+
+class DepreciationSchedule(Base):
+    __tablename__ = "depreciation_schedules"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    asset_id = Column(String, ForeignKey("fixed_assets.id"), nullable=False)
+    period_month = Column(Integer, nullable=False)
+    period_year = Column(Integer, nullable=False)
+    opening_book_value = Column(Float, nullable=False)
+    depreciation_amount = Column(Float, nullable=False)
+    closing_book_value = Column(Float, nullable=False)
+    journal_entry_id = Column(String, ForeignKey("journal_entries.id"))
+    status = Column(String, default="draft")  # draft, posted
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    asset = relationship("FixedAsset")
+    journal_entry = relationship("JournalEntry")
+
+class AccountingPeriod(Base):
+    __tablename__ = "accounting_periods"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    period_name = Column(String, nullable=False)  # e.g., "January 2025", "Q1 2025"
+    period_type = Column(String, default="month")  # month, quarter, year
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    fiscal_year = Column(Integer, nullable=False)
+    is_closed = Column(Boolean, default=False)
+    closed_at = Column(DateTime)
+    closed_by = Column(String, ForeignKey("users.id"))
+    is_locked = Column(Boolean, default=False)
+    locked_at = Column(DateTime)
+    locked_by = Column(String, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    invoice_number = Column(String, nullable=False, unique=True, index=True)
+    customer_id = Column(String, ForeignKey("customers.id"), nullable=False)
+    invoice_date = Column(Date, nullable=False)
+    due_date = Column(Date, nullable=False)
+    currency = Column(String, default="ZMW")
+    subtotal = Column(Float, nullable=False)
+    tax_amount = Column(Float, default=0.0)
+    total_amount = Column(Float, nullable=False)
+    amount_paid = Column(Float, default=0.0)
+    status = Column(String, default="draft")  # draft, sent, paid, overdue, cancelled
+    # Smart Invoice / ZRA Compliance fields
+    qr_code = Column(Text)  # QR code for ZRA compliance
+    ubl_xml = Column(Text)  # UBL (Universal Business Language) XML format
+    zra_reference = Column(String)  # ZRA validation reference
+    zra_validated = Column(Boolean, default=False)
+    zra_validated_at = Column(DateTime)
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    customer = relationship("Customer")
+
+class InvoiceLine(Base):
+    __tablename__ = "invoice_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    invoice_id = Column(String, ForeignKey("invoices.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"))
+    description = Column(Text, nullable=False)
+    quantity = Column(Float, nullable=False)
+    unit_price = Column(Float, nullable=False)
+    discount = Column(Float, default=0.0)
+    tax_rate = Column(Float, default=0.0)
+    line_total = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    invoice = relationship("Invoice")
+    product = relationship("Product")
