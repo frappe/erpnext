@@ -478,3 +478,35 @@ class CashierSession(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     terminal = relationship("POSTerminal")
+
+class StatutoryObligation(Base):
+    __tablename__ = "statutory_obligations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    obligation_type = Column(String, nullable=False)  # PAYE, NAPSA, NHIMA, SDL, VAT, etc.
+    description = Column(Text)
+    frequency = Column(String, nullable=False)  # monthly, quarterly, annually
+    due_day = Column(Integer)  # Day of month when due
+    amount = Column(Float)
+    status = Column(String, default="pending")  # pending, paid, overdue
+    due_date = Column(Date, nullable=False)
+    paid_date = Column(Date)
+    reference_no = Column(String)
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class StatutoryObligationTemplate(Base):
+    __tablename__ = "statutory_obligation_templates"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    obligation_type = Column(String, nullable=False, unique=True)
+    description = Column(Text)
+    frequency = Column(String, nullable=False)
+    due_day = Column(Integer)
+    calculation_method = Column(Text)  # How to calculate the amount
+    penalty_rate = Column(Float)  # Penalty percentage for late payment
+    authority = Column(String)  # ZRA, NAPSA, NHIMA, etc.
+    enabled_by_default = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -20,6 +20,8 @@ import MobileMoney from './pages/MobileMoney';
 import Branches from './pages/Branches';
 import POS from './pages/POS';
 import SecuritySettings from './pages/SecuritySettings';
+import AIAssistant from './pages/AIAssistant';
+import StatutoryObligations from './pages/StatutoryObligations';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -101,6 +103,8 @@ function App() {
           <Route path="branches" element={<Branches />} />
           <Route path="pos" element={<POS />} />
           <Route path="security" element={<SecuritySettings />} />
+          <Route path="ai-assistant" element={<AIAssistant />} />
+          <Route path="statutory-obligations" element={<StatutoryObligations />} />
         </Route>
       </Routes>
     </Router>
