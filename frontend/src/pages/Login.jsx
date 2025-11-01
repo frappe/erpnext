@@ -29,7 +29,7 @@ function Login({ onLogin }) {
     <div className="min-h-screen flex items-center justify-center gradient-bg px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold gradient-text mb-2">ERIK</h1>
+          <img src="/assets/erik-logo.png" alt="ERIK ERP" className="h-20 mx-auto mb-4" />
           <p className="text-gray-400">Enterprise Resource & Intelligence Kernel</p>
         </div>
 

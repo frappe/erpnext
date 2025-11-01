@@ -74,11 +74,9 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
+              <img src="/assets/erik-logo.png" alt="ERIK ERP" className="h-10 w-auto" />
               <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                ERIK ERP
+                ERP
               </span>
             </div>
             <Link
