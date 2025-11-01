@@ -18,7 +18,9 @@ import {
   Smartphone,
   Shield,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Building2,
+  TrendingUp
 } from 'lucide-react';
 
 function Layout({ user, onLogout }) {
@@ -48,6 +50,7 @@ function Layout({ user, onLogout }) {
       items: [
         { name: 'Accounts', href: '/accounts', icon: BookOpen },
         { name: 'Journals', href: '/journals', icon: FileText },
+        { name: 'Consolidated Reports', href: '/consolidated-reports', icon: TrendingUp },
         { name: 'Statutory Obligations', href: '/statutory-obligations', icon: AlertCircle },
       ]
     },
@@ -69,8 +72,9 @@ function Layout({ user, onLogout }) {
     {
       title: 'Operations',
       items: [
-        { name: 'Point of Sale', href: '/pos', icon: ShoppingCart },
+        { name: 'Departments', href: '/departments', icon: Building2 },
         { name: 'Branches', href: '/branches', icon: Building },
+        { name: 'Point of Sale', href: '/pos', icon: ShoppingCart },
         { name: 'Mobile Money', href: '/mobile-money', icon: Smartphone },
       ]
     }

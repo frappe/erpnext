@@ -45,6 +45,21 @@ class User(Base):
     
     company = relationship("Company", back_populates="users")
 
+class Department(Base):
+    __tablename__ = "departments"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    dept_code = Column(String, nullable=False, index=True)
+    dept_name = Column(String, nullable=False)
+    parent_dept_id = Column(String, ForeignKey("departments.id"))
+    manager_id = Column(String, ForeignKey("users.id"))
+    cost_center_code = Column(String)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    parent_dept = relationship("Department", remote_side=[id], backref="sub_departments")
+
 class Employee(Base):
     __tablename__ = "employees"
     
@@ -59,7 +74,7 @@ class Employee(Base):
     date_of_birth = Column(Date)
     gender = Column(String)
     position = Column(String)
-    department = Column(String)
+    department_id = Column(String, ForeignKey("departments.id"))
     salary_base = Column(Float, default=0.0)
     bank_account = Column(String)
     tax_id = Column(String)
@@ -68,6 +83,7 @@ class Employee(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     company = relationship("Company", back_populates="employees")
+    department = relationship("Department")
 
 class Account(Base):
     __tablename__ = "accounts"
@@ -90,6 +106,8 @@ class JournalEntry(Base):
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    department_id = Column(String, ForeignKey("departments.id"))
+    branch_id = Column(String, ForeignKey("branches.id"))
     journal_number = Column(String, nullable=False, unique=True)
     date = Column(Date, nullable=False)
     description = Column(Text)
@@ -100,6 +118,7 @@ class JournalEntry(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     company = relationship("Company", back_populates="journals")
+    department = relationship("Department")
     lines = relationship("JournalLine", back_populates="journal")
 
 class JournalLine(Base):
@@ -202,6 +221,8 @@ class PurchaseOrder(Base):
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    department_id = Column(String, ForeignKey("departments.id"))
+    branch_id = Column(String, ForeignKey("branches.id"))
     supplier_id = Column(String, ForeignKey("suppliers.id"), nullable=False)
     po_number = Column(String, nullable=False, unique=True, index=True)
     order_date = Column(Date, nullable=False)
@@ -213,6 +234,7 @@ class PurchaseOrder(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     supplier = relationship("Supplier", back_populates="purchase_orders")
+    department = relationship("Department")
     lines = relationship("PurchaseOrderLine", back_populates="purchase_order")
 
 class PurchaseOrderLine(Base):
@@ -233,6 +255,8 @@ class SalesOrder(Base):
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    department_id = Column(String, ForeignKey("departments.id"))
+    branch_id = Column(String, ForeignKey("branches.id"))
     customer_id = Column(String, ForeignKey("customers.id"), nullable=False)
     so_number = Column(String, nullable=False, unique=True, index=True)
     order_date = Column(Date, nullable=False)
@@ -244,6 +268,7 @@ class SalesOrder(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     customer = relationship("Customer", back_populates="sales_orders")
+    department = relationship("Department")
     lines = relationship("SalesOrderLine", back_populates="sales_order")
 
 class SalesOrderLine(Base):
