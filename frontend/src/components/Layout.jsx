@@ -15,7 +15,8 @@ import {
   Calendar,
   BarChart3,
   Building,
-  Smartphone
+  Smartphone,
+  Shield
 } from 'lucide-react';
 
 function Layout({ user, onLogout }) {
@@ -28,6 +29,7 @@ function Layout({ user, onLogout }) {
       items: [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Reports', href: '/reports', icon: BarChart3 },
+        { name: 'Security', href: '/security', icon: Shield },
       ]
     },
     {
