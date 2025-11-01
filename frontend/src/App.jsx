@@ -19,6 +19,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import MobileMoney from './pages/MobileMoney';
 import Branches from './pages/Branches';
 import POS from './pages/POS';
+import SecuritySettings from './pages/SecuritySettings';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -99,6 +100,7 @@ function App() {
           <Route path="mobile-money" element={<MobileMoney />} />
           <Route path="branches" element={<Branches />} />
           <Route path="pos" element={<POS />} />
+          <Route path="security" element={<SecuritySettings />} />
         </Route>
       </Routes>
     </Router>
