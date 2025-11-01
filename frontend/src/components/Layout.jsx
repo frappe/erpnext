@@ -82,8 +82,7 @@ function Layout({ user, onLogout }) {
               >
                 {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
-              <span className="ml-4 text-2xl font-bold gradient-text">ERIK</span>
-              <span className="ml-2 text-sm text-gray-400">ERP</span>
+              <img src="/assets/erik-logo.png" alt="ERIK ERP" className="ml-4 h-8 w-auto" />
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-300">{user.full_name}</span>
