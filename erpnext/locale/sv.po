@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-10-26 09:35+0000\n"
-"PO-Revision-Date: 2025-10-30 16:33\n"
+"PO-Revision-Date: 2025-11-01 16:48\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -12841,7 +12841,7 @@ msgstr "Kontroll Åtgärd för Ackumulerad Kostnad"
 #. field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Control Historical Stock Transactions"
-msgstr "Kontroll Tidigare Lager Transaktioner"
+msgstr "Tidigare Lager Transaktioner"
 
 #. Label of the conversion_factor (Float) field in DocType 'Loyalty Program'
 #. Label of the conversion_factor (Float) field in DocType 'Purchase Order Item
@@ -16468,7 +16468,7 @@ msgstr "Standard Retur Lager"
 #. Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Default Warehouses for Production"
-msgstr "Standard Lager för Produktion"
+msgstr "Standard Produktion Lager"
 
 #. Label of the default_wip_warehouse (Link) field in DocType 'Manufacturing
 #. Settings'
@@ -18973,7 +18973,7 @@ msgstr "Förfallodatum kan inte vara före {0}"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:129
 msgid "Due to stock closing entry {0}, you cannot repost item valuation before {1}"
-msgstr "På grund av lagerstängning post {0} kan du inte lägga om artikel varuvärdering innan {1}"
+msgstr "På grund av lagerlåsning post {0} kan du inte lägga om artikel varuvärdering innan {1}"
 
 #. Name of a DocType
 #. Label of a Card Break in the Receivables Workspace
@@ -19072,7 +19072,7 @@ msgstr "Dubbletter av Försäljning Fakturor hittades"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:78
 msgid "Duplicate Stock Closing Entry"
-msgstr "Kopiera Lagerstängning Post"
+msgstr "Kopiera Lagerlåsning Post"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:153
 msgid "Duplicate customer group found in the customer group table"
@@ -22989,7 +22989,7 @@ msgstr "Skapa Schema"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.js:12
 msgid "Generate Stock Closing Entry"
-msgstr "Skapa Lagerstängning Post"
+msgstr "Skapa Lagerlåsning Post"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -35767,19 +35767,19 @@ msgstr "Överlappande villkor hittade mellan:"
 #. DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Overproduction Percentage For Sales Order"
-msgstr "Överproduktion Procent för Försäljning Order"
+msgstr "Försäljning Order Procentuell Överproduktion"
 
 #. Label of the overproduction_percentage_for_work_order (Percent) field in
 #. DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Overproduction Percentage For Work Order"
-msgstr "Överproduktion Procent för Arbetsorder"
+msgstr "Arbetsorder Procentuell Överproduktion"
 
 #. Label of the over_production_for_sales_and_work_order_section (Section
 #. Break) field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Overproduction for Sales and Work Order"
-msgstr "Överproduktion för Försäljning och Arbetsorder"
+msgstr "Procentuell Överproduktion"
 
 #. Label of the overview_tab (Tab Break) field in DocType 'Prospect'
 #. Label of the basic_details_tab (Tab Break) field in DocType 'Employee'
@@ -45035,7 +45035,7 @@ msgstr "Hälsningar,"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.js:27
 msgid "Regenerate Stock Closing Entry"
-msgstr "Återskapa Lagerstängning Post"
+msgstr "Återskapa Lagerlåsning Post"
 
 #. Label of a Card Break in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -52905,12 +52905,12 @@ msgstr "Lager Kapacitet"
 #. Label of the stock_closing_tab (Tab Break) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Stock Closing"
-msgstr "Lager Stängning"
+msgstr "Lager Låsning"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/stock_closing_balance/stock_closing_balance.json
 msgid "Stock Closing Balance"
-msgstr "Lagerstängning Saldo"
+msgstr "Lagerlåsning Saldo"
 
 #. Label of the stock_closing_entry (Link) field in DocType 'Stock Closing
 #. Balance'
@@ -52918,19 +52918,19 @@ msgstr "Lagerstängning Saldo"
 #: erpnext/stock/doctype/stock_closing_balance/stock_closing_balance.json
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.json
 msgid "Stock Closing Entry"
-msgstr "Lagerstängning Post"
+msgstr "Lagerlåsning Post"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:77
 msgid "Stock Closing Entry {0} already exists for the selected date range"
-msgstr "Lagerstängning Post {0} finns redan för vald datumintervall"
+msgstr "Lagerlåsning Post {0} finns redan för vald datumintervall"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:98
 msgid "Stock Closing Entry {0} has been queued for processing, system will take sometime to complete it."
-msgstr "Lagerstängning Post {0} är i kö för behandling, och kommer att ta lite tid att slutföra."
+msgstr "Lagerlåsning Post {0} är i kö för behandling, och kommer att ta lite tid att slutföra."
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry_dashboard.py:9
 msgid "Stock Closing Log"
-msgstr "Lagerstängning Logg"
+msgstr "Lagerlåsning Logg"
 
 #. Label of the warehouse_and_reference (Section Break) field in DocType 'POS
 #. Invoice Item'
