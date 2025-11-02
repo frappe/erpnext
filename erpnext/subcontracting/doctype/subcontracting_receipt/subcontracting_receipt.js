@@ -128,7 +128,6 @@ frappe.ui.form.on("Subcontracting Receipt", {
 						);
 					} else {
 						make_standard_return();
-
 					}
 				},
 				__("Create")
