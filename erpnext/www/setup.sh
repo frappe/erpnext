@@ -9,7 +9,7 @@ echo "⚙️ Installing frappe-bench..."
 pip install frappe-bench
 
 echo "📦 Initializing bench..."
-bench init --frappe-branch ${FRAPPE_BRANCH:-version-15} frappe-bench
+bench init --frappe-branch ${FRAPPE_BRANCH:-version-15} ./frappe-bench
 cd frappe-bench
 
 echo "🌐 Creating new site ${SITE_NAME}..."
