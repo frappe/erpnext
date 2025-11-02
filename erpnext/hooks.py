@@ -340,10 +340,7 @@ doc_events = {
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
 		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",
-		"on_update": [
-			"erpnext.setup.doctype.employee.employee.update_user_permissions",
-			"erpnext.portal.utils.set_default_role",
-		],
+		"on_update": "erpnext.portal.utils.set_default_role",
 	},
 	"Communication": {
 		"on_update": [
