@@ -88,9 +88,6 @@ class Employee(NestedSet):
 		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
 			return
 
-		if not has_permission("User Permission", ptype="write", raise_exception=False):
-			return
-
 		employee_user_permission_exists = frappe.db.exists(
 			"User Permission", {"allow": "Employee", "for_value": self.name, "user": self.user_id}
 		)
@@ -249,16 +246,6 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 			_("User {0}: Removed Employee Self Service role as there is no mapped employee.").format(doc.name)
 		)
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
-
-
-def update_user_permissions(doc, method):
-	# called via User hook
-	if "Employee" in [d.role for d in doc.get("roles")]:
-		if not has_permission("User Permission", ptype="write", raise_exception=False):
-			return
-		employee = frappe.get_doc("Employee", {"user_id": doc.name})
-		employee.update_user_permissions()
-
 
 def get_employee_email(employee_doc):
 	return (
