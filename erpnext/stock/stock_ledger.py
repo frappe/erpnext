@@ -1927,7 +1927,7 @@ def get_valuation_rate(
 		)
 
 		last_valuation_rate = query.run()
-		if last_valuation_rate:
+		if last_valuation_rate and last_valuation_rate[0][0] is not None:
 			return flt(last_valuation_rate[0][0])
 
 	# Get moving average rate of a specific batch number
