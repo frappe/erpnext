@@ -12,3 +12,6 @@ python-dotenv==1.0.0
 email-validator==2.1.0
 anthropic==0.18.1
 httpx==0.27.0
+apscheduler==3.10.4
+qrcode[pil]==7.4.2
+Pillow==10.4.0
