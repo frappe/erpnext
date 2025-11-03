@@ -86,26 +86,146 @@ class Employee(Base):
     __tablename__ = "employees"
     
     id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
-    employee_no = Column(String, nullable=False)
-    first_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
-    email = Column(String)
-    phone = Column(String)
-    id_number = Column(String)
-    date_of_birth = Column(Date)
-    gender = Column(String)
-    position = Column(String)
-    department_id = Column(String, ForeignKey("departments.id"))
-    salary_base = Column(Float, default=0.0)
-    bank_account = Column(String)
-    tax_id = Column(String)
-    date_joined = Column(Date)
-    employment_status = Column(String, default="active")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    employee_no = Column(String, nullable=False, index=True)
     
+    # Personal Information
+    first_name = Column(String, nullable=False)
+    middle_name = Column(String)
+    last_name = Column(String, nullable=False)
+    maiden_name = Column(String)  # For labour law compliance
+    
+    # Contact Details
+    email = Column(String, index=True)
+    phone = Column(String)
+    mobile_phone = Column(String)
+    emergency_contact_name = Column(String)
+    emergency_contact_phone = Column(String)
+    emergency_contact_relationship = Column(String)
+    
+    # Personal Details
+    id_number = Column(String, unique=True, index=True)  # National ID
+    passport_number = Column(String)
+    drivers_license = Column(String)
+    date_of_birth = Column(Date)
+    place_of_birth = Column(String)
+    gender = Column(String)
+    marital_status = Column(String)  # single, married, divorced, widowed
+    nationality = Column(String, default="Zambian")
+    
+    # Address
+    residential_address = Column(Text)
+    postal_address = Column(String)
+    city = Column(String)
+    province = Column(String)
+    postal_code = Column(String)
+    
+    # Employment Details
+    position = Column(String)
+    job_title = Column(String)
+    department_id = Column(String, ForeignKey("departments.id"))
+    supervisor_id = Column(String, ForeignKey("employees.id"))
+    branch_id = Column(String, ForeignKey("branches.id"))
+    
+    # Employment Dates
+    date_joined = Column(Date, index=True)
+    probation_period_months = Column(Integer, default=3)
+    probation_end_date = Column(Date)
+    confirmation_date = Column(Date)  # Permanent confirmation after probation
+    contract_end_date = Column(Date)  # For fixed-term contracts
+    retirement_date = Column(Date)  # Auto-calculated based on retirement age
+    date_terminated = Column(Date)
+    termination_reason = Column(String)
+    
+    # Employment Status & Type
+    employment_status = Column(String, default="active", index=True)  # active, probation, suspended, terminated, retired
+    employment_type = Column(String, default="permanent")  # permanent, contract, part_time, casual
+    work_schedule = Column(String, default="full_time")  # full_time, part_time, shift
+    
+    # Compensation
+    salary_base = Column(Float, default=0.0)
+    salary_currency = Column(String, default="ZMW")
+    payment_frequency = Column(String, default="monthly")  # monthly, weekly, daily
+    payment_method = Column(String, default="bank_transfer")  # bank_transfer, cash, mobile_money
+    
+    # Banking Details
+    bank_name = Column(String)
+    bank_account = Column(String)
+    bank_branch = Column(String)
+    bank_swift_code = Column(String)
+    mobile_money_provider = Column(String)  # MTN, Airtel, Zamtel
+    mobile_money_number = Column(String)
+    
+    # Tax & Statutory IDs - CRITICAL FOR ZAMBIAN COMPLIANCE
+    tax_id = Column(String, unique=True, index=True)  # TPIN - Tax Payer Identification Number
+    napsa_number = Column(String, unique=True, index=True)  # NAPSA (National Pension Scheme Authority) number
+    nhima_number = Column(String, unique=True, index=True)  # NHIMA (National Health Insurance) number
+    workers_comp_number = Column(String, index=True)  # Workers Compensation Fund number
+    
+    # Statutory Configuration
+    napsa_exempted = Column(Boolean, default=False)  # Some employees may be exempt
+    nhima_exempted = Column(Boolean, default=False)
+    paye_exempted = Column(Boolean, default=False)
+    
+    # Labour Law Compliance Fields
+    has_employment_contract = Column(Boolean, default=False)
+    contract_signed_date = Column(Date)
+    labour_card_number = Column(String)  # For foreign workers
+    work_permit_number = Column(String)  # For foreign workers
+    work_permit_expiry = Column(Date)
+    
+    # Benefits & Entitlements
+    leave_days_annual = Column(Integer, default=24)  # Zambia: 24 days/year
+    leave_days_accrued = Column(Float, default=0.0)
+    leave_days_taken = Column(Float, default=0.0)
+    leave_days_balance = Column(Float, default=0.0)
+    sick_leave_days = Column(Integer, default=0)
+    maternity_leave_eligible = Column(Boolean, default=False)
+    paternity_leave_eligible = Column(Boolean, default=False)
+    
+    # Skills & Qualifications
+    education_level = Column(String)  # Primary, Secondary, Diploma, Degree, Masters, PhD
+    qualifications = Column(JSON)  # List of qualifications
+    professional_certifications = Column(JSON)
+    skills_json = Column(JSON)  # Skills tracking
+    
+    # Dependents (for benefits & tax relief)
+    number_of_dependents = Column(Integer, default=0)
+    dependents_json = Column(JSON)  # Detailed dependent information
+    
+    # Performance & Development
+    last_appraisal_date = Column(Date)
+    next_appraisal_due = Column(Date)
+    performance_rating = Column(String)  # Excellent, Good, Satisfactory, Needs Improvement
+    
+    # Onboarding & Offboarding
+    onboarding_completed = Column(Boolean, default=False)
+    onboarding_completion_date = Column(Date)
+    onboarding_checklist = Column(JSON)  # Track onboarding tasks
+    offboarding_checklist = Column(JSON)  # Track exit tasks
+    
+    # Documents
+    photo_path = Column(String)
+    cv_path = Column(String)
+    id_document_path = Column(String)
+    tax_clearance_path = Column(String)
+    educational_certificates_path = Column(JSON)  # Multiple files
+    
+    # System Fields
+    is_active = Column(Boolean, default=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Metadata
+    notes = Column(Text)
+    metadata = Column(JSON)  # Additional flexible data
+    
+    # Relationships
     company = relationship("Company", back_populates="employees")
     department = relationship("Department")
+    supervisor = relationship("Employee", remote_side=[id], foreign_keys=[supervisor_id])
+    creator = relationship("User", foreign_keys=[created_by])
 
 class Account(Base):
     __tablename__ = "accounts"
@@ -2440,3 +2560,487 @@ class Enterprise(Base):
     # Relationships
     ceo = relationship("User")
     sectors = relationship("Sector", back_populates="enterprise", cascade="all, delete-orphan")
+
+# ============================================================================
+# PHASE 3: STATUTORY COMPLIANCE & NOTIFICATIONS
+# ============================================================================
+
+class StatutoryObligation(Base):
+    """Statutory compliance tracking (PAYE, NAPSA, NHIMA, VAT, etc.)"""
+    __tablename__ = "statutory_obligations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Obligation Details
+    obligation_type = Column(String, nullable=False, index=True)  # PAYE, NAPSA, NHIMA, VAT, WHT, etc.
+    obligation_name = Column(String, nullable=False)
+    description = Column(Text)
+    
+    # Frequency & Timing
+    frequency = Column(String, nullable=False)  # monthly, quarterly, annual
+    due_day_of_month = Column(Integer)  # e.g., 10 for PAYE/NAPSA/NHIMA
+    due_month = Column(Integer)  # For annual/quarterly
+    
+    # Amounts & Status
+    period_start = Column(Date, nullable=False, index=True)
+    period_end = Column(Date, nullable=False)
+    due_date = Column(Date, nullable=False, index=True)
+    amount_due = Column(Float, default=0.0)
+    amount_paid = Column(Float, default=0.0)
+    
+    status = Column(String, default="pending", index=True)  # pending, paid, overdue, exempted
+    compliance_status = Column(String, default="not_started")  # not_started, in_progress, completed
+    
+    # Confirmation
+    confirmed_by_user = Column(Boolean, default=False)
+    confirmed_at = Column(DateTime)
+    confirmed_by = Column(String, ForeignKey("users.id"))
+    
+    # Payments
+    payment_reference = Column(String)
+    payment_date = Column(Date)
+    payment_method = Column(String)
+    
+    # Alerts
+    alert_days_before = Column(Integer, default=5)  # Alert 5 days before due date
+    last_alert_sent = Column(DateTime)
+    
+    # Metadata
+    metadata = Column(JSON)  # Store additional obligation-specific data
+    notes = Column(Text)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    company = relationship("Company")
+    confirmer = relationship("User", foreign_keys=[confirmed_by])
+
+class ComplianceChecklist(Base):
+    """Checklist items for compliance tracking"""
+    __tablename__ = "compliance_checklists"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    obligation_id = Column(String, ForeignKey("statutory_obligations.id"), index=True)
+    
+    # Checklist Item
+    item_name = Column(String, nullable=False)
+    item_description = Column(Text)
+    item_category = Column(String)  # preparation, calculation, filing, payment, documentation
+    
+    # Status
+    is_completed = Column(Boolean, default=False)
+    completed_at = Column(DateTime)
+    completed_by = Column(String, ForeignKey("users.id"))
+    
+    # Order & Priority
+    sequence_order = Column(Integer, default=0)
+    is_required = Column(Boolean, default=True)
+    
+    # Attachments
+    attachment_required = Column(Boolean, default=False)
+    attachment_path = Column(String)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    obligation = relationship("StatutoryObligation")
+    completer = relationship("User", foreign_keys=[completed_by])
+
+class Notification(Base):
+    """Notification system for alerts"""
+    __tablename__ = "notifications"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    
+    # Notification Details
+    notification_type = Column(String, nullable=False, index=True)  # statutory_alert, payroll_reminder, leave_approval, etc.
+    title = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+    
+    # Reference
+    reference_type = Column(String)  # obligation, payrun, leave, loan, etc.
+    reference_id = Column(String)
+    
+    # Status
+    is_read = Column(Boolean, default=False, index=True)
+    read_at = Column(DateTime)
+    
+    # Priority
+    priority = Column(String, default="normal")  # low, normal, high, urgent
+    
+    # Delivery
+    delivery_channels = Column(JSON)  # ["in_app", "email", "sms"]
+    email_sent = Column(Boolean, default=False)
+    sms_sent = Column(Boolean, default=False)
+    
+    # Action
+    action_url = Column(String)  # URL to navigate to when clicked
+    action_taken = Column(Boolean, default=False)
+    
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    expires_at = Column(DateTime)  # Auto-delete old notifications
+    
+    # Relationships
+    user = relationship("User")
+
+# ============================================================================
+# PHASE 3: ENHANCED HR/PAYROLL MODELS
+# ============================================================================
+
+class EmployeeContract(Base):
+    """Employment contracts with document storage"""
+    __tablename__ = "employee_contracts"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
+    
+    # Contract Details
+    contract_type = Column(String, nullable=False)  # permanent, fixed_term, contract, probation
+    contract_number = Column(String)
+    
+    # Dates
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date)  # Null for permanent
+    probation_end_date = Column(Date)
+    
+    # Compensation
+    salary_amount = Column(Float, nullable=False)
+    salary_currency = Column(String, default="ZMW")
+    salary_frequency = Column(String, default="monthly")  # monthly, weekly, daily
+    
+    # Terms
+    position_title = Column(String)
+    department_id = Column(String, ForeignKey("departments.id"))
+    reporting_to = Column(String, ForeignKey("employees.id"))
+    work_location = Column(String)
+    
+    # Benefits
+    benefits_package = Column(JSON)  # housing, transport, medical, etc.
+    leave_days_annual = Column(Integer, default=24)
+    
+    # Documents
+    contract_template_id = Column(String)
+    signed_contract_path = Column(String)
+    signed_date = Column(Date)
+    
+    # Status
+    status = Column(String, default="draft")  # draft, active, expired, terminated
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    employee = relationship("Employee", foreign_keys=[employee_id])
+    department = relationship("Department")
+    supervisor = relationship("Employee", foreign_keys=[reporting_to])
+
+class SalaryComponentDefinition(Base):
+    """Configurable salary components (earnings & deductions)"""
+    __tablename__ = "salary_component_definitions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Component Details
+    component_code = Column(String, nullable=False, index=True)
+    component_name = Column(String, nullable=False)
+    component_type = Column(String, nullable=False)  # earning, deduction
+    component_category = Column(String)  # basic, allowance, overtime, statutory, loan, benefit
+    
+    # Calculation
+    calculation_method = Column(String, default="fixed")  # fixed, percentage, formula
+    calculation_formula = Column(Text)  # Formula or percentage
+    base_component = Column(String)  # Which component to calculate from (e.g., "basic_salary")
+    
+    # Tax Treatment
+    is_taxable = Column(Boolean, default=True)
+    is_pensionable = Column(Boolean, default=True)  # Included in NAPSA calculation
+    
+    # Statutory
+    is_statutory = Column(Boolean, default=False)  # PAYE, NAPSA, NHIMA
+    statutory_type = Column(String)  # paye, napsa_employee, napsa_employer, nhima_employee, nhima_employer
+    
+    # Account Mapping
+    gl_account_id = Column(String, ForeignKey("accounts.id"))  # Link to chart of accounts
+    
+    # Status
+    is_active = Column(Boolean, default=True)
+    effective_from = Column(Date)
+    effective_to = Column(Date)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    gl_account = relationship("Account")
+
+class Payrun(Base):
+    """Payroll run/batch processing"""
+    __tablename__ = "payruns"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Payrun Details
+    payrun_number = Column(String, nullable=False, unique=True, index=True)
+    payrun_name = Column(String)
+    
+    # Period
+    period_start = Column(Date, nullable=False, index=True)
+    period_end = Column(Date, nullable=False)
+    payment_date = Column(Date, nullable=False)
+    
+    # Currency
+    currency = Column(String, default="ZMW")
+    exchange_rate = Column(Float, default=1.0)
+    
+    # Totals
+    total_gross = Column(Float, default=0.0)
+    total_deductions = Column(Float, default=0.0)
+    total_net = Column(Float, default=0.0)
+    total_employer_cost = Column(Float, default=0.0)
+    
+    # Statutory Totals
+    total_paye = Column(Float, default=0.0)
+    total_napsa_employee = Column(Float, default=0.0)
+    total_napsa_employer = Column(Float, default=0.0)
+    total_nhima_employee = Column(Float, default=0.0)
+    total_nhima_employer = Column(Float, default=0.0)
+    
+    # Status
+    status = Column(String, default="draft", index=True)  # draft, validated, posted, exported, archived
+    
+    # Validation
+    validation_errors = Column(JSON)  # List of validation issues
+    validated_at = Column(DateTime)
+    validated_by = Column(String, ForeignKey("users.id"))
+    
+    # Posting
+    posted_to_gl = Column(Boolean, default=False)
+    gl_journal_id = Column(String, ForeignKey("journal_entries.id"))
+    posted_at = Column(DateTime)
+    posted_by = Column(String, ForeignKey("users.id"))
+    
+    # Export
+    bank_file_path = Column(String)
+    exported_at = Column(DateTime)
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    company = relationship("Company")
+    gl_journal = relationship("JournalEntry")
+    payslips = relationship("Payslip", back_populates="payrun", cascade="all, delete-orphan")
+
+class Payslip(Base):
+    """Individual employee payslip"""
+    __tablename__ = "payslips"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    payrun_id = Column(String, ForeignKey("payruns.id"), nullable=False, index=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
+    
+    # Employee Snapshot (cached at time of payrun)
+    employee_name = Column(String)
+    employee_number = Column(String)
+    department_name = Column(String)
+    position = Column(String)
+    
+    # Earnings
+    basic_salary = Column(Float, default=0.0)
+    earnings_json = Column(JSON)  # All earnings components
+    total_earnings = Column(Float, default=0.0)
+    
+    # Deductions
+    deductions_json = Column(JSON)  # All deduction components
+    total_deductions = Column(Float, default=0.0)
+    
+    # Statutory
+    paye_amount = Column(Float, default=0.0)
+    napsa_employee = Column(Float, default=0.0)
+    napsa_employer = Column(Float, default=0.0)
+    nhima_employee = Column(Float, default=0.0)
+    nhima_employer = Column(Float, default=0.0)
+    
+    # Totals
+    gross_pay = Column(Float, default=0.0)
+    taxable_income = Column(Float, default=0.0)
+    net_pay = Column(Float, default=0.0)
+    employer_cost = Column(Float, default=0.0)
+    
+    # Payment
+    payment_method = Column(String, default="bank_transfer")  # bank_transfer, cash, mobile_money
+    bank_account_number = Column(String)
+    bank_name = Column(String)
+    mobile_money_number = Column(String)
+    
+    # Documents
+    payslip_pdf_path = Column(String)
+    email_sent = Column(Boolean, default=False)
+    email_sent_at = Column(DateTime)
+    
+    # Status
+    status = Column(String, default="draft")  # draft, approved, paid
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    payrun = relationship("Payrun", back_populates="payslips")
+    employee = relationship("Employee")
+
+class EmployeeLoan(Base):
+    """Employee loans and salary advances"""
+    __tablename__ = "employee_loans"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
+    
+    # Loan Details
+    loan_number = Column(String, nullable=False, unique=True, index=True)
+    loan_type = Column(String, nullable=False)  # salary_advance, emergency_loan, housing_loan, etc.
+    loan_purpose = Column(Text)
+    
+    # Amounts
+    principal_amount = Column(Float, nullable=False)
+    interest_rate = Column(Float, default=0.0)  # Annual percentage
+    total_amount = Column(Float, nullable=False)  # Principal + Interest
+    outstanding_balance = Column(Float, nullable=False)
+    
+    # Repayment
+    repayment_amount = Column(Float, nullable=False)  # Monthly deduction
+    repayment_start_date = Column(Date, nullable=False)
+    repayment_months = Column(Integer, nullable=False)
+    remaining_months = Column(Integer)
+    
+    # Amortization
+    amortization_schedule = Column(JSON)  # Monthly breakdown
+    
+    # Approval
+    requested_date = Column(Date, default=datetime.utcnow)
+    approved_by = Column(String, ForeignKey("users.id"))
+    approved_date = Column(Date)
+    approval_notes = Column(Text)
+    
+    # Disbursement
+    disbursed_date = Column(Date)
+    disbursement_method = Column(String)  # bank_transfer, cash, offset_against_salary
+    disbursement_reference = Column(String)
+    
+    # Status
+    status = Column(String, default="pending", index=True)  # pending, approved, rejected, disbursed, active, completed, written_off
+    
+    # GL Integration
+    gl_journal_id = Column(String, ForeignKey("journal_entries.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    employee = relationship("Employee")
+    approver = relationship("User", foreign_keys=[approved_by])
+    gl_journal = relationship("JournalEntry")
+
+class JobRequisition(Base):
+    """Job requisition and approval workflow"""
+    __tablename__ = "job_requisitions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Requisition Details
+    requisition_number = Column(String, nullable=False, unique=True, index=True)
+    position_title = Column(String, nullable=False)
+    department_id = Column(String, ForeignKey("departments.id"), nullable=False)
+    
+    # Position Details
+    job_description = Column(Text)
+    required_qualifications = Column(Text)
+    experience_years = Column(Integer)
+    number_of_positions = Column(Integer, default=1)
+    
+    # Compensation
+    salary_band_min = Column(Float)
+    salary_band_max = Column(Float)
+    employment_type = Column(String)  # permanent, contract, part_time
+    
+    # Budget
+    budget_allocated = Column(Float)
+    cost_center_code = Column(String)
+    
+    # Timing
+    requested_start_date = Column(Date)
+    urgency = Column(String, default="normal")  # low, normal, high, urgent
+    
+    # Approval Workflow
+    approval_status = Column(String, default="pending", index=True)  # pending, approved, rejected
+    approval_chain = Column(JSON)  # List of approvers
+    current_approver_id = Column(String, ForeignKey("users.id"))
+    
+    # Status
+    status = Column(String, default="draft")  # draft, submitted, approved, rejected, filled, cancelled
+    filled_date = Column(Date)
+    
+    # Justification
+    business_justification = Column(Text)
+    replacement_for = Column(String, ForeignKey("employees.id"))  # If replacing someone
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    department = relationship("Department")
+    current_approver = relationship("User", foreign_keys=[current_approver_id])
+    replacement_employee = relationship("Employee")
+
+# ============================================================================
+# PHASE 3: ENHANCED FINANCE MODELS
+# ============================================================================
+
+class TaxSetting(Base):
+    """Tax configuration (PAYE, VAT, WHT, etc.)"""
+    __tablename__ = "tax_settings"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Tax Type
+    tax_type = Column(String, nullable=False, index=True)  # PAYE, VAT, WHT, Turnover, Excise
+    tax_name = Column(String, nullable=False)
+    
+    # Tax Configuration
+    tax_jurisdiction = Column(String, default="Zambia")
+    tax_rate = Column(Float)  # Flat rate if applicable
+    tax_brackets = Column(JSON)  # For progressive taxes like PAYE
+    
+    # GL Account Mapping
+    tax_payable_account_id = Column(String, ForeignKey("accounts.id"))
+    tax_expense_account_id = Column(String, ForeignKey("accounts.id"))
+    
+    # Effective Dates
+    effective_from = Column(Date, nullable=False)
+    effective_to = Column(Date)
+    
+    # Filing Details
+    filing_frequency = Column(String)  # monthly, quarterly, annual
+    filing_due_day = Column(Integer)  # Day of month due
+    
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    tax_payable_account = relationship("Account", foreign_keys=[tax_payable_account_id])
+    tax_expense_account = relationship("Account", foreign_keys=[tax_expense_account_id])
