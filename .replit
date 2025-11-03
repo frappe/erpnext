@@ -66,5 +66,5 @@ externalPort = 3000
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["sh", "-c", "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 5000 --workers 2"]
+run = ["sh", "-c", "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 34711 --workers 2"]
 build = ["./build.sh"]
