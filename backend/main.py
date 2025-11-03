@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, date
 from typing import Optional, List, Dict, Any
+import os
+import uuid
 import models
 import schemas
 import auth
@@ -3408,6 +3410,705 @@ def apply_industry_template(
         "product_categories": config.get('product_categories', []),
         "recommended_accounts": config.get('recommended_accounts', [])
     }
+
+# OCR & Document Intelligence Endpoints
+from ocr_service import OCRService
+from fastapi import File, UploadFile
+import shutil
+import mimetypes
+
+ocr_service = OCRService()
+
+@app.post("/api/documents/upload")
+async def upload_document(
+    file: UploadFile = File(...),
+    document_type: str = "invoice",
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Upload a document (invoice, receipt, etc.) for OCR processing"""
+    
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type. Allowed: {', '.join(allowed_types)}")
+    
+    upload_dir = "uploads/documents"
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+    file_id = str(uuid.uuid4())
+    file_path = f"{upload_dir}/{file_id}.{file_ext}"
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    file_size = os.path.getsize(file_path)
+    
+    document = models.DocumentUpload(
+        company_id=current_user.company_id,
+        document_type=document_type,
+        file_name=file.filename,
+        file_path=file_path,
+        file_size=file_size,
+        mime_type=file.content_type,
+        uploaded_by=current_user.id
+    )
+    db.add(document)
+    db.commit()
+    db.refresh(document)
+    
+    return document
+
+@app.post("/api/documents/{document_id}/process")
+def process_document_ocr(
+    document_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Process document with Claude AI Vision OCR"""
+    
+    document = db.query(models.DocumentUpload).filter(
+        models.DocumentUpload.id == document_id,
+        models.DocumentUpload.company_id == current_user.company_id
+    ).first()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    if document.ocr_status == "processing":
+        raise HTTPException(status_code=400, detail="Document is already being processed")
+    
+    document.ocr_status = "processing"
+    db.commit()
+    
+    try:
+        result = ocr_service.process_document(document.file_path, document.document_type)
+        
+        ocr_result = models.OCRResult(
+            document_id=document.id,
+            company_id=current_user.company_id,
+            extracted_text=result['extracted_text'],
+            structured_data=result['structured_data'],
+            confidence_score=result['confidence_score'],
+            ai_model=result['ai_model'],
+            processing_time_ms=result['processing_time_ms']
+        )
+        db.add(ocr_result)
+        
+        if document.document_type == "invoice":
+            invoice_data = result['structured_data']
+            if 'supplier' in invoice_data and 'invoice_details' in invoice_data:
+                suppliers = db.query(models.Supplier).filter(
+                    models.Supplier.company_id == current_user.company_id
+                ).all()
+                
+                match_result = ocr_service.match_supplier(invoice_data, suppliers)
+                
+                extracted_invoice = models.ExtractedInvoiceData(
+                    ocr_result_id=ocr_result.id,
+                    company_id=current_user.company_id,
+                    supplier_name=invoice_data['supplier'].get('name'),
+                    supplier_tax_id=invoice_data['supplier'].get('tax_id'),
+                    supplier_address=invoice_data['supplier'].get('address'),
+                    supplier_phone=invoice_data['supplier'].get('phone'),
+                    supplier_email=invoice_data['supplier'].get('email'),
+                    invoice_number=invoice_data['invoice_details'].get('invoice_number'),
+                    invoice_date=invoice_data['invoice_details'].get('invoice_date'),
+                    due_date=invoice_data['invoice_details'].get('due_date'),
+                    purchase_order_number=invoice_data['invoice_details'].get('purchase_order_number'),
+                    currency=invoice_data['financial'].get('currency', 'ZMW'),
+                    subtotal=invoice_data['financial'].get('subtotal', 0.0),
+                    tax_amount=invoice_data['financial'].get('tax_amount', 0.0),
+                    total_amount=invoice_data['financial'].get('total_amount'),
+                    amount_paid=invoice_data['financial'].get('amount_paid', 0.0),
+                    amount_due=invoice_data['financial'].get('amount_due'),
+                    line_items=invoice_data.get('line_items', []),
+                    matched_supplier_id=match_result['supplier_id'] if match_result else None,
+                    match_confidence=match_result['confidence'] if match_result else None
+                )
+                db.add(extracted_invoice)
+        
+        elif document.document_type == "receipt":
+            receipt_data = result['structured_data']
+            if 'merchant' in receipt_data and 'receipt_details' in receipt_data:
+                expense_category, category_confidence = ocr_service.suggest_expense_category(receipt_data)
+                
+                extracted_receipt = models.ExtractedReceiptData(
+                    ocr_result_id=ocr_result.id,
+                    company_id=current_user.company_id,
+                    merchant_name=receipt_data['merchant'].get('name'),
+                    merchant_address=receipt_data['merchant'].get('address'),
+                    merchant_phone=receipt_data['merchant'].get('phone'),
+                    merchant_tax_id=receipt_data['merchant'].get('tax_id'),
+                    receipt_number=receipt_data['receipt_details'].get('receipt_number'),
+                    receipt_date=receipt_data['receipt_details'].get('receipt_date'),
+                    receipt_time=receipt_data['receipt_details'].get('receipt_time'),
+                    currency=receipt_data['financial'].get('currency', 'ZMW'),
+                    subtotal=receipt_data['financial'].get('subtotal', 0.0),
+                    tax_amount=receipt_data['financial'].get('tax_amount', 0.0),
+                    tip_amount=receipt_data['financial'].get('tip_amount', 0.0),
+                    total_amount=receipt_data['financial'].get('total_amount'),
+                    payment_method=receipt_data['payment'].get('payment_method') if 'payment' in receipt_data else None,
+                    card_last_four=receipt_data['payment'].get('card_last_four') if 'payment' in receipt_data else None,
+                    line_items=receipt_data.get('line_items', []),
+                    expense_category=expense_category,
+                    category_confidence=category_confidence
+                )
+                db.add(extracted_receipt)
+        
+        document.ocr_status = "completed"
+        document.ocr_processed_at = datetime.utcnow()
+        
+        db.commit()
+        db.refresh(ocr_result)
+        
+        return ocr_result
+        
+    except Exception as e:
+        document.ocr_status = "failed"
+        db.commit()
+        raise HTTPException(status_code=500, detail=f"OCR processing failed: {str(e)}")
+
+@app.get("/api/documents")
+def get_documents(
+    document_type: str = None,
+    ocr_status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get uploaded documents"""
+    query = db.query(models.DocumentUpload).filter(
+        models.DocumentUpload.company_id == current_user.company_id
+    )
+    
+    if document_type:
+        query = query.filter(models.DocumentUpload.document_type == document_type)
+    if ocr_status:
+        query = query.filter(models.DocumentUpload.ocr_status == ocr_status)
+    
+    documents = query.order_by(models.DocumentUpload.uploaded_at.desc()).all()
+    return documents
+
+@app.get("/api/ocr-results/{result_id}")
+def get_ocr_result(
+    result_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get OCR result with extracted data"""
+    ocr_result = db.query(models.OCRResult).filter(
+        models.OCRResult.id == result_id,
+        models.OCRResult.company_id == current_user.company_id
+    ).first()
+    if not ocr_result:
+        raise HTTPException(status_code=404, detail="OCR result not found")
+    
+    extracted_invoice = db.query(models.ExtractedInvoiceData).filter(
+        models.ExtractedInvoiceData.ocr_result_id == result_id
+    ).first()
+    
+    extracted_receipt = db.query(models.ExtractedReceiptData).filter(
+        models.ExtractedReceiptData.ocr_result_id == result_id
+    ).first()
+    
+    return {
+        "ocr_result": ocr_result,
+        "extracted_invoice": extracted_invoice,
+        "extracted_receipt": extracted_receipt
+    }
+
+@app.post("/api/ocr-results/{result_id}/approve")
+def approve_ocr_result(
+    result_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Approve OCR extraction result"""
+    ocr_result = db.query(models.OCRResult).filter(
+        models.OCRResult.id == result_id,
+        models.OCRResult.company_id == current_user.company_id
+    ).first()
+    if not ocr_result:
+        raise HTTPException(status_code=404, detail="OCR result not found")
+    
+    ocr_result.validation_status = "approved"
+    ocr_result.validated_by = current_user.id
+    ocr_result.validated_at = datetime.utcnow()
+    
+    db.commit()
+    return {"message": "OCR result approved"}
+
+@app.post("/api/ocr-results/{result_id}/reject")
+def reject_ocr_result(
+    result_id: str,
+    reason: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Reject OCR extraction result"""
+    ocr_result = db.query(models.OCRResult).filter(
+        models.OCRResult.id == result_id,
+        models.OCRResult.company_id == current_user.company_id
+    ).first()
+    if not ocr_result:
+        raise HTTPException(status_code=404, detail="OCR result not found")
+    
+    ocr_result.validation_status = "rejected"
+    ocr_result.validated_by = current_user.id
+    ocr_result.validated_at = datetime.utcnow()
+    
+    db.commit()
+    return {"message": "OCR result rejected"}
+
+@app.get("/api/extracted-invoices")
+def get_extracted_invoices(
+    status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all extracted invoice data"""
+    query = db.query(models.ExtractedInvoiceData).filter(
+        models.ExtractedInvoiceData.company_id == current_user.company_id
+    )
+    
+    if status:
+        query = query.filter(models.ExtractedInvoiceData.status == status)
+    
+    invoices = query.order_by(models.ExtractedInvoiceData.created_at.desc()).all()
+    return invoices
+
+@app.get("/api/extracted-receipts")
+def get_extracted_receipts(
+    status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all extracted receipt data"""
+    query = db.query(models.ExtractedReceiptData).filter(
+        models.ExtractedReceiptData.company_id == current_user.company_id
+    )
+    
+    if status:
+        query = query.filter(models.ExtractedReceiptData.status == status)
+    
+    receipts = query.order_by(models.ExtractedReceiptData.created_at.desc()).all()
+    return receipts
+
+# Advanced HR Endpoints
+
+# Employment Contracts
+@app.post("/api/employment-contracts")
+def create_employment_contract(
+    contract: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new employment contract"""
+    # Validate employee
+    employee = db.query(models.Employee).filter(
+        models.Employee.id == contract['employee_id'],
+        models.Employee.company_id == current_user.company_id
+    ).first()
+    if not employee:
+        raise HTTPException(status_code=400, detail="Invalid employee")
+    
+    # Validate department if provided
+    if contract.get('department_id'):
+        dept = db.query(models.Department).filter(
+            models.Department.id == contract['department_id'],
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not dept:
+            raise HTTPException(status_code=400, detail="Invalid department")
+    
+    # Generate contract number
+    count = db.query(models.EmploymentContract).filter(
+        models.EmploymentContract.company_id == current_user.company_id
+    ).count()
+    contract_number = f"EC-{count + 1:05d}"
+    
+    new_contract = models.EmploymentContract(
+        company_id=current_user.company_id,
+        contract_number=contract_number,
+        created_by=current_user.id,
+        **contract
+    )
+    db.add(new_contract)
+    db.commit()
+    db.refresh(new_contract)
+    return new_contract
+
+@app.get("/api/employment-contracts")
+def get_employment_contracts(
+    employee_id: str = None,
+    status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get employment contracts"""
+    query = db.query(models.EmploymentContract).filter(
+        models.EmploymentContract.company_id == current_user.company_id
+    )
+    
+    if employee_id:
+        query = query.filter(models.EmploymentContract.employee_id == employee_id)
+    if status:
+        query = query.filter(models.EmploymentContract.status == status)
+    
+    contracts = query.order_by(models.EmploymentContract.created_at.desc()).all()
+    return contracts
+
+@app.put("/api/employment-contracts/{contract_id}")
+def update_employment_contract(
+    contract_id: str,
+    contract_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update an employment contract"""
+    contract = db.query(models.EmploymentContract).filter(
+        models.EmploymentContract.id == contract_id,
+        models.EmploymentContract.company_id == current_user.company_id
+    ).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    for key, value in contract_data.items():
+        if hasattr(contract, key):
+            setattr(contract, key, value)
+    
+    db.commit()
+    db.refresh(contract)
+    return contract
+
+@app.post("/api/employment-contracts/{contract_id}/activate")
+def activate_employment_contract(
+    contract_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Activate an employment contract"""
+    contract = db.query(models.EmploymentContract).filter(
+        models.EmploymentContract.id == contract_id,
+        models.EmploymentContract.company_id == current_user.company_id
+    ).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    contract.status = "active"
+    contract.signed_by_employer_at = datetime.utcnow()
+    contract.signed_by_employer_id = current_user.id
+    db.commit()
+    return {"message": "Contract activated"}
+
+# Employee Skills
+@app.post("/api/employee-skills")
+def create_employee_skill(
+    skill: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Add a skill to an employee"""
+    # Validate employee
+    employee = db.query(models.Employee).filter(
+        models.Employee.id == skill['employee_id'],
+        models.Employee.company_id == current_user.company_id
+    ).first()
+    if not employee:
+        raise HTTPException(status_code=400, detail="Invalid employee")
+    
+    new_skill = models.EmployeeSkill(
+        company_id=current_user.company_id,
+        **skill
+    )
+    db.add(new_skill)
+    db.commit()
+    db.refresh(new_skill)
+    return new_skill
+
+@app.get("/api/employee-skills")
+def get_employee_skills(
+    employee_id: str = None,
+    skill_category: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get employee skills"""
+    query = db.query(models.EmployeeSkill).filter(
+        models.EmployeeSkill.company_id == current_user.company_id
+    )
+    
+    if employee_id:
+        query = query.filter(models.EmployeeSkill.employee_id == employee_id)
+    if skill_category:
+        query = query.filter(models.EmployeeSkill.skill_category == skill_category)
+    
+    skills = query.order_by(models.EmployeeSkill.created_at.desc()).all()
+    return skills
+
+@app.put("/api/employee-skills/{skill_id}")
+def update_employee_skill(
+    skill_id: str,
+    skill_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update an employee skill"""
+    skill = db.query(models.EmployeeSkill).filter(
+        models.EmployeeSkill.id == skill_id,
+        models.EmployeeSkill.company_id == current_user.company_id
+    ).first()
+    if not skill:
+        raise HTTPException(status_code=404, detail="Skill not found")
+    
+    for key, value in skill_data.items():
+        if hasattr(skill, key):
+            setattr(skill, key, value)
+    
+    db.commit()
+    db.refresh(skill)
+    return skill
+
+@app.delete("/api/employee-skills/{skill_id}")
+def delete_employee_skill(
+    skill_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete an employee skill"""
+    skill = db.query(models.EmployeeSkill).filter(
+        models.EmployeeSkill.id == skill_id,
+        models.EmployeeSkill.company_id == current_user.company_id
+    ).first()
+    if not skill:
+        raise HTTPException(status_code=404, detail="Skill not found")
+    
+    db.delete(skill)
+    db.commit()
+    return {"message": "Skill deleted"}
+
+# Job Requisitions
+@app.post("/api/job-requisitions")
+def create_job_requisition(
+    requisition: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new job requisition"""
+    # Validate department
+    dept = db.query(models.Department).filter(
+        models.Department.id == requisition['department_id'],
+        models.Department.company_id == current_user.company_id
+    ).first()
+    if not dept:
+        raise HTTPException(status_code=400, detail="Invalid department")
+    
+    # Generate requisition number
+    count = db.query(models.JobRequisition).filter(
+        models.JobRequisition.company_id == current_user.company_id
+    ).count()
+    requisition_number = f"JR-{count + 1:05d}"
+    
+    new_requisition = models.JobRequisition(
+        company_id=current_user.company_id,
+        requisition_number=requisition_number,
+        requested_by=current_user.id,
+        created_by=current_user.id,
+        **requisition
+    )
+    db.add(new_requisition)
+    db.commit()
+    db.refresh(new_requisition)
+    return new_requisition
+
+@app.get("/api/job-requisitions")
+def get_job_requisitions(
+    department_id: str = None,
+    status: str = None,
+    approval_status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get job requisitions"""
+    query = db.query(models.JobRequisition).filter(
+        models.JobRequisition.company_id == current_user.company_id
+    )
+    
+    if department_id:
+        query = query.filter(models.JobRequisition.department_id == department_id)
+    if status:
+        query = query.filter(models.JobRequisition.status == status)
+    if approval_status:
+        query = query.filter(models.JobRequisition.approval_status == approval_status)
+    
+    requisitions = query.order_by(models.JobRequisition.created_at.desc()).all()
+    return requisitions
+
+@app.post("/api/job-requisitions/{requisition_id}/approve")
+def approve_job_requisition(
+    requisition_id: str,
+    approval_notes: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Approve a job requisition"""
+    requisition = db.query(models.JobRequisition).filter(
+        models.JobRequisition.id == requisition_id,
+        models.JobRequisition.company_id == current_user.company_id
+    ).first()
+    if not requisition:
+        raise HTTPException(status_code=404, detail="Requisition not found")
+    
+    requisition.approval_status = "approved"
+    requisition.approved_by = current_user.id
+    requisition.approved_at = datetime.utcnow()
+    requisition.approval_notes = approval_notes
+    requisition.status = "open"
+    
+    db.commit()
+    return {"message": "Requisition approved"}
+
+@app.post("/api/job-requisitions/{requisition_id}/fill")
+def fill_job_requisition(
+    requisition_id: str,
+    employee_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Mark a job requisition as filled"""
+    requisition = db.query(models.JobRequisition).filter(
+        models.JobRequisition.id == requisition_id,
+        models.JobRequisition.company_id == current_user.company_id
+    ).first()
+    if not requisition:
+        raise HTTPException(status_code=404, detail="Requisition not found")
+    
+    # Validate employee
+    employee = db.query(models.Employee).filter(
+        models.Employee.id == employee_id,
+        models.Employee.company_id == current_user.company_id
+    ).first()
+    if not employee:
+        raise HTTPException(status_code=400, detail="Invalid employee")
+    
+    requisition.status = "filled"
+    requisition.filled_by_employee_id = employee_id
+    requisition.filled_at = datetime.utcnow()
+    
+    db.commit()
+    return {"message": "Requisition marked as filled"}
+
+# Performance Reviews
+@app.post("/api/performance-reviews")
+def create_performance_review(
+    review: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new performance review"""
+    # Validate employee
+    employee = db.query(models.Employee).filter(
+        models.Employee.id == review['employee_id'],
+        models.Employee.company_id == current_user.company_id
+    ).first()
+    if not employee:
+        raise HTTPException(status_code=400, detail="Invalid employee")
+    
+    new_review = models.PerformanceReview(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **review
+    )
+    db.add(new_review)
+    db.commit()
+    db.refresh(new_review)
+    return new_review
+
+@app.get("/api/performance-reviews")
+def get_performance_reviews(
+    employee_id: str = None,
+    review_type: str = None,
+    status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get performance reviews"""
+    query = db.query(models.PerformanceReview).filter(
+        models.PerformanceReview.company_id == current_user.company_id
+    )
+    
+    if employee_id:
+        query = query.filter(models.PerformanceReview.employee_id == employee_id)
+    if review_type:
+        query = query.filter(models.PerformanceReview.review_type == review_type)
+    if status:
+        query = query.filter(models.PerformanceReview.status == status)
+    
+    reviews = query.order_by(models.PerformanceReview.created_at.desc()).all()
+    return reviews
+
+@app.put("/api/performance-reviews/{review_id}")
+def update_performance_review(
+    review_id: str,
+    review_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update a performance review"""
+    review = db.query(models.PerformanceReview).filter(
+        models.PerformanceReview.id == review_id,
+        models.PerformanceReview.company_id == current_user.company_id
+    ).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    for key, value in review_data.items():
+        if hasattr(review, key):
+            setattr(review, key, value)
+    
+    db.commit()
+    db.refresh(review)
+    return review
+
+@app.post("/api/performance-reviews/{review_id}/complete")
+def complete_performance_review(
+    review_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Complete a performance review"""
+    review = db.query(models.PerformanceReview).filter(
+        models.PerformanceReview.id == review_id,
+        models.PerformanceReview.company_id == current_user.company_id
+    ).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    review.status = "completed"
+    review.reviewed_by = current_user.id
+    review.reviewed_at = datetime.utcnow()
+    
+    db.commit()
+    return {"message": "Performance review completed"}
+
+@app.post("/api/performance-reviews/{review_id}/acknowledge")
+def acknowledge_performance_review(
+    review_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Employee acknowledges performance review"""
+    review = db.query(models.PerformanceReview).filter(
+        models.PerformanceReview.id == review_id,
+        models.PerformanceReview.company_id == current_user.company_id
+    ).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    review.status = "acknowledged"
+    review.acknowledged_by_employee_at = datetime.utcnow()
+    
+    db.commit()
+    return {"message": "Performance review acknowledged"}
 
 if __name__ == "__main__":
     import uvicorn
