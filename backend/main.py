@@ -16,6 +16,7 @@ from ai_assistant import ai_assistant
 from notification_service import notification_service
 from audit_logger import audit_logger
 import migrations
+from routers import bank_connections
 
 models.Base.metadata.create_all(bind=engine)
 migrations.run_migrations()
@@ -29,6 +30,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(bank_connections.router)
 
 @app.get("/")
 def read_root():
