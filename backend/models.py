@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, JSON, Date
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, JSON, Date, UniqueConstraint, Index
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
@@ -1349,3 +1349,114 @@ class PerformanceReview(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     employee = relationship("Employee")
+
+class BankConnection(Base):
+    __tablename__ = "bank_connections"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    bank_name = Column(String, nullable=False)  # ZANACO, ABSA, FNB, Stanbic
+    bank_code = Column(String, nullable=False, index=True)  # zanaco, absa, fnb, stanbic
+    account_number = Column(String, nullable=False)
+    account_name = Column(String)
+    account_type = Column(String)  # savings, current, business
+    currency = Column(String, default="ZMW")
+    branch_code = Column(String)
+    
+    # API Credentials (encrypted in production)
+    api_username = Column(String)
+    api_key_encrypted = Column(String)
+    api_endpoint = Column(String)
+    
+    # Connection Status
+    is_active = Column(Boolean, default=True)
+    connection_status = Column(String, default="pending")  # pending, connected, failed, disconnected
+    last_sync_at = Column(DateTime)
+    last_sync_status = Column(String)  # success, failed, partial
+    sync_frequency = Column(String, default="daily")  # manual, hourly, daily, weekly
+    
+    # Auto-sync Settings
+    auto_sync_enabled = Column(Boolean, default=True)
+    auto_reconcile_enabled = Column(Boolean, default=False)
+    
+    # Linked Account
+    linked_bank_account_id = Column(String, ForeignKey("bank_accounts.id"))  # From Phase 2 bank reconciliation
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    linked_bank_account = relationship("BankAccount")
+
+class BankTransaction(Base):
+    __tablename__ = "bank_transactions"
+    __table_args__ = (
+        UniqueConstraint('bank_connection_id', 'bank_transaction_id', name='uq_bank_connection_transaction'),
+    )
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    bank_connection_id = Column(String, ForeignKey("bank_connections.id"), nullable=False)
+    
+    # Transaction Details from Bank
+    bank_transaction_id = Column(String, index=True)  # External bank reference (unique per connection)
+    transaction_date = Column(Date, nullable=False)
+    posting_date = Column(Date)
+    description = Column(Text)
+    transaction_type = Column(String)  # debit, credit, fee, interest
+    amount = Column(Float, nullable=False)
+    balance_after = Column(Float)
+    currency = Column(String, default="ZMW")
+    
+    # Additional Details
+    reference_number = Column(String)
+    counterparty_name = Column(String)
+    counterparty_account = Column(String)
+    category = Column(String)  # payment, transfer, withdrawal, deposit, fee
+    
+    # Reconciliation
+    is_reconciled = Column(Boolean, default=False)
+    reconciled_with_statement_id = Column(String, ForeignKey("bank_statements.id"))
+    reconciled_at = Column(DateTime)
+    matched_journal_entry_id = Column(String, ForeignKey("journal_entries.id"))
+    
+    # AI Categorization
+    suggested_account_id = Column(String, ForeignKey("accounts.id"))  # AI-suggested GL account
+    suggestion_confidence = Column(Float)
+    
+    # Import Tracking
+    import_batch_id = Column(String)
+    imported_at = Column(DateTime, default=datetime.utcnow)
+    
+    bank_connection = relationship("BankConnection")
+
+class BankSyncHistory(Base):
+    __tablename__ = "bank_sync_history"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    bank_connection_id = Column(String, ForeignKey("bank_connections.id"), nullable=False)
+    
+    sync_type = Column(String, default="manual")  # manual, scheduled, auto
+    sync_started_at = Column(DateTime, default=datetime.utcnow)
+    sync_completed_at = Column(DateTime)
+    
+    status = Column(String, default="in_progress")  # in_progress, completed, failed, partial
+    
+    # Sync Results
+    transactions_fetched = Column(Integer, default=0)
+    transactions_new = Column(Integer, default=0)
+    transactions_updated = Column(Integer, default=0)
+    transactions_failed = Column(Integer, default=0)
+    
+    # Date Range
+    from_date = Column(Date)
+    to_date = Column(Date)
+    
+    # Error Tracking
+    error_message = Column(Text)
+    error_details = Column(JSON)
+    
+    triggered_by = Column(String, ForeignKey("users.id"))
+    
+    bank_connection = relationship("BankConnection")
