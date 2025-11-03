@@ -8,7 +8,11 @@ def get_data():
 		"transactions": [
 			{
 				"label": _("Reference"),
-				"items": ["Subcontracting Receipt", "Stock Entry", "Stock Reservation Entry"],
-			}
+				"items": ["Subcontracting Receipt", "Stock Entry"],
+			},
+			{
+				"label": _("Stock Reservation"),
+				"items": ["Stock Reservation Entry"],
+			},
 		],
 	}

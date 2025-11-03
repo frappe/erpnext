@@ -3345,12 +3345,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 				if item.sco_rm_detail:
 					reserved_qty = frappe.get_value(
-						"Subcontracting Order Supplied Item", item.sco_rm_detail, "reserved_qty"
+						"Subcontracting Order Supplied Item", item.sco_rm_detail, "stock_reserved_qty"
 					)
 					frappe.db.set_value(
 						"Subcontracting Order Supplied Item",
 						item.sco_rm_detail,
-						"reserved_qty",
+						"stock_reserved_qty",
 						reserved_qty - total_qty_delivered,
 					)
 
@@ -3430,12 +3430,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 				if item.sco_rm_detail:
 					reserved_qty = frappe.get_value(
-						"Subcontracting Order Supplied Item", item.sco_rm_detail, "reserved_qty"
+						"Subcontracting Order Supplied Item", item.sco_rm_detail, "stock_reserved_qty"
 					)
 					frappe.db.set_value(
 						"Subcontracting Order Supplied Item",
 						item.sco_rm_detail,
-						"reserved_qty",
+						"stock_reserved_qty",
 						reserved_qty + total_qty_undelivered,
 					)
 
