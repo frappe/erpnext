@@ -26,6 +26,9 @@ import Departments from './pages/Departments';
 import ConsolidatedReports from './pages/ConsolidatedReports';
 import Settings from './pages/Settings';
 import AuditTrail from './pages/AuditTrail';
+import BankConnections from './pages/Banking/BankConnections';
+import TransactionFeed from './pages/Banking/TransactionFeed';
+import ReconciliationDashboard from './pages/Banking/ReconciliationDashboard';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -113,6 +116,9 @@ function App() {
           <Route path="consolidated-reports" element={<ConsolidatedReports />} />
           <Route path="settings" element={<Settings />} />
           <Route path="audit-trail" element={<AuditTrail />} />
+          <Route path="bank-connections" element={<BankConnections />} />
+          <Route path="transaction-feed" element={<TransactionFeed />} />
+          <Route path="reconciliation" element={<ReconciliationDashboard />} />
         </Route>
       </Routes>
     </Router>
