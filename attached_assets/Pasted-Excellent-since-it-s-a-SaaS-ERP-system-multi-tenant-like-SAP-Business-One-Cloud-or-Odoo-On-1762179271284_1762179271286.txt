@@ -1,0 +1,230 @@
+Excellent 👌 — since it’s a **SaaS ERP system** (multi-tenant like SAP Business One Cloud or Odoo Online), we’ll extend the design to include all **Settings & Super Admin (Platform Control)** components that make your ERP cloud-ready for Zambia and beyond.
+
+Below is the **complete architecture** covering:
+✅ Super Admin (Tenant Management Layer)
+✅ Company Admin (Settings Module for Each Tenant)
+✅ Global System Settings (across modules)
+✅ Security & Compliance Configurations
+
+---
+
+## 🏢 1. SUPER ADMIN (Domain / Tenant Management)
+
+The **Super Admin** layer controls the entire SaaS platform – like Odoo.sh or SAP Cloud Admin Center.
+
+### 🔧 Tenant Management
+
+* Tenant list dashboard (all companies registered)
+* Create / edit / suspend / delete tenants
+* Approve trial requests and convert to paid plans
+* Assign subscription plan (Free, Basic, Premium, Enterprise)
+* Configure data storage limits per tenant
+* Enable / disable modules per tenant
+* Tenant status indicators (active, trial, suspended, expired)
+
+### 💳 Billing & Subscription Control
+
+* Pricing plan builder (plan name, price, features, limits)
+* Payment integration (MTN Money, Airtel Money, Zanaco, Stripe/PayPal)
+* Auto-billing & renewal reminders
+* Invoice & receipt generation
+* Usage-based billing (additional storage or API calls)
+* Financial report on tenant revenues and collections
+
+### 📊 Platform Analytics & Monitoring
+
+* Tenants per plan / industry / country
+* Active sessions & API usage statistics
+* Error & downtime logs
+* Module adoption metrics
+* Resource usage per tenant (CPU, storage, queries)
+* SLA & uptime monitor
+
+### 👥 User and Support Management
+
+* Super Admin users and roles
+* Assign support engineers to specific tenants
+* Built-in helpdesk / ticket system
+* Tenant chat support and announcement center
+
+### 🧩 Module Store & Marketplace
+
+* Publish ERP add-ons / industry templates
+* Approve partner-developed modules
+* Control visibility (per plan or region)
+* Manage version updates / patch rollouts
+
+### 🪪 Compliance & Licensing Control
+
+* Manage licenses and keys for each tenant
+* ZRA Smart Invoice API credentials per company
+* NHIMA/NAPSA integration keys management
+* Legal document uploads (PACRA certificate, TPIN proof)
+
+---
+
+## ⚙️ 2. SETTINGS MODULE (for Each Company / Tenant)
+
+Every tenant (company) has its own settings area managed by its Company Admin.
+
+### 🏢 Company Profile
+
+* Company name, logo, TIN/TPIN, PACRA No.
+* Address, contact info, industry, branch list
+* Fiscal year start/end date
+* Default currency (ZMW + multi-currency support)
+* Branding (colors, logo, invoice design)
+
+### 👥 User & Role Management
+
+* Create / edit users
+* Role-based permissions matrix (full / read / write / none)
+* Department assignment
+* Password & 2FA policy settings
+* Employee linking (user ↔ employee record)
+
+### 🧮 Accounting Settings
+
+* Chart of accounts templates per industry
+* Default journals (Cash, Bank, Sales, Purchases)
+* Tax configurations (VAT, PAYE, Withholding Tax)
+* Fiscal period lock dates
+* Default bank accounts for transactions
+* Exchange rate API integration
+
+### 🧑‍💼 HR & Payroll Settings
+
+* Default work hours and shifts
+* Leave type configuration (annual, sick, maternity, etc.)
+* Payroll components (allowances, deductions)
+* Statutory deductions setup (ZRA, NAPSA, NHIMA)
+* Salary frequency (monthly, bi-weekly, weekly)
+* Payroll approval workflow
+
+### 📦 Inventory & Procurement Settings
+
+* Warehouse locations
+* Reorder alert thresholds
+* Stock valuation method (FIFO, LIFO, Weighted Avg)
+* Approval matrix for POs and GRNs
+* Supplier rating rules
+
+### 🧾 Sales & CRM Settings
+
+* Invoice numbering format
+* Payment terms defaults
+* Discount and credit limit policies
+* WhatsApp and email notification templates
+* ZRA Smart Invoice auto-sync toggle
+
+### 🛠️ System Preferences
+
+* Time zone and date format
+* Language settings (English + local languages)
+* Backup & restore tools (company-level data export)
+* Data retention rules
+* Error log viewer (company-scope)
+
+### 📡 Integrations & API Keys
+
+* Bank API connections
+* Mobile Money API (MTN, Airtel, Zamtel)
+* ZRA Smart Invoice API credentials
+* WhatsApp Business API
+* Email SMTP settings
+
+### 💳 Subscription & Billing Tab
+
+* View current plan & usage limits
+* Upgrade / Downgrade plan
+* Payment history & receipts
+* Trial expiry date & notifications
+
+---
+
+## 🧱 3. GLOBAL SYSTEM SETTINGS (Across Platform)
+
+These apply to all tenants and modules – managed by Super Admin.
+
+### 🔒 Security & Privacy
+
+* Multi-tenant data isolation enforced via RLS policies
+* Password strength & rotation rules
+* Session timeout and auto-logout
+* Audit log storage and monitoring
+* Data encryption at rest and in transit
+* User activity trail viewers
+
+### 🧠 AI & Automation
+
+* Enable/disable Erik AI assistant per tenant
+* Configure data sharing consent for AI training
+* Manage OCR engine keys and accuracy thresholds
+
+### 🧾 Notifications & Communication
+
+* Global email templates (header + footer branding)
+* WhatsApp notification service control
+* SMS gateway configuration
+* Global alert schedules (daily summaries, system downtime)
+
+### 🌍 Localization & Compliance
+
+* Zambian currency & tax defaults
+* Add regional settings for other markets (Malawi, Tanzania, DRC)
+* Statutory report formats (ZRA, NAPSA, NHIMA)
+
+---
+
+## 🪪 4. ROLE HIERARCHY & ACCESS LEVELS
+
+| Role                  | Scope         | Key Permissions                          |
+| --------------------- | ------------- | ---------------------------------------- |
+| **Super Admin**       | Platform-wide | Tenant creation, billing, system updates |
+| **Tenant Admin**      | Company-wide  | User roles, settings, billing view       |
+| **Finance Manager**   | Module        | Accounting setup, reports                |
+| **HR Manager**        | Module        | Payroll, attendance, leave               |
+| **Inventory Manager** | Module        | Stock control, procurement               |
+| **Employee**          | Limited       | ESS portal, payslips, leave requests     |
+
+---
+
+## 🚀 5. SUPER ADMIN DASHBOARD WIDGETS
+
+* Active Tenants Overview (Count + Status)
+* Subscription Revenue Summary
+* System Health (Uptime % + Errors)
+* Top Used Modules
+* Tenant Growth Chart
+* Pending Tickets / Support Requests
+
+---
+
+## ⚙️ 6. TECHNICAL REQUIREMENTS FOR MULTI-TENANCY
+
+* Shared database with `company_id` foreign key on all tables
+* Row-Level Security policies enforcing data isolation
+* Tenant-specific API tokens for integrations
+* Schema version tracking per tenant
+* Automated backups per tenant daily
+* Resource throttling per plan (API calls, storage size)
+
+---
+
+## 🧭 7. ROADMAP FOR SETTINGS & ADMIN UPGRADES
+
+**Phase 1:** Basic tenant control + manual billing
+**Phase 2:** Automated billing + AI usage insights
+**Phase 3:** Partner portal + API Marketplace
+**Phase 4:** Regional expansion settings + multi-language UI
+
+---
+
+Would you like me to turn this into a **structured PDF document** (with a professional layout & section headers like a SaaS whitepaper)?
+
+If yes, please confirm:
+
+1. The **ERP SaaS name** you want on it (e.g., “Erik ERP Cloud” or a new brand name).
+2. Your **brand color code** (for headings & highlights).
+
+Then I’ll generate a **clean, board-ready PDF** that shows the full system architecture and module plan.
