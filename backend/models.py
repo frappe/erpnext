@@ -1060,3 +1060,292 @@ class CompanyIndustryTemplate(Base):
     
     company = relationship("Company")
     template = relationship("IndustryTemplate")
+
+class DocumentUpload(Base):
+    __tablename__ = "document_uploads"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    document_type = Column(String, nullable=False)  # invoice, receipt, purchase_order, contract, etc.
+    file_name = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)  # Storage path
+    file_size = Column(Integer)  # File size in bytes
+    mime_type = Column(String)
+    uploaded_by = Column(String, ForeignKey("users.id"))
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    ocr_status = Column(String, default="pending")  # pending, processing, completed, failed
+    ocr_processed_at = Column(DateTime)
+    notes = Column(Text)
+    
+    company = relationship("Company")
+
+class OCRResult(Base):
+    __tablename__ = "ocr_results"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    document_id = Column(String, ForeignKey("document_uploads.id"), nullable=False)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    extracted_text = Column(Text)  # Raw OCR text
+    structured_data = Column(JSON)  # AI-extracted structured data
+    confidence_score = Column(Float)  # Overall confidence (0-100)
+    ai_model = Column(String, default="claude-3.5-sonnet")
+    processing_time_ms = Column(Integer)
+    validation_status = Column(String, default="pending")  # pending, approved, rejected, needs_review
+    validated_by = Column(String, ForeignKey("users.id"))
+    validated_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    document = relationship("DocumentUpload")
+
+class ExtractedInvoiceData(Base):
+    __tablename__ = "extracted_invoice_data"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    ocr_result_id = Column(String, ForeignKey("ocr_results.id"), nullable=False)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    # Supplier Information
+    supplier_name = Column(String)
+    supplier_tax_id = Column(String)
+    supplier_address = Column(Text)
+    supplier_phone = Column(String)
+    supplier_email = Column(String)
+    
+    # Invoice Details
+    invoice_number = Column(String, index=True)
+    invoice_date = Column(Date)
+    due_date = Column(Date)
+    purchase_order_number = Column(String)
+    
+    # Financial Information
+    currency = Column(String, default="ZMW")
+    subtotal = Column(Float, default=0.0)
+    tax_amount = Column(Float, default=0.0)
+    total_amount = Column(Float, nullable=False)
+    amount_paid = Column(Float, default=0.0)
+    amount_due = Column(Float, default=0.0)
+    
+    # Line Items
+    line_items = Column(JSON)  # Array of {description, quantity, unit_price, amount}
+    
+    # Matching & Status
+    matched_supplier_id = Column(String, ForeignKey("suppliers.id"))  # Auto-matched supplier
+    match_confidence = Column(Float)
+    created_invoice_id = Column(String)  # If invoice was auto-created
+    status = Column(String, default="extracted")  # extracted, matched, imported, archived
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    ocr_result = relationship("OCRResult")
+    matched_supplier = relationship("Supplier")
+
+class ExtractedReceiptData(Base):
+    __tablename__ = "extracted_receipt_data"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    ocr_result_id = Column(String, ForeignKey("ocr_results.id"), nullable=False)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    # Merchant Information
+    merchant_name = Column(String)
+    merchant_address = Column(Text)
+    merchant_phone = Column(String)
+    merchant_tax_id = Column(String)
+    
+    # Receipt Details
+    receipt_number = Column(String, index=True)
+    receipt_date = Column(Date)
+    receipt_time = Column(String)
+    
+    # Financial Information
+    currency = Column(String, default="ZMW")
+    subtotal = Column(Float, default=0.0)
+    tax_amount = Column(Float, default=0.0)
+    tip_amount = Column(Float, default=0.0)
+    total_amount = Column(Float, nullable=False)
+    
+    # Payment Information
+    payment_method = Column(String)  # cash, card, mobile_money, etc.
+    card_last_four = Column(String)
+    
+    # Line Items
+    line_items = Column(JSON)  # Array of {description, quantity, unit_price, amount}
+    
+    # Categorization
+    expense_category = Column(String)  # AI-suggested category
+    category_confidence = Column(Float)
+    created_expense_id = Column(String)  # If expense was auto-created
+    status = Column(String, default="extracted")  # extracted, categorized, imported, archived
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    ocr_result = relationship("OCRResult")
+
+class EmploymentContract(Base):
+    __tablename__ = "employment_contracts"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    contract_number = Column(String, nullable=False, unique=True, index=True)
+    contract_type = Column(String, nullable=False)  # permanent, fixed_term, probation, contract, internship
+    position_title = Column(String, nullable=False)
+    department_id = Column(String, ForeignKey("departments.id"))
+    reporting_to_id = Column(String, ForeignKey("employees.id"))  # Supervisor
+    
+    # Contract Terms
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date)  # For fixed-term contracts
+    probation_period_months = Column(Integer, default=3)
+    notice_period_days = Column(Integer, default=30)
+    
+    # Compensation
+    salary_amount = Column(Float, nullable=False)
+    salary_currency = Column(String, default="ZMW")
+    salary_frequency = Column(String, default="monthly")  # monthly, bi_weekly, weekly
+    bonus_eligible = Column(Boolean, default=False)
+    benefits_package = Column(JSON)  # Array of benefits (medical, pension, allowances)
+    
+    # Work Arrangement
+    work_location = Column(String)
+    remote_allowed = Column(Boolean, default=False)
+    working_hours_per_week = Column(Float, default=40.0)
+    
+    # Documents
+    contract_document_path = Column(String)  # Signed contract file
+    signed_by_employee_at = Column(DateTime)
+    signed_by_employer_at = Column(DateTime)
+    signed_by_employer_id = Column(String, ForeignKey("users.id"))
+    
+    # Status
+    status = Column(String, default="draft")  # draft, active, terminated, expired, renewed
+    termination_date = Column(Date)
+    termination_reason = Column(Text)
+    terminated_by = Column(String, ForeignKey("users.id"))
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    employee = relationship("Employee", foreign_keys=[employee_id])
+    department = relationship("Department")
+    reporting_to = relationship("Employee", foreign_keys=[reporting_to_id])
+
+class EmployeeSkill(Base):
+    __tablename__ = "employee_skills"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    skill_name = Column(String, nullable=False)
+    skill_category = Column(String)  # technical, soft_skills, language, certification, etc.
+    proficiency_level = Column(String)  # beginner, intermediate, advanced, expert
+    years_of_experience = Column(Float)
+    last_used_date = Column(Date)
+    verified_by = Column(String, ForeignKey("users.id"))  # Manager who verified
+    verified_at = Column(DateTime)
+    certification_name = Column(String)
+    certification_number = Column(String)
+    certification_expires_at = Column(Date)
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    employee = relationship("Employee")
+
+class JobRequisition(Base):
+    __tablename__ = "job_requisitions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    requisition_number = Column(String, nullable=False, unique=True, index=True)
+    job_title = Column(String, nullable=False)
+    department_id = Column(String, ForeignKey("departments.id"), nullable=False)
+    position_type = Column(String, default="permanent")  # permanent, contract, temporary, internship
+    number_of_openings = Column(Integer, default=1)
+    
+    # Job Details
+    job_description = Column(Text)
+    responsibilities = Column(JSON)  # Array of responsibility strings
+    required_qualifications = Column(JSON)  # Array of qualification strings
+    preferred_qualifications = Column(JSON)
+    required_skills = Column(JSON)  # Array of skill strings
+    experience_years_min = Column(Integer)
+    experience_years_max = Column(Integer)
+    
+    # Compensation
+    salary_min = Column(Float)
+    salary_max = Column(Float)
+    salary_currency = Column(String, default="ZMW")
+    benefits = Column(JSON)
+    
+    # Hiring Details
+    requested_by = Column(String, ForeignKey("users.id"))
+    hiring_manager_id = Column(String, ForeignKey("users.id"))
+    target_start_date = Column(Date)
+    posting_date = Column(Date)
+    application_deadline = Column(Date)
+    
+    # Approval Workflow
+    approval_status = Column(String, default="pending")  # pending, approved, rejected, on_hold
+    approved_by = Column(String, ForeignKey("users.id"))
+    approved_at = Column(DateTime)
+    approval_notes = Column(Text)
+    
+    # Status
+    status = Column(String, default="draft")  # draft, open, interviewing, filled, cancelled
+    filled_by_employee_id = Column(String, ForeignKey("employees.id"))
+    filled_at = Column(DateTime)
+    cancelled_reason = Column(Text)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    department = relationship("Department")
+    filled_by_employee = relationship("Employee")
+
+class PerformanceReview(Base):
+    __tablename__ = "performance_reviews"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    review_period_start = Column(Date, nullable=False)
+    review_period_end = Column(Date, nullable=False)
+    review_type = Column(String, default="annual")  # annual, semi_annual, quarterly, probation
+    
+    # Ratings
+    overall_rating = Column(Float)  # 1-5 scale
+    performance_rating = Column(Float)  # Job performance
+    behavior_rating = Column(Float)  # Conduct and behavior
+    goal_achievement_rating = Column(Float)  # Goals met
+    
+    # Reviews
+    strengths = Column(JSON)  # Array of strength points
+    areas_for_improvement = Column(JSON)  # Array of improvement areas
+    achievements = Column(JSON)  # Key achievements during period
+    goals_for_next_period = Column(JSON)  # Goals for next review period
+    
+    # Feedback
+    manager_comments = Column(Text)
+    employee_comments = Column(Text)
+    hr_comments = Column(Text)
+    
+    # People Involved
+    reviewed_by = Column(String, ForeignKey("users.id"))  # Manager conducting review
+    reviewed_at = Column(DateTime)
+    acknowledged_by_employee_at = Column(DateTime)
+    
+    # Outcomes
+    promotion_recommended = Column(Boolean, default=False)
+    salary_increase_recommended = Column(Boolean, default=False)
+    recommended_salary_increase_percent = Column(Float)
+    training_recommendations = Column(JSON)
+    
+    # Status
+    status = Column(String, default="draft")  # draft, in_progress, completed, acknowledged
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    employee = relationship("Employee")
