@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import NotificationCenter from './NotificationCenter';
 import { 
   LayoutDashboard, 
   Users, 
@@ -97,6 +98,7 @@ function Layout({ user, onLogout }) {
               <img src="/assets/erik-logo.png" alt="ERIK ERP" className="ml-4 h-8 w-auto" />
             </div>
             <div className="flex items-center space-x-4">
+              <NotificationCenter />
               <span className="text-gray-300">{user.full_name}</span>
               <button
                 onClick={onLogout}

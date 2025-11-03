@@ -37,6 +37,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
+    phone = Column(String)
     role = Column(String, default="user")
     company_id = Column(String, ForeignKey("companies.id"), nullable=True)
     is_active = Column(Boolean, default=True)
@@ -1640,3 +1641,40 @@ class LeaveTypeConfiguration(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     leave_type = relationship("LeaveType")
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    
+    title = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+    
+    notification_type = Column(String, default="info")  # info, warning, error, success
+    channel = Column(String, default="in_app")  # in_app, email, sms, all
+    priority = Column(String, default="normal")  # low, normal, high, urgent
+    
+    is_read = Column(Boolean, default=False)
+    read_at = Column(DateTime)
+    
+    related_entity_type = Column(String)  # leave_application, loan, payslip, invoice, etc.
+    related_entity_id = Column(String)
+    
+    action_url = Column(String)  # URL to navigate to when clicked
+    action_label = Column(String)  # Label for action button
+    
+    email_sent = Column(Boolean, default=False)
+    email_sent_at = Column(DateTime)
+    
+    sms_sent = Column(Boolean, default=False)
+    sms_sent_at = Column(DateTime)
+    
+    expires_at = Column(DateTime)  # Auto-archive after this date
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    user = relationship("User", foreign_keys=[user_id])
+    creator = relationship("User", foreign_keys=[created_by])
