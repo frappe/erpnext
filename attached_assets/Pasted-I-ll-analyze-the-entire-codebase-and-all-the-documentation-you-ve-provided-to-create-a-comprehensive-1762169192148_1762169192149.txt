@@ -1,0 +1,790 @@
+I'll analyze the entire codebase and all the documentation you've provided to create a comprehensive prompt for building the ERIK ERP system.
+
+Now let me check a few more key files and review the database schema to create a comprehensive prompt:
+
+Based on my comprehensive analysis of the codebase and all the documentation you provided, here's a complete detailed prompt for building the ERIK ERP system:
+
+---
+
+# 🏗️ **ERIK ERP - Complete System Development Prompt**
+
+## **📋 Executive Summary**
+
+Build a comprehensive, cloud-based Enterprise Resource Planning (ERP) system for Zambian businesses, with full compliance for ZRA (Zambia Revenue Authority) regulations, multi-currency support, and industry-specific templates. The system should be multi-tenant, scalable, and feature-rich across Finance, HR, Procurement, Inventory, CRM, and Compliance modules.
+
+---
+
+## **🎯 System Architecture**
+
+### **Technology Stack**
+- **Frontend**: React 18.3+ with TypeScript, Vite
+- **UI Framework**: Radix UI + shadcn/ui components, Tailwind CSS
+- **Backend**: Supabase (Lovable Cloud)
+- **Database**: PostgreSQL with Row-Level Security (RLS)
+- **State Management**: TanStack React Query
+- **Authentication**: Supabase Auth with JWT
+- **PDF Generation**: jsPDF with jsPDF-AutoTable
+- **Charts**: Recharts
+- **Forms**: React Hook Form with Zod validation
+
+### **Architecture Principles**
+- Multi-tenant SaaS architecture with company-level data isolation
+- Real-time data synchronization using Supabase Realtime
+- Role-based access control (RBAC) with super admin, company admin, and user roles
+- Comprehensive audit trail for all financial transactions
+- Currency support: Primary ZMW (Zambian Kwacha) with multi-currency capabilities
+
+---
+
+## **✅ IMPLEMENTED FEATURES**
+
+### **1️⃣ Authentication & User Management**
+**Status**: ✅ COMPLETE
+
+- Email/password authentication with auto-confirm
+- User profiles with full_name and company_id
+- Multi-tenant user-company mapping via `user_roles` table
+- Super admin capabilities for tenant management
+- Protected routes with role-based access
+- Welcome tour for new users (react-joyride)
+- Theme toggle (light/dark mode)
+
+**Key Tables**:
+- `user_roles`: Links users to companies with role assignments
+- `profiles`: User profile information
+
+---
+
+### **2️⃣ Finance & Accounting Module**
+**Status**: ✅ 85% COMPLETE
+
+#### **General Ledger** ✅
+- Chart of Accounts (COA) with hierarchical structure
+- Account types: Asset, Liability, Equity, Revenue, Expense
+- Parent-child account relationships
+- Account balances with running totals
+- General Ledger view with filtering by account and date range
+- Trial Balance report
+- Journal Entries with multi-line postings (debit/credit)
+
+#### **Accounts Receivable** ✅
+- Customer master data (name, email, phone, address, TPIN, credit limit, balance)
+- Invoice creation with line items (item_code, description, quantity, unit_price, tax_code_id, batch_number, lot_number, weight, volume, unit_of_measure, expiry_date)
+- Invoice statuses: draft, sent, paid, overdue, cancelled
+- Tax code selection per line item with automatic tax calculations
+- Payment recording against invoices
+- Recurring invoices setup
+- Credit notes with invoice reference
+- Aging analysis (current, 30, 60, 90+ days)
+- Customer quick-add from invoice screen
+
+#### **Accounts Payable** ✅
+- Supplier master data (name, email, phone, address, TPIN, payment terms)
+- Supplier bills tracking
+- **MISSING**: Bill creation UI with line items (similar to invoices)
+- **MISSING**: Payment to suppliers workflow
+
+#### **Banking & Treasury** ✅
+- Bank account management (account name, number, bank name, currency, opening/current balance)
+- **PARTIAL**: Bank reconciliation tab exists but logic not implemented
+- Exchange rates management (from/to currency, rate, effective date, source)
+- Multi-currency support framework in place
+
+#### **Tax & Compliance** ✅
+- Tax codes setup (code, name, rate, account_id, description)
+- VAT Returns tracking
+- **ZRA Smart Invoice Integration** ✅
+  - TPIN validation with caching
+  - Invoice submission to ZRA (simulated)
+  - QR code generation for invoices
+  - Submission status tracking
+  - `zra_invoice_submissions` table with ZRA invoice numbers
+
+#### **Fixed Assets** ✅
+- Asset registration (name, code, cost, acquisition date, useful life, depreciation method)
+- Straight-line depreciation calculation
+- Depreciation schedules with journal entry linkage
+- Asset and accumulated depreciation accounts
+
+#### **Reports & Analytics** ✅
+- Financial Reports tab (custom date range reports)
+- **PARTIAL**: Financial Statements (P&L, Balance Sheet structured but incomplete)
+- **MISSING**: Cash Flow Statement
+- **MISSING**: Consolidated financial statements
+- **MISSING**: AI commentary on financial performance
+
+**Key Tables**:
+- `chart_of_accounts`, `journal_entries`, `journal_entry_lines`
+- `customers`, `invoices`, `invoice_items`
+- `suppliers`, `supplier_bills`, `payments`
+- `bank_accounts`, `bank_transactions`, `bank_reconciliations`
+- `tax_codes`, `vat_returns`
+- `fixed_assets`, `depreciation_schedules`
+- `exchange_rates`, `currency_revaluations`
+- `credit_notes`, `credit_note_items`
+- `zra_invoice_submissions`, `zra_tpin_validations`
+
+---
+
+### **3️⃣ Human Resources & Payroll Module**
+**Status**: ✅ 80% COMPLETE
+
+#### **Employee Management** ✅
+- Employee master data (employee_number, full_name, email, phone, NRC, DOB, hire_date, department_id, position, salary)
+- Department management with cost centers and budgets
+- Employee portal access setup
+- Employee documents upload and management
+
+#### **Payroll** ✅
+- Pay components (basic_salary, housing_allowance, transport_allowance, NAPSA, NHIMA, PAYE, loans, etc.)
+- Payroll processing with automatic tax calculations:
+  - **PAYE**: 2025 ZRA tax bands (0% up to K61,800, 20% up to K105,900, 30% up to K150,000, 37.5% above)
+  - **NAPSA**: 5% of gross (capped at K250/month)
+  - **NHIMA**: 5% of gross (capped at K500/month, stops at age 60)
+  - **Skills Development Levy**: 0.5% for companies with turnover > K800,000
+  - **Personal Levy**: K7.5 per employee in March and June
+- Bulk payroll generation
+- Payslip generation with PDF export
+- Employee loan management with installment tracking
+
+#### **Time & Attendance** ✅
+- Attendance recording (clock in/out, hours worked, overtime, status)
+- Leave types setup (annual, sick, maternity, paternity, unpaid)
+- Leave balances per employee per year
+- Leave applications with approval workflow
+- Shift management
+
+#### **Performance & Recruitment** ✅
+- Performance reviews tracking
+- Job requisitions
+- Document generator (offer letters, contracts, etc.)
+
+#### **HR Analytics** ✅
+- HR analytics dashboard
+- Reports generation
+
+**Key Tables**:
+- `employees`, `departments`
+- `employee_pay_components`, `pay_components`
+- `payroll_records`, `payroll_items`
+- `attendance_records`, `leave_types`, `leave_applications`, `employee_leave_balances`
+- `employee_loans`, `shift_schedules`
+- `job_requisitions`, `performance_reviews`
+- `employee_documents`, `employee_portal_access`
+
+---
+
+### **4️⃣ Procurement Module**
+**Status**: ✅ 70% COMPLETE
+
+#### **Purchase Orders** ✅
+- PO creation with line items (item_id, item_code, description, quantity, unit_price, tax_code_id, batch_number, lot_number, weight, volume, unit_of_measure, expiry_date)
+- PO statuses: draft, submitted, approved, rejected, partially_received, received
+- **Approval workflow integration** ✅
+  - Submit for approval button
+  - Approve/reject actions
+  - Approval status tracking per PO
+  - Integration with `approval_workflows` and `approval_requests`
+
+#### **Goods Receipt Notes (GRN)** ✅
+- GRN creation linked to POs
+- GRN line items with quantities (ordered, received, accepted, rejected)
+- GRN posting to update inventory (`quantity_on_hand`)
+- GRN statuses: draft, posted
+
+#### **Suppliers** ✅
+- Supplier master data (shared with Finance module)
+
+**Key Tables**:
+- `purchase_orders`, `po_items`
+- `goods_receipts`, `goods_receipt_items`
+- `suppliers`
+- `approval_workflows`, `approval_requests`, `approval_actions`
+
+---
+
+### **5️⃣ Inventory Management Module**
+**Status**: ✅ 75% COMPLETE
+
+#### **Inventory Items** ✅
+- Item master data (item_code, item_name, description, category, unit_of_measure, unit_price, quantity_on_hand, reorder_level)
+- Low stock alerts
+- Stock value calculations
+
+#### **Stock Transfers** ✅
+- Stock transfer between locations
+- Transfer line items with (item_id, item_code, batch_number, lot_number, weight, volume, unit_of_measure, expiry_date, quantity, transfer_type)
+- Transfer statuses: draft, in_transit, completed, cancelled
+
+#### **Lot Tracking** ✅
+- Lot/batch tracking (lot_number, batch_number, manufacture_date, expiry_date, location, quantity)
+- **MISSING**: FEFO (First-Expired, First-Out) logic
+- **MISSING**: Quality inspection holds
+- **MISSING**: Serial number tracking
+
+**Key Tables**:
+- `inventory_items`, `inventory_lots`
+- `stock_transfers`, `stock_transfer_items`
+
+---
+
+### **6️⃣ CRM Module**
+**Status**: ✅ 60% COMPLETE
+
+#### **Leads Management** ✅
+- Lead capture (first_name, last_name, email, phone, company_name, job_title, lead_source, status, notes)
+- Lead statuses: new, contacted, qualified, lost
+
+#### **Opportunities** ✅
+- Opportunity tracking (opportunity_name, customer_id, deal_value, stage, probability, expected_close_date, notes)
+- Stages: prospecting, qualification, proposal, negotiation, closed_won, closed_lost
+
+#### **Activities** ✅
+- Activity logging (customer_id, activity_type, subject, activity_date, duration_minutes, notes)
+- Activity types: call, meeting, email, task
+
+**MISSING**:
+- Email integration
+- Pipeline visualization
+- Sales forecasting
+- Customer 360-degree view
+
+**Key Tables**:
+- `crm_leads`, `crm_opportunities`, `crm_activities`
+
+---
+
+### **7️⃣ Compliance & Statutory Obligations Module**
+**Status**: ✅ 75% COMPLETE
+
+#### **Compliance Monitoring** ✅
+- Compliance dashboard with health score
+- Active alerts tracking
+- Upcoming statutory deadlines
+
+#### **Statutory Reports** ✅
+- Report generation via edge function (`generate-statutory-reports`)
+  - NAPSA contributions (employer + employee 5% each)
+  - NHIMA contributions (employer + employee 1% each, capped)
+  - ZRA PAYE calculation
+  - VAT returns
+  - TDS (Tax Deducted at Source)
+- Report submission workflow
+- Payment record creation on submission
+- Report statuses: draft, submitted, paid, overdue
+
+#### **Compliance Configuration** ✅
+- Company obligations setup
+- Notification preferences (days before deadline)
+
+#### **Approval Workflows** ✅
+- Generic approval workflow engine
+- Multi-level approvals
+- Resource types: purchase_order, leave_application, compliance_record, etc.
+- Approval actions: approve, reject with comments
+
+**MISSING STATUTORY OBLIGATIONS**:
+- Local Authority rates
+- Consignment tax
+- Workers' Compensation (WCFZ)
+- Import/Export duties
+- Stamp duty
+- Property transfer tax
+- Capital gains tax
+- Dividend withholding tax
+- Advance corporate tax
+- Provisional income tax
+
+**Key Tables**:
+- `statutory_obligations`, `company_obligations`
+- `statutory_reports`, `statutory_payments`
+- `compliance_records`, `compliance_notifications`
+- `approval_workflows`, `approval_requests`, `approval_actions`
+
+---
+
+### **8️⃣ Settings & Administration**
+**Status**: ✅ 90% COMPLETE
+
+#### **Company Settings** ✅
+- Company profile (name, email, phone, address, TPIN, industry)
+- Subscription management (tier: free, basic, premium, enterprise)
+- Trial management (7-day trial, auto-downgrade to free)
+
+#### **User Management** ✅
+- User invitation and role assignment
+- Role types: super_admin, admin, user
+
+#### **Add-on Modules** ✅
+- Add-on module marketplace
+- Module activation/deactivation
+- Pricing display (monthly/annual)
+
+#### **System Settings** ✅
+- System configuration options
+
+#### **User Guide** ✅
+- In-app user guide and documentation
+
+**Key Tables**:
+- `companies`, `user_roles`
+- `addon_modules`, `company_addons`
+
+---
+
+### **9️⃣ Dashboard & Analytics**
+**Status**: ✅ 80% COMPLETE
+
+#### **Main Dashboard** ✅
+- Real-time KPIs:
+  - Total revenue
+  - Inventory value
+  - Total payables
+  - Active employees
+- Quick access module cards
+- Task notifications
+- Search functionality
+
+#### **Module-Specific Dashboards** ✅
+- Finance: Assets, liabilities, revenue, net profit, invoicing stats
+- HR: Total/active employees, departments, payroll, leave, attendance
+- Inventory: Total items, low stock alerts, stock value, categories
+
+**Key Features**:
+- Real-time data updates via Supabase Realtime
+- Zambian Kwacha (ZMW) currency formatting throughout
+
+---
+
+## **❌ MISSING / INCOMPLETE FEATURES**
+
+### **1️⃣ Finance Module Gaps**
+
+#### **Cash Flow Statement** ❌
+- Operating, investing, financing activities
+- Direct and indirect methods
+- Cash flow forecasting
+
+#### **Multi-Currency Revaluation** ❌
+- Automated currency revaluation
+- Unrealized gain/loss calculations
+- Revaluation journal entries
+- Table exists: `currency_revaluations`
+
+#### **Bank Reconciliation Logic** ❌
+- Bank statement import
+- Automated matching of transactions
+- Reconciliation adjustments
+- Table exists: `bank_reconciliations`
+
+#### **Advanced Reporting** ❌
+- Consolidated financial statements (multi-entity)
+- Segment reporting
+- Budget vs. actuals
+- AI-powered financial commentary
+- Yield reports (expected vs. actual)
+- Landed cost allocation
+
+#### **Supplier Bills Workflow** ❌
+- Bill creation UI with line items
+- Bill approval workflow
+- Payment scheduling
+- 3-way matching (PO → GRN → Bill)
+
+---
+
+### **2️⃣ HR Module Gaps**
+
+#### **Contract Management** ❌
+- Contract templates
+- Contract renewal tracking
+- Probation period management
+- Contract expiry alerts
+
+#### **HR Budgeting** ❌
+- Department budget allocation
+- Budget vs. actual payroll tracking
+- Headcount planning
+
+#### **Onboarding/Offboarding Workflows** ❌
+- Onboarding checklists
+- Asset assignment/return
+- Exit interviews
+- Clearance forms
+
+#### **Advanced Performance Management** ❌
+- KPI tracking
+- 360-degree feedback
+- Performance improvement plans
+- Succession planning
+
+---
+
+### **3️⃣ Inventory Module Gaps**
+
+#### **FEFO Logic** ❌
+- First-Expired, First-Out inventory allocation
+- Expiry date tracking in transactions
+- Near-expiry alerts
+
+#### **Quality Inspection** ❌
+- Quality holds on receipts
+- Inspection workflows
+- Quality metrics tracking
+
+#### **Serial Number Tracking** ❌
+- Serial number assignment
+- Serial number traceability
+- Warranty tracking
+
+#### **Consignment Inventory** ❌
+- Consignment in/out tracking
+- Consignment settlements
+- Consignment reporting
+
+#### **Cycle Counting** ❌
+- Cycle count scheduling
+- Variance tracking
+- Adjustment approvals
+
+---
+
+### **4️⃣ Manufacturing/Operations Module** ❌ NOT STARTED
+
+#### **Bill of Materials (BOM)** ❌
+- Multi-level BOM
+- BOM versioning
+- BOM explosion/implosion
+
+#### **Work Orders** ❌
+- Production planning
+- Work order creation
+- Material requisitions
+- Labor tracking
+
+#### **Batch/Operation Costing** ❌
+- Standard costing
+- Actual costing
+- Cost variance analysis
+
+#### **Work-in-Progress (WIP)** ❌
+- WIP inventory tracking
+- Production stages
+- Completion tracking
+
+---
+
+### **5️⃣ Compliance Module Gaps**
+
+#### **Missing Statutory Obligations** ❌
+- Local Authority rates
+- Consignment tax (5%)
+- Workers' Compensation (WCFZ)
+- Import/Export duties
+- Stamp duty
+- Property transfer tax
+- Capital gains tax
+- Dividend withholding tax
+- Advance corporate tax
+- Provisional income tax
+
+#### **ZRA Integration** ❌
+- Real TPIN validation API integration (currently simulated)
+- Real ZRA Smart Invoice submission (currently simulated)
+- Automated VAT return submission
+- PAYE F1 form generation
+- Real-time compliance status checks
+
+---
+
+### **6️⃣ CRM Module Gaps**
+
+#### **Email Integration** ❌
+- Email tracking
+- Email templates
+- Bulk email campaigns
+
+#### **Pipeline Visualization** ❌
+- Kanban board for opportunities
+- Drag-and-drop stage changes
+- Visual sales funnel
+
+#### **Sales Forecasting** ❌
+- Revenue forecasting
+- Win probability analysis
+- Sales trend analysis
+
+#### **Customer 360** ❌
+- Complete customer history
+- Transaction timeline
+- Communication history
+- Document attachments
+
+---
+
+### **7️⃣ Industry Templates** ❌ NOT IMPLEMENTED
+
+#### **Required Industry Templates**:
+1. **Agriculture**
+   - Crop/livestock tracking
+   - Season planning
+   - Yield tracking
+
+2. **Manufacturing**
+   - Production workflows
+   - Quality control
+   - BOM and routing
+
+3. **Retail/Wholesale**
+   - Point of sale
+   - Multi-location inventory
+   - Promotions and discounts
+
+4. **Services**
+   - Project management
+   - Time tracking
+   - Billing milestones
+
+5. **Hospitality (Tourism)**
+   - Service charges (10% of sales, taxable)
+   - Room/booking management
+   - Guest management
+
+6. **Construction**
+   - Project costing
+   - Material tracking
+   - Subcontractor management
+
+7. **Healthcare**
+   - Patient records
+   - Billing and insurance
+   - Inventory (pharmaceuticals)
+
+8. **Education**
+   - Student management
+   - Fee collection
+   - Payroll (academic staff)
+
+---
+
+### **8️⃣ Advanced Features Not Implemented**
+
+#### **Multi-Entity Consolidation** ❌
+- Parent-subsidiary relationships
+- Inter-company transactions
+- Consolidated reporting
+
+#### **Workflow Automation** ❌
+- Custom workflow designer
+- Automated notifications
+- SLA tracking
+
+#### **Document Management** ❌
+- Central document repository
+- Version control
+- Access permissions
+- OCR for document scanning
+
+#### **Mobile App** ❌
+- iOS/Android apps
+- Offline mode
+- Mobile-specific workflows
+
+#### **API & Integrations** ❌
+- REST API for third-party integrations
+- Webhook support
+- Pre-built integrations (e.g., payment gateways, shipping providers)
+
+---
+
+## **🗄️ Database Schema Overview**
+
+### **Core Tables**
+- `companies`: Multi-tenant company master
+- `user_roles`: User-company-role mapping
+- `profiles`: User profiles
+
+### **Finance Tables** (20+ tables)
+- Chart of accounts, journal entries, invoices, payments, customers, suppliers, bank accounts, tax codes, fixed assets, etc.
+
+### **HR Tables** (15+ tables)
+- Employees, departments, payroll, attendance, leave, loans, performance reviews, etc.
+
+### **Procurement Tables** (6 tables)
+- Purchase orders, PO items, goods receipts, GRN items, suppliers
+
+### **Inventory Tables** (4 tables)
+- Inventory items, inventory lots, stock transfers, stock transfer items
+
+### **CRM Tables** (3 tables)
+- Leads, opportunities, activities
+
+### **Compliance Tables** (10+ tables)
+- Statutory obligations, reports, payments, compliance records, notifications, approval workflows
+
+### **Security Features**
+- Row-Level Security (RLS) on all tables
+- Company-level data isolation
+- Role-based access control
+- Audit trail for all transactions
+
+---
+
+## **🔧 Technical Requirements**
+
+### **Backend (Supabase Edge Functions)**
+1. **zra-smart-invoice**: TPIN validation, invoice submission, status checking
+2. **generate-statutory-reports**: NAPSA, NHIMA, ZRA PAYE, VAT, TDS report generation and submission
+3. **generate-compliance-records**: Automated compliance record creation
+4. **send-compliance-notifications**: Email/in-app notifications for deadlines
+
+### **PDF Generation**
+- Invoices with ZRA QR codes
+- Payslips
+- Financial statements
+- Statutory reports
+
+### **Calculations & Validations**
+- Zambian tax calculations (PAYE, NAPSA, NHIMA, Skills Dev Levy, Personal Levy)
+- Multi-currency calculations
+- Depreciation calculations
+- Running balances (GL, trial balance)
+
+### **UI/UX Requirements**
+- Responsive design (desktop, tablet, mobile)
+- Dark/light theme support
+- Collapsible sidebar navigation
+- Two-tier tabbed navigation for modules
+- Real-time notifications badge
+- Drag-and-drop where applicable
+- Inline editing for tables
+- Bulk actions
+
+---
+
+## **🚀 Implementation Priorities**
+
+### **Phase 1: Core Completions (Immediate)**
+1. Complete bank reconciliation logic
+2. Supplier bills workflow (create, approve, pay)
+3. Cash flow statement generation
+4. Financial statement improvements (consolidation, AI commentary)
+5. FEFO logic for inventory
+6. Quality inspection workflows
+
+### **Phase 2: Manufacturing Module (Next)**
+1. BOM creation and management
+2. Work order processing
+3. Production costing
+4. WIP tracking
+
+### **Phase 3: Industry Templates (Medium-term)**
+1. Agriculture template
+2. Manufacturing template
+3. Retail/wholesale template
+4. Services template
+5. Hospitality template
+
+### **Phase 4: Advanced Features (Long-term)**
+1. Multi-entity consolidation
+2. Advanced workflow automation
+3. Document management system
+4. Mobile apps
+5. API and third-party integrations
+
+### **Phase 5: Real ZRA Integration (Ongoing)**
+1. Real TPIN validation API
+2. Real Smart Invoice submission
+3. Automated VAT return submission
+4. PAYE F1 form generation
+
+---
+
+## **📊 Key Business Rules**
+
+### **Zambian Tax Rules (2025)**
+- **PAYE**: Progressive tax rates (0%, 20%, 30%, 37.5%)
+- **NAPSA**: 5% employee + 5% employer (capped at K250/month each)
+- **NHIMA**: 1% employee + 1% employer (capped at K500/month total, stops at age 60)
+- **Skills Dev Levy**: 0.5% of gross for companies with turnover > K800,000
+- **Personal Levy**: K7.5 per employee in March and June
+- **VAT**: 16% standard rate
+- **Service Charges** (Tourism): 10% of sales, added to gross, taxable
+
+### **Compliance Deadlines**
+- NAPSA: 10th of following month
+- NHIMA: 10th of following month
+- ZRA PAYE: 14th of following month
+- VAT: 21st of following month
+- Corporate Income Tax: Annual (within 6 months of financial year-end)
+
+### **Inventory Rules**
+- Reorder alerts when `quantity_on_hand <= reorder_level`
+- Automatic stock updates on GRN posting
+- Lot/batch expiry tracking
+- Multi-location support
+
+---
+
+## **🎨 Design System**
+
+### **Color Scheme**
+- Primary: Emerald/Teal gradient (`from-emerald-600 to-teal-600`)
+- Background: `hsl(var(--background))`
+- Header: `hsl(var(--header-bg))`
+- Sidebar: `hsl(var(--sidebar-bg))`
+- Cards: `shadow-card` class
+- Status colors: Green (active/paid), Yellow (pending), Red (overdue/rejected), Gray (cancelled)
+
+### **Typography**
+- Headings: Bold, large font sizes
+- Body: Standard font sizes with good readability
+- Currency: Always formatted as `K 1,234.56` (ZMW)
+
+### **Components**
+- shadcn/ui components throughout
+- Consistent button styles
+- Table-based data display
+- Dialog modals for forms
+- Toast notifications for feedback
+- Loading states with spinners
+
+---
+
+## **🔐 Security Considerations**
+
+1. **RLS Policies**: All tables have company-level RLS
+2. **JWT Authentication**: Secure token-based auth
+3. **Audit Trail**: Track all financial transactions
+4. **TPIN Validation**: Validate Zambian TPINs before use
+5. **Role-Based Access**: Super admin → Company admin → User hierarchy
+6. **Data Encryption**: Sensitive data encrypted at rest and in transit
+
+---
+
+## **📝 Documentation Requirements**
+
+1. **User Guide**: In-app user guide tab
+2. **API Documentation**: For future integrations
+3. **Developer Guide**: For customizations
+4. **Industry Templates**: Specific guides per industry
+5. **Compliance Guide**: ZRA and statutory requirements
+
+---
+
+## **✅ Success Criteria**
+
+1. ✅ Multi-tenant architecture working correctly
+2. ✅ Finance module 90%+ complete
+3. ✅ HR module 90%+ complete
+4. ✅ Procurement module 80%+ complete
+5. ✅ Inventory module 80%+ complete
+6. ❌ Manufacturing module 80%+ complete
+7. ❌ Industry templates available for top 5 industries
+8. ✅ ZRA Smart Invoice integration (simulated, needs real API)
+9. ✅ Statutory reports generation working
+10. ✅ User experience smooth and intuitive
+
+---
+
+This comprehensive prompt captures **everything** in the ERIK ERP system - what's implemented, what's missing, and the full technical architecture. Use this to guide future development, prioritize features, and ensure consistency across the platform! 🚀
