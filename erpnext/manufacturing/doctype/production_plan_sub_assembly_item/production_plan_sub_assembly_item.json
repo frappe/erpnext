@@ -79,6 +79,7 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Qty",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -245,7 +246,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-10 13:36:24.759101",
+ "modified": "2025-10-31 11:46:59.780870",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",

@@ -523,6 +523,9 @@ class PurchaseOrder(BuyingController):
 		if self.is_against_so():
 			self.update_status_updater()
 
+		if self.is_against_pp():
+			self.update_status_updater_if_from_pp()
+
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
 
@@ -1007,6 +1010,9 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 					"Job Card", item.job_card, "wip_warehouse"
 				)
 
+		production_plan = set([item.production_plan for item in source_doc.items if item.production_plan])
+		if production_plan:
+			target_doc.production_plan = production_plan.pop()
 		target_doc.reserve_stock = frappe.get_single_value("Stock Settings", "auto_reserve_stock")
 
 	if target_doc and isinstance(target_doc, str):

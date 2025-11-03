@@ -17,9 +17,11 @@ class MaterialRequestPlanItem(Document):
 		actual_qty: DF.Float
 		conversion_factor: DF.Float
 		description: DF.TextEditor | None
+		from_bom: DF.Link | None
 		from_warehouse: DF.Link | None
 		item_code: DF.Link
 		item_name: DF.Data | None
+		main_item_code: DF.Link | None
 		material_request_type: DF.Literal[
 			"",
 			"Purchase",
@@ -43,6 +45,7 @@ class MaterialRequestPlanItem(Document):
 		sales_order: DF.Link | None
 		schedule_date: DF.Date | None
 		stock_reserved_qty: DF.Float
+		sub_assembly_item_reference: DF.Data | None
 		uom: DF.Link | None
 		warehouse: DF.Link
 	# end: auto-generated types

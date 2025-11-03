@@ -568,6 +568,7 @@ class ProductionPlan(Document):
 	def on_submit(self):
 		self.update_bin_qty()
 		self.update_sales_order()
+		self.add_reference_to_raw_materials()
 		self.update_stock_reservation()
 
 	def on_cancel(self):
@@ -582,6 +583,19 @@ class ProductionPlan(Document):
 			return
 
 		make_stock_reservation_entries(self)
+
+	def add_reference_to_raw_materials(self):
+		if self.reserve_stock:
+			for item in self.mr_items:
+				if reference := next(
+					(
+						sa_item.name
+						for sa_item in self.sub_assembly_items
+						if sa_item.production_item == item.main_item_code and sa_item.bom_no == item.from_bom
+					),
+					None,
+				):
+					item.db_set("sub_assembly_item_reference", reference)
 
 	def update_sales_order(self):
 		sales_orders = [row.sales_order for row in self.po_items if row.sales_order]
@@ -1448,7 +1462,8 @@ def get_material_request_items(
 		"sales_order": sales_order,
 		"description": row.get("description"),
 		"uom": row.get("purchase_uom") or row.get("stock_uom"),
-		"main_bom_item": row.get("main_bom_item"),
+		"main_item_code": row.get("main_bom_item"),
+		"from_bom": row.get("main_bom"),
 	}
 
 
@@ -1629,7 +1644,10 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	sub_assembly_items = defaultdict(int)
 	if doc.get("skip_available_sub_assembly_item") and doc.get("sub_assembly_items"):
 		for d in doc.get("sub_assembly_items"):
-			sub_assembly_items[(d.get("production_item"), d.get("bom_no"))] += d.get("qty")
+			sub_assembly_items[
+				(d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
+			] += d.get("qty")
+		sub_assembly_items = {k[:2]: v for k, v in sub_assembly_items.items()}
 
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
@@ -1718,14 +1736,14 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 		sales_order = data.get("sales_order")
 
-		for item_code, details in item_details.items():
+		for key, details in item_details.items():
 			so_item_details.setdefault(sales_order, frappe._dict())
-			if item_code in so_item_details.get(sales_order, {}):
-				so_item_details[sales_order][item_code]["qty"] = so_item_details[sales_order][item_code].get(
+			if key in so_item_details.get(sales_order, {}):
+				so_item_details[sales_order][key]["qty"] = so_item_details[sales_order][key].get(
 					"qty", 0
 				) + flt(details.qty)
 			else:
-				so_item_details[sales_order][item_code] = details
+				so_item_details[sales_order][key] = details
 
 	mr_items = []
 	for sales_order in so_item_details:
@@ -2024,6 +2042,7 @@ def get_raw_materials_of_sub_assembly_items(
 			item_uom.conversion_factor,
 			item.safety_stock,
 			bom.item.as_("main_bom_item"),
+			bom.name.as_("main_bom"),
 		)
 		.where(
 			(bei.docstatus == 1)
@@ -2036,7 +2055,9 @@ def get_raw_materials_of_sub_assembly_items(
 
 	for item in items:
 		key = (item.item_code, item.bom_no)
-		if (item.bom_no and key not in sub_assembly_items) or (item.item_code in existing_sub_assembly_items):
+		if (item.bom_no and key not in sub_assembly_items) or (
+			(item.item_code, item.bom_no or item.main_bom) in existing_sub_assembly_items
+		):
 			continue
 
 		if item.bom_no:
@@ -2050,15 +2071,15 @@ def get_raw_materials_of_sub_assembly_items(
 				sub_assembly_items,
 				planned_qty=planned_qty,
 			)
-			existing_sub_assembly_items.add(item.item_code)
+			existing_sub_assembly_items.add((item.item_code, item.bom_no or item.main_bom))
 		else:
 			if not item.conversion_factor and item.purchase_uom:
 				item.conversion_factor = get_uom_conversion_factor(item.item_code, item.purchase_uom)
 
-			if details := item_details.get(item.get("item_code")):
+			if details := item_details.get((item.get("item_code"), item.get("main_bom"))):
 				details.qty += item.get("qty")
 			else:
-				item_details.setdefault(item.get("item_code"), item)
+				item_details.setdefault((item.get("item_code"), item.get("main_bom")), item)
 
 	return item_details
 

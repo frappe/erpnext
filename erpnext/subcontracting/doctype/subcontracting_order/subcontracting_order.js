@@ -197,7 +197,10 @@ frappe.ui.form.on("Subcontracting Order", {
 				}
 
 				frm.doc.supplied_items.forEach((item) => {
-					if (flt(item.reserved_qty) > 0 && frappe.model.can_read("Stock Reservation Entry")) {
+					if (
+						flt(item.stock_reserved_qty) > 0 &&
+						frappe.model.can_read("Stock Reservation Entry")
+					) {
 						frm.add_custom_button(
 							__("Reserved Stock"),
 							() => frm.events.show_reserved_stock(frm),
@@ -301,7 +304,8 @@ frappe.ui.form.on("Subcontracting Order", {
 		});
 
 		frm.doc.supplied_items.forEach((item) => {
-			let unreserved_qty = flt(item.required_qty) - flt(item.supplied_qty) - flt(item.reserved_qty);
+			let unreserved_qty =
+				flt(item.required_qty) - flt(item.supplied_qty) - flt(item.stock_reserved_qty);
 
 			if (unreserved_qty > 0) {
 				dialog.fields_dict.items.df.data.push({

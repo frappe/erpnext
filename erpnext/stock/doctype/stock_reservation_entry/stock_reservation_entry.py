@@ -343,7 +343,7 @@ class StockReservationEntry(Document):
 
 	def validate_reservation_based_on_serial_and_batch(self) -> None:
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
-		if self.voucher_type == "Work Order":
+		if self.voucher_type in ["Work Order", "Subcontracting Order"]:
 			return
 
 		if self.reservation_based_on == "Serial and Batch":
@@ -465,6 +465,7 @@ class StockReservationEntry(Document):
 			"Sales Order": "Sales Order Item",
 			"Work Order": "Work Order Item",
 			"Production Plan": "Production Plan Sub Assembly Item",
+			"Subcontracting Order": "Subcontracting Order Supplied Item",
 		}.get(self.voucher_type, None)
 
 		if item_doctype:
@@ -579,7 +580,7 @@ class StockReservationEntry(Document):
 		)
 
 		from_voucher_detail_no = None
-		if self.from_voucher_type and self.from_voucher_type == "Stock Entry":
+		if self.from_voucher_type and self.from_voucher_type in ["Stock Entry", "Production Plan"]:
 			from_voucher_detail_no = self.from_voucher_detail_no
 
 		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
@@ -1201,6 +1202,9 @@ class StockReservation:
 				self.set_serial_batch(sre, item.serial_and_batch_bundles)
 
 			sre.submit()
+			item.voucher_type = sre.voucher_type
+			item.voucher_no = sre.voucher_no
+			item.voucher_detail_no = sre.voucher_detail_no
 			is_sre_created = True
 
 		return is_sre_created
@@ -1281,7 +1285,7 @@ class StockReservation:
 		if not reservation_entries:
 			return
 
-		entries_to_reserve = frappe._dict({})
+		entries_to_reserve = frappe._dict()
 		for row in reservation_entries:
 			reserved_qty_field = "reserved_qty" if row.reservation_based_on == "Qty" else "sabb_qty"
 			delivered_qty_field = (
@@ -1298,7 +1302,7 @@ class StockReservation:
 				if available_qty <= 0:
 					continue
 
-				key = (row.item_code, row.warehouse)
+				key = (row.item_code, row.warehouse, entry.voucher_detail_no)
 
 				if key not in entries_to_reserve:
 					entries_to_reserve.setdefault(
@@ -1308,7 +1312,7 @@ class StockReservation:
 								"qty_to_reserve": 0.0,
 								"item_code": row.item_code,
 								"warehouse": row.warehouse,
-								"voucher_type": entry.voucher_type,
+								"voucher_type": entry.voucher_type or to_doctype,
 								"voucher_no": entry.voucher_no,
 								"voucher_detail_no": entry.voucher_detail_no,
 								"serial_nos": [],
@@ -1348,7 +1352,9 @@ class StockReservation:
 			(row.item_code, row.warehouse) for row in reservation_entries
 		)
 		for entry in [
-			entry for entry in items_to_reserve if (entry.item_code, entry.warehouse) in extra_items
+			entry
+			for entry in items_to_reserve
+			if (entry.item_code, entry.warehouse, entry.voucher_detail_no) in extra_items
 		]:
 			available_qty = get_available_qty_to_reserve(entry.item_code, entry.warehouse)
 			if not available_qty:
@@ -1480,6 +1486,11 @@ class StockReservation:
 			.orderby(sabb_entry.idx)
 		)
 
+		if self.items:
+			query = query.where(
+				sre.voucher_detail_no.isin([item.from_voucher_detail_no for item in self.items])
+			)
+
 		if against_fg_item:
 			query = query.where(
 				sre.voucher_detail_no.isin(
@@ -1495,9 +1506,11 @@ class StockReservation:
 
 	def get_items_to_reserve(self, docnames, from_doctype, to_doctype):
 		field = frappe.scrub(from_doctype)
+		item_code_fieldname = "rm_item_code" if to_doctype == "Subcontracting Order" else "item_code"
+		child_table_suffix = " Supplied Item" if to_doctype == "Subcontracting Order" else " Item"
 
 		doctype = frappe.qb.DocType(to_doctype)
-		child_doctype = frappe.qb.DocType(to_doctype + " Item")
+		child_doctype = frappe.qb.DocType(to_doctype + child_table_suffix)
 
 		query = (
 			frappe.qb.from_(doctype)
@@ -1506,11 +1519,12 @@ class StockReservation:
 			.select(
 				doctype.name.as_("voucher_no"),
 				child_doctype.name.as_("voucher_detail_no"),
-				child_doctype.item_code,
+				child_doctype[item_code_fieldname].as_("item_code"),
 				doctype.company,
 				child_doctype.stock_uom,
 			)
 			.where((doctype.docstatus == 1) & (doctype[field].isin(docnames)))
+			.groupby(child_doctype.name)
 		)
 
 		if to_doctype == "Work Order":
@@ -1528,6 +1542,15 @@ class StockReservation:
 				(doctype.qty > doctype.material_transferred_for_manufacturing)
 				& (doctype.status != "Completed")
 			)
+		elif to_doctype == "Subcontracting Order":
+			query = query.select(
+				child_doctype.stock_reserved_qty,
+				child_doctype.required_qty.as_("qty"),
+				child_doctype.reserve_warehouse.as_("source_warehouse"),
+			)
+
+		if self.items:
+			query = query.where(child_doctype.name.isin([item.voucher_detail_no for item in self.items]))
 
 		data = query.run(as_dict=True)
 		items = []

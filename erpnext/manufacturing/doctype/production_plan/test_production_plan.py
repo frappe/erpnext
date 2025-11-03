@@ -2364,9 +2364,6 @@ class TestProductionPlan(IntegrationTestCase):
 	def test_production_plan_for_partial_sub_assembly_items(self):
 		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
-			create_subcontracting_bom,
-		)
 
 		frappe.flags.test_print = False
 
@@ -2440,6 +2437,7 @@ def create_production_plan(**args):
 			"skip_available_sub_assembly_item": args.skip_available_sub_assembly_item or 0,
 			"sub_assembly_warehouse": args.sub_assembly_warehouse,
 			"reserve_stock": args.reserve_stock or 0,
+			"for_warehouse": args.for_warehouse or None,
 		}
 	)
 
