@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, date
@@ -12,6 +12,7 @@ import utils
 from database import engine, get_db
 from ai_assistant import ai_assistant
 from notification_service import notification_service
+from audit_logger import audit_logger
 import migrations
 
 models.Base.metadata.create_all(bind=engine)
@@ -97,9 +98,30 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/api/auth/login", response_model=schemas.Token)
-def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
+def login(user: schemas.UserLogin, request: Request, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
-    if not db_user or not auth.verify_password(user.password, db_user.hashed_password):
+    
+    if not db_user:
+        audit_logger.log_login_attempt(
+            db=db,
+            email=user.email,
+            request=request,
+            status="failure",
+            error_message="Unknown user account"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password"
+        )
+    
+    if not auth.verify_password(user.password, db_user.hashed_password):
+        audit_logger.log_login(
+            db=db,
+            user=db_user,
+            request=request,
+            status="failure",
+            error_message="Incorrect password"
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
@@ -107,6 +129,8 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     
     db_user.last_login = datetime.utcnow()
     db.commit()
+    
+    audit_logger.log_login(db=db, user=db_user, request=request, status="success")
     
     access_token = auth.create_access_token(data={"sub": db_user.id})
     return {"access_token": access_token, "token_type": "bearer"}
@@ -154,6 +178,7 @@ def get_employees(
 @app.post("/api/employees", response_model=schemas.EmployeeResponse)
 def create_employee(
     employee: schemas.EmployeeCreate,
+    request: Request,
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -173,6 +198,21 @@ def create_employee(
     db.add(new_employee)
     db.commit()
     db.refresh(new_employee)
+    
+    audit_logger.log_create(
+        db=db,
+        user=current_user,
+        entity_type="Employee",
+        entity_id=new_employee.id,
+        data={
+            "employee_no": new_employee.employee_no,
+            "name": f"{new_employee.first_name} {new_employee.last_name}",
+            "position": new_employee.position,
+            "salary_base": new_employee.salary_base
+        },
+        request=request
+    )
+    
     return new_employee
 
 @app.get("/api/accounts", response_model=list[schemas.AccountResponse])
@@ -5112,3 +5152,232 @@ def delete_notification(
     db.commit()
     
     return {"message": "Notification deleted successfully"}
+
+# ============================================================
+# AUDIT LOG ENDPOINTS - Compliance & Security Tracking
+# ============================================================
+
+@app.get("/api/audit-logs", response_model=List[schemas.AuditLogResponse])
+def get_audit_logs(
+    skip: int = 0,
+    limit: int = 100,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    user_id: Optional[str] = None,
+    action: Optional[str] = None,
+    entity_type: Optional[str] = None,
+    entity_id: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get audit logs with filtering.
+    
+    Supports filtering by:
+    - Date range (start_date, end_date)
+    - User (user_id)
+    - Action type (CREATE, UPDATE, DELETE, etc.)
+    - Entity type (Invoice, Employee, etc.)
+    - Entity ID
+    - Status (success, failure, error)
+    
+    Ordered by timestamp descending (newest first).
+    """
+    query = db.query(models.AuditLog).filter(
+        models.AuditLog.company_id == current_user.company_id
+    )
+    
+    # Apply filters
+    if start_date:
+        query = query.filter(models.AuditLog.timestamp >= start_date)
+    if end_date:
+        query = query.filter(models.AuditLog.timestamp <= end_date)
+    if user_id:
+        query = query.filter(models.AuditLog.user_id == user_id)
+    if action:
+        query = query.filter(models.AuditLog.action == action)
+    if entity_type:
+        query = query.filter(models.AuditLog.entity_type == entity_type)
+    if entity_id:
+        query = query.filter(models.AuditLog.entity_id == entity_id)
+    if status:
+        query = query.filter(models.AuditLog.status == status)
+    
+    # Order by newest first
+    query = query.order_by(models.AuditLog.timestamp.desc())
+    
+    # Pagination
+    logs = query.offset(skip).limit(limit).all()
+    
+    return logs
+
+@app.get("/api/audit-logs/stats")
+def get_audit_log_stats(
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get audit log statistics for dashboards and analytics.
+    
+    Returns:
+    - Total logs count
+    - Actions breakdown (CREATE, UPDATE, DELETE counts)
+    - Top users by activity
+    - Top entity types
+    - Success/failure rates
+    - Hourly activity (last 24h)
+    """
+    from sqlalchemy import func
+    
+    # Base query with filters
+    base_query = db.query(models.AuditLog).filter(
+        models.AuditLog.company_id == current_user.company_id
+    )
+    
+    if start_date:
+        base_query = base_query.filter(models.AuditLog.timestamp >= start_date)
+    if end_date:
+        base_query = base_query.filter(models.AuditLog.timestamp <= end_date)
+    
+    # Total count
+    total_logs = base_query.count()
+    
+    # Actions breakdown
+    actions = db.query(
+        models.AuditLog.action,
+        func.count(models.AuditLog.id).label('count')
+    ).filter(
+        models.AuditLog.company_id == current_user.company_id
+    ).group_by(models.AuditLog.action).all()
+    
+    actions_breakdown = {action: count for action, count in actions}
+    
+    # Top users
+    top_users = db.query(
+        models.AuditLog.user_email,
+        func.count(models.AuditLog.id).label('count')
+    ).filter(
+        models.AuditLog.company_id == current_user.company_id,
+        models.AuditLog.user_email.isnot(None)
+    ).group_by(models.AuditLog.user_email).order_by(
+        func.count(models.AuditLog.id).desc()
+    ).limit(10).all()
+    
+    top_users_list = [{"user_email": email, "count": count} for email, count in top_users]
+    
+    # Top entity types
+    top_entities = db.query(
+        models.AuditLog.entity_type,
+        func.count(models.AuditLog.id).label('count')
+    ).filter(
+        models.AuditLog.company_id == current_user.company_id,
+        models.AuditLog.entity_type.isnot(None)
+    ).group_by(models.AuditLog.entity_type).order_by(
+        func.count(models.AuditLog.id).desc()
+    ).limit(10).all()
+    
+    top_entities_list = [{"entity_type": entity, "count": count} for entity, count in top_entities]
+    
+    # Status breakdown
+    status_counts = db.query(
+        models.AuditLog.status,
+        func.count(models.AuditLog.id).label('count')
+    ).filter(
+        models.AuditLog.company_id == current_user.company_id
+    ).group_by(models.AuditLog.status).all()
+    
+    status_breakdown = {status: count for status, count in status_counts}
+    
+    return {
+        "total_logs": total_logs,
+        "actions_breakdown": actions_breakdown,
+        "top_users": top_users_list,
+        "top_entities": top_entities_list,
+        "status_breakdown": status_breakdown
+    }
+
+@app.post("/api/audit-logs/export")
+def export_audit_logs(
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    action: Optional[str] = None,
+    entity_type: Optional[str] = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Export audit logs to CSV format.
+    
+    Returns CSV data as downloadable file.
+    """
+    from io import StringIO
+    import csv
+    from fastapi.responses import StreamingResponse
+    from audit_logger import audit_logger
+    
+    # Log the export action
+    audit_logger.log_export(
+        db=db,
+        user=current_user,
+        entity_type="AuditLog",
+        format="CSV",
+        filters={
+            "start_date": str(start_date) if start_date else None,
+            "end_date": str(end_date) if end_date else None,
+            "action": action,
+            "entity_type": entity_type
+        }
+    )
+    
+    # Query logs
+    query = db.query(models.AuditLog).filter(
+        models.AuditLog.company_id == current_user.company_id
+    )
+    
+    if start_date:
+        query = query.filter(models.AuditLog.timestamp >= start_date)
+    if end_date:
+        query = query.filter(models.AuditLog.timestamp <= end_date)
+    if action:
+        query = query.filter(models.AuditLog.action == action)
+    if entity_type:
+        query = query.filter(models.AuditLog.entity_type == entity_type)
+    
+    logs = query.order_by(models.AuditLog.timestamp.desc()).all()
+    
+    # Create CSV
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Write headers
+    writer.writerow([
+        'Timestamp', 'User', 'Action', 'Entity Type', 'Entity ID',
+        'Status', 'IP Address', 'User Agent', 'Changes'
+    ])
+    
+    # Write rows
+    for log in logs:
+        writer.writerow([
+            log.timestamp.isoformat() if log.timestamp else '',
+            log.user_email or '',
+            log.action or '',
+            log.entity_type or '',
+            log.entity_id or '',
+            log.status or '',
+            log.ip_address or '',
+            log.user_agent or '',
+            str(log.changes) if log.changes else ''
+        ])
+    
+    # Return as downloadable CSV
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=audit_logs_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+        }
+    )

@@ -38,6 +38,7 @@ function Layout({ user, onLogout }) {
         { name: 'Reports', href: '/reports', icon: BarChart3 },
         { name: 'Settings', href: '/settings', icon: Settings },
         { name: 'Security', href: '/security', icon: Shield },
+        { name: 'Audit Trail', href: '/audit-trail', icon: FileText },
       ]
     },
     {

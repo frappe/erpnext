@@ -46,6 +46,27 @@ class User(Base):
     
     company = relationship("Company", back_populates="users")
 
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    user_email = Column(String)  # Cached for deleted users
+    action = Column(String, nullable=False, index=True)  # CREATE, READ, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+    entity_type = Column(String, index=True)  # Invoice, Employee, Product, etc.
+    entity_id = Column(String, index=True)
+    changes = Column(JSON)  # Before/after state
+    ip_address = Column(String)
+    user_agent = Column(Text)
+    status = Column(String, default="success")  # success, failure, error
+    error_message = Column(Text)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True, nullable=False)
+    
+    # Relationships
+    company = relationship("Company")
+    user = relationship("User")
+
 class Department(Base):
     __tablename__ = "departments"
     
