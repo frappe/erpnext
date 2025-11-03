@@ -24,6 +24,7 @@ import AIAssistant from './pages/AIAssistant';
 import StatutoryObligations from './pages/StatutoryObligations';
 import Departments from './pages/Departments';
 import ConsolidatedReports from './pages/ConsolidatedReports';
+import Settings from './pages/Settings';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -109,6 +110,7 @@ function App() {
           <Route path="statutory-obligations" element={<StatutoryObligations />} />
           <Route path="departments" element={<Departments />} />
           <Route path="consolidated-reports" element={<ConsolidatedReports />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </Router>

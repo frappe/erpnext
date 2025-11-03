@@ -680,3 +680,206 @@ class BankReconciliationResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class SystemSettingCreate(BaseModel):
+    setting_key: str
+    setting_value: Optional[str] = None
+    setting_type: str = "string"
+    category: Optional[str] = None
+    description: Optional[str] = None
+    is_public: bool = False
+
+class SystemSettingUpdate(BaseModel):
+    setting_value: Optional[str] = None
+    setting_type: Optional[str] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    is_public: Optional[bool] = None
+
+class SystemSettingResponse(BaseModel):
+    id: str
+    company_id: str
+    setting_key: str
+    setting_value: Optional[str]
+    setting_type: str
+    category: Optional[str]
+    description: Optional[str]
+    is_public: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class TaxSettingCreate(BaseModel):
+    tax_name: str
+    tax_type: str
+    jurisdiction: str = "Zambia"
+    tax_brackets: Optional[List[dict]] = None
+    employer_rate: float = 0.0
+    employee_rate: float = 0.0
+    max_amount: Optional[float] = None
+    min_amount: Optional[float] = None
+    applies_to: str = "gross"
+    is_active: bool = True
+    effective_from: Optional[date] = None
+    effective_to: Optional[date] = None
+    tax_payable_account_id: Optional[str] = None
+    tax_expense_account_id: Optional[str] = None
+
+class TaxSettingUpdate(BaseModel):
+    tax_name: Optional[str] = None
+    tax_type: Optional[str] = None
+    tax_brackets: Optional[List[dict]] = None
+    employer_rate: Optional[float] = None
+    employee_rate: Optional[float] = None
+    is_active: Optional[bool] = None
+
+class TaxSettingResponse(BaseModel):
+    id: str
+    company_id: str
+    tax_name: str
+    tax_type: str
+    jurisdiction: str
+    tax_brackets: Optional[List[dict]]
+    employer_rate: float
+    employee_rate: float
+    max_amount: Optional[float]
+    applies_to: str
+    is_active: bool
+    effective_from: Optional[date]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class EmailTemplateCreate(BaseModel):
+    template_name: str
+    template_code: str
+    subject: str
+    body_html: Optional[str] = None
+    body_text: Optional[str] = None
+    available_variables: Optional[List[str]] = None
+    is_active: bool = True
+
+class EmailTemplateUpdate(BaseModel):
+    template_name: Optional[str] = None
+    subject: Optional[str] = None
+    body_html: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class EmailTemplateResponse(BaseModel):
+    id: str
+    company_id: str
+    template_name: str
+    template_code: str
+    subject: str
+    body_html: Optional[str]
+    is_active: bool
+    is_system: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class SalaryComponentCreate(BaseModel):
+    component_code: str
+    component_name: str
+    component_type: str
+    calculation_method: str = "fixed"
+    default_amount: float = 0.0
+    percentage_of: Optional[str] = None
+    is_taxable: bool = True
+    is_pensionable: bool = False
+    include_in_gross: bool = True
+    is_statutory: bool = False
+    statutory_type: Optional[str] = None
+    expense_account_id: Optional[str] = None
+    payable_account_id: Optional[str] = None
+    is_active: bool = True
+    display_order: int = 0
+
+class SalaryComponentUpdate(BaseModel):
+    component_name: Optional[str] = None
+    default_amount: Optional[float] = None
+    is_active: Optional[bool] = None
+
+class SalaryComponentResponse(BaseModel):
+    id: str
+    company_id: str
+    component_code: str
+    component_name: str
+    component_type: str
+    calculation_method: str
+    default_amount: float
+    is_taxable: bool
+    is_statutory: bool
+    is_active: bool
+    display_order: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class ApprovalWorkflowRuleCreate(BaseModel):
+    workflow_name: str
+    entity_type: str
+    conditions: Optional[dict] = None
+    approval_chain: Optional[List[dict]] = None
+    notify_on_submit: bool = True
+    is_active: bool = True
+    priority: int = 0
+
+class ApprovalWorkflowRuleUpdate(BaseModel):
+    workflow_name: Optional[str] = None
+    conditions: Optional[dict] = None
+    approval_chain: Optional[List[dict]] = None
+    is_active: Optional[bool] = None
+
+class ApprovalWorkflowRuleResponse(BaseModel):
+    id: str
+    company_id: str
+    workflow_name: str
+    entity_type: str
+    conditions: Optional[dict]
+    approval_chain: Optional[List[dict]]
+    is_active: bool
+    priority: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class LeaveTypeConfigurationCreate(BaseModel):
+    leave_type_id: str
+    accrual_method: str = "annual"
+    accrual_rate: float = 0.0
+    max_accrual: Optional[float] = None
+    carry_forward_allowed: bool = True
+    min_days_per_request: float = 0.5
+    requires_approval: bool = True
+    approval_levels: int = 1
+    exclude_weekends: bool = True
+    exclude_holidays: bool = True
+    is_paid: bool = True
+    pay_percentage: float = 100.0
+
+class LeaveTypeConfigurationUpdate(BaseModel):
+    accrual_method: Optional[str] = None
+    accrual_rate: Optional[float] = None
+    requires_approval: Optional[bool] = None
+    is_paid: Optional[bool] = None
+
+class LeaveTypeConfigurationResponse(BaseModel):
+    id: str
+    company_id: str
+    leave_type_id: str
+    accrual_method: str
+    accrual_rate: float
+    requires_approval: bool
+    is_paid: bool
+    pay_percentage: float
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
