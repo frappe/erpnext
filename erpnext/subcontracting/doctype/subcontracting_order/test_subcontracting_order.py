@@ -730,16 +730,16 @@ class TestSubcontractingOrder(IntegrationTestCase):
 		se.submit()
 		sco.reload()
 
-		self.assertEqual(sco.supplied_items[0].reserved_qty, 5)
-		self.assertEqual(sco.supplied_items[1].reserved_qty, 3)
-		self.assertEqual(sco.supplied_items[2].reserved_qty, 1)
+		self.assertEqual(sco.supplied_items[0].stock_reserved_qty, 5)
+		self.assertEqual(sco.supplied_items[1].stock_reserved_qty, 3)
+		self.assertEqual(sco.supplied_items[2].stock_reserved_qty, 1)
 
 		se.cancel()
 		sco.reload()
 
-		self.assertEqual(sco.supplied_items[0].reserved_qty, 10)
-		self.assertEqual(sco.supplied_items[1].reserved_qty, 10)
-		self.assertEqual(sco.supplied_items[2].reserved_qty, 10)
+		self.assertEqual(sco.supplied_items[0].stock_reserved_qty, 10)
+		self.assertEqual(sco.supplied_items[1].stock_reserved_qty, 10)
+		self.assertEqual(sco.supplied_items[2].stock_reserved_qty, 10)
 
 	def test_stock_reservation_transfer(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -788,7 +788,10 @@ class TestSubcontractingOrder(IntegrationTestCase):
 		sbe_pp_list = []
 		for sre in sre_against_plan:
 			sbe_pp_list.append(
-				sorted(get_serial_batch_entries_for_voucher(sre.name), key=lambda x: x.get("serial_no"))
+				sorted(
+					get_serial_batch_entries_for_voucher(sre.name),
+					key=lambda x: x.get("serial_no") or x.get("batch_no") or "",
+				)
 			)
 
 		plan.make_work_order()
@@ -809,7 +812,10 @@ class TestSubcontractingOrder(IntegrationTestCase):
 		sbe_so_list = []
 		for sre in sre_against_so:
 			sbe_so_list.append(
-				sorted(get_serial_batch_entries_for_voucher(sre.name), key=lambda x: x.get("serial_no"))
+				sorted(
+					get_serial_batch_entries_for_voucher(sre.name),
+					key=lambda x: x.get("serial_no") or x.get("batch_no") or "",
+				)
 			)
 
 		self.assertEqual(sbe_pp_list, sbe_so_list)

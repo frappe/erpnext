@@ -1202,9 +1202,6 @@ class StockReservation:
 				self.set_serial_batch(sre, item.serial_and_batch_bundles)
 
 			sre.submit()
-			item.voucher_type = sre.voucher_type
-			item.voucher_no = sre.voucher_no
-			item.voucher_detail_no = sre.voucher_detail_no
 			is_sre_created = True
 
 		return is_sre_created
@@ -1352,9 +1349,7 @@ class StockReservation:
 			(row.item_code, row.warehouse) for row in reservation_entries
 		)
 		for entry in [
-			entry
-			for entry in items_to_reserve
-			if (entry.item_code, entry.warehouse, entry.voucher_detail_no) in extra_items
+			entry for entry in items_to_reserve if (entry.item_code, entry.warehouse) in extra_items
 		]:
 			available_qty = get_available_qty_to_reserve(entry.item_code, entry.warehouse)
 			if not available_qty:
@@ -1486,10 +1481,8 @@ class StockReservation:
 			.orderby(sabb_entry.idx)
 		)
 
-		if self.items:
-			query = query.where(
-				sre.voucher_detail_no.isin([item.from_voucher_detail_no for item in self.items])
-			)
+		if self.items and (data := [item.from_voucher_detail_no for item in self.items]):
+			query = query.where(sre.voucher_detail_no.isin(data))
 
 		if against_fg_item:
 			query = query.where(
@@ -1506,8 +1499,11 @@ class StockReservation:
 
 	def get_items_to_reserve(self, docnames, from_doctype, to_doctype):
 		field = frappe.scrub(from_doctype)
-		item_code_fieldname = "rm_item_code" if to_doctype == "Subcontracting Order" else "item_code"
-		child_table_suffix = " Supplied Item" if to_doctype == "Subcontracting Order" else " Item"
+		item_code_fieldname, child_table_suffix = (
+			("rm_item_code", " Supplied Item")
+			if to_doctype == "Subcontracting Order"
+			else ("item_code", " Item")
+		)
 
 		doctype = frappe.qb.DocType(to_doctype)
 		child_doctype = frappe.qb.DocType(to_doctype + child_table_suffix)
@@ -1549,8 +1545,8 @@ class StockReservation:
 				child_doctype.reserve_warehouse.as_("source_warehouse"),
 			)
 
-		if self.items:
-			query = query.where(child_doctype.name.isin([item.voucher_detail_no for item in self.items]))
+		if self.items and (data := [item.voucher_detail_no for item in self.items]):
+			query = query.where(child_doctype.name.isin(data))
 
 		data = query.run(as_dict=True)
 		items = []
