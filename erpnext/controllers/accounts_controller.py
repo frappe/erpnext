@@ -3680,8 +3680,15 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item"
 		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
+	def is_allowed_zero_qty():
+		if parent_doctype == "Sales Order":
+			return frappe.db.get_single_value("Selling Settings", "allow_zero_qty_in_sales_order") or False
+		elif parent_doctype == "Purchase Order":
+			return frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_purchase_order") or False
+		return False
+
 	def validate_quantity(child_item, new_data):
-		if not flt(new_data.get("qty")):
+		if not flt(new_data.get("qty")) and not is_allowed_zero_qty():
 			frappe.throw(
 				_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
 					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
@@ -3816,6 +3823,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		rate_precision = child_item.precision("rate") or 2
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2
+
+		prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
+		rate_unchanged = prev_rate == new_rate
+		if not rate_unchanged and not child_item.get("qty") and is_allowed_zero_qty():
+			frappe.throw(_("Rate of '{}' items cannot be changed").format(frappe.bold(_("Unit Price"))))
 
 		# Amount cannot be lesser than billed amount, except for negative amounts
 		row_rate = flt(d.get("rate"), rate_precision)
