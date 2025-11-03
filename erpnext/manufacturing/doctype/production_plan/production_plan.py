@@ -1928,7 +1928,12 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(Sum(child.quantity * child.conversion_factor))
+		.select(
+			Sum(
+				Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity)
+				* child.conversion_factor
+			)
+		)
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
