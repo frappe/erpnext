@@ -6,7 +6,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict_new
 from erpnext.accounts.doctype.account.test_account import create_account, make_company
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_or_create_fiscal_year
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_or_create_fiscal_year, make_test_item
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_customer
 
@@ -69,14 +69,17 @@ class TestPOSRegistry(FrappeTestCase, AccountsTestMixin):
         
     def create_dependencies_record(self, company="_Test Company"):
         """Create all dependent records needed for POS Profile test."""
+        make_test_item("_Test Item")
 
-        # 2. Warehouse
-        if not frappe.db.exists("Warehouse", {"company": company}):
-            frappe.get_doc({
+        # Warehouse
+        self.warehouse = frappe.db.exists("Warehouse", {"company": company})
+        if not self.warehouse:
+            warehouse_doc = frappe.get_doc({
                 "doctype": "Warehouse",
                 "warehouse_name": "_Test Warehouse",
                 "company": company
             }).insert(ignore_permissions=True)
+            warehouse = warehouse_doc.name
 
         parent_cc = frappe.db.get_value("Cost Center", {"company": company, "is_group": 1}, "name")
         if not parent_cc:
@@ -146,7 +149,7 @@ class TestPOSRegistry(FrappeTestCase, AccountsTestMixin):
                 }).insert(ignore_permissions=True)
 
     def test_pos_registry_report_TC_ACC_594(self):
-        pos_profile = make_pos_profile()
+        pos_profile = self.pos_profile
         # Create and submit POS invoice
         self.invoice = create_sales_invoice(
             customer=self.customer,
@@ -154,6 +157,7 @@ class TestPOSRegistry(FrappeTestCase, AccountsTestMixin):
             pos_profile=pos_profile.name,
             is_pos=1,
             do_not_submit=True,
+            warehouse = self.warehouse
         )
 
         self.invoice.cash_bank_account = "Bank - _TC"
@@ -164,7 +168,7 @@ class TestPOSRegistry(FrappeTestCase, AccountsTestMixin):
         filters = frappe._dict({
             "company": self.company,
             'from_date' :'2025-01-01',
-            'to_date' :'2025-10-08',
+            'to_date' :str(frappe.utils.getdate()),
             'group_by' :'POS Profile'
         })
         columns, data = execute(filters)
@@ -196,3 +200,11 @@ class TestPOSRegistry(FrappeTestCase, AccountsTestMixin):
             columns, data = execute(filters)
         
         return
+
+@frappe.whitelist()
+def run_test():
+    obj1= TestPOSRegistry()
+    obj1.setUp()
+    obj1.test_pos_registry_report_TC_ACC_594()
+    return "Test Sucessfull"
+
