@@ -5,7 +5,7 @@ integrations = ["python_anthropic_ai_integrations:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["glibcLocales", "rapidfuzz-cpp", "taskflow"]
+packages = ["glibcLocales", "qrencode", "rapidfuzz-cpp", "taskflow"]
 
 [workflows]
 runButton = "Project"

@@ -17,11 +17,20 @@ from notification_service import notification_service
 from audit_logger import audit_logger
 import migrations
 from routers import bank_connections, compliance, payroll, employees, finance
+import scheduled_jobs
+from contextlib import asynccontextmanager
 
 models.Base.metadata.create_all(bind=engine)
 migrations.run_migrations()
 
-app = FastAPI(title="ERIK ERP API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan - start/stop background jobs"""
+    scheduled_jobs.start_scheduler()
+    yield
+    scheduled_jobs.stop_scheduler()
+
+app = FastAPI(title="ERIK ERP API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

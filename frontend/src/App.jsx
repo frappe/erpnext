@@ -9,6 +9,7 @@ import Accounts from './pages/Accounts';
 import Journals from './pages/Journals';
 import Reports from './pages/Reports';
 import Payroll from './pages/Payroll';
+import Compliance from './pages/Compliance';
 import Leave from './pages/Leave';
 import Products from './pages/Products';
 import Customers from './pages/Customers';
@@ -98,6 +99,7 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="employees" element={<Employees />} />
           <Route path="payroll" element={<Payroll />} />
+          <Route path="compliance" element={<Compliance />} />
           <Route path="leave" element={<Leave />} />
           <Route path="accounts" element={<Accounts />} />
           <Route path="journals" element={<Journals />} />
