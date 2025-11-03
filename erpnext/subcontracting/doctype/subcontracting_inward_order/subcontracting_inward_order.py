@@ -451,7 +451,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			qty = (
 				fg_item.produced_qty
 				if allow_over
-				else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty - fg_item.returned_qty
+				else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty
 			)
 			if qty < 0:
 				continue
