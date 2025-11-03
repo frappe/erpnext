@@ -217,9 +217,9 @@ class Employee(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     created_by = Column(String, ForeignKey("users.id"))
     
-    # Metadata
+    # Additional Data
     notes = Column(Text)
-    metadata = Column(JSON)  # Additional flexible data
+    extra_data = Column(JSON)  # Additional flexible data (renamed from 'metadata' to avoid SQLAlchemy conflict)
     
     # Relationships
     company = relationship("Company", back_populates="employees")
@@ -460,30 +460,6 @@ class LeaveApplication(Base):
     employee = relationship("Employee")
     leave_type = relationship("LeaveType")
 
-class Payslip(Base):
-    __tablename__ = "payslips"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
-    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
-    payslip_number = Column(String, nullable=False, unique=True)
-    period_month = Column(Integer, nullable=False)
-    period_year = Column(Integer, nullable=False)
-    basic_salary = Column(Float, nullable=False)
-    gross_salary = Column(Float, nullable=False)
-    paye_tax = Column(Float, default=0.0)
-    napsa_employee = Column(Float, default=0.0)
-    napsa_employer = Column(Float, default=0.0)
-    nhima_employee = Column(Float, default=0.0)
-    nhima_employer = Column(Float, default=0.0)
-    total_deductions = Column(Float, default=0.0)
-    net_salary = Column(Float, nullable=False)
-    status = Column(String, default="draft")
-    payment_date = Column(Date)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    employee = relationship("Employee")
-
 class MobileMoneyProvider(Base):
     __tablename__ = "mobile_money_providers"
     
@@ -647,24 +623,6 @@ class CashierSession(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     terminal = relationship("POSTerminal")
-
-class StatutoryObligation(Base):
-    __tablename__ = "statutory_obligations"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
-    obligation_type = Column(String, nullable=False)  # PAYE, NAPSA, NHIMA, SDL, VAT, etc.
-    description = Column(Text)
-    frequency = Column(String, nullable=False)  # monthly, quarterly, annually
-    due_day = Column(Integer)  # Day of month when due
-    amount = Column(Float)
-    status = Column(String, default="pending")  # pending, paid, overdue
-    due_date = Column(Date, nullable=False)
-    paid_date = Column(Date)
-    reference_no = Column(String)
-    notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class StatutoryObligationTemplate(Base):
     __tablename__ = "statutory_obligation_templates"
@@ -1392,57 +1350,6 @@ class EmployeeSkill(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     employee = relationship("Employee")
-
-class JobRequisition(Base):
-    __tablename__ = "job_requisitions"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
-    requisition_number = Column(String, nullable=False, unique=True, index=True)
-    job_title = Column(String, nullable=False)
-    department_id = Column(String, ForeignKey("departments.id"), nullable=False)
-    position_type = Column(String, default="permanent")  # permanent, contract, temporary, internship
-    number_of_openings = Column(Integer, default=1)
-    
-    # Job Details
-    job_description = Column(Text)
-    responsibilities = Column(JSON)  # Array of responsibility strings
-    required_qualifications = Column(JSON)  # Array of qualification strings
-    preferred_qualifications = Column(JSON)
-    required_skills = Column(JSON)  # Array of skill strings
-    experience_years_min = Column(Integer)
-    experience_years_max = Column(Integer)
-    
-    # Compensation
-    salary_min = Column(Float)
-    salary_max = Column(Float)
-    salary_currency = Column(String, default="ZMW")
-    benefits = Column(JSON)
-    
-    # Hiring Details
-    requested_by = Column(String, ForeignKey("users.id"))
-    hiring_manager_id = Column(String, ForeignKey("users.id"))
-    target_start_date = Column(Date)
-    posting_date = Column(Date)
-    application_deadline = Column(Date)
-    
-    # Approval Workflow
-    approval_status = Column(String, default="pending")  # pending, approved, rejected, on_hold
-    approved_by = Column(String, ForeignKey("users.id"))
-    approved_at = Column(DateTime)
-    approval_notes = Column(Text)
-    
-    # Status
-    status = Column(String, default="draft")  # draft, open, interviewing, filled, cancelled
-    filled_by_employee_id = Column(String, ForeignKey("employees.id"))
-    filled_at = Column(DateTime)
-    cancelled_reason = Column(Text)
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    created_by = Column(String, ForeignKey("users.id"))
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    department = relationship("Department")
     filled_by_employee = relationship("Employee")
 
 class PerformanceReview(Base):
@@ -1619,39 +1526,6 @@ class SystemSetting(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     updated_by = Column(String, ForeignKey("users.id"))
-
-class TaxSetting(Base):
-    __tablename__ = "tax_settings"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
-    
-    tax_name = Column(String, nullable=False)  # PAYE, VAT, WHT, etc.
-    tax_type = Column(String, nullable=False)  # income_tax, sales_tax, withholding, statutory
-    jurisdiction = Column(String, default="Zambia")
-    
-    # Tax Brackets (JSON array of {min, max, rate, fixed_amount})
-    tax_brackets = Column(JSON)  # [{min: 0, max: 4500, rate: 0, fixed: 0}, {min: 4501, max: 6900, rate: 20, fixed: 0}, ...]
-    
-    # Statutory Contributions (for NAPSA, NHIMA, etc.)
-    employer_rate = Column(Float, default=0.0)  # Employer contribution %
-    employee_rate = Column(Float, default=0.0)  # Employee contribution %
-    max_amount = Column(Float)  # Maximum contribution amount
-    min_amount = Column(Float)  # Minimum contribution amount
-    applies_to = Column(String, default="gross")  # gross, basic, net
-    
-    # Tax Configuration
-    is_active = Column(Boolean, default=True)
-    effective_from = Column(Date)
-    effective_to = Column(Date)
-    
-    # GL Accounts
-    tax_payable_account_id = Column(String, ForeignKey("accounts.id"))
-    tax_expense_account_id = Column(String, ForeignKey("accounts.id"))
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    created_by = Column(String, ForeignKey("users.id"))
 
 class EmailTemplate(Base):
     __tablename__ = "email_templates"
@@ -2606,8 +2480,8 @@ class StatutoryObligation(Base):
     alert_days_before = Column(Integer, default=5)  # Alert 5 days before due date
     last_alert_sent = Column(DateTime)
     
-    # Metadata
-    metadata = Column(JSON)  # Store additional obligation-specific data
+    # Additional Data
+    extra_data = Column(JSON)  # Store additional obligation-specific data (renamed from 'metadata' to avoid SQLAlchemy conflict)
     notes = Column(Text)
     
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -2649,45 +2523,6 @@ class ComplianceChecklist(Base):
     # Relationships
     obligation = relationship("StatutoryObligation")
     completer = relationship("User", foreign_keys=[completed_by])
-
-class Notification(Base):
-    """Notification system for alerts"""
-    __tablename__ = "notifications"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
-    user_id = Column(String, ForeignKey("users.id"), index=True)
-    
-    # Notification Details
-    notification_type = Column(String, nullable=False, index=True)  # statutory_alert, payroll_reminder, leave_approval, etc.
-    title = Column(String, nullable=False)
-    message = Column(Text, nullable=False)
-    
-    # Reference
-    reference_type = Column(String)  # obligation, payrun, leave, loan, etc.
-    reference_id = Column(String)
-    
-    # Status
-    is_read = Column(Boolean, default=False, index=True)
-    read_at = Column(DateTime)
-    
-    # Priority
-    priority = Column(String, default="normal")  # low, normal, high, urgent
-    
-    # Delivery
-    delivery_channels = Column(JSON)  # ["in_app", "email", "sms"]
-    email_sent = Column(Boolean, default=False)
-    sms_sent = Column(Boolean, default=False)
-    
-    # Action
-    action_url = Column(String)  # URL to navigate to when clicked
-    action_taken = Column(Boolean, default=False)
-    
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    expires_at = Column(DateTime)  # Auto-delete old notifications
-    
-    # Relationships
-    user = relationship("User")
 
 # ============================================================================
 # PHASE 3: ENHANCED HR/PAYROLL MODELS
