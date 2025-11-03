@@ -4110,6 +4110,284 @@ def acknowledge_performance_review(
     db.commit()
     return {"message": "Performance review acknowledged"}
 
+# Banking API Integration Endpoints
+from banking_service import BankingService
+
+banking_service = BankingService()
+
+@app.post("/api/bank-connections")
+def create_bank_connection(
+    connection: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new bank connection"""
+    # Validate bank code
+    supported_banks = ['zanaco', 'absa', 'fnb', 'stanbic']
+    if connection['bank_code'] not in supported_banks:
+        raise HTTPException(status_code=400, detail=f"Unsupported bank. Supported: {', '.join(supported_banks)}")
+    
+    # Test connection before saving
+    credentials = {
+        "username": connection.get('api_username'),
+        "api_key": connection.get('api_key_encrypted'),
+        "endpoint": connection.get('api_endpoint')
+    }
+    
+    test_result = banking_service.test_connection(connection['bank_code'], credentials)
+    if not test_result['success']:
+        raise HTTPException(status_code=400, detail=f"Connection test failed: {test_result.get('error')}")
+    
+    new_connection = models.BankConnection(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        connection_status="connected",
+        **connection
+    )
+    db.add(new_connection)
+    db.commit()
+    db.refresh(new_connection)
+    return new_connection
+
+@app.get("/api/bank-connections")
+def get_bank_connections(
+    is_active: bool = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all bank connections"""
+    query = db.query(models.BankConnection).filter(
+        models.BankConnection.company_id == current_user.company_id
+    )
+    
+    if is_active is not None:
+        query = query.filter(models.BankConnection.is_active == is_active)
+    
+    connections = query.order_by(models.BankConnection.created_at.desc()).all()
+    return connections
+
+@app.get("/api/bank-connections/{connection_id}")
+def get_bank_connection(
+    connection_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get a specific bank connection"""
+    connection = db.query(models.BankConnection).filter(
+        models.BankConnection.id == connection_id,
+        models.BankConnection.company_id == current_user.company_id
+    ).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Bank connection not found")
+    return connection
+
+@app.post("/api/bank-connections/{connection_id}/sync")
+def sync_bank_transactions(
+    connection_id: str,
+    days_back: int = 7,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Sync transactions from bank API"""
+    connection = db.query(models.BankConnection).filter(
+        models.BankConnection.id == connection_id,
+        models.BankConnection.company_id == current_user.company_id
+    ).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Bank connection not found")
+    
+    # Create sync history record
+    from_date = datetime.now() - timedelta(days=days_back)
+    to_date = datetime.now()
+    
+    sync_history = models.BankSyncHistory(
+        company_id=current_user.company_id,
+        bank_connection_id=connection_id,
+        sync_type="manual",
+        from_date=from_date.date(),
+        to_date=to_date.date(),
+        triggered_by=current_user.id
+    )
+    db.add(sync_history)
+    db.flush()
+    
+    try:
+        # Fetch transactions from bank
+        credentials = {
+            "username": connection.api_username,
+            "api_key": connection.api_key_encrypted,
+            "endpoint": connection.api_endpoint
+        }
+        
+        result = banking_service.fetch_transactions(
+            connection.bank_code,
+            credentials,
+            connection.account_number,
+            from_date,
+            to_date
+        )
+        
+        if not result['success']:
+            sync_history.status = "failed"
+            sync_history.error_message = result.get('error')
+            sync_history.sync_completed_at = datetime.utcnow()
+            db.commit()
+            raise HTTPException(status_code=500, detail=result.get('error'))
+        
+        transactions = result['transactions']
+        
+        # Save transactions
+        new_count = 0
+        updated_count = 0
+        failed_count = 0
+        
+        for trans_data in transactions:
+            try:
+                # Check if transaction already exists (composite unique: connection + transaction ID)
+                existing = db.query(models.BankTransaction).filter(
+                    models.BankTransaction.bank_connection_id == connection_id,
+                    models.BankTransaction.bank_transaction_id == trans_data['bank_transaction_id']
+                ).first()
+                
+                if existing:
+                    # Update existing transaction
+                    for key, value in trans_data.items():
+                        if hasattr(existing, key):
+                            setattr(existing, key, value)
+                    updated_count += 1
+                else:
+                    # Create new transaction
+                    new_trans = models.BankTransaction(
+                        company_id=current_user.company_id,
+                        bank_connection_id=connection_id,
+                        import_batch_id=sync_history.id,
+                        **trans_data
+                    )
+                    db.add(new_trans)
+                    new_count += 1
+            except Exception as e:
+                failed_count += 1
+                continue
+        
+        # Update sync history
+        sync_history.status = "completed" if failed_count == 0 else "partial"
+        sync_history.transactions_fetched = len(transactions)
+        sync_history.transactions_new = new_count
+        sync_history.transactions_updated = updated_count
+        sync_history.transactions_failed = failed_count
+        sync_history.sync_completed_at = datetime.utcnow()
+        
+        # Update connection
+        connection.last_sync_at = datetime.utcnow()
+        connection.last_sync_status = sync_history.status
+        
+        db.commit()
+        
+        return {
+            "message": "Sync completed",
+            "sync_id": sync_history.id,
+            "transactions_fetched": len(transactions),
+            "transactions_new": new_count,
+            "transactions_updated": updated_count,
+            "transactions_failed": failed_count,
+            "status": sync_history.status
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        sync_history.status = "failed"
+        sync_history.error_message = str(e)
+        sync_history.sync_completed_at = datetime.utcnow()
+        db.commit()
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
+@app.get("/api/bank-transactions")
+def get_bank_transactions(
+    connection_id: str = None,
+    is_reconciled: bool = None,
+    from_date: str = None,
+    to_date: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get bank transactions"""
+    query = db.query(models.BankTransaction).filter(
+        models.BankTransaction.company_id == current_user.company_id
+    )
+    
+    if connection_id:
+        query = query.filter(models.BankTransaction.bank_connection_id == connection_id)
+    if is_reconciled is not None:
+        query = query.filter(models.BankTransaction.is_reconciled == is_reconciled)
+    if from_date:
+        query = query.filter(models.BankTransaction.transaction_date >= datetime.fromisoformat(from_date).date())
+    if to_date:
+        query = query.filter(models.BankTransaction.transaction_date <= datetime.fromisoformat(to_date).date())
+    
+    transactions = query.order_by(models.BankTransaction.transaction_date.desc()).limit(500).all()
+    return transactions
+
+@app.get("/api/bank-connections/{connection_id}/balance")
+def get_bank_balance(
+    connection_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current bank account balance"""
+    connection = db.query(models.BankConnection).filter(
+        models.BankConnection.id == connection_id,
+        models.BankConnection.company_id == current_user.company_id
+    ).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Bank connection not found")
+    
+    credentials = {
+        "username": connection.api_username,
+        "api_key": connection.api_key_encrypted,
+        "endpoint": connection.api_endpoint
+    }
+    
+    result = banking_service.get_account_balance(
+        connection.bank_code,
+        credentials,
+        connection.account_number
+    )
+    
+    if not result['success']:
+        raise HTTPException(status_code=500, detail=result.get('error'))
+    
+    return result['balance']
+
+@app.get("/api/bank-sync-history")
+def get_sync_history(
+    connection_id: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get bank sync history"""
+    query = db.query(models.BankSyncHistory).filter(
+        models.BankSyncHistory.company_id == current_user.company_id
+    )
+    
+    if connection_id:
+        query = query.filter(models.BankSyncHistory.bank_connection_id == connection_id)
+    
+    history = query.order_by(models.BankSyncHistory.sync_started_at.desc()).limit(100).all()
+    return history
+
+@app.get("/api/supported-banks")
+def get_supported_banks():
+    """Get list of supported banks"""
+    return {
+        "banks": [
+            {"code": "zanaco", "name": "ZANACO", "full_name": "Zambia National Commercial Bank"},
+            {"code": "absa", "name": "ABSA", "full_name": "ABSA Bank Zambia"},
+            {"code": "fnb", "name": "FNB", "full_name": "First National Bank Zambia"},
+            {"code": "stanbic", "name": "Stanbic", "full_name": "Stanbic Bank Zambia"}
+        ]
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
