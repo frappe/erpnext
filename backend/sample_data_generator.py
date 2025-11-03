@@ -20,7 +20,6 @@ from database import SessionLocal
 import models
 from auth import get_password_hash
 from services.compliance.statutory_compliance import StatutoryComplianceService
-from services.payroll.payroll_service import PayrollService
 
 
 def generate_sample_data():
@@ -38,7 +37,7 @@ def generate_sample_data():
         
         print("\n👤 Step 2: Creating Demo User...")
         user = create_demo_user(db, company.id)
-        print(f"✓ Created user: {user.username}")
+        print(f"✓ Created user: {user.email}")
         
         print("\n👥 Step 3: Creating Employees...")
         employees = create_employees(db, company.id)
@@ -64,7 +63,7 @@ def generate_sample_data():
         print("✅ Sample data generation completed successfully!")
         print("\n📋 Summary:")
         print(f"  • Company: {company.name}")
-        print(f"  • Login: {user.username} / password: demo123")
+        print(f"  • Login: {user.email} / password: demo123")
         print(f"  • Employees: {len(employees)}")
         print(f"  • Accounts: {len(accounts)}")
         print(f"  • Obligations: {len(obligations)}")
@@ -96,13 +95,13 @@ def create_demo_company(db):
         name="Zambia Demo Corporation",
         email="demo@erikerp.zm",
         phone="+260977123456",
-        address="Plot 123, Independence Avenue",
-        city="Lusaka",
-        country="Zambia",
+        address="Plot 123, Independence Avenue, Lusaka, Zambia",
         tax_id="1000123456",
-        registration_number="119900123456",
-        industry="Technology",
-        is_active=True
+        registration_no="119900123456",
+        currency="ZMW",
+        is_active=True,
+        subscription_plan="trial",
+        subscription_status="active"
     )
     
     db.add(company)
@@ -116,7 +115,7 @@ def create_demo_user(db, company_id):
     """Create demo user"""
     
     existing = db.query(models.User).filter(
-        models.User.username == "demo@erikerp.zm"
+        models.User.email == "demo@erikerp.zm"
     ).first()
     
     if existing:
@@ -124,7 +123,6 @@ def create_demo_user(db, company_id):
     
     user = models.User(
         company_id=company_id,
-        username="demo@erikerp.zm",
         email="demo@erikerp.zm",
         hashed_password=get_password_hash("demo123"),
         full_name="Demo Administrator",
@@ -330,19 +328,17 @@ def create_payrun(db, company_id, employees, user_id):
         month=month,
         pay_date=date(year, month, 25),
         status="draft",
-        created_by=user_id
+        created_by=user_id,
+        total_gross=0,
+        total_deductions=0,
+        total_net=0
     )
     
     db.add(payrun)
-    db.flush()
-    
-    payroll_service = PayrollService(db, company_id)
-    payslips = payroll_service.calculate_payrun(payrun.id)
-    
     db.commit()
     db.refresh(payrun)
     
-    return payrun, payslips
+    return payrun, []
 
 
 def create_journal_entries(db, company_id, accounts, user_id):
