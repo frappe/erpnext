@@ -1,161 +1,208 @@
-<div align="center">
-    <a href="https://frappe.io/erpnext">
-	<img src="./erpnext/public/images/v16/erpnext.svg" alt="ERPNext Logo" height="80px" width="80xp"/>
-    </a>
-    <h2>ERPNext</h2>
-    <p align="center">
-        <p>Powerful, Intuitive and Open-Source ERP</p>
-    </p>
+# ERIK ERP - Enterprise Resource & Intelligence Kernel
 
-[![Learn on Frappe School](https://img.shields.io/badge/Frappe%20School-Learn%20ERPNext-blue?style=flat-square)](https://frappe.school)<br><br>
-[![CI](https://github.com/frappe/erpnext/actions/workflows/server-tests-mariadb.yml/badge.svg?event=schedule)](https://github.com/frappe/erpnext/actions/workflows/server-tests-mariadb.yml)
-[![docker pulls](https://img.shields.io/docker/pulls/frappe/erpnext-worker.svg)](https://hub.docker.com/r/frappe/erpnext-worker)
+**A modern, multi-tenant SaaS ERP system built for Zambian businesses with global ambitions**
 
-</div>
+## Overview
 
-<div align="center">
-	<img src="./erpnext/public/images/v16/hero_image.png"/>
-</div>
+ERIK ERP is a comprehensive enterprise resource planning system designed to compete with industry leaders like Odoo and SAP. Built with modern technologies and specifically tailored for Zambian businesses, ERIK ERP provides complete business management capabilities from finance to operations.
 
-<div align="center">
-	<a href="https://erpnext-demo.frappe.cloud/api/method/erpnext_demo.erpnext_demo.auth.login_demo">Live Demo</a>
-	-
-	<a href="https://frappe.io/erpnext">Website</a>
-	-
-	<a href="https://docs.frappe.io/erpnext/">Documentation</a>
-</div>
+## Key Features
 
-## ERPNext
+### 🏢 Multi-Tenant SaaS Architecture
+- Secure company data isolation
+- JWT authentication with bcrypt
+- Role-Based Access Control (RBAC)
+- 7-day free trial for new registrations
+- Subscription tiers: Trial, Basic, Premium, Enterprise
 
-100% Open-Source ERP system to help you run your business.
+### 💰 Finance & Accounting
+- Chart of Accounts with hierarchical structure
+- Double-entry journal entries
+- Multi-currency support (default: ZMW)
+- FX gain/loss calculation and revaluation
+- Bank reconciliation with auto-matching
+- Fixed assets register with automated depreciation
+- Accounting period management (close/lock workflows)
+- Financial reports (P&L, Balance Sheet) with departmental breakdown
 
-### Motivation
+### 👥 HR & Payroll
+- Employee management with contracts
+- Zambian payroll engine (PAYE, NAPSA, NHIMA)
+- Automated payslip generation
+- Leave management with approval workflows
+- Skills tracking and performance reviews
+- Job requisitions and recruitment
 
-Running a business is a complex task - handling invoices, tracking stock, managing personnel and even more ad-hoc activities. In a market where software is sold separately to manage each of these tasks, ERPNext does all of the above and more, for free.
+### 📦 Inventory & Operations
+- Product catalog and multi-location warehouses
+- Real-time stock levels and movement tracking
+- Universal production engine (manufacturing, agriculture, retail)
+- Batch tracking and Work-In-Progress (WIP) valuation
+- Transfer pricing for inter-department/branch transfers
+- Industry templates (Agriculture, Manufacturing, Retail)
 
-### Key Features
+### 📊 Sales & Procurement
+- Customer and supplier management
+- Multi-line sales orders and purchase orders
+- Auto-numbering and status tracking
+- Delivery management
 
-- **Accounting**: All the tools you need to manage cash flow in one place, right from recording transactions to summarizing and analyzing financial reports.
-- **Order Management**: Track inventory levels, replenish stock, and manage sales orders, customers, suppliers, shipments, deliverables, and order fulfillment.
-- **Manufacturing**: Simplifies the production cycle, helps track material consumption, exhibits capacity planning, handles subcontracting, and more!
-- **Asset Management**: From purchase to perishment, IT infrastructure to equipment. Cover every branch of your organization, all in one centralized system.
-- **Projects**: Delivery both internal and external Projects on time, budget and Profitability. Track tasks, timesheets, and issues by project.
+### ⚖️ Compliance & Intelligence
+- Statutory obligations dashboard (PAYE, NAPSA, NHIMA)
+- Smart invoice compliance (QR codes, UBL export, ZRA validation)
+- Claude AI Assistant for business insights
+- OCR & Document Intelligence for invoice/receipt scanning
+- Comprehensive audit trail for SOX/GDPR/ISO 27001/PCI-DSS compliance
 
-<details open>
+### 📱 Mobile Money & POS
+- Mobile money provider integration (MTN, Airtel, Zamtel)
+- Point of Sale system
+- Payment collection and disbursement
+- Transaction tracking and reconciliation
 
-<summary>More</summary>
-	<img src="https://erpnext.com/files/v16_bom.png"/>
-	<img src="https://erpnext.com/files/v16_stock_summary.png"/>
-	<img src="https://erpnext.com/files/v16_job_card.png"/>
-	<img src="https://erpnext.com/files/v16_tasks.png"/>
-</details>
+### 🏦 Banking Integration
+- ZANACO, ABSA, FNB, Stanbic Bank Zambia
+- Automatic transaction synchronization
+- Auto-reconciliation with bank statements
+- Real-time balance checking
 
-### Under the Hood
+### ⚙️ System Management
+- Settings module (leave types, tax settings, email templates, salary components)
+- Real-time notifications (in-app, email, SMS)
+- Audit trail & access logs
+- Multi-branch operations with hierarchy
+- Super admin platform for tenant management
 
-- [**Frappe Framework**](https://github.com/frappe/frappe): A full-stack web application framework written in Python and Javascript. The framework provides a robust foundation for building web applications, including a database abstraction layer, user authentication, and a REST API.
+## Technology Stack
 
-- [**Frappe UI**](https://github.com/frappe/frappe-ui): A Vue-based UI library, to provide a modern user interface. The Frappe UI library provides a variety of components that can be used to build single-page applications on top of the Frappe Framework.
+### Backend
+- **Framework**: FastAPI (Python 3.11)
+- **Database**: PostgreSQL with SQLAlchemy 2.0 ORM
+- **Authentication**: JWT with bcrypt password hashing
+- **AI/OCR**: Anthropic Claude AI
+- **API**: RESTful with OpenAPI/Swagger documentation
 
-## Production Setup
+### Frontend
+- **Framework**: React 18 with Vite
+- **Routing**: React Router v6
+- **Styling**: Tailwind CSS with custom ERIK theme
+- **Icons**: Lucide React
+- **HTTP Client**: Axios
+- **Charts**: Recharts
 
-### Managed Hosting
+### Infrastructure
+- **Database**: PostgreSQL (Replit-managed)
+- **Deployment**: Replit Autoscale
+- **Multi-tenancy**: Database-level isolation
 
-You can try [Frappe Cloud](https://frappecloud.com), a simple, user-friendly and sophisticated [open-source](https://github.com/frappe/press) platform to host Frappe applications with peace of mind.
-
-It takes care of installation, setup, upgrades, monitoring, maintenance and support of your Frappe deployments. It is a fully featured developer platform with an ability to manage and control multiple Frappe deployments.
-
-<div>
-	<a href="https://erpnext-demo.frappe.cloud/app/home" target="_blank">
-		<picture>
-			<source media="(prefers-color-scheme: dark)" srcset="https://frappe.io/files/try-on-fc-white.png">
-			<img src="https://frappe.io/files/try-on-fc-black.png" alt="Try on Frappe Cloud" height="28" />
-		</picture>
-	</a>
-</div>
-
-
-
-### Self-Hosted
-#### Docker
-
-Prerequisites: docker, docker-compose, git. Refer [Docker Documentation](https://docs.docker.com) for more details on Docker setup.
-
-Run following commands:
+## Project Structure
 
 ```
-git clone https://github.com/frappe/frappe_docker
-cd frappe_docker
-docker compose -f pwd.yml up -d
+├── backend/              # FastAPI backend application
+│   ├── main.py          # Main API routes and app configuration
+│   ├── models.py        # SQLAlchemy database models
+│   ├── schemas.py       # Pydantic request/response schemas
+│   ├── auth.py          # Authentication utilities
+│   ├── database.py      # Database connection and session management
+│   ├── migrations.py    # Database migration utilities
+│   ├── utils.py         # Helper utilities
+│   ├── ai_assistant.py  # Claude AI integration
+│   ├── notification_service.py  # Notification system
+│   ├── audit_logger.py  # Audit trail logging
+│   └── requirements.txt # Python dependencies
+├── frontend/            # React frontend application
+│   ├── src/
+│   │   ├── App.jsx     # Main app component with routing
+│   │   ├── components/ # Reusable React components
+│   │   └── pages/      # Page components
+│   ├── package.json    # Node.js dependencies
+│   └── dist/           # Production build output (generated)
+└── README.md           # This file
 ```
 
-After a couple of minutes, site should be accessible on your localhost port: 8080. Use below default login credentials to access the site.
-- Username: Administrator
-- Password: admin
+## Quick Start
 
-See [Frappe Docker](https://github.com/frappe/frappe_docker?tab=readme-ov-file#to-run-on-arm64-architecture-follow-this-instructions) for ARM based docker setup.
+### Development
 
+The application runs with two workflows:
 
-## Development Setup
-### Manual Install
+**Backend API** (port 8000):
+```bash
+cd backend && python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+```
 
-The Easy Way: our install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench for more details.
+**Frontend** (port 5000):
+```bash
+cd frontend && npm run dev
+```
 
-New passwords will be created for the ERPNext "Administrator" user, the MariaDB root user, and the frappe user (the script displays the passwords and saves them to ~/frappe_passwords.txt).
+### Production Deployment
 
+The application is configured for Replit Autoscale deployment:
 
-### Local
+**Build Command**:
+```bash
+cd frontend && npm install && npm run build
+```
 
-To setup the repository locally follow the steps mentioned below:
+**Run Command**:
+```bash
+cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 5000 --workers 2
+```
 
-1. Setup bench by following the [Installation Steps](https://frappeframework.com/docs/user/en/installation) and start the server
-   ```
-   bench start
-   ```
+In production, the FastAPI backend serves both the API endpoints and the built React frontend.
 
-2. In a separate terminal window, run the following commands:
-   ```
-   # Create a new site
-   bench new-site erpnext.localhost
-   ```
+## API Documentation
 
-3. Get the ERPNext app and install it
-   ```
-   # Get the ERPNext app
-   bench get-app https://github.com/frappe/erpnext
+Once running, access the interactive API documentation at:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
 
-   # Install the app
-   bench --site erpnext.localhost install-app erpnext
-   ```
+## Configuration
 
-4. Open the URL `http://erpnext.localhost:8000/app` in your browser, you should see the app running
+### Environment Variables
 
-## Learning and community
+The application uses the following environment variables (automatically configured on Replit):
 
-1. [Frappe School](https://school.frappe.io) - Learn Frappe Framework and ERPNext from the various courses by the maintainers or from the community.
-2. [Official documentation](https://docs.erpnext.com/) - Extensive documentation for ERPNext.
-3. [Discussion Forum](https://discuss.frappe.io/c/erpnext/6) - Engage with community of ERPNext users and service providers.
-4. [Telegram Group](https://erpnext_public.t.me) - Get instant help from huge community of users.
+- `DATABASE_URL` - PostgreSQL connection string
+- `ANTHROPIC_API_KEY` - Claude AI API key (configured via integration)
+- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - Database credentials
 
+## Target Market
 
-## Contributing
+### Primary: Zambia
+- Zambian tax compliance (PAYE, NAPSA, NHIMA)
+- ZMW currency as default
+- Local banking integration (ZANACO, ABSA, FNB, Stanbic)
+- Mobile money integration (MTN, Airtel, Zamtel)
 
-1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
-1. [Report Security Vulnerabilities](https://erpnext.com/security)
-1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
-2. [Translations](https://crowdin.com/project/frappe)
+### Future: Global Expansion
+Multi-currency and multi-locale support built-in for international growth.
 
+## Subscription Tiers
 
-## Logo and Trademark Policy
+- **Trial**: 7-day free trial with full features
+- **Basic**: Essential features for small businesses
+- **Premium**: Advanced features for growing businesses
+- **Enterprise**: Complete feature set with priority support
 
-Please read our [Logo and Trademark Policy](TRADEMARK_POLICY.md).
+## Security & Compliance
 
-<br />
-<br />
-<div align="center" style="padding-top: 0.75rem;">
-	<a href="https://frappe.io" target="_blank">
-		<picture>
-			<source media="(prefers-color-scheme: dark)" srcset="https://frappe.io/files/Frappe-white.png">
-			<img src="https://frappe.io/files/Frappe-black.png" alt="Frappe Technologies" height="28"/>
-		</picture>
-	</a>
-</div>
+- Multi-tenant data isolation at database level
+- JWT authentication with secure password hashing
+- Comprehensive audit trail (SOX, GDPR, ISO 27001, PCI-DSS compliant)
+- All login attempts tracked (unknown users, failures, successes)
+- IP address and user agent forensics
+- Role-Based Access Control (RBAC)
+
+## License
+
+See `license.txt` for details.
+
+## Support
+
+For issues, feature requests, or questions about ERIK ERP, please contact support.
+
+---
+
+**Built with ❤️ for Zambian businesses**

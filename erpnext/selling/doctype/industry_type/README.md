@@ -1,1 +1,0 @@
-Type of industry for a Customer.

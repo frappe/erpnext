@@ -1,1 +1,0 @@
-Detail of transaction for parent Bank Clearance.

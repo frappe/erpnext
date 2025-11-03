@@ -1,3 +1,0 @@
-**/setup/setup_wizard/data/uom_data.json,erpnext.gettext.extractors.uom_data.extract
-**/setup/doctype/incoterm/incoterms.csv,erpnext.gettext.extractors.incoterms.extract
-**/setup/setup_wizard/data/*.txt,erpnext.gettext.extractors.lines_from_txt_file.extract

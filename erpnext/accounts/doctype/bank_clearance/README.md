@@ -1,1 +1,0 @@
-Tool to update realization dates for banking transactions.

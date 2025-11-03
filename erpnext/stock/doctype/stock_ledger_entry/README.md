@@ -1,1 +1,0 @@
-Internal / consolidated record of stock movement. All types of stock movements are recorded on this table and is the key table for inventory reports.

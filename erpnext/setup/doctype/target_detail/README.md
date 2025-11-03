@@ -1,1 +1,0 @@
-Target set for Sales Person, Territory or Sales Partner.

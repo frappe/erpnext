@@ -1,1 +1,0 @@
-Stock movement from one warehouse to another (or from, or to a warehouse).
