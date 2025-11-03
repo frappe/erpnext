@@ -1699,3 +1699,141 @@ class Notification(Base):
     
     user = relationship("User", foreign_keys=[user_id])
     creator = relationship("User", foreign_keys=[created_by])
+
+class AutoPostingRule(Base):
+    __tablename__ = "auto_posting_rules"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    rule_name = Column(String, nullable=False)
+    rule_code = Column(String, nullable=False, index=True, unique=True)
+    description = Column(Text)
+    
+    # Rule Trigger Conditions
+    source_type = Column(String, nullable=False)  # bank_transaction, mobile_money, invoice_payment, etc.
+    transaction_type = Column(String)  # debit, credit, collection, disbursement
+    
+    # Pattern Matching (JSON) - flexible matching criteria
+    match_criteria = Column(JSON)  # {description_contains: "SALARY", counterparty_contains: "ABC LTD", amount_min: 1000}
+    
+    # Posting Actions (JSON array)
+    posting_actions = Column(JSON)  # [{account_id: "xxx", side: "debit", amount_type: "full"}, {account_id: "yyy", side: "credit", amount_type: "full"}]
+    
+    # Additional Options
+    auto_apply = Column(Boolean, default=False)  # Auto-apply without review
+    require_approval = Column(Boolean, default=True)
+    priority = Column(Integer, default=100)  # Higher priority rules run first
+    
+    # Status
+    is_active = Column(Boolean, default=True)
+    
+    # Usage Stats
+    times_matched = Column(Integer, default=0)
+    times_applied = Column(Integer, default=0)
+    last_matched_at = Column(DateTime)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ReconciliationRule(Base):
+    __tablename__ = "reconciliation_rules"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    rule_name = Column(String, nullable=False)
+    rule_type = Column(String, nullable=False)  # exact_match, fuzzy_match, date_amount_match, ml_match
+    description = Column(Text)
+    
+    # Matching Criteria
+    match_on_amount = Column(Boolean, default=True)
+    amount_tolerance = Column(Float, default=0.01)  # Allow 1 cent variance
+    match_on_date = Column(Boolean, default=True)
+    date_tolerance_days = Column(Integer, default=3)  # Allow 3 days variance
+    match_on_reference = Column(Boolean, default=False)
+    match_on_description = Column(Boolean, default=False)
+    description_similarity_threshold = Column(Float, default=0.8)  # 80% similarity
+    
+    # ML/AI Settings
+    use_ml_matching = Column(Boolean, default=False)
+    ml_confidence_threshold = Column(Float, default=0.85)  # 85% confidence required
+    learn_from_manual_matches = Column(Boolean, default=True)
+    
+    # Auto-match Settings
+    auto_match_enabled = Column(Boolean, default=False)
+    auto_match_max_amount = Column(Float)  # Only auto-match below this amount
+    require_review = Column(Boolean, default=True)
+    
+    # Priority
+    priority = Column(Integer, default=100)
+    
+    # Status
+    is_active = Column(Boolean, default=True)
+    
+    # Usage Stats
+    matches_suggested = Column(Integer, default=0)
+    matches_accepted = Column(Integer, default=0)
+    matches_rejected = Column(Integer, default=0)
+    accuracy_rate = Column(Float)  # accepted / suggested
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class PaymentTransaction(Base):
+    __tablename__ = "payment_transactions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    payment_number = Column(String, nullable=False, unique=True, index=True)
+    payment_date = Column(Date, nullable=False)
+    payment_type = Column(String, nullable=False)  # customer_receipt, supplier_payment, expense_payment
+    payment_method = Column(String, nullable=False)  # cash, bank_transfer, mobile_money, cheque, card
+    
+    # Amounts
+    amount = Column(Float, nullable=False)
+    currency = Column(String, default="ZMW")
+    exchange_rate = Column(Float, default=1.0)
+    amount_base = Column(Float)  # Amount in base currency
+    
+    # Related Entities
+    customer_id = Column(String, ForeignKey("customers.id"))
+    supplier_id = Column(String, ForeignKey("suppliers.id"))
+    
+    # Payment Source/Destination
+    bank_account_id = Column(String, ForeignKey("bank_accounts.id"))
+    mobile_money_provider_id = Column(String, ForeignKey("mobile_money_providers.id"))
+    cash_account_id = Column(String, ForeignKey("accounts.id"))
+    
+    # Linked Transactions
+    bank_transaction_id = Column(String, ForeignKey("bank_transactions.id"))
+    mobile_money_transaction_id = Column(String, ForeignKey("mobile_money_transactions.id"))
+    journal_entry_id = Column(String, ForeignKey("journal_entries.id"))
+    
+    # Additional Details
+    reference_number = Column(String)
+    description = Column(Text)
+    notes = Column(Text)
+    
+    # Status
+    status = Column(String, default="draft")  # draft, submitted, approved, posted, cancelled
+    posted_at = Column(DateTime)
+    
+    # Audit
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    approved_at = Column(DateTime)
+    approved_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    customer = relationship("Customer")
+    supplier = relationship("Supplier")
+    bank_account = relationship("BankAccount")
+    mobile_money_provider = relationship("MobileMoneyProvider")
+    cash_account = relationship("Account", foreign_keys=[cash_account_id])
+    bank_transaction = relationship("BankTransaction")
+    mobile_money_transaction = relationship("MobileMoneyTransaction")
+    journal_entry = relationship("JournalEntry")
