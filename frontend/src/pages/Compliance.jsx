@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, AlertTriangle, CheckCircle, Clock, TrendingUp, Bell } from 'lucide-react';
+import { Calendar, AlertTriangle, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = 'http://127.0.0.1:8000';
@@ -7,8 +7,6 @@ const API_URL = 'http://127.0.0.1:8000';
 export default function Compliance() {
   const [obligations, setObligations] = useState([]);
   const [dashboard, setDashboard] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -23,20 +21,16 @@ export default function Compliance() {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [dashRes, obligRes, notifRes, unreadRes] = await Promise.all([
+      const [dashRes, obligRes] = await Promise.all([
         axios.get(`${API_URL}/api/compliance/dashboard`, { headers }),
         axios.get(`${API_URL}/api/compliance/obligations`, {
           headers,
           params: filter !== 'all' ? { status: filter } : {}
-        }),
-        axios.get(`${API_URL}/api/compliance/notifications?limit=5`, { headers }),
-        axios.get(`${API_URL}/api/compliance/notifications/unread-count`, { headers })
+        })
       ]);
 
       setDashboard(dashRes.data);
       setObligations(obligRes.data.obligations || []);
-      setNotifications(notifRes.data.notifications || []);
-      setUnreadCount(unreadRes.data.unread_count || 0);
       setLoading(false);
     } catch (error) {
       console.error('Error loading compliance data:', error);
@@ -216,35 +210,6 @@ export default function Compliance() {
           </div>
         )}
 
-        {/* Recent Notifications */}
-        {notifications.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Recent Notifications ({unreadCount} unread)</h2>
-              <Bell className="w-5 h-5 text-gray-600" />
-            </div>
-            <div className="space-y-3">
-              {notifications.map((notif) => (
-                <div
-                  key={notif.id}
-                  className={`p-3 rounded-lg border ${notif.is_read ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'}`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <p className={`font-medium ${notif.is_read ? 'text-gray-900' : 'text-blue-900'}`}>
-                        {notif.title}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">{notif.message}</p>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(notif.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Filters */}
         <div className="flex gap-2 mb-6">

@@ -43,10 +43,22 @@ function Payroll() {
 
   const createPayrun = async () => {
     try {
+      const year = newPayrun.year;
+      const month = newPayrun.month;
+      
+      const monthZeroBased = month - 1;
+      const periodStart = new Date(year, monthZeroBased, 1);
+      const periodEnd = new Date(year, monthZeroBased + 1, 0);
+      
       const token = localStorage.getItem('token');
       await axios.post(
         `${API_URL}/api/payroll/payruns`,
-        newPayrun,
+        {
+          period_start: periodStart.toISOString().split('T')[0],
+          period_end: periodEnd.toISOString().split('T')[0],
+          payment_date: newPayrun.pay_date,
+          payrun_name: `Payroll ${month}/${year}`
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
