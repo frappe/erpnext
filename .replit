@@ -5,7 +5,7 @@ integrations = ["python_anthropic_ai_integrations:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["cargo", "glibcLocales", "libiconv", "libxcrypt", "openssl", "pkg-config", "rapidfuzz-cpp", "rustc", "taskflow"]
+packages = ["glibcLocales", "rapidfuzz-cpp", "taskflow"]
 
 [workflows]
 runButton = "Project"
@@ -59,6 +59,10 @@ exposeLocalhost = true
 [[ports]]
 localPort = 34711
 externalPort = 80
+
+[[ports]]
+localPort = 37795
+externalPort = 3001
 
 [[ports]]
 localPort = 38679

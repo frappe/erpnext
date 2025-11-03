@@ -1837,3 +1837,606 @@ class PaymentTransaction(Base):
     bank_transaction = relationship("BankTransaction")
     mobile_money_transaction = relationship("MobileMoneyTransaction")
     journal_entry = relationship("JournalEntry")
+
+# ============================================================================
+# PHASE 2: MANUFACTURING ENGINE
+# ============================================================================
+
+class BillOfMaterials(Base):
+    """Bill of Materials - defines components needed to manufacture a product"""
+    __tablename__ = "bill_of_materials"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    bom_code = Column(String, nullable=False, unique=True, index=True)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    version = Column(Integer, default=1)
+    quantity_produced = Column(Float, default=1.0)  # Output quantity
+    unit_of_measure = Column(String, default="Unit")
+    
+    # BOM Type
+    bom_type = Column(String, default="manufacturing")  # manufacturing, engineering, assembly
+    is_active = Column(Boolean, default=True)
+    is_default = Column(Boolean, default=False)
+    
+    # Routing
+    routing_id = Column(String, ForeignKey("routings.id"))
+    
+    # Costing
+    total_material_cost = Column(Float, default=0.0)
+    total_labor_cost = Column(Float, default=0.0)
+    total_overhead_cost = Column(Float, default=0.0)
+    total_cost = Column(Float, default=0.0)
+    
+    # Metadata
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    product = relationship("Product")
+    routing = relationship("Routing")
+    lines = relationship("BOMLine", back_populates="bom", cascade="all, delete-orphan")
+
+class BOMLine(Base):
+    """BOM Line - individual component in a BOM"""
+    __tablename__ = "bom_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    bom_id = Column(String, ForeignKey("bill_of_materials.id"), nullable=False)
+    
+    line_number = Column(Integer, nullable=False)
+    component_id = Column(String, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    unit_of_measure = Column(String, default="Unit")
+    
+    # Scrap/Waste
+    scrap_percentage = Column(Float, default=0.0)
+    
+    # Costing
+    unit_cost = Column(Float, default=0.0)
+    total_cost = Column(Float, default=0.0)
+    
+    # Operation (optional - link to specific routing operation)
+    operation_id = Column(String, ForeignKey("routing_operations.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    bom = relationship("BillOfMaterials", back_populates="lines")
+    component = relationship("Product", foreign_keys=[component_id])
+    operation = relationship("RoutingOperation")
+
+class Routing(Base):
+    """Routing - manufacturing process steps"""
+    __tablename__ = "routings"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    routing_code = Column(String, nullable=False, unique=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text)
+    
+    # Product
+    product_id = Column(String, ForeignKey("products.id"))
+    
+    is_active = Column(Boolean, default=True)
+    
+    # Total Times (calculated from operations)
+    total_setup_time = Column(Float, default=0.0)  # minutes
+    total_run_time = Column(Float, default=0.0)  # minutes per unit
+    
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    product = relationship("Product")
+    operations = relationship("RoutingOperation", back_populates="routing", cascade="all, delete-orphan")
+
+class RoutingOperation(Base):
+    """Routing Operation - individual step in manufacturing process"""
+    __tablename__ = "routing_operations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    routing_id = Column(String, ForeignKey("routings.id"), nullable=False)
+    
+    operation_number = Column(Integer, nullable=False)
+    operation_name = Column(String, nullable=False)
+    description = Column(Text)
+    
+    # Work Center / Department
+    work_center_code = Column(String)
+    department_id = Column(String, ForeignKey("departments.id"))
+    
+    # Timing
+    setup_time = Column(Float, default=0.0)  # minutes
+    run_time_per_unit = Column(Float, default=0.0)  # minutes per unit
+    
+    # Costing
+    hourly_rate = Column(Float, default=0.0)
+    overhead_rate = Column(Float, default=0.0)  # % of labor or fixed amount
+    
+    # Quality Control
+    requires_qc = Column(Boolean, default=False)
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    routing = relationship("Routing", back_populates="operations")
+    department = relationship("Department")
+
+class ProductionOrder(Base):
+    """Production Order - manufacturing job"""
+    __tablename__ = "production_orders"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    department_id = Column(String, ForeignKey("departments.id"))
+    
+    po_number = Column(String, nullable=False, unique=True, index=True)
+    order_date = Column(Date, nullable=False)
+    scheduled_start = Column(DateTime)
+    scheduled_end = Column(DateTime)
+    actual_start = Column(DateTime)
+    actual_end = Column(DateTime)
+    
+    # Product
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    bom_id = Column(String, ForeignKey("bill_of_materials.id"))
+    routing_id = Column(String, ForeignKey("routings.id"))
+    
+    # Quantities
+    planned_quantity = Column(Float, nullable=False)
+    produced_quantity = Column(Float, default=0.0)
+    scrapped_quantity = Column(Float, default=0.0)
+    
+    # Warehouses
+    source_warehouse_id = Column(String, ForeignKey("warehouses.id"))  # Raw materials
+    destination_warehouse_id = Column(String, ForeignKey("warehouses.id"))  # Finished goods
+    
+    # Status
+    status = Column(String, default="draft")  # draft, confirmed, in_progress, completed, cancelled
+    
+    # Costing
+    material_cost = Column(Float, default=0.0)
+    labor_cost = Column(Float, default=0.0)
+    overhead_cost = Column(Float, default=0.0)
+    total_cost = Column(Float, default=0.0)
+    unit_cost = Column(Float, default=0.0)
+    
+    # Reference
+    sales_order_id = Column(String, ForeignKey("sales_orders.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    product = relationship("Product")
+    bom = relationship("BillOfMaterials")
+    routing = relationship("Routing")
+    department = relationship("Department")
+    source_warehouse = relationship("Warehouse", foreign_keys=[source_warehouse_id])
+    destination_warehouse = relationship("Warehouse", foreign_keys=[destination_warehouse_id])
+    sales_order = relationship("SalesOrder")
+    lines = relationship("ProductionOrderLine", back_populates="production_order", cascade="all, delete-orphan")
+    wip_entries = relationship("WorkInProgress", back_populates="production_order", cascade="all, delete-orphan")
+
+class ProductionOrderLine(Base):
+    """Production Order Line - materials consumed"""
+    __tablename__ = "production_order_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    production_order_id = Column(String, ForeignKey("production_orders.id"), nullable=False)
+    
+    line_type = Column(String, nullable=False)  # material, labor, overhead
+    line_number = Column(Integer, nullable=False)
+    
+    # Material
+    product_id = Column(String, ForeignKey("products.id"))
+    planned_quantity = Column(Float, default=0.0)
+    consumed_quantity = Column(Float, default=0.0)
+    unit_of_measure = Column(String)
+    
+    # Costing
+    unit_cost = Column(Float, default=0.0)
+    total_cost = Column(Float, default=0.0)
+    
+    # Operation
+    operation_id = Column(String, ForeignKey("routing_operations.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    production_order = relationship("ProductionOrder", back_populates="lines")
+    product = relationship("Product")
+    operation = relationship("RoutingOperation")
+
+class WorkInProgress(Base):
+    """WIP Tracking - work in progress inventory"""
+    __tablename__ = "work_in_progress"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    production_order_id = Column(String, ForeignKey("production_orders.id"), nullable=False)
+    
+    transaction_date = Column(DateTime, default=datetime.utcnow)
+    transaction_type = Column(String, nullable=False)  # material_issue, labor, overhead, completion
+    
+    # Amounts
+    material_cost = Column(Float, default=0.0)
+    labor_cost = Column(Float, default=0.0)
+    overhead_cost = Column(Float, default=0.0)
+    total_cost = Column(Float, default=0.0)
+    
+    # Quantities
+    quantity = Column(Float, default=0.0)
+    
+    # GL Posting
+    journal_entry_id = Column(String, ForeignKey("journal_entries.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    production_order = relationship("ProductionOrder", back_populates="wip_entries")
+    journal_entry = relationship("JournalEntry")
+
+class CostLayer(Base):
+    """Cost Layer - inventory costing (FIFO/LIFO/Average)"""
+    __tablename__ = "cost_layers"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    warehouse_id = Column(String, ForeignKey("warehouses.id"))
+    
+    # Layer Info
+    layer_date = Column(DateTime, default=datetime.utcnow)
+    transaction_type = Column(String, nullable=False)  # purchase, production, adjustment, sale
+    reference_id = Column(String)  # PO, Production Order, etc
+    
+    # Quantities
+    quantity_in = Column(Float, default=0.0)
+    quantity_out = Column(Float, default=0.0)
+    quantity_remaining = Column(Float, default=0.0)
+    
+    # Costing
+    unit_cost = Column(Float, nullable=False)
+    total_cost = Column(Float, nullable=False)
+    
+    # Batch/Serial
+    batch_lot_id = Column(String, ForeignKey("batch_lots.id"))
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    product = relationship("Product")
+    warehouse = relationship("Warehouse")
+
+# ============================================================================
+# PHASE 2: ADVANCED INVENTORY
+# ============================================================================
+
+class BatchLot(Base):
+    """Batch/Lot Tracking"""
+    __tablename__ = "batch_lots"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    batch_number = Column(String, nullable=False, unique=True, index=True)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    
+    # Dates
+    production_date = Column(Date)
+    expiry_date = Column(Date)
+    received_date = Column(Date)
+    
+    # Quantities
+    initial_quantity = Column(Float, nullable=False)
+    available_quantity = Column(Float, nullable=False)
+    
+    # Source
+    supplier_id = Column(String, ForeignKey("suppliers.id"))
+    production_order_id = Column(String, ForeignKey("production_orders.id"))
+    
+    # Quality
+    quality_status = Column(String, default="approved")  # approved, hold, rejected
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    product = relationship("Product")
+    supplier = relationship("Supplier")
+    production_order = relationship("ProductionOrder")
+
+class SerialNumber(Base):
+    """Serial Number Tracking"""
+    __tablename__ = "serial_numbers"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    serial_number = Column(String, nullable=False, unique=True, index=True)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    batch_lot_id = Column(String, ForeignKey("batch_lots.id"))
+    
+    # Location
+    warehouse_id = Column(String, ForeignKey("warehouses.id"))
+    current_location = Column(String)
+    
+    # Status
+    status = Column(String, default="in_stock")  # in_stock, sold, scrapped, in_transit
+    
+    # Dates
+    manufactured_date = Column(Date)
+    warranty_expiry = Column(Date)
+    
+    # Ownership
+    customer_id = Column(String, ForeignKey("customers.id"))  # If sold
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    product = relationship("Product")
+    batch_lot = relationship("BatchLot")
+    warehouse = relationship("Warehouse")
+    customer = relationship("Customer")
+
+class QualityControl(Base):
+    """Quality Control Inspections"""
+    __tablename__ = "quality_controls"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    qc_number = Column(String, nullable=False, unique=True, index=True)
+    inspection_date = Column(Date, nullable=False)
+    
+    # What is being inspected
+    inspection_type = Column(String, nullable=False)  # incoming, in_process, final, audit
+    product_id = Column(String, ForeignKey("products.id"))
+    batch_lot_id = Column(String, ForeignKey("batch_lots.id"))
+    production_order_id = Column(String, ForeignKey("production_orders.id"))
+    
+    # Results
+    quantity_inspected = Column(Float, nullable=False)
+    quantity_passed = Column(Float, default=0.0)
+    quantity_failed = Column(Float, default=0.0)
+    
+    # Decision
+    decision = Column(String, nullable=False)  # approved, rejected, conditional, hold
+    
+    # Inspector
+    inspector_id = Column(String, ForeignKey("users.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    product = relationship("Product")
+    batch_lot = relationship("BatchLot")
+    production_order = relationship("ProductionOrder")
+    inspector = relationship("User")
+
+class ConsignmentStock(Base):
+    """Consignment Inventory (goods held for/by third parties)"""
+    __tablename__ = "consignment_stocks"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    consignment_type = Column(String, nullable=False)  # consignment_in, consignment_out
+    
+    # Product
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    
+    # Third Party
+    customer_id = Column(String, ForeignKey("customers.id"))  # For consignment_out
+    supplier_id = Column(String, ForeignKey("suppliers.id"))  # For consignment_in
+    
+    # Location
+    warehouse_id = Column(String, ForeignKey("warehouses.id"))
+    
+    # Dates
+    consignment_date = Column(Date, nullable=False)
+    expected_return_date = Column(Date)
+    actual_return_date = Column(Date)
+    
+    # Status
+    status = Column(String, default="active")  # active, returned, sold
+    
+    # Costing (for insurance purposes)
+    unit_value = Column(Float, default=0.0)
+    total_value = Column(Float, default=0.0)
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    product = relationship("Product")
+    customer = relationship("Customer")
+    supplier = relationship("Supplier")
+    warehouse = relationship("Warehouse")
+
+class LandedCost(Base):
+    """Landed Cost Components (duties, shipping, insurance)"""
+    __tablename__ = "landed_costs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    landed_cost_number = Column(String, nullable=False, unique=True, index=True)
+    reference_date = Column(Date, nullable=False)
+    
+    # Source Document
+    reference_type = Column(String, nullable=False)  # purchase_order, goods_receipt
+    reference_id = Column(String, nullable=False)
+    
+    # Cost Components
+    freight_cost = Column(Float, default=0.0)
+    insurance_cost = Column(Float, default=0.0)
+    customs_duty = Column(Float, default=0.0)
+    handling_charges = Column(Float, default=0.0)
+    other_charges = Column(Float, default=0.0)
+    total_landed_cost = Column(Float, default=0.0)
+    
+    # Allocation Method
+    allocation_method = Column(String, default="value")  # value, quantity, weight, volume
+    
+    # Status
+    status = Column(String, default="draft")  # draft, posted
+    posted_at = Column(DateTime)
+    
+    # GL Posting
+    journal_entry_id = Column(String, ForeignKey("journal_entries.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    journal_entry = relationship("JournalEntry")
+    allocations = relationship("LandedCostAllocation", back_populates="landed_cost", cascade="all, delete-orphan")
+
+class LandedCostAllocation(Base):
+    """Landed Cost Allocation to Products"""
+    __tablename__ = "landed_cost_allocations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    landed_cost_id = Column(String, ForeignKey("landed_costs.id"), nullable=False)
+    
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    
+    # Base Values (for allocation calculation)
+    base_value = Column(Float, nullable=False)  # Product value
+    base_quantity = Column(Float)  # For quantity-based allocation
+    base_weight = Column(Float)  # For weight-based allocation
+    base_volume = Column(Float)  # For volume-based allocation
+    
+    # Allocated Costs
+    allocated_freight = Column(Float, default=0.0)
+    allocated_insurance = Column(Float, default=0.0)
+    allocated_duty = Column(Float, default=0.0)
+    allocated_handling = Column(Float, default=0.0)
+    allocated_other = Column(Float, default=0.0)
+    total_allocated = Column(Float, default=0.0)
+    
+    # Unit Cost Adjustment
+    original_unit_cost = Column(Float, nullable=False)
+    adjusted_unit_cost = Column(Float, nullable=False)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    landed_cost = relationship("LandedCost", back_populates="allocations")
+    product = relationship("Product")
+
+class TransferPricingRule(Base):
+    """Transfer Pricing Rules (inter-branch/department pricing)"""
+    __tablename__ = "transfer_pricing_rules"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    rule_name = Column(String, nullable=False)
+    
+    # Product/Category
+    product_id = Column(String, ForeignKey("products.id"))
+    product_category = Column(String)  # Apply to category
+    
+    # Locations
+    from_location_type = Column(String)  # warehouse, department, branch
+    from_location_id = Column(String)
+    to_location_type = Column(String)
+    to_location_id = Column(String)
+    
+    # Pricing Method
+    pricing_method = Column(String, nullable=False)  # cost, cost_plus, market_price, negotiated
+    
+    # Cost Plus
+    markup_percentage = Column(Float, default=0.0)
+    fixed_markup = Column(Float, default=0.0)
+    
+    # Fixed Price
+    transfer_price = Column(Float)
+    
+    is_active = Column(Boolean, default=True)
+    effective_from = Column(Date)
+    effective_to = Column(Date)
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    product = relationship("Product")
+
+# ============================================================================
+# PHASE 2: ORGANIZATIONAL HIERARCHY (for consolidation)
+# ============================================================================
+
+class Sector(Base):
+    """Sector - middle level: Department → Sector → Enterprise"""
+    __tablename__ = "sectors"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    sector_code = Column(String, nullable=False, unique=True, index=True)
+    sector_name = Column(String, nullable=False)
+    description = Column(Text)
+    
+    # Hierarchy
+    enterprise_id = Column(String, ForeignKey("enterprises.id"))
+    
+    # Manager
+    manager_id = Column(String, ForeignKey("users.id"))
+    
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    enterprise = relationship("Enterprise", back_populates="sectors")
+    manager = relationship("User")
+
+class Enterprise(Base):
+    """Enterprise - top level for multi-company consolidation"""
+    __tablename__ = "enterprises"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    
+    enterprise_code = Column(String, nullable=False, unique=True, index=True)
+    enterprise_name = Column(String, nullable=False)
+    description = Column(Text)
+    
+    # Consolidation Settings
+    consolidation_currency = Column(String, default="ZMW")
+    elimination_method = Column(String, default="full")  # full, proportional
+    
+    # CEO/Head
+    ceo_id = Column(String, ForeignKey("users.id"))
+    
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    ceo = relationship("User")
+    sectors = relationship("Sector", back_populates="enterprise", cascade="all, delete-orphan")
