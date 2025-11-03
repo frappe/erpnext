@@ -924,3 +924,38 @@ class NotificationResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class AuditLogCreate(BaseModel):
+    action: str
+    entity_type: Optional[str] = None
+    entity_id: Optional[str] = None
+    changes: Optional[dict] = None
+    status: str = "success"
+    error_message: Optional[str] = None
+
+class AuditLogResponse(BaseModel):
+    id: str
+    company_id: str
+    user_id: Optional[str]
+    user_email: Optional[str]
+    action: str
+    entity_type: Optional[str]
+    entity_id: Optional[str]
+    changes: Optional[dict]
+    ip_address: Optional[str]
+    user_agent: Optional[str]
+    status: str
+    error_message: Optional[str]
+    timestamp: datetime
+    
+    class Config:
+        from_attributes = True
+
+class AuditLogFilter(BaseModel):
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    user_id: Optional[str] = None
+    action: Optional[str] = None
+    entity_type: Optional[str] = None
+    entity_id: Optional[str] = None
+    status: Optional[str] = None
