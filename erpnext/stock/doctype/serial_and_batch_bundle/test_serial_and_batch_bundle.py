@@ -929,6 +929,8 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 			sn_doc.insert(ignore_permissions=True)
 		else:
 			frappe.db.set_value("Serial No", serial_no, "status", "Delivered")
+
+		with self.assertRaises(SerialNoDuplicateError) as context:
 			make_serial_batch_bundle(
 				{
 					"item_code": item_code,
@@ -967,7 +969,7 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 			)
 			sn_doc.insert(ignore_permissions=True)
 
-		se = make_stock_entry(
+		make_stock_entry(
 			item_code=item_code,
 			target="_Test Warehouse - _TC",
 			qty=1,

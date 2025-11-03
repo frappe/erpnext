@@ -290,7 +290,7 @@ class SerialandBatchBundle(Document):
 		# Check if this is a return transaction
 		# Returns legitimately reuse serial numbers that were delivered
 		is_return = self.is_return_transaction()
-		
+
 		if not is_return:
 			# For non-return transactions, prevent reuse of delivered serial numbers
 			deliver_serials = frappe.get_all(
@@ -337,7 +337,7 @@ class SerialandBatchBundle(Document):
 		# Check if returned_against field is set
 		if self.returned_against:
 			return True
-		
+
 		# Check if parent voucher is a return
 		if self.voucher_type in [
 			"Delivery Note",
@@ -349,16 +349,13 @@ class SerialandBatchBundle(Document):
 		]:
 			try:
 				voucher_details = frappe.db.get_value(
-					self.voucher_type, 
-					self.voucher_no, 
-					["is_return", "return_against"], 
-					as_dict=True
+					self.voucher_type, self.voucher_no, ["is_return", "return_against"], as_dict=True
 				)
 				if voucher_details and voucher_details.get("is_return"):
 					return True
 			except Exception:
 				pass
-		
+
 		return False
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
