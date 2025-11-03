@@ -906,6 +906,95 @@ class TestSerialandBatchBundle(IntegrationTestCase):
 		self.assertTrue(bundle_doc.docstatus == 0)
 		self.assertRaises(frappe.ValidationError, bundle_doc.submit)
 
+	def test_delivered_serial_no_reuse_blocked(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			SerialNoDuplicateError,
+		)
+
+		item_code = make_item(
+			"Test Delivered Serial Reuse",
+			properties={"has_serial_no": 1, "serial_no_series": "TEST-DSR-.####", "is_stock_item": 1},
+		).name
+
+		serial_no = "TEST-DSR-0001"
+		if not frappe.db.exists("Serial No", serial_no):
+			sn_doc = frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": serial_no,
+					"item_code": item_code,
+					"status": "Delivered",
+				}
+			)
+			sn_doc.insert(ignore_permissions=True)
+		else:
+			frappe.db.set_value("Serial No", serial_no, "status", "Delivered")
+			make_serial_batch_bundle(
+				{
+					"item_code": item_code,
+					"warehouse": "_Test Warehouse - _TC",
+					"voucher_type": "Stock Entry",
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"qty": 1,
+					"rate": 100,
+					"serial_nos": [serial_no],
+					"type_of_transaction": "Inward",
+					"do_not_submit": True,
+				}
+			)
+
+		self.assertIn("already delivered", str(context.exception).lower())
+
+		frappe.db.rollback()
+
+	def test_return_transaction_allows_delivered_serial(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code = make_item(
+			"Test Return Serial Reuse",
+			properties={"has_serial_no": 1, "serial_no_series": "TEST-RSR-.####", "is_stock_item": 1},
+		).name
+
+		serial_no = "TEST-RSR-0001"
+		if not frappe.db.exists("Serial No", serial_no):
+			sn_doc = frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": serial_no,
+					"item_code": item_code,
+				}
+			)
+			sn_doc.insert(ignore_permissions=True)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=1,
+			rate=100,
+			serial_no=[serial_no],
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code, qty=1, rate=100, warehouse="_Test Warehouse - _TC", serial_no=[serial_no]
+		)
+
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Delivered")
+
+		return_dn = create_delivery_note(
+			item_code=item_code,
+			qty=-1,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+			serial_no=[serial_no],
+			is_return=1,
+			return_against=dn.name,
+		)
+
+		self.assertTrue(return_dn.name)
+
+		frappe.db.rollback()
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
