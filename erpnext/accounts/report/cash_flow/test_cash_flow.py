@@ -3,7 +3,6 @@ from frappe.tests.utils import FrappeTestCase
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.doctype.account.test_account import create_account, make_company, _make_test_records
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_or_create_fiscal_year
-from erpnext.setup.doctype.company.test_company import create_child_company as create_company
 from erpnext.accounts.report.cash_flow.cash_flow import execute
 
 class TestCashFlow(FrappeTestCase, AccountsTestMixin):
