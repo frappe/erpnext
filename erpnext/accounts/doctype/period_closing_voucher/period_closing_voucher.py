@@ -131,8 +131,8 @@ class PeriodClosingVoucher(AccountsController):
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
 
 	def on_submit(self):
+		self.db_set("gle_processing_status", "In Progress")
 		if frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
-			self.db_set("gle_processing_status", "In Progress")
 			self.make_gl_entries()
 		else:
 			ppcv = frappe.get_doc({"doctype": "Process Period Closing Voucher", "parent_pcv": self.name})
@@ -165,7 +165,7 @@ class PeriodClosingVoucher(AccountsController):
 			"Process Period Closing Voucher", {"parent_pcv": self.name, "docstatus": ["in", [1, 2]]}
 		)
 		for x in ppcvs:
-			frappe.delete_doc("Process Period Closing Voucher", x.name)
+			frappe.delete_doc("Process Period Closing Voucher", x.name, force=True, ignore_permissions=True)
 
 	def make_gl_entries(self):
 		if frappe.db.estimate_count("GL Entry") > 100_000:

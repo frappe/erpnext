@@ -113,6 +113,7 @@ def start_pcv_processing(docname: str):
 					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 						queue="long",
+						timeout="3600",
 						is_async=True,
 						enqueue_after_commit=True,
 						docname=docname,
@@ -256,6 +257,7 @@ def schedule_next_date(docname: str):
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 				queue="long",
+				timeout="3600",
 				is_async=True,
 				enqueue_after_commit=True,
 				docname=docname,
