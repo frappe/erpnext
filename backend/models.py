@@ -40,6 +40,7 @@ class User(Base):
     phone = Column(String)
     role = Column(String, default="user")
     company_id = Column(String, ForeignKey("companies.id"), nullable=True)
+    is_super_admin = Column(Boolean, default=False, index=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     last_login = Column(DateTime)
@@ -2879,3 +2880,226 @@ class TaxSetting(Base):
     # Relationships
     tax_payable_account = relationship("Account", foreign_keys=[tax_payable_account_id])
     tax_expense_account = relationship("Account", foreign_keys=[tax_expense_account_id])
+
+
+# ============================================================================
+# PHASE 4: SUPER ADMIN & TENANT MANAGEMENT
+# ============================================================================
+
+class SubscriptionPlan(Base):
+    """Subscription plans for multi-tenant SaaS (Free, Basic, Premium, Enterprise)"""
+    __tablename__ = "subscription_plans"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    plan_code = Column(String, nullable=False, unique=True, index=True)
+    plan_name = Column(String, nullable=False)
+    description = Column(Text)
+    
+    # Pricing
+    price_monthly = Column(Float, nullable=False, default=0.0)
+    price_annual = Column(Float, nullable=False, default=0.0)
+    currency = Column(String, default="ZMW")
+    
+    # Limits
+    max_users = Column(Integer, default=5)
+    max_employees = Column(Integer, default=50)
+    max_storage_gb = Column(Integer, default=10)
+    max_api_calls_per_month = Column(Integer, default=10000)
+    max_branches = Column(Integer, default=1)
+    
+    # Module Access
+    modules_included = Column(JSON)  # ["finance", "hr", "inventory", "sales"]
+    features_included = Column(JSON)  # ["multi_currency", "reporting", "mobile_app"]
+    
+    # Settings
+    trial_days = Column(Integer, default=7)
+    is_active = Column(Boolean, default=True)
+    is_public = Column(Boolean, default=True)
+    sort_order = Column(Integer, default=0)
+    
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class PlatformSettings(Base):
+    """Global platform-wide settings managed by Super Admin"""
+    __tablename__ = "platform_settings"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    setting_key = Column(String, nullable=False, unique=True, index=True)
+    setting_value = Column(JSON)
+    setting_type = Column(String, nullable=False)  # string, number, boolean, json
+    setting_category = Column(String, index=True)  # security, notifications, ai, billing
+    description = Column(Text)
+    is_sensitive = Column(Boolean, default=False)
+    updated_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class SupportTicket(Base):
+    """Customer support tickets from tenants"""
+    __tablename__ = "support_tickets"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    ticket_number = Column(String, nullable=False, unique=True, index=True)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Requester
+    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    requester_email = Column(String)
+    requester_phone = Column(String)
+    
+    # Ticket Details
+    subject = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    category = Column(String, index=True)  # technical, billing, feature_request, bug
+    priority = Column(String, default="medium", index=True)  # low, medium, high, critical
+    status = Column(String, default="open", index=True)  # open, in_progress, waiting_customer, resolved, closed
+    
+    # Assignment
+    assigned_to = Column(String, ForeignKey("users.id"))
+    assigned_at = Column(DateTime)
+    
+    # Resolution
+    resolution = Column(Text)
+    resolved_at = Column(DateTime)
+    resolved_by = Column(String, ForeignKey("users.id"))
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_response_at = Column(DateTime)
+    
+    # Relationships
+    company = relationship("Company")
+    creator = relationship("User", foreign_keys=[created_by])
+    assignee = relationship("User", foreign_keys=[assigned_to])
+    resolver = relationship("User", foreign_keys=[resolved_by])
+
+
+class SystemLog(Base):
+    """Platform-wide system logs for monitoring and debugging"""
+    __tablename__ = "system_logs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    
+    # Log Details
+    log_level = Column(String, nullable=False, index=True)  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    log_category = Column(String, index=True)  # api, database, auth, billing, integration
+    message = Column(Text, nullable=False)
+    stack_trace = Column(Text)
+    
+    # Request Context
+    endpoint = Column(String, index=True)
+    http_method = Column(String)
+    status_code = Column(Integer, index=True)
+    response_time_ms = Column(Integer)
+    ip_address = Column(String, index=True)
+    user_agent = Column(Text)
+    
+    # Additional Data
+    extra_data = Column(JSON)
+    
+    # Timestamp
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True, nullable=False)
+
+
+class APIUsageLog(Base):
+    """Track API usage per tenant for billing and analytics"""
+    __tablename__ = "api_usage_logs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    
+    # API Call Details
+    endpoint = Column(String, nullable=False, index=True)
+    http_method = Column(String, nullable=False)
+    status_code = Column(Integer)
+    response_time_ms = Column(Integer)
+    
+    # Usage Metrics
+    request_size_bytes = Column(Integer)
+    response_size_bytes = Column(Integer)
+    
+    # Billing
+    is_billable = Column(Boolean, default=True, index=True)
+    cost_credits = Column(Float, default=1.0)
+    
+    # Timestamp
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True, nullable=False)
+    
+    # Aggregation (for monthly billing)
+    year_month = Column(String, index=True)  # Format: "2025-11"
+    
+    # Relationships
+    company = relationship("Company")
+
+
+class TenantModule(Base):
+    """Module access control per tenant"""
+    __tablename__ = "tenant_modules"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Module Details
+    module_code = Column(String, nullable=False, index=True)  # finance, hr, inventory, sales, etc.
+    module_name = Column(String, nullable=False)
+    is_enabled = Column(Boolean, default=True, index=True)
+    
+    # Access Control
+    enabled_at = Column(DateTime)
+    enabled_by = Column(String, ForeignKey("users.id"))
+    disabled_at = Column(DateTime)
+    disabled_by = Column(String, ForeignKey("users.id"))
+    
+    # Usage Tracking
+    last_accessed_at = Column(DateTime)
+    access_count = Column(Integer, default=0)
+    
+    # Relationships
+    company = relationship("Company")
+
+
+class PaymentTransaction(Base):
+    """Payment transactions for subscription billing"""
+    __tablename__ = "payment_transactions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    # Transaction Details
+    transaction_number = Column(String, nullable=False, unique=True, index=True)
+    transaction_type = Column(String, nullable=False, index=True)  # subscription, upgrade, addon, refund
+    
+    # Amount
+    amount = Column(Float, nullable=False)
+    currency = Column(String, default="ZMW")
+    
+    # Payment Method
+    payment_method = Column(String, nullable=False, index=True)  # mtn_money, airtel_money, bank_transfer, stripe
+    payment_reference = Column(String, index=True)
+    
+    # Status
+    status = Column(String, default="pending", index=True)  # pending, processing, completed, failed, refunded
+    
+    # Payment Provider Response
+    provider_response = Column(JSON)
+    provider_transaction_id = Column(String, index=True)
+    
+    # Subscription Context
+    subscription_plan_id = Column(String, ForeignKey("subscription_plans.id"))
+    billing_period_start = Column(Date)
+    billing_period_end = Column(Date)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    completed_at = Column(DateTime)
+    
+    # Relationships
+    company = relationship("Company")
+    subscription_plan = relationship("SubscriptionPlan")
