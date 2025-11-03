@@ -1,1 +1,0 @@
-Entry to close all Profit and Loss (P&L) accounts at the end of a financial period.
