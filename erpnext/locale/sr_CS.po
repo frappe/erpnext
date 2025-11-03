@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-02 09:35+0000\n"
-"PO-Revision-Date: 2025-11-02 18:01\n"
+"PO-Revision-Date: 2025-11-03 18:50\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Latin)\n"
 "MIME-Version: 1.0\n"
@@ -357,7 +357,7 @@ msgstr "(D) Stanje vrednosti zaliha"
 #. Description of the 'Capacity' (Int) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "(Daily Yield * No of Units Produced) / 100"
-msgstr ""
+msgstr "(Dnevni prinos * broj proizvedenih jedinica) / 100"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:199
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:238
@@ -425,7 +425,7 @@ msgstr "(Nabavna porudžbina + Zahtev za nabavku + Stvarni trošak)"
 #. Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "(Total Workstation Time / Manufacturing Time) * 60"
-msgstr ""
+msgstr "(Ukupno vreme radne stanice / vreme proizvodnje) * 60"
 
 #. Description of the 'From No' (Int) field in DocType 'Share Transfer'
 #. Description of the 'To No' (Int) field in DocType 'Share Transfer'
@@ -1615,11 +1615,11 @@ msgstr "Račun {0} je dodat više puta"
 
 #: erpnext/accounts/doctype/account/account.py:288
 msgid "Account {0} cannot be converted to Group as it is already set as {1} for {2}."
-msgstr ""
+msgstr "Račun {0} ne može biti konvertovan u grupu jer je već postavljen kao {1} za {2}."
 
 #: erpnext/accounts/doctype/account/account.py:285
 msgid "Account {0} cannot be disabled as it is already set as {1} for {2}."
-msgstr ""
+msgstr "Račun {0} ne može biti onemogućen jer je već postavljen kao {1} za {2}."
 
 #: erpnext/setup/doctype/company/company.py:238
 msgid "Account {0} does not belong to company: {1}"
@@ -1663,7 +1663,7 @@ msgstr "Račun {0} je dodat u zavisnu kompaniju {1}"
 
 #: erpnext/setup/doctype/company/company.py:227
 msgid "Account {0} is disabled."
-msgstr ""
+msgstr "Račun {0} je onemogućen."
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:430
 msgid "Account {0} is frozen"
@@ -9827,7 +9827,7 @@ msgstr "Nije moguće izračunati vreme jer nedostaje adresa vozača."
 
 #: erpnext/setup/doctype/company/company.py:178
 msgid "Cannot Change Inventory Account Setting"
-msgstr ""
+msgstr "Nije moguće promeniti podešavanje računa inventara"
 
 #: erpnext/controllers/sales_and_purchase_return.py:375
 msgid "Cannot Create Return"
@@ -9979,7 +9979,7 @@ msgstr "Ne može se obrisati broj serije {0}, jer se koristi u transakcijama sa 
 
 #: erpnext/setup/doctype/company/company.py:512
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
-msgstr ""
+msgstr "Nije moguće onemogućiti stvarno praćenje inventara jer postoje unosi u knjigu zaliha za kompaniju {0}. Molimo Vas da najpre otkažete transakcije zaliha i pokušate ponovo."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:667
 msgid "Cannot disassemble more than produced quantity."
@@ -9987,7 +9987,7 @@ msgstr "Nije moguće demontirati više od proizvedene količine."
 
 #: erpnext/setup/doctype/company/company.py:175
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
-msgstr ""
+msgstr "Nije moguće omogućiti račun inventara po stavkama jer postoje unosi u knjigu zaliha za kompaniju {0} koji koriste račun inventara po skladištima. Molimo Vas da najpre otkažete transakcije zaliha i pokušate ponovo."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:110
 msgid "Cannot enqueue multi docs for one company. {0} is already queued/running for company: {1}"
@@ -15504,7 +15504,7 @@ msgstr "Dnevni rezime evidencije vremena"
 #. Label of the daily_yield (Percent) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "Daily Yield (%)"
-msgstr ""
+msgstr "Dnevni prinos (%)"
 
 #. Label of a shortcut in the Accounting Workspace
 #. Label of a shortcut in the Assets Workspace
@@ -19814,7 +19814,7 @@ msgstr "Omogući nepromenljivu glavnu knjigu"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Enable Item-wise Inventory Account"
-msgstr ""
+msgstr "Omogući račun inventara po stavkama"
 
 #. Label of the enable_perpetual_inventory (Check) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -21717,7 +21717,7 @@ msgstr "Fiskalna godina {0} je obavezna"
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.js:28
 msgid "Fix SABB Entry"
-msgstr ""
+msgstr "Ispravak unosa paketa serije i šarže"
 
 #. Option for the 'Calculate Based On' (Select) field in DocType 'Shipping
 #. Rule'
@@ -24539,7 +24539,7 @@ msgstr "Ukoliko je omogućeno, sistem će generisati računovodstveni unos za od
 #. DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "If enabled, the system will use the inventory account set in the Item Master or Item Group or Brand. Otherwise, it will use the inventory account set in the Warehouse."
-msgstr ""
+msgstr "Ukoliko je omogućeno, sistem će koristiti račun inventara postavljen u master podacima stavke, grupi stavke ili brendu. U suprotnom, koristiće se račun inventara postavljen u skladištu."
 
 #. Description of the 'Do Not Use Batch-wise Valuation' (Check) field in
 #. DocType 'Stock Settings'
@@ -26435,7 +26435,7 @@ msgstr "Inventar"
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Inventory Account Currency"
-msgstr ""
+msgstr "Valuta računa inventara"
 
 #. Name of a DocType
 #: erpnext/patches/v15_0/refactor_closing_stock_balance.py:43
@@ -28685,7 +28685,7 @@ msgstr "Cena po stavci u cenovniku"
 #: erpnext/buying/report/item_wise_purchase_history/item_wise_purchase_history.json
 #: erpnext/buying/workspace/buying/buying.json
 msgid "Item-wise Purchase History"
-msgstr "Istorija prodaje po stavkama"
+msgstr "Istorija nabavke po stavkama"
 
 #. Name of a report
 #. Label of a Link in the Payables Workspace
@@ -31518,7 +31518,7 @@ msgstr "Zahtevi za nabavku za koje ponude dobavljača nisu kreirane"
 #. Label of a Link in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Material Requirements Planning"
-msgstr ""
+msgstr "Planiranje potreba za materijalom"
 
 #. Name of a report
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.json
@@ -37881,7 +37881,7 @@ msgstr "Po danu"
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "Per Day\n"
 "Shift Time (In Hours) * No of Workstations * No of Shift"
-msgstr ""
+msgstr "Vreme smene po danu (u satima) * broj radnih stanica * broj smena"
 
 #. Option for the 'Evaluation Period' (Select) field in DocType 'Supplier
 #. Scorecard'
@@ -39267,7 +39267,7 @@ msgstr "Molimo Vas da izaberete barem jedan filter: Šifra stavke, šarža ili b
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.js:33
 msgid "Please select at least one row to fix"
-msgstr ""
+msgstr "Molimo Vas da izaberete barem jedan red za ispravku"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1274
 msgid "Please select atleast one item to continue"
@@ -39539,7 +39539,7 @@ msgstr "Molimo Vas da postavite podrazumevani račun troška prodate robe u komp
 
 #: erpnext/controllers/stock_controller.py:188
 msgid "Please set default inventory account for item {0}, or their item group or brand."
-msgstr ""
+msgstr "Molimo Vas da podesite podrazumevani račun inventara za stavku {0}, ili za njenu grupu ili brend."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:274
 #: erpnext/accounts/utils.py:1119
@@ -49934,7 +49934,7 @@ msgstr "Izabrani format štampe ne postoji."
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:163
 msgid "Selected Serial and Batch Bundle entries have been fixed."
-msgstr ""
+msgstr "Izabrani unosi paketa serije i šarže su ispravljeni."
 
 #. Label of the repost_vouchers (Table) field in DocType 'Repost Payment
 #. Ledger'
@@ -63083,7 +63083,7 @@ msgstr "Ne možete izvršiti nikakve izmene na radnoj kartici jer je radni nalog
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:189
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
-msgstr "Ne možete obraditi broj serije {0} jer je već korišćen u SABB {1}. {2} ukoliko želite da ponovo koristite isti serijski broj više puta, omogućite opciju 'Dozvoli da postojeći broj serije bude ponovo proizveden/primljen' u {3}"
+msgstr "Ne možete obraditi broj serije {0} jer je već korišćen u paketu serije i šarže {1}. {2} ukoliko želite da ponovo koristite isti serijski broj više puta, omogućite opciju 'Dozvoli da postojeći broj serije bude ponovo proizveden/primljen' u {3}"
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.py:192
 msgid "You can't redeem Loyalty Points having more value than the Total Amount."
@@ -64186,7 +64186,7 @@ msgstr "{0}: {1} ne postoji"
 
 #: erpnext/setup/doctype/company/company.py:231
 msgid "{0}: {1} is a group account."
-msgstr ""
+msgstr "{0}: {1} je grupni račun."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:964
 msgid "{0}: {1} must be less than {2}"
