@@ -4391,3 +4391,591 @@ def get_supported_banks():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
+# ============================================================================
+# SETTINGS MODULE ENDPOINTS
+# ============================================================================
+
+# System Settings Endpoints
+@app.get("/api/settings/system", response_model=List[schemas.SystemSettingResponse])
+def get_system_settings(
+    category: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Get all system settings for the company"""
+    query = db.query(models.SystemSetting).filter(
+        models.SystemSetting.company_id == current_user.company_id
+    )
+    
+    if category:
+        query = query.filter(models.SystemSetting.category == category)
+    
+    return query.all()
+
+@app.post("/api/settings/system", response_model=schemas.SystemSettingResponse)
+def create_system_setting(
+    setting: schemas.SystemSettingCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Create a new system setting"""
+    db_setting = models.SystemSetting(
+        company_id=current_user.company_id,
+        updated_by=current_user.id,
+        **setting.dict()
+    )
+    db.add(db_setting)
+    db.commit()
+    db.refresh(db_setting)
+    return db_setting
+
+@app.put("/api/settings/system/{setting_id}", response_model=schemas.SystemSettingResponse)
+def update_system_setting(
+    setting_id: str,
+    setting_update: schemas.SystemSettingUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Update a system setting"""
+    db_setting = db.query(models.SystemSetting).filter(
+        models.SystemSetting.id == setting_id,
+        models.SystemSetting.company_id == current_user.company_id
+    ).first()
+    
+    if not db_setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    
+    for key, value in setting_update.dict(exclude_unset=True).items():
+        setattr(db_setting, key, value)
+    
+    db_setting.updated_by = current_user.id
+    db.commit()
+    db.refresh(db_setting)
+    return db_setting
+
+@app.delete("/api/settings/system/{setting_id}")
+def delete_system_setting(
+    setting_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Delete a system setting"""
+    db_setting = db.query(models.SystemSetting).filter(
+        models.SystemSetting.id == setting_id,
+        models.SystemSetting.company_id == current_user.company_id
+    ).first()
+    
+    if not db_setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    
+    db.delete(db_setting)
+    db.commit()
+    return {"message": "Setting deleted successfully"}
+
+# Tax Settings Endpoints
+@app.get("/api/settings/tax", response_model=List[schemas.TaxSettingResponse])
+def get_tax_settings(
+    tax_type: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Get all tax settings for the company"""
+    query = db.query(models.TaxSetting).filter(
+        models.TaxSetting.company_id == current_user.company_id
+    )
+    
+    if tax_type:
+        query = query.filter(models.TaxSetting.tax_type == tax_type)
+    if is_active is not None:
+        query = query.filter(models.TaxSetting.is_active == is_active)
+    
+    return query.all()
+
+@app.post("/api/settings/tax", response_model=schemas.TaxSettingResponse)
+def create_tax_setting(
+    tax_setting: schemas.TaxSettingCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Create a new tax setting"""
+    db_tax = models.TaxSetting(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **tax_setting.dict()
+    )
+    db.add(db_tax)
+    db.commit()
+    db.refresh(db_tax)
+    return db_tax
+
+@app.put("/api/settings/tax/{tax_id}", response_model=schemas.TaxSettingResponse)
+def update_tax_setting(
+    tax_id: str,
+    tax_update: schemas.TaxSettingUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Update a tax setting"""
+    db_tax = db.query(models.TaxSetting).filter(
+        models.TaxSetting.id == tax_id,
+        models.TaxSetting.company_id == current_user.company_id
+    ).first()
+    
+    if not db_tax:
+        raise HTTPException(status_code=404, detail="Tax setting not found")
+    
+    for key, value in tax_update.dict(exclude_unset=True).items():
+        setattr(db_tax, key, value)
+    
+    db.commit()
+    db.refresh(db_tax)
+    return db_tax
+
+@app.delete("/api/settings/tax/{tax_id}")
+def delete_tax_setting(
+    tax_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Delete a tax setting"""
+    db_tax = db.query(models.TaxSetting).filter(
+        models.TaxSetting.id == tax_id,
+        models.TaxSetting.company_id == current_user.company_id
+    ).first()
+    
+    if not db_tax:
+        raise HTTPException(status_code=404, detail="Tax setting not found")
+    
+    db.delete(db_tax)
+    db.commit()
+    return {"message": "Tax setting deleted successfully"}
+
+# Email Templates Endpoints
+@app.get("/api/settings/email-templates", response_model=List[schemas.EmailTemplateResponse])
+def get_email_templates(
+    template_code: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Get all email templates"""
+    query = db.query(models.EmailTemplate).filter(
+        models.EmailTemplate.company_id == current_user.company_id
+    )
+    
+    if template_code:
+        query = query.filter(models.EmailTemplate.template_code == template_code)
+    if is_active is not None:
+        query = query.filter(models.EmailTemplate.is_active == is_active)
+    
+    return query.all()
+
+@app.post("/api/settings/email-templates", response_model=schemas.EmailTemplateResponse)
+def create_email_template(
+    template: schemas.EmailTemplateCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Create a new email template"""
+    db_template = models.EmailTemplate(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **template.dict()
+    )
+    db.add(db_template)
+    db.commit()
+    db.refresh(db_template)
+    return db_template
+
+@app.put("/api/settings/email-templates/{template_id}", response_model=schemas.EmailTemplateResponse)
+def update_email_template(
+    template_id: str,
+    template_update: schemas.EmailTemplateUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Update an email template"""
+    db_template = db.query(models.EmailTemplate).filter(
+        models.EmailTemplate.id == template_id,
+        models.EmailTemplate.company_id == current_user.company_id
+    ).first()
+    
+    if not db_template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    if db_template.is_system:
+        raise HTTPException(status_code=403, detail="Cannot modify system templates")
+    
+    for key, value in template_update.dict(exclude_unset=True).items():
+        setattr(db_template, key, value)
+    
+    db.commit()
+    db.refresh(db_template)
+    return db_template
+
+@app.delete("/api/settings/email-templates/{template_id}")
+def delete_email_template(
+    template_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Delete an email template"""
+    db_template = db.query(models.EmailTemplate).filter(
+        models.EmailTemplate.id == template_id,
+        models.EmailTemplate.company_id == current_user.company_id
+    ).first()
+    
+    if not db_template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    if db_template.is_system:
+        raise HTTPException(status_code=403, detail="Cannot delete system templates")
+    
+    db.delete(db_template)
+    db.commit()
+    return {"message": "Template deleted successfully"}
+
+# Salary Components Endpoints
+@app.get("/api/settings/salary-components", response_model=List[schemas.SalaryComponentResponse])
+def get_salary_components(
+    component_type: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Get all salary components"""
+    query = db.query(models.SalaryComponent).filter(
+        models.SalaryComponent.company_id == current_user.company_id
+    ).order_by(models.SalaryComponent.display_order)
+    
+    if component_type:
+        query = query.filter(models.SalaryComponent.component_type == component_type)
+    if is_active is not None:
+        query = query.filter(models.SalaryComponent.is_active == is_active)
+    
+    return query.all()
+
+@app.post("/api/settings/salary-components", response_model=schemas.SalaryComponentResponse)
+def create_salary_component(
+    component: schemas.SalaryComponentCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Create a new salary component"""
+    db_component = models.SalaryComponent(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **component.dict()
+    )
+    db.add(db_component)
+    db.commit()
+    db.refresh(db_component)
+    return db_component
+
+@app.put("/api/settings/salary-components/{component_id}", response_model=schemas.SalaryComponentResponse)
+def update_salary_component(
+    component_id: str,
+    component_update: schemas.SalaryComponentUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Update a salary component"""
+    db_component = db.query(models.SalaryComponent).filter(
+        models.SalaryComponent.id == component_id,
+        models.SalaryComponent.company_id == current_user.company_id
+    ).first()
+    
+    if not db_component:
+        raise HTTPException(status_code=404, detail="Salary component not found")
+    
+    for key, value in component_update.dict(exclude_unset=True).items():
+        setattr(db_component, key, value)
+    
+    db.commit()
+    db.refresh(db_component)
+    return db_component
+
+@app.delete("/api/settings/salary-components/{component_id}")
+def delete_salary_component(
+    component_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Delete a salary component"""
+    db_component = db.query(models.SalaryComponent).filter(
+        models.SalaryComponent.id == component_id,
+        models.SalaryComponent.company_id == current_user.company_id
+    ).first()
+    
+    if not db_component:
+        raise HTTPException(status_code=404, detail="Salary component not found")
+    
+    if db_component.is_statutory:
+        raise HTTPException(status_code=403, detail="Cannot delete statutory components")
+    
+    db.delete(db_component)
+    db.commit()
+    return {"message": "Salary component deleted successfully"}
+
+# Approval Workflow Rules Endpoints
+@app.get("/api/settings/approval-workflows", response_model=List[schemas.ApprovalWorkflowRuleResponse])
+def get_approval_workflows(
+    entity_type: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Get all approval workflow rules"""
+    query = db.query(models.ApprovalWorkflowRule).filter(
+        models.ApprovalWorkflowRule.company_id == current_user.company_id
+    ).order_by(models.ApprovalWorkflowRule.priority)
+    
+    if entity_type:
+        query = query.filter(models.ApprovalWorkflowRule.entity_type == entity_type)
+    if is_active is not None:
+        query = query.filter(models.ApprovalWorkflowRule.is_active == is_active)
+    
+    return query.all()
+
+@app.post("/api/settings/approval-workflows", response_model=schemas.ApprovalWorkflowRuleResponse)
+def create_approval_workflow(
+    workflow: schemas.ApprovalWorkflowRuleCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Create a new approval workflow rule"""
+    db_workflow = models.ApprovalWorkflowRule(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **workflow.dict()
+    )
+    db.add(db_workflow)
+    db.commit()
+    db.refresh(db_workflow)
+    return db_workflow
+
+@app.put("/api/settings/approval-workflows/{workflow_id}", response_model=schemas.ApprovalWorkflowRuleResponse)
+def update_approval_workflow(
+    workflow_id: str,
+    workflow_update: schemas.ApprovalWorkflowRuleUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Update an approval workflow rule"""
+    db_workflow = db.query(models.ApprovalWorkflowRule).filter(
+        models.ApprovalWorkflowRule.id == workflow_id,
+        models.ApprovalWorkflowRule.company_id == current_user.company_id
+    ).first()
+    
+    if not db_workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    for key, value in workflow_update.dict(exclude_unset=True).items():
+        setattr(db_workflow, key, value)
+    
+    db.commit()
+    db.refresh(db_workflow)
+    return db_workflow
+
+@app.delete("/api/settings/approval-workflows/{workflow_id}")
+def delete_approval_workflow(
+    workflow_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Delete an approval workflow rule"""
+    db_workflow = db.query(models.ApprovalWorkflowRule).filter(
+        models.ApprovalWorkflowRule.id == workflow_id,
+        models.ApprovalWorkflowRule.company_id == current_user.company_id
+    ).first()
+    
+    if not db_workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    db.delete(db_workflow)
+    db.commit()
+    return {"message": "Workflow deleted successfully"}
+
+# Leave Type Configuration Endpoints
+@app.get("/api/settings/leave-configurations", response_model=List[schemas.LeaveTypeConfigurationResponse])
+def get_leave_configurations(
+    leave_type_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Get all leave type configurations"""
+    query = db.query(models.LeaveTypeConfiguration).filter(
+        models.LeaveTypeConfiguration.company_id == current_user.company_id
+    )
+    
+    if leave_type_id:
+        query = query.filter(models.LeaveTypeConfiguration.leave_type_id == leave_type_id)
+    
+    return query.all()
+
+@app.post("/api/settings/leave-configurations", response_model=schemas.LeaveTypeConfigurationResponse)
+def create_leave_configuration(
+    config: schemas.LeaveTypeConfigurationCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Create a new leave type configuration"""
+    # Verify leave type exists and belongs to company
+    leave_type = db.query(models.LeaveType).filter(
+        models.LeaveType.id == config.leave_type_id,
+        models.LeaveType.company_id == current_user.company_id
+    ).first()
+    
+    if not leave_type:
+        raise HTTPException(status_code=404, detail="Leave type not found")
+    
+    db_config = models.LeaveTypeConfiguration(
+        company_id=current_user.company_id,
+        **config.dict()
+    )
+    db.add(db_config)
+    db.commit()
+    db.refresh(db_config)
+    return db_config
+
+@app.put("/api/settings/leave-configurations/{config_id}", response_model=schemas.LeaveTypeConfigurationResponse)
+def update_leave_configuration(
+    config_id: str,
+    config_update: schemas.LeaveTypeConfigurationUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Update a leave type configuration"""
+    db_config = db.query(models.LeaveTypeConfiguration).filter(
+        models.LeaveTypeConfiguration.id == config_id,
+        models.LeaveTypeConfiguration.company_id == current_user.company_id
+    ).first()
+    
+    if not db_config:
+        raise HTTPException(status_code=404, detail="Configuration not found")
+    
+    for key, value in config_update.dict(exclude_unset=True).items():
+        setattr(db_config, key, value)
+    
+    db.commit()
+    db.refresh(db_config)
+    return db_config
+
+@app.delete("/api/settings/leave-configurations/{config_id}")
+def delete_leave_configuration(
+    config_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Delete a leave type configuration"""
+    db_config = db.query(models.LeaveTypeConfiguration).filter(
+        models.LeaveTypeConfiguration.id == config_id,
+        models.LeaveTypeConfiguration.company_id == current_user.company_id
+    ).first()
+    
+    if not db_config:
+        raise HTTPException(status_code=404, detail="Configuration not found")
+    
+    db.delete(db_config)
+    db.commit()
+    return {"message": "Configuration deleted successfully"}
+
+# Seed Default Settings Endpoint
+@app.post("/api/settings/seed-defaults")
+def seed_default_settings(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Seed default settings for the company (Zambian tax settings, salary components, etc.)"""
+    
+    # Check if already seeded
+    existing = db.query(models.TaxSetting).filter(
+        models.TaxSetting.company_id == current_user.company_id
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Default settings already seeded")
+    
+    # Create Zambian PAYE Tax Brackets (2024)
+    paye_brackets = [
+        {"min": 0, "max": 4500, "rate": 0, "fixed": 0},
+        {"min": 4501, "max": 6900, "rate": 20, "fixed": 0},
+        {"min": 6901, "max": 11100, "rate": 30, "fixed": 480},
+        {"min": 11101, "max": 15300, "rate": 35, "fixed": 1740},
+        {"min": 15301, "max": 99999999, "rate": 37.5, "fixed": 3210}
+    ]
+    
+    paye_tax = models.TaxSetting(
+        company_id=current_user.company_id,
+        tax_name="PAYE (Pay As You Earn)",
+        tax_type="income_tax",
+        jurisdiction="Zambia",
+        tax_brackets=paye_brackets,
+        is_active=True,
+        created_by=current_user.id
+    )
+    db.add(paye_tax)
+    
+    # Create NAPSA (National Pension Scheme Authority)
+    napsa = models.TaxSetting(
+        company_id=current_user.company_id,
+        tax_name="NAPSA",
+        tax_type="statutory",
+        jurisdiction="Zambia",
+        employer_rate=5.0,
+        employee_rate=5.0,
+        applies_to="gross",
+        is_active=True,
+        created_by=current_user.id
+    )
+    db.add(napsa)
+    
+    # Create NHIMA (National Health Insurance Management Authority)
+    nhima = models.TaxSetting(
+        company_id=current_user.company_id,
+        tax_name="NHIMA",
+        tax_type="statutory",
+        jurisdiction="Zambia",
+        employer_rate=1.0,
+        employee_rate=1.0,
+        applies_to="basic",
+        is_active=True,
+        created_by=current_user.id
+    )
+    db.add(nhima)
+    
+    # Create Standard Salary Components
+    components = [
+        {"code": "BASIC", "name": "Basic Salary", "type": "earning", "taxable": True, "in_gross": True, "statutory": False, "order": 1},
+        {"code": "HRA", "name": "Housing Allowance", "type": "earning", "taxable": True, "in_gross": True, "statutory": False, "order": 2},
+        {"code": "TRANS", "name": "Transport Allowance", "type": "earning", "taxable": True, "in_gross": True, "statutory": False, "order": 3},
+        {"code": "LUNCH", "name": "Lunch Allowance", "type": "earning", "taxable": True, "in_gross": True, "statutory": False, "order": 4},
+        {"code": "PAYE", "name": "PAYE Tax", "type": "deduction", "taxable": False, "in_gross": False, "statutory": True, "stat_type": "paye", "order": 100},
+        {"code": "NAPSA_EE", "name": "NAPSA (Employee)", "type": "deduction", "taxable": False, "in_gross": False, "statutory": True, "stat_type": "napsa", "order": 101},
+        {"code": "NHIMA_EE", "name": "NHIMA (Employee)", "type": "deduction", "taxable": False, "in_gross": False, "statutory": True, "stat_type": "nhima", "order": 102},
+    ]
+    
+    for comp in components:
+        salary_comp = models.SalaryComponent(
+            company_id=current_user.company_id,
+            component_code=comp["code"],
+            component_name=comp["name"],
+            component_type=comp["type"],
+            is_taxable=comp["taxable"],
+            include_in_gross=comp["in_gross"],
+            is_statutory=comp["statutory"],
+            statutory_type=comp.get("stat_type"),
+            display_order=comp["order"],
+            created_by=current_user.id
+        )
+        db.add(salary_comp)
+    
+    db.commit()
+    
+    return {
+        "message": "Default Zambian tax settings and salary components seeded successfully",
+        "tax_settings": 3,
+        "salary_components": len(components)
+    }

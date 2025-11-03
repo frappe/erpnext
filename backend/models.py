@@ -1460,3 +1460,183 @@ class BankSyncHistory(Base):
     triggered_by = Column(String, ForeignKey("users.id"))
     
     bank_connection = relationship("BankConnection")
+
+class SystemSetting(Base):
+    __tablename__ = "system_settings"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    setting_key = Column(String, nullable=False, index=True)
+    setting_value = Column(Text)
+    setting_type = Column(String, default="string")  # string, number, boolean, json
+    category = Column(String)  # general, payroll, finance, hr, inventory
+    description = Column(Text)
+    is_public = Column(Boolean, default=False)  # Can be viewed by non-admins
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_by = Column(String, ForeignKey("users.id"))
+
+class TaxSetting(Base):
+    __tablename__ = "tax_settings"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    tax_name = Column(String, nullable=False)  # PAYE, VAT, WHT, etc.
+    tax_type = Column(String, nullable=False)  # income_tax, sales_tax, withholding, statutory
+    jurisdiction = Column(String, default="Zambia")
+    
+    # Tax Brackets (JSON array of {min, max, rate, fixed_amount})
+    tax_brackets = Column(JSON)  # [{min: 0, max: 4500, rate: 0, fixed: 0}, {min: 4501, max: 6900, rate: 20, fixed: 0}, ...]
+    
+    # Statutory Contributions (for NAPSA, NHIMA, etc.)
+    employer_rate = Column(Float, default=0.0)  # Employer contribution %
+    employee_rate = Column(Float, default=0.0)  # Employee contribution %
+    max_amount = Column(Float)  # Maximum contribution amount
+    min_amount = Column(Float)  # Minimum contribution amount
+    applies_to = Column(String, default="gross")  # gross, basic, net
+    
+    # Tax Configuration
+    is_active = Column(Boolean, default=True)
+    effective_from = Column(Date)
+    effective_to = Column(Date)
+    
+    # GL Accounts
+    tax_payable_account_id = Column(String, ForeignKey("accounts.id"))
+    tax_expense_account_id = Column(String, ForeignKey("accounts.id"))
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+
+class EmailTemplate(Base):
+    __tablename__ = "email_templates"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    template_name = Column(String, nullable=False)
+    template_code = Column(String, nullable=False, index=True)  # payslip, leave_approval, invoice, etc.
+    subject = Column(String, nullable=False)
+    body_html = Column(Text)  # HTML email body with {{placeholders}}
+    body_text = Column(Text)  # Plain text fallback
+    
+    # Template Variables (JSON array)
+    available_variables = Column(JSON)  # ["employee_name", "payslip_date", "amount", etc.]
+    
+    is_active = Column(Boolean, default=True)
+    is_system = Column(Boolean, default=False)  # System templates cannot be deleted
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+
+class SalaryComponent(Base):
+    __tablename__ = "salary_components"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    component_code = Column(String, nullable=False, index=True)  # BASIC, HRA, TRANSPORT, etc.
+    component_name = Column(String, nullable=False)
+    component_type = Column(String, nullable=False)  # earning, deduction, benefit
+    
+    # Calculation
+    calculation_method = Column(String, default="fixed")  # fixed, percentage, formula
+    default_amount = Column(Float, default=0.0)
+    percentage_of = Column(String)  # For percentage: basic, gross, net
+    formula = Column(Text)  # For formula: JSON expression
+    
+    # Tax Treatment
+    is_taxable = Column(Boolean, default=True)
+    is_pensionable = Column(Boolean, default=False)
+    include_in_gross = Column(Boolean, default=True)
+    
+    # Statutory
+    is_statutory = Column(Boolean, default=False)  # PAYE, NAPSA, NHIMA
+    statutory_type = Column(String)  # paye, napsa, nhima, pension
+    
+    # GL Account Mapping
+    expense_account_id = Column(String, ForeignKey("accounts.id"))
+    payable_account_id = Column(String, ForeignKey("accounts.id"))
+    
+    # Status
+    is_active = Column(Boolean, default=True)
+    display_order = Column(Integer, default=0)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+
+class ApprovalWorkflowRule(Base):
+    __tablename__ = "approval_workflow_rules"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    
+    workflow_name = Column(String, nullable=False)
+    entity_type = Column(String, nullable=False)  # leave_application, loan, purchase_order, journal_entry, etc.
+    
+    # Conditions (JSON)
+    conditions = Column(JSON)  # {amount_min: 0, amount_max: 10000, department: "sales"}
+    
+    # Approval Chain (JSON array)
+    approval_chain = Column(JSON)  # [{level: 1, approver_role: "manager", required: true}, {level: 2, approver_role: "hr_head", required: false}]
+    
+    # Notification Settings
+    notify_on_submit = Column(Boolean, default=True)
+    notify_on_approve = Column(Boolean, default=True)
+    notify_on_reject = Column(Boolean, default=True)
+    escalation_hours = Column(Integer)  # Hours before escalation
+    
+    is_active = Column(Boolean, default=True)
+    priority = Column(Integer, default=0)  # Lower number = higher priority
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+
+class LeaveTypeConfiguration(Base):
+    __tablename__ = "leave_type_configurations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    leave_type_id = Column(String, ForeignKey("leave_types.id"), nullable=False)
+    
+    # Accrual Settings
+    accrual_method = Column(String, default="annual")  # annual, monthly, per_pay_period, none
+    accrual_rate = Column(Float, default=0.0)  # Days per period
+    max_accrual = Column(Float)  # Maximum accumulated days
+    carry_forward_allowed = Column(Boolean, default=True)
+    max_carry_forward = Column(Float)  # Maximum days to carry forward
+    carry_forward_expiry_months = Column(Integer)  # Months before carried days expire
+    
+    # Leave Rules
+    min_days_per_request = Column(Float, default=0.5)
+    max_days_per_request = Column(Float)
+    max_consecutive_days = Column(Float)
+    requires_approval = Column(Boolean, default=True)
+    approval_levels = Column(Integer, default=1)
+    
+    # Notice Period
+    min_notice_days = Column(Integer, default=0)  # Days notice required
+    max_advance_days = Column(Integer)  # How far in advance can be requested
+    
+    # Weekend & Holiday Handling
+    exclude_weekends = Column(Boolean, default=True)
+    exclude_holidays = Column(Boolean, default=True)
+    
+    # Documentation
+    requires_documents = Column(Boolean, default=False)
+    document_types = Column(JSON)  # ["medical_certificate", "travel_docs"]
+    
+    # Financial
+    is_paid = Column(Boolean, default=True)
+    pay_percentage = Column(Float, default=100.0)  # % of salary paid
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    leave_type = relationship("LeaveType")
