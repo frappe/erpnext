@@ -79,7 +79,7 @@ class TestPOSRegistry(FrappeTestCase, AccountsTestMixin):
                 "warehouse_name": "_Test Warehouse",
                 "company": company
             }).insert(ignore_permissions=True)
-            warehouse = warehouse_doc.name
+            self.warehouse = warehouse_doc.name
 
         parent_cc = frappe.db.get_value("Cost Center", {"company": company, "is_group": 1}, "name")
         if not parent_cc:
