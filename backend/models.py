@@ -812,3 +812,251 @@ class InvoiceLine(Base):
     
     invoice = relationship("Invoice")
     product = relationship("Product")
+
+class Operation(Base):
+    __tablename__ = "operations"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    operation_code = Column(String, nullable=False, index=True)
+    operation_name = Column(String, nullable=False)
+    operation_type = Column(String, nullable=False)  # manufacturing, agriculture, food_processing, assembly
+    description = Column(Text)
+    output_product_id = Column(String, ForeignKey("products.id"))  # Main output product
+    standard_output_quantity = Column(Float, default=1.0)
+    standard_duration_hours = Column(Float)  # Expected duration
+    department_id = Column(String, ForeignKey("departments.id"))
+    cost_center_id = Column(String, ForeignKey("accounts.id"))  # For cost allocation
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    output_product = relationship("Product")
+    department = relationship("Department")
+    steps = relationship("OperationStep", back_populates="operation")
+
+class OperationStep(Base):
+    __tablename__ = "operation_steps"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    operation_id = Column(String, ForeignKey("operations.id"), nullable=False)
+    step_number = Column(Integer, nullable=False)
+    step_name = Column(String, nullable=False)
+    description = Column(Text)
+    duration_hours = Column(Float)
+    labor_cost_per_hour = Column(Float, default=0.0)
+    machine_cost_per_hour = Column(Float, default=0.0)
+    overhead_rate = Column(Float, default=0.0)  # Percentage
+    is_quality_control = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    operation = relationship("Operation", back_populates="steps")
+
+class Batch(Base):
+    __tablename__ = "batches"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    batch_number = Column(String, nullable=False, unique=True, index=True)
+    operation_id = Column(String, ForeignKey("operations.id"), nullable=False)
+    planned_quantity = Column(Float, nullable=False)
+    actual_quantity = Column(Float, default=0.0)
+    unit_of_measure = Column(String, default="units")
+    start_date = Column(DateTime)
+    planned_end_date = Column(DateTime)
+    actual_end_date = Column(DateTime)
+    status = Column(String, default="draft")  # draft, planned, in_progress, completed, cancelled
+    department_id = Column(String, ForeignKey("departments.id"))
+    branch_id = Column(String, ForeignKey("branches.id"))
+    supervisor_id = Column(String, ForeignKey("employees.id"))
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    operation = relationship("Operation")
+    department = relationship("Department")
+    branch = relationship("Branch")
+    inputs = relationship("BatchInput", back_populates="batch")
+    outputs = relationship("BatchOutput", back_populates="batch")
+    costs = relationship("BatchCost", back_populates="batch")
+
+class BatchInput(Base):
+    __tablename__ = "batch_inputs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    batch_id = Column(String, ForeignKey("batches.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    planned_quantity = Column(Float, nullable=False)
+    actual_quantity = Column(Float, default=0.0)
+    unit_cost = Column(Float, default=0.0)
+    total_cost = Column(Float, default=0.0)
+    warehouse_id = Column(String, ForeignKey("warehouses.id"))
+    issued_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    batch = relationship("Batch", back_populates="inputs")
+    product = relationship("Product")
+    warehouse = relationship("Warehouse")
+
+class BatchOutput(Base):
+    __tablename__ = "batch_outputs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    batch_id = Column(String, ForeignKey("batches.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    output_type = Column(String, default="finished_good")  # finished_good, by_product, waste
+    quantity = Column(Float, nullable=False)
+    unit_cost = Column(Float, default=0.0)  # Calculated from batch costs
+    total_cost = Column(Float, default=0.0)
+    warehouse_id = Column(String, ForeignKey("warehouses.id"))
+    received_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    batch = relationship("Batch", back_populates="outputs")
+    product = relationship("Product")
+    warehouse = relationship("Warehouse")
+
+class BatchCost(Base):
+    __tablename__ = "batch_costs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    batch_id = Column(String, ForeignKey("batches.id"), nullable=False)
+    cost_type = Column(String, nullable=False)  # material, labor, overhead, machine
+    description = Column(String)
+    amount = Column(Float, nullable=False)
+    account_id = Column(String, ForeignKey("accounts.id"))  # For GL posting
+    posted_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    batch = relationship("Batch", back_populates="costs")
+    account = relationship("Account")
+
+class TransferPrice(Base):
+    __tablename__ = "transfer_prices"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    from_department_id = Column(String, ForeignKey("departments.id"))
+    to_department_id = Column(String, ForeignKey("departments.id"))
+    from_branch_id = Column(String, ForeignKey("branches.id"))
+    to_branch_id = Column(String, ForeignKey("branches.id"))
+    pricing_method = Column(String, default="cost_plus")  # cost_plus, market_price, negotiated
+    cost_price = Column(Float, default=0.0)
+    markup_percentage = Column(Float, default=0.0)  # For cost_plus method
+    transfer_price = Column(Float, nullable=False)
+    margin_amount = Column(Float, default=0.0)  # Calculated margin
+    margin_percentage = Column(Float, default=0.0)
+    effective_from = Column(Date, nullable=False)
+    effective_to = Column(Date)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    product = relationship("Product")
+    from_department = relationship("Department", foreign_keys=[from_department_id])
+    to_department = relationship("Department", foreign_keys=[to_department_id])
+    from_branch = relationship("Branch", foreign_keys=[from_branch_id])
+    to_branch = relationship("Branch", foreign_keys=[to_branch_id])
+
+class TransferOrder(Base):
+    __tablename__ = "transfer_orders"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    transfer_number = Column(String, nullable=False, unique=True, index=True)
+    from_department_id = Column(String, ForeignKey("departments.id"))
+    to_department_id = Column(String, ForeignKey("departments.id"))
+    from_branch_id = Column(String, ForeignKey("branches.id"))
+    to_branch_id = Column(String, ForeignKey("branches.id"))
+    from_warehouse_id = Column(String, ForeignKey("warehouses.id"))
+    to_warehouse_id = Column(String, ForeignKey("warehouses.id"))
+    transfer_date = Column(Date, nullable=False)
+    total_cost = Column(Float, default=0.0)  # Total cost from sending department
+    total_transfer_price = Column(Float, default=0.0)  # Total price charged to receiving department
+    total_margin = Column(Float, default=0.0)  # Total margin (profit to sending department)
+    status = Column(String, default="draft")  # draft, approved, in_transit, received, cancelled
+    approved_by = Column(String, ForeignKey("users.id"))
+    approved_at = Column(DateTime)
+    received_by = Column(String, ForeignKey("users.id"))
+    received_at = Column(DateTime)
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    from_department = relationship("Department", foreign_keys=[from_department_id])
+    to_department = relationship("Department", foreign_keys=[to_department_id])
+    from_branch = relationship("Branch", foreign_keys=[from_branch_id])
+    to_branch = relationship("Branch", foreign_keys=[to_branch_id])
+    from_warehouse = relationship("Warehouse", foreign_keys=[from_warehouse_id])
+    to_warehouse = relationship("Warehouse", foreign_keys=[to_warehouse_id])
+    lines = relationship("TransferOrderLine", back_populates="transfer_order")
+
+class TransferOrderLine(Base):
+    __tablename__ = "transfer_order_lines"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    transfer_order_id = Column(String, ForeignKey("transfer_orders.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    unit_cost = Column(Float, default=0.0)  # Cost to sending department
+    transfer_price = Column(Float, default=0.0)  # Price charged to receiving department
+    margin_amount = Column(Float, default=0.0)  # Calculated margin per line
+    margin_percentage = Column(Float, default=0.0)
+    line_total_cost = Column(Float, default=0.0)
+    line_total_price = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    transfer_order = relationship("TransferOrder", back_populates="lines")
+    product = relationship("Product")
+
+class WIPBalance(Base):
+    __tablename__ = "wip_balances"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    product_id = Column(String, ForeignKey("products.id"))
+    operation_id = Column(String, ForeignKey("operations.id"))
+    department_id = Column(String, ForeignKey("departments.id"))
+    branch_id = Column(String, ForeignKey("branches.id"))
+    as_of_date = Column(Date, nullable=False)
+    material_cost = Column(Float, default=0.0)
+    labor_cost = Column(Float, default=0.0)
+    overhead_cost = Column(Float, default=0.0)
+    machine_cost = Column(Float, default=0.0)
+    total_wip_value = Column(Float, default=0.0)
+    quantity_in_progress = Column(Float, default=0.0)
+    batch_count = Column(Integer, default=0)  # Number of batches in WIP
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    product = relationship("Product")
+    operation = relationship("Operation")
+    department = relationship("Department")
+    branch = relationship("Branch")
+
+class IndustryTemplate(Base):
+    __tablename__ = "industry_templates"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    template_code = Column(String, nullable=False, unique=True, index=True)
+    template_name = Column(String, nullable=False)
+    industry_type = Column(String, nullable=False)  # agriculture, manufacturing, retail, services, etc.
+    description = Column(Text)
+    template_config = Column(JSON)  # Stores operations, products, accounts, workflows as JSON
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class CompanyIndustryTemplate(Base):
+    __tablename__ = "company_industry_templates"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    template_id = Column(String, ForeignKey("industry_templates.id"), nullable=False)
+    applied_at = Column(DateTime, default=datetime.utcnow)
+    applied_by = Column(String, ForeignKey("users.id"))
+    customizations = Column(JSON)  # Stores any company-specific modifications
+    
+    company = relationship("Company")
+    template = relationship("IndustryTemplate")

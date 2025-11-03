@@ -2462,6 +2462,953 @@ def lock_accounting_period(
     db.commit()
     return {"message": f"Period {period.period_name} locked successfully"}
 
+# Operations & Batch Tracking Endpoints
+@app.post("/api/operations")
+def create_operation(
+    operation: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new operation template (for manufacturing, agriculture, etc.)"""
+    # Validate department if provided
+    if 'department_id' in operation and operation['department_id']:
+        dept = db.query(models.Department).filter(
+            models.Department.id == operation['department_id'],
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not dept:
+            raise HTTPException(status_code=400, detail="Invalid department")
+    
+    # Validate output product if provided
+    if 'output_product_id' in operation and operation['output_product_id']:
+        product = db.query(models.Product).filter(
+            models.Product.id == operation['output_product_id'],
+            models.Product.company_id == current_user.company_id
+        ).first()
+        if not product:
+            raise HTTPException(status_code=400, detail="Invalid output product")
+    
+    # Extract steps before creating operation (avoid passing nested dict to model)
+    steps_data = operation.pop('steps', [])
+    
+    new_operation = models.Operation(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **operation
+    )
+    db.add(new_operation)
+    db.flush()
+    
+    # Add operation steps if provided
+    for step_data in steps_data:
+        step = models.OperationStep(
+            operation_id=new_operation.id,
+            **step_data
+        )
+        db.add(step)
+    
+    db.commit()
+    db.refresh(new_operation)
+    return new_operation
+
+@app.get("/api/operations")
+def get_operations(
+    operation_type: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all operations for the company, optionally filtered by type"""
+    query = db.query(models.Operation).filter(
+        models.Operation.company_id == current_user.company_id
+    )
+    
+    if operation_type:
+        query = query.filter(models.Operation.operation_type == operation_type)
+    
+    operations = query.all()
+    return operations
+
+@app.post("/api/batches")
+def create_batch(
+    batch: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new production batch"""
+    # Validate operation
+    operation = db.query(models.Operation).filter(
+        models.Operation.id == batch['operation_id'],
+        models.Operation.company_id == current_user.company_id
+    ).first()
+    if not operation:
+        raise HTTPException(status_code=400, detail="Invalid operation")
+    
+    # Validate department if provided
+    if 'department_id' in batch and batch['department_id']:
+        dept = db.query(models.Department).filter(
+            models.Department.id == batch['department_id'],
+            models.Department.company_id == current_user.company_id
+        ).first()
+        if not dept:
+            raise HTTPException(status_code=400, detail="Invalid department")
+    
+    # Validate branch if provided
+    if 'branch_id' in batch and batch['branch_id']:
+        branch = db.query(models.Branch).filter(
+            models.Branch.id == batch['branch_id'],
+            models.Branch.company_id == current_user.company_id
+        ).first()
+        if not branch:
+            raise HTTPException(status_code=400, detail="Invalid branch")
+    
+    # Generate batch number
+    batch_count = db.query(models.Batch).filter(
+        models.Batch.company_id == current_user.company_id
+    ).count()
+    batch_number = f"BATCH-{batch_count + 1:06d}"
+    
+    new_batch = models.Batch(
+        company_id=current_user.company_id,
+        batch_number=batch_number,
+        created_by=current_user.id,
+        **batch
+    )
+    db.add(new_batch)
+    db.flush()
+    
+    # Add inputs if provided
+    if 'inputs' in batch:
+        for input_data in batch['inputs']:
+            batch_input = models.BatchInput(
+                batch_id=new_batch.id,
+                **input_data
+            )
+            db.add(batch_input)
+    
+    db.commit()
+    db.refresh(new_batch)
+    return new_batch
+
+@app.get("/api/batches")
+def get_batches(
+    status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all batches for the company, optionally filtered by status"""
+    query = db.query(models.Batch).filter(
+        models.Batch.company_id == current_user.company_id
+    )
+    
+    if status:
+        query = query.filter(models.Batch.status == status)
+    
+    batches = query.order_by(models.Batch.created_at.desc()).all()
+    return batches
+
+@app.post("/api/batches/{batch_id}/start")
+def start_batch(
+    batch_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Start a batch (change status to in_progress)"""
+    batch = db.query(models.Batch).filter(
+        models.Batch.id == batch_id,
+        models.Batch.company_id == current_user.company_id
+    ).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    if batch.status not in ['draft', 'planned']:
+        raise HTTPException(status_code=400, detail="Batch cannot be started")
+    
+    batch.status = "in_progress"
+    batch.start_date = datetime.utcnow()
+    
+    db.commit()
+    return {"message": f"Batch {batch.batch_number} started"}
+
+@app.post("/api/batches/{batch_id}/complete")
+def complete_batch(
+    batch_id: str,
+    actual_quantity: float,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Complete a batch and calculate costs"""
+    batch = db.query(models.Batch).filter(
+        models.Batch.id == batch_id,
+        models.Batch.company_id == current_user.company_id
+    ).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    if batch.status != "in_progress":
+        raise HTTPException(status_code=400, detail="Batch must be in progress")
+    
+    batch.status = "completed"
+    batch.actual_quantity = actual_quantity
+    batch.actual_end_date = datetime.utcnow()
+    
+    # Calculate total costs
+    total_material_cost = db.query(func.sum(models.BatchInput.total_cost)).filter(
+        models.BatchInput.batch_id == batch_id
+    ).scalar() or 0.0
+    
+    total_other_costs = db.query(func.sum(models.BatchCost.amount)).filter(
+        models.BatchCost.batch_id == batch_id
+    ).scalar() or 0.0
+    
+    total_cost = total_material_cost + total_other_costs
+    unit_cost = total_cost / actual_quantity if actual_quantity > 0 else 0
+    
+    db.commit()
+    
+    return {
+        "message": f"Batch {batch.batch_number} completed",
+        "actual_quantity": actual_quantity,
+        "total_cost": total_cost,
+        "unit_cost": unit_cost
+    }
+
+@app.post("/api/batches/{batch_id}/inputs")
+def add_batch_input(
+    batch_id: str,
+    input_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Add material input to a batch"""
+    batch = db.query(models.Batch).filter(
+        models.Batch.id == batch_id,
+        models.Batch.company_id == current_user.company_id
+    ).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    # Validate product
+    product = db.query(models.Product).filter(
+        models.Product.id == input_data['product_id'],
+        models.Product.company_id == current_user.company_id
+    ).first()
+    if not product:
+        raise HTTPException(status_code=400, detail="Invalid product")
+    
+    batch_input = models.BatchInput(
+        batch_id=batch_id,
+        issued_at=datetime.utcnow(),
+        **input_data
+    )
+    db.add(batch_input)
+    db.commit()
+    db.refresh(batch_input)
+    return batch_input
+
+@app.post("/api/batches/{batch_id}/outputs")
+def add_batch_output(
+    batch_id: str,
+    output_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Record output from a batch"""
+    batch = db.query(models.Batch).filter(
+        models.Batch.id == batch_id,
+        models.Batch.company_id == current_user.company_id
+    ).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    # Validate product
+    product = db.query(models.Product).filter(
+        models.Product.id == output_data['product_id'],
+        models.Product.company_id == current_user.company_id
+    ).first()
+    if not product:
+        raise HTTPException(status_code=400, detail="Invalid product")
+    
+    batch_output = models.BatchOutput(
+        batch_id=batch_id,
+        received_at=datetime.utcnow(),
+        **output_data
+    )
+    db.add(batch_output)
+    db.commit()
+    db.refresh(batch_output)
+    return batch_output
+
+@app.post("/api/batches/{batch_id}/costs")
+def add_batch_cost(
+    batch_id: str,
+    cost_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Add a cost entry to a batch (labor, overhead, etc.)"""
+    batch = db.query(models.Batch).filter(
+        models.Batch.id == batch_id,
+        models.Batch.company_id == current_user.company_id
+    ).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    batch_cost = models.BatchCost(
+        batch_id=batch_id,
+        **cost_data
+    )
+    db.add(batch_cost)
+    db.commit()
+    db.refresh(batch_cost)
+    return batch_cost
+
+# Transfer Pricing Endpoints
+@app.post("/api/transfer-prices")
+def create_transfer_price(
+    price_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Define transfer pricing rules between departments/branches"""
+    # Validate product
+    product = db.query(models.Product).filter(
+        models.Product.id == price_data['product_id'],
+        models.Product.company_id == current_user.company_id
+    ).first()
+    if not product:
+        raise HTTPException(status_code=400, detail="Invalid product")
+    
+    # Validate departments/branches if provided
+    for field, model in [
+        ('from_department_id', models.Department),
+        ('to_department_id', models.Department),
+        ('from_branch_id', models.Branch),
+        ('to_branch_id', models.Branch)
+    ]:
+        if field in price_data and price_data[field]:
+            entity = db.query(model).filter(
+                model.id == price_data[field],
+                model.company_id == current_user.company_id
+            ).first()
+            if not entity:
+                raise HTTPException(status_code=400, detail=f"Invalid {field}")
+    
+    # Calculate margin if cost_plus method
+    if price_data.get('pricing_method') == 'cost_plus':
+        cost = price_data.get('cost_price', 0.0)
+        markup = price_data.get('markup_percentage', 0.0)
+        transfer_price = cost * (1 + markup / 100)
+        price_data['transfer_price'] = transfer_price
+        price_data['margin_amount'] = transfer_price - cost
+        price_data['margin_percentage'] = markup
+    
+    new_price = models.TransferPrice(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **price_data
+    )
+    db.add(new_price)
+    db.commit()
+    db.refresh(new_price)
+    return new_price
+
+@app.get("/api/transfer-prices")
+def get_transfer_prices(
+    product_id: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get transfer pricing rules"""
+    query = db.query(models.TransferPrice).filter(
+        models.TransferPrice.company_id == current_user.company_id,
+        models.TransferPrice.is_active == True
+    )
+    
+    if product_id:
+        query = query.filter(models.TransferPrice.product_id == product_id)
+    
+    prices = query.all()
+    return prices
+
+@app.post("/api/transfer-orders")
+def create_transfer_order(
+    order_data: dict,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create an inter-department/inter-branch transfer order"""
+    # Validate departments/branches
+    for field, model in [
+        ('from_department_id', models.Department),
+        ('to_department_id', models.Department),
+        ('from_branch_id', models.Branch),
+        ('to_branch_id', models.Branch),
+        ('from_warehouse_id', models.Warehouse),
+        ('to_warehouse_id', models.Warehouse)
+    ]:
+        if field in order_data and order_data[field]:
+            entity = db.query(model).filter(
+                model.id == order_data[field],
+                model.company_id == current_user.company_id
+            ).first()
+            if not entity:
+                raise HTTPException(status_code=400, detail=f"Invalid {field}")
+    
+    # Generate transfer number
+    transfer_count = db.query(models.TransferOrder).filter(
+        models.TransferOrder.company_id == current_user.company_id
+    ).count()
+    transfer_number = f"TRF-{transfer_count + 1:06d}"
+    
+    new_order = models.TransferOrder(
+        company_id=current_user.company_id,
+        transfer_number=transfer_number,
+        created_by=current_user.id,
+        transfer_date=order_data['transfer_date'],
+        from_department_id=order_data.get('from_department_id'),
+        to_department_id=order_data.get('to_department_id'),
+        from_branch_id=order_data.get('from_branch_id'),
+        to_branch_id=order_data.get('to_branch_id'),
+        from_warehouse_id=order_data.get('from_warehouse_id'),
+        to_warehouse_id=order_data.get('to_warehouse_id'),
+        notes=order_data.get('notes')
+    )
+    db.add(new_order)
+    db.flush()
+    
+    # Add lines with transfer pricing
+    total_cost = 0.0
+    total_price = 0.0
+    
+    if 'lines' in order_data:
+        for line_data in order_data['lines']:
+            # Validate product
+            product = db.query(models.Product).filter(
+                models.Product.id == line_data['product_id'],
+                models.Product.company_id == current_user.company_id
+            ).first()
+            if not product:
+                raise HTTPException(status_code=400, detail="Invalid product in line items")
+            
+            # Get transfer price
+            transfer_price_rule = db.query(models.TransferPrice).filter(
+                models.TransferPrice.company_id == current_user.company_id,
+                models.TransferPrice.product_id == line_data['product_id'],
+                models.TransferPrice.is_active == True
+            ).first()
+            
+            unit_cost = line_data.get('unit_cost', product.cost if hasattr(product, 'cost') else 0.0)
+            transfer_price = transfer_price_rule.transfer_price if transfer_price_rule else unit_cost
+            quantity = line_data['quantity']
+            
+            line_total_cost = unit_cost * quantity
+            line_total_price = transfer_price * quantity
+            margin = line_total_price - line_total_cost
+            margin_pct = (margin / line_total_cost * 100) if line_total_cost > 0 else 0
+            
+            line = models.TransferOrderLine(
+                transfer_order_id=new_order.id,
+                product_id=line_data['product_id'],
+                quantity=quantity,
+                unit_cost=unit_cost,
+                transfer_price=transfer_price,
+                margin_amount=margin,
+                margin_percentage=margin_pct,
+                line_total_cost=line_total_cost,
+                line_total_price=line_total_price
+            )
+            db.add(line)
+            
+            total_cost += line_total_cost
+            total_price += line_total_price
+    
+    new_order.total_cost = total_cost
+    new_order.total_transfer_price = total_price
+    new_order.total_margin = total_price - total_cost
+    
+    db.commit()
+    db.refresh(new_order)
+    return new_order
+
+@app.get("/api/transfer-orders")
+def get_transfer_orders(
+    status: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get transfer orders"""
+    query = db.query(models.TransferOrder).filter(
+        models.TransferOrder.company_id == current_user.company_id
+    )
+    
+    if status:
+        query = query.filter(models.TransferOrder.status == status)
+    
+    orders = query.order_by(models.TransferOrder.transfer_date.desc()).all()
+    return orders
+
+@app.post("/api/transfer-orders/{order_id}/approve")
+def approve_transfer_order(
+    order_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Approve a transfer order"""
+    order = db.query(models.TransferOrder).filter(
+        models.TransferOrder.id == order_id,
+        models.TransferOrder.company_id == current_user.company_id
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Transfer order not found")
+    
+    if order.status != "draft":
+        raise HTTPException(status_code=400, detail="Only draft orders can be approved")
+    
+    order.status = "approved"
+    order.approved_by = current_user.id
+    order.approved_at = datetime.utcnow()
+    
+    db.commit()
+    return {"message": f"Transfer order {order.transfer_number} approved"}
+
+@app.post("/api/transfer-orders/{order_id}/receive")
+def receive_transfer_order(
+    order_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Mark transfer order as received"""
+    order = db.query(models.TransferOrder).filter(
+        models.TransferOrder.id == order_id,
+        models.TransferOrder.company_id == current_user.company_id
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Transfer order not found")
+    
+    if order.status not in ["approved", "in_transit"]:
+        raise HTTPException(status_code=400, detail="Order must be approved or in transit")
+    
+    order.status = "received"
+    order.received_by = current_user.id
+    order.received_at = datetime.utcnow()
+    
+    db.commit()
+    return {"message": f"Transfer order {order.transfer_number} received"}
+
+# WIP (Work-In-Progress) Tracking Endpoints
+@app.get("/api/wip-balances")
+def get_wip_balances(
+    department_id: str = None,
+    branch_id: str = None,
+    product_id: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get Work-In-Progress balances (calculated from in-progress batches)"""
+    # Query in-progress batches
+    query = db.query(models.Batch).filter(
+        models.Batch.company_id == current_user.company_id,
+        models.Batch.status.in_(['planned', 'in_progress'])
+    )
+    
+    if department_id:
+        query = query.filter(models.Batch.department_id == department_id)
+    if branch_id:
+        query = query.filter(models.Batch.branch_id == branch_id)
+    
+    batches = query.all()
+    
+    # Calculate WIP by product
+    wip_summary = {}
+    
+    for batch in batches:
+        # Calculate material costs from inputs
+        material_cost = db.query(func.sum(models.BatchInput.total_cost)).filter(
+            models.BatchInput.batch_id == batch.id
+        ).scalar() or 0.0
+        
+        # Calculate other costs (labor, overhead, machine)
+        labor_cost = db.query(func.sum(models.BatchCost.amount)).filter(
+            models.BatchCost.batch_id == batch.id,
+            models.BatchCost.cost_type == 'labor'
+        ).scalar() or 0.0
+        
+        overhead_cost = db.query(func.sum(models.BatchCost.amount)).filter(
+            models.BatchCost.batch_id == batch.id,
+            models.BatchCost.cost_type == 'overhead'
+        ).scalar() or 0.0
+        
+        machine_cost = db.query(func.sum(models.BatchCost.amount)).filter(
+            models.BatchCost.batch_id == batch.id,
+            models.BatchCost.cost_type == 'machine'
+        ).scalar() or 0.0
+        
+        total_cost = material_cost + labor_cost + overhead_cost + machine_cost
+        
+        # Get operation details
+        operation = db.query(models.Operation).filter(
+            models.Operation.id == batch.operation_id
+        ).first()
+        
+        product_id_key = operation.output_product_id if operation else None
+        
+        if product_id_key:
+            if product_id_key not in wip_summary:
+                wip_summary[product_id_key] = {
+                    'product_id': product_id_key,
+                    'material_cost': 0.0,
+                    'labor_cost': 0.0,
+                    'overhead_cost': 0.0,
+                    'machine_cost': 0.0,
+                    'total_wip_value': 0.0,
+                    'quantity_in_progress': 0.0,
+                    'batch_count': 0
+                }
+            
+            wip_summary[product_id_key]['material_cost'] += material_cost
+            wip_summary[product_id_key]['labor_cost'] += labor_cost
+            wip_summary[product_id_key]['overhead_cost'] += overhead_cost
+            wip_summary[product_id_key]['machine_cost'] += machine_cost
+            wip_summary[product_id_key]['total_wip_value'] += total_cost
+            wip_summary[product_id_key]['quantity_in_progress'] += batch.planned_quantity
+            wip_summary[product_id_key]['batch_count'] += 1
+    
+    return list(wip_summary.values())
+
+@app.post("/api/wip-balances/snapshot")
+def create_wip_snapshot(
+    as_of_date: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a WIP balance snapshot for reporting purposes"""
+    from datetime import datetime as dt
+    snapshot_date = dt.fromisoformat(as_of_date).date()
+    
+    # Query in-progress batches
+    batches = db.query(models.Batch).filter(
+        models.Batch.company_id == current_user.company_id,
+        models.Batch.status.in_(['planned', 'in_progress'])
+    ).all()
+    
+    snapshots_created = 0
+    
+    for batch in batches:
+        # Calculate costs
+        material_cost = db.query(func.sum(models.BatchInput.total_cost)).filter(
+            models.BatchInput.batch_id == batch.id
+        ).scalar() or 0.0
+        
+        labor_cost = db.query(func.sum(models.BatchCost.amount)).filter(
+            models.BatchCost.batch_id == batch.id,
+            models.BatchCost.cost_type == 'labor'
+        ).scalar() or 0.0
+        
+        overhead_cost = db.query(func.sum(models.BatchCost.amount)).filter(
+            models.BatchCost.batch_id == batch.id,
+            models.BatchCost.cost_type == 'overhead'
+        ).scalar() or 0.0
+        
+        machine_cost = db.query(func.sum(models.BatchCost.amount)).filter(
+            models.BatchCost.batch_id == batch.id,
+            models.BatchCost.cost_type == 'machine'
+        ).scalar() or 0.0
+        
+        total_cost = material_cost + labor_cost + overhead_cost + machine_cost
+        
+        if total_cost > 0:
+            operation = db.query(models.Operation).filter(
+                models.Operation.id == batch.operation_id
+            ).first()
+            
+            snapshot = models.WIPBalance(
+                company_id=current_user.company_id,
+                product_id=operation.output_product_id if operation else None,
+                operation_id=batch.operation_id,
+                department_id=batch.department_id,
+                branch_id=batch.branch_id,
+                as_of_date=snapshot_date,
+                material_cost=material_cost,
+                labor_cost=labor_cost,
+                overhead_cost=overhead_cost,
+                machine_cost=machine_cost,
+                total_wip_value=total_cost,
+                quantity_in_progress=batch.planned_quantity,
+                batch_count=1
+            )
+            db.add(snapshot)
+            snapshots_created += 1
+    
+    db.commit()
+    return {
+        "message": f"WIP snapshot created for {snapshot_date}",
+        "snapshots_created": snapshots_created
+    }
+
+@app.get("/api/wip-balances/history")
+def get_wip_history(
+    start_date: str = None,
+    end_date: str = None,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get historical WIP balance snapshots"""
+    query = db.query(models.WIPBalance).filter(
+        models.WIPBalance.company_id == current_user.company_id
+    )
+    
+    if start_date:
+        from datetime import datetime as dt
+        query = query.filter(models.WIPBalance.as_of_date >= dt.fromisoformat(start_date).date())
+    if end_date:
+        from datetime import datetime as dt
+        query = query.filter(models.WIPBalance.as_of_date <= dt.fromisoformat(end_date).date())
+    
+    snapshots = query.order_by(models.WIPBalance.as_of_date.desc()).all()
+    return snapshots
+
+# Industry Templates Endpoints
+@app.post("/api/industry-templates/seed")
+def seed_industry_templates(db: Session = Depends(get_db)):
+    """Seed default industry templates (Agriculture, Manufacturing, Retail)"""
+    templates = [
+        {
+            "template_code": "AGRICULTURE",
+            "template_name": "Agriculture & Farming",
+            "industry_type": "agriculture",
+            "description": "Template for agricultural businesses including crop cultivation, livestock, and harvest tracking",
+            "template_config": {
+                "operations": [
+                    {
+                        "operation_code": "CROP-PLANT",
+                        "operation_name": "Crop Planting",
+                        "operation_type": "agriculture",
+                        "description": "Planting seeds/seedlings for crop cultivation",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Land Preparation", "duration_hours": 8},
+                            {"step_number": 2, "step_name": "Seed Planting", "duration_hours": 6},
+                            {"step_number": 3, "step_name": "Initial Irrigation", "duration_hours": 2}
+                        ]
+                    },
+                    {
+                        "operation_code": "CROP-HARVEST",
+                        "operation_name": "Crop Harvesting",
+                        "operation_type": "agriculture",
+                        "description": "Harvesting mature crops",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Harvest Collection", "duration_hours": 10},
+                            {"step_number": 2, "step_name": "Quality Sorting", "duration_hours": 4, "is_quality_control": True},
+                            {"step_number": 3, "step_name": "Storage/Packaging", "duration_hours": 3}
+                        ]
+                    },
+                    {
+                        "operation_code": "LIVESTOCK-FEED",
+                        "operation_name": "Livestock Feeding & Care",
+                        "operation_type": "agriculture",
+                        "description": "Daily feeding and care for livestock"
+                    }
+                ],
+                "product_categories": ["Seeds", "Fertilizers", "Crops - Maize", "Crops - Wheat", "Livestock", "Dairy Products"],
+                "recommended_accounts": [
+                    {"account_code": "1510", "account_name": "Growing Crops (Biological Assets)", "account_type": "asset"},
+                    {"account_code": "1520", "account_name": "Livestock (Biological Assets)", "account_type": "asset"},
+                    {"account_code": "5110", "account_name": "Crop Production Costs", "account_type": "expense"}
+                ]
+            }
+        },
+        {
+            "template_code": "MANUFACTURING",
+            "template_name": "Manufacturing & Production",
+            "industry_type": "manufacturing",
+            "description": "Template for manufacturing businesses with production lines, assembly, and quality control",
+            "template_config": {
+                "operations": [
+                    {
+                        "operation_code": "ASSEMBLY-LINE",
+                        "operation_name": "Assembly Line Production",
+                        "operation_type": "manufacturing",
+                        "description": "Standard assembly line manufacturing process",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Component Preparation", "duration_hours": 2},
+                            {"step_number": 2, "step_name": "Assembly", "duration_hours": 4},
+                            {"step_number": 3, "step_name": "Quality Inspection", "duration_hours": 1, "is_quality_control": True},
+                            {"step_number": 4, "step_name": "Packaging", "duration_hours": 1}
+                        ]
+                    },
+                    {
+                        "operation_code": "MACHINING",
+                        "operation_name": "CNC Machining",
+                        "operation_type": "manufacturing",
+                        "description": "Precision machining operations",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Material Setup", "duration_hours": 0.5},
+                            {"step_number": 2, "step_name": "CNC Machining", "duration_hours": 3},
+                            {"step_number": 3, "step_name": "Deburring & Finishing", "duration_hours": 1}
+                        ]
+                    },
+                    {
+                        "operation_code": "QUALITY-TEST",
+                        "operation_name": "Final Quality Testing",
+                        "operation_type": "manufacturing",
+                        "description": "Comprehensive quality testing before shipment",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Visual Inspection", "duration_hours": 0.5, "is_quality_control": True},
+                            {"step_number": 2, "step_name": "Functional Testing", "duration_hours": 1, "is_quality_control": True},
+                            {"step_number": 3, "step_name": "Certification", "duration_hours": 0.25}
+                        ]
+                    }
+                ],
+                "product_categories": ["Raw Materials", "Components", "Work-In-Progress", "Finished Goods", "Packaging Materials"],
+                "recommended_accounts": [
+                    {"account_code": "1410", "account_name": "Raw Materials Inventory", "account_type": "asset"},
+                    {"account_code": "1420", "account_name": "Work-In-Progress (WIP)", "account_type": "asset"},
+                    {"account_code": "1430", "account_name": "Finished Goods Inventory", "account_type": "asset"},
+                    {"account_code": "5120", "account_name": "Manufacturing Overhead", "account_type": "expense"},
+                    {"account_code": "5130", "account_name": "Quality Control Costs", "account_type": "expense"}
+                ]
+            }
+        },
+        {
+            "template_code": "RETAIL",
+            "template_name": "Retail & E-commerce",
+            "industry_type": "retail",
+            "description": "Template for retail businesses with store operations, inventory management, and sales",
+            "template_config": {
+                "operations": [
+                    {
+                        "operation_code": "RECEIVING",
+                        "operation_name": "Goods Receiving",
+                        "operation_type": "retail",
+                        "description": "Receiving and processing incoming inventory",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Delivery Verification", "duration_hours": 0.5},
+                            {"step_number": 2, "step_name": "Quality Check", "duration_hours": 1, "is_quality_control": True},
+                            {"step_number": 3, "step_name": "Shelving/Storage", "duration_hours": 2}
+                        ]
+                    },
+                    {
+                        "operation_code": "REPLENISHMENT",
+                        "operation_name": "Shelf Replenishment",
+                        "operation_type": "retail",
+                        "description": "Restocking store shelves from backroom",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Inventory Count", "duration_hours": 1},
+                            {"step_number": 2, "step_name": "Product Retrieval", "duration_hours": 0.5},
+                            {"step_number": 3, "step_name": "Shelf Stocking", "duration_hours": 1.5}
+                        ]
+                    },
+                    {
+                        "operation_code": "ECOMMERCE-PICK",
+                        "operation_name": "E-commerce Order Picking",
+                        "operation_type": "retail",
+                        "description": "Pick and pack online orders for shipping",
+                        "steps": [
+                            {"step_number": 1, "step_name": "Order Picking", "duration_hours": 0.5},
+                            {"step_number": 2, "step_name": "Packing", "duration_hours": 0.25},
+                            {"step_number": 3, "step_name": "Shipping Label", "duration_hours": 0.1}
+                        ]
+                    }
+                ],
+                "product_categories": ["Merchandise", "Promotional Items", "Packaging Supplies", "Store Supplies"],
+                "recommended_accounts": [
+                    {"account_code": "1440", "account_name": "Retail Merchandise Inventory", "account_type": "asset"},
+                    {"account_code": "4010", "account_name": "Retail Sales Revenue", "account_type": "revenue"},
+                    {"account_code": "5010", "account_name": "Cost of Goods Sold - Retail", "account_type": "expense"},
+                    {"account_code": "5140", "account_name": "Store Operating Expenses", "account_type": "expense"}
+                ]
+            }
+        }
+    ]
+    
+    created_count = 0
+    for template_data in templates:
+        # Check if template already exists
+        existing = db.query(models.IndustryTemplate).filter(
+            models.IndustryTemplate.template_code == template_data["template_code"]
+        ).first()
+        
+        if not existing:
+            new_template = models.IndustryTemplate(**template_data)
+            db.add(new_template)
+            created_count += 1
+    
+    db.commit()
+    return {"message": f"Seeded {created_count} industry templates", "total_templates": len(templates)}
+
+@app.get("/api/industry-templates")
+def get_industry_templates(db: Session = Depends(get_db)):
+    """Get all available industry templates"""
+    templates = db.query(models.IndustryTemplate).filter(
+        models.IndustryTemplate.is_active == True
+    ).all()
+    return templates
+
+@app.post("/api/industry-templates/{template_id}/apply")
+def apply_industry_template(
+    template_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Apply an industry template to the current company"""
+    # Get template
+    template = db.query(models.IndustryTemplate).filter(
+        models.IndustryTemplate.id == template_id
+    ).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    # Check if already applied
+    existing = db.query(models.CompanyIndustryTemplate).filter(
+        models.CompanyIndustryTemplate.company_id == current_user.company_id,
+        models.CompanyIndustryTemplate.template_id == template_id
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Template already applied to this company")
+    
+    # Apply template operations
+    config = template.template_config
+    operations_created = 0
+    
+    if 'operations' in config:
+        for op_data in config['operations']:
+            # Extract steps before creating operation (avoid passing nested dict to model)
+            steps_data = op_data.pop('steps', [])
+            
+            new_operation = models.Operation(
+                company_id=current_user.company_id,
+                created_by=current_user.id,
+                **op_data
+            )
+            db.add(new_operation)
+            db.flush()
+            
+            # Add steps
+            for step_data in steps_data:
+                step = models.OperationStep(
+                    operation_id=new_operation.id,
+                    **step_data
+                )
+                db.add(step)
+            
+            operations_created += 1
+    
+    # Record template application
+    application = models.CompanyIndustryTemplate(
+        company_id=current_user.company_id,
+        template_id=template_id,
+        applied_by=current_user.id
+    )
+    db.add(application)
+    
+    db.commit()
+    
+    return {
+        "message": f"Applied {template.template_name} template",
+        "operations_created": operations_created,
+        "product_categories": config.get('product_categories', []),
+        "recommended_accounts": config.get('recommended_accounts', [])
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
