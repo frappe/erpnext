@@ -11,8 +11,11 @@ import auth
 import utils
 from database import engine, get_db
 from ai_assistant import ai_assistant
+from notification_service import notification_service
+import migrations
 
 models.Base.metadata.create_all(bind=engine)
+migrations.run_migrations()
 
 app = FastAPI(title="ERIK ERP API", version="1.0.0")
 
@@ -4979,3 +4982,133 @@ def seed_default_settings(
         "tax_settings": 3,
         "salary_components": len(components)
     }
+
+@app.get("/api/notifications", response_model=List[schemas.NotificationResponse])
+def get_notifications(
+    unread_only: bool = False,
+    notification_type: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Notification).filter(
+        models.Notification.company_id == current_user.company_id,
+        models.Notification.user_id == current_user.id
+    )
+    
+    if unread_only:
+        query = query.filter(models.Notification.is_read == False)
+    
+    if notification_type:
+        query = query.filter(models.Notification.notification_type == notification_type)
+    
+    notifications = query.order_by(models.Notification.created_at.desc()).offset(offset).limit(limit).all()
+    return notifications
+
+@app.get("/api/notifications/unread-count")
+def get_unread_count(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    count = db.query(models.Notification).filter(
+        models.Notification.company_id == current_user.company_id,
+        models.Notification.user_id == current_user.id,
+        models.Notification.is_read == False
+    ).count()
+    
+    return {"unread_count": count}
+
+@app.post("/api/notifications", response_model=schemas.NotificationResponse)
+def create_notification(
+    notification: schemas.NotificationCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    target_user = db.query(models.User).filter(
+        models.User.id == notification.user_id,
+        models.User.company_id == current_user.company_id
+    ).first()
+    
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Target user not found or not in your company")
+    
+    db_notification = models.Notification(
+        company_id=current_user.company_id,
+        created_by=current_user.id,
+        **notification.model_dump()
+    )
+    db.add(db_notification)
+    db.commit()
+    db.refresh(db_notification)
+    
+    notification_service.send_notification(
+        notification=db_notification,
+        user_email=target_user.email,
+        user_phone=target_user.phone,
+        db=db
+    )
+    
+    return db_notification
+
+@app.put("/api/notifications/{notification_id}/mark-read", response_model=schemas.NotificationResponse)
+def mark_notification_read(
+    notification_id: str,
+    is_read: bool = True,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    notification = db.query(models.Notification).filter(
+        models.Notification.id == notification_id,
+        models.Notification.company_id == current_user.company_id,
+        models.Notification.user_id == current_user.id
+    ).first()
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    notification.is_read = is_read
+    notification.read_at = datetime.utcnow() if is_read else None
+    
+    db.commit()
+    db.refresh(notification)
+    
+    return notification
+
+@app.put("/api/notifications/mark-all-read")
+def mark_all_notifications_read(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    updated_count = db.query(models.Notification).filter(
+        models.Notification.company_id == current_user.company_id,
+        models.Notification.user_id == current_user.id,
+        models.Notification.is_read == False
+    ).update({
+        "is_read": True,
+        "read_at": datetime.utcnow()
+    })
+    
+    db.commit()
+    
+    return {"message": f"Marked {updated_count} notifications as read"}
+
+@app.delete("/api/notifications/{notification_id}")
+def delete_notification(
+    notification_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    notification = db.query(models.Notification).filter(
+        models.Notification.id == notification_id,
+        models.Notification.company_id == current_user.company_id,
+        models.Notification.user_id == current_user.id
+    ).first()
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    db.delete(notification)
+    db.commit()
+    
+    return {"message": "Notification deleted successfully"}

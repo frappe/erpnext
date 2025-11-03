@@ -883,3 +883,44 @@ class LeaveTypeConfigurationResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class NotificationCreate(BaseModel):
+    user_id: str
+    title: str
+    message: str
+    notification_type: str = "info"
+    channel: str = "in_app"
+    priority: str = "normal"
+    related_entity_type: Optional[str] = None
+    related_entity_id: Optional[str] = None
+    action_url: Optional[str] = None
+    action_label: Optional[str] = None
+    expires_at: Optional[datetime] = None
+
+class NotificationUpdate(BaseModel):
+    is_read: Optional[bool] = None
+    
+class NotificationResponse(BaseModel):
+    id: str
+    company_id: str
+    user_id: str
+    title: str
+    message: str
+    notification_type: str
+    channel: str
+    priority: str
+    is_read: bool
+    read_at: Optional[datetime]
+    related_entity_type: Optional[str]
+    related_entity_id: Optional[str]
+    action_url: Optional[str]
+    action_label: Optional[str]
+    email_sent: bool
+    email_sent_at: Optional[datetime]
+    sms_sent: bool
+    sms_sent_at: Optional[datetime]
+    expires_at: Optional[datetime]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
