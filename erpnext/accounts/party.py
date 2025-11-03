@@ -404,6 +404,8 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 	Will first search in party (Customer / Supplier) record, if not found,
 	will search in group (Customer Group / Supplier Group),
 	finally will return default."""
+	if not party_type:
+		frappe.throw(_("Party Type is mandatory"))
 	if not company:
 		frappe.throw(_("Please select a Company"))
 
@@ -536,7 +538,7 @@ def get_party_gle_account(party_type, party, company):
 
 def validate_party_gle_currency(party_type, party, company, party_account_currency=None):
 	"""Validate party account currency with existing GL Entry's currency"""
-	# Removed validation for party account currency for multicurrency support 
+	# Removed validation for party account currency for multicurrency support
 	return
 
 

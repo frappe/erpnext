@@ -12,7 +12,7 @@ class BudgetEntry(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
 
 		actual_overall_credit: DF.Currency
@@ -34,9 +34,13 @@ class BudgetEntry(Document):
 		wbs_name: DF.Data | None
 		zero_budget: DF.Link | None
 	# end: auto-generated types
-	
+
 	def on_cancel(self):
-		wbs = frappe.get_doc(self.voucher_type,self.voucher_no)
+		wbs = frappe.get_doc(self.voucher_type, self.voucher_no)
 		if wbs.docstatus == 1:
 			link = frappe.utils.get_link_to_form(self.voucher_type, self.voucher_no)
-			frappe.throw(_(f"Cannot cancel Budget Entry {self.name}. Please cancel {self.voucher_type} : {link} first."))
+			frappe.throw(
+				_(
+					f"Cannot cancel Budget Entry {self.name}. Please cancel {self.voucher_type} : {link} first."
+				)
+			)

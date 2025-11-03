@@ -184,7 +184,13 @@ class TestBlanketOrder(FrappeTestCase):
 		purchase_receipt.insert()
 		purchase_receipt.submit()
 
+		stock_account = frappe.db.get_value("Account", {"company": company, "account_type": "Stock"}, "name")
+		srbn_account = frappe.db.get_value("Account", {"company": company, "account_type": "Stock Received But Not Billed"}, "name")
+
 		# Validate PR Accounting Entries
+		pr_gl_entries = frappe.get_all("GL Entry", filters={"voucher_no": purchase_receipt.name}, fields=["account", "debit", "credit"])
+		self.assertTrue(any(entry["account"] == stock_account and entry["debit"] == 100000 for entry in pr_gl_entries))
+		self.assertTrue(any(entry["account"] == srbn_account and entry["credit"] == 100000 for entry in pr_gl_entries))
 		pr_gl_entries = frappe.get_all(
 			"GL Entry", filters={"voucher_no": purchase_receipt.name}, fields=["account", "debit", "credit"]
 		)
@@ -210,6 +216,10 @@ class TestBlanketOrder(FrappeTestCase):
 			"GL Entry", filters={"voucher_no": purchase_invoice.name}, fields=["account", "debit", "credit"]
 		)
 
+		self.assertTrue(any(entry["account"] == srbn_account and entry["debit"] == 100000 for entry in pi_gl_entries))
+		self.assertTrue(any(entry["account"] == "Input Tax CGST - TC-5" and entry["debit"] == 9000 for entry in pi_gl_entries))
+		self.assertTrue(any(entry["account"] == "Input Tax SGST - TC-5" and entry["debit"] == 9000 for entry in pi_gl_entries))
+		self.assertTrue(any(entry["account"] == "Creditors - TC-5" and entry["credit"] == 118000 for entry in pi_gl_entries))
 		self.assertTrue(
 			any(
 				entry["account"] == "Stock Received But Not Billed - TC-5" and entry["debit"] == 100000

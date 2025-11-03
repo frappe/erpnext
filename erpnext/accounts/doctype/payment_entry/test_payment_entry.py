@@ -2430,7 +2430,7 @@ class TestPaymentEntry(FrappeTestCase):
 		make_test_item("_Test Item")
 		get_or_create_fiscal_year("_Test Company")
 
-		pi = create_purchase_invoice(supplier=supplier)
+		pi = create_purchase_invoice(supplier=supplier, item_code="_Test Item")
 
 		# Insert GL Entries for a customer
 		gl_entry = frappe.get_doc(
@@ -3223,7 +3223,7 @@ class TestPaymentEntry(FrappeTestCase):
 		item = make_test_item("_Test Item")
 		get_or_create_fiscal_year(company)
 		# Step 1: Create a Sales Invoice with Payment Terms
-		si = create_sales_invoice(customer=customer, company=company, qty=2, rate=100, do_not_save = True)
+		si = create_sales_invoice(customer=customer, company=company, qty=2, rate=100, do_not_save=True)
 		si.payment_terms_template = "_Test Payment Term Template"
 		si.taxes_and_charges = ""
 		si.taxes = []
@@ -3232,9 +3232,7 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# Step 2: Build references like Payment Entry would
 		references = [
-			frappe._dict(
-				reference_doctype="Sales Invoice", reference_name=si.name, payment_term="_Test COD"
-			)
+			frappe._dict(reference_doctype="Sales Invoice", reference_name=si.name, payment_term="_Test COD")
 		]
 		# Step 3: Call function
 		result = get_outstanding_of_references_with_payment_term(references)

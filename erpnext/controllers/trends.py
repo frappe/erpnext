@@ -165,7 +165,7 @@ def get_data(filters, conditions):
 				row1 = frappe.db.sql(
 					"""
 					SELECT
-						t1.currency , {} , {}
+						MAX(t1.currency) AS currency,{} , {}
 					FROM
 						`tab{}` t1,
 						`tab{} Item` t2
@@ -414,7 +414,8 @@ def based_wise_columns_query(based_on, trans):
 		else:
 			frappe.throw(_("Project-wise data is not available for Quotation"))
 
-	based_on_details["based_on_select"] += "t1.currency,"
+	
+	based_on_details["based_on_select"] += "MAX(t1.currency) AS currency,"
 	based_on_details["based_on_cols"].append("Currency:Link/Currency:120")
 
 	return based_on_details

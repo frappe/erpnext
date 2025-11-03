@@ -1525,17 +1525,20 @@ def stop_unstop(work_order, status):
 	return pro_order.status
 
 
-def query_sales_order(production_item: str) -> list[str]:
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def query_sales_order(doctype, txt, searchfield, start, page_len, filters) -> list[str]:
 	return frappe.get_list(
 		"Sales Order",
+		fields=["name"],
 		filters=[
 			["Sales Order", "docstatus", "=", 1],
 		],
 		or_filters=[
-			["Sales Order Item", "item_code", "=", production_item],
-			["Packed Item", "item_code", "=", production_item],
+			["Sales Order Item", "item_code", "=", filters.get("production_item")],
+			["Packed Item", "item_code", "=", filters.get("production_item")],
 		],
-		pluck="name",
+		as_list=True,
 		distinct=True,
 	)
 

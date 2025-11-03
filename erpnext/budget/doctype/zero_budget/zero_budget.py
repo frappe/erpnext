@@ -14,7 +14,7 @@ class ZeroBudget(Document):
 
     from typing import TYPE_CHECKING
 
-    if TYPE_CHECKING:
+    if TYPE_CHECKING:  # pragma: no cover
         from erpnext.budget.doctype.zero_budget_item.zero_budget_item import ZeroBudgetItem
         from frappe.types import DF
 
