@@ -1,3 +1,1 @@
-web: gunicorn --config gunicorn.conf.py wsgi:application
-worker: bench worker --queue long,default,short
-scheduler: bench schedule
+web: gunicorn --bind 0.0.0.0:$PORT wsgi:application
