@@ -23,6 +23,7 @@ ERIK ERP is a comprehensive, multi-tenant SaaS enterprise resource planning syst
 - **Multi-Branch Operations**: Branch creation, inter-branch transfers, and branch-level reporting.
 - **Super Admin Platform**: Tenant management, subscription control, system analytics, and 7-day free trial.
 - **Dashboard**: Real-time statistics and company activity overview.
+- **Addon Marketplace**: Industry-specific modules that can be activated/deactivated per tenant, including Construction, Healthcare, Agriculture, Retail, Education, Transport, Hospitality, Real Estate, Legal, NGO, Manufacturing, Logistics, Telecom, Energy, Media, Insurance, and Government sectors.
 
 ### UI/UX
 - **Modern Design**: Responsive landing page with a professional aesthetic.
@@ -33,6 +34,39 @@ ERIK ERP is a comprehensive, multi-tenant SaaS enterprise resource planning syst
 - **Backend**: FastAPI (Python 3.11), SQLAlchemy 2.0 ORM, JWT authentication (bcrypt), RESTful API with OpenAPI/Swagger.
 - **Frontend**: React 18 (Vite), React Router v6, Tailwind CSS (custom ERIK theme), Lucide React icons, Axios.
 - **Database**: PostgreSQL.
+
+## Recent Updates (November 4, 2025)
+
+### Addon Marketplace Implementation
+Built a complete addon marketplace infrastructure with per-tenant activation/deactivation:
+
+**Completed Industry Modules (7/17):**
+1. **Construction & Real Estate** - Project management, Bill of Quantities
+2. **Agriculture & Agribusiness** - Farm management, Crop planning, Livestock tracking
+3. **Healthcare & Pharmaceuticals** - Patient management, Appointment scheduling
+4. **Retail, Wholesale & POS** - Store management, POS sales tracking
+5. **Education & Training** - Student information system, Enrollment management
+6. **Transport & Logistics** - Vehicle fleet, Trip management
+7. **Hospitality & Restaurants** - Room management, Hotel reservations
+
+**Pending Industry Modules (10/17):**
+- Real Estate Development
+- Legal Practice Management
+- NGO & Non-Profit Management
+- Advanced Manufacturing
+- Logistics & Warehousing
+- Telecommunications
+- Energy & Utilities
+- Media & Publishing
+- Insurance & Underwriting
+- Government & Public Sector
+
+**Technical Features:**
+- Backend API with activation/deactivation endpoints
+- Beautiful frontend Addon Store UI with card-based layout
+- Per-tenant addon management with activation tracking
+- Full CRUD operations for each industry module
+- Integrated into main navigation sidebar
 
 ## External Dependencies
 - **Database**: PostgreSQL
