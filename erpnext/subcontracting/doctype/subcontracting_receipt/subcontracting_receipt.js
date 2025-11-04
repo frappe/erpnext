@@ -85,11 +85,11 @@ frappe.ui.form.on("Subcontracting Receipt", {
 					const make_standard_return = () => {
 						frappe.model.open_mapped_doc({
 							method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return",
-							frm: cur_frm,
+							frm: frm,
 						});
 					};
 
-					let has_rejected_items = cur_frm.doc.items.filter((item) => {
+					let has_rejected_items = frm.doc.items.filter((item) => {
 						if (item.rejected_qty > 0) {
 							return true;
 						}
@@ -110,7 +110,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 									frappe.call({
 										method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return_against_rejected_warehouse",
 										args: {
-											source_name: cur_frm.doc.name,
+											source_name: frm.doc.name,
 										},
 										callback: function (r) {
 											if (r.message) {
