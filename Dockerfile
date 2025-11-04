@@ -40,7 +40,8 @@ RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Clone Frappe Framework from GitHub
 # Using main branch which contains the latest stable version
-RUN git clone --branch v15 --depth 1 https://github.com/frappe/frappe.git /opt/frappe
+RUN git clone --branch version-15 --depth 1 https://github.com/frappe/frappe.git /opt/frappe
+RUN pip install -e /opt/frappe
 
 # Install Frappe framework from the cloned repository (development mode)
 # This makes it importable as 'frappe' while keeping the source code accessible
