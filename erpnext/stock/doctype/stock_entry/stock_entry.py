@@ -867,15 +867,27 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 
 	def validate_same_source_target_warehouse_during_material_transfer(self):
+		"""
+		Validate Material Transfer entries where source and target warehouses are identical.
+
+		For Material Transfer purpose, if an item has the same source and target warehouse,
+		require that at least one inventory dimension (if configured) differs between source
+		and target to ensure a meaningful transfer is occurring.
+
+		Raises:
+		        frappe.ValidationError: If warehouses are same and no inventory dimensions differ
+		"""
 		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 
 		inventory_dimensions = get_inventory_dimensions()
 		if self.purpose == "Material Transfer":
 			for item in self.items:
-				if item.s_warehouse == item.t_warehouse:
+				if cstr(item.s_warehouse) == cstr(item.t_warehouse):
 					if not inventory_dimensions:
 						frappe.throw(
-							_("Source and Target Warehouse cannot be the same for Material Transfer"),
+							_(
+								"Row #{0}: Source and Target Warehouse cannot be the same for Material Transfer"
+							).format(item.idx),
 							title=_("Invalid Source and Target Warehouse"),
 						)
 					else:
