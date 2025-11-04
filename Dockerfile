@@ -36,12 +36,21 @@ COPY . /app/
 # Upgrade pip, setuptools, wheel
 RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
+# Clone Frappe v16 Framework from GitHub
+# This is the official Frappe framework that ERPNext depends on
+RUN git clone --branch version-16 --depth 1 https://github.com/frappe/frappe.git /opt/frappe
+
+# Install Frappe framework from the cloned repository (development mode)
+# This makes it importable as 'frappe' while keeping the source code accessible
+RUN cd /opt/frappe && python -m pip install --no-cache-dir -e .
+
 # Install Python dependencies from requirements.txt
-# This includes Frappe v16 which is required for wsgi:application to work
+# This includes all other dependencies required for production deployment
 RUN python -m pip install --no-cache-dir -r /app/requirements.txt
 
 # Verify critical packages are installed
-RUN python -m pip list | grep -E "frappe|gunicorn" && echo "✅ Core packages (Frappe + Gunicorn) installed successfully"
+RUN python -c "import frappe; print(f'✅ Frappe {frappe.__version__} installed successfully')" && \
+    python -c "import gunicorn; print('✅ Gunicorn installed successfully')"
 
 # ============================================================================
 # STAGE 4: Create Required Directories
@@ -73,7 +82,7 @@ RUN chmod +x /app/docker-entrypoint.sh
 # STAGE 7: Environment Variables
 # ============================================================================
 ENV FRAPPE_BENCH_PATH=/app \
-    PYTHONPATH=/app:$PYTHONPATH \
+    PYTHONPATH=/app:/opt/frappe:$PYTHONPATH \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     NODE_ENV=production \

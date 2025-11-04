@@ -1,14 +1,17 @@
 # ============================================================================
 # ERPNext & Frappe Framework Dependencies
 # ============================================================================
-# NOTE: Frappe is installed from PyPI (the core framework)
+# NOTE: Frappe is installed from GitHub (the core framework)
 #       ERPNext source code is in /app/erpnext directory
 #       These dependencies are required for production deployment
+#
+# Frappe v16 is installed from GitHub via docker build (see Dockerfile)
+# It will be cloned and installed in development mode (-e flag)
 
 # ============================================================================
-# CORE FRAMEWORK (REQUIRED)
+# CORE FRAMEWORK DEPENDENCIES (Frappe dependencies)
+# These are what Frappe itself requires (from its pyproject.toml/setup.cfg)
 # ============================================================================
-frappe>=16.0.0,<17.0.0
 
 # ============================================================================
 # Database Drivers
