@@ -1,13 +1,12 @@
 # ============================================================================
-# ERPNext Kanaan ERP - Multi-Stage Dockerfile
+# ERPNext Kanaan ERP - Production Dockerfile
 # ============================================================================
-# Stage 1: Builder - تجميع الـ Assets و Dependencies
-# ============================================================================
-FROM python:3.10-slim AS builder
+
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# تثبيت المتطلبات النظام
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
@@ -16,69 +15,49 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     npm \
     nodejs \
     mariadb-client \
-    && rm -rf /var/lib/apt/lists/*
-
-# تثبيت Frappe Bench
-RUN pip install --no-cache-dir frappe-bench
-
-# ============================================================================
-# Stage 2: Production - الصورة النهائية
-# ============================================================================
-FROM python:3.10-slim
-
-WORKDIR /app
-
-# تثبيت المتطلبات النظام للإنتاج
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    mariadb-client \
     redis-tools \
-    git \
-    curl \
-    npm \
-    nodejs \
     supervisor \
     nginx \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# نسخ المشروع
-COPY . /app
+# Copy project files
+COPY . /app/
 
-# Create required directories first
+# Create required directories
 RUN mkdir -p /app/logs \
     && mkdir -p /app/private/files \
     && mkdir -p /app/sites \
     && mkdir -p /app/public/files \
     && chmod -R 755 /app
 
-# تثبيت Python Dependencies
-RUN if [ -f /app/requirements.txt ]; then pip install --no-cache-dir -r /app/requirements.txt; else echo "No requirements.txt found"; fi
+# Install Python dependencies from requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r /app/requirements.txt
 
-# تثبيت Node Dependencies
-RUN cd /app && npm ci --omit=dev 2>/dev/null || npm install 2>/dev/null || echo "npm install skipped"
+# Install Node dependencies
+RUN cd /app && npm ci --omit=dev || npm install || echo "npm install completed with warnings"
 
-# نسخ Nginx Config if exists
-RUN if [ -f /app/nginx.conf ]; then cp /app/nginx.conf /etc/nginx/nginx.conf; fi
-
-# نسخ Supervisor Config if exists
-RUN if [ -f /app/supervisor.conf ]; then cp /app/supervisor.conf /etc/supervisor/conf.d/erpnext.conf; fi
-
-# نسخ Docker Entry Point Script
+# Make entrypoint executable
 RUN chmod +x /app/docker-entrypoint.sh
 
-# تعيين متغيرات البيئة الافتراضية
+# Copy configs
+RUN if [ -f /app/nginx.conf ]; then cp /app/nginx.conf /etc/nginx/nginx.conf; fi && \
+    if [ -f /app/supervisor.conf ]; then cp /app/supervisor.conf /etc/supervisor/conf.d/erpnext.conf; fi
+
+# Set environment variables
 ENV FRAPPE_BENCH_PATH=/app \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     NODE_ENV=production
 
-# الحد الأدنى من الأوامر الصحية
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080 || exit 1
 
-# إذاعة المنافذ
+# Expose ports
 EXPOSE 8000 8080 3000
 
-# نقطة دخول التطبيق
+# Entry point
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["gunicorn", "--config", "/app/gunicorn.conf.py", "wsgi:application"]
