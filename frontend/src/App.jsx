@@ -30,6 +30,7 @@ import AuditTrail from './pages/AuditTrail';
 import BankConnections from './pages/Banking/BankConnections';
 import TransactionFeed from './pages/Banking/TransactionFeed';
 import ReconciliationDashboard from './pages/Banking/ReconciliationDashboard';
+import SuperAdmin from './pages/SuperAdmin';
 import Layout from './components/Layout';
 import { auth } from './services/api';
 
@@ -91,6 +92,9 @@ function App() {
         } />
         <Route path="/admin" element={
           user ? <AdminDashboard /> : <Navigate to="/login" />
+        } />
+        <Route path="/super-admin" element={
+          user ? <SuperAdmin /> : <Navigate to="/login" />
         } />
         <Route path="/" element={
           user ? <Layout user={user} onLogout={handleLogout} /> : <Navigate to="/" />
