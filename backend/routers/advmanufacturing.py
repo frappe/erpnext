@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import ProductionOrder, QualityControl
+from models import AdvProductionOrder, AdvQualityControl
 import schemas
 from auth import get_current_user
 
@@ -15,7 +15,7 @@ async def create_production_order(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    db_order = ProductionOrder(**order.dict(), company_id=current_user.company_id)
+    db_order = AdvProductionOrder(**order.dict(), company_id=current_user.company_id)
     db.add(db_order)
     db.commit()
     db.refresh(db_order)
@@ -26,8 +26,8 @@ async def get_production_orders(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return db.query(ProductionOrder).filter(
-        ProductionOrder.company_id == current_user.company_id
+    return db.query(AdvProductionOrder).filter(
+        AdvProductionOrder.company_id == current_user.company_id
     ).all()
 
 @router.get("/production-orders/{order_id}")
@@ -36,9 +36,9 @@ async def get_production_order(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    order = db.query(ProductionOrder).filter(
-        ProductionOrder.id == order_id,
-        ProductionOrder.company_id == current_user.company_id
+    order = db.query(AdvProductionOrder).filter(
+        AdvProductionOrder.id == order_id,
+        AdvProductionOrder.company_id == current_user.company_id
     ).first()
     if not order:
         raise HTTPException(status_code=404, detail="Production order not found")
@@ -51,9 +51,9 @@ async def update_production_order(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    order = db.query(ProductionOrder).filter(
-        ProductionOrder.id == order_id,
-        ProductionOrder.company_id == current_user.company_id
+    order = db.query(AdvProductionOrder).filter(
+        AdvProductionOrder.id == order_id,
+        AdvProductionOrder.company_id == current_user.company_id
     ).first()
     if not order:
         raise HTTPException(status_code=404, detail="Production order not found")
@@ -71,9 +71,9 @@ async def delete_production_order(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    order = db.query(ProductionOrder).filter(
-        ProductionOrder.id == order_id,
-        ProductionOrder.company_id == current_user.company_id
+    order = db.query(AdvProductionOrder).filter(
+        AdvProductionOrder.id == order_id,
+        AdvProductionOrder.company_id == current_user.company_id
     ).first()
     if not order:
         raise HTTPException(status_code=404, detail="Production order not found")
@@ -89,7 +89,7 @@ async def create_quality_control(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    db_qc = QualityControl(**qc.dict(), company_id=current_user.company_id)
+    db_qc = AdvQualityControl(**qc.dict(), company_id=current_user.company_id)
     db.add(db_qc)
     db.commit()
     db.refresh(db_qc)
@@ -100,6 +100,6 @@ async def get_quality_controls(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return db.query(QualityControl).filter(
-        QualityControl.company_id == current_user.company_id
+    return db.query(AdvQualityControl).filter(
+        AdvQualityControl.company_id == current_user.company_id
     ).all()

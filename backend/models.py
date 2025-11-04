@@ -3426,8 +3426,8 @@ class Grant(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 # Advanced Manufacturing
-class ProductionOrder(Base):
-    __tablename__ = "production_orders"
+class AdvProductionOrder(Base):
+    __tablename__ = "adv_production_orders"
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey('companies.id'), nullable=False)
@@ -3440,12 +3440,12 @@ class ProductionOrder(Base):
     status = Column(String, default='planned')
     created_at = Column(DateTime, default=datetime.utcnow)
 
-class QualityControl(Base):
-    __tablename__ = "quality_controls"
+class AdvQualityControl(Base):
+    __tablename__ = "adv_quality_controls"
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey('companies.id'), nullable=False)
-    production_order_id = Column(String, ForeignKey('production_orders.id'))
+    production_order_id = Column(String, ForeignKey('adv_production_orders.id'))
     inspection_date = Column(Date)
     inspector_name = Column(String)
     result = Column(String)
@@ -3454,8 +3454,8 @@ class QualityControl(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 # Logistics & Warehousing
-class Warehouse(Base):
-    __tablename__ = "warehouses"
+class LogisticsWarehouse(Base):
+    __tablename__ = "logistics_warehouses"
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey('companies.id'), nullable=False)
@@ -3467,8 +3467,8 @@ class Warehouse(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-class Shipment(Base):
-    __tablename__ = "shipments"
+class LogisticsShipment(Base):
+    __tablename__ = "logistics_shipments"
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey('companies.id'), nullable=False)
@@ -3539,7 +3539,7 @@ class Consumption(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 # Media & Publishing
-class Content(Base):
+class MediaContent(Base):
     __tablename__ = "media_contents"
     
     id = Column(String, primary_key=True, default=generate_uuid)
@@ -3552,8 +3552,8 @@ class Content(Base):
     status = Column(String, default='draft')
     created_at = Column(DateTime, default=datetime.utcnow)
 
-class Publication(Base):
-    __tablename__ = "publications"
+class MediaPublication(Base):
+    __tablename__ = "media_publications"
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey('companies.id'), nullable=False)
