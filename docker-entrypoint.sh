@@ -9,85 +9,161 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🚀 Starting ERPNext Kanaan ERP Application"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Wait for Database to be ready
-echo "⏳ Waiting for database to be ready..."
-while ! mysqladmin ping -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" --silent; do
-    echo "📦 Database is unavailable - sleeping..."
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+DB_HOST="${DB_HOST:-localhost}"
+DB_PORT="${DB_PORT:-3306}"
+DB_USER="${DB_USER:-root}"
+DB_PASSWORD="${DB_PASSWORD:-root}"
+DB_NAME="${DB_NAME:-erpnext}"
+REDIS_CACHE="${REDIS_CACHE:-localhost:6379}"
+REDIS_QUEUE="${REDIS_QUEUE:-localhost:6380}"
+SITE_NAME="${SITE_NAME:-localhost}"
+
+echo ""
+echo "📝 Configuration:"
+echo "  🗄️  Database: $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
+echo "  💾 Redis Cache: $REDIS_CACHE"
+echo "  ⚡ Redis Queue: $REDIS_QUEUE"
+echo "  📍 Site Name: $SITE_NAME"
+echo ""
+
+# ============================================================================
+# HEALTH CHECKS
+# ============================================================================
+
+# Wait for Database
+echo "⏳ Waiting for MariaDB to be ready..."
+MAX_RETRIES=30
+RETRY=0
+while ! mysqladmin ping -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" --silent 2>/dev/null; do
+    RETRY=$((RETRY + 1))
+    if [ $RETRY -ge $MAX_RETRIES ]; then
+        echo "❌ Database failed to start after $MAX_RETRIES attempts"
+        echo "   Make sure DB_HOST, DB_USER, DB_PASSWORD are set correctly"
+        exit 1
+    fi
+    echo "   ⏳ Database is unavailable - sleeping... ($RETRY/$MAX_RETRIES)"
     sleep 2
 done
 echo "✅ Database is ready!"
 
-# Wait for Redis Cache to be ready
+# Wait for Redis Cache
 echo "⏳ Waiting for Redis Cache to be ready..."
-while ! redis-cli -h "$REDIS_CACHE" ping > /dev/null 2>&1; do
-    echo "📦 Redis Cache is unavailable - sleeping..."
+REDIS_HOST=$(echo "$REDIS_CACHE" | cut -d: -f1)
+REDIS_PORT=$(echo "$REDIS_CACHE" | cut -d: -f2)
+RETRY=0
+while ! redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" ping > /dev/null 2>&1; do
+    RETRY=$((RETRY + 1))
+    if [ $RETRY -ge $MAX_RETRIES ]; then
+        echo "❌ Redis Cache failed to start after $MAX_RETRIES attempts"
+        exit 1
+    fi
+    echo "   ⏳ Redis Cache is unavailable - sleeping... ($RETRY/$MAX_RETRIES)"
     sleep 2
 done
 echo "✅ Redis Cache is ready!"
 
-# Wait for Redis Queue to be ready
+# Wait for Redis Queue
 echo "⏳ Waiting for Redis Queue to be ready..."
-while ! redis-cli -h $(echo "$REDIS_QUEUE" | cut -d: -f1) -p $(echo "$REDIS_QUEUE" | cut -d: -f2) ping > /dev/null 2>&1; do
-    echo "📦 Redis Queue is unavailable - sleeping..."
+REDIS_QUEUE_HOST=$(echo "$REDIS_QUEUE" | cut -d: -f1)
+REDIS_QUEUE_PORT=$(echo "$REDIS_QUEUE" | cut -d: -f2)
+RETRY=0
+while ! redis-cli -h "$REDIS_QUEUE_HOST" -p "$REDIS_QUEUE_PORT" ping > /dev/null 2>&1; do
+    RETRY=$((RETRY + 1))
+    if [ $RETRY -ge $MAX_RETRIES ]; then
+        echo "❌ Redis Queue failed to start after $MAX_RETRIES attempts"
+        exit 1
+    fi
+    echo "   ⏳ Redis Queue is unavailable - sleeping... ($RETRY/$MAX_RETRIES)"
     sleep 2
 done
 echo "✅ Redis Queue is ready!"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📝 Application Configuration:"
+echo "✅ All dependencies are ready!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  📍 Site Name: $SITE_NAME"
-echo "  🗄️  Database: $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
-echo "  💾 Redis Cache: $REDIS_CACHE"
-echo "  ⚡ Redis Queue: $REDIS_QUEUE"
-echo "  🏗️  Environment: $FRAPPE_ENV"
 echo ""
 
-# Install/Update Python Dependencies if needed
-echo "📦 Installing Python dependencies..."
-if [ -f "requirements.txt" ]; then
-    pip install --no-cache-dir -r requirements.txt || echo "⚠️  Some dependencies may have failed"
-fi
+# ============================================================================
+# CREATE REQUIRED DIRECTORIES
+# ============================================================================
+echo "📁 Ensuring required directories exist..."
+mkdir -p /app/sites/"$SITE_NAME"
+mkdir -p /app/private/files
+mkdir -p /app/logs
+mkdir -p /app/public/files
+chmod -R 755 /app/sites
 
-# Install/Update Node Dependencies if needed
-echo "📦 Installing Node dependencies..."
-npm ci --omit=dev 2>/dev/null || echo "⚠️  Node install may have failed"
+# ============================================================================
+# SITE CONFIGURATION
+# ============================================================================
+echo "⚙️  Setting up site configuration..."
 
-# Create required directories
-echo "📁 Creating required directories..."
-mkdir -p sites/$SITE_NAME
-mkdir -p private/files
-mkdir -p logs
-mkdir -p public/files
-
-# Create site configuration if it doesn't exist
-if [ ! -f "sites/$SITE_NAME/site_config.json" ]; then
-    echo "⚙️  Creating site configuration..."
-    cat > sites/$SITE_NAME/site_config.json <<EOF
+if [ ! -f "/app/sites/$SITE_NAME/site_config.json" ]; then
+    echo "   📝 Creating new site_config.json..."
+    mkdir -p "/app/sites/$SITE_NAME"
+    cat > "/app/sites/$SITE_NAME/site_config.json" <<EOF
 {
-  "domain": "$SITE_NAME",
+  "db_type": "MariaDB",
   "db_name": "$DB_NAME",
-  "db_type": "mariadb",
   "db_host": "$DB_HOST",
   "db_port": $DB_PORT,
-  "cache_servers": ["$REDIS_CACHE"],
+  "db_user": "$DB_USER",
   "redis_cache": "$REDIS_CACHE",
   "redis_queue": "$REDIS_QUEUE",
-  "encryption_key": "$ENCRYPTION_KEY"
+  "allow_on_submit": [],
+  "encryption_key": "${ENCRYPTION_KEY:-}"
 }
 EOF
+    echo "   ✅ site_config.json created"
+else
+    echo "   ✅ site_config.json already exists"
 fi
 
-# Build Frontend Assets if Frappe
-echo "🎨 Building frontend assets..."
-npm run build 2>/dev/null || echo "⚠️  Frontend build skipped"
+# ============================================================================
+# VALIDATE APPLICATION
+# ============================================================================
+echo ""
+echo "🔍 Validating application..."
 
+# Check if wsgi.py exists
+if [ ! -f /app/wsgi.py ]; then
+    echo "❌ ERROR: wsgi.py not found in /app"
+    exit 1
+fi
+echo "   ✅ wsgi.py found"
+
+# Check if gunicorn is installed
+if ! python -c "import gunicorn" 2>/dev/null; then
+    echo "❌ ERROR: gunicorn is not installed"
+    exit 1
+fi
+echo "   ✅ gunicorn is installed"
+
+# Check if frappe can be imported
+if python -c "from frappe.app import application" 2>/dev/null; then
+    echo "   ✅ Frappe application can be imported"
+else
+    echo "⚠️  WARNING: Frappe application cannot be imported yet (may initialize on first request)"
+fi
+
+# ============================================================================
+# START APPLICATION
+# ============================================================================
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Setup Complete! Starting application..."
+echo "🚀 Starting Gunicorn Server..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "   📍 Host: 0.0.0.0"
+echo "   🔌 Port: 8000"
+echo "   👥 Workers: $(grep -c '^processor' /proc/cpuinfo || echo 2)"
+echo "   📄 WSGI: wsgi:application"
+echo ""
+echo "✅ Ready to receive requests!"
 echo ""
 
-# Execute the command
+# Execute the main command (gunicorn)
 exec "$@"
