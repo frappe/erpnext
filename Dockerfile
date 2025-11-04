@@ -2,6 +2,8 @@
 # ERPNext Kanaan ERP - Production Dockerfile
 # ============================================================================
 # This Dockerfile implements a proper Frappe bench setup for production
+# Version: 2.0.1 - Frappe v16 installed from GitHub
+# Build: Force rebuild with Frappe GitHub installation
 
 FROM python:3.10-slim
 
