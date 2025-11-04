@@ -16,7 +16,10 @@ from ai_assistant import ai_assistant
 from notification_service import notification_service
 from audit_logger import audit_logger
 import migrations
-from routers import bank_connections, compliance, payroll, employees, finance, super_admin
+from routers import (
+    bank_connections, compliance, payroll, employees, finance, super_admin,
+    sales, procurement, inventory, tax
+)
 
 models.Base.metadata.create_all(bind=engine)
 migrations.run_migrations()
@@ -38,6 +41,10 @@ app.include_router(payroll.router)
 app.include_router(employees.router)
 app.include_router(finance.router)
 app.include_router(super_admin.router)
+app.include_router(sales.router)
+app.include_router(procurement.router)
+app.include_router(inventory.router)
+app.include_router(tax.router)
 
 @app.get("/api/health")
 def health_check():
