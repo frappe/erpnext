@@ -68,6 +68,7 @@
    "fieldname": "completion_date",
    "fieldtype": "Datetime",
    "label": "Completion Date",
+   "mandatory_depends_on": "eval:doc.repair_status==\"Completed\"",
    "no_copy": 1
   },
   {
@@ -260,7 +261,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-29 22:30:00.589597",
+ "modified": "2025-07-18 15:59:53.981224",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

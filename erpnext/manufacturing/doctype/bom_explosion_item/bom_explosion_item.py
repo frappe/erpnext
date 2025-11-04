@@ -18,6 +18,7 @@ class BOMExplosionItem(Document):
 		description: DF.TextEditor | None
 		image: DF.Attach | None
 		include_item_in_manufacturing: DF.Check
+		is_sub_assembly_item: DF.Check
 		item_code: DF.Link | None
 		item_name: DF.Data | None
 		operation: DF.Link | None

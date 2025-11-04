@@ -29,6 +29,7 @@ class Warehouse(NestedSet):
 		address_line_2: DF.Data | None
 		city: DF.Data | None
 		company: DF.Link
+		customer: DF.Link | None
 		default_in_transit_warehouse: DF.Link | None
 		disabled: DF.Check
 		email_id: DF.Data | None
@@ -58,13 +59,13 @@ class Warehouse(NestedSet):
 		self.name = self.warehouse_name
 
 	def onload(self):
-		"""load account name for General Ledger Report"""
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
 			account = self.account or get_warehouse_account(self)
 
 			if account:
 				self.set_onload("account", account)
 		load_address_and_contact(self)
+		self.set_onload("stock_exists", self.check_if_sle_exists(non_cancelled_only=True))
 
 	def validate(self):
 		self.warn_about_multiple_warehouse_account()
@@ -150,8 +151,11 @@ class Warehouse(NestedSet):
 				indicator="orange",
 			)
 
-	def check_if_sle_exists(self):
-		return frappe.db.exists("Stock Ledger Entry", {"warehouse": self.name})
+	def check_if_sle_exists(self, non_cancelled_only=False):
+		filters = {"warehouse": self.name}
+		if non_cancelled_only:
+			filters["is_cancelled"] = 0
+		return frappe.db.exists("Stock Ledger Entry", filters)
 
 	def check_if_child_exists(self):
 		return frappe.db.exists("Warehouse", {"parent_warehouse": self.name})
@@ -253,19 +257,35 @@ def get_warehouses_based_on_account(account, company=None):
 
 # Will be use for frappe.qb
 def apply_warehouse_filter(query, sle, filters):
-	if warehouse := filters.get("warehouse"):
-		warehouse_table = frappe.qb.DocType("Warehouse")
+	if not (warehouses := filters.get("warehouse")):
+		return query
 
-		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-		chilren_subquery = (
-			frappe.qb.from_(warehouse_table)
-			.select(warehouse_table.name)
-			.where(
-				(warehouse_table.lft >= lft)
-				& (warehouse_table.rgt <= rgt)
-				& (warehouse_table.name == sle.warehouse)
-			)
-		)
-		query = query.where(ExistsCriterion(chilren_subquery))
+	warehouse_table = frappe.qb.DocType("Warehouse")
+
+	if isinstance(warehouses, str):
+		warehouses = [warehouses]
+
+	warehouse_range = frappe.get_all(
+		"Warehouse",
+		filters={
+			"name": ("in", warehouses),
+		},
+		fields=["lft", "rgt"],
+		as_list=True,
+	)
+
+	child_query = frappe.qb.from_(warehouse_table).select(warehouse_table.name)
+
+	range_conditions = [
+		(warehouse_table.lft >= lft) & (warehouse_table.rgt <= rgt) for lft, rgt in warehouse_range
+	]
+
+	combined_condition = range_conditions[0]
+	for condition in range_conditions[1:]:
+		combined_condition = combined_condition | condition
+
+	child_query = child_query.where(combined_condition).where(warehouse_table.name == sle.warehouse)
+
+	query = query.where(ExistsCriterion(child_query))
 
 	return query

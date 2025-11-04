@@ -2,14 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
+from erpnext.accounts.party import get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
 from erpnext.controllers.selling_controller import SellingController
 
@@ -95,7 +100,6 @@ class DeliveryNote(SellingController):
 		per_billed: DF.Percent
 		per_installed: DF.Percent
 		per_returned: DF.Percent
-		pick_list: DF.Link | None
 		plc_conversion_rate: DF.Float
 		po_date: DF.Date | None
 		po_no: DF.SmallText | None
@@ -790,35 +794,39 @@ def get_list_context(context=None):
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
-	invoiced_qty_map = {}
+	sii = DocType("Sales Invoice Item")
 
-	for dn_detail, qty in frappe.db.sql(
-		"""select dn_detail, qty from `tabSales Invoice Item`
-		where delivery_note=%s and docstatus=1""",
-		delivery_note,
-	):
-		if not invoiced_qty_map.get(dn_detail):
-			invoiced_qty_map[dn_detail] = 0
-		invoiced_qty_map[dn_detail] += qty
+	invoiced_qty_map = frappe._dict(
+		(
+			frappe.qb.from_(sii)
+			.select(sii.dn_detail, Sum(sii.qty).as_("qty"))
+			.where((sii.delivery_note == delivery_note) & (sii.docstatus == 1))
+			.groupby(sii.dn_detail)
+		).run()
+	)
 
 	return invoiced_qty_map
 
 
 def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
+	dn = DocType("Delivery Note")
+	dni = DocType("Delivery Note Item")
+
 	returned_qty_map = frappe._dict(
-		frappe.db.sql(
-			"""select dn_item.dn_detail, sum(abs(dn_item.qty)) as qty
-		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name = dn_item.parent
-			and dn.docstatus = 1
-			and dn.is_return = 1
-			and dn.return_against = %s
-			and dn_item.qty <= 0
-			group by dn_item.item_code
-	""",
-			delivery_note,
-		)
+		(
+			frappe.qb.from_(dni)
+			.join(dn)
+			.on(dn.name == dni.parent)
+			.select(dni.dn_detail, Sum(Abs(dni.qty)).as_("qty"))
+			.where(
+				(dn.docstatus == 1)
+				& (dn.is_return == 1)
+				& (dn.return_against == delivery_note)
+				& (dni.qty <= 0)
+			)
+			.groupby(dni.dn_detail)
+		).run()
 	)
 
 	return returned_qty_map
@@ -826,6 +834,11 @@ def get_returned_qty_map(delivery_note):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	doc = frappe.get_doc("Delivery Note", source_name)
 
 	to_make_invoice_qty_map = {}
@@ -877,6 +890,11 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 		return pending_qty
 
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
 	doc = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -899,6 +917,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 				"filter": lambda d: get_pending_qty(d) <= 0
 				if not doc.get("is_return")
 				else get_pending_qty(d) > 0,
+				"condition": select_item,
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
@@ -918,8 +937,25 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 	automatically_fetch_payment_terms = cint(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
-	if automatically_fetch_payment_terms and not doc.is_return:
-		doc.set_payment_schedule()
+
+	if not doc.is_return:
+		so, doctype, fieldname = doc.get_order_details()
+		if (
+			doc.linked_order_has_payment_terms(so, fieldname, doctype)
+			and not automatically_fetch_payment_terms
+		):
+			payment_terms_template = frappe.db.get_value(doctype, so, "payment_terms_template")
+			doc.payment_terms_template = payment_terms_template
+			doc.due_date = get_due_date(
+				doc.posting_date,
+				"Customer",
+				doc.customer,
+				doc.company,
+				template_name=doc.payment_terms_template,
+			)
+
+		elif automatically_fetch_payment_terms:
+			doc.set_payment_schedule()
 
 	return doc
 
@@ -1267,6 +1303,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
 
 		if source.get("use_serial_batch_fields"):
+			target.set("use_serial_batch_fields", 1)
+
+		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
 			target.set("use_serial_batch_fields", 1)
 
 	doclist = get_mapped_doc(

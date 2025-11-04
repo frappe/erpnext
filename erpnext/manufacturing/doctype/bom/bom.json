@@ -282,6 +282,7 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -590,6 +591,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.track_semi_finished_goods === 0",
    "fieldname": "fg_based_operating_cost",
    "fieldtype": "Check",
    "label": "Finished Goods based Operating Cost"
@@ -664,7 +666,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-16 16:13:22.497695",
+ "modified": "2025-10-29 17:43:12.966753",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

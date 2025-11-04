@@ -115,7 +115,8 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate"
+   "label": "Rate",
+   "options": "currency"
   },
   {
    "columns": 1,
@@ -158,7 +159,8 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
-   "read_only": 1
+   "read_only": 1,
+   "options": "currency"
   },
   {
    "fieldname": "column_break_yuca",
@@ -180,13 +182,15 @@
    "fieldname": "base_amount",
    "fieldtype": "Currency",
    "hidden": 1,
-   "label": "Base Amount"
+   "label": "Base Amount",
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "base_rate",
    "fieldtype": "Currency",
    "hidden": 1,
-   "label": "Base Rate"
+   "label": "Base Rate",
+   "options": "Company:company:default_currency"
   },
   {
    "default": "0",

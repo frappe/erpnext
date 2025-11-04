@@ -452,7 +452,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 					get_pricing_rule_items(pricing_rule, other_items=fetch_other_item) or []
 				)
 
-			if pricing_rule.coupon_code_based == 1:
+			if pricing_rule.get("coupon_code_based") == 1:
 				if not args.coupon_code:
 					continue
 				coupon_code = frappe.db.get_value(
@@ -700,17 +700,6 @@ def set_transaction_type(args):
 		args.transaction_type = "selling"
 	else:
 		args.transaction_type = "buying"
-
-
-@frappe.whitelist()
-def make_pricing_rule(doctype, docname):
-	doc = frappe.new_doc("Pricing Rule")
-	doc.applicable_for = doctype
-	doc.set(frappe.scrub(doctype), docname)
-	doc.selling = 1 if doctype == "Customer" else 0
-	doc.buying = 1 if doctype == "Supplier" else 0
-
-	return doc
 
 
 @frappe.whitelist()

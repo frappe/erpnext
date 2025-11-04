@@ -7,10 +7,6 @@ from erpnext.controllers.taxes_and_totals import get_itemised_tax
 
 
 def update_itemised_tax_data(doc):
-	# maybe this should be a standard function rather than a regional one
-	if not doc.taxes:
-		return
-
 	if not doc.items:
 		return
 
@@ -19,6 +15,29 @@ def update_itemised_tax_data(doc):
 		return
 
 	itemised_tax = get_itemised_tax(doc.taxes)
+
+	def determine_if_export(doc):
+		if doc.doctype != "Sales Invoice":
+			return False
+
+		if not doc.customer_address:
+			if not doc.total_taxes_and_charges:
+				frappe.msgprint(
+					_("Please set Customer Address to determine if the transaction is an export."),
+					alert=True,
+				)
+
+			return False
+
+		company_country = frappe.get_cached_value("Company", doc.company, "country")
+		customer_country = frappe.db.get_value("Address", doc.customer_address, "country")
+
+		if company_country != customer_country:
+			return True
+
+		return False
+
+	is_export = determine_if_export(doc)
 
 	for row in doc.items:
 		tax_rate, tax_amount = 0.0, 0.0
@@ -29,6 +48,9 @@ def update_itemised_tax_data(doc):
 				_tax_rate = flt(tax.get("tax_rate", 0), row.precision("tax_rate"))
 				tax_amount += flt((row.net_amount * _tax_rate) / 100, row.precision("tax_amount"))
 				tax_rate += _tax_rate
+
+		if not tax_rate or row.get("is_zero_rated"):
+			row.is_zero_rated = is_export or frappe.get_cached_value("Item", row.item_code, "is_zero_rated")
 
 		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
 		row.tax_amount = flt(tax_amount, row.precision("tax_amount"))

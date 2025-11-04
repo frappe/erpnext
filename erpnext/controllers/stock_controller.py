@@ -22,11 +22,15 @@ from erpnext.controllers.sales_and_purchase_return import (
 	filter_serial_batches,
 	make_serial_batch_bundle_for_return,
 )
+from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
+from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	combine_datetime,
 	get_type_of_transaction,
 )
 from erpnext.stock.stock_ledger import get_items_to_be_repost
@@ -94,9 +98,11 @@ class StockController(AccountsController):
 			"Stock Reconciliation",
 		]:
 			for item in self.get("items"):
-				if (item.get("valuation_rate") == 0 or item.get("incoming_rate") == 0) and item.get(
-					"allow_zero_valuation_rate"
-				) == 0:
+				if (
+					(item.get("valuation_rate") == 0 or item.get("incoming_rate") == 0)
+					and item.get("allow_zero_valuation_rate") == 0
+					and frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+				):
 					frappe.toast(
 						_(
 							"Row #{0}: Item {1} has zero rate but 'Allow Zero Valuation Rate' is not enabled."
@@ -149,6 +155,61 @@ class StockController(AccountsController):
 					)
 				)
 
+	def get_item_wise_inventory_account_map(self):
+		inventory_account_map = frappe._dict()
+		for table in ["items", "packed_items", "supplied_items"]:
+			if not self.get(table):
+				continue
+
+			_map = get_item_wise_inventory_account_map(self.get(table), self.company)
+			inventory_account_map.update(_map)
+
+		return inventory_account_map
+
+	@property
+	def use_item_inventory_account(self):
+		return frappe.get_cached_value("Company", self.company, "enable_item_wise_inventory_account")
+
+	def get_inventory_account_dict(self, row, inventory_account_map, warehouse_field=None):
+		account_dict = frappe._dict()
+
+		if isinstance(row, dict):
+			row = frappe._dict(row)
+
+		if self.use_item_inventory_account:
+			item_code = (
+				row.rm_item_code if hasattr(row, "rm_item_code") and row.rm_item_code else row.item_code
+			)
+
+			account_dict = inventory_account_map.get(item_code)
+
+			if not account_dict:
+				frappe.throw(
+					_(
+						"Please set default inventory account for item {0}, or their item group or brand."
+					).format(bold(item_code))
+				)
+
+			return account_dict
+
+		if not warehouse_field:
+			warehouse_field = "warehouse"
+
+		warehouse = row.get(warehouse_field)
+		if not warehouse:
+			warehouse = self.get(warehouse_field)
+
+		if warehouse and warehouse in inventory_account_map:
+			account_dict = inventory_account_map[warehouse]
+
+		return account_dict
+
+	def get_inventory_account_map(self):
+		if self.use_item_inventory_account:
+			return self.get_item_wise_inventory_account_map()
+
+		return get_warehouse_account_map(self.company)
+
 	def make_gl_entries(self, gl_entries=None, from_repost=False, via_landed_cost_voucher=False):
 		if self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -166,14 +227,14 @@ class StockController(AccountsController):
 			or provisional_accounting_for_non_stock_items
 			or is_asset_pr
 		):
-			warehouse_account = get_warehouse_account_map(self.company)
+			inventory_account_map = self.get_inventory_account_map()
 
 			if self.docstatus == 1:
 				if not gl_entries:
 					gl_entries = (
-						self.get_gl_entries(warehouse_account, via_landed_cost_voucher)
+						self.get_gl_entries(inventory_account_map, via_landed_cost_voucher)
 						if self.doctype == "Purchase Receipt"
-						else self.get_gl_entries(warehouse_account)
+						else self.get_gl_entries(inventory_account_map)
 					)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
@@ -266,8 +327,7 @@ class StockController(AccountsController):
 			):
 				bundle_details = {
 					"item_code": row.get("rm_item_code") or row.item_code,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"voucher_detail_no": row.name,
@@ -277,6 +337,14 @@ class StockController(AccountsController):
 					"via_landed_cost_voucher": via_landed_cost_voucher,
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
+
+				if self.is_internal_transfer() and row.get("from_warehouse") and not self.is_return:
+					self.update_bundle_details(bundle_details, table_name, row)
+					bundle_details["type_of_transaction"] = "Outward"
+					bundle_details["warehouse"] = row.get("from_warehouse")
+					bundle_details["qty"] = row.get("stock_qty") or row.get("qty")
+					self.create_serial_batch_bundle(bundle_details, row)
+					continue
 
 				if row.get("qty") or row.get("consumed_qty") or row.get("stock_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, parent_details=parent_details)
@@ -360,10 +428,20 @@ class StockController(AccountsController):
 			return
 
 		child_doctype = self.doctype + " Item"
+		if table_name == "packed_items":
+			field = "parent_detail_docname"
+			child_doctype = "Packed Item"
+
 		available_dict = available_serial_batch_for_return(field, child_doctype, reference_ids)
 
 		for row in self.get(table_name):
-			if data := available_dict.get(row.get(field)):
+			value = row.get(field)
+			if table_name == "packed_items" and row.get("parent_detail_docname"):
+				value = self.get_value_for_packed_item(row)
+				if not value:
+					continue
+
+			if data := available_dict.get(value):
 				data = filter_serial_batches(self, data, row)
 				bundle = make_serial_batch_bundle_for_return(data, row, self)
 				row.db_set(
@@ -378,6 +456,14 @@ class StockController(AccountsController):
 					row.db_set(
 						"incoming_rate", frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
 					)
+
+	def get_value_for_packed_item(self, row):
+		parent_items = self.get("items", {"name": row.parent_detail_docname})
+		if parent_items:
+			ref = parent_items[0].get("dn_detail")
+			return (row.item_code, ref)
+
+		return None
 
 	def get_reference_ids(self, table_name, qty_field=None, bundle_field=None) -> tuple[str, list[str]]:
 		field = {
@@ -412,6 +498,12 @@ class StockController(AccountsController):
 				and not row.get(bundle_field)
 			):
 				reference_ids.append(row.get(field))
+
+			if table_name == "packed_items" and row.get("parent_detail_docname"):
+				parent_rows = self.get("items", {"name": row.parent_detail_docname}) or []
+				for d in parent_rows:
+					if d.get(field) and not d.get(bundle_field):
+						reference_ids.append(d.get(field))
 
 		return field, reference_ids
 
@@ -520,10 +612,14 @@ class StockController(AccountsController):
 						break
 
 		elif row.batch_no:
-			batches = frappe.get_all(
-				"Serial and Batch Entry", fields=["batch_no"], filters={"parent": row.serial_and_batch_bundle}
+			batches = sorted(
+				frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="batch_no",
+					distinct=True,
+				)
 			)
-			batches = sorted([d.batch_no for d in batches])
 
 			if batches != [row.batch_no]:
 				throw_error = True
@@ -540,9 +636,11 @@ class StockController(AccountsController):
 			for row in self.items:
 				row.use_serial_batch_fields = 1
 
-	def get_gl_entries(self, warehouse_account=None, default_expense_account=None, default_cost_center=None):
-		if not warehouse_account:
-			warehouse_account = get_warehouse_account_map(self.company)
+	def get_gl_entries(
+		self, inventory_account_map=None, default_expense_account=None, default_cost_center=None
+	):
+		if not inventory_account_map:
+			inventory_account_map = self.get_inventory_account_map()
 
 		sle_map = self.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
@@ -555,7 +653,9 @@ class StockController(AccountsController):
 			sle_rounding_diff = 0.0
 			if sle_list:
 				for sle in sle_list:
-					if warehouse_account.get(sle.warehouse):
+					_inv_dict = self.get_inventory_account_dict(sle, inventory_account_map)
+
+					if _inv_dict.get("account"):
 						# from warehouse account
 
 						sle_rounding_diff += flt(sle.stock_value_difference)
@@ -564,15 +664,17 @@ class StockController(AccountsController):
 
 						# expense account/ target_warehouse / source_warehouse
 						if item_row.get("target_warehouse"):
-							warehouse = item_row.get("target_warehouse")
-							expense_account = warehouse_account[warehouse]["account"]
+							_target_wh_inv_dict = self.get_inventory_account_dict(
+								item_row, inventory_account_map, warehouse_field="target_warehouse"
+							)
+							expense_account = _target_wh_inv_dict["account"]
 						else:
 							expense_account = item_row.expense_account
 
 						gl_list.append(
 							self.get_gl_dict(
 								{
-									"account": warehouse_account[sle.warehouse]["account"],
+									"account": _inv_dict["account"],
 									"against": expense_account,
 									"cost_center": item_row.cost_center,
 									"project": sle.get("project") or item_row.project or self.get("project"),
@@ -582,7 +684,7 @@ class StockController(AccountsController):
 									or self.get("is_opening")
 									or "No",
 								},
-								warehouse_account[sle.warehouse]["account_currency"],
+								_inv_dict["account_currency"],
 								item=item_row,
 							)
 						)
@@ -591,7 +693,7 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": expense_account,
-									"against": warehouse_account[sle.warehouse]["account"],
+									"against": _inv_dict["account"],
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 									"debit": -1 * flt(sle.stock_value_difference, precision),
@@ -611,9 +713,15 @@ class StockController(AccountsController):
 			if abs(sle_rounding_diff) > (1.0 / (10**precision)) and self.is_internal_transfer():
 				warehouse_asset_account = ""
 				if self.get("is_internal_customer"):
-					warehouse_asset_account = warehouse_account[item_row.get("target_warehouse")]["account"]
+					_inv_dict = self.get_inventory_account_dict(
+						item_row, inventory_account_map, warehouse_field="target_warehouse"
+					)
+
+					warehouse_asset_account = _inv_dict.get("account") if _inv_dict else None
 				elif self.get("is_internal_supplier"):
-					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
+					_inv_dict = self.get_inventory_account_dict(item_row, inventory_account_map)
+
+					warehouse_asset_account = _inv_dict.get("account") if _inv_dict else None
 
 				expense_account = frappe.get_cached_value("Company", self.company, "default_expense_account")
 				if not expense_account:
@@ -634,7 +742,7 @@ class StockController(AccountsController):
 							"debit": sle_rounding_diff,
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						},
-						warehouse_account[sle.warehouse]["account_currency"],
+						_inv_dict["account_currency"],
 						item=item_row,
 					)
 				)
@@ -663,7 +771,9 @@ class StockController(AccountsController):
 						).format(wh, self.company)
 					)
 
-		return process_gl_map(gl_list, precision=precision)
+		return process_gl_map(
+			gl_list, precision=precision, from_repost=frappe.flags.through_repost_item_valuation
+		)
 
 	def get_debit_field_precision(self):
 		if not frappe.flags.debit_field_precision:
@@ -1068,10 +1178,13 @@ class StockController(AccountsController):
 		from erpnext.stock.stock_ledger import make_sl_entries
 
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
-		update_batch_qty(self.doctype, self.name, via_landed_cost_voucher=via_landed_cost_voucher)
+		update_batch_qty(
+			self.doctype, self.name, self.docstatus, via_landed_cost_voucher=via_landed_cost_voucher
+		)
 
-	def make_gl_entries_on_cancel(self):
-		cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+	def make_gl_entries_on_cancel(self, from_repost=False):
+		if not from_repost:
+			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 		if frappe.db.sql(
 			"""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""",
@@ -1624,7 +1737,9 @@ def get_stock_ledger_preview(doc, filters):
 
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
 		doc.docstatus = 1
+		doc.make_bundle_using_old_serial_batch_fields()
 		doc.update_stock_ledger()
+
 		columns = get_sl_columns(filters)
 		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name, fields)
 
@@ -1960,6 +2075,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 		row.warehouse = kwargs.warehouse
 
+	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()
 	bundle_doc.flags.ignore_permissions = True
 	bundle_doc.flags.ignore_validate = True
@@ -1969,3 +2085,49 @@ def make_bundle_for_material_transfer(**kwargs):
 		bundle_doc.submit()
 
 	return bundle_doc.name
+
+
+def get_item_wise_inventory_account_map(rows, company):
+	# returns dict of item_code and its inventory account details
+	# Example: {"ITEM-001": {"account": "Stock - ABC", "account_currency": "INR"}, ...}
+
+	inventory_map = frappe._dict()
+
+	for row in rows:
+		item_code = row.rm_item_code if hasattr(row, "rm_item_code") and row.rm_item_code else row.item_code
+		if not item_code:
+			continue
+
+		if inventory_map.get(item_code):
+			continue
+
+		item_defaults = get_item_defaults(item_code, company)
+		if item_defaults.default_inventory_account:
+			inventory_map[item_code] = frappe._dict(
+				{
+					"account": item_defaults.default_inventory_account,
+					"account_currency": item_defaults.inventory_account_currency,
+				}
+			)
+
+		if not inventory_map.get(item_code):
+			item_group_defaults = get_item_group_defaults(item_code, company)
+			if item_group_defaults.default_inventory_account:
+				inventory_map[item_code] = frappe._dict(
+					{
+						"account": item_group_defaults.default_inventory_account,
+						"account_currency": item_group_defaults.inventory_account_currency,
+					}
+				)
+
+		if not inventory_map.get(item_code):
+			brand_defaults = get_brand_defaults(item_code, company)
+			if brand_defaults.default_inventory_account:
+				inventory_map[item_code] = frappe._dict(
+					{
+						"account": brand_defaults.default_inventory_account,
+						"account_currency": brand_defaults.inventory_account_currency,
+					}
+				)
+
+	return inventory_map

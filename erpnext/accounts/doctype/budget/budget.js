@@ -23,8 +23,8 @@ frappe.ui.form.on("Budget", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-		frappe.db.get_single_value("Accounts Settings", "use_new_budget_controller").then((value) => {
-			if (!value) {
+		frappe.db.get_single_value("Accounts Settings", "use_legacy_budget_controller").then((value) => {
+			if (value) {
 				frm.get_field("control_action_for_cumulative_expense_section").hide();
 			}
 		});

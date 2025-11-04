@@ -775,6 +775,7 @@ class ProductionPlan(Document):
 			work_order_data = {
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
+				"scrap_warehouse": default_warehouses.get("scrap_warehouse"),
 				"company": self.get("company"),
 			}
 
@@ -935,7 +936,7 @@ class ProductionPlan(Document):
 			material_request_type = item.material_request_type or item_doc.default_material_request_type
 
 			# key for Sales Order:Material Request Type:Customer
-			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
+			key = "{}:{}:{}".format(item.sales_order, material_request_type, "")
 			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if key not in material_request_map:
@@ -948,7 +949,6 @@ class ProductionPlan(Document):
 						"status": "Draft",
 						"company": self.company,
 						"material_request_type": material_request_type,
-						"customer": item_doc.customer or "",
 					}
 				)
 				material_request_list.append(material_request)
@@ -964,6 +964,7 @@ class ProductionPlan(Document):
 					if material_request_type == "Material Transfer"
 					else None,
 					"qty": item.quantity - item.requested_qty,
+					"uom": item.uom,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
 					"sales_order": item.sales_order,
@@ -1001,6 +1002,7 @@ class ProductionPlan(Document):
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 		bin_details = frappe._dict()
 
+		track_semi_finished_goods = True
 		for row in self.po_items:
 			if self.skip_available_sub_assembly_item and not self.sub_assembly_warehouse:
 				frappe.throw(_("Row #{0}: Please select the Sub Assembly Warehouse").format(row.idx))
@@ -1011,7 +1013,17 @@ class ProductionPlan(Document):
 			if not row.bom_no:
 				frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
+			if frappe.db.get_value("BOM", row.bom_no, "track_semi_finished_goods"):
+				frappe.msgprint(
+					_(
+						"Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+					).format(row.idx, row.bom_no)
+				)
+				continue
+
 			bom_data = []
+
+			track_semi_finished_goods = False
 
 			get_sub_assembly_items(
 				[item.production_item for item in sub_assembly_items_store],
@@ -1026,7 +1038,11 @@ class ProductionPlan(Document):
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 			sub_assembly_items_store.extend(bom_data)
 
-		if not sub_assembly_items_store and self.skip_available_sub_assembly_item:
+		if (
+			not track_semi_finished_goods
+			and not sub_assembly_items_store
+			and self.skip_available_sub_assembly_item
+		):
 			message = (
 				_(
 					"As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
@@ -1253,6 +1269,7 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 		)
 		.where(
 			(bei.docstatus < 2)
+			& (bei.is_sub_assembly_item == 0)
 			& (bom.name == bom_no)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
@@ -1321,6 +1338,7 @@ def get_subitems(
 		)
 		.where(
 			(bom.name == bom_no)
+			& (bom_item.is_sub_assembly_item == 0)
 			& (bom_item.docstatus < 2)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
@@ -1606,6 +1624,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	include_safety_stock = doc.get("include_safety_stock")
 
 	so_item_details = frappe._dict()
+	existing_sub_assembly_items = set()
 
 	sub_assembly_items = defaultdict(int)
 	if doc.get("skip_available_sub_assembly_item") and doc.get("sub_assembly_items"):
@@ -1641,7 +1660,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 					and doc.get("sub_assembly_items")
 				):
 					item_details = get_raw_materials_of_sub_assembly_items(
-						so_item_details[doc.get("sales_order")].keys() if so_item_details else [],
+						existing_sub_assembly_items,
 						item_details,
 						company,
 						bom_no,
@@ -1697,7 +1716,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				}
 			)
 
-		sales_order = doc.get("sales_order")
+		sales_order = data.get("sales_order")
 
 		for item_code, details in item_details.items():
 			so_item_details.setdefault(sales_order, frappe._dict())
@@ -1892,7 +1911,7 @@ def get_sub_assembly_items(
 
 
 def set_default_warehouses(row, default_warehouses):
-	for field in ["wip_warehouse", "fg_warehouse"]:
+	for field in ["wip_warehouse", "fg_warehouse", "scrap_warehouse"]:
 		if not row.get(field):
 			row[field] = default_warehouses.get(field)
 
@@ -1909,7 +1928,12 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(Sum(child.required_bom_qty))
+		.select(
+			Sum(
+				Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity)
+				* child.conversion_factor
+			)
+		)
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
@@ -2003,6 +2027,7 @@ def get_raw_materials_of_sub_assembly_items(
 		)
 		.where(
 			(bei.docstatus == 1)
+			& (bei.is_sub_assembly_item == 0)
 			& (bom.name == bom_no)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
@@ -2025,6 +2050,7 @@ def get_raw_materials_of_sub_assembly_items(
 				sub_assembly_items,
 				planned_qty=planned_qty,
 			)
+			existing_sub_assembly_items.add(item.item_code)
 		else:
 			if not item.conversion_factor and item.purchase_uom:
 				item.conversion_factor = get_uom_conversion_factor(item.item_code, item.purchase_uom)
@@ -2061,6 +2087,9 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 
 	if filters.get("sales_orders"):
 		query = query.where(so_table.name.isin(filters.get("sales_orders")))
+
+	if filters.get("item_code"):
+		query = query.where(table.item_code == filters.get("item_code"))
 
 	if txt:
 		query = query.where(table.parent.like(f"%{txt}%"))

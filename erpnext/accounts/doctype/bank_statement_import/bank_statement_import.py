@@ -111,20 +111,54 @@ class BankStatementImport(DataImport):
 		return None
 
 
+def preprocess_mt940_content(content: str) -> str:
+	"""Preprocess MT940 content to fix statement number format issues.
+
+	The MT940 standard expects statement numbers to be maximum 5 digits,
+	but some banks provide longer statement numbers that cause parsing errors.
+	This function truncates statement numbers longer than 5 digits to the last 5 digits.
+	"""
+	# Fast-path: bail if no :28C: tag exists
+	if ":28C:" not in content:
+		return content
+
+	# Match :28C: at start of line, capture digits and optional /seq, preserve whitespace
+	pattern = re.compile(r"(?m)^(:28C:)(\d{6,})(/\d+)?(\s*)$")
+
+	def replace_statement_number(match):
+		prefix = match.group(1)  # ':28C:'
+		statement_num = match.group(2)  # The statement number
+		sequence_part = match.group(3) or ""  # The sequence part like '/1'
+		trailing_space = match.group(4) or ""  # Preserve trailing whitespace
+
+		# If statement number is longer than 5 digits, truncate to last 5 digits
+		if len(statement_num) > 5:
+			statement_num = statement_num[-5:]
+
+		return prefix + statement_num + sequence_part + trailing_space
+
+	# Apply the replacement
+	processed_content = pattern.sub(replace_statement_number, content)
+	return processed_content
+
+
 @frappe.whitelist()
 def convert_mt940_to_csv(data_import, mt940_file_path):
 	doc = frappe.get_doc("Bank Statement Import", data_import)
 
-	file_doc, content = get_file(mt940_file_path)
+	_file_doc, content = get_file(mt940_file_path)
 
-	if not is_mt940_format(content):
+	is_mt940 = is_mt940_format(content)
+	if not is_mt940:
 		frappe.throw(_("The uploaded file does not appear to be in valid MT940 format."))
 
-	if is_mt940_format(content) and not doc.import_mt940_fromat:
+	if is_mt940 and not doc.import_mt940_fromat:
 		frappe.throw(_("MT940 file detected. Please enable 'Import MT940 Format' to proceed."))
 
 	try:
-		transactions = mt940.parse(content)
+		# Preprocess MT940 content to fix statement number format issues
+		processed_content = preprocess_mt940_content(content)
+		transactions = mt940.parse(processed_content)
 	except Exception as e:
 		frappe.throw(_("Failed to parse MT940 format. Error: {0}").format(str(e)))
 
@@ -249,6 +283,7 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 
 
 def update_mapping_db(bank, template_options):
+	"""Update bank transaction mapping database with template options."""
 	bank = frappe.get_doc("Bank", bank)
 	for d in bank.bank_transaction_mapping:
 		d.delete()
@@ -260,6 +295,7 @@ def update_mapping_db(bank, template_options):
 
 
 def add_bank_account(data, bank_account):
+	"""Add bank account information to data rows."""
 	bank_account_loc = None
 	if "Bank Account" not in data[0]:
 		data[0].append("Bank Account")
@@ -276,6 +312,7 @@ def add_bank_account(data, bank_account):
 
 
 def write_files(import_file, data):
+	"""Write processed data to CSV or Excel files."""
 	full_file_path = import_file.file_doc.get_full_path()
 	parts = import_file.file_doc.get_extension()
 	extension = parts[1]
@@ -285,11 +322,12 @@ def write_files(import_file, data):
 		with open(full_file_path, "w", newline="") as file:
 			writer = csv.writer(file)
 			writer.writerows(data)
-	elif extension == "xlsx" or "xls":
+	elif extension in ("xlsx", "xls"):
 		write_xlsx(data, "trans", file_path=full_file_path)
 
 
 def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
+	"""Write data to Excel file with formatting."""
 	# from xlsx utils with changes
 	column_widths = column_widths or []
 	if wb is None:

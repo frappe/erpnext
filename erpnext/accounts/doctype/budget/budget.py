@@ -145,8 +145,10 @@ def validate_expense_against_budget(args, expense_amount=0):
 	if not frappe.db.count("Budget", cache=True):
 		return
 
-	if args.get("company") and not args.fiscal_year:
+	if not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
+
+	if args.get("company"):
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
 			"Company", args.get("company"), "exception_budget_approver_role"
 		)
@@ -270,21 +272,19 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 
 	if total_expense > budget_amount:
 		if args.actual_expense > budget_amount:
-			error_tense = _("is already")
 			diff = args.actual_expense - budget_amount
+			_msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It is already exceeded by {5}.")
 		else:
-			error_tense = _("will be")
 			diff = total_expense - budget_amount
+			_msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will be exceeded by {5}.")
 
 		currency = frappe.get_cached_value("Company", args.company, "default_currency")
-
-		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It {5} exceed by {6}").format(
+		msg = _msg.format(
 			_(action_for),
 			frappe.bold(args.account),
 			frappe.unscrub(args.budget_against_field),
 			frappe.bold(budget_against),
 			frappe.bold(fmt_money(budget_amount, currency=currency)),
-			error_tense,
 			frappe.bold(fmt_money(diff, currency=currency)),
 		)
 
@@ -302,7 +302,7 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 
 
 def get_expense_breakup(args, currency, budget_against):
-	msg = "<hr>Total Expenses booked through - <ul>"
+	msg = "<hr> {{ _('Total Expenses booked through') }} - <ul>"
 
 	common_filters = frappe._dict(
 		{
@@ -316,7 +316,7 @@ def get_expense_breakup(args, currency, budget_against):
 		"<li>"
 		+ frappe.utils.get_link_to_report(
 			"General Ledger",
-			label="Actual Expenses",
+			label=_("Actual Expenses"),
 			filters=common_filters.copy().update(
 				{
 					"from_date": frappe.get_cached_value("Fiscal Year", args.fiscal_year, "year_start_date"),
@@ -334,7 +334,7 @@ def get_expense_breakup(args, currency, budget_against):
 		"<li>"
 		+ frappe.utils.get_link_to_report(
 			"Material Request",
-			label="Material Requests",
+			label=_("Material Requests"),
 			report_type="Report Builder",
 			doctype="Material Request",
 			filters=common_filters.copy().update(
@@ -357,7 +357,7 @@ def get_expense_breakup(args, currency, budget_against):
 		"<li>"
 		+ frappe.utils.get_link_to_report(
 			"Purchase Order",
-			label="Unbilled Orders",
+			label=_("Unbilled Orders"),
 			report_type="Report Builder",
 			doctype="Purchase Order",
 			filters=common_filters.copy().update(

@@ -132,7 +132,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "IBAN",
-   "length": 30
+   "length": 34,
+   "options": "IBAN"
   },
   {
    "fieldname": "column_break_12",
@@ -208,6 +209,7 @@
    "label": "Disabled"
   }
  ],
+ "grid_page_length": 50,
  "links": [
   {
    "group": "Transactions",
@@ -250,7 +252,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2024-10-30 09:41:14.113414",
+ "modified": "2025-08-29 12:32:01.081687",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
@@ -282,6 +284,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "bank,account",
  "sort_field": "creation",
  "sort_order": "DESC",

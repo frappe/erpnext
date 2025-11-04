@@ -34,6 +34,9 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		this.$component = this.wrapper.find(".items-selector");
 		this.$items_container = this.$component.find(".items-container");
+
+		const show_hide_images = this.hide_images ? "hide-item-image" : "show-item-image";
+		this.$items_container.addClass(show_hide_images);
 	}
 
 	async load_items_data() {
@@ -73,10 +76,23 @@ erpnext.PointOfSale.ItemSelector = class {
 	render_item_list(items) {
 		this.$items_container.html("");
 
+		if (this.hide_images) {
+			this.$items_container.append(this.render_item_list_column_header());
+		}
+
 		items.forEach((item) => {
 			const item_html = this.get_item_html(item);
 			this.$items_container.append(item_html);
 		});
+	}
+
+	render_item_list_column_header() {
+		return `<div class="list-column">
+			<div class="column-name">Name</div>
+			<div class="column-price">Price</div>
+			<div class="column-uom">UOM</div>
+			<div class="column-qty-available">Quantity Available</div>
+		</div>`;
 	}
 
 	get_item_html(item) {
@@ -100,7 +116,8 @@ erpnext.PointOfSale.ItemSelector = class {
 		}
 
 		function get_item_image_html() {
-			if (!me.hide_images && item_image) {
+			if (me.hide_images) return "";
+			if (item_image) {
 				return `<div class="item-qty-pill">
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
@@ -130,9 +147,19 @@ erpnext.PointOfSale.ItemSelector = class {
 
 				<div class="item-detail">
 					<div class="item-name">
-						${frappe.ellipsis(item.item_name, 18)}
+						${!me.hide_images ? frappe.ellipsis(item.item_name, 18) : item.item_name}
 					</div>
-					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}</div>
+					${
+						!me.hide_images
+							? `<div class="item-rate">
+								${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}
+							</div>`
+							: `
+							<div class="item-price">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
+							<div class="item-uom">${uom}</div>
+							<div class="item-qty-available">${qty_to_display || "Non stock item"}</div>
+							`
+					}
 				</div>
 			</div>`;
 	}

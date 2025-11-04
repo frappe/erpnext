@@ -5,7 +5,7 @@
 				<span class="workstation-status-title" style="font-size:10px">{{row.status}}</span>
 			</span>
 		</div>
-		<div class="workstation-image {{row.workstation_off}}" onclick="location.href='{{row.workstation_link}}'">
+		<div class="workstation-image {{row.workstation_off}}" onclick="location.href='{{ frappe.utils.get_form_link('Workstation', row.name)}}'">
 			<div class="workstation-image-container flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 				{% if(row.status_image) { %}
 					<img class="workstation-image-cls" src="{{row.status_image}}">

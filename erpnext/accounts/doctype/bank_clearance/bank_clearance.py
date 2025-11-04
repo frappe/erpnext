@@ -155,8 +155,10 @@ def get_payment_entries_for_bank_clearance(
 	entries = []
 
 	condition = ""
+	pe_condition = ""
 	if not include_reconciled_entries:
 		condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
+		pe_condition = "and (pe.clearance_date IS NULL or pe.clearance_date='0000-00-00')"
 
 	journal_entries = frappe.db.sql(
 		f"""
@@ -181,19 +183,20 @@ def get_payment_entries_for_bank_clearance(
 	payment_entries = frappe.db.sql(
 		f"""
 			select
-				"Payment Entry" as payment_document, name as payment_entry,
-				reference_no as cheque_number, reference_date as cheque_date,
-				if(paid_from=%(account)s, paid_amount + total_taxes_and_charges, 0) as credit,
-				if(paid_from=%(account)s, 0, received_amount + total_taxes_and_charges) as debit,
-				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
-				if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
-			from `tabPayment Entry`
+				"Payment Entry" as payment_document, pe.name as payment_entry,
+				pe.reference_no as cheque_number, pe.reference_date as cheque_date,
+				if(pe.paid_from=%(account)s, pe.paid_amount + if(pe.payment_type = 'Pay' and c.default_currency = pe.paid_from_account_currency, pe.base_total_taxes_and_charges, pe.total_taxes_and_charges) , 0) as credit,
+				if(pe.paid_from=%(account)s, 0, pe.received_amount + pe.total_taxes_and_charges) as debit,
+				pe.posting_date, ifnull(pe.party,if(pe.paid_from=%(account)s,pe.paid_to,pe.paid_from)) as against_account, pe.clearance_date,
+				if(pe.paid_to=%(account)s, pe.paid_to_account_currency, pe.paid_from_account_currency) as account_currency
+			from `tabPayment Entry` as pe
+			join `tabCompany` c on c.name = pe.company
 			where
-				(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
-				and posting_date >= %(from)s and posting_date <= %(to)s
-				{condition}
+				(pe.paid_from=%(account)s or pe.paid_to=%(account)s) and pe.docstatus=1
+				and pe.posting_date >= %(from)s and pe.posting_date <= %(to)s
+				{pe_condition}
 			order by
-				posting_date ASC, name DESC
+				pe.posting_date ASC, pe.name DESC
 		""",
 		{
 			"account": account,

@@ -18,6 +18,7 @@
   "set_warehouse",
   "section_break_22",
   "scan_barcode",
+  "last_scanned_warehouse",
   "column_break_12",
   "scan_mode",
   "sb9",
@@ -72,6 +73,7 @@
    "reqd": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "in_list_view": 1,
@@ -177,13 +179,20 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:44.699413",
+ "modified": "2025-08-04 19:21:20.179658",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
@@ -203,6 +212,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "posting_date",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

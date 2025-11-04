@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.gl_entry.gl_entry import (
 	validate_balance_type,
 	validate_frozen_account,
 )
-from erpnext.accounts.utils import update_voucher_outstanding
+from erpnext.accounts.utils import OUTSTANDING_DOCTYPES, update_voucher_outstanding
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
 
@@ -51,38 +51,36 @@ class PaymentLedgerEntry(Document):
 	# end: auto-generated types
 
 	def validate_account(self):
-		valid_account = frappe.db.get_list(
-			"Account",
-			"name",
-			filters={"name": self.account, "account_type": self.account_type, "company": self.company},
-			ignore_permissions=True,
+		account = frappe.get_cached_value(
+			"Account", self.account, fieldname=["account_type", "company"], as_dict=True
 		)
-		if not valid_account:
+
+		if account.company != self.company:
+			frappe.throw(_("{0} account is not of company {1}").format(self.account, self.company))
+
+		if account.account_type != self.account_type:
 			frappe.throw(_("{0} account is not of type {1}").format(self.account, self.account_type))
 
 	def validate_account_details(self):
 		"""Account must be ledger, active and not freezed"""
 
-		ret = frappe.db.sql(
-			"""select is_group, docstatus, company
-			from tabAccount where name=%s""",
-			self.account,
-			as_dict=1,
-		)[0]
+		account = frappe.get_cached_value(
+			"Account", self.account, fieldname=["is_group", "docstatus", "company"], as_dict=True
+		)
 
-		if ret.is_group == 1:
+		if account.is_group == 1:
 			frappe.throw(
 				_(
 					"""{0} {1}: Account {2} is a Group Account and group accounts cannot be used in transactions"""
 				).format(self.voucher_type, self.voucher_no, self.account)
 			)
 
-		if ret.docstatus == 2:
+		if account.docstatus == 2:
 			frappe.throw(
 				_("{0} {1}: Account {2} is inactive").format(self.voucher_type, self.voucher_no, self.account)
 			)
 
-		if ret.company != self.company:
+		if account.company != self.company:
 			frappe.throw(
 				_("{0} {1}: Account {2} does not belong to Company {3}").format(
 					self.voucher_type, self.voucher_no, self.account, self.company
@@ -170,7 +168,7 @@ class PaymentLedgerEntry(Document):
 
 		# update outstanding amount
 		if (
-			self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees"]
+			self.against_voucher_type in OUTSTANDING_DOCTYPES
 			and self.flags.update_outstanding == "Yes"
 			and not frappe.flags.is_reverse_depr_entry
 		):
