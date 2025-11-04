@@ -1387,3 +1387,211 @@ class ReservationCreate(BaseModel):
     check_out: Optional[datetime] = None
     total_amount: Optional[float] = 0.0
     status: Optional[str] = "confirmed"
+
+# ============================================================================
+# REAL ESTATE DEVELOPMENT SCHEMAS
+# ============================================================================
+
+class RealEstatePropertyCreate(BaseModel):
+    property_code: str
+    property_name: str
+    property_type: Optional[str] = None
+    address: Optional[str] = None
+    size_sqm: Optional[float] = None
+    purchase_price: Optional[float] = None
+    current_value: Optional[float] = None
+    status: Optional[str] = 'available'
+
+class LeaseCreate(BaseModel):
+    property_id: str
+    tenant_name: str
+    lease_start: Optional[date] = None
+    lease_end: Optional[date] = None
+    monthly_rent: Optional[float] = None
+    deposit_amount: Optional[float] = None
+    status: Optional[str] = 'active'
+
+# ============================================================================
+# LEGAL PRACTICE MANAGEMENT SCHEMAS
+# ============================================================================
+
+class LegalCaseCreate(BaseModel):
+    case_number: str
+    case_title: str
+    client_name: Optional[str] = None
+    case_type: Optional[str] = None
+    filing_date: Optional[date] = None
+    court_name: Optional[str] = None
+    status: Optional[str] = 'open'
+
+class LegalDocumentCreate(BaseModel):
+    case_id: str
+    document_type: Optional[str] = None
+    document_title: str
+    file_path: Optional[str] = None
+
+# ============================================================================
+# NGO & NON-PROFIT SCHEMAS
+# ============================================================================
+
+class DonorCreate(BaseModel):
+    donor_code: str
+    donor_name: str
+    donor_type: Optional[str] = None
+    contact_person: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+class GrantCreate(BaseModel):
+    donor_id: str
+    grant_number: str
+    grant_title: str
+    grant_amount: Optional[float] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    status: Optional[str] = 'active'
+
+# ============================================================================
+# ADVANCED MANUFACTURING SCHEMAS
+# ============================================================================
+
+class ProductionOrderCreate(BaseModel):
+    order_number: str
+    product_name: str
+    quantity_ordered: float
+    start_date: Optional[date] = None
+    target_date: Optional[date] = None
+    status: Optional[str] = 'planned'
+
+class QualityControlCreate(BaseModel):
+    production_order_id: str
+    inspection_date: Optional[date] = None
+    inspector_name: Optional[str] = None
+    result: Optional[str] = None
+    defects_found: Optional[int] = 0
+    notes: Optional[str] = None
+
+# ============================================================================
+# LOGISTICS & WAREHOUSING SCHEMAS
+# ============================================================================
+
+class WarehouseCreate(BaseModel):
+    warehouse_code: str
+    warehouse_name: str
+    location: Optional[str] = None
+    capacity: Optional[float] = None
+    manager_name: Optional[str] = None
+    is_active: Optional[bool] = True
+
+class ShipmentCreate(BaseModel):
+    shipment_number: str
+    origin: Optional[str] = None
+    destination: Optional[str] = None
+    carrier: Optional[str] = None
+    tracking_number: Optional[str] = None
+    ship_date: Optional[date] = None
+    estimated_arrival: Optional[date] = None
+    status: Optional[str] = 'pending'
+
+# ============================================================================
+# TELECOMMUNICATIONS SCHEMAS
+# ============================================================================
+
+class SubscriberCreate(BaseModel):
+    subscriber_number: str
+    full_name: str
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    plan_id: Optional[str] = None
+    activation_date: Optional[date] = None
+    status: Optional[str] = 'active'
+
+class TelecomPlanCreate(BaseModel):
+    plan_code: str
+    plan_name: str
+    monthly_fee: Optional[float] = None
+    data_limit_gb: Optional[float] = None
+    voice_minutes: Optional[int] = None
+    sms_count: Optional[int] = None
+    is_active: Optional[bool] = True
+
+# ============================================================================
+# ENERGY & UTILITIES SCHEMAS
+# ============================================================================
+
+class MeterCreate(BaseModel):
+    meter_number: str
+    meter_type: Optional[str] = None
+    customer_name: Optional[str] = None
+    location: Optional[str] = None
+    installation_date: Optional[date] = None
+    status: Optional[str] = 'active'
+
+class ConsumptionCreate(BaseModel):
+    meter_id: str
+    reading_date: Optional[date] = None
+    reading_value: Optional[float] = None
+    consumption_amount: Optional[float] = None
+    billing_amount: Optional[float] = None
+
+# ============================================================================
+# MEDIA & PUBLISHING SCHEMAS
+# ============================================================================
+
+class ContentCreate(BaseModel):
+    content_code: str
+    title: str
+    content_type: Optional[str] = None
+    author: Optional[str] = None
+    publication_date: Optional[date] = None
+    status: Optional[str] = 'draft'
+
+class PublicationCreate(BaseModel):
+    publication_name: str
+    publisher: Optional[str] = None
+    frequency: Optional[str] = None
+    subscription_price: Optional[float] = None
+    is_active: Optional[bool] = True
+
+# ============================================================================
+# INSURANCE & UNDERWRITING SCHEMAS
+# ============================================================================
+
+class InsurancePolicyCreate(BaseModel):
+    policy_number: str
+    policyholder_name: str
+    policy_type: Optional[str] = None
+    coverage_amount: Optional[float] = None
+    premium_amount: Optional[float] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    status: Optional[str] = 'active'
+
+class ClaimCreate(BaseModel):
+    policy_id: str
+    claim_number: str
+    claim_date: Optional[date] = None
+    claim_amount: Optional[float] = None
+    approved_amount: Optional[float] = None
+    status: Optional[str] = 'pending'
+
+# ============================================================================
+# GOVERNMENT & PUBLIC SECTOR SCHEMAS
+# ============================================================================
+
+class PermitCreate(BaseModel):
+    permit_number: str
+    permit_type: Optional[str] = None
+    applicant_name: str
+    application_date: Optional[date] = None
+    issue_date: Optional[date] = None
+    expiry_date: Optional[date] = None
+    status: Optional[str] = 'pending'
+
+class PublicServiceCreate(BaseModel):
+    service_code: str
+    service_name: str
+    department: Optional[str] = None
+    service_fee: Optional[float] = None
+    processing_time_days: Optional[int] = None
+    is_active: Optional[bool] = True

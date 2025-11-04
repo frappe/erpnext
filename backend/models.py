@@ -3339,3 +3339,284 @@ class Store(Base):
     manager_name = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+# Real Estate Development
+class RealEstateProperty(Base):
+    __tablename__ = "real_estate_properties"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    property_code = Column(String, nullable=False)
+    property_name = Column(String, nullable=False)
+    property_type = Column(String)
+    address = Column(Text)
+    size_sqm = Column(Float)
+    purchase_price = Column(Float)
+    current_value = Column(Float)
+    status = Column(String, default='available')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Lease(Base):
+    __tablename__ = "leases"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    property_id = Column(String, ForeignKey('real_estate_properties.id'))
+    tenant_name = Column(String, nullable=False)
+    lease_start = Column(Date)
+    lease_end = Column(Date)
+    monthly_rent = Column(Float)
+    deposit_amount = Column(Float)
+    status = Column(String, default='active')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Legal Practice Management
+class LegalCase(Base):
+    __tablename__ = "legal_cases"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    case_number = Column(String, unique=True, nullable=False)
+    case_title = Column(String, nullable=False)
+    client_name = Column(String)
+    case_type = Column(String)
+    filing_date = Column(Date)
+    court_name = Column(String)
+    status = Column(String, default='open')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class LegalDocument(Base):
+    __tablename__ = "legal_documents"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    case_id = Column(String, ForeignKey('legal_cases.id'))
+    document_type = Column(String)
+    document_title = Column(String, nullable=False)
+    file_path = Column(String)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+
+# NGO & Non-Profit
+class Donor(Base):
+    __tablename__ = "donors"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    donor_code = Column(String, nullable=False)
+    donor_name = Column(String, nullable=False)
+    donor_type = Column(String)
+    contact_person = Column(String)
+    email = Column(String)
+    phone = Column(String)
+    total_donations = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Grant(Base):
+    __tablename__ = "grants"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    donor_id = Column(String, ForeignKey('donors.id'))
+    grant_number = Column(String, nullable=False)
+    grant_title = Column(String, nullable=False)
+    grant_amount = Column(Float)
+    start_date = Column(Date)
+    end_date = Column(Date)
+    status = Column(String, default='active')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Advanced Manufacturing
+class ProductionOrder(Base):
+    __tablename__ = "production_orders"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    order_number = Column(String, unique=True, nullable=False)
+    product_name = Column(String, nullable=False)
+    quantity_ordered = Column(Float)
+    quantity_produced = Column(Float, default=0.0)
+    start_date = Column(Date)
+    target_date = Column(Date)
+    status = Column(String, default='planned')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class QualityControl(Base):
+    __tablename__ = "quality_controls"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    production_order_id = Column(String, ForeignKey('production_orders.id'))
+    inspection_date = Column(Date)
+    inspector_name = Column(String)
+    result = Column(String)
+    defects_found = Column(Integer, default=0)
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Logistics & Warehousing
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    warehouse_code = Column(String, nullable=False)
+    warehouse_name = Column(String, nullable=False)
+    location = Column(String)
+    capacity = Column(Float)
+    manager_name = Column(String)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Shipment(Base):
+    __tablename__ = "shipments"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    shipment_number = Column(String, unique=True, nullable=False)
+    origin = Column(String)
+    destination = Column(String)
+    carrier = Column(String)
+    tracking_number = Column(String)
+    ship_date = Column(Date)
+    estimated_arrival = Column(Date)
+    status = Column(String, default='pending')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Telecommunications
+class Subscriber(Base):
+    __tablename__ = "subscribers"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    subscriber_number = Column(String, unique=True, nullable=False)
+    full_name = Column(String, nullable=False)
+    phone_number = Column(String)
+    email = Column(String)
+    plan_id = Column(String)
+    activation_date = Column(Date)
+    status = Column(String, default='active')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class TelecomPlan(Base):
+    __tablename__ = "telecom_plans"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    plan_code = Column(String, nullable=False)
+    plan_name = Column(String, nullable=False)
+    monthly_fee = Column(Float)
+    data_limit_gb = Column(Float)
+    voice_minutes = Column(Integer)
+    sms_count = Column(Integer)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Energy & Utilities
+class Meter(Base):
+    __tablename__ = "meters"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    meter_number = Column(String, unique=True, nullable=False)
+    meter_type = Column(String)
+    customer_name = Column(String)
+    location = Column(String)
+    installation_date = Column(Date)
+    last_reading = Column(Float, default=0.0)
+    status = Column(String, default='active')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Consumption(Base):
+    __tablename__ = "consumptions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    meter_id = Column(String, ForeignKey('meters.id'))
+    reading_date = Column(Date)
+    reading_value = Column(Float)
+    consumption_amount = Column(Float)
+    billing_amount = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Media & Publishing
+class Content(Base):
+    __tablename__ = "media_contents"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    content_code = Column(String, nullable=False)
+    title = Column(String, nullable=False)
+    content_type = Column(String)
+    author = Column(String)
+    publication_date = Column(Date)
+    status = Column(String, default='draft')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Publication(Base):
+    __tablename__ = "publications"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    publication_name = Column(String, nullable=False)
+    publisher = Column(String)
+    frequency = Column(String)
+    subscription_price = Column(Float)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Insurance & Underwriting
+class InsurancePolicy(Base):
+    __tablename__ = "insurance_policies"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    policy_number = Column(String, unique=True, nullable=False)
+    policyholder_name = Column(String, nullable=False)
+    policy_type = Column(String)
+    coverage_amount = Column(Float)
+    premium_amount = Column(Float)
+    start_date = Column(Date)
+    end_date = Column(Date)
+    status = Column(String, default='active')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Claim(Base):
+    __tablename__ = "insurance_claims"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    policy_id = Column(String, ForeignKey('insurance_policies.id'))
+    claim_number = Column(String, unique=True, nullable=False)
+    claim_date = Column(Date)
+    claim_amount = Column(Float)
+    approved_amount = Column(Float)
+    status = Column(String, default='pending')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Government & Public Sector
+class Permit(Base):
+    __tablename__ = "permits"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    permit_number = Column(String, unique=True, nullable=False)
+    permit_type = Column(String)
+    applicant_name = Column(String, nullable=False)
+    application_date = Column(Date)
+    issue_date = Column(Date)
+    expiry_date = Column(Date)
+    status = Column(String, default='pending')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class PublicService(Base):
+    __tablename__ = "public_services"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    service_code = Column(String, nullable=False)
+    service_name = Column(String, nullable=False)
+    department = Column(String)
+    service_fee = Column(Float)
+    processing_time_days = Column(Integer)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
