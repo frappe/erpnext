@@ -10,8 +10,7 @@
                 "tax_rate": 10,
                 "tax_type": "_Test Account Excise Duty - _TC"
             }
-        ],
-        "gst_rate": 18.0
+        ]
     },
     {
         "doctype": "Item Tax Template",
@@ -24,8 +23,7 @@
                 "tax_rate": 12,
                 "tax_type": "_Test Account Excise Duty - _TC"
             }
-        ],
-        "gst_rate": 18.0
+        ]
     },
     {
         "doctype": "Item Tax Template",
@@ -38,8 +36,7 @@
                 "tax_rate": 15,
                 "tax_type": "_Test Account Excise Duty - _TC"
             }
-        ],
-        "gst_rate": 18.0
+        ]
     },
     {
         "doctype": "Item Tax Template",
@@ -52,8 +49,7 @@
                 "tax_rate": 20,
                 "tax_type": "_Test Account Excise Duty - _TC"
             }
-        ],
-        "gst_rate": 18.0
+        ]
     },
     {
         "doctype": "Item Tax Template",
@@ -78,7 +74,6 @@
                 "tax_rate": 15,
                 "tax_type": "_Test Account S&H Education Cess - _TC"
             }
-        ],
-        "gst_rate": 18.0
+        ]
     }
 ]
