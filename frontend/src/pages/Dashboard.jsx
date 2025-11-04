@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, BookOpen, FileText, TrendingUp, Package, Warehouse, 
   ShoppingCart, ShoppingBag, Building2, DollarSign, Puzzle, 
@@ -7,6 +8,7 @@ import {
 import { dashboard } from '../services/api';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -216,16 +218,28 @@ function Dashboard() {
             Quick Actions
           </h3>
           <div className="space-y-3">
-            <button className="w-full px-4 py-2 bg-gradient-to-r from-teal-500/20 to-green-500/20 hover:from-teal-500/30 hover:to-green-500/30 text-teal-300 rounded-lg transition-all border border-teal-500/30 text-left">
+            <button 
+              onClick={() => navigate('/employees')}
+              className="w-full px-4 py-2 bg-gradient-to-r from-teal-500/20 to-green-500/20 hover:from-teal-500/30 hover:to-green-500/30 text-teal-300 rounded-lg transition-all border border-teal-500/30 text-left"
+            >
               Add New Employee
             </button>
-            <button className="w-full px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-blue-300 rounded-lg transition-all border border-blue-500/30 text-left">
+            <button 
+              onClick={() => navigate('/finance/journal-entries')}
+              className="w-full px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-blue-300 rounded-lg transition-all border border-blue-500/30 text-left"
+            >
               Create Journal Entry
             </button>
-            <button className="w-full px-4 py-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 hover:from-orange-500/30 hover:to-red-500/30 text-orange-300 rounded-lg transition-all border border-orange-500/30 text-left">
-              Generate Report
+            <button 
+              onClick={() => navigate('/finance/chart-of-accounts')}
+              className="w-full px-4 py-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 hover:from-orange-500/30 hover:to-red-500/30 text-orange-300 rounded-lg transition-all border border-orange-500/30 text-left"
+            >
+              View Chart of Accounts
             </button>
-            <button className="w-full px-4 py-2 bg-gradient-to-r from-violet-500/20 to-pink-500/20 hover:from-violet-500/30 hover:to-pink-500/30 text-violet-300 rounded-lg transition-all border border-violet-500/30 text-left">
+            <button 
+              onClick={() => navigate('/addon-store')}
+              className="w-full px-4 py-2 bg-gradient-to-r from-violet-500/20 to-pink-500/20 hover:from-violet-500/30 hover:to-pink-500/30 text-violet-300 rounded-lg transition-all border border-violet-500/30 text-left"
+            >
               Manage Addons
             </button>
           </div>
