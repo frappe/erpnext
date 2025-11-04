@@ -1,0 +1,17 @@
+[
+    {
+        "doctype": "Customer",
+        "customer_group": "Demo Customer Group",
+        "customer_name": "Grant Plastics Ltd."
+    },
+    {
+        "doctype": "Customer",
+        "customer_group": "Demo Customer Group",
+        "customer_name": "West View Software Ltd."
+    },
+    {
+        "doctype": "Customer",
+        "customer_group": "Demo Customer Group",
+        "customer_name": "Palmer Productions Ltd."
+    }
+]

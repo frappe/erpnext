@@ -1,0 +1,20 @@
+{
+ "actions": [],
+ "creation": "2012-03-27 14:36:18",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [],
+ "fields": [],
+ "idx": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:36.513715",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Authorization Control",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

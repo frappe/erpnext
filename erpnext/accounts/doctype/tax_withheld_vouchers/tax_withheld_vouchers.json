@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2022-09-13 16:18:59.404842",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "voucher_name",
+  "taxable_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Voucher Type"
+  },
+  {
+   "fieldname": "voucher_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Voucher Name"
+  },
+  {
+   "fieldname": "taxable_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Taxable Amount",
+   "options": "Company:company:default_currency"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-02-05 16:39:14.863698",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Tax Withheld Vouchers",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

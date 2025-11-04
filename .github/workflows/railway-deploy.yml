@@ -1,0 +1,121 @@
+name: Railway Deployment
+
+# ============================================================================
+# Trigger on push to main branch
+# ============================================================================
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'package.json'
+      - 'gunicorn.conf.py'
+      - 'railway.json'
+      - 'docker-entrypoint.sh'
+      - '.github/workflows/railway-deploy.yml'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+# ============================================================================
+# Jobs
+# ============================================================================
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ======================================================================
+      # 1. Checkout code
+      # ======================================================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ======================================================================
+      # 2. Log info
+      # ======================================================================
+      - name: 📋 Log deployment info
+        run: |
+          echo "🚀 Deploying to Railway..."
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+
+      # ======================================================================
+      # 3. Set up Node.js (for Railway CLI)
+      # ======================================================================
+      - name: 📦 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # ======================================================================
+      # 4. Install Railway CLI
+      # ======================================================================
+      - name: 🛠️  Install Railway CLI
+        run: npm install -g @railway/cli
+
+      # ======================================================================
+      # 5. Deploy using Railway CLI
+      # ======================================================================
+      - name: 🚀 Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          # Check if token is set
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "❌ RAILWAY_TOKEN not set"
+            echo "Please add RAILWAY_TOKEN to GitHub Secrets"
+            exit 1
+          fi
+          
+          # Authenticate with Railway
+          railway login --token $RAILWAY_TOKEN
+          
+          # Link project (requires PROJECT_ID)
+          if [ ! -z "${{ secrets.RAILWAY_PROJECT_ID }}" ]; then
+            railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+          fi
+          
+          # Deploy
+          railway up --detach
+
+      # ======================================================================
+      # 6. Optional: Notify deployment
+      # ======================================================================
+      - name: ✅ Deployment successful
+        if: success()
+        run: |
+          echo "✅ Deployment to Railway completed!"
+          echo "📍 Check Railway Dashboard: https://railway.app/dashboard"
+
+      # ======================================================================
+      # 7. Handle failure
+      # ======================================================================
+      - name: ❌ Deployment failed
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "📋 Check logs for details"
+
+# ============================================================================
+# Notes
+# ============================================================================
+# To enable automatic deployment:
+# 
+# 1. Add RAILWAY_TOKEN to GitHub Secrets:
+#    - Go to GitHub → Settings → Secrets and variables → Actions
+#    - Add new secret: RAILWAY_TOKEN (get from railway.app)
+#
+# 2. Optionally add RAILWAY_PROJECT_ID:
+#    - Find from: railway.app dashboard URL
+#    - Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+#
+# Then every push to main will automatically deploy to Railway!
+# ============================================================================

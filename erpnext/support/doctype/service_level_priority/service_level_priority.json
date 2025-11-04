@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "creation": "2019-05-04 05:54:03.658991",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "default_priority",
+  "cb_01",
+  "priority",
+  "sb_00",
+  "response_time",
+  "cb_00",
+  "resolution_time"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "priority",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "Issue Priority",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "resolution_time",
+   "fieldtype": "Duration",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Resolution Time"
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "default_priority",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Default Priority"
+  },
+  {
+   "columns": 2,
+   "fieldname": "response_time",
+   "fieldtype": "Duration",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "in_list_view": 1,
+   "label": "First Response Time",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:39.731977",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Service Level Priority",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

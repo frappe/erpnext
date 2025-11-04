@@ -1,0 +1,39 @@
+# This workflow is agnostic to branches. Only maintain on develop branch.
+# To add/remove branches just modify the matrix.
+
+name: Regenerate POT file (translatable strings)
+on:
+  schedule:
+    # 9:30 UTC => 3 PM IST Sunday
+    - cron: "30 9 * * 0"
+  workflow_dispatch:
+
+jobs:
+  regenerate-pot-file:
+    name: Regenerate POT file
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ["develop"]
+    permissions:
+      contents: write
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            ref: ${{ matrix.branch }}
+
+        - name: Setup Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: "3.12"
+
+        - name: Run script to update POT file
+          run: |
+            bash ${GITHUB_WORKSPACE}/.github/helper/update_pot_file.sh
+          env:
+            GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+            BASE_BRANCH: ${{ matrix.branch }}
+            PR_REVIEWER: barredterra # change to your GitHub username if you copied this file

@@ -1,0 +1,419 @@
+{
+ "actions": [],
+ "autoname": "ACC-GLE-.YYYY.-.#####",
+ "creation": "2013-01-10 16:34:06",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "dates_section",
+  "posting_date",
+  "transaction_date",
+  "column_break_avko",
+  "fiscal_year",
+  "due_date",
+  "account_details_section",
+  "account",
+  "account_currency",
+  "column_break_ifvf",
+  "against",
+  "party_type",
+  "party",
+  "transaction_details_section",
+  "voucher_type",
+  "voucher_no",
+  "voucher_subtype",
+  "transaction_currency",
+  "column_break_dpsx",
+  "against_voucher_type",
+  "against_voucher",
+  "voucher_detail_no",
+  "transaction_exchange_rate",
+  "reporting_currency_exchange_rate",
+  "amounts_section",
+  "debit_in_account_currency",
+  "debit",
+  "debit_in_transaction_currency",
+  "debit_in_reporting_currency",
+  "column_break_bm1w",
+  "credit_in_account_currency",
+  "credit",
+  "credit_in_transaction_currency",
+  "credit_in_reporting_currency",
+  "dimensions_section",
+  "cost_center",
+  "column_break_lmnm",
+  "project",
+  "more_info_section",
+  "finance_book",
+  "company",
+  "is_opening",
+  "is_advance",
+  "column_break_8abq",
+  "to_rename",
+  "is_cancelled",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "search_index": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Transaction Date",
+   "oldfieldname": "transaction_date",
+   "oldfieldtype": "Date"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Account",
+   "oldfieldname": "account",
+   "oldfieldtype": "Link",
+   "options": "Account",
+   "search_index": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "search_index": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_standard_filter": 1,
+   "label": "Party",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "oldfieldname": "cost_center",
+   "oldfieldtype": "Link",
+   "options": "Cost Center",
+   "search_index": 1
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "label": "Debit Amount",
+   "oldfieldname": "debit",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "label": "Credit Amount",
+   "oldfieldname": "credit",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "debit_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Debit Amount in Account Currency",
+   "options": "account_currency"
+  },
+  {
+   "fieldname": "credit_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Credit Amount in Account Currency",
+   "options": "account_currency"
+  },
+  {
+   "fieldname": "against",
+   "fieldtype": "Text",
+   "in_filter": 1,
+   "label": "Against",
+   "oldfieldname": "against",
+   "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "against_voucher_type",
+   "fieldtype": "Link",
+   "label": "Against Voucher Type",
+   "oldfieldname": "against_voucher_type",
+   "oldfieldtype": "Data",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "against_voucher",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "label": "Against Voucher",
+   "oldfieldname": "against_voucher",
+   "oldfieldtype": "Data",
+   "options": "against_voucher_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Voucher Type",
+   "oldfieldname": "voucher_type",
+   "oldfieldtype": "Select",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "oldfieldname": "voucher_no",
+   "oldfieldtype": "Data",
+   "options": "voucher_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "in_filter": 1,
+   "label": "Remarks",
+   "no_copy": 1,
+   "oldfieldname": "remarks",
+   "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "is_opening",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "label": "Is Opening",
+   "oldfieldname": "is_opening",
+   "oldfieldtype": "Select",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "is_advance",
+   "fieldtype": "Select",
+   "label": "Is Advance",
+   "oldfieldname": "is_advance",
+   "oldfieldtype": "Select",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Fiscal Year",
+   "oldfieldname": "fiscal_year",
+   "oldfieldtype": "Select",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "search_index": 1
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
+   "default": "1",
+   "fieldname": "to_rename",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "To Rename",
+   "search_index": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled"
+  },
+  {
+   "fieldname": "transaction_currency",
+   "fieldtype": "Link",
+   "label": "Transaction Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "transaction_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Transaction Exchange Rate",
+   "precision": "9"
+  },
+  {
+   "fieldname": "debit_in_transaction_currency",
+   "fieldtype": "Currency",
+   "label": "Debit Amount in Transaction Currency",
+   "options": "transaction_currency"
+  },
+  {
+   "fieldname": "credit_in_transaction_currency",
+   "fieldtype": "Currency",
+   "label": "Credit Amount in Transaction Currency",
+   "options": "transaction_currency"
+  },
+  {
+   "fieldname": "voucher_subtype",
+   "fieldtype": "Small Text",
+   "label": "Voucher Subtype"
+  },
+  {
+   "fieldname": "dates_section",
+   "fieldtype": "Section Break",
+   "label": "Dates"
+  },
+  {
+   "fieldname": "column_break_avko",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_details_section",
+   "fieldtype": "Section Break",
+   "label": "Account Details"
+  },
+  {
+   "fieldname": "column_break_ifvf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Details"
+  },
+  {
+   "fieldname": "amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fieldname": "column_break_dpsx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_section",
+   "fieldtype": "Section Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "column_break_bm1w",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Dimensions"
+  },
+  {
+   "fieldname": "column_break_lmnm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_8abq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "debit_in_reporting_currency",
+   "fieldtype": "Currency",
+   "label": "Debit Amount in Reporting Currency",
+   "options": "Company:company:reporting_currency"
+  },
+  {
+   "fieldname": "credit_in_reporting_currency",
+   "fieldtype": "Currency",
+   "label": "Credit Amount in Reporting Currency",
+   "options": "Company:company:reporting_currency"
+  },
+  {
+   "fieldname": "reporting_currency_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Reporting Currency Exchange Rate",
+   "precision": "9"
+  }
+ ],
+ "icon": "fa fa-list",
+ "idx": 1,
+ "in_create": 1,
+ "links": [],
+ "modified": "2025-08-22 12:57:17.750252",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "GL Entry",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "search_fields": "voucher_no,account,posting_date,against_voucher",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

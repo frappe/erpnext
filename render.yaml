@@ -1,0 +1,150 @@
+services:
+  # ============================================================================
+  # Database Service (PostgreSQL)
+  # ============================================================================
+  - type: pserv
+    name: kanaan-db
+    env: docker
+    dockerfilePath: ./Dockerfile.postgres
+    envVars:
+      - key: POSTGRES_DB
+        value: kanaan_erpnext
+      - key: POSTGRES_USER
+        value: erpnext
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+
+  # ============================================================================
+  # Redis Cache Service
+  # ============================================================================
+  - type: pserv
+    name: kanaan-redis-cache
+    env: docker
+    image: redis:7-alpine
+    plan: free
+
+  # ============================================================================
+  # Redis Queue Service
+  # ============================================================================
+  - type: pserv
+    name: kanaan-redis-queue
+    env: docker
+    image: redis:7-alpine
+    plan: free
+
+  # ============================================================================
+  # Backend Web Service (Gunicorn + Frappe)
+  # ============================================================================
+  - type: web
+    name: kanaan-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: FRAPPE_ENV
+        value: production
+      - key: DEBUG
+        value: false
+      - key: DB_HOST
+        fromService:
+          name: kanaan-db
+          property: hostname
+      - key: DB_PORT
+        value: 5432
+      - key: DB_NAME
+        value: kanaan_erpnext
+      - key: DB_USER
+        value: erpnext
+      - key: DB_PASSWORD
+        fromService:
+          name: kanaan-db
+          envKey: POSTGRES_PASSWORD
+      - key: REDIS_CACHE
+        fromService:
+          name: kanaan-redis-cache
+          property: hostname
+        value: :6379
+      - key: REDIS_QUEUE
+        fromService:
+          name: kanaan-redis-queue
+          property: hostname
+        value: :6379
+      - key: SITE_NAME
+        value: kanaan.render.com
+    healthCheckPath: /api/health
+    numInstances: 1
+    plan: standard
+    region: singapore
+    
+  # ============================================================================
+  # Worker Service (Background Tasks)
+  # ============================================================================
+  - type: pserv
+    name: kanaan-worker
+    env: docker
+    dockerfilePath: ./Dockerfile
+    command: bench worker --queue long,default,short
+    envVars:
+      - key: FRAPPE_ENV
+        value: production
+      - key: DB_HOST
+        fromService:
+          name: kanaan-db
+          property: hostname
+      - key: DB_PORT
+        value: 5432
+      - key: DB_NAME
+        value: kanaan_erpnext
+      - key: DB_USER
+        value: erpnext
+      - key: DB_PASSWORD
+        fromService:
+          name: kanaan-db
+          envKey: POSTGRES_PASSWORD
+      - key: REDIS_CACHE
+        fromService:
+          name: kanaan-redis-cache
+          property: hostname
+        value: :6379
+      - key: REDIS_QUEUE
+        fromService:
+          name: kanaan-redis-queue
+          property: hostname
+        value: :6379
+    plan: starter
+
+  # ============================================================================
+  # Scheduler Service (Scheduled Tasks)
+  # ============================================================================
+  - type: pserv
+    name: kanaan-scheduler
+    env: docker
+    dockerfilePath: ./Dockerfile
+    command: bench schedule
+    envVars:
+      - key: FRAPPE_ENV
+        value: production
+      - key: DB_HOST
+        fromService:
+          name: kanaan-db
+          property: hostname
+      - key: DB_PORT
+        value: 5432
+      - key: DB_NAME
+        value: kanaan_erpnext
+      - key: DB_USER
+        value: erpnext
+      - key: DB_PASSWORD
+        fromService:
+          name: kanaan-db
+          envKey: POSTGRES_PASSWORD
+      - key: REDIS_CACHE
+        fromService:
+          name: kanaan-redis-cache
+          property: hostname
+        value: :6379
+      - key: REDIS_QUEUE
+        fromService:
+          name: kanaan-redis-queue
+          property: hostname
+        value: :6379
+    plan: starter

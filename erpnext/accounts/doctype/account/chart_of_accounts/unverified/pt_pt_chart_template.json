@@ -1,0 +1,847 @@
+{
+    "country_code": "pt",
+    "name": "Portugal - Template do Plano de Contas SNC",
+    "tree": {
+        "Capital, reservas e resultados transitados": {
+            "Ac\u00e7\u00f5es (quotas) pr\u00f3prias": {
+                "Descontos e pr\u00e9mios": {},
+                "Valor nominal": {}
+            },
+            "Ajustamentos em activos financeiros": {
+                "Outros": {},
+                "Relacionados com o m\u00e9todo da equival\u00eancia patrimonial": {
+                    "Ajustamentos de transi\u00e7\u00e3o": {},
+                    "Decorrentes de outras varia\u00e7\u00f5es nos capitais pr\u00f3prios d": {},
+                    "Lucros n\u00e3o atribu\u00eddos": {}
+                }
+            },
+            "Capital": {},
+            "Excedentes de revalor. de activos fixos tang\u00edveis e int": {
+                "Outros excedentes": {
+                    "Antes de imposto sobre o rendimento": {},
+                    "Impostos diferidos": {}
+                },
+                "Reavalia\u00e7\u00f5es decorrentes de diplomas legais": {
+                    "Antes de imposto sobre o rendimento": {},
+                    "Impostos diferidos": {}
+                }
+            },
+            "Outras varia\u00e7\u00f5es no capital pr\u00f3prio": {
+                "Ajustamentos por impostos diferidos": {},
+                "Diferen\u00e7as de convers\u00e3o de demonstra\u00e7\u00f5es financeiras": {},
+                "Doa\u00e7\u00f5es": {},
+                "Outras": {},
+                "Subs\u00eddios": {}
+            },
+            "Outros instrumentos de capital pr\u00f3prio": {},
+            "Pr\u00e9mios de emiss\u00e3o": {},
+            "Reservas": {
+                "Outras reservas": {},
+                "Reservas legais": {}
+            },
+            "Resultados transitados": {},
+            "root_type": ""
+        },
+        "Contas a receber e a pagar": {
+            "Accionistas/s\u00f3cios": {
+                "Accionistas c. subscri\u00e7\u00e3o": {
+                    "account_type": "Equity"
+                },
+                "Adiantamentos por conta de lucros": {
+                    "account_type": "Equity"
+                },
+                "Empr\u00e9stimos concedidos empresa m\u00e3e": {
+                    "account_type": "Equity"
+                },
+                "Lucros dispon\u00edveis": {
+                    "account_type": "Equity"
+                },
+                "Outras opera\u00e7\u00f5es": {
+                    "account_type": "Equity"
+                },
+                "Perdas por imparidade acumuladas": {
+                    "account_type": "Equity"
+                },
+                "Quotas n\u00e3o liberadas": {
+                    "account_type": "Equity"
+                },
+                "Resultados atribu\u00eddos": {
+                    "account_type": "Equity"
+                },
+                "account_type": "Equity"
+            },
+            "Clientes": {
+                "Adiantamentos de clientes": {
+                    "account_type": "Receivable"
+                },
+                "Clientes c/c": {
+                    "Clientes empreendimentos conjuntos": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes empresa m\u00e3e": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes empresas associadas": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes empresas subsidi\u00e1rias": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes gerais": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes outras partes relacionadas": {
+                        "account_type": "Receivable"
+                    },
+                    "account_type": "Receivable"
+                },
+                "Clientes t\u00edtulos a receber": {
+                    "Clientes empreendimentos conjuntos": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes empresa m\u00e3e": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes empresas associadas": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes empresas subsidi\u00e1rias": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes gerais": {
+                        "account_type": "Receivable"
+                    },
+                    "Clientes outras partes relacionadas": {
+                        "account_type": "Receivable"
+                    },
+                    "account_type": "Receivable"
+                },
+                "Perdas por imparidade acumuladas": {
+                    "account_type": "Receivable"
+                },
+                "account_type": "Receivable"
+            },
+            "Diferimentos": {
+                "Gastos a reconhecer": {
+                    "account_type": "Equity"
+                },
+                "Rendimentos a reconhecer": {
+                    "account_type": "Equity"
+                },
+                "account_type": "Equity"
+            },
+            "Estado e outros entes p\u00fablicos": {
+                "Contribui\u00e7\u00f5es para a seguran\u00e7a social": {
+                    "account_type": "Tax"
+                },
+                "Imposto sobre o rendimento": {
+                    "account_type": "Tax"
+                },
+                "Imposto sobre o valor acrescentado": {
+                    "Iva a pagar": {
+                        "account_type": "Tax"
+                    },
+                    "Iva a recuperar": {
+                        "account_type": "Tax"
+                    },
+                    "Iva apuramento": {
+                        "account_type": "Tax"
+                    },
+                    "Iva dedut\u00edvel": {
+                        "account_type": "Tax"
+                    },
+                    "Iva liquidado": {
+                        "account_type": "Tax"
+                    },
+                    "Iva liquida\u00e7\u00f5es oficiosas": {
+                        "account_type": "Tax"
+                    },
+                    "Iva reembolsos pedidos": {
+                        "account_type": "Tax"
+                    },
+                    "Iva regulariza\u00e7\u00f5es": {
+                        "account_type": "Tax"
+                    },
+                    "Iva suportado": {
+                        "account_type": "Tax"
+                    },
+                    "account_type": "Tax"
+                },
+                "Outras tributa\u00e7\u00f5es": {
+                    "account_type": "Tax"
+                },
+                "Outros impostos": {
+                    "account_type": "Tax"
+                },
+                "Reten\u00e7\u00e3o de impostos sobre rendimentos": {
+                    "account_type": "Tax"
+                },
+                "Tributos das autarquias locais": {
+                    "account_type": "Tax"
+                },
+                "account_type": "Tax"
+            },
+            "Financiamentos obtidos": {
+                "Institui\u00e7\u00f5es de cr\u00e9dito e sociedades financeiras": {
+                    "Descobertos banc\u00e1rios": {
+                        "account_type": "Equity"
+                    },
+                    "Empr\u00e9stimos banc\u00e1rios": {
+                        "account_type": "Equity"
+                    },
+                    "Loca\u00e7\u00f5es financeiras": {
+                        "account_type": "Equity"
+                    },
+                    "account_type": "Equity"
+                },
+                "Mercado de valores mobili\u00e1rios": {
+                    "Empr\u00e9stimos por obriga\u00e7\u00f5es": {
+                        "account_type": "Equity"
+                    },
+                    "account_type": "Equity"
+                },
+                "Outros financiadores": {
+                    "account_type": "Equity"
+                },
+                "Participantes de capital": {
+                    "Empresa m\u00e3e suprimentos e outros m\u00fatuos": {
+                        "account_type": "Equity"
+                    },
+                    "Outros participantes suprimentos e outros m\u00fatuos": {
+                        "account_type": "Equity"
+                    },
+                    "account_type": "Equity"
+                },
+                "Subsidi\u00e1rias, associadas e empreendimentos conjuntos": {
+                    "account_type": "Equity"
+                },
+                "account_type": "Equity"
+            },
+            "Fornecedores": {
+                "Adiantamentos a fornecedores": {
+                    "account_type": "Payable"
+                },
+                "Facturas em recep\u00e7\u00e3o e confer\u00eancia": {
+                    "account_type": "Payable"
+                },
+                "Fornecedores c/c": {
+                    "Fornecedores empreendimentos conjuntos": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores empresa m\u00e3e": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores empresas associadas": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores empresas subsidi\u00e1rias": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores gerais": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores outras partes relacionadas": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "Fornecedores t\u00edtulos a pagar": {
+                    "Fornecedores empreendimentos conjuntos": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores empresa m\u00e3e": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores empresas associadas": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores empresas subsidi\u00e1rias": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores gerais": {
+                        "account_type": "Payable"
+                    },
+                    "Fornecedores outras partes relacionadas": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "Perdas por imparidade acumuladas": {
+                    "account_type": "Payable"
+                },
+                "account_type": "Payable"
+            },
+            "Outras contas a receber e a pagar": {
+                "Adiantamentos por conta de vendas": {
+                    "account_type": "Equity"
+                },
+                "Benef\u00edcios p\u00f3s emprego": {
+                    "account_type": "Equity"
+                },
+                "Credores por subscri\u00e7\u00f5es n\u00e3o liberadas": {
+                    "account_type": "Equity"
+                },
+                "Devedores e credores por acr\u00e9scimos": {
+                    "Credores por acr\u00e9scimos de gastos": {
+                        "account_type": "Equity"
+                    },
+                    "Devedores por acr\u00e9scimo de rendimentos": {
+                        "account_type": "Equity"
+                    },
+                    "account_type": "Equity"
+                },
+                "Fornecedores de investimentos": {
+                    "Adiantamentos a fornecedores de investimentos": {
+                        "account_type": "Equity"
+                    },
+                    "Facturas em recep\u00e7\u00e3o e confer\u00eancia": {
+                        "account_type": "Equity"
+                    },
+                    "Fornecedores de investimentos contas gerais": {
+                        "account_type": "Equity"
+                    },
+                    "account_type": "Equity"
+                },
+                "Impostos diferidos": {
+                    "Activos por impostos diferidos": {
+                        "account_type": "Equity"
+                    },
+                    "Passivos por impostos diferidos": {
+                        "account_type": "Equity"
+                    },
+                    "account_type": "Equity"
+                },
+                "Outros devedores e credores": {
+                    "account_type": "Equity"
+                },
+                "Perdas por imparidade acumuladas": {
+                    "account_type": "Equity"
+                },
+                "account_type": "Equity"
+            },
+            "Pessoal": {
+                "Adiantamentos": {
+                    "Ao pessoal": {
+                        "account_type": "Payable"
+                    },
+                    "Aos \u00f3rg\u00e3os sociais": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "Cau\u00e7\u00f5es": {
+                    "Do pessoal": {
+                        "account_type": "Payable"
+                    },
+                    "Dos \u00f3rg\u00e3os sociais": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "Outras opera\u00e7\u00f5es": {
+                    "Com o pessoal": {
+                        "account_type": "Payable"
+                    },
+                    "Com os \u00f3rg\u00e3os sociais": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "Perdas por imparidade acumuladas": {
+                    "account_type": "Payable"
+                },
+                "Remunera\u00e7\u00f5es a pagar": {
+                    "Ao pessoal": {
+                        "account_type": "Payable"
+                    },
+                    "Aos \u00f3rg\u00e3os sociais": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "account_type": "Payable"
+            },
+            "Provis\u00f5es": {
+                "Acidentes de trabalho e doen\u00e7as profissionais": {
+                    "account_type": "Equity"
+                },
+                "Contratos onerosos": {
+                    "account_type": "Equity"
+                },
+                "Garantias a clientes": {
+                    "account_type": "Equity"
+                },
+                "Impostos": {
+                    "account_type": "Equity"
+                },
+                "Mat\u00e9rias ambientais": {
+                    "account_type": "Equity"
+                },
+                "Outras provis\u00f5es": {
+                    "account_type": "Equity"
+                },
+                "Processos judiciais em curso": {
+                    "account_type": "Equity"
+                },
+                "Reestrutura\u00e7\u00e3o": {
+                    "account_type": "Equity"
+                },
+                "account_type": "Equity"
+            },
+            "root_type": ""
+        },
+        "Gastos": {
+            "Custo das mercadorias vendidas e mat\u00e9rias consumidas": {
+                "Activos biol\u00f3gicos (compras)": {},
+                "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo": {},
+                "Mercadorias": {}
+            },
+            "Fornecimentos e servi\u00e7os externos": {
+                "Desloca\u00e7\u00f5es, estadas e transportes": {
+                    "Desloca\u00e7\u00f5es e estadas": {},
+                    "Outros": {},
+                    "Transporte de pessoal": {},
+                    "Transportes de mercadorias": {}
+                },
+                "Energia e flu\u00eddos": {
+                    "Combust\u00edveis": {},
+                    "Electricidade": {},
+                    "Outros": {},
+                    "\u00c1gua": {}
+                },
+                "Materiais": {
+                    "Artigos de oferta": {},
+                    "Ferramentas e utens\u00edlios de desgaste r\u00e1pido": {},
+                    "Livros de documenta\u00e7\u00e3o t\u00e9cnica": {},
+                    "Material de escrit\u00f3rio": {},
+                    "Outros": {}
+                },
+                "Servi\u00e7os diversos": {
+                    "Comunica\u00e7\u00e3o": {},
+                    "Contencioso e notariado": {},
+                    "Despesas de representa\u00e7\u00e3o": {},
+                    "Limpeza, higiene e conforto": {},
+                    "Outros servi\u00e7os": {},
+                    "Rendas e alugueres": {},
+                    "Royalties": {},
+                    "Seguros": {}
+                },
+                "Subcontratos": {},
+                "Trabalhos especializados": {
+                    "Comiss\u00f5es": {},
+                    "Conserva\u00e7\u00e3o e repara\u00e7\u00e3o": {},
+                    "Honor\u00e1rios": {},
+                    "Outros": {},
+                    "Publicidade e propaganda": {},
+                    "Trabalhos especializados": {},
+                    "Vigil\u00e2ncia e seguran\u00e7a": {}
+                }
+            },
+            "Gastos com o pessoal": {
+                "Benef\u00edcios p\u00f3s emprego": {
+                    "Outros benef\u00edcios": {},
+                    "Pr\u00e9mios para pens\u00f5es": {}
+                },
+                "Encargos sobre remunera\u00e7\u00f5es": {},
+                "Gastos de ac\u00e7\u00e3o social": {},
+                "Indemniza\u00e7\u00f5es": {},
+                "Outros gastos com o pessoal": {},
+                "Remunera\u00e7\u00f5es do pessoal": {},
+                "Remunera\u00e7\u00f5es dos \u00f3rg\u00e3os sociais": {},
+                "Seguros de acidentes no trabalho e doen\u00e7as profissionais": {}
+            },
+            "Gastos de deprecia\u00e7\u00e3o e de amortiza\u00e7\u00e3o": {
+                "Activos fixos tang\u00edveis": {},
+                "Activos intang\u00edveis": {},
+                "Propriedades de investimento": {}
+            },
+            "Gastos e perdas de financiamento": {
+                "Diferen\u00e7as de c\u00e2mbio desfavor\u00e1veis": {
+                    "Outras": {},
+                    "Relativos a financiamentos obtidos": {}
+                },
+                "Juros suportados": {
+                    "Juros de financiamento obtidos": {},
+                    "Outros juros": {}
+                },
+                "Outros gastos e perdas de financiamento": {
+                    "Outros": {},
+                    "Relativos a financiamentos obtidos": {}
+                }
+            },
+            "Outros gastos e perdas": {
+                "Descontos de pronto pagamento concedidos": {},
+                "D\u00edvidas incobr\u00e1veis": {},
+                "Gastos e perdas em investimentos n\u00e3o financeiros": {
+                    "Abates": {},
+                    "Aliena\u00e7\u00f5es": {},
+                    "Gastos em propriedades de investimento": {},
+                    "Outros gastos e perdas": {},
+                    "Sinistros": {}
+                },
+                "Gastos e perdas em subsid. , assoc. e empreend. conjuntos": {
+                    "Aliena\u00e7\u00f5es": {},
+                    "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial": {},
+                    "Cobertura de preju\u00edzos": {},
+                    "Outros gastos e perdas": {}
+                },
+                "Gastos e perdas nos restantes investimentos financeiros": {
+                    "Aliena\u00e7\u00f5es": {},
+                    "Cobertura de preju\u00edzos": {},
+                    "Outros gastos e perdas": {}
+                },
+                "Impostos": {
+                    "Impostos directos": {},
+                    "Impostos indirectos": {},
+                    "Taxas": {}
+                },
+                "Outros": {
+                    "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores": {},
+                    "Donativos": {},
+                    "Insufici\u00eancia da estimativa para impostos": {},
+                    "Ofertas e amostras de invent\u00e1rios": {},
+                    "Outros n\u00e3o especificados": {},
+                    "Perdas em instrumentos financeiros": {},
+                    "Quotiza\u00e7\u00f5es": {}
+                },
+                "Perdas em invent\u00e1rios": {
+                    "Outras perdas": {},
+                    "Quebras": {},
+                    "Sinistros": {}
+                }
+            },
+            "Perdas por imparidade": {
+                "Em activos fixos tang\u00edveis": {},
+                "Em activos intang\u00edveis": {},
+                "Em activos n\u00e3o correntes detidos para venda": {},
+                "Em d\u00edvidas a receber": {
+                    "Clientes": {},
+                    "Outros devedores": {}
+                },
+                "Em invent\u00e1rios": {},
+                "Em investimentos em curso": {},
+                "Em investimentos financeiros": {},
+                "Em propriedades de investimento": {}
+            },
+            "Perdas por redu\u00e7\u00f5es de justo valor": {
+                "Em activos biol\u00f3gicos": {},
+                "Em instrumentos financeiros": {},
+                "Em investimentos financeiros": {},
+                "Em propriedades de investimento": {}
+            },
+            "Provis\u00f5es do per\u00edodo": {
+                "Acidentes de trabalho e doen\u00e7as profissionais": {},
+                "Contratos onerosos": {},
+                "Garantias a clientes": {},
+                "Impostos": {},
+                "Mat\u00e9rias ambientais": {},
+                "Outras provis\u00f5es": {},
+                "Processos judiciais em curso": {},
+                "Reestrutura\u00e7\u00e3o": {}
+            },
+            "root_type": ""
+        },
+        "Invent\u00e1rios e activos biol\u00f3gicos": {
+            "Activos biol\u00f3gicos": {
+                "Consum\u00edveis": {
+                    "Animais": {},
+                    "Plantas": {}
+                },
+                "De produ\u00e7\u00e3o": {
+                    "Animais": {},
+                    "Plantas": {}
+                }
+            },
+            "Adiantamentos por conta de compras": {},
+            "Compras": {
+                "Activos biol\u00f3gicos": {},
+                "Descontos e abatimentos em compras": {},
+                "Devolu\u00e7\u00f5es de compras": {},
+                "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo": {},
+                "Mercadorias": {}
+            },
+            "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo": {
+                "Embalagens": {},
+                "Materiais diversos": {},
+                "Mat\u00e9rias em tr\u00e2nsito": {},
+                "Mat\u00e9rias primas": {},
+                "Mat\u00e9rias subsidi\u00e1rias": {},
+                "Perdas por imparidade acumuladas": {}
+            },
+            "Mercadorias": {
+                "Mercadorias em poder de terceiros": {},
+                "Mercadorias em tr\u00e2nsito": {},
+                "Perdas por imparidade acumuladas": {}
+            },
+            "Produtos acabados e interm\u00e9dios": {
+                "Perdas por imparidade acumuladas": {},
+                "Produtos em poder de terceiros": {}
+            },
+            "Produtos e trabalhos em curso": {},
+            "Reclassifica\u00e7\u00e3o e regular. de invent. e activos biol\u00f3g.": {
+                "Activos biol\u00f3gicos": {},
+                "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo": {},
+                "Mercadorias": {},
+                "Produtos acabados e interm\u00e9dios": {},
+                "Produtos e trabalhos em curso": {},
+                "Subprodutos, desperd\u00edcios, res\u00edduos e refugos": {}
+            },
+            "Subprodutos, desperd\u00edcios, res\u00edduos e refugos": {
+                "Desperd\u00edcios, res\u00edduos e refugos": {},
+                "Perdas por imparidade acumuladas": {},
+                "Subprodutos": {}
+            },
+            "root_type": ""
+        },
+        "Investimentos": {
+            "Activo fixos tang\u00edveis": {
+                "Deprecia\u00e7\u00f5es acumuladas": {},
+                "Edif\u00edcios e outras constru\u00e7\u00f5es": {},
+                "Equipamento administrativo": {},
+                "Equipamento b\u00e1sico": {},
+                "Equipamento de transporte": {},
+                "Equipamentos biol\u00f3gicos": {},
+                "Outros activos fixos tang\u00edveis": {},
+                "Perdas por imparidade acumuladas": {},
+                "Terrenos e recursos naturais": {}
+            },
+            "Activos intang\u00edveis": {
+                "Deprecia\u00e7\u00f5es acumuladas": {},
+                "Goodwill": {},
+                "Outros activos intang\u00edveis": {},
+                "Perdas por imparidade acumuladas": {},
+                "Programas de computador": {},
+                "Projectos de desenvolvimento": {},
+                "Propriedade industrial": {}
+            },
+            "Activos n\u00e3o correntes detidos para venda": {
+                "Perdas por imparidade acumuladas": {}
+            },
+            "Investimentos em curso": {
+                "Activos fixos tang\u00edveis em curso": {},
+                "Activos intang\u00edveis em curso": {},
+                "Adiantamentos por conta de investimentos": {},
+                "Investimentos financeiros em curso": {},
+                "Perdas por imparidade acumuladas": {},
+                "Propriedades de investimento em curso": {}
+            },
+            "Investimentos financeiros": {
+                "Investimentos em associadas": {
+                    "Empr\u00e9stimos concedidos": {},
+                    "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial": {},
+                    "Participa\u00e7\u00f5es de capital outros m\u00e9todos": {}
+                },
+                "Investimentos em entidades conjuntamente controladas": {
+                    "Empr\u00e9stimos concedidos": {},
+                    "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial": {},
+                    "Participa\u00e7\u00f5es de capital outros m\u00e9todos": {}
+                },
+                "Investimentos em subsidi\u00e1rias": {
+                    "Empr\u00e9stimos concedidos": {},
+                    "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial": {},
+                    "Participa\u00e7\u00f5es de capital outros m\u00e9todos": {}
+                },
+                "Investimentos noutras empresas": {
+                    "Empr\u00e9stimos concedidos": {},
+                    "Participa\u00e7\u00f5es de capital": {}
+                },
+                "Outros investimentos financeiros": {
+                    "Ac\u00e7\u00f5es da sgm (6500x1,00)": {},
+                    "Detidos at\u00e9 \u00e0 maturidade": {}
+                },
+                "Perdas por imparidade acumuladas": {}
+            },
+            "Propriedades de investimento": {
+                "Deprecia\u00e7\u00f5es acumuladas": {},
+                "Edif\u00edcios e outras constru\u00e7\u00f5es": {},
+                "Outras propriedades de investimento": {},
+                "Perdas por imparidade acumuladas": {},
+                "Terrenos e recursos naturais": {}
+            },
+            "root_type": ""
+        },
+        "Meios financeiros l\u00edquidos": {
+            "Caixa": {
+                "account_type": "Cash"
+            },
+            "Dep\u00f3sitos \u00e0 ordem": {
+                "account_type": "Cash"
+            },
+            "Outros dep\u00f3sitos banc\u00e1rios": {
+                "account_type": "Cash"
+            },
+            "Outros instrumentos financeiros": {
+                "Derivados": {
+                    "Potencialmente desfavor\u00e1veis": {
+                        "account_type": "Cash"
+                    },
+                    "Potencialmente favor\u00e1veis": {
+                        "account_type": "Cash"
+                    },
+                    "account_type": "Cash"
+                },
+                "Instrumentos financeiros detidos para negocia\u00e7\u00e3o": {
+                    "Activos financeiros": {
+                        "account_type": "Cash"
+                    },
+                    "Passivos financeiros": {
+                        "account_type": "Cash"
+                    },
+                    "account_type": "Cash"
+                },
+                "Outros activos e passivos financeiros": {
+                    "Outros activos financeiros": {
+                        "account_type": "Cash"
+                    },
+                    "Outros passivos financeiros": {
+                        "account_type": "Cash"
+                    },
+                    "account_type": "Cash"
+                },
+                "account_type": "Cash"
+            },
+            "root_type": ""
+        },
+        "Rendimentos": {
+            "Ganhos por aumentos de justo valor": {
+                "Em activos biol\u00f3gicos": {},
+                "Em instrumentos financeiros": {},
+                "Em investimentos financeiros": {},
+                "Em propriedades de investimento": {}
+            },
+            "Juros, dividendos e outros rendimentos similares": {
+                "Dividendos obtidos": {
+                    "De aplica\u00e7\u00f5es de meios financeiros l\u00edquidos": {},
+                    "De associadas e empreendimentos conjuntos": {},
+                    "De subsidi\u00e1rias": {},
+                    "Outras": {}
+                },
+                "Juros obtidos": {
+                    "De dep\u00f3sitos": {},
+                    "De financiamentos concedidos a associadas e emp. conjun": {},
+                    "De financiamentos concedidos a subsidi\u00e1rias": {},
+                    "De financiamentos obtidos": {},
+                    "De outras aplica\u00e7\u00f5es de meios financeiros l\u00edquidos": {},
+                    "De outros financiamentos obtidos": {}
+                },
+                "Outros rendimentos similares": {}
+            },
+            "Outros rendimentos e ganhos": {
+                "Descontos de pronto pagamento obtidos": {},
+                "Ganhos em invent\u00e1rios": {
+                    "Outros ganhos": {},
+                    "Sinistros": {},
+                    "Sobras": {}
+                },
+                "Outros": {
+                    "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores": {},
+                    "Excesso da estimativa para impostos": {},
+                    "Ganhos em outros instrumentos financeiros": {},
+                    "Imputa\u00e7\u00e3o de subs\u00eddios para investimentos": {},
+                    "Outros n\u00e3o especificados": {},
+                    "Restitui\u00e7\u00e3o de impostos": {}
+                },
+                "Recupera\u00e7\u00e3o de d\u00edvidas a receber": {},
+                "Rendimentos e ganhos em investimentos n\u00e3o financeiros": {
+                    "Aliena\u00e7\u00f5es": {},
+                    "Outros rendimentos e ganhos": {},
+                    "Rendas e outros rendimentos em propriedades de investimento": {},
+                    "Sinistros": {}
+                },
+                "Rendimentos e ganhos em subsidi\u00e1rias, associadas e empr": {
+                    "Aliena\u00e7\u00f5es": {},
+                    "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial": {},
+                    "Outros rendimentos e ganhos": {}
+                },
+                "Rendimentos e ganhos nos restantes activos financeiros": {
+                    "Aliena\u00e7\u00f5es": {},
+                    "Diferen\u00e7as de c\u00e2mbio favor\u00e1veis": {},
+                    "Outros rendimentos e ganhos": {}
+                },
+                "Rendimentos suplementares": {
+                    "Aluguer de equipamento": {},
+                    "Desempenho de cargos sociais noutras empresas": {},
+                    "Estudos, projectos e assist\u00eancia tecnol\u00f3gica": {},
+                    "Outros rendimentos suplementares": {},
+                    "Royalties": {},
+                    "Servi\u00e7os sociais": {}
+                }
+            },
+            "Presta\u00e7\u00f5es de servi\u00e7os": {
+                "Descontos e abatimentos": {},
+                "Iva dos servi\u00e7os com imposto inclu\u00eddo": {},
+                "Servi\u00e7o a": {},
+                "Servi\u00e7o b": {},
+                "Servi\u00e7os secund\u00e1rios": {}
+            },
+            "Revers\u00f5es": {
+                "De deprecia\u00e7\u00f5es e de amortiza\u00e7\u00f5es": {
+                    "Activos fixos tang\u00edveis": {},
+                    "Activos intang\u00edveis": {},
+                    "Propriedades de investimento": {}
+                },
+                "De perdas por imparidade": {
+                    "Em activos fixos tang\u00edveis": {},
+                    "Em activos intang\u00edveis": {},
+                    "Em activos n\u00e3o correntes detidos para venda": {},
+                    "Em d\u00edvidas a receber": {
+                        "Clientes": {},
+                        "Outros devedores": {}
+                    },
+                    "Em invent\u00e1rios": {},
+                    "Em investimentos em curso": {},
+                    "Em investimentos financeiros": {},
+                    "Em propriedades de investimento": {}
+                },
+                "De provis\u00f5es": {
+                    "Acidentes no trabalho e doen\u00e7as profissionais": {},
+                    "Contratos onerosos": {},
+                    "Garantias a clientes": {},
+                    "Impostos": {},
+                    "Mat\u00e9rias ambientais": {},
+                    "Outras provis\u00f5es": {},
+                    "Processos judiciais em curso": {},
+                    "Reestrutura\u00e7\u00e3o": {}
+                }
+            },
+            "Subs\u00eddios \u00e0 explora\u00e7\u00e3o": {
+                "Subs\u00eddios de outras entidades": {},
+                "Subs\u00eddios do estado e outros entes p\u00fablicos": {}
+            },
+            "Trabalhos para a pr\u00f3pria entidade": {
+                "Activos fixos tang\u00edveis": {},
+                "Activos intang\u00edveis": {},
+                "Activos por gastos diferidos": {},
+                "Propriedades de investimento": {}
+            },
+            "Varia\u00e7\u00f5es nos invent\u00e1rios da produ\u00e7\u00e3o": {
+                "Activos biol\u00f3gicos": {},
+                "Produtos acabados e interm\u00e9dios": {},
+                "Produtos e trabalhos em curso": {},
+                "Subprodutos, desperd\u00edcios, res\u00edduos e refugos": {}
+            },
+            "Vendas": {
+                "Activos biol\u00f3gicos": {},
+                "Descontos e abatimentos em vendas": {},
+                "Devolu\u00e7\u00f5es de vendas": {},
+                "Iva das vendas com imposto inclu\u00eddo": {},
+                "Mercadoria": {},
+                "Produtos acabados e interm\u00e9dios": {},
+                "Subprodutos, desperd\u00edcios, res\u00edduos e refugos": {}
+            },
+            "root_type": ""
+        },
+        "Resultados": {
+            "Dividendos antecipados": {},
+            "Resultado l\u00edquido do per\u00edodo": {
+                "Impostos sobre o rendimento do per\u00edodo": {
+                    "Imposto diferido": {},
+                    "Imposto estimado para o per\u00edodo": {}
+                },
+                "Resultado antes de impostos": {},
+                "Resultado l\u00edquido": {}
+            },
+            "root_type": ""
+        }
+    }
+}

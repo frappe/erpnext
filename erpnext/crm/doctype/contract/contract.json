@@ -1,0 +1,337 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "CON-.YYYY.-.#####",
+ "creation": "2018-04-12 06:32:04.582486",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "party_type",
+  "is_signed",
+  "cb_party",
+  "party_name",
+  "party_user",
+  "status",
+  "fulfilment_status",
+  "party_full_name",
+  "sb_terms",
+  "start_date",
+  "cb_date",
+  "end_date",
+  "sb_signee",
+  "signee",
+  "signed_on",
+  "cb_user",
+  "ip_address",
+  "sb_contract",
+  "contract_template",
+  "contract_terms",
+  "sb_fulfilment",
+  "requires_fulfilment",
+  "fulfilment_deadline",
+  "fulfilment_terms",
+  "authorised_by_section",
+  "signee_company",
+  "signed_by_company",
+  "sb_references",
+  "document_type",
+  "cb_links",
+  "document_name",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "Customer",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Party Type",
+   "options": "Customer\nSupplier\nEmployee",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_signed",
+   "fieldtype": "Check",
+   "label": "Signed",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "cb_party",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Dynamic Link",
+   "in_standard_filter": 1,
+   "label": "Party Name",
+   "options": "party_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party_user",
+   "fieldtype": "Link",
+   "label": "Party User",
+   "options": "User"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Unsigned\nActive\nInactive"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "fulfilment_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fulfilment Status",
+   "no_copy": 1,
+   "options": "N/A\nUnfulfilled\nPartially Fulfilled\nFulfilled\nLapsed"
+  },
+  {
+   "fieldname": "sb_terms",
+   "fieldtype": "Section Break",
+   "label": "Contract Period"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "cb_date",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "depends_on": "eval:doc.is_signed==1",
+   "fieldname": "sb_signee",
+   "fieldtype": "Section Break",
+   "label": "Signee Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "signee",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Signee",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "signed_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Signed On",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "cb_user",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "label": "IP Address",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.docstatus==0",
+   "fieldname": "sb_contract",
+   "fieldtype": "Section Break",
+   "label": "Contract Details"
+  },
+  {
+   "fieldname": "contract_template",
+   "fieldtype": "Link",
+   "label": "Contract Template",
+   "options": "Contract Template"
+  },
+  {
+   "fieldname": "contract_terms",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Contract Terms",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_fulfilment",
+   "fieldtype": "Section Break",
+   "label": "Fulfilment Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_fulfilment",
+   "fieldtype": "Check",
+   "label": "Requires Fulfilment"
+  },
+  {
+   "depends_on": "eval:doc.requires_fulfilment==1",
+   "fieldname": "fulfilment_deadline",
+   "fieldtype": "Date",
+   "label": "Fulfilment Deadline"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.requires_fulfilment==1",
+   "fieldname": "fulfilment_terms",
+   "fieldtype": "Table",
+   "label": "Fulfilment Terms",
+   "options": "Contract Fulfilment Checklist"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_references",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "label": "Document Type",
+   "options": "\nQuotation\nProject\nSales Order\nPurchase Order\nSales Invoice\nPurchase Invoice"
+  },
+  {
+   "fieldname": "cb_links",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "document_name",
+   "fieldtype": "Dynamic Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Document Name",
+   "options": "document_type"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Contract",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "signee_company",
+   "fieldtype": "Signature",
+   "label": "Signee (Company)"
+  },
+  {
+   "fieldname": "signed_by_company",
+   "fieldtype": "Link",
+   "label": "Signed By (Company)",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorised_by_section",
+   "fieldtype": "Section Break",
+   "label": "Authorised By"
+  },
+  {
+   "fieldname": "party_full_name",
+   "fieldtype": "Data",
+   "label": "Party Full Name",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-06-19 17:48:45.049007",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Contract",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "party_type, party_name, contract_template",
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "party_name",
+ "track_changes": 1,
+ "track_seen": 1
+}

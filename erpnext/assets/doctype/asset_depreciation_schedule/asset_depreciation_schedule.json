@@ -1,0 +1,259 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2022-10-31 15:03:35.424877",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "asset",
+  "naming_series",
+  "company",
+  "column_break_2",
+  "net_purchase_amount",
+  "opening_accumulated_depreciation",
+  "opening_number_of_booked_depreciations",
+  "finance_book",
+  "finance_book_id",
+  "depreciation_details_section",
+  "depreciation_method",
+  "total_number_of_depreciations",
+  "rate_of_depreciation",
+  "daily_prorata_based",
+  "shift_based",
+  "column_break_8",
+  "frequency_of_depreciation",
+  "expected_value_after_useful_life",
+  "value_after_depreciation",
+  "depreciation_schedule_section",
+  "depreciation_schedule",
+  "details_section",
+  "notes",
+  "status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "link_filters": "[[\"Asset\",\"docstatus\",\"<\",\"2\"],[\"Asset\",\"company\",\"=\",\"eval:doc.company\"]]",
+   "options": "Asset",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "ACC-ADS-.YYYY.-"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset Depreciation Schedule",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Details"
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
+   "fieldname": "depreciation_method",
+   "fieldtype": "Select",
+   "label": "Depreciation Method",
+   "options": "\nStraight Line\nDouble Declining Balance\nWritten Down Value\nManual",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.depreciation_method == 'Written Down Value'",
+   "description": "In Percentage",
+   "fieldname": "rate_of_depreciation",
+   "fieldtype": "Percent",
+   "label": "Rate of Depreciation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "total_number_of_depreciations",
+   "fieldname": "total_number_of_depreciations",
+   "fieldtype": "Int",
+   "label": "Total Number of Depreciations",
+   "read_only": 1
+  },
+  {
+   "fieldname": "depreciation_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Schedule"
+  },
+  {
+   "fieldname": "depreciation_schedule",
+   "fieldtype": "Table",
+   "label": "Depreciation Schedule",
+   "options": "Depreciation Schedule"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "notes",
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Draft\nActive\nCancelled",
+   "read_only": 1
+  },
+  {
+   "depends_on": "frequency_of_depreciation",
+   "fieldname": "frequency_of_depreciation",
+   "fieldtype": "Int",
+   "label": "Frequency of Depreciation (Months)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected_value_after_useful_life",
+   "fieldtype": "Currency",
+   "label": "Expected Value After Useful Life",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "finance_book_id",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Finance Book Id",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "opening_accumulated_depreciation",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Opening Accumulated Depreciation",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "opening_number_of_booked_depreciations",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Opening Number of Booked Depreciations",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
+   "fieldname": "daily_prorata_based",
+   "fieldtype": "Check",
+   "label": "Depreciate based on daily pro-rata",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.depreciation_method == \"Straight Line\"",
+   "fieldname": "shift_based",
+   "fieldtype": "Check",
+   "label": "Depreciate based on shifts",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "asset.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "value_after_depreciation",
+   "fieldtype": "Currency",
+   "label": "Value After Depreciation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_purchase_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Net Purchase Amount",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-05-23 01:17:16.708004",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Depreciation Schedule",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

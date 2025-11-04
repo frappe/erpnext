@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "creation": "2018-04-13 18:51:29.720606",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "closed"
+ ],
+ "fields": [
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Document Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "closed",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Closed"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:44.854280",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Closed Document",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

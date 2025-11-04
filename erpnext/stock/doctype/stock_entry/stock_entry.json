@@ -1,0 +1,802 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2013-04-09 11:43:55",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "stock_entry_details_tab",
+  "naming_series",
+  "stock_entry_type",
+  "outgoing_stock_entry",
+  "purpose",
+  "add_to_transit",
+  "work_order",
+  "job_card",
+  "purchase_order",
+  "subcontracting_order",
+  "subcontracting_inward_order",
+  "delivery_note_no",
+  "sales_invoice_no",
+  "pick_list",
+  "purchase_receipt_no",
+  "asset_repair",
+  "col2",
+  "company",
+  "posting_date",
+  "posting_time",
+  "column_break_eaoa",
+  "set_posting_time",
+  "inspection_required",
+  "apply_putaway_rule",
+  "is_additional_transfer_entry",
+  "bom_info_section",
+  "from_bom",
+  "use_multi_level_bom",
+  "bom_no",
+  "cb1",
+  "fg_completed_qty",
+  "get_items",
+  "section_break_7qsm",
+  "process_loss_percentage",
+  "column_break_e92r",
+  "process_loss_qty",
+  "section_break_jwgn",
+  "from_warehouse",
+  "source_warehouse_address",
+  "source_address_display",
+  "cb0",
+  "to_warehouse",
+  "target_warehouse_address",
+  "target_address_display",
+  "sb0",
+  "scan_barcode",
+  "last_scanned_warehouse",
+  "items_section",
+  "items",
+  "get_stock_and_rate",
+  "section_break_19",
+  "total_outgoing_value",
+  "column_break_22",
+  "total_incoming_value",
+  "value_difference",
+  "additional_costs_section",
+  "additional_costs",
+  "total_additional_costs",
+  "supplier_info_tab",
+  "contact_section",
+  "supplier",
+  "supplier_name",
+  "supplier_address",
+  "address_display",
+  "accounting_dimensions_section",
+  "project",
+  "other_info_tab",
+  "printing_settings",
+  "select_print_heading",
+  "print_settings_col_break",
+  "letter_head",
+  "more_info",
+  "is_opening",
+  "remarks",
+  "col5",
+  "per_transferred",
+  "total_amount",
+  "amended_from",
+  "credit_note",
+  "is_return",
+  "tab_connections"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "oldfieldname": "naming_series",
+   "oldfieldtype": "Select",
+   "options": "MAT-STE-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "stock_entry_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Stock Entry Type",
+   "options": "Stock Entry Type",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.purpose == 'Material Transfer'",
+   "fieldname": "outgoing_stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock Entry (Outward GIT)",
+   "options": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fetch_from": "stock_entry_type.purpose",
+   "fieldname": "purpose",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Purpose",
+   "oldfieldname": "purpose",
+   "oldfieldtype": "Select",
+   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble\nReceive from Customer\nReturn Raw Material to Customer\nSubcontracting Delivery\nSubcontracting Return",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:in_list([\"Material Transfer for Manufacture\", \"Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose)",
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "oldfieldname": "production_order",
+   "oldfieldtype": "Link",
+   "options": "Work Order",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order"
+  },
+  {
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+   "fieldname": "subcontracting_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Order",
+   "options": "Subcontracting Order"
+  },
+  {
+   "depends_on": "eval:doc.purpose==\"Sales Return\"",
+   "fieldname": "delivery_note_no",
+   "fieldtype": "Link",
+   "label": "Delivery Note No",
+   "no_copy": 1,
+   "oldfieldname": "delivery_note_no",
+   "oldfieldtype": "Link",
+   "options": "Delivery Note",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.purpose==\"Sales Return\"",
+   "fieldname": "sales_invoice_no",
+   "fieldtype": "Link",
+   "label": "Sales Invoice No",
+   "no_copy": 1,
+   "options": "Sales Invoice",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.purpose==\"Purchase Return\"",
+   "fieldname": "purchase_receipt_no",
+   "fieldtype": "Link",
+   "label": "Purchase Receipt No",
+   "no_copy": 1,
+   "oldfieldname": "purchase_receipt_no",
+   "oldfieldtype": "Link",
+   "options": "Purchase Receipt",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "no_copy": 1,
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "search_index": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "oldfieldname": "posting_time",
+   "oldfieldtype": "Time",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "inspection_required",
+   "fieldtype": "Check",
+   "label": "Inspection Required"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list([\"Material Issue\", \"Material Transfer\", \"Manufacture\", \"Repack\", \"Send to Subcontractor\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose)",
+   "fieldname": "from_bom",
+   "fieldtype": "Check",
+   "label": "From BOM",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "from_bom",
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "label": "BOM No",
+   "options": "BOM"
+  },
+  {
+   "depends_on": "from_bom",
+   "description": "As per Stock UOM",
+   "fieldname": "fg_completed_qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Quantity ",
+   "oldfieldname": "fg_completed_qty",
+   "oldfieldtype": "Currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "depends_on": "from_bom",
+   "description": "Including items for sub assemblies",
+   "fieldname": "use_multi_level_bom",
+   "fieldtype": "Check",
+   "label": "Use Multi-Level BOM",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "from_bom",
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items",
+   "oldfieldtype": "Button",
+   "print_hide": 1
+  },
+  {
+   "description": "Sets 'Source Warehouse' in each row of the items table.",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Default Source Warehouse",
+   "no_copy": 1,
+   "oldfieldname": "from_warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "from_warehouse",
+   "fieldname": "source_warehouse_address",
+   "fieldtype": "Link",
+   "label": "Source Warehouse Address Link",
+   "options": "Address"
+  },
+  {
+   "fieldname": "source_address_display",
+   "fieldtype": "Text Editor",
+   "label": "Source Warehouse Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Sets 'Target Warehouse' in each row of the items table.",
+   "fieldname": "to_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Default Target Warehouse",
+   "no_copy": 1,
+   "oldfieldname": "to_warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "to_warehouse",
+   "fieldname": "target_warehouse_address",
+   "fieldtype": "Link",
+   "label": "Target Warehouse Address Link",
+   "options": "Address"
+  },
+  {
+   "fieldname": "target_address_display",
+   "fieldtype": "Text Editor",
+   "label": "Target Warehouse Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb0",
+   "fieldtype": "Section Break",
+   "options": "Simple"
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "oldfieldname": "mtn_details",
+   "oldfieldtype": "Table",
+   "options": "Stock Entry Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "get_stock_and_rate",
+   "fieldtype": "Button",
+   "label": "Update Rate and Availability",
+   "oldfieldtype": "Button",
+   "options": "get_stock_and_rate",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "total_incoming_value",
+   "fieldtype": "Currency",
+   "label": "Total Incoming Value (Receipt)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_outgoing_value",
+   "fieldtype": "Currency",
+   "label": "Total Outgoing Value (Consumption)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "value_difference",
+   "fieldtype": "Currency",
+   "label": "Total Value Difference (Incoming - Outgoing)",
+   "options": "Company:company:default_currency",
+   "print_hide_if_no_value": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "total_additional_costs",
+   "fieldname": "additional_costs_section",
+   "fieldtype": "Tab Break",
+   "label": "Additional Costs"
+  },
+  {
+   "fieldname": "additional_costs",
+   "fieldtype": "Table",
+   "label": "Additional Costs",
+   "options": "Landed Cost Taxes and Charges"
+  },
+  {
+   "fieldname": "total_additional_costs",
+   "fieldtype": "Currency",
+   "label": "Total Additional Costs",
+   "options": "Company:company:default_currency",
+   "print_hide_if_no_value": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Details"
+  },
+  {
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "no_copy": 1,
+   "oldfieldname": "supplier",
+   "oldfieldtype": "Link",
+   "options": "Supplier",
+   "print_hide": 1
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "no_copy": 1,
+   "oldfieldname": "supplier_name",
+   "oldfieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
+   "fieldname": "supplier_address",
+   "fieldtype": "Link",
+   "label": "Supplier Address",
+   "no_copy": 1,
+   "oldfieldname": "supplier_address",
+   "oldfieldtype": "Small Text",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Text Editor",
+   "label": "Address"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "printing_settings",
+   "fieldtype": "Section Break",
+   "label": "Printing Settings"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "select_print_heading",
+   "fieldtype": "Link",
+   "label": "Print Heading",
+   "oldfieldname": "select_print_heading",
+   "oldfieldtype": "Link",
+   "options": "Print Heading"
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "is_opening",
+   "fieldtype": "Select",
+   "label": "Is Opening",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "oldfieldtype": "Link",
+   "options": "Project"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks",
+   "no_copy": 1,
+   "oldfieldname": "remarks",
+   "oldfieldtype": "Text",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "col5",
+   "fieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "fieldname": "per_transferred",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Per Transferred",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_amount",
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "options": "Company:company:default_currency",
+   "print_hide_if_no_value": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "oldfieldname": "amended_from",
+   "oldfieldtype": "Link",
+   "options": "Stock Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit_note",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Credit Note",
+   "options": "Journal Entry"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Tab Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "pick_list",
+   "fieldtype": "Link",
+   "label": "Pick List",
+   "options": "Pick List",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "print_settings_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.purpose=='Material Transfer' && !doc.outgoing_stock_entry",
+   "fetch_from": "stock_entry_type.add_to_transit",
+   "fetch_if_empty": 1,
+   "fieldname": "add_to_transit",
+   "fieldtype": "Check",
+   "label": "Add to Transit",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list([\"Material Transfer\", \"Material Receipt\"], doc.purpose)",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_return",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Is Return",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "bom_info_section",
+   "fieldtype": "Section Break",
+   "label": "BOM Info"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_jwgn",
+   "fieldtype": "Section Break",
+   "label": "Default Warehouse"
+  },
+  {
+   "fieldname": "other_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Other Info"
+  },
+  {
+   "fieldname": "supplier_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Supplier Info"
+  },
+  {
+   "fieldname": "stock_entry_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval: doc.fg_completed_qty > 0 && in_list([\"Manufacture\", \"Repack\"], doc.purpose)",
+   "fieldname": "section_break_7qsm",
+   "fieldtype": "Section Break",
+   "label": "Process Loss"
+  },
+  {
+   "depends_on": "eval: doc.fg_completed_qty > 0 && in_list([\"Manufacture\", \"Repack\"], doc.purpose)",
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty"
+  },
+  {
+   "fieldname": "column_break_e92r",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.from_bom && doc.fg_completed_qty",
+   "fieldname": "process_loss_percentage",
+   "fieldtype": "Percent",
+   "label": "% Process Loss"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "column_break_eaoa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.asset_repair",
+   "fieldname": "asset_repair",
+   "fieldtype": "Link",
+   "label": "Asset Repair",
+   "options": "Asset Repair",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_connections",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "depends_on": "eval: doc.last_scanned_warehouse",
+   "fieldname": "last_scanned_warehouse",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Last Scanned Warehouse"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.purpose == \"Material Transfer for Manufacture\"",
+   "fieldname": "is_additional_transfer_entry",
+   "fieldtype": "Check",
+   "label": "Is Additional Transfer Entry",
+   "read_only": 1
+  },
+  {
+   "depends_on": "subcontracting_inward_order",
+   "fieldname": "subcontracting_inward_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Inward Order",
+   "options": "Subcontracting Inward Order",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "icon": "fa fa-file-text",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-10-13 15:09:23.905118",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "stock_entry_type",
+ "track_changes": 1
+}

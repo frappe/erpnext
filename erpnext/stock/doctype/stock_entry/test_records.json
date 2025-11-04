@@ -1,0 +1,105 @@
+[
+	{
+		"company": "_Test Company",
+		"doctype": "Stock Entry",
+		"stock_entry_type": "Material Receipt",
+		"purpose": "Material Receipt",
+		"items": [
+			{
+				"conversion_factor": 1.0,
+				"cost_center": "_Test Cost Center - _TC",
+				"doctype": "Stock Entry Detail",
+				"expense_account": "Stock Adjustment - _TC",
+				"basic_rate": 100,
+				"item_code": "_Test Item",
+				"parentfield": "items",
+				"qty": 50.0,
+				"stock_uom": "_Test UOM",
+				"t_warehouse": "_Test Warehouse - _TC",
+				"transfer_qty": 50.0,
+				"uom": "_Test UOM"
+			}
+		]
+	},
+	{
+		"company": "_Test Company",
+		"doctype": "Stock Entry",
+		"purpose": "Material Issue",
+		"stock_entry_type": "Material Issue",
+		"items": [
+			{
+				"conversion_factor": 1.0,
+				"cost_center": "_Test Cost Center - _TC",
+				"doctype": "Stock Entry Detail",
+				"expense_account": "Stock Adjustment - _TC",
+				"basic_rate": 100,
+				"item_code": "_Test Item",
+				"parentfield": "items",
+				"qty": 40.0,
+				"s_warehouse": "_Test Warehouse - _TC",
+				"stock_uom": "_Test UOM",
+				"transfer_qty": 40.0,
+				"uom": "_Test UOM"
+			}
+		]
+	},
+	{
+		"company": "_Test Company",
+		"doctype": "Stock Entry",
+		"purpose": "Material Transfer",
+		"stock_entry_type": "Material Transfer",
+		"items": [
+			{
+				"conversion_factor": 1.0,
+				"cost_center": "_Test Cost Center - _TC",
+				"doctype": "Stock Entry Detail",
+				"expense_account": "Stock Adjustment - _TC",
+				"basic_rate": 100,
+				"item_code": "_Test Item",
+				"parentfield": "items",
+				"qty": 45.0,
+				"s_warehouse": "_Test Warehouse - _TC",
+				"stock_uom": "_Test UOM",
+				"t_warehouse": "_Test Warehouse 1 - _TC",
+				"transfer_qty": 45.0,
+				"uom": "_Test UOM"
+			}
+		]
+	},
+	{
+		"company": "_Test Company",
+		"doctype": "Stock Entry",
+		"purpose": "Repack",
+		"stock_entry_type": "Repack",
+		"items": [
+			{
+				"conversion_factor": 1.0,
+				"cost_center": "_Test Cost Center - _TC",
+				"doctype": "Stock Entry Detail",
+				"expense_account": "Stock Adjustment - _TC",
+				"basic_rate": 100,
+				"item_code": "_Test Item",
+				"parentfield": "items",
+				"qty": 50.0,
+				"s_warehouse": "_Test Warehouse - _TC",
+				"stock_uom": "_Test UOM",
+				"transfer_qty": 50.0,
+				"uom": "_Test UOM"
+			},
+			{
+				"conversion_factor": 1.0,
+				"cost_center": "_Test Cost Center - _TC",
+				"doctype": "Stock Entry Detail",
+				"expense_account": "Stock Adjustment - _TC",
+				"basic_rate": 5000,
+				"item_code": "_Test Item Home Desktop 100",
+				"parentfield": "items",
+				"qty": 1,
+				"stock_uom": "_Test UOM",
+				"t_warehouse": "_Test Warehouse - _TC",
+				"transfer_qty": 1,
+				"uom": "_Test UOM"
+			}
+		]
+	}
+]

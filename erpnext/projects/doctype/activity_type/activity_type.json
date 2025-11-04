@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:activity_type",
+ "creation": "2013-03-05 10:14:59",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "activity_type",
+  "costing_rate",
+  "column_break_3",
+  "billing_rate",
+  "disabled"
+ ],
+ "fields": [
+  {
+   "fieldname": "activity_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Activity Type",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "costing_rate",
+   "fieldtype": "Currency",
+   "label": "Default Costing Rate"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_rate",
+   "fieldtype": "Currency",
+   "label": "Default Billing Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  }
+ ],
+ "icon": "icon-flag",
+ "idx": 1,
+ "links": [],
+ "modified": "2024-08-16 19:22:57.706521",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Activity Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Employee"
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": [],
+ "translated_doctype": 1
+}

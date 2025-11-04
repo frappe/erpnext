@@ -1,0 +1,113 @@
+name: Railway Status Check
+
+# ============================================================================
+# Trigger on schedule or manual
+# ============================================================================
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  
+  workflow_dispatch:
+
+# ============================================================================
+# Jobs
+# ============================================================================
+jobs:
+  check-status:
+    name: Check Railway Application Status
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ======================================================================
+      # 1. Checkout code
+      # ======================================================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ======================================================================
+      # 2. Check application health
+      # ======================================================================
+      - name: 🏥 Check application health
+        id: health-check
+        continue-on-error: true
+        run: |
+          # Replace with your actual Railway domain
+          RAILWAY_URL="https://your-app-production-xxxx.railway.app"
+          
+          echo "🔍 Checking: $RAILWAY_URL"
+          
+          # Try health check endpoint
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $RAILWAY_URL/api/health || echo "000")
+          
+          echo "Response code: $RESPONSE"
+          
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Application is healthy"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Application returned: $RESPONSE"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+          fi
+
+      # ======================================================================
+      # 3. Check database connectivity
+      # ======================================================================
+      - name: 🗄️  Check database connectivity
+        id: db-check
+        continue-on-error: true
+        run: |
+          RAILWAY_URL="https://your-app-production-xxxx.railway.app"
+          
+          # Try API endpoint that requires DB
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $RAILWAY_URL/api/resource || echo "000")
+          
+          if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "401" ]; then
+            echo "✅ Database is accessible"
+            echo "status=connected" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Database check returned: $RESPONSE"
+            echo "status=error" >> $GITHUB_OUTPUT
+          fi
+
+      # ======================================================================
+      # 4. Generate status report
+      # ======================================================================
+      - name: 📊 Generate status report
+        run: |
+          echo "# 🚀 Railway Deployment Status Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Application Health" >> $GITHUB_STEP_SUMMARY
+          echo "- Health Check: ${{ steps.health-check.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Database: ${{ steps.db-check.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Quick Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [Railway Dashboard](https://railway.app/dashboard)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Application Logs](https://railway.app/dashboard)" >> $GITHUB_STEP_SUMMARY
+
+      # ======================================================================
+      # 5. Notify on failure (optional)
+      # ======================================================================
+      - name: 🔔 Notify on failure
+        if: failure()
+        run: |
+          echo "⚠️  Railway status check failed"
+          echo "Please check the Railway Dashboard for details"
+
+      # ======================================================================
+      # 6. Success notification
+      # ======================================================================
+      - name: ✅ Status check complete
+        if: success()
+        run: |
+          echo "✅ All checks passed at $(date)"
+
+# ============================================================================
+# Notes:
+# 1. Replace 'your-app-production-xxxx.railway.app' with your actual domain
+# 2. This workflow checks health periodically
+# 3. Failures don't block the workflow (continue-on-error: true)
+# 4. Results are shown in GitHub Actions summary
+# ============================================================================

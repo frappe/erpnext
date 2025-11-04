@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2013-03-07 11:42:59",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse_group",
+  "warehouse",
+  "warehouse_reorder_level",
+  "warehouse_reorder_qty",
+  "material_request_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Check in (group)",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Request for",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse_reorder_level",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Re-order Level"
+  },
+  {
+   "fieldname": "warehouse_reorder_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Re-order Qty"
+  },
+  {
+   "fieldname": "material_request_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Material Request Type",
+   "options": "Purchase\nTransfer\nMaterial Issue\nManufacture",
+   "reqd": 1
+  }
+ ],
+ "idx": 1,
+ "in_create": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:09:55.227275",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Reorder",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

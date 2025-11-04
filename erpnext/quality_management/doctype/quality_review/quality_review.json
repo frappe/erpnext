@@ -1,0 +1,135 @@
+{
+ "actions": [],
+ "autoname": "format:QA-REV-{#####}",
+ "creation": "2018-10-02 11:45:16.301955",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "goal",
+  "date",
+  "cb_00",
+  "procedure",
+  "status",
+  "sb_00",
+  "reviews",
+  "sb_01",
+  "additional_information"
+ ],
+ "fields": [
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "goal.procedure",
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "label": "Procedure",
+   "options": "Quality Procedure",
+   "read_only": 1
+  },
+  {
+   "fieldname": "additional_information",
+   "fieldtype": "Text",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Review"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_01",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "reviews",
+   "fieldtype": "Table",
+   "label": "Reviews",
+   "options": "Quality Review Objective"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nPassed\nFailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "goal",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Goal",
+   "options": "Quality Goal",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Review",
+   "link_doctype": "Quality Action",
+   "link_fieldname": "review"
+  }
+ ],
+ "modified": "2024-03-27 13:10:30.167995",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Review",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Desk User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "goal",
+ "track_changes": 1
+}

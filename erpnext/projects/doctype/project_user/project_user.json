@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "creation": "2016-03-25 02:52:19.283003",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "user",
+  "email",
+  "image",
+  "column_break_2",
+  "full_name",
+  "welcome_email_sent",
+  "view_attachments",
+  "hide_timesheets",
+  "section_break_5",
+  "project_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "user.email",
+   "fieldname": "email",
+   "fieldtype": "Read Only",
+   "label": "Email"
+  },
+  {
+   "fetch_from": "user.user_image",
+   "fieldname": "image",
+   "fieldtype": "Read Only",
+   "hidden": 1,
+   "in_global_search": 1,
+   "label": "Image"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "user.full_name",
+   "fieldname": "full_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Full Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "welcome_email_sent",
+   "fieldtype": "Check",
+   "label": "Welcome email sent"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "view_attachments",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "View attachments"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "hide_timesheets",
+   "fieldtype": "Check",
+   "label": "Hide timesheets"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:parent.doctype == 'Project Update'",
+   "fieldname": "project_status",
+   "fieldtype": "Text",
+   "label": "Project Status"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:21.859474",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project User",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

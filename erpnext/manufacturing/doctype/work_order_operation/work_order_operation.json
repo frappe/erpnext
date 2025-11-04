@@ -1,0 +1,314 @@
+{
+ "actions": [],
+ "creation": "2025-04-09 12:12:19.824560",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "details",
+  "operation",
+  "status",
+  "completed_qty",
+  "process_loss_qty",
+  "column_break_4",
+  "bom",
+  "workstation_type",
+  "workstation",
+  "sequence_id",
+  "section_break_insy",
+  "bom_no",
+  "finished_good",
+  "is_subcontracted",
+  "skip_material_transfer",
+  "backflush_from_wip_warehouse",
+  "column_break_vjih",
+  "source_warehouse",
+  "wip_warehouse",
+  "fg_warehouse",
+  "section_break_10",
+  "description",
+  "estimated_time_and_cost",
+  "planned_start_time",
+  "hour_rate",
+  "time_in_mins",
+  "column_break_10",
+  "planned_end_time",
+  "batch_size",
+  "planned_operating_cost",
+  "section_break_9",
+  "actual_start_time",
+  "actual_operation_time",
+  "column_break_11",
+  "actual_end_time",
+  "actual_operating_cost"
+ ],
+ "fields": [
+  {
+   "fieldname": "details",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operation",
+   "oldfieldname": "operation_no",
+   "oldfieldtype": "Data",
+   "options": "Operation",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "bom",
+   "fieldtype": "Link",
+   "label": "BOM",
+   "no_copy": 1,
+   "options": "BOM",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Operation Description",
+   "oldfieldname": "opn_description",
+   "oldfieldtype": "Text"
+  },
+  {
+   "columns": 1,
+   "description": "Operation completed for how many finished goods?",
+   "fieldname": "completed_qty",
+   "fieldtype": "Float",
+   "label": "Completed Qty",
+   "no_copy": 1
+  },
+  {
+   "columns": 1,
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Pending\nWork in Progress\nCompleted"
+  },
+  {
+   "columns": 1,
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Workstation",
+   "oldfieldname": "workstation",
+   "oldfieldtype": "Link",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "estimated_time_and_cost",
+   "fieldtype": "Section Break",
+   "label": "Estimated Time and Cost"
+  },
+  {
+   "fieldname": "planned_start_time",
+   "fieldtype": "Datetime",
+   "label": "Planned Start Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_end_time",
+   "fieldtype": "Datetime",
+   "label": "Planned End Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "description": "In Minutes",
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Time",
+   "oldfieldname": "time_in_mins",
+   "oldfieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hour_rate",
+   "fieldtype": "Float",
+   "label": "Hour Rate",
+   "oldfieldname": "hour_rate",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Planned Operating Cost",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Actual Time and Cost"
+  },
+  {
+   "description": "Updated via 'Time Log' (In Minutes)",
+   "fieldname": "actual_start_time",
+   "fieldtype": "Datetime",
+   "label": "Actual Start Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Updated via 'Time Log' (In Minutes)",
+   "fieldname": "actual_end_time",
+   "fieldtype": "Datetime",
+   "label": "Actual End Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Updated via 'Time Log' (In Minutes)",
+   "fieldname": "actual_operation_time",
+   "fieldtype": "Float",
+   "label": "Actual Operation Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "description": "(Hour Rate / 60) * Actual Operation Time",
+   "fieldname": "actual_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Actual Operating Cost",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Batch Size",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "label": "Sequence ID",
+   "non_negative": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "label": "Workstation Type",
+   "options": "Workstation Type"
+  },
+  {
+   "columns": 2,
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "fieldname": "section_break_insy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "label": "BOM No (For Semi-Finished Goods)",
+   "options": "BOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vjih",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "finished_good",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Semi Finished Goods / Finished Goods",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "wip_warehouse",
+   "fieldtype": "Link",
+   "label": "WIP WH",
+   "options": "Warehouse"
+  },
+  {
+   "columns": 2,
+   "fieldname": "fg_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Finished Goods Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "columns": 2,
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_subcontracted",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_material_transfer",
+   "fieldtype": "Check",
+   "label": "Skip Material Transfer",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "backflush_from_wip_warehouse",
+   "fieldtype": "Check",
+   "label": "Backflush Materials From WIP Warehouse",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-05-15 15:10:06.885440",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Work Order Operation",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

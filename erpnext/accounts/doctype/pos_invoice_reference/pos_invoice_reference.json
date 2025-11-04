@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "creation": "2020-01-28 11:54:47.149392",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "pos_invoice",
+  "posting_date",
+  "column_break_3",
+  "customer",
+  "grand_total",
+  "is_return",
+  "return_against"
+ ],
+ "fields": [
+  {
+   "fieldname": "pos_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "POS Invoice",
+   "options": "POS Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "pos_invoice.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "pos_invoice.posting_date",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "pos_invoice.grand_total",
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "pos_invoice.is_return",
+   "fieldname": "is_return",
+   "fieldtype": "Check",
+   "label": "Is Return",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "pos_invoice.return_against",
+   "fieldname": "return_against",
+   "fieldtype": "Link",
+   "label": "Return Against",
+   "options": "POS Invoice",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:15.790122",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "POS Invoice Reference",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,296 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2018-10-22 18:19:02.784533",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "date",
+  "column_break_2",
+  "status",
+  "bank_account",
+  "company",
+  "amended_from",
+  "section_break_4",
+  "deposit",
+  "withdrawal",
+  "column_break_7",
+  "currency",
+  "section_break_10",
+  "description",
+  "reference_number",
+  "column_break_10",
+  "transaction_id",
+  "transaction_type",
+  "section_break_14",
+  "column_break_oufv",
+  "payment_entries",
+  "section_break_18",
+  "allocated_amount",
+  "column_break_17",
+  "unallocated_amount",
+  "party_section",
+  "party_type",
+  "party",
+  "column_break_3czf",
+  "bank_party_name",
+  "bank_party_account_number",
+  "bank_party_iban"
+ ],
+ "fields": [
+  {
+   "default": "ACC-BTN-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "ACC-BTN-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nPending\nSettled\nUnreconciled\nReconciled\nCancelled"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fetch_from": "bank_account.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reference_number",
+   "fieldtype": "Small Text",
+   "label": "Reference Number"
+  },
+  {
+   "fieldname": "transaction_id",
+   "fieldtype": "Data",
+   "label": "Transaction ID",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_entries",
+   "fieldtype": "Table",
+   "label": "Payment Entries",
+   "options": "Bank Transaction Payments"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "label": "Allocated Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Bank Transaction",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "unallocated_amount",
+   "fieldtype": "Currency",
+   "label": "Unallocated Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_section",
+   "fieldtype": "Section Break",
+   "label": "Payment From / To"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "deposit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Deposit",
+   "oldfieldname": "debit",
+   "options": "currency"
+  },
+  {
+   "fieldname": "withdrawal",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Withdrawal",
+   "oldfieldname": "credit",
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Data",
+   "label": "Transaction Type",
+   "length": 50
+  },
+  {
+   "fieldname": "column_break_3czf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_party_name",
+   "fieldtype": "Data",
+   "label": "Party Name/Account Holder (Bank Statement)"
+  },
+  {
+   "fieldname": "bank_party_iban",
+   "fieldtype": "Data",
+   "label": "Party IBAN (Bank Statement)",
+   "options": "IBAN"
+  },
+  {
+   "fieldname": "bank_party_account_number",
+   "fieldtype": "Data",
+   "label": "Party Account No. (Bank Statement)"
+  },
+  {
+   "fieldname": "column_break_oufv",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-10-23 17:32:58.514807",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Transaction",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "bank_account",
+ "track_changes": 1
+}

@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:27:45",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "school_univ",
+  "qualification",
+  "level",
+  "year_of_passing",
+  "class_per",
+  "maj_opt_subj"
+ ],
+ "fields": [
+  {
+   "fieldname": "school_univ",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "School/University",
+   "oldfieldname": "school_univ",
+   "oldfieldtype": "Small Text"
+  },
+  {
+   "fieldname": "qualification",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Qualification",
+   "oldfieldname": "qualification",
+   "oldfieldtype": "Data",
+   "print_width": "100px",
+   "width": "100px"
+  },
+  {
+   "fieldname": "level",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Level",
+   "oldfieldname": "level",
+   "oldfieldtype": "Select",
+   "options": "Graduate\nPost Graduate\nUnder Graduate"
+  },
+  {
+   "fieldname": "year_of_passing",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Year of Passing",
+   "oldfieldname": "year_of_passing",
+   "oldfieldtype": "Int"
+  },
+  {
+   "fieldname": "class_per",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Class / Percentage",
+   "oldfieldname": "class_per",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "maj_opt_subj",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Major/Optional Subjects",
+   "oldfieldname": "maj_opt_subj",
+   "oldfieldtype": "Text"
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:09:38.507746",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Employee Education",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

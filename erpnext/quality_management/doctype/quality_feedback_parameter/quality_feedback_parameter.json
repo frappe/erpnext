@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "creation": "2019-05-26 21:25:01.715807",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parameter",
+  "cb_00",
+  "rating",
+  "sb_00",
+  "feedback"
+ ],
+ "fields": [
+  {
+   "fieldname": "parameter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parameter",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "rating",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Rating",
+   "options": "\n1\n2\n3\n4\n5",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "feedback",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Feedback"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:28.002632",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Feedback Parameter",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,20 @@
+[
+	{
+		"doctype": "Shareholder",
+		"naming_series": "SH-",
+		"title": "Iron Man",
+		"company": "_Test Company"
+	},
+	{
+		"doctype": "Shareholder",
+		"naming_series": "SH-",
+		"title": "Thor",
+		"company": "_Test Company"
+	},
+	{
+		"doctype": "Shareholder",
+		"naming_series": "SH-",
+		"title": "Hulk",
+		"company": "_Test Company"
+	}
+]

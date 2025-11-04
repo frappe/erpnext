@@ -1,0 +1,22 @@
+{
+ "aggregate_function_based_on": "base_paid_amount",
+ "creation": "2020-07-17 11:25:34.700137",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Payment Entry",
+ "dynamic_filters_json": "[[\"Payment Entry\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+ "filters_json": "[[\"Payment Entry\",\"docstatus\",\"=\",\"1\"],[\"Payment Entry\",\"posting_date\",\"Timespan\",\"this year\"],[\"Payment Entry\",\"payment_type\",\"=\",\"Pay\"]]",
+ "function": "Sum",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Total Outgoing Payment",
+ "modified": "2024-12-05 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Total Outgoing Payment",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type"
+}

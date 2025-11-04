@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "creation": "2017-10-27 16:46:06.060930",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "default",
+  "user"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Default"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:16.846276",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "POS Profile User",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

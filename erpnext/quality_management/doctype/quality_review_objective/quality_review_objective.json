@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "creation": "2019-05-26 15:17:44.796958",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "objective",
+  "cb_00",
+  "target",
+  "uom",
+  "sb_00",
+  "status",
+  "review"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "objective",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Objective",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "target",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Target",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "target_unit",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "review",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Review"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Review"
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nPassed\nFailed"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:30.328235",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Review Objective",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,214 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Database - MariaDB
+  # ============================================================================
+  db:
+    image: mariadb:10.11
+    container_name: kanaan-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-kanaan_root_2024}
+      MYSQL_DATABASE: ${DB_NAME:-kanaan_erpnext}
+      MYSQL_USER: ${DB_USER:-erpnext}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-erpnext_secure_123}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 5
+      interval: 10s
+    networks:
+      - kanaan-network
+
+  # ============================================================================
+  # Redis Cache
+  # ============================================================================
+  redis-cache:
+    image: redis:7-alpine
+    container_name: kanaan-redis-cache
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_cache_data:/data
+    ports:
+      - "${REDIS_CACHE_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
+    networks:
+      - kanaan-network
+
+  # ============================================================================
+  # Redis Queue
+  # ============================================================================
+  redis-queue:
+    image: redis:7-alpine
+    container_name: kanaan-redis-queue
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_queue_data:/data
+    ports:
+      - "${REDIS_QUEUE_PORT:-6380}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
+    networks:
+      - kanaan-network
+
+  # ============================================================================
+  # Frappe/ERPNext Backend
+  # ============================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kanaan-backend
+    environment:
+      # Database Configuration
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-kanaan_erpnext}
+      DB_USER: ${DB_USER:-erpnext}
+      DB_PASSWORD: ${DB_PASSWORD:-erpnext_secure_123}
+      
+      # Redis Configuration
+      REDIS_CACHE: ${REDIS_CACHE:-redis-cache:6379}
+      REDIS_QUEUE: ${REDIS_QUEUE:-redis-queue:6379}
+      
+      # Frappe Configuration
+      FRAPPE_BENCH_PATH: /app
+      SITE_NAME: ${SITE_NAME:-localhost}
+      FRAPPE_ENVIRONMENT: ${FRAPPE_ENV:-development}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      
+      # Node Configuration
+      NODE_ENV: production
+      
+      # Application Settings
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+    
+    volumes:
+      - .:/app
+      - private_files:/app/private/files
+      - sites_data:/app/sites
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      redis-queue:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+    networks:
+      - kanaan-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # Nginx Frontend & Reverse Proxy
+  # ============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: kanaan-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./erpnext/public:/app/erpnext/public:ro
+      - private_files:/app/private/files:ro
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+      - "${NGINX_HTTPS_PORT:-8443}:443"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      timeout: 5s
+      retries: 3
+      interval: 30s
+    networks:
+      - kanaan-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # Frappe Queue Worker (for background tasks)
+  # ============================================================================
+  queue-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kanaan-queue-worker
+    command: "bench worker --queue long,default,short"
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-kanaan_erpnext}
+      DB_USER: ${DB_USER:-erpnext}
+      DB_PASSWORD: ${DB_PASSWORD:-erpnext_secure_123}
+      REDIS_CACHE: ${REDIS_CACHE:-redis-cache:6379}
+      REDIS_QUEUE: ${REDIS_QUEUE:-redis-queue:6379}
+      FRAPPE_BENCH_PATH: /app
+      NODE_ENV: production
+    volumes:
+      - .:/app
+      - sites_data:/app/sites
+    depends_on:
+      - backend
+      - redis-queue
+    networks:
+      - kanaan-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # Frappe Scheduler (for scheduled tasks)
+  # ============================================================================
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kanaan-scheduler
+    command: "bench schedule"
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-kanaan_erpnext}
+      DB_USER: ${DB_USER:-erpnext}
+      DB_PASSWORD: ${DB_PASSWORD:-erpnext_secure_123}
+      REDIS_CACHE: ${REDIS_CACHE:-redis-cache:6379}
+      REDIS_QUEUE: ${REDIS_QUEUE:-redis-queue:6379}
+      FRAPPE_BENCH_PATH: /app
+      NODE_ENV: production
+    volumes:
+      - .:/app
+      - sites_data:/app/sites
+    depends_on:
+      - backend
+      - redis-queue
+    networks:
+      - kanaan-network
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    driver: local
+  redis_cache_data:
+    driver: local
+  redis_queue_data:
+    driver: local
+  private_files:
+    driver: local
+  sites_data:
+    driver: local
+
+networks:
+  kanaan-network:
+    driver: bridge

@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:quality_inspection_template_name",
+ "creation": "2018-01-24 16:23:41.691127",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "quality_inspection_template_name",
+  "item_quality_inspection_parameter"
+ ],
+ "fields": [
+  {
+   "fieldname": "quality_inspection_template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Quality Inspection Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "item_quality_inspection_parameter",
+   "fieldtype": "Table",
+   "label": "Item Quality Inspection Parameter",
+   "options": "Item Quality Inspection Parameter",
+   "reqd": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Quality Inspection",
+   "link_doctype": "Quality Inspection",
+   "link_fieldname": "quality_inspection_template"
+  }
+ ],
+ "modified": "2024-03-27 13:10:29.303619",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Quality Inspection Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

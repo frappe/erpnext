@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:27:37",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_document",
+  "payment_entry",
+  "against_account",
+  "amount",
+  "column_break_5",
+  "posting_date",
+  "cheque_number",
+  "cheque_date",
+  "clearance_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "payment_document",
+   "fieldtype": "Link",
+   "label": "Payment Document",
+   "options": "DocType"
+  },
+  {
+   "columns": 2,
+   "fieldname": "payment_entry",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Payment Entry",
+   "oldfieldname": "voucher_id",
+   "oldfieldtype": "Link",
+   "options": "payment_document",
+   "width": "50"
+  },
+  {
+   "columns": 2,
+   "fieldname": "against_account",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Against Account",
+   "oldfieldname": "against_account",
+   "oldfieldtype": "Data",
+   "read_only": 1,
+   "width": "15"
+  },
+  {
+   "columns": 2,
+   "fieldname": "amount",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Amount",
+   "oldfieldname": "debit",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "columns": 2,
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "cheque_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cheque Number",
+   "oldfieldname": "cheque_number",
+   "oldfieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "label": "Cheque Date",
+   "oldfieldname": "cheque_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Clearance Date",
+   "oldfieldname": "clearance_date",
+   "oldfieldtype": "Date"
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:37.609319",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Clearance Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

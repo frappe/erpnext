@@ -1,0 +1,27 @@
+{
+  "name": "erpnext",
+  "description": "Open Source ERP System powered by the Frappe Framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frappe/erpnext.git"
+  },
+  "homepage": "https://frappe.io/erpnext",
+  "author": "Frappe Technologies Pvt. Ltd.",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/frappe/erpnext/issues"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "test:e2e": "playwright test tests/e2e",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
+  },
+  "dependencies": {
+    "onscan.js": "^1.5.2"
+  }
+}

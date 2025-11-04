@@ -1,0 +1,1 @@
+Item details (rate, qty) in parent Supplier Quotation.

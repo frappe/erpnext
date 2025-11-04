@@ -1,0 +1,85 @@
+# Git
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# Node
+node_modules
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Development
+.env.local
+.env.development
+docker-compose.dev.yml
+docker-compose.override.yml
+
+# Docker
+Dockerfile.dev
+docker-compose.*.yml
+
+# Tests & Documentation
+tests/
+docs/
+README.md
+CONTRIBUTING.md
+LICENSE
+
+# Temporary
+*.tmp
+*.bak
+*.log
+logs/
+.pytest/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Common local files
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store

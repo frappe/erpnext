@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:27:45",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "department",
+  "designation",
+  "from_date",
+  "to_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "oldfieldname": "branch",
+   "oldfieldtype": "Select",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Department",
+   "oldfieldname": "department",
+   "oldfieldtype": "Select",
+   "options": "Department"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Designation",
+   "oldfieldname": "designation",
+   "oldfieldtype": "Select",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "oldfieldname": "from_date",
+   "oldfieldtype": "Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "oldfieldname": "to_date",
+   "oldfieldtype": "Date"
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:09:39.822645",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Employee Internal Work History",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

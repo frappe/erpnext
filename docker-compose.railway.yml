@@ -1,0 +1,133 @@
+version: '3.8'
+
+# ============================================================================
+# Docker Compose for Railway Local Testing
+# Similar to Railway.com deployment structure
+# ============================================================================
+
+services:
+  # ============================================================================
+  # Database - MariaDB (Railway provides this)
+  # ============================================================================
+  mariadb:
+    image: mariadb:10.11
+    container_name: railway-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_NAME:-kanaan_erpnext}
+      MYSQL_USER: ${DB_USER:-erpnext}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secure_password}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 5
+      interval: 10s
+    networks:
+      - railway-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # Redis - Cache & Queue (Railway provides this)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: railway-redis
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
+    networks:
+      - railway-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # Application - Kanaan ERP (Main Service)
+  # ============================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: railway-app
+    environment:
+      # Database
+      DATABASE_URL_HOSTNAME: mariadb
+      DATABASE_URL_PORT: 3306
+      DATABASE_URL_USERNAME: ${DB_USER:-erpnext}
+      DATABASE_URL_PASSWORD: ${DB_PASSWORD:-secure_password}
+      DATABASE_URL_DATABASE: ${DB_NAME:-kanaan_erpnext}
+
+      # Redis
+      REDIS_URL: redis://redis:6379
+
+      # Application
+      FRAPPE_ENV: ${FRAPPE_ENV:-production}
+      SITE_NAME: ${SITE_NAME:-localhost}
+      SECRET_KEY: ${SECRET_KEY:-change-this-to-random}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-change-this-to-random}
+      DEBUG: ${DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+      # Python/Node
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=2048
+
+    volumes:
+      - .:/app
+      - app_sites:/app/sites
+      - app_private:/app/private/files
+    ports:
+      - "8000:8000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+    networks:
+      - railway-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # Nginx - Reverse Proxy (Optional)
+  # ============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: railway-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      timeout: 5s
+      retries: 3
+    networks:
+      - railway-network
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:
+  redis_data:
+  app_sites:
+  app_private:
+
+networks:
+  railway-network:
+    driver: bridge

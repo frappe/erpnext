@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:payment_term_name",
+ "creation": "2017-08-10 15:24:54.876365",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_term_name",
+  "invoice_portion",
+  "mode_of_payment",
+  "column_break_3",
+  "due_date_based_on",
+  "credit_days",
+  "credit_months",
+  "section_break_8",
+  "discount_type",
+  "discount",
+  "column_break_11",
+  "discount_validity_based_on",
+  "discount_validity",
+  "section_break_6",
+  "description"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "payment_term_name",
+   "fieldtype": "Data",
+   "label": "Payment Term Name",
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "invoice_portion",
+   "fieldtype": "Float",
+   "label": "Invoice Portion (%)"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "due_date_based_on",
+   "fieldtype": "Select",
+   "label": "Due Date Based On",
+   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval:in_list(['Day(s) after invoice date', 'Day(s) after the end of the invoice month'], doc.due_date_based_on)",
+   "fieldname": "credit_days",
+   "fieldtype": "Int",
+   "label": "Credit Days"
+  },
+  {
+   "depends_on": "eval:doc.due_date_based_on=='Month(s) after the end of the invoice month'",
+   "fieldname": "credit_months",
+   "fieldtype": "Int",
+   "label": "Credit Months"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "Discount Settings"
+  },
+  {
+   "default": "Percentage",
+   "fieldname": "discount_type",
+   "fieldtype": "Select",
+   "label": "Discount Type",
+   "options": "Percentage\nAmount"
+  },
+  {
+   "fieldname": "discount",
+   "fieldtype": "Float",
+   "label": "Discount"
+  },
+  {
+   "default": "Day(s) after invoice date",
+   "depends_on": "discount",
+   "fieldname": "discount_validity_based_on",
+   "fieldtype": "Select",
+   "label": "Discount Validity Based On",
+   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+  },
+  {
+   "depends_on": "discount",
+   "fieldname": "discount_validity",
+   "fieldtype": "Int",
+   "label": "Discount Validity",
+   "mandatory_depends_on": "discount"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "links": [],
+ "modified": "2024-03-27 13:10:11.511137",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Term",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

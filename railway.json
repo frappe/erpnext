@@ -1,0 +1,95 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "dockerfile",
+    "buildCommand": "npm run build 2>/dev/null || true && pip install -q -r requirements.txt",
+    "dockerfile": "./Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "gunicorn --config gunicorn.conf.py wsgi:application",
+    "restartPolicyMaxRetries": 5,
+    "restartPolicyWindowSeconds": 60,
+    "healthchecks": {
+      "readiness": {
+        "httpGet": {
+          "path": "/api/health",
+          "port": 8000
+        },
+        "initialDelaySeconds": 45,
+        "periodSeconds": 30,
+        "timeoutSeconds": 10,
+        "failureThreshold": 3
+      },
+      "liveness": {
+        "httpGet": {
+          "path": "/api/health",
+          "port": 8000
+        },
+        "initialDelaySeconds": 60,
+        "periodSeconds": 60,
+        "timeoutSeconds": 10,
+        "failureThreshold": 5
+      }
+    }
+  },
+  "variables": {
+    "FRAPPE_ENV": {
+      "description": "Environment: development, staging, or production",
+      "value": "production"
+    },
+    "DEBUG": {
+      "description": "Enable debug mode (true/false)",
+      "value": "false"
+    },
+    "SITE_NAME": {
+      "description": "Primary site name (domain)",
+      "value": "localhost"
+    },
+    "SECRET_KEY": {
+      "description": "Secret key for cryptographic operations (generate random 32+ char)",
+      "value": "change-this-to-random-string-32-chars-minimum"
+    },
+    "ENCRYPTION_KEY": {
+      "description": "Encryption key for sensitive data (generate random 32+ char)",
+      "value": "change-this-to-random-string-32-chars-minimum"
+    },
+    "ALLOW_HOSTS": {
+      "description": "Comma-separated list of allowed hosts",
+      "value": "localhost,127.0.0.1,*.railway.app"
+    },
+    "LOG_LEVEL": {
+      "description": "Logging level (debug, info, warning, error, critical)",
+      "value": "info"
+    },
+    "MAX_POOL_SIZE": {
+      "description": "Maximum database connection pool size",
+      "value": "10"
+    },
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production"
+    },
+    "NODE_OPTIONS": {
+      "description": "Node.js options",
+      "value": "--max-old-space-size=2048"
+    },
+    "PYTHONUNBUFFERED": {
+      "description": "Python output buffering",
+      "value": "1"
+    },
+    "PYTHONDONTWRITEBYTECODE": {
+      "description": "Prevent Python bytecode writing",
+      "value": "1"
+    }
+  },
+  "plugins": [
+    {
+      "source": "railway/mariadb",
+      "envPrefix": "DATABASE_URL"
+    },
+    {
+      "source": "railway/redis",
+      "envPrefix": "REDIS_URL"
+    }
+  ]
+}

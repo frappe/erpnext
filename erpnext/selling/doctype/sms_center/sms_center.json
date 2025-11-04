@@ -1,0 +1,132 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2013-01-10 16:34:22",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "send_to",
+  "customer",
+  "supplier",
+  "sales_partner",
+  "department",
+  "branch",
+  "create_receiver_list",
+  "receiver_list",
+  "column_break9",
+  "message",
+  "total_characters",
+  "total_messages",
+  "send_sms"
+ ],
+ "fields": [
+  {
+   "fieldname": "send_to",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Send To",
+   "options": "\nAll Contact\nAll Customer Contact\nAll Supplier Contact\nAll Sales Partner Contact\nAll Lead (Open)\nAll Employee (Active)\nAll Sales Person"
+  },
+  {
+   "depends_on": "eval:doc.send_to=='All Customer Contact'",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.send_to=='All Supplier Contact'",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:doc.send_to=='All Sales Partner Contact'",
+   "fieldname": "sales_partner",
+   "fieldtype": "Link",
+   "label": "Sales Partner",
+   "options": "Sales Partner"
+  },
+  {
+   "depends_on": "eval:doc.send_to=='All Employee (Active)'",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "depends_on": "eval:doc.send_to=='All Employee (Active)'",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "create_receiver_list",
+   "fieldtype": "Button",
+   "label": "Create Receiver List",
+   "options": "create_receiver_list"
+  },
+  {
+   "fieldname": "receiver_list",
+   "fieldtype": "Code",
+   "label": "Receiver List"
+  },
+  {
+   "fieldname": "column_break9",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "description": "Messages greater than 160 characters will be split into multiple messages",
+   "fieldname": "message",
+   "fieldtype": "Text",
+   "label": "Message",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_characters",
+   "fieldtype": "Int",
+   "label": "Total Characters",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_messages",
+   "fieldtype": "Int",
+   "label": "Total Message(s)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "send_sms",
+   "fieldtype": "Button",
+   "label": "Send SMS",
+   "options": "send_sms"
+  }
+ ],
+ "icon": "fa fa-mobile-phone",
+ "idx": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-27 13:10:43.007491",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "SMS Center",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "read_only": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

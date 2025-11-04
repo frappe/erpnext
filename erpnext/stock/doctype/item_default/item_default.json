@@ -1,0 +1,203 @@
+{
+ "actions": [],
+ "creation": "2018-05-03 02:29:24.444341",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "default_warehouse",
+  "column_break_3",
+  "default_price_list",
+  "default_discount_account",
+  "default_inventory_account",
+  "inventory_account_currency",
+  "purchase_defaults",
+  "buying_cost_center",
+  "default_supplier",
+  "column_break_8",
+  "expense_account",
+  "default_provisional_account",
+  "column_break_cpif",
+  "purchase_expense_account",
+  "purchase_expense_contra_account",
+  "selling_defaults",
+  "selling_cost_center",
+  "column_break_12",
+  "income_account",
+  "cost_of_good_sold_section",
+  "default_cogs_account",
+  "deferred_accounting_defaults_section",
+  "deferred_expense_account",
+  "column_break_kwad",
+  "deferred_revenue_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Warehouse",
+   "options": "Warehouse",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "purchase_defaults",
+   "fieldtype": "Section Break",
+   "label": "Purchase Defaults"
+  },
+  {
+   "fieldname": "buying_cost_center",
+   "fieldtype": "Link",
+   "label": "Default Buying Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "default_supplier",
+   "fieldtype": "Link",
+   "label": "Default Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Default Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "selling_defaults",
+   "fieldtype": "Section Break",
+   "label": "Sales Defaults"
+  },
+  {
+   "fieldname": "selling_cost_center",
+   "fieldtype": "Link",
+   "label": "Default Selling Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "label": "Default Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_discount_account",
+   "fieldtype": "Link",
+   "label": "Default Discount Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_provisional_account",
+   "fieldtype": "Link",
+   "label": "Default Provisional Account (Service)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "deferred_accounting_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting Defaults"
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_expense",
+   "fieldname": "deferred_expense_account",
+   "fieldtype": "Link",
+   "label": "Deferred Expense Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_revenue",
+   "fieldname": "deferred_revenue_account",
+   "fieldtype": "Link",
+   "label": "Deferred Revenue Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_kwad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cpif",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_of_good_sold_section",
+   "fieldtype": "Section Break",
+   "label": "Cost of Goods Sold"
+  },
+  {
+   "fieldname": "default_cogs_account",
+   "fieldtype": "Link",
+   "label": "Default COGS Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_expense_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_expense_contra_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Contra Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_inventory_account",
+   "fieldtype": "Link",
+   "label": "Default Inventory Account",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "default_inventory_account.account_currency",
+   "fieldname": "inventory_account_currency",
+   "fieldtype": "Link",
+   "label": "Inventory Account Currency",
+   "options": "Currency",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2025-10-21 10:50:46.144721",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Default",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

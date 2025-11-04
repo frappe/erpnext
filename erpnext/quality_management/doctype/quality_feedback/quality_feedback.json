@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "autoname": "format:QA-FB-{#####}",
+ "creation": "2019-05-26 21:23:05.308379",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "template",
+  "cb_00",
+  "document_type",
+  "document_name",
+  "sb_00",
+  "parameters"
+ ],
+ "fields": [
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Template",
+   "options": "Quality Feedback Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "template.feedback_values",
+   "fieldname": "parameters",
+   "fieldtype": "Table",
+   "label": "Parameters",
+   "options": "Quality Feedback Parameter"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "User\nCustomer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "document_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Feedback By",
+   "options": "document_type",
+   "reqd": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Actions",
+   "link_doctype": "Quality Action",
+   "link_fieldname": "feedback"
+  }
+ ],
+ "modified": "2024-03-27 13:10:27.838693",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Feedback",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Desk User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

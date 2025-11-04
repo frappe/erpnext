@@ -1,0 +1,14 @@
+<div class="web-list-item transaction-list-item">
+	<div class="row">
+		<div class="col-xs-3">
+			<span class='indicator {{ "red" if doc.status=="Cancelled" else "green" if doc.status=="Billed" else "blue" if doc.status=="Submitted" else "gray" }} small'>
+				{{ doc.name }}
+			</span>
+		</div>
+		<div class="col-xs-2 small"> {{ doc.billing_hours }} </div>
+		<div class="col-xs-2 small"> {{ doc.project or '' }} </div>
+		<div class="col-xs-2 small"> {{ doc.sales_invoice or '' }} </div>
+		<div class="col-xs-2 small"> {{ _(doc.activity_type) }} </div>
+	</div>
+	<!-- <a href="/timesheets?name={{ doc.name | urlencode }}" class="transaction-item-link">Link</a> -->
+</div>

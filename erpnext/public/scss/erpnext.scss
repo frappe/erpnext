@@ -1,0 +1,628 @@
+.erpnext-footer {
+	margin: 11px auto;
+	text-align: center;
+}
+
+.show-all-reports {
+	margin-top: 5px;
+	font-size: 11px;
+}
+
+/* toolbar */
+.toolbar-splash {
+	width: 32px;
+	height: 32px;
+	margin: -10px auto;
+}
+
+.erpnext-icon {
+	width: 24px;
+	margin-right: 0px;
+	margin-top: -3px;
+}
+
+.app-icon-svg {
+	display: inline-block;
+	margin: auto;
+	text-align: center;
+	border-radius: 16px;
+	cursor: pointer;
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.app-icon-svg .hub-icon {
+	height: 72px;
+	width: 72px;
+}
+
+.dashboard-list-item {
+	background-color: inherit;
+	border-bottom: 1px solid var(--border-color);
+	font-size: var(--text-md);
+	color: var(--text-color);
+}
+
+#page-stock-balance .dashboard-list-item {
+	padding: 5px 15px;
+}
+
+.dashboard-list-item:last-child {
+	border-bottom: none;
+}
+
+// assessment tool
+.frappe-control[data-fieldname="result_html"] {
+	overflow: scroll;
+}
+.assessment-result-tool {
+	table-layout: fixed;
+
+	input {
+		width: 100%;
+		border: 0;
+		outline: none;
+		text-align: right;
+	}
+
+	th {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.total-score,
+	.grade,
+	.score {
+		text-align: right;
+	}
+}
+
+/* pos */
+
+body[data-route="pos"] {
+	.pos-bill-toolbar {
+		padding: 10px 0px;
+		height: 51px;
+	}
+
+	.pos-bill-item:hover,
+	.list-customers-table > .pos-list-row:hover {
+		background-color: #f5f7fa;
+		cursor: pointer;
+	}
+
+	.pos-item-qty {
+		display: inline-block;
+	}
+
+	.pos-qty-row > div {
+		padding: 5px 0px;
+	}
+
+	.pos-qty-btn {
+		margin-top: 3px;
+		cursor: pointer;
+		font-size: 120%;
+	}
+
+	.search-area .form-group {
+		max-width: 100% !important;
+	}
+
+	.tax-table {
+		margin-bottom: 10px;
+	}
+
+	.discount-field-col {
+		padding-left: 24px;
+	}
+
+	.discount-amount-area {
+		.input-group:first-child {
+			margin-bottom: 2px;
+		}
+	}
+
+	.payment-toolbar {
+		.row {
+			width: 323px;
+			margin: 0 auto;
+		}
+	}
+
+	.payment-mode {
+		cursor: pointer;
+		font-family: sans-serif;
+		font-size: 15px;
+	}
+
+	.pos-payment-row .col-xs-6 {
+		padding: 15px;
+	}
+
+	.pos-payment-row {
+		border-bottom: 1px solid var(--border-color);
+		margin: 2px 0px 5px 0px;
+		height: 60px;
+		margin-top: 0px;
+		margin-bottom: 0px;
+	}
+
+	.pos-payment-row:hover,
+	.pos-keyboard-key:hover {
+		background-color: var(--bg-color);
+		cursor: pointer;
+	}
+
+	.pos-keyboard-key,
+	.delete-btn {
+		border: 1px solid var(--border-color);
+		height: 85px;
+		width: 85px;
+		margin: 10px 10px;
+		font-size: 24px;
+		font-weight: 200;
+		background-color: #fdfdfd;
+		border-color: #e8e8e8;
+	}
+
+	.numeric-keypad {
+		border: 1px solid var(--border-color);
+		height: 69px;
+		width: 69px;
+		font-size: 20px;
+		font-weight: 200;
+		background-color: #fdfdfd;
+		border-color: #e8e8e8;
+		margin-left: -4px;
+	}
+
+	.pos-pay {
+		height: 69px;
+		width: 69px;
+		font-size: 17px;
+		font-weight: 200;
+		margin-left: -4px;
+	}
+
+	.numeric-keypad {
+		height: 60px;
+		width: 60px;
+		font-size: 20px;
+		font-weight: 200;
+		border-radius: 0;
+		background-color: #fff;
+		margin-left: -4px;
+
+		@media (max-width: var(--xl-width)) {
+			height: 45px;
+			width: 45px;
+			font-size: 14px;
+		}
+
+		@media (max-width: var(--lg-width)) {
+			height: 40px;
+			width: 40px;
+		}
+	}
+
+	.numeric_keypad {
+		margin-left: -15px;
+
+		& > .row > button {
+			border: none;
+			border-right: 1px solid var(--border-color);
+			border-bottom: 1px solid var(--border-color);
+
+			&:first-child {
+				border-left: 1px solid var(--border-color);
+			}
+		}
+
+		& > .row:first-child > button {
+			border-top: 1px solid var(--border-color);
+		}
+	}
+
+	.pos-pay {
+		background-color: var(--primary);
+		border: none;
+	}
+
+	.multimode-payments {
+		padding-left: 30px;
+	}
+
+	.payment-toolbar {
+		padding-right: 30px;
+	}
+
+	.list-row-head.pos-invoice-list {
+		border-top: 1px solid var(--border-color);
+	}
+
+	.modal-dialog {
+		width: 750px;
+
+		@media (max-width: var(--md-width)) {
+			width: auto;
+
+			.modal-content {
+				height: auto;
+			}
+		}
+	}
+
+	@media (max-width: var(--md-width)) {
+		.amount-row h3 {
+			font-size: 15px;
+		}
+		.pos-keyboard-key,
+		.delete-btn {
+			height: 50px;
+		}
+		.multimode-payments {
+			padding-left: 15px;
+		}
+		.payment-toolbar {
+			padding-right: 15px;
+		}
+	}
+
+	.amount-label {
+		font-size: 16px;
+	}
+
+	.selected-payment-mode {
+		background-color: var(--bg-color);
+		cursor: pointer;
+	}
+
+	.pos-invoice-list {
+		padding: 15px 10px;
+	}
+
+	.write_off_amount,
+	.change_amount {
+		margin: 15px;
+		width: 130px;
+	}
+
+	.pos-list-row {
+		display: table;
+		table-layout: fixed;
+		width: 100%;
+		padding: 9px 15px;
+		font-size: 12px;
+		margin: 0px;
+		border-bottom: 1px solid var(--border-color);
+
+		.cell {
+			display: table-cell;
+			vertical-align: middle;
+
+			&.price-cell {
+				width: 50%;
+			}
+		}
+
+		.subject {
+			width: 40%;
+		}
+
+		.list-row-checkbox,
+		.list-select-all {
+			margin-right: 7px;
+		}
+	}
+
+	.pos-bill-header {
+		background-color: #f5f7fa;
+		border: 1px solid var(--border-color);
+		padding: 13px 15px;
+	}
+
+	.pos-list-row.active {
+		background-color: var(--fg-hover-color);
+	}
+
+	.totals-area {
+		border-right: 1px solid var(--border-color);
+		border-left: 1px solid var(--border-color);
+		margin-bottom: 15px;
+	}
+
+	.tax-area .pos-list-row {
+		border: none;
+	}
+
+	.item-cart-items {
+		height: calc(100vh - 526px);
+		overflow: auto;
+		border: 1px solid var(--border-color);
+		border-top: none;
+
+		@media (max-width: var(--md-width)) {
+			height: 30vh;
+		}
+	}
+
+	.no-items-message {
+		min-height: 200px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+	}
+
+	.pos-list-row:last-child {
+		border-bottom: none;
+	}
+
+	.form-section-heading {
+		padding: 0;
+	}
+
+	.item-list {
+		border: 1px solid var(--border-color);
+		border-top: none;
+		max-height: calc(100vh - 190px);
+		overflow: auto;
+
+		@media (max-width: var(--md-width)) {
+			max-height: initial;
+		}
+
+		.image-field {
+			height: 140px;
+
+			.placeholder-text {
+				font-size: 50px;
+			}
+		}
+
+		.pos-item-wrapper {
+			position: relative;
+		}
+	}
+
+	.pos-bill-toolbar {
+		margin-top: 10px;
+	}
+
+	.search-item .form-group {
+		margin: 0;
+	}
+
+	.item-list-area .pos-bill-header {
+		padding: 5px;
+		padding-left: 15px;
+	}
+
+	.pos-selected-item-action {
+		.pos-list-row:first-child {
+			padding-top: 0;
+		}
+
+		& > .pos-list-row {
+			border: none;
+
+			@media (max-width: var(--xl-width)) {
+				padding: 5px 15px;
+			}
+		}
+	}
+
+	.edit-customer-btn {
+		position: absolute;
+		right: 57px;
+		top: 15px;
+		z-index: 100;
+	}
+
+	.btn-more {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		cursor: pointer;
+		background-color: var(--bg-color);
+		min-height: 200px;
+	}
+
+	.collapse-btn {
+		cursor: pointer;
+	}
+
+	@media (max-width: var(--md-width)) {
+		.page-actions {
+			max-width: 110px;
+		}
+	}
+}
+
+.price-info {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	margin: 0 0 15px 15px;
+	background-color: rgba(141, 153, 166, 0.6);
+	padding: 5px 9px;
+	border-radius: 3px;
+	color: #fff;
+}
+
+// Healthcare
+
+.exercise-card {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	border-radius: 2px;
+	padding: 6px 6px 6px 8px;
+	margin-top: 10px;
+	height: 100% !important;
+
+	.card-img-top {
+		width: 100%;
+		height: 15vw;
+		object-fit: cover;
+	}
+
+	.btn-edit {
+		position: absolute;
+		bottom: 10px;
+		left: 20px;
+	}
+
+	.btn-del {
+		position: absolute;
+		bottom: 10px;
+		left: 50px;
+	}
+
+	.card-body {
+		margin-bottom: 10px;
+	}
+
+	.card-footer {
+		padding: 10px;
+	}
+}
+
+.exercise-row {
+	height: 100% !important;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.exercise-col {
+	padding: 10px;
+}
+
+.plant-floor,
+.workstation-wrapper,
+.workstation-card p {
+	border-radius: var(--border-radius-md);
+	border: 1px solid var(--border-color);
+	box-shadow: none;
+	background-color: var(--card-bg);
+	position: relative;
+}
+
+.ring-container {
+	position: relative;
+}
+
+.circle {
+	width: 9px;
+	height: 9px;
+	background-color: #278f5e;
+	border-radius: 50%;
+	position: absolute;
+	left: 9px;
+	top: 8px;
+}
+
+@keyframes pulsate {
+	0% {
+		-webkit-transform: scale(0.1, 0.1);
+		opacity: 0;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		-webkit-transform: scale(1.2, 1.2);
+		opacity: 0;
+	}
+}
+
+.ringring {
+	border: 2px solid #62bd19;
+	-webkit-border-radius: 40px;
+	height: 15px;
+	width: 15px;
+	position: absolute;
+	left: 6px;
+	top: 5px;
+	-webkit-animation: pulsate 3s ease-out;
+	-webkit-animation-iteration-count: infinite;
+	opacity: 0;
+}
+
+.plant-floor {
+	padding-bottom: 25px;
+}
+
+.workstation-image {
+	cursor: pointer;
+}
+
+.workstation-image-container {
+	height: 4.5rem;
+}
+
+.workstation-image-cls {
+	padding-top: 2px;
+}
+
+.plant-floor-filter {
+	padding-top: 10px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.plant-floor-container {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 6px;
+}
+
+.workstation-off {
+	opacity: 0.6;
+}
+
+@media screen and (max-width: 620px) {
+	.plant-floor-container {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.plant-floor-container .workstation-card {
+	padding: 5px;
+}
+
+.plant-floor-container .workstation-image-link {
+	width: 100%;
+	font-size: 50px;
+	margin: var(--margin-xs);
+	min-height: 9rem;
+}
+
+.workstation-abbr {
+	display: flex;
+	background-color: var(--control-bg);
+	height: 100%;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+}
+
+.frappe-control[data-fieldname="other_charges_calculation"] .ql-editor,
+.frappe-control[data-fieldname="address_display"] .ql-editor,
+.frappe-control[data-fieldname="shipping_address_display"] .ql-editor,
+.frappe-control[data-fieldname="shipping_address"] .ql-editor,
+.frappe-control[data-fieldname="dispatch_address_display"] .ql-editor,
+.frappe-control[data-fieldname="dispatch_address"] .ql-editor,
+.frappe-control[data-fieldname="source_address_display"] .ql-editor,
+.frappe-control[data-fieldname="target_address_display"] .ql-editor,
+.frappe-control[data-fieldname="billing_address_display"] .ql-editor,
+.frappe-control[data-fieldname="company_address_display"] .ql-editor {
+	white-space: normal;
+}
+
+.btn-clear-last-scanned-warehouse {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 1;
+}

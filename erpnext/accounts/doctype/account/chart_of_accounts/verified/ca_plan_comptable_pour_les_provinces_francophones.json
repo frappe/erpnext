@@ -1,0 +1,416 @@
+{
+    "country_code": "ca", 
+    "name": "Canada - Plan comptable pour les provinces francophones", 
+    "tree": {
+        "Actif": {
+            "Actif \u00e0 court terme": {
+                "Avances": {
+                    "Avances aux actionnaires": {}, 
+                    "Avances aux employ\u00e9s": {}, 
+                    "Avances sur commissions": {}
+                }, 
+                "Banque": {
+                    "account_type": "Bank", 
+                    "is_group": 1
+                }, 
+                "Comptes \u00e0 recevoir": {
+                    "Comptes clients": {
+                        "account_type": "Receivable"
+                    }, 
+                    "Provision pour cr\u00e9ances douteuses": {}
+                }, 
+                "Encaisse": {
+                    "is_group": 1
+                }, 
+                "Frais pay\u00e9s d\u2019avance": {
+                    "Assurances pay\u00e9s d'avance": {}, 
+                    "Publicit\u00e9 pay\u00e9 d'avance": {}, 
+                    "Taxes pay\u00e9s d'avance": {}
+                }, 
+                "Petite caisse": {
+                    "account_type": "Cash", 
+                    "is_group": 1
+                }, 
+                "Stocks": {
+                    "Mati\u00e8res premi\u00e8res": {}, 
+                    "Stock de produits fini": {
+                        "account_type": "Stock"
+                    }, 
+                    "Stock exp\u00e9di\u00e9 non-factur\u00e9": {}, 
+                    "Travaux en cours": {}, 
+                    "account_type": "Stock"
+                }, 
+                "Subventions \u00e0 recevoir": {}, 
+                "TR\u00c9SORERIE OU \u00c9QUIVALENTS DE TR\u00c9SORERIE": {}, 
+                "Taxes \u00e0 recevoir": {
+                    "TPS \u00e0 recevoir": {}, 
+                    "TVH \u00e0 recevoir": {
+                        "TVH \u00e0 recevoir - 13%": {}, 
+                        "TVH \u00e0 recevoir - 14%": {}, 
+                        "TVH \u00e0 recevoir - 15%": {}
+                    }, 
+                    "TVP/TVQ \u00e0 recevoir": {}
+                }
+            }, 
+            "Autres actifs": {
+                " Frais de premier \u00e9tablissement": {}, 
+                "Achalandage": {}, 
+                "Brevets, droits": {}, 
+                "Frais de recherche et de d\u00e9veloppement - actif": {}
+            }, 
+            "Immobilisations": {
+                " Amortissement accumul\u00e9 - b\u00e2timent": {}, 
+                " Amortissement accumul\u00e9 - entrep\u00f4t": {}, 
+                " Amortissement accumul\u00e9 - logiciels": {}, 
+                " Amortissement accumul\u00e9 - machinerie et \u00e9quipement": {}, 
+                " Amortissement accumul\u00e9 - \u00e9quipement informatique": {}, 
+                "Amortissement accumul\u00e9 - am\u00e9liorations locatives": {}, 
+                "Amortissement accumul\u00e9 - biens lou\u00e9s en vertu d\u2019un contrat de location - acquisition": {}, 
+                "Amortissement accumul\u00e9 - mat\u00e9riel roulant": {}, 
+                "Amortissement accumul\u00e9 - mobilier et \u00e9quipement de bureau": {}, 
+                "Am\u00e9liorations locatives": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Biens lou\u00e9s en vertu d\u2019un contrat de location - acquisition": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "B\u00e2timent": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Entrep\u00f4t": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Logiciels": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Machinerie et \u00e9quipement": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Mat\u00e9riel roulant": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Mobilier et \u00e9quipement de bureau": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "Terrain": {
+                    "account_type": "Fixed Asset"
+                }, 
+                "account_type": "Fixed Asset", 
+                "\u00c9quipement informatique": {
+                    "account_type": "Fixed Asset"
+                }
+            }, 
+            "Placements": {
+                "D\u00e9p\u00f4ts": {}, 
+                "Placement": {}
+            }, 
+            "root_type": "Asset"
+        }, 
+        "Avoir des actionnaires": {
+            " B\u00e9n\u00e9fice de la p\u00e9riode": {}, 
+            "Bonis": {}, 
+            "B\u00e9n\u00e9fices non r\u00e9partis": {}, 
+            "Capital - actions ordinaire": {}, 
+            "Capital - actions privil\u00e9gi\u00e9": {}, 
+            "Dividendes": {}, 
+            "Surplus d\u2019apport": {}, 
+            "root_type": "Equity"
+        }, 
+        "Charges": {
+            "Charges d'exploitation": {
+                "Salaires et charges sociales": {
+                    "Assurance - emploi": {
+                        "account_type": "Chargeable"
+                    }, 
+                    "Assurance parentale": {}, 
+                    "Fonds des services de sant\u00e9": {}, 
+                    "Imp\u00f4t f\u00e9d\u00e9ral": {}, 
+                    "Imp\u00f4t provincial": {}, 
+                    "Normes du travail": {}, 
+                    "Rentes": {}, 
+                    "Salaires": {
+                        "account_type": "Chargeable"
+                    }, 
+                    "sant\u00e9 et s\u00e9curit\u00e9 du travail CSST": {
+                        "account_type": "Chargeable"
+                    }
+                }
+            }, 
+            "Frais fixes": {
+                "Frais de fabrication": {
+                    " R\u00e9parations et entretien - moules et matrices": {}, 
+                    "Ammortissements": {
+                        "Amortissements - am\u00e9liorations locatives": {
+                            "account_type": "Depreciation"
+                        }, 
+                        "Amortissements - biens lou\u00e9s contrat de location - acquisition": {
+                            "account_type": "Depreciation"
+                        }, 
+                        "Amortissements - b\u00e2timent": {
+                            "account_type": "Depreciation"
+                        }, 
+                        "Amortissements - entrep\u00f4t": {
+                            "account_type": "Depreciation"
+                        }, 
+                        "Amortissements - machinerie et \u00e9quipement": {
+                            "account_type": "Depreciation"
+                        }, 
+                        "Amortissements - mat\u00e9riel roulant": {
+                            "account_type": "Depreciation"
+                        }, 
+                        "Amortissements - moules et matrices": {
+                            "account_type": "Depreciation"
+                        }, 
+                        "account_type": "Depreciation"
+                    }, 
+                    "Assurances": {
+                        " Assurances - feu": {}, 
+                        " Assurances - responsabilit\u00e9": {}, 
+                        " Assurances - vol": {}
+                    }, 
+                    "Avantages sociaux - frais de fabrication": {}, 
+                    "D\u00e9penses - mat\u00e9riel roulant": {}, 
+                    "Entretien du terrain \u00e0 contrat": {}, 
+                    "Fournitures d\u2019emballage": {}, 
+                    "Fournitures d\u2019usine": {}, 
+                    "Location de machinerie": {}, 
+                    "Loyer - b\u00e2timent": {}, 
+                    "Loyer - entrep\u00f4t": {}, 
+                    "Op\u00e9rations indirectes de la main-d\u2019\u0153uvre directe": {
+                        "is_group": 1
+                    }, 
+                    "R\u00e9parations et entretien - b\u00e2timent": {}, 
+                    "R\u00e9parations et entretien - machinerie et \u00e9quipement": {}, 
+                    "Salaires de soutien": {}, 
+                    "Salaires de supervision": {}, 
+                    "Taxes fonci\u00e8res": {}, 
+                    "\u00c9nergie": {}
+                }, 
+                "Frais de formation": {
+                    " Salaires - administration - frais fixe formation": {}, 
+                    "Avantages sociaux - frais fixe formation": {}, 
+                    "Cr\u00e9dits d\u2019imp\u00f4ts \u00e0 la formation": {}, 
+                    "Honoraires": {}, 
+                    "Main-d\u2019\u0153uvre directe - frais fixe formation": {}, 
+                    "Main-d\u2019\u0153uvre indirecte - frais fixe formation": {}, 
+                    "Salaires - bureau - frais fixe formation": {}, 
+                    "Salaires - vente": {}
+                }, 
+                "Frais de non-qualit\u00e9": {
+                    " Avantages sociaux - non-qualit\u00e9": {}, 
+                    " Main-d\u2019\u0153uvre directe - non-qualit\u00e9": {
+                        "Main-d\u2019\u0153uvre directe - gaspillage": {}, 
+                        "Main-d\u2019\u0153uvre directe - r\u00e9parations de garantie": {}, 
+                        "Main-d\u2019\u0153uvre directe - travail a reprendre": {}
+                    }, 
+                    "Mat\u00e9riel - non-qualit\u00e9": {
+                        "Mat\u00e9riel - gaspillage": {}, 
+                        "Mat\u00e9riel - r\u00e9parations de garantie": {}, 
+                        "Mat\u00e9riel - travail a reprendre": {}
+                    }, 
+                    "Salaire - inspecteur (contr\u00f4le de la qualit\u00e9)": {}
+                }, 
+                "Frais de recherche et de d\u00e9veloppement - charge": {
+                    " Mati\u00e8res premi\u00e8res - R&D": {}, 
+                    "Avantages sociaux - R&D": {}, 
+                    "Cr\u00e9dits d\u2019imp\u00f4ts - R&D": {}, 
+                    "Honoraires professionnels - R&D": {}, 
+                    "Main-d\u2019\u0153uvre directe - R&D": {}, 
+                    "Sous-traitance - R&D": {}
+                }, 
+                "Frais financiers": {
+                    " Escomptes de caisse sur achats": {}, 
+                    " Int\u00e9r\u00eats et frais de banque": {}, 
+                    " Int\u00e9r\u00eats sur emprunts - actionnaires": {}, 
+                    " Int\u00e9r\u00eats sur emprunts - machinerie": {}, 
+                    " Int\u00e9r\u00eats sur emprunts - mat\u00e9riel roulant": {}, 
+                    "Escomptes de caisse sur ventes": {}, 
+                    "Int\u00e9r\u00eats sur hypoth\u00e8que": {}
+                }, 
+                "Frais fixe de vente": {
+                    " Frais de voyages - camionneurs": {}, 
+                    " Frais de voyages - service apr\u00e8s-vente": {}, 
+                    "Amortissement - camions": {}, 
+                    "Amortissements - frais fixe de vente": {
+                        " Amortissements - autos": {}, 
+                        " Amortissements - bureau de vente": {}
+                    }, 
+                    "Assurances - camions": {}, 
+                    "Assurances d\u2019autos - vendeurs": {}, 
+                    "Avantages sociaux - frais fixe de vente": {}, 
+                    "Catalogues": {}, 
+                    "D\u00e9penses - bureau de vente": {}, 
+                    "Emballage \u00e0 la livraison": {}, 
+                    "Entretien et r\u00e9parations - camions": {}, 
+                    "Frais de repr\u00e9sentation": {}, 
+                    "Frais de voyages - vendeurs": {}, 
+                    "Frais d\u2019autos - service apr\u00e8s-vente": {}, 
+                    "Frais d\u2019autos - vendeurs": {}, 
+                    "Loyer - bureau de vente": {}, 
+                    "Prototypes et \u00e9chantillons": {}, 
+                    "Publicit\u00e9": {}, 
+                    "Salaires - camionneurs": {}, 
+                    "Salaires - frais fixe de vente": {
+                        "Salaires - exp\u00e9diteurs": {}, 
+                        "Salaires - g\u00e9rants": {}, 
+                        "Salaires - service apr\u00e8s-vente": {}, 
+                        "Salaires - vendeurs": {}
+                    }
+                }, 
+                "Frais fixe d\u2019administration": {
+                    " Assurances d\u2019autos - administration": {}, 
+                    "Amortissements - frais fixe d'administration": {
+                        "Amortissements - autos - frais fixe d'administration": {}, 
+                        "Amortissements - logiciels": {}, 
+                        "Amortissements - mobilier de bureau": {}, 
+                        "Amortissements - \u00e9quipement informatique": {}
+                    }, 
+                    "Avantages sociaux - frais fixe d'administration": {}, 
+                    "Dons et associations": {}, 
+                    "Entretien et r\u00e9parations - bureau": {}, 
+                    "Frais de perception": {}, 
+                    "Frais de voyages - administration": {}, 
+                    "Frais de v\u00e9rification": {}, 
+                    "Frais d\u2019autos - administration": {}, 
+                    "Frais juridiques": {}, 
+                    "Location - \u00e9quipement de bureau": {}, 
+                    "Mauvaises cr\u00e9ances": {}, 
+                    "Papeterie et d\u00e9penses de bureau": {}, 
+                    "Salaires - frais fixe d'administration": {
+                        "Salaires - administration": {}, 
+                        "Salaires - bureau": {}
+                    }, 
+                    "Taxe sur le capital": {}, 
+                    "Taxes, licences, permis": {}, 
+                    "Timbres": {}, 
+                    "T\u00e9l\u00e9communications": {}
+                }
+            }, 
+            "Frais variables": {
+                "Frais variables de fabrication": {
+                    " Emballage \u00e0 la production": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    " Sous-traitance": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "Achats de mati\u00e8res premi\u00e8res": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "Achats de mat\u00e9riel direct": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "Achats de produits non fabriqu\u00e9s": {
+                        "account_type": "Expenses Included In Valuation"
+                    }, 
+                    "Avantages sociaux": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "Main-d\u2019\u0153uvre directe": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "Variation des stocks": {
+                        "account_type": "Stock Adjustment"
+                    }, 
+                    "account_type": "Cost of Goods Sold"
+                }, 
+                "Frais variables de vente": {
+                    "Commissions": {}, 
+                    "Redevances": {}, 
+                    "Transport (\u00e0 contrat)": {}
+                }
+            }, 
+            "root_type": "Expense"
+        }, 
+        "Passif": {
+            "PASSIFS NON-COURANTS": {
+                "AUTRES PASSIFS NON-COURANTS": {}, 
+                "DETTES FINANCI\u00c8RES NON-COURANTES": {}, 
+                "IMP\u00d4TS DIFF\u00c9R\u00c9S": {}, 
+                "PROVISIONS POUR RETRAITES ET AUTRES AVANTAGES POST\u00c9RIEURS \u00c0 L'EMPLOI": {}
+            }, 
+            "Passif \u00e0 court terme": {
+                " Commissions \u00e0 payer": {}, 
+                "Assurance collective \u00e0 payer": {}, 
+                "Autres comptes cr\u00e9diteurs": {}, 
+                "Comptes \u00e0 payer": {
+                    "Comptes fournisseurs": {
+                        "account_type": "Payable"
+                    }
+                }, 
+                "D\u00e9p\u00f4ts de clients": {}, 
+                "Emprunt de banque": {}, 
+                "Imp\u00f4ts li\u00e9s aux salaires \u00e0 payer": {
+                    "Agence du revenu du Canada": {
+                        "Assurance - emploi \u00e0 payer": {
+                            "AE - Contribution de l'employeur": {}, 
+                            "AE - Contribution des employ\u00e9s": {}
+                        }, 
+                        "Imp\u00f4t f\u00e9d\u00e9ral sur salaires \u00e0 payer": {}
+                    }, 
+                    "Agence du revenu du Qu\u00e9bec": {
+                        "Fond des Services de Sant\u00e9 \u00e0 payer": {}, 
+                        "Imp\u00f4t provincial sur salaires \u00e0 payer": {}, 
+                        "Normes du Travail \u00e0 payer": {}, 
+                        "Provision pour sant\u00e9 et s\u00e9curit\u00e9 du travail CSST": {}, 
+                        "R\u00e9gime des rentes du Qu\u00e9bec \u00e0 payer": {
+                            "Rentes - Contribution de l'employeur": {}, 
+                            "Rentes - Contribution des employ\u00e9s": {}
+                        }, 
+                        "R\u00e9gime qu\u00e9becois d'assurance parentale": {
+                            "AP - Contribution de l'employeur": {}, 
+                            "AP - Contribution des employ\u00e9s": {}
+                        }
+                    }, 
+                    "Caisse de retraite \u00e0 payer": {}
+                }, 
+                "Imp\u00f4ts \u00e0 payer": {
+                    "Imp\u00f4t f\u00e9d\u00e9ral sur le revenu \u00e0 payer": {}, 
+                    "Imp\u00f4t provincial sur le revenu \u00e0 payer": {}, 
+                    "TPS \u00e0 payer": {}, 
+                    "TVH \u00e0 payer": {
+                        "TVH \u00e0 payer - 13%": {}, 
+                        "TVH \u00e0 payer - 14%": {}, 
+                        "TVH \u00e0 payer - 15%": {}
+                    }, 
+                    "TVP/TVQ \u00e0 payer": {}
+                }, 
+                "Passifs de stock": {
+                    "Stock re\u00e7u non factur\u00e9": {
+                        "account_type": "Stock Received But Not Billed"
+                    }
+                }, 
+                "Provision pour vacances et cong\u00e9s": {}, 
+                "Revenus per\u00e7us d\u2019avance": {}, 
+                "Salaires \u00e0 payer": {}
+            }, 
+            "Passif \u00e0 long terme": {
+                "Avances des actionnaires": {}, 
+                "Cr\u00e9dits d\u2019imp\u00f4ts report\u00e9s": {}, 
+                "Hypoth\u00e8que \u00e0 payer": {}, 
+                "Liens sur machinerie": {}, 
+                "Liens sur mat\u00e9riel roulant": {}, 
+                "Obligation d\u00e9coulant d\u2019un contrat de location - acquisition": {}, 
+                "Passif d\u2019imp\u00f4ts futurs": {}
+            }, 
+            "root_type": "Liability"
+        }, 
+        "Produits": {
+            "Revenus de ventes": {
+                "Escomptes de volume sur ventes": {}, 
+                "Autres produits d'exploitation": {}, 
+                "Ventes": {
+                    "account_type": "Income Account"
+                }, 
+                "Ventes avec des provinces harmonis\u00e9es": {}, 
+                "Ventes avec des provinces non-harmonis\u00e9es": {}, 
+                "Ventes \u00e0 l'\u00e9tranger": {}
+            }, 
+            "Revenus non li\u00e9 \u00e0 la vente": {
+                "Autres revenus non li\u00e9s \u00e0 la vente": {}, 
+                "Revenues d'int\u00e9r\u00eats": {}
+            }, 
+            "root_type": "Income"
+        }
+    }
+}

@@ -1,0 +1,60 @@
+# ============================================================================
+# ERPNext & Frappe Framework Dependencies
+# ============================================================================
+
+# Core Framework
+frappe-framework>=15.0.0,<16.0.0
+erpnext>=15.0.0,<16.0.0
+
+# Database Drivers
+PyMySQL>=1.0.0
+psycopg2-binary>=2.9.0
+
+# Cache & Queue
+redis>=4.0.0
+rq>=1.11.0
+
+# Web Server & WSGI
+gunicorn>=20.1.0
+Werkzeug>=2.2.0
+gevent>=21.0.0
+
+# Required by ERPNext/Frappe
+python-dateutil>=2.8.2
+requests>=2.28.0
+urllib3>=1.26.0
+Unidecode>=1.4.0
+barcodenumber>=0.5.0
+rapidfuzz>=3.0.0
+holidays>=0.75
+
+# Database Migration & ORM
+alembic>=1.10.0
+sqlalchemy>=1.4.0
+
+# Email & Communication
+secure-smtplib>=0.1.1
+
+# PDF & Report Generation
+weasyprint>=59.0
+pypdf>=3.15.0
+python-bidi>=0.4.2
+
+# Excel & CSV
+openpyxl>=3.10.0
+xlrd>=2.0.0
+
+# Utilities
+click>=8.0.0
+pydantic>=1.10.0
+python-dotenv>=0.21.0
+
+# Monitoring & Logging
+python-json-logger>=2.0.0
+
+# Development (optional, can be removed for production)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# black>=23.0.0
+# flake8>=5.0.0
+# isort>=5.11.0

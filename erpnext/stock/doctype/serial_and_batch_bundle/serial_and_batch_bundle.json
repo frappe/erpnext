@@ -1,0 +1,394 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2023-08-11 17:22:12.907518",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_details_tab",
+  "naming_series",
+  "company",
+  "item_name",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_4",
+  "item_code",
+  "warehouse",
+  "type_of_transaction",
+  "serial_no_and_batch_no_tab",
+  "entries",
+  "quantity_and_rate_section",
+  "total_qty",
+  "item_group",
+  "column_break_13",
+  "avg_rate",
+  "total_amount",
+  "tab_break_12",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "column_break_aouy",
+  "posting_datetime",
+  "returned_against",
+  "section_break_wzou",
+  "is_cancelled",
+  "is_packed",
+  "is_rejected",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Serial and Batch"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_no_and_batch_no_tab",
+   "fieldtype": "Section Break",
+   "label": "Serial / Batch No"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "DocType",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "no_copy": 1,
+   "options": "voucher_type"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_break_12",
+   "fieldtype": "Tab Break",
+   "label": "Reference"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "quantity_and_rate_section",
+   "fieldtype": "Tab Break",
+   "label": "Quantity and Rate"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "avg_rate",
+   "fieldtype": "Float",
+   "label": "Avg Rate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_amount",
+   "fieldtype": "Float",
+   "label": "Total Amount",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_qty",
+   "fieldtype": "Float",
+   "label": "Total Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_aouy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "mandatory_depends_on": "eval:doc.type_of_transaction != \"Maintenance\"",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "type_of_transaction",
+   "fieldtype": "Select",
+   "label": "Type of Transaction",
+   "options": "\nInward\nOutward\nMaintenance\nAsset Repair",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.voucher_type == \"Purchase Receipt\"",
+   "fieldname": "is_rejected",
+   "fieldtype": "Check",
+   "label": "Is Rejected",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_wzou",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "entries",
+   "fieldtype": "Table",
+   "options": "Serial and Batch Entry",
+   "reqd": 1
+  },
+  {
+   "fieldname": "returned_against",
+   "fieldtype": "Data",
+   "label": "Returned Against",
+   "read_only": 1
+  },
+  {
+   "default": "SABB-.########",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "\nSABB-.########",
+   "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_packed",
+   "fieldtype": "Check",
+   "label": "Is Packed"
+  },
+  {
+   "fieldname": "posting_datetime",
+   "fieldtype": "Datetime",
+   "label": "Posting Datetime"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-24 16:24:48.154853",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial and Batch Bundle",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Delivery User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Delivery Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "item_code"
+}

@@ -1,0 +1,66 @@
+{% for d in data %}
+	<div class="dashboard-list-item">
+		<div class="row">
+			<div class="col-sm-3" style="margin-top: 8px;">
+				<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
+			</div>
+			<div class="col-sm-3" style="margin-top: 8px;">
+				{% if show_item %}
+					<a data-type="item"
+						data-name="{{ d.item_code }}">{{ d.item_code }}
+						{% if d.item_name != d.item_code %}({{ d.item_name }}){% endif %}
+					</a>
+				{% endif %}
+			</div>
+			<div class="col-sm-1" style="margin-top: 8px;" title="{{ __("Reserved Stock") }}">
+				<a data-name="{{ d.reserved_stock }}">{{ d.reserved_stock }}</a>
+			</div>
+			<div class="col-sm-3">
+				<span class="inline-graph">
+					<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
+						<span class="inline-graph-count">{{ d.total_reserved }}</span>
+						<span class="inline-graph-bar">
+							<span class="inline-graph-bar-inner"
+								style="width: {{ cint(Math.abs(d.total_reserved)/max_count * 100) || 5 }}%">
+							</span>
+						</span>
+					</span>
+					<span class="inline-graph-half" title="{{ __("Actual Qty {0} / Waiting Qty {1}", [d.actual_qty, d.pending_qty]) }}">
+						<span class="inline-graph-count">
+							{{ d.actual_qty }} {{ (d.pending_qty > 0) ? ("(" + d.pending_qty+ ")") : "" }}
+						</span>
+						<span class="inline-graph-bar">
+							<span class="inline-graph-bar-inner dark"
+								style="width: {{ cint(d.actual_qty/max_count * 100) }}%">
+							</span>
+							{% if d.pending_qty > 0 %}
+							<span class="inline-graph-bar-inner" title="{{ __("Projected Qty") }}"
+								style="width: {{ cint(d.pending_qty/max_count * 100) }}%">
+							</span>
+							{% endif %}
+						</span>
+					</span>
+				</span>
+			</div>
+			{% if can_write %}
+			<div class="col-sm-2 text-right" style="margin: var(--margin-sm) 0;">
+				{% if d.actual_qty %}
+				<button class="btn btn-default btn-xs btn-move"
+					data-disable_quick_entry="{{ d.disable_quick_entry }}"
+					data-warehouse="{{ d.warehouse }}"
+					data-actual_qty="{{ d.actual_qty }}"
+					data-stock-uom="{{ d.stock_uom }}"
+					data-item="{{ escape(d.item_code) }}">{{ __("Move") }}</a>
+				{% endif %}
+				<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-add"
+					data-disable_quick_entry="{{ d.disable_quick_entry }}"
+					data-warehouse="{{ d.warehouse }}"
+					data-actual_qty="{{ d.actual_qty }}"
+					data-stock-uom="{{ d.stock_uom }}"
+					data-item="{{ escape(d.item_code) }}"
+					data-rate="{{ d.valuation_rate }}">{{ __("Add") }}</a>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+{% endfor %}

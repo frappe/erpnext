@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "creation": "2018-02-26 17:39:11.249778",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "alternative_item_code",
+  "two_way",
+  "column_break_4",
+  "item_name",
+  "alternative_item_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "alternative_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Alternative Item Code",
+   "options": "Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "two_way",
+   "fieldtype": "Check",
+   "label": "Two-way"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Read Only",
+   "label": "Item Name"
+  },
+  {
+   "fetch_from": "alternative_item_code.item_name",
+   "fieldname": "alternative_item_name",
+   "fieldtype": "Read Only",
+   "label": "Alternative Item Name"
+  }
+ ],
+ "links": [],
+ "modified": "2024-03-27 13:09:53.809482",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Alternative",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "item_code",
+ "track_changes": 1
+}

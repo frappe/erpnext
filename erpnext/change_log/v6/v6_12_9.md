@@ -1,0 +1,2 @@
+- Task status will be automatically set to "Overdue" when it crosses expected end date.
+- Task notification will only be for overdue tasks, not open tasks.

@@ -1,0 +1,38 @@
+{
+ "actions": [],
+ "creation": "2018-10-24 15:24:56.713277",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bank_transaction_field",
+  "file_field"
+ ],
+ "fields": [
+  {
+   "fieldname": "bank_transaction_field",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Field in Bank Transaction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "file_field",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Column in Bank File",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-27 13:06:38.436517",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Transaction Mapping",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
