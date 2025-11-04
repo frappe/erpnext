@@ -18,7 +18,7 @@ from audit_logger import audit_logger
 import migrations
 from routers import (
     bank_connections, compliance, payroll, employees, finance, super_admin,
-    sales, procurement, inventory, tax
+    sales, procurement, inventory, tax, manufacturing, banking, ocr, chat
 )
 
 models.Base.metadata.create_all(bind=engine)
@@ -45,6 +45,10 @@ app.include_router(sales.router)
 app.include_router(procurement.router)
 app.include_router(inventory.router)
 app.include_router(tax.router)
+app.include_router(manufacturing.router)
+app.include_router(banking.router)
+app.include_router(ocr.router)
+app.include_router(chat.router)
 
 @app.get("/api/health")
 def health_check():

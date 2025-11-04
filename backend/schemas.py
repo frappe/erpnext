@@ -1127,3 +1127,60 @@ class TaxSettingUpdate(BaseModel):
 class TaxCalculation(BaseModel):
     tax_setting_id: str
     amount: float
+
+
+# ============================================================================
+# MANUFACTURING SCHEMAS
+# ============================================================================
+
+class BOMLineCreate(BaseModel):
+    component_id: str
+    quantity: float
+    unit_cost: Optional[float] = None
+    scrap_percentage: Optional[float] = 0
+
+class BOMCreate(BaseModel):
+    product_id: str
+    product_quantity: Optional[float] = 1.0
+    description: Optional[str] = None
+    lines: List[BOMLineCreate]
+
+class ProductionOrderCreate(BaseModel):
+    product_id: str
+    bom_id: Optional[str] = None
+    quantity_planned: float
+    start_date: Optional[date] = None
+    planned_end_date: Optional[date] = None
+    warehouse_id: Optional[str] = None
+    notes: Optional[str] = None
+
+
+# ============================================================================
+# BANKING SCHEMAS
+# ============================================================================
+
+class BankAccountCreate(BaseModel):
+    bank_name: str
+    account_number: str
+    account_type: Optional[str] = "checking"
+    currency: Optional[str] = "ZMW"
+    branch: Optional[str] = None
+    swift_code: Optional[str] = None
+    current_balance: Optional[float] = 0
+    is_active: Optional[bool] = True
+
+
+# ============================================================================
+# CHAT/COMMUNICATION SCHEMAS
+# ============================================================================
+
+class ChatMessageCreate(BaseModel):
+    recipient_id: Optional[str] = None
+    channel_id: Optional[str] = None
+    message_text: str
+    message_type: Optional[str] = "text"
+
+class ChatChannelCreate(BaseModel):
+    channel_name: str
+    channel_type: Optional[str] = "department"
+    description: Optional[str] = None
