@@ -3,7 +3,7 @@
 # ============================================================================
 # Stage 1: Builder - تجميع الـ Assets و Dependencies
 # ============================================================================
-FROM python:3.10-slim as builder
+FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
@@ -44,26 +44,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # نسخ المشروع
 COPY . /app
 
-# تثبيت Python Dependencies
-RUN pip install --no-cache-dir -r /app/requirements.txt || echo "No requirements.txt found"
-
-# تثبيت Node Dependencies
-RUN cd /app && npm ci --omit=dev 2>/dev/null || echo "npm install skipped"
-
-# إنشاء المجلدات المطلوبة
+# Create required directories first
 RUN mkdir -p /app/logs \
     && mkdir -p /app/private/files \
     && mkdir -p /app/sites \
+    && mkdir -p /app/public/files \
     && chmod -R 755 /app
 
-# نسخ Nginx Config (if exists)
-RUN test -f /app/nginx.conf && cp /app/nginx.conf /etc/nginx/nginx.conf || echo "nginx.conf not found, skipping"
+# تثبيت Python Dependencies
+RUN if [ -f /app/requirements.txt ]; then pip install --no-cache-dir -r /app/requirements.txt; else echo "No requirements.txt found"; fi
 
-# نسخ Supervisor Config (if exists)
-RUN test -f /app/supervisor.conf && cp /app/supervisor.conf /etc/supervisor/conf.d/erpnext.conf || echo "supervisor.conf not found, skipping"
+# تثبيت Node Dependencies
+RUN cd /app && npm ci --omit=dev 2>/dev/null || npm install 2>/dev/null || echo "npm install skipped"
+
+# نسخ Nginx Config if exists
+RUN if [ -f /app/nginx.conf ]; then cp /app/nginx.conf /etc/nginx/nginx.conf; fi
+
+# نسخ Supervisor Config if exists
+RUN if [ -f /app/supervisor.conf ]; then cp /app/supervisor.conf /etc/supervisor/conf.d/erpnext.conf; fi
 
 # نسخ Docker Entry Point Script
-COPY docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
 
 # تعيين متغيرات البيئة الافتراضية
