@@ -19,6 +19,11 @@ import SupplierManagement from './pages/SupplierManagement';
 import ProductCatalog from './pages/ProductCatalog';
 import SalesOrders from './pages/SalesOrders';
 import PurchaseOrders from './pages/PurchaseOrders';
+import InventoryDashboard from './pages/InventoryDashboard';
+import ManufacturingDashboard from './pages/ManufacturingDashboard';
+import BankReconciliation from './pages/BankReconciliation';
+import TaxDashboard from './pages/TaxDashboard';
+import OCRUpload from './pages/OCRUpload';
 import AdminDashboard from './pages/AdminDashboard';
 import MobileMoney from './pages/MobileMoney';
 import Branches from './pages/Branches';
@@ -131,6 +136,11 @@ function App() {
           <Route path="bank-connections" element={<BankConnections />} />
           <Route path="transaction-feed" element={<TransactionFeed />} />
           <Route path="reconciliation" element={<ReconciliationDashboard />} />
+          <Route path="inventory-dashboard" element={<InventoryDashboard />} />
+          <Route path="manufacturing" element={<ManufacturingDashboard />} />
+          <Route path="bank-reconciliation" element={<BankReconciliation />} />
+          <Route path="tax-dashboard" element={<TaxDashboard />} />
+          <Route path="ocr-upload" element={<OCRUpload />} />
         </Route>
       </Routes>
     </Router>
