@@ -14,6 +14,9 @@ import Leave from './pages/Leave';
 import Products from './pages/Products';
 import Customers from './pages/Customers';
 import Suppliers from './pages/Suppliers';
+import CustomerManagement from './pages/CustomerManagement';
+import SupplierManagement from './pages/SupplierManagement';
+import ProductCatalog from './pages/ProductCatalog';
 import SalesOrders from './pages/SalesOrders';
 import PurchaseOrders from './pages/PurchaseOrders';
 import AdminDashboard from './pages/AdminDashboard';
@@ -108,9 +111,12 @@ function App() {
           <Route path="accounts" element={<Accounts />} />
           <Route path="journals" element={<Journals />} />
           <Route path="products" element={<Products />} />
+          <Route path="product-catalog" element={<ProductCatalog />} />
           <Route path="customers" element={<Customers />} />
+          <Route path="customer-management" element={<CustomerManagement />} />
           <Route path="sales-orders" element={<SalesOrders />} />
           <Route path="suppliers" element={<Suppliers />} />
+          <Route path="supplier-management" element={<SupplierManagement />} />
           <Route path="purchase-orders" element={<PurchaseOrders />} />
           <Route path="mobile-money" element={<MobileMoney />} />
           <Route path="branches" element={<Branches />} />
