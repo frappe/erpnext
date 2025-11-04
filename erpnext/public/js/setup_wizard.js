@@ -55,9 +55,13 @@ erpnext.setup.slides_settings = [
 
 		onload: function (slide) {
 			this.bind_events(slide);
-			this.load_chart_of_accounts(slide);
-			this.set_fy_dates(slide);
 		},
+
+		before_show: function () {
+			this.load_chart_of_accounts(this);
+			this.set_fy_dates(this);
+		},
+		
 		validate: function () {
 			if (!this.validate_fy_dates()) {
 				return false;

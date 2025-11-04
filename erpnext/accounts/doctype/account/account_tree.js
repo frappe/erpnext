@@ -138,6 +138,11 @@ frappe.treeview_settings["Account"] = {
 			description: __(
 				"Further accounts can be made under Groups, but entries can be made against non-Groups"
 			),
+			onchange: function () {
+				if (!this.value) {
+					this.layout.set_value("root_type", "");
+				}
+			},
 		},
 		{
 			fieldtype: "Select",

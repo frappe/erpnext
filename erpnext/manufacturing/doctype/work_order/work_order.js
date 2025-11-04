@@ -105,6 +105,18 @@ frappe.ui.form.on("Work Order", {
 			}
 		});
 
+
+		frm.set_query("sales_order", function () {
+			if (frm.doc.production_item) {
+				return {
+					query: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
+					filters: {
+						production_item: frm.doc.production_item,
+					},
+				};
+			}
+		});
+
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
