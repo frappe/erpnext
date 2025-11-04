@@ -4979,9 +4979,189 @@
 	},
 
 	"United Kingdom": {
-		"United Kingdom Tax": {
-			"account_name": "VAT",
-			"tax_rate": 20.00
+		"tax_categories": [],
+		"chart_of_accounts": {
+			"*": {
+				"sales_tax_templates": [
+					{
+						"title": "UK VAT Standard Rated",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "VAT",
+									"tax_rate": 20.00
+								},
+								"rate": 20.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Reduced Rate",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "VAT",
+									"tax_rate": 5.00
+								},
+								"rate": 5.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Zero-Rated",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "VAT",
+									"tax_rate": 0.00
+								},
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Exempt",
+						"taxes": []
+					},
+					{
+						"title": "UK VAT Outside Scope",
+						"taxes": []
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "UK VAT Standard Rated",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input VAT",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Reduced Rate",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input VAT",
+									"root_type": "Asset",
+									"tax_rate": 5.00
+								},
+								"tax_rate": 5.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Zero-Rated",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input VAT",
+									"root_type": "Asset",
+									"tax_rate": 0.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Reverse Charge",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input VAT",
+									"root_type": "Asset",
+									"tax_rate": -20.00
+								},
+								"tax_rate": -20.00
+							},
+							{
+								"account_head": {
+									"account_name": "VAT",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "UK VAT Standard Rated Item",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Input VAT",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							},
+							{
+								"tax_type": {
+									"account_name": "VAT",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Reduced Rate Item",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Input VAT",
+									"root_type": "Asset",
+									"tax_rate": 5.00
+								},
+								"tax_rate": 5.00
+							},
+							{
+								"tax_type": {
+									"account_name": "VAT",
+									"root_type": "Liability",
+									"tax_rate": 5.00
+								},
+								"tax_rate": 5.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Zero-Rated Item",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Input VAT",
+									"root_type": "Asset",
+									"tax_rate": 0.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "VAT",
+									"root_type": "Liability",
+									"tax_rate": 0.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "UK VAT Exempt Item",
+						"taxes": []
+					}
+				]
+			}
 		}
 	},
 
