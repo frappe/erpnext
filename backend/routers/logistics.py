@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import Warehouse, Shipment
+from models import LogisticsWarehouse, LogisticsShipment
 import schemas
 from auth import get_current_user
 
@@ -15,7 +15,7 @@ async def create_warehouse(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    db_warehouse = Warehouse(**warehouse.dict(), company_id=current_user.company_id)
+    db_warehouse = LogisticsWarehouse(**warehouse.dict(), company_id=current_user.company_id)
     db.add(db_warehouse)
     db.commit()
     db.refresh(db_warehouse)
@@ -26,8 +26,8 @@ async def get_warehouses(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return db.query(Warehouse).filter(
-        Warehouse.company_id == current_user.company_id
+    return db.query(LogisticsWarehouse).filter(
+        LogisticsWarehouse.company_id == current_user.company_id
     ).all()
 
 @router.get("/warehouses/{warehouse_id}")
@@ -36,9 +36,9 @@ async def get_warehouse(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    warehouse = db.query(Warehouse).filter(
-        Warehouse.id == warehouse_id,
-        Warehouse.company_id == current_user.company_id
+    warehouse = db.query(LogisticsWarehouse).filter(
+        LogisticsWarehouse.id == warehouse_id,
+        LogisticsWarehouse.company_id == current_user.company_id
     ).first()
     if not warehouse:
         raise HTTPException(status_code=404, detail="Warehouse not found")
@@ -51,9 +51,9 @@ async def update_warehouse(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    warehouse = db.query(Warehouse).filter(
-        Warehouse.id == warehouse_id,
-        Warehouse.company_id == current_user.company_id
+    warehouse = db.query(LogisticsWarehouse).filter(
+        LogisticsWarehouse.id == warehouse_id,
+        LogisticsWarehouse.company_id == current_user.company_id
     ).first()
     if not warehouse:
         raise HTTPException(status_code=404, detail="Warehouse not found")
@@ -71,9 +71,9 @@ async def delete_warehouse(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    warehouse = db.query(Warehouse).filter(
-        Warehouse.id == warehouse_id,
-        Warehouse.company_id == current_user.company_id
+    warehouse = db.query(LogisticsWarehouse).filter(
+        LogisticsWarehouse.id == warehouse_id,
+        LogisticsWarehouse.company_id == current_user.company_id
     ).first()
     if not warehouse:
         raise HTTPException(status_code=404, detail="Warehouse not found")
@@ -89,7 +89,7 @@ async def create_shipment(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    db_shipment = Shipment(**shipment.dict(), company_id=current_user.company_id)
+    db_shipment = LogisticsShipment(**shipment.dict(), company_id=current_user.company_id)
     db.add(db_shipment)
     db.commit()
     db.refresh(db_shipment)
@@ -100,6 +100,6 @@ async def get_shipments(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return db.query(Shipment).filter(
-        Shipment.company_id == current_user.company_id
+    return db.query(LogisticsShipment).filter(
+        LogisticsShipment.company_id == current_user.company_id
     ).all()

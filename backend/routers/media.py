@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import Content, Publication
+from models import MediaContent, MediaPublication
 import schemas
 from auth import get_current_user
 
@@ -15,7 +15,7 @@ async def create_content(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    db_content = Content(**content.dict(), company_id=current_user.company_id)
+    db_content = MediaContent(**content.dict(), company_id=current_user.company_id)
     db.add(db_content)
     db.commit()
     db.refresh(db_content)
@@ -26,8 +26,8 @@ async def get_contents(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return db.query(Content).filter(
-        Content.company_id == current_user.company_id
+    return db.query(MediaContent).filter(
+        MediaContent.company_id == current_user.company_id
     ).all()
 
 @router.get("/content/{content_id}")
@@ -36,9 +36,9 @@ async def get_content(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    content = db.query(Content).filter(
-        Content.id == content_id,
-        Content.company_id == current_user.company_id
+    content = db.query(MediaContent).filter(
+        MediaContent.id == content_id,
+        MediaContent.company_id == current_user.company_id
     ).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
@@ -51,9 +51,9 @@ async def update_content(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    content = db.query(Content).filter(
-        Content.id == content_id,
-        Content.company_id == current_user.company_id
+    content = db.query(MediaContent).filter(
+        MediaContent.id == content_id,
+        MediaContent.company_id == current_user.company_id
     ).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
@@ -71,9 +71,9 @@ async def delete_content(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    content = db.query(Content).filter(
-        Content.id == content_id,
-        Content.company_id == current_user.company_id
+    content = db.query(MediaContent).filter(
+        MediaContent.id == content_id,
+        MediaContent.company_id == current_user.company_id
     ).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
@@ -89,7 +89,7 @@ async def create_publication(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    db_publication = Publication(**publication.dict(), company_id=current_user.company_id)
+    db_publication = MediaPublication(**publication.dict(), company_id=current_user.company_id)
     db.add(db_publication)
     db.commit()
     db.refresh(db_publication)
@@ -100,6 +100,6 @@ async def get_publications(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return db.query(Publication).filter(
-        Publication.company_id == current_user.company_id
+    return db.query(MediaPublication).filter(
+        MediaPublication.company_id == current_user.company_id
     ).all()
