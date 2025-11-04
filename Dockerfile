@@ -2,8 +2,8 @@
 # ERPNext Kanaan ERP - Production Dockerfile
 # ============================================================================
 # This Dockerfile implements a proper Frappe bench setup for production
-# Version: 2.0.1 - Frappe v16 installed from GitHub
-# Build: Force rebuild with Frappe GitHub installation
+# Version: 2.0.2 - Frappe main branch from GitHub (v15/v16)
+# Build: Fixed branch name - uses 'main' instead of non-existent 'version-16'
 
 FROM python:3.10-slim
 
@@ -38,9 +38,9 @@ COPY . /app/
 # Upgrade pip, setuptools, wheel
 RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Clone Frappe v16 Framework from GitHub
-# This is the official Frappe framework that ERPNext depends on
-RUN git clone --branch version-16 --depth 1 https://github.com/frappe/frappe.git /opt/frappe
+# Clone Frappe Framework from GitHub
+# Using main branch which contains the latest stable version
+RUN git clone --branch main --depth 1 https://github.com/frappe/frappe.git /opt/frappe
 
 # Install Frappe framework from the cloned repository (development mode)
 # This makes it importable as 'frappe' while keeping the source code accessible
