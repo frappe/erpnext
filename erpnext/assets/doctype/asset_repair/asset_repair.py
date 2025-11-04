@@ -82,10 +82,20 @@ class AssetRepair(AccountsController):
 
 	def validate_purchase_invoices(self):
 		for d in self.invoices:
+			self.validate_purchase_invoice_status(d.purchase_invoice)
 			invoice_items = self.get_invoice_items(d.purchase_invoice)
 			self.validate_service_purchase_invoice(d.purchase_invoice, invoice_items)
 			self.validate_expense_account(d, invoice_items)
 			self.validate_purchase_invoice_repair_cost(d, invoice_items)
+
+	def validate_purchase_invoice_status(self, purchase_invoice):
+		docstatus = frappe.db.get_value("Purchase Invoice", purchase_invoice, "docstatus")
+		if docstatus == 0:
+			frappe.throw(
+				_("{0} is still in Draft. Please submit it before saving the Asset Repair.").format(
+					get_link_to_form("Purchase Invoice", purchase_invoice)
+				)
+			)
 
 	def get_invoice_items(self, pi):
 		invoice_items = frappe.get_all(
