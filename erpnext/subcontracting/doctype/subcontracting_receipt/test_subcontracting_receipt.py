@@ -1390,6 +1390,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertEqual(pr_details[0]["total_taxes_and_charges"], 60)
 
+	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
