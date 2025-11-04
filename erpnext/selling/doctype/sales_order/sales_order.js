@@ -170,16 +170,20 @@ frappe.ui.form.on("Sales Order", {
 		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
 			return {
-				filters: {
-					company: frm.doc.company,
-				},
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+					["Warehouse", "is_group", "=", 0],
+				],
 			};
 		});
 
 		frm.set_query("warehouse", "items", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 			let query = {
-				filters: { company: frm.doc.company },
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+					["Warehouse", "is_group", "=", 0],
+				],
 			};
 			if (row.item_code) {
 				query.query = "erpnext.controllers.queries.warehouse_query";

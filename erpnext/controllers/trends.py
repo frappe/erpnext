@@ -95,7 +95,7 @@ def get_data(filters, conditions):
 			sel_col = "t1.supplier"
 
 		if filters.get("based_on") in ["Item", "Customer", "Supplier"]:
-			inc = 2
+			inc = 3
 		else:
 			inc = 1
 		data1 = frappe.db.sql(
@@ -359,11 +359,20 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Customer":
-		based_on_details["based_on_cols"] = [
-			"Customer:Link/Customer:120",
-			"Territory:Link/Territory:120",
-		]
-		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
+		if trans == "Quotation":
+			based_on_details["based_on_cols"] = [
+				"Party:Link/Customer:120",
+				"Party Name:Data:120",
+				"Territory:Link/Territory:120",
+			]
+			based_on_details["based_on_select"] = "t1.party_name, t1.customer_name, t1.territory,"
+		else:
+			based_on_details["based_on_cols"] = [
+				"Customer:Link/Customer:120",
+				"Customer Name:Data:120",
+				"Territory:Link/Territory:120",
+			]
+			based_on_details["based_on_select"] = "t1.customer, t1.customer_name, t1.territory,"
 		based_on_details["based_on_group_by"] = (
 			"t1.party_name, t1.customer_name , t1.territory"
 			if trans == "Quotation"
@@ -380,9 +389,10 @@ def based_wise_columns_query(based_on, trans):
 	elif based_on == "Supplier":
 		based_on_details["based_on_cols"] = [
 			"Supplier:Link/Supplier:120",
+			"Supplier Name:Data:120",
 			"Supplier Group:Link/Supplier Group:140",
 		]
-		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_group,"
+		based_on_details["based_on_select"] = "t1.supplier, t1.supplier_name, t3.supplier_group,"
 		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_group"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"

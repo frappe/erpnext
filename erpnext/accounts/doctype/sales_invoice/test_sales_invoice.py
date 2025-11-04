@@ -5832,6 +5832,8 @@ class TestSalesInvoice(FrappeTestCase):
 
 		self.assertRaises(StockOverReturnError, return_doc.save)
 
+	
+
 	def test_repost_account_ledger_for_si_TC_ACC_118(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
 		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
@@ -7769,6 +7771,114 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
+	def test_pos_sales_invoice_creation_during_pos_invoice_mode(self):
+		# Deleting all opening entry
+		frappe.db.sql("delete from `tabPOS Opening Entry`")
+
+		with self.change_settings("POS Settings", {"invoice_type": "POS Invoice"}):
+			pos_profile = make_pos_profile()
+
+			pos_profile.payments = []
+			pos_profile.append("payments", {"default": 1, "mode_of_payment": "Cash"})
+
+			pos_profile.save()
+
+			pos = create_sales_invoice(qty=10, do_not_save=True)
+
+			pos.is_pos = 1
+			pos.pos_profile = pos_profile.name
+			pos.is_created_using_pos = 1
+
+			pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000})
+			self.assertRaises(frappe.ValidationError, pos.insert)
+
+	def test_stand_alone_credit_note_valuation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = "_Test Item for Credit Note Valuation"
+		make_item_for_si(
+			item_code,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-TCNV.####",
+			},
+		)
+
+		si = create_sales_invoice(
+			item=item_code,
+			qty=-2,
+			rate=1200,
+			is_return=1,
+			update_stock=1,
+		)
+
+		stock_ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Sales Invoice",
+				"voucher_no": si.name,
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+			},
+			["incoming_rate", "valuation_rate", "actual_qty as qty", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(stock_ledger_entry.incoming_rate, 1200.0)
+		self.assertEqual(stock_ledger_entry.valuation_rate, 1200.0)
+		self.assertEqual(stock_ledger_entry.qty, 2.0)
+		self.assertEqual(stock_ledger_entry.stock_value_difference, 2400.0)
+
+	def test_stand_alone_credit_note_zero_valuation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = "_Test Item for Credit Note Zero Valuation"
+		make_item_for_si(
+			item_code,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-TCNZV.####",
+			},
+		)
+
+		si = create_sales_invoice(
+			item=item_code,
+			qty=-2,
+			rate=1200,
+			is_return=1,
+			update_stock=1,
+			allow_zero_valuation_rate=1,
+		)
+
+		stock_ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Sales Invoice",
+				"voucher_no": si.name,
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+			},
+			["incoming_rate", "valuation_rate", "actual_qty as qty", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(stock_ledger_entry.incoming_rate, 0.0)
+		self.assertEqual(stock_ledger_entry.valuation_rate, 0.0)
+		self.assertEqual(stock_ledger_entry.qty, 2.0)
+		self.assertEqual(stock_ledger_entry.stock_value_difference, 0.0)
+
+
+def make_item_for_si(item_code, properties=None):
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	item = make_item(item_code, properties=properties)
+	item.is_stock_item = 1
+	item.save()
+	return item
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
@@ -7846,6 +7956,7 @@ def create_sales_invoice(**args):
 				"conversion_factor": args.get("conversion_factor", 1),
 				"incoming_rate": args.incoming_rate or 0,
 				"serial_and_batch_bundle": bundle_id,
+				"allow_zero_valuation_rate": args.allow_zero_valuation_rate or 0,
 			},
 		)
 	if not args.do_not_save:
