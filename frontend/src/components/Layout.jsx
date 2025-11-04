@@ -22,7 +22,8 @@ import {
   AlertCircle,
   Building2,
   TrendingUp,
-  Settings
+  Settings,
+  ShoppingBag
 } from 'lucide-react';
 
 function Layout({ user, onLogout }) {
@@ -35,6 +36,7 @@ function Layout({ user, onLogout }) {
       items: [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'AI Assistant', href: '/ai-assistant', icon: Sparkles },
+        { name: 'Addon Marketplace', href: '/addon-store', icon: ShoppingBag },
         { name: 'Reports', href: '/reports', icon: BarChart3 },
         { name: 'Settings', href: '/settings', icon: Settings },
         { name: 'Security', href: '/security', icon: Shield },
