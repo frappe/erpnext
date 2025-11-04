@@ -39,9 +39,9 @@ app.include_router(employees.router)
 app.include_router(finance.router)
 app.include_router(super_admin.router)
 
-@app.get("/")
-def read_root():
-    return {"message": "ERIK ERP API is running", "version": "1.0.0"}
+@app.get("/api/health")
+def health_check():
+    return {"message": "ERIK ERP API is running", "version": "1.0.0", "status": "healthy"}
 
 @app.post("/api/auth/register", response_model=schemas.Token)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
