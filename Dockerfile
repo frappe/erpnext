@@ -56,11 +56,11 @@ RUN mkdir -p /app/logs \
     && mkdir -p /app/sites \
     && chmod -R 755 /app
 
-# نسخ Nginx Config
-COPY nginx.conf /etc/nginx/nginx.conf || true
+# نسخ Nginx Config (if exists)
+RUN test -f /app/nginx.conf && cp /app/nginx.conf /etc/nginx/nginx.conf || echo "nginx.conf not found, skipping"
 
-# نسخ Supervisor Config
-COPY supervisor.conf /etc/supervisor/conf.d/erpnext.conf || true
+# نسخ Supervisor Config (if exists)
+RUN test -f /app/supervisor.conf && cp /app/supervisor.conf /etc/supervisor/conf.d/erpnext.conf || echo "supervisor.conf not found, skipping"
 
 # نسخ Docker Entry Point Script
 COPY docker-entrypoint.sh /app/
