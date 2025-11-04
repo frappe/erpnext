@@ -1535,7 +1535,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)
 
-	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_use_serial_batch_fields_for_subcontracting_receipt_with_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
