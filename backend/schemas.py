@@ -959,3 +959,171 @@ class AuditLogFilter(BaseModel):
     entity_type: Optional[str] = None
     entity_id: Optional[str] = None
     status: Optional[str] = None
+
+
+# ============================================================================
+# SALES & PROCUREMENT SCHEMAS (Phase 4B)
+# ============================================================================
+
+class CustomerCreate(BaseModel):
+    customer_code: str
+    customer_name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = "Zambia"
+    tax_id: Optional[str] = None
+    credit_limit: Optional[float] = 0
+    payment_terms_days: Optional[int] = 30
+    is_active: Optional[bool] = True
+
+class CustomerUpdate(BaseModel):
+    customer_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+    tax_id: Optional[str] = None
+    credit_limit: Optional[float] = None
+    payment_terms_days: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class SupplierCreate(BaseModel):
+    supplier_code: str
+    supplier_name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = "Zambia"
+    tax_id: Optional[str] = None
+    payment_terms_days: Optional[int] = 30
+    is_active: Optional[bool] = True
+
+class SupplierUpdate(BaseModel):
+    supplier_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+    tax_id: Optional[str] = None
+    payment_terms_days: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class SalesOrderLineCreate(BaseModel):
+    product_id: Optional[str] = None
+    description: str
+    quantity: float
+    unit_price: float
+    tax_rate: Optional[float] = 0.16
+
+class SalesOrderCreate(BaseModel):
+    customer_id: str
+    order_date: Optional[date] = None
+    delivery_date: Optional[date] = None
+    currency: Optional[str] = "ZMW"
+    notes: Optional[str] = None
+    lines: List[SalesOrderLineCreate]
+
+class PurchaseOrderLineCreate(BaseModel):
+    product_id: Optional[str] = None
+    description: str
+    quantity: float
+    unit_price: float
+    tax_rate: Optional[float] = 0.16
+
+class PurchaseOrderCreate(BaseModel):
+    supplier_id: str
+    order_date: Optional[date] = None
+    expected_delivery_date: Optional[date] = None
+    currency: Optional[str] = "ZMW"
+    notes: Optional[str] = None
+    lines: List[PurchaseOrderLineCreate]
+
+
+# ============================================================================
+# INVENTORY SCHEMAS
+# ============================================================================
+
+class ProductCreate(BaseModel):
+    product_code: str
+    product_name: str
+    description: Optional[str] = None
+    product_type: str = "goods"  # goods, service, raw_material, finished_goods
+    unit_of_measure: str = "unit"
+    cost_price: Optional[float] = 0
+    selling_price: Optional[float] = 0
+    barcode: Optional[str] = None
+    track_inventory: Optional[bool] = True
+    track_batches: Optional[bool] = False
+    track_serials: Optional[bool] = False
+    is_active: Optional[bool] = True
+
+class ProductUpdate(BaseModel):
+    product_name: Optional[str] = None
+    description: Optional[str] = None
+    product_type: Optional[str] = None
+    unit_of_measure: Optional[str] = None
+    cost_price: Optional[float] = None
+    selling_price: Optional[float] = None
+    barcode: Optional[str] = None
+    track_inventory: Optional[bool] = None
+    track_batches: Optional[bool] = None
+    track_serials: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+class WarehouseCreate(BaseModel):
+    warehouse_code: str
+    warehouse_name: str
+    location: Optional[str] = None
+    is_active: Optional[bool] = True
+
+class StockMovementCreate(BaseModel):
+    product_id: str
+    warehouse_id: str
+    movement_type: str  # purchase, sale, production, adjustment_in, adjustment_out, transfer_in, transfer_out
+    quantity: float
+    unit_cost: Optional[float] = None
+    reference_type: Optional[str] = None
+    reference_id: Optional[str] = None
+    notes: Optional[str] = None
+    movement_date: Optional[date] = None
+
+
+# ============================================================================
+# TAX/VAT SCHEMAS
+# ============================================================================
+
+class TaxSettingCreate(BaseModel):
+    tax_type: str  # PAYE, VAT, WHT, Turnover, Excise
+    tax_name: str
+    tax_jurisdiction: Optional[str] = "Zambia"
+    tax_rate: Optional[float] = None
+    tax_brackets: Optional[dict] = None
+    tax_payable_account_id: Optional[str] = None
+    tax_expense_account_id: Optional[str] = None
+    effective_from: date
+    effective_to: Optional[date] = None
+    filing_frequency: Optional[str] = "monthly"
+    filing_due_day: Optional[int] = None
+    is_active: Optional[bool] = True
+
+class TaxSettingUpdate(BaseModel):
+    tax_name: Optional[str] = None
+    tax_jurisdiction: Optional[str] = None
+    tax_rate: Optional[float] = None
+    tax_brackets: Optional[dict] = None
+    tax_payable_account_id: Optional[str] = None
+    tax_expense_account_id: Optional[str] = None
+    effective_from: Optional[date] = None
+    effective_to: Optional[date] = None
+    filing_frequency: Optional[str] = None
+    filing_due_day: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class TaxCalculation(BaseModel):
+    tax_setting_id: str
+    amount: float
