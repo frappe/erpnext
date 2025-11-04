@@ -33,8 +33,10 @@ RUN mkdir -p /app/logs \
     && chmod -R 755 /app
 
 # Install Python dependencies from requirements.txt
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r /app/requirements.txt
+# Force fresh build - timestamp: 2025-11-04T11:56-v2
+RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    python -m pip install --no-cache-dir -r /app/requirements.txt && \
+    python -m pip list | grep gunicorn
 
 # Install Node dependencies
 RUN cd /app && npm ci --omit=dev || npm install || echo "npm install completed with warnings"
