@@ -31,6 +31,7 @@
   "determine_address_tax_category_from",
   "column_break_19",
   "add_taxes_from_item_tax_template",
+  "add_taxes_from_taxes_and_charges_template",
   "book_tax_discount_loss",
   "round_row_wise_tax",
   "print_settings",

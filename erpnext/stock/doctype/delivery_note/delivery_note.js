@@ -188,6 +188,55 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 			);
 		}
 
+		if (
+			!doc.is_return &&
+			doc.status != "Closed" &&
+			this.frm.has_perm("write") &&
+			frappe.model.can_read("Pick List") &&
+			this.frm.doc.docstatus === 0
+		) {
+			this.frm.add_custom_button(
+				__("Pick List"),
+				function () {
+					if (!me.frm.doc.customer) {
+						frappe.throw({
+							title: __("Mandatory"),
+							message: __("Please Select a Customer"),
+						});
+					}
+					erpnext.utils.map_current_doc({
+						method: "erpnext.stock.doctype.pick_list.pick_list.create_dn_for_pick_lists",
+						source_doctype: "Pick List",
+						target: me.frm,
+						setters: [
+							{
+								fieldname: "customer",
+								default: me.frm.doc.customer,
+								label: __("Customer"),
+								fieldtype: "Link",
+								options: "Customer",
+								reqd: 1,
+								read_only: 1,
+							},
+							{
+								fieldname: "sales_order",
+								label: __("Sales Order"),
+								fieldtype: "Link",
+								options: "Sales Order",
+								link_filters: `[["Sales Order","customer","=","${me.frm.doc.customer}"],["Sales Order","docstatus","=","1"],["Sales Order","delivery_status","not in",["Closed","Fully Delivered"]]]`,
+							},
+						],
+						get_query_filters: {
+							company: me.frm.doc.company,
+						},
+						get_query_method: "erpnext.stock.doctype.pick_list.pick_list.get_pick_list_query",
+						size: "extra-large",
+					});
+				},
+				__("Get Items From")
+			);
+		}
+
 		if (!doc.is_return && doc.status != "Closed") {
 			if (doc.docstatus == 1 && frappe.model.can_create("Shipment")) {
 				this.frm.add_custom_button(

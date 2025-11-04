@@ -21,6 +21,7 @@
   "uom",
   "conversion_factor",
   "stock_uom",
+  "delivered_qty",
   "serial_no_and_batch_section",
   "pick_serial_and_batch",
   "serial_and_batch_bundle",
@@ -237,6 +238,16 @@
   {
    "fieldname": "column_break_belw",
    "fieldtype": "Column Break"
+   },
+  {
+   "default": "0",
+   "fieldname": "delivered_qty",
+   "fieldtype": "Float",
+   "label": "Delivered Qty (in Stock UOM)",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
   }
  ],
  "istable": 1,
@@ -248,6 +259,7 @@
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

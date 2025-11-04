@@ -284,13 +284,24 @@
 					grid-template-columns: repeat(2, minmax(0, 1fr));
 					margin-top: var(--margin-md);
 					column-gap: var(--padding-sm);
-					row-gap: var(--padding-xs);
+					row-gap: var(--padding-sm);
 				}
 
-				> .transactions-label {
-					@extend .label;
+				> .transactions-section {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
 					margin-top: var(--margin-md);
 					margin-bottom: var(--margin-sm);
+
+					> .recent-transactions {
+						@extend .label;
+					}
+
+					> .last-transaction {
+						font-weight: 400;
+						font-size: var(--text-sm);
+					}
 				}
 			}
 
@@ -299,8 +310,8 @@
 				overflow-x: hidden;
 				overflow-y: scroll;
 				margin-right: -12px;
-				padding-right: 12px;
 				margin-left: -10px;
+				scrollbar-width: thin;
 
 				> .no-transactions-placeholder {
 					height: 100%;
@@ -611,6 +622,11 @@
 			background-color: var(--gray-50);
 		}
 
+		&.invoice-selected {
+			background-color: var(--control-bg);
+		}
+
+		> .invoice-name-customer,
 		> .invoice-name-date {
 			display: flex;
 			flex-direction: column;
@@ -630,6 +646,21 @@
 			}
 		}
 
+		> .invoice-name-date {
+			> .invoice-name {
+				font-size: var(--text-md);
+				display: flex;
+				align-items: center;
+				font-weight: 700;
+			}
+
+			> .invoice-date {
+				@extend .nowrap;
+				font-size: var(--text-sm);
+			}
+		}
+
+		> .invoice-total-date,
 		> .invoice-total-status {
 			display: flex;
 			flex-direction: column;
@@ -642,6 +673,18 @@
 				font-size: var(--text-base);
 				font-weight: 700;
 				text-align: right;
+			}
+
+			> .invoice-status {
+				display: flex;
+				align-items: center;
+				justify-content: right;
+			}
+		}
+
+		> .invoice-total-status {
+			> .invoice-total {
+				margin-right: 8px;
 			}
 
 			> .invoice-status {

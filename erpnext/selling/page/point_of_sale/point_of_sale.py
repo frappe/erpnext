@@ -221,7 +221,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		item_uom_price = stock_uom_price
 
 		if item.sales_uom and item.sales_uom != item.stock_uom:
-			item_uom = item.sales_uom
+			item_uom = item.sales_uomerpnext/accounts/doctype/journal_entry/journal_entry.py
 			sales_uom_price = next((d for d in item_prices if d.get("uom") == item.sales_uom), {})
 			if sales_uom_price:
 				item_uom_price = sales_uom_price
@@ -346,7 +346,11 @@ def get_past_order_list(search_term, status, limit=20):
 	if search_term and status:
 		invoices_by_customer = frappe.db.get_list(
 			"POS Invoice",
-			filters={"customer": ["like", f"%{search_term}%"], "status": status},
+			filters={"status": status},
+			or_filters={
+				"customer_name": ["like", f"%{search_term}%"],
+				"customer": ["like", f"%{search_term}%"],
+			},
 			fields=fields,
 			page_length=limit,
 		)

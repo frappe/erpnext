@@ -3,6 +3,7 @@ def get_data():
 		"fieldname": "pick_list",
 		"non_standard_fieldnames": {
 			"Stock Reservation Entry": "from_voucher_no",
+			"Delivery Note": "against_pick_list",
 		},
 		"internal_links": {
 			"Sales Order": ["locations", "sales_order"],

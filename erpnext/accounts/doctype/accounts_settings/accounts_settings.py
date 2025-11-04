@@ -24,6 +24,7 @@ class AccountsSettings(Document):
 
 		acc_frozen_upto: DF.Date | None
 		add_taxes_from_item_tax_template: DF.Check
+		add_taxes_from_taxes_and_charges_template: DF.Check
 		allow_multi_currency_invoices_against_single_party_account: DF.Check
 		allow_stale: DF.Check
 		auto_reconcile_payments: DF.Check
@@ -68,6 +69,7 @@ class AccountsSettings(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_auto_tax_settings()
 		old_doc = self.get_doc_before_save()
 		clear_cache = False
 
@@ -118,3 +120,13 @@ class AccountsSettings(Document):
 	def validate_pending_reposts(self):
 		if self.acc_frozen_upto:
 			check_pending_reposting(self.acc_frozen_upto)
+
+	def validate_auto_tax_settings(self):
+		if self.add_taxes_from_item_tax_template and self.add_taxes_from_taxes_and_charges_template:
+			frappe.throw(
+				_("You cannot enable both the settings '{0}' and '{1}'.").format(
+					frappe.bold(self.meta.get_label("add_taxes_from_item_tax_template")),
+					frappe.bold(self.meta.get_label("add_taxes_from_taxes_and_charges_template")),
+				),
+				title=_("Auto Tax Settings Error"),
+			)
