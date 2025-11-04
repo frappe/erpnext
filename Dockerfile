@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ============================================================================
 # STAGE 2: Copy Project Source Code
 # ============================================================================
-# Copy the entire repository (which contains frappe/erpnext source)
+# Copy the entire repository (which contains ERPNext source and requirements.txt)
 COPY . /app/
 
 # ============================================================================
@@ -36,38 +36,12 @@ COPY . /app/
 # Upgrade pip, setuptools, wheel
 RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Install Python dependencies (NOT frappe/erpnext - those are in the repo)
-# Remove frappe and erpnext from requirements.txt since they're in /app
-RUN python -m pip install --no-cache-dir \
-    PyMySQL>=1.0.0 \
-    psycopg2-binary>=2.9.0 \
-    redis>=4.0.0 \
-    rq>=1.11.0 \
-    gunicorn>=20.1.0 \
-    Werkzeug>=2.2.0 \
-    gevent>=21.0.0 \
-    python-dateutil>=2.8.2 \
-    requests>=2.28.0 \
-    urllib3>=1.26.0 \
-    Unidecode>=1.4.0 \
-    barcodenumber>=0.5.0 \
-    rapidfuzz>=3.0.0 \
-    holidays>=0.75 \
-    alembic>=1.10.0 \
-    sqlalchemy>=1.4.0 \
-    secure-smtplib>=0.1.1 \
-    weasyprint>=59.0 \
-    pypdf>=3.15.0 \
-    python-bidi>=0.4.2 \
-    openpyxl>=3.10.0 \
-    xlrd>=2.0.0 \
-    click>=8.0.0 \
-    pydantic>=1.10.0 \
-    python-dotenv>=0.21.0 \
-    python-json-logger>=2.0.0
+# Install Python dependencies from requirements.txt
+# This includes Frappe v16 which is required for wsgi:application to work
+RUN python -m pip install --no-cache-dir -r /app/requirements.txt
 
-# Verify gunicorn is installed
-RUN python -m pip list | grep gunicorn && echo "✅ Gunicorn installed successfully"
+# Verify critical packages are installed
+RUN python -m pip list | grep -E "frappe|gunicorn" && echo "✅ Core packages (Frappe + Gunicorn) installed successfully"
 
 # ============================================================================
 # STAGE 4: Create Required Directories

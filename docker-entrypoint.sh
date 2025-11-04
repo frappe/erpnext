@@ -144,10 +144,17 @@ fi
 echo "   ✅ gunicorn is installed"
 
 # Check if frappe can be imported
-if python -c "from frappe.app import application" 2>/dev/null; then
-    echo "   ✅ Frappe application can be imported"
+echo "🔍 Checking if Frappe can be imported..."
+if python -c "import frappe; print(f'   Frappe version: {frappe.__version__}')" 2>/dev/null; then
+    echo "   ✅ Frappe framework found"
+    if python -c "from frappe.app import application" 2>/dev/null; then
+        echo "   ✅ Frappe WSGI application can be imported"
+    else
+        echo "   ⚠️  WARNING: Frappe app module cannot be imported (may initialize on first request)"
+    fi
 else
-    echo "⚠️  WARNING: Frappe application cannot be imported yet (may initialize on first request)"
+    echo "   ⚠️  WARNING: Frappe framework not found in Python path"
+    echo "   This may cause issues. Continuing anyway..."
 fi
 
 # ============================================================================
