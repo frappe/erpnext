@@ -17,6 +17,10 @@ class CircularReferenceError(frappe.ValidationError):
 	pass
 
 
+class ParentIsGroupError(frappe.ValidationError):
+	pass
+
+
 class Task(NestedSet):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -84,6 +88,7 @@ class Task(NestedSet):
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
+		self.validate_parent_is_group()
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -171,6 +176,14 @@ class Task(NestedSet):
 	def validate_completed_on(self):
 		if self.completed_on and getdate(self.completed_on) > getdate():
 			frappe.throw(_("Completed On cannot be greater than Today"))
+
+	def validate_parent_is_group(self):
+		if self.parent_task:
+			if not frappe.db.get_value("Task", self.parent_task, "is_group"):
+				parent_task_format = f"""<a href="/app/task/{self.parent_task}">{self.parent_task}</a>"""
+				frappe.throw(
+					_("Parent Task {0} must be a Group Task").format(parent_task_format), ParentIsGroupError
+				)
 
 	def update_depends_on(self):
 		depends_on_tasks = ""
