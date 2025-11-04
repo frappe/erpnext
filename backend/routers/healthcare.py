@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/healthcare", tags=["healthcare"])
 # Patients
 @router.post("/patients")
 async def create_patient(
-    patient: PatientCreate,
+    patient: schemas.PatientCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -53,7 +53,7 @@ async def get_patient(
 @router.put("/patients/{patient_id}")
 async def update_patient(
     patient_id: str,
-    patient_update: PatientCreate,
+    patient_update: schemas.PatientCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -91,7 +91,7 @@ async def delete_patient(
 # Appointments
 @router.post("/appointments")
 async def create_appointment(
-    appointment: AppointmentCreate,
+    appointment: schemas.AppointmentCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -120,7 +120,7 @@ async def get_appointments(
 @router.put("/appointments/{appointment_id}")
 async def update_appointment(
     appointment_id: str,
-    appointment_update: AppointmentCreate,
+    appointment_update: schemas.AppointmentCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/transport", tags=["transport"])
 # Vehicles
 @router.post("/vehicles")
 async def create_vehicle(
-    vehicle: VehicleCreate,
+    vehicle: schemas.VehicleCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -35,7 +35,7 @@ async def get_vehicles(
 @router.put("/vehicles/{vehicle_id}")
 async def update_vehicle(
     vehicle_id: str,
-    vehicle_update: VehicleCreate,
+    vehicle_update: schemas.VehicleCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -73,7 +73,7 @@ async def delete_vehicle(
 # Trips
 @router.post("/trips")
 async def create_trip(
-    trip: TripCreate,
+    trip: schemas.TripCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -100,7 +100,7 @@ async def get_trips(
 @router.put("/trips/{trip_id}")
 async def update_trip(
     trip_id: str,
-    trip_update: TripCreate,
+    trip_update: schemas.TripCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):

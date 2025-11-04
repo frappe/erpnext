@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/hospitality", tags=["hospitality"])
 # Rooms
 @router.post("/rooms")
 async def create_room(
-    room: RoomCreate,
+    room: schemas.RoomCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -38,7 +38,7 @@ async def get_rooms(
 @router.put("/rooms/{room_id}")
 async def update_room(
     room_id: str,
-    room_update: RoomCreate,
+    room_update: schemas.RoomCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -76,7 +76,7 @@ async def delete_room(
 # Reservations
 @router.post("/reservations")
 async def create_reservation(
-    reservation: ReservationCreate,
+    reservation: schemas.ReservationCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -103,7 +103,7 @@ async def get_reservations(
 @router.put("/reservations/{reservation_id}")
 async def update_reservation(
     reservation_id: str,
-    reservation_update: ReservationCreate,
+    reservation_update: schemas.ReservationCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):

@@ -3108,6 +3108,11 @@ class SubscriptionPayment(Base):
 # ADDON MARKETPLACE MODELS
 # ============================================================================
 
+
+# ============================================================================
+# ADDON MARKETPLACE MODELS
+# ============================================================================
+
 class Addon(Base):
     __tablename__ = "addons"
     
@@ -3242,36 +3247,6 @@ class Appointment(Base):
     notes = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# Retail & POS
-class Store(Base):
-    __tablename__ = "stores"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
-    store_code = Column(String, nullable=False)
-    store_name = Column(String, nullable=False)
-    location = Column(String)
-    phone = Column(String)
-    manager_name = Column(String)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-class POSSale(Base):
-    __tablename__ = "pos_sales"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
-    store_id = Column(String, ForeignKey('stores.id'))
-    receipt_number = Column(String, unique=True, nullable=False)
-    sale_date = Column(DateTime, default=datetime.utcnow)
-    subtotal = Column(Float, default=0.0)
-    tax_amount = Column(Float, default=0.0)
-    discount_amount = Column(Float, default=0.0)
-    total_amount = Column(Float, default=0.0)
-    payment_method = Column(String)
-    cashier_name = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
 # Education
 class Student(Base):
     __tablename__ = "students"
@@ -3349,4 +3324,18 @@ class Reservation(Base):
     check_out = Column(DateTime)
     total_amount = Column(Float)
     status = Column(String, default='confirmed')
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Retail Store Management
+class Store(Base):
+    __tablename__ = "retail_stores"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey('companies.id'), nullable=False)
+    store_code = Column(String, nullable=False)
+    store_name = Column(String, nullable=False)
+    location = Column(String)
+    phone = Column(String)
+    manager_name = Column(String)
+    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/agriculture", tags=["agriculture"])
 # Farms
 @router.post("/farms")
 async def create_farm(
-    farm: FarmCreate,
+    farm: schemas.FarmCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -31,7 +31,7 @@ async def get_farms(
 @router.put("/farms/{farm_id}")
 async def update_farm(
     farm_id: str,
-    farm_update: FarmCreate,
+    farm_update: schemas.FarmCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -69,7 +69,7 @@ async def delete_farm(
 # Crop Plantings
 @router.post("/crops")
 async def create_crop_planting(
-    crop: CropPlantingCreate,
+    crop: schemas.CropPlantingCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -95,7 +95,7 @@ async def get_crop_plantings(
 @router.put("/crops/{crop_id}")
 async def update_crop_planting(
     crop_id: str,
-    crop_update: CropPlantingCreate,
+    crop_update: schemas.CropPlantingCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -133,7 +133,7 @@ async def delete_crop_planting(
 # Livestock
 @router.post("/livestock")
 async def create_livestock(
-    livestock: LivestockCreate,
+    livestock: schemas.LivestockCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -159,7 +159,7 @@ async def get_livestock(
 @router.put("/livestock/{livestock_id}")
 async def update_livestock(
     livestock_id: str,
-    livestock_update: LivestockCreate,
+    livestock_update: schemas.LivestockCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):

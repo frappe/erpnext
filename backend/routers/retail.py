@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/retail", tags=["retail"])
 # Stores
 @router.post("/stores")
 async def create_store(
-    store: StoreCreate,
+    store: schemas.StoreCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -31,7 +31,7 @@ async def get_stores(
 @router.put("/stores/{store_id}")
 async def update_store(
     store_id: str,
-    store_update: StoreCreate,
+    store_update: schemas.StoreCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -69,7 +69,7 @@ async def delete_store(
 # POS Sales
 @router.post("/sales")
 async def create_pos_sale(
-    sale: POSSaleCreate,
+    sale: schemas.POSSaleCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
