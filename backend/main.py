@@ -20,7 +20,8 @@ from routers import (
     bank_connections, compliance, payroll, employees, finance, super_admin,
     sales, procurement, inventory, tax, manufacturing, banking, ocr, chat,
     addons, construction, agriculture, healthcare, retail, education,
-    transport, hospitality
+    transport, hospitality, realestate, legal, ngo, advmanufacturing,
+    logistics, telecom, energy, media, insurance, government
 )
 
 models.Base.metadata.create_all(bind=engine)
@@ -59,6 +60,16 @@ app.include_router(retail.router)
 app.include_router(education.router)
 app.include_router(transport.router)
 app.include_router(hospitality.router)
+app.include_router(realestate.router)
+app.include_router(legal.router)
+app.include_router(ngo.router)
+app.include_router(advmanufacturing.router)
+app.include_router(logistics.router)
+app.include_router(telecom.router)
+app.include_router(energy.router)
+app.include_router(media.router)
+app.include_router(insurance.router)
+app.include_router(government.router)
 
 @app.get("/api/health")
 def health_check():
