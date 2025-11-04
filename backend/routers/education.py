@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/education", tags=["education"])
 
 @router.post("/students")
 async def create_student(
-    student: StudentCreate,
+    student: schemas.StudentCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -51,7 +51,7 @@ async def get_student(
 @router.put("/students/{student_id}")
 async def update_student(
     student_id: str,
-    student_update: StudentCreate,
+    student_update: schemas.StudentCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):

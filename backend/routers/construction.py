@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/construction", tags=["construction"])
 # Construction Projects
 @router.post("/projects")
 async def create_project(
-    project: ConstructionProjectCreate,
+    project: schemas.ConstructionProjectCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -51,7 +51,7 @@ async def get_project(
 @router.put("/projects/{project_id}")
 async def update_project(
     project_id: str,
-    project_update: ConstructionProjectCreate,
+    project_update: schemas.ConstructionProjectCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
@@ -89,7 +89,7 @@ async def delete_project(
 # Bill of Quantities
 @router.post("/boq")
 async def create_boq(
-    boq: BillOfQuantitiesCreate,
+    boq: schemas.BillOfQuantitiesCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
