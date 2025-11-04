@@ -1065,6 +1065,7 @@ def make_company(company_name, is_group=False, **kwargs):
 				doctype="Company",
 				company_name=company_name,
 				company_type="Company",
+				abbr = kwargs.get("abbr") or "",
 				default_currency=kwargs.get("default_currency") or "INR",
 				country=kwargs.get("country") or "India",
 				is_group=is_group,
