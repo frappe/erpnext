@@ -3065,9 +3065,9 @@ class TenantModule(Base):
     company = relationship("Company")
 
 
-class PaymentTransaction(Base):
+class SubscriptionPayment(Base):
     """Payment transactions for subscription billing"""
-    __tablename__ = "payment_transactions"
+    __tablename__ = "subscription_payments"
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
