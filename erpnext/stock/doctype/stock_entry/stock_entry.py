@@ -262,6 +262,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
 
+		self.validate_same_source_target_warehouse_during_material_transfer()
+
 		self.validate_closed_subcontracting_order()
 		self.validate_subcontract_order()
 
@@ -863,6 +865,41 @@ class StockEntry(StockController, SubcontractingInwardController):
 					),
 					title=_("Missing Item"),
 				)
+
+	def validate_same_source_target_warehouse_during_material_transfer(self):
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+		inventory_dimensions = get_inventory_dimensions()
+		if self.purpose == "Material Transfer":
+			for item in self.items:
+				if item.s_warehouse == item.t_warehouse:
+					if not inventory_dimensions:
+						frappe.throw(
+							_("Source and Target Warehouse cannot be the same for Material Transfer"),
+							title=_("Invalid Source and Target Warehouse"),
+						)
+					else:
+						difference_found = False
+						for dimension in inventory_dimensions:
+							fieldname = (
+								dimension.source_fieldname
+								if dimension.source_fieldname.startswith("to_")
+								else f"to_{dimension.source_fieldname}"
+							)
+							if (
+								item.get(dimension.source_fieldname)
+								and item.get(fieldname)
+								and item.get(dimension.source_fieldname) != item.get(fieldname)
+							):
+								difference_found = True
+								break
+						if not difference_found:
+							frappe.throw(
+								_(
+									"Row #{0}: Source, Target Warehouse and Inventory Dimensions cannot be the exact same for Material Transfer"
+								).format(item.idx),
+								title=_("Invalid Source and Target Warehouse"),
+							)
 
 	def get_matched_items(self, item_code):
 		for row in self.items:
