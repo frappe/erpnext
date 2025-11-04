@@ -182,30 +182,90 @@ def login(user: schemas.UserLogin, request: Request, db: Session = Depends(get_d
 def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
 
-@app.get("/api/dashboard/stats", response_model=schemas.DashboardStats)
+@app.get("/api/dashboard/stats")
 def get_dashboard_stats(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
     company = db.query(models.Company).filter(models.Company.id == current_user.company_id).first()
     
-    total_employees = db.query(models.Employee).filter(
+    # Core metrics
+    total_employees = db.query(models.Employee.id).filter(
         models.Employee.company_id == current_user.company_id
     ).count()
     
-    total_accounts = db.query(models.Account).filter(
+    total_accounts = db.query(models.Account.id).filter(
         models.Account.company_id == current_user.company_id
     ).count()
     
-    total_journals = db.query(models.JournalEntry).filter(
+    total_journals = db.query(models.JournalEntry.id).filter(
         models.JournalEntry.company_id == current_user.company_id
+    ).count()
+    
+    # Inventory metrics
+    total_products = db.query(models.Product.id).filter(
+        models.Product.company_id == current_user.company_id
+    ).count()
+    
+    total_warehouses = db.query(models.Warehouse.id).filter(
+        models.Warehouse.company_id == current_user.company_id
+    ).count()
+    
+    # Sales & Procurement metrics
+    total_sales_orders = db.query(models.SalesOrder.id).filter(
+        models.SalesOrder.company_id == current_user.company_id
+    ).count()
+    
+    total_purchase_orders = db.query(models.PurchaseOrder.id).filter(
+        models.PurchaseOrder.company_id == current_user.company_id
+    ).count()
+    
+    # HR metrics
+    total_departments = db.query(models.Department.id).filter(
+        models.Department.company_id == current_user.company_id
+    ).count()
+    
+    total_payslips = db.query(models.Payslip.id).filter(
+        models.Payslip.company_id == current_user.company_id
+    ).count()
+    
+    # Addons
+    activated_addons = db.query(models.CompanyAddon.id).filter(
+        models.CompanyAddon.company_id == current_user.company_id,
+        models.CompanyAddon.is_active == True
+    ).count()
+    
+    # Customers & Suppliers
+    total_customers = db.query(models.Customer.id).filter(
+        models.Customer.company_id == current_user.company_id
+    ).count()
+    
+    total_suppliers = db.query(models.Supplier.id).filter(
+        models.Supplier.company_id == current_user.company_id
+    ).count()
+    
+    # Banking
+    total_bank_accounts = db.query(models.BankAccount.id).filter(
+        models.BankAccount.company_id == current_user.company_id
     ).count()
     
     return {
         "total_employees": total_employees,
         "total_accounts": total_accounts,
         "total_journals": total_journals,
-        "company_name": company.name if company else "Unknown"
+        "total_products": total_products,
+        "total_warehouses": total_warehouses,
+        "total_sales_orders": total_sales_orders,
+        "total_purchase_orders": total_purchase_orders,
+        "total_departments": total_departments,
+        "total_payslips": total_payslips,
+        "activated_addons": activated_addons,
+        "total_customers": total_customers,
+        "total_suppliers": total_suppliers,
+        "total_bank_accounts": total_bank_accounts,
+        "company_name": company.name if company else "Unknown",
+        "subscription_plan": company.subscription_plan if company else "trial",
+        "subscription_status": company.subscription_status if company else "active"
     }
 
 @app.get("/api/employees", response_model=list[schemas.EmployeeResponse])
