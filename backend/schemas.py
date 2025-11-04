@@ -1184,3 +1184,206 @@ class ChatChannelCreate(BaseModel):
     channel_name: str
     channel_type: Optional[str] = "department"
     description: Optional[str] = None
+
+
+# ============================================================================
+# ADDON MARKETPLACE SCHEMAS
+# ============================================================================
+
+class AddonCreate(BaseModel):
+    addon_code: str
+    addon_name: str
+    category: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    pricing_model: Optional[str] = None
+    monthly_price: Optional[float] = 0.0
+    features: Optional[str] = None
+
+class AddonResponse(BaseModel):
+    id: str
+    addon_code: str
+    addon_name: str
+    category: str
+    description: Optional[str]
+    icon: Optional[str]
+    pricing_model: Optional[str]
+    monthly_price: Optional[float]
+    features: Optional[str]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class CompanyAddonCreate(BaseModel):
+    addon_id: str
+    settings: Optional[str] = None
+
+class CompanyAddonResponse(BaseModel):
+    id: str
+    company_id: str
+    addon_id: str
+    is_active: bool
+    activated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# ============================================================================
+# CONSTRUCTION & REAL ESTATE SCHEMAS
+# ============================================================================
+
+class ConstructionProjectCreate(BaseModel):
+    project_code: str
+    project_name: str
+    client_name: Optional[str] = None
+    location: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    budget: Optional[float] = 0.0
+    status: Optional[str] = "planning"
+
+class BillOfQuantitiesCreate(BaseModel):
+    project_id: Optional[str] = None
+    item_code: Optional[str] = None
+    description: Optional[str] = None
+    unit: Optional[str] = None
+    quantity: Optional[float] = 0.0
+    rate: Optional[float] = 0.0
+
+
+# ============================================================================
+# AGRICULTURE SCHEMAS
+# ============================================================================
+
+class FarmCreate(BaseModel):
+    farm_code: str
+    farm_name: str
+    location: Optional[str] = None
+    total_area: Optional[float] = 0.0
+    area_unit: Optional[str] = "hectares"
+    farm_type: Optional[str] = None
+
+class CropPlantingCreate(BaseModel):
+    farm_id: str
+    crop_name: str
+    variety: Optional[str] = None
+    planting_date: Optional[date] = None
+    expected_harvest: Optional[date] = None
+    area_planted: Optional[float] = 0.0
+    expected_yield: Optional[float] = 0.0
+
+class LivestockCreate(BaseModel):
+    farm_id: str
+    animal_type: str
+    tag_number: str
+    breed: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    gender: Optional[str] = None
+    weight: Optional[float] = None
+
+
+# ============================================================================
+# HEALTHCARE SCHEMAS
+# ============================================================================
+
+class PatientCreate(BaseModel):
+    patient_number: str
+    first_name: str
+    last_name: str
+    date_of_birth: Optional[date] = None
+    gender: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    blood_group: Optional[str] = None
+
+class AppointmentCreate(BaseModel):
+    patient_id: str
+    doctor_name: Optional[str] = None
+    appointment_date: Optional[datetime] = None
+    reason: Optional[str] = None
+    status: Optional[str] = "scheduled"
+
+
+# ============================================================================
+# RETAIL & POS SCHEMAS
+# ============================================================================
+
+class StoreCreate(BaseModel):
+    store_code: str
+    store_name: str
+    location: Optional[str] = None
+    phone: Optional[str] = None
+    manager_name: Optional[str] = None
+
+class POSSaleCreate(BaseModel):
+    store_id: str
+    receipt_number: str
+    subtotal: Optional[float] = 0.0
+    tax_amount: Optional[float] = 0.0
+    discount_amount: Optional[float] = 0.0
+    total_amount: Optional[float] = 0.0
+    payment_method: Optional[str] = None
+    cashier_name: Optional[str] = None
+
+
+# ============================================================================
+# EDUCATION SCHEMAS
+# ============================================================================
+
+class StudentCreate(BaseModel):
+    student_number: str
+    first_name: str
+    last_name: str
+    date_of_birth: Optional[date] = None
+    gender: Optional[str] = None
+    grade_level: Optional[str] = None
+    enrollment_date: Optional[date] = None
+    guardian_name: Optional[str] = None
+    guardian_phone: Optional[str] = None
+
+
+# ============================================================================
+# TRANSPORT & LOGISTICS SCHEMAS
+# ============================================================================
+
+class VehicleCreate(BaseModel):
+    registration_number: str
+    vehicle_type: Optional[str] = None
+    make: Optional[str] = None
+    model: Optional[str] = None
+    year: Optional[int] = None
+    capacity: Optional[float] = None
+    fuel_type: Optional[str] = None
+
+class TripCreate(BaseModel):
+    vehicle_id: str
+    trip_number: str
+    driver_name: Optional[str] = None
+    origin: Optional[str] = None
+    destination: Optional[str] = None
+    start_date: Optional[datetime] = None
+    distance_km: Optional[float] = None
+    freight_charges: Optional[float] = 0.0
+
+
+# ============================================================================
+# HOSPITALITY SCHEMAS
+# ============================================================================
+
+class RoomCreate(BaseModel):
+    room_number: str
+    room_type: Optional[str] = None
+    capacity: Optional[int] = 2
+    rate_per_night: Optional[float] = 0.0
+    floor: Optional[int] = None
+
+class ReservationCreate(BaseModel):
+    room_id: str
+    guest_name: str
+    guest_phone: Optional[str] = None
+    check_in: Optional[datetime] = None
+    check_out: Optional[datetime] = None
+    total_amount: Optional[float] = 0.0
+    status: Optional[str] = "confirmed"

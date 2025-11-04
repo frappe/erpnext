@@ -24,6 +24,7 @@ import ManufacturingDashboard from './pages/ManufacturingDashboard';
 import BankReconciliation from './pages/BankReconciliation';
 import TaxDashboard from './pages/TaxDashboard';
 import OCRUpload from './pages/OCRUpload';
+import AddonStore from './pages/AddonStore';
 import AdminDashboard from './pages/AdminDashboard';
 import MobileMoney from './pages/MobileMoney';
 import Branches from './pages/Branches';
@@ -141,6 +142,7 @@ function App() {
           <Route path="bank-reconciliation" element={<BankReconciliation />} />
           <Route path="tax-dashboard" element={<TaxDashboard />} />
           <Route path="ocr-upload" element={<OCRUpload />} />
+          <Route path="addon-store" element={<AddonStore />} />
         </Route>
       </Routes>
     </Router>
