@@ -26,30 +26,10 @@ OFFICIAL_ADDONS = [
         "addon_name": "Agriculture & Agribusiness",
         "category": "Industry",
         "description": "Farm management, crop planning, livestock tracking",
-        "icon": "🧑‍🌾",
+        "icon": "🌾",
         "pricing_model": "per_user",
         "monthly_price": 40.0,
         "features": "Crop Planning, Livestock Management, Harvest Tracking, Farm Equipment"
-    },
-    {
-        "addon_code": "manufacturing",
-        "addon_name": "Manufacturing & Industrial",
-        "category": "Industry",
-        "description": "Production planning, BOM, quality control",
-        "icon": "🏭",
-        "pricing_model": "per_user",
-        "monthly_price": 60.0,
-        "features": "Work Orders, Shop Floor Control, Machine Maintenance, Quality Control"
-    },
-    {
-        "addon_code": "retail",
-        "addon_name": "Retail, Wholesale & POS",
-        "category": "Industry",
-        "description": "Point of sale, inventory, multi-store management",
-        "icon": "🏪",
-        "pricing_model": "per_store",
-        "monthly_price": 30.0,
-        "features": "POS System, Multi-branch, Loyalty Programs, E-Commerce Sync"
     },
     {
         "addon_code": "healthcare",
@@ -62,18 +42,38 @@ OFFICIAL_ADDONS = [
         "features": "Patient EMR, Appointments, Pharmacy Inventory, Insurance Claims"
     },
     {
-        "addon_code": "education",
-        "addon_name": "Education & Training Institutions",
+        "addon_code": "retail",
+        "addon_name": "Retail, Wholesale & POS",
         "category": "Industry",
-        "description": "Student records, timetables, fee management",
+        "description": "Point of sale, inventory, multi-store management",
+        "icon": "🏪",
+        "pricing_model": "per_store",
+        "monthly_price": 30.0,
+        "features": "POS System, Multi-branch, Loyalty Programs, E-Commerce Sync"
+    },
+    {
+        "addon_code": "education",
+        "addon_name": "Education & Training",
+        "category": "Industry",
+        "description": "Student records, timetables, fee management, academic tracking",
         "icon": "🏫",
         "pricing_model": "per_student",
         "monthly_price": 5.0,
         "features": "Student Enrollment, Attendance, Fee Invoicing, Academic Performance"
     },
     {
+        "addon_code": "transport",
+        "addon_name": "Transport & Logistics",
+        "category": "Industry",
+        "description": "Fleet management, route planning, maintenance tracking",
+        "icon": "🚚",
+        "pricing_model": "per_vehicle",
+        "monthly_price": 25.0,
+        "features": "Fleet Management, Route Planning, Fuel Tracking, GPS Integration"
+    },
+    {
         "addon_code": "hospitality",
-        "addon_name": "Hospitality, Lodges & Restaurants",
+        "addon_name": "Hospitality & Restaurants",
         "category": "Industry",
         "description": "Room bookings, restaurant POS, kitchen inventory",
         "icon": "🍽️",
@@ -82,84 +82,24 @@ OFFICIAL_ADDONS = [
         "features": "Reservation Management, Housekeeping, Restaurant POS, Event Management"
     },
     {
-        "addon_code": "transport",
-        "addon_name": "Transport, Logistics & Fleet",
+        "addon_code": "realestate",
+        "addon_name": "Real Estate Development",
         "category": "Industry",
-        "description": "Fleet management, route planning, maintenance",
-        "icon": "🚚",
-        "pricing_model": "per_vehicle",
-        "monthly_price": 25.0,
-        "features": "Fleet Management, Route Planning, Fuel Tracking, GPS Integration"
+        "description": "Property management, lease tracking, tenant management",
+        "icon": "🏘️",
+        "pricing_model": "per_property",
+        "monthly_price": 35.0,
+        "features": "Property Portfolio, Lease Agreements, Tenant Management, Maintenance Scheduling"
     },
     {
-        "addon_code": "banking",
-        "addon_name": "Banking, Finance & Micro-Lending",
+        "addon_code": "legal",
+        "addon_name": "Legal Practice Management",
         "category": "Industry",
-        "description": "Loan origination, disbursement, collections",
-        "icon": "🏦",
+        "description": "Case management, legal documents, client billing, court tracking",
+        "icon": "⚖️",
         "pricing_model": "per_user",
-        "monthly_price": 100.0,
-        "features": "Loan Management, Disbursement, Repayment Scheduling, KYC"
-    },
-    {
-        "addon_code": "mining",
-        "addon_name": "Oil, Gas & Mining",
-        "category": "Industry",
-        "description": "Extraction planning, equipment maintenance, compliance",
-        "icon": "⚙️",
-        "pricing_model": "enterprise",
-        "monthly_price": 200.0,
-        "features": "Production Planning, Equipment Maintenance, Safety Tracking, Compliance"
-    },
-    {
-        "addon_code": "government",
-        "addon_name": "Public Sector & Government",
-        "category": "Industry",
-        "description": "Budget tracking, procurement, citizen services",
-        "icon": "🏛️",
-        "pricing_model": "enterprise",
-        "monthly_price": 150.0,
-        "features": "Departmental Budgeting, ZPPA Procurement, Project Monitoring, IFMIS Integration"
-    },
-    {
-        "addon_code": "insurance",
-        "addon_name": "Insurance",
-        "category": "Industry",
-        "description": "Policy management, claims processing, agent commissions",
-        "icon": "💰",
-        "pricing_model": "per_user",
-        "monthly_price": 80.0,
-        "features": "Policy Administration, Claims Processing, Agent Management, Premium Billing"
-    },
-    {
-        "addon_code": "energy",
-        "addon_name": "Energy & Utilities",
-        "category": "Industry",
-        "description": "Meter management, billing, outage scheduling",
-        "icon": "💡",
-        "pricing_model": "per_customer",
-        "monthly_price": 2.0,
-        "features": "Meter Management, Billing & Collections, Outage Management, Asset Lifecycle"
-    },
-    {
-        "addon_code": "telecom",
-        "addon_name": "Telecommunications",
-        "category": "Industry",
-        "description": "Subscriber management, billing, network resources",
-        "icon": "🌐",
-        "pricing_model": "enterprise",
-        "monthly_price": 250.0,
-        "features": "Customer Onboarding, Plan Management, Billing, Tower Maintenance"
-    },
-    {
-        "addon_code": "professional",
-        "addon_name": "Professional Services",
-        "category": "Industry",
-        "description": "Client management, time tracking, project billing",
-        "icon": "🏢",
-        "pricing_model": "per_user",
-        "monthly_price": 45.0,
-        "features": "Client Records, Time Tracking, Project Billing, Document Management"
+        "monthly_price": 60.0,
+        "features": "Case Management, Document Library, Time & Billing, Court Calendar"
     },
     {
         "addon_code": "ngo",
@@ -169,7 +109,77 @@ OFFICIAL_ADDONS = [
         "icon": "🕊️",
         "pricing_model": "per_project",
         "monthly_price": 35.0,
-        "features": "Donor Management, Grant Budgeting, Project Tracking, Compliance"
+        "features": "Donor Management, Grant Budgeting, Project Tracking, Compliance Reporting"
+    },
+    {
+        "addon_code": "advmanufacturing",
+        "addon_name": "Advanced Manufacturing",
+        "category": "Industry",
+        "description": "Production orders, quality control, shop floor management",
+        "icon": "🏭",
+        "pricing_model": "per_user",
+        "monthly_price": 60.0,
+        "features": "Work Orders, Shop Floor Control, Machine Maintenance, Quality Assurance"
+    },
+    {
+        "addon_code": "logistics",
+        "addon_name": "Logistics & Warehousing",
+        "category": "Industry",
+        "description": "Warehouse management, shipment tracking, inventory optimization",
+        "icon": "📦",
+        "pricing_model": "per_warehouse",
+        "monthly_price": 45.0,
+        "features": "Warehouse Management, Shipment Tracking, Inventory Optimization, 3PL Integration"
+    },
+    {
+        "addon_code": "telecom",
+        "addon_name": "Telecommunications",
+        "category": "Industry",
+        "description": "Subscriber management, billing, network resources",
+        "icon": "🌐",
+        "pricing_model": "enterprise",
+        "monthly_price": 250.0,
+        "features": "Customer Onboarding, Plan Management, Usage Billing, Tower Maintenance"
+    },
+    {
+        "addon_code": "energy",
+        "addon_name": "Energy & Utilities",
+        "category": "Industry",
+        "description": "Meter management, consumption billing, outage scheduling",
+        "icon": "💡",
+        "pricing_model": "per_customer",
+        "monthly_price": 2.0,
+        "features": "Meter Reading, Billing & Collections, Outage Management, Asset Lifecycle"
+    },
+    {
+        "addon_code": "media",
+        "addon_name": "Media & Publishing",
+        "category": "Industry",
+        "description": "Content management, publication scheduling, subscription tracking",
+        "icon": "📰",
+        "pricing_model": "per_user",
+        "monthly_price": 40.0,
+        "features": "Content Management, Editorial Calendar, Subscriptions, Ad Management"
+    },
+    {
+        "addon_code": "insurance",
+        "addon_name": "Insurance & Underwriting",
+        "category": "Industry",
+        "description": "Policy management, claims processing, agent commissions",
+        "icon": "💰",
+        "pricing_model": "per_user",
+        "monthly_price": 80.0,
+        "features": "Policy Administration, Claims Processing, Agent Management, Premium Billing"
+    },
+    {
+        "addon_code": "government",
+        "addon_name": "Government & Public Sector",
+        "category": "Industry",
+        "description": "Permit management, public services, budget tracking",
+        "icon": "🏛️",
+        "pricing_model": "enterprise",
+        "monthly_price": 150.0,
+        "features": "Permit Management, Public Services, Departmental Budgeting, Procurement Compliance"
     }
 ]
 
