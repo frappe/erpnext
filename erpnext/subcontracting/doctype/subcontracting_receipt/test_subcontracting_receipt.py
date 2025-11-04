@@ -1329,8 +1329,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
-	@IntegrationTestCase.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
->>>>>>> 8854db51dd (Merge pull request #50299 from saadchaudharry/feature-subcontract-return-rejected)
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
@@ -1539,6 +1537,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)
 
+	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_use_serial_batch_fields_for_subcontracting_receipt_with_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
