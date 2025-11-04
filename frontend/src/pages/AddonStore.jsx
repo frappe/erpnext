@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { ShoppingBag, Check, Download, Star } from 'lucide-react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
 export default function AddonStore() {
   const [addons, setAddons] = useState([]);
   const [myAddons, setMyAddons] = useState([]);
@@ -17,10 +15,10 @@ export default function AddonStore() {
     try {
       const token = localStorage.getItem('token');
       const [addonsRes, myAddonsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/addons/marketplace`, {
+        axios.get('/api/addons/marketplace', {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get(`${API_URL}/api/addons/my-addons`, {
+        axios.get('/api/addons/my-addons', {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -40,7 +38,7 @@ export default function AddonStore() {
   const handleActivate = async (addonCode) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/addons/activate/${addonCode}`, {}, {
+      await axios.post(`/api/addons/activate/${addonCode}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(`Addon activated successfully!`);
@@ -56,7 +54,7 @@ export default function AddonStore() {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/addons/deactivate/${addonCode}`, {}, {
+      await axios.post(`/api/addons/deactivate/${addonCode}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Addon deactivated successfully');
