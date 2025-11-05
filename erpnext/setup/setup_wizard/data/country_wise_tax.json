@@ -4979,7 +4979,14 @@
 	},
 
 	"United Kingdom": {
-		"tax_categories": [],
+		"tax_categories": [
+			{
+				"title" : "UK Export Customer - EU"
+			},
+			{
+				"title" : "UK Export Customer - Rest of World"
+			}
+		],
 		"chart_of_accounts": {
 			"*": {
 				"sales_tax_templates": [
@@ -5155,10 +5162,6 @@
 								"tax_rate": 0.00
 							}
 						]
-					},
-					{
-						"title": "UK VAT Exempt Item",
-						"taxes": []
 					}
 				]
 			}
