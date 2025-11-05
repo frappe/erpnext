@@ -12,9 +12,11 @@
 # CORE FRAMEWORK DEPENDENCIES (Frappe dependencies)
 # These are what Frappe itself requires (from its pyproject.toml/setup.cfg)
 # ============================================================================
-frappe
+
+frappe-bench
 gunicorn
 mysqlclient
+
 
 # ============================================================================
 # Database Drivers
