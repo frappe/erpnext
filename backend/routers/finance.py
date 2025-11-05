@@ -576,3 +576,188 @@ def balance_sheet(
         },
         "total_liabilities_and_equity": float(total_liabilities + total_equity)
     }
+
+
+# ============================================================================
+# NEW COMPACT JOURNAL ENTRY ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+from services.finance import JournalEntryService
+import schemas
+
+
+@router.post("/journals/compact", response_model=schemas.JournalEntryDetailResponse)
+def create_compact_journal_entry(
+    data: schemas.CompactJournalEntryCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Create journal entry using COMPACT format (per Finance PDF spec)
+    
+    Single amount with both debit and credit accounts specified.
+    System automatically expands to double-entry format internally.
+    
+    Example:
+    {
+      "date": "2025-11-05",
+      "description": "Sale of goods to Customer A",
+      "currency": "ZMW",
+      "total_amount": 1200.00,
+      "entries": {
+        "debits": [{"account_code": "1000-AR", "amount": 1200, "narration": "Invoice #001"}],
+        "credits": [{"account_code": "4000-SALES", "amount": 1200, "narration": "Goods sold"}]
+      },
+      "auto_post": false
+    }
+    """
+    service = JournalEntryService(db, current_user.company_id, current_user.id)
+    
+    # Generate journal number if not provided
+    journal_number = data.journal_number or service.generate_journal_number()
+    
+    # Create compact journal entry
+    journal_entry = service.create_journal_entry(
+        journal_number=journal_number,
+        entry_date=data.date,
+        description=data.description,
+        currency=data.currency,
+        data={"entries": data.entries.dict()},
+        department_id=data.department_id,
+        branch_id=data.branch_id,
+        source_type=data.source_type,
+        source_id=data.source_id,
+        auto_post=data.auto_post
+    )
+    
+    # Return detailed response with lines
+    return service.get_journal_entry(journal_entry.id)
+
+
+@router.post("/journals/legacy", response_model=schemas.JournalEntryDetailResponse)
+def create_legacy_journal_entry(
+    data: schemas.LegacyJournalEntryCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Create journal entry using LEGACY format (traditional double-entry)
+    
+    Example:
+    {
+      "date": "2025-11-05",
+      "description": "Sale of goods",
+      "currency": "ZMW",
+      "lines": [
+        {"account_code": "1000-AR", "side": "debit", "amount": 1200, "narration": "Invoice"},
+        {"account_code": "4000-SALES", "side": "credit", "amount": 1200, "narration": "Sale"}
+      ],
+      "auto_post": false
+    }
+    """
+    service = JournalEntryService(db, current_user.company_id, current_user.id)
+    
+    # Generate journal number if not provided
+    journal_number = data.journal_number or service.generate_journal_number()
+    
+    # Create legacy journal entry
+    journal_entry = service.create_journal_entry(
+        journal_number=journal_number,
+        entry_date=data.date,
+        description=data.description,
+        currency=data.currency,
+        data={"lines": [line.dict() for line in data.lines]},
+        department_id=data.department_id,
+        branch_id=data.branch_id,
+        source_type=data.source_type,
+        source_id=data.source_id,
+        auto_post=data.auto_post
+    )
+    
+    # Return detailed response with lines
+    return service.get_journal_entry(journal_entry.id)
+
+
+@router.get("/journals/{journal_id}", response_model=schemas.JournalEntryDetailResponse)
+def get_journal_detail(
+    journal_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Get journal entry with all line details"""
+    service = JournalEntryService(db, current_user.company_id, current_user.id)
+    return service.get_journal_entry(journal_id)
+
+
+@router.post("/journals/{journal_id}/post", response_model=schemas.JournalEntryDetailResponse)
+def post_journal(
+    journal_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Post a journal entry (change status from draft to posted)
+    Posted entries cannot be edited - only reversed
+    """
+    service = JournalEntryService(db, current_user.company_id, current_user.id)
+    journal = service.post_journal_entry(journal_id)
+    return service.get_journal_entry(journal.id)
+
+
+@router.post("/journals/reverse", response_model=schemas.JournalEntryDetailResponse)
+def reverse_journal(
+    data: schemas.JournalEntryReversalRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Reverse a journal entry by creating a reversing entry
+    
+    Per audit trail requirement: entries cannot be deleted, only reversed.
+    This creates a new entry with swapped debits/credits.
+    """
+    service = JournalEntryService(db, current_user.company_id, current_user.id)
+    reversal = service.reverse_journal_entry(
+        journal_id=data.journal_id,
+        reversal_date=data.reversal_date,
+        reversal_reason=data.reversal_reason
+    )
+    return service.get_journal_entry(reversal.id)
+
+
+@router.get("/journals")
+def list_journals(
+    from_date: Optional[date] = None,
+    to_date: Optional[date] = None,
+    status: Optional[str] = None,
+    department_id: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """List journal entries with filters"""
+    query = db.query(models.JournalEntry).filter(
+        models.JournalEntry.company_id == current_user.company_id
+    )
+    
+    if from_date:
+        query = query.filter(models.JournalEntry.date >= from_date)
+    if to_date:
+        query = query.filter(models.JournalEntry.date <= to_date)
+    if status:
+        query = query.filter(models.JournalEntry.status == status)
+    if department_id:
+        query = query.filter(models.JournalEntry.department_id == department_id)
+    
+    total_count = query.count()
+    journals = query.order_by(models.JournalEntry.date.desc()).limit(limit).offset(offset).all()
+    
+    return {
+        "success": True,
+        "total_count": total_count,
+        "count": len(journals),
+        "limit": limit,
+        "offset": offset,
+        "journals": journals
+    }

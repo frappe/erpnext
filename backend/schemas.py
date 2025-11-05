@@ -141,6 +141,117 @@ class JournalEntryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+# Compact Journal Entry Schemas (per Finance PDF spec)
+class CompactJournalLineEntry(BaseModel):
+    """Single line in compact journal format"""
+    account_code: str
+    amount: float
+    narration: Optional[str] = ""
+
+
+class CompactJournalEntries(BaseModel):
+    """Compact journal entries with separate debits and credits"""
+    debits: List[CompactJournalLineEntry]
+    credits: List[CompactJournalLineEntry]
+
+
+class CompactJournalEntryCreate(BaseModel):
+    """
+    Compact journal entry format (per Finance PDF spec)
+    
+    Example:
+    {
+      "journal_number": "JE-2025-001",  # Optional, auto-generated if not provided
+      "date": "2025-11-05",
+      "description": "Sale of goods",
+      "currency": "ZMW",
+      "total_amount": 1200.00,
+      "entries": {
+        "debits": [{"account_code": "1000-AR", "amount": 1200, "narration": "Invoice"}],
+        "credits": [{"account_code": "4000-SALES", "amount": 1200, "narration": "Sale"}]
+      }
+    }
+    """
+    journal_number: Optional[str] = None  # Auto-generated if not provided
+    date: date
+    description: str
+    currency: str = "ZMW"
+    total_amount: Optional[float] = None  # Can be omitted, will be calculated
+    department_id: Optional[str] = None
+    branch_id: Optional[str] = None
+    entries: CompactJournalEntries
+    source_type: Optional[str] = None  # e.g., "invoice", "payment"
+    source_id: Optional[str] = None
+    auto_post: bool = False  # If True, automatically post after creation
+
+
+class LegacyJournalLineCreate(BaseModel):
+    """Single line in legacy journal format"""
+    account_code: str
+    side: str  # "debit" or "credit"
+    amount: float
+    narration: Optional[str] = ""
+
+
+class LegacyJournalEntryCreate(BaseModel):
+    """
+    Legacy journal entry format (traditional double-entry)
+    
+    Example:
+    {
+      "journal_number": "JE-2025-001",
+      "date": "2025-11-05",
+      "description": "Sale of goods",
+      "currency": "ZMW",
+      "lines": [
+        {"account_code": "1000-AR", "side": "debit", "amount": 1200},
+        {"account_code": "4000-SALES", "side": "credit", "amount": 1200}
+      ]
+    }
+    """
+    journal_number: Optional[str] = None  # Auto-generated if not provided
+    date: date
+    description: str
+    currency: str = "ZMW"
+    department_id: Optional[str] = None
+    branch_id: Optional[str] = None
+    lines: List[LegacyJournalLineCreate]
+    source_type: Optional[str] = None
+    source_id: Optional[str] = None
+    auto_post: bool = False
+
+
+class JournalEntryDetailResponse(BaseModel):
+    """Detailed journal entry with all lines"""
+    id: str
+    journal_number: str
+    date: date
+    description: str
+    currency: str
+    total_amount: float
+    status: str
+    department_id: Optional[str]
+    branch_id: Optional[str]
+    created_by: Optional[str]
+    created_at: datetime
+    lines: List[dict]  # Will include account details
+    
+    class Config:
+        from_attributes = True
+
+
+class JournalEntryPostRequest(BaseModel):
+    """Request to post a journal entry"""
+    journal_id: str
+
+
+class JournalEntryReversalRequest(BaseModel):
+    """Request to reverse a journal entry"""
+    journal_id: str
+    reversal_date: date
+    reversal_reason: str
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int
