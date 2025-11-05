@@ -821,7 +821,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(accounts_data, [])
 
 	def test_calculate_exchange_rate_using_last_gle_TC_ACC_382(self):
-		from erpnext.accounts.utils import calculate_exchange_rate_using_last_gle
+		from erpnext.accounts.doctype.exchange_rate_revaluation.exchange_rate_revaluation import calculate_exchange_rate_using_last_gle
 
 		existing = frappe.db.exists("GL Entry", {"voucher_no": "TEST-JE-001"})
 		if existing:
@@ -839,7 +839,10 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 			"debit_in_account_currency": 100,
 			"credit_in_account_currency": 0,
 			"is_cancelled": 0
-		}).insert(ignore_permissions=True)
+		})
+		gl_entry.flags.ignore_links = True   # 🔥 bypass voucher validation
+		gl_entry.flags.ignore_validate = True
+		gl_entry.insert(ignore_permissions=True)
 
 		rate = calculate_exchange_rate_using_last_gle(
 			company="_Test Company",
