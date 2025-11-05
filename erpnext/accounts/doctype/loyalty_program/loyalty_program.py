@@ -161,7 +161,7 @@ def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None
 		"only_lp": 1
 	}
 	data = get_customer_lp(filters)
-	return {"loyalty_points": data[0]["actual_lp"]}
+	return {"loyalty_points": data[0]["actual_lp"] if data else 0}
     # expire_date=today()
     # acquired_list=[]
     # used_list=[]
