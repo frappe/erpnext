@@ -859,9 +859,13 @@ class FixedAsset(Base):
     asset_account_id = Column(String, ForeignKey("accounts.id"))
     depreciation_account_id = Column(String, ForeignKey("accounts.id"))
     accumulated_depreciation_account_id = Column(String, ForeignKey("accounts.id"))
-    status = Column(String, default="active")  # active, disposed, written_off
+    status = Column(String, default="active")  # active, disposed, written_off, fully_depreciated
     disposal_date = Column(Date)
     disposal_amount = Column(Float)
+    disposal_proceeds = Column(Float)
+    disposal_gain_loss = Column(Float)
+    supplier_id = Column(String, ForeignKey("suppliers.id"))
+    created_by = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
     
     asset_account = relationship("Account", foreign_keys=[asset_account_id])

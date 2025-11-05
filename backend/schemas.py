@@ -444,6 +444,62 @@ class PaymentSplitRequest(BaseModel):
     payment_type: str = "customer"
 
 
+# Fixed Asset Depreciation Schemas (per Finance PDF spec)
+class FixedAssetCreate(BaseModel):
+    """Create a new fixed asset"""
+    asset_name: str
+    asset_code: str
+    asset_category: str  # Building, Vehicle, Equipment, Furniture, IT
+    purchase_date: date
+    purchase_cost: float
+    salvage_value: float = 0.0
+    useful_life_years: int = 5
+    depreciation_method: str = "straight_line"  # straight_line, declining_balance
+    account_id: Optional[str] = None
+    location: Optional[str] = None
+    serial_number: Optional[str] = None
+    supplier_id: Optional[str] = None
+
+
+class FixedAssetResponse(BaseModel):
+    """Fixed asset details"""
+    id: str
+    company_id: str
+    asset_code: str
+    asset_name: str
+    asset_category: str
+    purchase_date: date
+    purchase_cost: float
+    residual_value: float
+    useful_life_years: int
+    depreciation_method: str
+    accumulated_depreciation: float
+    book_value: float
+    status: str
+    location: Optional[str]
+    serial_number: Optional[str]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class DepreciationScheduleEntry(BaseModel):
+    """Single depreciation schedule entry"""
+    period: int
+    date: date
+    depreciation_expense: float
+    accumulated_depreciation: float
+    book_value: float
+
+
+class AssetDisposalRequest(BaseModel):
+    """Dispose of a fixed asset"""
+    disposal_date: date
+    disposal_proceeds: float
+    create_journal: bool = True
+
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int
