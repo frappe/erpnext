@@ -1,7 +1,10 @@
-# ---- Base image ----
+# استخدم صورة Python خفيفة
 FROM python:3.11-slim
 
-# ---- System setup ----
+# إعداد بيئة العمل
+WORKDIR /app
+
+# تثبيت المتطلبات الأساسية (بما في ذلك pkg-config)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -13,33 +16,33 @@ RUN apt-get update && apt-get install -y \
     libmariadb-dev \
     libmariadb-dev-compat \
     python3-dev \
+    pkg-config \
     xfonts-base \
     xfonts-75dpi \
     fontconfig \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends \
+       wkhtmltopdf \
+       || (echo "⚠️ wkhtmltopdf not in repo, installing from source..." \
+       && wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb \
+       && apt-get install -y ./wkhtmltox_0.12.6-1.buster_amd64.deb) \
+    && rm -rf /var/lib/apt/lists/*
 
-# ---- Install wkhtmltopdf ----
-RUN echo "📦 Installing wkhtmltopdf..." && \
-    wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.jammy_amd64.deb && \
-    apt-get update && apt-get install -y ./wkhtmltox_0.12.6-1.jammy_amd64.deb || true && \
-    rm -f wkhtmltox_0.12.6-1.jammy_amd64.deb
+# نسخ الملفات إلى داخل الكونتينر
+COPY . .
 
-# ---- Python setup ----
-WORKDIR /app
-COPY . /app
-
-# Upgrade pip and install dependencies
+# تثبيت متطلبات المشروع
 RUN pip install --upgrade pip setuptools wheel \
     && pip install -r requirements.txt --no-cache-dir
 
-# ---- Environment variables ----
-ENV FRAPPE_ENV=production \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8000
+# تعريف المتغيرات الخاصة بقاعدة البيانات
+ENV MYSQL_DATABASE=railway \
+    MYSQL_USER=root \
+    MYSQL_PASSWORD=eLtJZovDmgTLoeBlFYbvzoudseKHyrFY \
+    MYSQL_HOST=mainline.proxy.rlwy.net \
+    MYSQL_PORT=40503
 
-# ---- Expose port ----
+# منفذ التشغيل
 EXPOSE 8000
 
-# ---- Start Frappe app ----
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "wsgi:application"]
+# أمر التشغيل الافتراضي
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "wsgi:application"]
