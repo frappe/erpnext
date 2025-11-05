@@ -46,11 +46,14 @@ RUN useradd -m -s /bin/bash frappe \
 
 WORKDIR /home/frappe/bench
 
-# Install bench
+# Change ownership of the bench directory to frappe user
+RUN chown -R frappe:frappe /home/frappe/bench
+
+# Install bench as frappe user
+USER frappe
 RUN pip3 install frappe-bench
 
 # Initialize bench
-USER frappe
 RUN bench init frappe-bench --python python3 --skip-assets
 
 WORKDIR /home/frappe/bench/frappe-bench
