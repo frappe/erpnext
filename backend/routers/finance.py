@@ -1077,7 +1077,11 @@ def get_accounting_period(
 # FX REVALUATION ENDPOINTS (per Finance PDF spec)
 # ============================================================================
 
-from services.finance import FXRevaluationService, SmartInvoiceService
+from services.finance import (
+    FXRevaluationService,
+    SmartInvoiceService,
+    PaymentMatchingEngine
+)
 from fastapi.responses import Response
 
 
@@ -1462,3 +1466,154 @@ def submit_invoice_to_zra(
             "Enable ZRA integration in settings"
         ]
     }
+
+
+# ============================================================================
+# PAYMENT MATCHING ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+
+@router.post("/payments/{payment_id}/match")
+def match_payment_auto(
+    payment_id: str,
+    data: schemas.PaymentMatchRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Automatically match a payment to invoices/bills
+    
+    Matching logic:
+    1. Exact match by reference number + amount
+    2. High confidence: reference OR (amount + customer/supplier)
+    3. Medium confidence: amount + date proximity
+    4. Low confidence: customer/supplier only
+    
+    Returns:
+    - Auto-matched if exact/high confidence
+    - Suggestions for manual matching if medium/low confidence
+    
+    Example (match customer payment):
+    {
+      "payment_id": "pay_12345",
+      "payment_type": "customer"
+    }
+    """
+    service = PaymentMatchingEngine(db, current_user.company_id, current_user.id)
+    result = service.match_payment_auto(
+        payment_id=payment_id,
+        payment_type=data.payment_type
+    )
+    return result
+
+
+@router.post("/payments/{payment_id}/apply")
+def apply_payment_manual(
+    payment_id: str,
+    invoice_id: Optional[str] = None,
+    bill_id: Optional[str] = None,
+    amount: float = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Manually apply payment to specific invoice/bill
+    
+    Use when automatic matching doesn't find the right match
+    or when you want to override automatic suggestions.
+    
+    Query params:
+    - invoice_id: ID of invoice to apply to (for customer payments)
+    - bill_id: ID of bill to apply to (for supplier payments)
+    - amount: Amount to apply (optional, defaults to full payment)
+    
+    Example: /payments/pay_123/apply?invoice_id=inv_456&amount=1000
+    """
+    service = PaymentMatchingEngine(db, current_user.company_id, current_user.id)
+    
+    from decimal import Decimal
+    
+    if invoice_id:
+        result = service.apply_payment_to_invoice(
+            payment_id=payment_id,
+            invoice_id=invoice_id,
+            amount=Decimal(str(amount)) if amount else None
+        )
+    elif bill_id:
+        result = service.apply_payment_to_bill(
+            payment_id=payment_id,
+            bill_id=bill_id,
+            amount=Decimal(str(amount)) if amount else None
+        )
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Either invoice_id or bill_id must be provided"
+        )
+    
+    return {
+        "success": True,
+        "payment_id": payment_id,
+        "application": result
+    }
+
+
+@router.post("/payments/{payment_id}/split", response_model=dict)
+def split_payment(
+    payment_id: str,
+    data: schemas.PaymentSplitRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Split a payment across multiple invoices/bills
+    
+    Use when one payment covers multiple invoices/bills.
+    
+    Example (split 5000 payment across 3 invoices):
+    {
+      "payment_id": "pay_123",
+      "allocations": [
+        {"invoice_id": "inv_001", "amount": 2000},
+        {"invoice_id": "inv_002", "amount": 1500},
+        {"invoice_id": "inv_003", "amount": 1500}
+      ],
+      "payment_type": "customer"
+    }
+    """
+    service = PaymentMatchingEngine(db, current_user.company_id, current_user.id)
+    
+    result = service.apply_payment_split(
+        payment_id=payment_id,
+        allocations=[a.dict() for a in data.allocations],
+        payment_type=data.payment_type
+    )
+    
+    return result
+
+
+@router.get("/payments/unmatched")
+def get_unmatched_payments(
+    payment_type: str = "customer",
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Get list of unmatched payments requiring manual attention
+    
+    Query params:
+    - payment_type: "customer" or "supplier"
+    
+    Returns payments that haven't been matched to any invoices/bills.
+    These require manual review and matching.
+    """
+    service = PaymentMatchingEngine(db, current_user.company_id, current_user.id)
+    
+    unmatched = service.get_unmatched_payments(payment_type=payment_type)
+    
+    return {
+        "success": True,
+        "count": len(unmatched),
+        "payments": unmatched
+    }
+
