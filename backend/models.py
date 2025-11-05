@@ -280,6 +280,33 @@ class JournalLine(Base):
     journal = relationship("JournalEntry", back_populates="lines")
     account = relationship("Account", back_populates="journal_lines")
 
+
+class ApprovalRequest(Base):
+    """
+    Approval requests for finance documents (journal entries, invoices, bills, payments)
+    Implements approval workflow: draft → pending → approved/rejected → posted → locked
+    """
+    __tablename__ = "approval_requests"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    document_type = Column(String, nullable=False)  # journal_entry, invoice, bill, payment
+    document_id = Column(String, nullable=False)
+    requested_by = Column(String, ForeignKey("users.id"), nullable=False)
+    approved_by = Column(String, ForeignKey("users.id"))
+    approval_level = Column(String, nullable=False)  # basic, medium, high
+    status = Column(String, default="pending")  # pending, approved, rejected, cancelled
+    notes = Column(Text)  # Submission notes
+    approval_notes = Column(Text)  # Approval/rejection notes
+    requested_at = Column(DateTime, default=datetime.utcnow)
+    approved_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    company = relationship("Company")
+    requester = relationship("User", foreign_keys=[requested_by])
+    approver = relationship("User", foreign_keys=[approved_by])
+
+
 class Product(Base):
     __tablename__ = "products"
     

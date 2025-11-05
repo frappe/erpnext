@@ -761,3 +761,116 @@ def list_journals(
         "offset": offset,
         "journals": journals
     }
+
+
+# ============================================================================
+# APPROVAL WORKFLOW ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+from services.finance import ApprovalWorkflowEngine
+
+
+@router.post("/approvals/submit", response_model=schemas.ApprovalResponse)
+def submit_for_approval(
+    data: schemas.ApprovalSubmitRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Submit a document for approval (draft → pending_approval)
+    
+    Approval levels are automatically determined by amount:
+    - Basic (< 10,000 ZMW): Any manager can approve
+    - Medium (10,000 - 100,000 ZMW): Department manager approval
+    - High (> 100,000 ZMW): Finance director approval
+    
+    Example:
+    {
+      "document_type": "journal_entry",
+      "document_id": "abc123",
+      "notes": "Please review and approve"
+    }
+    """
+    workflow = ApprovalWorkflowEngine(db, current_user.company_id, current_user.id)
+    result = workflow.submit_for_approval(
+        document_type=data.document_type,
+        document_id=data.document_id,
+        notes=data.notes
+    )
+    return result
+
+
+@router.post("/approvals/approve", response_model=schemas.ApprovalResponse)
+def approve_document(
+    data: schemas.ApprovalActionRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Approve a document (pending_approval → approved)
+    
+    User must have permission to approve based on approval level.
+    Cannot approve own submission (segregation of duties).
+    
+    Example:
+    {
+      "document_type": "journal_entry",
+      "document_id": "abc123",
+      "notes": "Approved - looks good"
+    }
+    """
+    workflow = ApprovalWorkflowEngine(db, current_user.company_id, current_user.id)
+    result = workflow.approve_document(
+        document_type=data.document_type,
+        document_id=data.document_id,
+        approval_notes=data.notes
+    )
+    return result
+
+
+@router.post("/approvals/reject", response_model=schemas.ApprovalResponse)
+def reject_document(
+    data: schemas.ApprovalActionRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Reject a document (pending_approval → rejected)
+    
+    User must have permission to reject based on approval level.
+    Rejection reason is required in notes field.
+    
+    Example:
+    {
+      "document_type": "journal_entry",
+      "document_id": "abc123",
+      "notes": "Incorrect account codes - please revise"
+    }
+    """
+    if not data.notes:
+        raise HTTPException(status_code=400, detail="Rejection reason is required")
+    
+    workflow = ApprovalWorkflowEngine(db, current_user.company_id, current_user.id)
+    result = workflow.reject_document(
+        document_type=data.document_type,
+        document_id=data.document_id,
+        rejection_reason=data.notes
+    )
+    return result
+
+
+@router.get("/approvals/pending", response_model=List[schemas.PendingApprovalItem])
+def get_pending_approvals(
+    document_type: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Get pending approvals for current user
+    
+    Returns only documents that the current user has permission to approve.
+    Excludes self-submitted requests (segregation of duties).
+    """
+    workflow = ApprovalWorkflowEngine(db, current_user.company_id, current_user.id)
+    pending = workflow.get_pending_approvals(document_type=document_type)
+    return pending

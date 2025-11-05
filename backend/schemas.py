@@ -252,6 +252,46 @@ class JournalEntryReversalRequest(BaseModel):
     reversal_date: date
     reversal_reason: str
 
+
+# Approval Workflow Schemas (per Finance PDF spec)
+class ApprovalSubmitRequest(BaseModel):
+    """Request to submit a document for approval"""
+    document_type: str  # journal_entry, invoice, bill, payment
+    document_id: str
+    notes: Optional[str] = None
+
+
+class ApprovalActionRequest(BaseModel):
+    """Request to approve or reject a document"""
+    document_type: str
+    document_id: str
+    action: str  # approve, reject
+    notes: Optional[str] = None
+
+
+class ApprovalResponse(BaseModel):
+    """Response for approval actions"""
+    success: bool
+    document_id: str
+    document_type: str
+    status: str
+    approval_level: Optional[str] = None
+    approved_by: Optional[str] = None
+    approved_at: Optional[datetime] = None
+    rejection_reason: Optional[str] = None
+
+
+class PendingApprovalItem(BaseModel):
+    """Pending approval item for current user"""
+    id: str
+    document_type: str
+    document_id: str
+    approval_level: str
+    requested_by: str
+    requested_at: datetime
+    notes: Optional[str]
+
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int
