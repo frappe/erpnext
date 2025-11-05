@@ -6,6 +6,8 @@ Used by Gunicorn to run the application
 import os
 import sys
 from pathlib import Path
+import frappe
+application = frappe.app
 
 # Add the app directory to the path
 app_dir = Path(__file__).parent
