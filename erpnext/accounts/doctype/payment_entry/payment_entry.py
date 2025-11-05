@@ -3425,7 +3425,7 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 	if party_account_currency != doc.company_currency:
 		discount_amount = discount_amount * doc.get("conversion_rate", 1)
 
-	# Avoid considering miniscule losses
+	# Avoid considering minuscule losses
 	discount_amount = flt(discount_amount - base_total_discount_loss, doc.precision("grand_total"))
 
 	# Set base discount amount (discount loss/pending rounding loss) in deductions
