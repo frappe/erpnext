@@ -1284,16 +1284,16 @@ def get_bom_items_as_dict(
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
-				and item.is_stock_item in (1, {is_stock_item})
+				and (item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
 				{group_by_cond}
 				order by idx"""
 
-	is_stock_item = 0 if include_non_stock_items else 1
+	is_stock_item = cint(not include_non_stock_items)
 	if cint(fetch_exploded):
 		query = query.format(
 			table="BOM Explosion Item",
-			where_conditions="",
+			where_conditions=")",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			group_by_cond=group_by_cond,
@@ -1308,7 +1308,7 @@ def get_bom_items_as_dict(
 	elif fetch_scrap_items:
 		query = query.format(
 			table="BOM Scrap Item",
-			where_conditions="",
+			where_conditions=")",
 			select_columns=", item.description",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
@@ -1319,12 +1319,12 @@ def get_bom_items_as_dict(
 	else:
 		query = query.format(
 			table="BOM Item",
-			where_conditions="",
+			where_conditions="or bom_item.is_phantom_item)",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate, bom_item.operation_row_id """,
+				bom_item.description, bom_item.base_rate as rate, bom_item.operation_row_id, bom_item.is_phantom_item , bom_item.bom_no """,
 			group_by_cond=group_by_cond,
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
@@ -1334,7 +1334,19 @@ def get_bom_items_as_dict(
 		if item.operation_row_id:
 			key = (item.item_code, item.operation_row_id)
 
-		if key in item_dict:
+		if item.get("is_phantom_item"):
+			item_dict.update(
+				get_bom_items_as_dict(
+					item.get("bom_no"),
+					company,
+					qty=item.get("qty"),
+					fetch_exploded=fetch_exploded,
+					fetch_scrap_items=fetch_scrap_items,
+					include_non_stock_items=include_non_stock_items,
+					fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+				)
+			)
+		elif key in item_dict:
 			item_dict[key]["qty"] += flt(item.qty)
 		else:
 			item_dict[key] = item
@@ -1400,7 +1412,7 @@ def get_children(parent=None, is_root=False, **filters):
 
 		bom_items = frappe.get_all(
 			"BOM Item",
-			fields=["item_code", "bom_no as value", "stock_qty", "qty"],
+			fields=["item_code", "bom_no as value", "stock_qty", "qty", "is_phantom_item"],
 			filters=[["parent", "=", frappe.form_dict.parent]],
 			order_by="idx",
 		)

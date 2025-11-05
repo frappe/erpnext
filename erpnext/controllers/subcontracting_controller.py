@@ -550,6 +550,8 @@ class SubcontractingController(StockController):
 			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
 
 	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
+		data = []
+
 		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
 		fields = [f"`tab{doctype}`.`stock_qty` / `tabBOM`.`quantity` as qty_consumed_per_unit"]
 
@@ -558,7 +560,7 @@ class SubcontractingController(StockController):
 			"name": "bom_detail_no",
 			"source_warehouse": "reserve_warehouse",
 		}
-		for field in [
+		fields_list = [
 			"item_code",
 			"name",
 			"rate",
@@ -567,7 +569,12 @@ class SubcontractingController(StockController):
 			"description",
 			"item_name",
 			"stock_uom",
-		]:
+		]
+
+		if doctype == "BOM Item":
+			fields_list.extend(["is_phantom_item", "bom_no"])
+
+		for field in fields_list:
 			fields.append(f"`tab{doctype}`.`{field}` As {alias_dict.get(field, field)}")
 
 		filters = [
@@ -577,7 +584,20 @@ class SubcontractingController(StockController):
 			[doctype, "sourced_by_supplier", "=", 0],
 		]
 
-		return frappe.get_all("BOM", fields=fields, filters=filters, order_by=f"`tab{doctype}`.`idx`") or []
+		data = frappe.get_all("BOM", fields=fields, filters=filters, order_by=f"`tab{doctype}`.`idx`") or []
+		to_remove = []
+		for item in data:
+			if item.is_phantom_item:
+				data = (
+					self.__get_materials_from_bom(item.rm_item_code, item.bom_no, exploded_item=exploded_item)
+					+ data
+				)
+				to_remove.append(item)
+
+		for item in to_remove:
+			data.remove(item)
+
+		return data
 
 	def __update_reserve_warehouse(self, row, item):
 		if (
