@@ -659,7 +659,7 @@ class JournalEntry(AccountsController):
 					d.party_type
 					and frappe.db.get_value("Party Type", d.party_type, "account_type") != account_type
 					and d.party_type
-					!= "Employee"  # making an excpetion for employee since they can be both payable and receivable
+					!= "Employee"  # making an exception for employee since they can be both payable and receivable
 				):
 					frappe.throw(
 						_("Row {0}: Account {1} and Party Type {2} have different account types").format(
@@ -1058,7 +1058,7 @@ class JournalEntry(AccountsController):
 					ignore_exchange_rate = True
 
 				if not ignore_exchange_rate:
-					# Modified to include the posting date for which to retreive the exchange rate
+					# Modified to include the posting date for which to retrieve the exchange rate
 					d.exchange_rate = get_exchange_rate(
 						self.posting_date,
 						d.account,
@@ -1719,7 +1719,7 @@ def get_account_details_and_party_type(account, date, company, debit=None, credi
 		"party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
-		# The date used to retreive the exchange rate here is the date passed in
+		# The date used to retrieve the exchange rate here is the date passed in
 		# as an argument to this function. It is assumed to be the date on which the balance is sought
 		"exchange_rate": get_exchange_rate(
 			date,
@@ -1772,14 +1772,14 @@ def get_exchange_rate(
 		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
 			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
 
-		# The date used to retreive the exchange rate here is the date passed
+		# The date used to retrieve the exchange rate here is the date passed
 		# in as an argument to this function.
 		elif (not exchange_rate or flt(exchange_rate) == 1) and account_currency and posting_date:
 			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1
 
-	# don't return None or 0 as it is multipled with a value and that value could be lost
+	# don't return None or 0 as it is multiplied with a value and that value could be lost
 	return exchange_rate or 1
 
 
