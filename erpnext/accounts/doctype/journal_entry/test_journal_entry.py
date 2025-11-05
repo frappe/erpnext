@@ -418,7 +418,7 @@ class TestJournalEntry(IntegrationTestCase):
 			settings.append("allowed_types", {"document_type": "Journal Entry", "allowed": True})
 		settings.save()
 
-		# Create JV with defaut cost center - _Test Cost Center
+		# Create JV with default cost center - _Test Cost Center
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
 		jv.multi_currency = 0
 		jv.submit()
@@ -480,7 +480,7 @@ class TestJournalEntry(IntegrationTestCase):
 	def test_negative_debit_and_credit_with_same_account_head(self):
 		from erpnext.accounts.general_ledger import process_gl_map
 
-		# Create JV with defaut cost center - _Test Cost Center
+		# Create JV with default cost center - _Test Cost Center
 		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 
 		jv = make_journal_entry("_Test Bank - _TC", "_Test Bank - _TC", 100 * -1, save=True)
@@ -517,7 +517,7 @@ class TestJournalEntry(IntegrationTestCase):
 	def test_toggle_debit_credit_if_negative(self):
 		from erpnext.accounts.general_ledger import process_gl_map
 
-		# Create JV with defaut cost center - _Test Cost Center
+		# Create JV with default cost center - _Test Cost Center
 		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 
 		jv = frappe.new_doc("Journal Entry")
