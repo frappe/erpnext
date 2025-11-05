@@ -423,6 +423,27 @@ class InvoiceValidationResponse(BaseModel):
     tax_total: Optional[float]
 
 
+# Payment Matching Schemas (per Finance PDF spec)
+class PaymentMatchRequest(BaseModel):
+    """Request to match a payment"""
+    payment_id: str
+    payment_type: str = "customer"  # "customer" or "supplier"
+
+
+class PaymentAllocation(BaseModel):
+    """Payment allocation to an invoice/bill"""
+    invoice_id: Optional[str] = None
+    bill_id: Optional[str] = None
+    amount: float
+
+
+class PaymentSplitRequest(BaseModel):
+    """Split payment across multiple invoices/bills"""
+    payment_id: str
+    allocations: List[PaymentAllocation]
+    payment_type: str = "customer"
+
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int
