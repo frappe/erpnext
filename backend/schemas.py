@@ -292,6 +292,66 @@ class PendingApprovalItem(BaseModel):
     notes: Optional[str]
 
 
+# Accounting Period Schemas (per Finance PDF spec)
+class AccountingPeriodCreate(BaseModel):
+    """Create new accounting period"""
+    period_name: str
+    start_date: date
+    end_date: date
+    period_type: str = "monthly"  # monthly, quarterly, yearly
+    fiscal_year: Optional[int] = None
+
+
+class AccountingPeriodAutoCreate(BaseModel):
+    """Auto-create periods for a year"""
+    start_year: int
+    num_years: int = 1
+    period_type: str = "monthly"
+
+
+class AccountingPeriodClose(BaseModel):
+    """Close an accounting period"""
+    period_id: str
+    close_notes: Optional[str] = None
+
+
+class AccountingPeriodLock(BaseModel):
+    """Lock an accounting period"""
+    period_id: str
+    lock_notes: Optional[str] = None
+
+
+class AccountingPeriodReopen(BaseModel):
+    """Reopen a closed period"""
+    period_id: str
+    reopen_reason: str
+
+
+class AccountingPeriodResponse(BaseModel):
+    """Accounting period details"""
+    id: str
+    company_id: str
+    period_name: str
+    period_type: str
+    start_date: date
+    end_date: date
+    fiscal_year: int
+    status: str  # open, closed, locked
+    close_notes: Optional[str]
+    closed_at: Optional[datetime]
+    closed_by: Optional[str]
+    lock_notes: Optional[str]
+    locked_at: Optional[datetime]
+    locked_by: Optional[str]
+    reopen_reason: Optional[str]
+    reopened_at: Optional[datetime]
+    reopened_by: Optional[str]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int
