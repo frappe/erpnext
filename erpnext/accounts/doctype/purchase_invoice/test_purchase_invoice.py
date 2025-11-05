@@ -370,7 +370,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
+		# Get exchange gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
 
 		# fetching the latest GL Entry with exchange gain and loss account account
@@ -409,14 +409,14 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pr.insert()
 		pr.submit()
 
-		# Createing purchase invoice against Purchase Receipt
+		# Creating purchase invoice against Purchase Receipt
 		pi = create_purchase_invoice(pr.name)
 		pi.conversion_rate = 80
 		pi.credit_to = "_Test Payable USD - TCP1"
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
+		# Get exchange gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
 
 		# fetching the latest GL Entry with exchange gain and loss account account
@@ -2638,7 +2638,7 @@ class TestPurchaseInvoice(IntegrationTestCase, StockTestMixin):
 		pi.submit()
 		pr.reload()
 
-		# Inital check
+		# Initial check
 		self.assertEqual(pr.status, "Completed")
 
 		pi.reload()
