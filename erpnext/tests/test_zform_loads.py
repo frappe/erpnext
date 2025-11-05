@@ -35,10 +35,10 @@ class TestFormLoads(IntegrationTestCase):
 			self.fail(f"Failed to load {doctype}-{docname}: {e}")
 
 		self.assertTrue(
-			frappe.response.docs, msg=f"expected document in reponse, found: {frappe.response.docs}"
+			frappe.response.docs, msg=f"expected document in response, found: {frappe.response.docs}"
 		)
 		self.assertTrue(
-			frappe.response.docinfo, msg=f"expected docinfo in reponse, found: {frappe.response.docinfo}"
+			frappe.response.docinfo, msg=f"expected docinfo in response, found: {frappe.response.docinfo}"
 		)
 
 	def assertDocPrint(self, doctype, docname):
