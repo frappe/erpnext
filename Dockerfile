@@ -21,6 +21,10 @@ RUN git clone --branch version-15 --depth 1 https://github.com/frappe/erpnext.gi
 
 
 RUN pip install --no-cache-dir -e /opt/frappe
+RUN mkdir -p /opt/frappe/sites && \
+    echo '{"db_name": "site1.local", "db_password": "admin"}' > /opt/frappe/sites/common_site_config.json && \
+    echo "site1.local" > /opt/frappe/sites/apps.txt
+
 RUN pip install --no-cache-dir -e /opt/erpnext
 
 
