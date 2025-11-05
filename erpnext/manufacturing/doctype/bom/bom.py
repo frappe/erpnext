@@ -135,6 +135,7 @@ class BOM(WebsiteGenerator):
 		inspection_required: DF.Check
 		is_active: DF.Check
 		is_default: DF.Check
+		is_phantom_bom: DF.Check
 		item: DF.Link
 		item_name: DF.Data | None
 		items: DF.Table[BOMItem]
@@ -447,6 +448,9 @@ class BOM(WebsiteGenerator):
 			"uom": args["uom"] if args.get("uom") else item and args["stock_uom"] or "",
 			"conversion_factor": args["conversion_factor"] if args.get("conversion_factor") else 1,
 			"bom_no": args["bom_no"],
+			"is_phantom_item": frappe.get_value("BOM", args["bom_no"], "is_phantom_bom")
+			if args["bom_no"]
+			else 0,
 			"rate": rate,
 			"qty": args.get("qty") or args.get("stock_qty") or 1,
 			"stock_qty": args.get("stock_qty") or args.get("qty") or 1,
@@ -454,6 +458,9 @@ class BOM(WebsiteGenerator):
 			"include_item_in_manufacturing": cint(args.get("transfer_for_manufacture")),
 			"sourced_by_supplier": args.get("sourced_by_supplier", 0),
 		}
+
+		if ret_item["is_phantom_item"]:
+			ret_item["do_not_explode"] = 0
 
 		if args.get("do_not_explode"):
 			ret_item["bom_no"] = ""

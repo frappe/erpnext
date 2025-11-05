@@ -45,7 +45,7 @@ frappe.ui.form.on("BOM", {
 			return {
 				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
 				filters: {
-					is_stock_item: 1,
+					is_stock_item: !frm.doc.is_phantom_bom,
 				},
 			};
 		});
