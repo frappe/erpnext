@@ -684,14 +684,20 @@ class ExchangeRate(Base):
     
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey("companies.id"), nullable=False)
-    from_currency = Column(String, nullable=False)  # Base currency
-    to_currency = Column(String, nullable=False)  # Foreign currency
-    rate = Column(Float, nullable=False)  # 1 base = rate foreign
+    from_currency = Column(String, nullable=False)  # Source currency
+    to_currency = Column(String, nullable=False)  # Target currency
+    rate = Column(Float, nullable=False)  # 1 from_currency = rate to_currency
     rate_date = Column(Date, nullable=False, index=True)
-    rate_type = Column(String, default="spot")  # spot, average, budget
+    rate_type = Column(String, default="official")  # official, market, custom
     source = Column(String)  # manual, bank_of_zambia, api
     created_at = Column(DateTime, default=datetime.utcnow)
     created_by = Column(String, ForeignKey("users.id"))
+    updated_at = Column(DateTime)
+    updated_by = Column(String, ForeignKey("users.id"))
+    
+    company = relationship("Company")
+    creator = relationship("User", foreign_keys=[created_by])
+    updater = relationship("User", foreign_keys=[updated_by])
 
 class FXRevaluation(Base):
     __tablename__ = "fx_revaluations"
