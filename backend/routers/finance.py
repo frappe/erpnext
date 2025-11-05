@@ -1080,7 +1080,8 @@ def get_accounting_period(
 from services.finance import (
     FXRevaluationService,
     SmartInvoiceService,
-    PaymentMatchingEngine
+    PaymentMatchingEngine,
+    FixedAssetDepreciationService
 )
 from fastapi.responses import Response
 
@@ -1616,4 +1617,209 @@ def get_unmatched_payments(
         "count": len(unmatched),
         "payments": unmatched
     }
+
+
+# ============================================================================
+# FIXED ASSET DEPRECIATION ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+
+@router.post("/assets", response_model=schemas.FixedAssetResponse)
+def create_fixed_asset(
+    data: schemas.FixedAssetCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Create a new fixed asset
+    
+    Example (purchase a vehicle):
+    {
+      "asset_name": "Toyota Hilux 2025",
+      "asset_code": "VEH-001",
+      "asset_category": "Vehicle",
+      "purchase_date": "2025-01-15",
+      "purchase_cost": 450000,
+      "salvage_value": 50000,
+      "useful_life_years": 5,
+      "depreciation_method": "declining_balance",
+      "location": "Head Office",
+      "serial_number": "VIN123456789"
+    }
+    """
+    service = FixedAssetDepreciationService(db, current_user.company_id, current_user.id)
+    
+    from decimal import Decimal
+    asset = service.create_fixed_asset(
+        asset_name=data.asset_name,
+        asset_code=data.asset_code,
+        asset_category=data.asset_category,
+        purchase_date=data.purchase_date,
+        purchase_cost=Decimal(str(data.purchase_cost)),
+        salvage_value=Decimal(str(data.salvage_value)),
+        useful_life_years=data.useful_life_years,
+        depreciation_method=data.depreciation_method,
+        account_id=data.account_id,
+        location=data.location,
+        serial_number=data.serial_number,
+        supplier_id=data.supplier_id
+    )
+    
+    return asset
+
+
+@router.get("/assets", response_model=List[schemas.FixedAssetResponse])
+def list_fixed_assets(
+    status: Optional[str] = None,
+    category: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    List all fixed assets
+    
+    Query params:
+    - status: Filter by status (active, disposed, fully_depreciated)
+    - category: Filter by category (Building, Vehicle, Equipment, etc.)
+    """
+    query = db.query(models.FixedAsset).filter(
+        models.FixedAsset.company_id == current_user.company_id
+    )
+    
+    if status:
+        query = query.filter(models.FixedAsset.status == status)
+    if category:
+        query = query.filter(models.FixedAsset.asset_category == category)
+    
+    assets = query.order_by(models.FixedAsset.asset_code).all()
+    return assets
+
+
+@router.get("/assets/{asset_id}", response_model=schemas.FixedAssetResponse)
+def get_fixed_asset(
+    asset_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Get details of a specific fixed asset"""
+    asset = db.query(models.FixedAsset).filter(
+        models.FixedAsset.id == asset_id,
+        models.FixedAsset.company_id == current_user.company_id
+    ).first()
+    
+    if not asset:
+        raise HTTPException(status_code=404, detail="Fixed asset not found")
+    
+    return asset
+
+
+@router.get("/assets/{asset_id}/schedule", response_model=List[schemas.DepreciationScheduleEntry])
+def get_depreciation_schedule(
+    asset_id: str,
+    num_periods: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Get depreciation schedule for an asset
+    
+    Shows projected depreciation for each period.
+    
+    Query params:
+    - num_periods: Number of periods to show (default: until fully depreciated)
+    """
+    service = FixedAssetDepreciationService(db, current_user.company_id, current_user.id)
+    
+    schedule = service.generate_depreciation_schedule(
+        asset_id=asset_id,
+        num_periods=num_periods
+    )
+    
+    return schedule
+
+
+@router.post("/assets/{asset_id}/depreciate")
+def record_asset_depreciation(
+    asset_id: str,
+    period_date: date,
+    create_journal: bool = True,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Record depreciation for a specific asset for a period
+    
+    This updates accumulated depreciation and optionally creates a journal entry.
+    
+    Query params:
+    - period_date: Period to record depreciation for (YYYY-MM-DD)
+    - create_journal: Create depreciation journal entry (default: true)
+    
+    Example: /assets/asset_123/depreciate?period_date=2025-01-31&create_journal=true
+    """
+    service = FixedAssetDepreciationService(db, current_user.company_id, current_user.id)
+    
+    result = service.record_depreciation(
+        asset_id=asset_id,
+        period_date=period_date,
+        create_journal=create_journal
+    )
+    
+    return result
+
+
+@router.post("/assets/depreciate/batch")
+def run_monthly_depreciation(
+    period_date: date,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Run depreciation for ALL active assets for a specific month
+    
+    This is typically run as a scheduled job at month-end.
+    It processes all active assets and creates depreciation journals.
+    
+    Query params:
+    - period_date: Period to run depreciation for (YYYY-MM-DD)
+    
+    Example: /assets/depreciate/batch?period_date=2025-01-31
+    """
+    service = FixedAssetDepreciationService(db, current_user.company_id, current_user.id)
+    
+    result = service.run_monthly_depreciation(period_date=period_date)
+    
+    return result
+
+
+@router.post("/assets/{asset_id}/dispose")
+def dispose_fixed_asset(
+    asset_id: str,
+    data: schemas.AssetDisposalRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Dispose of a fixed asset
+    
+    Calculates gain/loss on disposal and optionally creates journal entry.
+    
+    Example (sell vehicle for 150K):
+    {
+      "disposal_date": "2025-11-05",
+      "disposal_proceeds": 150000,
+      "create_journal": true
+    }
+    """
+    service = FixedAssetDepreciationService(db, current_user.company_id, current_user.id)
+    
+    from decimal import Decimal
+    result = service.dispose_asset(
+        asset_id=asset_id,
+        disposal_date=data.disposal_date,
+        disposal_proceeds=Decimal(str(data.disposal_proceeds)),
+        create_journal=data.create_journal
+    )
+    
+    return result
 

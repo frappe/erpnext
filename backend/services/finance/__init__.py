@@ -10,6 +10,7 @@ from .period_management import PeriodManagementService
 from .fx_revaluation import FXRevaluationService
 from .smart_invoice import SmartInvoiceService
 from .payment_matching import PaymentMatchingEngine
+from .fixed_asset_depreciation import FixedAssetDepreciationService
 
 __all__ = [
     "JournalEntryService",
@@ -17,5 +18,6 @@ __all__ = [
     "PeriodManagementService",
     "FXRevaluationService",
     "SmartInvoiceService",
-    "PaymentMatchingEngine"
+    "PaymentMatchingEngine",
+    "FixedAssetDepreciationService"
 ]
