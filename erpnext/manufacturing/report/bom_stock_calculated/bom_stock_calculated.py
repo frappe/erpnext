@@ -103,10 +103,7 @@ def get_columns():
 
 
 def get_bom_data(filters):
-	if filters.get("show_exploded_view"):
-		bom_item_table = "BOM Explosion Item"
-	else:
-		bom_item_table = "BOM Item"
+	bom_item_table = "BOM Explosion Item" if filters.get("show_exploded_view") else "BOM Item"
 
 	bom_item = frappe.qb.DocType(bom_item_table)
 	bin = frappe.qb.DocType("Bin")
@@ -123,6 +120,7 @@ def get_bom_data(filters):
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
 		.groupby(bom_item.item_code)
+		.orderby(bom_item.idx)
 	)
 
 	if filters.get("warehouse"):
@@ -146,7 +144,26 @@ def get_bom_data(filters):
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
 
-	return query.run(as_dict=True)
+	if bom_item_table == "BOM Item":
+		query = query.select(bom_item.bom_no, bom_item.is_phantom_item)
+
+	data = query.run(as_dict=True)
+	return explode_phantom_boms(data, filters) if bom_item_table == "BOM Item" else data
+
+
+def explode_phantom_boms(data, filters):
+	indexes = []
+	for i, item in enumerate(data):
+		if item.is_phantom_item:
+			filters["bom"] = item.bom_no
+			indexes.append({"index": i, "items": get_bom_data(filters)})
+
+	for item in indexes:
+		index = item["index"]
+		data.pop(index)
+		data[index:index] = item["items"]
+
+	return data
 
 
 def get_manufacturer_records():

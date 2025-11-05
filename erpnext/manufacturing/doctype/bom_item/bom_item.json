@@ -320,7 +320,6 @@
    "fieldname": "is_phantom_item",
    "fieldtype": "Check",
    "label": "Is Phantom Item",
-   "no_copy": 1,
    "read_only": 1
   }
  ],
@@ -328,7 +327,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-05 13:09:53.874603",
+ "modified": "2025-11-05 19:00:38.646539",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

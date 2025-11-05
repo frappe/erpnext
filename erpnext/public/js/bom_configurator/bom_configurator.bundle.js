@@ -141,6 +141,17 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
+								label: __(frappe.utils.icon("add", "sm") + " Phantom Item"),
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
+									view.events.add_sub_assembly(node, view, true);
+								},
+								condition: function (node) {
+									return node.expandable;
+								},
+								btnClass: "hidden-xs",
+							},
+							{
 								label: __("Collapse All"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
@@ -253,10 +264,10 @@ class BOMConfigurator {
 		}
 	}
 
-	add_sub_assembly(node, view) {
+	add_sub_assembly(node, view, phantom = false) {
 		let dialog = new frappe.ui.Dialog({
-			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root),
-			title: __("Add Sub Assembly"),
+			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root, false, phantom),
+			title: phantom ? __("Add Phantom Item") : __("Add Sub Assembly"),
 		});
 		view.events.set_query_for_workstation(dialog);
 
@@ -282,6 +293,7 @@ class BOMConfigurator {
 					operation: node.data.operation,
 					workstation_type: node.data.workstation_type,
 					operation_time: node.data.operation_time,
+					phantom: phantom,
 				},
 				callback: (r) => {
 					view.events.load_tree(r, node);
@@ -292,15 +304,18 @@ class BOMConfigurator {
 		});
 	}
 
-	get_sub_assembly_modal_fields(view, is_root = false, read_only = false) {
+	get_sub_assembly_modal_fields(view, is_root = false, read_only = false, phantom = false) {
 		let fields = [
 			{
-				label: __("Sub Assembly Item"),
+				label: phantom ? __("Phantom Item") : __("Sub Assembly Item"),
 				fieldname: "item_code",
 				fieldtype: "Link",
 				options: "Item",
 				reqd: 1,
 				read_only: read_only,
+				filters: {
+					is_stock_item: !phantom,
+				},
 			},
 			{ fieldtype: "Column Break" },
 			{
@@ -320,7 +335,7 @@ class BOMConfigurator {
 			},
 		];
 
-		if (is_root) {
+		if (is_root && !phantom) {
 			fields.push(
 				...[
 					{ fieldtype: "Section Break" },

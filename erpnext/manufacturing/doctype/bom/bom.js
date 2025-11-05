@@ -529,6 +529,14 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_value("process_loss_qty", qty);
 	},
+
+	is_phantom_bom(frm) {
+		frm.doc.item = "";
+		frm.doc.uom = "";
+		frm.doc.quantity = 1;
+		frm.doc.items = undefined;
+		frm.refresh();
+	},
 });
 
 frappe.ui.form.on("BOM Operation", {
