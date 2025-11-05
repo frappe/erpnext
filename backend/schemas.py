@@ -412,6 +412,17 @@ class FXRevaluationResponse(BaseModel):
     journal_entry_id: Optional[str]
 
 
+# Smart Invoice Schemas (per Finance PDF spec - ZRA Compliance)
+class InvoiceValidationResponse(BaseModel):
+    """Invoice validation result"""
+    valid: bool
+    errors: List[str]
+    warnings: List[str]
+    invoice_number: Optional[str]
+    subtotal: Optional[float]
+    tax_total: Optional[float]
+
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int
