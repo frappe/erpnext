@@ -1077,7 +1077,8 @@ def get_accounting_period(
 # FX REVALUATION ENDPOINTS (per Finance PDF spec)
 # ============================================================================
 
-from services.finance import FXRevaluationService
+from services.finance import FXRevaluationService, SmartInvoiceService
+from fastapi.responses import Response
 
 
 @router.post("/fx/rates", response_model=schemas.ExchangeRateResponse)
@@ -1291,4 +1292,173 @@ def convert_currency(
         "converted_amount": float(converted),
         "exchange_rate": rate,
         "conversion_date": conversion_date
+    }
+
+
+# ============================================================================
+# SMART INVOICE ENDPOINTS (per Finance PDF spec - ZRA Compliance)
+# ============================================================================
+
+
+@router.post("/invoices/{invoice_id}/validate", response_model=schemas.InvoiceValidationResponse)
+def validate_invoice(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Validate invoice for ZRA compliance
+    
+    Checks:
+    - Supplier TPIN present
+    - Customer TPIN present (for B2B)
+    - Tax calculations correct
+    - All required fields present
+    - Invoice number unique
+    """
+    service = SmartInvoiceService(db, current_user.company_id, current_user.id)
+    result = service.validate_invoice(invoice_id)
+    return result
+
+
+@router.get("/invoices/{invoice_id}/ubl")
+def export_invoice_ubl(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Export invoice as UBL 2.1 XML (ZRA compliant)
+    
+    UBL (Universal Business Language) is the international standard
+    for electronic invoicing and is required for ZRA e-invoice submission.
+    
+    Returns XML content with proper content type.
+    """
+    service = SmartInvoiceService(db, current_user.company_id, current_user.id)
+    
+    try:
+        ubl_xml = service.generate_ubl_xml(invoice_id)
+        
+        # Return XML with proper content type
+        return Response(
+            content=ubl_xml,
+            media_type="application/xml",
+            headers={
+                "Content-Disposition": f"attachment; filename=invoice_{invoice_id}.xml"
+            }
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate UBL: {str(e)}")
+
+
+@router.get("/invoices/{invoice_id}/json")
+def export_invoice_json(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Export invoice as JSON (ZRA compliant)
+    
+    JSON format is an alternative to UBL XML for e-invoice submission.
+    It contains all the same information in a more compact format.
+    """
+    service = SmartInvoiceService(db, current_user.company_id, current_user.id)
+    
+    try:
+        json_invoice = service.generate_json_invoice(invoice_id)
+        return json_invoice
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate JSON: {str(e)}")
+
+
+@router.get("/invoices/{invoice_id}/qr")
+def generate_invoice_qr_code(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Generate QR code for invoice (ZRA compliance)
+    
+    QR code contains:
+    - Invoice number
+    - Invoice date
+    - Supplier TPIN
+    - Total amount
+    - Validation hash
+    
+    The QR code can be printed on the invoice for mobile verification.
+    Returns PNG image.
+    """
+    service = SmartInvoiceService(db, current_user.company_id, current_user.id)
+    
+    try:
+        qr_bytes = service.generate_qr_code(invoice_id)
+        
+        # Return image with proper content type
+        return Response(
+            content=qr_bytes,
+            media_type="image/png",
+            headers={
+                "Content-Disposition": f"inline; filename=invoice_{invoice_id}_qr.png"
+            }
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate QR code: {str(e)}")
+
+
+@router.post("/invoices/{invoice_id}/submit-zra")
+def submit_invoice_to_zra(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Submit invoice to ZRA e-invoice system (placeholder)
+    
+    This endpoint will integrate with ZRA's Smart Invoice API
+    to submit validated invoices for tax compliance.
+    
+    Note: Requires ZRA API credentials and active integration.
+    """
+    # Validate invoice first
+    service = SmartInvoiceService(db, current_user.company_id, current_user.id)
+    validation = service.validate_invoice(invoice_id)
+    
+    if not validation["valid"]:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Invoice validation failed",
+                "errors": validation["errors"],
+                "warnings": validation["warnings"]
+            }
+        )
+    
+    # TODO: Integrate with ZRA Smart Invoice API
+    # This would involve:
+    # 1. Generate UBL XML
+    # 2. Sign XML with digital certificate
+    # 3. Submit to ZRA endpoint
+    # 4. Receive ZRA reference number
+    # 5. Update invoice with ZRA status
+    
+    return {
+        "success": True,
+        "message": "ZRA integration pending - invoice validated and ready for submission",
+        "invoice_id": invoice_id,
+        "validation": validation,
+        "next_steps": [
+            "Configure ZRA API credentials",
+            "Obtain digital signing certificate",
+            "Enable ZRA integration in settings"
+        ]
     }

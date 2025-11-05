@@ -8,10 +8,12 @@ from .journal_service import JournalEntryService
 from .approval_workflow import ApprovalWorkflowEngine
 from .period_management import PeriodManagementService
 from .fx_revaluation import FXRevaluationService
+from .smart_invoice import SmartInvoiceService
 
 __all__ = [
     "JournalEntryService",
     "ApprovalWorkflowEngine",
     "PeriodManagementService",
-    "FXRevaluationService"
+    "FXRevaluationService",
+    "SmartInvoiceService"
 ]
