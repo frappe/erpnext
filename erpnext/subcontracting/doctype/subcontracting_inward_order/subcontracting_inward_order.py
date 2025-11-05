@@ -213,13 +213,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 				self.append("items", item)
 
 	def validate_customer_provided_items(self):
-		"""Check if atleast one raw material is customer provided"""
+		"""Check if at least one raw material is customer provided"""
 		for item in self.get("items"):
 			raw_materials = [rm for rm in self.get("received_items") if rm.main_item_code == item.item_code]
 			if not any([rm.is_customer_provided_item for rm in raw_materials]):
 				frappe.throw(
 					_(
-						"Atleast one raw material for Finished Good Item {0} should be customer provided."
+						"At least one raw material for Finished Good Item {0} should be customer provided."
 					).format(frappe.bold(item.item_code))
 				)
 
