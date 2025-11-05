@@ -874,3 +874,200 @@ def get_pending_approvals(
     workflow = ApprovalWorkflowEngine(db, current_user.company_id, current_user.id)
     pending = workflow.get_pending_approvals(document_type=document_type)
     return pending
+
+
+# ============================================================================
+# PERIOD MANAGEMENT ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+from services.finance import PeriodManagementService
+
+
+@router.post("/periods", response_model=schemas.AccountingPeriodResponse)
+def create_accounting_period(
+    data: schemas.AccountingPeriodCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Create a new accounting period
+    
+    Example:
+    {
+      "period_name": "January 2025",
+      "start_date": "2025-01-01",
+      "end_date": "2025-01-31",
+      "period_type": "monthly",
+      "fiscal_year": 2025
+    }
+    """
+    service = PeriodManagementService(db, current_user.company_id, current_user.id)
+    period = service.create_period(
+        period_name=data.period_name,
+        start_date=data.start_date,
+        end_date=data.end_date,
+        period_type=data.period_type,
+        fiscal_year=data.fiscal_year
+    )
+    return period
+
+
+@router.post("/periods/auto-create", response_model=List[schemas.AccountingPeriodResponse])
+def auto_create_periods(
+    data: schemas.AccountingPeriodAutoCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Auto-create accounting periods for a year
+    
+    Example (create all 12 months for 2025):
+    {
+      "start_year": 2025,
+      "num_years": 1,
+      "period_type": "monthly"
+    }
+    
+    Example (create quarters for 2025-2026):
+    {
+      "start_year": 2025,
+      "num_years": 2,
+      "period_type": "quarterly"
+    }
+    """
+    service = PeriodManagementService(db, current_user.company_id, current_user.id)
+    periods = service.auto_create_periods(
+        start_year=data.start_year,
+        num_years=data.num_years,
+        period_type=data.period_type
+    )
+    return periods
+
+
+@router.post("/periods/close", response_model=schemas.AccountingPeriodResponse)
+def close_accounting_period(
+    data: schemas.AccountingPeriodClose,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Close an accounting period (open → closed)
+    
+    Validates:
+    - No draft journal entries in period
+    - Period is currently open
+    
+    Closed periods:
+    - No new transactions allowed
+    - Existing transactions can be adjusted (with approval)
+    - Can be reopened if needed
+    
+    Example:
+    {
+      "period_id": "abc123",
+      "close_notes": "Month-end close complete"
+    }
+    """
+    service = PeriodManagementService(db, current_user.company_id, current_user.id)
+    period = service.close_period(
+        period_id=data.period_id,
+        close_notes=data.close_notes
+    )
+    return period
+
+
+@router.post("/periods/lock", response_model=schemas.AccountingPeriodResponse)
+def lock_accounting_period(
+    data: schemas.AccountingPeriodLock,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Lock an accounting period (closed → locked)
+    
+    WARNING: Locked periods are IMMUTABLE
+    - Cannot be unlocked (requires database intervention)
+    - All journal entries in period are also locked
+    - Used for year-end close and audit compliance
+    
+    Validates:
+    - Period must be closed first
+    
+    Example:
+    {
+      "period_id": "abc123",
+      "lock_notes": "Year-end close 2024 - audited"
+    }
+    """
+    service = PeriodManagementService(db, current_user.company_id, current_user.id)
+    period = service.lock_period(
+        period_id=data.period_id,
+        lock_notes=data.lock_notes
+    )
+    return period
+
+
+@router.post("/periods/reopen", response_model=schemas.AccountingPeriodResponse)
+def reopen_accounting_period(
+    data: schemas.AccountingPeriodReopen,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Reopen a closed accounting period (closed → open)
+    
+    Note: LOCKED periods CANNOT be reopened
+    Requires a reason for audit trail
+    
+    Example:
+    {
+      "period_id": "abc123",
+      "reopen_reason": "Adjustment required for missed invoice"
+    }
+    """
+    service = PeriodManagementService(db, current_user.company_id, current_user.id)
+    period = service.reopen_period(
+        period_id=data.period_id,
+        reopen_reason=data.reopen_reason
+    )
+    return period
+
+
+@router.get("/periods", response_model=List[schemas.AccountingPeriodResponse])
+def list_accounting_periods(
+    fiscal_year: Optional[int] = None,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    List all accounting periods for the company
+    
+    Query params:
+    - fiscal_year: Filter by fiscal year (e.g., 2025)
+    - status: Filter by status (open, closed, locked)
+    """
+    service = PeriodManagementService(db, current_user.company_id, current_user.id)
+    periods = service.get_all_periods(
+        fiscal_year=fiscal_year,
+        status=status
+    )
+    return periods
+
+
+@router.get("/periods/{period_id}", response_model=schemas.AccountingPeriodResponse)
+def get_accounting_period(
+    period_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Get details of a specific accounting period"""
+    period = db.query(models.AccountingPeriod).filter(
+        models.AccountingPeriod.id == period_id,
+        models.AccountingPeriod.company_id == current_user.company_id
+    ).first()
+    
+    if not period:
+        raise HTTPException(status_code=404, detail="Accounting period not found")
+    
+    return period

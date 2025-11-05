@@ -885,17 +885,28 @@ class AccountingPeriod(Base):
     id = Column(String, primary_key=True, default=generate_uuid)
     company_id = Column(String, ForeignKey("companies.id"), nullable=False)
     period_name = Column(String, nullable=False)  # e.g., "January 2025", "Q1 2025"
-    period_type = Column(String, default="month")  # month, quarter, year
+    period_type = Column(String, default="monthly")  # monthly, quarterly, yearly
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     fiscal_year = Column(Integer, nullable=False)
-    is_closed = Column(Boolean, default=False)
+    status = Column(String, default="open")  # open, closed, locked
+    close_notes = Column(Text)
     closed_at = Column(DateTime)
     closed_by = Column(String, ForeignKey("users.id"))
-    is_locked = Column(Boolean, default=False)
+    lock_notes = Column(Text)
     locked_at = Column(DateTime)
     locked_by = Column(String, ForeignKey("users.id"))
+    reopen_reason = Column(Text)
+    reopened_at = Column(DateTime)
+    reopened_by = Column(String, ForeignKey("users.id"))
+    created_by = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    company = relationship("Company")
+    closer = relationship("User", foreign_keys=[closed_by])
+    locker = relationship("User", foreign_keys=[locked_by])
+    reopener = relationship("User", foreign_keys=[reopened_by])
+    creator = relationship("User", foreign_keys=[created_by])
 
 class Invoice(Base):
     __tablename__ = "invoices"
