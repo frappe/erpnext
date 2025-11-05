@@ -12,15 +12,18 @@ def setup(company=None, patch=True):
 def update_regional_tax_settings(country=None, company=None):
 	"""Create UK VAT Tax Rules:-
 
-		- UK Domestic Purchases
-		- UK Domestic Sales
-		- UK to EU Sales
-		- UK to Rest of World Sales
+	- UK Domestic Purchases
+	- UK Domestic Sales
+	- UK to EU Sales
+	- UK to Rest of World Sales
 	"""
+	abbr = "UK"
+	if company is not None:
+		abbr = frappe.get_cached_value("Company", company, "abbr")
 	tax_rules = [
 		{
 			"doctype": "Tax Rule",
-			"name": "UK Standard Rated Purchases",
+			"name": "UK Standard Rated Purchases - " + abbr,
 			"tax_type": "Purchase",
 			"purchase_tax_template": frappe.db.get_value(
 				"Purchase Taxes and Charges Template",
@@ -32,7 +35,7 @@ def update_regional_tax_settings(country=None, company=None):
 		},
 		{
 			"doctype": "Tax Rule",
-			"name": "UK Reduced Rate Purchases",
+			"name": "UK Reduced Rate Purchases - " + abbr,
 			"tax_type": "Purchase",
 			"purchase_tax_template": frappe.db.get_value(
 				"Purchase Taxes and Charges Template",
@@ -44,7 +47,7 @@ def update_regional_tax_settings(country=None, company=None):
 		},
 		{
 			"doctype": "Tax Rule",
-			"name": "UK Zero Rated Purchases",
+			"name": "UK Zero Rated Purchases - " + abbr,
 			"tax_type": "Purchase",
 			"purchase_tax_template": frappe.db.get_value(
 				"Purchase Taxes and Charges Template",
@@ -56,7 +59,7 @@ def update_regional_tax_settings(country=None, company=None):
 		},
 		{
 			"doctype": "Tax Rule",
-			"name": "UK Standard Rated Sales",
+			"name": "UK Standard Rated Sales - " + abbr,
 			"tax_type": "Sales",
 			"sales_tax_template": frappe.db.get_value(
 				"Sales Taxes and Charges Template",
@@ -68,7 +71,7 @@ def update_regional_tax_settings(country=None, company=None):
 		},
 		{
 			"doctype": "Tax Rule",
-			"name": "UK Reduced Rate Sales",
+			"name": "UK Reduced Rate Sales - " + abbr,
 			"tax_type": "Sales",
 			"sales_tax_template": frappe.db.get_value(
 				"Sales Taxes and Charges Template",
@@ -80,7 +83,7 @@ def update_regional_tax_settings(country=None, company=None):
 		},
 		{
 			"doctype": "Tax Rule",
-			"name": "UK Zero Rated Sales",
+			"name": "UK Zero Rated Sales - " + abbr,
 			"tax_type": "Sales",
 			"sales_tax_template": frappe.db.get_value(
 				"Sales Taxes and Charges Template",
@@ -92,7 +95,7 @@ def update_regional_tax_settings(country=None, company=None):
 		},
 		{
 			"doctype": "Tax Rule",
-			"name": "UK to EU Sales",
+			"name": "UK to EU Sales - " + abbr,
 			"tax_type": "Sales",
 			"sales_tax_template": frappe.db.get_value(
 				"Sales Taxes and Charges Template",
@@ -105,7 +108,7 @@ def update_regional_tax_settings(country=None, company=None):
 		},
 		{
 			"doctype": "Tax Rule",
-			"name": "UK to Rest of World Sales",
+			"name": "UK to Rest of World Sales - " + abbr,
 			"tax_type": "Sales",
 			"sales_tax_template": frappe.db.get_value(
 				"Sales Taxes and Charges Template",
@@ -120,7 +123,6 @@ def update_regional_tax_settings(country=None, company=None):
 	make_records(tax_rules)
 	# The names aren't applied, as Tax Rule has an Autoname rule. However,
 	# renaming is allowed...
-	docs = frappe.get_all('Tax Rule', filters={'company': company}, fields=['name'], order_by='creation asc')
+	docs = frappe.get_all("Tax Rule", filters={"company": company}, fields=["name"], order_by="creation asc")
 	for i, tax_rule in enumerate(tax_rules):
 		frappe.rename_doc("Tax Rule", docs[i].name, tax_rule["name"])
-
