@@ -1,2 +1,1 @@
-web: gunicorn --bind 0.0.0.0:$PORT wsgi:application
-
+web: gunicorn --config gunicorn.conf.py wsgi:application
