@@ -1,5 +1,5 @@
 {
- "add_total_row": 1,
+ "add_total_row": 0,
  "add_translate_data": 0,
  "columns": [],
  "creation": "2013-12-06 13:22:23",
@@ -10,7 +10,7 @@
  "idx": 3,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-08-13 12:47:27.645023",
+ "modified": "2025-11-05 15:47:59.597853",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "General Ledger",
