@@ -28,7 +28,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Queued\nRunning\nCompleted\nCancelled"
+   "options": "Queued\nRunning\nPaused\nCompleted\nCancelled"
   },
   {
    "fieldname": "amended_from",
@@ -70,7 +70,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-20 12:06:32.613247",
+ "modified": "2025-11-05 11:40:24.996403",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",

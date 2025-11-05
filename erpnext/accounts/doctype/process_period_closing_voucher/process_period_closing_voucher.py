@@ -34,7 +34,7 @@ class ProcessPeriodClosingVoucher(Document):
 		normal_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
 		p_l_closing_balance: DF.JSON | None
 		parent_pcv: DF.Link
-		status: DF.Literal["Queued", "Running", "Completed", "Cancelled"]
+		status: DF.Literal["Queued", "Running", "Paused", "Completed", "Cancelled"]
 		z_opening_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
 	# end: auto-generated types
 
