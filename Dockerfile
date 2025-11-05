@@ -1,68 +1,58 @@
 # ========= مرحلة البناء =========
-FROM python:3.11-slim AS builder
+FROM python:3.11-slim AS build
 
-# تعيين مجلد العمل
 WORKDIR /app
 
-# تثبيت المتطلبات الأساسية
+# تثبيت أدوات البناء المطلوبة لتجميع mysqlclient
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    wget \
     build-essential \
-    mariadb-client \
-    libffi-dev \
-    libssl-dev \
+    pkg-config \
     libmariadb-dev \
     libmariadb-dev-compat \
-    python3-dev \
-    pkg-config \
-    xfonts-base \
-    xfonts-75dpi \
-    fontconfig \
-    && apt-get install -y --no-install-recommends \
-       wkhtmltopdf \
-       || (echo "⚠️ Installing wkhtmltopdf from source..." \
-       && wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb \
-       && apt-get install -y ./wkhtmltox_0.12.6-1.buster_amd64.deb) \
+    libffi-dev \
+    libssl-dev \
+    curl \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# نسخ الملفات إلى الحاوية
+# نسخ ملفات المشروع
 COPY . .
 
-# تحديث pip وتثبيت متطلبات المشروع
-RUN pip install --upgrade pip setuptools wheel \
-    && pip install frappe-bench gunicorn mysqlclient --no-cache-dir \
-    && pip install -r requirements.txt --no-cache-dir || true
+# تثبيت بايثون باقات (بدون كاش)
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt --no-cache-dir
+
 
 # ========= مرحلة التشغيل =========
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# تثبيت المتطلبات الضرورية فقط للتشغيل (أخف حجمًا)
+# تثبيت الحزم الأساسية لتشغيل Frappe و wkhtmltopdf
 RUN apt-get update && apt-get install -y \
     mariadb-client \
     libmariadb-dev-compat \
-    wkhtmltopdf \
     fontconfig \
-    && rm -rf /var/lib/apt/lists/*
+    xfonts-75dpi \
+    xfonts-base \
+    wget \
+    && wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb \
+    && apt-get install -y ./wkhtmltox_0.12.6-1.buster_amd64.deb \
+    && rm -rf /var/lib/apt/lists/* wkhtmltox_0.12.6-1.buster_amd64.deb
 
-# نسخ الملفات من مرحلة البناء
-COPY --from=builder /usr/local /usr/local
+# نسخ الملفات المثبّتة من مرحلة البناء
+COPY --from=build /usr/local/lib/python3.11 /usr/local/lib/python3.11
+COPY --from=build /usr/local/bin /usr/local/bin
 COPY . .
 
-# إعداد متغيرات قاعدة البيانات (Railway)
-ENV MYSQL_DATABASE=railway \
-    MYSQL_USER=root \
-    MYSQL_PASSWORD=eLtJZovDmgTLoeBlFYbvzoudseKHyrFY \
-    MYSQL_HOST=mainline.proxy.rlwy.net \
-    MYSQL_PORT=40503 \
-    FRAPPE_SITE_NAME=kanaan.localhost \
-    TZ=Asia/Tehran
+# تعريف متغيرات البيئة
+ENV PYTHONUNBUFFERED=1 \
+    FRAPPE_ENV=production \
+    SITE_NAME=site1.local \
+    PORT=8000
 
 # فتح المنفذ 8000
 EXPOSE 8000
 
-# أمر التشغيل (تشغيل Frappe عبر bench أو Gunicorn)
-CMD ["bash", "-c", "bench start || gunicorn --bind 0.0.0.0:8000 wsgi:application"]
+# تشغيل Gunicorn مع WSGI
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "wsgi:application"]
