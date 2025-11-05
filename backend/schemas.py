@@ -352,6 +352,66 @@ class AccountingPeriodResponse(BaseModel):
         from_attributes = True
 
 
+# FX Revaluation Schemas (per Finance PDF spec)
+class ExchangeRateCreate(BaseModel):
+    """Add or update exchange rate"""
+    from_currency: str  # Source currency (e.g., USD)
+    to_currency: str    # Target currency (e.g., ZMW)
+    rate: float         # Exchange rate (e.g., 27.5 means 1 USD = 27.5 ZMW)
+    rate_date: date     # Date of the rate
+    rate_type: str = "official"  # official, market, custom
+    source: Optional[str] = "manual"
+
+
+class ExchangeRateResponse(BaseModel):
+    """Exchange rate details"""
+    id: str
+    company_id: str
+    from_currency: str
+    to_currency: str
+    rate: float
+    rate_date: date
+    rate_type: str
+    source: Optional[str]
+    created_at: datetime
+    created_by: Optional[str]
+    updated_at: Optional[datetime]
+    updated_by: Optional[str]
+    
+    class Config:
+        from_attributes = True
+
+
+class FXRevaluationRequest(BaseModel):
+    """Request to perform FX revaluation"""
+    revaluation_date: date
+    currencies: Optional[List[str]] = None  # None = all currencies
+    create_journal: bool = True
+
+
+class FXRevaluationLineDetail(BaseModel):
+    """Single account revaluation detail"""
+    account_id: str
+    account_code: str
+    account_name: str
+    currency: str
+    fc_balance: float  # Foreign currency balance
+    exchange_rate: float
+    current_value_base: float  # Current value in base currency
+    book_value_base: float     # Book value in base currency
+    unrealized_gain_loss: float  # Positive = gain, Negative = loss
+
+
+class FXRevaluationResponse(BaseModel):
+    """FX revaluation result"""
+    success: bool
+    revaluation_date: date
+    accounts_revalued: int
+    total_gain_loss: float
+    revaluation_lines: List[FXRevaluationLineDetail]
+    journal_entry_id: Optional[str]
+
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int

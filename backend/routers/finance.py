@@ -1071,3 +1071,224 @@ def get_accounting_period(
         raise HTTPException(status_code=404, detail="Accounting period not found")
     
     return period
+
+
+# ============================================================================
+# FX REVALUATION ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+from services.finance import FXRevaluationService
+
+
+@router.post("/fx/rates", response_model=schemas.ExchangeRateResponse)
+def add_exchange_rate(
+    data: schemas.ExchangeRateCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Add or update exchange rate for a currency pair
+    
+    Example (1 USD = 27.5 ZMW on Nov 5, 2025):
+    {
+      "from_currency": "USD",
+      "to_currency": "ZMW",
+      "rate": 27.5,
+      "rate_date": "2025-11-05",
+      "rate_type": "official",
+      "source": "Bank of Zambia"
+    }
+    """
+    service = FXRevaluationService(db, current_user.company_id, current_user.id)
+    rate = service.add_exchange_rate(
+        from_currency=data.from_currency,
+        to_currency=data.to_currency,
+        rate=data.rate,
+        rate_date=data.rate_date,
+        rate_type=data.rate_type
+    )
+    return rate
+
+
+@router.get("/fx/rates", response_model=List[schemas.ExchangeRateResponse])
+def list_exchange_rates(
+    from_currency: Optional[str] = None,
+    to_currency: Optional[str] = None,
+    from_date: Optional[date] = None,
+    to_date: Optional[date] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    List all exchange rates for the company
+    
+    Query params:
+    - from_currency: Filter by source currency (e.g., USD)
+    - to_currency: Filter by target currency (e.g., ZMW)
+    - from_date: Filter rates from this date
+    - to_date: Filter rates to this date
+    """
+    query = db.query(models.ExchangeRate).filter(
+        models.ExchangeRate.company_id == current_user.company_id
+    )
+    
+    if from_currency:
+        query = query.filter(models.ExchangeRate.from_currency == from_currency)
+    if to_currency:
+        query = query.filter(models.ExchangeRate.to_currency == to_currency)
+    if from_date:
+        query = query.filter(models.ExchangeRate.rate_date >= from_date)
+    if to_date:
+        query = query.filter(models.ExchangeRate.rate_date <= to_date)
+    
+    rates = query.order_by(models.ExchangeRate.rate_date.desc()).all()
+    return rates
+
+
+@router.get("/fx/rates/{currency_pair}/{rate_date}")
+def get_exchange_rate(
+    currency_pair: str,  # Format: USD-ZMW
+    rate_date: date,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Get specific exchange rate for a currency pair and date
+    
+    URL format: /fx/rates/USD-ZMW/2025-11-05
+    
+    Returns the rate or the most recent rate before the specified date.
+    """
+    try:
+        from_currency, to_currency = currency_pair.split("-")
+    except:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid currency pair format. Use: USD-ZMW"
+        )
+    
+    service = FXRevaluationService(db, current_user.company_id, current_user.id)
+    rate_value = service.get_exchange_rate(from_currency, to_currency, rate_date)
+    
+    if rate_value is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No exchange rate found for {currency_pair} on or before {rate_date}"
+        )
+    
+    return {
+        "from_currency": from_currency,
+        "to_currency": to_currency,
+        "rate": rate_value,
+        "rate_date": rate_date
+    }
+
+
+@router.post("/fx/revaluate", response_model=schemas.FXRevaluationResponse)
+def perform_fx_revaluation(
+    data: schemas.FXRevaluationRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Perform FX revaluation for all foreign currency accounts
+    
+    This calculates unrealized gains/losses and optionally creates
+    a revaluation journal entry.
+    
+    Process:
+    1. Identify accounts marked for FX revaluation
+    2. Get current balances in foreign currency
+    3. Apply current exchange rate vs. book rate
+    4. Calculate unrealized gain/loss
+    5. Create revaluation journal entry (if requested)
+    
+    Example (revalue all USD accounts as of Nov 5, 2025):
+    {
+      "revaluation_date": "2025-11-05",
+      "currencies": ["USD"],
+      "create_journal": true
+    }
+    
+    Example (revalue all foreign currencies):
+    {
+      "revaluation_date": "2025-11-05",
+      "currencies": null,
+      "create_journal": true
+    }
+    """
+    service = FXRevaluationService(db, current_user.company_id, current_user.id)
+    result = service.perform_revaluation(
+        revaluation_date=data.revaluation_date,
+        currencies=data.currencies,
+        create_journal=data.create_journal
+    )
+    return result
+
+
+@router.get("/fx/revaluation-history")
+def get_revaluation_history(
+    from_date: Optional[date] = None,
+    to_date: Optional[date] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Get history of FX revaluations
+    
+    Returns all journal entries created by the FX revaluation process.
+    """
+    service = FXRevaluationService(db, current_user.company_id, current_user.id)
+    history = service.get_revaluation_history(from_date=from_date, to_date=to_date)
+    return {
+        "success": True,
+        "count": len(history),
+        "revaluations": history
+    }
+
+
+@router.post("/fx/convert")
+def convert_currency(
+    from_currency: str,
+    to_currency: str,
+    amount: float,
+    conversion_date: date,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Convert amount from one currency to another using historical rate
+    
+    Example: Convert 1000 USD to ZMW on Nov 5, 2025
+    Query params:
+    - from_currency=USD
+    - to_currency=ZMW
+    - amount=1000
+    - conversion_date=2025-11-05
+    """
+    service = FXRevaluationService(db, current_user.company_id, current_user.id)
+    
+    from decimal import Decimal
+    converted = service.convert_amount(
+        amount=Decimal(str(amount)),
+        from_currency=from_currency,
+        to_currency=to_currency,
+        conversion_date=conversion_date
+    )
+    
+    if converted is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No exchange rate available for {from_currency}/{to_currency} on {conversion_date}"
+        )
+    
+    rate = service.get_exchange_rate(from_currency, to_currency, conversion_date)
+    
+    return {
+        "from_currency": from_currency,
+        "to_currency": to_currency,
+        "amount": amount,
+        "converted_amount": float(converted),
+        "exchange_rate": rate,
+        "conversion_date": conversion_date
+    }
