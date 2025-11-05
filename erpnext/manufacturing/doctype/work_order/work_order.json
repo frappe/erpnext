@@ -20,6 +20,7 @@
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
+  "disassembled_qty",
   "process_loss_qty",
   "section_break_ndpq",
   "required_items",
@@ -577,6 +578,14 @@
   {
    "fieldname": "section_break_ndpq",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "disassembled_qty",
+   "fieldtype": "Float",
+   "label": "Disassembled Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",

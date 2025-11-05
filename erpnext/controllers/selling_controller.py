@@ -520,6 +520,15 @@ class SellingController(StockController):
 					d.incoming_rate = get_rate_for_return(
 						self.doctype, self.name, d.item_code, self.return_against, item_row=d
 					)
+				
+				if (
+					self.get("is_return")
+					and not d.incoming_rate
+					and not self.get("return_against")
+					and not self.is_internal_transfer()
+					and not d.get("allow_zero_valuation_rate")
+				):
+					d.incoming_rate = d.rate
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():

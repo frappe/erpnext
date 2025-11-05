@@ -156,6 +156,17 @@ status_map = {
 		["Draft", None],
 		["Completed", "eval:self.docstatus == 1"],
 	],
+	"Pick List": [
+		["Draft", None],
+		["Open", "eval:self.docstatus == 1"],
+		["Completed", "stock_entry_exists"],
+		[
+			"Partly Delivered",
+			"eval:self.purpose == 'Delivery' and self.delivery_status == 'Partly Delivered'",
+		],
+		["Completed", "eval:self.purpose == 'Delivery' and self.delivery_status == 'Fully Delivered'"],
+		["Cancelled", "eval:self.docstatus == 2"],
+	],
 }
 
 

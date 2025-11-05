@@ -1667,8 +1667,8 @@ def create_pick_list(source_name, target_doc=None):
 				"doctype": "Pick List Item",
 				"field_map": {
 					"parent": "sales_order",
-					"name": "sales_order_item",
-					"parent_detail_docname": "product_bundle_item",
+					"parent_detail_docname": "sales_order_item",
+					"name": "product_bundle_item",
 				},
 				"field_no_map": ["picked_qty"],
 				"postprocess": update_packed_item_qty,

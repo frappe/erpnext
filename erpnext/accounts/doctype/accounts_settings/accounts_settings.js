@@ -22,7 +22,23 @@ frappe.ui.form.on("Accounts Settings", {
 			}
 		);
 	},
+	add_taxes_from_taxes_and_charges_template(frm) {
+		toggle_tax_settings(frm, "add_taxes_from_taxes_and_charges_template");
+	},
+	add_taxes_from_item_tax_template(frm) {
+		toggle_tax_settings(frm, "add_taxes_from_item_tax_template");
+	},
 });
+
+function toggle_tax_settings(frm, field_name) {
+	if (frm.doc[field_name]) {
+		const other_field =
+			field_name === "add_taxes_from_item_tax_template"
+				? "add_taxes_from_taxes_and_charges_template"
+				: "add_taxes_from_item_tax_template";
+		frm.set_value(other_field, 0);
+	}
+}
 
 
 frappe.ui.form.on('Accounts Settings', {
@@ -34,3 +50,4 @@ frappe.ui.form.on('Accounts Settings', {
 		
     }
 });
+

@@ -165,6 +165,20 @@ class DeliveryNote(SellingController):
 				"overflow_type": "delivery",
 				"no_allowance": 1,
 			},
+
+			{
+				"source_dt": "Delivery Note Item",
+				"target_dt": "Pick List Item",
+				"join_field": "pick_list_item",
+				"target_field": "delivered_qty",
+				"target_parent_dt": "Pick List",
+				"target_parent_field": "per_delivered",
+				"target_ref_field": "picked_qty",
+				"source_field": "stock_qty",
+				"percent_join_field": "against_pick_list",
+				"status_field": "delivery_status",
+				"keyword": "Delivered",
+			},
 		]
 		if cint(self.is_return):
 			self.status_updater.extend(
@@ -310,18 +324,15 @@ class DeliveryNote(SellingController):
 	def set_serial_and_batch_bundle_from_pick_list(self):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		if not self.pick_list:
-			return
-
 		for item in self.items:
-			if item.use_serial_batch_fields:
+			if item.use_serial_batch_fields or not item.against_pick_list:
 				continue
 
 			if item.pick_list_item and not item.serial_and_batch_bundle:
 				filters = {
 					"item_code": item.item_code,
 					"voucher_type": "Pick List",
-					"voucher_no": self.pick_list,
+					"voucher_no": item.against_pick_list,
 					"voucher_detail_no": item.pick_list_item,
 				}
 
@@ -556,7 +567,9 @@ class DeliveryNote(SellingController):
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
 
-		update_pick_list_status(self.pick_list)
+		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
+		for pick_list in pick_lists:
+			update_pick_list_status(pick_list)
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
