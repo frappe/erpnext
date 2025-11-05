@@ -5047,7 +5047,7 @@
 									"root_type": "Asset",
 									"tax_rate": 20.00
 								},
-								"tax_rate": 20.00
+								"rate": 20.00
 							}
 						]
 					},
@@ -5060,7 +5060,7 @@
 									"root_type": "Asset",
 									"tax_rate": 5.00
 								},
-								"tax_rate": 5.00
+								"rate": 5.00
 							}
 						]
 					},
@@ -5073,7 +5073,7 @@
 									"root_type": "Asset",
 									"tax_rate": 0.00
 								},
-								"tax_rate": 0.00
+								"rate": 0.00
 							}
 						]
 					},
@@ -5086,7 +5086,7 @@
 									"root_type": "Asset",
 									"tax_rate": -20.00
 								},
-								"tax_rate": -20.00
+								"rate": -20.00
 							},
 							{
 								"account_head": {
@@ -5094,7 +5094,7 @@
 									"root_type": "Liability",
 									"tax_rate": 20.00
 								},
-								"tax_rate": 20.00
+								"rate": 20.00
 							}
 						]
 					}
