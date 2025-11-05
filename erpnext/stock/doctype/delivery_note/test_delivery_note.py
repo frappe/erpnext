@@ -8,7 +8,7 @@ from collections import defaultdict
 import frappe
 from frappe.tests.utils import FrappeTestCase, if_app_installed
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
-
+from frappe.tests import change_settings
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, make_company
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_customer, make_test_item
 from erpnext.accounts.utils import get_balance_on
@@ -1752,6 +1752,30 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn2.get("items")[0].billed_amt, 300)
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
+
+	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
+	def test_sales_invoice_qty_after_return(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		dn = create_delivery_note(qty=10)
+
+		dnr1 = make_sales_return(dn.name)
+		dnr1.get("items")[0].qty = -3
+		dnr1.save().submit()
+
+		dnr2 = make_sales_return(dn.name)
+		dnr2.get("items")[0].qty = -2
+		dnr2.save().submit()
+
+		si = make_sales_invoice(dn.name)
+		si.save().submit()
+
+		self.assertEqual(si.get("items")[0].qty, 5)
+
+		si.reload().cancel().delete()
+		dnr1.reload().cancel().delete()
+		dnr2.reload().cancel().delete()
+		dn.reload().cancel().delete()
 
 	def test_dn_billing_status_case3(self):
 		# SO -> DN1 -> SI and SO -> SI and SO -> DN2

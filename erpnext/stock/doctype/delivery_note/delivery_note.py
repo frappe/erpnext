@@ -763,13 +763,15 @@ def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
 	returned_qty_map = frappe._dict(
 		frappe.db.sql(
-			"""select dn_item.dn_detail, abs(dn_item.qty) as qty
-		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name = dn_item.parent
-			and dn.docstatus = 1
-			and dn.is_return = 1
-			and dn.return_against = %s
-	""",
+			"""select dn_item.dn_detail, sum(abs(dn_item.qty)) as qty
+			from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
+			where dn.name = dn_item.parent
+				and dn.docstatus = 1
+				and dn.is_return = 1
+				and dn.return_against = %s
+				and dn_item.qty <= 0
+				group by dn_item.item_code
+		""",
 			delivery_note,
 		)
 	)

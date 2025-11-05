@@ -341,13 +341,24 @@ class SerialBatchBundle:
 		if not self.sle.serial_and_batch_bundle and self.sle.serial_no:
 			serial_nos = get_parsed_serial_nos(self.sle.serial_no)
 
-		warehouse = self.warehouse if self.sle.actual_qty > 0 else None
-
 		if not serial_nos:
 			return
+		
+		if self.sle.voucher_type == "Stock Reconciliation" and self.sle.actual_qty > 0:
+			self.update_serial_no_status_for_stock_reco(serial_nos)
+			return
+
+		self.update_serial_no_status_warehouse(self.sle, serial_nos)
+
+	def update_serial_no_status_warehouse(self, sle, serial_nos):
+		warehouse = self.warehouse if sle.actual_qty > 0 else None
+
+		if isinstance(serial_nos, str):
+			serial_nos = [serial_nos]
+
 
 		status = "Inactive"
-		if self.sle.actual_qty < 0:
+		if sle.actual_qty < 0:
 			status = "Delivered"
 
 		sn_table = frappe.qb.DocType("Serial No")
@@ -360,17 +371,17 @@ class SerialBatchBundle:
 				"Active"
 				if warehouse
 				else status
-				if (sn_table.purchase_document_no != self.sle.voucher_no and self.sle.is_cancelled != 1)
+				if (sn_table.purchase_document_no != sle.voucher_no and sle.is_cancelled != 1)
 				else "Inactive",
 			)
-			.set(sn_table.company, self.sle.company)
+			.set(sn_table.company, sle.company)
 			.where(sn_table.name.isin(serial_nos))
 		)
 
 		if status == "Delivered":
-			warranty_period = frappe.get_cached_value("Item", self.sle.item_code, "warranty_period")
+			warranty_period = frappe.get_cached_value("Item", sle.item_code, "warranty_period")
 			if warranty_period:
-				warranty_expiry_date = add_days(self.sle.posting_date, cint(warranty_period))
+				warranty_expiry_date = add_days(sle.posting_date, cint(warranty_period))
 				query = query.set(sn_table.warranty_expiry_date, warranty_expiry_date)
 				query = query.set(sn_table.warranty_period, warranty_period)
 		else:
@@ -378,6 +389,41 @@ class SerialBatchBundle:
 			query = query.set(sn_table.warranty_period, 0)
 
 		query.run()
+
+	
+	def update_serial_no_status_for_stock_reco(self, serial_nos):
+		for serial_no in serial_nos:
+			sle_doctype = frappe.qb.DocType("Stock Ledger Entry")
+			sn_table = frappe.qb.DocType("Serial and Batch Entry")
+
+			query = (
+				frappe.qb.from_(sle_doctype)
+				.inner_join(sn_table)
+				.on(sle_doctype.serial_and_batch_bundle == sn_table.parent)
+				.select(
+					sle_doctype.warehouse,
+					sle_doctype.actual_qty,
+					sle_doctype.voucher_type,
+					sle_doctype.voucher_no,
+					sle_doctype.is_cancelled,
+					sle_doctype.item_code,
+					sle_doctype.posting_date,
+					sle_doctype.company,
+				)
+				.where(
+					(sn_table.serial_no == serial_no)
+					& (sle_doctype.is_cancelled == 0)
+					& (sn_table.docstatus == 1)
+				)
+				.orderby(sle_doctype.posting_datetime, order=Order.desc)
+				.orderby(sle_doctype.creation, order=Order.desc)
+				.limit(1)
+			)
+
+			sle = query.run(as_dict=1)
+			if sle:
+				self.update_serial_no_status_warehouse(sle[0], serial_no)
+				
 
 	def set_batch_no_in_serial_nos(self):
 		entries = frappe.get_all(
