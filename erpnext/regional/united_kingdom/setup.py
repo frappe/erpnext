@@ -12,8 +12,12 @@ def setup(company=None, patch=True):
 def update_regional_tax_settings(country=None, company=None):
 	"""Create UK VAT Tax Rules:-
 
-	- UK Domestic Purchases
-	- UK Domestic Sales
+	- UK Standard Rated Purchases
+	- UK Reduced Rate Purchases
+	- UK Zero Rated Purchases
+	- UK Standard Rated Sales
+	- UK Reduced Rate Sales
+	- UK Zero Rated Sales
 	- UK to EU Sales
 	- UK to Rest of World Sales
 	"""
@@ -120,9 +124,9 @@ def update_regional_tax_settings(country=None, company=None):
 			"company": company,
 		},
 	]
-	make_records(tax_rules)
-	# The names aren't applied, as Tax Rule has an Autoname rule. However,
-	# renaming is allowed...
-	docs = frappe.get_all("Tax Rule", filters={"company": company}, fields=["name"], order_by="creation asc")
-	for i, tax_rule in enumerate(tax_rules):
-		frappe.rename_doc("Tax Rule", docs[i].name, tax_rule["name"])
+	# Setting the `in_import` flag to True allows us to apply the `name`
+	frappe.flags.in_import = True
+	try:
+		make_records(tax_rules)
+	finally:
+		frappe.flags.in_import = False
