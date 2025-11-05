@@ -1,91 +1,92 @@
-FROM python:3.11-bookworm
+FROM ubuntu:22.04
 
 # Set environment variables
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 \
-    PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
-# Install system dependencies
+# Install basic dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
     git \
-    gcc \
-    g++ \
-    make \
-    python3-dev \
-    libffi-dev \
-    libssl-dev \
-    libmariadb-dev \
-    libjpeg-dev \
-    libxslt1-dev \
-    libldap2-dev \
-    libsasl2-dev \
-    mariadb-client \
-    libmariadb-dev-compat \
-    fontconfig \
-    xfonts-75dpi \
-    xfonts-base \
-    xvfb \
-    && wget -O /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bookworm_amd64.deb \
-    && dpkg -i /tmp/wkhtmltox.deb || apt-get -f -y install \
-    && ln -s /usr/local/bin/wkhtmltopdf /usr/bin/wkhtmltopdf \
-    && rm -rf /var/lib/apt/lists/* /tmp/wkhtmltox.deb
+    python3 \
+    python3-pip \
+    python3-venv \
+    software-properties-common \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js and npm
+# Install Node.js 18
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
-# Install yarn
-RUN npm install -g yarn
+# Install MariaDB client and other dependencies
+RUN apt-get update && apt-get install -y \
+    mariadb-client \
+    libmariadb-dev \
+    build-essential \
+    python3-dev \
+    libssl-dev \
+    libffi-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create app directory
-RUN mkdir -p /home/frappe/bench
+# Install wkhtmltopdf
+RUN wget -O /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb \
+    && apt-get update && apt-get install -y /tmp/wkhtmltox.deb \
+    && rm /tmp/wkhtmltox.deb
+
+# Create user and directories
+RUN useradd -m -s /bin/bash frappe \
+    && mkdir -p /home/frappe/bench
+
 WORKDIR /home/frappe/bench
 
-# Install Python dependencies for Frappe/ERPNext
-RUN pip install --upgrade pip
-RUN pip install frappe-bench
+# Install bench
+RUN pip3 install frappe-bench
 
-# Initialize bench (if needed)
-RUN bench init frappe-bench --skip-assets --python $(which python) --skip-redis-config-generation
+# Initialize bench
+USER frappe
+RUN bench init frappe-bench --python python3 --skip-assets
 
 WORKDIR /home/frappe/bench/frappe-bench
 
-# Clone ERPNext repo (adjust version as needed)
+# Install ERPNext
 RUN bench get-app erpnext https://github.com/frappe/erpnext --branch version-14
 
-# Expose ports
-EXPOSE 8000 9000
+# Switch back to root for startup script
+USER root
 
 # Create startup script
-RUN cat > /start.sh << EOF
-#!/bin/bash
-
-# Check if site exists, if not create one
-if [ ! -f /home/frappe/bench/frappe-bench/sites/.initialized ]; then
-    echo "Initializing new site..."
-    
-    # Set MariaDB connection details from environment variables
-    export DB_HOST=\${DB_HOST:-localhost}
-    export DB_PORT=\${DB_PORT:-3306}
-    export DB_NAME=\${DB_NAME:-frappe}
-    export DB_USER=\${DB_USER:-root}
-    export DB_PASSWORD=\${DB_PASSWORD:-}
-    
-    # Create site
-    bench new-site \${SITE_NAME:-erp.example.com} \
-        --mariadb-root-password=\${DB_PASSWORD} \
-        --admin-password=\${ADMIN_PASSWORD:-admin} \
-        --install-app erpnext \
-        --force
-    
-    touch /home/frappe/bench/frappe-bench/sites/.initialized
-fi
-
-# Start bench services
-bench start
-EOF
+RUN echo '#!/bin/bash\n\
+\n\
+cd /home/frappe/bench/frappe-bench\n\
+\n\
+# Wait for database to be ready\n\
+echo "Waiting for database..."\n\
+while ! mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD -P $DB_PORT -e "SELECT 1;" > /dev/null 2>&1; do\n\
+  sleep 5\n\
+done\n\
+\n\
+# Check if site exists\n\
+if [ ! -f sites/.initialized ]; then\n\
+  echo "Creating new site..."\n\
+  su frappe -c "cd /home/frappe/bench/frappe-bench && bench new-site $SITE_NAME --mariadb-root-password=$DB_PASSWORD --admin-password=$ADMIN_PASSWORD --force"\n\
+  su frappe -c "cd /home/frappe/bench/frappe-bench && bench --site $SITE_NAME install-app erpnext"\n\
+  touch sites/.initialized\n\
+  echo "Site created successfully!"\n\
+fi\n\
+\n\
+echo "Starting bench..."\n\
+su frappe -c "cd /home/frappe/bench/frappe-bench && bench start"\n\
+' > /start.sh
 
 RUN chmod +x /start.sh
 
-CMD ["/start.sh"]
+EXPOSE 8000 9000
+
+CMD ["/bin/bash", "/start.sh"]
