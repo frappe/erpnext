@@ -249,6 +249,7 @@ class AccountsController(TransactionBase):
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
 			self.validate_tax_account_company()
+			self.validate_tax_account_type()
 
 		self.set_taxes_and_charges()
 
@@ -1217,6 +1218,30 @@ class AccountsController(TransactionBase):
 							d.idx, d.account_head, self.company
 						)
 					)
+
+	def validate_tax_account_type(self):
+		for d in self.get("taxes"):
+			if d.account_head:
+				account_type = frappe.get_cached_value("Account", d.account_head, "account_type")
+
+				if self.doctype in ["Sales Invoice", "Sales Order", "Quotation", "Delivery Note"]:
+					valid_types = ["Tax", "Chargeable", "Indirect Expense"]
+					transaction_type = "Sales"
+				else:
+					valid_types = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]
+					transaction_type = "Purchase"
+
+				if account_type and account_type not in valid_types:
+					msg = (
+						_("Row #{0}: Account {1} of type {2} is not allowed for {3} taxes.").format(
+							d.idx, frappe.bold(d.account_head), frappe.bold(account_type), transaction_type
+						)
+						+ " "
+					)
+					msg += _("Please select an account with type: {0}").format(
+						", ".join([frappe.bold(t) for t in valid_types])
+					)
+					frappe.throw(msg, title=_("Invalid Tax Account"))
 
 	def get_gl_dict(self, args, account_currency=None, item=None):
 		"""this method populates the common properties of a gl entry record"""
