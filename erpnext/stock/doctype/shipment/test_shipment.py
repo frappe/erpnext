@@ -11,6 +11,8 @@ from erpnext.accounts.doctype.account.test_account import make_company
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_address
 from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
 from erpnext.stock.doctype.item.test_item import get_hsn
+from erpnext.accounts.utils import get_fiscal_year
+from datetime import date
 
 
 class TestShipment(FrappeTestCase):
@@ -330,7 +332,20 @@ def get_shipment_company_address(company_name):
 
 
 def get_shipment_company():
-	return frappe.get_doc("Company", "_Test Company")
+	company = "_Test Company" 
+	fiscal_year = get_fiscal_year()["name"]
+
+	exists = frappe.db.exists(
+    "Fiscal Year Company",
+    {"parent": fiscal_year, "company": company}
+	)
+
+	if not exists:
+		fy_doc = frappe.get_doc("Fiscal Year", fiscal_year)
+		fy_doc.append("companies", {"company": company})
+		fy_doc.save()
+
+	return frappe.get_doc("Company",company)
 
 
 def get_shipment_item(company_name):
