@@ -224,7 +224,7 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 
 			frappe.flags.tree_conditions[key] = condition
 		elif allow_blank:
-		condition = f"ifnull({table}.{field}, '') = ''"
+			condition = f"ifnull({table}.{field}, '') = ''"
 	return condition
 
 

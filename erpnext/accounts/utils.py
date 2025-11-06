@@ -713,7 +713,7 @@ def update_reference_in_payment_entry(
 
 	# Update Reconciliation effect date in reference
 	reconcile_on = get_reconciliation_effect_date(d, payment_entry.company, payment_entry.posting_date)
-		reference_details.update({"reconcile_effect_on": reconcile_on})
+	reference_details.update({"reconcile_effect_on": reconcile_on})
 		
 
 	if d.voucher_detail_no:
@@ -1766,6 +1766,37 @@ def auto_create_exchange_rate_revaluation_daily() -> None:
 		fields=["name", "submit_err_jv"],
 	)
 	create_err_and_its_journals(companies)
+
+
+
+def build_qb_match_conditions(doctype, user=None) -> list:
+	match_filters = build_match_conditions(doctype, user, False)
+	link_fields_map = get_link_fields_grouped_by_option(doctype)
+	criterion = []
+	apply_strict_user_permissions = frappe.get_system_settings("apply_strict_user_permissions")
+
+	if match_filters:
+		_dt = qb.DocType(doctype)
+
+		for filter in match_filters:
+			for link_option, allowed_values in filter.items():
+				fieldnames = link_fields_map.get(link_option, [])
+				cond = None
+
+				if link_option == doctype:
+					cond = _dt["name"].isin(allowed_values)
+
+				for fieldname in fieldnames:
+					field = _dt[fieldname]
+					cond = field.isin(allowed_values)
+
+					if not apply_strict_user_permissions:
+						cond = (Coalesce(field, "") == "") | cond
+
+				if cond:
+					criterion.append(cond)
+
+	return criterion
 
 
 def auto_create_exchange_rate_revaluation_weekly() -> None:

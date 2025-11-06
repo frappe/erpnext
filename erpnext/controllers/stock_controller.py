@@ -1644,7 +1644,6 @@ def is_reposting_pending():
 
 def future_sle_exists(args, sl_entries=None):
 	from erpnext.stock.utils import get_combine_datetime
-		return True
 
 	key = (args.voucher_type, args.voucher_no)
 	if not hasattr(frappe.local, "future_sle"):

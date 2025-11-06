@@ -369,8 +369,8 @@ class SerialBatchBundle:
 			status = "Delivered"
 
 		customer = None
-			if sle.voucher_type in ["Sales Invoice", "Delivery Note"] and sle.actual_qty < 0:
-				customer = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "customer")
+		if sle.voucher_type in ["Sales Invoice", "Delivery Note"] and sle.actual_qty < 0:
+			customer = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "customer")
 
 		sn_table = frappe.qb.DocType("Serial No")
 
