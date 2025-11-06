@@ -115,7 +115,7 @@ class StockReservationEntry(Document):
 		]
 		for d in mandatory:
 			if not self.get(d):
-				msg = _("{0} is required").format(self.meta.get_label(d))
+				msg = _("{0} is required").format(_(self.meta.get_label(d)))
 				frappe.throw(msg)
 
 	def validate_group_warehouse(self) -> None:

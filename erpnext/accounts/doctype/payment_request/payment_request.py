@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_pla
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
+from erpnext.accounts.utils import get_account_currency, get_currency_precision
 
 ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"Sales Order",
@@ -466,7 +467,7 @@ class PaymentRequest(Document):
 			references[0].payment_request = self.name
 			return
 
-		precision = references[0].precision("allocated_amount")
+		precision = frappe.get_precision("Payment Entry Reference", "allocated_amount")
 		outstanding_amount = self.outstanding_amount
 
 		# to manage rows

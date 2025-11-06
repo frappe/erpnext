@@ -436,6 +436,8 @@ class DeliveryNote(SellingController):
 
 			self.make_bundle_for_sales_purchase_return(table_name)
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+		
+		self.validate_standalone_serial_nos_customer()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -1253,6 +1255,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"field_no_map": ["taxes_and_charges", "set_warehouse"],
+				"field_map": {"shipping_address_name": "shipping_address"},
 			},
 			doctype + " Item": {
 				"doctype": target_doctype + " Item",

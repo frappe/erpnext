@@ -298,5 +298,6 @@ def get_pr_items(purchase_receipt):
 			(pr_item.parent == purchase_receipt.receipt_document)
 			& condition
 		)
+		.orderby(pr_item.idx)
 		.run(as_dict=True)
 	)

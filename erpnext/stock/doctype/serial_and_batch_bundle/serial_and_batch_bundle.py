@@ -12,11 +12,11 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import (
-	add_days,
 	cint,
 	cstr,
 	flt,
 	get_link_to_form,
+	getdate,
 	now,
 	nowtime,
 	parse_json,
@@ -785,7 +785,7 @@ class SerialandBatchBundle(Document):
 		if qty_field == "qty" and row.get("stock_qty"):
 			qty = row.get("stock_qty")
 
-		precision = row.precision
+		precision = row.precision(qty_field)
 		if abs(abs(flt(self.total_qty, precision)) - abs(flt(qty, precision))) > 0.01:
 			total_qty = frappe.format_value(abs(flt(self.total_qty)), "Float", row)
 			set_qty = frappe.format_value(abs(flt(row.get(qty_field))), "Float", row)
@@ -2146,6 +2146,9 @@ def get_auto_batch_nos(kwargs):
 			picked_batches,
 		)
 
+	if kwargs.based_on == "Expiry":
+		available_batches = sorted(available_batches, key=lambda x: (x.expiry_date or getdate("9999-12-31")))
+
 	if not kwargs.get("do_not_check_future_batches") and available_batches and kwargs.get("posting_date"):
 		filter_zero_near_batches(available_batches, kwargs)
 
@@ -2155,6 +2158,7 @@ def get_auto_batch_nos(kwargs):
 
 	if not qty:
 		return available_batches
+
 
 	return get_qty_based_available_batches(available_batches, qty)
 
@@ -2245,6 +2249,7 @@ def get_available_batches(kwargs):
 			batch_ledger.batch_no,
 			batch_ledger.warehouse,
 			Sum(batch_ledger.qty).as_("qty"),
+			batch_table.expiry_date,
 		)
 		.where(batch_table.disabled == 0)
 		.where(stock_ledger_entry.is_cancelled == 0)
@@ -2538,6 +2543,7 @@ def get_stock_ledgers_batches(kwargs):
 			stock_ledger_entry.item_code,
 			Sum(stock_ledger_entry.actual_qty).as_("qty"),
 			stock_ledger_entry.batch_no,
+			batch_table.expiry_date,
 		)
 		.where((stock_ledger_entry.is_cancelled == 0) & (stock_ledger_entry.batch_no.isnotnull()))
 		.groupby(

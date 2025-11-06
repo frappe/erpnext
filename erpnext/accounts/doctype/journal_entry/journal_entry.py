@@ -24,6 +24,7 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
+	get_advance_payment_doctypes,
 	get_balance_on,
 	get_stock_accounts,
 	get_stock_and_account_balance,
@@ -142,7 +143,8 @@ class JournalEntry(AccountsController):
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
 
-		self.title = self.get_title()
+		if self.is_new() or not self.title:
+			self.title = self.get_title()
 
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])
@@ -227,9 +229,10 @@ class JournalEntry(AccountsController):
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
+		advance_payment_doctypes = get_advance_payment_doctypes()
 		for d in self.get("accounts"):
 			if d.is_advance:
-				if d.reference_type in frappe.get_hooks("advance_payment_doctypes"):
+				if d.reference_type in advance_payment_doctypes:
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
 		for voucher_type, order_list in advance_paid.items():
@@ -919,7 +922,9 @@ class JournalEntry(AccountsController):
 
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
-		currency = bank_account_currency = party_account_currency = pay_to_recd_from = None
+		currency = (
+			bank_account_currency
+		) = party_account_currency = pay_to_recd_from = self.pay_to_recd_from = None
 		party_type = None
 		for d in self.get("accounts"):
 			if d.party_type in ["Customer", "Supplier"] and d.party:
