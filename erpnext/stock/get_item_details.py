@@ -665,7 +665,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 
 
 @frappe.whitelist()
-def get_item_tax_template(args, item, out):
+def get_item_tax_template(args, item = None, out = None):
 	if isinstance(args, str):
 		args = json.loads(args)
 
