@@ -387,6 +387,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -682,7 +683,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-05 11:24:02.042055",
+ "modified": "2025-11-06 15:27:54.806116",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

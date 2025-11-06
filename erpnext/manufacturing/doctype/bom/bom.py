@@ -488,7 +488,9 @@ class BOM(WebsiteGenerator):
 			if not frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") and not arg.get(
 				"sourced_by_supplier"
 			):
-				if arg.get("bom_no") and self.set_rate_of_sub_assembly_item_based_on_bom:
+				if arg.get("bom_no") and (
+					self.set_rate_of_sub_assembly_item_based_on_bom or arg.get("is_phantom_item")
+				):
 					rate = flt(self.get_bom_unitcost(arg["bom_no"])) * (arg.get("conversion_factor") or 1)
 				else:
 					rate = get_bom_item_rate(arg, self)
@@ -895,7 +897,7 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("items"):
 			old_rate = d.rate
-			if not self.bom_creator and d.is_stock_item:
+			if not self.bom_creator and (d.is_stock_item or d.is_phantom_item):
 				d.rate = self.get_rm_rate(
 					{
 						"company": self.company,
@@ -906,6 +908,7 @@ class BOM(WebsiteGenerator):
 						"stock_uom": d.stock_uom,
 						"conversion_factor": d.conversion_factor,
 						"sourced_by_supplier": d.sourced_by_supplier,
+						"is_phantom_item": d.is_phantom_item,
 					}
 				)
 
