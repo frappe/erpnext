@@ -163,15 +163,21 @@ class Task(NestedSet):
 	def validate_parent_template_task(self):
 		if self.parent_task:
 			if not frappe.db.get_value("Task", self.parent_task, "is_template"):
-				parent_task_format = f"""<a href="/app/task/{self.parent_task}">{self.parent_task}</a>"""
-				frappe.throw(_("Parent Task {0} is not a Template Task").format(parent_task_format))
+				frappe.throw(
+					_("Parent Task {0} is not a Template Task").format(
+						get_link_to_form("Task", self.parent_task)
+					)
+				)
 
 	def validate_depends_on_tasks(self):
 		if self.depends_on:
 			for task in self.depends_on:
 				if not frappe.db.get_value("Task", task.task, "is_template"):
-					dependent_task_format = f"""<a href="/app/task/{task.task}">{task.task}</a>"""
-					frappe.throw(_("Dependent Task {0} is not a Template Task").format(dependent_task_format))
+					frappe.throw(
+						_("Dependent Task {0} is not a Template Task").format(
+							get_link_to_form("Task", task.task)
+						)
+					)
 
 	def validate_completed_on(self):
 		if self.completed_on and getdate(self.completed_on) > getdate():
@@ -180,9 +186,11 @@ class Task(NestedSet):
 	def validate_parent_is_group(self):
 		if self.parent_task:
 			if not frappe.db.get_value("Task", self.parent_task, "is_group"):
-				parent_task_format = f"""<a href="/app/task/{self.parent_task}">{self.parent_task}</a>"""
 				frappe.throw(
-					_("Parent Task {0} must be a Group Task").format(parent_task_format), ParentIsGroupError
+					_("Parent Task {0} must be a Group Task").format(
+						get_link_to_form("Task", self.parent_task)
+					),
+					ParentIsGroupError,
 				)
 
 	def update_depends_on(self):
