@@ -75,12 +75,12 @@ jobs:
         working-directory: /home/runner/frappe-bench
         run: |
           bench get-app erpnext https://github.com/8848digital/erpnext.git --branch pre-prod
-          bench get-app https://Abhishek8848:${{secrets.GH_PAT}}@github.com/8848digital/ERPNext-India.git --branch pre-prod
+          bench get-app https://Satya8848:${{secrets.GH_PAT}}@github.com/8848digital/ERPNext-India.git --branch pre-prod
           bench get-app https://github.com/8848digital/india_compliance.git --branch pre-prod
           bench get-app https://github.com/8848digital/Assets --branch pre-prod
-          bench get-app https://Abhishek8848:${{secrets.GH_PAT}}@github.com/8848digital/CRM --branch pre-prod
-          bench get-app https://Abhishek8848:${{secrets.GH_PAT}}@github.com/8848digital/projects.git --branch pre-prod
-          bench get-app https://Abhishek8848:${{secrets.GH_PAT}}@github.com/8848digital/sales_commission.git --branch pre-prod
+          bench get-app https://Satya8848:${{secrets.GH_PAT}}@github.com/8848digital/CRM --branch pre-prod
+          bench get-app https://Satya8848:${{secrets.GH_PAT}}@github.com/8848digital/projects.git --branch pre-prod
+          bench get-app https://Satya8848:${{secrets.GH_PAT}}@github.com/8848digital/sales_commission.git --branch pre-prod
           bench get-app --branch version-15 payments
           bench setup requirements --dev
       - name: Create Site
@@ -106,7 +106,7 @@ jobs:
       - name: Run Tests
         working-directory: /home/runner/frappe-bench
         run: |
-          set +e  # Prevent script exit on failure
+          set +e
           bench --site test_site run-tests --app erpnext --coverage --junit-xml-output /home/runner/frappe-bench/test_results.xml 2>&1 | tee test_output.log
           echo "Tests completed, proceeding with next steps..."
         env:
@@ -118,17 +118,11 @@ jobs:
           python <<EOF
           import xmltodict
           import pandas as pd
-          # Read XML File
           xml_file = "/home/runner/frappe-bench/test_results.xml"
           with open(xml_file, 'r', encoding='utf-8') as file:
               xml_content = file.read()
           data = xmltodict.parse(xml_content)
-          # Ensure XML structure is valid
-          if not isinstance(data, dict):
-              raise ValueError("Parsed XML is not a dictionary. Check the XML structure.")
-          # Extract test results from different formats
           testsuites = data.get("testsuites", {}).get("testsuite", [])
-          # Ensure testsuites is always a list
           if isinstance(testsuites, dict):
               testsuites = [testsuites]
           test_results = []
@@ -136,18 +130,13 @@ jobs:
               testcases = suite.get("testcase", [])
               if isinstance(testcases, dict):
                   testcases = [testcases]
-              count = 0 
               for testcase in testcases:
-                  count += 1 
                   test_name = testcase.get("@name", "Unknown")
                   error_info = testcase.get("error", "Unknown")
                   type_value = error_info.get("#text", "Unknown") if isinstance(error_info, dict) else "Unknown"
-                  # Determine pass/fail status
                   status = "Failed" if type_value != "Unknown" else "Passed"
                   traceback = type_value if status == "Failed" else ""
                   test_results.append([test_name, status, traceback])
-                  
-          # Convert to CSV
           df = pd.DataFrame(test_results, columns=["Test Name", "Status", "Traceback"])
           df.to_csv("/home/runner/frappe-bench/test_report.csv", index=False)
           EOF
@@ -173,4 +162,3 @@ jobs:
         with:
           name: test-logs
           path: /home/runner/frappe-bench/test_output.log
-          
