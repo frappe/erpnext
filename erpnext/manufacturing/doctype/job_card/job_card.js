@@ -51,9 +51,13 @@ frappe.ui.form.on("Job Card", {
 			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
 
 			if (to_request || excess_transfer_allowed) {
-				frm.add_custom_button(__("Material Request"), () => {
-					frm.trigger("make_material_request");
-				});
+				frm.add_custom_button(
+					__("Material Request"),
+					() => {
+						frm.trigger("make_material_request");
+					},
+					__("Create")
+				);
 			}
 
 			// check if any row has untransferred materials
@@ -61,9 +65,13 @@ frappe.ui.form.on("Job Card", {
 			let to_transfer = frm.doc.items.some((row) => row.transferred_qty < row.required_qty);
 
 			if (to_transfer || excess_transfer_allowed) {
-				frm.add_custom_button(__("Material Transfer"), () => {
-					frm.trigger("make_stock_entry");
-				}).addClass("btn-primary");
+				frm.add_custom_button(
+					__("Material Transfer"),
+					() => {
+						frm.trigger("make_stock_entry");
+					},
+					__("Create")
+				);
 			}
 		}
 

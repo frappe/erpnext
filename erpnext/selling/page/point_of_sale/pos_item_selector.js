@@ -345,7 +345,10 @@ erpnext.PointOfSale.ItemSelector = class {
 				const items = this.search_index[selling_price_list][search_term];
 				this.items = items;
 				this.render_item_list(items);
-				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
+				this.auto_add_item &&
+					this.search_field.$input[0].value &&
+					this.items.length == 1 &&
+					this.add_filtered_item_to_cart();
 				return;
 			}
 		}
@@ -358,7 +361,10 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 			this.items = items;
 			this.render_item_list(items);
-			this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
+			this.auto_add_item &&
+				this.search_field.$input[0].value &&
+				this.items.length == 1 &&
+				this.add_filtered_item_to_cart();
 		});
 	}
 

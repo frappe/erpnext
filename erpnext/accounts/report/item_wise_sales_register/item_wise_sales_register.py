@@ -5,13 +5,14 @@
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import functions as fn
 from frappe.utils import cstr, flt
 from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.xlsxutils import handle_html
 from pypika import Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,
 )
@@ -342,7 +343,7 @@ def get_columns(additional_table_columns, filters):
 	return columns
 
 
-def apply_conditions(query, si, sii, filters, additional_conditions=None):
+def apply_conditions(query, si, sii, sip, filters, additional_conditions=None):
 	for opts in ("company", "customer"):
 		if filters.get(opts):
 			query = query.where(si[opts] == filters[opts])
@@ -354,14 +355,9 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 		query = query.where(si.posting_date <= filters.get("to_date"))
 
 	if filters.get("mode_of_payment"):
-		sales_invoice = frappe.db.get_all(
-			"Sales Invoice Payment", {"mode_of_payment": filters.get("mode_of_payment")}, pluck="parent"
-		)
-
-		if sales_invoice:
-			query = query.where(si.name.isin(sales_invoice))
-		else:
-			query = query.where(si.name == "")
+		query = query.where(sip.mode_of_payment == filters.get("mode_of_payment"))
+	else:
+		query = query.where(si.name == "")
 
 	if filters.get("warehouse"):
 		if frappe.db.get_value("Warehouse", filters.get("warehouse"), "is_group"):
@@ -419,6 +415,7 @@ def apply_order_by_conditions(query, si, ii, filters):
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	doctype = "Sales Invoice"
 	si = frappe.qb.DocType(doctype)
+	sip = frappe.qb.DocType(f"{doctype} Payment")
 	sii = frappe.qb.DocType(f"{doctype} Item")
 	item = frappe.qb.DocType("Item")
 
@@ -426,6 +423,8 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 		frappe.qb.from_(si)
 		.join(sii)
 		.on(si.name == sii.parent)
+		.left_join(sip)
+		.on(sip.parent == si.name)
 		.left_join(item)
 		.on(sii.item_code == item.name)
 		.select(
@@ -437,7 +436,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			si.is_internal_customer,
 			si.customer,
 			si.remarks,
-			si.territory,
+			fn.IfNull(si.territory, "Not Specified").as_("territory"),
 			si.company,
 			si.base_net_total,
 			sii.project,
@@ -460,11 +459,12 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			sii.base_net_rate,
 			sii.base_net_amount,
 			si.customer_name,
-			si.customer_group,
+			fn.IfNull(si.customer_group, "Not Specified").as_("customer_group"),
 			sii.so_detail,
 			si.update_stock,
 			sii.uom,
 			sii.qty,
+			sip.mode_of_payment,
 		)
 		.where(si.docstatus == 1)
 		.where(sii.parenttype == doctype)
@@ -484,7 +484,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 	if filters.get("customer_group"):
 		query = query.where(si.customer_group == filters["customer_group"])
 
-	query = apply_conditions(query, si, sii, filters, additional_conditions)
+	query = apply_conditions(query, si, sii, sip, filters, additional_conditions)
 
 	from frappe.desk.reportview import build_match_conditions
 

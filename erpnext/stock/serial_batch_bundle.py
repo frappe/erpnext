@@ -368,6 +368,10 @@ class SerialBatchBundle:
 		if sle.actual_qty < 0:
 			status = "Delivered"
 
+		customer = None
+		if sle.voucher_type in ["Sales Invoice", "Delivery Note"] and sle.actual_qty < 0:
+			customer = frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "customer")
+
 		sn_table = frappe.qb.DocType("Serial No")
 
 		query = (
@@ -378,10 +382,11 @@ class SerialBatchBundle:
 				"Active"
 				if warehouse
 				else status
-				if (sn_table.purchase_document_no != sle.voucher_no and sle.is_cancelled != 1)
+				if (sn_table.purchase_document_no != sle.voucher_no or sle.is_cancelled != 1)
 				else "Inactive",
 			)
 			.set(sn_table.company, sle.company)
+			.set(sn_table.customer, customer)
 			.where(sn_table.name.isin(serial_nos))
 		)
 

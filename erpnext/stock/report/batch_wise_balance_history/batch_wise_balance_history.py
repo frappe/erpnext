@@ -42,7 +42,7 @@ def execute(filters=None):
 	for item in sorted(iwb_map):
 		if not filters.get("item") or filters.get("item") == item:
 			for wh in sorted(iwb_map[item]):
-				for batch in sorted(iwb_map[item][wh], key=lambda x: (x is None, x)):
+				for batch in sorted(iwb_map[item][wh]):
 					qty_dict = iwb_map[item][wh][batch]
 					if qty_dict.opening_qty or qty_dict.in_qty or qty_dict.out_qty or qty_dict.bal_qty:
 						data.append(
@@ -56,6 +56,11 @@ def execute(filters=None):
 								flt(qty_dict.in_qty, float_precision),
 								flt(qty_dict.out_qty, float_precision),
 								flt(qty_dict.bal_qty, float_precision),
+								flt(
+									(qty_dict.bal_value / qty_dict.bal_qty) if qty_dict.bal_qty else 0,
+									float_precision,
+								),
+								flt(qty_dict.bal_value, float_precision),
 								item_map[item]["stock_uom"],
 							]
 						)
@@ -68,14 +73,16 @@ def get_columns(filters):
 
 	columns = [
 		_("Item") + ":Link/Item:100",
-		_("Item Name") + "::150",
-		_("Description") + "::150",
+		_("Item Name") + "::120",
+		_("Description") + "::90",
 		_("Warehouse") + ":Link/Warehouse:100",
 		_("Batch") + ":Link/Batch:100",
 		_("Opening Qty") + ":Float:90",
 		_("In Qty") + ":Float:80",
 		_("Out Qty") + ":Float:80",
-		_("Balance Qty") + ":Float:90",
+		_("Balance Qty") + ":Float:120",
+		_("Valuation Rate") + ":Float:120",
+		_("Balance Value") + ":Currency:120",
 		_("UOM") + "::90",
 	]
 
@@ -107,6 +114,7 @@ def get_stock_ledger_entries_for_batch_no(filters):
 			sle.batch_no,
 			sle.posting_date,
 			fn.Sum(sle.actual_qty).as_("actual_qty"),
+			fn.Sum(sle.stock_value_difference).as_("stock_value_difference"),
 		)
 		.where(
 			(sle.docstatus < 2)
@@ -114,7 +122,7 @@ def get_stock_ledger_entries_for_batch_no(filters):
 			& (sle.batch_no != "")
 			& (sle.posting_datetime < posting_datetime)
 		)
-		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse, sle.posting_date)
+		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
 	)
 
 	query = apply_warehouse_filter(query, sle, filters)
@@ -139,7 +147,7 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	batch_package = frappe.qb.DocType("Serial and Batch Entry")
 
-	to_date = get_datetime(str(filters.to_date) + " 23:59:59")
+	to_date = get_datetime(filters.to_date + " 23:59:59")
 
 	query = (
 		frappe.qb.from_(sle)
@@ -151,6 +159,7 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 			batch_package.batch_no,
 			sle.posting_date,
 			fn.Sum(batch_package.qty).as_("actual_qty"),
+			fn.Sum(batch_package.stock_value_difference).as_("stock_value_difference"),
 		)
 		.where(
 			(sle.docstatus < 2)
@@ -158,7 +167,7 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 			& (sle.has_batch_no == 1)
 			& (sle.posting_datetime <= to_date)
 		)
-		.groupby(sle.voucher_no, batch_package.batch_no, sle.item_code, sle.warehouse, sle.posting_date)
+		.groupby(sle.voucher_no, batch_package.batch_no, batch_package.warehouse)
 	)
 
 	query = apply_warehouse_filter(query, sle, filters)
@@ -191,7 +200,10 @@ def get_item_warehouse_batch_map(filters, float_precision):
 
 	for d in sle:
 		iwb_map.setdefault(d.item_code, {}).setdefault(d.warehouse, {}).setdefault(
-			d.batch_no, frappe._dict({"opening_qty": 0.0, "in_qty": 0.0, "out_qty": 0.0, "bal_qty": 0.0})
+			d.batch_no,
+			frappe._dict(
+				{"opening_qty": 0.0, "in_qty": 0.0, "out_qty": 0.0, "bal_qty": 0.0, "bal_value": 0.0}
+			),
 		)
 		qty_dict = iwb_map[d.item_code][d.warehouse][d.batch_no]
 		if d.posting_date < from_date:
@@ -207,6 +219,7 @@ def get_item_warehouse_batch_map(filters, float_precision):
 				)
 
 		qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
+		qty_dict.bal_value += flt(d.stock_value_difference, float_precision)
 
 	return iwb_map
 

@@ -203,8 +203,8 @@ frappe.ui.form.on("Production Plan", {
 
 		let has_items =
 			items.filter((item) => {
-				if (item.pending_qty) {
-					return item.pending_qty > item.ordered_qty;
+				if (item.planned_qty) {
+					return item.planned_qty > item.ordered_qty;
 				} else {
 					return item.qty > (item.received_qty || item.ordered_qty);
 				}

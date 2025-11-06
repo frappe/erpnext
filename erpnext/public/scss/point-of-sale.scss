@@ -1063,21 +1063,31 @@
 						justify-content: flex-end;
 						padding-right: var(--padding-sm);
 
-						> .customer-name {
-							font-size: var(--text-2xl);
-							font-weight: 700;
-						}
+						> .customer-section {
+							margin-bottom: auto;
 
-						> .customer-email {
-							font-size: var(--text-md);
-							font-weight: 500;
+							> .customer-name {
+								font-size: var(--text-2xl);
+								font-weight: 700;
+							}
+
+							> .customer-code {
+								font-size: var(--text-xs);
+								font-weight: 500;
+								color: var(--text-light);
+							}
+
+							> .customer-email {
+								font-size: var(--text-md);
+								font-weight: 500;
+							}
 						}
 
 						> .cashier {
 							font-size: var(--text-md);
 							font-weight: 500;
 							color: var(--gray-600);
-							margin-top: auto;
+							margin-top: var(--margin-md);
 						}
 					}
 
@@ -1085,7 +1095,6 @@
 						display: flex;
 						flex-direction: column;
 						align-items: flex-end;
-						justify-content: space-between;
 
 						> .paid-amount {
 							font-size: var(--text-2xl);

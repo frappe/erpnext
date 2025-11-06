@@ -6,11 +6,11 @@ frappe.listview_settings["Material Request"] = {
 			return [__("Stopped"), "red", "status,=,Stopped"];
 		} else if (doc.transfer_status && doc.docstatus != 2) {
 			if (doc.transfer_status == "Not Started") {
-				return [__("Not Started"), "orange"];
+				return [__("Not Started"), "orange", "transfer_status,=,Not Started"];
 			} else if (doc.transfer_status == "In Transit") {
-				return [__("In Transit"), "yellow"];
+				return [__("In Transit"), "yellow", "transfer_status,=,In Transit"];
 			} else if (doc.transfer_status == "Completed") {
-				return [__("Completed"), "green"];
+				return [__("Completed"), "green", "transfer_status,=,Completed"];
 			}
 		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0) {
 			return [__("Pending"), "orange", "per_ordered,=,0|docstatus,=,1"];

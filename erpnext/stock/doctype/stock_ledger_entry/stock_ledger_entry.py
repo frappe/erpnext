@@ -192,7 +192,7 @@ class StockLedgerEntry(Document):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
+				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
 		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
 			frappe.throw(_("Actual Qty is mandatory"))

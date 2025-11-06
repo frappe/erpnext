@@ -155,6 +155,7 @@ class TestInventoryDimension(FrappeTestCase):
 		inv_dimension = create_inventory_dimension(
 			reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1
 		)
+		inv_dimension.db_set("fetch_from_parent", "Rack")
 
 		self.assertEqual(inv_dimension.type_of_transaction, "Both")
 		self.assertEqual(inv_dimension.fetch_from_parent, "Rack")
