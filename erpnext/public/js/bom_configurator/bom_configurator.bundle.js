@@ -182,6 +182,17 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
+								label: __(frappe.utils.icon("move", "sm") + " Phantom Item"),
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
+									view.events.convert_to_sub_assembly(node, view, true);
+								},
+								condition: function (node) {
+									return !node.expandable;
+								},
+								btnClass: "hidden-xs",
+							},
+							{
 								label: __(frappe.utils.icon("delete", "sm") + " Item"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
@@ -399,10 +410,10 @@ class BOMConfigurator {
 		return fields;
 	}
 
-	convert_to_sub_assembly(node, view) {
+	convert_to_sub_assembly(node, view, phantom = false) {
 		let dialog = new frappe.ui.Dialog({
-			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root, true),
-			title: __("Add Sub Assembly"),
+			fields: view.events.get_sub_assembly_modal_fields(view, node.is_root, true, phantom),
+			title: phantom ? __("Add Phantom Item") : __("Add Sub Assembly"),
 		});
 
 		dialog.set_values({
@@ -415,7 +426,9 @@ class BOMConfigurator {
 			let bom_item = dialog.get_values();
 
 			if (!bom_item.item_code) {
-				frappe.throw(__("Sub Assembly Item is mandatory"));
+				frappe.throw(
+					phantom ? __("Phantom Item is mandatory") : __("Sub Assembly Item is mandatory")
+				);
 			}
 
 			bom_item.items.forEach((d) => {
@@ -440,6 +453,7 @@ class BOMConfigurator {
 					workstation_type: node.data.workstation_type,
 					operation_time: node.data.operation_time,
 					workstation: node.data.workstation,
+					phantom: phantom,
 				},
 				callback: (r) => {
 					node.expandable = true;

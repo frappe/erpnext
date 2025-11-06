@@ -465,6 +465,9 @@ def add_sub_assembly(**kwargs):
 		parent_row_no = item_row.idx
 		name = ""
 	else:
+		if sbool(kwargs.phantom):
+			parent_row = next(item for item in doc.items if item.name == kwargs.fg_reference_id)
+			parent_row.db_set("is_phantom_item", 1)
 		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
 
 	for row in bom_item.get("items"):
