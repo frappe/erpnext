@@ -175,6 +175,9 @@ class StockLedgerEntry(Document):
 		if frappe.flags.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
 			return
 
+		if self.is_adjustment_entry:
+			return
+
 		if not self.get("via_landed_cost_voucher"):
 			SerialBatchBundle(
 				sle=self,

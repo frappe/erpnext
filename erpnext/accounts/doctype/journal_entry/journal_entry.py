@@ -142,8 +142,7 @@ class JournalEntry(AccountsController):
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
 
-		if not self.title:
-			self.title = self.get_title()
+		self.title = self.get_title()
 
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])

@@ -8,7 +8,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let me = this;
 
 		this.set_fields_onload_for_line_item();
-		this.frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
+		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
@@ -911,7 +911,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		var get_party_currency = function() {
-			if (me.is_a_mapped_document()) {
+			if (me.is_a_mapped_document() || me.frm.doc.__onload?.load_after_mapping) {
 				return;
 			}
 

@@ -1167,7 +1167,7 @@ class PurchaseInvoice(BuyingController):
 		pr_items = frappe.get_all(
 			"Purchase Receipt Item",
 			filters={"parent": ("in", linked_purchase_receipts)},
-			fields=["name", "provisional_expense_account", "qty", "base_rate"],
+			fields=["name", "provisional_expense_account", "qty", "base_rate", "rate"],
 		)
 		default_provisional_account = self.get_company_default("default_provisional_account")
 		provisional_accounts = set(
@@ -1195,6 +1195,7 @@ class PurchaseInvoice(BuyingController):
 				"provisional_account": item.provisional_expense_account or default_provisional_account,
 				"qty": item.qty,
 				"base_rate": item.base_rate,
+				"rate": item.rate,
 				"has_provisional_entry": item.name in rows_with_provisional_entries,
 			}
 
@@ -1211,7 +1212,10 @@ class PurchaseInvoice(BuyingController):
 					self.posting_date,
 					pr_item.get("provisional_account"),
 					reverse=1,
-					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("base_rate")),
+					item_amount=(
+						(min(item.qty, pr_item.get("qty")) * pr_item.get("rate"))
+						* purchase_receipt_doc.get("conversion_rate")
+					),
 				)
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
@@ -1252,17 +1256,12 @@ class PurchaseInvoice(BuyingController):
 
 			warehouse_debit_amount = stock_amount
 
-		elif self.is_return and self.update_stock and self.is_internal_supplier and warehouse_debit_amount:
+		elif self.is_return and self.update_stock and (self.is_internal_supplier or not self.return_against):
 			net_rate = item.base_net_amount
 			if item.sales_incoming_rate:  # for internal transfer
 				net_rate = item.qty * item.sales_incoming_rate
 
-			stock_amount = (
-				net_rate
-				+ item.item_tax_amount
-				+ flt(item.landed_cost_voucher_amount)
-				+ flt(item.get("amount_difference_with_purchase_invoice"))
-			)
+			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 
 			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
 				cost_of_goods_sold_account = self.get_company_default("default_expense_account")

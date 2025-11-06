@@ -80,6 +80,8 @@ def make_packing_list(doc):
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
 				update_packed_item_price_data(pi_row, item_data, doc)
+				if item_row.get("against_pick_list"):
+					update_packed_item_with_pick_list_info(item_row, pi_row)
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
 				if set_price_from_children:  # create/update bundle item wise price dict
@@ -226,6 +228,27 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.actual_qty = flt(bin.get("actual_qty"))
 	pi_row.projected_qty = flt(bin.get("projected_qty"))
 	pi_row.use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
+
+def update_packed_item_with_pick_list_info(main_item_row, pi_row):
+	pl_row = frappe.db.get_value(
+		"Pick List Item",
+		{
+			"item_code": pi_row.item_code,
+			"sales_order": main_item_row.get("against_sales_order"),
+			"sales_order_item": main_item_row.get("so_detail"),
+			"parent": main_item_row.against_pick_list,
+		},
+		["warehouse", "batch_no", "serial_no"],
+		as_dict=True,
+		order_by="qty desc",
+	)
+
+	if not pl_row:
+		return
+
+	pi_row.warehouse = pl_row.warehouse
+	pi_row.batch_no = pl_row.batch_no
+	pi_row.serial_no = pl_row.serial_no
 
 
 def update_packed_item_price_data(pi_row, item_data, doc):

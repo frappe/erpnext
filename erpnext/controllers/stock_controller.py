@@ -203,7 +203,11 @@ class StockController(AccountsController):
 			parent_details = self.get_parent_details_for_packed_items()
 
 		for row in self.get(table_name):
-			if row.serial_and_batch_bundle and (row.serial_no or row.batch_no):
+			if (
+				not via_landed_cost_voucher
+				and row.serial_and_batch_bundle
+				and (row.serial_no or row.batch_no)
+			):
 				self.validate_serial_nos_and_batches_with_bundle(row)
 
 			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
@@ -891,7 +895,7 @@ class StockController(AccountsController):
 								fieldname = f"{dimension.source_fieldname}"
 
 							sl_dict[dimension.target_fieldname] = row.get(fieldname)
-							return
+							continue
 					sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 				else:
 					fieldname_start_with = "to"
