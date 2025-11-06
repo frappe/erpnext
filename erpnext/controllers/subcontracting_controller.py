@@ -588,9 +588,8 @@ class SubcontractingController(StockController):
 		to_remove = []
 		for item in data:
 			if item.is_phantom_item:
-				data = (
-					self.__get_materials_from_bom(item.rm_item_code, item.bom_no, exploded_item=exploded_item)
-					+ data
+				data += self.__get_materials_from_bom(
+					item.rm_item_code, item.bom_no, exploded_item=exploded_item
 				)
 				to_remove.append(item)
 

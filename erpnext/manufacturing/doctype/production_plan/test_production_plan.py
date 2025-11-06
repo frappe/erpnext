@@ -2368,7 +2368,6 @@ class TestProductionPlan(IntegrationTestCase):
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_production_plan_for_partial_sub_assembly_items(self):
-		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		frappe.flags.test_print = False
@@ -2420,6 +2419,30 @@ class TestProductionPlan(IntegrationTestCase):
 
 		for row in plan.sub_assembly_items:
 			self.assertEqual(row.ordered_qty, 10.0)
+
+	def test_phantom_bom_explosion(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
+
+		create_tree_for_phantom_bom_tests()
+
+		plan = create_production_plan(
+			item_code="Top Level Parent",
+			planned_qty=10,
+			use_multi_level_bom=1,
+			do_not_submit=True,
+			company="_Test Company",
+			skip_getting_mr_items=True,
+		)
+		plan.get_sub_assembly_items()
+		plan.submit()
+
+		plan.set("mr_items", [])
+		mr_items = get_items_for_material_requests(plan.as_dict())
+		for d in mr_items:
+			plan.append("mr_items", d)
+
+		self.assertEqual(plan.sub_assembly_items[0].production_item, "Sub Assembly Level 1-1")
+		self.assertEqual([item.item_code for item in plan.mr_items], ["Item Level 2-3", "Item Level 1-3"])
 
 
 def create_production_plan(**args):
