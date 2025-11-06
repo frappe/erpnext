@@ -17,6 +17,7 @@ from frappe.utils import cint, flt
 from erpnext.accounts.party import get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.stock.stock_ledger import validate_reserved_stock
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -471,6 +472,10 @@ class DeliveryNote(SellingController):
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
 		self.validate_standalone_serial_nos_customer()
+
+		if not self.is_return:
+			self.validate_reserved_stock()
+
 		self.update_stock_reservation_entries()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -507,6 +512,39 @@ class DeliveryNote(SellingController):
 		)
 
 		self.delete_auto_created_batches()
+
+	def validate_reserved_stock(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_against_so_for_dn,
+		)
+
+		for row in self.items:
+			reserved_stock = frappe.db.get_value(
+				"Bin", {"item_code": row.item_code, "warehouse": row.warehouse}, "reserved_stock"
+			)
+			if reserved_stock > 0:
+				args = frappe._dict(
+					{
+						"item_code": row.item_code,
+						"warehouse": row.warehouse,
+						"batch_nos": [row.batch_no] if row.batch_no else [],
+						"serial_nos": row.serial_no.split("\n") if row.serial_no else [],
+						"serial_and_batch_bundle": row.serial_and_batch_bundle,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"voucher_detail_no": row.name,
+						"actual_qty": row.qty * -1,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+					}
+				)
+
+				if row.against_sales_order and row.so_detail:
+					args.ignore_voucher_nos = get_sre_against_so_for_dn(
+						row.against_sales_order, row.so_detail
+					)
+
+				validate_reserved_stock(args)
 
 	def validate_against_stock_reservation_entries(self):
 		"""Validates if Stock Reservation Entries are available for the Sales Order Item reference."""

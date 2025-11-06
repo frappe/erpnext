@@ -919,7 +919,7 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 
 
 def get_sre_reserved_serial_nos_details(
-	item_code: str, warehouse: str, serial_nos: list | None = None
+	item_code: str, warehouse: str, serial_nos: list | None = None, ignore_voucher_nos: list | None = None
 ) -> dict:
 	"""Returns a dict of `Serial No` reserved in Stock Reservation Entry. The dict is like {serial_no: sre_name, ...}"""
 
@@ -946,7 +946,9 @@ def get_sre_reserved_serial_nos_details(
 	return frappe._dict(query.run())
 
 
-def get_sre_reserved_batch_nos_details(item_code: str, warehouse: str, batch_nos: list | None = None) -> dict:
+def get_sre_reserved_batch_nos_details(
+	item_code: str, warehouse: str, batch_nos: list | None = None, ignore_voucher_nos: list | None = None
+) -> dict:
 	"""Returns a dict of `Batch Qty` reserved in Stock Reservation Entry. The dict is like {batch_no: qty, ...}"""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -973,6 +975,9 @@ def get_sre_reserved_batch_nos_details(item_code: str, warehouse: str, batch_nos
 
 	if batch_nos:
 		query = query.where(sb_entry.batch_no.isin(batch_nos))
+
+	if ignore_voucher_nos:
+		query = query.where(sre.name.notin(ignore_voucher_nos))
 
 	return frappe._dict(query.run())
 
@@ -1859,3 +1864,24 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 			)
 
 		query.run()
+
+
+@frappe.request_cache
+def get_sre_against_so_for_dn(so_name: str, so_detail_no: str) -> list[str]:
+	"""Returns list of Stock Reservation Entries against Delivery Note with Sales Order Reference."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.select(sre.name)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_no == so_name)
+			& (sre.voucher_detail_no == so_detail_no)
+		)
+	)
+
+	result = query.run(as_list=True)
+
+	return result[0] if result else []
