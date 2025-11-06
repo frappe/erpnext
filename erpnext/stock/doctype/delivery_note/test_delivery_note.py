@@ -1026,7 +1026,14 @@ class TestDeliveryNote(IntegrationTestCase):
 	def test_sales_invoice_qty_after_return(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
-		dn = create_delivery_note(qty=10)
+		item = make_item(
+			"Test Sales Invoice Qty After Return",
+			properties={"is_stock_item": 1, "stock_uom": "Nos"},
+		)
+
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		dn = create_delivery_note(item_code=item.name, qty=10)
 
 		dnr1 = make_sales_return(dn.name)
 		dnr1.get("items")[0].qty = -3
@@ -1042,8 +1049,8 @@ class TestDeliveryNote(IntegrationTestCase):
 		self.assertEqual(si.get("items")[0].qty, 5)
 
 		si.reload().cancel().delete()
-		dnr1.reload().cancel().delete()
 		dnr2.reload().cancel().delete()
+		dnr1.reload().cancel().delete()
 		dn.reload().cancel().delete()
 
 	def test_dn_billing_status_case3(self):

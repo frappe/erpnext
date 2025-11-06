@@ -510,7 +510,6 @@ class SubcontractingInwardController:
 						)
 						.else_(table.qty)
 						- table.delivered_qty
-						- table.returned_qty
 					).as_("max_allowed_qty")
 				)
 				.where((table.name == item.scio_detail) & (table.docstatus == 1))

@@ -78,13 +78,6 @@ frappe.query_reports["Material Requirements Planning Report"] = {
 			options: "\nFinished Goods\nRaw Materials\nAll",
 		},
 		{
-			fieldname: "safety_stock_check_frequency",
-			label: __("Safety Stock Check Frequency"),
-			fieldtype: "Select",
-			default: "Weekly",
-			options: "\nDaily\nWeekly\nMonthly",
-		},
-		{
 			fieldname: "add_safety_stock",
 			label: __("Add Safety Stock"),
 			fieldtype: "Check",

@@ -311,6 +311,30 @@ class SerialandBatchBundle(Document):
 					SerialNoDuplicateError,
 				)
 
+		if (
+			self.voucher_type == "Stock Entry"
+			and self.type_of_transaction == "Inward"
+			and frappe.get_cached_value("Stock Entry", self.voucher_no, "purpose")
+			in ["Manufacture", "Repack"]
+		):
+			serial_nos = frappe.get_all(
+				"Serial No", filters={"name": ("in", serial_nos), "status": "Delivered"}, pluck="name"
+			)
+
+			if serial_nos:
+				if len(serial_nos) == 1:
+					frappe.throw(
+						_(
+							"Serial No {0} is already Delivered. You cannot use them again in Manufacture / Repack entry."
+						).format(bold(serial_nos[0]))
+					)
+				else:
+					frappe.throw(
+						_(
+							"Serial Nos {0} are already Delivered. You cannot use them again in Manufacture / Repack entry."
+						).format(bold(", ".join(serial_nos)))
+					)
+
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception, title=_("Error"))
 

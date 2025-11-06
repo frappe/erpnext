@@ -8,6 +8,7 @@ import json
 import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_to_date,
@@ -67,8 +68,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists
 
 	if sl_entries:
-		cancel = sl_entries[0].get("is_cancelled")
-		if cancel:
+		cancelled = sl_entries[0].get("is_cancelled")
+		if cancelled:
 			validate_cancellation(sl_entries)
 			set_as_cancel(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
 
@@ -79,7 +80,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			if sle.serial_no and not via_landed_cost_voucher:
 				validate_serial_no(sle)
 
-			if cancel:
+			if cancelled:
 				sle["actual_qty"] = -flt(sle.get("actual_qty"))
 
 				if sle["actual_qty"] < 0 and not sle.get("outgoing_rate"):
@@ -108,7 +109,9 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			if is_stock_item:
 				bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
 				args.reserved_stock = flt(frappe.db.get_value("Bin", bin_name, "reserved_stock"))
-				repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
+				repost_current_voucher(
+					args, allow_negative_stock, via_landed_cost_voucher, cancelled=cancelled
+				)
 				update_bin_qty(bin_name, args)
 			else:
 				frappe.msgprint(
@@ -116,7 +119,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				)
 
 
-def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False, cancelled=False):
 	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
 		if not args.get("posting_date"):
 			args["posting_date"] = nowdate()
@@ -135,6 +138,7 @@ def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_vou
 					"sle_id": args.get("name"),
 					"creation": args.get("creation"),
 					"reserved_stock": args.get("reserved_stock"),
+					"cancelled": cancelled,
 				},
 				allow_negative_stock=allow_negative_stock,
 				via_landed_cost_voucher=via_landed_cost_voucher,
@@ -667,32 +671,30 @@ class update_entries_after:
 	def process_sle_against_current_timestamp(self):
 		sl_entries = self.get_sle_against_current_voucher()
 		for sle in sl_entries:
+			sle["timestamp"] = sle.posting_datetime
 			self.process_sle(sle)
 
 	def get_sle_against_current_voucher(self):
 		self.args["posting_datetime"] = get_combine_datetime(self.args.posting_date, self.args.posting_time)
+		doctype = frappe.qb.DocType("Stock Ledger Entry")
 
-		return frappe.db.sql(
-			"""
-			select
-				*, posting_datetime as "timestamp"
-			from
-				`tabStock Ledger Entry`
-			where
-				item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and is_cancelled = 0
-				and (
-					posting_datetime = %(posting_datetime)s
-				)
-				and creation = %(creation)s
-			order by
-				creation ASC
-			for update
-		""",
-			self.args,
-			as_dict=1,
+		query = (
+			frappe.qb.from_(doctype)
+			.select("*")
+			.where(
+				(doctype.item_code == self.args.item_code)
+				& (doctype.warehouse == self.args.warehouse)
+				& (doctype.is_cancelled == 0)
+				& (doctype.posting_datetime == self.args.posting_datetime)
+			)
+			.orderby(doctype.creation, order=Order.asc)
+			.for_update()
 		)
+
+		if not self.args.get("cancelled"):
+			query = query.where(doctype.creation == self.args.creation)
+
+		return query.run(as_dict=True)
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!
@@ -1715,7 +1717,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	elif args.get("creation") and args.get("sle_id"):
+	elif args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
 		creation = args.get("creation")
 		operator = "<="
 		voucher_condition = f"and creation < '{creation}'"

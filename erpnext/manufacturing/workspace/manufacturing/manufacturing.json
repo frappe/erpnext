@@ -347,7 +347,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Production",
-   "link_count": 7,
+   "link_count": 8,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -386,22 +386,32 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Master Production Schedule",
-   "link_count": 0,
-   "link_to": "Master Production Schedule",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Job Card",
    "link_count": 0,
    "link_to": "Job Card",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item Lead Time",
+   "link_count": 0,
+   "link_to": "Item Lead Time",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Production Schedule",
+   "link_count": 0,
+   "link_to": "Master Production Schedule",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -428,7 +438,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-10-30 11:49:35.589944",
+ "modified": "2025-11-03 17:02:26.882516",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

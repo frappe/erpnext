@@ -284,9 +284,6 @@ class MasterProductionSchedule(Document):
 			row = data[key]
 			row.cumulative_lead_time = math.ceil(row.cumulative_lead_time)
 			row.order_release_date = add_days(row.delivery_date, -row.cumulative_lead_time)
-			if getdate(row.order_release_date) < getdate(today()):
-				continue
-
 			row.planned_qty = row.qty
 			row.uom = row.stock_uom
 			row.warehouse = row.warehouse or self.parent_warehouse

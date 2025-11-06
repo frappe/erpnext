@@ -77,6 +77,7 @@
   "period_closing_settings_section",
   "acc_frozen_upto",
   "ignore_account_closing_balance",
+  "use_legacy_controller_for_pcv",
   "column_break_25",
   "frozen_accounts_modifier",
   "tab_break_dpet",
@@ -651,6 +652,12 @@
    "fieldname": "use_legacy_budget_controller",
    "fieldtype": "Check",
    "label": "Use Legacy Budget Controller"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_legacy_controller_for_pcv",
+   "fieldtype": "Check",
+   "label": "Use Legacy Controller For Period Closing Voucher"
   }
  ],
  "grid_page_length": 50,
@@ -659,7 +666,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-24 16:08:08.515254",
+ "modified": "2025-10-20 14:06:08.870427",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

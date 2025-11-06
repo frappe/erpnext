@@ -847,9 +847,10 @@ class SalesInvoice(SellingController):
 				timesheet.db_update_all()
 
 	def update_billed_qty_in_scio(self):
-		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-		fieldname = table.returned_qty if self.is_return else table.billed_qty
+		if self.is_return:
+			return
 
+		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 		data = frappe._dict(
 			{
 				item.scio_detail: item.stock_qty if self._action == "submit" else -item.stock_qty
@@ -861,8 +862,8 @@ class SalesInvoice(SellingController):
 		if data:
 			case_expr = Case()
 			for name, qty in data.items():
-				case_expr = case_expr.when(table.name == name, fieldname + qty)
-			frappe.qb.update(table).set(fieldname, case_expr).where(
+				case_expr = case_expr.when(table.name == name, table.billed_qty + qty)
+			frappe.qb.update(table).set(table.billed_qty, case_expr).where(
 				(table.name.isin(list(data.keys()))) & (table.docstatus == 1)
 			).run()
 
@@ -1281,16 +1282,14 @@ class SalesInvoice(SellingController):
 			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 			query = (
 				frappe.qb.from_(table)
-				.select(
-					table.required_qty, table.consumed_qty, table.billed_qty, table.returned_qty, table.name
-				)
+				.select(table.required_qty, table.consumed_qty, table.billed_qty, table.name)
 				.where((table.docstatus == 1) & (table.name.isin([item.scio_detail for item in self_rms])))
 			)
 			result = query.run(as_dict=True)
 			data = {item.name: item for item in result}
 			for item in self_rms:
 				row = data.get(item.scio_detail)
-				max_qty = max(row.required_qty, row.consumed_qty) - row.billed_qty - row.returned_qty
+				max_qty = max(row.required_qty, row.consumed_qty) - row.billed_qty
 				if item.stock_qty > max_qty:
 					frappe.throw(
 						_("Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}").format(
