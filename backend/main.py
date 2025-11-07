@@ -23,7 +23,7 @@ from routers import (
     addons, construction, agriculture, healthcare, retail, education,
     transport, hospitality, realestate, legal, ngo, advmanufacturing,
     logistics, telecom, energy, media, insurance, government, attendance, leave,
-    payroll_run, employee_loans
+    payroll_run, employee_loans, compliance_validation
 )
 
 # Create FastAPI app first so port opens immediately
@@ -59,6 +59,7 @@ app.include_router(employees.router)
 app.include_router(attendance.router)
 app.include_router(leave.router)
 app.include_router(employee_loans.router)
+app.include_router(compliance_validation.router)
 app.include_router(finance.router)
 app.include_router(super_admin.router)
 app.include_router(sales.router)
