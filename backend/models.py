@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, JSON, Date, UniqueConstraint, Index
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, JSON, Date, Time, UniqueConstraint, Index
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
@@ -256,6 +256,76 @@ class EmployeeDocument(Base):
     employee = relationship("Employee", back_populates="documents")
     uploader = relationship("User", foreign_keys=[uploaded_by])
     deleter = relationship("User", foreign_keys=[deleted_by])
+
+class ShiftDefinition(Base):
+    """Shift templates/definitions for rostering"""
+    __tablename__ = "shift_definitions"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    
+    shift_name = Column(String, nullable=False)
+    shift_code = Column(String, nullable=False, index=True)
+    start_time = Column(Time)
+    end_time = Column(Time)
+    break_duration_minutes = Column(Integer, default=0)
+    is_overnight = Column(Boolean, default=False)
+    working_hours = Column(Float, default=8.0)
+    overtime_eligible = Column(Boolean, default=True)
+    description = Column(Text)
+    
+    is_active = Column(Boolean, default=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    company = relationship("Company")
+
+class EmployeeShiftRoster(Base):
+    """Employee shift assignments (rostering)"""
+    __tablename__ = "employee_shift_roster"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
+    shift_id = Column(String, ForeignKey("shift_definitions.id"), nullable=False)
+    
+    effective_date = Column(Date, nullable=False, index=True)
+    end_date = Column(Date)
+    
+    is_active = Column(Boolean, default=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    company = relationship("Company")
+    employee = relationship("Employee")
+    shift = relationship("ShiftDefinition")
+
+class AttendanceRecord(Base):
+    """Employee attendance tracking"""
+    __tablename__ = "attendance_records"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
+    
+    attendance_date = Column(Date, nullable=False, index=True)
+    clock_in = Column(DateTime)
+    clock_out = Column(DateTime)
+    hours_worked = Column(Float)
+    overtime_hours = Column(Float, default=0.0)
+    
+    status = Column(String, default="present", index=True)
+    notes = Column(Text)
+    
+    recorded_by = Column(String, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        UniqueConstraint('company_id', 'employee_id', 'attendance_date', name='unique_attendance_per_day'),
+    )
+    
+    company = relationship("Company")
+    employee = relationship("Employee")
+    recorder = relationship("User", foreign_keys=[recorded_by])
 
 class Account(Base):
     __tablename__ = "accounts"
