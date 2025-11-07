@@ -20,6 +20,8 @@ from database import get_db
 from auth import get_current_user
 from services.payroll.payroll_run_service import PayrollRunService
 from services.payroll.payroll_journal_service import PayrollJournalService
+from services.payroll.payslip_generator import PayslipGenerator
+from fastapi.responses import HTMLResponse
 
 router = APIRouter(prefix="/api/payroll-runs", tags=["Payroll Runs"])
 
@@ -491,6 +493,128 @@ def reverse_payroll_posting(
             payrun_id=payrun_id,
             reversed_by=current_user.id,
             reason=data.reason
+        )
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# PAYSLIP GENERATION & DISTRIBUTION
+# ============================================================================
+
+@router.get("/{payrun_id}/payslips/{payslip_id}/html", response_class=HTMLResponse)
+def get_payslip_html(
+    payrun_id: str,
+    payslip_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Generate and view HTML payslip"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    generator = PayslipGenerator(db)
+    
+    try:
+        html = generator.generate_payslip_html(
+            company_id=current_user.company_id,
+            payslip_id=payslip_id
+        )
+        
+        return HTMLResponse(content=html)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{payrun_id}/generate-all-payslips")
+def generate_batch_payslips(
+    payrun_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Generate HTML payslips for all employees in the payroll run"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    generator = PayslipGenerator(db)
+    
+    try:
+        results = generator.generate_batch_payslips(
+            company_id=current_user.company_id,
+            payrun_id=payrun_id
+        )
+        
+        successful = sum(1 for r in results if r["success"])
+        failed = sum(1 for r in results if not r["success"])
+        
+        return {
+            "success": True,
+            "message": f"Generated {successful} payslips, {failed} failed",
+            "total": len(results),
+            "successful": successful,
+            "failed": failed,
+            "results": results
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class PayslipEmailRequest(BaseModel):
+    recipient_email: Optional[str] = None
+
+
+@router.post("/{payrun_id}/payslips/{payslip_id}/send-email")
+def send_payslip_email(
+    payrun_id: str,
+    payslip_id: str,
+    data: PayslipEmailRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Send payslip to employee via email"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    generator = PayslipGenerator(db)
+    
+    try:
+        result = generator.send_payslip_email(
+            company_id=current_user.company_id,
+            payslip_id=payslip_id,
+            recipient_email=data.recipient_email
+        )
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{payrun_id}/send-all-payslips")
+def send_batch_payslip_emails(
+    payrun_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Send payslips to all employees via email"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    generator = PayslipGenerator(db)
+    
+    try:
+        result = generator.send_batch_payslip_emails(
+            company_id=current_user.company_id,
+            payrun_id=payrun_id
         )
         
         return result
