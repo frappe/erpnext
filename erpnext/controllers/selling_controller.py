@@ -1009,12 +1009,11 @@ class SellingController(StockController):
 
 
 def set_default_income_account_for_item(obj):
+	company_default = frappe.get_cached_value("Company", obj.company, "default_income_account")
 	for d in obj.get("items", default=[]):
-		if d.item_code:
-			if getattr(d, "income_account", None) and d.income_account != frappe.db.get_value(
-				"Company", obj.company, "default_income_account"
-			):
-				set_item_default(d.item_code, obj.company, "income_account", d.income_account)
+		income_account = getattr(d, "income_account", None)
+		if d.item_code and income_account and income_account != company_default:
+			set_item_default(d.item_code, obj.company, "income_account", income_account)
 
 
 def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
