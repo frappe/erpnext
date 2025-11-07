@@ -1009,6 +1009,14 @@ class SellingController(StockController):
 
 
 def set_default_income_account_for_item(obj):
+	"""Set income account as default for items in the transaction.
+
+	Updates the item default income account for each item in the transaction
+	if it differs from the company's default income account.
+
+	Args:
+	    obj: Transaction document containing items table with income_account field
+	"""
 	company_default = frappe.get_cached_value("Company", obj.company, "default_income_account")
 	for d in obj.get("items", default=[]):
 		income_account = getattr(d, "income_account", None)
