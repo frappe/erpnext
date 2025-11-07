@@ -500,6 +500,42 @@ class AssetDisposalRequest(BaseModel):
     create_journal: bool = True
 
 
+# Intercompany Transaction Schemas (per Finance PDF spec)
+class IntercompanySaleRequest(BaseModel):
+    """Record an intercompany sale"""
+    from_company_id: str
+    to_company_id: str
+    transaction_date: date
+    amount: float
+    description: str
+    reference: Optional[str] = None
+
+
+class IntercompanyLoanRequest(BaseModel):
+    """Record an intercompany loan"""
+    lender_company_id: str
+    borrower_company_id: str
+    loan_date: date
+    loan_amount: float
+    interest_rate: float
+    maturity_date: date
+    description: str
+    reference: Optional[str] = None
+
+
+class EliminationRequest(BaseModel):
+    """Generate elimination entries"""
+    period_end_date: date
+    company_ids: Optional[List[str]] = None
+
+
+class ReconciliationRequest(BaseModel):
+    """Reconcile intercompany accounts"""
+    company1_id: str
+    company2_id: str
+    as_of_date: date
+
+
 class DashboardStats(BaseModel):
     total_employees: int
     total_accounts: int

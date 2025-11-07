@@ -11,6 +11,7 @@ from .fx_revaluation import FXRevaluationService
 from .smart_invoice import SmartInvoiceService
 from .payment_matching import PaymentMatchingEngine
 from .fixed_asset_depreciation import FixedAssetDepreciationService
+from .intercompany_transactions import IntercompanyTransactionService
 
 __all__ = [
     "JournalEntryService",
@@ -19,5 +20,6 @@ __all__ = [
     "FXRevaluationService",
     "SmartInvoiceService",
     "PaymentMatchingEngine",
-    "FixedAssetDepreciationService"
+    "FixedAssetDepreciationService",
+    "IntercompanyTransactionService"
 ]

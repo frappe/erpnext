@@ -1081,7 +1081,8 @@ from services.finance import (
     FXRevaluationService,
     SmartInvoiceService,
     PaymentMatchingEngine,
-    FixedAssetDepreciationService
+    FixedAssetDepreciationService,
+    IntercompanyTransactionService
 )
 from fastapi.responses import Response
 
@@ -1819,6 +1820,192 @@ def dispose_fixed_asset(
         disposal_date=data.disposal_date,
         disposal_proceeds=Decimal(str(data.disposal_proceeds)),
         create_journal=data.create_journal
+    )
+    
+    return result
+
+
+# ============================================================================
+# INTERCOMPANY TRANSACTION ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+
+@router.post("/intercompany/sale")
+def record_intercompany_sale(
+    data: schemas.IntercompanySaleRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Record an intercompany sale between entities
+    
+    Creates matching journal entries in both companies:
+    - Seller: DR Intercompany Receivable / CR Intercompany Sales
+    - Buyer: DR Intercompany Purchases / CR Intercompany Payable
+    
+    Example (Company A sells to Company B for 50,000):
+    {
+      "from_company_id": "company_a_id",
+      "to_company_id": "company_b_id",
+      "transaction_date": "2025-11-05",
+      "amount": 50000,
+      "description": "Management services",
+      "reference": "IC-2025-001"
+    }
+    """
+    service = IntercompanyTransactionService(db, current_user.company_id, current_user.id)
+    
+    from decimal import Decimal
+    result = service.record_intercompany_sale(
+        from_company_id=data.from_company_id,
+        to_company_id=data.to_company_id,
+        transaction_date=data.transaction_date,
+        amount=Decimal(str(data.amount)),
+        description=data.description,
+        reference=data.reference
+    )
+    
+    return result
+
+
+@router.post("/intercompany/loan")
+def record_intercompany_loan(
+    data: schemas.IntercompanyLoanRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Record an intercompany loan between entities
+    
+    Creates matching journal entries in both companies:
+    - Lender: DR Intercompany Loan Receivable / CR Cash
+    - Borrower: DR Cash / CR Intercompany Loan Payable
+    
+    Example (Company A lends 100,000 to Company B):
+    {
+      "lender_company_id": "company_a_id",
+      "borrower_company_id": "company_b_id",
+      "loan_date": "2025-11-05",
+      "loan_amount": 100000,
+      "interest_rate": 8.5,
+      "maturity_date": "2026-11-05",
+      "description": "Working capital loan",
+      "reference": "LOAN-2025-001"
+    }
+    """
+    service = IntercompanyTransactionService(db, current_user.company_id, current_user.id)
+    
+    from decimal import Decimal
+    result = service.record_intercompany_loan(
+        lender_company_id=data.lender_company_id,
+        borrower_company_id=data.borrower_company_id,
+        loan_date=data.loan_date,
+        loan_amount=Decimal(str(data.loan_amount)),
+        interest_rate=data.interest_rate,
+        maturity_date=data.maturity_date,
+        description=data.description,
+        reference=data.reference
+    )
+    
+    return result
+
+
+@router.post("/intercompany/eliminations")
+def generate_elimination_entries(
+    data: schemas.EliminationRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Generate elimination entries for consolidated reporting
+    
+    Eliminates intercompany balances:
+    - Intercompany receivables vs. payables
+    - Intercompany sales vs. purchases
+    - Intercompany loans
+    - Unrealized profit on inventory
+    
+    Run this at period-end for consolidation.
+    
+    Example (eliminate all IC transactions as of Jan 31, 2025):
+    {
+      "period_end_date": "2025-01-31",
+      "company_ids": ["company_a_id", "company_b_id", "company_c_id"]
+    }
+    """
+    service = IntercompanyTransactionService(db, current_user.company_id, current_user.id)
+    
+    result = service.generate_elimination_entries(
+        period_end_date=data.period_end_date,
+        company_ids=data.company_ids
+    )
+    
+    return result
+
+
+@router.get("/intercompany/balances")
+def get_intercompany_balances(
+    as_of_date: date,
+    company_ids: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Get intercompany balances between entities
+    
+    Shows:
+    - Intercompany receivables
+    - Intercompany payables
+    - Intercompany loans
+    - Net position by company
+    
+    Query params:
+    - as_of_date: Date to get balances as of (YYYY-MM-DD)
+    - company_ids: Comma-separated list of company IDs (optional)
+    
+    Example: /intercompany/balances?as_of_date=2025-01-31&company_ids=comp1,comp2
+    """
+    service = IntercompanyTransactionService(db, current_user.company_id, current_user.id)
+    
+    # Parse company_ids if provided
+    company_list = company_ids.split(",") if company_ids else None
+    
+    balances = service.get_intercompany_balances(
+        as_of_date=as_of_date,
+        company_ids=company_list
+    )
+    
+    return balances
+
+
+@router.post("/intercompany/reconcile")
+def reconcile_intercompany_accounts(
+    data: schemas.ReconciliationRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Reconcile intercompany accounts between two entities
+    
+    Identifies:
+    - Matched transactions
+    - Unmatched transactions
+    - Amount discrepancies
+    - Balance differences
+    
+    Example (reconcile Company A with Company B):
+    {
+      "company1_id": "company_a_id",
+      "company2_id": "company_b_id",
+      "as_of_date": "2025-01-31"
+    }
+    """
+    service = IntercompanyTransactionService(db, current_user.company_id, current_user.id)
+    
+    result = service.reconcile_intercompany_accounts(
+        company1_id=data.company1_id,
+        company2_id=data.company2_id,
+        as_of_date=data.as_of_date
     )
     
     return result
