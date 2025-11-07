@@ -1082,7 +1082,8 @@ from services.finance import (
     SmartInvoiceService,
     PaymentMatchingEngine,
     FixedAssetDepreciationService,
-    IntercompanyTransactionService
+    IntercompanyTransactionService,
+    FinancialReportService
 )
 from fastapi.responses import Response
 
@@ -2009,4 +2010,185 @@ def reconcile_intercompany_accounts(
     )
     
     return result
+
+
+# ============================================================================
+# FINANCIAL REPORTS ENDPOINTS (per Finance PDF spec)
+# ============================================================================
+
+
+@router.get("/reports/balance-sheet")
+def get_balance_sheet_report(
+    as_of_date: date,
+    comparison_date: Optional[date] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Generate Balance Sheet (Statement of Financial Position)
+    
+    Shows:
+    - Assets (Current + Non-Current)
+    - Liabilities (Current + Non-Current)
+    - Equity
+    - Verification: Assets = Liabilities + Equity
+    
+    Query params:
+    - as_of_date: Date to generate balance sheet as of (YYYY-MM-DD)
+    - comparison_date: Optional prior date for comparison
+    
+    Example: /reports/balance-sheet?as_of_date=2025-01-31
+    """
+    service = FinancialReportService(db, current_user.company_id, current_user.id)
+    
+    report = service.get_balance_sheet(
+        as_of_date=as_of_date,
+        comparison_date=comparison_date
+    )
+    
+    return report
+
+
+@router.get("/reports/income-statement")
+def get_income_statement_report(
+    start_date: date,
+    end_date: date,
+    comparison_start: Optional[date] = None,
+    comparison_end: Optional[date] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Generate Income Statement (Profit & Loss)
+    
+    Shows:
+    - Revenue (all revenue accounts)
+    - Expenses (all expense accounts)
+    - Net Income (Revenue - Expenses)
+    - Profit Margin %
+    
+    Query params:
+    - start_date: Period start date (YYYY-MM-DD)
+    - end_date: Period end date (YYYY-MM-DD)
+    - comparison_start: Optional comparison period start
+    - comparison_end: Optional comparison period end
+    
+    Example: /reports/income-statement?start_date=2025-01-01&end_date=2025-01-31
+    """
+    service = FinancialReportService(db, current_user.company_id, current_user.id)
+    
+    report = service.get_income_statement(
+        start_date=start_date,
+        end_date=end_date,
+        comparison_start=comparison_start,
+        comparison_end=comparison_end
+    )
+    
+    return report
+
+
+@router.get("/reports/trial-balance")
+def get_trial_balance_report(
+    as_of_date: date,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Generate Trial Balance
+    
+    Shows all accounts with their debit and credit balances
+    Verifies that total debits = total credits
+    
+    Essential for:
+    - Period-end verification
+    - Finding posting errors
+    - Balance sheet preparation
+    
+    Query params:
+    - as_of_date: Date to generate trial balance as of (YYYY-MM-DD)
+    
+    Example: /reports/trial-balance?as_of_date=2025-01-31
+    """
+    service = FinancialReportService(db, current_user.company_id, current_user.id)
+    
+    report = service.get_trial_balance(as_of_date=as_of_date)
+    
+    return report
+
+
+@router.get("/reports/general-ledger")
+def get_general_ledger_report(
+    start_date: date,
+    end_date: date,
+    account_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Generate General Ledger Report
+    
+    Shows all journal entries for a period, grouped by account
+    Optionally filtered by a specific account
+    
+    Each account shows:
+    - All transactions
+    - Total debits
+    - Total credits
+    - Net balance
+    
+    Query params:
+    - start_date: Period start date (YYYY-MM-DD)
+    - end_date: Period end date (YYYY-MM-DD)
+    - account_id: Optional account filter
+    
+    Example: /reports/general-ledger?start_date=2025-01-01&end_date=2025-01-31
+    Example: /reports/general-ledger?start_date=2025-01-01&end_date=2025-01-31&account_id=acc123
+    """
+    service = FinancialReportService(db, current_user.company_id, current_user.id)
+    
+    report = service.get_general_ledger(
+        start_date=start_date,
+        end_date=end_date,
+        account_id=account_id
+    )
+    
+    return report
+
+
+@router.get("/reports/account-activity/{account_id}")
+def get_account_activity_report(
+    account_id: str,
+    start_date: date,
+    end_date: date,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Get detailed activity for a specific account (drill-down)
+    
+    Shows:
+    - Opening balance
+    - All transactions in period with running balance
+    - Closing balance
+    - Net change
+    - Direct links to journal entries for drill-down
+    
+    This is the drill-down endpoint - click an account in any report
+    to see detailed transactions.
+    
+    Query params:
+    - start_date: Period start date (YYYY-MM-DD)
+    - end_date: Period end date (YYYY-MM-DD)
+    
+    Example: /reports/account-activity/acc123?start_date=2025-01-01&end_date=2025-01-31
+    """
+    service = FinancialReportService(db, current_user.company_id, current_user.id)
+    
+    report = service.get_account_activity(
+        account_id=account_id,
+        start_date=start_date,
+        end_date=end_date
+    )
+    
+    return report
 
