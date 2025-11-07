@@ -381,9 +381,101 @@ class PayrollRunService:
     ) -> Dict[str, float]:
         """Get loan deductions for the employee"""
         
-        # TODO: Implement in H4.2 - Automatic Loan Deductions
-        # For now, return empty
-        return {}
+        from services.hr.loan_service import LoanService
+        
+        try:
+            # Get payrun to determine payment date
+            payrun = self.db.query(models.Payrun).filter(
+                models.Payrun.id == payrun_id
+            ).first()
+            
+            if not payrun:
+                return {}
+            
+            # Get active loans for this employee
+            loan_service = LoanService(self.db)
+            active_loans = loan_service.get_active_loans_for_employee(
+                company_id=company_id,
+                employee_id=employee_id
+            )
+            
+            # Build deductions dictionary
+            deductions = {}
+            for loan in active_loans:
+                # Only deduct if repayment has started and balance remains
+                if loan.repayment_start_date <= payrun.payment_date and loan.outstanding_balance > 0:
+                    # Determine deduction amount (lesser of monthly payment or remaining balance)
+                    deduction_amount = min(loan.repayment_amount, loan.outstanding_balance)
+                    
+                    # Use loan number as key for clarity
+                    key = f"{loan.loan_type}_{loan.loan_number}"
+                    deductions[key] = deduction_amount
+            
+            return deductions
+        except Exception as e:
+            # Log error but don't fail payroll processing
+            print(f"Error getting loan deductions: {str(e)}")
+            return {}
+    
+    def _record_loan_payments_for_payrun(
+        self,
+        company_id: str,
+        payrun_id: str,
+        payment_date: date,
+        created_by: str
+    ):
+        """Record loan payments for all employees in this payroll run"""
+        
+        from services.hr.loan_service import LoanService
+        
+        try:
+            # Get all payslips for this payrun
+            payslips = self.db.query(models.Payslip).filter(
+                models.Payslip.payrun_id == payrun_id
+            ).all()
+            
+            loan_service = LoanService(self.db)
+            
+            for payslip in payslips:
+                # Check if payslip has loan deductions
+                if not payslip.deductions_json or "loans" not in payslip.deductions_json:
+                    continue
+                
+                loan_deductions = payslip.deductions_json.get("loans", {})
+                if not loan_deductions:
+                    continue
+                
+                # Get active loans for this employee
+                active_loans = loan_service.get_active_loans_for_employee(
+                    company_id=company_id,
+                    employee_id=payslip.employee_id
+                )
+                
+                # Record payment for each loan
+                for loan in active_loans:
+                    loan_key = f"{loan.loan_type}_{loan.loan_number}"
+                    
+                    if loan_key in loan_deductions:
+                        payment_amount = loan_deductions[loan_key]
+                        
+                        if payment_amount > 0:
+                            try:
+                                loan_service.record_payment(
+                                    company_id=company_id,
+                                    loan_id=loan.id,
+                                    payment_amount=payment_amount,
+                                    payment_date=payment_date,
+                                    payment_method="payroll_deduction",
+                                    payrun_id=payrun_id,
+                                    reference_number=f"Payroll-{payrun_id}",
+                                    created_by=created_by,
+                                    notes=f"Automatic deduction from payroll {payslip.employee_number}"
+                                )
+                            except Exception as e:
+                                print(f"Error recording loan payment for employee {payslip.employee_id}: {str(e)}")
+        
+        except Exception as e:
+            print(f"Error processing loan payments for payrun: {str(e)}")
     
     def _calculate_payrun_totals(self, payrun: models.Payrun):
         """Calculate and update payrun totals"""
@@ -501,6 +593,14 @@ class PayrollRunService:
         self.db.query(models.Payslip).filter(
             models.Payslip.payrun_id == payrun.id
         ).update({"status": "approved"})
+        
+        # Record loan payments for this payroll run
+        self._record_loan_payments_for_payrun(
+            company_id=company_id,
+            payrun_id=payrun.id,
+            payment_date=payrun.payment_date,
+            created_by=approved_by
+        )
         
         # Mark payrun as posted (ready for GL posting and export)
         payrun.status = "posted"
