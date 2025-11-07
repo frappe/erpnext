@@ -5,7 +5,7 @@ integrations = ["python_anthropic_ai_integrations:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["glibcLocales", "qrencode", "rapidfuzz-cpp", "taskflow"]
+packages = ["glibcLocales", "rapidfuzz-cpp", "taskflow"]
 
 [workflows]
 runButton = "Project"
@@ -47,10 +47,32 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
-[[p[[ports]]
-localPort = 80
+[[ports]]
+localPort = 5000
+externalPort = 5000
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+exposeLocalhost = true
+
+[[ports]]
+localPort = 34711
 externalPort = 80
+
+[[ports]]
+localPort = 35467
+externalPort = 3002
+
+[[ports]]
+localPort = 35503
+externalPort = 3001
+
+[[ports]]
+localPort = 38679
+externalPort = 3000
+
 [deployment]
 deploymentTarget = "autoscale"
-run = ["sh", "-c", "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 80"]
-build = ["sh", "-c", "cd frontend && npm install && npm run build"]
+run = ["sh", "-c", "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 34711 --workers 2"]
+build = ["./build.sh"]
