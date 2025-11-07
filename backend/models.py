@@ -227,6 +227,35 @@ class Employee(Base):
     department = relationship("Department")
     supervisor = relationship("Employee", remote_side=[id], foreign_keys=[supervisor_id])
     creator = relationship("User", foreign_keys=[created_by])
+    documents = relationship("EmployeeDocument", back_populates="employee")
+
+class EmployeeDocument(Base):
+    """Employee document storage and management"""
+    __tablename__ = "employee_documents"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
+    
+    document_category = Column(String, nullable=False, index=True)
+    document_name = Column(String, nullable=False)
+    secure_filename = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
+    file_size = Column(Integer, default=0)
+    mime_type = Column(String)
+    description = Column(Text)
+    
+    uploaded_by = Column(String, ForeignKey("users.id"))
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    
+    is_deleted = Column(Boolean, default=False, index=True)
+    deleted_at = Column(DateTime)
+    deleted_by = Column(String, ForeignKey("users.id"))
+    
+    company = relationship("Company")
+    employee = relationship("Employee", back_populates="documents")
+    uploader = relationship("User", foreign_keys=[uploaded_by])
+    deleter = relationship("User", foreign_keys=[deleted_by])
 
 class Account(Base):
     __tablename__ = "accounts"

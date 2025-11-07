@@ -6,9 +6,11 @@ Endpoints for:
 - Employment contracts
 - Job requisitions
 - Employee onboarding/offboarding
+- Document management
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date, datetime, timedelta
@@ -17,6 +19,7 @@ from pydantic import BaseModel
 import models
 from database import get_db
 from auth import get_current_user
+from services.hr.document_manager import DocumentManager
 
 router = APIRouter(prefix="/api/employees", tags=["Employees"])
 
@@ -444,4 +447,144 @@ def get_onboarding_progress(
             "completion_percentage": round(completion_percentage, 2)
         },
         "checklist": checklist
+    }
+
+
+# ============================================================================
+# EMPLOYEE DOCUMENT MANAGEMENT
+# ============================================================================
+
+@router.post("/{employee_id}/documents/upload")
+async def upload_employee_document(
+    employee_id: str,
+    file: UploadFile = File(...),
+    category: str = "other",
+    description: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Upload a document for an employee"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    doc_manager = DocumentManager(db)
+    
+    try:
+        result = await doc_manager.upload_document(
+            file=file,
+            company_id=current_user.company_id,
+            employee_id=employee_id,
+            document_category=category,
+            description=description,
+            uploaded_by=current_user.id
+        )
+        
+        return {
+            "success": True,
+            "message": "Document uploaded successfully",
+            "document": result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{employee_id}/documents")
+def list_employee_documents(
+    employee_id: str,
+    category: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """List all documents for an employee"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    doc_manager = DocumentManager(db)
+    documents = doc_manager.list_employee_documents(
+        employee_id=employee_id,
+        company_id=current_user.company_id,
+        category=category
+    )
+    
+    return {
+        "success": True,
+        "employee_id": employee_id,
+        "documents": documents,
+        "count": len(documents)
+    }
+
+
+@router.get("/documents/{document_id}/download")
+def download_employee_document(
+    document_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Download an employee document"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    doc_manager = DocumentManager(db)
+    
+    try:
+        file_path = doc_manager.get_document_path(document_id, current_user.company_id)
+        
+        # Get document details for filename
+        document = db.query(models.EmployeeDocument).filter(
+            models.EmployeeDocument.id == document_id
+        ).first()
+        
+        return FileResponse(
+            path=file_path,
+            filename=document.document_name if document else "document",
+            media_type=document.mime_type if document else "application/octet-stream"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/documents/{document_id}")
+def delete_employee_document(
+    document_id: str,
+    hard_delete: bool = False,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Delete an employee document (soft delete by default)"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    doc_manager = DocumentManager(db)
+    
+    try:
+        doc_manager.delete_document(
+            document_id=document_id,
+            company_id=current_user.company_id,
+            soft_delete=not hard_delete
+        )
+        
+        return {
+            "success": True,
+            "message": "Document deleted successfully"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/documents/categories")
+def get_document_categories(
+    current_user: models.User = Depends(get_current_user)
+):
+    """Get all available document categories"""
+    doc_manager = DocumentManager(None)
+    categories = doc_manager.get_document_categories()
+    
+    return {
+        "success": True,
+        "categories": [
+            {"key": key, "label": label}
+            for key, label in categories.items()
+        ]
     }
