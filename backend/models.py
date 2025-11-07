@@ -2972,6 +2972,46 @@ class EmployeeLoan(Base):
     employee = relationship("Employee")
     approver = relationship("User", foreign_keys=[approved_by])
     gl_journal = relationship("JournalEntry")
+    payments = relationship("LoanPayment", back_populates="loan")
+
+
+class LoanPayment(Base):
+    """Track individual loan payment transactions"""
+    __tablename__ = "loan_payments"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
+    loan_id = Column(String, ForeignKey("employee_loans.id"), nullable=False, index=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    
+    # Payment Details
+    payment_date = Column(Date, nullable=False)
+    payment_number = Column(Integer)  # 1, 2, 3... (installment number)
+    
+    # Amounts
+    payment_amount = Column(Float, nullable=False)
+    principal_paid = Column(Float, nullable=False)
+    interest_paid = Column(Float, nullable=False)
+    balance_after_payment = Column(Float, nullable=False)
+    
+    # Source
+    payrun_id = Column(String, ForeignKey("payruns.id"))  # If deducted from payroll
+    payment_method = Column(String)  # payroll_deduction, manual_payment, bank_transfer
+    reference_number = Column(String)
+    
+    # GL Integration
+    gl_journal_id = Column(String, ForeignKey("journal_entries.id"))
+    
+    notes = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    # Relationships
+    loan = relationship("EmployeeLoan", back_populates="payments")
+    employee = relationship("Employee")
+    payrun = relationship("Payrun")
+    gl_journal = relationship("JournalEntry")
+
 
 class JobRequisition(Base):
     """Job requisition and approval workflow"""
