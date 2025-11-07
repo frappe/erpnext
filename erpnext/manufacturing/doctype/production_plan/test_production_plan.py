@@ -2428,7 +2428,7 @@ class TestProductionPlan(IntegrationTestCase):
 		plan = create_production_plan(
 			item_code="Top Level Parent",
 			planned_qty=10,
-			use_multi_level_bom=1,
+			use_multi_level_bom=0,
 			do_not_submit=True,
 			company="_Test Company",
 			skip_getting_mr_items=True,
@@ -2442,7 +2442,7 @@ class TestProductionPlan(IntegrationTestCase):
 			plan.append("mr_items", d)
 
 		self.assertEqual(plan.sub_assembly_items[0].production_item, "Sub Assembly Level 1-1")
-		self.assertEqual([item.item_code for item in plan.mr_items], ["Item Level 2-3", "Item Level 1-3"])
+		self.assertEqual([item.item_code for item in plan.mr_items], ["Item Level 1-3", "Item Level 2-3"])
 
 
 def create_production_plan(**args):

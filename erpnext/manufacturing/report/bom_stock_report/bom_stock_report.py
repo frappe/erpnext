@@ -22,6 +22,7 @@ def get_columns():
 		_("Item") + ":Link/Item:150",
 		_("Item Name") + "::240",
 		_("Description") + "::300",
+		_("From BOM No") + "::200",
 		_("BOM Qty") + ":Float:160",
 		_("BOM UOM") + "::160",
 		_("Required Qty") + ":Float:120",
@@ -72,6 +73,7 @@ def get_bom_stock(filters):
 			BOM_ITEM.item_code,
 			BOM_ITEM.item_name,
 			BOM_ITEM.description,
+			BOM.name,
 			Sum(BOM_ITEM.stock_qty),
 			BOM_ITEM.stock_uom,
 			(Sum(BOM_ITEM.stock_qty) * qty_to_produce) / BOM.quantity,
@@ -91,17 +93,14 @@ def get_bom_stock(filters):
 
 
 def explode_phantom_boms(data, filters):
-	indexes = []
-	for i, item in enumerate(data):
-		print(i, item)
-		if item[-1]:  # last element is `is_phantom_item` column
-			filters["qty_to_produce"] = item[-5]
-			filters["bom"] = item[-2]
-			indexes.append({"index": i, "data": get_bom_stock(filters)})
+	expanded = []
+	for row in data:
+		if row[-1]:  # last element is `is_phantom_item`
+			phantom_filters = filters.copy()
+			phantom_filters["qty_to_produce"] = row[-5]
+			phantom_filters["bom"] = row[-2]
+			expanded.extend(get_bom_stock(phantom_filters))
+		else:
+			expanded.append(row)
 
-	for item in indexes:
-		index = item["index"]
-		data.pop(index)
-		data[index:index] = item["data"]
-
-	return data
+	return expanded

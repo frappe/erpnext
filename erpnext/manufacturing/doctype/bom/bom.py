@@ -1338,17 +1338,22 @@ def get_bom_items_as_dict(
 			key = (item.item_code, item.operation_row_id)
 
 		if item.get("is_phantom_item"):
-			item_dict.update(
-				get_bom_items_as_dict(
-					item.get("bom_no"),
-					company,
-					qty=item.get("qty"),
-					fetch_exploded=fetch_exploded,
-					fetch_scrap_items=fetch_scrap_items,
-					include_non_stock_items=include_non_stock_items,
-					fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
-				)
+			data = get_bom_items_as_dict(
+				item.get("bom_no"),
+				company,
+				qty=item.get("qty"),
+				fetch_exploded=fetch_exploded,
+				fetch_scrap_items=fetch_scrap_items,
+				include_non_stock_items=include_non_stock_items,
+				fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
 			)
+
+			for k, v in data.items():
+				if item_dict.get(k):
+					item_dict[k]["qty"] += flt(v.qty)
+				else:
+					item_dict[k] = v
+
 		elif key in item_dict:
 			item_dict[key]["qty"] += flt(item.qty)
 		else:
@@ -1401,7 +1406,7 @@ def validate_bom_no(item, bom_no):
 
 
 @frappe.whitelist()
-def get_children(parent=None, is_root=False, **filters):
+def get_children(parent=None, return_all=True, fetch_phantom_items=False, is_root=False, **filters):
 	if not parent or parent == "BOM":
 		frappe.msgprint(_("Please select a BOM"))
 		return
@@ -1413,10 +1418,13 @@ def get_children(parent=None, is_root=False, **filters):
 		bom_doc = frappe.get_cached_doc("BOM", frappe.form_dict.parent)
 		frappe.has_permission("BOM", doc=bom_doc, throw=True)
 
+		filters = [["parent", "=", frappe.form_dict.parent]]
+		if not return_all:
+			filters.append(["is_phantom_item", "=", cint(fetch_phantom_items)])
 		bom_items = frappe.get_all(
 			"BOM Item",
-			fields=["item_code", "bom_no as value", "stock_qty", "qty", "is_phantom_item"],
-			filters=[["parent", "=", frappe.form_dict.parent]],
+			fields=["item_code", "bom_no as value", "stock_qty", "qty", "is_phantom_item", "bom_no"],
+			filters=filters,
 			order_by="idx",
 		)
 

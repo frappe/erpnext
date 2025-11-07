@@ -32,6 +32,7 @@ def get_report_data(last_purchase_rate, required_qty, row, manufacture_details):
 	return [
 		row.item_code,
 		row.description,
+		row.from_bom_no,
 		comma_and(manufacture_details.get(row.item_code, {}).get("manufacturer", []), add_quotes=False),
 		comma_and(manufacture_details.get(row.item_code, {}).get("manufacturer_part", []), add_quotes=False),
 		qty_per_unit,
@@ -55,6 +56,13 @@ def get_columns():
 			"fieldname": "description",
 			"label": _("Description"),
 			"fieldtype": "Data",
+			"width": 150,
+		},
+		{
+			"fieldname": "from_bom_no",
+			"label": _("From BOM No"),
+			"fieldtype": "Link",
+			"options": "BOM",
 			"width": 150,
 		},
 		{
@@ -115,6 +123,7 @@ def get_bom_data(filters):
 		.select(
 			bom_item.item_code,
 			bom_item.description,
+			bom_item.parent.as_("from_bom_no"),
 			bom_item.qty_consumed_per_unit.as_("qty_per_unit"),
 			IfNull(Sum(bin.actual_qty), 0).as_("actual_qty"),
 		)
@@ -152,17 +161,27 @@ def get_bom_data(filters):
 
 
 def explode_phantom_boms(data, filters):
-	indexes = []
-	for i, item in enumerate(data):
-		if item.is_phantom_item:
-			filters["bom"] = item.bom_no
-			indexes.append({"index": i, "items": get_bom_data(filters)})
+	original_bom = filters.get("bom")
+	replacements = []
 
-	for item in indexes:
-		index = item["index"]
-		data.pop(index)
-		data[index:index] = item["items"]
+	for idx, item in enumerate(data):
+		if not item.is_phantom_item:
+			continue
 
+		filters["bom"] = item.bom_no
+		children = get_bom_data(filters)
+		filters["bom"] = original_bom
+
+		for child in children:
+			child.qty_per_unit = (child.qty_per_unit or 0) * (item.qty_per_unit or 0)
+
+		replacements.append((idx, children))
+
+	for idx, children in reversed(replacements):
+		data.pop(idx)
+		data[idx:idx] = children
+
+	filters["bom"] = original_bom
 	return data
 
 
