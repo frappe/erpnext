@@ -31,7 +31,7 @@ All 10 tasks completed and tested:
 - 10/10 E2E Tests Passed
 - Production-Ready ✅
 
-### 🚀 HR & Payroll Module (IN PROGRESS) - 53% Complete (8/15 tasks)
+### 🚀 HR & Payroll Module (IN PROGRESS) - 67% Complete (10/15 tasks)
 **Phase 2 Started:** November 7, 2025
 
 **Completed Tasks:**
@@ -43,9 +43,10 @@ All 10 tasks completed and tested:
 6. ✅ H3.3: Payslip Generation - HTML payslips with detailed breakdown and email distribution
 7. ✅ H4.1: Employee Loans & Advances - Loan creation, amortization schedules, approval workflow
 8. ✅ H4.2: Automatic Loan Deductions - Payroll integration with automatic payment tracking
+9. ✅ H5.1: TPIN Validation - Mock ZRA validation with format checking and status tracking
+10. ✅ H5.2: Statutory Exports - NAPSA, NHIMA, PAYE CSV exports for compliance reporting
 
-**Pending Tasks (7 remaining):**
-- H5.1-H5.2: TPIN Validation, Statutory Compliance Exports
+**Pending Tasks (5 remaining):**
 - H6.1-H6.2: Employee Self-Service Portal, Leave Requests
 - H7.1-H7.2: HR Analytics Dashboard, Onboarding Automation
 - H-TEST: End-to-End Testing & UAT
