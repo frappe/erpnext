@@ -571,21 +571,58 @@ class LeaveApplication(Base):
     __tablename__ = "leave_applications"
     
     id = Column(String, primary_key=True, default=generate_uuid)
-    company_id = Column(String, ForeignKey("companies.id"), nullable=False)
-    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
     leave_type_id = Column(String, ForeignKey("leave_types.id"), nullable=False)
     application_number = Column(String, nullable=False, unique=True)
-    start_date = Column(Date, nullable=False)
+    start_date = Column(Date, nullable=False, index=True)
     end_date = Column(Date, nullable=False)
     days_requested = Column(Float, nullable=False)
     reason = Column(Text)
-    status = Column(String, default="pending")
-    approved_by = Column(String)
+    status = Column(String, default="pending", index=True)
+    submitted_by = Column(String, ForeignKey("users.id"))
+    submitted_at = Column(DateTime, default=datetime.utcnow)
+    approved_by = Column(String, ForeignKey("users.id"))
     approved_at = Column(DateTime)
+    approver_comments = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     
+    company = relationship("Company")
     employee = relationship("Employee")
     leave_type = relationship("LeaveType")
+    submitter = relationship("User", foreign_keys=[submitted_by])
+    approver = relationship("User", foreign_keys=[approved_by])
+
+class EmployeeLeaveBalance(Base):
+    """Employee leave balance tracking"""
+    __tablename__ = "employee_leave_balances"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    company_id = Column(String, ForeignKey("companies.id"), nullable=False, index=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False, index=True)
+    leave_type_id = Column(String, ForeignKey("leave_types.id"), nullable=False)
+    year = Column(Integer, nullable=False, index=True)
+    
+    entitled_days = Column(Float, default=0.0)
+    accrued_days = Column(Float, default=0.0)
+    taken_days = Column(Float, default=0.0)
+    pending_days = Column(Float, default=0.0)
+    balance_days = Column(Float, default=0.0)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        UniqueConstraint('company_id', 'employee_id', 'leave_type_id', 'year', name='unique_leave_balance_per_year'),
+    )
+    
+    company = relationship("Company")
+    employee = relationship("Employee")
+    leave_type = relationship("LeaveType")
+
+# Aliases for backward compatibility
+LeaveRequest = LeaveApplication
+LeaveTypeConfiguration = LeaveType
 
 class MobileMoneyProvider(Base):
     __tablename__ = "mobile_money_providers"
