@@ -11,7 +11,7 @@ Endpoints for batch payroll processing:
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import date
 from pydantic import BaseModel
 
@@ -19,6 +19,7 @@ import models
 from database import get_db
 from auth import get_current_user
 from services.payroll.payroll_run_service import PayrollRunService
+from services.payroll.payroll_journal_service import PayrollJournalService
 
 router = APIRouter(prefix="/api/payroll-runs", tags=["Payroll Runs"])
 
@@ -379,3 +380,121 @@ def get_payroll_summary(
             "validation_errors": payrun.validation_errors
         }
     }
+
+
+# ============================================================================
+# GL POSTING & BANK FILE GENERATION
+# ============================================================================
+
+@router.post("/{payrun_id}/post-to-gl")
+def post_payroll_to_gl(
+    payrun_id: str,
+    account_mapping: Optional[Dict] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Post approved payroll to General Ledger"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    service = PayrollJournalService(db)
+    
+    try:
+        result = service.post_payroll_to_gl(
+            company_id=current_user.company_id,
+            payrun_id=payrun_id,
+            posted_by=current_user.id,
+            account_mapping=account_mapping
+        )
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{payrun_id}/generate-bank-file")
+def generate_bank_payment_file(
+    payrun_id: str,
+    file_format: str = "csv",
+    bank_code: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Generate bank payment file for salary transfers"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    service = PayrollJournalService(db)
+    
+    try:
+        result = service.generate_bank_payment_file(
+            company_id=current_user.company_id,
+            payrun_id=payrun_id,
+            file_format=file_format,
+            bank_code=bank_code
+        )
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{payrun_id}/statutory-summary")
+def get_statutory_payment_summary(
+    payrun_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Get statutory payment summary (PAYE, NAPSA, NHIMA)"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    service = PayrollJournalService(db)
+    
+    try:
+        result = service.generate_statutory_payment_summary(
+            company_id=current_user.company_id,
+            payrun_id=payrun_id
+        )
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class PayrollReversalRequest(BaseModel):
+    reason: str
+
+
+@router.post("/{payrun_id}/reverse-posting")
+def reverse_payroll_posting(
+    payrun_id: str,
+    data: PayrollReversalRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Reverse GL posting for payroll"""
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User must belong to a company")
+    
+    service = PayrollJournalService(db)
+    
+    try:
+        result = service.reverse_payroll_posting(
+            company_id=current_user.company_id,
+            payrun_id=payrun_id,
+            reversed_by=current_user.id,
+            reason=data.reason
+        )
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
