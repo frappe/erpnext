@@ -1,0 +1,259 @@
+I organized each phase into epics → features → tasks, with acceptance criteria, dependencies, and recommended owners/roles so you (or your Lovable project) can start assigning and executing immediately.
+You can paste these epics and stories straight into Lovable (they’re formatted as short user-stories + tasks). I kept each item actionable and testable.
+ERIKERP — Detailed Task Breakdown (by Phase)
+Phase 1 — Core Finance Module (Priority 1)
+Goal: Take Finance from 20% → 100% (production-ready, audited, multi-currency, ZRA-compliant).
+Epic F1 — Core Ledger & Chart of Accounts
+User story: As an accountant, I want a multi-level chart of accounts and GL so I can post journals and produce financial statements.
+Tasks
+Design final COA data model and UI.
+Implement GL posting engine (double-entry).
+Implement journal templates and recurring journals.
+Implement soft-delete and audit trail on postings.
+Acceptance criteria
+Can create/edit/delete COA entries with validation.
+Every journal results in balanced debit/credit lines.
+Journals have created_by + created_at + audit log.
+Dependencies: DB schema finalized, auth/RBAC.
+Epic F2 — Journal Entry UX & Approval
+User story: As finance manager, I want to create journal entries and route them for approval.
+Tasks
+Create simple journal entry form + upload CSV import.
+Build approval workflow engine for journal approvals (multi-level).
+Email/WhatsApp notifications for approval steps.
+Acceptance criteria
+Entries cannot post until approved (unless role bypass).
+Approval history is visible; approver can comment/return.
+Owner: Finance dev, Workflow engineer.
+Epic F3 — Period Close & Locking
+User story: As finance admin, I want to close fiscal periods so no further edits are allowed.
+Tasks
+Implement period entity (open/close/lock).
+Prevent transactions in closed periods; create reversal process.
+Add audit logs and period-close checklist.
+Acceptance criteria
+Attempt to post to closed period returns error with guidance.
+Close event creates immutable snapshot for reporting.
+Epic F4 — Multi-currency & Revaluation
+User story: As CFO, I want automatic multi-currency revaluation so reports reflect FX exposure.
+Tasks
+Implement exchange rate table + scheduled update hook (pluggable).
+Implement unrealized fx gain/loss revaluation entries generator.
+Add reporting filters by currency.
+Acceptance criteria
+System can revalue foreign currency balances and create revaluation journal entries.
+Epic F5 — Smart Invoice Export & QR
+User story: As billing clerk, I want to export invoices in ZRA Smart Invoice JSON and print invoices with QR codes.
+Tasks
+Implement invoice JSON export conforming to ZRA Smart Invoice spec.
+Add QR generation (encoded invoice ID + verification hash).
+Toggle per-tenant auto-sync to ZRA endpoint.
+Acceptance criteria
+Exported JSON validates against ZRA schema.
+Invoice PDFs include scannable QR that resolves to invoice view.
+Epic F6 — AR/AP & Payment Matching
+User story: As AR clerk, I want payments auto-matched to invoices.
+Tasks
+Implement AR aging, invoice states (draft/sent/part-paid/paid/overdue).
+Build matching engine: exact match, best-effort fuzzy match (amount+ref), manual match UI.
+Support partial payments and credit notes.
+Acceptance criteria
+Bank feed payment with invoice ref auto-reconciles >80% on rules match; remainder goes to manual queue.
+Epic F7 — Fixed Assets & Depreciation
+User story: As asset custodian, I want asset lifecycle and scheduled depreciation.
+Tasks
+Asset register CRUD; depreciation method support (SLM, WDV).
+Scheduled depreciation runs with accrual journals.
+Asset disposal & gain/loss posting.
+Acceptance criteria
+Depreciation run creates balanced journal entries; asset book value updated.
+Epic F8 — Intercompany & Consolidation (starter)
+User story: As group finance manager, I want intercompany posting and consolidation baseline.
+Tasks
+Implement intercompany invoice flow and elimination flags.
+Build consolidation data model (group entity, mapping rules).
+Acceptance criteria
+Can generate consolidated trial balance with elimination entries (manual / template-based).
+Epic F9 — Financial Reports & Export
+User story: As CFO, I want P&L, Balance Sheet, Cash Flow and detailed drilldowns.
+Tasks
+Implement P&L, BS, CF reports with date filters, dimensions (branch, cost center).
+PDF & Excel export and scheduled report delivery.
+Trial balance & audit pack generator.
+Acceptance criteria
+Reports match sample data and pass reconciliation tests.
+F1 → Testing & Go/No-go
+Create test cases & sample dataset for full finance cycle.
+Run UAT sessions with accountants; capture sign-off.
+Phase 2 — HR & Payroll Module (Priority 2)
+Goal: Complete HR/Payroll from 30% → 100% with statutory compliance for Zambia and robust workflows.
+Epic H1 — Employee Master & Contracts
+User story: As HR, I want a complete employee record and contract management area.
+Tasks
+Employee CRUD with document upload (contracts, IDs).
+Contract types, start/end dates, probation settings.
+Automated onboarding checklist templates.
+Acceptance criteria
+HR can view contract history and download stored files.
+Epic H2 — Attendance & Leave Management
+User story: As HR manager, I want shift scheduling, attendance capture and leave workflows.
+Tasks
+Shift definitions & rostering UI.
+Attendance import (biometric / manual) + adjustments.
+Leave request → approval → auto-post to payroll.
+Acceptance criteria
+Approved leave reduces payable days; attendance adjustments logged with reason.
+Epic H3 — Payroll Engine & Statutory Deductions
+User story: As payroll officer, I want to run payroll with PAYE, NAPSA, NHIMA, and auto deductions.
+Tasks
+Implement pay components and formula engine.
+PAYE tax bands for Zambia; NAPSA & NHIMA rates configurable.
+Auto-create payroll journals and bank file export (per-bank format).
+Acceptance criteria
+Net pay calculation matches sample manual calculation; export bank file accepted by test bank (if sandbox).
+Epic H4 — Loans, Advances & Salary Deductions
+User story: As HR, I want employee loan schedules and automatic salary deduction.
+Tasks
+Loan creation, schedule generation, early settlement handling.
+Auto-deduction hook at payroll run, arrears handling.
+Acceptance criteria
+Payroll run deducts scheduled loan installment and updates loan balance.
+Epic H5 — TPIN Validation & Compliance Exports
+User story: As HR/finance, I want TPIN validation and statutory export formats.
+Tasks
+Integrate TPIN validation (external API or mock).
+Build exports for NAPSA/NHIMA/PAYE returns (CSV/XML templates).
+Acceptance criteria
+Validation returns status; exports match required templates.
+Epic H6 — Employee Self-Service (ESS)
+User story: As an employee, I want to view payslips, request leave, and download tax forms.
+Tasks
+ESS portal: payslip viewer (PDF), leave request form, bank details update (with approval).
+Acceptance criteria
+Employee can view last 12 payslips; payroll admin approves bank change requests.
+Epic H7 — HR Analytics & Onboarding
+User story: As HR director, I want dashboards for headcount, attrition and onboarding progress.
+Tasks
+Build HR dashboards with trends, attrition ratio, open requisitions.
+Onboarding checklist automation and reminders.
+Acceptance criteria
+Dashboard numbers match underlying data; onboarding tasks assigned on hire.
+H1 → Testing & Sign-off
+Payroll parallel run with existing payroll for 2 months (compare results).
+Formal sign-off from HR stakeholders.
+Phase 3 — Inventory & Operations (Priority 3)
+Goal: Advanced inventory, manufacturing and operations fully functional.
+Epic I1 — Item Master & Warehouse
+User story: As inventory manager, I want complete item & warehouse definitions.
+Tasks
+Item attributes (batch, serial, expiry, unit of measure, landed cost fields).
+Warehouse locations and bin management.
+Acceptance criteria
+Items can be created with multiple units and warehouse assignment.
+Epic I2 — FEFO/Expiry & Batch/Serial Tracking
+User story: As quality manager, I want FEFO enforcement, expiry alerts and batch lifecycle.
+Tasks
+FEFO picking rules, expiry date fields, batch traceability.
+Expiry alert scheduler + quarantine/quality hold flags.
+Acceptance criteria
+Picking engine honors FEFO; expiry alerts sent X days before expiry.
+Epic I3 — Barcode / Scan & Warehouse Ops
+User story: As warehouse operator, I want barcode scanning for receipts, picking and cycle counts.
+Tasks
+QR/Barcode generation and scanning UI (mobile-friendly).
+Cycle count workflow and discrepancy reconciliation.
+Acceptance criteria
+Cycle count adjustment workflow updates stock with audit trail.
+Epic I4 — Goods Receipt Matching & Quality Holds
+User story: As purchasing, I want to match GRNs to POs and place hold on failed QC.
+Tasks
+PO → GRN → invoice matching process.
+QC inspection step that can block stock from usage.
+Acceptance criteria
+GRN can be partially received; QC failed items moved to quarantine.
+Epic I5 — Serial Tracking & Warranty
+User story: As service manager, I want serial-tracking for warranty and returns.
+Tasks
+Assign serials on receipt, support RMA with serial history.
+Acceptance criteria
+RMA created references serial and reduces inventory on approval.
+Epic I6 — Manufacturing / Production (BOM & Work Orders)
+User story: As production manager, I want BOMs, work orders and job tracking.
+Tasks
+BOM CRUD, production routing, work order lifecycle (planned → released → produced).
+Consumption posting (backflush) and scrap reporting.
+Acceptance criteria
+Work order completion posts finished goods to inventory and consumes raw materials.
+Epic I7 — Landed Cost & Scenario Costing
+User story: As costing analyst, I want landed cost allocation and scenario costing tools.
+Tasks
+Landed cost allocations by import shipment and cost components.
+Scenario costing (simulate alternate labor/material rates).
+Acceptance criteria
+Landed cost applied to inventory valuation; scenario outputs show variance.
+I1 → Testing & Inventory Audit
+Physical reconciliation for a pilot warehouse.
+Cycle count accuracy > 98% target before sign-off.
+Phase 4 — Banking, Reconciliation & Reporting (Priority 4)
+Goal: Real bank integrations, automated reconciliation, consolidation & audit packs.
+Epic B1 — Bank Feed & Statement Import
+User story: As finance staff, I want to import bank statements and map transactions.
+Tasks
+Implement bank statement upload (CSV, OFX) parser.
+Build connector adapters for local banks (Zanaco, Stanbic, ABSA, FNB) and mobile money feeds.
+Acceptance criteria
+Statement imports parse and create bank transactions with metadata.
+Epic B2 — Reconciliation Engine
+User story: As accountant, I want auto-reconciliation and manual matching tools.
+Tasks
+Auto-match rules (reference, amount, date range).
+Manual reconcile UI and suggestion queue.
+Acceptance criteria
+Auto-match accuracy measured; manual overrides create reconciliation notes.
+Epic B3 — Bank Integration & Payroll Disbursements
+User story: As payroll officer, I want to export payroll bank files and trigger mass disbursements.
+Tasks
+Implement bank file generator per-bank (flat file/ISO 20022 if supported).
+Support mobile money bulk payout API flows.
+Acceptance criteria
+Generated bank file accepted in bank UAT (or passes format validation tests).
+Epic B4 — Consolidation Engine & Multi-level Reporting
+User story: As group controller, I want consolidation across subsidiaries with elimination.
+Tasks
+Build consolidation mapping UI (company mappings, currency conversion).
+Implement elimination entries by rule or manual.
+Consolidated financial statements and drill-downs.
+Acceptance criteria
+Consolidated P&L/BS generated with intercompany eliminations applied.
+Epic B5 — Audit Pack Generator & Compliance Reporting
+User story: As auditor, I want an auto-generated audit pack with supporting ledgers and attachments.
+Tasks
+Audit pack builder (trial balance, supporting journal lists, sample invoices).
+Scheduled export & secure download link.
+Acceptance criteria
+Audit pack includes all required artifacts and can be validated against the ledger.
+Epic B6 — Reporting Drill-downs & BI
+User story: As CEO, I want interactive drill-down reports and scheduled distribution.
+Tasks
+Implement OLAP-like aggregation or pre-aggregated views for fast drill-down.
+Scheduled reports via email/WhatsApp and push to dashboard.
+Acceptance criteria
+Drill-down response under target threshold for sample datasets.
+B1 → Testing & Bank UAT
+Run reconciliation cycles with live/sandbox statements.
+Bank file testing in sandbox and reconciliation cycles.
+Cross-Phase Common Tasks (apply to all phases)
+Security & Compliance
+Implement RLS for tenant isolation across all tables.
+Penetration testing / security audit before each major go-live.
+Implement MFA/SSO in final polish phase.
+Data Migration & Import Tools
+CSV/XLS import tools with mapping UI for COA, customers, suppliers, items, employees.
+Data validation engine with error reporting.
+DevOps & Monitoring
+CI/CD pipelines for feature branches and environment promotion (staging → prod).
+Per-tenant backups and restore tooling.
+Centralized logging and error alerting.
+QA & Testing
+Define acceptance test suites (unit, integration, E2E) per module.
+UAT sign-off checklist per module (business sign-off).
