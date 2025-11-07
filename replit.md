@@ -31,7 +31,7 @@ All 10 tasks completed and tested:
 - 10/10 E2E Tests Passed
 - Production-Ready ✅
 
-### 🚀 HR & Payroll Module (IN PROGRESS) - 27% Complete (4/15 tasks)
+### 🚀 HR & Payroll Module (IN PROGRESS) - 33% Complete (5/15 tasks)
 **Phase 2 Started:** November 7, 2025
 
 **Completed Tasks:**
@@ -39,11 +39,9 @@ All 10 tasks completed and tested:
 2. ✅ H2.1: Attendance Management - Shift definitions, rostering, attendance capture with CSV import
 3. ✅ H2.2: Leave Workflow Enhancement - Leave request submission, approval workflow, balance tracking with payroll integration
 4. ✅ H3.1: Payroll Run System - Batch payroll processing with preview and approval workflow
+5. ✅ H3.2: Payroll Journal Posting - Auto-create GL journals from payroll and generate bank payment files
 
-**In Progress:**
-5. 🔄 H3.2: Payroll Journal Posting - Auto-create GL journals from payroll and generate bank payment files
-
-**Pending Tasks (11 remaining):**
+**Pending Tasks (10 remaining):**
 - H3.3: Payslip Generation
 - H4.1-H4.2: Employee Loans & Advances, Automatic Deductions
 - H5.1-H5.2: TPIN Validation, Statutory Compliance Exports
