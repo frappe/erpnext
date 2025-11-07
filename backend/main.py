@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date
 from typing import Optional, List, Dict, Any
 import os
 import uuid
+import asyncio
 import models
 import schemas
 import auth
@@ -24,11 +25,10 @@ from routers import (
     logistics, telecom, energy, media, insurance, government
 )
 
-models.Base.metadata.create_all(bind=engine)
-migrations.run_migrations()
-
+# Create FastAPI app first so port opens immediately
 app = FastAPI(title="ERIK ERP API", version="1.0.0")
 
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,6 +36,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Run database initialization in background to not delay port opening
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database tables and run migrations in background"""
+    def init_db():
+        models.Base.metadata.create_all(bind=engine)
+        migrations.run_migrations()
+    
+    # Run in background thread to not block startup
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, init_db)
 
 # Include routers
 app.include_router(bank_connections.router)
