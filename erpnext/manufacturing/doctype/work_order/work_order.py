@@ -1234,13 +1234,18 @@ class WorkOrder(Document):
 					"fixed_time",
 					"skip_material_transfer",
 					"backflush_from_wip_warehouse",
+					"set_cost_based_on_bom_qty",
 				],
 				order_by="idx",
 			)
 
 			for d in data:
 				if not d.fixed_time:
-					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+					if d.set_cost_based_on_bom_qty:
+						d.time_in_mins = flt(d.time_in_mins) * flt(flt(qty) / flt(d.batch_size or 1))
+					else:
+						d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+
 				d.status = "Pending"
 
 				if self.track_semi_finished_goods and not d.sequence_id:
@@ -1263,7 +1268,7 @@ class WorkOrder(Document):
 					operations.extend(_get_operations(node.name, qty=node.exploded_qty / node.bom_qty))
 
 		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
-		operations.extend(_get_operations(self.bom_no, qty=1.0 / bom_qty))
+		operations.extend(_get_operations(self.bom_no, qty=bom_qty))
 
 		for correct_index, operation in enumerate(operations, start=1):
 			operation.idx = correct_index
