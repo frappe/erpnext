@@ -151,6 +151,7 @@ class WorkOrder(Document):
 
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
+		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
@@ -205,7 +206,11 @@ class WorkOrder(Document):
 
 		validate_uom_is_integer(self, "stock_uom", ["required_qty"])
 
-		self.set_required_items(reset_only_qty=len(self.get("required_items")))
+		if not len(self.get("required_items")) or not frappe.db.get_single_value(
+			"Manufacturing Settings", "allow_editing_of_items_and_quantities_in_work_order"
+		):
+			self.set_required_items(reset_only_qty=len(self.get("required_items")))
+
 		self.enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
