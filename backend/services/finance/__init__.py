@@ -12,6 +12,7 @@ from .smart_invoice import SmartInvoiceService
 from .payment_matching import PaymentMatchingEngine
 from .fixed_asset_depreciation import FixedAssetDepreciationService
 from .intercompany_transactions import IntercompanyTransactionService
+from .financial_reports import FinancialReportService
 
 __all__ = [
     "JournalEntryService",
@@ -21,5 +22,6 @@ __all__ = [
     "SmartInvoiceService",
     "PaymentMatchingEngine",
     "FixedAssetDepreciationService",
-    "IntercompanyTransactionService"
+    "IntercompanyTransactionService",
+    "FinancialReportService"
 ]
