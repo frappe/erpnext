@@ -7020,7 +7020,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		make_stock_entry(item_code="_Test Item 1", qty=10, rate=5000, target="_Test Warehouse - _TC")
 
-		sales_order = make_sales_order(item="_Test Item 1", qty=1, rate=5000)
+		sales_order = make_sales_order(item="_Test Item 1", qty=1, rate=5000,customer = "__Test Customer 2")
 		sales_order.save()
 		sales_order.submit()
 		self.assertEqual(sales_order.status, "To Deliver and Bill")
