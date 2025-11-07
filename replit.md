@@ -31,15 +31,16 @@ All 10 tasks completed and tested:
 - 10/10 E2E Tests Passed
 - Production-Ready ✅
 
-### 🚀 HR & Payroll Module (IN PROGRESS) - 13% Complete (2/15 tasks)
+### 🚀 HR & Payroll Module (IN PROGRESS) - 20% Complete (3/15 tasks)
 **Phase 2 Started:** November 7, 2025
 
 **Completed Tasks:**
 1. ✅ H1: Employee Document Management - Secure upload/download for contracts, IDs, certificates
 2. ✅ H2.1: Attendance Management - Shift definitions, rostering, attendance capture with CSV import
+3. ✅ H2.2: Leave Workflow Enhancement - Leave request submission, approval workflow, balance tracking with payroll integration
 
 **In Progress:**
-3. 🔄 H2.2: Leave Workflow Enhancement - Leave approval workflow with payroll integration
+4. 🔄 H3.1: Payroll Run System - Batch payroll processing with preview and approval
 
 **Pending Tasks (12 remaining):**
 - H3.1-H3.3: Payroll Run System, Journal Posting, Payslip Generation
