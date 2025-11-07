@@ -1009,9 +1009,11 @@ class SellingController(StockController):
 
 
 def set_default_income_account_for_item(obj):
-	for d in obj.get("items"):
+	for d in obj.get("items", default=[]):
 		if d.item_code:
-			if getattr(d, "income_account", None):
+			if getattr(d, "income_account", None) and d.income_account != frappe.db.get_value(
+				"Company", obj.company, "default_income_account"
+			):
 				set_item_default(d.item_code, obj.company, "income_account", d.income_account)
 
 
