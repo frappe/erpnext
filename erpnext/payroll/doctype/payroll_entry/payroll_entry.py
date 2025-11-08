@@ -194,7 +194,7 @@ class PayrollEntry(Document):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
 		if salary_slips:
 			salary_components = frappe.db.sql("""
-				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
+				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center, ss.employee
 				from `tabSalary Slip` ss, `tabSalary Detail` ssd
 				where ss.name = ssd.parent and ssd.parentfield = '%s' and ss.name in (%s)
 			""" % (component_type, ', '.join(['%s']*len(salary_slips))),
@@ -202,7 +202,7 @@ class PayrollEntry(Document):
 
 			return salary_components
 
-	def get_salary_component_total(self, component_type = None):
+	def get_salary_component_total(self, component_type = None, employee_wise_accounting_enabled = False):
 		salary_components = self.get_salary_components(component_type)
 		if salary_components:
 			component_dict = {}
@@ -213,22 +213,48 @@ class PayrollEntry(Document):
 					if is_flexible_benefit == 1 and only_tax_impact ==1:
 						add_component_to_accrual_jv_entry = False
 				if add_component_to_accrual_jv_entry:
-					component_dict[(item.salary_component, item.payroll_cost_center)] \
-						= component_dict.get((item.salary_component, item.payroll_cost_center), 0) + flt(item.amount)
-			account_details = self.get_account(component_dict = component_dict)
+					# When employee-wise accounting is enabled, group by employee as well
+					if employee_wise_accounting_enabled:
+						key = (item.salary_component, item.payroll_cost_center, item.employee)
+					else:
+						key = (item.salary_component, item.payroll_cost_center)
+
+					component_dict[key] = component_dict.get(key, 0) + flt(item.amount)
+
+			account_details = self.get_account(
+				component_dict = component_dict,
+				employee_wise_accounting_enabled = employee_wise_accounting_enabled
+			)
 			return account_details
 
-	def get_account(self, component_dict = None):
+	def get_account(self, component_dict = None, employee_wise_accounting_enabled = False):
 		account_dict = {}
 		for key, amount in component_dict.items():
 			account = self.get_salary_component_account(key[0])
-			account_dict[(account, key[1])] = account_dict.get((account, key[1]), 0) + amount
+			# For employee-wise accounting, include employee in the key
+			if employee_wise_accounting_enabled and len(key) == 3:
+				# key = (salary_component, cost_center, employee)
+				account_key = (account, key[1], key[2])  # (account, cost_center, employee)
+			else:
+				# key = (salary_component, cost_center)
+				account_key = (account, key[1])  # (account, cost_center)
+
+			account_dict[account_key] = account_dict.get(account_key, 0) + amount
 		return account_dict
 
 	def make_accrual_jv_entry(self):
 		self.check_permission("write")
-		earnings = self.get_salary_component_total(component_type = "earnings") or {}
-		deductions = self.get_salary_component_total(component_type = "deductions") or {}
+		# Check if employee-wise accounting is enabled
+		employee_wise_accounting_enabled = 1
+
+		earnings = self.get_salary_component_total(
+			component_type = "earnings",
+			employee_wise_accounting_enabled = employee_wise_accounting_enabled
+		) or {}
+		deductions = self.get_salary_component_total(
+			component_type = "deductions",
+			employee_wise_accounting_enabled = employee_wise_accounting_enabled
+		) or {}
 		payroll_payable_account = self.payroll_payable_account
 		jv_name = ""
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
@@ -240,6 +266,8 @@ class PayrollEntry(Document):
 				.format(self.start_date, self.end_date)
 			journal_entry.company = self.company
 			journal_entry.posting_date = self.posting_date
+			# Set party_not_required based on employee-wise accounting
+			journal_entry.party_not_required = 0 if employee_wise_accounting_enabled else 1
 			accounting_dimensions = get_accounting_dimensions() or []
 
 			accounts = []
@@ -248,32 +276,50 @@ class PayrollEntry(Document):
 			multi_currency = 0
 			company_currency = erpnext.get_company_currency(self.company)
 
-			# Earnings
-			for acc_cc, amount in earnings.items():
-				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
+			# Earnings - with employee party when employee-wise accounting is enabled
+			for acc_cc_emp, amount in earnings.items():
+				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc_emp[0], amount, company_currency, currencies)
 				payable_amount += flt(amount, precision)
-				accounts.append(self.update_accounting_dimensions({
-					"account": acc_cc[0],
+
+				entry = {
+					"account": acc_cc_emp[0],
 					"debit_in_account_currency": flt(amt, precision),
 					"exchange_rate": flt(exchange_rate),
-					"cost_center": acc_cc[1] or self.cost_center,
+					"cost_center": acc_cc_emp[1] or self.cost_center,
 					"project": self.project
-				}, accounting_dimensions))
+				}
 
-			# Deductions
-			for acc_cc, amount in deductions.items():
-				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
+				# Add employee as party for earnings when employee-wise accounting is enabled
+				if employee_wise_accounting_enabled and len(acc_cc_emp) == 3:
+					entry["party_type"] = "Employee"
+					entry["party"] = acc_cc_emp[2]  # employee
+
+				accounts.append(self.update_accounting_dimensions(entry, accounting_dimensions))
+
+			# Deductions - with employee party when employee-wise accounting is enabled
+			for acc_cc_emp, amount in deductions.items():
+				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc_emp[0], amount, company_currency, currencies)
 				payable_amount -= flt(amount, precision)
-				accounts.append(self.update_accounting_dimensions({
-					"account": acc_cc[0],
+
+				entry = {
+					"account": acc_cc_emp[0],
 					"credit_in_account_currency": flt(amt, precision),
 					"exchange_rate": flt(exchange_rate),
-					"cost_center": acc_cc[1] or self.cost_center,
+					"cost_center": acc_cc_emp[1] or self.cost_center,
 					"project": self.project
-				}, accounting_dimensions))
+				}
 
-			# Payable amount
-			exchange_rate, payable_amt = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, payable_amount, company_currency, currencies)
+				# Add employee as party for deductions when employee-wise accounting is enabled
+				if employee_wise_accounting_enabled and len(acc_cc_emp) == 3:
+					entry["party_type"] = "Employee"
+					entry["party"] = acc_cc_emp[2]  # employee
+
+				accounts.append(self.update_accounting_dimensions(entry, accounting_dimensions))
+
+			# Payable amount - consolidated (no employee party)
+			exchange_rate, payable_amt = self.get_amount_and_exchange_rate_for_journal_entry(
+				payroll_payable_account, payable_amount, company_currency, currencies
+			)
 			accounts.append(self.update_accounting_dimensions({
 				"account": payroll_payable_account,
 				"credit_in_account_currency": flt(payable_amt, precision),
