@@ -151,6 +151,7 @@ class WorkOrder(Document):
 
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
+		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
@@ -205,7 +206,11 @@ class WorkOrder(Document):
 
 		validate_uom_is_integer(self, "stock_uom", ["required_qty"])
 
-		self.set_required_items(reset_only_qty=len(self.get("required_items")))
+		if not len(self.get("required_items")) or not frappe.db.get_single_value(
+			"Manufacturing Settings", "allow_editing_of_items_and_quantities_in_work_order"
+		):
+			self.set_required_items(reset_only_qty=len(self.get("required_items")))
+
 		self.enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
@@ -1229,13 +1234,18 @@ class WorkOrder(Document):
 					"fixed_time",
 					"skip_material_transfer",
 					"backflush_from_wip_warehouse",
+					"set_cost_based_on_bom_qty",
 				],
 				order_by="idx",
 			)
 
 			for d in data:
 				if not d.fixed_time:
-					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+					if d.set_cost_based_on_bom_qty:
+						d.time_in_mins = flt(d.time_in_mins) * flt(flt(qty) / flt(d.batch_size or 1))
+					else:
+						d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+
 				d.status = "Pending"
 
 				if self.track_semi_finished_goods and not d.sequence_id:
@@ -1258,7 +1268,7 @@ class WorkOrder(Document):
 					operations.extend(_get_operations(node.name, qty=node.exploded_qty / node.bom_qty))
 
 		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
-		operations.extend(_get_operations(self.bom_no, qty=1.0 / bom_qty))
+		operations.extend(_get_operations(self.bom_no, qty=bom_qty))
 
 		for correct_index, operation in enumerate(operations, start=1):
 			operation.idx = correct_index

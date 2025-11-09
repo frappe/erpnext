@@ -836,7 +836,7 @@ class BOM(WebsiteGenerator):
 		self.base_operating_cost = 0
 		if self.get("with_operations"):
 			for d in self.get("operations"):
-				if d.workstation:
+				if d.workstation or d.workstation_type:
 					self.update_rate_and_time(d, update_hour_rate)
 
 				operating_cost = d.operating_cost
@@ -857,7 +857,13 @@ class BOM(WebsiteGenerator):
 
 	def update_rate_and_time(self, row, update_hour_rate=False):
 		if not row.hour_rate or update_hour_rate:
-			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
+			hour_rate = 0
+			if row.workstation:
+				hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
+			elif row.workstation_type:
+				hour_rate = flt(
+					frappe.get_cached_value("Workstation Type", row.workstation_type, "hour_rate")
+				)
 
 			if hour_rate:
 				row.hour_rate = (
