@@ -1,0 +1,387 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("ADMIN_DATABASE_URL")
+}
+
+// Tenant Management
+model Tenant {
+  id              String @id @default(cuid())
+  name            String
+  subdomain       String @unique
+  customDomain    String?
+  status          TenantStatus @default(TRIAL)
+  plan            SubscriptionPlan
+  maxUsers        Int @default(5)
+  maxWorkshops    Int @default(1)
+  trialEndsAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  subscription    Subscription?
+  users           TenantUser[]
+  workshops       TenantWorkshop[]
+  supportTickets  SupportTicket[]
+  billingHistory  BillingRecord[]
+  usageMetrics    UsageMetric[]
+
+  // Contact Information
+  primaryContactId String?
+  primaryContact   TenantUser? @relation("PrimaryContact", fields: [primaryContactId], references: [id])
+
+  @@map("tenants")
+}
+
+model TenantUser {
+  id          String @id @default(cuid())
+  email       String
+  firstName   String
+  lastName    String
+  role        TenantUserRole @default(ADMIN)
+  isActive    Boolean @default(true)
+  lastLoginAt DateTime?
+  tenantId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  primaryContactFor Tenant[] @relation("PrimaryContact")
+
+  @@unique([email, tenantId])
+  @@map("tenant_users")
+}
+
+model TenantWorkshop {
+  id          String @id @default(cuid())
+  name        String
+  address     String
+  phone       String
+  email       String
+  isActive    Boolean @default(true)
+  tenantId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_workshops")
+}
+
+// Subscription Management
+model Subscription {
+  id              String @id @default(cuid())
+  tenantId        String @unique
+  plan            SubscriptionPlan
+  status          SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean @default(false)
+  canceledAt         DateTime?
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant          Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model BillingRecord {
+  id              String @id @default(cuid())
+  tenantId        String
+  invoiceId       String?
+  amount          Decimal
+  currency        String @default("AUD")
+  description     String
+  status          BillingStatus
+  billingDate     DateTime
+  dueDate         DateTime?
+  paidDate        DateTime?
+  createdAt       DateTime @default(now())
+
+  tenant          Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("billing_records")
+}
+
+// Support & Communication
+model SupportTicket {
+  id          String @id @default(cuid())
+  ticketNumber String @unique
+  tenantId    String
+  subject     String
+  description String
+  priority    SupportPriority @default(MEDIUM)
+  status      SupportStatus @default(OPEN)
+  category    SupportCategory
+  assignedToId String?
+  createdById String?
+  resolution  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedTo  AdminUser? @relation("AssignedTickets", fields: [assignedToId], references: [id])
+  createdBy   AdminUser? @relation("CreatedTickets", fields: [createdById], references: [id])
+
+  messages    SupportMessage[]
+
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id          String @id @default(cuid())
+  ticketId    String
+  content     String
+  isInternal  Boolean @default(false)
+  authorId    String?
+  authorType  MessageAuthorType
+  createdAt   DateTime @default(now())
+
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author      AdminUser? @relation(fields: [authorId], references: [id])
+
+  @@map("support_messages")
+}
+
+// Admin Users & Permissions
+model AdminUser {
+  id          String @id @default(cuid())
+  email       String @unique
+  firstName   String
+  lastName    String
+  role        AdminRole
+  department  AdminDepartment
+  isActive    Boolean @default(true)
+  permissions AdminPermission[]
+  lastLoginAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assignedTickets SupportTicket[] @relation("AssignedTickets")
+  createdTickets  SupportTicket[] @relation("CreatedTickets")
+  supportMessages SupportMessage[]
+
+  @@map("admin_users")
+}
+
+// Usage Metrics & Analytics
+model UsageMetric {
+  id          String @id @default(cuid())
+  tenantId    String
+  metricType  UsageMetricType
+  value       Int
+  date        DateTime
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, metricType, date])
+  @@map("usage_metrics")
+}
+
+// System Configuration
+model SystemConfig {
+  id          String @id @default(cuid())
+  key         String @unique
+  value       String
+  description String?
+  isEncrypted Boolean @default(false)
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@map("system_config")
+}
+
+// Communication Templates
+model NotificationTemplate {
+  id          String @id @default(cuid())
+  name        String
+  type        NotificationType
+  channel     NotificationChannel
+  subject     String?
+  content     String
+  variables   String[]
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("notification_templates")
+}
+
+model NotificationLog {
+  id          String @id @default(cuid())
+  tenantId    String?
+  recipientEmail String
+  type        NotificationType
+  channel     NotificationChannel
+  subject     String?
+  content     String
+  status      NotificationStatus
+  sentAt      DateTime?
+  errorMessage String?
+  createdAt   DateTime @default(now())
+
+  @@map("notification_logs")
+}
+
+// Feature Flags
+model FeatureFlag {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  isEnabled   Boolean @default(false)
+  rolloutPercentage Int @default(0)
+  targetTenants String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature_flags")
+}
+
+// Enums
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  EXPIRED
+}
+
+enum SubscriptionPlan {
+  PROFESSIONAL
+  PERFORMANCE
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  UNPAID
+}
+
+enum TenantUserRole {
+  ADMIN
+  MANAGER
+  TECHNICIAN
+  READONLY
+}
+
+enum BillingStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  DISPUTED
+}
+
+enum SupportPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+enum SupportStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportCategory {
+  TECHNICAL
+  BILLING
+  FEATURE_REQUEST
+  BUG_REPORT
+  INTEGRATION
+  TRAINING
+  OTHER
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  DEVELOPER
+  SUPPORT
+  MARKETING
+  FINANCE
+  SALES
+}
+
+enum AdminDepartment {
+  ENGINEERING
+  SUPPORT
+  MARKETING
+  FINANCE
+  SALES
+  OPERATIONS
+}
+
+enum AdminPermission {
+  TENANT_MANAGEMENT
+  USER_MANAGEMENT
+  BILLING_ACCESS
+  SUPPORT_ACCESS
+  SYSTEM_CONFIG
+  ANALYTICS_ACCESS
+  MARKETING_TOOLS
+  DEVELOPER_TOOLS
+}
+
+enum MessageAuthorType {
+  ADMIN
+  TENANT_USER
+}
+
+enum UsageMetricType {
+  ACTIVE_USERS
+  JOBS_CREATED
+  INSPECTIONS_COMPLETED
+  ECU_SESSIONS
+  API_CALLS
+  STORAGE_USED
+  LOGIN_COUNT
+}
+
+enum NotificationType {
+  WELCOME
+  TRIAL_EXPIRING
+  SUBSCRIPTION_RENEWAL
+  PAYMENT_FAILED
+  FEATURE_ANNOUNCEMENT
+  MAINTENANCE_NOTICE
+  SECURITY_ALERT
+  SUPPORT_UPDATE
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  IN_APP
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+}
