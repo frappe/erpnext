@@ -94,6 +94,7 @@ After a couple of minutes, site should be accessible on your localhost port: 808
 
 See [Frappe Docker](https://github.com/frappe/frappe_docker?tab=readme-ov-file#to-run-on-arm64-architecture-follow-this-instructions) for ARM based docker setup.
 
+See [easy-install.py](https://github.com/frappe/bench?tab=readme-ov-file#arguments) to add apps and more complex setups (bench get-app will not work in docker)
 
 ## Development Setup
 ### Manual Install
