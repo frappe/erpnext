@@ -39,6 +39,11 @@ build
 
 # Prisma
 prisma/migrations
+*.prisma.bak
 
 # Coverage
 .coverage
+
+# Package lock files
+package-lock.json
+yarn.lock
