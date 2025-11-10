@@ -663,3 +663,8 @@ default_log_clearing_doctypes = {
 export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
+
+# Translation
+# ------------
+# List of apps whose translatable strings should be excluded from this app's translations.
+ignore_translatable_strings_from = ["frappe"]
