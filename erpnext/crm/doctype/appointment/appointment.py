@@ -224,7 +224,7 @@ class Appointment(Document):
 		if not frappe.has_permission(doc=self, user=agent):
 			add_docshare(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
 
-		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]}, ignore_permissions=True)
 
 
 def _get_agents_sorted_by_asc_workload(date):
