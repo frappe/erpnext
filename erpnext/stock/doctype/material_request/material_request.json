@@ -308,6 +308,7 @@
    "fieldname": "transfer_status",
    "fieldtype": "Select",
    "label": "Transfer Status",
+   "no_copy": 1,
    "options": "\nNot Started\nIn Transit\nCompleted",
    "read_only": 1
   },

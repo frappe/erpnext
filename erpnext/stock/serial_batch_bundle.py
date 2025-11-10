@@ -716,6 +716,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				& (parent.is_cancelled == 0)
 				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
 			)
+			.for_update()
 			.groupby(child.batch_no)
 		)
 

@@ -723,6 +723,14 @@ class SalesOrder(SellingController):
 		cancel_stock_reservation_entries(
 			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
 		)
+	def set_missing_values(self, for_validate=False):
+		super().set_missing_values(for_validate)
+
+		if self.delivery_date:
+			for item in self.items:
+				if not item.delivery_date:
+					item.delivery_date = self.delivery_date
+
 
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:

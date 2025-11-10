@@ -37,6 +37,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.stock.doctype.material_request_item.material_request_item import MaterialRequestItem
 
 		amended_from: DF.Link | None
+		buying_price_list: DF.Link | None
 		company: DF.Link
 		customer: DF.Link | None
 		items: DF.Table[MaterialRequestItem]
