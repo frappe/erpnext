@@ -1645,21 +1645,35 @@ class StockController(AccountsController):
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
-	def update_sre_for_submit(self):
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_sre_details_for_voucher,
-		)
-
-		purpose = self.get("purpose")
-		if (
-			purpose == "Subcontracting Delivery"
-			or (
-				purpose == "Send to Subcontractor"
-				and get_sre_details_for_voucher("Subcontracting Order", self.subcontracting_order)
+	def update_stock_reservation_entries(self):
+		def get_sre_list():
+			table = frappe.qb.DocType("Stock Reservation Entry")
+			query = (
+				frappe.qb.from_(table)
+				.select(table.name)
+				.where(
+					(table.docstatus == 1)
+					& (table.voucher_type == data_map[purpose or self.doctype]["voucher_type"])
+					& (
+						table.voucher_no
+						== data_map[purpose or self.doctype].get(
+							"voucher_no", item.get("subcontracting_order")
+						)
+					)
+				)
+				.orderby(table.creation)
 			)
-			or (self.doctype == "Subcontracting Receipt" and self.has_reserved_stock() and not self.is_return)
-		):
-			data_map = {
+			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
+				query = query.where(table.voucher_detail_no == item.get(reference_field))
+			else:
+				query = query.where(
+					(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
+				)
+
+			return query.run(pluck="name")
+
+		def get_data_map():
+			return {
 				"Subcontracting Delivery": {
 					"table_name": "items",
 					"voucher_type": "Subcontracting Inward Order",
@@ -1681,205 +1695,79 @@ class StockController(AccountsController):
 				},
 			}
 
-			field = data_map[purpose or self.doctype]["field"]
-			items = []
-			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
-				table = frappe.qb.DocType("Stock Reservation Entry")
-				query = (
-					frappe.qb.from_(table)
-					.select(table.name)
-					.where(
-						(table.docstatus == 1)
-						& (table.voucher_type == data_map[purpose or self.doctype]["voucher_type"])
-						& (
-							table.voucher_no
-							== data_map[purpose or self.doctype].get(
-								"voucher_no", item.get("subcontracting_order")
-							)
-						)
-					)
-					.orderby(table.creation)
-				)
-				if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
-					query = query.where(table.voucher_detail_no == item.get(reference_field))
-				else:
-					query = query.where(
-						(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
-					)
+		purpose = self.get("purpose")
+		if (
+			purpose == "Subcontracting Delivery"
+			or (
+				purpose == "Send to Subcontractor"
+				and frappe.get_value("Subcontracting Order", self.subcontracting_order, "reserve_stock")
+			)
+			or (self.doctype == "Subcontracting Receipt" and self.has_reserved_stock() and not self.is_return)
+		):
+			data_map = get_data_map()
 
-				sre_list = query.run(pluck="name")
+			field = data_map[purpose or self.doctype]["field"]
+			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
+				sre_list = get_sre_list()
 
 				if not sre_list:
 					continue
 
-				qty_to_deliver = item.get("transfer_qty", item.get("consumed_qty"))
-				total_qty_delivered = 0
+				qty = item.get("transfer_qty", item.get("consumed_qty"))
+				total_qty = 0
 				for sre in sre_list:
-					if qty_to_deliver <= 0:
+					if qty <= 0:
 						break
 
 					sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
 
-					qty_can_be_deliver = 0
+					working_qty = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
 						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 						if sre_doc.has_serial_no:
-							delivered_serial_nos = [d.serial_no for d in sbb.entries]
+							serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in delivered_serial_nos:
-									entry.delivered_qty = 1
+								if entry.serial_no in serial_nos:
+									entry.delivered_qty = 1 if self._action == "submit" else 0
 									entry.db_update()
-									qty_can_be_deliver += 1
-									delivered_serial_nos.remove(entry.serial_no)
+									working_qty += 1
+									serial_nos.remove(entry.serial_no)
 						else:
-							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
+							batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-								if entry.batch_no in delivered_batch_qty:
+								if entry.batch_no in batch_qty:
 									delivered_qty = min(
-										(entry.qty - entry.delivered_qty),
-										delivered_batch_qty[entry.batch_no],
+										(entry.qty - entry.delivered_qty)
+										if self._action == "submit"
+										else entry.delivered_qty,
+										batch_qty[entry.batch_no],
 									)
-									entry.delivered_qty += delivered_qty
+									entry.delivered_qty += (
+										delivered_qty if self._action == "submit" else (-1 * delivered_qty)
+									)
 									entry.db_update()
-									qty_can_be_deliver += delivered_qty
-									delivered_batch_qty[entry.batch_no] -= delivered_qty
+									working_qty += delivered_qty
+									batch_qty[entry.batch_no] -= delivered_qty
 					else:
-						qty_can_be_deliver = min((sre_doc.reserved_qty - sre_doc.get(field)), qty_to_deliver)
+						working_qty = min(
+							(sre_doc.reserved_qty - sre_doc.get(field))
+							if self._action == "submit"
+							else sre_doc.get(field),
+							qty,
+						)
 
-					sre_doc.set(field, sre_doc.get(field) + qty_can_be_deliver)
+					sre_doc.set(
+						field,
+						sre_doc.get(field)
+						+ (working_qty if self._action == "submit" else (-1 * working_qty)),
+					)
 					sre_doc.db_update()
 					sre_doc.update_reserved_qty_in_voucher()
 					sre_doc.update_status()
 					sre_doc.update_reserved_stock_in_bin()
 
-					qty_to_deliver -= qty_can_be_deliver
-					total_qty_delivered += qty_can_be_deliver
-
-				if self.get("purpose") == "Send to Subcontractor":
-					items.append(
-						frappe._dict(
-							{
-								"name": item.sco_rm_detail,
-								"qty_to_reserve": item.transfer_qty,
-								"warehouse": item.t_warehouse,
-								"reference_voucher_detail_no": item.name,
-								"serial_and_batch_bundle": item.serial_and_batch_bundle,
-							}
-						)
-					)
-
-			if items:
-				frappe.get_doc("Subcontracting Order", self.subcontracting_order).reserve_raw_materials(
-					items=items, stock_entry=self.name
-				)
-
-	def update_sre_for_cancel(self):
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_sre_details_for_voucher,
-		)
-
-		purpose = self.get("purpose")
-		if (
-			purpose == "Subcontracting Delivery"
-			or (
-				purpose == "Send to Subcontractor"
-				and get_sre_details_for_voucher("Subcontracting Order", self.subcontracting_order)
-			)
-			or (self.doctype == "Subcontracting Receipt" and self.has_reserved_stock() and not self.is_return)
-		):
-			data_map = {
-				"Subcontracting Delivery": {
-					"table_name": "items",
-					"voucher_type": "Subcontracting Inward Order",
-					"voucher_no": self.get("subcontracting_inward_order"),
-					"voucher_detail_no_field": "scio_detail",
-					"field": "delivered_qty",
-				},
-				"Send to Subcontractor": {
-					"table_name": "items",
-					"voucher_type": "Subcontracting Order",
-					"voucher_no": self.get("subcontracting_order"),
-					"voucher_detail_no_field": "sco_rm_detail",
-					"field": "transferred_qty",
-				},
-				"Subcontracting Receipt": {
-					"table_name": "supplied_items",
-					"voucher_type": "Subcontracting Order",
-					"field": "consumed_qty",
-				},
-			}
-
-			field = data_map[purpose or self.doctype]["field"]
-			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
-				table = frappe.qb.DocType("Stock Reservation Entry")
-				query = (
-					frappe.qb.from_(table)
-					.select(table.name)
-					.where(
-						(table.docstatus == 1)
-						& (table.voucher_type == data_map[purpose or self.doctype]["voucher_type"])
-						& (
-							table.voucher_no
-							== data_map[purpose or self.doctype].get(
-								"voucher_no", item.get("subcontracting_order")
-							)
-						)
-					)
-					.orderby(table.creation)
-				)
-				if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
-					query = query.where(table.voucher_detail_no == item.get(reference_field))
-				else:
-					query = query.where(
-						(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
-					)
-
-				sre_list = query.run(pluck="name")
-
-				if not sre_list:
-					continue
-
-				qty_to_undelivered = item.get("transfer_qty", item.get("consumed_qty"))
-				total_qty_undelivered = 0
-				for sre in sre_list:
-					if qty_to_undelivered <= 0:
-						break
-
-					sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
-
-					qty_can_be_undelivered = 0
-					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
-						if sre_doc.has_serial_no:
-							serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
-							for entry in sre_doc.sb_entries:
-								if entry.serial_no in serial_nos_to_undelivered:
-									entry.delivered_qty = 0
-									entry.db_update()
-									qty_can_be_undelivered += 1
-									serial_nos_to_undelivered.remove(entry.serial_no)
-						else:
-							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
-							for entry in sre_doc.sb_entries:
-								if entry.batch_no in batch_qty_to_undelivered:
-									undelivered_qty = min(
-										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
-									)
-									entry.delivered_qty -= undelivered_qty
-									entry.db_update()
-									qty_can_be_undelivered += undelivered_qty
-									batch_qty_to_undelivered[entry.batch_no] -= undelivered_qty
-					else:
-						qty_can_be_undelivered = min(sre_doc.get(field), qty_to_undelivered)
-
-					sre_doc.set(field, sre_doc.get(field) - qty_can_be_undelivered)
-					sre_doc.db_update()
-					sre_doc.update_reserved_qty_in_voucher()
-					sre_doc.update_status()
-					sre_doc.update_reserved_stock_in_bin()
-
-					qty_to_undelivered -= qty_can_be_undelivered
-					total_qty_undelivered += qty_can_be_undelivered
+					qty -= working_qty
+					total_qty += working_qty
 
 
 @frappe.whitelist()

@@ -701,6 +701,10 @@ class TestSubcontractingOrder(IntegrationTestCase):
 		self.assertEqual(sco.supplied_items[0].required_qty, 210.149)
 
 	def test_stock_reservation(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_details_for_voucher,
+		)
+
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
@@ -719,27 +723,24 @@ class TestSubcontractingOrder(IntegrationTestCase):
 		make_stock_in_entry(rm_items=rm_items)
 		sco.submit()
 
+		sre_list = get_sre_details_for_voucher("Subcontracting Order", sco.name)
+		self.assertTrue(len(sre_list) > 0)
+
 		se_dict = make_rm_stock_entry(sco.name)
-		se_dict["items"][0]["qty"] = 5
-		se_dict["items"][1]["qty"] = 7
 		se = frappe.get_doc(se_dict)
-		se.save()
-		se.items.pop(2)
 		se.items[-1].use_serial_batch_fields = 1
 		se.save()
 		se.submit()
 		sco.reload()
 
-		self.assertEqual(sco.supplied_items[0].stock_reserved_qty, 5)
-		self.assertEqual(sco.supplied_items[1].stock_reserved_qty, 3)
-		self.assertEqual(sco.supplied_items[2].stock_reserved_qty, 1)
+		for sre in sre_list:
+			self.assertEqual(frappe.get_value("Stock Reservation Entry", sre.name, "status"), "Closed")
 
-		se.cancel()
-		sco.reload()
-
-		self.assertEqual(sco.supplied_items[0].stock_reserved_qty, 10)
-		self.assertEqual(sco.supplied_items[1].stock_reserved_qty, 10)
-		self.assertEqual(sco.supplied_items[2].stock_reserved_qty, 10)
+		make_subcontracting_receipt(sco.name).submit()
+		for status in frappe.get_all(
+			"Stock Reservation Entry", filters={"voucher_no": sco.name, "docstatus": 1}, pluck="status"
+		)[:3]:
+			self.assertEqual(status, "Delivered")
 
 	def test_stock_reservation_transfer(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (

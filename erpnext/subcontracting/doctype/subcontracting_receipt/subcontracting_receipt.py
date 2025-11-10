@@ -165,7 +165,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
-		self.update_sre_for_submit()
+		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
@@ -191,7 +191,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_consumed_qty_in_subcontract_order()
 		self.set_subcontracting_order_status(update_bin=False)
 		self.update_stock_ledger()
-		self.update_sre_for_cancel()
+		self.update_stock_reservation_entries()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.update_status()

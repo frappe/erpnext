@@ -280,9 +280,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_work_order()
 		self.update_disassembled_order()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_submit()
+		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
+		self.reserve_stock_for_subcontracting()
 
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
@@ -330,7 +331,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_cancel()
+		self.update_stock_reservation_entries()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 
@@ -1894,6 +1895,28 @@ class StockEntry(StockController, SubcontractingInwardController):
 				return
 
 			pro_doc.set_reserved_qty_for_wip_and_fg(self)
+
+	def reserve_stock_for_subcontracting(self):
+		if self.purpose == "Send to Subcontractor" and frappe.get_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			items = []
+			for item in self.items:
+				items.append(
+					frappe._dict(
+						{
+							"name": item.sco_rm_detail,
+							"qty_to_reserve": item.transfer_qty,
+							"warehouse": item.t_warehouse,
+							"reference_voucher_detail_no": item.name,
+							"serial_and_batch_bundle": item.serial_and_batch_bundle,
+						}
+					)
+				)
+
+			frappe.get_doc("Subcontracting Order", self.subcontracting_order).reserve_raw_materials(
+				items=items, stock_entry=self.name
+			)
 
 	def cancel_stock_reserve_for_wip_and_fg(self):
 		if self.is_stock_reserve_for_work_order():
