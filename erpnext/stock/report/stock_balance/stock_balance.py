@@ -7,11 +7,10 @@ from typing import Any, TypedDict
 
 import frappe
 from frappe import _
-from frappe.query_builder import Order
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
-
+from frappe.query_builder import Order
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -24,8 +23,8 @@ class StockBalanceFilter(TypedDict):
 	from_date: str
 	to_date: str
 	item_group: str | None
-	item: str | None
-	warehouse: str | None
+	item: list[str] | None
+	warehouse: list[str] | None
 	warehouse_type: str | None
 	include_uom: str | None  # include extra info in converted UOM
 	show_stock_ageing_data: bool
@@ -157,18 +156,19 @@ class StockBalanceReport:
 
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
-		if not self.filters.get("show_stock_ageing_data"):
-			self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
+		with frappe.db.unbuffered_cursor():
+			if not self.filters.get("show_stock_ageing_data"):
+				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
 
-		for entry in self.sle_entries:
-			group_by_key = self.get_group_by_key(entry)
-			if group_by_key not in item_warehouse_map:
-				self.initialize_data(item_warehouse_map, group_by_key, entry)
+			for entry in self.sle_entries:
+				group_by_key = self.get_group_by_key(entry)
+				if group_by_key not in item_warehouse_map:
+					self.initialize_data(item_warehouse_map, group_by_key, entry)
 
-			self.prepare_item_warehouse_map(item_warehouse_map, entry, group_by_key)
+				self.prepare_item_warehouse_map(item_warehouse_map, entry, group_by_key)
 
-			if self.opening_data.get(group_by_key):
-				del self.opening_data[group_by_key]
+				if self.opening_data.get(group_by_key):
+					del self.opening_data[group_by_key]
 
 		for group_by_key, entry in self.opening_data.items():
 			if group_by_key not in item_warehouse_map:
@@ -256,6 +256,7 @@ class StockBalanceReport:
 		for fieldname in self.inventory_dimensions:
 			if not row.get(fieldname):
 				continue
+
 			if self.filters.get(fieldname) or self.filters.get("show_dimension_wise_stock"):
 				group_by_key.append(row.get(fieldname))
 
@@ -281,8 +282,11 @@ class StockBalanceReport:
 		)
 
 		for fieldname in ["warehouse", "item_code", "item_group", "warehouse_type"]:
-			if self.filters.get(fieldname):
-				query = query.where(table[fieldname] == self.filters.get(fieldname))
+			if value := self.filters.get(fieldname):
+				if isinstance(value, list | tuple):
+					query = query.where(table[fieldname].isin(value))
+				else:
+					query = query.where(table[fieldname] == value)
 
 		return query.run(as_dict=True)
 
@@ -345,6 +349,7 @@ class StockBalanceReport:
 
 		if self.filters.get("warehouse"):
 			query = apply_warehouse_filter(query, sle, self.filters)
+
 		elif warehouse_type := self.filters.get("warehouse_type"):
 			query = (
 				query.join(warehouse_table)
@@ -359,13 +364,11 @@ class StockBalanceReport:
 			children = get_descendants_of("Item Group", item_group, ignore_permissions=True)
 			query = query.where(item_table.item_group.isin([*children, item_group]))
 
-		for field in ["item_code", "brand"]:
-			if not self.filters.get(field):
-				continue
-			elif field == "item_code":
-				query = query.where(item_table.name == self.filters.get(field))
-			else:
-				query = query.where(item_table[field] == self.filters.get(field))
+		if item_codes := self.filters.get("item_code"):
+			query = query.where(item_table.name.isin(item_codes))
+
+		if brand := self.filters.get("brand"):
+			query = query.where(item_table.brand == brand)
 
 		return query
 

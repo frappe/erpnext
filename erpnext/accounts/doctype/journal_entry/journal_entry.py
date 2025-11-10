@@ -922,9 +922,7 @@ class JournalEntry(AccountsController):
 
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
-		currency = (
-			bank_account_currency
-		) = party_account_currency = pay_to_recd_from = self.pay_to_recd_from = None
+		currency = bank_account_currency = party_account_currency = pay_to_recd_from = None
 		party_type = None
 		for d in self.get("accounts"):
 			if d.party_type in ["Customer", "Supplier"] and d.party:

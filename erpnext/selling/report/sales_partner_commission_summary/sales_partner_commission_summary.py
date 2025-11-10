@@ -36,6 +36,12 @@ def get_columns(filters):
 			"width": 140,
 		},
 		{
+		"label": _("Currency"),
+		"fieldname": "currency",
+		"fieldtype": "Data",
+		"width": 80,
+		},
+		{
 			"label": _("Territory"),
 			"options": "Territory",
 			"fieldname": "territory",
@@ -43,7 +49,7 @@ def get_columns(filters):
 			"width": 100,
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
-		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 120},
+		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{
 			"label": _("Sales Partner"),
 			"options": "Sales Partner",
@@ -61,6 +67,7 @@ def get_columns(filters):
 			"label": _("Total Commission"),
 			"fieldname": "total_commission",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120,
 		},
 	]
@@ -86,6 +93,9 @@ def get_entries(filters):
 		filters,
 		as_dict=1,
 	)
+	currency_company = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+	for row in entries:
+		row["currency"] = currency_company
 
 	return entries
 

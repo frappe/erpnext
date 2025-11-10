@@ -10,7 +10,11 @@ frappe.listview_settings["Material Request"] = {
 			} else if (doc.transfer_status == "In Transit") {
 				return [__("In Transit"), "yellow", "transfer_status,=,In Transit"];
 			} else if (doc.transfer_status == "Completed") {
-				return [__("Completed"), "green", "transfer_status,=,Completed"];
+				if (doc.status == "Transferred") {
+					return [__("Completed"), "green", "transfer_status,=,Completed"];
+				} else {
+					return [__("Partially Received"), "yellow", "per_ordered,<,100"];
+				}
 			}
 		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 0) {
 			return [__("Pending"), "orange", "per_ordered,=,0|docstatus,=,1"];
