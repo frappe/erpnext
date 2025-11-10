@@ -1308,7 +1308,11 @@ def make_subcontracted_items():
 		"Subcontracted Item SA7": {},
 		"Subcontracted Item SA8": {},
 		"Subcontracted Item SA9": {"stock_uom": "Litre"},
-		"Subcontracted Item SA10": {},
+		"Subcontracted Item SA10": {
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SBAT.####",
+		},
 	}
 
 	for item, properties in sub_contracted_items.items():

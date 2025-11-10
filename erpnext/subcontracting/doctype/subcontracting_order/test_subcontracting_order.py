@@ -754,13 +754,12 @@ class TestSubcontractingOrder(IntegrationTestCase):
 
 		parent_fg = make_item()
 		make_bom(
-			item=parent_fg.name, raw_materials=["Subcontracted Item SA4"], rate=100, rm_qty=1, currency="INR"
+			item=parent_fg.name, raw_materials=["Subcontracted Item SA10"], rate=100, rm_qty=1, currency="INR"
 		)
 
 		plan = create_production_plan(
 			item_code=parent_fg.name,
 			planned_qty=10,
-			use_multi_level_bom=1,
 			do_not_submit=True,
 			reserve_stock=True,
 			skip_available_sub_assembly_item=True,
