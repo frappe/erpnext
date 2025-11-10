@@ -47,9 +47,14 @@
   "role_to_override_stop_action",
   "currency_exchange_section",
   "allow_stale",
+  "allow_pegged_currencies_exchange_rates",
+  "column_break_yuug",
+  "stale_days",
   "section_break_jpd0",
   "auto_reconcile_payments",
-  "stale_days",
+  "auto_reconciliation_job_trigger",
+  "reconciliation_queue_size",
+  "column_break_resa",
   "exchange_gain_loss_posting_date",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
@@ -61,10 +66,16 @@
   "pos_tab",
   "pos_setting_section",
   "post_change_gl_entries",
+  "assets_tab",
+  "asset_settings_section",
+  "calculate_depr_using_total_days",
+  "column_break_gjcc",
+  "book_asset_depreciation_entry_automatically",
   "closing_settings_tab",
   "period_closing_settings_section",
   "acc_frozen_upto",
   "ignore_account_closing_balance",
+  "use_legacy_controller_for_pcv",
   "column_break_25",
   "frozen_accounts_modifier",
   "tab_break_dpet",
@@ -142,6 +153,12 @@
    "fieldname": "unlink_advance_payment_on_cancelation_of_order",
    "fieldtype": "Check",
    "label": "Unlink Advance Payment on Cancellation of Order"
+  },
+  {
+   "default": "1",
+   "fieldname": "book_asset_depreciation_entry_automatically",
+   "fieldtype": "Check",
+   "label": "Book Asset Depreciation Entry Automatically"
   },
   {
    "default": "1",
@@ -304,11 +321,20 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "asset_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Settings"
+  },
+  {
    "fieldname": "invoicing_settings_tab",
    "fieldtype": "Tab Break",
    "label": "Credit Limits"
   },
-
+  {
+   "fieldname": "assets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Assets"
+  },
   {
    "fieldname": "closing_settings_tab",
    "fieldtype": "Tab Break",
@@ -462,10 +488,49 @@
    "label": "Enable Immutable Ledger"
   },
   {
+   "fieldname": "column_break_gjcc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation",
+   "fieldname": "calculate_depr_using_total_days",
+   "fieldtype": "Check",
+   "label": "Calculate daily depreciation using total days in depreciation period"
+  },
+  {
    "description": "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state.",
    "fieldname": "payment_request_settings",
    "fieldtype": "Tab Break",
    "label": "Payment Request"
+  },
+  {
+   "default": "1",
+   "fieldname": "create_pr_in_draft_status",
+   "fieldtype": "Check",
+   "label": "Create in Draft Status"
+  },
+  {
+   "fieldname": "column_break_yuug",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_resa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "15",
+   "description": "Interval should be between 1 to 59 MInutes",
+   "fieldname": "auto_reconciliation_job_trigger",
+   "fieldtype": "Int",
+   "label": "Auto Reconciliation Job Trigger"
+  },
+  {
+   "default": "5",
+   "description": "Documents Processed on each trigger. Queue Size should be between 5 and 100",
+   "fieldname": "reconciliation_queue_size",
+   "fieldtype": "Int",
+   "label": "Reconciliation Queue Size"
   },
   {
    "default": "0",
@@ -535,11 +600,20 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
-   "fieldname": "create_pr_in_draft_status",
+   "default": "0",
+   "description": "System will do an implicit conversion using the pegged currency. <br>\nEx: Instead of AED -&gt; INR, system will do AED -&gt; USD -&gt; INR using the pegged exchange rate of AED against USD.",
+   "documentation_url": "/app/pegged-currencies/Pegged Currencies",
+   "fieldname": "allow_pegged_currencies_exchange_rates",
    "fieldtype": "Check",
-   "label": "Create in Draft Status"
-   },
+   "label": "Allow Implicit Pegged Currency Conversion"
+  },
+  {
+   "default": "0",
+   "description": "If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template.",
+   "fieldname": "add_taxes_from_taxes_and_charges_template",
+   "fieldtype": "Check",
+   "label": "Automatically Add Taxes from Taxes and Charges Template"
+  },
   {
    "fieldname": "column_break_ntmi",
    "fieldtype": "Column Break"
@@ -550,12 +624,18 @@
    "fieldname": "drop_ar_procedures",
    "fieldtype": "Button",
    "label": "Drop Procedures"
-   },
+  },
   {
    "default": "0",
    "fieldname": "fetch_valuation_rate_for_internal_transaction",
    "fieldtype": "Check",
    "label": "Fetch Valuation Rate for Internal Transaction"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_legacy_controller_for_pcv",
+   "fieldtype": "Check",
+   "label": "Use Legacy Controller For Period Closing Voucher"
   }
  ],
  "icon": "icon-cog",
@@ -563,7 +643,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-05 12:29:38.302027",
+ "modified": "2025-10-20 14:06:08.870427",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

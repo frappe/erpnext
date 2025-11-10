@@ -3513,6 +3513,7 @@ def make_test_item(item_name=None):
 					"gst_hsn_code": "888890",
 				},
 			)
+			frappe.db.commit()
 
 			return item
 
@@ -3523,6 +3524,7 @@ def make_test_item(item_name=None):
 					"is_stock_item": 1,
 				},
 			)
+			frappe.db.commit()
 
 			return item
 	else:

@@ -3350,7 +3350,7 @@ class TestDeliveryNote(FrappeTestCase):
 		warehouse = "_Test Warehouse - _TC"
 
 		item_code = "_Test Item2"
-		item = make_test_item(item_code)
+		item = make_test_item(item_name = item_code)
 		item.has_serial_no = 1
 		item.serial_no_series = "ASD.##"
 		item.save()
