@@ -9,7 +9,11 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "node --loader ts-node/esm prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
     "@next/font": "^14.0.0",
@@ -59,6 +63,10 @@
     "postcss": "^8.4.0",
     "prisma": "^5.7.0",
     "tailwindcss": "^3.3.0",
+    "ts-node": "^10.9.0",
     "typescript": "^5.0.0"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
