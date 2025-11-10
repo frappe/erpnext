@@ -378,12 +378,12 @@ class SubcontractingOrder(SubcontractingController):
 			)
 
 	@frappe.whitelist()
-	def reserve_raw_materials(self, items=None):
+	def reserve_raw_materials(self, items=None, stock_entry=None):
 		if self.reserve_stock:
 			item_dict = {}
 
 			if items:
-				item_dict = {d["name"]: d["qty_to_reserve"] for d in items}
+				item_dict = {d["name"]: d for d in items}
 				items = [item for item in self.supplied_items if item.name in item_dict]
 
 			reservation_items = []
@@ -395,8 +395,8 @@ class SubcontractingOrder(SubcontractingController):
 						"voucher_type": self.doctype,
 						"voucher_detail_no": item.name,
 						"item_code": item.rm_item_code,
-						"warehouse": item.reserve_warehouse,
-						"stock_qty": item_dict.get(item.name, item.required_qty),
+						"warehouse": item_dict.get(item.name, {}).get("warehouse", item.reserve_warehouse),
+						"stock_qty": item_dict.get(item.name, {}).get("qty_to_reserve", item.required_qty),
 					}
 				)
 
@@ -423,6 +423,15 @@ class SubcontractingOrder(SubcontractingController):
 									"from_voucher_detail_no": from_voucher_detail_no,
 								}
 							)
+				elif stock_entry:
+					data.update(
+						{
+							"from_voucher_no": stock_entry,
+							"from_voucher_type": "Stock Entry",
+							"from_voucher_detail_no": item_dict[item.name]["reference_voucher_detail_no"],
+							"serial_and_batch_bundles": item_dict[item.name]["serial_and_batch_bundle"],
+						}
+					)
 
 				reservation_items.append(data)
 

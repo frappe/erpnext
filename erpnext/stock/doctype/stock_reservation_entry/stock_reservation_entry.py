@@ -472,7 +472,7 @@ class StockReservationEntry(Document):
 			sre = frappe.qb.DocType("Stock Reservation Entry")
 			reserved_qty = (
 				frappe.qb.from_(sre)
-				.select(Sum(sre.reserved_qty))
+				.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
 				.where(
 					(sre.docstatus == 1)
 					& (sre.voucher_type == self.voucher_type)

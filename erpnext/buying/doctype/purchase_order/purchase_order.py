@@ -1013,7 +1013,9 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 		production_plan = set([item.production_plan for item in source_doc.items if item.production_plan])
 		if production_plan:
 			target_doc.production_plan = production_plan.pop()
-		target_doc.reserve_stock = frappe.get_single_value("Stock Settings", "auto_reserve_stock")
+		target_doc.reserve_stock = frappe.get_single_value(
+			"Stock Settings", "auto_reserve_stock"
+		) or frappe.get_value("Production Plan", target_doc.production_plan, "reserve_stock")
 
 	if target_doc and isinstance(target_doc, str):
 		target_doc = json.loads(target_doc)

@@ -497,11 +497,10 @@ class SubcontractingController(StockController):
 
 			if row.serial_no:
 				details.serial_no.extend(get_serial_nos(row.serial_no))
-
-			elif row.batch_no:
+			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty
 
-			elif voucher_bundle_data:
+			if not row.serial_no and not row.batch_no and voucher_bundle_data:
 				bundle_key = (row.rm_item_code, row.main_item_code, row.t_warehouse, row.voucher_no)
 
 				bundle_data = voucher_bundle_data.get(bundle_key, frappe._dict())
