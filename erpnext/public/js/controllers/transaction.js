@@ -649,9 +649,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 										me.apply_product_discount(d);
 									}
 								},
-								() => {
+								async () => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									if ((me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) && me.frm.doc.represents_company === me.frm.doc.company) {
+									const fetch_valuation_rate_for_internal_transactions = await frappe.db.get_single_value(
+										"Accounts Settings", "fetch_valuation_rate_for_internal_transaction"
+									);
+									if ((me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) && fetch_valuation_rate_for_internal_transactions) {
 										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
 											me.frm.doc.doctype, me.frm.doc.company);
 									} else {

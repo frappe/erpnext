@@ -41,6 +41,7 @@
   "show_payment_schedule_in_print",
   "item_price_settings_section",
   "maintain_same_internal_transaction_rate",
+  "fetch_valuation_rate_for_internal_transaction",
   "column_break_feyo",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
@@ -549,6 +550,12 @@
    "fieldname": "drop_ar_procedures",
    "fieldtype": "Button",
    "label": "Drop Procedures"
+   },
+  {
+   "default": "0",
+   "fieldname": "fetch_valuation_rate_for_internal_transaction",
+   "fieldtype": "Check",
+   "label": "Fetch Valuation Rate for Internal Transaction"
   }
  ],
  "icon": "icon-cog",

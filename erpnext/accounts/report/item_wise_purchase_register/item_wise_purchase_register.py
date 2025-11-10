@@ -310,8 +310,8 @@ def apply_conditions(query, pi, pii, filters):
 
 def get_items(filters, additional_table_columns):
 	doctype = "Purchase Invoice"
-	pi = frappe.qb.DocType(doctype).as_("invoice")
-	pii = frappe.qb.DocType(f"{doctype} Item").as_("invoice_item")
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pii = frappe.qb.DocType("Purchase Invoice Item")
 	Item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(pi)
@@ -375,7 +375,7 @@ def get_items(filters, additional_table_columns):
 	if match_conditions:
 		query += " and " + match_conditions
 
-	query = apply_order_by_conditions(query, filters)
+	query = apply_order_by_conditions(doctype, query, filters)
 
 	return frappe.db.sql(query, params, as_dict=True)
 

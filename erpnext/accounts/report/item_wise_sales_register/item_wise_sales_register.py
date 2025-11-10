@@ -140,7 +140,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 		data.append(row)
 
 	if filters.get("group_by") and item_list:
-		total_row = total_row_map.get(prev_group_by_value) or total_row_map.get(d.get("item_name"))
+		total_row = total_row_map.get(prev_group_by_value or d.get("item_name"))
 		total_row["percent_gt"] = flt(total_row["total"] / grand_total * 100)
 		data.append(total_row)
 		data.append({})
@@ -356,8 +356,6 @@ def apply_conditions(query, si, sii, sip, filters, additional_conditions=None):
 
 	if filters.get("mode_of_payment"):
 		query = query.where(sip.mode_of_payment == filters.get("mode_of_payment"))
-	else:
-		query = query.where(si.name == "")
 
 	if filters.get("warehouse"):
 		if frappe.db.get_value("Warehouse", filters.get("warehouse"), "is_group"):
@@ -396,15 +394,18 @@ def apply_conditions(query, si, sii, sip, filters, additional_conditions=None):
 	return query
 
 
-def apply_order_by_conditions(query, filters):
+def apply_order_by_conditions(doctype, query, filters):
+	invoice = f"`tab{doctype}`"
+	invoice_item = f"`tab{doctype} Item`"
+
 	if not filters.get("group_by"):
-		query += "order by invoice.posting_date desc, invoice_item.item_group desc"
+		query += f" order by {invoice}.posting_date desc, {invoice_item}.item_group desc"
 	elif filters.get("group_by") == "Invoice":
-		query += "order by invoice_item.parent desc"
+		query += f" order by {invoice_item}.parent desc"
 	elif filters.get("group_by") == "Item":
-		query += "order by invoice_item.item_code"
+		query += f" order by {invoice_item}.item_code"
 	elif filters.get("group_by") == "Item Group":
-		query += "order by invoice_item.item_group"
+		query += f" order by {invoice_item}.item_group"
 	elif filters.get("group_by") in ("Customer", "Customer Group", "Territory", "Supplier"):
 		filter_field = frappe.scrub(filters.get("group_by"))
 		query += f" order by {filter_field} desc"
@@ -414,8 +415,8 @@ def apply_order_by_conditions(query, filters):
 
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	doctype = "Sales Invoice"
-	si = frappe.qb.DocType("Sales Invoice").as_("invoice")
-	sii = frappe.qb.DocType("Sales Invoice Item").as_("invoice_item")
+	si = frappe.qb.DocType("Sales Invoice")
+	sii = frappe.qb.DocType("Sales Invoice Item")
 	sip = frappe.qb.DocType("Sales Invoice Payment")
 	item = frappe.qb.DocType("Item")
 
@@ -489,12 +490,12 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 	from frappe.desk.reportview import build_match_conditions
 
 	query, params = query.walk()
-	match_conditions = build_match_conditions("Sales Invoice")
+	match_conditions = build_match_conditions(doctype)
 
 	if match_conditions:
 		query += " and " + match_conditions
 
-	query = apply_order_by_conditions(query, filters)
+	query = apply_order_by_conditions(doctype, query, filters)
 
 	return frappe.db.sql(query, params, as_dict=True)
 
@@ -521,28 +522,16 @@ def get_delivery_notes_against_sales_order(item_list):
 
 
 def get_grand_total(filters, doctype):
-	# return flt(
-	# 	frappe.db.get_value(
-	# 		doctype,
-	# 		{
-	# 			"docstatus": 1,
-	# 			"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-	# 		},
-	# 		"sum(base_grand_total)",
-	# 	)
-	# )
-
-	grand_total = frappe.db.sql(
-		"""
-		SELECT SUM(base_grand_total)
-		FROM `tab{0}`
-		WHERE docstatus = 1
-			AND posting_date BETWEEN '{1}' AND '{2}'
-		""".format(doctype, filters.get("from_date"), filters.get("to_date")),
-		as_list=1,
+	return flt(
+		frappe.db.get_value(
+			doctype,
+			{
+				"docstatus": 1,
+				"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
+			},
+			"sum(base_grand_total)",
+		)
 	)
-	if grand_total:
-		return flt(grand_total[0][0])
 
 
 def get_tax_accounts(
@@ -745,6 +734,7 @@ def add_total_row(
 			add_sub_total_row(total_row, total_row_map, "total_row", tax_columns)
 
 		prev_group_by_value = item.get(group_by_field, "")
+
 		total_row_map.setdefault(
 			item.get(group_by_field, ""),
 			{
