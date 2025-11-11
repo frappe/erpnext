@@ -155,7 +155,10 @@ class Item(Document):
 	def onload(self):
 		self.set_onload("stock_exists", self.stock_ledger_created())
 		self.set_onload("asset_naming_series", get_asset_naming_series())
-		self.set_onload("current_valuation_method", get_valuation_method(self.name))
+		self.set_onload(
+			"current_valuation_method",
+			get_valuation_method(self.name, frappe.defaults.get_global_default("company")),
+		)
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by") == "Naming Series":
@@ -965,7 +968,10 @@ class Item(Document):
 
 		if not values.get("valuation_method") and self.get("valuation_method"):
 			values["valuation_method"] = (
-				frappe.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+				frappe.get_value(
+					"Company", frappe.defaults.get_global_default("default_company"), "valuation_method"
+				)
+				or "FIFO"
 			)
 
 		changed_fields = [

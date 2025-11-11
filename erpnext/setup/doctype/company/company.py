@@ -110,6 +110,7 @@ class Company(NestedSet):
 		transactions_annual_history: DF.Code | None
 		unrealized_exchange_gain_loss_account: DF.Link | None
 		unrealized_profit_loss_account: DF.Link | None
+		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 		website: DF.Data | None
 		write_off_account: DF.Link | None
 	# end: auto-generated types
@@ -160,6 +161,32 @@ class Company(NestedSet):
 		self.validate_parent_company()
 		self.set_reporting_currency()
 		self.validate_inventory_account_settings()
+		self.cant_change_valuation_method()
+
+	def cant_change_valuation_method(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		previous_valuation_method = doc_before_save.get("valuation_method")
+
+		if previous_valuation_method and previous_valuation_method != self.valuation_method:
+			# check if there are any stock ledger entries against items
+			# which does not have it's own valuation method
+			sle = frappe.db.sql(
+				"""select name from `tabStock Ledger Entry` sle
+				where exists(select name from tabItem
+					where name=sle.item_code and (valuation_method is null or valuation_method='')) and sle.company=%s limit 1
+			""",
+				(self.name,),
+			)
+
+			if sle:
+				frappe.throw(
+					_(
+						"Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"
+					)
+				)
 
 	def validate_inventory_account_settings(self):
 		doc_before_save = self.get_doc_before_save()

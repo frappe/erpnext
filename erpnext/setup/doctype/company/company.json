@@ -117,6 +117,7 @@
   "enable_item_wise_inventory_account",
   "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
+  "valuation_method",
   "column_break_32",
   "stock_adjustment_account",
   "stock_received_but_not_billed",
@@ -885,6 +886,16 @@
    "fieldname": "enable_item_wise_inventory_account",
    "fieldtype": "Check",
    "label": "Enable Item-wise Inventory Account"
+  },
+  {
+   "default": "FIFO",
+   "documentation_url": "https://docs.erpnext.com/docs/v14/user/manual/en/stock/articles/calculation-of-valuation-rate-in-fifo-and-moving-average",
+   "fieldname": "valuation_method",
+   "fieldtype": "Select",
+   "label": "Default Stock Valuation Method",
+   "no_copy": 1,
+   "options": "FIFO\nMoving Average\nLIFO",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-building",
@@ -892,7 +903,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-10-23 13:15:52.411984",
+ "modified": "2025-11-11 13:09:54.010603",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

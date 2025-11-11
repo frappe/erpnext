@@ -514,7 +514,7 @@ class SerialandBatchBundle(Document):
 		if hasattr(sn_obj, "stock_queue") and sn_obj.stock_queue:
 			stock_queue = parse_json(sn_obj.stock_queue)
 
-		val_method = get_valuation_method(self.item_code)
+		val_method = get_valuation_method(self.item_code, self.company)
 
 		for d in self.entries:
 			available_qty = 0
@@ -642,7 +642,7 @@ class SerialandBatchBundle(Document):
 	def set_incoming_rate_for_inward_transaction(self, row=None, save=False, prev_sle=None):
 		from erpnext.stock.utils import get_valuation_method
 
-		valuation_method = get_valuation_method(self.item_code)
+		valuation_method = get_valuation_method(self.item_code, self.company)
 
 		valuation_field = "valuation_rate"
 		if self.voucher_type in ["Sales Invoice", "Delivery Note", "Quotation"]:

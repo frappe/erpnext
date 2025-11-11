@@ -8,7 +8,6 @@
   "defaults_tab",
   "item_defaults_section",
   "item_naming_by",
-  "valuation_method",
   "item_group",
   "column_break_4",
   "default_warehouse",
@@ -123,13 +122,6 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "documentation_url": "https://docs.erpnext.com/docs/v14/user/manual/en/stock/articles/calculation-of-valuation-rate-in-fifo-and-moving-average",
-   "fieldname": "valuation_method",
-   "fieldtype": "Select",
-   "label": "Default Valuation Method",
-   "options": "FIFO\nMoving Average\nLIFO"
   },
   {
    "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
@@ -553,7 +545,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-11-11 11:35:39.864923",
+ "modified": "2025-11-11 11:50:33.812558",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

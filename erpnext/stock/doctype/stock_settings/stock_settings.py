@@ -103,7 +103,6 @@ class StockSettings(Document):
 			)
 
 		self.validate_warehouses()
-		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
 		self.validate_stock_reservation()
@@ -120,30 +119,6 @@ class StockSettings(Document):
 						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
 					).format(frappe.bold(self.meta.get_field(field).label)),
 					title=_("Incorrect Warehouse"),
-				)
-
-	def cant_change_valuation_method(self):
-		doc_before_save = self.get_doc_before_save()
-		if not doc_before_save:
-			return
-
-		previous_valuation_method = doc_before_save.get("valuation_method")
-
-		if previous_valuation_method and previous_valuation_method != self.valuation_method:
-			# check if there are any stock ledger entries against items
-			# which does not have it's own valuation method
-			sle = frappe.db.sql(
-				"""select name from `tabStock Ledger Entry` sle
-				where exists(select name from tabItem
-					where name=sle.item_code and (valuation_method is null or valuation_method='')) limit 1
-			"""
-			)
-
-			if sle:
-				frappe.throw(
-					_(
-						"Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"
-					)
 				)
 
 	def validate_clean_description_html(self):
