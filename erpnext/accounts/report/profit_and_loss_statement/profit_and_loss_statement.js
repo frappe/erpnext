@@ -51,6 +51,7 @@ frappe.query_reports[PL_REPORT_NAME]["filters"].push(
 		fieldname: "show_zero_values",
 		label: __("Show zero values"),
 		fieldtype: "Check",
+		depends_on: "eval:!doc.report_template",
 	}
 );
 
