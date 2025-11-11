@@ -1388,13 +1388,17 @@ class SerialandBatchBundle(Document):
 			get_sre_against_so_for_dn,
 		)
 
-		so_name, so_detail_no = frappe.db.get_value(
+		so_details = frappe.db.get_value(
 			"Delivery Note Item", self.voucher_detail_no, ["against_sales_order", "so_detail"]
 		)
 
+		if not so_details:
+			return None
+
+		so_name, so_detail_no = so_details
+
 		if so_name and so_detail_no:
 			sre_names = get_sre_against_so_for_dn(so_name, so_detail_no)
-
 			return sre_names
 
 
