@@ -374,11 +374,16 @@ def get_avg_purchase_rate(serial_nos):
 
 
 @frappe.request_cache
-def get_valuation_method(item_code, company):
+def get_valuation_method(item_code, company=None):
 	"""get valuation method from item or default"""
 	val_method = frappe.get_cached_value("Item", item_code, "valuation_method")
 	if not val_method:
-		val_method = frappe.get_cached_value("Company", company, "valuation_method") or "FIFO"
+		val_method = (
+			frappe.get_cached_value(
+				"Company", company or frappe.defaults.get_global_default("company"), "valuation_method"
+			)
+			or "FIFO"
+		)
 	return val_method
 
 

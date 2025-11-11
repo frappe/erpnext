@@ -173,9 +173,7 @@ class Batch(Document):
 		from erpnext.stock.utils import get_valuation_method
 
 		if self.is_new():
-			if get_valuation_method(
-				self.item, frappe.defaults.get_global_default("company")
-			) == "Moving Average" and frappe.get_single_value(
+			if get_valuation_method(self.item) == "Moving Average" and frappe.get_single_value(
 				"Stock Settings", "do_not_use_batchwise_valuation"
 			):
 				self.use_batchwise_valuation = 0

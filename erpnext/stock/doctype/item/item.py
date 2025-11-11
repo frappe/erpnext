@@ -157,7 +157,7 @@ class Item(Document):
 		self.set_onload("asset_naming_series", get_asset_naming_series())
 		self.set_onload(
 			"current_valuation_method",
-			get_valuation_method(self.name, frappe.defaults.get_global_default("company")),
+			get_valuation_method(self.name),
 		)
 
 	def autoname(self):
