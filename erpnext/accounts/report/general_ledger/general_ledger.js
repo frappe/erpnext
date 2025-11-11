@@ -209,7 +209,7 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			fieldname: "ignore_err",
-			label: __("Ignore Exchange Rate Revaluation Journals"),
+			label: __("Ignore Exchange Rate Revaluation and Gain / Loss Journals"),
 			fieldtype: "Check",
 		},
 		{

@@ -352,7 +352,7 @@
    "default": "0",
    "fieldname": "ignore_exchange_rate_revaluation_journals",
    "fieldtype": "Check",
-   "label": "Ignore Exchange Rate Revaluation Journals"
+   "label": "Ignore Exchange Rate Revaluation and Gain / Loss Journals"
   },
   {
    "default": "0",

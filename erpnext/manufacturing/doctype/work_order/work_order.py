@@ -167,6 +167,31 @@ class WorkOrder(Document):
 		validate_uom_is_integer(self, "stock_uom", ["required_qty"])
 
 		self.set_required_items(reset_only_qty=len(self.get("required_items")))
+		self.validate_operations_sequence()
+
+	def validate_operations_sequence(self):
+		if all([not op.sequence_id for op in self.operations]):
+			for op in self.operations:
+				op.sequence_id = op.idx
+		else:
+			sequence_id = 1
+			for op in self.operations:
+				if op.idx == 1 and op.sequence_id != 1:
+					frappe.throw(
+						_("Row #1: Sequence ID must be 1 for Operation {0}.").format(
+							frappe.bold(op.operation)
+						)
+					)
+				elif op.sequence_id != sequence_id and op.sequence_id != sequence_id + 1:
+					frappe.throw(
+						_("Row #{0}: Sequence ID must be {1} or {2} for Operation {3}.").format(
+							op.idx,
+							frappe.bold(sequence_id),
+							frappe.bold(sequence_id + 1),
+							frappe.bold(op.operation),
+						)
+					)
+				sequence_id = op.sequence_id
 
 	def set_warehouses(self):
 		for row in self.required_items:
@@ -382,7 +407,7 @@ class WorkOrder(Document):
 			if qty > completed_qty:
 				frappe.throw(
 					_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
-						self.meta.get_label(fieldname), qty, completed_qty, self.name
+						_(self.meta.get_label(fieldname)), qty, completed_qty, self.name
 					),
 					StockOverProductionError,
 				)
@@ -629,17 +654,6 @@ class WorkOrder(Document):
 
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
-
-		if all([op.sequence_id for op in self.operations]):
-			self.operations = sorted(self.operations, key=lambda op: op.sequence_id)
-			for idx, op in enumerate(self.operations):
-				op.idx = idx + 1
-		elif any([op.sequence_id for op in self.operations]):
-			frappe.throw(
-				_(
-					"Row #{0}: Incorrect Sequence ID. If any single operation has a Sequence ID then all other operations must have one too."
-				).format(next((op.idx for op in self.operations if not op.sequence_id), None))
-			)
 
 		for idx, row in enumerate(self.operations):
 			qty = self.qty
@@ -1083,7 +1097,7 @@ class WorkOrder(Document):
 			self.transfer_material_against = "Work Order"
 		if not self.transfer_material_against:
 			frappe.throw(
-				_("Setting {} is required").format(self.meta.get_label("transfer_material_against")),
+				_("Setting {0} is required").format(_(self.meta.get_label("transfer_material_against"))),
 				title=_("Missing value"),
 			)
 

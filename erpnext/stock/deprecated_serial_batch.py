@@ -232,6 +232,7 @@ class DeprecatedBatchNoValuation:
 				& (sle.is_cancelled == 0)
 				& (sle.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
+			.for_update()
 			.where(timestamp_condition)
 			.groupby(sle.batch_no)
 		)
@@ -273,10 +274,18 @@ class DeprecatedBatchNoValuation:
 			.where(timestamp_condition)
 			.orderby(sle.posting_datetime, order=Order.desc)
 			.orderby(sle.creation, order=Order.desc)
+			.for_update()
 			.limit(1)
 		)
 		if self.sle.name:
 			query = query.where(sle.name != self.sle.name)
+		
+		if self.sle.serial_and_batch_bundle:
+			query = query.where(
+				(sle.serial_and_batch_bundle != self.sle.serial_and_batch_bundle)
+				| (sle.serial_and_batch_bundle.isnull())
+			)
+
 		data = query.run(as_dict=True)
 
 		return data[0] if data else frappe._dict()
@@ -317,6 +326,7 @@ class DeprecatedBatchNoValuation:
 				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
 				& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
+			.for_update()
 			.where(timestamp_condition)
 			.groupby(bundle_child.batch_no)
 		)

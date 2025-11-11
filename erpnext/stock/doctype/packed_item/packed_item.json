@@ -23,6 +23,7 @@
   "use_serial_batch_fields",
   "column_break_11",
   "serial_and_batch_bundle",
+  "delivered_by_supplier",
   "section_break_bgys",
   "serial_no",
   "column_break_qlha",
@@ -290,6 +291,13 @@
   {
    "fieldname": "column_break_qlha",
    "fieldtype": "Column Break"
+   },
+  {
+   "default": "0",
+   "fieldname": "delivered_by_supplier",
+   "fieldtype": "Check",
+   "label": "Supplier delivers to Customer",
+   "read_only": 1
   }
  ],
  "idx": 1,
@@ -303,6 +311,7 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
+ "row_format": "Dynamic",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

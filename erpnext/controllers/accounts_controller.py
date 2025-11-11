@@ -27,7 +27,9 @@ from frappe.utils import (
 	today,
 )
 from frappe.utils.data import getdate as convert_to_date
-
+from erpnext.accounts.utils import (
+	get_advance_payment_doctypes as _get_advance_payment_doctypes,
+)
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -387,9 +389,7 @@ class AccountsController(TransactionBase):
 		adv = qb.DocType("Advance Payment Ledger Entry")
 		qb.from_(adv).delete().where(adv.voucher_type.eq(self.doctype) & adv.voucher_no.eq(self.name)).run()
 
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_doctypes")
-
-		if self.doctype in advance_payment_doctypes:
+		if self.doctype in self.get_advance_payment_doctypes():
 			qb.from_(adv).delete().where(
 				adv.against_voucher_type.eq(self.doctype) & adv.against_voucher_no.eq(self.name)
 			).run()
@@ -1937,6 +1937,14 @@ class AccountsController(TransactionBase):
 			and self.get("discount_amount")
 			and self.get("additional_discount_account")
 		):
+			# cases where distributed_discount_amount is not patched
+			if not hasattr(self, "__has_distributed_discount_set"):
+				self.__has_distributed_discount_set = any(
+					i.distributed_discount_amount for i in self.get("items")
+				)
+
+			if not self.__has_distributed_discount_set:
+				return item.amount, item.base_amount
 			amount = item.amount
 			base_amount = item.base_amount
 
@@ -2883,7 +2891,7 @@ class AccountsController(TransactionBase):
 		repost_ledger.submit()
 
 	def get_advance_payment_doctypes(self) -> list:
-		return frappe.get_hooks("advance_payment_doctypes")
+		return _get_advance_payment_doctypes()
 
 	def make_advance_payment_ledger_for_journal(self):
 		advance_payment_doctypes = self.get_advance_payment_doctypes()
@@ -3934,6 +3942,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 						).format(frappe.bold(parent.name))
 					)
 	else:  # Sales Order
+		parent.validate_selling_price()
 		parent.validate_for_duplicate_items()
 		parent.validate_warehouse()
 		parent.update_reserved_qty()

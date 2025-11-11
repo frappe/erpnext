@@ -881,10 +881,6 @@ class StockReconciliation(StockController):
 
 		self.update_inventory_dimensions(row, data)
 
-		if self.docstatus == 1 and has_dimensions and (not row.batch_no or not row.serial_and_batch_bundle):
-			data.qty_after_transaction = data.actual_qty
-			data.actual_qty = 0.0
-
 		return data
 
 	def make_sle_on_cancel(self):
@@ -1076,17 +1072,14 @@ class StockReconciliation(StockController):
 					}
 				)
 
-			if (
-				add_new_sle
-				and not frappe.db.get_value(
-					"Stock Ledger Entry",
-					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
-					"name",
-				)
-				and not row.current_serial_and_batch_bundle
+			if add_new_sle and not frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
+				"name",
 			):
-				self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
-				row.reload()
+				if not row.current_serial_and_batch_bundle:
+					self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
+					row.reload()
 
 				self.add_missing_stock_ledger_entry(row, voucher_detail_no, sle_creation)
 
@@ -1249,12 +1242,12 @@ def get_items(warehouse, posting_date, posting_time, company, item_code=None, ig
 	itemwise_batch_data = get_itemwise_batch(warehouse, posting_date, company, item_code)
 
 	for d in items:
-		if d.item_code in itemwise_batch_data:
+		if (d.item_code, d.warehouse) in itemwise_batch_data:
 			valuation_rate = get_stock_balance(
 				d.item_code, d.warehouse, posting_date, posting_time, with_valuation_rate=True
 			)[1]
 
-			for row in itemwise_batch_data.get(d.item_code):
+			for row in itemwise_batch_data.get((d.item_code, d.warehouse)):
 				if ignore_empty_stock and not row.qty:
 					continue
 
@@ -1397,7 +1390,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 	columns, data = execute(filters)
 
 	for row in data:
-		itemwise_batch_data.setdefault(row[0], []).append(
+		itemwise_batch_data.setdefault((row[0], row[3]), []).append(
 			frappe._dict(
 				{
 					"item_code": row[0],

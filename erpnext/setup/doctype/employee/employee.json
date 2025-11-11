@@ -600,7 +600,7 @@
    "collapsible": 1,
    "fieldname": "exit",
    "fieldtype": "Tab Break",
-   "label": "Exit",
+   "label": "Employee Exit",
    "oldfieldtype": "Section Break"
   },
   {

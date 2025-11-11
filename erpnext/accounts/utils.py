@@ -170,7 +170,7 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 		if doc:
 			doc.fiscal_year = years[0]
 		else:
-			throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
+			throw(_("{0} '{1}' not in Fiscal Year {2}").format(_(label), formatdate(date), fiscal_year))
 
 
 @frappe.whitelist()
@@ -513,6 +513,9 @@ def reconcile_against_document(
 					dimensions_dict=dimensions_dict,
 				)
 
+				if referenced_row.get("outstanding_amount"):
+					referenced_row.outstanding_amount -= flt(entry.allocated_amount)
+
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
@@ -712,23 +715,8 @@ def update_reference_in_payment_entry(
 	update_advance_paid = []
 
 	# Update Reconciliation effect date in reference
-	reconciliation_takes_effect_on = frappe.get_cached_value(
-		"Company", payment_entry.company, "reconciliation_takes_effect_on"
-	)
-	if payment_entry.book_advance_payments_in_separate_party_account:
-		if reconciliation_takes_effect_on == "Advance Payment Date":
-			reconcile_on = payment_entry.posting_date
-
-		elif reconciliation_takes_effect_on == "Oldest Of Invoice Or Advance":
-			date_field = "posting_date"
-			if d.against_voucher_type in ["Sales Order", "Purchase Order"]:
-				date_field = "transaction_date"
-			reconcile_on = frappe.db.get_value(d.against_voucher_type, d.against_voucher, date_field)
-			if getdate(reconcile_on) < getdate(payment_entry.posting_date):
-				reconcile_on = payment_entry.posting_date
-		elif reconciliation_takes_effect_on == "Reconciliation Date":
-			reconcile_on = nowdate()
-		reference_details.update({"reconcile_effect_on": reconcile_on})
+	reconcile_on = get_reconciliation_effect_date(d, payment_entry.company, payment_entry.posting_date)
+	reference_details.update({"reconcile_effect_on": reconcile_on})
 		
 
 	if d.voucher_detail_no:
@@ -780,6 +768,28 @@ def update_reference_in_payment_entry(
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
 	return row, update_advance_paid
+
+def get_reconciliation_effect_date(reference, company, posting_date):
+	reconciliation_takes_effect_on = frappe.get_cached_value(
+		"Company", company, "reconciliation_takes_effect_on"
+	)
+
+	if reconciliation_takes_effect_on == "Advance Payment Date":
+		reconcile_on = posting_date
+	elif reconciliation_takes_effect_on == "Oldest Of Invoice Or Advance":
+		date_field = "posting_date"
+		if reference.against_voucher_type in ["Sales Order", "Purchase Order"]:
+			date_field = "transaction_date"
+		reconcile_on = frappe.db.get_value(
+			reference.against_voucher_type, reference.against_voucher, date_field
+		)
+		if getdate(reconcile_on) < getdate(posting_date):
+			reconcile_on = posting_date
+	elif reconciliation_takes_effect_on == "Reconciliation Date":
+		reconcile_on = nowdate()
+
+	return reconcile_on
+
 
 
 def cancel_exchange_gain_loss_journal(
@@ -996,58 +1006,77 @@ def remove_ref_doc_link_from_pe(
 	per = qb.DocType("Payment Entry Reference")
 	pay = qb.DocType("Payment Entry")
 
-	linked_pe = (
+	query = (
 		qb.from_(per)
-		.select(per.parent)
-		.where((per.reference_doctype == ref_type) & (per.reference_name == ref_no) & (per.docstatus.lt(2)))
-		.run(as_list=1)
-	)
-	linked_pe = convert_to_list(linked_pe)
-	# remove reference only from specified payment
-	linked_pe = [x for x in linked_pe if x == payment_name] if payment_name else linked_pe
-
-	if linked_pe:
-		update_query = (
-			qb.update(per)
-			.set(per.allocated_amount, 0)
-			.set(per.modified, now())
-			.set(per.modified_by, frappe.session.user)
-			.where(per.docstatus.lt(2) & (per.reference_doctype == ref_type) & (per.reference_name == ref_no))
+		.select("*")
+		.where(
+			(per.reference_doctype == ref_type)
+			& (per.reference_name == ref_no)
+			& (per.docstatus.lt(2))
+			& (per.parenttype == "Payment Entry")
 		)
+	)
+	if payment_name:
+		query = query.where(per.parent == payment_name)
 
-		if payment_name:
-			update_query = update_query.where(per.parent == payment_name)
+	reference_rows = query.run(as_dict=True)
 
-		update_query.run()
+	if not reference_rows:
+		return
+	
+	linked_pe = set()
+	row_names = set()
 
-		for pe in linked_pe:
-			try:
-				pe_doc = frappe.get_doc("Payment Entry", pe)
-				pe_doc.set_amounts()
+	for row in reference_rows:
+		linked_pe.add(row.parent)
+		row_names.add(row.name)
 
-				# Call cancel on only removed reference
-				references = [
-					x
-					for x in pe_doc.references
-					if x.reference_doctype == ref_type and x.reference_name == ref_no
-				]
-				[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
+	from erpnext.accounts.doctype.payment_request.payment_request import (
+		update_payment_requests_as_per_pe_references,
+	)
 
-				pe_doc.clear_unallocated_reference_document_rows()
-				pe_doc.validate_payment_type_with_outstanding()
-			except Exception:
-				msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
-				msg += "<br>"
-				msg += _("Please cancel payment entry manually first")
-				frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
+	# Update payment request amount
+	update_payment_requests_as_per_pe_references(reference_rows, cancel=True)
 
-			qb.update(pay).set(pay.total_allocated_amount, pe_doc.total_allocated_amount).set(
-				pay.base_total_allocated_amount, pe_doc.base_total_allocated_amount
-			).set(pay.unallocated_amount, pe_doc.unallocated_amount).set(pay.modified, now()).set(
-				pay.modified_by, frappe.session.user
-			).where(pay.name == pe).run()
+	# Update allocated amounts and modified fields in one go
+	(
+		qb.update(per)
+		.set(per.allocated_amount, 0)
+		.set(per.modified, now())
+		.set(per.modified_by, frappe.session.user)
+		.where(per.name.isin(row_names))
+		.where(per.parenttype == "Payment Entry")
+		.run()
+	)
 
-		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
+	for pe in linked_pe:
+		try:
+			pe_doc = frappe.get_doc("Payment Entry", pe)
+			pe_doc.set_amounts()
+
+			# Call cancel on only removed reference
+			references = [x for x in pe_doc.references if x.name in row_names]
+			[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
+
+			pe_doc.clear_unallocated_reference_document_rows()
+			pe_doc.validate_payment_type_with_outstanding()
+		except Exception:
+			msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
+			msg += "<br>"
+			msg += _("Please cancel payment entry manually first")
+			frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
+
+		(
+			qb.update(pay)
+			.set(pay.total_allocated_amount, pe_doc.total_allocated_amount)
+			.set(pay.base_total_allocated_amount, pe_doc.base_total_allocated_amount)
+			.set(pay.unallocated_amount, pe_doc.unallocated_amount)
+			.set(pay.modified, now())
+			.set(pay.modified_by, frappe.session.user)
+			.where(pay.name == pe)
+			.run()
+		)
+	frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 
 @frappe.whitelist()
@@ -1742,6 +1771,37 @@ def auto_create_exchange_rate_revaluation_daily() -> None:
 	create_err_and_its_journals(companies)
 
 
+
+def build_qb_match_conditions(doctype, user=None) -> list:
+	match_filters = build_match_conditions(doctype, user, False)
+	link_fields_map = get_link_fields_grouped_by_option(doctype)
+	criterion = []
+	apply_strict_user_permissions = frappe.get_system_settings("apply_strict_user_permissions")
+
+	if match_filters:
+		_dt = qb.DocType(doctype)
+
+		for filter in match_filters:
+			for link_option, allowed_values in filter.items():
+				fieldnames = link_fields_map.get(link_option, [])
+				cond = None
+
+				if link_option == doctype:
+					cond = _dt["name"].isin(allowed_values)
+
+				for fieldname in fieldnames:
+					field = _dt[fieldname]
+					cond = field.isin(allowed_values)
+
+					if not apply_strict_user_permissions:
+						cond = (Coalesce(field, "") == "") | cond
+
+				if cond:
+					criterion.append(cond)
+
+	return criterion
+
+
 def auto_create_exchange_rate_revaluation_weekly() -> None:
 	"""
 	Executed by background job
@@ -2275,6 +2335,14 @@ def create_gain_loss_journal(
 
 def get_party_types_from_account_type(account_type):
 	return frappe.db.get_all("Party Type", {"account_type": account_type}, pluck="name")
+
+
+def get_advance_payment_doctypes():
+	"""
+	Get list of advance payment doctypes based on type.
+	:param type: Optional, can be "receivable" or "payable". If not provided, returns both.
+	"""
+	return frappe.get_hooks("advance_payment_doctypes")
 
 
 def run_ledger_health_checks():

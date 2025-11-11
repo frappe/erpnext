@@ -7,6 +7,7 @@
 import json
 
 import frappe
+import frappe.defaults
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -26,6 +27,7 @@ class PackedItem(Document):
 		actual_qty: DF.Float
 		batch_no: DF.Link | None
 		conversion_factor: DF.Float
+		delivered_by_supplier: DF.Check
 		description: DF.TextEditor | None
 		incoming_rate: DF.Currency
 		item_code: DF.Link | None
@@ -206,6 +208,7 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.uom = item_data.stock_uom
 	pi_row.qty = flt(packing_item.qty) * flt(main_item_row.stock_qty)
 	pi_row.conversion_factor = main_item_row.conversion_factor
+	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
 	if not pi_row.description:
 		pi_row.description = packing_item.get("description")
@@ -336,12 +339,20 @@ def on_doctype_update():
 
 
 @frappe.whitelist()
-def get_items_from_product_bundle(row):  # pragma: no cover
+def get_items_from_product_bundle(row, price_list):
 	row, items = json.loads(row), []
 
 	bundled_items = get_product_bundle_items(row["item_code"])
 	for item in bundled_items:
-		row.update({"item_code": item.item_code, "qty": flt(row["qty"]) * flt(item.qty)})
+		row.update(
+			{
+				"item_code": item.item_code,
+				"qty": flt(row["quantity"]) * flt(item.qty),
+				"conversion_rate": 1,
+				"price_list": price_list,
+				"currency": frappe.defaults.get_defaults().currency,
+			}
+		)
 		items.append(get_item_details(row))
 
 	return items

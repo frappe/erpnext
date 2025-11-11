@@ -150,3 +150,157 @@ class TestCustomerLedgerSummary(FrappeTestCase, AccountsTestMixin):
 		for field in expected_after_cr_and_payment:
 			with self.subTest(field=field):
 				self.assertEqual(report[0].get(field), expected_after_cr_and_payment.get(field))
+
+	def test_journal_voucher_against_return_invoice(self):
+		filters = {"company": self.company, "from_date": today(), "to_date": today()}
+
+		# Create Sales Invoice of 10 qty at rate 100 (Amount: 1000.0)
+		si1 = self.create_sales_invoice(do_not_submit=True)
+		si1.save().submit()
+
+		expected = {
+			"party": "_Test Customer",
+			"party_name": "_Test Customer",
+			"opening_balance": 0,
+			"invoiced_amount": 1000.0,
+			"paid_amount": 0,
+			"return_amount": 0,
+			"closing_balance": 1000.0,
+			"currency": "INR",
+			"customer_name": "_Test Customer",
+		}
+
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		for field in expected:
+			with self.subTest(field=field):
+				actual_value = report[0].get(field)
+				expected_value = expected.get(field)
+				self.assertEqual(
+					actual_value,
+					expected_value,
+					f"Field {field} does not match expected value. "
+					f"Expected: {expected_value}, Got: {actual_value}",
+				)
+
+		# Create Payment Entry (Receive) for the first invoice
+		pe1 = self.create_payment_entry(si1.name, True)
+		pe1.paid_amount = 1000  # Full payment 1000.0
+		pe1.save().submit()
+
+		expected_after_payment = {
+			"party": "_Test Customer",
+			"party_name": "_Test Customer",
+			"opening_balance": 0,
+			"invoiced_amount": 1000.0,
+			"paid_amount": 1000.0,
+			"return_amount": 0,
+			"closing_balance": 0.0,
+			"currency": "INR",
+			"customer_name": "_Test Customer",
+		}
+
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		for field in expected_after_payment:
+			with self.subTest(field=field):
+				actual_value = report[0].get(field)
+				expected_value = expected_after_payment.get(field)
+				self.assertEqual(
+					actual_value,
+					expected_value,
+					f"Field {field} does not match expected value. "
+					f"Expected: {expected_value}, Got: {actual_value}",
+				)
+
+		# Create Credit Note (return invoice) for first invoice (1000.0)
+		cr_note = self.create_credit_note(si1.name, do_not_submit=True)
+		cr_note.items[0].qty = -10  # 1 item of qty 10 at rate 100 (Amount: 1000.0)
+		cr_note.save().submit()
+
+		expected_after_cr_note = {
+			"party": "_Test Customer",
+			"party_name": "_Test Customer",
+			"opening_balance": 0,
+			"invoiced_amount": 1000.0,
+			"paid_amount": 1000.0,
+			"return_amount": 1000.0,
+			"closing_balance": -1000.0,
+			"currency": "INR",
+			"customer_name": "_Test Customer",
+		}
+
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		for field in expected_after_cr_note:
+			with self.subTest(field=field):
+				actual_value = report[0].get(field)
+				expected_value = expected_after_cr_note.get(field)
+				self.assertEqual(
+					actual_value,
+					expected_value,
+					f"Field {field} does not match expected value. "
+					f"Expected: {expected_value}, Got: {actual_value}",
+				)
+
+		# Create Payment Entry for the returned amount (1000.0) - Pay the customer back
+		pe2 = get_payment_entry("Sales Invoice", cr_note.name, bank_account=self.cash)
+		pe2.insert().submit()
+
+		expected_after_cr_and_return_payment = {
+			"party": "_Test Customer",
+			"party_name": "_Test Customer",
+			"opening_balance": 0,
+			"invoiced_amount": 1000.0,
+			"paid_amount": 0,
+			"return_amount": 1000.0,
+			"closing_balance": 0,
+			"currency": "INR",
+		}
+
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		for field in expected_after_cr_and_return_payment:
+			with self.subTest(field=field):
+				actual_value = report[0].get(field)
+				expected_value = expected_after_cr_and_return_payment.get(field)
+				self.assertEqual(
+					actual_value,
+					expected_value,
+					f"Field {field} does not match expected value. "
+					f"Expected: {expected_value}, Got: {actual_value}",
+				)
+
+		# Create second Sales Invoice of 10 qty at rate 100 (Amount: 1000.0)
+		si2 = self.create_sales_invoice(do_not_submit=True)
+		si2.save().submit()
+
+		# Create Payment Entry (Receive) for the second invoice - payment (500.0)
+		pe3 = self.create_payment_entry(si2.name, True)
+		pe3.paid_amount = 500  # Partial payment 500.0
+		pe3.save().submit()
+
+		expected_after_cr_and_payment = {
+			"party": "_Test Customer",
+			"party_name": "_Test Customer",
+			"opening_balance": 0.0,
+			"invoiced_amount": 2000.0,
+			"paid_amount": 500.0,
+			"return_amount": 1000.0,
+			"closing_balance": 500.0,
+			"currency": "INR",
+			"customer_name": "_Test Customer",
+		}
+
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		for field in expected_after_cr_and_payment:
+			with self.subTest(field=field):
+				actual_value = report[0].get(field)
+				expected_value = expected_after_cr_and_payment.get(field)
+				self.assertEqual(
+					actual_value,
+					expected_value,
+					f"Field {field} does not match expected value. "
+					f"Expected: {expected_value}, Got: {actual_value}",
+				)

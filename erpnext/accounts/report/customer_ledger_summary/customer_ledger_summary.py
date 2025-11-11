@@ -275,12 +275,25 @@ class PartyLedgerSummaryReport:
 			if gle.posting_date < self.filters.from_date or gle.is_opening == "Yes":
 				self.party_data[gle.party].opening_balance += amount
 			else:
-				if amount > 0:
-					self.party_data[gle.party].invoiced_amount += amount
-				elif gle.voucher_no in self.return_invoices:
-					self.party_data[gle.party].return_amount -= amount
+				# Cache the party data reference to avoid repeated dictionary lookups
+				party_data = self.party_data[gle.party]
+
+				# Check if this is a direct return invoice (most specific condition first)
+				if gle.voucher_no in self.return_invoices:
+					party_data.return_amount -= amount
+				# Check if this entry is against a return invoice
+				elif gle.against_voucher in self.return_invoices:
+					# For entries against return invoices, positive amounts are payments
+					if amount > 0:
+						party_data.paid_amount -= amount
+					else:
+						party_data.invoiced_amount += amount
+				# Normal transaction logic
 				else:
-					self.party_data[gle.party].paid_amount -= amount
+					if amount > 0:
+						party_data.invoiced_amount += amount
+					else:
+						party_data.paid_amount -= amount
 
 		out = []
 		for party, row in self.party_data.items():
@@ -289,7 +302,7 @@ class PartyLedgerSummaryReport:
 				or row.invoiced_amount
 				or row.paid_amount
 				or row.return_amount
-				or row.closing_amount
+				or row.closing_balance  # Fixed typo from closing_amount to closing_balance
 			):
 				total_party_adjustment = sum(
 					amount for amount in self.party_adjustment_details.get(party, {}).values()

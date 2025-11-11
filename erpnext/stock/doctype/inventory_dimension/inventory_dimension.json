@@ -60,7 +60,6 @@
    "label": "Applicable For"
   },
   {
-   "depends_on": "eval:!doc.apply_to_all_doctypes",
    "fieldname": "document_type",
    "fieldtype": "Link",
    "label": "Apply to Document",

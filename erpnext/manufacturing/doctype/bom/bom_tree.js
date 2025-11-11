@@ -16,7 +16,14 @@ frappe.treeview_settings["BOM"] = {
 	show_expand_all: false,
 	get_label: function (node) {
 		if (node.data.qty) {
-			return node.data.qty + " x " + node.data.item_code;
+			const escape = frappe.utils.escape_html;
+			let label = escape(node.data.item_code);
+			if (node.data.item_name && node.data.item_code !== node.data.item_name) {
+				label += `: ${escape(node.data.item_name)}`;
+			}
+			return `${label} <span class="badge badge-pill badge-light">${node.data.qty} ${escape(
+				__(node.data.stock_uom)
+			)}</span>`;
 		} else {
 			return node.data.item_code || node.data.value;
 		}

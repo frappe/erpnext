@@ -194,6 +194,7 @@
    "fieldname": "sequence_id",
    "fieldtype": "Int",
    "label": "Sequence ID",
+   "non_negative": 1,
    "print_hide": 1
   },
   {
