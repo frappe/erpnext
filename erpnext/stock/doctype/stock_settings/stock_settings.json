@@ -545,13 +545,8 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-10-17 18:32:35.829395",
- "modified_by": "hello@aerele.in",
-=======
  "modified": "2025-11-11 11:35:39.864923",
  "modified_by": "Administrator",
->>>>>>> c7b8461d43 (feat: make material transfer warehouse validation optional)
  "module": "Stock",
  "name": "Stock Settings",
  "owner": "Administrator",
