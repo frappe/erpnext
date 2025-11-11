@@ -6,17 +6,15 @@ import json
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
 from functools import reduce
-from typing import Any, ClassVar, Union
+from typing import Any, Union
 
 import frappe
 from frappe import _
 from frappe.database.operator_map import OPERATOR_MAP
-from frappe.database.query import SQLFunctionParser
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, cstr, date_diff, flt, getdate
+from frappe.utils import cstr, date_diff, flt, getdate
 from pypika.terms import LiteralValue
 
 from erpnext import get_company_currency
@@ -32,7 +30,6 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 	AccountFilterValidator,
 	CalculationFormulaValidator,
 	DependencyValidator,
-	FormulaValidator,
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
