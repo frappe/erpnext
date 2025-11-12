@@ -72,7 +72,7 @@ class PaymentReconciliation(Document):
 		self.common_filter_conditions = []
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
-		self.dimensions = get_dimensions()[0]
+		self.dimensions = get_dimensions(with_cost_center_and_project=True)[0]
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.

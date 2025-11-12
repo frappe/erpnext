@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.buying");
-// cur_frm.add_fetch('project', 'cost_center', 'cost_center');
 
 erpnext.buying = {
 	setup_buying_controller: function() {
@@ -11,23 +10,14 @@ erpnext.buying = {
 				super.setup();
 				this.toggle_enable_for_stock_uom("allow_to_edit_stock_uom_qty_for_purchase");
 				this.frm.email_field = "contact_email";
+				this.frm.add_fetch("project", "cost_center", "cost_center");
 			}
 
 			onload(doc, cdt, cdn) {
 				this.setup_queries(doc, cdt, cdn);
 				super.onload();
 
-				if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
-					this.frm.set_query("supplier", function () {
-						return {
-							filters: {
-								is_transporter: 0,
-							},
-						};
-					});
-				}
-
-				this.frm.set_query("shipping_rule", function () {
+				this.frm.set_query('shipping_rule', function() {
 					return {
 						filters: {
 							"shipping_rule_type": "Buying"
@@ -181,15 +171,13 @@ erpnext.buying = {
 						shipping_address: this.frm.doc.shipping_address
 					},
 					callback: (r) => {
-						if (!this.frm.doc.billing_address)
-							this.frm.set_value("billing_address", r.message.primary_address || "");
+						if (!r.message) return;
 
-						if (
-							!frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") ||
-							this.frm.doc.shipping_address
-						)
-							return;
-						this.frm.set_value("shipping_address", r.message.shipping_address || "");
+						this.frm.set_value("billing_address", r.message.primary_address || "");
+
+						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+							this.frm.set_value("shipping_address", r.message.shipping_address || "");
+						}
 					},
 				});
 				erpnext.utils.set_letter_head(this.frm)

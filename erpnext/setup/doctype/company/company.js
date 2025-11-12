@@ -50,6 +50,15 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+
+		frm.set_query("default_warehouse_for_sales_return", function () {
+			return {
+				filters: {
+					company: frm.doc.name,
+					is_group: 0,
+				},
+			};
+		});
 	},
 
 	company_name: function (frm) {

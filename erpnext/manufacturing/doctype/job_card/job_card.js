@@ -408,7 +408,7 @@ frappe.ui.form.on("Job Card", {
 		function updateStopwatch(increment) {
 			var hours = Math.floor(increment / 3600);
 			var minutes = Math.floor((increment - hours * 3600) / 60);
-			var seconds = increment - hours * 3600 - minutes * 60;
+			var seconds = Math.floor(increment - hours * 3600 - minutes * 60);
 
 			$(section)
 				.find(".hours")
@@ -431,7 +431,7 @@ frappe.ui.form.on("Job Card", {
 		frm.dashboard.refresh();
 		const timer = `
 			<div class="stopwatch" style="font-weight:bold;margin:0px 13px 0px 2px;
-				color:#545454;font-size:18px;display:inline-block;vertical-align:text-bottom;>
+				color:#545454;font-size:18px;display:inline-block;vertical-align:text-bottom;">
 				<span class="hours">00</span>
 				<span class="colon">:</span>
 				<span class="minutes">00</span>
@@ -441,18 +441,32 @@ frappe.ui.form.on("Job Card", {
 
 		var section = frm.toolbar.page.add_inner_message(timer);
 
-		let currentIncrement = frm.doc.current_time || 0;
+		let currentIncrement = frm.events.get_current_time(frm);
 		if (frm.doc.started_time || frm.doc.current_time) {
 			if (frm.doc.status == "On Hold") {
 				updateStopwatch(currentIncrement);
 			} else {
-				currentIncrement += moment(frappe.datetime.now_datetime()).diff(
-					moment(frm.doc.started_time),
-					"seconds"
-				);
 				initialiseTimer();
 			}
 		}
+	},
+
+	get_current_time(frm) {
+		let current_time = 0;
+
+		frm.doc.time_logs.forEach((d) => {
+			if (d.to_time) {
+				if (d.time_in_mins) {
+					current_time += flt(d.time_in_mins, 2) * 60;
+				} else {
+					current_time += get_seconds_diff(d.to_time, d.from_time);
+				}
+			} else {
+				current_time += get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+			}
+		});
+
+		return current_time;
 	},
 
 	hide_timer: function (frm) {
@@ -519,3 +533,7 @@ frappe.ui.form.on("Job Card Time Log", {
 		frm.set_value("started_time", "");
 	},
 });
+
+function get_seconds_diff(d1, d2) {
+	return moment(d1).diff(d2, "seconds");
+}

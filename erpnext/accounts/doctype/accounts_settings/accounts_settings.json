@@ -56,6 +56,9 @@
   "reconciliation_queue_size",
   "column_break_resa",
   "exchange_gain_loss_posting_date",
+  "payment_entry_settings",
+  "show_account_balance",
+  "show_party_balance",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -75,6 +78,7 @@
   "period_closing_settings_section",
   "acc_frozen_upto",
   "ignore_account_closing_balance",
+  "use_legacy_controller_for_pcv",
   "column_break_25",
   "frozen_accounts_modifier",
   "tab_break_dpet",
@@ -94,7 +98,8 @@
   "legacy_section",
   "ignore_is_opening_check_for_reporting",
   "payment_request_settings",
-  "create_pr_in_draft_status"
+  "create_pr_in_draft_status",
+  "column_break_xrnd"
  ],
  "fields": [
   {
@@ -629,6 +634,29 @@
    "fieldname": "fetch_valuation_rate_for_internal_transaction",
    "fieldtype": "Check",
    "label": "Fetch Valuation Rate for Internal Transaction"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_legacy_controller_for_pcv",
+   "fieldtype": "Check",
+   "label": "Use Legacy Controller For Period Closing Voucher"
+  },
+  {
+   "fieldname": "payment_entry_settings",
+   "fieldtype": "Section Break",
+   "label": "Payment Entry Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_account_balance",
+   "fieldtype": "Check",
+   "label": "Show Account Balance"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_party_balance",
+   "fieldtype": "Check",
+   "label": "Show Party Balance"
   }
  ],
  "icon": "icon-cog",
@@ -636,7 +664,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-07-18 13:56:47.192437",
+ "modified": "2025-11-06 17:48:07.682837",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
@@ -661,6 +689,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "ASC",
  "states": [],

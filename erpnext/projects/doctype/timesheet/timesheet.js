@@ -21,6 +21,7 @@ frappe.ui.form.on("Timesheet", {
 				filters: {
 					project: child.project,
 					status: ["!=", "Cancelled"],
+					is_group: 0,
 				},
 			};
 		};

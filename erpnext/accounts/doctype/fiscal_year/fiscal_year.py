@@ -99,7 +99,7 @@ class FiscalYear(Document):
 				)
 
 				overlap = False
-				if not self.get("companies") or not company_for_existing:
+				if not self.get("companies") and not company_for_existing:
 					overlap = True
 
 				for d in self.get("companies"):

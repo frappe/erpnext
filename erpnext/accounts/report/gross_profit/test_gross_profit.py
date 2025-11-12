@@ -442,7 +442,11 @@ class TestGrossProfit(FrappeTestCase):
 		sinv = sinv.save().submit()
 
 		filters = frappe._dict(
-			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			group_by="Invoice",
+			include_returned_invoices=1,
 		)
 
 		columns, data = execute(filters=filters)

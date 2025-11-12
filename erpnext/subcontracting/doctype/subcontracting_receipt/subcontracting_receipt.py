@@ -599,7 +599,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for item in self.items:
 			if flt(item.rate) and flt(item.qty):
-				if warehouse_account.get(item.warehouse):
+				if warehouse_account and warehouse_account.get(item.warehouse):
 					stock_value_diff = frappe.db.get_value(
 						"Stock Ledger Entry",
 						{
@@ -772,6 +772,13 @@ class SubcontractingReceipt(SubcontractingController):
 	def auto_create_purchase_receipt(self):
 		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
 			make_purchase_receipt(self, save=True, notify=True)
+
+
+@frappe.whitelist()
+def make_subcontract_return_against_rejected_warehouse(source_name):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+	return make_return_doc("Subcontracting Receipt", source_name, return_against_rejected_qty=True)
 
 
 @frappe.whitelist()
