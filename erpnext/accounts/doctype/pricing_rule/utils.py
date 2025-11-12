@@ -90,7 +90,6 @@ def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
 	return filtered_pricing_rules
 
 def _get_pricing_rules(apply_on, args, values):
-	from cstm_erpnext.main_server_utils import get_doc_from_main_server
 	from cstm_erpnext.custom_selling.page.easy_pos_plus.easy_pos_plus import get_pr_usage_count
 
 	apply_on_field = frappe.scrub(apply_on)
@@ -159,17 +158,16 @@ def _get_pricing_rules(apply_on, args, values):
 				pricing_rules = []
 
 		if (pr_r.get('usable_count', 0) > 0 or pr_r.get('app_users_only', 0)) and args.get('parenttype') == 'POS Invoice':
-			if not args.get('customer'):
-				return []
-
 			if pr_r.get('usable_count', 0) > 0:
-				used_count = get_pr_usage_count(pr_r.get("name"), args.get('customer'), args.get('item_code'), args.get('uom'))
-				if used_count >= pr_r.get('usable_count', 0):
+				if args.get('customer'):
+					used_count = get_pr_usage_count(pr_r.get("name"), args.get('customer'), args.get('item_code'), args.get('uom'))
+					if used_count >= pr_r.get('usable_count', 0):
+						pricing_rules = []
+				else:
 					pricing_rules = []
 
 			if pr_r.get('app_users_only', 0):
-				snd_ecm_user = get_doc_from_main_server("Customer", args.get('customer')).get("snd_ecm_user", 0)
-				if not snd_ecm_user:
+				if cint(args.get('from_app_user', 0)) != 1:
 					pricing_rules = []
 
 	return pricing_rules
