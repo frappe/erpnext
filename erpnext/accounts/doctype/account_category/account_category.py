@@ -5,7 +5,9 @@ import os
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
+from frappe.model.document import Document, bulk_insert
+
+DOCTYPE = "Account Category"
 
 
 class AccountCategory(Document):
@@ -69,7 +71,8 @@ def create_account_categories(categories: list[dict]):
 	if not categories:
 		return
 
-	existing_categories = set(frappe.get_all("Account Category", pluck="name"))
+	existing_categories = set(frappe.get_all(DOCTYPE, pluck="name"))
+	new_categories = []
 
 	for category_data in categories:
 		category_name = category_data.get("account_category_name")
@@ -78,9 +81,14 @@ def create_account_categories(categories: list[dict]):
 
 		doc = frappe.get_doc(
 			{
-				"doctype": "Account Category",
 				**category_data,
+				"doctype": DOCTYPE,
+				"name": category_name,
 			}
 		)
-		doc.insert(ignore_permissions=True)
+
+		new_categories.append(doc)
 		existing_categories.add(category_name)
+
+	if new_categories:
+		bulk_insert(DOCTYPE, new_categories)
