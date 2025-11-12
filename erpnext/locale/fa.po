@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-10 12:11+0000\n"
-"PO-Revision-Date: 2025-11-10 21:18\n"
+"PO-Revision-Date: 2025-11-12 21:29\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -18407,7 +18407,7 @@ msgstr "سال مالی {0} الزامی است"
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.js:28
 msgid "Fix SABB Entry"
-msgstr ""
+msgstr "رفع مشکل ثبت SABB"
 
 #. Option for the 'Calculate Based On' (Select) field in DocType 'Shipping
 #. Rule'
@@ -22361,7 +22361,7 @@ msgstr "ثبت‌های دفتر نامعتبر"
 
 #: erpnext/assets/doctype/asset/asset.py:450
 msgid "Invalid Net Purchase Amount"
-msgstr ""
+msgstr "مبلغ خالص خرید نامعتبر است"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:77
 #: erpnext/accounts/general_ledger.py:796
@@ -22442,7 +22442,7 @@ msgstr "باندل سریال و دسته نامعتبر"
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:891
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:913
 msgid "Invalid Source and Target Warehouse"
-msgstr ""
+msgstr "انبار منبع و هدف نامعتبر"
 
 #: erpnext/controllers/item_variant.py:145
 msgid "Invalid Value"
@@ -28491,7 +28491,7 @@ msgstr "مبلغ خالص خرید"
 
 #: erpnext/assets/doctype/asset/asset.py:385
 msgid "Net Purchase Amount is mandatory"
-msgstr ""
+msgstr "مبلغ خالص خرید الزامی است"
 
 #: erpnext/assets/doctype/asset/asset.py:445
 msgid "Net Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
@@ -33687,7 +33687,7 @@ msgstr "لطفا بیش از 500 آیتم را همزمان ایجاد نکنی�
 
 #: erpnext/accounts/doctype/budget/budget.py:133
 msgid "Please enable Applicable on Booking Actual Expenses"
-msgstr "لطفاً Applicable on Booking Actual Expenses را فعال کنید"
+msgstr ""
 
 #: erpnext/accounts/doctype/budget/budget.py:129
 msgid "Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses"
@@ -34190,7 +34190,7 @@ msgstr ""
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.js:33
 msgid "Please select at least one row to fix"
-msgstr ""
+msgstr "لطفا حداقل یک ردیف را برای اصلاح انتخاب کنید"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1274
 msgid "Please select atleast one item to continue"
@@ -35748,7 +35748,7 @@ msgstr "فرآیندها"
 #. Voucher Detail'
 #: erpnext/accounts/doctype/process_period_closing_voucher_detail/process_period_closing_voucher_detail.json
 msgid "Processing Date"
-msgstr ""
+msgstr "تاریخ پردازش"
 
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.py:52
 msgid "Processing XML Files"
@@ -44136,7 +44136,7 @@ msgstr "شماره های سریال در ورودی های رزرو موجود�
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:333
 msgid "Serial Nos {0} are already Delivered. You cannot use them again in Manufacture / Repack entry."
-msgstr ""
+msgstr "شماره سریال‌های {0} قبلاً تحویل داده شده‌اند. شما نمی‌توانید دوباره از آنها در ثبت ساخت / بسته‌بندی مجدد استفاده کنید."
 
 #. Label of the serial_no_series (Data) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -52174,7 +52174,7 @@ msgstr "واحد"
 
 #: erpnext/controllers/accounts_controller.py:3830
 msgid "Unit Price"
-msgstr ""
+msgstr "قیمت واحد"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:68
 msgid "Unit of Measure"
