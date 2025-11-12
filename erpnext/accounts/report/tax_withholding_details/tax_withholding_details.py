@@ -98,11 +98,11 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 					"pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id": party_map.get(
 						party, {}
 					).get("pan"),
-					"party": party_map.get(party, {}).get("name"),
+					"party": party_map.get(party, {}).get("name") or party,
 				}
 
 				if filters.naming_series == "Naming Series":
-					row["party_name"] = party_map.get(party, {}).get(party_name)
+					row["party_name"] = party_map.get(party, {}).get(party_name) or party
 
 				row.update(
 					{
