@@ -475,8 +475,18 @@ def process_gl_and_closing_entries(doc):
 		frappe.db.set_value(doc.doctype, doc.name, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
-		frappe.log_error(e)
-		frappe.db.set_value(doc.doctype, doc.name, "gle_processing_status", "Failed")
+		frappe.log_error(
+			title=_("Period Closing Voucher {0} GL Entry Processing Failed").format(doc.name),
+			message=frappe.get_traceback(),
+		)
+		frappe.db.set_value(
+			doc.doctype,
+			doc.name,
+			{
+				"error_message": str(e),
+				"gle_processing_status": "Failed",
+			},
+		)
 
 
 def process_cancellation(voucher_type, voucher_no):
@@ -488,8 +498,18 @@ def process_cancellation(voucher_type, voucher_no):
 		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
-		frappe.log_error(e)
-		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Failed")
+		frappe.log_error(
+			title=_("Period Closing Voucher {0} GL Entry Cancellation Failed").format(voucher_no),
+			message=frappe.get_traceback(),
+		)
+		frappe.db.set_value(
+			voucher_type,
+			voucher_no,
+			{
+				"error_message": str(e),
+				"gle_processing_status": "Failed",
+			},
+		)
 
 
 def delete_closing_entries(voucher_no):
