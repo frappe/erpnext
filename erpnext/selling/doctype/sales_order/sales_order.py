@@ -565,9 +565,6 @@ class SalesOrder(SellingController):
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {"reserved_qty": get_reserved_qty(item_code, warehouse)})
 
-	def on_update(self):
-		pass
-
 	def on_update_after_submit(self):
 		self.calculate_commission()
 		self.calculate_contribution()
