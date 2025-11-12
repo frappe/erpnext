@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
-from frappe.utils import add_days, add_months, format_date, getdate, today
+from frappe.utils import add_days, add_months, add_to_date, format_date, getdate, today
 from frappe.utils.jinja import validate_template
 from frappe.utils.pdf import get_pdf
 from frappe.www.printview import get_print_style
@@ -55,7 +55,7 @@ class ProcessStatementOfAccounts(Document):
 		enable_auto_email: DF.Check
 		filter_duration: DF.Int
 		finance_book: DF.Link | None
-		frequency: DF.Literal["Weekly", "Monthly", "Quarterly"]
+		frequency: DF.Literal["Daily", "Weekly", "Biweekly", "Monthly", "Quarterly"]
 		from_date: DF.Date | None
 		ignore_cr_dr_notes: DF.Check
 		ignore_exchange_rate_revaluation_journals: DF.Check
@@ -555,8 +555,9 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 
 		if doc.enable_auto_email and from_scheduler:
 			new_to_date = getdate(posting_date or today())
-			if doc.frequency == "Weekly":
-				new_to_date = add_days(new_to_date, 7)
+			if doc.frequency in ("Daily", "Weekly", "Biweekly"):
+				frequency = {"Daily": 1, "Weekly": 7, "Biweekly": 14}
+				new_to_date = add_days(new_to_date, frequency[doc.frequency])
 			else:
 				new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
 			new_from_date = add_months(new_to_date, -1 * doc.filter_duration)

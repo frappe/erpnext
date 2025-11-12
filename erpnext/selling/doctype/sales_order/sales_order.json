@@ -25,6 +25,7 @@
   "company",
   "skip_delivery_note",
   "has_unit_price_items",
+  "is_subcontracted",
   "amended_from",
   "accounting_dimensions_section",
   "cost_center",
@@ -1036,8 +1037,8 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "packed_items",
-   "depends_on": "packed_items",
+   "collapsible_depends_on": "eval:!doc.is_subcontracted && doc.packed_items",
+   "depends_on": "eval:!doc.is_subcontracted && doc.packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1608,7 +1609,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: (doc.docstatus == 0 || doc.reserve_stock)",
+   "depends_on": "eval: ((doc.docstatus == 0 || doc.reserve_stock) && !doc.is_subcontracted)",
    "description": "If checked, Stock will be reserved on <b>Submit</b>",
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
@@ -1691,6 +1692,13 @@
    "label": "Last Scanned Warehouse"
   },
   {
+   "default": "0",
+   "fieldname": "is_subcontracted",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
+   "print_hide": 1
+  },
+  {
    "fieldname": "item_wise_tax_details",
    "fieldtype": "Table",
    "hidden": 1,
@@ -1699,11 +1707,12 @@
    "options": "Item Wise Tax Detail"
   }
  ],
+ "grid_page_length": 50,
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-28 12:14:29.760988",
+ "modified": "2025-10-12 12:14:29.760988",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

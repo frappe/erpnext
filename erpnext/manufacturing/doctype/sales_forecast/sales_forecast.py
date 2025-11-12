@@ -84,7 +84,7 @@ class SalesForecast(Document):
 			)
 
 			for index in range(self.demand_number):
-				if self.horizon_type == "Monthly":
+				if self.frequency == "Monthly":
 					delivery_date = add_to_date(self.from_date, months=index + 1)
 				else:
 					delivery_date = add_to_date(self.from_date, weeks=index + 1)
@@ -95,14 +95,12 @@ class SalesForecast(Document):
 						"delivery_date": delivery_date,
 						"item_name": item_details.item_name,
 						"uom": item_details.uom,
-						"demand_qty": 0.0,
+						"demand_qty": 1.0,
 					}
 				)
 
 		for demand in forecast_demand:
 			self.append("items", demand)
-
-		self.save()
 
 	@frappe.whitelist()
 	def generate_demand(self):
@@ -124,7 +122,7 @@ class SalesForecast(Document):
 			seasonal_periods = self.get_seasonal_periods(data)
 			pd_sales_data = pd.DataFrame({"item": data.item, "date": data.date, "qty": data.qty})
 
-			resample_val = "M" if self.horizon_type == "Monthly" else "W"
+			resample_val = "M" if self.frequency == "Monthly" else "W"
 			_sales_data = pd_sales_data.set_index("date").resample(resample_val).sum()["qty"]
 
 			model = ExponentialSmoothing(
@@ -164,7 +162,7 @@ class SalesForecast(Document):
 
 	def get_seasonal_periods(self, data):
 		days = date_diff(data["end_date"], data["start_date"])
-		if self.horizon_type == "Monthly":
+		if self.frequency == "Monthly":
 			months = (days / 365) * 12
 			seasonal_periods = cint(months / 2)
 			if seasonal_periods > 12:

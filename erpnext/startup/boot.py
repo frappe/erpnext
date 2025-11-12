@@ -81,6 +81,8 @@ def update_page_info(bootinfo):
 def bootinfo(bootinfo):
 	if bootinfo.get("user") and bootinfo["user"].get("name"):
 		bootinfo["user"]["employee"] = ""
+		frappe.session.data.employee = ""
 		employee = frappe.db.get_value("Employee", {"user_id": bootinfo["user"]["name"]}, "name")
 		if employee:
 			bootinfo["user"]["employee"] = employee
+			frappe.session.data.employee = employee

@@ -108,6 +108,7 @@ class Account(NestedSet):
 		self.validate_parent_child_account_type()
 		self.validate_root_details()
 		self.validate_account_number()
+		self.validate_disabled()
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
@@ -252,6 +253,14 @@ class Account(NestedSet):
 
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
 
+	def validate_disabled(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save or cint(doc_before_save.disabled) == cint(self.disabled):
+			return
+
+		if cint(self.disabled):
+			self.validate_default_accounts_in_company()
+
 	def validate_group_or_ledger(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save or cint(doc_before_save.is_group) == cint(self.is_group):
@@ -262,8 +271,31 @@ class Account(NestedSet):
 		elif cint(self.is_group):
 			if self.account_type and not self.flags.exclude_account_type_check:
 				throw(_("Cannot covert to Group because Account Type is selected."))
+			self.validate_default_accounts_in_company()
 		elif self.check_if_child_exists():
 			throw(_("Account with child nodes cannot be set as ledger"))
+
+	def validate_default_accounts_in_company(self):
+		default_account_fields = get_company_default_account_fields()
+
+		company_default_accounts = frappe.db.get_value(
+			"Company", self.company, list(default_account_fields.keys()), as_dict=1
+		)
+
+		msg = _("Account {0} cannot be disabled as it is already set as {1} for {2}.")
+
+		if not self.disabled:
+			msg = _("Account {0} cannot be converted to Group as it is already set as {1} for {2}.")
+
+		for d in default_account_fields:
+			if company_default_accounts.get(d) == self.name:
+				throw(
+					msg.format(
+						frappe.bold(self.name),
+						frappe.bold(default_account_fields.get(d)),
+						frappe.bold(self.company),
+					)
+				)
 
 	def validate_frozen_accounts_modifier(self):
 		doc_before_save = self.get_doc_before_save()
@@ -625,3 +657,27 @@ def _ensure_idle_system():
 			).format(pretty_date(last_gl_update)),
 			title=_("System In Use"),
 		)
+
+
+def get_company_default_account_fields():
+	return {
+		"default_bank_account": "Default Bank Account",
+		"default_cash_account": "Default Cash Account",
+		"default_receivable_account": "Default Receivable Account",
+		"default_payable_account": "Default Payable Account",
+		"default_expense_account": "Default Expense Account",
+		"default_income_account": "Default Income Account",
+		"stock_received_but_not_billed": "Stock Received But Not Billed Account",
+		"stock_adjustment_account": "Stock Adjustment Account",
+		"write_off_account": "Write Off Account",
+		"default_discount_account": "Default Payment Discount Account",
+		"unrealized_profit_loss_account": "Unrealized Profit / Loss Account",
+		"exchange_gain_loss_account": "Exchange Gain / Loss Account",
+		"unrealized_exchange_gain_loss_account": "Unrealized Exchange Gain / Loss Account",
+		"round_off_account": "Round Off Account",
+		"default_deferred_revenue_account": "Default Deferred Revenue Account",
+		"default_deferred_expense_account": "Default Deferred Expense Account",
+		"accumulated_depreciation_account": "Accumulated Depreciation Account",
+		"depreciation_expense_account": "Depreciation Expense Account",
+		"disposal_account": "Gain/Loss Account on Asset Disposal",
+	}

@@ -101,8 +101,8 @@ class RepostAccountingLedger(Document):
 			if doc.doctype in ["Payment Entry", "Journal Entry"]:
 				gle_map = doc.build_gl_map()
 			elif doc.doctype == "Purchase Receipt":
-				warehouse_account_map = get_warehouse_account_map(doc.company)
-				gle_map = doc.get_gl_entries(warehouse_account_map)
+				inventory_account_map = doc.get_inventory_account_map()
+				gle_map = doc.get_gl_entries(inventory_account_map)
 			else:
 				gle_map = doc.get_gl_entries()
 

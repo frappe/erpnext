@@ -337,7 +337,7 @@ def validate_item_details(ctx: ItemDetailsCtx, item):
 
 		throw(_(msg), title=_("Template Item Selected"))
 
-	elif ctx.transaction_type == "buying" and ctx.doctype != "Material Request":
+	elif ctx.doctype != "Material Request":
 		if ctx.is_subcontracted:
 			if ctx.is_old_subcontracting_flow:
 				if item.is_sub_contracted_item != 1:
@@ -501,6 +501,9 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 			"grant_commission": item.get("grant_commission"),
 		}
 	)
+
+	if not item.is_stock_item and not out.expense_account:
+		out.expense_account = frappe.get_cached_value("Company", ctx.company, "service_expense_account")
 
 	default_supplier = get_default_supplier(ctx, item_defaults, item_group_defaults, brand_defaults)
 	if default_supplier:
@@ -866,6 +869,18 @@ def get_default_income_account(ctx: ItemDetailsCtx, item, item_group, brand):
 		or item_group.get("income_account")
 		or brand.get("income_account")
 		or ctx.income_account
+	)
+
+
+def get_default_inventory_account(ctx: ItemDetailsCtx, item, item_group, brand):
+	if not frappe.get_cached_value("Company", ctx.company, "enable_item_wise_inventory_account"):
+		return None
+
+	return (
+		ctx.inventory_account
+		or item.get("default_inventory_account")
+		or item_group.get("default_inventory_account")
+		or brand.get("default_inventory_account")
 	)
 
 
