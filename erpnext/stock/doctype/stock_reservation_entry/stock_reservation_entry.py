@@ -109,6 +109,37 @@ class StockReservationEntry(Document):
 		self.update_status()
 		self.update_reserved_stock_in_bin()
 
+	def before_cancel(self) -> None:
+		self.validate_reserved_entries()
+
+	def validate_reserved_entries(self):
+		entries = frappe.get_all(
+			"Stock Reservation Entry",
+			fields=["voucher_no as name"],
+			filters={
+				"status": "Closed",
+				"docstatus": 1,
+				"from_voucher_type": "Purchase Receipt",
+				"from_voucher_no": self.from_voucher_no,
+			},
+		)
+
+		if entries:
+			work_orders = frappe.get_all(
+				"Work Order",
+				fields=["name"],
+				filters={"production_plan": ("in", [entry.name for entry in entries])},
+			)
+
+			frappe.throw(
+				_(
+					"Cannot cancel Stock Reservation Entry {0}, as it has used in the work order {1}. Please cancel the work order first or unreserved the stock"
+				).format(
+					", ".join([frappe.bold(entry.name) for entry in entries]),
+					", ".join([frappe.bold(wo.name) for wo in work_orders]),
+				)
+			)
+
 	def update_unreserved_qty_in_sre(self):
 		if self.voucher_type == "Delivery Note":
 			return

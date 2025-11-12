@@ -262,6 +262,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
 
+		self.validate_same_source_target_warehouse_during_material_transfer()
+
 		self.validate_closed_subcontracting_order()
 		self.validate_subcontract_order()
 
@@ -864,6 +866,55 @@ class StockEntry(StockController, SubcontractingInwardController):
 					title=_("Missing Item"),
 				)
 
+	def validate_same_source_target_warehouse_during_material_transfer(self):
+		"""
+		Validate Material Transfer entries where source and target warehouses are identical.
+
+		For Material Transfer purpose, if an item has the same source and target warehouse,
+		require that at least one inventory dimension (if configured) differs between source
+		and target to ensure a meaningful transfer is occurring.
+
+		Raises:
+		frappe.ValidationError: If warehouses are same and no inventory dimensions differ
+		"""
+
+		if frappe.get_single_value("Stock Settings", "validate_material_transfer_warehouses"):
+			from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+			inventory_dimensions = get_inventory_dimensions()
+			if self.purpose == "Material Transfer":
+				for item in self.items:
+					if cstr(item.s_warehouse) == cstr(item.t_warehouse):
+						if not inventory_dimensions:
+							frappe.throw(
+								_(
+									"Row #{0}: Source and Target Warehouse cannot be the same for Material Transfer"
+								).format(item.idx),
+								title=_("Invalid Source and Target Warehouse"),
+							)
+						else:
+							difference_found = False
+							for dimension in inventory_dimensions:
+								fieldname = (
+									dimension.source_fieldname
+									if dimension.source_fieldname.startswith("to_")
+									else f"to_{dimension.source_fieldname}"
+								)
+								if (
+									item.get(dimension.source_fieldname)
+									and item.get(fieldname)
+									and item.get(dimension.source_fieldname) != item.get(fieldname)
+								):
+									difference_found = True
+									break
+							if not difference_found:
+								frappe.throw(
+									_(
+										"Row #{0}: Source, Target Warehouse and Inventory Dimensions cannot be the exact same for Material Transfer"
+									).format(item.idx),
+									title=_("Invalid Source and Target Warehouse"),
+								)
+
 	def get_matched_items(self, item_code):
 		for row in self.items:
 			if row.item_code == item_code or row.original_item == item_code:
@@ -904,10 +955,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
 
-			if d.allow_zero_valuation_rate and self.purpose != "Receive from Customer":
+			if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
 				d.basic_rate = 0.0
 				items.append(d.item_code)
-
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
@@ -1645,8 +1695,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 				sl_entries.append(sle)
 
-	def get_gl_entries(self, warehouse_account):
-		gl_entries = super().get_gl_entries(warehouse_account)
+	def get_gl_entries(self, inventory_account_map):
+		gl_entries = super().get_gl_entries(inventory_account_map)
 
 		if self.purpose in ("Repack", "Manufacture"):
 			total_basic_amount = sum(flt(t.basic_amount) for t in self.get("items") if t.is_finished_item)
@@ -1721,11 +1771,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 						)
 					)
 
-		self.set_gl_entries_for_landed_cost_voucher(gl_entries, warehouse_account)
+		self.set_gl_entries_for_landed_cost_voucher(gl_entries, inventory_account_map)
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
-	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, warehouse_account):
+	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, inventory_account_map):
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()
 		if not landed_cost_entries:
 			return
@@ -1743,11 +1793,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 						else flt(amount["amount"])
 					)
 
+					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")
 					gl_entries.append(
 						self.get_gl_dict(
 							{
 								"account": account,
-								"against": warehouse_account.get(item.t_warehouse)["account"],
+								"against": _inv_dict["account"],
 								"cost_center": item.cost_center,
 								"debit": 0.0,
 								"credit": credit_amount,
@@ -1767,7 +1818,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						self.get_gl_dict(
 							{
 								"account": item.expense_account,
-								"against": warehouse_account.get(item.t_warehouse)["account"],
+								"against": _inv_dict["account"],
 								"cost_center": item.cost_center,
 								"debit": 0.0,
 								"credit": credit_amount * -1,

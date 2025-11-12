@@ -10,6 +10,8 @@
   "column_break_3",
   "default_price_list",
   "default_discount_account",
+  "default_inventory_account",
+  "inventory_account_currency",
   "purchase_defaults",
   "buying_cost_center",
   "default_supplier",
@@ -168,11 +170,25 @@
    "fieldtype": "Link",
    "label": "Purchase Expense Contra Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "default_inventory_account",
+   "fieldtype": "Link",
+   "label": "Default Inventory Account",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "default_inventory_account.account_currency",
+   "fieldname": "inventory_account_currency",
+   "fieldtype": "Link",
+   "label": "Inventory Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2025-10-01 19:17:33.687836",
+ "modified": "2025-10-21 10:50:46.144721",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",

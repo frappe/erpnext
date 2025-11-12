@@ -76,6 +76,46 @@ class TestRequestforQuotation(IntegrationTestCase):
 		self.assertEqual(sq1.get("items")[0].item_code, "_Test Item")
 		self.assertEqual(sq1.get("items")[0].qty, 5)
 
+	def test_make_supplier_quotation_with_taxes(self):
+		"""Test automatic tax addition when supplier quotation is created from RFQ taxes_and_charges are set"""
+
+		# Create a Purchase Taxes and Charges Template for testing
+		tax_template = frappe.new_doc("Purchase Taxes and Charges Template")
+		tax_template.doctype = "Purchase Taxes and Charges Template"
+		tax_template.title = "_Test Purchase Taxes Template for RFQ"
+		tax_template.company = "_Test Company"
+		tax_template.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"description": "VAT",
+				"rate": 10,
+			},
+		)
+		tax_template.save()
+
+		rfq = make_request_for_quotation()
+		supplier = rfq.get("suppliers")[0].supplier
+
+		tax_rule = frappe.new_doc("Tax Rule")
+		tax_rule.company = "_Test Company"
+		tax_rule.tax_type = "Purchase"
+		tax_rule.supplier = supplier
+		tax_rule.purchase_tax_template = tax_template.name
+		tax_rule.save()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+
+		# Verify that taxes_and_charges is set from get_party_details
+		self.assertEqual(sq.taxes_and_charges, tax_template.name)
+
+		# Verify that taxes are automatically added
+		self.assertGreaterEqual(len(sq.get("taxes")), 1)
+
+		tax_rule.delete()
+		tax_template.delete()
+
 	def test_make_supplier_quotation_with_special_characters(self):
 		frappe.delete_doc_if_exists("Supplier", "_Test Supplier '1", force=1)
 		supplier = frappe.new_doc("Supplier")

@@ -284,9 +284,6 @@ class MasterProductionSchedule(Document):
 			row = data[key]
 			row.cumulative_lead_time = math.ceil(row.cumulative_lead_time)
 			row.order_release_date = add_days(row.delivery_date, -row.cumulative_lead_time)
-			if getdate(row.order_release_date) < getdate(today()):
-				continue
-
 			row.planned_qty = row.qty
 			row.uom = row.stock_uom
 			row.warehouse = row.warehouse or self.parent_warehouse
@@ -457,3 +454,13 @@ def get_item_lead_time(item_code):
 		return result[0].cumulative_lead_time or 0
 
 	return 0
+
+
+@frappe.whitelist()
+def get_mps_details(mps):
+	return frappe.db.get_value(
+		"Master Production Schedule",
+		mps,
+		["name", "from_date", "to_date", "company", "posting_date"],
+		as_dict=True,
+	)

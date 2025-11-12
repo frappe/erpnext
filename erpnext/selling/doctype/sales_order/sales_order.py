@@ -1361,7 +1361,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 			.select(
 				child.required_qty,
 				child.consumed_qty,
-				(child.billed_qty - child.returned_qty).as_("qty"),
+				child.billed_qty,
 				child.rm_item_code,
 				child.stock_uom,
 				child.name,
@@ -1377,7 +1377,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 		if result:
 			idx = len(doclist.items) + 1
 			for item in result:
-				if (qty := max(item.required_qty, item.consumed_qty) - item.qty) > 0:
+				if (qty := max(item.required_qty, item.consumed_qty) - item.billed_qty) > 0:
 					doclist.append(
 						"items",
 						{
@@ -1675,7 +1675,8 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 						"pricing_rules",
 					],
 					"postprocess": update_item_for_packed_item,
-					"condition": lambda doc: doc.parent_item in items_to_map,
+					"condition": lambda doc: doc.parent_item in items_to_map
+					and flt(doc.ordered_qty) < flt(doc.qty),
 				},
 			},
 			target_doc,
@@ -1813,7 +1814,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 					"pricing_rules",
 				],
 				"postprocess": update_item_for_packed_item,
-				"condition": lambda doc: doc.parent_item in items_to_map,
+				"condition": lambda doc: doc.parent_item in items_to_map
+				and flt(doc.ordered_qty) < flt(doc.qty),
 			},
 		},
 		target_doc,

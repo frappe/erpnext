@@ -39,6 +39,8 @@ from erpnext.accounts.doctype.pricing_rule.utils import (
 )
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import (
+	PURCHASE_TRANSACTION_TYPES,
+	SALES_TRANSACTION_TYPES,
 	get_party_account,
 	get_party_account_currency,
 	get_party_gle_currency,
@@ -2005,7 +2007,7 @@ class AccountsController(TransactionBase):
 									discount_amount * self.get("conversion_rate"),
 									item.precision("discount_amount"),
 								),
-								"debit_in_account_currency": flt(
+								"debit_in_transaction_currency": flt(
 									discount_amount, item.precision("discount_amount")
 								),
 								"cost_center": item.cost_center,
@@ -2026,7 +2028,7 @@ class AccountsController(TransactionBase):
 									discount_amount * self.get("conversion_rate"),
 									item.precision("discount_amount"),
 								),
-								"credit_in_account_currency": flt(
+								"credit_in_transaction_currency": flt(
 									discount_amount, item.precision("discount_amount")
 								),
 								"cost_center": item.cost_center,
@@ -2933,6 +2935,104 @@ class AccountsController(TransactionBase):
 			x["transaction_currency"] = self.currency
 			x["transaction_exchange_rate"] = self.get("conversion_rate") or 1
 
+	def after_mapping(self, source_doc):
+		self.set_discount_amount_after_mapping(source_doc)
+
+	def set_discount_amount_after_mapping(self, source_doc):
+		"""
+		Ensures that Additional Discount Amount is not copied repeatedly
+		for multiple mappings of a single source transaction.
+		"""
+
+		# source and target doctypes should both be buying / selling
+		for transaction_types in (PURCHASE_TRANSACTION_TYPES, SALES_TRANSACTION_TYPES):
+			if self.doctype in transaction_types and source_doc.doctype in transaction_types:
+				break
+
+		else:
+			return
+
+		# ensure both doctypes have discount_amount field
+		if not self.meta.get_field("discount_amount") or not source_doc.meta.get_field("discount_amount"):
+			return
+
+		# ensure discount_amount is set in source doc
+		if not source_doc.discount_amount:
+			return
+
+		# ensure additional_discount_percentage is not set in the source doc
+		if source_doc.get("additional_discount_percentage"):
+			return
+
+		item_doctype = self.meta.get_field("items").options
+		doctype_table = frappe.qb.DocType(self.doctype)
+		item_table = frappe.qb.DocType(item_doctype)
+
+		is_same_doctype = self.doctype == source_doc.doctype
+		is_return = self.get("is_return") and is_same_doctype
+
+		if is_same_doctype and not is_return:
+			# should never happen
+			# you don't map to the same doctype without it being a return
+			return
+
+		query = (
+			frappe.qb.from_(doctype_table)
+			.where(doctype_table.docstatus == 1)
+			.where(doctype_table.discount_amount != 0)
+			.select(Sum(doctype_table.discount_amount))
+		)
+
+		if is_return:
+			query = query.where(doctype_table.is_return == 1).where(
+				doctype_table.return_against == source_doc.name
+			)
+
+		else:
+			item_meta = frappe.get_meta(item_doctype)
+			reference_fieldname = next(
+				(
+					row.fieldname
+					for row in item_meta.fields
+					if row.fieldtype == "Link"
+					and row.options == source_doc.doctype
+					and not row.get("is_custom_field")
+				),
+				None,
+			)
+
+			if not reference_fieldname:
+				return
+
+			query = query.where(
+				doctype_table.name.isin(
+					frappe.qb.from_(item_table)
+					.select(item_table.parent)
+					.where(item_table[reference_fieldname] == source_doc.name)
+					.distinct()
+				)
+			)
+
+		result = query.run()
+		if not result:
+			return
+
+		discount_already_applied = result[0][0]
+		if not discount_already_applied:
+			return
+
+		if is_return:
+			# returns have negative discount
+			discount_already_applied *= -1
+
+		discount_amount = max(source_doc.discount_amount - discount_already_applied, 0)
+		if discount_amount and is_return:
+			discount_amount *= -1
+
+		self.discount_amount = flt(discount_amount, self.precision("discount_amount"))
+
+		self.calculate_taxes_and_totals()
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
@@ -3088,9 +3188,7 @@ def set_balance_in_account_currency(
 			_("Account: {0} with currency: {1} can not be selected").format(gl_dict.account, account_currency)
 		)
 
-	gl_dict["account_currency"] = (
-		company_currency if account_currency == company_currency else account_currency
-	)
+	gl_dict["account_currency"] = account_currency
 
 	# set debit/credit in account currency if not provided
 	if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
@@ -3682,8 +3780,15 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item"
 		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
+	def is_allowed_zero_qty():
+		if parent_doctype == "Sales Order":
+			return frappe.db.get_single_value("Selling Settings", "allow_zero_qty_in_sales_order") or False
+		elif parent_doctype == "Purchase Order":
+			return frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_purchase_order") or False
+		return False
+
 	def validate_quantity(child_item, new_data):
-		if not flt(new_data.get("qty")):
+		if not flt(new_data.get("qty")) and not is_allowed_zero_qty():
 			frappe.throw(
 				_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
 					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
@@ -3819,6 +3924,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2
 
+		prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
+		rate_unchanged = prev_rate == new_rate
+		if not rate_unchanged and not child_item.get("qty") and is_allowed_zero_qty():
+			frappe.throw(_("Rate of '{}' items cannot be changed").format(frappe.bold(_("Unit Price"))))
+
 		# Amount cannot be lesser than billed amount, except for negative amounts
 		row_rate = flt(d.get("rate"), rate_precision)
 		amount_below_billed_amt = flt(child_item.billed_amt, rate_precision) > flt(
@@ -3941,8 +4051,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		if parent.is_subcontracted and not parent.can_update_items():
 			frappe.throw(
 				_(
-					"Items cannot be updated as Subcontracting Inward Order is created against the Sales Order {0}."
-				).format(frappe.bold(parent.name))
+					"Items cannot be updated as Subcontracting Inward Order(s) exist against this Subcontracted Sales Order."
+				)
 			)
 		parent.validate_selling_price()
 		parent.validate_for_duplicate_items()

@@ -138,7 +138,6 @@ class BOM(WebsiteGenerator):
 		item: DF.Link
 		item_name: DF.Data | None
 		items: DF.Table[BOMItem]
-		track_semi_finished_goods: DF.Check
 		operating_cost: DF.Currency
 		operating_cost_per_bom_quantity: DF.Currency
 		operations: DF.Table[BOMOperation]
@@ -161,6 +160,7 @@ class BOM(WebsiteGenerator):
 		show_operations: DF.Check
 		thumbnail: DF.Data | None
 		total_cost: DF.Currency
+		track_semi_finished_goods: DF.Check
 		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
 		uom: DF.Link | None
 		web_long_description: DF.TextEditor | None
@@ -836,7 +836,7 @@ class BOM(WebsiteGenerator):
 		self.base_operating_cost = 0
 		if self.get("with_operations"):
 			for d in self.get("operations"):
-				if d.workstation:
+				if d.workstation or d.workstation_type:
 					self.update_rate_and_time(d, update_hour_rate)
 
 				operating_cost = d.operating_cost
@@ -857,7 +857,13 @@ class BOM(WebsiteGenerator):
 
 	def update_rate_and_time(self, row, update_hour_rate=False):
 		if not row.hour_rate or update_hour_rate:
-			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
+			hour_rate = 0
+			if row.workstation:
+				hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
+			elif row.workstation_type:
+				hour_rate = flt(
+					frappe.get_cached_value("Workstation Type", row.workstation_type, "hour_rate")
+				)
 
 			if hour_rate:
 				row.hour_rate = (

@@ -60,6 +60,14 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 			};
 		});
 
+		frm.set_query("bom", "items", () => {
+			return {
+				filters: {
+					is_active: 1,
+				},
+			};
+		});
+
 		frm.set_query("set_delivery_warehouse", () => {
 			return {
 				filters: {

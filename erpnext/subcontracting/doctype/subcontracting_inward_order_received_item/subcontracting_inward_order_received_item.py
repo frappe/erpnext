@@ -19,12 +19,13 @@ class SubcontractingInwardOrderReceivedItem(Document):
 		consumed_qty: DF.Float
 		is_additional_item: DF.Check
 		is_customer_provided_item: DF.Check
-		main_item_code: DF.Link | None
+		main_item_code: DF.Link
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		rate: DF.Currency
 		received_qty: DF.Float
-		reference_name: DF.Data | None
+		reference_name: DF.Data
 		required_qty: DF.Float
 		returned_qty: DF.Float
 		rm_item_code: DF.Link
