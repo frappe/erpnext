@@ -30,6 +30,8 @@ frappe.ui.form.on("Financial Report Template", {
 frappe.ui.form.on("Financial Report Row", {
 	data_source(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
+
+		update_formula_label(frm, row.data_source);
 		update_formula_description(frm, row.data_source);
 
 		if (row.data_source !== "Account Data") {
@@ -46,6 +48,7 @@ frappe.ui.form.on("Financial Report Row", {
 	form_render(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 
+		update_formula_label(frm, row.data_source);
 		update_advanced_formula_property(frm, cdt, cdn);
 		set_up_filters_editor(frm, cdt, cdn);
 		update_formula_description(frm, row.data_source);
@@ -283,6 +286,23 @@ class FilteredTree extends frappe.ui.Tree {
 
 		return data_list;
 	}
+}
+
+function update_formula_label(frm, data_source) {
+	const grid = frm.fields_dict.rows.grid;
+	const field = grid.fields_map.calculation_formula;
+	if (!field) return;
+
+	const labels = {
+		"Account Data": "Account Filter",
+		"Custom API": "API Method Path",
+	};
+
+	grid.update_docfield_property(
+		"calculation_formula",
+		"label",
+		labels[data_source] || "Calculation Formula"
+	);
 }
 
 // FORMULA DESCRIPTION

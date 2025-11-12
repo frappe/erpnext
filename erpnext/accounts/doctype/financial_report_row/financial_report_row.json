@@ -117,7 +117,6 @@
   },
   {
    "depends_on": "eval: (doc.data_source === \"Account Data\" && doc.advanced_filtering) || [\"Calculated Amount\", \"Custom API\"].includes(doc.data_source);\n",
-   "description": "Formula to calculate values or account filter criteria",
    "fieldname": "calculation_formula",
    "fieldtype": "Code",
    "label": "Formula or Account Filter",
