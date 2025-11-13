@@ -36,6 +36,7 @@
   "show_barcode_field",
   "clean_description_html",
   "allow_internal_transfer_at_arms_length_price",
+  "validate_material_transfer_warehouses",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
   "allow_existing_serial_no",
@@ -538,6 +539,13 @@
    "label": "Update Price List Based On",
    "mandatory_depends_on": "eval: doc.auto_insert_price_list_rate_if_missing",
    "options": "Rate\nPrice List Rate"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the source and target warehouse in the Material Transfer Stock Entry must be different else an error will be thrown. If inventory dimensions are present, same source and target warehouse can be allowed but atleast any one of the inventory dimension fields must be different.",
+   "fieldname": "validate_material_transfer_warehouses",
+   "fieldtype": "Check",
+   "label": "Validate Material Transfer Warehouses"
   }
  ],
  "icon": "icon-cog",
@@ -545,7 +553,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-23 13:16:10.527190",
+ "modified": "2025-11-11 11:35:39.864923",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

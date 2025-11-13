@@ -190,8 +190,8 @@ class MasterProductionSchedule(Document):
 		ignore_orders = []
 		if sales_order_schedules:
 			for row in sales_order_schedules:
-				if row.sales_order not in ignore_orders:
-					ignore_orders.append(row.sales_order)
+				if row.sales_order_item and row.sales_order_item not in ignore_orders:
+					ignore_orders.append(row.sales_order_item)
 
 		sales_orders = self.get_items_from_sales_orders(ignore_orders)
 
@@ -221,13 +221,13 @@ class MasterProductionSchedule(Document):
 
 		if self.sales_orders:
 			names = [s.sales_order for s in self.sales_orders if s.sales_order]
-			if ignore_orders:
-				names = [name for name in names if name not in ignore_orders]
-
 			if not names:
 				return []
 
 			query = query.where(doctype.parent.isin(names))
+
+		if ignore_orders:
+			query = query.where(doctype.name.notin(ignore_orders))
 
 		return query.run(as_dict=True)
 
@@ -239,6 +239,7 @@ class MasterProductionSchedule(Document):
 			doctype.stock_uom,
 			doctype.delivery_date,
 			doctype.sales_order,
+			doctype.sales_order_item,
 			doctype.stock_qty.as_("qty"),
 		)
 
@@ -248,9 +249,6 @@ class MasterProductionSchedule(Document):
 
 		if self.from_date:
 			query = query.where(doctype.delivery_date >= self.from_date)
-
-		if self.to_date:
-			query = query.where(doctype.delivery_date <= self.to_date)
 
 		return query.run(as_dict=True)
 

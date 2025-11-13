@@ -9,7 +9,7 @@ from frappe import _
 def execute(filters=None):
 	validate_warehouse(filters)
 	columns = get_columns()
-	data = get_data(filters.warehouse, filters.show_disables_items)
+	data = get_data(filters.warehouse, filters.show_disabled_items)
 	return columns, data
 
 
@@ -38,9 +38,9 @@ def get_columns():
 	return columns
 
 
-def get_data(warehouse, show_disables_items):
+def get_data(warehouse, show_disabled_items):
 	filters = {"has_serial_no": True}
-	if not show_disables_items:
+	if not show_disabled_items:
 		filters["disabled"] = False
 	serial_item_list = frappe.get_all(
 		"Item",

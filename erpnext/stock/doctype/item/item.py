@@ -185,9 +185,6 @@ class Item(Document):
 		if not self.item_name:
 			self.item_name = self.item_code
 
-		if not strip_html(cstr(self.description)).strip():
-			self.description = self.item_name
-
 		self.validate_uom()
 		self.validate_description()
 		self.add_default_uom_in_conversion_factor_table()

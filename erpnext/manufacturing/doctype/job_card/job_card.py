@@ -923,6 +923,10 @@ class JobCard(Document):
 		wo.update_operation_status()
 		wo.calculate_operating_cost()
 		wo.set_actual_dates()
+
+		if wo.track_semi_finished_goods and time_data:
+			wo.status = "In Process"
+
 		wo.save()
 
 	def get_current_operation_data(self):

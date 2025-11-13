@@ -444,3 +444,4 @@ erpnext.patches.v16_0.rename_subcontracted_quantity
 erpnext.patches.v16_0.add_new_stock_entry_types
 erpnext.patches.v15_0.set_asset_status_if_not_already_set
 erpnext.patches.v15_0.toggle_legacy_controller_for_period_closing
+erpnext.patches.v16_0.update_serial_batch_entries

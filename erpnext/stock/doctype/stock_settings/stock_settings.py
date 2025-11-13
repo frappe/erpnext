@@ -68,6 +68,7 @@ class StockSettings(Document):
 		update_price_list_based_on: DF.Literal["Rate", "Price List Rate"]
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
+		validate_material_transfer_warehouses: DF.Check
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 	# end: auto-generated types
 

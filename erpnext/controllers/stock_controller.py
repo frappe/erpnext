@@ -2074,6 +2074,11 @@ def make_bundle_for_material_transfer(**kwargs):
 			row.is_outward = 1
 
 		row.warehouse = kwargs.warehouse
+		row.posting_datetime = bundle_doc.posting_datetime
+		row.voucher_type = bundle_doc.voucher_type
+		row.voucher_no = bundle_doc.voucher_no
+		row.voucher_detail_no = bundle_doc.voucher_detail_no
+		row.type_of_transaction = bundle_doc.type_of_transaction
 
 	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()

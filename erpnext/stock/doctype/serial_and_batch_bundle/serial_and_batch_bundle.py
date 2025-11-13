@@ -1300,10 +1300,24 @@ class SerialandBatchBundle(Document):
 	def before_submit(self):
 		self.validate_serial_and_batch_data()
 		self.validate_serial_and_batch_no_for_returned()
+		self.set_child_details()
 		self.set_source_document_no()
 
 	def on_submit(self):
 		self.validate_serial_nos_inventory()
+
+	def set_child_details(self):
+		for row in self.entries:
+			for field in [
+				"warehouse",
+				"posting_datetime",
+				"voucher_type",
+				"voucher_no",
+				"voucher_detail_no",
+				"type_of_transaction",
+			]:
+				if not row.get(field) or row.get(field) != self.get(field):
+					row.set(field, self.get(field))
 
 	def set_source_document_no(self):
 		if self.flags.ignore_validate_serial_batch:
@@ -3033,7 +3047,3 @@ def get_stock_reco_details(voucher_detail_no):
 		],
 		as_dict=True,
 	)
-
-
-def on_doctype_update():
-	frappe.db.add_index("Serial and Batch Bundle", ["item_code", "warehouse", "posting_datetime", "creation"])

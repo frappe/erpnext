@@ -875,43 +875,45 @@ class StockEntry(StockController, SubcontractingInwardController):
 		and target to ensure a meaningful transfer is occurring.
 
 		Raises:
-		        frappe.ValidationError: If warehouses are same and no inventory dimensions differ
+		frappe.ValidationError: If warehouses are same and no inventory dimensions differ
 		"""
-		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 
-		inventory_dimensions = get_inventory_dimensions()
-		if self.purpose == "Material Transfer":
-			for item in self.items:
-				if cstr(item.s_warehouse) == cstr(item.t_warehouse):
-					if not inventory_dimensions:
-						frappe.throw(
-							_(
-								"Row #{0}: Source and Target Warehouse cannot be the same for Material Transfer"
-							).format(item.idx),
-							title=_("Invalid Source and Target Warehouse"),
-						)
-					else:
-						difference_found = False
-						for dimension in inventory_dimensions:
-							fieldname = (
-								dimension.source_fieldname
-								if dimension.source_fieldname.startswith("to_")
-								else f"to_{dimension.source_fieldname}"
-							)
-							if (
-								item.get(dimension.source_fieldname)
-								and item.get(fieldname)
-								and item.get(dimension.source_fieldname) != item.get(fieldname)
-							):
-								difference_found = True
-								break
-						if not difference_found:
+		if frappe.get_single_value("Stock Settings", "validate_material_transfer_warehouses"):
+			from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+			inventory_dimensions = get_inventory_dimensions()
+			if self.purpose == "Material Transfer":
+				for item in self.items:
+					if cstr(item.s_warehouse) == cstr(item.t_warehouse):
+						if not inventory_dimensions:
 							frappe.throw(
 								_(
-									"Row #{0}: Source, Target Warehouse and Inventory Dimensions cannot be the exact same for Material Transfer"
+									"Row #{0}: Source and Target Warehouse cannot be the same for Material Transfer"
 								).format(item.idx),
 								title=_("Invalid Source and Target Warehouse"),
 							)
+						else:
+							difference_found = False
+							for dimension in inventory_dimensions:
+								fieldname = (
+									dimension.source_fieldname
+									if dimension.source_fieldname.startswith("to_")
+									else f"to_{dimension.source_fieldname}"
+								)
+								if (
+									item.get(dimension.source_fieldname)
+									and item.get(fieldname)
+									and item.get(dimension.source_fieldname) != item.get(fieldname)
+								):
+									difference_found = True
+									break
+							if not difference_found:
+								frappe.throw(
+									_(
+										"Row #{0}: Source, Target Warehouse and Inventory Dimensions cannot be the exact same for Material Transfer"
+									).format(item.idx),
+									title=_("Invalid Source and Target Warehouse"),
+								)
 
 	def get_matched_items(self, item_code):
 		for row in self.items:

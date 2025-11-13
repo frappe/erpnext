@@ -61,6 +61,22 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 			};
 		});
+		this.frm.set_query("cost_center", "payments", () => {
+			return {
+				filters: {
+					company: this.frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
+		this.frm.set_query("cost_center", "allocation", () => {
+			return {
+				filters: {
+					company: this.frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
 	}
 
 	refresh() {

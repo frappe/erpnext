@@ -58,6 +58,12 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	refresh: function (frm) {
+		frm.fields_dict["items"].grid.update_docfield_property(
+			"add_schedule",
+			"hidden",
+			frm.is_new() || frm.doc.docstatus === 1 ? true : false
+		);
+
 		if (frm.doc.docstatus === 1) {
 			if (
 				frm.doc.status !== "Closed" &&
@@ -849,6 +855,10 @@ frappe.ui.form.on("Sales Order Item", {
 	add_schedule(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 
+		if (row.__islocal) {
+			frappe.throw(__("Please save the Sales Order before adding a delivery schedule."));
+		}
+
 		frappe.call({
 			method: "get_delivery_schedule",
 			doc: frm.doc,
@@ -1559,7 +1569,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_purchase_order() {
 		let pending_items = this.frm.doc.items.some((item) => {
-			let pending_qty = flt(item.stock_qty) - flt(item.ordered_qty);
+			const pending_qty = flt(item.stock_qty) - this.get_ordered_qty(item, this.frm.doc);
 			return pending_qty > 0;
 		});
 		if (!pending_items) {
@@ -1713,8 +1723,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			// calculate ordered qty based on packed items in case of product bundle
 			let packed_items = so.packed_items.filter((pi) => pi.parent_detail_docname == item.name);
 			if (packed_items && packed_items.length) {
-				ordered_qty = packed_items.reduce((sum, pi) => sum + flt(pi.ordered_qty), 0);
-				ordered_qty = ordered_qty / packed_items.length;
+				const all_packed_items_ordered = packed_items.every(
+					(pi) => flt(pi.ordered_qty) >= flt(pi.qty)
+				);
+				ordered_qty = all_packed_items_ordered ? item.stock_qty : 0;
 			}
 		}
 		return ordered_qty;

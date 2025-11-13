@@ -719,6 +719,25 @@ class calculate_taxes_and_totals:
 				self.doc.precision("discount_amount"),
 			)
 
+		discount_amount = self.doc.discount_amount or 0
+		grand_total = self.doc.grand_total
+
+		# validate that discount amount cannot exceed the total before discount
+		if (
+			(grand_total >= 0 and discount_amount > grand_total)
+			or (grand_total < 0 and discount_amount < grand_total)  # returns
+		):
+			frappe.throw(
+				_(
+					"Additional Discount Amount ({discount_amount}) cannot exceed "
+					"the total before such discount ({total_before_discount})"
+				).format(
+					discount_amount=self.doc.get_formatted("discount_amount"),
+					total_before_discount=self.doc.get_formatted("grand_total"),
+				),
+				title=_("Invalid Discount Amount"),
+			)
+
 	def apply_discount_amount(self):
 		if self.doc.discount_amount:
 			if not self.doc.apply_discount_on:
