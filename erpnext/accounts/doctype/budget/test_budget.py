@@ -24,7 +24,7 @@ class TestBudget(ERPNextTestSuite):
 		cls.make_projects()
 
 	def setUp(self):
-		frappe.db.set_single_value("Accounts Settings", "use_new_budget_controller", True)
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
 
 	def test_monthly_budget_crossed_ignore(self):
 		set_total_expense_zero(nowdate(), "cost_center")

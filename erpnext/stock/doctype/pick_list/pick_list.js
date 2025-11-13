@@ -121,7 +121,6 @@ frappe.ui.form.on("Pick List", {
 		frm.trigger("update_warehouse_property");
 		if (frm.doc.docstatus === 1) {
 			const status_completed = frm.doc.status === "Completed";
-			frm.set_df_property("locations", "allow_on_submit", status_completed ? 0 : 1);
 
 			if (!status_completed) {
 				frm.add_custom_button(__("Update Current Stock"), () =>

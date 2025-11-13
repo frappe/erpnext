@@ -22,6 +22,7 @@ class CommonCode(Document):
 
 		additional_data: DF.Code | None
 		applies_to: DF.Table[DynamicLink]
+		canonical_uri: DF.Data | None
 		code_list: DF.Link
 		common_code: DF.Data
 		description: DF.SmallText | None

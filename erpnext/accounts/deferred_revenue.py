@@ -46,7 +46,8 @@ def validate_service_stop_date(doc):
 		if (
 			old_stop_dates
 			and old_stop_dates.get(item.name)
-			and item.service_stop_date != old_stop_dates.get(item.name)
+			and item.service_stop_date
+			and getdate(item.service_stop_date) != getdate(old_stop_dates.get(item.name))
 		):
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}").format(item.idx))
 

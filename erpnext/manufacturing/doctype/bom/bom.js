@@ -833,6 +833,31 @@ frappe.ui.form.on("BOM Operation", "workstation", function (frm, cdt, cdn) {
 	});
 });
 
+frappe.ui.form.on("BOM Operation", "workstation_type", function (frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (!d.workstation_type) return;
+	frappe.call({
+		method: "frappe.client.get",
+		args: {
+			doctype: "Workstation Type",
+			name: d.workstation_type,
+		},
+		callback: function (data) {
+			frappe.model.set_value(d.doctype, d.name, "base_hour_rate", data.message.hour_rate);
+			frappe.model.set_value(
+				d.doctype,
+				d.name,
+				"hour_rate",
+				flt(flt(data.message.hour_rate) / flt(frm.doc.conversion_rate)),
+				2
+			);
+
+			erpnext.bom.calculate_op_cost(frm.doc);
+			erpnext.bom.calculate_total(frm.doc);
+		},
+	});
+});
+
 frappe.ui.form.on("BOM Item", {
 	do_not_explode: function (frm, cdt, cdn) {
 		get_bom_material_detail(frm.doc, cdt, cdn, false);

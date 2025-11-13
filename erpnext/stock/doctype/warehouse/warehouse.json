@@ -18,6 +18,7 @@
   "column_break_4",
   "account",
   "company",
+  "customer",
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -258,6 +259,15 @@
    "fieldname": "is_rejected_warehouse",
    "fieldtype": "Check",
    "label": "Is Rejected Warehouse"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "eval:!doc.disabled",
+   "description": "Only to be used for Subcontracting Inward.",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
  "grid_page_length": 50,
@@ -265,7 +275,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-06-26 11:19:04.673115",
+ "modified": "2025-09-05 14:47:17.140099",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

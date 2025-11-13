@@ -53,6 +53,15 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+
+		frm.set_query("default_warehouse_for_sales_return", function () {
+			return {
+				filters: {
+					company: frm.doc.name,
+					is_group: 0,
+				},
+			};
+		});
 	},
 
 	company_name: function (frm) {
@@ -278,6 +287,8 @@ erpnext.company.setup_queries = function (frm) {
 			["depreciation_expense_account", { root_type: "Expense", account_type: "Depreciation" }],
 			["disposal_account", { report_type: "Profit and Loss" }],
 			["default_inventory_account", { account_type: "Stock" }],
+			["purchase_expense_account", { root_type: "Expense" }],
+			["purchase_expense_contra_account", { root_type: "Expense" }],
 			["cost_center", {}],
 			["round_off_cost_center", {}],
 			["depreciation_cost_center", {}],
@@ -287,6 +298,7 @@ erpnext.company.setup_queries = function (frm) {
 			["default_provisional_account", { root_type: ["in", ["Liability", "Asset"]] }],
 			["default_advance_received_account", { root_type: "Liability", account_type: "Receivable" }],
 			["default_advance_paid_account", { root_type: "Asset", account_type: "Payable" }],
+			["service_expense_account", { root_type: "Expense" }],
 		],
 		function (i, v) {
 			erpnext.company.set_custom_query(frm, v);

@@ -519,8 +519,15 @@ class SellingController(StockController):
 			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				continue
 
+			item_details = frappe.get_cached_value(
+				"Item", d.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+			)
+
 			if not self.get("return_against") or (
-				get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
+				get_valuation_method(d.item_code) == "Moving Average"
+				and self.get("is_return")
+				and not item_details.has_serial_no
+				and not item_details.has_batch_no
 			):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
@@ -998,6 +1005,9 @@ def set_default_income_account_for_item(obj):
 
 def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+	if parent.get("is_return") and parent.get("packed_items"):
+		return
 
 	if child.get("use_serial_batch_fields"):
 		return

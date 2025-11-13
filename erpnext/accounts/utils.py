@@ -968,19 +968,28 @@ def update_accounting_ledgers_after_reference_removal(
 	adv_ple.run()
 
 
-def remove_ref_from_advance_section(ref_doc: object = None):
+def remove_ref_from_advance_section(ref_doc: object = None, payment_name: str | None = None):
 	# TODO: this might need some testing
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
-		ref_doc.set("advances", [])
-		adv_type = qb.DocType(f"{ref_doc.doctype} Advance")
-		qb.from_(adv_type).delete().where(adv_type.parent == ref_doc.name).run()
+		row_names = []
+		for adv in ref_doc.get("advances") or []:
+			if adv.get("reference_name", None) == payment_name:
+				row_names.append(adv.name)
+
+		if not row_names:
+			return
+
+		child_table = (
+			"Sales Invoice Advance" if ref_doc.doctype == "Sales Invoice" else "Purchase Invoice Advance"
+		)
+		frappe.db.delete(child_table, {"name": ("in", row_names)})
 
 
 def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: str | None = None):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name, payment_name)
 	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name, payment_name)
 	update_accounting_ledgers_after_reference_removal(ref_doc.doctype, ref_doc.name, payment_name)
-	remove_ref_from_advance_section(ref_doc)
+	remove_ref_from_advance_section(ref_doc, payment_name)
 
 
 def remove_ref_doc_link_from_jv(
@@ -1047,7 +1056,6 @@ def remove_ref_doc_link_from_pe(
 		query = query.where(per.parent == payment_name)
 
 	reference_rows = query.run(as_dict=True)
-
 	if not reference_rows:
 		return
 
@@ -1527,7 +1535,8 @@ def repost_gle_for_stock_vouchers(
 			voucher_obj = frappe.get_lazy_doc(voucher_type, voucher_no)
 			# Some transactions post credit as negative debit, this is handled while posting GLE
 			# but while comparing we need to make sure it's flipped so comparisons are accurate
-			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(warehouse_account))
+			inventory_account_map = voucher_obj.get_inventory_account_map()
+			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(inventory_account_map))
 			if expected_gle:
 				if not existing_gle or not compare_existing_and_expected_gle(
 					existing_gle, expected_gle, precision
@@ -1781,24 +1790,22 @@ def check_and_delete_linked_reports(report):
 			frappe.delete_doc("Desktop Icon", icon)
 
 
-def create_err_and_its_journals(companies: list | None = None) -> None:
-	if companies:
-		for company in companies:
-			err = frappe.new_doc("Exchange Rate Revaluation")
-			err.company = company.name
-			err.posting_date = nowdate()
-			err.rounding_loss_allowance = 0.0
+def create_err_and_its_journals(company: dict) -> None:
+	err = frappe.new_doc("Exchange Rate Revaluation")
+	err.company = company.name
+	err.posting_date = nowdate()
+	err.rounding_loss_allowance = 0.0
 
-			err.fetch_and_calculate_accounts_data()
-			if err.accounts:
-				err.save().submit()
-				response = err.make_jv_entries()
+	err.fetch_and_calculate_accounts_data()
+	if err.accounts:
+		err.save().submit()
+		response = err.make_jv_entries()
 
-				if company.submit_err_jv:
-					jv = response.get("revaluation_jv", None)
-					jv and frappe.get_doc("Journal Entry", jv).submit()
-					jv = response.get("zero_balance_jv", None)
-					jv and frappe.get_doc("Journal Entry", jv).submit()
+		if company.submit_err_jv:
+			jv = response.get("revaluation_jv", None)
+			jv and frappe.get_doc("Journal Entry", jv).submit()
+			jv = response.get("zero_balance_jv", None)
+			jv and frappe.get_doc("Journal Entry", jv).submit()
 
 
 def _auto_create_exchange_rate_revaluation_for(frequency: str) -> None:
@@ -1811,7 +1818,14 @@ def _auto_create_exchange_rate_revaluation_for(frequency: str) -> None:
 		filters={"auto_exchange_rate_revaluation": 1, "auto_err_frequency": frequency},
 		fields=["name", "submit_err_jv"],
 	)
-	create_err_and_its_journals(companies)
+
+	if companies:
+		for company in companies:
+			frappe.enqueue(
+				"erpnext.accounts.utils.create_err_and_its_journals",
+				company=company,
+				queue="long",
+			)
 
 
 def auto_create_exchange_rate_revaluation_daily() -> None:

@@ -272,21 +272,19 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 
 	if total_expense > budget_amount:
 		if args.actual_expense > budget_amount:
-			error_tense = _("is already")
 			diff = args.actual_expense - budget_amount
+			_msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It is already exceeded by {5}.")
 		else:
-			error_tense = _("will be")
 			diff = total_expense - budget_amount
+			_msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will be exceeded by {5}.")
 
 		currency = frappe.get_cached_value("Company", args.company, "default_currency")
-
-		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It {5} exceed by {6}").format(
+		msg = _msg.format(
 			_(action_for),
 			frappe.bold(args.account),
 			frappe.unscrub(args.budget_against_field),
 			frappe.bold(budget_against),
 			frappe.bold(fmt_money(budget_amount, currency=currency)),
-			error_tense,
 			frappe.bold(fmt_money(diff, currency=currency)),
 		)
 

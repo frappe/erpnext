@@ -334,6 +334,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 		if (
 			doc.docstatus == 1 &&
 			!doc.is_return &&
+			doc.per_returned != 100 &&
 			doc.status != "Closed" &&
 			flt(doc.per_billed) < 100 &&
 			frappe.model.can_create("Sales Invoice")
