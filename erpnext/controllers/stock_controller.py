@@ -1714,7 +1714,6 @@ class StockController(AccountsController):
 					continue
 
 				qty = item.get("transfer_qty", item.get("consumed_qty"))
-				total_qty = 0
 				for sre in sre_list:
 					if qty <= 0:
 						break
@@ -1767,7 +1766,6 @@ class StockController(AccountsController):
 					sre_doc.update_reserved_stock_in_bin()
 
 					qty -= working_qty
-					total_qty += working_qty
 
 
 @frappe.whitelist()

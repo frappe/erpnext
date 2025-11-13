@@ -400,7 +400,16 @@ class SubcontractingOrder(SubcontractingController):
 					}
 				)
 
-				if self.production_plan:
+				if stock_entry:
+					data.update(
+						{
+							"from_voucher_no": stock_entry,
+							"from_voucher_type": "Stock Entry",
+							"from_voucher_detail_no": item_dict[item.name]["reference_voucher_detail_no"],
+							"serial_and_batch_bundles": item_dict[item.name]["serial_and_batch_bundles"],
+						}
+					)
+				elif self.production_plan:
 					fg_item = next(i for i in self.items if i.name == item.reference_name)
 					if production_plan_sub_assembly_item := fg_item.production_plan_sub_assembly_item:
 						from_voucher_detail_no, reserved_qty = frappe.get_value(
@@ -423,15 +432,6 @@ class SubcontractingOrder(SubcontractingController):
 									"from_voucher_detail_no": from_voucher_detail_no,
 								}
 							)
-				elif stock_entry:
-					data.update(
-						{
-							"from_voucher_no": stock_entry,
-							"from_voucher_type": "Stock Entry",
-							"from_voucher_detail_no": item_dict[item.name]["reference_voucher_detail_no"],
-							"serial_and_batch_bundles": item_dict[item.name]["serial_and_batch_bundle"],
-						}
-					)
 
 				reservation_items.append(data)
 

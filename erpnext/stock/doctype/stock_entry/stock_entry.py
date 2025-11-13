@@ -1900,22 +1900,24 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose == "Send to Subcontractor" and frappe.get_value(
 			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
 		):
-			items = []
+			items = {}
 			for item in self.items:
-				items.append(
-					frappe._dict(
+				if item.sco_rm_detail in items:
+					items[item.sco_rm_detail].qty_to_reserve += item.transfer_qty
+					items[item.sco_rm_detail].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
+				else:
+					items[item.sco_rm_detail] = frappe._dict(
 						{
 							"name": item.sco_rm_detail,
 							"qty_to_reserve": item.transfer_qty,
 							"warehouse": item.t_warehouse,
 							"reference_voucher_detail_no": item.name,
-							"serial_and_batch_bundle": item.serial_and_batch_bundle,
+							"serial_and_batch_bundles": [item.serial_and_batch_bundle],
 						}
 					)
-				)
 
 			frappe.get_doc("Subcontracting Order", self.subcontracting_order).reserve_raw_materials(
-				items=items, stock_entry=self.name
+				items=items.values(), stock_entry=self.name
 			)
 
 	def cancel_stock_reserve_for_wip_and_fg(self):

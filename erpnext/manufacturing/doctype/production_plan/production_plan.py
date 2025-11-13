@@ -1685,7 +1685,6 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 						include_non_stock_items,
 						sub_assembly_items,
 						planned_qty=planned_qty,
-						split=doc.reserve_stock,  # split items only on stock reservation
 					)
 
 				elif data.get("include_exploded_items") and include_subcontracted_items:
@@ -2010,7 +2009,6 @@ def get_raw_materials_of_sub_assembly_items(
 	include_non_stock_items,
 	sub_assembly_items,
 	planned_qty=1,
-	split=False,
 ):
 	bei = frappe.qb.DocType("BOM Item")
 	bom = frappe.qb.DocType("BOM")
@@ -2044,6 +2042,7 @@ def get_raw_materials_of_sub_assembly_items(
 			item_uom.conversion_factor,
 			item.safety_stock,
 			bom.item.as_("main_bom_item"),
+			bom.name.as_("main_bom"),
 		)
 		.where(
 			(bei.docstatus == 1)
@@ -2053,9 +2052,6 @@ def get_raw_materials_of_sub_assembly_items(
 		)
 		.groupby(bei.item_code, bei.stock_uom)
 	)
-
-	if split:
-		query = query.select(bom.name.as_("main_bom"))
 
 	for item in query.run(as_dict=True):
 		key = (item.item_code, item.bom_no)
@@ -2074,7 +2070,6 @@ def get_raw_materials_of_sub_assembly_items(
 				include_non_stock_items,
 				sub_assembly_items,
 				planned_qty=planned_qty,
-				split=split,
 			)
 			existing_sub_assembly_items.add((item.item_code, item.bom_no or item.main_bom))
 		else:
