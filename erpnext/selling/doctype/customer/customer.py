@@ -730,7 +730,17 @@ def make_contact(args, is_primary_contact=1):
 	party_type = args.customer_type if args.doctype == "Customer" else args.supplier_type
 	party_name_key = "customer_name" if args.doctype == "Customer" else "supplier_name"
 
-	if party_type == "Individual":
+	if contact_name := args.get("contact_name"):
+		first, middle, last = parse_full_name(contact_name)
+		values.update(
+			{
+				"first_name": first,
+				"middle_name": middle,
+				"last_name": last,
+			}
+		)
+
+	elif party_type == "Individual":
 		first, middle, last = parse_full_name(args.get(party_name_key))
 		values.update(
 			{

@@ -73,6 +73,11 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				collapsible: 1,
 			},
 			{
+				label: __("Contact Name"),
+				fieldname: "contact_name",
+				fieldtype: "Data",
+			},
+			{
 				label: __("Address Line 1"),
 				fieldname: "address_line1",
 				fieldtype: "Data",
