@@ -39,6 +39,25 @@ frappe.ui.form.ContactAddressQuickEntryForm = class ContactAddressQuickEntryForm
 				collapsible: 1,
 			},
 			{
+<<<<<<< HEAD
+=======
+				label: __("First Name"),
+				fieldname: "map_to_first_name",
+				fieldtype: "Data",
+				depends_on: "eval:doc.customer_type=='Company' || doc.supplier_type=='Company'",
+			},
+			{
+				label: __("Last Name"),
+				fieldname: "map_to_last_name",
+				fieldtype: "Data",
+				depends_on: "eval:doc.customer_type=='Company' || doc.supplier_type=='Company'",
+			},
+
+			{
+				fieldtype: "Column Break",
+			},
+			{
+>>>>>>> 510f50077b (fix: first and last name in supplier quick entry)
 				label: __("Email Id"),
 				fieldname: "email_address",
 				fieldtype: "Data",
