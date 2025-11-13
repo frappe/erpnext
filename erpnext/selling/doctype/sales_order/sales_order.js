@@ -58,6 +58,12 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	refresh: function (frm) {
+		frm.fields_dict["items"].grid.update_docfield_property(
+			"add_schedule",
+			"hidden",
+			frm.is_new() || frm.doc.docstatus === 1 ? true : false
+		);
+
 		if (frm.doc.docstatus === 1) {
 			if (
 				frm.doc.status !== "Closed" &&
@@ -848,6 +854,10 @@ frappe.ui.form.on("Sales Order Item", {
 
 	add_schedule(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
+
+		if (row.__islocal) {
+			frappe.throw(__("Please save the Sales Order before adding a delivery schedule."));
+		}
 
 		frappe.call({
 			method: "get_delivery_schedule",

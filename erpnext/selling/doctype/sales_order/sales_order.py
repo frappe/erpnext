@@ -481,6 +481,7 @@ class SalesOrder(SellingController):
 	def on_submit(self):
 		self.check_credit_limit()
 		self.update_reserved_qty()
+		self.delete_removed_delivery_schedule_items()
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total, self
@@ -498,6 +499,13 @@ class SalesOrder(SellingController):
 
 		if self.get("reserve_stock") and not self.get("is_subcontracted"):
 			self.create_stock_reservation_entries()
+
+	def delete_removed_delivery_schedule_items(self):
+		items = [d.name for d in self.get("items")]
+		doctype = frappe.qb.DocType("Delivery Schedule Item")
+		frappe.qb.from_(doctype).delete().where(
+			(doctype.sales_order == self.name) & (doctype.sales_order_item.notin(items))
+		).run()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -901,7 +909,7 @@ class SalesOrder(SellingController):
 			names.append(doc.name)
 
 		if names:
-			self.delete_delivery_schedule_items(names)
+			self.delete_delivery_schedule_items(child_row.name, names)
 
 		if first_delivery_date:
 			self.update_delivery_date_based_on_schedule(child_row, first_delivery_date)
@@ -915,7 +923,7 @@ class SalesOrder(SellingController):
 
 		self.save()
 
-	def delete_delivery_schedule_items(self, ignore_names=None):
+	def delete_delivery_schedule_items(self, sales_order_item=None, ignore_names=None):
 		"""Delete delivery schedule items."""
 		doctype = frappe.qb.DocType("Delivery Schedule Item")
 
@@ -923,6 +931,9 @@ class SalesOrder(SellingController):
 
 		if ignore_names:
 			query = query.where(doctype.name.notin(ignore_names))
+
+		if sales_order_item:
+			query = query.where(doctype.sales_order_item == sales_order_item)
 
 		query.run()
 
