@@ -17,6 +17,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
 )
+from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import JournalTaxWithholding
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -46,6 +47,7 @@ class JournalEntry(AccountsController):
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.journal_entry_account.journal_entry_account import JournalEntryAccount
+		from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import TaxWithholdingEntry
 
 		accounts: DF.Table[JournalEntryAccount]
 		amended_from: DF.Link | None
@@ -62,6 +64,7 @@ class JournalEntry(AccountsController):
 		finance_book: DF.Link | None
 		for_all_stock_asset_accounts: DF.Check
 		from_template: DF.Link | None
+		ignore_tax_withholding_threshold: DF.Check
 		inter_company_journal_entry_reference: DF.Link | None
 		is_opening: DF.Literal["No", "Yes"]
 		is_system_generated: DF.Check
@@ -69,6 +72,7 @@ class JournalEntry(AccountsController):
 		mode_of_payment: DF.Link | None
 		multi_currency: DF.Check
 		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
+		override_tax_withholding_entries: DF.Check
 		pay_to_recd_from: DF.Data | None
 		payment_order: DF.Link | None
 		periodic_entry_difference_account: DF.Link | None
@@ -80,6 +84,8 @@ class JournalEntry(AccountsController):
 		stock_asset_account: DF.Link | None
 		stock_entry: DF.Link | None
 		tax_withholding_category: DF.Link | None
+		tax_withholding_entries: DF.Table[TaxWithholdingEntry]
+		tax_withholding_group: DF.Link | None
 		title: DF.Data | None
 		total_amount: DF.Currency
 		total_amount_currency: DF.Link | None
@@ -146,6 +152,8 @@ class JournalEntry(AccountsController):
 		self.validate_company_in_accounting_dimension()
 		self.validate_advance_accounts()
 
+		JournalTaxWithholding(self).on_validate()
+
 		if self.is_new() or not self.title:
 			self.title = self.get_title()
 
@@ -193,6 +201,7 @@ class JournalEntry(AccountsController):
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		JournalTaxWithholding(self).on_submit()
 
 	@frappe.whitelist()
 	def get_balance_for_periodic_accounting(self):
@@ -276,6 +285,8 @@ class JournalEntry(AccountsController):
 			self.repost_accounting_entries()
 
 	def on_cancel(self):
+		# Cancel tax withholding entries
+
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
 		super().on_cancel()
 		self.ignore_linked_doctypes = (
@@ -292,6 +303,7 @@ class JournalEntry(AccountsController):
 			"Tax Withholding Entry",
 		)
 		self.make_gl_entries(1)
+		JournalTaxWithholding(self).on_cancel()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 		self.unlink_inter_company_jv()
