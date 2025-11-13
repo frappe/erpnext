@@ -546,9 +546,6 @@ class PurchaseOrder(BuyingController):
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 
-	def on_update(self):
-		pass
-
 	def update_status_updater(self):
 		self.status_updater.append(
 			{
