@@ -72,6 +72,7 @@ class SubcontractingOrder(SubcontractingController):
 		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
+		supplier_currency: DF.Link | None
 		supplier_name: DF.Data
 		supplier_warehouse: DF.Link
 		title: DF.Data | None
