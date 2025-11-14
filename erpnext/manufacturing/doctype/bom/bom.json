@@ -591,7 +591,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.track_semi_finished_goods === 0",
    "fieldname": "fg_based_operating_cost",
    "fieldtype": "Check",
    "label": "Finished Goods based Operating Cost"
