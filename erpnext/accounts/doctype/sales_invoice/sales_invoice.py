@@ -877,6 +877,7 @@ class SalesInvoice(SellingController):
 				data.sales_invoice = sales_invoice
 
 	def on_update_after_submit(self):
+		self.calculate_contribution()
 		fields_to_check = [
 			"additional_discount_account",
 			"cash_bank_account",
