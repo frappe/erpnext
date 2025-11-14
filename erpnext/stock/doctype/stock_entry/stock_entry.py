@@ -2278,6 +2278,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		new_items_to_add = []
 		for d in self.items:
+			if d.serial_and_batch_bundle or d.serial_no or d.batch_no:
+				continue
+
 			key = (d.item_code, d.s_warehouse)
 			if details := reservation_entries.get(key):
 				original_qty = d.qty

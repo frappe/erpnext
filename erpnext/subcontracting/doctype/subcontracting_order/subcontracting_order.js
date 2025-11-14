@@ -406,7 +406,7 @@ frappe.ui.form.on("Subcontracting Order", {
 				method: "erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.get_stock_reservation_entries_for_voucher",
 				args: {
 					voucher_type: frm.doctype,
-					voucher_no: frm.docname,
+					voucher_no: frm.doc.name,
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {

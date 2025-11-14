@@ -1944,11 +1944,17 @@ class TestProductionPlan(IntegrationTestCase):
 
 		mr_items = get_items_for_material_requests(plan.as_dict())
 
+		from collections import defaultdict
+
+		mr_items_dict = defaultdict(float)
+		for item in mr_items:
+			mr_items_dict[item.get("item_code")] += item.get("quantity")
+
 		# RM Item 1 (FG1 (100 + 100) + FG2 (50) + FG3 (10) - 90 in stock - 80 sub assembly stock)
-		self.assertEqual(mr_items[0].get("quantity"), 90)
+		self.assertEqual(mr_items_dict["RM Item 1"], 90)
 
 		# RM Item 2 (FG1 (100) + FG2 (50) + FG4 (10) - 80 sub assembly stock)
-		self.assertEqual(mr_items[1].get("quantity"), 80)
+		self.assertEqual(mr_items_dict["RM Item 2"], 80)
 
 	def test_stock_reservation_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
