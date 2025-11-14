@@ -585,17 +585,22 @@ class ProductionPlan(Document):
 		make_stock_reservation_entries(self)
 
 	def add_reference_to_raw_materials(self):
-		if self.reserve_stock:
-			for item in self.mr_items:
-				if reference := next(
-					(
-						sa_item.name
-						for sa_item in self.sub_assembly_items
-						if sa_item.production_item == item.main_item_code and sa_item.bom_no == item.from_bom
-					),
-					None,
-				):
-					item.db_set("sub_assembly_item_reference", reference)
+		for item in self.mr_items:
+			if reference := next(
+				(
+					sa_item.name
+					for sa_item in self.sub_assembly_items
+					if sa_item.production_item == item.main_item_code and sa_item.bom_no == item.from_bom
+				),
+				None,
+			):
+				item.db_set("sub_assembly_item_reference", reference)
+			elif self.reserve_stock and item.main_item_code and item.from_bom:
+				frappe.throw(
+					_(
+						"Sub assembly item references are missing. Please fetch the sub assemblies and raw materials again."
+					)
+				)
 
 	def update_sales_order(self):
 		sales_orders = [row.sales_order for row in self.po_items if row.sales_order]
