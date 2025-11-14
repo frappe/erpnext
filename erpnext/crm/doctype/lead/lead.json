@@ -329,11 +329,13 @@
   {
    "fieldname": "middle_name",
    "fieldtype": "Data",
-   "label": "Middle Name"
+   "label": "Middle Name",
+   "reqd": 1
   },
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Last Name"
   },
   {
@@ -514,7 +516,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2025-01-31 13:40:08.094759",
+ "modified": "2025-11-14 16:44:37.469902",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
