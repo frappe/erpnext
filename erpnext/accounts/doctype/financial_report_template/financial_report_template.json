@@ -28,6 +28,8 @@
    "description": "Type of financial statement this template generates",
    "fieldname": "report_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Report Type",
    "options": "\nProfit and Loss Statement\nBalance Sheet\nCash Flow\nCustom Financial Statement"
   },
@@ -64,7 +66,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-15 03:31:53.866694",
+ "modified": "2025-11-14 00:11:03.508139",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Report Template",
@@ -95,5 +97,6 @@
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "template_name"
 }
