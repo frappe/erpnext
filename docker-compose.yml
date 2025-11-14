@@ -1,0 +1,248 @@
+version: '3.8'
+
+services:
+  # MariaDB Database
+  mariadb:
+    image: mariadb:10.6
+    container_name: erpnext_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin123}
+      MYSQL_DATABASE: ${DB_NAME:-erpnext}
+      MYSQL_USER: ${DB_USER:-erpnext}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-erpnext123}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --max-connections=500
+      - --innodb-buffer-pool-size=1G
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - erpnext_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-admin123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching
+  redis-cache:
+    image: redis:7-alpine
+    container_name: erpnext_redis_cache
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_cache_data:/data
+    networks:
+      - erpnext_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for queue/background jobs
+  redis-queue:
+    image: redis:7-alpine
+    container_name: erpnext_redis_queue
+    restart: unless-stopped
+    volumes:
+      - redis_queue_data:/data
+    networks:
+      - erpnext_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for socket.io (real-time updates)
+  redis-socketio:
+    image: redis:7-alpine
+    container_name: erpnext_redis_socketio
+    restart: unless-stopped
+    volumes:
+      - redis_socketio_data:/data
+    networks:
+      - erpnext_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ERPNext Backend
+  erpnext-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erpnext_backend
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      redis-queue:
+        condition: service_healthy
+    environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-erpnext}
+      - DB_USER=${DB_USER:-erpnext}
+      - DB_PASSWORD=${DB_PASSWORD:-erpnext123}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-admin123}
+      - REDIS_CACHE=redis://redis-cache:6379
+      - REDIS_QUEUE=redis://redis-queue:6379
+      - REDIS_SOCKETIO=redis://redis-socketio:6379
+      - SITE_NAME=${SITE_NAME:-erp.localhost}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - INSTALL_APPS=erpnext
+    command: >
+      bash -c "
+        # Wait for database
+        until mysqladmin ping -h mariadb -u root -p${DB_ROOT_PASSWORD:-admin123} --silent; do
+          echo 'Waiting for MariaDB...'
+          sleep 2
+        done
+
+        # Configure Redis
+        bench set-redis-cache-host redis-cache:6379
+        bench set-redis-queue-host redis-queue:6379
+        bench set-redis-socketio-host redis-socketio:6379
+
+        # Create site if it doesn't exist
+        if [ ! -d sites/${SITE_NAME:-erp.localhost} ]; then
+          echo 'Creating new site...'
+          bench new-site ${SITE_NAME:-erp.localhost} \
+            --db-name ${DB_NAME:-erpnext} \
+            --db-host mariadb \
+            --db-port 3306 \
+            --mariadb-root-username root \
+            --mariadb-root-password ${DB_ROOT_PASSWORD:-admin123} \
+            --admin-password ${ADMIN_PASSWORD:-admin} \
+            --no-mariadb-socket
+
+          # Install ERPNext app
+          bench --site ${SITE_NAME:-erp.localhost} install-app erpnext
+
+          # Set site as default
+          bench use ${SITE_NAME:-erp.localhost}
+        fi
+
+        # Migrate database
+        bench --site ${SITE_NAME:-erp.localhost} migrate
+
+        # Start development server
+        bench start
+      "
+    volumes:
+      - sites_data:/home/frappe/frappe-bench/sites
+      - assets_data:/home/frappe/frappe-bench/sites/assets
+    networks:
+      - erpnext_network
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+
+  # ERPNext Worker - Long running background jobs
+  erpnext-worker-long:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erpnext_worker_long
+    restart: unless-stopped
+    depends_on:
+      - erpnext-backend
+    command: bench worker --queue long
+    volumes:
+      - sites_data:/home/frappe/frappe-bench/sites
+      - assets_data:/home/frappe/frappe-bench/sites/assets
+    networks:
+      - erpnext_network
+
+  # ERPNext Worker - Short running background jobs
+  erpnext-worker-short:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erpnext_worker_short
+    restart: unless-stopped
+    depends_on:
+      - erpnext-backend
+    command: bench worker --queue short
+    volumes:
+      - sites_data:/home/frappe/frappe-bench/sites
+      - assets_data:/home/frappe/frappe-bench/sites/assets
+    networks:
+      - erpnext_network
+
+  # ERPNext Worker - Default queue
+  erpnext-worker-default:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erpnext_worker_default
+    restart: unless-stopped
+    depends_on:
+      - erpnext-backend
+    command: bench worker --queue default
+    volumes:
+      - sites_data:/home/frappe/frappe-bench/sites
+      - assets_data:/home/frappe/frappe-bench/sites/assets
+    networks:
+      - erpnext_network
+
+  # ERPNext Scheduler - Cron jobs
+  erpnext-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erpnext_scheduler
+    restart: unless-stopped
+    depends_on:
+      - erpnext-backend
+    command: bench schedule
+    volumes:
+      - sites_data:/home/frappe/frappe-bench/sites
+      - assets_data:/home/frappe/frappe-bench/sites/assets
+    networks:
+      - erpnext_network
+
+  # Nginx reverse proxy (optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: erpnext_nginx
+    restart: unless-stopped
+    depends_on:
+      - erpnext-backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - assets_data:/var/www/html/assets:ro
+    networks:
+      - erpnext_network
+    ports:
+      - "80:80"
+      - "443:443"
+    profiles:
+      - production
+
+volumes:
+  mariadb_data:
+    driver: local
+  redis_cache_data:
+    driver: local
+  redis_queue_data:
+    driver: local
+  redis_socketio_data:
+    driver: local
+  sites_data:
+    driver: local
+  assets_data:
+    driver: local
+
+networks:
+  erpnext_network:
+    driver: bridge
