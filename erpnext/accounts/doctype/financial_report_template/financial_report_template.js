@@ -9,7 +9,7 @@ frappe.ui.form.on("Financial Report Template", {
 			const has_selection = selected_rows.length > 0;
 			if (selected_rows.length === 0) selected_rows = frm.doc.rows;
 
-			show_accounts_tree(selected_rows, !has_selection);
+			show_accounts_tree(selected_rows, has_selection);
 		});
 
 		// add custom button to open the financial report
@@ -153,7 +153,7 @@ function is_advanced_formula(row) {
 
 // ACCOUNTS TREE VIEW
 
-function show_accounts_tree(template_rows, show_alert) {
+function show_accounts_tree(template_rows, has_selection) {
 	// filtered rows
 	const account_rows = template_rows.filter((row) => row.data_source === "Account Data");
 
@@ -183,7 +183,7 @@ function show_accounts_tree(template_rows, show_alert) {
 				fieldtype: "Select",
 				options: ["Missing Accounts", "Filtered Accounts"],
 				label: "View",
-				default: "Missing Accounts",
+				default: has_selection ? "Filtered Accounts" : "Missing Accounts",
 				reqd: 1,
 				onchange: () => {
 					dialog.set_title(
@@ -204,7 +204,7 @@ function show_accounts_tree(template_rows, show_alert) {
 							Tip: Select report lines to view their accounts
 					</div>
 				`,
-				depends_on: show_alert ? "eval: true" : "eval: false",
+				depends_on: has_selection ? "eval: false" : "eval: true",
 			},
 			{
 				fieldname: "tree_area",
