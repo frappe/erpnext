@@ -463,7 +463,7 @@
    "show_dashboard": 1
   },
   {
-   "fetch_from": "supplier.default_currency",
+   "fetch_from": "purchase_order.currency",
    "fieldname": "supplier_currency",
    "fieldtype": "Link",
    "hidden": 1,
@@ -476,7 +476,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-13 16:06:19.165660",
+ "modified": "2025-11-14 10:31:40.682892",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
