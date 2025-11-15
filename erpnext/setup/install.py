@@ -7,7 +7,6 @@ import os
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-from frappe.utils import cint
 
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 from erpnext.setup.utils import identity as _
