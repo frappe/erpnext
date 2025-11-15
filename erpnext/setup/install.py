@@ -313,26 +313,26 @@ def create_letter_head():
 
 
 DEFAULT_ROLE_PROFILES = {
-	"Inventory": [
+	_("Inventory"): [
 		"Stock User",
 		"Stock Manager",
 		"Item Manager",
 	],
-	"Manufacturing": [
+	_("Manufacturing"): [
 		"Stock User",
 		"Manufacturing User",
 		"Manufacturing Manager",
 	],
-	"Accounts": [
+	_("Accounts"): [
 		"Accounts User",
 		"Accounts Manager",
 	],
-	"Sales": [
+	_("Sales"): [
 		"Sales User",
 		"Stock User",
 		"Sales Manager",
 	],
-	"Purchase": [
+	_("Purchase"): [
 		"Item Manager",
 		"Stock User",
 		"Purchase User",
