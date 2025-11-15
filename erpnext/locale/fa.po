@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-10 12:11+0000\n"
-"PO-Revision-Date: 2025-11-12 21:29\n"
+"PO-Revision-Date: 2025-11-15 21:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -7812,7 +7812,7 @@ msgstr "گروه خونی"
 #. Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr "بدنه"
+msgstr ""
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
@@ -9378,7 +9378,7 @@ msgstr "اگر ثبت انتقال مواد مورد نیاز نیست علام�
 #. Label of the warehouse_group (Link) field in DocType 'Item Reorder'
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 msgid "Check in (group)"
-msgstr "اعلام حضور (گروهی)"
+msgstr "بررسی در (گروه)"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -14376,7 +14376,7 @@ msgstr "هزینه معوق"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Deferred Expense Account"
-msgstr "حساب هزینه معوق"
+msgstr ""
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Label of the deferred_revenue (Section Break) field in DocType 'POS Invoice
@@ -20573,7 +20573,7 @@ msgstr "ساعت"
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Hour Rate"
-msgstr "نرخ ساعت"
+msgstr ""
 
 #. Label of the hours (Float) field in DocType 'Workstation Working Hour'
 #: erpnext/manufacturing/doctype/workstation_working_hour/workstation_working_hour.json
@@ -21311,7 +21311,7 @@ msgstr "در درصد"
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 msgid "In Process"
-msgstr "در جریان"
+msgstr ""
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:107
 msgid "In Production"
@@ -23073,7 +23073,7 @@ msgstr ""
 #. Label of the is_paid (Check) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Is Paid"
-msgstr "پرداخت شده"
+msgstr ""
 
 #. Label of the is_paused (Check) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
@@ -28020,7 +28020,7 @@ msgstr "نحوه پرداخت‌ها"
 #. Label of the model (Data) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Model"
-msgstr "مدل"
+msgstr ""
 
 #. Label of the section_break_11 (Section Break) field in DocType 'POS Closing
 #. Entry'
@@ -29657,7 +29657,7 @@ msgstr "جبران برای بعد حسابداری"
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Old Parent"
-msgstr "مرجع پیشین"
+msgstr ""
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
@@ -32196,7 +32196,7 @@ msgstr "پرداخت"
 #: erpnext/accounts/doctype/payment_gateway_account/payment_gateway_account.json
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Payment Account"
-msgstr "حساب پرداخت"
+msgstr ""
 
 #. Label of the payment_amount (Currency) field in DocType 'Overdue Payment'
 #. Label of the payment_amount (Currency) field in DocType 'Payment Schedule'
@@ -37990,7 +37990,7 @@ msgstr "ایجاد درخواست مواد زمانی که موجودی به س�
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Raised By"
-msgstr "مطرح شده توسط"
+msgstr ""
 
 #. Label of the raised_by (Data) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -40169,7 +40169,7 @@ msgstr "بازنشانی قرارداد سطح سرویس."
 #. Label of the resignation_letter_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Resignation Letter Date"
-msgstr "تاریخ استعفا نامه"
+msgstr ""
 
 #. Label of the sb_00 (Section Break) field in DocType 'Quality Action'
 #. Label of the resolution (Text Editor) field in DocType 'Quality Action
@@ -40192,7 +40192,7 @@ msgstr "حل و فصل توسط"
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution Date"
-msgstr "تاریخ حل و فصل"
+msgstr ""
 
 #. Label of the section_break_19 (Section Break) field in DocType 'Issue'
 #. Label of the resolution_details (Text Editor) field in DocType 'Issue'
@@ -40241,7 +40241,7 @@ msgstr "حل شد"
 #. Label of the resolved_by (Link) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolved By"
-msgstr "حل شده توسط"
+msgstr ""
 
 #. Label of the response_by (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -40513,7 +40513,7 @@ msgstr ""
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:138
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Returned"
-msgstr "بازگشت"
+msgstr ""
 
 #. Label of the returned_against (Data) field in DocType 'Serial and Batch
 #. Bundle'
@@ -40835,7 +40835,7 @@ msgstr "مجموع گرد شده"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Rounded Total (Company Currency)"
-msgstr "کل گرد شده (ارز شرکت)"
+msgstr ""
 
 #. Label of the rounding_adjustment (Currency) field in DocType 'POS Invoice'
 #. Label of the rounding_adjustment (Currency) field in DocType 'Purchase
@@ -42158,7 +42158,7 @@ msgstr "حقوق"
 #. Label of the salary_currency (Link) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Salary Currency"
-msgstr "ارز حقوق و دستمزد"
+msgstr ""
 
 #. Label of the salary_mode (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -44443,7 +44443,7 @@ msgstr "کل مبلغ هزینه خدمات"
 #. 'Asset Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Service Expenses"
-msgstr "هزینه های خدمات"
+msgstr ""
 
 #. Label of the service_item (Link) field in DocType 'Subcontracting BOM'
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
@@ -48089,7 +48089,7 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Suspended"
-msgstr "معلق"
+msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:442
 msgid "Switch Between Payment Modes"
@@ -50076,7 +50076,7 @@ msgstr "زمان مورد نیاز (بر حسب دقیقه)"
 #. Label of the time_sheet (Link) field in DocType 'Sales Invoice Timesheet'
 #: erpnext/accounts/doctype/sales_invoice_timesheet/sales_invoice_timesheet.json
 msgid "Time Sheet"
-msgstr "برگه زمان"
+msgstr ""
 
 #. Label of the time_sheet_list (Section Break) field in DocType 'POS Invoice'
 #. Label of the time_sheet_list (Section Break) field in DocType 'Sales
@@ -50738,7 +50738,7 @@ msgstr "کل مبلغ صورتحساب (از طریق فاکتور فروش)"
 #. Label of the total_billed_hours (Float) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
 msgid "Total Billed Hours"
-msgstr "مجموع ساعات صورتحساب"
+msgstr ""
 
 #. Label of the total_billing_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the total_billing_amount (Currency) field in DocType 'Sales
@@ -50890,7 +50890,7 @@ msgstr "کل زمان نگهداری"
 #. Label of the total_holidays (Int) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Total Holidays"
-msgstr "کل تعطیلات"
+msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:115
 msgid "Total Income"
@@ -51231,7 +51231,7 @@ msgstr "کل مالیات"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Total Taxes and Charges"
-msgstr "کل مالیات ها و هزینه ها"
+msgstr ""
 
 #. Label of the base_total_taxes_and_charges (Currency) field in DocType
 #. 'Payment Entry'
