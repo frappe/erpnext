@@ -6,6 +6,7 @@ import frappe
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import flt, nowtime
 from pypika import Order
+from pypika.functions import Coalesce
 
 from erpnext.deprecation_dumpster import deprecated
 
@@ -18,10 +19,10 @@ class DeprecatedSerialNoValuation:
 		"No known instructions.",
 	)
 	def calculate_stock_value_from_deprecarated_ledgers(self):
-		if not has_sle_for_serial_nos(self.sle.item_code):
-			return
+		serial_nos = []
+		if hasattr(self, "old_serial_nos"):
+			serial_nos = self.old_serial_nos
 
-		serial_nos = self.get_filterd_serial_nos()
 		if not serial_nos:
 			return
 
@@ -30,17 +31,6 @@ class DeprecatedSerialNoValuation:
 			stock_value_change = self.get_incoming_value_for_serial_nos(serial_nos)
 
 		self.stock_value_change += flt(stock_value_change)
-
-	def get_filterd_serial_nos(self):
-		serial_nos = []
-		non_filtered_serial_nos = self.get_serial_nos()
-
-		# If the serial no inwarded using the Serial and Batch Bundle, then the serial no should not be considered
-		for serial_no in non_filtered_serial_nos:
-			if serial_no and serial_no not in self.serial_no_incoming_rate:
-				serial_nos.append(serial_no)
-
-		return serial_nos
 
 	@deprecated(
 		"erpnext.stock.serial_batch_bundle.SerialNoValuation.get_incoming_value_for_serial_nos",
@@ -95,20 +85,6 @@ class DeprecatedSerialNoValuation:
 		return incoming_values
 
 
-@frappe.request_cache
-def has_sle_for_serial_nos(item_code):
-	serial_nos = frappe.db.get_all(
-		"Stock Ledger Entry",
-		fields=["name"],
-		filters={"serial_no": ("is", "set"), "is_cancelled": 0, "item_code": item_code},
-		limit=1,
-	)
-	if serial_nos:
-		return True
-
-	return False
-
-
 class DeprecatedBatchNoValuation:
 	@deprecated(
 		"erpnext.stock.serial_batch_bundle.BatchNoValuation.calculate_avg_rate_from_deprecarated_ledgers",
@@ -121,6 +97,7 @@ class DeprecatedBatchNoValuation:
 		for ledger in entries:
 			self.stock_value_differece[ledger.batch_no] += flt(ledger.batch_value)
 			self.available_qty[ledger.batch_no] += flt(ledger.batch_qty)
+			self.total_qty[ledger.batch_no] += flt(ledger.batch_qty)
 
 	@deprecated(
 		"erpnext.stock.serial_batch_bundle.BatchNoValuation.get_sle_for_batches",
@@ -228,9 +205,15 @@ class DeprecatedBatchNoValuation:
 		"No known instructions.",
 	)
 	def set_balance_value_for_non_batchwise_valuation_batches(self):
-		self.last_sle = self.get_last_sle_for_non_batch()
+		if hasattr(self, "prev_sle"):
+			self.last_sle = self.prev_sle
+		else:
+			self.last_sle = self.get_last_sle_for_non_batch()
+
 		if self.last_sle and self.last_sle.stock_queue:
-			self.stock_queue = json.loads(self.last_sle.stock_queue or "[]") or []
+			self.stock_queue = self.last_sle.stock_queue
+			if isinstance(self.stock_queue, str):
+				self.stock_queue = json.loads(self.stock_queue) or []
 
 		self.set_balance_value_from_sl_entries()
 		self.set_balance_value_from_bundle()
@@ -288,6 +271,7 @@ class DeprecatedBatchNoValuation:
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
 			self.available_qty[d.batch_no] += flt(d.batch_qty)
+			self.total_qty[d.batch_no] += flt(d.batch_qty)
 
 		for d in batch_data:
 			if self.available_qty.get(d.batch_no):
@@ -336,10 +320,7 @@ class DeprecatedBatchNoValuation:
 			query = query.where(sle.name != self.sle.name)
 
 		if self.sle.serial_and_batch_bundle:
-			query = query.where(
-				(sle.serial_and_batch_bundle != self.sle.serial_and_batch_bundle)
-				| (sle.serial_and_batch_bundle.isnull())
-			)
+			query = query.where(Coalesce(sle.serial_and_batch_bundle, "") != self.sle.serial_and_batch_bundle)
 
 		data = query.run(as_dict=True)
 
@@ -402,6 +383,7 @@ class DeprecatedBatchNoValuation:
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
 			self.available_qty[d.batch_no] += flt(d.batch_qty)
+			self.total_qty[d.batch_no] += flt(d.batch_qty)
 
 		if not self.last_sle:
 			return

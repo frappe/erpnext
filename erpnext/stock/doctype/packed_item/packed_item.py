@@ -67,6 +67,10 @@ class PackedItem(Document):
 
 def make_packing_list(doc):
 	"Make/Update packing list for Product Bundle Item."
+
+	if doc.get("is_subcontracted"):
+		return
+
 	if doc.get("_action") and doc._action == "update_after_submit":
 		return
 

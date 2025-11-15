@@ -340,7 +340,7 @@ frappe.ui.form.on("Asset", {
 		}
 
 		var x_intervals = [frappe.format(frm.doc.purchase_date, { fieldtype: "Date" })];
-		var asset_values = [frm.doc.gross_purchase_amount];
+		var asset_values = [frm.doc.net_purchase_amount];
 
 		if (frm.doc.calculate_depreciation) {
 			if (frm.doc.opening_accumulated_depreciation) {
@@ -351,8 +351,8 @@ frappe.ui.form.on("Asset", {
 				x_intervals.push(frappe.format(depreciation_date, { fieldtype: "Date" }));
 				asset_values.push(
 					flt(
-						frm.doc.gross_purchase_amount - frm.doc.opening_accumulated_depreciation,
-						precision("gross_purchase_amount")
+						frm.doc.net_purchase_amount - frm.doc.opening_accumulated_depreciation,
+						precision("net_purchase_amount")
 					)
 				);
 			}
@@ -371,8 +371,8 @@ frappe.ui.form.on("Asset", {
 			$.each(asset_depr_schedule_doc.depreciation_schedule || [], function (i, v) {
 				x_intervals.push(frappe.format(v.schedule_date, { fieldtype: "Date" }));
 				var asset_value = flt(
-					frm.doc.gross_purchase_amount - v.accumulated_depreciation_amount,
-					precision("gross_purchase_amount")
+					frm.doc.net_purchase_amount - v.accumulated_depreciation_amount,
+					precision("net_purchase_amount")
 				);
 				if (v.journal_entry) {
 					asset_values.push(asset_value);
@@ -392,8 +392,8 @@ frappe.ui.form.on("Asset", {
 				x_intervals.push(frappe.format(frm.doc.creation.split(" ")[0], { fieldtype: "Date" }));
 				asset_values.push(
 					flt(
-						frm.doc.gross_purchase_amount - frm.doc.opening_accumulated_depreciation,
-						precision("gross_purchase_amount")
+						frm.doc.net_purchase_amount - frm.doc.opening_accumulated_depreciation,
+						precision("net_purchase_amount")
 					)
 				);
 			}
@@ -408,7 +408,7 @@ frappe.ui.form.on("Asset", {
 			$.each(depr_entries || [], function (i, v) {
 				x_intervals.push(frappe.format(v.posting_date, { fieldtype: "Date" }));
 				let last_asset_value = asset_values[asset_values.length - 1];
-				asset_values.push(flt(last_asset_value - v.value, precision("gross_purchase_amount")));
+				asset_values.push(flt(last_asset_value - v.value, precision("net_purchase_amount")));
 			});
 		}
 
@@ -434,7 +434,7 @@ frappe.ui.form.on("Asset", {
 	},
 
 	item_code: function (frm) {
-		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.gross_purchase_amount) {
+		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
 			frm.trigger("set_finance_book");
 		} else {
 			frm.set_value("finance_books", []);
@@ -447,7 +447,7 @@ frappe.ui.form.on("Asset", {
 			args: {
 				item_code: frm.doc.item_code,
 				asset_category: frm.doc.asset_category,
-				gross_purchase_amount: frm.doc.gross_purchase_amount,
+				net_purchase_amount: frm.doc.net_purchase_amount,
 			},
 			callback: function (r, rt) {
 				if (r.message) {
@@ -463,10 +463,10 @@ frappe.ui.form.on("Asset", {
 
 	is_composite_asset: function (frm) {
 		if (frm.doc.is_composite_asset) {
-			frm.set_value("gross_purchase_amount", 0);
-			frm.set_df_property("gross_purchase_amount", "read_only", 1);
+			frm.set_value("net_purchase_amount", 0);
+			frm.set_df_property("net_purchase_amount", "read_only", 1);
 		} else {
-			frm.set_df_property("gross_purchase_amount", "read_only", 0);
+			frm.set_df_property("net_purchase_amount", "read_only", 0);
 		}
 
 		frm.trigger("toggle_reference_doc");
@@ -592,14 +592,14 @@ frappe.ui.form.on("Asset", {
 
 	calculate_depreciation: function (frm) {
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
-		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.gross_purchase_amount) {
+		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
 			frm.trigger("set_finance_book");
 		} else {
 			frm.set_value("finance_books", []);
 		}
 	},
 
-	gross_purchase_amount: function (frm) {
+	net_purchase_amount: function (frm) {
 		if (frm.doc.finance_books) {
 			frm.doc.finance_books.forEach((d) => {
 				frm.events.set_depreciation_rate(frm, d);
@@ -650,8 +650,8 @@ frappe.ui.form.on("Asset", {
 					let data = r.message;
 					frm.set_value("company", data.company);
 					frm.set_value("purchase_date", data.purchase_date);
-					frm.set_value("gross_purchase_amount", data.gross_purchase_amount);
-					frm.set_value("purchase_amount", data.gross_purchase_amount);
+					frm.set_value("net_purchase_amount", data.net_purchase_amount);
+					frm.set_value("purchase_amount", data.net_purchase_amount);
 					frm.set_value("asset_quantity", data.asset_quantity);
 					frm.set_value("cost_center", data.cost_center);
 					if (data.asset_location) {
@@ -702,7 +702,7 @@ frappe.ui.form.on("Asset", {
 		if (expected_value_after_useful_life_changed) {
 			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = true;
 			const new_salvage_value_percentage = flt(
-				(row.expected_value_after_useful_life * 100) / frm.doc.gross_purchase_amount,
+				(row.expected_value_after_useful_life * 100) / frm.doc.net_purchase_amount,
 				precision("salvage_value_percentage", row)
 			);
 			frappe.model.set_value(
@@ -715,8 +715,8 @@ frappe.ui.form.on("Asset", {
 		} else if (salvage_value_percentage_changed) {
 			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = true;
 			const new_expected_value_after_useful_life = flt(
-				frm.doc.gross_purchase_amount * (row.salvage_value_percentage / 100),
-				precision("gross_purchase_amount")
+				frm.doc.net_purchase_amount * (row.salvage_value_percentage / 100),
+				precision("net_purchase_amount")
 			);
 			frappe.model.set_value(
 				row.doctype,

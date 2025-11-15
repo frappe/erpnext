@@ -53,6 +53,15 @@ frappe.ui.form.on("Master Production Schedule", {
 	set_custom_buttons(frm) {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("View MRP"), () => {
+				if (!frm.doc.items?.length && !frm.doc.sales_forecast) {
+					frappe.throw(
+						__(
+							"Please set actual demand or sales forecast to generate Material Requirements Planning Report."
+						)
+					);
+					return;
+				}
+
 				frappe.set_route("query-report", "Material Requirements Planning Report", {
 					company: frm.doc.company,
 					from_date: frm.doc.from_date,

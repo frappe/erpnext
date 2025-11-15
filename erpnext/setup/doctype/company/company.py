@@ -6,15 +6,18 @@ import json
 
 import frappe
 import frappe.defaults
-from frappe import _
+from frappe import _, bold
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
-from frappe.utils import cint, formatdate, get_link_to_form, get_timestamp, today
+from frappe.utils import add_months, cint, formatdate, get_first_day, get_link_to_form, get_timestamp, today
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+	sync_financial_report_templates,
+)
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 
@@ -73,6 +76,7 @@ class Company(NestedSet):
 		disposal_account: DF.Link | None
 		domain: DF.Data | None
 		email: DF.Data | None
+		enable_item_wise_inventory_account: DF.Check
 		enable_perpetual_inventory: DF.Check
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		exception_budget_approver_role: DF.Link | None
@@ -86,6 +90,8 @@ class Company(NestedSet):
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
+		purchase_expense_account: DF.Link | None
+		purchase_expense_contra_account: DF.Link | None
 		reconcile_on_advance_payment_date: DF.Check
 		reconciliation_takes_effect_on: DF.Literal[
 			"Advance Payment Date", "Oldest Of Invoice Or Advance", "Reconciliation Date"
@@ -98,6 +104,7 @@ class Company(NestedSet):
 		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
 		series_for_depreciation_entry: DF.Data | None
+		service_expense_account: DF.Link | None
 		stock_adjustment_account: DF.Link | None
 		stock_received_but_not_billed: DF.Link | None
 		submit_err_jv: DF.Check
@@ -155,6 +162,24 @@ class Company(NestedSet):
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
 		self.set_reporting_currency()
+		self.validate_inventory_account_settings()
+
+	def validate_inventory_account_settings(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if (
+			doc_before_save.enable_item_wise_inventory_account != self.enable_item_wise_inventory_account
+			and frappe.db.get_value("Stock Ledger Entry", {"is_cancelled": 0, "company": self.name}, "name")
+			and doc_before_save.enable_perpetual_inventory
+		):
+			frappe.throw(
+				_(
+					"Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
+				).format(bold(self.name)),
+				title=_("Cannot Change Inventory Account Setting"),
+			)
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -182,11 +207,35 @@ class Company(NestedSet):
 			["Default Income Account", "default_income_account"],
 			["Stock Received But Not Billed Account", "stock_received_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
+			["Write Off Account", "write_off_account"],
+			["Default Payment Discount Account", "default_discount_account"],
+			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
+			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
+			["Unrealized Exchange Gain / Loss Account", "unrealized_exchange_gain_loss_account"],
+			["Round Off Account", "round_off_account"],
+			["Default Deferred Revenue Account", "default_deferred_revenue_account"],
+			["Default Deferred Expense Account", "default_deferred_expense_account"],
+			["Accumulated Depreciation Account", "accumulated_depreciation_account"],
+			["Depreciation Expense Account", "depreciation_expense_account"],
+			["Gain/Loss Account on Asset Disposal", "disposal_account"],
 		]
 
 		for account in accounts:
 			if self.get(account[1]):
-				for_company = frappe.db.get_value("Account", self.get(account[1]), "company")
+				for_company, is_group, disabled = frappe.db.get_value(
+					"Account", self.get(account[1]), ["company", "is_group", "disabled"]
+				)
+
+				if disabled:
+					frappe.throw(_("Account {0} is disabled.").format(frappe.bold(self.get(account[1]))))
+
+				if is_group:
+					frappe.throw(
+						_("{0}: {1} is a group account.").format(
+							frappe.bold(account[0]), frappe.bold(self.get(account[1]))
+						)
+					)
+
 				if for_company != self.name:
 					frappe.throw(
 						_("Account {0} does not belong to company: {1}").format(
@@ -248,6 +297,7 @@ class Company(NestedSet):
 		):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
+				sync_financial_report_templates(self.chart_of_accounts, self.existing_company)
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
@@ -452,6 +502,22 @@ class Company(NestedSet):
 					_("Set default inventory account for perpetual inventory"), alert=True, indicator="orange"
 				)
 
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		if (
+			doc_before_save.enable_perpetual_inventory
+			and not self.enable_perpetual_inventory
+			and doc_before_save.enable_item_wise_inventory_account != self.enable_item_wise_inventory_account
+		):
+			if frappe.db.get_value("Stock Ledger Entry", {"is_cancelled": 0, "company": self.name}, "name"):
+				frappe.throw(
+					_(
+						"Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
+					).format(bold(self.name))
+				)
+
 	def validate_provisional_account_for_non_stock_items(self):
 		if not self.get("__islocal"):
 			if (
@@ -567,6 +633,21 @@ class Company(NestedSet):
 			)
 
 			self.db_set("disposal_account", disposal_acct)
+
+		if not self.service_expense_account:
+			service_expense_acct = frappe.db.get_value(
+				"Account",
+				{
+					"account_name": _("Marketing Expenses"),
+					"company": self.name,
+					"is_group": 0,
+					"root_type": "Expense",
+				},
+				"name",
+			)
+
+			if service_expense_acct:
+				self.db_set("service_expense_account", service_expense_acct)
 
 	def _set_default_account(self, fieldname, account_type):
 		if self.get(fieldname):
@@ -744,39 +825,39 @@ def install_country_fixtures(company, country):
 
 
 def update_company_current_month_sales(company):
-	current_month_year = formatdate(today(), "MM-yyyy")
+	from_date = get_first_day(today())
+	to_date = get_first_day(add_months(from_date, 1))
 
 	results = frappe.db.sql(
-		f"""
+		"""
 		SELECT
 			SUM(base_grand_total) AS total,
-			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+			DATE_FORMAT(posting_date, '%%m-%%Y') AS month_year
 		FROM
 			`tabSales Invoice`
 		WHERE
-			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			posting_date >= %s
+			AND posting_date < %s
 			AND docstatus = 1
-			AND company = {frappe.db.escape(company)}
+			AND company = %s
 		GROUP BY
 			month_year
-	""",
+		""",
+		(from_date, to_date, company),
 		as_dict=True,
 	)
 
 	monthly_total = results[0]["total"] if len(results) > 0 else 0
-
 	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
 
 
 def update_company_monthly_sales(company):
 	"""Cache past year monthly sales of every company based on sales invoices"""
-	import json
-
 	from frappe.utils.goal import get_monthly_results
 
-	filter_str = f"company = {frappe.db.escape(company)} and status != 'Draft' and docstatus=1"
+	filter_dict = {"company": company, "status": ["!=", "Draft"], "docstatus": 1}
 	month_to_value_dict = get_monthly_results(
-		"Sales Invoice", "base_grand_total", "posting_date", filter_str, "sum"
+		"Sales Invoice", "base_grand_total", "posting_date", filter_dict, "sum"
 	)
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))

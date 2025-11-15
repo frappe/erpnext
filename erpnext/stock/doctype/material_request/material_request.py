@@ -83,6 +83,21 @@ class MaterialRequest(BuyingController):
 		work_order: DF.Link | None
 	# end: auto-generated types
 
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.status_updater = [
+			{
+				"source_dt": "Material Request Item",
+				"target_dt": "Sales Order Item",
+				"target_field": "ordered_qty",
+				"target_parent_dt": "Sales Order",
+				"target_parent_field": "",
+				"join_field": "sales_order_item",
+				"target_ref_field": "stock_qty",
+				"source_field": "stock_qty",
+			}
+		]
+
 	def check_if_already_pulled(self):
 		pass
 
@@ -206,10 +221,10 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
-		if self.material_request_type == "Purchase" and frappe.db.exists(
-			"Budget", {"applicable_on_material_request": 1, "docstatus": 1}
-		):
-			self.validate_budget()
+		if self.material_request_type == "Purchase":
+			self.update_prevdoc_status()
+			if frappe.db.exists("Budget", {"applicable_on_material_request": 1, "docstatus": 1}):
+				self.validate_budget()
 
 	def before_save(self):
 		self.set_status(update=True)
@@ -887,6 +902,16 @@ def raise_work_orders(material_request):
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
+	def update_item(obj, target, source_parent):
+		qty = (
+			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
+			if flt(obj.stock_qty) > flt(obj.ordered_qty)
+			else 0
+		)
+		target.qty = qty
+		target.stock_qty = qty * obj.conversion_factor
+		target.conversion_factor = obj.conversion_factor
+
 	doc = get_mapped_doc(
 		"Material Request",
 		source_name,
@@ -899,6 +924,11 @@ def create_pick_list(source_name, target_doc=None):
 			"Material Request Item": {
 				"doctype": "Pick List Item",
 				"field_map": {"name": "material_request_item", "stock_qty": "stock_qty"},
+				"postprocess": update_item,
+				"condition": lambda doc: (
+					flt(doc.ordered_qty, doc.precision("ordered_qty"))
+					< flt(doc.stock_qty, doc.precision("ordered_qty"))
+				),
 			},
 		},
 		target_doc,

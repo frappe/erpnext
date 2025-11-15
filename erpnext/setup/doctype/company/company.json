@@ -106,13 +106,19 @@
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
+  "purchase_expense_section",
+  "purchase_expense_account",
+  "service_expense_account",
+  "column_break_ereg",
+  "purchase_expense_contra_account",
   "stock_tab",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
+  "enable_item_wise_inventory_account",
   "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
-  "stock_adjustment_account",
   "column_break_32",
+  "stock_adjustment_account",
   "stock_received_but_not_billed",
   "default_provisional_account",
   "default_in_transit_warehouse",
@@ -844,6 +850,41 @@
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Expense"
+  },
+  {
+   "fieldname": "column_break_ereg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_expense_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_expense_contra_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Contra Account",
+   "options": "Account"
+  },
+  {
+   "description": "For service item",
+   "fieldname": "service_expense_account",
+   "fieldtype": "Link",
+   "label": "Service Expense Account",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will use the inventory account set in the Item Master or Item Group or Brand. Otherwise, it will use the inventory account set in the Warehouse.",
+   "fieldname": "enable_item_wise_inventory_account",
+   "fieldtype": "Check",
+   "label": "Enable Item-wise Inventory Account"
   }
  ],
  "icon": "fa fa-building",
@@ -851,7 +892,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-08-25 18:34:03.602046",
+ "modified": "2025-10-23 13:15:52.411984",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

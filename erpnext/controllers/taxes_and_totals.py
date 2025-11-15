@@ -208,12 +208,18 @@ class calculate_taxes_and_totals:
 						if item.discount_amount and not item.discount_percentage:
 							item.rate = item.rate_with_margin - item.discount_amount
 						else:
-							item.discount_amount = item.rate_with_margin - item.rate
+							item.discount_amount = flt(
+								item.rate_with_margin - item.rate, item.precision("discount_amount")
+							)
 
 					elif flt(item.price_list_rate) > 0:
-						item.discount_amount = item.price_list_rate - item.rate
+						item.discount_amount = flt(
+							item.price_list_rate - item.rate, item.precision("discount_amount")
+						)
 				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
-					item.discount_amount = item.price_list_rate - item.rate
+					item.discount_amount = flt(
+						item.price_list_rate - item.rate, item.precision("discount_amount")
+					)
 
 				item.net_rate = item.rate
 
@@ -711,6 +717,25 @@ class calculate_taxes_and_totals:
 				* self.doc.additional_discount_percentage
 				/ 100,
 				self.doc.precision("discount_amount"),
+			)
+
+		discount_amount = self.doc.discount_amount or 0
+		grand_total = self.doc.grand_total
+
+		# validate that discount amount cannot exceed the total before discount
+		if (
+			(grand_total >= 0 and discount_amount > grand_total)
+			or (grand_total < 0 and discount_amount < grand_total)  # returns
+		):
+			frappe.throw(
+				_(
+					"Additional Discount Amount ({discount_amount}) cannot exceed "
+					"the total before such discount ({total_before_discount})"
+				).format(
+					discount_amount=self.doc.get_formatted("discount_amount"),
+					total_before_discount=self.doc.get_formatted("grand_total"),
+				),
+				title=_("Invalid Discount Amount"),
 			)
 
 	def apply_discount_amount(self):
