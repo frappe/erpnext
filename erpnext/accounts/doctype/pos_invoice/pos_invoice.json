@@ -633,7 +633,8 @@
    "fieldtype": "Table",
    "label": "Packed Items",
    "options": "Packed Item",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.__islocal"
   },
   {
    "fieldname": "product_bundle_help",
@@ -1607,7 +1608,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 22:22:31.471752",
+ "modified": "2025-11-16 15:25:53.929750",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

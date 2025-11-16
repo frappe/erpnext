@@ -553,7 +553,8 @@
    "oldfieldname": "packing_details",
    "oldfieldtype": "Table",
    "options": "Packed Item",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.__islocal"
   },
   {
    "fieldname": "product_bundle_help",
@@ -1424,7 +1425,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 19:20:47.724218",
+ "modified": "2025-11-16 15:25:08.893374",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

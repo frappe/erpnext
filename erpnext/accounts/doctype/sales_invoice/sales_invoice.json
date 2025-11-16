@@ -759,7 +759,8 @@
    "hide_seconds": 1,
    "label": "Packed Items",
    "options": "Packed Item",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.__islocal"
   },
   {
    "fieldname": "product_bundle_help",
@@ -2251,7 +2252,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2025-10-09 14:48:59.472826",
+ "modified": "2025-11-16 15:24:06.023393",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
