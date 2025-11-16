@@ -262,6 +262,8 @@ class AccountsController(TransactionBase):
 
 			validate_return(self)
 
+			self.validate_total_discount()
+
 		self.validate_all_documents_schedule()
 
 		self.validate_party()
@@ -1380,6 +1382,29 @@ class AccountsController(TransactionBase):
 					title=_("Invalid Quantity"),
 					exc=InvalidQtyError,
 				)
+
+	def validate_total_discount(self):
+		if not self.get("base_discount_amount") or not self.get("items"):
+			return
+
+		if self.get("is_return"):
+			return
+
+		min_item = min(self.get("items"), key=lambda x: flt(x.base_amount))
+		min_item_amount = flt(min_item.base_amount)
+
+		if flt(self.base_discount_amount) > min_item_amount:
+			frappe.msgprint(
+				_(
+					"If you process partial transactions in the future, you may encounter a negative total amount. Consider applying the discount at the item level instead. Additional Discount {0} is higher than item {1} value {2}."
+				).format(
+					bold(fmt_money(self.base_discount_amount, currency=self.company_currency)),
+					bold(min_item.item_code),
+					bold(fmt_money(min_item_amount, currency=self.company_currency)),
+				),
+				title=_("Additional Discount Warning"),
+				indicator="orange",
+			)
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
