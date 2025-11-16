@@ -794,7 +794,7 @@ def level_order_traversal(node):
 	return traversal
 
 
-def create_nested_bom(tree, prefix="_Test bom ", phantom_items=None, submit=True):
+def create_nested_bom(tree, prefix="_Test bom ", submit=True, phantom_items=None):
 	"""Helper function to create a simple nested bom from tree describing item names. (along with required items)"""
 
 	def create_items(bom_tree):
