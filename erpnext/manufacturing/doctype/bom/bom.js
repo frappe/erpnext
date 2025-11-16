@@ -183,7 +183,7 @@ frappe.ui.form.on("BOM", {
 			);
 		}
 
-		if (frm.doc.docstatus == 1) {
+		if (frm.doc.docstatus == 1 && !frm.doc.is_phantom_bom) {
 			frm.add_custom_button(
 				__("Work Order"),
 				function () {
