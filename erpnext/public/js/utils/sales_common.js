@@ -119,7 +119,10 @@ erpnext.sales_common = {
 			company() {
 				super.company();
 				this.set_default_company_address();
-				this.set_default_company_contact_person();
+				if (!this.is_onload) {
+					// we don't want to override the mapped contact from prevdoc
+					this.set_default_company_contact_person();
+				}
 			}
 
 			set_default_company_address() {
