@@ -6,7 +6,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, sbool
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 
@@ -29,6 +29,7 @@ BOM_ITEM_FIELDS = [
 	"conversion_factor",
 	"do_not_explode",
 	"operation",
+	"is_phantom_item",
 ]
 
 
@@ -305,6 +306,7 @@ class BOMCreator(Document):
 				"allow_alternative_item": 1,
 				"bom_creator": self.name,
 				"bom_creator_item": bom_creator_item,
+				"is_phantom_bom": row.get("is_phantom_item"),
 			}
 		)
 
@@ -332,7 +334,7 @@ class BOMCreator(Document):
 				{
 					"bom_no": bom_no,
 					"allow_alternative_item": 1,
-					"allow_scrap_items": 1,
+					"allow_scrap_items": not item.get("is_phantom_item"),
 					"include_item_in_manufacturing": 1,
 				}
 			)
@@ -456,12 +458,16 @@ def add_sub_assembly(**kwargs):
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
 				"operation": bom_item.operation,
+				"is_phantom_item": sbool(kwargs.phantom),
 			},
 		)
 
 		parent_row_no = item_row.idx
 		name = ""
 	else:
+		if sbool(kwargs.phantom):
+			parent_row = next(item for item in doc.items if item.name == kwargs.fg_reference_id)
+			parent_row.db_set("is_phantom_item", 1)
 		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
 
 	for row in bom_item.get("items"):

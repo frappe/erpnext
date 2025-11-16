@@ -747,7 +747,7 @@ class TestMaterialRequest(IntegrationTestCase):
 			(mr.items[0].item_code, mr.items[0].warehouse),
 		)[0][0]
 
-		prod_order = raise_work_orders(mr.name)
+		prod_order = raise_work_orders(mr.name, mr.company)
 		po = frappe.get_doc("Work Order", prod_order[0])
 		po.wip_warehouse = "_Test Warehouse 1 - _TC"
 		po.submit()
@@ -789,7 +789,7 @@ class TestMaterialRequest(IntegrationTestCase):
 
 		self.assertEqual(requested_qty, existing_requested_qty + 120)
 
-		work_order = raise_work_orders(mr.name)
+		work_order = raise_work_orders(mr.name, mr.company)
 		wo = frappe.get_doc("Work Order", work_order[0])
 		wo.qty = 50
 		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
@@ -924,7 +924,7 @@ class TestMaterialRequest(IntegrationTestCase):
 			item_code="_Test FG Item", material_request_type="Manufacture", do_not_submit=False
 		)
 
-		work_order = raise_work_orders(mr.name)
+		work_order = raise_work_orders(mr.name, mr.company)
 		wo = frappe.get_doc("Work Order", work_order[0])
 		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
 		wo.submit()

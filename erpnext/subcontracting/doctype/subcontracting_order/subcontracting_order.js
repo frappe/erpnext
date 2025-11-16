@@ -172,9 +172,277 @@ frappe.ui.form.on("Subcontracting Order", {
 					__("Status")
 				);
 			}
+
+			if (frm.doc.reserve_stock) {
+				if (frm.doc.status !== "Closed") {
+					if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+						frm.add_custom_button(
+							__("Reserve"),
+							() => frm.events.create_stock_reservation_entries(frm),
+							__("Stock Reservation")
+						);
+					}
+				}
+
+				if (
+					frm.doc.__onload &&
+					frm.doc.__onload.has_reserved_stock &&
+					frappe.model.can_cancel("Stock Reservation Entry")
+				) {
+					frm.add_custom_button(
+						__("Unreserve"),
+						() => frm.events.cancel_stock_reservation_entries(frm),
+						__("Stock Reservation")
+					);
+				}
+
+				frm.doc.supplied_items.forEach((item) => {
+					if (
+						flt(item.stock_reserved_qty) > 0 &&
+						frappe.model.can_read("Stock Reservation Entry")
+					) {
+						frm.add_custom_button(
+							__("Reserved Stock"),
+							() => frm.events.show_reserved_stock(frm),
+							__("Stock Reservation")
+						);
+						return;
+					}
+				});
+			}
 		}
 
 		frm.trigger("get_materials_from_supplier");
+	},
+
+	create_stock_reservation_entries(frm) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Stock Reservation"),
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "items",
+					fieldtype: "Table",
+					label: __("Items to Reserve"),
+					allow_bulk_edit: false,
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					data: [],
+					fields: [
+						{
+							fieldname: "subcontracting_order_supplied_item",
+							fieldtype: "Link",
+							label: __("Subcontracting Order Supplied Item"),
+							options: "Subcontracting Order Supplied Item",
+							reqd: 1,
+							in_list_view: 1,
+							read_only: 1,
+							get_query: () => {
+								return {
+									query: "erpnext.controllers.queries.get_filtered_child_rows",
+									filters: {
+										parenttype: frm.doc.doctype,
+										parent: frm.doc.name,
+									},
+								};
+							},
+						},
+						{
+							fieldname: "rm_item_code",
+							fieldtype: "Link",
+							label: __("Item Code"),
+							options: "Item",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "warehouse",
+							fieldtype: "Link",
+							label: __("Warehouse"),
+							options: "Warehouse",
+							reqd: 1,
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldname: "qty_to_reserve",
+							fieldtype: "Float",
+							label: __("Qty"),
+							reqd: 1,
+							in_list_view: 1,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Reserve Stock"),
+			primary_action: () => {
+				var data = { items: dialog.fields_dict.items.grid.get_selected_children() };
+
+				if (data.items && data.items.length > 0) {
+					frappe.call({
+						doc: frm.doc,
+						method: "reserve_raw_materials",
+						args: {
+							items: data.items.map((item) => ({
+								name: item.subcontracting_order_supplied_item,
+								qty_to_reserve: item.qty_to_reserve,
+							})),
+						},
+						freeze: true,
+						freeze_message: __("Reserving Stock..."),
+						callback: (_) => {
+							frm.reload_doc();
+						},
+					});
+
+					dialog.hide();
+				} else {
+					frappe.msgprint(__("Please select items to reserve."));
+				}
+			},
+		});
+
+		frm.doc.supplied_items.forEach((item) => {
+			let unreserved_qty =
+				flt(item.required_qty) - flt(item.supplied_qty) - flt(item.stock_reserved_qty);
+
+			if (unreserved_qty > 0) {
+				dialog.fields_dict.items.df.data.push({
+					__checked: 1,
+					subcontracting_order_supplied_item: item.name,
+					rm_item_code: item.rm_item_code,
+					warehouse: item.reserve_warehouse,
+					qty_to_reserve: unreserved_qty,
+				});
+			}
+		});
+
+		dialog.fields_dict.items.grid.refresh();
+		dialog.show();
+	},
+
+	cancel_stock_reservation_entries(frm) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Stock Unreservation"),
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "sr_entries",
+					fieldtype: "Table",
+					label: __("Reserved Stock"),
+					allow_bulk_edit: false,
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: true,
+					data: [],
+					fields: [
+						{
+							fieldname: "sre",
+							fieldtype: "Link",
+							label: __("Stock Reservation Entry"),
+							options: "Stock Reservation Entry",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "item_code",
+							fieldtype: "Link",
+							label: __("Item Code"),
+							options: "Item",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "warehouse",
+							fieldtype: "Link",
+							label: __("Warehouse"),
+							options: "Warehouse",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "qty",
+							fieldtype: "Float",
+							label: __("Qty"),
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Unreserve Stock"),
+			primary_action: () => {
+				var data = { sr_entries: dialog.fields_dict.sr_entries.grid.get_selected_children() };
+
+				if (data.sr_entries && data.sr_entries.length > 0) {
+					frappe.call({
+						doc: frm.doc,
+						method: "cancel_stock_reservation_entries",
+						args: {
+							sre_list: data.sr_entries.map((item) => item.sre),
+						},
+						freeze: true,
+						freeze_message: __("Unreserving Stock..."),
+						callback: (_) => {
+							frm.doc.__onload.has_reserved_stock = false;
+							frm.reload_doc();
+						},
+					});
+
+					dialog.hide();
+				} else {
+					frappe.msgprint(__("Please select items to unreserve."));
+				}
+			},
+		});
+
+		frappe
+			.call({
+				method: "erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.get_stock_reservation_entries_for_voucher",
+				args: {
+					voucher_type: frm.doctype,
+					voucher_no: frm.doc.name,
+				},
+				callback: (r) => {
+					if (!r.exc && r.message) {
+						r.message.forEach((sre) => {
+							if (flt(sre.reserved_qty) > flt(sre.delivered_qty)) {
+								dialog.fields_dict.sr_entries.df.data.push({
+									sre: sre.name,
+									item_code: sre.item_code,
+									warehouse: sre.warehouse,
+									qty: flt(sre.reserved_qty) - flt(sre.delivered_qty),
+								});
+							}
+						});
+					}
+				},
+			})
+			.then((r) => {
+				dialog.fields_dict.sr_entries.grid.refresh();
+				dialog.show();
+			});
+	},
+
+	show_reserved_stock(frm) {
+		// Get the latest modified date from the items table.
+		var to_date = moment(new Date(Math.max(...frm.doc.items.map((e) => new Date(e.modified))))).format(
+			"YYYY-MM-DD"
+		);
+
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: frm.doc.transaction_date,
+			to_date: to_date,
+			voucher_type: frm.doc.doctype,
+			voucher_no: frm.doc.name,
+		};
+		frappe.set_route("query-report", "Reserved Stock");
 	},
 
 	update_subcontracting_order_status(frm, status) {

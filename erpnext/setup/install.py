@@ -5,12 +5,11 @@
 import os
 
 import frappe
-from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-from frappe.utils import cint
 
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
+from erpnext.setup.utils import identity as _
 
 from .default_success_action import get_default_success_action
 
@@ -184,33 +183,27 @@ def add_company_to_session_defaults():
 
 def add_standard_navbar_items():
 	navbar_settings = frappe.get_single("Navbar Settings")
-
-	# Translatable strings for below navbar items
-	__ = _("Documentation")
-	__ = _("User Forum")
-	__ = _("Report an Issue")
-
 	erpnext_navbar_items = [
 		{
-			"item_label": "Documentation",
+			"item_label": _("Documentation"),
 			"item_type": "Route",
 			"route": "https://docs.erpnext.com/",
 			"is_standard": 1,
 		},
 		{
-			"item_label": "User Forum",
+			"item_label": _("User Forum"),
 			"item_type": "Route",
 			"route": "https://discuss.frappe.io",
 			"is_standard": 1,
 		},
 		{
-			"item_label": "Frappe School",
+			"item_label": _("Frappe School"),
 			"item_type": "Route",
 			"route": "https://frappe.io/school?utm_source=in_app",
 			"is_standard": 1,
 		},
 		{
-			"item_label": "Report an Issue",
+			"item_label": _("Report an Issue"),
 			"item_type": "Route",
 			"route": "https://github.com/frappe/erpnext/issues",
 			"is_standard": 1,
@@ -319,26 +312,26 @@ def create_letter_head():
 
 
 DEFAULT_ROLE_PROFILES = {
-	"Inventory": [
+	_("Inventory"): [
 		"Stock User",
 		"Stock Manager",
 		"Item Manager",
 	],
-	"Manufacturing": [
+	_("Manufacturing"): [
 		"Stock User",
 		"Manufacturing User",
 		"Manufacturing Manager",
 	],
-	"Accounts": [
+	_("Accounts"): [
 		"Accounts User",
 		"Accounts Manager",
 	],
-	"Sales": [
+	_("Sales"): [
 		"Sales User",
 		"Stock User",
 		"Sales Manager",
 	],
-	"Purchase": [
+	_("Purchase"): [
 		"Item Manager",
 		"Stock User",
 		"Purchase User",

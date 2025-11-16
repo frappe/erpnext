@@ -40,6 +40,16 @@ class TestAccountBalance(IntegrationTestCase):
 				"balance": 0.0,
 			},
 			{
+				"account": "Interest Income - _TC2",
+				"currency": "EUR",
+				"balance": 0.0,
+			},
+			{
+				"account": "Interest on Fixed Deposits - _TC2",
+				"currency": "EUR",
+				"balance": 0.0,
+			},
+			{
 				"account": "Sales - _TC2",
 				"currency": "EUR",
 				"balance": -100.0,

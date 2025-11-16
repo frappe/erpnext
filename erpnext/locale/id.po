@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-10 12:11+0000\n"
-"PO-Revision-Date: 2025-11-10 21:18\n"
+"PO-Revision-Date: 2025-11-15 21:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Indonesian\n"
 "MIME-Version: 1.0\n"
@@ -16771,7 +16771,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
-msgstr "Para karyawan"
+msgstr ""
 
 #: erpnext/stock/doctype/batch/batch_list.js:16
 msgid "Empty"
@@ -19907,7 +19907,7 @@ msgstr "Sasaran dan Prosedur"
 #. Group in Quality Procedure's connections
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.json
 msgid "Goals"
-msgstr "tujuan"
+msgstr ""
 
 #. Option for the 'Shipment Type' (Select) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json

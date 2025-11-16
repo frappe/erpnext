@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-10 12:11+0000\n"
-"PO-Revision-Date: 2025-11-11 21:15\n"
+"PO-Revision-Date: 2025-11-12 21:29\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -32241,7 +32241,7 @@ msgstr "Plati / Uplata od"
 #: erpnext/accounts/report/account_balance/account_balance.js:54
 #: erpnext/setup/doctype/party_type/party_type.json
 msgid "Payable"
-msgstr "Plaća se"
+msgstr "Obaveze"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:39
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1160
@@ -32249,7 +32249,7 @@ msgstr "Plaća se"
 #: erpnext/accounts/report/purchase_register/purchase_register.py:194
 #: erpnext/accounts/report/purchase_register/purchase_register.py:235
 msgid "Payable Account"
-msgstr "Račun Plaćanja"
+msgstr "Račun Obaveza"
 
 #. Name of a Workspace
 #. Label of the payables (Check) field in DocType 'Email Digest'
