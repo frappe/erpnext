@@ -158,6 +158,8 @@ erpnext.sales_common = {
 						.then((r) => {
 							if (r.message?.default_sales_contact) {
 								this.frm.set_value("company_contact_person", r.message.default_sales_contact);
+							} else {
+								this.frm.set_value("company_contact_person", "");
 							}
 						});
 				}
