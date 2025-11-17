@@ -12,6 +12,7 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.accounts.utils import get_zero_cutoff
 from erpnext.controllers.accounts_controller import (
 	validate_conversion_rate,
 	validate_inclusive_tax,
@@ -496,6 +497,8 @@ class calculate_taxes_and_totals:
 			return
 
 		invalid_rows = []
+		company_currency = erpnext.get_company_currency(self.doc.company)
+		zero_cutoff = get_zero_cutoff(company_currency)
 
 		# reset temporary attributes
 		for tax in self.doc.taxes:
@@ -520,8 +523,7 @@ class calculate_taxes_and_totals:
 			actual_breakup = tax._total_tax_breakup
 			diff = flt(expected_amount - actual_breakup, 5)
 
-			# TODO: how much diff allowed ??
-			if abs(diff) <= 0.5:
+			if abs(diff) <= zero_cutoff:
 				detail_row = self.doc._item_wise_tax_details[last_idx]
 				detail_row["amount"] = flt(detail_row["amount"] + diff, 5)
 
