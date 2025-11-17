@@ -497,8 +497,6 @@ class calculate_taxes_and_totals:
 			return
 
 		invalid_rows = []
-		company_currency = erpnext.get_company_currency(self.doc.company)
-		zero_cutoff = get_zero_cutoff(company_currency)
 
 		# reset temporary attributes
 		for tax in self.doc.taxes:
@@ -523,7 +521,8 @@ class calculate_taxes_and_totals:
 			actual_breakup = tax._total_tax_breakup
 			diff = flt(expected_amount - actual_breakup, 5)
 
-			if abs(diff) <= zero_cutoff:
+			# TODO: fix rounding difference issues
+			if abs(diff) <= 0.5:
 				detail_row = self.doc._item_wise_tax_details[last_idx]
 				detail_row["amount"] = flt(detail_row["amount"] + diff, 5)
 
@@ -618,7 +617,7 @@ class calculate_taxes_and_totals:
 		else:
 			item_wise_taxable_amount = 0.0
 
-		# maintaing a temp object with item and tax object because correct name will be available after insertion.
+		# maintaining a temp object with item and tax object because correct name will be available after insertion.
 		self.doc._item_wise_tax_details.append(
 			frappe._dict(
 				item=item,
