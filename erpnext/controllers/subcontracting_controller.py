@@ -549,7 +549,7 @@ class SubcontractingController(StockController):
 		if item.get("serial_and_batch_bundle"):
 			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
 
-	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
+	def _get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
 		data = []
 
 		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
@@ -590,7 +590,7 @@ class SubcontractingController(StockController):
 		to_remove = []
 		for item in data:
 			if item.is_phantom_item:
-				data += self.__get_materials_from_bom(
+				data += self._get_materials_from_bom(
 					item.rm_item_code, item.bom_no, exploded_item=exploded_item
 				)
 				to_remove.append(item)
@@ -921,7 +921,7 @@ class SubcontractingController(StockController):
 			if self.doctype == self.subcontract_data.order_doctype or (
 				self.backflush_based_on == "BOM" or self.is_return
 			):
-				for bom_item in self.__get_materials_from_bom(
+				for bom_item in self._get_materials_from_bom(
 					row.item_code, row.bom, row.get("include_exploded_items")
 				):
 					qty = flt(bom_item.qty_consumed_per_unit) * flt(row.qty) * row.conversion_factor
