@@ -20,6 +20,7 @@
   "section_break_tbej",
   "doctypes",
   "doctypes_to_be_ignored",
+  "doctypes_to_delete",
   "amended_from",
   "process_in_single_transaction"
  ],
@@ -41,11 +42,18 @@
    "read_only": 1
   },
   {
+   "description": "DocTypes that will NOT be deleted. Add or remove items as needed.",
    "fieldname": "doctypes_to_be_ignored",
    "fieldtype": "Table",
    "label": "Excluded DocTypes",
-   "options": "Transaction Deletion Record Item",
-   "read_only": 1
+   "options": "Transaction Deletion Record Item"
+  },
+  {
+   "description": "DocTypes that will be deleted",
+   "fieldname": "doctypes_to_delete",
+   "fieldtype": "Table",
+   "label": "DocTypes To Delete",
+   "options": "Transaction Deletion Record To Delete"
   },
   {
    "fieldname": "amended_from",
@@ -144,7 +152,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:54.828051",
+ "modified": "2025-11-14 16:17:36.170889",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
@@ -165,6 +173,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

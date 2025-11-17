@@ -1,15 +1,14 @@
 {
  "actions": [],
- "allow_rename": 1,
- "creation": "2024-02-04 10:53:32.307930",
+ "creation": "2025-11-14 00:00:00",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "doctype_name",
-  "docfield_name",
-  "no_of_docs",
-  "done"
+  "document_count",
+  "child_doctypes",
+  "deleted"
  ],
  "fields": [
   {
@@ -17,44 +16,44 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "DocType",
-   "options": "DocType",
-   "read_only": 1,
-   "reqd": 1
+   "options": "DocType"
   },
   {
-   "fieldname": "docfield_name",
-   "fieldtype": "Data",
-   "label": "DocField",
+   "fieldname": "document_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Document Count",
    "read_only": 1
   },
   {
-   "fieldname": "no_of_docs",
-   "fieldtype": "Int",
+   "description": "Child tables that will also be deleted",
+   "fieldname": "child_doctypes",
+   "fieldtype": "Small Text",
    "in_list_view": 1,
-   "label": "No of Docs",
+   "label": "Child DocTypes",
    "read_only": 1
   },
   {
    "default": "0",
-   "fieldname": "done",
+   "fieldname": "deleted",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Done",
+   "label": "Deleted",
    "read_only": 1
   }
  ],
- "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-14 16:17:25.584675",
+ "modified": "2025-11-14 16:17:04.494126",
  "modified_by": "Administrator",
- "module": "Accounts",
- "name": "Transaction Deletion Record Details",
+ "module": "Setup",
+ "name": "Transaction Deletion Record To Delete",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
