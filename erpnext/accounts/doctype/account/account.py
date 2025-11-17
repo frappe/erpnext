@@ -31,6 +31,7 @@ class Account(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		account_category: DF.Link | None
 		account_currency: DF.Link | None
 		account_name: DF.Data
 		account_number: DF.Data | None

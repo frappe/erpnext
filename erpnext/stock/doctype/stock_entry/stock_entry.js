@@ -1382,8 +1382,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "cost_center"]);
 		}
 
-		if (!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
-		if (!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
+		if (this.frm.doc.from_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
+		if (this.frm.doc.to_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 
 		if (cint(frappe.user_defaults?.use_serial_batch_fields)) {
 			frappe.model.set_value(row.doctype, row.name, "use_serial_batch_fields", 1);

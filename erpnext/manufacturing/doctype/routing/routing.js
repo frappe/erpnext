@@ -2,6 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Routing", {
+	setup: function (frm) {
+		frm.set_query("bom_no", "operations", function () {
+			return {
+				filters: {
+					is_phantom_bom: 0,
+				},
+			};
+		});
+	},
+
 	refresh: function (frm) {
 		frm.trigger("display_sequence_id_column");
 	},

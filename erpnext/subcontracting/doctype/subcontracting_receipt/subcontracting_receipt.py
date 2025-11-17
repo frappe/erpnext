@@ -164,6 +164,8 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
@@ -189,6 +191,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_consumed_qty_in_subcontract_order()
 		self.set_subcontracting_order_status(update_bin=False)
 		self.update_stock_ledger()
+		self.update_stock_reservation_entries()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.update_status()
@@ -199,7 +202,7 @@ class SubcontractingReceipt(SubcontractingController):
 	def reset_raw_materials(self):
 		self.supplied_items = []
 		self.flags.reset_raw_materials = True
-		self.create_raw_materials_supplied()
+		self.create_raw_materials_supplied_or_received()
 
 	def validate_closed_subcontracting_order(self):
 		for item in self.items:
@@ -852,6 +855,17 @@ class SubcontractingReceipt(SubcontractingController):
 	def auto_create_purchase_receipt(self):
 		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
 			make_purchase_receipt(self, save=True, notify=True)
+
+	def has_reserved_stock(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_details_for_voucher,
+		)
+
+		for item in self.supplied_items:
+			if get_sre_details_for_voucher("Subcontracting Order", item.subcontracting_order):
+				return True
+
+		return False
 
 
 @frappe.whitelist()

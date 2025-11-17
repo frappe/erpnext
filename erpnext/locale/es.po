@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-10 12:11+0000\n"
-"PO-Revision-Date: 2025-11-10 21:18\n"
+"PO-Revision-Date: 2025-11-15 21:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -6922,7 +6922,7 @@ msgstr "Información de la Cuenta Bancaria"
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Bank Account No"
-msgstr "Número de Cuenta Bancaria"
+msgstr ""
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_account_subtype/bank_account_subtype.json
@@ -7024,7 +7024,7 @@ msgstr "Tipo de Garantía Bancaria"
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Bank Name"
-msgstr "Nombre del banco"
+msgstr ""
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:98
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:142
@@ -7513,7 +7513,7 @@ msgstr "Antes de Reconciliación"
 #. Label of the start (Int) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Begin On (Days)"
-msgstr "Comience el (días)"
+msgstr ""
 
 #. Option for the 'Generate Invoice At' (Select) field in DocType
 #. 'Subscription'
@@ -11762,7 +11762,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Costing"
-msgstr "Presupuesto"
+msgstr ""
 
 #. Label of the costing_amount (Currency) field in DocType 'Timesheet Detail'
 #. Label of the base_costing_amount (Currency) field in DocType 'Timesheet
@@ -12454,7 +12454,7 @@ msgstr "Acreedores"
 #. Label of the criteria (Table) field in DocType 'Supplier Scorecard Period'
 #: erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgid "Criteria"
-msgstr "Criterios"
+msgstr ""
 
 #. Label of the formula (Small Text) field in DocType 'Supplier Scorecard
 #. Criteria'
@@ -13579,7 +13579,7 @@ msgstr "Importación de datos y configuraciones"
 #. Label of the date (Date) field in DocType 'Bulk Transaction Log Detail'
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
 msgid "Date "
-msgstr "Fecha "
+msgstr ""
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.js:97
 msgid "Date Based On"
@@ -13603,7 +13603,7 @@ msgstr "La fecha debe estar entre {0} y {1}"
 #. Label of the date_of_birth (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Date of Birth"
-msgstr "Fecha de nacimiento"
+msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:147
 msgid "Date of Birth cannot be greater than today."
@@ -13636,7 +13636,7 @@ msgstr "Fecha de Emisión."
 #. Label of the date_of_joining (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Date of Joining"
-msgstr "Fecha de Ingreso"
+msgstr ""
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:273
 msgid "Date of Transaction"
@@ -13955,7 +13955,7 @@ msgstr "Deducciones o Pérdida"
 #: erpnext/accounts/doctype/mode_of_payment_account/mode_of_payment_account.json
 #: erpnext/accounts/doctype/party_account/party_account.json
 msgid "Default Account"
-msgstr "Cuenta predeterminada"
+msgstr ""
 
 #. Label of the default_accounts_section (Section Break) field in DocType
 #. 'Supplier'
@@ -14463,7 +14463,7 @@ msgstr "Gasto Diferido"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Deferred Expense Account"
-msgstr "Cuenta de Gastos Diferidos"
+msgstr ""
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Label of the deferred_revenue (Section Break) field in DocType 'POS Invoice
@@ -15352,7 +15352,7 @@ msgstr "Ingreso directo"
 #: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.json
 msgid "Disable"
-msgstr "Desactivar"
+msgstr ""
 
 #. Label of the disable_capacity_planning (Check) field in DocType
 #. 'Manufacturing Settings'
@@ -15396,7 +15396,7 @@ msgstr "Desactivar última tasa de compra"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Disable Rounded Total"
-msgstr "Desactivar redondeo"
+msgstr ""
 
 #. Label of the disable_serial_no_and_batch_selector (Check) field in DocType
 #. 'Stock Settings'
@@ -16311,7 +16311,7 @@ msgstr "Duplicado {0} encontrado en la tabla"
 #. Label of the duration (Int) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "Duration (Days)"
-msgstr "Duración (Días)"
+msgstr ""
 
 #: erpnext/crm/report/lead_conversion_time/lead_conversion_time.py:66
 msgid "Duration in Days"
@@ -16687,7 +16687,7 @@ msgstr "Empleado"
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Employee Advance"
-msgstr "Avance del Empleado"
+msgstr ""
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:16
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:23
@@ -16750,7 +16750,7 @@ msgstr "Nombre de empleado"
 #. Label of the employee_number (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Employee Number"
-msgstr "Número de empleado"
+msgstr ""
 
 #. Label of the employee_user_id (Link) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
@@ -16776,7 +16776,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
-msgstr "Empleados"
+msgstr ""
 
 #: erpnext/stock/doctype/batch/batch_list.js:16
 msgid "Empty"
@@ -16967,7 +16967,7 @@ msgstr ""
 #. Label of the encashment_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Encashment Date"
-msgstr "Fecha de Cobro"
+msgstr ""
 
 #: erpnext/crm/doctype/contract/contract.py:70
 msgid "End Date cannot be before Start Date."
@@ -17413,7 +17413,7 @@ msgstr ""
 #: erpnext/stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Exchange Rate"
-msgstr "Tipo de cambio"
+msgstr ""
 
 #. Name of a DocType
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
@@ -17688,7 +17688,7 @@ msgstr "Falta la cuenta de gastos"
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Expense Claim"
-msgstr "Reembolso de gastos"
+msgstr ""
 
 #. Label of the expense_account (Link) field in DocType 'Purchase Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -19079,7 +19079,7 @@ msgstr ""
 #. Label of the from_employee (Link) field in DocType 'Asset Movement Item'
 #: erpnext/assets/doctype/asset_movement_item/asset_movement_item.json
 msgid "From Employee"
-msgstr "Desde Empleado"
+msgstr ""
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:85
 msgid "From Employee is required while issuing Asset {0}"
@@ -20632,7 +20632,7 @@ msgstr "Nombre de festividad"
 #. Label of the holidays (Table) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Holidays"
-msgstr "Vacaciones"
+msgstr ""
 
 #. Option for the 'Forecasting Method' (Select) field in DocType 'Sales
 #. Forecast'
@@ -20662,7 +20662,7 @@ msgstr "Hora"
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Hour Rate"
-msgstr "Salario por hora"
+msgstr ""
 
 #. Label of the hours (Float) field in DocType 'Workstation Working Hour'
 #: erpnext/manufacturing/doctype/workstation_working_hour/workstation_working_hour.json
@@ -21399,7 +21399,7 @@ msgstr "En porcentaje"
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 msgid "In Process"
-msgstr "En Proceso"
+msgstr ""
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:107
 msgid "In Production"
@@ -22262,7 +22262,7 @@ msgstr "Configuración de transferencia entre almacenes"
 #. Label of the interest (Currency) field in DocType 'Overdue Payment'
 #: erpnext/accounts/doctype/overdue_payment/overdue_payment.json
 msgid "Interest"
-msgstr "Interesar"
+msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:3052
 msgid "Interest and/or dunning fee"
@@ -23107,7 +23107,7 @@ msgstr "Es un Proveedor Interno"
 #. Label of the is_mandatory (Check) field in DocType 'Applicable On Account'
 #: erpnext/accounts/doctype/applicable_on_account/applicable_on_account.json
 msgid "Is Mandatory"
-msgstr "Es obligatorio"
+msgstr ""
 
 #. Label of the is_milestone (Check) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -23161,7 +23161,7 @@ msgstr ""
 #. Label of the is_paid (Check) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Is Paid"
-msgstr "Está pagado"
+msgstr ""
 
 #. Label of the is_paused (Check) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
@@ -25098,7 +25098,7 @@ msgstr "Trabajo comenzó"
 #: erpnext/crm/doctype/lead/lead.json
 #: erpnext/crm/doctype/opportunity/opportunity.json
 msgid "Job Title"
-msgstr "Título del trabajo"
+msgstr ""
 
 #. Label of the supplier (Link) field in DocType 'Subcontracting Order'
 #. Label of the supplier (Link) field in DocType 'Subcontracting Receipt'
@@ -25888,7 +25888,7 @@ msgstr "Número de Licencia"
 #. Label of the license_plate (Data) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "License Plate"
-msgstr "Matrículas"
+msgstr ""
 
 #: erpnext/controllers/status_updater.py:459
 msgid "Limit Crossed"
@@ -26017,7 +26017,7 @@ msgstr ""
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Loan"
-msgstr "Préstamo"
+msgstr ""
 
 #. Label of the loan_end_date (Date) field in DocType 'Invoice Discounting'
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
@@ -28108,7 +28108,7 @@ msgstr "Modo de pago"
 #. Label of the model (Data) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Model"
-msgstr "Modelo"
+msgstr ""
 
 #. Label of the section_break_11 (Section Break) field in DocType 'POS Closing
 #. Entry'
@@ -29703,7 +29703,7 @@ msgstr "Valor del cuentakilómetros (Última)"
 #. Label of the scheduled_confirmation_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Offer Date"
-msgstr "Fecha de oferta"
+msgstr ""
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:29
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:42
@@ -29745,7 +29745,7 @@ msgstr ""
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Old Parent"
-msgstr "Antiguo Padre"
+msgstr ""
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
@@ -30712,7 +30712,7 @@ msgstr "Artículo Original"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Other Details"
-msgstr "Otros detalles"
+msgstr ""
 
 #. Label of the other_info_tab (Tab Break) field in DocType 'Asset'
 #. Label of the other_info_tab (Tab Break) field in DocType 'Stock Entry'
@@ -30745,7 +30745,7 @@ msgstr "Otros Reportes"
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Other Settings"
-msgstr "Otros ajustes"
+msgstr ""
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -31034,7 +31034,7 @@ msgstr "Sobreproducción para ventas y órdenes de trabajo"
 #. Option for the 'Current Address Is' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Owned"
-msgstr "Propiedad"
+msgstr ""
 
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js:29
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.py:23
@@ -32166,7 +32166,7 @@ msgstr ""
 #. Label of the passport_number (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Passport Number"
-msgstr "Número de pasaporte"
+msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -32283,7 +32283,7 @@ msgstr "Pago"
 #: erpnext/accounts/doctype/payment_gateway_account/payment_gateway_account.json
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Payment Account"
-msgstr "Cuenta de pagos"
+msgstr ""
 
 #. Label of the payment_amount (Currency) field in DocType 'Overdue Payment'
 #. Label of the payment_amount (Currency) field in DocType 'Payment Schedule'
@@ -32874,7 +32874,7 @@ msgstr ""
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Payroll Entry"
-msgstr "Entrada de Nómina"
+msgstr ""
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:88
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:119
@@ -35608,7 +35608,7 @@ msgstr ""
 #. Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Printing Details"
-msgstr "Detalles de impresión"
+msgstr ""
 
 #. Label of the printing_settings_section (Section Break) field in DocType
 #. 'Dunning'
@@ -38077,7 +38077,7 @@ msgstr "Aumente la solicitud de material cuando el stock alcance el nivel de ped
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Raised By"
-msgstr "Propuesto por"
+msgstr ""
 
 #. Label of the raised_by (Data) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -39388,7 +39388,7 @@ msgstr "La fecha de lanzamiento debe ser en el futuro"
 #. Label of the relieving_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Relieving Date"
-msgstr "Fecha de relevo"
+msgstr ""
 
 #: erpnext/public/js/bank_reconciliation_tool/dialog_manager.js:125
 msgid "Remaining"
@@ -40256,7 +40256,7 @@ msgstr "Restablecimiento del acuerdo de nivel de servicio."
 #. Label of the resignation_letter_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Resignation Letter Date"
-msgstr "Fecha de carta de renuncia"
+msgstr ""
 
 #. Label of the sb_00 (Section Break) field in DocType 'Quality Action'
 #. Label of the resolution (Text Editor) field in DocType 'Quality Action
@@ -40279,7 +40279,7 @@ msgstr "Resolución por"
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution Date"
-msgstr "Fecha de resolución"
+msgstr ""
 
 #. Label of the section_break_19 (Section Break) field in DocType 'Issue'
 #. Label of the resolution_details (Text Editor) field in DocType 'Issue'
@@ -40287,7 +40287,7 @@ msgstr "Fecha de resolución"
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution Details"
-msgstr "Detalles de la resolución"
+msgstr ""
 
 #. Option for the 'Service Level Agreement Status' (Select) field in DocType
 #. 'Issue'
@@ -40328,7 +40328,7 @@ msgstr "Resuelto"
 #. Label of the resolved_by (Link) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolved By"
-msgstr "Resuelto por"
+msgstr ""
 
 #. Label of the response_by (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -40600,7 +40600,7 @@ msgstr ""
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:138
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Returned"
-msgstr "Devuelto"
+msgstr ""
 
 #. Label of the returned_against (Data) field in DocType 'Serial and Batch
 #. Bundle'
@@ -48178,7 +48178,7 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Suspended"
-msgstr "Suspendido"
+msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:442
 msgid "Switch Between Payment Modes"
@@ -48529,7 +48529,7 @@ msgstr "Tipo de tarea"
 #. Option for the '% Complete Method' (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
 msgid "Task Weight"
-msgstr "Peso de la Tarea"
+msgstr ""
 
 #: erpnext/projects/doctype/project_template/project_template.py:41
 msgid "Task {0} depends on Task {1}. Please add Task {1} to the Tasks list."
@@ -49068,7 +49068,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_terms_template/payment_terms_template.json
 #: erpnext/quality_management/doctype/quality_feedback_template/quality_feedback_template.json
 msgid "Template Name"
-msgstr "Nombre de Plantilla"
+msgstr ""
 
 #. Label of the template_task (Data) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -49146,7 +49146,7 @@ msgstr "Detalles de términos y condiciones"
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Terms"
-msgstr "Términos."
+msgstr ""
 
 #. Label of the terms_section_break (Section Break) field in DocType 'Purchase
 #. Order'
@@ -50165,7 +50165,7 @@ msgstr "Tiempo requerido (en minutos)"
 #. Label of the time_sheet (Link) field in DocType 'Sales Invoice Timesheet'
 #: erpnext/accounts/doctype/sales_invoice_timesheet/sales_invoice_timesheet.json
 msgid "Time Sheet"
-msgstr "Hoja de horario"
+msgstr ""
 
 #. Label of the time_sheet_list (Section Break) field in DocType 'POS Invoice'
 #. Label of the time_sheet_list (Section Break) field in DocType 'Sales
@@ -50827,7 +50827,7 @@ msgstr "Importe Total Facturado (a través de Facturas de Ventas)"
 #. Label of the total_billed_hours (Float) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
 msgid "Total Billed Hours"
-msgstr "Total de Horas Facturadas"
+msgstr ""
 
 #. Label of the total_billing_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the total_billing_amount (Currency) field in DocType 'Sales
@@ -50979,7 +50979,7 @@ msgstr "Tiempo total de espera"
 #. Label of the total_holidays (Int) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Total Holidays"
-msgstr "Vacaciones Totales"
+msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:115
 msgid "Total Income"
@@ -51320,7 +51320,7 @@ msgstr "Impuesto Total"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Total Taxes and Charges"
-msgstr "Total Impuestos y Cargos"
+msgstr ""
 
 #. Label of the base_total_taxes_and_charges (Currency) field in DocType
 #. 'Payment Entry'
@@ -51432,7 +51432,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 #: erpnext/projects/doctype/timesheet/timesheet.json
 msgid "Total Working Hours"
-msgstr "Horas de trabajo total"
+msgstr ""
 
 #. Label of the total_workstation_time (Int) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
@@ -53873,7 +53873,7 @@ msgstr "Esperando Pago..."
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:10
 msgid "Walk In"
-msgstr "Entrar"
+msgstr ""
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:4
 msgid "Warehouse Capacity Summary"

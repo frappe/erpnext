@@ -6,6 +6,8 @@ frappe.ui.form.on("Master Production Schedule", {
 		frm.trigger("set_query_filters");
 
 		frm.set_df_property("items", "cannot_add_rows", true);
+		frm.set_df_property("material_requests", "cannot_add_rows", true);
+		frm.set_df_property("sales_orders", "cannot_add_rows", true);
 		frm.fields_dict.items.$wrapper.find("[data-action='duplicate_rows']").css("display", "none");
 
 		frm.trigger("set_custom_buttons");
@@ -36,6 +38,14 @@ frappe.ui.form.on("Master Production Schedule", {
 				},
 			};
 		});
+
+		frm.set_query("sales_forecast", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
 	},
 
 	get_actual_demand(frm) {
@@ -53,6 +63,15 @@ frappe.ui.form.on("Master Production Schedule", {
 	set_custom_buttons(frm) {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("View MRP"), () => {
+				if (!frm.doc.items?.length && !frm.doc.sales_forecast) {
+					frappe.throw(
+						__(
+							"Please set actual demand or sales forecast to generate Material Requirements Planning Report."
+						)
+					);
+					return;
+				}
+
 				frappe.set_route("query-report", "Material Requirements Planning Report", {
 					company: frm.doc.company,
 					from_date: frm.doc.from_date,

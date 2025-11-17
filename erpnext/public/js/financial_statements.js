@@ -4,45 +4,160 @@ erpnext.financial_statements = {
 	filters: get_filters(),
 	baseData: null,
 	formatter: function (value, row, column, data, default_formatter, filter) {
-		if (
-			frappe.query_report.get_filter_value("selected_view") == "Growth" &&
-			data &&
-			column.colIndex >= 3
-		) {
-			const growthPercent = data[column.fieldname];
+		// Growth/Margin
+		if (this._is_special_view(column, data))
+			return this._format_special_view(value, row, column, data, default_formatter);
 
-			if (growthPercent == undefined) return "NA"; //making this not applicable for undefined/null values
+		if (frappe.query_report.get_filter_value("report_template"))
+			return this._format_custom_report(value, row, column, data, default_formatter, filter);
+		else return this._format_standard_report(value, row, column, data, default_formatter, filter);
+	},
+
+	_is_special_view: function (column, data) {
+		if (!data) return false;
+		const view = frappe.query_report.get_filter_value("selected_view");
+		return (view === "Growth" && column.colIndex >= 3) || (view === "Margin" && column.colIndex >= 2);
+	},
+
+	_format_custom_report: function (value, row, column, data, default_formatter, filter) {
+		const columnInfo = this._parse_column_info(column.fieldname, data);
+		const formatting = this._get_formatting_for_column(data, columnInfo);
+
+		if (columnInfo.isAccount) {
+			return this._format_custom_account_column(
+				value,
+				data,
+				formatting,
+				column,
+				default_formatter,
+				row
+			);
+		} else {
+			return this._format_custom_value_column(value, data, formatting, column, default_formatter, row);
+		}
+	},
+
+	_parse_column_info: function (fieldname, data) {
+		const valueMatch = fieldname.match(/^(?:seg_(\d+)_)?(.+)$/);
+
+		const periodKeys = data._segment_info?.period_keys || [];
+		const baseName = valueMatch ? valueMatch[2] : fieldname;
+		const isPeriodColumn = periodKeys.includes(baseName);
+
+		return {
+			isAccount: baseName === "account",
+			isPeriod: isPeriodColumn,
+			segmentIndex: valueMatch && valueMatch[1] ? parseInt(valueMatch[1]) : null,
+			fieldname: baseName,
+		};
+	},
+
+	_get_formatting_for_column: function (data, columnInfo) {
+		let formatting = {};
+
+		if (columnInfo.segmentIndex !== null && data.segment_values)
+			formatting = data.segment_values[`seg_${columnInfo.segmentIndex}`] || {};
+		else formatting = data;
+
+		return formatting;
+	},
+
+	_format_custom_account_column: function (value, data, formatting, column, default_formatter, row) {
+		if (!value) return "";
+
+		// Link to open ledger
+		const should_link_to_ledger =
+			formatting.is_detail || (formatting.account_filters && formatting.child_accounts);
+
+		if (should_link_to_ledger) {
+			const glData = {
+				account: formatting.account_name || formatting.child_accounts || value,
+				from_date: formatting.from_date || formatting.period_start_date,
+				to_date: formatting.to_date || formatting.period_end_date,
+				account_type: formatting.account_type,
+				company: frappe.query_report.get_filter_value("company"),
+			};
+
+			column.link_onclick =
+				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(glData) + ")";
+
+			value = default_formatter(value, row, column, data);
+		}
+
+		let formattedValue = String(value);
+
+		// Prefix
+		if (formatting.is_detail || formatting.prefix)
+			formattedValue = (formatting.prefix || "• ") + formattedValue;
+
+		// Indent
+		if (data._segment_info && data._segment_info.total_segments === 1) {
+			column.is_tree = true;
+		} else if (formatting.indent && formatting.indent > 0) {
+			const indent = "&nbsp;".repeat(formatting.indent * 4);
+			formattedValue = indent + formattedValue;
+		}
+
+		// Style
+		return this._style_custom_value(formattedValue, formatting, null);
+	},
+
+	_format_custom_value_column: function (value, data, formatting, column, default_formatter, row) {
+		if (formatting.is_blank_line) return "";
+
+		const col = { ...column };
+		col.fieldtype = formatting.fieldtype || col.fieldtype;
+		// Avoid formatting as currency
+		if (col.fieldtype === "Float") col.options = null;
+
+		let formattedValue = default_formatter(value, row, col, data);
+		return this._style_custom_value(formattedValue, formatting, value);
+	},
+
+	_style_custom_value(formattedValue, formatting, value) {
+		let $element = $(`<span>${formattedValue}</span>`);
+
+		if (formatting.bold) $element.css("font-weight", "bold");
+		if (formatting.italic) $element.css("font-style", "italic");
+		if (formatting.warn_if_negative && typeof value === "number" && value < 0)
+			$element.addClass("text-danger");
+		if (formatting.color) $element.css("color", formatting.color);
+
+		return $element.wrap("<p></p>").parent().html();
+	},
+
+	_format_special_view: function (value, row, column, data, default_formatter) {
+		const selectedView = frappe.query_report.get_filter_value("selected_view");
+
+		if (selectedView === "Growth") {
+			const growthPercent = data[column.fieldname];
+			if (growthPercent === undefined) return "NA";
+			if (growthPercent === "") return "";
 
 			if (column.fieldname === "total") {
 				value = $(`<span>${growthPercent}</span>`);
 			} else {
 				value = $(`<span>${(growthPercent >= 0 ? "+" : "") + growthPercent + "%"}</span>`);
-
 				if (growthPercent < 0) {
 					value = $(value).addClass("text-danger");
 				} else {
 					value = $(value).addClass("text-success");
 				}
 			}
-			value = $(value).wrap("<p></p>").parent().html();
+			return $(value).wrap("<p></p>").parent().html();
+		} else {
+			const marginPercent = data[column.fieldname];
+			if (marginPercent === undefined) return "NA";
 
-			return value;
-		} else if (frappe.query_report.get_filter_value("selected_view") == "Margin" && data) {
-			if (column.colIndex >= 2) {
-				const marginPercent = data[column.fieldname];
-
-				if (marginPercent == undefined) return "NA"; //making this not applicable for undefined/null values
-
-				value = $(`<span>${marginPercent + "%"}</span>`);
-				if (marginPercent < 0) value = $(value).addClass("text-danger");
-				else value = $(value).addClass("text-success");
-				value = $(value).wrap("<p></p>").parent().html();
-				return value;
-			}
+			value = $(`<span>${marginPercent + "%"}</span>`);
+			if (marginPercent < 0) value = $(value).addClass("text-danger");
+			else value = $(value).addClass("text-success");
+			return $(value).wrap("<p></p>").parent().html();
 		}
+	},
 
+	_format_standard_report: function (value, row, column, data, default_formatter, filter) {
 		if (data && column.fieldname == this.name_field) {
-			// first column
 			value = data.section_name || data.account_name || value;
 
 			if (filter && filter?.text && filter?.type == "contains") {

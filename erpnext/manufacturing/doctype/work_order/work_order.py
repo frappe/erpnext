@@ -453,9 +453,9 @@ class WorkOrder(Document):
 
 	def set_default_warehouse(self):
 		if not self.wip_warehouse and not self.skip_transfer:
-			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+			self.fg_warehouse = frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
 
 	def check_wip_warehouse_skip(self):
 		if self.skip_transfer and not self.from_wip_warehouse:
@@ -2318,13 +2318,14 @@ def make_stock_entry(
 
 
 @frappe.whitelist()
-def get_default_warehouse():
-	doc = frappe.get_cached_doc("Manufacturing Settings")
-
+def get_default_warehouse(company):
+	wip, fg, scrap = frappe.get_cached_value(
+		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
+	)
 	return {
-		"wip_warehouse": doc.default_wip_warehouse,
-		"fg_warehouse": doc.default_fg_warehouse,
-		"scrap_warehouse": doc.default_scrap_warehouse,
+		"wip_warehouse": wip,
+		"fg_warehouse": fg,
+		"scrap_warehouse": scrap,
 	}
 
 

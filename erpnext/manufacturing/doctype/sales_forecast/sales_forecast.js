@@ -2,6 +2,7 @@ frappe.ui.form.on("Sales Forecast", {
 	refresh(frm) {
 		frm.trigger("set_query_filters");
 		frm.trigger("set_custom_buttons");
+		frm.set_df_property("items", "cannot_add_rows", true);
 	},
 
 	set_query_filters(frm) {

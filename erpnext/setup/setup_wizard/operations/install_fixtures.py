@@ -15,14 +15,7 @@ from frappe.utils import cstr, getdate
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
-
-
-def _(x, *args, **kwargs):
-	"""Redefine the translation function to return the string as is.
-
-	We want to create english records but still mark the strings as translatable.
-	The respective DocTypes have 'Translate Link Fields' enabled."""
-	return x
+from erpnext.setup.utils import identity as _
 
 
 def read_lines(filename: str) -> list[str]:
@@ -579,7 +572,7 @@ def create_bank_account(args, demo=False):
 			return doc
 
 		except RootNotEditable:
-			frappe.throw(_("Bank account cannot be named as {0}").format(args.get("bank_account")))
+			frappe.throw(frappe._("Bank account cannot be named as {0}").format(args.get("bank_account")))
 		except frappe.DuplicateEntryError:
 			# bank account same as a CoA entry
 			pass

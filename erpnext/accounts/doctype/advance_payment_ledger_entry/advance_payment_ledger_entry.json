@@ -10,8 +10,10 @@
   "voucher_no",
   "against_voucher_type",
   "against_voucher_no",
-  "amount",
   "currency",
+  "exchange_rate",
+  "amount",
+  "base_amount",
   "event",
   "delinked"
  ],
@@ -76,13 +78,29 @@
    "fieldtype": "Check",
    "label": "DeLinked",
    "read_only": 1
+  },
+  {
+   "depends_on": "base_amount",
+   "fieldname": "base_amount",
+   "fieldtype": "Currency",
+   "label": "Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "exchange_rate",
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-13 15:11:58.300836",
+ "modified": "2025-11-13 12:45:03.014555",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Payment Ledger Entry",

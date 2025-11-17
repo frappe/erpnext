@@ -833,11 +833,11 @@ def make_stock_entry(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def raise_work_orders(material_request):
+def raise_work_orders(material_request, company):
 	mr = frappe.get_doc("Material Request", material_request)
 	errors = []
 	work_orders = []
-	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+	default_wip_warehouse = frappe.get_cached_value("Company", company, "default_wip_warehouse")
 
 	for d in mr.items:
 		if (d.stock_qty - d.ordered_qty) > 0:

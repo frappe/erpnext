@@ -10,6 +10,9 @@ from frappe.query_builder import DocType
 from frappe.utils import cstr, flt
 from pypika import Order
 
+from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+	FinancialReportEngine,
+)
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
 	get_cost_centers_with_children,
@@ -25,6 +28,9 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+	if filters and filters.report_template:
+		return FinancialReportEngine().execute(filters)
+
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,

@@ -79,13 +79,14 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Qty",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Bom No",
+   "label": "BOM No",
    "options": "BOM"
   },
   {
@@ -245,7 +246,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-10 13:36:24.759101",
+ "modified": "2025-11-03 14:33:50.677717",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",

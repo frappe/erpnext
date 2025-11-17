@@ -17,7 +17,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_stock_balance
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -1057,6 +1057,7 @@ class StockReconciliation(StockController):
 					self.posting_date,
 					self.posting_time,
 					self.name,
+					sle_creation,
 				)
 
 			precesion = row.precision("current_qty")
@@ -1216,8 +1217,11 @@ class StockReconciliation(StockController):
 		return current_qty
 
 
-def get_batch_qty_for_stock_reco(item_code, warehouse, batch_no, posting_date, posting_time, voucher_no):
+def get_batch_qty_for_stock_reco(
+	item_code, warehouse, batch_no, posting_date, posting_time, voucher_no, sle_creation
+):
 	ledger = frappe.qb.DocType("Stock Ledger Entry")
+	posting_datetime = get_combine_datetime(posting_date, posting_time)
 
 	query = (
 		frappe.qb.from_(ledger)
@@ -1230,12 +1234,11 @@ def get_batch_qty_for_stock_reco(item_code, warehouse, batch_no, posting_date, p
 			& (ledger.docstatus == 1)
 			& (ledger.is_cancelled == 0)
 			& (ledger.batch_no == batch_no)
-			& (ledger.posting_date <= posting_date)
-			& (
-				CombineDatetime(ledger.posting_date, ledger.posting_time)
-				<= CombineDatetime(posting_date, posting_time)
-			)
 			& (ledger.voucher_no != voucher_no)
+			& (
+				(ledger.posting_datetime < posting_datetime)
+				| ((ledger.posting_datetime == posting_datetime) & (ledger.creation < sle_creation))
+			)
 		)
 		.groupby(ledger.batch_no)
 	)
