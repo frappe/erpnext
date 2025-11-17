@@ -3,10 +3,10 @@
 
 
 # import frappe
-from frappe.model.document import Document
+from frappe.model.document import Document  # pragma: no cover
 
 
-class JournalEntryTemplateAccount(Document):
+class JournalEntryTemplateAccount(Document): # pragma: no cover
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

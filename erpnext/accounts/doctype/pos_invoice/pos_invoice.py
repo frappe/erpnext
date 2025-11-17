@@ -21,7 +21,8 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 class PartialPaymentValidationError(frappe.ValidationError):
- 	pass
+	pass
+
 
 class POSInvoice(SalesInvoice):
 	# begin: auto-generated types
@@ -29,17 +30,22 @@ class POSInvoice(SalesInvoice):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
+		from frappe.types import DF
+
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pos_invoice_item.pos_invoice_item import POSInvoiceItem
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
 		from erpnext.accounts.doctype.sales_invoice_advance.sales_invoice_advance import SalesInvoiceAdvance
 		from erpnext.accounts.doctype.sales_invoice_payment.sales_invoice_payment import SalesInvoicePayment
-		from erpnext.accounts.doctype.sales_invoice_timesheet.sales_invoice_timesheet import SalesInvoiceTimesheet
-		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import SalesTaxesandCharges
+		from erpnext.accounts.doctype.sales_invoice_timesheet.sales_invoice_timesheet import (
+			SalesInvoiceTimesheet,
+		)
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
+			SalesTaxesandCharges,
+		)
 		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
-		from frappe.types import DF
 
 		account_for_change_amount: DF.Link | None
 		additional_discount_percentage: DF.Float
@@ -136,7 +142,20 @@ class POSInvoice(SalesInvoice):
 		shipping_address: DF.SmallText | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
-		status: DF.Literal["", "Draft", "Return", "Credit Note Issued", "Consolidated", "Submitted", "Paid", "Unpaid", "Unpaid and Discounted", "Overdue and Discounted", "Overdue", "Cancelled"]
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Return",
+			"Credit Note Issued",
+			"Consolidated",
+			"Submitted",
+			"Paid",
+			"Unpaid",
+			"Unpaid and Discounted",
+			"Overdue and Discounted",
+			"Overdue",
+			"Cancelled",
+		]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		taxes: DF.Table[SalesTaxesandCharges]
@@ -250,6 +269,8 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
+
+		self.db_set("status", "Cancelled")
 
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
@@ -478,7 +499,7 @@ class POSInvoice(SalesInvoice):
 		is_partial_payment_allowed = frappe.db.get_value(
 			"POS Profile", self.pos_profile, "allow_partial_payment"
 		)
- 
+
 		if self.docstatus == 1 and not is_partial_payment_allowed:
 			if self.is_return and self.paid_amount != invoice_total:
 				frappe.throw(

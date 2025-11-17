@@ -306,12 +306,13 @@ class MaintenanceSchedule(TransactionBase):
 
 	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
-			sr_details = frappe.db.get_value(
-				"Serial No",
-				serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date", "item_code"],
-				as_dict=1,
-			)
+			fields = ["warranty_expiry_date", "amc_expiry_date", "warehouse", "item_code"]
+
+			# Check if "delivery_date" column exists in Serial No doctype
+			if frappe.db.has_column("Serial No", "delivery_date"):
+				fields.append("delivery_date")
+
+			sr_details = frappe.db.get_value("Serial No", serial_no, fields, as_dict=True)
 
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))

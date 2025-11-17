@@ -165,7 +165,203 @@ class TestOpeningInvoiceCreationTool(FrappeTestCase):
 			1: ["_Test Customer 1", 250, "Overdue"],
 		}
 		self.check_expected_values(invoices, expected_value, invoice_type="Sales")
-		
+
+	def test_onload_sets_summary_and_temporary_account_TC_ACC_326(self):
+		self.company = "_Test Opening Invoice Company"
+
+		item_code = "Test Item"
+		if not frappe.db.exists("Item", item_code):
+			from erpnext.accounts.doctype.payment_entry.test_payment_entry import make_test_item
+
+			item = make_test_item(item_code)
+			item.update(
+				{
+					"is_sales_item": 1,
+					"is_purchase_item": 1,
+				}
+			)
+			item.save(ignore_permissions=True)
+
+		# Insert a dummy Sales Invoice for testing
+		if not frappe.db.exists("Sales Invoice", {"customer": "_Test Customer"}):
+			customer = frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Customer",
+					"customer_group": "Commercial",
+					"territory": "All Territories",
+				}
+			).insert(ignore_permissions=True)
+
+			# Create a Balance Sheet parent if not exists
+			if not frappe.db.exists("Account", "Temporary Accounts - _TOIC"):
+				frappe.get_doc(
+					{
+						"doctype": "Account",
+						"account_name": "Temporary Accounts",
+						"company": self.company,
+						"root_type": "Asset",
+						"account_type": "",
+						"is_group": 1,
+						"report_type": "Balance Sheet",
+					}
+				).insert(ignore_permissions=True)
+
+			# Create your temporary opening account under it
+			income_account = frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "Temporary Opening Income",
+					"parent_account": "Temporary Accounts - _TOIC",
+					"company": self.company,
+					"root_type": "Asset",
+					"is_group": 0,
+					"report_type": "Balance Sheet",
+				}
+			).insert(ignore_permissions=True)
+
+			# Insert Sales Invoice
+			frappe.get_doc(
+				{
+					"doctype": "Sales Invoice",
+					"customer": customer.name,
+					"company": self.company,
+					"is_opening": "Yes",
+					"docstatus": 1,
+					"outstanding_amount": 100.0,
+					"paid_amount": 50.0,
+					"grand_total": 150.0,
+					"base_grand_total": 150.0,
+					"base_write_off_amount": 0.0,
+					"items": [
+						{
+							"item_code": item_code,
+							"qty": 1,
+							"rate": 150.0,
+							"amount": 150.0,
+							"income_account": income_account.name,
+						}
+					],
+					"debit_to": "Debtors - _TOIC",
+				}
+			).insert(ignore_permissions=True)
+
+		# Create the Opening Invoice Creation Tool doc
+		doc = frappe.get_doc({"doctype": "Opening Invoice Creation Tool", "company": self.company})
+
+		# Call onload explicitly
+		doc.onload()
+
+		# Check if summary is set onload
+		summary = doc.get_onload("opening_invoices_summary")
+		max_count = doc.get_onload("max_count")
+		temp_account = doc.get_onload("temporary_opening_account")
+
+		# Assertions
+		self.assertIsInstance(summary, dict)
+		self.assertIsInstance(max_count, dict)
+		self.assertIsInstance(temp_account, str)
+		self.assertTrue(temp_account.startswith("ACC") or temp_account.startswith("Temp"))
+
+	def test_temporary_opening_account_without_company_TC_ACC_325(self):
+		temporary_account_response = get_temporary_opening_account()
+		self.assertEqual(temporary_account_response, None)
+
+	def test_make_invoices_path_TC_ACC_517(self):
+		company = "_Test Company"
+		tool = frappe.new_doc("Opening Invoice Creation Tool")
+		tool.company = company
+		tool.invoice_type = "Sales"
+
+		# Add 50 rows (>= 50 to trigger else path)
+		for i in range(50):
+			customer = make_customer(f"Customer {i}")
+			tool.append(
+				"invoices",
+				{
+					"party_type": "Customer",
+					"party": customer,
+					"outstanding_amount": 100 + i,
+					"temporary_opening_account": get_temporary_opening_account(company),
+				},
+			)
+
+		tool.insert()
+
+		# Force test flag so scheduler check won't throw
+		frappe.flags.in_test = True
+
+		# Call make_invoices
+		result = tool.make_invoices()
+
+		# Assert that enqueue/now path executed
+		# In test mode, enqueue runs inline and returns list of invoice names
+		self.assertGreaterEqual(tool.docstatus, 0)
+		self.assertGreaterEqual(len(tool.invoices), 50)
+
+		frappe.flags.in_test = False
+
+	def test_make_invoices_creating_missing_customer_TC_ACC_518(self):
+		company = "_Test Company"
+		tool = frappe.new_doc("Opening Invoice Creation Tool")
+		tool.company = company
+		tool.invoice_type = "Sales"
+		tool.create_missing_party = 1
+		party_name = ""
+		# Add 50 rows (>= 50 to trigger else path)
+		for i in range(50):
+			tool.append(
+				"invoices",
+				{
+					"party_type": "Customer",
+					"party": f"Customer {i}",
+					"outstanding_amount": 100 + i,
+					"temporary_opening_account": get_temporary_opening_account(company),
+				},
+			)
+			party_name = f"Customer {i}"
+			tool.validate_mandatory_invoice_fields(tool.invoices[i])
+
+		# Force test flag so scheduler check won't throw
+		frappe.flags.in_test = True
+
+		self.assertEqual(frappe.db.exists("Customer", party_name), party_name)
+
+		frappe.flags.in_test = False
+
+	def test_make_invoices_creating_missing_supplier_TC_ACC_519(self):
+		company = "_Test Company"
+		tool = frappe.new_doc("Opening Invoice Creation Tool")
+		tool.company = company
+		tool.invoice_type = "Sales"
+		tool.create_missing_party = 1
+
+		buying_setting = frappe.get_doc("Buying Settings", "supplier_group")
+		buying_setting.supplier_group = "Local"
+		buying_setting.save()
+		party_name = ""
+		# Add 50 rows (>= 50 to trigger else path)
+		for i in range(50):
+			tool.append(
+				"invoices",
+				{
+					"party_type": "Supplier",
+					"party": f"Supplier {i}",
+					"outstanding_amount": 100 + i,
+					"temporary_opening_account": get_temporary_opening_account(company),
+				},
+			)
+			party_name = f"Supplier {i}"
+
+			tool.validate_mandatory_invoice_fields(tool.invoices[i])
+
+		# Force test flag so scheduler check won't throw
+		frappe.flags.in_test = True
+
+		self.assertEqual(frappe.db.exists("Supplier", party_name), party_name)
+
+		frappe.flags.in_test = False
+
 	def tearDown(self):
 		disable_dimension()
 

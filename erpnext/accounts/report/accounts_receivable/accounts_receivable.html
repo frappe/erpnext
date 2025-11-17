@@ -185,7 +185,7 @@
 
 						{% if(!filters.show_future_payments) { %}
 						<td>
-							{% if(!(filters.party)) { %}
+							{% if(!filters.party?.length) { %}
 								{%= data[i]["party"] %}
 								{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 									<br> {%= data[i]["customer_name"] %}
@@ -258,7 +258,7 @@
 					{% if(data[i]["party"]|| "&nbsp;") { %}
 						{% if(!data[i]["is_total_row"]) { %}
 							<td>
-								{% if(!(filters.party)) { %}
+								{% if(!filters.party?.length) { %}
 									{%= data[i]["party"] %}
 									{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 										<br> {%= data[i]["customer_name"] %}

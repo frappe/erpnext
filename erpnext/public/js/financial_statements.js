@@ -27,12 +27,11 @@ erpnext.financial_statements = {
 
 			return value;
 		} else if (frappe.query_report.get_filter_value("selected_view") == "Margin" && data) {
-
 			if (column.fieldname == "account" && data.account_name == __("Income")) {
 				//Taking the total income from each column (for all the financial years) as the base (100%)
 				this.baseData = row;
 			}
-			
+
 			if (column.colIndex >= 2) {
 				const marginPercent = data[column.fieldname];
 				if (marginPercent == undefined) return "NA"; //making this not applicable for undefined/null values
@@ -45,7 +44,7 @@ erpnext.financial_statements = {
 			}
 		}
 
-		if (data && column.fieldname == "account") {
+		if (data && column.fieldname == this.name_field) {
 			// first column
 			value = data.section_name || data.account_name || value;
 

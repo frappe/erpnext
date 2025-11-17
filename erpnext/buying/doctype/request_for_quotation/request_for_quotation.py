@@ -439,10 +439,8 @@ def create_supplier_quotation(doc):
 
 def add_items(sq_doc, supplier, items):
 	for data in items:
-		if data.get("qty") > 0:
-			if isinstance(data, dict):
-				data = frappe._dict(data)
-
+		if isinstance(data, dict):
+			data = frappe._dict(data)
 			create_rfq_items(sq_doc, supplier, data)
 
 

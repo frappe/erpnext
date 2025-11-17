@@ -327,6 +327,537 @@ class TestSerialNo(FrappeTestCase):
 		)
 
 		self.assertEqual(non_expired_serials, [])
+  
+	def test_get_pos_reserved_serial_nos_TC_ACC_302(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.stock.doctype.item.test_item import (make_item, get_hsn)
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import validate_fiscal_year
+		create_company()
+		validate_fiscal_year("_Test Company")
+		warehouse = create_warehouse("_Test Warehouse", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center", company="_Test Company")
+
+		item_code = "_Test Item POS"
+
+		item = make_item(
+			item_code,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "SN-.#####",
+				"is_stock_item": 1,
+				"valuation_rate": 500,
+				"gst_hsn_code": get_hsn(),
+			}
+		)
+		pos_profile = frappe.get_doc({
+		"doctype": "POS Profile",
+		"name": "_Test POS Profile New Serial No",
+		"company": "_Test Company",
+		"currency": "INR",
+		"write_off_cost_center": "_Test Cost Center - _TC",
+		"write_off_account": "Sales - _TC",
+		"warehouse": warehouse,	
+		"accounts": [{
+			"company": "_Test Company",
+			"account": "_Test Account - _TC"  
+		}],
+		"payments": [{
+				"default": 1,
+				"mode_of_payment": "Cash",  
+				"account": "Cash - _TC"
+			}],
+		"warehouses": [{
+			"warehouse": warehouse
+			}]
+		})
+		pos_profile.insert()
+
+		se = frappe.get_doc({
+			"doctype": "Stock Entry",
+			"stock_entry_type": "Material Receipt",
+			"company": "_Test Company",
+			"items": [
+				{
+					"item_code": item.name,
+					"qty": 1,
+					"t_warehouse": warehouse
+				},
+				{
+					"item_code": item.name,
+					"qty": 1,
+					"t_warehouse": warehouse
+				}
+			]
+		})
+		se.insert()
+		se.submit()
+
+		serial_nos = frappe.get_all("Serial No", filters={"item_code": item.name, "warehouse": warehouse}, fields=["name"])
+		serial_no_1 = serial_nos[0].name
+		pos_opening_entry = frappe.get_doc({
+			"doctype": "POS Opening Entry",
+			"pos_profile": pos_profile.name,
+			"company": "_Test Company",
+			"user": "Administrator",
+			"period_start_date": frappe.utils.get_datetime(),
+			"mode_of_payment": "Cash",
+			"balance_details": [
+				{
+					"account": "Sales - _TC",
+					"mode_of_payment": "Cash",
+					"account_currency": "INR",
+					"opening_amount": 1000
+				}									
+			],
+			"posting_date": frappe.utils.today(),
+			"cash_denominations": [
+				{
+					"mode_of_payment": "Cash",
+					"account": "Cash - _TC",
+					"opening_amount": 1000
+				}
+			]
+		})
+		pos_opening_entry.insert()
+		pos_opening_entry.submit()
+		pos_invoice = frappe.get_doc({
+			"doctype": "POS Invoice",
+			"docstatus": 1,
+			"pos_profile": pos_profile.name,
+			"company": "_Test Company",
+			"cost_center": "_Test Cost Center - _TC",
+			"is_return": 0,
+			"paid_amount": 1000,
+			"items": [{
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"serial_no": serial_no_1,
+				"qty": 1
+			}],
+			"payments": [
+				{
+					"mode_of_payment": "Cash",
+					"account": "Cash - _TC",
+					"amount": 1000
+				}
+			]
+		}).insert()
+
+		filters = {
+			"item_code": item.name,
+			"warehouse": warehouse
+		}
+
+		result = get_pos_reserved_serial_nos(filters)
+		self.assertIsInstance(result, list)
+		self.assertEqual(len(result), 1)
+		self.assertEqual(result[0], serial_no_1)
+	
+	def test_auto_fetch_serial_number_basic_TC_ACC_303(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_company,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import validate_fiscal_year
+
+		create_company("_Test Company")
+		validate_fiscal_year("_Test Company")
+
+		if not frappe.db.exists("Supplier", "_Test Supplier Auto Fetch"):
+			frappe.get_doc({
+				"doctype": "Supplier",
+				"supplier_name": "_Test Supplier Auto Fetch",
+				"company": "_Test Company"
+			}).insert(ignore_mandatory=True,ignore_permissions=True,ignore_links=True)
+		if not frappe.db.exists("UOM", "_Test UOM"):
+			frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": "_Test UOM",
+				"company": "_Test Company"
+			}).insert(ignore_mandatory=True,ignore_permissions=True,ignore_links=True)
+		warehouse = create_warehouse("_Test Warehouse Auto Fetch", company="_Test Company")
+
+		account = frappe.get_doc({
+			"doctype": "Account",
+			"account_name": "_Test Inventory Account",
+			"parent_account": "Stock Assets - _TC",
+			"company": "_Test Company",
+			"is_group": 0,
+			"account_type": "Stock"
+		})
+		account.insert(ignore_permissions=True)
+		frappe.db.set_value("Warehouse", warehouse, "account", account.name)
+	
+		company = "_Test Company"
+		default_inventory_account = frappe.db.get_value("Company", company, "default_inventory_account")
+
+		if default_inventory_account != account.name:
+			frappe.db.set_value("Company", company, "default_inventory_account", account.name)
+   
+		frappe.db.set_value("Company", company, {
+			"enable_provisional_accounting_for_non_stock_items": 0,
+			"enable_perpetual_inventory":0
+		})
+		frappe.local.enable_perpetual_inventory = {}
+		frappe.local.enable_perpetual_inventory[company] = 0
+		company_doc = frappe.get_doc("Company", company)
+		frappe._set_document_in_cache("Company", company_doc)
+		
+		item = make_item("_Test Serial Item Auto", {
+			"has_serial_no": 1,
+			"serial_no_series": "AUTO-SERIAL-.###",
+			"is_stock_item": 1,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_no_series": "AUTO-BATCH-.###",
+			"valuation_rate": 100,
+			"is_fixed_asset": False
+		})
+
+		pe = make_purchase_receipt(
+			item_code=item.name,
+			qty=2,
+			supplier_warehouse=warehouse,
+			company=company,
+			supplier="_Test Supplier Auto Fetch",
+			warehouse=warehouse
+		)
+		pe.submit()
+		batch = frappe.get_all("Batch", {"item": item.name, "reference_name": pe.name})
+		exclude_sr_nos = ["AUTO-SERIAL-001", "AUTO-SERIAL-002"]
+		batch_nos = [d.name for d in batch]
+
+		from erpnext.stock.doctype.serial_no.serial_no import auto_fetch_serial_number
+		sr_nos = auto_fetch_serial_number(
+			qty=2,
+			item_code=item.name,
+			warehouse=warehouse,
+			exclude_sr_nos=exclude_sr_nos,
+			batch_nos=batch_nos,
+		)
+
+		assert isinstance(sr_nos, list)
+	
+	def test_validate_warehouse_all_cases_TC_ACC_304(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		create_company("_Test Company")
+		warehouse1 = create_warehouse("Stores", company="_Test Company")
+		warehouse2 = create_warehouse("Finished Goods", company="_Test Company")
+		item = make_item("_Test Item Auto", {
+			"has_serial_no": 1,
+			"serial_no_series": "AUTO-SERIAL-.###"
+		})
+		if not frappe.db.exists("UOM", "_Test UOM"):
+			frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": "_Test UOM",
+			}).insert(
+				ignore_permissions=True,
+				ignore_links=True,
+				ignore_mandatory=True
+			)
+		if not frappe.db.exists("Supplier", "_Test Supplier"):
+			frappe.get_doc({
+				"doctype": "Supplier",
+				"supplier_name": "_Test Supplier",
+				"company": "_Test Company"
+			}).insert(ignore_mandatory=True,ignore_permissions=True,ignore_links=True)
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			warehouse=warehouse1,
+			supplier_warehouse=warehouse1,
+			supplier="_Test Supplier",
+			qty=1,
+			rate=100,
+			do_not_submit=True
+		)
+		pr.submit()
+
+		serial_no = frappe.db.get_value("Serial No", {"purchase_document_no": pr.name}, "name")
+		sn = frappe.get_doc("Serial No", serial_no)  
+
+		local_sn = frappe.new_doc("Serial No")
+		local_sn.__islocal = True
+		local_sn.validate_warehouse() 
+
+		sn.__islocal = False
+		sn.item_code = "WRONG-ITEM"
+		sn.via_stock_ledger = False
+		with self.assertRaises(frappe.ValidationError) as e1:
+			sn.validate_warehouse()
+		self.assertIn("Item Code cannot be changed", str(e1.exception))
+
+		sn = frappe.get_doc("Serial No", serial_no)
+		sn.__islocal = False
+		sn.item_code = item.name
+		sn.warehouse = warehouse2
+		sn.via_stock_ledger = False
+		with self.assertRaises(frappe.ValidationError) as e2:
+			sn.validate_warehouse()
+		self.assertIn("Warehouse cannot be changed", str(e2.exception))
+  
+	def test_set_maintenance_status_all_cases_TC_ACC_305(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from frappe.utils import add_days, nowdate
+
+		create_company("_Test Company")
+		warehouse = create_warehouse("Stores", company="_Test Company")
+		item = make_item("_Test Item Auto 1", {"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "AUTO-SERIAL-.###"})
+		if not frappe.db.exists("UOM", "_Test UOM"):
+			frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": "_Test UOM",
+			}).insert(
+				ignore_permissions=True,
+				ignore_links=True,
+				ignore_mandatory=True
+			)
+		if not frappe.db.exists("Supplier", "_Test Supplier"):
+			frappe.get_doc({
+				"doctype": "Supplier",
+				"supplier_name": "_Test Supplier",
+				"company": "_Test Company"
+			}).insert(ignore_mandatory=True,ignore_permissions=True,ignore_links=True)
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			warehouse=warehouse,
+			supplier="_Test Supplier",
+			supplier_warehouse=warehouse,
+			qty=1,
+			rate=100,
+		)
+		pr.submit()
+
+		serial_no = frappe.db.get_value("Serial No", {"purchase_document_no": pr.name}, "name")
+		sn = frappe.get_doc("Serial No", serial_no)
+
+		sn.warranty_expiry_date = None
+		sn.amc_expiry_date = None
+		sn.set_maintenance_status()
+		self.assertIsNone(sn.maintenance_status)
+
+		sn.warranty_expiry_date = add_days(nowdate(), -1)
+		sn.amc_expiry_date = None
+		sn.set_maintenance_status()
+		self.assertEqual(sn.maintenance_status, "Out of Warranty")
+
+		sn.warranty_expiry_date = None
+		sn.amc_expiry_date = add_days(nowdate(), -1)
+		sn.set_maintenance_status()
+		self.assertEqual(sn.maintenance_status, "Out of AMC")
+
+		sn.amc_expiry_date = add_days(nowdate(), 5)
+		sn.set_maintenance_status()
+		self.assertEqual(sn.maintenance_status, "Under AMC")
+
+		sn.warranty_expiry_date = add_days(nowdate(), 5)
+		sn.set_maintenance_status()
+		self.assertEqual(sn.maintenance_status, "Under Warranty")
+	
+	def test_serial_generation_and_html_via_purchase_receipt_TC_ACC_306(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.serial_no.serial_no import (
+			get_available_serial_nos,
+			get_items_html,
+		)
+		import frappe
+
+		create_company("_Test Company")
+		warehouse = create_warehouse("Stores", company="_Test Company")
+		item = make_item("_Test Item Auto 2", {
+			"is_stock_item": 1,
+			"has_serial_no": 1,
+			"serial_no_series": "AUTO-SERIAL-.###"
+		})
+		if not frappe.db.exists("UOM", "_Test UOM"):
+			frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": "_Test UOM",
+			}).insert(
+				ignore_permissions=True,
+				ignore_links=True,
+				ignore_mandatory=True
+			)
+		if not frappe.db.exists("Supplier", "_Test Supplier"):
+			frappe.get_doc({
+				"doctype": "Supplier",
+				"supplier_name": "_Test Supplier",
+				"company": "_Test Company"
+			}).insert(ignore_mandatory=True,ignore_permissions=True,ignore_links=True)
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			warehouse=warehouse,
+			supplier="_Test Supplier",
+			supplier_warehouse=warehouse,
+			qty=2,
+			rate=100,
+			do_not_submit=True  
+		)
+		pr.submit()
+
+		serial_nos = frappe.get_all("Serial No", filters={"purchase_document_no": pr.name}, pluck="name")
+		self.assertEqual(len(serial_nos), 2)
+		
+		html = get_items_html(serial_nos, item.name)
+		self.assertIn(item.name, html)
+		self.assertIn("Serial Numbers", html)
+		for sn in serial_nos:
+			self.assertIn(sn, html)
+
+		new_serials = get_available_serial_nos("AUTO-SERIAL-.###", 2)
+		self.assertEqual(len(new_serials), 2)
+		for sn in new_serials:
+			self.assertTrue(sn.startswith("AUTO-SERIAL-"))
+			frappe.get_doc({
+				"doctype": "Serial No",
+				"serial_no": sn,
+				"item_code": item.name
+			}).insert()
+
+		extra_html = get_items_html(new_serials, item.name)
+		for sn in new_serials:
+			self.assertIn(sn, extra_html)
+	
+	def test_update_maintenance_status_TC_ACC_307(self):
+		from erpnext.stock.doctype.serial_no.serial_no import update_maintenance_status
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		create_company("_Test Company")
+		warehouse = create_warehouse("Stores", company="_Test Company")
+
+		item = make_item("_Test Item Auto 2", {
+			"is_stock_item": 1,
+			"has_serial_no": 1,
+			"serial_no_series": "AUTO-SERIAL-.###"
+		})
+
+		if not frappe.db.exists("UOM", "_Test UOM"):
+			frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": "_Test UOM",
+			}).insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+
+		if not frappe.db.exists("Supplier", "_Test Supplier"):
+			frappe.get_doc({
+				"doctype": "Supplier",
+				"supplier_name": "_Test Supplier",
+				"company": "_Test Company"
+			}).insert(ignore_mandatory=True, ignore_permissions=True, ignore_links=True)
+
+		
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			warehouse=warehouse,
+			supplier="_Test Supplier",
+			supplier_warehouse=warehouse,
+			qty=2,
+			rate=100,
+			do_not_submit=True
+		)
+		pr.submit()
+
+		
+		serial_nos = frappe.get_all("Serial No", filters={"item_code": item.name}, pluck="name")
+		for sn in serial_nos:
+			frappe.db.set_value("Serial No", sn, {
+				"warranty_expiry_date": frappe.utils.add_days(frappe.utils.nowdate(), -1),
+				"amc_expiry_date": frappe.utils.add_days(frappe.utils.nowdate(), -1),
+				"maintenance_status": "Under AMC"
+			})
+
+
+		update_maintenance_status()
+
+		for sn in serial_nos:
+			updated_status = frappe.db.get_value("Serial No", sn, "maintenance_status")
+			self.assertIn(updated_status, ("Out of Warranty", "Out of AMC"))
+   
+	def test_on_trash_with_single_qty_serial_no_TC_ACC_308(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		create_company("_Test Company")
+		warehouse = create_warehouse("Stores", company="_Test Company")
+
+		item = make_item("_Test Item Auto 2", {
+			"is_stock_item": 1,
+			"has_serial_no": 1,
+			"serial_no_series": "AUTO-SERIAL-.###"
+		})
+
+		if not frappe.db.exists("UOM", "_Test UOM"):
+			frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": "_Test UOM",
+			}).insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+
+		if not frappe.db.exists("Supplier", "_Test Supplier"):
+			frappe.get_doc({
+				"doctype": "Supplier",
+				"supplier_name": "_Test Supplier",
+				"company": "_Test Company"
+			}).insert(ignore_mandatory=True, ignore_permissions=True, ignore_links=True)
+
+		
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			warehouse=warehouse,
+			supplier="_Test Supplier",
+			supplier_warehouse=warehouse,
+			qty=1,
+			rate=100,
+			do_not_submit=True
+		)
+		pr.submit()
+		stock_ledger = frappe.db.get_value(
+		"Stock Ledger Entry",
+		{
+			"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name,
+			"voucher_detail_no":pr.items[0].name,
+			"warehouse": warehouse,
+			"is_cancelled": 0,
+		},
+		"name",
+		)
+		serial_nos = frappe.get_all("Serial No", filters={"purchase_document_no": pr.name}, pluck="name")
+		sl_sno = frappe.db.get_value("Stock Ledger Entry",
+		{
+			"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name,
+			"voucher_detail_no":pr.items[0].name,
+			"warehouse": warehouse,
+			"is_cancelled": 0,
+		},
+		"serial_no",)
+		if not sl_sno or sl_sno not in serial_nos:
+			frappe.db.set_value("Stock Ledger Entry", stock_ledger, "serial_no", serial_nos[0])
+		
+		serial_doc = frappe.get_doc("Serial No", serial_nos[0])
+
+		with self.assertRaises(frappe.ValidationError) as e2:
+			serial_doc.on_trash()
+
+		self.assertTrue("Cannot delete Serial No" in str(e2.exception))
 
 
 def get_auto_serial_nos(kwargs):

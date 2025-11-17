@@ -28,11 +28,16 @@ class ProcessStatementOfAccounts(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
-		from erpnext.accounts.doctype.process_statement_of_accounts_cc.process_statement_of_accounts_cc import ProcessStatementOfAccountsCC
-		from erpnext.accounts.doctype.process_statement_of_accounts_customer.process_statement_of_accounts_customer import ProcessStatementOfAccountsCustomer
-		from erpnext.accounts.doctype.psoa_cost_center.psoa_cost_center import PSOACostCenter
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
+
+		from erpnext.accounts.doctype.process_statement_of_accounts_cc.process_statement_of_accounts_cc import (
+			ProcessStatementOfAccountsCC,
+		)
+		from erpnext.accounts.doctype.process_statement_of_accounts_customer.process_statement_of_accounts_customer import (
+			ProcessStatementOfAccountsCustomer,
+		)
+		from erpnext.accounts.doctype.psoa_cost_center.psoa_cost_center import PSOACostCenter
 
 		account: DF.Link | None
 		ageing_based_on: DF.Literal["Due Date", "Posting Date"]
@@ -73,6 +78,10 @@ class ProcessStatementOfAccounts(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_account()
+		self.validate_company_for_table("Cost Center")
+		self.validate_company_for_table("Project")
+
 		if not self.subject:
 			self.subject = "Statement Of Accounts for {{ customer.customer_name }}"
 		if not self.body:
@@ -94,6 +103,43 @@ class ProcessStatementOfAccounts(Document):
 			if self.start_date and getdate(self.start_date) >= getdate(today()):
 				self.to_date = self.start_date
 				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
+
+	def validate_account(self):
+		if not self.account:
+			return
+
+		if self.company != frappe.get_cached_value("Account", self.account, "company"):
+			frappe.throw(
+				_("Account {0} doesn't belong to Company {1}").format(
+					frappe.bold(self.account),
+					frappe.bold(self.company),
+				)
+			)
+
+	def validate_company_for_table(self, doctype):
+		field = frappe.scrub(doctype)
+		if not self.get(field):
+			return
+
+		fieldname = field + "_name"
+
+		values = set(d.get(fieldname) for d in self.get(field))
+		invalid_values = frappe.db.get_all(
+			doctype, filters={"name": ["in", values], "company": ["!=", self.company]}, pluck="name"
+		)
+
+		if invalid_values:
+			msg = _("<p>Following {0}s doesn't belong to Company {1} :</p>").format(
+				doctype, frappe.bold(self.company)
+			)
+
+			msg += (
+				"<ul>"
+				+ "".join(_("<li>{}</li>").format(frappe.bold(row)) for row in invalid_values)
+				+ "</ul>"
+			)
+
+			frappe.throw(_(msg))
 
 
 def get_report_pdf(doc, consolidated=True):
@@ -120,8 +166,8 @@ def get_statement_dict(doc, get_statement_dict=False):
 
 		tax_id = frappe.get_doc("Customer", entry.customer).tax_id
 		presentation_currency = (
-			get_party_account_currency("Customer", entry.customer, doc.company)
-			or doc.currency
+			doc.currency
+			or get_party_account_currency("Customer", entry.customer, doc.company)
 			or get_company_currency(doc.company)
 		)
 
@@ -208,7 +254,7 @@ def get_gl_filters(doc, entry, tax_id, presentation_currency):
 
 
 def get_ar_filters(doc, entry):
-	filters =  {
+	filters = {
 		"report_date": doc.posting_date if doc.posting_date else None,
 		"party_type": "Customer",
 		"party": [entry.customer],
@@ -226,9 +272,8 @@ def get_ar_filters(doc, entry):
 	if frappe.db.has_column("Process Statement Of Accounts", "sales_partner"):
 		filters["sales_partner"] = doc.sales_partner if doc.sales_partner else None
 	if frappe.db.has_column("Process Statement Of Accounts", "sales_person"):
-		filters["sales_person"] = doc.sales_person if doc.sales_person else None,
+		filters["sales_person"] = (doc.sales_person if doc.sales_person else None,)
 	return filters
-
 
 
 def get_html(doc, filters, entry, col, res, ageing):
@@ -324,7 +369,7 @@ def get_recipients_and_cc(customer, doc):
 			if clist.billing_email:
 				for email in clist.billing_email.split(","):
 					recipients.append(email.strip())
-					
+
 			if doc.primary_mandatory and clist.primary_email:
 				for email in clist.primary_email.split(","):
 					recipients.append(email.strip())

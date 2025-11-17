@@ -221,7 +221,6 @@ erpnext.PointOfSale.Controller = class {
 		this.page.add_menu_item(__("Close the POS"), this.close_pos.bind(this), false, "Shift+Ctrl+C");
 	}
 
-
 	prepare_fullscreen_btn() {
 		this.page.page_actions.find(".custom-actions").empty();
 		this.page.add_button(__("Full Screen"), null, { btn_class: "btn-default fullscreen-btn" });
@@ -585,6 +584,7 @@ erpnext.PointOfSale.Controller = class {
 		) {
 			this.frm.doc.pos_profile = this.pos_profile;
 		}
+		this.frm.doc.set_warehouse = this.settings.warehouse;
 
 		if (!this.frm.doc.company) return;
 
@@ -605,7 +605,7 @@ erpnext.PointOfSale.Controller = class {
 
 			const from_selector = field === "qty" && value === "+1";
 			if (from_selector) value = flt(item_row.qty) + flt(value);
-			
+
 			if (item_row_exists) {
 				if (field === "qty") value = flt(value);
 
@@ -650,6 +650,7 @@ erpnext.PointOfSale.Controller = class {
 				}
 
 				new_item["use_serial_batch_fields"] = 1;
+				new_item["warehouse"] = this.settings.warehouse;
 				if (field === "serial_no") new_item["qty"] = value.split(`\n`).length || 0;
 
 				item_row = this.frm.add_child("items", new_item);

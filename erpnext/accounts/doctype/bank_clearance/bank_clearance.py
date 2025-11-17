@@ -20,7 +20,7 @@ class BankClearance(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.bank_clearance_detail.bank_clearance_detail import (
@@ -117,8 +117,9 @@ class BankClearance(Document):
 					)
 				else:
 					# using db_set to trigger notification
-					payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
-					payment_entry.db_set("clearance_date", d.clearance_date)
+					frappe.db.set_value(
+						d.payment_document, d.payment_entry, "clearance_date", d.clearance_date
+					)
 
 				clearance_date_updated = True
 
@@ -157,7 +158,6 @@ def get_payment_entries_for_bank_clearance(
 		{"account": account, "from": from_date, "to": to_date},
 		as_dict=1,
 	)
-
 
 	payment_entries = frappe.db.sql(
 		f"""

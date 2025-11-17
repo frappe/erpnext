@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, today
 from pypika.terms import ExistsCriterion
-
+from frappe.utils.nestedset import get_descendants_of
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
@@ -21,6 +21,10 @@ def execute(filters=None):
 	columns = get_columns()
 	bin_list = get_bin_list(filters)
 	item_map = get_item_map(filters.get("item_code"), include_uom)
+	item_groups = []
+	if filters.get("item_group"):
+		item_groups.append(filters.item_group)
+		item_groups.extend(get_descendants_of("Item Group", filters.item_group))
 
 	warehouse_company = {}
 	data = []
@@ -40,7 +44,7 @@ def execute(filters=None):
 		if filters.brand and filters.brand != item.brand:
 			continue
 
-		elif filters.item_group and filters.item_group != item.item_group:
+		elif item_groups and item.item_group not in item_groups:
 			continue
 
 		elif filters.company and filters.company != company:

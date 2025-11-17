@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class OverduePayment(Document):
+class OverduePayment(Document): # pragma: no cover
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, getdate
 from frappe.utils.data import nowtime
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
@@ -16,7 +17,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_incoming_rate
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
+
 
 class QtyMismatchError(ValidationError):
 	pass
@@ -67,6 +68,14 @@ class BuyingController(SubcontractingController):
 			"backflush_based_on",
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
 		)
+
+		if self.docstatus == 1 and self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+			self.set_onload(
+				"allow_to_make_qc_after_submission",
+				frappe.db.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				),
+			)
 
 	def create_package_for_transfer(self) -> None:
 		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
@@ -279,6 +288,8 @@ class BuyingController(SubcontractingController):
 
 		stock_and_asset_items_qty, stock_and_asset_items_amount = 0, 0
 		last_item_idx = 1
+		total_rejected_qty = 0
+
 		for d in self.get("items"):
 			if d.item_code and d.item_code in stock_and_asset_items:
 				stock_and_asset_items_qty += flt(d.qty)
@@ -293,12 +304,19 @@ class BuyingController(SubcontractingController):
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get("items")):
-			if item.item_code and item.qty and item.item_code in stock_and_asset_items:
-				item_proportion = (
-					flt(item.base_net_amount) / stock_and_asset_items_amount
-					if stock_and_asset_items_amount
-					else flt(item.qty) / stock_and_asset_items_qty
-				)
+			if (
+				item.item_code
+				and (item.qty or item.get("rejected_qty"))
+				and item.item_code in stock_and_asset_items
+			):
+				if stock_and_asset_items_qty:
+					item_proportion = (
+						flt(item.base_net_amount) / stock_and_asset_items_amount
+						if stock_and_asset_items_amount
+						else flt(item.qty) / stock_and_asset_items_qty
+					)
+				elif total_rejected_qty:
+					item_proportion = flt(item.get("rejected_qty")) / flt(total_rejected_qty)
 
 				if i == (last_item_idx - 1):
 					item.item_tax_amount = flt(
@@ -320,7 +338,21 @@ class BuyingController(SubcontractingController):
 				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
+				if (
+					not net_rate
+					and item.get("rejected_qty")
+					and frappe.get_single_value(
+						"Buying Settings", "set_valuation_rate_for_rejected_materials"
+					)
+				):
+					net_rate = item.rejected_qty * item.net_rate
+
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
+
+				if not qty_in_stock_uom and item.get("rejected_qty"):
+					qty_in_stock_uom = flt(item.rejected_qty * item.conversion_factor)
+
+
 				if self.get("is_old_subcontracting_flow"):
 					item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
 					item.valuation_rate = (
@@ -364,7 +396,6 @@ class BuyingController(SubcontractingController):
 		)
 		if allow_at_arms_length_price:
 			return
-
 
 		for d in self.get("items"):
 			d.discount_percentage = 0.0
@@ -416,13 +447,12 @@ class BuyingController(SubcontractingController):
 					raise_error_if_no_rate=False,
 				)
 
-				d.sales_incoming_rate = flt(outgoing_rate * (d.conversion_factor or 1), d.precision("rate"))
+				d.sales_incoming_rate = flt(outgoing_rate * (d.conversion_factor or 1))
 			else:
 				field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
 				d.sales_incoming_rate = flt(
 					frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
-					* (d.conversion_factor or 1),
-					d.precision("rate"),
+					* (d.conversion_factor or 1)
 				)
 
 	def validate_for_subcontracting(self):
@@ -627,6 +657,9 @@ class BuyingController(SubcontractingController):
 						sl_entries.append(from_warehouse_sle)
 
 			if flt(d.rejected_qty) != 0:
+				valuation_rate_for_rejected_item = 0.0
+				if frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
+					valuation_rate_for_rejected_item = d.valuation_rate
 				sl_entries.append(
 					self.get_sl_entries(
 						d,
@@ -635,7 +668,8 @@ class BuyingController(SubcontractingController):
 							"actual_qty": flt(
 								flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty")
 							),
-							"incoming_rate": 0.0,
+							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
+							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
 						},
 					)
@@ -760,6 +794,7 @@ class BuyingController(SubcontractingController):
 		else:
 			validate_item_type(self, "is_purchase_item", "purchase")
 
+
 def validate_item_type(doc, fieldname, message):
 	# iterate through items and check if they are valid sales or purchase items
 	items = [d.item_code for d in doc.items if d.item_code]
@@ -794,11 +829,13 @@ def validate_item_type(doc, fieldname, message):
 
 		frappe.throw(error_message)
 
+
 def get_asset_items(doc):
 	if doc.doctype not in ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]:
 		return []
 
 	return [d.item_code for d in doc.items if d.get("is_fixed_asset")]
+
 
 @erpnext.allow_regional
 def update_regional_item_valuation_rate(doc):

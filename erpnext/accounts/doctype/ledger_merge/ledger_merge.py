@@ -15,7 +15,7 @@ class LedgerMerge(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.ledger_merge_accounts.ledger_merge_accounts import (

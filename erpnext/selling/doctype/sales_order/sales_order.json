@@ -1339,6 +1339,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Auto Repeat",
+   "no_copy": 1,
    "options": "Auto Repeat"
   },
   {

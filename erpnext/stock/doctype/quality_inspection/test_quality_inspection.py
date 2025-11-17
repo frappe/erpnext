@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
+from datetime import date, datetime
+
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, nowdate, today
@@ -289,8 +291,8 @@ class TestQualityInspection(FrappeTestCase):
 
 	def test_qa_for_pr_TC_SCK_159(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		company = "_Test Company"
@@ -340,7 +342,7 @@ class TestQualityInspection(FrappeTestCase):
 
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-		from erpnext.selling.doctype.sales_order.test_sales_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		company = "_Test Company"
@@ -423,8 +425,8 @@ class TestQualityInspection(FrappeTestCase):
 
 	def test_qa_for_pr_out_TC_SCK_162(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		company = "_Test Company"
@@ -531,8 +533,8 @@ class TestQualityInspection(FrappeTestCase):
 
 	def test_qa_for_pr_proc_TC_SCK_166(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		company = "_Test Company"
@@ -894,16 +896,15 @@ class TestQualityInspection(FrappeTestCase):
 		qi3.inspected_by = "Administrator"
 		qi3.sample_size = 5
 		qi3.insert()
-		from types import SimpleNamespace
 
 		# Patch frappe.get_all to simulate how distribute_child_row_reference pulls QIs
 		with unittest.mock.patch("frappe.get_all") as mock_get_all, unittest.mock.patch(
 			"frappe.db.set_value"
 		) as mock_set_value:
 			mock_get_all.return_value = [
-				SimpleNamespace(name=qi1.name, child_row_reference="ROW-1", docstatus=1),
-				SimpleNamespace(name=qi2.name, child_row_reference="ROW-2", docstatus=0),
-				SimpleNamespace(name=qi3.name, child_row_reference=None, docstatus=0),
+				{"name": qi1.name, "child_row_reference": "ROW-1", "docstatus": 1},
+				{"name": qi2.name, "child_row_reference": "ROW-2", "docstatus": 0},
+				{"name": qi3.name, "child_row_reference": None, "docstatus": 0},
 			]
 
 			# Call method under test
@@ -1185,7 +1186,6 @@ def setup_test_company_defaults(company_name="_Test Company", abbreviation="_TC"
 	company.enable_perpetual_inventory = 1
 	company.enable_provisional_accounting_for_non_stock_items = 1
 	company.save()
-	frappe.db.commit()
 
 	set_default("company", company_name, "__default")
 
@@ -1227,34 +1227,53 @@ def setup_fy_gls_cost_center():
 			}
 		).insert()
 
-	# Setup Fiscal Year
-	fiscal_year = frappe.get_all(
+	current_date = datetime.today().date()
+
+	matching_fy_list = frappe.get_all(
 		"Fiscal Year",
-		filters={"year_start_date": ["<=", today()], "year_end_date": [">=", today()], "disabled": 0},
-		fields=["name"],
-		limit=1,
+		filters={
+			"disabled": 0,
+			"year_start_date": ["<=", current_date],
+			"year_end_date": [">=", current_date],
+		},
+		fields=["name", "year_start_date", "year_end_date"],
 	)
+	is_company = False
+	if len(matching_fy_list) > 0:
+		for fy in matching_fy_list:
+			fiscal_year = frappe.get_doc("Fiscal Year", fy["name"])
+			for years in fiscal_year.companies:
+				if years.company == company:
+					is_company = True
+					break
+			if is_company:
+				break
 
-	if fiscal_year:
-		fy_doc = frappe.get_doc("Fiscal Year", fiscal_year[0]["name"])
-		linked_companies = [d.company for d in fy_doc.companies]
+		if not is_company:
+			for rows in matching_fy_list:
+				try:
+					fiscal_year = frappe.get_doc("Fiscal Year", rows.name)
+					fiscal_year.append("companies", {"company": company})
+					fiscal_year.save()
+					break
+				except Exception as e:
+					print(f"Failed to get Fiscal Year {fy['name']}: {e}")
+					continue
 
-		if company.name not in linked_companies:
-			fy_doc.append("companies", {"company": company.name})
-			fy_doc.save()
 	else:
-		# If not exists create new FY
-		fy_doc = frappe.get_doc(
-			{
-				"doctype": "Fiscal Year",
-				"year": f"FY {today()[:4]}",
-				"year_start_date": today(),
-				"year_end_date": add_days(today(), 364),
-				"disabled": 0,
-			}
-		)
-		fy_doc.append("fiscal_year_company", {"company": company.name})
-		fy_doc.insert()
+		# No fiscal year includes current date — create a new one
+		current_year = current_date.year
+		first_date = date(current_year, 1, 1)
+		last_date = date(current_year, 12, 31)
+
+		fiscal_year = frappe.new_doc("Fiscal Year")
+		fiscal_year.year = f"{current_year}-{company}"
+		fiscal_year.year_start_date = first_date
+		fiscal_year.year_end_date = last_date
+		fiscal_year.company = company  # Required to avoid overlap error
+		fiscal_year.append("companies", {"company": company})
+		fiscal_year.save()
+
 	expense_account = f"T Cost of Goods Sold - {company_abbr}"
 	cost_center = f"_Test Cost Center - {company_abbr}"
 	return fiscal_year, expense_account, cost_center

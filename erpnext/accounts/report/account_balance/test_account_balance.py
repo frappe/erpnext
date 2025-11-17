@@ -52,6 +52,52 @@ class TestAccountBalance(unittest.TestCase):
 
 		self.assertEqual(expected_data, report[1])
 
+	def test_account_balance_TC_ACC_365(self):
+		filters = {
+			"company": "_Test Company",
+			"report_date": getdate(),
+			"root_type": "Income",
+		}
+
+		make_sales_invoice_1()
+
+		_, data = execute(filters)
+
+		# Build a dict by account for easy lookup
+		by_account = {d["account"]: d for d in data}
+
+		expected_accounts = [
+        "Direct Income - _TC",
+        "Income - _TC",
+        "Indirect Income - _TC",
+        "Sales - _TC",
+        "Service - _TC",
+        "_Test Account Sales - _TC",
+   		 ]
+
+		for acc in expected_accounts:
+			self.assertIn(acc, by_account, f"Missing account in report: {acc}")
+			self.assertEqual(
+				"INR", by_account[acc]["currency"], f"Currency mismatch for {acc}"
+			)
+			
+			self.assertIsInstance(
+				by_account[acc]["balance"], (int, float),
+				f"Balance for {acc} is not numeric"
+			)
+
+def make_sales_invoice_1():
+	frappe.set_user("Administrator")
+	create_sales_invoice(
+		company="_Test Company",
+		customer="_Test Customer",
+		warehouse="Finished Goods - _TC",
+		debit_to="Debtors - _TC",
+		income_account="Sales - _TC",
+		expense_account="Cost of Goods Sold - _TC",
+		cost_center="Main - _TC",
+		items=[{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "Finished Goods - _TC"}],
+	)
 
 def make_sales_invoice():
 	frappe.set_user("Administrator")

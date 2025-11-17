@@ -14,8 +14,8 @@ from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
- 	get_checks_for_pl_and_bs_accounts,
- )
+	get_checks_for_pl_and_bs_accounts,
+)
 
 
 class POSInvoiceMergeLog(Document):
@@ -27,11 +27,9 @@ class POSInvoiceMergeLog(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
-			POSInvoiceReference,
-		)
-
+		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import POSInvoiceReference
 		amended_from: DF.Link | None
+		company: DF.Link
 		consolidated_credit_note: DF.Link | None
 		consolidated_invoice: DF.Link | None
 		customer: DF.Link
@@ -147,7 +145,7 @@ class POSInvoiceMergeLog(Document):
 
 		sales_invoice.is_consolidated = 1
 		sales_invoice.set_posting_time = 1
-		
+
 		if not sales_invoice.posting_date:
 			sales_invoice.posting_date = getdate(self.posting_date)
 		if not sales_invoice.posting_time:
@@ -257,6 +255,7 @@ class POSInvoiceMergeLog(Document):
 				if not found:
 					tax.charge_type = "Actual"
 					tax.idx = idx
+					tax.row_id = None
 					idx += 1
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
@@ -331,12 +330,18 @@ class POSInvoiceMergeLog(Document):
 
 		if "projects" in frappe.get_installed_apps():
 			invoice.set(
-				"project", data[0].get("project") if data[0].get("project") else dimension_values.get("project")
+				"project",
+				data[0].get("project") if data[0].get("project") else dimension_values.get("project"),
 			)
 
 		if self.merge_invoices_based_on == "Customer Group":
 			invoice.flags.ignore_pos_profile = True
 			invoice.pos_profile = ""
+		
+		# Unset Commission Section
+		invoice.set("sales_partner", None)
+		invoice.set("commission_rate", 0)
+		invoice.set("total_commission", 0)
 
 		return invoice
 
@@ -379,6 +384,7 @@ class POSInvoiceMergeLog(Document):
 			.where(sle_table.serial_and_batch_bundle.isin(bundles) & sle_table.is_cancelled == 1)
 		)
 		query.run()
+
 	def get_serial_and_batch_bundles(self):
 		pos_invoices = []
 		for d in self.pos_invoices:
@@ -462,6 +468,7 @@ def get_invoice_customer_map(pos_invoices):
 
 	return pos_invoice_customer_map
 
+
 def split_invoices_by_accounting_dimension(pos_invoices):
 	# pos_invoices = {
 	# 	{'dim_field1': 'dim_field1_value1', 'dim_field2': 'dim_field2_value1'}: [],
@@ -482,6 +489,7 @@ def split_invoices_by_accounting_dimension(pos_invoices):
 		pos_invoice_accounting_dimensions_map[accounting_dimensions_dic_hash].append(invoice)
 
 	return pos_invoice_accounting_dimensions_map
+
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
 	invoices = pos_invoices or (closing_entry and closing_entry.get("pos_transactions"))
@@ -576,6 +584,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 					merge_log.posting_time = (
 						get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
 					)
+					merge_log.company = closing_entry.get("company") if closing_entry else None
 					merge_log.customer = customer
 					merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
 					merge_log.set("pos_invoices", _invoices)

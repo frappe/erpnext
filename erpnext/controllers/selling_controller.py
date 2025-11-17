@@ -4,8 +4,9 @@
 
 import frappe
 from frappe import _, bold, throw
-from frappe.utils import cint, flt, get_link_to_form, nowtime
 from frappe.tests.utils import if_app_installed
+from frappe.utils import cint, flt, get_link_to_form, nowtime
+
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -30,6 +31,14 @@ class SellingController(StockController):
 					)
 				)
 
+		if self.docstatus == 1 and self.doctype in ["Delivery Note", "Sales Invoice"]:
+			self.set_onload(
+				"allow_to_make_qc_after_submission",
+				frappe.db.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				),
+			)
+
 	def validate(self):
 		super().validate()
 		self.validate_items()
@@ -48,11 +57,46 @@ class SellingController(StockController):
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
 
+
+	def validate_standalone_serial_nos_customer(self):
+		if not self.is_return or self.return_against:
+			return
+
+		if self.doctype in ["Sales Invoice", "Delivery Note"]:
+			bundle_ids = [d.serial_and_batch_bundle for d in self.get("items") if d.serial_and_batch_bundle]
+			if not bundle_ids:
+				return
+
+			serial_nos = frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": ("in", bundle_ids), "serial_no": ("is", "set")},
+				pluck="serial_no",
+			)
+
+			if not serial_nos:
+				return
+
+			if serial_nos := frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", serial_nos), "customer": ("is", "set")},
+				fields=["name", "customer"],
+			):
+				for sn in serial_nos:
+					if sn.customer and sn.customer != self.customer:
+						frappe.throw(
+							_(
+								"Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1}"
+							).format(frappe.bold(sn.name), frappe.bold(sn.customer)),
+							title=_("Serial No Already Assigned"),
+						)
+
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
-		if hasattr(self, "set_missing_lead_customer_details") and callable(self.set_missing_lead_customer_details):
+		if hasattr(self, "set_missing_lead_customer_details") and callable(
+			self.set_missing_lead_customer_details
+		):
 			self.set_missing_lead_customer_details(for_validate=for_validate)
 
 		self.set_price_list_and_item_details(for_validate=for_validate)
@@ -75,7 +119,6 @@ class SellingController(StockController):
 
 		if customer:
 			from erpnext.accounts.party import _get_party_details
-
 
 			party_details = _get_party_details(
 				customer,
@@ -314,9 +357,6 @@ class SellingController(StockController):
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
-			if d.qty is None:
-				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
-
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
@@ -379,7 +419,7 @@ class SellingController(StockController):
 		if item_code not in product_bundle_items:
 			self._fetch_product_bundle_items(item_code)
 		return product_bundle_items[item_code]
-	
+
 	def _fetch_product_bundle_items(self, item_code):
 		product_bundle_items = self._product_bundle_items
 		items_to_fetch = {row.item_code for row in self.items if row.item_code not in product_bundle_items}
@@ -513,6 +553,15 @@ class SellingController(StockController):
 					d.incoming_rate = get_rate_for_return(
 						self.doctype, self.name, d.item_code, self.return_against, item_row=d
 					)
+				
+				if (
+					self.get("is_return")
+					and not d.incoming_rate
+					and not self.get("return_against")
+					and not self.is_internal_transfer()
+					and not d.get("allow_zero_valuation_rate")
+				):
+					d.incoming_rate = d.rate
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
@@ -923,6 +972,7 @@ class SellingController(StockController):
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
+
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):
 		if d.item_code:
@@ -964,8 +1014,3 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 	child.db_set("serial_and_batch_bundle", doc.name)
 
 	return doc.name
-
-
-
-	
-

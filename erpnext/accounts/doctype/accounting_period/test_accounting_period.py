@@ -65,32 +65,33 @@ class TestAccountingPeriod(unittest.TestCase):
 		frappe.flags.in_test = False
 
 	def test_bootstrap_doctypes_for_closing_TC_ACC_230(self):
-		from types import SimpleNamespace
-
+		from frappe import _dict
 		frappe.flags.in_test = True
-		# Create test Accounting Period doc
-		ap = frappe.new_doc("Accounting Period")
-		ap.company = "_Test Company"
-		ap.start_date = "2024-01-01"
-		ap.end_date = "2024-12-31"
-		ap.status = "Open"
-		ap.set("closed_documents", [])
+		try:
+			# Create test Accounting Period doc
+			ap = frappe.new_doc("Accounting Period")
+			ap.company = "_Test Company"
+			ap.start_date = "2024-01-01"
+			ap.end_date = "2024-12-31"
+			ap.status = "Open"
+			ap.set("closed_documents", [])
 
-		# Patch get_doctypes_for_closing to return object-like list
-		ap.get_doctypes_for_closing = lambda: [
-			SimpleNamespace(document_type="Sales Invoice", closed=1),
-			SimpleNamespace(document_type="Purchase Invoice", closed=1),
-		]
+			# Patch get_doctypes_for_closing to return dict-like list
+			ap.get_doctypes_for_closing = lambda: [
+				_dict(document_type="Sales Invoice", closed=1),
+				_dict(document_type="Purchase Invoice", closed=1),
+			]
+			
+			# Call bootstrap method
+			ap.bootstrap_doctypes_for_closing()
 
-		# Call bootstrap method
-		ap.bootstrap_doctypes_for_closing()
-
-		# Assertions: verify child table populated
-		self.assertEqual(len(ap.closed_documents), 2)
-		document_types = [d.document_type for d in ap.closed_documents]
-		self.assertIn("Sales Invoice", document_types)
-		self.assertIn("Purchase Invoice", document_types)
-		frappe.flags.in_test = False
+			# Assertions: verify child table populated
+			self.assertEqual(len(ap.closed_documents), 2)
+			document_types = [d.document_type for d in ap.closed_documents]
+			self.assertIn("Sales Invoice", document_types)
+			self.assertIn("Purchase Invoice", document_types)
+		finally:
+			frappe.flags.in_test = False
 
 	def test_validate_accounting_period_on_doc_save_TC_ACC_231(self):
 		from erpnext.accounts.doctype.accounting_period.accounting_period import (

@@ -17,7 +17,7 @@ class TestStockLedgerReeport(FrappeTestCase):
 			company="_Test Company",
 			from_date=today(),
 			to_date=add_days(today(), 30),
-			item_code="_Test Stock Report Serial Item",
+			item_code=["_Test Stock Report Serial Item"],
 		)
 
 	def tearDown(self) -> None:

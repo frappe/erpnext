@@ -507,7 +507,7 @@
    "collapsible": 1,
    "fieldname": "personal_details",
    "fieldtype": "Tab Break",
-   "label": "Personal"
+   "label": "Personal Details"
   },
   {
    "fieldname": "passport_number",
@@ -600,7 +600,7 @@
    "collapsible": 1,
    "fieldname": "exit",
    "fieldtype": "Tab Break",
-   "label": "Exit",
+   "label": "Employee Exit",
    "oldfieldtype": "Section Break"
   },
   {

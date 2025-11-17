@@ -1,3 +1,4 @@
+
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -211,6 +212,7 @@ def validate_cancellation(kargs):
 				doc.flags.ignore_permissions = True
 				doc.cancel()
 
+
 def set_as_cancel(voucher_type, voucher_no):
 	frappe.db.sql(
 		"""update `tabStock Ledger Entry` set is_cancelled=1,
@@ -410,20 +412,19 @@ def create_json_gz_file(data, doc, file_name=None) -> str:
 
 	if not file_name:
 		return create_file(doc, compressed_content)
-	
 	else:
 		file_doc = frappe.get_doc("File", file_name)
 		if "/frappe_s3_attachment." in file_doc.file_url:
 			file_doc.delete()
 			return create_file(doc, compressed_content)
-		
+
 		path = file_doc.get_full_path()
 
 		with open(path, "wb") as f:
 			f.write(compressed_content)
 
 		return doc.reposting_data_file
-	
+
 
 def create_file(doc, compressed_content):
 	json_filename = f"{scrub(doc.doctype)}-{scrub(doc.name)}.json.gz"
@@ -439,6 +440,7 @@ def create_file(doc, compressed_content):
 		}
 	)
 	_file.save(ignore_permissions=True)
+
 	return _file.file_url
 
 
@@ -455,26 +457,12 @@ def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposti
 		items_to_be_repost = json.loads(doc.items_to_be_repost) or []
 
 	if not items_to_be_repost and voucher_type and voucher_no:
-		# items_to_be_repost = frappe.db.get_all(
-		# 	"Stock Ledger Entry",
-		# 	filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-		# 	fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
-		# 	order_by="creation asc",
-		# 	group_by="item_code, warehouse",
-		# )
-		
-		# postgres
-		items_to_be_repost = frappe.db.sql(
-			"""
-			SELECT item_code, warehouse, posting_date, posting_time, creation
-			FROM `tabStock Ledger Entry`
-			WHERE voucher_type = %(voucher_type)s
-			AND voucher_no = %(voucher_no)s
-			GROUP BY item_code, warehouse, posting_date, posting_time, creation
-			ORDER BY creation ASC
-			""",
-			{"voucher_type": voucher_type, "voucher_no": voucher_no},
-			as_dict=True
+		items_to_be_repost = frappe.db.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+			fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
+			order_by="creation asc",
+			group_by="item_code, warehouse",
 		)
 
 	return items_to_be_repost or []
@@ -663,6 +651,15 @@ class update_entries_after:
 
 		if self.exceptions:
 			self.raise_exceptions()
+
+	def has_stock_reco_with_serial_batch(self, sle):
+		if (
+			sle.voucher_type == "Stock Reconciliation"
+			and frappe.db.get_value(sle.voucher_type, sle.voucher_no, "set_posting_time") == 1
+		):
+			return not (sle.batch_no or sle.serial_no or sle.serial_and_batch_bundle)
+
+		return False
 
 	def process_sle_against_current_timestamp(self):
 		sl_entries = self.get_sle_against_current_voucher()
@@ -886,6 +883,15 @@ class update_entries_after:
 					self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
 						self.wh_data.valuation_rate
 					)
+
+					if (
+						sle.actual_qty < 0
+						and flt(self.wh_data.qty_after_transaction, self.flt_precision) != 0
+					):
+						self.wh_data.valuation_rate = flt(
+							self.wh_data.stock_value, self.currency_precision
+						) / flt(self.wh_data.qty_after_transaction, self.flt_precision)
+
 				else:
 					self.update_queue_values(sle)
 
@@ -903,14 +909,18 @@ class update_entries_after:
 		sle.stock_value = self.wh_data.stock_value
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
 
-		if not sle.is_adjustment_entry or not self.args.get("sle_id"):
+		if not sle.is_adjustment_entry:
 			sle.stock_value_difference = stock_value_difference
 		elif sle.is_adjustment_entry and not self.args.get("sle_id"):
-			sle.stock_value_difference = get_stock_value_difference(
-				sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time, sle.voucher_no
+			sle.stock_value_difference = (
+				get_stock_value_difference(
+					sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time, sle.voucher_no
+				)
+				* -1
 			)
 
 		sle.doctype = "Stock Ledger Entry"
+		sle.modified = now()
 		frappe.get_doc(sle).db_update()
 
 		if not self.args.get("sle_id") or (
@@ -1065,6 +1075,7 @@ class update_entries_after:
 			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
 		):
 			return True
+
 		return False
 
 	def get_incoming_outgoing_rate_from_transaction(self, sle):
@@ -1219,6 +1230,7 @@ class update_entries_after:
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		for d in stock_entry.items:
+			# Update only the row that matches the voucher_detail_no or the row containing the FG/Scrap Item.
 			if (
 				d.name == voucher_detail_no
 				or (not d.s_warehouse and d.t_warehouse)
@@ -1244,12 +1256,19 @@ class update_entries_after:
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
-			if sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and frappe.get_cached_value(
-				sle.voucher_type, sle.voucher_no, "is_internal_supplier"
-			):
-				frappe.db.set_value(
-					f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", sle.outgoing_rate
+			if sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+				details = frappe.get_cached_value(
+					sle.voucher_type,
+					sle.voucher_no,
+					["is_internal_supplier", "is_return", "return_against"],
+					as_dict=True,
 				)
+				if details.is_internal_supplier or (details.is_return and not details.return_against):
+					rate = outgoing_rate if details.is_return else sle.outgoing_rate
+
+					frappe.db.set_value(
+						f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", rate
+					)
 		else:
 			frappe.db.set_value(
 				"Purchase Receipt Item Supplied", sle.voucher_detail_no, "rate", outgoing_rate
@@ -1377,7 +1396,7 @@ class update_entries_after:
 
 			# Get valuation rate from previous SLE or Item master, if item does not have the
 			# allow zero valuration rate flag set
-			if self.wh_data.valuation_rate is None and sle.voucher_detail_no:
+			if not self.wh_data.valuation_rate and sle.voucher_detail_no:
 				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(
 					sle.voucher_type, sle.voucher_detail_no
 				)
@@ -1652,8 +1671,20 @@ def get_stock_ledger_entries(
 ):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = f" and posting_datetime {operator} %(posting_datetime)s"
-	if previous_sle.get("warehouse"):
-		conditions += " and warehouse = %(warehouse)s"
+
+	if item_code := previous_sle.get("item_code"):
+		if isinstance(item_code, list | tuple):
+			conditions += " and item_code in %(item_code)s"
+		else:
+			conditions += " and item_code = %(item_code)s"
+
+	if warehouse := previous_sle.get("warehouse"):
+		if isinstance(warehouse, list | tuple):
+			conditions += " and warehouse in %(warehouse)s"
+
+		else:
+			conditions += " and warehouse = %(warehouse)s"
+
 	elif previous_sle.get("warehouse_condition"):
 		conditions += " and " + previous_sle.get("warehouse_condition")
 
@@ -1690,15 +1721,13 @@ def get_stock_ledger_entries(
 
 	if extra_cond:
 		conditions += f"{extra_cond}"
-	
-	# nosemgrep
 
+	# nosemgrep
 	return frappe.db.sql(
 		"""
 		select *, posting_datetime as "timestamp"
 		from `tabStock Ledger Entry`
-		where item_code = %(item_code)s
-		and is_cancelled = 0
+		where is_cancelled = 0
 		{conditions}
 		order by posting_datetime {order}, creation {order}
 		{limit} {for_update}""".format(
@@ -1794,6 +1823,9 @@ def get_valuation_rate(
 
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
+		sabb = frappe.db.get_value(
+			"Serial and Batch Bundle", serial_and_batch_bundle, ["posting_date", "posting_time"], as_dict=True
+		)
 		batch_obj = BatchNoValuation(
 			sle=frappe._dict(
 				{
@@ -1801,6 +1833,8 @@ def get_valuation_rate(
 					"warehouse": warehouse,
 					"actual_qty": -1,
 					"serial_and_batch_bundle": serial_and_batch_bundle,
+					"posting_date": sabb.posting_date,
+					"posting_time": sabb.posting_time,
 				}
 			)
 		)
@@ -1837,8 +1871,8 @@ def get_valuation_rate(
 			)
 
 	if (
-		(valuation_rate is None or flt(valuation_rate) == 0)
-		and not cint(allow_zero_rate)
+		not allow_zero_rate
+		and not valuation_rate
 		and raise_error_if_no_rate
 		and cint(erpnext.is_perpetual_inventory_enabled(company))
 	):
@@ -1912,6 +1946,9 @@ def get_stock_reco_qty_shift(args):
 	stock_reco_qty_shift = 0
 	if args.get("is_cancelled"):
 		if args.get("previous_qty_after_transaction"):
+			if args.get("serial_and_batch_bundle"):
+				return args.get("previous_qty_after_transaction")
+
 			# get qty (balance) that was set at submission
 			last_balance = args.get("previous_qty_after_transaction")
 			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)

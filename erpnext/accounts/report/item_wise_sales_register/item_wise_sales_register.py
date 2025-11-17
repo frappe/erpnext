@@ -5,12 +5,14 @@
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import functions as fn
 from frappe.utils import cstr, flt
+from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.xlsxutils import handle_html
 from pypika import Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,
 )
@@ -138,7 +140,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 		data.append(row)
 
 	if filters.get("group_by") and item_list:
-		total_row = total_row_map.get(prev_group_by_value) or total_row_map.get(d.get("item_name"))
+		total_row = total_row_map.get(prev_group_by_value or d.get("item_name"))
 		total_row["percent_gt"] = flt(total_row["total"] / grand_total * 100)
 		data.append(total_row)
 		data.append({})
@@ -196,7 +198,7 @@ def get_columns(additional_table_columns, filters):
 				"fieldname": "invoice",
 				"fieldtype": "Link",
 				"options": "Sales Invoice",
-				"width": 120,
+				"width": 150,
 			},
 			{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		]
@@ -341,7 +343,7 @@ def get_columns(additional_table_columns, filters):
 	return columns
 
 
-def apply_conditions(query, si, sii, filters, additional_conditions=None):
+def apply_conditions(query, si, sii, sip, filters, additional_conditions=None):
 	for opts in ("company", "customer"):
 		if filters.get(opts):
 			query = query.where(si[opts] == filters[opts])
@@ -353,14 +355,7 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 		query = query.where(si.posting_date <= filters.get("to_date"))
 
 	if filters.get("mode_of_payment"):
-		sales_invoice = frappe.db.get_all(
-			"Sales Invoice Payment", {"mode_of_payment": filters.get("mode_of_payment")}, pluck="parent"
-		)
-		
-		if sales_invoice:
-			query = query.where(si.name.isin(sales_invoice))
-		else:
-			query = query.where(si.name == '')
+		query = query.where(sip.mode_of_payment == filters.get("mode_of_payment"))
 
 	if filters.get("warehouse"):
 		if frappe.db.get_value("Warehouse", filters.get("warehouse"), "is_group"):
@@ -379,7 +374,12 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 		query = query.where(sii.item_code == filters.get("item_code"))
 
 	if filters.get("item_group"):
-		query = query.where(sii.item_group == filters.get("item_group"))
+		if frappe.db.get_value("Item Group", filters.get("item_group"), "is_group"):
+			item_groups = get_descendants_of("Item Group", filters.get("item_group"))
+			item_groups.append(filters.get("item_group"))
+			query = query.where(sii.item_group.isin(item_groups))
+		else:
+			query = query.where(sii.item_group == filters.get("item_group"))
 
 	if filters.get("income_account"):
 		query = query.where(
@@ -394,15 +394,18 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 	return query
 
 
-def apply_order_by_conditions(query, si, ii, filters):
+def apply_order_by_conditions(doctype, query, filters):
+	invoice = f"`tab{doctype}`"
+	invoice_item = f"`tab{doctype} Item`"
+
 	if not filters.get("group_by"):
-		query += f" order by {si.posting_date} desc, {ii.item_group} desc"
+		query += f" order by {invoice}.posting_date desc, {invoice_item}.item_group desc"
 	elif filters.get("group_by") == "Invoice":
-		query += f" order by {ii.parent} desc"
+		query += f" order by {invoice_item}.parent desc"
 	elif filters.get("group_by") == "Item":
-		query += f" order by {ii.item_code}"
+		query += f" order by {invoice_item}.item_code"
 	elif filters.get("group_by") == "Item Group":
-		query += f" order by {ii.item_group}"
+		query += f" order by {invoice_item}.item_group"
 	elif filters.get("group_by") in ("Customer", "Customer Group", "Territory", "Supplier"):
 		filter_field = frappe.scrub(filters.get("group_by"))
 		query += f" order by {filter_field} desc"
@@ -412,14 +415,17 @@ def apply_order_by_conditions(query, si, ii, filters):
 
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	doctype = "Sales Invoice"
-	si = frappe.qb.DocType(doctype)
-	sii = frappe.qb.DocType(f"{doctype} Item")
+	si = frappe.qb.DocType("Sales Invoice")
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	sip = frappe.qb.DocType("Sales Invoice Payment")
 	item = frappe.qb.DocType("Item")
 
 	query = (
 		frappe.qb.from_(si)
 		.join(sii)
 		.on(si.name == sii.parent)
+		.left_join(sip)
+		.on(sip.parent == si.name)
 		.left_join(item)
 		.on(sii.item_code == item.name)
 		.select(
@@ -431,7 +437,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			si.is_internal_customer,
 			si.customer,
 			si.remarks,
-			si.territory,
+			fn.IfNull(si.territory, "Not Specified").as_("territory"),
 			si.company,
 			si.base_net_total,
 			sii.project,
@@ -454,11 +460,12 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			sii.base_net_rate,
 			sii.base_net_amount,
 			si.customer_name,
-			si.customer_group,
+			fn.IfNull(si.customer_group, "Not Specified").as_("customer_group"),
 			sii.so_detail,
 			si.update_stock,
 			sii.uom,
 			sii.qty,
+			sip.mode_of_payment,
 		)
 		.where(si.docstatus == 1)
 		.where(sii.parenttype == doctype)
@@ -478,17 +485,17 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 	if filters.get("customer_group"):
 		query = query.where(si.customer_group == filters["customer_group"])
 
-	query = apply_conditions(query, si, sii, filters, additional_conditions)
+	query = apply_conditions(query, si, sii, sip, filters, additional_conditions)
 
 	from frappe.desk.reportview import build_match_conditions
 
 	query, params = query.walk()
-	match_conditions = build_match_conditions("Sales Invoice")
+	match_conditions = build_match_conditions(doctype)
 
 	if match_conditions:
 		query += " and " + match_conditions
 
-	query = apply_order_by_conditions(query, si, sii, filters)
+	query = apply_order_by_conditions(doctype, query, filters)
 
 	return frappe.db.sql(query, params, as_dict=True)
 
@@ -515,32 +522,17 @@ def get_delivery_notes_against_sales_order(item_list):
 
 
 def get_grand_total(filters, doctype):
-	# return flt(
-	# 	frappe.db.get_value(
-	# 		doctype,
-	# 		{
-	# 			"docstatus": 1,
-	# 			"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-	# 		},
-	# 		"sum(base_grand_total)",
-	# 	)
-	# )
-
-	grand_total = frappe.db.sql(
-		"""
-		SELECT SUM(base_grand_total)
-		FROM `tab{0}`
-		WHERE docstatus = 1
-			AND posting_date BETWEEN '{1}' AND '{2}'
-		"""
-		.format(
+	return flt(
+		frappe.db.get_value(
 			doctype,
-			filters.get("from_date"),
-			filters.get("to_date")
-		),as_list = 1
+			{
+				"docstatus": 1,
+				"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
+			},
+			"sum(base_grand_total)",
+		)
 	)
-	if grand_total:
-		return flt(grand_total[0][0])
+
 
 def get_tax_accounts(
 	item_list,
@@ -742,6 +734,7 @@ def add_total_row(
 			add_sub_total_row(total_row, total_row_map, "total_row", tax_columns)
 
 		prev_group_by_value = item.get(group_by_field, "")
+
 		total_row_map.setdefault(
 			item.get(group_by_field, ""),
 			{
@@ -774,25 +767,13 @@ def add_total_row(
 def get_display_value(filters, group_by_field, item):
 	if filters.get("group_by") == "Item":
 		if item.get("item_code") != item.get("item_name"):
-			value = (
-				cstr(item.get("item_code"))
-				+ "<br><br>"
-				+ "<span style='font-weight: normal'>"
-				+ cstr(item.get("item_name"))
-				+ "</span>"
-			)
+			value = f"{item.get('item_code')}: {item.get('item_name')}"
 		else:
 			value = item.get("item_code", "")
 	elif filters.get("group_by") in ("Customer", "Supplier"):
 		party = frappe.scrub(filters.get("group_by"))
 		if item.get(party) != item.get(party + "_name"):
-			value = (
-				item.get(party)
-				+ "<br><br>"
-				+ "<span style='font-weight: normal'>"
-				+ item.get(party + "_name")
-				+ "</span>"
-			)
+			value = f"{item.get(party)}: {item.get(party + '_name')}"
 		else:
 			value = item.get(party)
 	else:
@@ -826,4 +807,3 @@ def add_sub_total_row(item, total_row_map, group_by_value, tax_columns):
 	for tax in tax_columns:
 		total_row.setdefault(frappe.scrub(tax + " Amount"), 0.0)
 		total_row[frappe.scrub(tax + " Amount")] += flt(item[frappe.scrub(tax + " Amount")])
-

@@ -342,7 +342,7 @@ def remove_attached_file(docname):  # pragma: no cover
 	if file_name := frappe.db.get_value(
 		"File", {"attached_to_name": docname, "attached_to_doctype": "Repost Item Valuation"}, "name"
 	):
-		frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True)
+		frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True, force=True)
 
 
 def repost_sl_entries(doc):

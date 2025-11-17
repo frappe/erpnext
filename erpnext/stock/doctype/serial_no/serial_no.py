@@ -31,13 +31,14 @@ class SerialNo(StockController):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		amc_expiry_date: DF.Date | None
 		batch_no: DF.Link | None
 		brand: DF.Link | None
 		company: DF.Link
+		customer: DF.Link | None
 		description: DF.Text | None
 		employee: DF.Link | None
 		item_code: DF.Link

@@ -16,7 +16,7 @@ class PaymentOrder(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.payment_order_reference.payment_order_reference import (

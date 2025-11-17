@@ -22,7 +22,7 @@ class InvoiceDiscounting(AccountsController):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.discounted_invoice.discounted_invoice import DiscountedInvoice

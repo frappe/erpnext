@@ -12,7 +12,7 @@ class WBSMonthlyDistribution(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from erpnext.budget.doctype.distribution_percentage.distribution_percentage import DistributionPercentage
 		from frappe.types import DF
 

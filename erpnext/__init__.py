@@ -4,7 +4,10 @@ import inspect
 import frappe
 from frappe.utils.user import is_website_user
 
-__version__ = "15.60.2"
+
+__version__ = "15.72.0"
+
+
 
 def get_default_company(user=None):
 	"""Get default company for user"""
@@ -149,6 +152,7 @@ def allow_regional(fn):
 		return frappe.get_attr(overrides[function_path][-1])(*args, **kwargs)
 
 	return caller
+
 
 def check_app_permission():
 	if frappe.session.user == "Administrator":

@@ -15,7 +15,6 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -42,7 +41,12 @@ class TestBankTransaction(FrappeTestCase):
 		bank_account = create_bank_account(
 			gl_account=gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
-
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			"stock_received_but_not_billed",
+			f"Stock Received But Not Billed - _TC",
+		)
 		add_transactions(bank_account=bank_account)
 		add_vouchers(gl_account=gl_account)
 
@@ -224,6 +228,304 @@ class TestBankTransaction(FrappeTestCase):
 		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
 		self.assertEqual(linked_payments[0]["name"], repayment_entry.name)
 
+	def test_validate_currency_TC_ACC_270(self):
+		bank_account = create_bank_account()
+		account = frappe.get_doc("Account", frappe.get_value("Bank Account", bank_account, "account"))
+		account.account_currency = "USD"
+		account.save()
+
+		bank_transaction = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Currency Mismatch Test",
+				"date": "2025-01-01",
+				"deposit": 1000,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, bank_transaction.validate_currency)
+
+	def test_validate_duplicate_references_TC_ACC_271(self):
+		bt = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Duplicate Payment Entry",
+				"date": "2025-01-01",
+				"deposit": 1000,
+				"currency": "INR",
+				"bank_account": create_bank_account(),
+			}
+		)
+
+		bt.append(
+			"payment_entries",
+			{
+				"payment_document": "Payment Entry",
+				"payment_entry": "PE-00001",
+				"allocated_amount": 1000,
+			},
+		)
+		bt.append(
+			"payment_entries",
+			{
+				"payment_document": "Payment Entry",
+				"payment_entry": "PE-00001",
+				"allocated_amount": 1000,
+			},
+		)
+
+		self.assertRaises(frappe.ValidationError, bt.validate_duplicate_references)
+
+	def test_before_save_TC_ACC_272(self):
+		bank_account = create_bank_account()
+		doc1 = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Duplicate Check",
+				"date": "2025-01-01",
+				"deposit": 1000,
+				"currency": "INR",
+				"bank_account": bank_account,
+				"reference_number": "DUP-001",
+			}
+		).insert()
+		doc1.submit()
+
+		doc2 = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Duplicate Check",
+				"date": "2025-01-01",
+				"deposit": 1000,
+				"currency": "INR",
+				"bank_account": bank_account,
+				"reference_number": "DUP-001",
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, doc2.before_save)
+
+	def test_remove_payment_entries_TC_ACC_273(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		gl_account = create_gl_account("Remove PE Bank")
+		bank_account = create_bank_account(gl_account=gl_account, bank_account_name="Remove PE Account")
+
+		# Create a Purchase Invoice and Payment Entry
+		pi = make_purchase_invoice(supplier="Conrad Electronic", qty=1, rate=1000)
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account=gl_account)
+		pe.reference_no = "Test-REF-001"
+		pe.reference_date = "2025-01-01"
+		pe.insert()
+		pe.submit()
+
+		# Create a Bank Transaction and link the Payment Entry
+		bt = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Remove PE Test",
+				"date": "2025-01-01",
+				"deposit": 1000,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+		bt.append(
+			"payment_entries",
+			{
+				"payment_document": "Payment Entry",
+				"payment_entry": pe.name,
+				"allocated_amount": 500,
+			},
+		)
+		bt.insert()
+		bt.submit()
+
+		# Now call the method under test
+		bt.remove_payment_entries()
+
+		bt.reload()
+		self.assertEqual(len(bt.payment_entries), 0)
+
+	def test_remove_payment_entries_TC_ACC_274(self):
+		gl_account = create_gl_account("Linked BT Bank")
+		bank_account = create_bank_account(gl_account=gl_account, bank_account_name="Linked BT Account")
+
+		# Create Main Bank Transaction
+		bt_main = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Main BT",
+				"date": "2025-01-01",
+				"deposit": 1000,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+		bt_main.insert()
+		bt_main.submit()
+
+		bt_child = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Child BT",
+				"date": "2025-01-02",
+				"deposit": 500,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+		bt_child.append(
+			"payment_entries",
+			{
+				"payment_document": "Bank Transaction",
+				"payment_entry": bt_main.name,
+				"allocated_amount": 500,
+			},
+		)
+		bt_child.insert()
+		bt_child.submit()
+
+		bt_main.append(
+			"payment_entries",
+			{
+				"payment_document": "Bank Transaction",
+				"payment_entry": bt_child.name,
+				"allocated_amount": 500,
+			},
+		)
+		bt_main.save()
+		bt_main.submit()
+
+		# Test: remove entries in main BT (should call update_linked_bank_transaction)
+		bt_main.remove_payment_entries()
+		bt_main.reload()
+		self.assertEqual(len(bt_main.payment_entries), 0)
+
+	def test_allocate_payment_entries_all_paths_TC_ACC_275(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		gl_account = create_gl_account("Alloc Paths")
+		bank_account = create_bank_account(gl_account=gl_account, bank_account_name="Alloc Paths")
+
+		# Fully allocated (allocable_amount = 0 and should_clear)
+		si_full = create_sales_invoice(customer="Fayva", qty=1, rate=100)
+		pe_full = get_payment_entry("Sales Invoice", si_full.name, bank_account=gl_account)
+		pe_full.reference_no = "REF-A"
+		pe_full.reference_date = "2025-01-01"
+		pe_full.insert()
+		pe_full.submit()
+
+		# Full allocation through dummy bank transaction
+		bt_full = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Dummy full",
+				"date": "2025-01-02",
+				"deposit": 100,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+		bt_full.append(
+			"payment_entries",
+			{"payment_document": "Payment Entry", "payment_entry": pe_full.name, "allocated_amount": 100},
+		)
+		bt_full.insert()
+		bt_full.submit()
+
+		# Over-allocated (allocable_amount < 0)
+		si_over = create_sales_invoice(customer="Fayva", qty=1, rate=100)
+		pe_over = get_payment_entry("Sales Invoice", si_over.name, bank_account=gl_account)
+		pe_over.reference_no = "REF-B"
+		pe_over.reference_date = "2025-01-01"
+		pe_over.insert()
+		pe_over.submit()
+
+		# Allocate more than voucher amount manually
+		bt_over = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Over allocate",
+				"date": "2025-01-02",
+				"deposit": 200,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+		bt_over.append(
+			"payment_entries",
+			{"payment_document": "Payment Entry", "payment_entry": pe_over.name, "allocated_amount": 150},
+		)
+		bt_over.insert()
+		bt_over.submit()
+
+		# Will be skipped due to remaining_amount = 0
+		si_skip = create_sales_invoice(customer="Fayva", qty=1, rate=100)
+		pe_skip = get_payment_entry("Sales Invoice", si_skip.name, bank_account=gl_account)
+		pe_skip.reference_no = "REF-C"
+		pe_skip.reference_date = "2025-01-01"
+		pe_skip.insert()
+		pe_skip.submit()
+
+		# Linked Bank Transaction to test .update_linked_bank_transaction()
+		bt_linked = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Linked child",
+				"date": "2025-01-03",
+				"deposit": 50,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+		bt_linked.insert()
+		bt_linked.submit()
+
+		# BT to allocate all above
+		bt = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Master allocate test",
+				"date": "2025-01-05",
+				"deposit": 150,
+				"currency": "INR",
+				"bank_account": bank_account,
+			}
+		)
+
+		# Append all entries
+		bt.append(
+			"payment_entries",
+			{"payment_document": "Payment Entry", "payment_entry": pe_full.name, "allocated_amount": 0},
+		)  # allocable=0
+		bt.append(
+			"payment_entries",
+			{"payment_document": "Payment Entry", "payment_entry": pe_over.name, "allocated_amount": 0},
+		)  # over-alloc
+		bt.append(
+			"payment_entries",
+			{"payment_document": "Payment Entry", "payment_entry": pe_skip.name, "allocated_amount": 0},
+		)  # will be skipped
+		bt.append(
+			"payment_entries",
+			{"payment_document": "Bank Transaction", "payment_entry": bt_linked.name, "allocated_amount": 0},
+		)  # triggers update_linked_bank_transaction
+
+		bt.insert()
+		with self.assertRaises(frappe.ValidationError) as context:
+			bt.submit()
+
+		self.assertIn("is over-allocated by", str(context.exception))
+
+		# Run and expect one error during over-allocation
+		with self.assertRaises(frappe.ValidationError) as context:
+			bt.allocate_payment_entries()
+
+		self.assertIn("over-allocated", str(context.exception))
+
 
 @if_lending_app_installed
 def clear_loan_transactions():
@@ -335,6 +637,8 @@ def add_transactions(bank_account="_Test Bank - _TC"):
 
 
 def add_vouchers(gl_account="_Test Bank - _TC"):
+	from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 	try:
 		frappe.get_doc(
 			{

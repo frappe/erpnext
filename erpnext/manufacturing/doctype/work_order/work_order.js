@@ -84,7 +84,6 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
-
 		frm.set_query("operation", "required_items", function () {
 			return {
 				query: "erpnext.manufacturing.doctype.work_order.work_order.get_bom_operations",
@@ -93,6 +92,29 @@ frappe.ui.form.on("Work Order", {
 					parenttype: "BOM",
 				},
 			};
+		});
+
+		frm.set_query("sales_order", function () {
+			if (frm.doc.production_item) {
+				return {
+					query: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
+					filters: {
+						production_item: frm.doc.production_item,
+					},
+				};
+			}
+		});
+
+
+		frm.set_query("sales_order", function () {
+			if (frm.doc.production_item) {
+				return {
+					query: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
+					filters: {
+						production_item: frm.doc.production_item,
+					},
+				};
+			}
 		});
 
 		// formatter for work order operation
@@ -179,7 +201,6 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		}
-
 
 		if (frm.doc.status == "Completed") {
 			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
@@ -400,7 +421,7 @@ frappe.ui.form.on("Work Order", {
 				frm.doc.produced_qty -
 				frm.doc.process_loss_qty;
 
-			if (pending_complete) {
+			if (pending_complete > 0) {
 				var width = (pending_complete / frm.doc.qty) * 100 - added_min;
 				title = __("{0} items in progress", [pending_complete]);
 				bars.push({
@@ -473,7 +494,6 @@ frappe.ui.form.on("Work Order", {
 				callback: function (r) {
 					if (r.message) {
 						frm.set_value("sales_order", "");
-						frm.trigger("set_sales_order");
 						erpnext.in_production_item_onchange = true;
 
 						$.each(
@@ -529,28 +549,10 @@ frappe.ui.form.on("Work Order", {
 		frm.toggle_reqd("transfer_material_against", frm.doc.operations && frm.doc.operations.length > 0);
 	},
 
-	set_sales_order: function (frm) {
-		if (frm.doc.production_item) {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
-				args: { production_item: frm.doc.production_item },
-				callback: function (r) {
-					frm.set_query("sales_order", function () {
-						erpnext.in_production_item_onchange = true;
-						return {
-							filters: [["Sales Order", "name", "in", r.message]],
-						};
-					});
-				},
-			});
-		}
-	},
-
 	additional_operating_cost: function (frm) {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
-
 });
 
 frappe.ui.form.on("Work Order Item", {
@@ -797,7 +799,7 @@ erpnext.work_order = {
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
 		if (purpose === "Disassemble") {
-			return flt(frm.doc.produced_qty);
+			return flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
 		}
 
 		if (frm.doc.skip_transfer) {
@@ -823,6 +825,19 @@ erpnext.work_order = {
 				description: __("Max: {0}", [max]),
 				default: max,
 			},
+			{
+				fieldtype: "Check",
+				label: __("Consider Process Loss"),
+				fieldname: "consider_process_loss",
+				default: 0,
+				onchange: function () {
+					if (this.value) {
+						frm.qty_prompt.set_value("qty", max - frm.doc.process_loss_qty);
+					} else {
+						frm.qty_prompt.set_value("qty", max);
+					}
+				},
+			},
 		];
 
 		if (purpose === "Disassemble") {
@@ -844,7 +859,7 @@ erpnext.work_order = {
 		}
 
 		return new Promise((resolve, reject) => {
-			frappe.prompt(
+			frm.qty_prompt = frappe.prompt(
 				fields,
 				(data) => {
 					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;

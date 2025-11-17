@@ -31,7 +31,8 @@ class TestDeliveryNoteTrendsReport(unittest.TestCase):
 			}
 		).insert(ignore_permissions=True)
 		self.dn.submit()
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
+
 		get_or_create_fiscal_year("_Test Company")
 
 	def test_execute_with_valid_filters_T_DNT_001(self):
@@ -63,7 +64,7 @@ class TestDeliveryNoteTrendsReport(unittest.TestCase):
 		filters = frappe._dict(
 			{
 				"company": "_Test Company",
-				"fiscal_year": "2024-2025",
+				"fiscal_year": "2025",
 				"based_on": "Customer",
 				"group_by": "Item",
 				"period": "Monthly",
@@ -87,7 +88,7 @@ class TestDeliveryNoteTrendsReport(unittest.TestCase):
 		filters = frappe._dict(
 			{
 				"company": "_Test Company",
-				"fiscal_year": "2024-2025",
+				"fiscal_year": "2025",
 				"based_on": "Customer",
 				"group_by": "Item",
 				"period": "Monthly",

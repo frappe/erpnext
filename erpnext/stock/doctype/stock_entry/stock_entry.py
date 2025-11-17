@@ -6,7 +6,7 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
@@ -28,6 +28,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
+	get_bom_items_as_dict,
 	get_op_cost_from_sub_assemblies,
 	get_scrap_items_from_sub_assemblies,
 	validate_bom_no,
@@ -242,6 +243,7 @@ class StockEntry(StockController):
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.make_bundle_using_old_serial_batch_fields()
+		self.update_disassembled_order()
 		self.update_stock_ledger()
 		self.update_work_order()
 		self.validate_subcontract_order()
@@ -261,6 +263,7 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("Completed")
 
 	def on_cancel(self):
+		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
@@ -269,6 +272,7 @@ class StockEntry(StockController):
 			self.validate_work_order_status()
 
 		self.update_work_order()
+		self.update_disassembled_order(is_cancel=True)
 		self.update_stock_ledger()
 
 		self.ignore_linked_doctypes = (
@@ -360,11 +364,31 @@ class StockEntry(StockController):
 				},
 			):
 				frappe.delete_doc("Stock Entry", d.name)
+	
+	def delink_asset_repair_sabb(self):
+		if not self.asset_repair:
+			return
+
+		for row in self.items:
+			if row.serial_and_batch_bundle:
+				voucher_detail_no = frappe.db.get_value(
+					"Asset Repair Consumed Item",
+					{"parent": self.asset_repair, "serial_and_batch_bundle": row.serial_and_batch_bundle},
+					"name",
+				)
+
+				doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+				doc.db_set(
+					{
+						"voucher_type": "Asset Repair",
+						"voucher_no": self.asset_repair,
+						"voucher_detail_no": voucher_detail_no,
+					}
+				)
 
 	def set_transfer_qty(self):
+		self.validate_qty_is_not_zero()
 		for item in self.get("items"):
-			if not flt(item.qty):
-				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx), title=_("Zero quantity"))
 			if not flt(item.conversion_factor):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(
@@ -483,9 +507,19 @@ class StockEntry(StockController):
 			if acc_details.account_type == "Stock":
 				frappe.throw(
 					_(
-						"At row {0}: the Difference Account must not be a Stock type account, please change the Account Type for the account {1} or select a different account"
+						"At row #{0}: the Difference Account must not be a Stock type account, please change the Account Type for the account {1} or select a different account"
 					).format(d.idx, get_link_to_form("Account", d.expense_account)),
-					OpeningEntryAccountError,
+					title=_("Difference Account in Items Table"),
+				)
+
+			if self.purpose != "Material Issue" and acc_details.account_type == "Cost of Goods Sold":
+				frappe.msgprint(
+					_(
+						"At row #{0}: You have selected the Difference Account {1}, which is a Cost of Goods Sold type account. Please select a different account"
+					).format(d.idx, bold(get_link_to_form("Account", d.expense_account))),
+					title=_("Warning : Cost of Goods Sold Account"),
+					indicator="orange",
+					alert=1,
 				)
 
 	def validate_warehouse(self):
@@ -1570,6 +1604,13 @@ class StockEntry(StockController):
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
 
+	def update_disassembled_order(self, is_cancel=False):
+		if not self.work_order:
+			return
+		if self.purpose == "Disassemble" and self.fg_completed_qty:
+			pro_doc = frappe.get_doc("Work Order", self.work_order)
+			pro_doc.run_method("update_disassembled_qty", self.fg_completed_qty, is_cancel)
+
 	@frappe.whitelist()
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.qb.DocType("Item")
@@ -1712,7 +1753,7 @@ class StockEntry(StockController):
 					},
 				)
 
-	def get_items_for_disassembly(self):
+	def get_items_for_disassembly(self, disassemble_qty, production_item):
 		"""Get items for Disassembly Order"""
 
 		if not self.work_order:
@@ -1720,15 +1761,23 @@ class StockEntry(StockController):
 
 		items = self.get_items_from_manufacture_entry()
 
-		s_warehouse = ""
-		if self.work_order:
-			s_warehouse = frappe.db.get_value("Work Order", self.work_order, "fg_warehouse")
+		s_warehouse = frappe.db.get_value("Work Order", self.work_order, "fg_warehouse")
+
+		items_dict = get_bom_items_as_dict(self.bom_no, self.company, disassemble_qty)
 
 		for row in items:
 			child_row = self.append("items", {})
 			for field, value in row.items():
 				if value is not None:
 					child_row.set(field, value)
+
+			bom_items = items_dict.get(row.item_code)
+			if bom_items:
+				child_row.qty = bom_items.get("qty", child_row.qty)
+				child_row.amount = bom_items.get("amount", child_row.amount)
+
+			if row.item_code == production_item:
+				child_row.qty = disassemble_qty
 
 			child_row.s_warehouse = (self.from_warehouse or s_warehouse) if row.is_finished_item else ""
 			child_row.t_warehouse = self.to_warehouse if not row.is_finished_item else ""
@@ -1762,12 +1811,12 @@ class StockEntry(StockController):
 		)
 
 	@frappe.whitelist()
-	def get_items(self):
+	def get_items(self, qty=None, production_item=None):
 		self.set("items", [])
 		self.validate_work_order()
 
-		if self.purpose == "Disassemble":
-			return self.get_items_for_disassembly()
+		if self.purpose == "Disassemble" and qty is not None:
+			return self.get_items_for_disassembly(qty, production_item)
 
 		if not self.posting_date or not self.posting_time:
 			frappe.throw(_("Posting date and posting time is mandatory"))

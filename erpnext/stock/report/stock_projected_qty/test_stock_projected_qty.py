@@ -5,7 +5,6 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_com
 from erpnext.accounts.doctype.payment_ledger_entry.test_payment_ledger_entry import make_sales_order
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_territory
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.stock_entry.test_stock_entry import get_or_create_fiscal_year
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 # from your_module_path import execute

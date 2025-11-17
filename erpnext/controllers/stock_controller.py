@@ -203,7 +203,11 @@ class StockController(AccountsController):
 			parent_details = self.get_parent_details_for_packed_items()
 
 		for row in self.get(table_name):
-			if row.serial_and_batch_bundle and (row.serial_no or row.batch_no):
+			if (
+				not via_landed_cost_voucher
+				and row.serial_and_batch_bundle
+				and (row.serial_no or row.batch_no)
+			):
 				self.validate_serial_nos_and_batches_with_bundle(row)
 
 			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
@@ -874,7 +878,7 @@ class StockController(AccountsController):
 						or sl_dict.actual_qty < 0
 						and self.get("is_return")
 					)
-					and self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+					and self.doctype in ["Purchase Invoice", "Purchase Receipt", "Stock Entry"]
 				) or (
 					(
 						sl_dict.actual_qty < 0
@@ -884,6 +888,14 @@ class StockController(AccountsController):
 					)
 					and self.doctype in ["Sales Invoice", "Delivery Note", "Stock Entry"]
 				):
+					if self.doctype == "Stock Entry":
+						if row.get("t_warehouse") == sl_dict.warehouse and sl_dict.get("actual_qty") > 0:
+							fieldname = f"to_{dimension.source_fieldname}"
+							if dimension.source_fieldname.startswith("to_"):
+								fieldname = f"{dimension.source_fieldname}"
+
+							sl_dict[dimension.target_fieldname] = row.get(fieldname)
+							continue
 					sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 				else:
 					fieldname_start_with = "to"
@@ -1615,8 +1627,9 @@ def make_quality_inspections(doctype, docname, items):
 				"sample_size": flt(item.get("sample_size")),
 				"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
 				"batch_no": item.get("batch_no"),
+				"child_row_reference": item.get("child_row_reference"),
 			}
-		).insert()
+		)
 		quality_inspection.save()
 		inspections.append(quality_inspection.name)
 
@@ -1629,13 +1642,8 @@ def is_reposting_pending():
 	)
 
 
-def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
+def future_sle_exists(args, sl_entries=None):
 	from erpnext.stock.utils import get_combine_datetime
-
-	if allow_force_reposting and frappe.db.get_single_value(
-		"Stock Reposting Settings", "do_reposting_for_each_stock_transaction"
-	):
-		return True
 
 	key = (args.voucher_type, args.voucher_no)
 	if not hasattr(frappe.local, "future_sle"):

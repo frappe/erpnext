@@ -15,7 +15,7 @@ class POSOpeningEntry(StatusUpdater):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.pos_opening_entry_detail.pos_opening_entry_detail import (
@@ -72,4 +72,4 @@ class POSOpeningEntry(StatusUpdater):
 		self.set_status(update=True)
 
 	def on_cancel(self):
- 		self.set_status(update=True)
+		self.set_status(update=True)

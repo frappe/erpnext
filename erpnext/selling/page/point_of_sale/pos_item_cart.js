@@ -342,7 +342,13 @@ erpnext.PointOfSale.ItemCart = class {
 		if (customer) {
 			return new Promise((resolve) => {
 				frappe.db
-					.get_value("Customer", customer, ["email_id", "mobile_no", "image", "loyalty_program"])
+					.get_value("Customer", customer, [
+						"email_id",
+						"customer_name",
+						"mobile_no",
+						"image",
+						"loyalty_program",
+					])
 					.then(({ message }) => {
 						const { loyalty_program } = message;
 						// if loyalty program then fetch loyalty points too
@@ -439,7 +445,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 	update_customer_section() {
 		const me = this;
-		const { customer, email_id = "", mobile_no = "", image } = this.customer_info || {};
+		const { customer, customer_name, email_id = "", mobile_no = "", image } = this.customer_info || {};
 
 		if (customer) {
 			this.$customer_section.html(
@@ -447,7 +453,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="customer-display">
 						${this.get_customer_image()}
 						<div class="customer-name-desc">
-							<div class="customer-name">${customer}</div>
+							<div class="customer-name">${customer_name}</div>
 							${get_customer_description()}
 						</div>
 						<div class="reset-customer-btn" data-customer="${escape(customer)}">
@@ -867,7 +873,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 	toggle_customer_info(show) {
 		if (show) {
-			const { customer } = this.customer_info || {};
+			const { customer, customer_name } = this.customer_info || {};
 
 			this.$cart_container.css("display", "none");
 			this.$customer_section.css({
@@ -886,8 +892,8 @@ erpnext.PointOfSale.ItemCart = class {
 				<div class="customer-display">
 					${this.get_customer_image()}
 					<div class="customer-name-desc">
-						<div class="customer-name">${customer}</div>
-						<div class="customer-desc"></div>
+						<div class="customer-name">${customer_name}</div>
+						<div class="customer-desc">${customer}</div>
 					</div>
 				</div>
 				<div class="customer-fields-container">
@@ -896,7 +902,10 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="loyalty_program-field"></div>
 					<div class="loyalty_points-field"></div>
 				</div>
-				<div class="transactions-label">${__("Recent Transactions")}</div>`
+				<div class="transactions-section">
+					<div class="recent-transactions">${__("Recent Transactions")}</div>
+					<div class="last-transaction"></div>
+				</div>`
 			);
 			// transactions need to be in diff div from sticky elem for scrolling
 			this.$customer_section.append(`<div class="customer-transactions"></div>`);
@@ -998,13 +1007,15 @@ erpnext.PointOfSale.ItemCart = class {
 
 				if (!res.length) {
 					transaction_container.html(
-						`<div class="no-transactions-placeholder">No recent transactions found</div>`
+						`<div class="no-transactions-placeholder">${__("No recent transactions found")}</div>`
 					);
 					return;
 				}
 
 				const elapsed_time = moment(res[0].posting_date + " " + res[0].posting_time).fromNow();
-				this.$customer_section.find(".customer-desc").html(`Last transacted ${elapsed_time}`);
+				this.$customer_section
+					.find(".last-transaction")
+					.html(`${__("Last transacted")} ${__(elapsed_time)}`);
 
 				res.forEach((invoice) => {
 					const posting_datetime = frappe.datetime.str_to_user(
@@ -1025,11 +1036,11 @@ erpnext.PointOfSale.ItemCart = class {
 						</div>
 						<div class="invoice-total-status">
 							<div class="invoice-total">
-								${format_currency(invoice.grand_total, invoice.currency, 0) || 0}
+								${format_currency(invoice.grand_total, invoice.currency, frappe.sys_defaults.currency_precision) || 0}
 							</div>
 							<div class="invoice-status">
 								<span class="indicator-pill whitespace-nowrap ${indicator_color[invoice.status]}">
-									<span>${invoice.status}</span>
+									<span>${__(invoice.status)}</span>
 								</span>
 							</div>
 						</div>
@@ -1072,6 +1083,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.make_no_items_placeholder();
 			this.highlight_checkout_btn(false);
 		}
+
 		this.hide_discount_control(frm.doc.additional_discount_percentage);
 		this.update_totals_section(frm);
 

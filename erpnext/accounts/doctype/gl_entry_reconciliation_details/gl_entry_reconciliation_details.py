@@ -11,7 +11,7 @@ class GLEntryReconciliationDetails(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		amount: DF.Currency

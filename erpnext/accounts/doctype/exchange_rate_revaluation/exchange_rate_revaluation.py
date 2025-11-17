@@ -16,13 +16,13 @@ from erpnext.accounts.utils import get_currency_precision
 from erpnext.setup.utils import get_exchange_rate
 
 
-class ExchangeRateRevaluation(Document):
+class ExchangeRateRevaluation(Document): 
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING: # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.exchange_rate_revaluation_account.exchange_rate_revaluation_account import (

@@ -57,7 +57,7 @@ class PurchaseInvoice(BuyingController):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from erpnext.accounts.doctype.advance_tax.advance_tax import AdvanceTax
 		from erpnext.accounts.doctype.discount_terms.discount_terms import DiscountTerms
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
@@ -911,7 +911,7 @@ class PurchaseInvoice(BuyingController):
 			self.get_provisional_accounts()
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount):
+			if flt(item.base_net_amount) or (self.get("update_stock") and item.valuation_rate):
 				if item.item_code:
 					frappe.get_cached_value("Item", item.item_code, "asset_category")
 
@@ -1164,10 +1164,13 @@ class PurchaseInvoice(BuyingController):
 	def get_provisional_accounts(self):
 		self.provisional_accounts = frappe._dict()
 		linked_purchase_receipts = set([d.purchase_receipt for d in self.items if d.purchase_receipt])
+		if not linked_purchase_receipts:
+			return
+
 		pr_items = frappe.get_all(
 			"Purchase Receipt Item",
 			filters={"parent": ("in", linked_purchase_receipts)},
-			fields=["name", "provisional_expense_account", "qty", "base_rate"],
+			fields=["name", "provisional_expense_account", "qty", "base_rate", "rate"],
 		)
 		default_provisional_account = self.get_company_default("default_provisional_account")
 		provisional_accounts = set(
@@ -1195,6 +1198,7 @@ class PurchaseInvoice(BuyingController):
 				"provisional_account": item.provisional_expense_account or default_provisional_account,
 				"qty": item.qty,
 				"base_rate": item.base_rate,
+				"rate": item.rate,
 				"has_provisional_entry": item.name in rows_with_provisional_entries,
 			}
 
@@ -1211,7 +1215,10 @@ class PurchaseInvoice(BuyingController):
 					self.posting_date,
 					pr_item.get("provisional_account"),
 					reverse=1,
-					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("base_rate")),
+					item_amount=(
+						(min(item.qty, pr_item.get("qty")) * pr_item.get("rate"))
+						* purchase_receipt_doc.get("conversion_rate")
+					),
 				)
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
@@ -1224,7 +1231,37 @@ class PurchaseInvoice(BuyingController):
 		)
 
 		# Stock ledger value is not matching with the warehouse amount
-		if (
+		if self.is_return and self.update_stock and (self.is_internal_supplier or not self.return_against):
+			net_rate = item.base_net_amount
+			if item.sales_incoming_rate:  # for internal transfer
+				net_rate = item.qty * item.sales_incoming_rate
+
+			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
+			warehouse_debit_amount = flt(
+				voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision
+			)
+
+			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
+				cost_of_goods_sold_account = self.get_company_default("default_expense_account")
+				stock_adjustment_amt = stock_amount - warehouse_debit_amount
+
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": cost_of_goods_sold_account,
+							"against": item.expense_account,
+							"debit": stock_adjustment_amt,
+							"debit_in_transaction_currency": stock_adjustment_amt / self.conversion_rate,
+							"remarks": self.get("remarks") or _("Stock Adjustment"),
+							"cost_center": item.cost_center,
+							"project": item.project or self.project,
+						},
+						account_currency,
+						item=item,
+					)
+				)
+
+		elif (
 			self.update_stock
 			and voucher_wise_stock_value.get((item.name, item.warehouse))
 			and warehouse_debit_amount
@@ -1251,39 +1288,6 @@ class PurchaseInvoice(BuyingController):
 			)
 
 			warehouse_debit_amount = stock_amount
-
-		elif self.is_return and self.update_stock and self.is_internal_supplier and warehouse_debit_amount:
-			net_rate = item.base_net_amount
-			if item.sales_incoming_rate:  # for internal transfer
-				net_rate = item.qty * item.sales_incoming_rate
-
-			stock_amount = (
-				net_rate
-				+ item.item_tax_amount
-				+ flt(item.landed_cost_voucher_amount)
-				+ flt(item.get("amount_difference_with_purchase_invoice"))
-			)
-
-			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
-				cost_of_goods_sold_account = self.get_company_default("default_expense_account")
-				stock_adjustment_amt = stock_amount - warehouse_debit_amount
-
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": cost_of_goods_sold_account,
-							"against": item.expense_account,
-							"debit": stock_adjustment_amt,
-							"debit_in_transaction_currency": stock_adjustment_amt / self.conversion_rate,
-							"remarks": self.get("remarks") or _("Stock Adjustment"),
-							"cost_center": item.cost_center,
-							"project": item.project or self.get("project") if "projects" in frappe.get_installed_apps() else "",
-						},
-						account_currency,
-						item=item,
-					)
-				)
-
 		return warehouse_debit_amount
 
 	def make_tax_gl_entries(self, gl_entries):

@@ -12,7 +12,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings, if_app_installed
 from frappe.utils import add_days, add_months, add_to_date, flt, getdate, nowdate, today
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
-from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
 )
@@ -33,6 +33,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
+from erpnext.stock.utils import get_or_create_fiscal_year
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
@@ -98,6 +99,29 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		)
 		update_child_qty_rate("Sales Order", trans_item, so.name)
 
+	def test_sales_order_qty(self):
+		so = make_sales_order(qty=1, do_not_save=True)
+
+		# NonNegativeError with qty=-1
+		so.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": -1,
+				"rate": 10,
+			},
+		)
+		self.assertRaises(frappe.NonNegativeError, so.save)
+
+		# InvalidQtyError with qty=0
+		so.items[1].qty = 0
+		self.assertRaises(InvalidQtyError, so.save)
+
+		# No error with qty=1
+		so.items[1].qty = 1
+		so.save()
+		self.assertEqual(so.items[0].qty, 1)
+
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
 
@@ -158,6 +182,11 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		si1.submit()
 		so.load_from_db()
 		self.assertEqual(so.per_billed, 0)
+
+	@change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
+	)
 
 	def test_make_sales_invoice_with_terms(self):
 		so = make_sales_order(do_not_submit=True)
@@ -1811,6 +1840,11 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.items[0].work_order_qty, wo.produced_qty)
 		self.assertEqual(mr.status, "Manufactured")
 
+	@change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 0},
+	)
+
 	def test_sales_order_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
@@ -1835,6 +1869,11 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		sales_order.items[0].qty = 21
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
+
+	@change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
+	)
 
 	def test_sales_order_partial_advance_payment(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
@@ -2311,6 +2350,77 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		po.items[0].rate = 100
 		po.submit()
 		self.assertEqual(po.taxes[0].tax_amount, 2)
+
+	@change_settings("Selling Settings", {"allow_zero_qty_in_sales_order": 1})
+	def test_deliver_zero_qty_purchase_order(self):
+		"""
+		Test the flow of a Unit Price SO and DN creation against it until completion.
+		Flow:
+		SO Qty 0 -> Deliver +5 -> Update SO Qty +10 -> Deliver +5 -> SO is 100% delivered
+		"""
+		so = make_sales_order(qty=0)
+		dn = make_delivery_note(so.name)
+
+		self.assertEqual(dn.items[0].qty, 0)
+		dn.items[0].qty = 5
+		dn.submit()
+
+		# Test SO impact after DN
+		so.reload()
+		self.assertEqual(so.items[0].delivered_qty, 5)
+		self.assertFalse(so.per_delivered)
+		self.assertEqual(so.status, "To Deliver and Bill")
+
+		# Update SO Qty to final qty
+		first_item_of_so = so.items[0]
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": first_item_of_so.item_code,
+					"rate": first_item_of_so.rate,
+					"qty": 10,
+					"docname": first_item_of_so.name,
+				}
+			]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
+
+		# Test: DN maps pending qty from SO
+		dn2 = make_delivery_note(so.name)
+
+		so.reload()
+		self.assertEqual(so.items[0].qty, 10)
+		self.assertEqual(dn2.items[0].qty, 5)
+
+		dn2.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].delivered_qty, 10)
+		self.assertEqual(so.per_delivered, 100.0)
+		self.assertEqual(so.status, "To Bill")
+
+	@change_settings("Selling Settings", {"allow_zero_qty_in_sales_order": 1})
+	def test_bill_zero_qty_sales_order(self):
+		so = make_sales_order(qty=0)
+
+		self.assertEqual(so.grand_total, 0)
+		self.assertFalse(so.per_billed)
+		self.assertEqual(so.items[0].qty, 0)
+		self.assertEqual(so.items[0].rate, 100)
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.items[0].qty, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+		si.items[0].qty = 5
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].amount, 0)
+		self.assertEqual(so.items[0].billed_amt, si.grand_total)
+		# SO still has qty 0, so billed % should be unset
+		self.assertFalse(so.per_billed)
+		self.assertEqual(so.status, "To Deliver and Bill")
 
 	def test_sales_order_discount_on_total(self):
 		make_item_price()
@@ -6910,7 +7020,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		make_stock_entry(item_code="_Test Item 1", qty=10, rate=5000, target="_Test Warehouse - _TC")
 
-		sales_order = make_sales_order(item="_Test Item 1", qty=1, rate=5000)
+		sales_order = make_sales_order(item="_Test Item 1", qty=1, rate=5000,customer = "__Test Customer 2")
 		sales_order.save()
 		sales_order.submit()
 		self.assertEqual(sales_order.status, "To Deliver and Bill")
@@ -7188,7 +7298,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.customer_address = customer_add.get("name")
 		so.billing_address_gstin = customer_add.get("gstin")
 		so.company_address = company_add.get("name")
-		so.company_gstin = company_add.get("gstin")
+		so.company_gstin = company.get("gstin")
 		for i in so.items:
 			i.gst_hsn_code = "01011020"
 		so.save()
@@ -8285,7 +8395,7 @@ def make_sales_order(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"uom": args.uom or None,
 				"price_list_rate": args.price_list_rate or None,
 				"discount_percentage": args.discount_percentage or None,
@@ -8434,59 +8544,6 @@ def make_sales_order_workflow():
 	workflow.insert(ignore_permissions=True)
 
 	return workflow
-
-
-def get_or_create_fiscal_year(company):
-	from datetime import date, datetime
-
-	import frappe
-
-	current_date = datetime.today().date()
-
-	matching_fy_list = frappe.get_all(
-		"Fiscal Year",
-		filters={
-			"disabled": 0,
-			"year_start_date": ["<=", current_date],
-			"year_end_date": [">=", current_date],
-		},
-		fields=["name", "year_start_date", "year_end_date"],
-	)
-	is_company = False
-	if len(matching_fy_list) > 0:
-		for fy in matching_fy_list:
-			fiscal_year = frappe.get_doc("Fiscal Year", fy["name"])
-			for years in fiscal_year.companies:
-				if years.company == company:
-					is_company = True
-					break
-			if is_company:
-				break
-
-		if not is_company:
-			for rows in matching_fy_list:
-				try:
-					fiscal_year = frappe.get_doc("Fiscal Year", rows.name)
-					fiscal_year.append("companies", {"company": company})
-					fiscal_year.save()
-					break
-				except Exception as e:
-					print(f"Failed to get Fiscal Year {fy['name']}: {e}")
-					continue
-
-	else:
-		# No fiscal year includes current date — create a new one
-		current_year = current_date.year
-		first_date = date(current_year, 1, 1)
-		last_date = date(current_year, 12, 31)
-
-		fiscal_year = frappe.new_doc("Fiscal Year")
-		fiscal_year.year = f"{current_year}-{company}"
-		fiscal_year.year_start_date = first_date
-		fiscal_year.year_end_date = last_date
-		fiscal_year.company = company  # Required to avoid overlap error
-		fiscal_year.append("companies", {"company": company})
-		fiscal_year.save()
 
 
 def _make_blanket_order(**args):

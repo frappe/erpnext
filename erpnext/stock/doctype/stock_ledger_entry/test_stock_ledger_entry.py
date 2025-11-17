@@ -41,7 +41,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 		create_company()
 
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		get_or_create_fiscal_year("_Test Company")
 
@@ -210,6 +210,12 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(outgoing_rate, 100)
 		self.assertEqual(stock_value_difference, -200)
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			"expenses_included_in_valuation",
+			"Expenses Included In Valuation - _TC",
+		)
 
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
@@ -602,7 +608,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 	def test_batch_wise_valuation_across_warehouse(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_company
-		from erpnext.selling.doctype.sales_order.test_sales_order import get_or_create_fiscal_year
+		from erpnext.stock.utils import get_or_create_fiscal_year
 
 		create_company()
 		get_or_create_fiscal_year("_Test Company")
@@ -1106,6 +1112,9 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item = make_item().name
+		item = frappe.get_doc("Item", item)
+		item.valuation_rate = 100
+		item.save()
 		warehouse = "_Test Warehouse - _TC"
 
 		posting_date = "2022-01-01"
@@ -1306,7 +1315,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			"Stock Ledger Entry",
 			fields=["*"],
 			filters=filters,
-			order_by="timestamp(posting_date, posting_time), creation",
+			order_by="posting_date asc, posting_time asc, creation asc",
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
@@ -1645,12 +1654,12 @@ def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list
 def fetch_sle_details_for_doc_list(doc_list, columns, as_dict=1):
 	return frappe.db.sql(
 		f"""
-		SELECT { ', '.join(columns)}
+		SELECT {', '.join(columns)}
 		FROM `tabStock Ledger Entry`
 		WHERE
 			voucher_no IN %(voucher_nos)s
-			and docstatus = 1
-		ORDER BY timestamp(posting_date, posting_time) ASC, CREATION ASC
+			AND docstatus = 1
+		ORDER BY (posting_date + posting_time) ASC, creation ASC
 	""",
 		dict(voucher_nos=[doc.name for doc in doc_list]),
 		as_dict=as_dict,

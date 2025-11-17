@@ -14,7 +14,7 @@ class BankTransaction(Document):
 
 	from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
+	if TYPE_CHECKING:  # pragma: no cover
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.bank_transaction_payments.bank_transaction_payments import (
@@ -94,7 +94,7 @@ class BankTransaction(Document):
 					)
 				)
 			references.add(reference)
- 
+
 	def update_allocated_amount(self):
 		allocated_amount = (
 			sum(p.allocated_amount for p in self.payment_entries) if self.payment_entries else 0.0
@@ -138,13 +138,29 @@ class BankTransaction(Document):
 
 	def before_save(self):
 		if self.deposit or 0 > 0 and self.withdrawal == 0:
-			if frappe.db.exists("Bank Transaction", {'date':self.date, 'deposit':self.deposit, 'reference_number': self.reference_number, 'description': self.description, 'docstatus':1}) :
+			if frappe.db.exists(
+				"Bank Transaction",
+				{
+					"date": self.date,
+					"deposit": self.deposit,
+					"reference_number": self.reference_number,
+					"description": self.description,
+					"docstatus": 1,
+				},
+			):
 				frappe.throw("Entry already exists")
 		elif self.deposit == 0 and self.withdrawal > 0:
-			if frappe.db.exists("Bank Transaction", {'date':self.date, 'withdrawal':self.withdrawal, 'reference_number': self.reference_number, 'description': self.description, 'docstatus':1}) :
+			if frappe.db.exists(
+				"Bank Transaction",
+				{
+					"date": self.date,
+					"withdrawal": self.withdrawal,
+					"reference_number": self.reference_number,
+					"description": self.description,
+					"docstatus": 1,
+				},
+			):
 				frappe.throw("Entry already exists")
-			
-
 
 	def add_payment_entries(self, vouchers):
 		"Add the vouchers with zero allocation. Save() will perform the allocations and clearance"
@@ -197,7 +213,11 @@ class BankTransaction(Document):
 			)
 
 			if allocable_amount < 0:
-				frappe.throw(_("Voucher {0} is over-allocated by {1}").format(allocable_amount))
+				frappe.throw(
+					_("Voucher {0} is over-allocated by {1}").format(
+						payment_entry.payment_entry, allocable_amount
+					)
+				)
 
 			if remaining_amount <= 0:
 				self.remove(payment_entry)
@@ -242,7 +262,7 @@ class BankTransaction(Document):
 			self.update_linked_bank_transaction(payment_entry.payment_entry, allocated_amount=None)
 		else:
 			self.clear_linked_payment_entry(payment_entry, clearance_date=None)
- 
+
 	def clear_linked_payment_entry(self, payment_entry, clearance_date=None):
 		doctype = payment_entry.payment_document
 		docname = payment_entry.payment_entry
@@ -261,7 +281,7 @@ class BankTransaction(Document):
 			return
 
 		frappe.db.set_value(doctype, docname, "clearance_date", clearance_date)
- 
+
 	def update_linked_bank_transaction(self, bank_transaction_name, allocated_amount=None):
 		"""For when a second bank transaction has fixed another, e.g. refund"""
 
@@ -378,6 +398,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 	return allocable_amount, should_clear, clearance_date
 
+
 def get_related_bank_gl_entries(docs):
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-using-db-sql
 	if not docs:
@@ -460,12 +481,14 @@ def get_total_allocated_amount(docs):
 
 	return payment_allocation_details
 
+
 def get_reconciled_bank_transactions(doctype, docname):
 	return frappe.get_all(
 		"Bank Transaction Payments",
 		filters={"payment_document": doctype, "payment_entry": docname},
 		pluck="parent",
 	)
+
 
 def remove_from_bank_transaction(doctype, docname):
 	"""Remove a (cancelled) voucher from all Bank Transactions."""
