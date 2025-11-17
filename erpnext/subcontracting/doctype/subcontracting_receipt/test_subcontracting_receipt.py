@@ -38,6 +38,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+	BOMQuantityError,
+)
 
 
 class TestSubcontractingReceipt(IntegrationTestCase):
@@ -1783,6 +1786,54 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		self.assertEqual(batch_no, second_batch_no)
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
+
+	def test_required_qty_validation_based_on_bom(self):
+		set_backflush_based_on("BOM")
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item1 = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BRQV-.####",
+			}
+		).name
+
+		make_bom(item=fg_item, raw_materials=[rm_item1], rm_qty=2)
+		se = make_stock_entry(
+			item_code=rm_item1,
+			qty=1,
+			target="_Test Warehouse 1 - _TC",
+			rate=300,
+		)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 1,
+			},
+		]
+
+		sco = get_subcontracting_order(service_items=service_items)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.reload()
+
+		self.assertEqual(scr.supplied_items[0].batch_no, batch_no)
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 1)
+		self.assertEqual(scr.supplied_items[0].required_qty, 2)
+
+		self.assertRaises(BOMQuantityError, scr.submit)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
 
 def make_return_subcontracting_receipt(**args):
