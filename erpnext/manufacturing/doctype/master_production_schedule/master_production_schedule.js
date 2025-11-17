@@ -6,6 +6,8 @@ frappe.ui.form.on("Master Production Schedule", {
 		frm.trigger("set_query_filters");
 
 		frm.set_df_property("items", "cannot_add_rows", true);
+		frm.set_df_property("material_requests", "cannot_add_rows", true);
+		frm.set_df_property("sales_orders", "cannot_add_rows", true);
 		frm.fields_dict.items.$wrapper.find("[data-action='duplicate_rows']").css("display", "none");
 
 		frm.trigger("set_custom_buttons");
@@ -32,6 +34,14 @@ frappe.ui.form.on("Master Production Schedule", {
 			return {
 				filters: {
 					is_group: 1,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("sales_forecast", (doc) => {
+			return {
+				filters: {
 					company: doc.company,
 				},
 			};

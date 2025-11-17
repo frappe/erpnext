@@ -202,6 +202,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
 
+	def before_insert(self):
+		if self.subcontracting_order and frappe.get_cached_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			self.set_serial_batch_from_reserved_entry()
+
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 
@@ -274,9 +280,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_work_order()
 		self.update_disassembled_order()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_subcontracting_delivery()
+		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
+		self.reserve_stock_for_subcontracting()
 
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
@@ -324,7 +331,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.adjust_stock_reservation_entries_for_return()
-		self.update_sre_for_subcontracting_delivery()
+		self.update_stock_reservation_entries()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 
@@ -1889,6 +1896,30 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			pro_doc.set_reserved_qty_for_wip_and_fg(self)
 
+	def reserve_stock_for_subcontracting(self):
+		if self.purpose == "Send to Subcontractor" and frappe.get_value(
+			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
+		):
+			items = {}
+			for item in self.items:
+				if item.sco_rm_detail in items:
+					items[item.sco_rm_detail].qty_to_reserve += item.transfer_qty
+					items[item.sco_rm_detail].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
+				else:
+					items[item.sco_rm_detail] = frappe._dict(
+						{
+							"name": item.sco_rm_detail,
+							"qty_to_reserve": item.transfer_qty,
+							"warehouse": item.t_warehouse,
+							"reference_voucher_detail_no": item.name,
+							"serial_and_batch_bundles": [item.serial_and_batch_bundle],
+						}
+					)
+
+			frappe.get_doc("Subcontracting Order", self.subcontracting_order).reserve_raw_materials(
+				items=items.values(), stock_entry=self.name
+			)
+
 	def cancel_stock_reserve_for_wip_and_fg(self):
 		if self.is_stock_reserve_for_work_order():
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -2230,21 +2261,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_serial_batch_from_reserved_entry(self):
-		if not self.work_order:
-			return
+		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "reserve_stock"):
+			skip_transfer = frappe.get_cached_value("Work Order", self.work_order, "skip_transfer")
 
-		if not frappe.get_cached_value("Work Order", self.work_order, "reserve_stock"):
-			return
-
-		skip_transfer = frappe.get_cached_value("Work Order", self.work_order, "skip_transfer")
-
-		if (
-			self.purpose not in ["Material Transfer for Manufacture"]
-			and frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
-			!= "BOM"
-			and not skip_transfer
-		):
-			return
+			if (
+				self.purpose not in ["Material Transfer for Manufacture"]
+				and frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
+				!= "BOM"
+				and not skip_transfer
+			):
+				return
 
 		reservation_entries = self.get_available_reserved_materials()
 		if not reservation_entries:
@@ -2252,6 +2278,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		new_items_to_add = []
 		for d in self.items:
+			if d.serial_and_batch_bundle or d.serial_no or d.batch_no:
+				continue
+
 			key = (d.item_code, d.s_warehouse)
 			if details := reservation_entries.get(key):
 				original_qty = d.qty
@@ -2363,7 +2392,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 			.where(
 				(doctype.docstatus == 1)
-				& (doctype.voucher_no == self.work_order)
+				& (doctype.voucher_no == (self.work_order or self.subcontracting_order))
 				& (serial_batch_doc.delivered_qty < serial_batch_doc.qty)
 			)
 			.orderby(serial_batch_doc.idx)

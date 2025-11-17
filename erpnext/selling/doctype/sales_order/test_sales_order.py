@@ -1796,7 +1796,7 @@ class TestSalesOrder(AccountsTestMixin, IntegrationTestCase):
 		mr.submit()
 
 		# WO from MR
-		wo_name = raise_work_orders(mr.name)[0]
+		wo_name = raise_work_orders(mr.name, mr.company)[0]
 		wo = frappe.get_doc("Work Order", wo_name)
 		wo.wip_warehouse = "Work In Progress - _TC"
 		wo.skip_transfer = True

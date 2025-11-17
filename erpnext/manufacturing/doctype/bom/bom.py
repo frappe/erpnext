@@ -135,6 +135,7 @@ class BOM(WebsiteGenerator):
 		inspection_required: DF.Check
 		is_active: DF.Check
 		is_default: DF.Check
+		is_phantom_bom: DF.Check
 		item: DF.Link
 		item_name: DF.Data | None
 		items: DF.Table[BOMItem]
@@ -447,6 +448,9 @@ class BOM(WebsiteGenerator):
 			"uom": args["uom"] if args.get("uom") else item and args["stock_uom"] or "",
 			"conversion_factor": args["conversion_factor"] if args.get("conversion_factor") else 1,
 			"bom_no": args["bom_no"],
+			"is_phantom_item": frappe.get_value("BOM", args["bom_no"], "is_phantom_bom")
+			if args["bom_no"]
+			else 0,
 			"rate": rate,
 			"qty": args.get("qty") or args.get("stock_qty") or 1,
 			"stock_qty": args.get("stock_qty") or args.get("qty") or 1,
@@ -454,6 +458,9 @@ class BOM(WebsiteGenerator):
 			"include_item_in_manufacturing": cint(args.get("transfer_for_manufacture")),
 			"sourced_by_supplier": args.get("sourced_by_supplier", 0),
 		}
+
+		if ret_item["is_phantom_item"]:
+			ret_item["do_not_explode"] = 0
 
 		if args.get("do_not_explode"):
 			ret_item["bom_no"] = ""
@@ -481,7 +488,9 @@ class BOM(WebsiteGenerator):
 			if not frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") and not arg.get(
 				"sourced_by_supplier"
 			):
-				if arg.get("bom_no") and self.set_rate_of_sub_assembly_item_based_on_bom:
+				if arg.get("bom_no") and (
+					self.set_rate_of_sub_assembly_item_based_on_bom or arg.get("is_phantom_item")
+				):
 					rate = flt(self.get_bom_unitcost(arg["bom_no"])) * (arg.get("conversion_factor") or 1)
 				else:
 					rate = get_bom_item_rate(arg, self)
@@ -888,7 +897,7 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("items"):
 			old_rate = d.rate
-			if not self.bom_creator and d.is_stock_item:
+			if not self.bom_creator and (d.is_stock_item or d.is_phantom_item):
 				d.rate = self.get_rm_rate(
 					{
 						"company": self.company,
@@ -899,6 +908,7 @@ class BOM(WebsiteGenerator):
 						"stock_uom": d.stock_uom,
 						"conversion_factor": d.conversion_factor,
 						"sourced_by_supplier": d.sourced_by_supplier,
+						"is_phantom_item": d.is_phantom_item,
 					}
 				)
 
@@ -1277,16 +1287,16 @@ def get_bom_items_as_dict(
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
-				and item.is_stock_item in (1, {is_stock_item})
+				and (item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
 				{group_by_cond}
 				order by idx"""
 
-	is_stock_item = 0 if include_non_stock_items else 1
+	is_stock_item = cint(not include_non_stock_items)
 	if cint(fetch_exploded):
 		query = query.format(
 			table="BOM Explosion Item",
-			where_conditions="",
+			where_conditions=")",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			group_by_cond=group_by_cond,
@@ -1301,7 +1311,7 @@ def get_bom_items_as_dict(
 	elif fetch_scrap_items:
 		query = query.format(
 			table="BOM Scrap Item",
-			where_conditions="",
+			where_conditions=")",
 			select_columns=", item.description",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
@@ -1312,12 +1322,12 @@ def get_bom_items_as_dict(
 	else:
 		query = query.format(
 			table="BOM Item",
-			where_conditions="",
+			where_conditions="or bom_item.is_phantom_item)",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate, bom_item.operation_row_id """,
+				bom_item.description, bom_item.base_rate as rate, bom_item.operation_row_id, bom_item.is_phantom_item , bom_item.bom_no """,
 			group_by_cond=group_by_cond,
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
@@ -1327,7 +1337,24 @@ def get_bom_items_as_dict(
 		if item.operation_row_id:
 			key = (item.item_code, item.operation_row_id)
 
-		if key in item_dict:
+		if item.get("is_phantom_item"):
+			data = get_bom_items_as_dict(
+				item.get("bom_no"),
+				company,
+				qty=item.get("qty"),
+				fetch_exploded=fetch_exploded,
+				fetch_scrap_items=fetch_scrap_items,
+				include_non_stock_items=include_non_stock_items,
+				fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+			)
+
+			for k, v in data.items():
+				if item_dict.get(k):
+					item_dict[k]["qty"] += flt(v.qty)
+				else:
+					item_dict[k] = v
+
+		elif key in item_dict:
 			item_dict[key]["qty"] += flt(item.qty)
 		else:
 			item_dict[key] = item
@@ -1379,7 +1406,7 @@ def validate_bom_no(item, bom_no):
 
 
 @frappe.whitelist()
-def get_children(parent=None, is_root=False, **filters):
+def get_children(parent=None, return_all=True, fetch_phantom_items=False, is_root=False, **filters):
 	if not parent or parent == "BOM":
 		frappe.msgprint(_("Please select a BOM"))
 		return
@@ -1391,10 +1418,13 @@ def get_children(parent=None, is_root=False, **filters):
 		bom_doc = frappe.get_cached_doc("BOM", frappe.form_dict.parent)
 		frappe.has_permission("BOM", doc=bom_doc, throw=True)
 
+		filters = [["parent", "=", frappe.form_dict.parent]]
+		if not return_all:
+			filters.append(["is_phantom_item", "=", cint(fetch_phantom_items)])
 		bom_items = frappe.get_all(
 			"BOM Item",
-			fields=["item_code", "bom_no as value", "stock_qty", "qty"],
-			filters=[["parent", "=", frappe.form_dict.parent]],
+			fields=["item_code", "bom_no as value", "stock_qty", "qty", "is_phantom_item", "bom_no"],
+			filters=filters,
 			order_by="idx",
 		)
 

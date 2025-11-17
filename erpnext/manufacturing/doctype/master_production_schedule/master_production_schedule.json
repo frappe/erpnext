@@ -26,8 +26,8 @@
   "material_requests",
   "section_break_xtby",
   "column_break_yhkr",
-  "column_break_vvys",
   "get_actual_demand",
+  "column_break_vvys",
   "section_break_cmgo",
   "items",
   "forecast_demand_section",
@@ -60,7 +60,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -189,7 +188,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-02 19:33:28.244544",
+ "modified": "2025-11-13 19:15:36.090622",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Master Production Schedule",

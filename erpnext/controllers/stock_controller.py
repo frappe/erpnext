@@ -1645,6 +1645,128 @@ class StockController(AccountsController):
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
+	def update_stock_reservation_entries(self):
+		def get_sre_list():
+			table = frappe.qb.DocType("Stock Reservation Entry")
+			query = (
+				frappe.qb.from_(table)
+				.select(table.name)
+				.where(
+					(table.docstatus == 1)
+					& (table.voucher_type == data_map[purpose or self.doctype]["voucher_type"])
+					& (
+						table.voucher_no
+						== data_map[purpose or self.doctype].get(
+							"voucher_no", item.get("subcontracting_order")
+						)
+					)
+				)
+				.orderby(table.creation)
+			)
+			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
+				query = query.where(table.voucher_detail_no == item.get(reference_field))
+			else:
+				query = query.where(
+					(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
+				)
+
+			return query.run(pluck="name")
+
+		def get_data_map():
+			return {
+				"Subcontracting Delivery": {
+					"table_name": "items",
+					"voucher_type": "Subcontracting Inward Order",
+					"voucher_no": self.get("subcontracting_inward_order"),
+					"voucher_detail_no_field": "scio_detail",
+					"field": "delivered_qty",
+				},
+				"Send to Subcontractor": {
+					"table_name": "items",
+					"voucher_type": "Subcontracting Order",
+					"voucher_no": self.get("subcontracting_order"),
+					"voucher_detail_no_field": "sco_rm_detail",
+					"field": "transferred_qty",
+				},
+				"Subcontracting Receipt": {
+					"table_name": "supplied_items",
+					"voucher_type": "Subcontracting Order",
+					"field": "consumed_qty",
+				},
+			}
+
+		purpose = self.get("purpose")
+		if (
+			purpose == "Subcontracting Delivery"
+			or (
+				purpose == "Send to Subcontractor"
+				and frappe.get_value("Subcontracting Order", self.subcontracting_order, "reserve_stock")
+			)
+			or (self.doctype == "Subcontracting Receipt" and self.has_reserved_stock() and not self.is_return)
+		):
+			data_map = get_data_map()
+
+			field = data_map[purpose or self.doctype]["field"]
+			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
+				sre_list = get_sre_list()
+
+				if not sre_list:
+					continue
+
+				qty = item.get("transfer_qty", item.get("consumed_qty"))
+				for sre in sre_list:
+					if qty <= 0:
+						break
+
+					sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+
+					working_qty = 0
+					if sre_doc.reservation_based_on == "Serial and Batch":
+						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+						if sre_doc.has_serial_no:
+							serial_nos = [d.serial_no for d in sbb.entries]
+							for entry in sre_doc.sb_entries:
+								if entry.serial_no in serial_nos:
+									entry.delivered_qty = 1 if self._action == "submit" else 0
+									entry.db_update()
+									working_qty += 1
+									serial_nos.remove(entry.serial_no)
+						else:
+							batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
+							for entry in sre_doc.sb_entries:
+								if entry.batch_no in batch_qty:
+									delivered_qty = min(
+										(entry.qty - entry.delivered_qty)
+										if self._action == "submit"
+										else entry.delivered_qty,
+										batch_qty[entry.batch_no],
+									)
+									entry.delivered_qty += (
+										delivered_qty if self._action == "submit" else (-1 * delivered_qty)
+									)
+									entry.db_update()
+									working_qty += delivered_qty
+									batch_qty[entry.batch_no] -= delivered_qty
+					else:
+						working_qty = min(
+							(sre_doc.reserved_qty - sre_doc.get(field))
+							if self._action == "submit"
+							else sre_doc.get(field),
+							qty,
+						)
+
+					sre_doc.set(
+						field,
+						sre_doc.get(field)
+						+ (working_qty if self._action == "submit" else (-1 * working_qty)),
+					)
+					sre_doc.db_update()
+					sre_doc.update_reserved_qty_in_voucher()
+					sre_doc.update_status()
+					sre_doc.update_reserved_stock_in_bin()
+
+					qty -= working_qty
+
 
 @frappe.whitelist()
 def show_accounting_ledger_preview(company, doctype, docname):

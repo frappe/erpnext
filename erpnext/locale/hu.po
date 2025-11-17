@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-10 12:11+0000\n"
-"PO-Revision-Date: 2025-11-10 21:17\n"
+"PO-Revision-Date: 2025-11-14 21:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -25,11 +25,11 @@ msgstr ""
 
 #: erpnext/selling/doctype/quotation/quotation.js:73
 msgid " Address"
-msgstr ""
+msgstr " Cím"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:677
 msgid " Amount"
-msgstr ""
+msgstr " Összeg"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"

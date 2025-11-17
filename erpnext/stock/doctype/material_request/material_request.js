@@ -495,6 +495,7 @@ frappe.ui.form.on("Material Request", {
 			method: "erpnext.stock.doctype.material_request.material_request.raise_work_orders",
 			args: {
 				material_request: frm.doc.name,
+				company: frm.doc.company,
 			},
 			freeze: true,
 			callback: function (r) {

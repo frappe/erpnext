@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-10 12:11+0000\n"
-"PO-Revision-Date: 2025-11-10 21:18\n"
+"PO-Revision-Date: 2025-11-16 22:14\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1435,7 +1435,7 @@ msgstr "حساب {0} متعلق به شرکت {1} نیست"
 
 #: erpnext/accounts/doctype/account/account.py:541
 msgid "Account {0} exists in parent company {1}."
-msgstr "حساب {0} در شرکت مادر {1} وجود دارد."
+msgstr "حساب {0} در شرکت والد {1} وجود دارد."
 
 #: erpnext/accounts/doctype/budget/budget.py:114
 msgid "Account {0} has been entered multiple times"
@@ -3645,7 +3645,7 @@ msgstr "همه این آیتم‌ها قبلاً صورتحساب/بازگردا
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:85
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:92
 msgid "Allocate"
-msgstr ""
+msgstr "تخصیص"
 
 #. Label of the allocate_advances_automatically (Check) field in DocType 'POS
 #. Invoice'
@@ -7703,7 +7703,7 @@ msgstr "بیوتکنولوژی"
 #. Name of a DocType
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgid "Bisect Accounting Statements"
-msgstr ""
+msgstr "صورت‌های حسابداری دوبخشی"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:9
 msgid "Bisect Left"
@@ -7812,7 +7812,7 @@ msgstr "گروه خونی"
 #. Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr "بدنه"
+msgstr ""
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
@@ -9378,7 +9378,7 @@ msgstr "اگر ثبت انتقال مواد مورد نیاز نیست علام�
 #. Label of the warehouse_group (Link) field in DocType 'Item Reorder'
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 msgid "Check in (group)"
-msgstr "اعلام حضور (گروهی)"
+msgstr "بررسی در (گروه)"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -12413,7 +12413,7 @@ msgstr ""
 #. Description of a DocType
 #: erpnext/setup/doctype/website_item_group/website_item_group.json
 msgid "Cross Listing of Item in multiple groups"
-msgstr ""
+msgstr "لیست کردن متقابل آیتم‌ها در چندین گروه"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -14376,7 +14376,7 @@ msgstr "هزینه معوق"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Deferred Expense Account"
-msgstr "حساب هزینه معوق"
+msgstr ""
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Label of the deferred_revenue (Section Break) field in DocType 'POS Invoice
@@ -18407,7 +18407,7 @@ msgstr "سال مالی {0} الزامی است"
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.js:28
 msgid "Fix SABB Entry"
-msgstr ""
+msgstr "رفع مشکل ثبت SABB"
 
 #. Option for the 'Calculate Based On' (Select) field in DocType 'Shipping
 #. Rule'
@@ -20573,7 +20573,7 @@ msgstr "ساعت"
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Hour Rate"
-msgstr "نرخ ساعت"
+msgstr ""
 
 #. Label of the hours (Float) field in DocType 'Workstation Working Hour'
 #: erpnext/manufacturing/doctype/workstation_working_hour/workstation_working_hour.json
@@ -21311,7 +21311,7 @@ msgstr "در درصد"
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
 msgid "In Process"
-msgstr "در جریان"
+msgstr ""
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:107
 msgid "In Production"
@@ -22361,7 +22361,7 @@ msgstr "ثبت‌های دفتر نامعتبر"
 
 #: erpnext/assets/doctype/asset/asset.py:450
 msgid "Invalid Net Purchase Amount"
-msgstr ""
+msgstr "مبلغ خالص خرید نامعتبر است"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:77
 #: erpnext/accounts/general_ledger.py:796
@@ -22442,7 +22442,7 @@ msgstr "باندل سریال و دسته نامعتبر"
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:891
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:913
 msgid "Invalid Source and Target Warehouse"
-msgstr ""
+msgstr "انبار منبع و هدف نامعتبر"
 
 #: erpnext/controllers/item_variant.py:145
 msgid "Invalid Value"
@@ -23073,7 +23073,7 @@ msgstr ""
 #. Label of the is_paid (Check) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Is Paid"
-msgstr "پرداخت شده"
+msgstr ""
 
 #. Label of the is_paused (Check) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
@@ -26776,7 +26776,7 @@ msgstr "شماره قطعه تولید کننده <b>{0}</b> نامعتبر اس
 #. Description of a DocType
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Manufacturers used in Items"
-msgstr ""
+msgstr "تولیدکنندگان مورد استفاده در آیتم‌ها"
 
 #. Label of the work_order_details_section (Section Break) field in DocType
 #. 'Production Plan Sub Assembly Item'
@@ -28020,7 +28020,7 @@ msgstr "نحوه پرداخت‌ها"
 #. Label of the model (Data) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Model"
-msgstr "مدل"
+msgstr ""
 
 #. Label of the section_break_11 (Section Break) field in DocType 'POS Closing
 #. Entry'
@@ -28491,7 +28491,7 @@ msgstr "مبلغ خالص خرید"
 
 #: erpnext/assets/doctype/asset/asset.py:385
 msgid "Net Purchase Amount is mandatory"
-msgstr ""
+msgstr "مبلغ خالص خرید الزامی است"
 
 #: erpnext/assets/doctype/asset/asset.py:445
 msgid "Net Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
@@ -29657,7 +29657,7 @@ msgstr "جبران برای بعد حسابداری"
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Old Parent"
-msgstr "مرجع پیشین"
+msgstr ""
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
@@ -31522,7 +31522,7 @@ msgstr "دسته والد"
 #. Label of the parent_company (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Parent Company"
-msgstr "شرکت مادر"
+msgstr "شرکت والد"
 
 #: erpnext/setup/doctype/company/company.py:555
 msgid "Parent Company must be a group company"
@@ -32196,7 +32196,7 @@ msgstr "پرداخت"
 #: erpnext/accounts/doctype/payment_gateway_account/payment_gateway_account.json
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Payment Account"
-msgstr "حساب پرداخت"
+msgstr ""
 
 #. Label of the payment_amount (Currency) field in DocType 'Overdue Payment'
 #. Label of the payment_amount (Currency) field in DocType 'Payment Schedule'
@@ -33687,7 +33687,7 @@ msgstr "لطفا بیش از 500 آیتم را همزمان ایجاد نکنی�
 
 #: erpnext/accounts/doctype/budget/budget.py:133
 msgid "Please enable Applicable on Booking Actual Expenses"
-msgstr "لطفاً Applicable on Booking Actual Expenses را فعال کنید"
+msgstr ""
 
 #: erpnext/accounts/doctype/budget/budget.py:129
 msgid "Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses"
@@ -33711,7 +33711,7 @@ msgstr "لطفاً {} را در {} فعال کنید تا یک مورد در چ�
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:373
 msgid "Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
-msgstr ""
+msgstr "لطفاً مطمئن شوید که حساب {0} یک حساب ترازنامه است. می توانید حساب مادر را به حساب ترازنامه تغییر دهید یا حساب دیگری را انتخاب کنید."
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:381
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
@@ -34190,7 +34190,7 @@ msgstr ""
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.js:33
 msgid "Please select at least one row to fix"
-msgstr ""
+msgstr "لطفا حداقل یک ردیف را برای اصلاح انتخاب کنید"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1274
 msgid "Please select atleast one item to continue"
@@ -35748,7 +35748,7 @@ msgstr "فرآیندها"
 #. Voucher Detail'
 #: erpnext/accounts/doctype/process_period_closing_voucher_detail/process_period_closing_voucher_detail.json
 msgid "Processing Date"
-msgstr ""
+msgstr "تاریخ پردازش"
 
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.py:52
 msgid "Processing XML Files"
@@ -37990,7 +37990,7 @@ msgstr "ایجاد درخواست مواد زمانی که موجودی به س�
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Raised By"
-msgstr "مطرح شده توسط"
+msgstr ""
 
 #. Label of the raised_by (Data) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -39160,11 +39160,11 @@ msgstr "منابع"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:387
 msgid "References to Sales Invoices are Incomplete"
-msgstr ""
+msgstr "ارجاعات به فاکتورهای فروش ناقص است"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:382
 msgid "References to Sales Orders are Incomplete"
-msgstr ""
+msgstr "ارجاعات به سفارش‌های فروش ناقص است"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:733
 msgid "References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
@@ -40169,7 +40169,7 @@ msgstr "بازنشانی قرارداد سطح سرویس."
 #. Label of the resignation_letter_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Resignation Letter Date"
-msgstr "تاریخ استعفا نامه"
+msgstr ""
 
 #. Label of the sb_00 (Section Break) field in DocType 'Quality Action'
 #. Label of the resolution (Text Editor) field in DocType 'Quality Action
@@ -40192,7 +40192,7 @@ msgstr "حل و فصل توسط"
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution Date"
-msgstr "تاریخ حل و فصل"
+msgstr ""
 
 #. Label of the section_break_19 (Section Break) field in DocType 'Issue'
 #. Label of the resolution_details (Text Editor) field in DocType 'Issue'
@@ -40241,7 +40241,7 @@ msgstr "حل شد"
 #. Label of the resolved_by (Link) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolved By"
-msgstr "حل شده توسط"
+msgstr ""
 
 #. Label of the response_by (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -40513,7 +40513,7 @@ msgstr ""
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:138
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "Returned"
-msgstr "بازگشت"
+msgstr ""
 
 #. Label of the returned_against (Data) field in DocType 'Serial and Batch
 #. Bundle'
@@ -40835,7 +40835,7 @@ msgstr "مجموع گرد شده"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Rounded Total (Company Currency)"
-msgstr "کل گرد شده (ارز شرکت)"
+msgstr ""
 
 #. Label of the rounding_adjustment (Currency) field in DocType 'POS Invoice'
 #. Label of the rounding_adjustment (Currency) field in DocType 'Purchase
@@ -41976,7 +41976,7 @@ msgstr "ردیف {0}: {1} {2} با {3} مطابقت ندارد"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:102
 msgid "Row {0}: {2} Item {1} does not exist in {2} {3}"
-msgstr ""
+msgstr "ردیف {0}: {2} آیتم {1} در {2} {3} وجود ندارد"
 
 #: erpnext/utilities/transaction_base.py:558
 msgid "Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
@@ -42158,7 +42158,7 @@ msgstr "حقوق"
 #. Label of the salary_currency (Link) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Salary Currency"
-msgstr "ارز حقوق و دستمزد"
+msgstr ""
 
 #. Label of the salary_mode (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -43579,7 +43579,7 @@ msgstr "حسابی را برای چاپ با ارز حساب انتخاب کنی
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:19
 msgid "Select an invoice to load summary data"
-msgstr ""
+msgstr "برای بارگیری خلاصه داده‌ها، فاکتور را انتخاب کنید"
 
 #: erpnext/selling/doctype/quotation/quotation.js:340
 msgid "Select an item from each set to be used in the Sales Order."
@@ -44136,7 +44136,7 @@ msgstr "شماره های سریال در ورودی های رزرو موجود�
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:333
 msgid "Serial Nos {0} are already Delivered. You cannot use them again in Manufacture / Repack entry."
-msgstr ""
+msgstr "شماره سریال‌های {0} قبلاً تحویل داده شده‌اند. شما نمی‌توانید دوباره از آنها در ثبت ساخت / بسته‌بندی مجدد استفاده کنید."
 
 #. Label of the serial_no_series (Data) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -44443,7 +44443,7 @@ msgstr "کل مبلغ هزینه خدمات"
 #. 'Asset Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Service Expenses"
-msgstr "هزینه های خدمات"
+msgstr ""
 
 #. Label of the service_item (Link) field in DocType 'Subcontracting BOM'
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
@@ -44679,7 +44679,7 @@ msgstr "تنظیم هزینه عملیاتی بر اساس مقدار BOM"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:88
 msgid "Set Parent Row No in Items Table"
-msgstr ""
+msgstr "تنظیم شماره ردیف والد در جدول آیتم‌ها"
 
 #. Label of the set_posting_date (Check) field in DocType 'POS Opening Entry'
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.json
@@ -48089,7 +48089,7 @@ msgstr ""
 #: erpnext/setup/doctype/driver/driver.json
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Suspended"
-msgstr "معلق"
+msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:442
 msgid "Switch Between Payment Modes"
@@ -48372,7 +48372,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:741
 msgid "Target Warehouse is required before Submit"
-msgstr ""
+msgstr "انبار هدف قبل از ارسال الزامی است"
 
 #: erpnext/controllers/selling_controller.py:840
 msgid "Target Warehouse is set for some items but the customer is not an internal customer."
@@ -50076,7 +50076,7 @@ msgstr "زمان مورد نیاز (بر حسب دقیقه)"
 #. Label of the time_sheet (Link) field in DocType 'Sales Invoice Timesheet'
 #: erpnext/accounts/doctype/sales_invoice_timesheet/sales_invoice_timesheet.json
 msgid "Time Sheet"
-msgstr "برگه زمان"
+msgstr ""
 
 #. Label of the time_sheet_list (Section Break) field in DocType 'POS Invoice'
 #. Label of the time_sheet_list (Section Break) field in DocType 'Sales
@@ -50738,7 +50738,7 @@ msgstr "کل مبلغ صورتحساب (از طریق فاکتور فروش)"
 #. Label of the total_billed_hours (Float) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
 msgid "Total Billed Hours"
-msgstr "مجموع ساعات صورتحساب"
+msgstr ""
 
 #. Label of the total_billing_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the total_billing_amount (Currency) field in DocType 'Sales
@@ -50890,7 +50890,7 @@ msgstr "کل زمان نگهداری"
 #. Label of the total_holidays (Int) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Total Holidays"
-msgstr "کل تعطیلات"
+msgstr ""
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:115
 msgid "Total Income"
@@ -51231,7 +51231,7 @@ msgstr "کل مالیات"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Total Taxes and Charges"
-msgstr "کل مالیات ها و هزینه ها"
+msgstr ""
 
 #. Label of the base_total_taxes_and_charges (Currency) field in DocType
 #. 'Payment Entry'
@@ -52174,7 +52174,7 @@ msgstr "واحد"
 
 #: erpnext/controllers/accounts_controller.py:3830
 msgid "Unit Price"
-msgstr ""
+msgstr "قیمت واحد"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:68
 msgid "Unit of Measure"
