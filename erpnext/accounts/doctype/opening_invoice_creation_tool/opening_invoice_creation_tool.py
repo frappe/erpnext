@@ -71,7 +71,7 @@ class OpeningInvoiceCreationTool(Document):
 		max_count = {}
 		fields = [
 			"company",
-			"count(name) as total_invoices",
+			{"COUNT": "*", "as": "total_invoices"},
 			"sum(outstanding_amount) as outstanding_amount",
 		]
 		companies = frappe.get_all("Company", fields=["name as company", "default_currency as currency"])

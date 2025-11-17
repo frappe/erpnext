@@ -74,7 +74,7 @@ class OpportunitySummaryBySalesStage:
 		}[self.filters.get("based_on")]
 
 		data_based_on = {
-			"Number": "count(name) as count",
+			"Number": {"COUNT": "*", "as": "count"},
 			"Amount": "opportunity_amount as amount",
 		}[self.filters.get("data_based_on")]
 

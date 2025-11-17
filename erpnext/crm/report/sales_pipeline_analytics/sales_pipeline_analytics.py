@@ -74,7 +74,7 @@ class SalesPipelineAnalytics:
 		]
 
 		self.data_based_on = {
-			"Number": "count(name) as count",
+			"Number": {"COUNT": "*", "as": "count"},
 			"Amount": "opportunity_amount as amount",
 		}[self.filters.get("based_on")]
 
