@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -16,6 +18,10 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
+
+
+class BOMQuantityError(frappe.ValidationError):
+	pass
 
 
 class SubcontractingReceipt(SubcontractingController):
@@ -157,6 +163,7 @@ class SubcontractingReceipt(SubcontractingController):
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.validate_available_qty_for_consumption()
+		self.validate_bom_required_qty()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status(update_bin=False)
@@ -546,6 +553,43 @@ class SubcontractingReceipt(SubcontractingController):
 					in Consumed Items Table."""
 
 				frappe.throw(_(msg))
+
+	def validate_bom_required_qty(self):
+		if (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			== "Material Transferred for Subcontract"
+		):
+			return
+
+		rm_consumed_dict = self.get_rm_wise_consumed_qty()
+
+		for row in self.items:
+			precision = row.precision("qty")
+			for bom_item in self._get_materials_from_bom(
+				row.item_code, row.bom, row.get("include_exploded_items")
+			):
+				required_qty = flt(
+					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, precision
+				)
+				consumed_qty = rm_consumed_dict.get(bom_item.rm_item_code, 0)
+				diff = flt(consumed_qty, precision) - flt(required_qty, precision)
+
+				if diff < 0:
+					msg = f"""Additional {frappe.bold(abs(diff))} item {frappe.bold(bom_item.rm_item_code)} required
+						as per BOM to complete this transaction"""
+
+					frappe.throw(
+						_(msg),
+						exc=BOMQuantityError,
+					)
+
+	def get_rm_wise_consumed_qty(self):
+		rm_dict = defaultdict(float)
+
+		for row in self.supplied_items:
+			rm_dict[row.rm_item_code] += row.consumed_qty
+
+		return rm_dict
 
 	def update_status_updater_args(self):
 		if cint(self.is_return):
