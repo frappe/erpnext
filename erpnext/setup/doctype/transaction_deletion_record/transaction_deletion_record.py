@@ -7,6 +7,7 @@ import frappe
 from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
+from frappe.query_builder.functions import Max
 from frappe.utils import cint, comma_and, create_batch, get_link_to_form
 from frappe.utils.background_jobs import get_job, is_job_enqueued
 from frappe.utils.caching import request_cache
@@ -768,17 +769,22 @@ class TransactionDeletionRecord(Document):
 			prefix, hashes = naming_series.rsplit(".", 1)
 		else:
 			prefix, hashes = naming_series.rsplit("{", 1)
-		last = frappe.db.sql(
-			f"""select max(name) from `tab{doctype_name}`
-						where name like %s""",
-			prefix + "%",
+
+		# Find the highest number used in the naming series to reset the counter
+		doctype_table = qb.DocType(doctype_name)
+		result = (
+			qb.from_(doctype_table)
+			.select(Max(doctype_table.name))
+			.where(doctype_table.name.like(prefix + "%"))
+			.run()
 		)
-		if last and last[0][0]:
-			last = cint(last[0][0].replace(prefix, ""))
+
+		if result and result[0][0]:
+			last = cint(result[0][0].replace(prefix, ""))
 		else:
 			last = 0
 
-		frappe.db.sql("""update `tabSeries` set current = %s where name=%s""", (last, prefix))
+		frappe.db.set_value("Series", prefix, "current", last, update_modified=False)
 
 	def delete_version_log(self, doctype, docnames):
 		versions = qb.DocType("Version")
