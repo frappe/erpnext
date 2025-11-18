@@ -19,8 +19,8 @@
   "delete_transactions",
   "section_break_tbej",
   "doctypes",
-  "doctypes_to_be_ignored",
   "doctypes_to_delete",
+  "doctypes_to_be_ignored",
   "amended_from",
   "process_in_single_transaction"
  ],
@@ -34,13 +34,13 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.docstatus > 0 && (!doc.doctypes_to_delete || doc.doctypes_to_delete.length == 0)",
    "fieldname": "doctypes",
    "fieldtype": "Table",
    "label": "Summary",
    "no_copy": 1,
    "options": "Transaction Deletion Record Details",
-   "read_only": 1,
-   "depends_on": "eval:doc.docstatus > 0 && (!doc.doctypes_to_delete || doc.doctypes_to_delete.length == 0)"
+   "read_only": 1
   },
   {
    "description": "DocTypes that will be deleted",
@@ -153,7 +153,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-18 09:46:44.807718",
+ "modified": "2025-11-18 11:01:11.704846",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
