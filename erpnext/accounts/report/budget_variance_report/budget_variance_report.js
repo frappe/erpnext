@@ -17,6 +17,33 @@ frappe.query_reports["Budget Variance Report"] = {
 		return value;
 	},
 };
+
+frappe.query_reports["Budget Variance Report"].onload = function(report) {
+  let company = frappe.query_report.get_fileter_value("company");
+  if (!company) return;
+
+  frappe.call({
+    method: "frappe.client.get_value",
+    args: {
+      doctype: "Company",
+      filters: { name: company },
+      fieldname: "is_group",
+    },
+    callback: function(r) {
+      const filter = frappe.query_report.get_filter("accumulated_in_group_company");
+      if (!filter) return;
+
+      if (r.message && r.message.is_group) {
+        filter.df.hidden = 0;
+      } else {
+        filter.df.hidden = 1;
+        frappe.query_report.set_filter_value("accumulated_in_group_company", 0);
+      }
+      filter.refresh();
+    },
+  });
+};
+
 function get_filters() {
 	function get_dimensions() {
 		let result = [];
@@ -107,6 +134,13 @@ function get_filters() {
 			fieldtype: "Check",
 			default: 0,
 		},
+      {
+        fieldname: "accumulated_in_group_company",
+        label: __("Accumulated Values in Group Company"),
+        fieldtype: "Check",
+        default: 0,
+        hidden: 1,
+      },
 	];
 
 	return filters;

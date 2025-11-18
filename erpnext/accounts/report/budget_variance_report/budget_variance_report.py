@@ -10,6 +10,26 @@ from frappe.utils import flt, formatdate
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
+def get_companies_for_report(filters):
+    """Return list of companies for consolidated reporting."""
+    company = filters.get("company")
+
+    # If not consolidating -> return only the selected company
+    if not filters.get("accumulated_in_group_company"):
+        return [company]
+
+    # Consolidated -> get all child companies + parent
+    companies = frappe.get_all(
+            "Company",
+            filters={"parent_company": company},
+            pluck="name"
+            )
+    # Always include parent company
+    if company not in companies:
+        companies.append(company)
+
+    return companies
+
 
 def execute(filters=None):
 	if not filters:
@@ -23,6 +43,36 @@ def execute(filters=None):
 
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["from_fiscal_year"])
 	cam_map = get_dimension_account_month_map(filters)
+
+    # consolidate dimension_account_month map accross companies
+    companies = get_companies_for_report(filters)
+	if filters.get("accumulated_in_group_company"):
+		consolidated_cam_map = {}
+		for comp in companies:
+			filters["company"] = comp
+			company_map = get_dimension_account_month_map(filters)
+
+			for dim, accounts in company_map.items():
+				if dim not in consolidated_cam_map:
+					consolidated_cam_map[dim] = {}
+				for acc, months in accounts.items():
+					if acc not in consolidated_cam_map[dim]:
+						consolidated_cam_map[dim][acc] = months
+					else:
+						# accumulate monthwise data
+						for year, mdata in months.items():
+							consolidated_cam_map[dim][acc].setdefault(year, {})
+							for month, vals in mdata.items():
+								consolidated_cam_map[dim][acc][year].setdefault(month, {})
+								for key in ("target", "actual"):
+									consolidated_cam_map[dim][acc][year][month][key] = \
+										consolidated_cam_map[dim][acc][year][month].get(key, 0) + vals.get(key, 0)
+								consolidated_cam_map[dim][acc][year][month]["variance"] = \
+									consolidated_cam_map[dim][acc][year][month]["target"] - consolidated_cam_map[dim][acc][year][month]["actual"]
+
+		cam_map = consolidated_cam_map
+	else:
+		cam_map = get_dimension_account_month_map(filters)
 
 	data = []
 	for dimension in dimensions:
