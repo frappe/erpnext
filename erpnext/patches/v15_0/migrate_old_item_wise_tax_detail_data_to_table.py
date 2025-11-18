@@ -251,27 +251,24 @@ class ItemTax:
 	def _get_item_tax_rate(self, item, tax_row):
 		# NOTE: Use item tax rate as same item code
 		# could have different tax rates in same invoice
-
 		import json
 
 		item_tax_rates = {}
-
 		raw = item.get("item_tax_rate")
 
 		# Handle None, empty, wrong type
 		if raw:
 			try:
-			    if isinstance(raw, str):
-				item_tax_rates = json.loads(raw)
-			    elif isinstance(raw, dict):
-				item_tax_rates = raw
+				if isinstance(raw, str):
+					item_tax_rates = json.loads(raw)
+				elif isinstance(raw, dict):
+					item_tax_rates = raw
 			except Exception:
-			    item_tax_rates = {}
+				item_tax_rates = {}
 
 		# Ensure dict
 		if not isinstance(item_tax_rates, dict):
 			item_tax_rates = {}
-
 		# Check if account exists
 		if tax_row.account_head in item_tax_rates:
 			return item_tax_rates[tax_row.account_head]
