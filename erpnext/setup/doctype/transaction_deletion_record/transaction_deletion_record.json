@@ -11,12 +11,14 @@
   "status",
   "error_log",
   "tasks_section",
-  "delete_bin_data",
-  "delete_leads_and_addresses",
-  "reset_company_default_values",
-  "clear_notifications",
-  "initialize_doctypes_table",
-  "delete_transactions",
+  "delete_bin_data_status",
+  "delete_leads_and_addresses_status",
+  "column_break_tasks_1",
+  "reset_company_default_values_status",
+  "clear_notifications_status",
+  "column_break_tasks_2",
+  "initialize_doctypes_table_status",
+  "delete_transactions_status",
   "section_break_tbej",
   "doctypes",
   "doctypes_to_delete",
@@ -78,56 +80,71 @@
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "tasks_section",
    "fieldtype": "Section Break",
    "label": "Tasks"
   },
   {
-   "default": "0",
-   "fieldname": "delete_bin_data",
-   "fieldtype": "Check",
+   "default": "Pending",
+   "fieldname": "delete_bin_data_status",
+   "fieldtype": "Select",
    "label": "Delete Bins",
    "no_copy": 1,
+   "options": "Pending\nCompleted\nSkipped",
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "delete_leads_and_addresses",
-   "fieldtype": "Check",
+   "default": "Pending",
+   "fieldname": "delete_leads_and_addresses_status",
+   "fieldtype": "Select",
    "label": "Delete Leads and Addresses",
    "no_copy": 1,
+   "options": "Pending\nCompleted\nSkipped",
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "clear_notifications",
-   "fieldtype": "Check",
-   "label": "Clear Notifications",
-   "no_copy": 1,
-   "read_only": 1
+   "fieldname": "column_break_tasks_1",
+   "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "reset_company_default_values",
-   "fieldtype": "Check",
+   "default": "Pending",
+   "fieldname": "reset_company_default_values_status",
+   "fieldtype": "Select",
    "label": "Reset Company Default Values",
    "no_copy": 1,
+   "options": "Pending\nCompleted\nSkipped",
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "delete_transactions",
-   "fieldtype": "Check",
-   "label": "Delete Transactions",
+   "default": "Pending",
+   "fieldname": "clear_notifications_status",
+   "fieldtype": "Select",
+   "label": "Clear Notifications",
    "no_copy": 1,
+   "options": "Pending\nCompleted\nSkipped",
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "initialize_doctypes_table",
-   "fieldtype": "Check",
+   "fieldname": "column_break_tasks_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "initialize_doctypes_table_status",
+   "fieldtype": "Select",
    "label": "Initialize Summary Table",
    "no_copy": 1,
+   "options": "Pending\nCompleted\nSkipped",
+   "read_only": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "delete_transactions_status",
+   "fieldtype": "Select",
+   "label": "Delete Transactions",
+   "no_copy": 1,
+   "options": "Pending\nCompleted\nSkipped",
    "read_only": 1
   },
   {
@@ -153,7 +170,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-18 11:01:11.704846",
+ "modified": "2025-11-18 13:46:15.153489",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
