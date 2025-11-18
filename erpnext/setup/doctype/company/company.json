@@ -103,6 +103,7 @@
   "total_monthly_sales",
   "column_break_goals",
   "default_selling_terms",
+  "default_sales_contact",
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
@@ -851,6 +852,91 @@
    "fieldtype": "Select",
    "label": "Reconciliation Takes Effect On",
    "options": "Advance Payment Date\nOldest Of Invoice Or Advance\nReconciliation Date"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "reporting_currency",
+   "fieldtype": "Link",
+   "label": "Reporting Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Expense"
+  },
+  {
+   "fieldname": "column_break_ereg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_expense_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_expense_contra_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Contra Account",
+   "options": "Account"
+  },
+  {
+   "description": "For service item",
+   "fieldname": "service_expense_account",
+   "fieldtype": "Link",
+   "label": "Service Expense Account",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will use the inventory account set in the Item Master or Item Group or Brand. Otherwise, it will use the inventory account set in the Warehouse.",
+   "fieldname": "enable_item_wise_inventory_account",
+   "fieldtype": "Check",
+   "label": "Enable Item-wise Inventory Account"
+  },
+  {
+   "default": "FIFO",
+   "fieldname": "valuation_method",
+   "fieldtype": "Select",
+   "label": "Default Stock Valuation Method",
+   "options": "FIFO\nMoving Average\nLIFO",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_wip_warehouse",
+   "fieldtype": "Link",
+   "label": " Default Work In Progress Warehouse ",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Finished Goods Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_scrap_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Scrap Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_9prc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_sales_contact",
+   "fieldtype": "Link",
+   "label": "Default Sales Contact",
+   "options": "Contact"
+>>>>>>> 4d9473f844 (feat(Company): allow setting default sales contact, fetch into sales transaction (#50159))
   }
  ],
  "icon": "fa fa-building",
@@ -858,7 +944,11 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-08-25 18:34:03.602046",
+=======
+ "modified": "2025-11-16 16:51:27.624096",
+>>>>>>> 4d9473f844 (feat(Company): allow setting default sales contact, fetch into sales transaction (#50159))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

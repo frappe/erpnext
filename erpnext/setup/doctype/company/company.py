@@ -66,6 +66,11 @@ class Company(NestedSet):
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
 		default_receivable_account: DF.Link | None
+<<<<<<< HEAD
+=======
+		default_sales_contact: DF.Link | None
+		default_scrap_warehouse: DF.Link | None
+>>>>>>> 4d9473f844 (feat(Company): allow setting default sales contact, fetch into sales transaction (#50159))
 		default_selling_terms: DF.Link | None
 		default_warehouse_for_sales_return: DF.Link | None
 		depreciation_cost_center: DF.Link | None

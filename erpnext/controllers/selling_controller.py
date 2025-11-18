@@ -95,6 +95,7 @@ class SellingController(StockController):
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details(for_validate=for_validate)
 		self.set_price_list_and_item_details(for_validate=for_validate)
+		self.set_company_contact_person()
 
 	def set_missing_lead_customer_details(self, for_validate=False):
 		customer, lead = None, None
@@ -149,6 +150,13 @@ class SellingController(StockController):
 	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
 		self.set_missing_item_details(for_validate=for_validate)
+
+	def set_company_contact_person(self):
+		"""Set the Company's Default Sales Contact as Company Contact Person."""
+		if self.company and self.meta.has_field("company_contact_person") and not self.company_contact_person:
+			self.company_contact_person = frappe.get_cached_value(
+				"Company", self.company, "default_sales_contact"
+			)
 
 	def remove_shipping_charge(self):
 		if self.shipping_rule:
