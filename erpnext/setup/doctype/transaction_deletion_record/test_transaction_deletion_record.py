@@ -88,11 +88,10 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
 		tdr.append("doctypes_to_delete", {"doctype_name": "Sales Invoice Item"})  # Child table
-		tdr.insert()
 
 		# Should throw validation error
 		with self.assertRaises(frappe.ValidationError):
-			tdr.submit()
+			tdr.insert()
 
 	def test_validation_prevents_protected_doctypes(self):
 		"""Test that protected DocTypes cannot be added to To Delete list"""
@@ -101,11 +100,10 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
 		tdr.append("doctypes_to_delete", {"doctype_name": "DocType"})  # Protected
-		tdr.insert()
 
 		# Should throw validation error
 		with self.assertRaises(frappe.ValidationError):
-			tdr.submit()
+			tdr.insert()
 
 	def test_csv_export_import(self):
 		"""Test CSV export and import functionality"""
