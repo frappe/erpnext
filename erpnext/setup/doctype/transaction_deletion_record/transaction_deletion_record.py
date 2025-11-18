@@ -43,12 +43,10 @@ def get_protected_doctypes():
 	"""Get list of protected DocTypes that cannot be deleted"""
 	protected = []
 
-	# Add core protected DocTypes (only if they exist)
 	for doctype in PROTECTED_CORE_DOCTYPES:
 		if frappe.db.exists("DocType", doctype):
 			protected.append(doctype)
 
-	# Add all Single DocTypes
 	singles = frappe.get_all("DocType", filters={"issingle": 1}, pluck="name")
 	protected.extend(singles)
 
@@ -110,31 +108,32 @@ class TransactionDeletionRecord(Document):
 
 	def validate(self):
 		frappe.only_for("System Manager")
-		self.validate_doctypes_to_be_ignored()
 		self.validate_to_delete_list()
 
-	def validate_doctypes_to_be_ignored(self):
-		"""Allow users to freely edit the exclusion list - protected DocTypes are handled during generation"""
-		# Users can freely edit - protected DocTypes are automatically excluded during generation
-		pass
-
 	def validate_to_delete_list(self):
-		"""Ensure no protected DocTypes in to-delete list and all exist"""
+		"""Validate To Delete list: existence, protection status, child table exclusion"""
 		if not self.doctypes_to_delete:
 			return
 
 		protected = get_protected_doctypes()
 
 		for item in self.doctypes_to_delete:
-			# Check existence
 			if not frappe.db.exists("DocType", item.doctype_name):
 				frappe.throw(_("DocType {0} does not exist").format(item.doctype_name))
 
-			# Check protection (if in list, it will be deleted)
 			if item.doctype_name in protected:
 				frappe.throw(
 					_("Cannot delete protected core DocType: {0}").format(item.doctype_name),
 					title=_("Protected DocType"),
+				)
+
+			is_child_table = frappe.db.get_value("DocType", item.doctype_name, "istable")
+			if is_child_table:
+				frappe.throw(
+					_(
+						"Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
+					).format(item.doctype_name),
+					title=_("Child Table Not Allowed"),
 				)
 
 	def generate_job_name_for_task(self, task=None):
@@ -171,7 +170,6 @@ class TransactionDeletionRecord(Document):
 				)
 			)
 
-		# Require To Delete list for new workflow (backwards compatible)
 		if not self.doctypes_to_delete and not self.doctypes_to_be_ignored:
 			frappe.throw(_("Please generate To Delete list before submitting"))
 
@@ -193,70 +191,86 @@ class TransactionDeletionRecord(Document):
 
 	def on_submit(self):
 		self.db_set("status", "Queued")
-		# Automatically start deletion after submit
 		self.start_deletion_tasks()
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 
+	def _get_doctype_deletion_details(self, doctype_name, company=None):
+		"""Get child tables and document count for a DocType"""
+		company_to_use = company or self.company
+
+		child_tables = frappe.get_all(
+			"DocField", filters={"parent": doctype_name, "fieldtype": "Table"}, pluck="options"
+		)
+		child_doctypes_str = ", ".join(child_tables) if child_tables else ""
+
+		has_company_field = self._has_company_field(doctype_name)
+
+		if has_company_field and company_to_use:
+			doc_count = frappe.db.count(doctype_name, filters={"company": company_to_use})
+		else:
+			doc_count = frappe.db.count(doctype_name)
+
+		return {
+			"child_doctypes": child_doctypes_str,
+			"document_count": doc_count,
+		}
+
+	def _has_company_field(self, doctype_name):
+		"""Check if DocType has a field specifically named 'company' linking to Company"""
+		return frappe.db.exists(
+			"DocField",
+			{"parent": doctype_name, "fieldname": "company", "fieldtype": "Link", "options": "Company"},
+		)
+
 	@frappe.whitelist()
 	def generate_to_delete_list(self):
-		"""Generate To Delete list from all DocTypes minus exclusions"""
+		"""Generate To Delete list from all DocTypes with company field, excluding ignored and protected"""
 		self.doctypes_to_delete = []
 
-		# Get exclusions (user-specified + protected)
 		excluded = [d.doctype_name for d in self.doctypes_to_be_ignored]
 		excluded.extend(get_protected_doctypes())
 
-		# Get all DocTypes with company field
-		docfields = frappe.get_all(
-			"DocField",
-			filters={"fieldtype": "Link", "options": "Company"},
-			fields=["parent", "fieldname"],
+		doctypes_with_company = frappe.get_all(
+			"DocType",
+			filters=[
+				["DocType", "istable", "=", 0],  # Exclude child tables
+				["DocType", "name", "not in", excluded],  # Exclude protected/ignored
+				["DocType", "name", "!=", self.doctype],  # Exclude self
+				["DocField", "fieldname", "=", "company"],  # Must have "company" field
+				["DocField", "fieldtype", "=", "Link"],  # Field must be Link type
+				["DocField", "options", "=", "Company"],  # Linking to Company
+			],
+			pluck="name",
 		)
 
-		# Create a dict to group by parent for deduplication
-		parent_to_fieldname = {}
-		for docfield in docfields:
-			if docfield["parent"] not in parent_to_fieldname:
-				parent_to_fieldname[docfield["parent"]] = docfield["fieldname"]
+		for doctype_name in doctypes_with_company:
+			details = self._get_doctype_deletion_details(doctype_name)
 
-		for doctype_name, company_fieldname in parent_to_fieldname.items():
-			if doctype_name not in excluded and doctype_name != self.doctype:
-				# Skip child tables (they're deleted automatically with their parents)
-				is_child_table = frappe.db.get_value("DocType", doctype_name, "istable")
-				if is_child_table:
-					continue
-
-				doc_count = self.get_number_of_docs_linked_with_specified_company(
-					doctype_name, company_fieldname
-				)
-
-				# Get child DocTypes for this parent
-				child_tables = frappe.get_all(
-					"DocField", filters={"parent": doctype_name, "fieldtype": "Table"}, pluck="options"
-				)
-				child_doctypes_str = ", ".join(child_tables) if child_tables else ""
-
-				self.append(
-					"doctypes_to_delete",
-					{
-						"doctype_name": doctype_name,
-						"document_count": doc_count,
-						"child_doctypes": child_doctypes_str,
-					},
-				)
+			self.append(
+				"doctypes_to_delete",
+				{
+					"doctype_name": doctype_name,
+					"document_count": details["document_count"],
+					"child_doctypes": details["child_doctypes"],
+				},
+			)
 
 		self.save()
 		return {"count": len(self.doctypes_to_delete)}
 
 	@frappe.whitelist()
 	def populate_doctype_details(self, doctype_name, company=None):
-		"""Populate child DocTypes and document count for a given DocType"""
+		"""Get child DocTypes and document count for specified DocType"""
+		frappe.only_for("System Manager")
+
 		if not doctype_name:
 			return {}
 
-		# Check if it's a child table (should not be added directly)
+		if not frappe.db.exists("DocType", doctype_name):
+			frappe.throw(_("DocType {0} does not exist").format(doctype_name))
+
 		is_child_table = frappe.db.get_value("DocType", doctype_name, "istable")
 		if is_child_table:
 			return {
@@ -268,43 +282,18 @@ class TransactionDeletionRecord(Document):
 			}
 
 		try:
-			# Use provided company or fall back to self.company
-			company_to_use = company or self.company
-
-			# Get child tables
-			child_tables = frappe.get_all(
-				"DocField", filters={"parent": doctype_name, "fieldtype": "Table"}, pluck="options"
-			)
-			child_doctypes_str = ", ".join(child_tables) if child_tables else ""
-
-			# Only filter by company if field is specifically named "company"
-			has_company_field = frappe.db.exists(
-				"DocField",
-				{"parent": doctype_name, "fieldname": "company", "fieldtype": "Link", "options": "Company"},
-			)
-
-			# Get document count
-			if has_company_field and company_to_use:
-				# Filter by company only if field is named "company"
-				doc_count = frappe.db.count(doctype_name, filters={"company": company_to_use})
-			else:
-				# No company field or field not named "company" - get total count
-				doc_count = frappe.db.count(doctype_name)
-
-			return {
-				"child_doctypes": child_doctypes_str,
-				"document_count": doc_count,
-			}
+			# Use helper method to get deletion details
+			return self._get_doctype_deletion_details(doctype_name, company)
 		except Exception as e:
-			frappe.log_error(f"Error in populate_doctype_details for {doctype_name}: {e!s}")
-			# Return at least the doctype name on error
+			frappe.log_error(
+				f"Error in populate_doctype_details for {doctype_name}: {e!s}", "Transaction Deletion Record"
+			)
 			return {
 				"child_doctypes": "",
 				"document_count": 0,
-				"error": str(e),
+				"error": _("Unable to fetch DocType details. Please contact system administrator."),
 			}
 
-	@frappe.whitelist()
 	def export_to_delete_template_method(self):
 		"""Export To Delete list as CSV template"""
 		if not self.doctypes_to_delete:
@@ -322,64 +311,69 @@ class TransactionDeletionRecord(Document):
 
 		csv_content = output.getvalue()
 
-		# Use standard Frappe CSV response pattern
 		frappe.response["result"] = csv_content
 		frappe.response["type"] = "csv"
 		frappe.response[
 			"doctype"
 		] = f"deletion_template_{self.company}_{frappe.utils.now_datetime().strftime('%Y%m%d')}"
 
-	@frappe.whitelist()
 	def import_to_delete_template_method(self, csv_content):
 		"""Import CSV template and regenerate counts"""
 		import csv
 		from io import StringIO
 
+		reader = csv.DictReader(StringIO(csv_content))
+
+		if "doctype_name" not in (reader.fieldnames or []):
+			frappe.throw(_("Invalid CSV format. Expected column: doctype_name"))
+
 		self.doctypes_to_delete = []
 		protected = get_protected_doctypes()
 
-		reader = csv.DictReader(StringIO(csv_content))
 		imported_count = 0
+		skipped = []
 
 		for row in reader:
 			doctype_name = row.get("doctype_name", "").strip()
-			child_doctypes = row.get("child_doctypes", "").strip()
 
 			if not doctype_name:
 				continue
 
 			if doctype_name in protected:
-				frappe.msgprint(_("Skipping protected DocType: {0}").format(doctype_name))
+				skipped.append(_("{0}: Protected DocType").format(doctype_name))
 				continue
 
 			if not frappe.db.exists("DocType", doctype_name):
-				frappe.msgprint(_("DocType not found: {0}").format(doctype_name))
+				skipped.append(_("{0}: Not found").format(doctype_name))
 				continue
 
-			# Get fresh count
-			company_field = frappe.db.get_value(
-				"DocField",
-				{"parent": doctype_name, "fieldtype": "Link", "options": "Company"},
-				"fieldname",
-			)
+			is_child = frappe.db.get_value("DocType", doctype_name, "istable")
+			if is_child:
+				skipped.append(_("{0}: Child table (auto-deleted with parent)").format(doctype_name))
+				continue
 
-			if company_field:
-				doc_count = self.get_number_of_docs_linked_with_specified_company(doctype_name, company_field)
-			else:
-				doc_count = frappe.db.count(doctype_name)
+			details = self._get_doctype_deletion_details(doctype_name)
 
 			self.append(
 				"doctypes_to_delete",
 				{
 					"doctype_name": doctype_name,
-					"document_count": doc_count,
-					"child_doctypes": child_doctypes,
+					"document_count": details["document_count"],
+					"child_doctypes": details["child_doctypes"],
 				},
 			)
 			imported_count += 1
 
 		self.save()
-		return {"imported": imported_count}
+
+		if skipped:
+			frappe.msgprint(
+				_("Skipped {0} DocType(s):<br>{1}").format(len(skipped), "<br>".join(skipped)),
+				title=_("Import Summary"),
+				indicator="orange",
+			)
+
+		return {"imported": imported_count, "skipped": len(skipped)}
 
 	def enqueue_task(self, task: str | None = None):
 		if task and task in self.task_to_internal_method_map:
@@ -535,15 +529,7 @@ class TransactionDeletionRecord(Document):
 						# Add parent DocType only - child tables are handled automatically
 						# by delete_child_tables() when the parent is deleted
 						# Only use "company" field if it exists, otherwise pass None
-						has_company_field = frappe.db.exists(
-							"DocField",
-							{
-								"parent": to_delete_item.doctype_name,
-								"fieldname": "company",
-								"fieldtype": "Link",
-								"options": "Company",
-							},
-						)
+						has_company_field = self._has_company_field(to_delete_item.doctype_name)
 						self.populate_doctypes_table(
 							tables, to_delete_item.doctype_name, "company" if has_company_field else None, 0
 						)
@@ -558,7 +544,6 @@ class TransactionDeletionRecord(Document):
 							docfield["parent"], docfield["fieldname"]
 						)
 						if no_of_docs > 0:
-							# Initialize
 							self.populate_doctypes_table(tables, docfield["parent"], docfield["fieldname"], 0)
 			self.db_set("initialize_doctypes_table", 1)
 		self.enqueue_task(task="Delete Transactions")
@@ -569,21 +554,29 @@ class TransactionDeletionRecord(Document):
 			doctypes_to_be_ignored_list = self.get_doctypes_to_be_ignored_list()
 			self.get_doctypes_with_company_field(doctypes_to_be_ignored_list)
 
+			protected_doctypes = get_protected_doctypes()
+
 			self.get_all_child_doctypes()
 			for docfield in self.doctypes:
 				if docfield.doctype_name != self.doctype and not docfield.done:
-					# Only filter by company if field is named "company"
+					if docfield.doctype_name in protected_doctypes:
+						error_msg = (
+							f"CRITICAL: Attempted to delete protected DocType: {docfield.doctype_name}"
+						)
+						frappe.log_error(error_msg, "Transaction Deletion Security")
+						frappe.throw(
+							_("Cannot delete protected core DocType: {0}").format(docfield.doctype_name),
+							title=_("Protected DocType"),
+						)
+
 					if docfield.docfield_name == "company":
-						# Filter by company
 						no_of_docs = self.get_number_of_docs_linked_with_specified_company(
 							docfield.doctype_name, docfield.docfield_name
 						)
 					else:
-						# No company field or field not named "company" - count all
 						no_of_docs = frappe.db.count(docfield.doctype_name)
 
 					if no_of_docs > 0:
-						# Get reference docs - filter by company only if field is "company"
 						if docfield.docfield_name == "company":
 							reference_docs = frappe.get_all(
 								docfield.doctype_name,
@@ -591,7 +584,6 @@ class TransactionDeletionRecord(Document):
 								limit=self.batch_size,
 							)
 						else:
-							# No company field - get all docs (don't use pluck to keep dict-like objects)
 							reference_docs = frappe.get_all(
 								docfield.doctype_name, fields=["name"], limit=self.batch_size
 							)
@@ -609,14 +601,12 @@ class TransactionDeletionRecord(Document):
 						processed = int(docfield.no_of_docs) + len(reference_doc_names)
 						frappe.db.set_value(docfield.doctype, docfield.name, "no_of_docs", processed)
 					else:
-						# reset naming series
 						naming_series = frappe.db.get_value("DocType", docfield.doctype_name, "autoname")
 						if naming_series:
 							if "#" in naming_series:
 								self.update_naming_series(naming_series, docfield.doctype_name)
 						frappe.db.set_value(docfield.doctype, docfield.name, "done", 1)
 
-						# Also mark as deleted in the "To Delete" table
 						to_delete_row = frappe.db.get_value(
 							"Transaction Deletion Record To Delete",
 							{"parent": self.name, "doctype_name": docfield.doctype_name},
@@ -633,8 +623,6 @@ class TransactionDeletionRecord(Document):
 				pluck="doctype_name",
 			)
 			if pending_doctypes:
-				# as method is enqueued after commit, calling itself will not make validate_doc_status to throw
-				# recursively call this task to delete all transactions
 				self.enqueue_task(task="Delete Transactions")
 			else:
 				self.db_set("status", "Completed")
@@ -788,7 +776,8 @@ def get_doctypes_to_be_ignored():
 
 @frappe.whitelist()
 def export_to_delete_template(name):
-	"""Module-level export function for direct URL access"""
+	"""Export To Delete list as CSV via URL access"""
+	frappe.only_for("System Manager")
 	doc = frappe.get_doc("Transaction Deletion Record", name)
 	doc.check_permission("read")
 	return doc.export_to_delete_template_method()
@@ -796,13 +785,33 @@ def export_to_delete_template(name):
 
 @frappe.whitelist()
 def process_import_template(transaction_deletion_record_name, file_url):
-	"""Process uploaded CSV template file"""
+	"""Import CSV template and populate To Delete list"""
+	import os
+
 	doc = frappe.get_doc("Transaction Deletion Record", transaction_deletion_record_name)
 	doc.check_permission("write")
 
-	# Get file doc and read content using standard Frappe pattern
-	file_doc = frappe.get_doc("File", {"file_url": file_url})
+	if not file_url or ".." in file_url:
+		frappe.throw(_("Invalid file URL"))
+
+	try:
+		file_doc = frappe.get_doc("File", {"file_url": file_url})
+	except frappe.DoesNotExistError:
+		frappe.throw(_("File not found"))
+
+	if (
+		file_doc.attached_to_doctype != "Transaction Deletion Record"
+		or file_doc.attached_to_name != transaction_deletion_record_name
+	):
+		frappe.throw(_("File does not belong to this Transaction Deletion Record"))
+
+	if not file_doc.file_name or not file_doc.file_name.lower().endswith(".csv"):
+		frappe.throw(_("Only CSV files are allowed"))
+
 	file_path = file_doc.get_full_path()
+
+	if not os.path.isfile(file_path):
+		frappe.throw(_("File not found on server"))
 
 	with open(file_path, encoding="utf-8") as f:
 		csv_content = f.read()

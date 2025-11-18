@@ -39,14 +39,8 @@
    "label": "Summary",
    "no_copy": 1,
    "options": "Transaction Deletion Record Details",
-   "read_only": 1
-  },
-  {
-   "description": "DocTypes that will NOT be deleted. Add or remove items as needed.",
-   "fieldname": "doctypes_to_be_ignored",
-   "fieldtype": "Table",
-   "label": "Excluded DocTypes",
-   "options": "Transaction Deletion Record Item"
+   "read_only": 1,
+   "depends_on": "eval:doc.docstatus > 0 && (!doc.doctypes_to_delete || doc.doctypes_to_delete.length == 0)"
   },
   {
    "description": "DocTypes that will be deleted",
@@ -54,6 +48,13 @@
    "fieldtype": "Table",
    "label": "DocTypes To Delete",
    "options": "Transaction Deletion Record To Delete"
+  },
+  {
+   "description": "DocTypes that will NOT be deleted. Add or remove items as needed.",
+   "fieldname": "doctypes_to_be_ignored",
+   "fieldtype": "Table",
+   "label": "Excluded DocTypes",
+   "options": "Transaction Deletion Record Item"
   },
   {
    "fieldname": "amended_from",
@@ -152,7 +153,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-14 16:17:36.170889",
+ "modified": "2025-11-18 09:46:44.807718",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
