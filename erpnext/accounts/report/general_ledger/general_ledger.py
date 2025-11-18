@@ -546,6 +546,13 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 		gle.remarks = _(gle.remarks)
 		gle.party_type = _(gle.party_type)
 
+		if filters.get("include_dimensions"):
+			dimensions = [*accounting_dimensions, "cost_center", "project"]
+
+			for dimension in dimensions:
+				if val := gle.get(dimension):
+					gle[dimension] = _(val)
+
 		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not show_opening_entries):
 			if not group_by_voucher_consolidated:
 				update_value_in_dict(gle_map[group_by_value].totals, "opening", gle)
