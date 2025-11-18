@@ -26,15 +26,37 @@ PROTECTED_CORE_DOCTYPES = frozenset(
 		"DocField",
 		"Custom Field",
 		"Property Setter",
+		"DocPerm",
+		"Custom DocPerm",
 		# User & Permissions
 		"User",
 		"Role",
 		"Has Role",
 		"User Permission",
+		"User Type",
 		# System Configuration
 		"Module Def",
 		"Workflow",
 		"Workflow State",
+		"System Settings",
+		# Critical System DocTypes
+		"File",
+		"Version",
+		"Activity Log",
+		"Error Log",
+		"Scheduled Job Type",
+		"Scheduled Job Log",
+		"Server Script",
+		"Client Script",
+		"Data Import",
+		"Data Export",
+		"Report",
+		"Print Format",
+		"Email Template",
+		"Assignment Rule",
+		"Workspace",
+		"Dashboard",
+		"Access Log",
 	)
 )
 
@@ -134,6 +156,15 @@ class TransactionDeletionRecord(Document):
 						"Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
 					).format(item.doctype_name),
 					title=_("Child Table Not Allowed"),
+				)
+
+			is_virtual = frappe.db.get_value("DocType", item.doctype_name, "is_virtual")
+			if is_virtual:
+				frappe.throw(
+					_(
+						"Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
+					).format(item.doctype_name),
+					title=_("Virtual DocType"),
 				)
 
 	def _is_any_doctype_in_deletion_list(self, doctypes_list):
@@ -244,6 +275,7 @@ class TransactionDeletionRecord(Document):
 			"DocType",
 			filters=[
 				["DocType", "istable", "=", 0],  # Exclude child tables
+				["DocType", "is_virtual", "=", 0],  # Exclude virtual doctypes
 				["DocType", "name", "not in", excluded],  # Exclude protected/ignored
 				["DocType", "name", "!=", self.doctype],  # Exclude self
 				["DocField", "fieldname", "=", "company"],  # Must have "company" field
@@ -358,6 +390,11 @@ class TransactionDeletionRecord(Document):
 			is_child = frappe.db.get_value("DocType", doctype_name, "istable")
 			if is_child:
 				skipped.append(_("{0}: Child table (auto-deleted with parent)").format(doctype_name))
+				continue
+
+			is_virtual = frappe.db.get_value("DocType", doctype_name, "is_virtual")
+			if is_virtual:
+				skipped.append(_("{0}: Virtual DocType (no database table)").format(doctype_name))
 				continue
 
 			details = self._get_doctype_deletion_details(doctype_name)

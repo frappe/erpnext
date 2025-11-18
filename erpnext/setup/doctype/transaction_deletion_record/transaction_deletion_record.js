@@ -10,6 +10,7 @@ frappe.ui.form.on("Transaction Deletion Record", {
 				filters: [
 					["DocType", "name", "not in", existing_doctypes],
 					["DocType", "istable", "=", 0], // Exclude child tables
+					["DocType", "is_virtual", "=", 0], // Exclude virtual doctypes
 				],
 			};
 		});
