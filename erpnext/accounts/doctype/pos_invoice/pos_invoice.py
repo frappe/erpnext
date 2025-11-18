@@ -189,6 +189,9 @@ class POSInvoice(SalesInvoice):
 		super().__init__(*args, **kwargs)
 
 	def validate(self):
+		if not self.customer:
+			frappe.throw(_("Please select Customer first"))
+
 		if not cint(self.is_pos):
 			frappe.throw(
 				_("POS Invoice should have the field {0} checked.").format(frappe.bold(_("Include Payment")))
@@ -345,14 +348,14 @@ class POSInvoice(SalesInvoice):
 		):
 			return
 
-		from erpnext.stock.stock_ledger import is_negative_stock_allowed
-
 		for d in self.get("items"):
 			if not d.serial_and_batch_bundle:
-				if is_negative_stock_allowed(item_code=d.item_code):
-					return
+				available_stock, is_stock_item, is_negative_stock_allowed = get_stock_availability(
+					d.item_code, d.warehouse
+				)
 
-				available_stock, is_stock_item = get_stock_availability(d.item_code, d.warehouse)
+				if is_negative_stock_allowed:
+					continue
 
 				item_code, warehouse, _qty = (
 					frappe.bold(d.item_code),
@@ -760,20 +763,22 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
+	from erpnext.stock.stock_ledger import is_negative_stock_allowed
+
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 
-		return bin_qty - pos_sales_qty, is_stock_item
+		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock_allowed(item_code=item_code)
 	else:
 		is_stock_item = True
 		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
-			return get_bundle_availability(item_code, warehouse), is_stock_item
+			return get_bundle_availability(item_code, warehouse), is_stock_item, False
 		else:
 			is_stock_item = False
 			# Is a service item or non_stock item
-			return 0, is_stock_item
+			return 0, is_stock_item, False
 
 
 def get_bundle_availability(bundle_item_code, warehouse):

@@ -55,7 +55,7 @@ def search_by_term(search_term, warehouse, price_list):
 				}
 			)
 
-	item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+	item_stock_qty, is_stock_item, is_negative_stock_allowed = get_stock_availability(item_code, warehouse)
 	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
 	item.update({"actual_qty": item_stock_qty})
 
@@ -198,7 +198,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	current_date = frappe.utils.today()
 
 	for item in items_data:
-		item.actual_qty, _ = get_stock_availability(item.item_code, warehouse)
+		item.actual_qty, _, is_negative_stock_allowed = get_stock_availability(item.item_code, warehouse)
 
 		item_prices = frappe.get_all(
 			"Item Price",
