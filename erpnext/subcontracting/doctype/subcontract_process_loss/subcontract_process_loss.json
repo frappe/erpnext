@@ -1,0 +1,204 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-11-18 12:07:22.754494",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_4shf",
+  "naming_series",
+  "posting_date",
+  "section_break_e7mc",
+  "purchase_orders",
+  "section_break_y13s",
+  "calculate_process_loss",
+  "section_break_5spd",
+  "subcontract_sent_details",
+  "section_break_05s0",
+  "subcontract_return_details",
+  "section_break_vhfz",
+  "subcontract_received_details",
+  "section_break_0jsg",
+  "calculate_summary",
+  "section_break_i27z",
+  "subcontract_process_loss_details",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_4shf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "SPL/.####"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "section_break_e7mc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_orders",
+   "fieldtype": "Table",
+   "label": "Purchase Orders",
+   "options": "Purchase Orders"
+  },
+  {
+   "fieldname": "section_break_y13s",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "calculate_process_loss",
+   "fieldtype": "Button",
+   "label": "Calculate Process Loss"
+  },
+  {
+   "fieldname": "section_break_5spd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_05s0",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_vhfz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_0jsg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "calculate_summary",
+   "fieldtype": "Button",
+   "label": "Calculate Summary"
+  },
+  {
+   "fieldname": "section_break_i27z",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Subcontract Process Loss",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Subcontract Process Loss",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "subcontract_process_loss_details",
+   "fieldtype": "Table",
+   "label": "Subcontract Process Loss Details",
+   "options": "Subcontract Process Loss Details"
+  },
+  {
+   "fieldname": "subcontract_sent_details",
+   "fieldtype": "Table",
+   "label": "Subcontract Sent Details",
+   "options": "Subcontract Sent Details"
+  },
+  {
+   "fieldname": "subcontract_return_details",
+   "fieldtype": "Table",
+   "label": "Subcontract Return Details",
+   "options": "Subcontract Return Details"
+  },
+  {
+   "fieldname": "subcontract_received_details",
+   "fieldtype": "Table",
+   "label": "Subcontract Received Details",
+   "options": "Subcontract Received Details"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-18 13:12:21.143259",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontract Process Loss",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

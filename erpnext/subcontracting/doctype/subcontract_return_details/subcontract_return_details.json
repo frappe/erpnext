@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-18 12:13:41.799538",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purchase_order",
+  "subcontracting_order",
+  "item_code",
+  "po_item_code",
+  "po_qty",
+  "return_qty",
+  "stock_entry",
+  "uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order"
+  },
+  {
+   "fieldname": "subcontracting_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Subcontracting Order",
+   "options": "Subcontracting Order"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "po_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "PO Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "po_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "PO Qty"
+  },
+  {
+   "fieldname": "return_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Return Qty"
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Stock Entry",
+   "options": "Stock Entry"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "UOM"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-18 12:13:41.799538",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontract Return Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

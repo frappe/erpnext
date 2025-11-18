@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-18 12:13:04.828526",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purchase_order",
+  "subcontracting_order",
+  "item_code",
+  "po_qty",
+  "received_qty",
+  "uom",
+  "subcontracting_receipt",
+  "purchase_receipt",
+  "purchase_invoice",
+  "bill_no",
+  "po_rate",
+  "bill_rate",
+  "diff_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order"
+  },
+  {
+   "fieldname": "subcontracting_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Subcontracting Order",
+   "options": "Subcontracting Order"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "po_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "PO Qty"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "UOM"
+  },
+  {
+   "fieldname": "subcontracting_receipt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Subcontracting Receipt",
+   "options": "Subcontracting Receipt"
+  },
+  {
+   "fieldname": "purchase_receipt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Purchase Receipt",
+   "options": "Purchase Receipt"
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Data",
+   "label": "Purchase Invoice"
+  },
+  {
+   "fieldname": "bill_no",
+   "fieldtype": "Data",
+   "label": "Bill No"
+  },
+  {
+   "fieldname": "po_rate",
+   "fieldtype": "Data",
+   "label": "PO Rate"
+  },
+  {
+   "fieldname": "bill_rate",
+   "fieldtype": "Currency",
+   "label": "Bill Rate"
+  },
+  {
+   "fieldname": "diff_rate",
+   "fieldtype": "Currency",
+   "label": "Diff Rate"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-18 12:13:04.828526",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontract Received Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
