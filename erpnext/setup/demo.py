@@ -182,6 +182,10 @@ def create_transaction_deletion_record(company):
 	transaction_deletion_record.company = company
 	transaction_deletion_record.process_in_single_transaction = True
 	transaction_deletion_record.save(ignore_permissions=True)
+
+	transaction_deletion_record.generate_to_delete_list()
+	transaction_deletion_record.reload()
+
 	transaction_deletion_record.submit()
 	transaction_deletion_record.start_deletion_tasks()
 
