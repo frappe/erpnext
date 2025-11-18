@@ -136,6 +136,14 @@ class TransactionDeletionRecord(Document):
 					title=_("Child Table Not Allowed"),
 				)
 
+	def _is_any_doctype_in_deletion_list(self, doctypes_list):
+		"""Check if any DocType from the list is in the To Delete list"""
+		if not self.doctypes_to_delete:
+			return False
+
+		deletion_doctypes = {d.doctype_name for d in self.doctypes_to_delete}
+		return any(doctype in deletion_doctypes for doctype in doctypes_list)
+
 	def generate_job_name_for_task(self, task=None):
 		method = self.task_to_internal_method_map[task]
 		return f"{self.name}_{method}"
@@ -455,6 +463,23 @@ class TransactionDeletionRecord(Document):
 	def delete_bins(self):
 		self.validate_doc_status()
 		if not self.delete_bin_data:
+			stock_related_doctypes = [
+				"Item",
+				"Warehouse",
+				"Stock Entry",
+				"Delivery Note",
+				"Purchase Receipt",
+				"Stock Reconciliation",
+				"Material Request",
+				"Purchase Invoice",
+				"Sales Invoice",
+			]
+
+			if not self._is_any_doctype_in_deletion_list(stock_related_doctypes):
+				self.db_set("delete_bin_data", 1)
+				self.enqueue_task(task="Delete Leads and Addresses")
+				return
+
 			frappe.db.sql(
 				"""delete from `tabBin` where warehouse in
 					(select name from tabWarehouse where company=%s)""",
@@ -467,6 +492,11 @@ class TransactionDeletionRecord(Document):
 		"""Delete addresses to which leads are linked"""
 		self.validate_doc_status()
 		if not self.delete_leads_and_addresses:
+			if not self._is_any_doctype_in_deletion_list(["Lead"]):
+				self.db_set("delete_leads_and_addresses", 1)
+				self.enqueue_task(task="Reset Company Values")
+				return
+
 			leads = frappe.db.get_all("Lead", filters={"company": self.company}, pluck="name")
 			addresses = []
 			if leads:
@@ -509,6 +539,18 @@ class TransactionDeletionRecord(Document):
 	def reset_company_values(self):
 		self.validate_doc_status()
 		if not self.reset_company_default_values:
+			sales_related_doctypes = [
+				"Sales Order",
+				"Sales Invoice",
+				"Quotation",
+				"Delivery Note",
+			]
+
+			if not self._is_any_doctype_in_deletion_list(sales_related_doctypes):
+				self.db_set("reset_company_default_values", 1)
+				self.enqueue_task(task="Clear Notifications")
+				return
+
 			company_obj = frappe.get_doc("Company", self.company)
 			company_obj.total_monthly_sales = 0
 			company_obj.sales_monthly_history = None
