@@ -73,18 +73,18 @@ class TransactionDeletionRecord(Document):
 		)
 
 		amended_from: DF.Link | None
-		clear_notifications: DF.Check
+		clear_notifications_status: DF.Literal["Pending", "Completed", "Skipped"]
 		company: DF.Link
-		delete_bin_data: DF.Check
-		delete_leads_and_addresses: DF.Check
-		delete_transactions: DF.Check
+		delete_bin_data_status: DF.Literal["Pending", "Completed", "Skipped"]
+		delete_leads_and_addresses_status: DF.Literal["Pending", "Completed", "Skipped"]
+		delete_transactions_status: DF.Literal["Pending", "Completed", "Skipped"]
 		doctypes: DF.Table[TransactionDeletionRecordDetails]
 		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
 		doctypes_to_delete: DF.Table[TransactionDeletionRecordToDelete]
 		error_log: DF.LongText | None
-		initialize_doctypes_table: DF.Check
+		initialize_doctypes_table_status: DF.Literal["Pending", "Completed", "Skipped"]
 		process_in_single_transaction: DF.Check
-		reset_company_default_values: DF.Check
+		reset_company_default_values_status: DF.Literal["Pending", "Completed", "Skipped"]
 		status: DF.Literal["Queued", "Running", "Failed", "Completed", "Cancelled"]
 	# end: auto-generated types
 

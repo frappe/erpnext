@@ -45,14 +45,13 @@
    "read_only": 1
   },
   {
-   "description": "DocTypes that will be deleted",
    "fieldname": "doctypes_to_delete",
    "fieldtype": "Table",
    "label": "DocTypes To Delete",
    "options": "Transaction Deletion Record To Delete"
   },
   {
-   "description": "DocTypes that will NOT be deleted. Add or remove items as needed.",
+   "description": "DocTypes that will NOT be deleted.",
    "fieldname": "doctypes_to_be_ignored",
    "fieldtype": "Table",
    "label": "Excluded DocTypes",
@@ -170,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-18 13:46:15.153489",
+ "modified": "2025-11-18 15:02:46.427695",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
