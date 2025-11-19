@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 import datetime
 
 import frappe
@@ -10,44 +9,47 @@ from frappe.utils import flt, formatdate
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
+
 def get_companies_for_report(filters):
-    """Return list of companies for consolidated reporting."""
-    company = filters.get("company")
+	"""Return list of companies for consolidated reporting."""
+	company = filters.get("company")
 
-    # If not consolidating -> return only the selected company
-    if not filters.get("accumulated_in_group_company"):
-        return [company]
+	if not filters.get("accumulated_in_group_company"):
+		return [company]
 
-    # Consolidated -> get all child companies + parent
-    companies = frappe.get_all(
-            "Company",
-            filters={"parent_company": company},
-            pluck="name"
-            )
-    # Always include parent company
-    if company not in companies:
-        companies.append(company)
+	companies = frappe.get_all(
+		"Company",
+		filters={"parent_company": company},
+		pluck="name",
+	)
+	if company not in companies:
+		companies.append(company)
 
-    return companies
+	return companies
 
 
 def execute(filters=None):
+	"""Run Budget Variance Report with optional consolidation across group companies."""
 	if not filters:
 		filters = {}
 
 	columns = get_columns(filters)
+
 	if filters.get("budget_against_filter"):
 		dimensions = filters.get("budget_against_filter")
 	else:
 		dimensions = get_cost_centers(filters)
 
-	period_month_ranges = get_period_month_ranges(filters["period"], filters["from_fiscal_year"])
-	cam_map = get_dimension_account_month_map(filters)
+	period_month_ranges = get_period_month_ranges(
+		filters["period"], filters["from_fiscal_year"]
+	)
 
-    # consolidate dimension_account_month map accross companies
-    companies = get_companies_for_report(filters)
+	# consolidate dimension_account_month map across companies
+	companies = get_companies_for_report(filters)
 	if filters.get("accumulated_in_group_company"):
 		consolidated_cam_map = {}
+		original_company = filters.get("company")
+
 		for comp in companies:
 			filters["company"] = comp
 			company_map = get_dimension_account_month_map(filters)
@@ -55,6 +57,7 @@ def execute(filters=None):
 			for dim, accounts in company_map.items():
 				if dim not in consolidated_cam_map:
 					consolidated_cam_map[dim] = {}
+
 				for acc, months in accounts.items():
 					if acc not in consolidated_cam_map[dim]:
 						consolidated_cam_map[dim][acc] = months
@@ -65,11 +68,16 @@ def execute(filters=None):
 							for month, vals in mdata.items():
 								consolidated_cam_map[dim][acc][year].setdefault(month, {})
 								for key in ("target", "actual"):
-									consolidated_cam_map[dim][acc][year][month][key] = \
-										consolidated_cam_map[dim][acc][year][month].get(key, 0) + vals.get(key, 0)
-								consolidated_cam_map[dim][acc][year][month]["variance"] = \
-									consolidated_cam_map[dim][acc][year][month]["target"] - consolidated_cam_map[dim][acc][year][month]["actual"]
+									consolidated_cam_map[dim][acc][year][month][key] = (
+										consolidated_cam_map[dim][acc][year][month].get(key, 0)
+										+ vals.get(key, 0)
+									)
+								consolidated_cam_map[dim][acc][year][month]["variance"] = (
+									consolidated_cam_map[dim][acc][year][month]["target"]
+									- consolidated_cam_map[dim][acc][year][month]["actual"]
+								)
 
+		filters["company"] = original_company
 		cam_map = consolidated_cam_map
 	else:
 		cam_map = get_dimension_account_month_map(filters)
@@ -78,12 +86,18 @@ def execute(filters=None):
 	for dimension in dimensions:
 		dimension_items = cam_map.get(dimension)
 		if dimension_items:
-			data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, 0)
+			data = get_final_data(
+				dimension,
+				dimension_items,
+				filters,
+				period_month_ranges,
+				data,
+				0,
+			)
 
 	chart = get_chart_data(filters, columns, data)
 
 	return columns, data, None, chart
-
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
 	for account, monthwise_data in dimension_items.items():

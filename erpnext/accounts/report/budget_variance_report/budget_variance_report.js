@@ -1,15 +1,16 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd.
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Budget Variance Report"] = {
 	filters: get_filters(),
+
 	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
 
-		if (column.fieldname.includes(__("variance"))) {
-			if (data[column.fieldname] < 0) {
+		if (column.fieldname && column.fieldname.includes("variance")) {
+			if (data && data[column.fieldname] < 0) {
 				value = "<span style='color:red'>" + value + "</span>";
-			} else if (data[column.fieldname] > 0) {
+			} else if (data && data[column.fieldname] > 0) {
 				value = "<span style='color:green'>" + value + "</span>";
 			}
 		}
@@ -18,31 +19,35 @@ frappe.query_reports["Budget Variance Report"] = {
 	},
 };
 
-frappe.query_reports["Budget Variance Report"].onload = function(report) {
-  let company = frappe.query_report.get_fileter_value("company");
-  if (!company) return;
+frappe.query_reports["Budget Variance Report"].onload = function (report) {
+	let company = frappe.query_report.get_filter_value("company");
+	if (!company) return;
 
-  frappe.call({
-    method: "frappe.client.get_value",
-    args: {
-      doctype: "Company",
-      filters: { name: company },
-      fieldname: "is_group",
-    },
-    callback: function(r) {
-      const filter = frappe.query_report.get_filter("accumulated_in_group_company");
-      if (!filter) return;
-
-      if (r.message && r.message.is_group) {
-        filter.df.hidden = 0;
-      } else {
-        filter.df.hidden = 1;
-        frappe.query_report.set_filter_value("accumulated_in_group_company", 0);
-      }
-      filter.refresh();
-    },
-  });
+	update_group_company_checkbox(company);
 };
+
+function update_group_company_checkbox(company) {
+	frappe.call({
+		method: "frappe.client.get_value",
+		args: {
+			doctype: "Company",
+			filters: { name: company },
+			fieldname: "is_group",
+		},
+		callback: function (r) {
+			const filter = frappe.query_report.get_filter("accumulated_in_group_company");
+			if (!filter) return;
+
+			if (r.message && r.message.is_group) {
+				filter.df.hidden = 0;
+			} else {
+				filter.df.hidden = 1;
+				frappe.query_report.set_filter_value("accumulated_in_group_company", 0);
+			}
+			filter.refresh();
+		},
+	});
+}
 
 function get_filters() {
 	function get_dimensions() {
@@ -101,6 +106,10 @@ function get_filters() {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1,
+			on_change: function () {
+				let company = frappe.query_report.get_filter_value("company");
+				if (company) update_group_company_checkbox(company);
+			},
 		},
 		{
 			fieldname: "budget_against",
@@ -120,8 +129,6 @@ function get_filters() {
 			fieldtype: "MultiSelectList",
 			options: "budget_against",
 			get_data: function (txt) {
-				if (!frappe.query_report.filters) return;
-
 				let budget_against = frappe.query_report.get_filter_value("budget_against");
 				if (!budget_against) return;
 
@@ -134,13 +141,13 @@ function get_filters() {
 			fieldtype: "Check",
 			default: 0,
 		},
-      {
-        fieldname: "accumulated_in_group_company",
-        label: __("Accumulated Values in Group Company"),
-        fieldtype: "Check",
-        default: 0,
-        hidden: 1,
-      },
+		{
+			fieldname: "accumulated_in_group_company",
+			label: __("Accumulated Values in Group Company"),
+			fieldtype: "Check",
+			default: 0,
+			hidden: 1,
+		},
 	];
 
 	return filters;
