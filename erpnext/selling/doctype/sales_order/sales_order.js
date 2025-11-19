@@ -917,6 +917,9 @@ frappe.ui.form.on("Sales Order Item", {
 });
 
 erpnext.selling.SalesOrderController = class SalesOrderController extends erpnext.selling.SellingController {
+	setup() {
+		this.setup_accounting_dimension_triggers();
+	}
 	onload(doc, dt, dn) {
 		super.onload(doc, dt, dn);
 	}
