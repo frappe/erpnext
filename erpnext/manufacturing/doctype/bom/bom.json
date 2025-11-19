@@ -558,12 +558,14 @@
   {
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
-   "label": "% Process Loss"
+   "label": "% Process Loss",
+   "non_negative": 1
   },
   {
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
    "label": "Process Loss Qty",
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -682,8 +684,8 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-06 15:27:54.806116",
- "modified_by": "Administrator",
+ "modified": "2025-11-19 16:17:15.925156",
+ "modified_by": "mihir@frappe.io",
  "module": "Manufacturing",
  "name": "BOM",
  "owner": "Administrator",
