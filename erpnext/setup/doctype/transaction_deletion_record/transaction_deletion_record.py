@@ -134,22 +134,36 @@ class TransactionDeletionRecord(Document):
 		self.validate_to_delete_list()
 
 	def validate_to_delete_list(self):
-		"""Validate To Delete list: existence, protection status, child table exclusion"""
+		"""Validate To Delete list: existence, protection status, child table exclusion, duplicates"""
 		if not self.doctypes_to_delete:
 			return
 
 		protected = get_protected_doctypes()
+		seen_combinations = set()
 
 		for item in self.doctypes_to_delete:
+			# Validate existence
 			if not frappe.db.exists("DocType", item.doctype_name):
 				frappe.throw(_("DocType {0} does not exist").format(item.doctype_name))
 
+			# Check for duplicates using composite key
+			composite_key = (item.doctype_name, item.company_field or None)
+			if composite_key in seen_combinations:
+				field_desc = f" with company field '{item.company_field}'" if item.company_field else ""
+				frappe.throw(
+					_("Duplicate entry: {0}{1}").format(item.doctype_name, field_desc),
+					title=_("Duplicate DocType"),
+				)
+			seen_combinations.add(composite_key)
+
+			# Validate protected DocTypes
 			if item.doctype_name in protected:
 				frappe.throw(
 					_("Cannot delete protected core DocType: {0}").format(item.doctype_name),
 					title=_("Protected DocType"),
 				)
 
+			# Validate not a child table
 			is_child_table = frappe.db.get_value("DocType", item.doctype_name, "istable")
 			if is_child_table:
 				frappe.throw(
@@ -159,6 +173,7 @@ class TransactionDeletionRecord(Document):
 					title=_("Child Table Not Allowed"),
 				)
 
+			# Validate not virtual
 			is_virtual = frappe.db.get_value("DocType", item.doctype_name, "is_virtual")
 			if is_virtual:
 				frappe.throw(
@@ -167,6 +182,17 @@ class TransactionDeletionRecord(Document):
 					).format(item.doctype_name),
 					title=_("Virtual DocType"),
 				)
+
+			# Validate company_field if specified
+			if item.company_field:
+				valid_company_fields = self._get_company_link_fields(item.doctype_name)
+				if item.company_field not in valid_company_fields:
+					frappe.throw(
+						_("Field '{0}' is not a valid Company link field for DocType {1}").format(
+							item.company_field, item.doctype_name
+						),
+						title=_("Invalid Company Field"),
+					)
 
 	def _is_any_doctype_in_deletion_list(self, doctypes_list):
 		"""Check if any DocType from the list is in the To Delete list"""
@@ -236,19 +262,37 @@ class TransactionDeletionRecord(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 
-	def _get_doctype_deletion_details(self, doctype_name, company=None):
-		"""Get child tables and document count for a DocType"""
-		company_to_use = company or self.company
+	def _get_child_tables(self, doctype_name):
+		"""Get list of child table DocType names for a given DocType
 
-		child_tables = frappe.get_all(
+		Args:
+		        doctype_name: The parent DocType to check
+
+		Returns:
+		        list: List of child table DocType names (Table field options)
+		"""
+		return frappe.get_all(
 			"DocField", filters={"parent": doctype_name, "fieldtype": "Table"}, pluck="options"
 		)
+
+	def _get_to_delete_row_infos(self, doctype_name, company_field=None, company=None):
+		"""Get child tables and document count for a To Delete list row
+
+		Args:
+		        doctype_name: The DocType to get information for
+		        company_field: Optional company field name to filter by
+		        company: Optional company value (defaults to self.company)
+
+		Returns:
+		        dict: {"child_doctypes": str, "document_count": int}
+		"""
+		company = company or self.company
+
+		child_tables = self._get_child_tables(doctype_name)
 		child_doctypes_str = ", ".join(child_tables) if child_tables else ""
 
-		has_company_field = self._has_company_field(doctype_name)
-
-		if has_company_field and company_to_use:
-			doc_count = frappe.db.count(doctype_name, filters={"company": company_to_use})
+		if company_field and company:
+			doc_count = frappe.db.count(doctype_name, filters={company_field: company})
 		else:
 			doc_count = frappe.db.count(doctype_name)
 
@@ -264,14 +308,32 @@ class TransactionDeletionRecord(Document):
 			{"parent": doctype_name, "fieldname": "company", "fieldtype": "Link", "options": "Company"},
 		)
 
+	def _get_company_link_fields(self, doctype_name):
+		"""Get all Company Link field names for a DocType
+
+		Args:
+		        doctype_name: The DocType to check
+
+		Returns:
+		        list: List of field names that link to Company DocType, ordered by field index
+		"""
+		company_fields = frappe.get_all(
+			"DocField",
+			filters={"parent": doctype_name, "fieldtype": "Link", "options": "Company"},
+			pluck="fieldname",
+			order_by="idx",
+		)
+		return company_fields or []
+
 	@frappe.whitelist()
 	def generate_to_delete_list(self):
-		"""Generate To Delete list from all DocTypes with company field, excluding ignored and protected"""
+		"""Generate To Delete list with one row per company field"""
 		self.doctypes_to_delete = []
 
 		excluded = [d.doctype_name for d in self.doctypes_to_be_ignored]
 		excluded.extend(get_protected_doctypes())
 
+		# Get all DocTypes with Company Link Field.
 		doctypes_with_company = frappe.get_all(
 			"DocType",
 			filters=[
@@ -279,24 +341,35 @@ class TransactionDeletionRecord(Document):
 				["DocType", "is_virtual", "=", 0],  # Exclude virtual doctypes
 				["DocType", "name", "not in", excluded],  # Exclude protected/ignored
 				["DocType", "name", "!=", self.doctype],  # Exclude self
-				["DocField", "fieldname", "=", "company"],  # Must have "company" field
 				["DocField", "fieldtype", "=", "Link"],  # Field must be Link type
 				["DocField", "options", "=", "Company"],  # Linking to Company
 			],
 			pluck="name",
+			distinct=True,  # Remove duplicates (DocTypes with multiple company fields)
 		)
 
 		for doctype_name in doctypes_with_company:
-			details = self._get_doctype_deletion_details(doctype_name)
+			# Get ALL company fields for this DocType
+			company_fields = self._get_company_link_fields(doctype_name)
 
-			self.append(
-				"doctypes_to_delete",
-				{
-					"doctype_name": doctype_name,
-					"document_count": details["document_count"],
-					"child_doctypes": details["child_doctypes"],
-				},
-			)
+			# Get child tables once (same for all company fields of this DocType)
+			child_tables = self._get_child_tables(doctype_name)
+			child_doctypes_str = ", ".join(child_tables) if child_tables else ""
+
+			# Create one row per company field
+			for company_field in company_fields:
+				# Get document count for this specific company field
+				doc_count = frappe.db.count(doctype_name, {company_field: self.company})
+
+				self.append(
+					"doctypes_to_delete",
+					{
+						"doctype_name": doctype_name,
+						"company_field": company_field,
+						"document_count": doc_count,
+						"child_doctypes": child_doctypes_str,
+					},
+				)
 
 		self.save()
 		return {"count": len(self.doctypes_to_delete)}
@@ -324,7 +397,7 @@ class TransactionDeletionRecord(Document):
 
 		try:
 			# Use helper method to get deletion details
-			return self._get_doctype_deletion_details(doctype_name, company)
+			return self._get_to_delete_row_infos(doctype_name, company_field=None, company=company)
 		except Exception as e:
 			frappe.log_error(
 				f"Error in populate_doctype_details for {doctype_name}: {e!s}", "Transaction Deletion Record"
@@ -345,14 +418,12 @@ class TransactionDeletionRecord(Document):
 
 		output = StringIO()
 		writer = csv.writer(output)
-		writer.writerow(["doctype_name", "child_doctypes"])
+		writer.writerow(["doctype_name", "company_field", "child_doctypes"])
 
 		for item in self.doctypes_to_delete:
-			writer.writerow([item.doctype_name, item.child_doctypes or ""])
+			writer.writerow([item.doctype_name, item.company_field or "", item.child_doctypes or ""])
 
-		csv_content = output.getvalue()
-
-		frappe.response["result"] = csv_content
+		frappe.response["result"] = output.getvalue()
 		frappe.response["type"] = "csv"
 		frappe.response[
 			"doctype"
@@ -376,6 +447,7 @@ class TransactionDeletionRecord(Document):
 
 		for row in reader:
 			doctype_name = row.get("doctype_name", "").strip()
+			company_field = row.get("company_field", "").strip() or None
 
 			if not doctype_name:
 				continue
@@ -398,12 +470,28 @@ class TransactionDeletionRecord(Document):
 				skipped.append(_("{0}: Virtual DocType (no database table)").format(doctype_name))
 				continue
 
-			details = self._get_doctype_deletion_details(doctype_name)
+			db_company_fields = self._get_company_link_fields(doctype_name)
+			import_company_field = ""
+			if not db_company_fields:  # Case no company field exists
+				details = self._get_to_delete_row_infos(doctype_name)
+			elif (
+				company_field and company_field in db_company_fields
+			):  # Case it is provided by export and valid
+				details = self._get_to_delete_row_infos(doctype_name, company_field)
+				import_company_field = company_field
+			else:  # Company field exists but not provided by export or invalid
+				if "company" in db_company_fields:  # Check if 'company' is a valid field
+					details = self._get_to_delete_row_infos(doctype_name, "company")
+					import_company_field = "company"
+				else:  # Fallback to first valid company field
+					details = self._get_to_delete_row_infos(doctype_name, db_company_fields[0])
+					import_company_field = db_company_fields[0]
 
 			self.append(
 				"doctypes_to_delete",
 				{
 					"doctype_name": doctype_name,
+					"company_field": import_company_field,
 					"document_count": details["document_count"],
 					"child_doctypes": details["child_doctypes"],
 				},
@@ -601,30 +689,21 @@ class TransactionDeletionRecord(Document):
 		self.validate_doc_status()
 		if self.initialize_doctypes_table_status == "Pending":
 			# Use To Delete list if available (new behavior)
-			if self.doctypes_to_delete:
-				tables = self.get_all_child_doctypes()
+			if not self.doctypes_to_delete:
+				frappe.throw(
+					_("No DocTypes in To Delete list. Please generate or import the list before submitting."),
+					title=_("Empty To Delete List"),
+				)
+			tables = self.get_all_child_doctypes()
 
-				for to_delete_item in self.doctypes_to_delete:
-					if to_delete_item.document_count > 0:
-						# Add parent DocType only - child tables are handled automatically
-						# by delete_child_tables() when the parent is deleted
-						# Only use "company" field if it exists, otherwise pass None
-						has_company_field = self._has_company_field(to_delete_item.doctype_name)
-						self.populate_doctypes_table(
-							tables, to_delete_item.doctype_name, "company" if has_company_field else None, 0
-						)
-			else:
-				# Fallback to original logic (backwards compatibility)
-				doctypes_to_be_ignored_list = self.get_doctypes_to_be_ignored_list()
-				docfields = self.get_doctypes_with_company_field(doctypes_to_be_ignored_list)
-				tables = self.get_all_child_doctypes()
-				for docfield in docfields:
-					if docfield["parent"] != self.doctype:
-						no_of_docs = self.get_number_of_docs_linked_with_specified_company(
-							docfield["parent"], docfield["fieldname"]
-						)
-						if no_of_docs > 0:
-							self.populate_doctypes_table(tables, docfield["parent"], docfield["fieldname"], 0)
+			for to_delete_item in self.doctypes_to_delete:
+				if to_delete_item.document_count > 0:
+					# Add parent DocType only - child tables are handled automatically
+					# by delete_child_tables() when the parent is deleted
+					# Use company_field directly from To Delete item
+					self.populate_doctypes_table(
+						tables, to_delete_item.doctype_name, to_delete_item.company_field, 0
+					)
 			self.db_set("initialize_doctypes_table_status", "Completed")
 		self.enqueue_task(task="Delete Transactions")
 
@@ -649,18 +728,22 @@ class TransactionDeletionRecord(Document):
 							title=_("Protected DocType"),
 						)
 
-					if docfield.docfield_name == "company":
+					# Get company_field from stored value (could be any Company link field)
+					company_field = docfield.docfield_name
+
+					if company_field:
 						no_of_docs = self.get_number_of_docs_linked_with_specified_company(
-							docfield.doctype_name, docfield.docfield_name
+							docfield.doctype_name, company_field
 						)
 					else:
 						no_of_docs = frappe.db.count(docfield.doctype_name)
 
 					if no_of_docs > 0:
-						if docfield.docfield_name == "company":
+						if company_field:
 							reference_docs = frappe.get_all(
 								docfield.doctype_name,
-								filters={"company": self.company},
+								filters={company_field: self.company},
+								fields=["name"],
 								limit=self.batch_size,
 							)
 						else:
@@ -689,7 +772,11 @@ class TransactionDeletionRecord(Document):
 
 						to_delete_row = frappe.db.get_value(
 							"Transaction Deletion Record To Delete",
-							{"parent": self.name, "doctype_name": docfield.doctype_name},
+							{
+								"parent": self.name,
+								"doctype_name": docfield.doctype_name,
+								"company_field": company_field,
+							},
 							"name",
 						)
 						if to_delete_row:
@@ -745,18 +832,25 @@ class TransactionDeletionRecord(Document):
 			"fieldname",
 		)
 
-	def populate_doctypes_table(self, tables, doctype, fieldname, no_of_docs):
+	def populate_doctypes_table(self, tables, doctype, company_field, no_of_docs):
+		"""Add doctype to processing tracker
+
+		Args:
+		        tables: List of child table DocType names (to exclude)
+		        doctype: DocType name to track
+		        company_field: Company link field name (or None)
+		        no_of_docs: Initial count
+		"""
 		self.flags.ignore_validate_update_after_submit = True
 		if doctype not in tables:
 			self.append(
-				"doctypes", {"doctype_name": doctype, "docfield_name": fieldname, "no_of_docs": no_of_docs}
+				"doctypes",
+				{"doctype_name": doctype, "docfield_name": company_field, "no_of_docs": no_of_docs},
 			)
 		self.save(ignore_permissions=True)
 
 	def delete_child_tables(self, doctype, reference_doc_names):
-		child_tables = frappe.get_all(
-			"DocField", filters={"fieldtype": "Table", "parent": doctype}, pluck="options"
-		)
+		child_tables = self._get_child_tables(doctype)
 
 		for table in child_tables:
 			frappe.db.delete(table, {"parent": ["in", reference_doc_names]})
@@ -766,9 +860,9 @@ class TransactionDeletionRecord(Document):
 
 	def update_naming_series(self, naming_series, doctype_name):
 		if "." in naming_series:
-			prefix, hashes = naming_series.rsplit(".", 1)
+			prefix, _ = naming_series.rsplit(".", 1)
 		else:
-			prefix, hashes = naming_series.rsplit("{", 1)
+			prefix, _ = naming_series.rsplit("{", 1)
 
 		# Find the highest number used in the naming series to reset the counter
 		doctype_table = qb.DocType(doctype_name)

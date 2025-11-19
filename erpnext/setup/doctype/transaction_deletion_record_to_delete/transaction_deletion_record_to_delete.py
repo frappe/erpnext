@@ -15,6 +15,7 @@ class TransactionDeletionRecordToDelete(Document):
 		from frappe.types import DF
 
 		child_doctypes: DF.SmallText | None
+		company_field: DF.Data | None
 		deleted: DF.Check
 		doctype_name: DF.Link | None
 		document_count: DF.Int

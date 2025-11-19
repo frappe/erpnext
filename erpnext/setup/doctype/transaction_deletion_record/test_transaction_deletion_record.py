@@ -14,24 +14,29 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		frappe.db.rollback()
 
 	def test_doctypes_contain_company_field(self):
-		"""Test that all DocTypes in To Delete list have a company field"""
+		"""Test that all DocTypes in To Delete list have a valid company link field"""
 		tdr = create_transaction_deletion_doc("Dunder Mifflin Paper Co")
-		for doctype in tdr.doctypes_to_delete:
-			contains_company = False
-			doctype_fields = frappe.get_meta(doctype.doctype_name).as_dict()["fields"]
-			for doctype_field in doctype_fields:
-				if (
-					doctype_field["fieldname"] == "company"
-					and doctype_field["fieldtype"] == "Link"
-					and doctype_field["options"] == "Company"
-				):
-					contains_company = True
-					break
-			self.assertTrue(contains_company, f"DocType {doctype.doctype_name} should have a company field")
+		for doctype_row in tdr.doctypes_to_delete:
+			# If company_field is specified, verify it's a valid Company link field
+			if doctype_row.company_field:
+				field_found = False
+				doctype_fields = frappe.get_meta(doctype_row.doctype_name).as_dict()["fields"]
+				for doctype_field in doctype_fields:
+					if (
+						doctype_field["fieldname"] == doctype_row.company_field
+						and doctype_field["fieldtype"] == "Link"
+						and doctype_field["options"] == "Company"
+					):
+						field_found = True
+						break
+				self.assertTrue(
+					field_found,
+					f"DocType {doctype_row.doctype_name} should have company field '{doctype_row.company_field}'",
+				)
 
 	def test_no_of_docs_is_correct(self):
 		"""Test that document counts are calculated correctly in To Delete list"""
-		for _i in range(5):
+		for _ in range(5):
 			create_task("Dunder Mifflin Paper Co")
 		tdr = create_transaction_deletion_doc("Dunder Mifflin Paper Co")
 		tdr.reload()
@@ -106,7 +111,7 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 			tdr.insert()
 
 	def test_csv_export_import(self):
-		"""Test CSV export and import functionality"""
+		"""Test CSV export and import functionality with company_field column"""
 		company = "Dunder Mifflin Paper Co"
 		create_task(company)
 
@@ -125,6 +130,7 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		csv_content = frappe.response.get("result")
 		self.assertIsNotNone(csv_content)
 		self.assertIn("doctype_name", csv_content)
+		self.assertIn("company_field", csv_content)  # New: verify company_field column exists
 
 		# Create new record and import
 		tdr2 = frappe.new_doc("Transaction Deletion Record")
@@ -133,9 +139,15 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		result = tdr2.import_to_delete_template_method(csv_content)
 		tdr2.reload()
 
-		# Should have same DocTypes (counts may differ due to new task)
+		# Should have same entries (counts may differ due to new task)
 		self.assertEqual(len(tdr2.doctypes_to_delete), original_count)
 		self.assertGreaterEqual(result["imported"], 1)
+
+		# Verify company_field values are preserved
+		for row in tdr2.doctypes_to_delete:
+			if row.doctype_name == "Task":
+				# Task should have company field set
+				self.assertIsNotNone(row.company_field, "Task should have company_field set after import")
 
 	def test_progress_tracking(self):
 		"""Test that deleted checkbox is marked when DocType deletion completes"""
@@ -146,6 +158,7 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		tdr.reload()
 
 		# After deletion, Task should be marked as deleted in To Delete list
+		# Note: Must match using composite key (doctype_name + company_field)
 		task_row = None
 		for doctype in tdr.doctypes_to_delete:
 			if doctype.doctype_name == "Task":
@@ -154,6 +167,53 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 
 		if task_row:
 			self.assertEqual(task_row.deleted, 1, "Task should be marked as deleted")
+
+	def test_composite_key_validation(self):
+		"""Test that duplicate (doctype_name + company_field) combinations are prevented"""
+		company = "Dunder Mifflin Paper Co"
+
+		tdr = frappe.new_doc("Transaction Deletion Record")
+		tdr.company = company
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})  # Duplicate!
+
+		# Should throw validation error for duplicate composite key
+		with self.assertRaises(frappe.ValidationError):
+			tdr.insert()
+
+	def test_same_doctype_different_company_field_allowed(self):
+		"""Test that same DocType can be added with different company_field values"""
+		company = "Dunder Mifflin Paper Co"
+
+		tdr = frappe.new_doc("Transaction Deletion Record")
+		tdr.company = company
+		# Same DocType but one with company field, one without (None)
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": None})
+
+		# Should NOT throw error - different company_field values are allowed
+		try:
+			tdr.insert()
+			self.assertEqual(
+				len(tdr.doctypes_to_delete),
+				2,
+				"Should allow 2 Task entries with different company_field values",
+			)
+		except frappe.ValidationError as e:
+			self.fail(f"Should allow same DocType with different company_field values, but got error: {e}")
+
+	def test_company_field_validation(self):
+		"""Test that invalid company_field values are rejected"""
+		company = "Dunder Mifflin Paper Co"
+
+		tdr = frappe.new_doc("Transaction Deletion Record")
+		tdr.company = company
+		# Add Task with invalid company field
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "nonexistent_field"})
+
+		# Should throw validation error for invalid company field
+		with self.assertRaises(frappe.ValidationError):
+			tdr.insert()
 
 
 def create_company(company_name):

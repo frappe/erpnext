@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "doctype_name",
+  "company_field",
   "document_count",
   "child_doctypes",
   "deleted"
@@ -17,6 +18,13 @@
    "in_list_view": 1,
    "label": "DocType",
    "options": "DocType"
+  },
+  {
+   "description": "Company link field name used for filtering",
+   "fieldname": "company_field",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Company Field"
   },
   {
    "fieldname": "document_count",

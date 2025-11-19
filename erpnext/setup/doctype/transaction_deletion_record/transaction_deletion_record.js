@@ -3,12 +3,11 @@
 
 frappe.ui.form.on("Transaction Deletion Record", {
 	setup: function (frm) {
-		// Set up query for DocTypes to prevent duplicates and exclude child tables
-		frm.set_query("doctype_name", "doctypes_to_delete", function (doc, cdt, cdn) {
-			let existing_doctypes = doc.doctypes_to_delete.map((row) => row.doctype_name);
+		// Set up query for DocTypes to exclude child tables and virtual doctypes
+		// Note: Same DocType can be added multiple times with different company_field values
+		frm.set_query("doctype_name", "doctypes_to_delete", function () {
 			return {
 				filters: [
-					["DocType", "name", "not in", existing_doctypes],
 					["DocType", "istable", "=", 0], // Exclude child tables
 					["DocType", "is_virtual", "=", 0], // Exclude virtual doctypes
 				],
@@ -45,15 +44,15 @@ frappe.ui.form.on("Transaction Deletion Record", {
 					"<div style='margin-bottom: 15px;'><b style='color: #d73939;'>⚠ Warning: This action cannot be undone!</b></div>" +
 					"<div style='margin-bottom: 10px;'>You are about to permanently delete data for <b>" +
 					frm.doc.doctypes_to_delete.length +
-					" DocTypes</b> for company <b>" +
+					" entries</b> for company <b>" +
 					frm.doc.company +
 					"</b>.</div>" +
 					"<div style='margin-bottom: 10px;'><b>What will be deleted:</b></div>" +
 					"<ul style='margin-left: 20px; margin-bottom: 10px;'>" +
-					"<li><b>DocTypes with a 'company' field:</b> Only records belonging to <b>" +
+					"<li><b>DocTypes with a company field:</b> Only records belonging to <b>" +
 					frm.doc.company +
 					"</b> will be deleted</li>" +
-					"<li><b>DocTypes without a 'company' field:</b> ALL records will be deleted (entire DocType cleared)</li>" +
+					"<li><b>DocTypes without a company field:</b> ALL records will be deleted (entire DocType cleared)</li>" +
 					"</ul>" +
 					"<div style='margin-bottom: 10px; padding: 10px; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>" +
 					"<b style='color: #856404;'>📦 IMPORTANT: Create a backup before proceeding!</b>" +
@@ -206,16 +205,6 @@ frappe.ui.form.on("Transaction Deletion Record To Delete", {
 	doctype_name: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.doctype_name) {
-			// Check for duplicates
-			let duplicates = frm.doc.doctypes_to_delete.filter(
-				(r) => r.doctype_name === row.doctype_name && r.name !== row.name
-			);
-			if (duplicates.length > 0) {
-				frappe.msgprint(__("DocType {0} is already in the list", [row.doctype_name]));
-				frappe.model.set_value(cdt, cdn, "doctype_name", "");
-				return;
-			}
-
 			// Auto-populate child DocTypes and document count using server-side method
 			frm.call({
 				method: "populate_doctype_details",
@@ -241,6 +230,46 @@ frappe.ui.form.on("Transaction Deletion Record To Delete", {
 					}
 				},
 			});
+		}
+	},
+
+	company_field: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.doctype_name && row.company_field !== undefined) {
+			// Check for duplicates using composite key (doctype_name + company_field)
+			let duplicates = frm.doc.doctypes_to_delete.filter(
+				(r) =>
+					r.doctype_name === row.doctype_name &&
+					r.company_field === row.company_field &&
+					r.name !== row.name
+			);
+			if (duplicates.length > 0) {
+				frappe.msgprint(
+					__("DocType {0} with company field '{1}' is already in the list", [
+						row.doctype_name,
+						row.company_field || __("(none)"),
+					])
+				);
+				frappe.model.set_value(cdt, cdn, "company_field", "");
+				return;
+			}
+
+			// Recalculate document count if company_field changes
+			if (row.doctype_name) {
+				frm.call({
+					method: "populate_doctype_details",
+					doc: frm.doc,
+					args: {
+						doctype_name: row.doctype_name,
+						company: frm.doc.company,
+					},
+					callback: function (r) {
+						if (r.message && r.message.document_count !== undefined) {
+							frappe.model.set_value(cdt, cdn, "document_count", r.message.document_count || 0);
+						}
+					},
+				});
+			}
 		}
 	},
 });
