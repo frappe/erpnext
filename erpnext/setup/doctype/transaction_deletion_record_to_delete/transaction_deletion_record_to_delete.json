@@ -20,7 +20,7 @@
    "options": "DocType"
   },
   {
-   "description": "Company link field name used for filtering",
+   "description": "Company link field name used for filtering (optional - leave empty to delete all records)",
    "fieldname": "company_field",
    "fieldtype": "Data",
    "in_list_view": 1,

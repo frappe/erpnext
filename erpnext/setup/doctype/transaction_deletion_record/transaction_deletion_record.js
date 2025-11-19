@@ -6,22 +6,54 @@ frappe.ui.form.on("Transaction Deletion Record", {
 		// Set up query for DocTypes to exclude child tables and virtual doctypes
 		// Note: Same DocType can be added multiple times with different company_field values
 		frm.set_query("doctype_name", "doctypes_to_delete", function () {
-			return {
-				filters: [
-					["DocType", "istable", "=", 0], // Exclude child tables
-					["DocType", "is_virtual", "=", 0], // Exclude virtual doctypes
-				],
-			};
+			// Build exclusion list from protected and ignored doctypes
+			let excluded_doctypes = ["Transaction Deletion Record"]; // Always exclude self
+
+			// Add protected doctypes (fetched in onload)
+			if (frm.protected_doctypes_list && frm.protected_doctypes_list.length > 0) {
+				excluded_doctypes = excluded_doctypes.concat(frm.protected_doctypes_list);
+			}
+
+			// Add doctypes from the ignore list
+			if (frm.doc.doctypes_to_be_ignored && frm.doc.doctypes_to_be_ignored.length > 0) {
+				frm.doc.doctypes_to_be_ignored.forEach((row) => {
+					if (row.doctype_name) {
+						excluded_doctypes.push(row.doctype_name);
+					}
+				});
+			}
+
+			let filters = [
+				["DocType", "istable", "=", 0], // Exclude child tables
+				["DocType", "is_virtual", "=", 0], // Exclude virtual doctypes
+			];
+
+			// Only add "not in" filter if we have items to exclude
+			if (excluded_doctypes.length > 0) {
+				filters.push(["DocType", "name", "not in", excluded_doctypes]);
+			}
+
+			return { filters: filters };
 		});
 	},
 
 	onload: function (frm) {
 		if (frm.doc.docstatus == 0) {
-			let doctypes_to_be_ignored_array;
+			// Fetch protected doctypes list for filtering
+			frappe.call({
+				method: "erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.get_protected_doctypes",
+				callback: function (r) {
+					if (r.message) {
+						frm.protected_doctypes_list = r.message;
+					}
+				},
+			});
+
+			// Fetch ignored doctypes and populate table
 			frappe.call({
 				method: "erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.get_doctypes_to_be_ignored",
 				callback: function (r) {
-					doctypes_to_be_ignored_array = r.message;
+					let doctypes_to_be_ignored_array = r.message;
 					populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm);
 					frm.refresh_field("doctypes_to_be_ignored");
 				},
@@ -34,46 +66,49 @@ frappe.ui.form.on("Transaction Deletion Record", {
 		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.page.clear_primary_action();
 			frm.page.set_primary_action(__("Submit"), () => {
-				// Validate before showing confirmation
 				if (!frm.doc.doctypes_to_delete || frm.doc.doctypes_to_delete.length === 0) {
 					frappe.msgprint(__("Please generate the To Delete list before submitting"));
 					return;
 				}
 
 				let message =
-					"<div style='margin-bottom: 15px;'><b style='color: #d73939;'>⚠ Warning: This action cannot be undone!</b></div>" +
-					"<div style='margin-bottom: 10px;'>You are about to permanently delete data for <b>" +
-					frm.doc.doctypes_to_delete.length +
-					" entries</b> for company <b>" +
-					frm.doc.company +
-					"</b>.</div>" +
-					"<div style='margin-bottom: 10px;'><b>What will be deleted:</b></div>" +
-					"<ul style='margin-left: 20px; margin-bottom: 10px;'>" +
-					"<li><b>DocTypes with a company field:</b> Only records belonging to <b>" +
-					frm.doc.company +
-					"</b> will be deleted</li>" +
-					"<li><b>DocTypes without a company field:</b> ALL records will be deleted (entire DocType cleared)</li>" +
-					"</ul>" +
-					"<div style='margin-bottom: 10px; padding: 10px; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>" +
-					"<b style='color: #856404;'>📦 IMPORTANT: Create a backup before proceeding!</b>" +
-					"</div>" +
-					"<div style='margin-top: 10px;'>Deletion will start automatically after submission.</div>";
+					`<div style='margin-bottom: 15px;'><b style='color: #d73939;'>⚠ ${__(
+						"Warning: This action cannot be undone!"
+					)}</b></div>` +
+					`<div style='margin-bottom: 10px;'>${__(
+						"You are about to permanently delete data for {0} entries for company {1}.",
+						[`<b>${frm.doc.doctypes_to_delete.length}</b>`, `<b>${frm.doc.company}</b>`]
+					)}</div>` +
+					`<div style='margin-bottom: 10px;'><b>${__("What will be deleted:")}</b></div>` +
+					`<ul style='margin-left: 20px; margin-bottom: 10px;'>` +
+					`<li><b>${__("DocTypes with a company field:")}</b> ${__(
+						"Only records belonging to {0} will be deleted",
+						[`<b>${frm.doc.company}</b>`]
+					)}</li>` +
+					`<li><b>${__("DocTypes without a company field:")}</b> ${__(
+						"ALL records will be deleted (entire DocType cleared)"
+					)}</li>` +
+					`</ul>` +
+					`<div style='margin-bottom: 10px; padding: 10px; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>` +
+					`<b style='color: #856404;'>📦 ${__(
+						"IMPORTANT: Create a backup before proceeding!"
+					)}</b>` +
+					`</div>` +
+					`<div style='margin-top: 10px;'>${__(
+						"Deletion will start automatically after submission."
+					)}</div>`;
 
 				frappe.confirm(
 					message,
 					() => {
-						// User confirmed - now submit
 						frm.save("Submit");
 					},
-					() => {
-						// User cancelled - do nothing
-					}
+					() => {}
 				);
 			});
 		}
 
 		if (frm.doc.docstatus == 0) {
-			// Add Generate To Delete List button for draft documents
 			frm.add_custom_button(__("Generate To Delete List"), () => {
 				frm.call({
 					method: "generate_to_delete_list",
@@ -88,12 +123,10 @@ frappe.ui.form.on("Transaction Deletion Record", {
 				});
 			});
 
-			// Add Export Template button if To Delete list exists
 			if (frm.doc.doctypes_to_delete && frm.doc.doctypes_to_delete.length > 0) {
 				frm.add_custom_button(
 					__("Export"),
 					() => {
-						// Use standard Frappe download pattern
 						open_url_post(
 							"/api/method/erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.export_to_delete_template",
 							{
@@ -104,11 +137,8 @@ frappe.ui.form.on("Transaction Deletion Record", {
 					__("Template")
 				);
 
-				// Add Remove Zero Counts button
 				frm.add_custom_button(__("Remove Zero Counts"), () => {
 					let removed_count = 0;
-
-					// Create a copy of the array to avoid modification during iteration
 					let rows_to_keep = [];
 					frm.doc.doctypes_to_delete.forEach((row) => {
 						if (row.document_count && row.document_count > 0) {
@@ -123,11 +153,8 @@ frappe.ui.form.on("Transaction Deletion Record", {
 						return;
 					}
 
-					// Replace the entire array with filtered rows
 					frm.doc.doctypes_to_delete = rows_to_keep;
 					frm.refresh_field("doctypes_to_delete");
-
-					// Mark form as modified so user can save
 					frm.dirty();
 
 					frappe.show_alert({
@@ -140,7 +167,6 @@ frappe.ui.form.on("Transaction Deletion Record", {
 				});
 			}
 
-			// Add Import Template button
 			frm.add_custom_button(
 				__("Import"),
 				() => {
@@ -152,7 +178,6 @@ frappe.ui.form.on("Transaction Deletion Record", {
 							allowed_file_types: [".csv"],
 						},
 						on_success: (file_doc) => {
-							// File uploaded, now process it
 							frappe.call({
 								method: "erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.process_import_template",
 								args: {
@@ -167,7 +192,7 @@ frappe.ui.form.on("Transaction Deletion Record", {
 											message: __("Imported {0} DocTypes", [r.message.imported]),
 											indicator: "green",
 										});
-										// Force reload from database by clearing local doc cache
+
 										frappe.model.clear_doc(frm.doctype, frm.docname);
 										frm.reload_doc();
 									}
@@ -183,12 +208,10 @@ frappe.ui.form.on("Transaction Deletion Record", {
 		// Only show Retry button for Failed status (deletion starts automatically on submit)
 		if (frm.doc.docstatus == 1 && frm.doc.status == "Failed") {
 			frm.add_custom_button(__("Retry"), () => {
-				// Entry point for retry after failure
 				frm.call({
 					method: "start_deletion_tasks",
 					doc: frm.doc,
 					callback: () => {
-						// Reload the document to show updated status
 						frappe.show_alert({
 							message: __("Deletion process restarted"),
 							indicator: "blue",
@@ -205,13 +228,35 @@ frappe.ui.form.on("Transaction Deletion Record To Delete", {
 	doctype_name: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.doctype_name) {
-			// Auto-populate child DocTypes and document count using server-side method
+			// Fetch company fields for auto-selection (only if exactly 1 field exists)
+			frappe.call({
+				method: "erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.get_company_link_fields",
+				args: {
+					doctype_name: row.doctype_name,
+				},
+				callback: function (r) {
+					if (r.message && r.message.length === 1 && !row.company_field) {
+						frappe.model.set_value(cdt, cdn, "company_field", r.message[0]);
+					} else if (r.message && r.message.length > 1) {
+						// Show message with available options when multiple company fields exist
+						frappe.show_alert({
+							message: __("Multiple company fields available: {0}. Please select manually.", [
+								r.message.join(", "),
+							]),
+							indicator: "blue",
+						});
+					}
+				},
+			});
+
+			// Auto-populate child DocTypes and document count
 			frm.call({
 				method: "populate_doctype_details",
 				doc: frm.doc,
 				args: {
 					doctype_name: row.doctype_name,
 					company: frm.doc.company,
+					company_field: row.company_field,
 				},
 				callback: function (r) {
 					if (r.message) {
@@ -262,6 +307,7 @@ frappe.ui.form.on("Transaction Deletion Record To Delete", {
 					args: {
 						doctype_name: row.doctype_name,
 						company: frm.doc.company,
+						company_field: row.company_field,
 					},
 					callback: function (r) {
 						if (r.message && r.message.document_count !== undefined) {
