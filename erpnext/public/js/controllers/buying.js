@@ -517,6 +517,7 @@ erpnext.buying = {
 					}
 				});
 			}
+
 			setup_accounting_dimension_triggers() {
 				frappe.call({
 					method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
@@ -524,6 +525,7 @@ erpnext.buying = {
 						if (r.message && r.message[0]) {
 							let dimensions = r.message[0].map((d) => d.fieldname);
 							dimensions.forEach((dim) => {
+								// nosemgrep: frappe-semgrep-rules.rules.frappe-cur-frm-usage
 								cur_frm.cscript[dim] = function (doc, cdt, cdn) {
 									erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", dim);
 								};
