@@ -554,6 +554,22 @@ erpnext.sales_common = {
 					this.frm.set_df_property("set_target_warehouse", "label", source_warehouse_label);
 				}
 			}
+
+			setup_accounting_dimension_triggers() {
+				frappe.call({
+					method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+					callback: function (r) {
+						if (r.message && r.message[0]) {
+							let dimensions = r.message[0].map((d) => d.fieldname);
+							dimensions.forEach((dim) => {
+								cur_frm.cscript[dim] = function (doc, cdt, cdn) {
+									erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", dim);
+								};
+							});
+						}
+					},
+				});
+			}
 		};
 	},
 };
