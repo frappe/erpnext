@@ -226,6 +226,7 @@
    "fieldname": "bank_party_iban",
    "fieldtype": "Data",
    "label": "Party IBAN (Bank Statement)"
+   "options": "IBAN"
   },
   {
    "fieldname": "bank_party_account_number",
