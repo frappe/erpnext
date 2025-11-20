@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-18 22:13\n"
+"PO-Revision-Date: 2025-11-20 22:23\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Arabic\n"
 "MIME-Version: 1.0\n"
@@ -36135,7 +36135,7 @@ msgstr "إنتاج الكمية"
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Produced"
-msgstr ""
+msgstr "Produced"
 
 #: erpnext/manufacturing/report/production_plan_summary/production_plan_summary.py:177
 msgid "Produced / Received Qty"
