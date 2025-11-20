@@ -215,6 +215,47 @@ class TestTransactionDeletionRecord(IntegrationTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			tdr.insert()
 
+	def test_get_naming_series_prefix_with_dot(self):
+		"""Test prefix extraction for standard dot-separated naming series"""
+		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+			TransactionDeletionRecord,
+		)
+
+		# Standard patterns with dot separator
+		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("TDL.####", "Task"), "TDL")
+		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("PREFIX.#####", "Task"), "PREFIX")
+		self.assertEqual(
+			TransactionDeletionRecord.get_naming_series_prefix("TASK-.YYYY.-.#####", "Task"), "TASK-.YYYY.-"
+		)
+
+	def test_get_naming_series_prefix_with_brace(self):
+		"""Test prefix extraction for format patterns with brace separators"""
+		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+			TransactionDeletionRecord,
+		)
+
+		# Format patterns with brace separator
+		self.assertEqual(
+			TransactionDeletionRecord.get_naming_series_prefix("QA-ACT-{#####}", "Quality Action"), "QA-ACT-"
+		)
+		self.assertEqual(
+			TransactionDeletionRecord.get_naming_series_prefix("PREFIX-{####}", "Task"), "PREFIX-"
+		)
+		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("{####}", "Task"), "")
+
+	def test_get_naming_series_prefix_fallback(self):
+		"""Test prefix extraction fallback for patterns without standard separators"""
+		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+			TransactionDeletionRecord,
+		)
+
+		# Edge case: pattern with # but no dot or brace (shouldn't happen in practice)
+		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("PREFIX####", "Task"), "PREFIX")
+		# Edge case: pattern with no # at all
+		self.assertEqual(
+			TransactionDeletionRecord.get_naming_series_prefix("JUSTPREFIX", "Task"), "JUSTPREFIX"
+		)
+
 
 def create_company(company_name):
 	company = frappe.get_doc({"doctype": "Company", "company_name": company_name, "default_currency": "INR"})

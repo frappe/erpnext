@@ -890,11 +890,36 @@ class TransactionDeletionRecord(Document):
 	def delete_docs_linked_with_specified_company(self, doctype, reference_doc_names):
 		frappe.db.delete(doctype, {"name": ("in", reference_doc_names)})
 
-	def update_naming_series(self, naming_series, doctype_name):
+	@staticmethod
+	def get_naming_series_prefix(naming_series: str, doctype_name: str) -> str:
+		"""Extract the static prefix from an autoname pattern.
+
+		Args:
+		        naming_series: The autoname pattern (e.g., "PREFIX.####", "format:PRE-{####}")
+		        doctype_name: DocType name for error logging
+
+		Returns:
+		        The static prefix before the counter placeholders
+		"""
 		if "." in naming_series:
-			prefix, _ = naming_series.rsplit(".", 1)
+			prefix = naming_series.rsplit(".", 1)[0]
+		elif "{" in naming_series:
+			prefix = naming_series.rsplit("{", 1)[0]
 		else:
-			prefix, _ = naming_series.rsplit("{", 1)
+			# Fallback for unexpected patterns (shouldn't happen with valid Frappe naming series)
+			frappe.log_error(
+				title=_("Unexpected Naming Series Pattern"),
+				message=_(
+					"Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
+				).format(naming_series, doctype_name),
+			)
+			prefix = naming_series.split("#", 1)[0] if "#" in naming_series else naming_series
+
+		return prefix
+
+	def update_naming_series(self, naming_series, doctype_name):
+		# Derive a static prefix from the autoname pattern
+		prefix = self.get_naming_series_prefix(naming_series, doctype_name)
 
 		# Find the highest number used in the naming series to reset the counter
 		doctype_table = qb.DocType(doctype_name)
