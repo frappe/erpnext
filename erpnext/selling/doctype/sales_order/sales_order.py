@@ -1603,6 +1603,10 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 			target.customer = ""
 			target.customer_name = ""
 
+		if source.company_address:
+			target.billing_address = source.company_address
+			target.billing_address_display = source.company_address_display
+
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -1698,6 +1702,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		)
 
 		set_delivery_date(doc.items, source_name)
+		doc.get("__onload").is_drop_ship = (
+			1 if any(item.delivered_by_supplier == 1 for item in doc.items) else 0
+		)
 		doc.insert()
 		frappe.db.commit()
 		purchase_orders.append(doc)
@@ -1751,6 +1758,10 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 			target.customer_contact_email = source.contact_email
 		else:
 			target.customer = target.customer_name = target.shipping_address = None
+
+		if source.company_address:
+			target.billing_address = source.company_address
+			target.billing_address_display = source.company_address_display
 
 		target.run_method("set_missing_values")
 		if not target.taxes:
@@ -1835,10 +1846,9 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
-
+	doc.get("__onload").is_drop_ship = 1 if is_drop_ship_order(doc) else 0
 	set_delivery_date(doc.items, source_name)
 	doc.set_onload("load_after_mapping", False)
-
 	return doc
 
 

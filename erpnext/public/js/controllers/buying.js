@@ -165,7 +165,6 @@ erpnext.buying = {
 			company() {
 				super.company();
 				if (!frappe.meta.has_field(this.frm.doc.doctype, "billing_address")) return;
-
 				frappe.call({
 					method: "erpnext.setup.doctype.company.company.get_billing_shipping_address",
 					args: {
@@ -175,11 +174,22 @@ erpnext.buying = {
 					},
 					callback: (r) => {
 						if (!r.message) return;
+						if (this.frm.__onload.is_drop_ship) {
+							!this.frm.doc.billing_address &&
+								this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						this.frm.set_value("billing_address", r.message.primary_address || "");
+							if (
+								frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
+								!this.frm.doc.shipping_address
+							) {
+								this.frm.set_value("shipping_address", r.message.shipping_address || "");
+							}
+						} else {
+							this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
-							this.frm.set_value("shipping_address", r.message.shipping_address || "");
+							if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+								this.frm.set_value("shipping_address", r.message.shipping_address || "");
+							}
 						}
 					},
 				});
