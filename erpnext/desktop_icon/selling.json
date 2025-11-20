@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.335051",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "sell",
+ "icon_type": "Link",
+ "idx": 2,
+ "label": "Selling",
+ "link_to": "Selling",
+ "link_type": "Workspace",
+ "logo_url": "/assets/erpnext/desktop_icons/selling.svg",
+ "modified": "2025-11-17 17:37:59.847865",
+ "modified_by": "Administrator",
+ "name": "Selling",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

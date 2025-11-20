@@ -87,7 +87,9 @@ frappe.ui.form.on("Material Request", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-		frm.doc.buying_price_list = frappe.defaults.get_default("buying_price_list");
+		if (!frm.doc.buying_price_list) {
+			frm.doc.buying_price_list = frappe.defaults.get_default("buying_price_list");
+		}
 	},
 
 	company: function (frm) {
@@ -344,6 +346,9 @@ frappe.ui.form.on("Material Request", {
 					label: __("For Warehouse"),
 					options: "Warehouse",
 					reqd: 1,
+					get_query: function () {
+						return { filters: { company: frm.doc.company } };
+					},
 				},
 				{ fieldname: "qty", fieldtype: "Float", label: __("Quantity"), reqd: 1, default: 1 },
 				{
@@ -493,6 +498,7 @@ frappe.ui.form.on("Material Request", {
 			method: "erpnext.stock.doctype.material_request.material_request.raise_work_orders",
 			args: {
 				material_request: frm.doc.name,
+				company: frm.doc.company,
 			},
 			freeze: true,
 			callback: function (r) {

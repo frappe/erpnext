@@ -126,8 +126,7 @@
    "fieldname": "transaction_id",
    "fieldtype": "Data",
    "label": "Transaction ID",
-   "read_only": 1,
-   "unique": 1
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,

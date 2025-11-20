@@ -15,11 +15,7 @@
   "bom_section",
   "update_bom_costs_automatically",
   "column_break_lhyt",
-  "section_break_6",
-  "default_wip_warehouse",
-  "default_fg_warehouse",
-  "column_break_11",
-  "default_scrap_warehouse",
+  "allow_editing_of_items_and_quantities_in_work_order",
   "over_production_for_sales_and_work_order_section",
   "overproduction_percentage_for_sales_order",
   "column_break_16",
@@ -86,11 +82,6 @@
    "label": "Time Between Operations (Mins)"
   },
   {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break",
-   "label": "Default Warehouses for Production"
-  },
-  {
    "fieldname": "overproduction_percentage_for_sales_order",
    "fieldtype": "Percent",
    "label": "Overproduction Percentage For Sales Order"
@@ -122,32 +113,10 @@
    "label": "Update BOM Cost Automatically"
   },
   {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "default_wip_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Work In Progress Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "fieldname": "default_fg_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Finished Goods Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "default": "0",
    "fieldname": "disable_capacity_planning",
    "fieldtype": "Check",
    "label": "Disable Capacity Planning"
-  },
-  {
-   "fieldname": "default_scrap_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Scrap Warehouse",
-   "options": "Warehouse"
   },
   {
    "fieldname": "over_production_for_sales_and_work_order_section",
@@ -261,13 +230,20 @@
    "fieldname": "transfer_extra_materials_percentage",
    "fieldtype": "Percent",
    "label": "Transfer Extra Raw Materials to WIP (%)"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow users to edit the raw materials and their quantities in the Work Order. The system will not reset the quantities as per the BOM, if the user has changed them.",
+   "fieldname": "allow_editing_of_items_and_quantities_in_work_order",
+   "fieldtype": "Check",
+   "label": "Allow Editing of Items and Quantities in Work Order"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-08 19:48:31.726126",
+ "modified": "2025-11-13 12:30:29.006822",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

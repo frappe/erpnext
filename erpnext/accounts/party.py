@@ -854,8 +854,8 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		group_by="company",
 		fields=[
 			"company",
-			"sum(grand_total) as grand_total",
-			"sum(base_grand_total) as base_grand_total",
+			{"SUM": "grand_total", "as": "grand_total"},
+			{"SUM": "base_grand_total", "as": "base_grand_total"},
 		],
 	)
 
@@ -870,7 +870,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 					"expiry_date": (">=", getdate()),
 				},
 				group_by="company",
-				fields=["company", "sum(loyalty_points) as loyalty_points"],
+				fields=["company", {"SUM": "loyalty_points", "as": "loyalty_points"}],
 				as_list=1,
 			)
 		)

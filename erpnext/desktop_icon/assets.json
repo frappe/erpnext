@@ -1,0 +1,21 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-17 13:19:04.299276",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon": "assets",
+ "icon_type": "Link",
+ "idx": 8,
+ "label": "Assets",
+ "link_to": "Assets",
+ "link_type": "Workspace",
+ "logo_url": "/assets/erpnext/desktop_icons/asset.svg",
+ "modified": "2025-11-17 17:41:41.635533",
+ "modified_by": "Administrator",
+ "name": "Assets",
+ "owner": "Administrator",
+ "parent_icon": "",
+ "roles": [],
+ "standard": 1
+}

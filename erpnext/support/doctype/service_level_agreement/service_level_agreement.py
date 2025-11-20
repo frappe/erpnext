@@ -484,10 +484,16 @@ def get_documents_with_active_service_level_agreement():
 
 
 def set_documents_with_active_service_level_agreement():
-	active = frozenset(
-		sla.document_type for sla in frappe.get_all("Service Level Agreement", fields=["document_type"])
-	)
-	frappe.cache.set_value("doctypes_with_active_sla", active)
+	try:
+		active = frozenset(
+			sla.document_type for sla in frappe.get_all("Service Level Agreement", fields=["document_type"])
+		)
+		frappe.cache.set_value("doctypes_with_active_sla", active)
+	except (frappe.DoesNotExistError, frappe.db.TableMissingError):
+		# This happens during install / uninstall when wildcard hook for SLA intercepts some doc action.
+		# In both cases, the error can be safely ignored.
+		active = frozenset()
+
 	return active
 
 

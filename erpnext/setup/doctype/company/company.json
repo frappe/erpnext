@@ -103,6 +103,7 @@
   "total_monthly_sales",
   "column_break_goals",
   "default_selling_terms",
+  "default_sales_contact",
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
@@ -114,15 +115,21 @@
   "stock_tab",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
+  "enable_item_wise_inventory_account",
   "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
-  "stock_adjustment_account",
+  "valuation_method",
   "column_break_32",
+  "stock_adjustment_account",
   "stock_received_but_not_billed",
   "default_provisional_account",
   "default_in_transit_warehouse",
   "manufacturing_section",
   "default_operating_cost_account",
+  "column_break_9prc",
+  "default_wip_warehouse",
+  "default_fg_warehouse",
+  "default_scrap_warehouse",
   "dashboard_tab"
  ],
  "fields": [
@@ -877,6 +884,52 @@
    "fieldtype": "Link",
    "label": "Service Expense Account",
    "options": "Account"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will use the inventory account set in the Item Master or Item Group or Brand. Otherwise, it will use the inventory account set in the Warehouse.",
+   "fieldname": "enable_item_wise_inventory_account",
+   "fieldtype": "Check",
+   "label": "Enable Item-wise Inventory Account"
+  },
+  {
+   "default": "FIFO",
+   "fieldname": "valuation_method",
+   "fieldtype": "Select",
+   "label": "Default Stock Valuation Method",
+   "options": "FIFO\nMoving Average\nLIFO",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_wip_warehouse",
+   "fieldtype": "Link",
+   "label": " Default Work In Progress Warehouse ",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Finished Goods Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_scrap_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Scrap Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_9prc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_sales_contact",
+   "fieldtype": "Link",
+   "label": "Default Sales Contact",
+   "options": "Contact"
   }
  ],
  "icon": "fa fa-building",
@@ -884,7 +937,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2025-10-10 15:12:37.941251",
+ "modified": "2025-11-16 16:51:27.624096",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

@@ -50,6 +50,8 @@ class ReportData:
 		if self.filters.get("traceability_direction") in ["Backward", "Both"]:
 			data = self.get_serial_no_batches()
 			source_data = self.prepare_source_data(data)
+
+			# Prepare source data with raw materials
 			for key in source_data:
 				sabb_data = source_data[key]
 				if sabb_data.reference_doctype != "Stock Entry":
@@ -57,6 +59,7 @@ class ReportData:
 
 				self.set_backward_data(sabb_data)
 
+			# Source data has all the details including raw materials
 			self.parse_batch_details(source_data, result_data, "Backward")
 
 		if self.filters.get("traceability_direction") in ["Forward", "Both"]:
@@ -180,7 +183,7 @@ class ReportData:
 		for material in materials:
 			# Recursive: batch has sub-components
 			if material.serial_no or material.batch_no:
-				key = (material.item_code, material.reference_name)
+				key = (material.item_code, material.reference_name, material.name)
 				value = material.serial_no or material.batch_no
 
 				if key not in sabb_data.raw_materials:
@@ -197,7 +200,7 @@ class ReportData:
 				if sabb_data.raw_materials.get(key):
 					self.set_backward_data(sabb_data.raw_materials[key], material.qty)
 			else:
-				sub_key = material.item_code
+				sub_key = (material.item_code, material.name)
 				if sub_key not in sabb_data.raw_materials:
 					sabb_data.raw_materials[sub_key] = frappe._dict(
 						{
@@ -291,6 +294,7 @@ class ReportData:
 			.select(
 				stock_entry_detail.s_warehouse.as_("warehouse"),
 				stock_entry_detail.item_code,
+				stock_entry_detail.name,
 				stock_entry_detail.item_name,
 				stock_entry_detail.parenttype.as_("reference_doctype"),
 				stock_entry.name.as_("reference_name"),

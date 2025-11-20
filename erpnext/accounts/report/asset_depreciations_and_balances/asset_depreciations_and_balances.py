@@ -273,6 +273,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 			AND a.company = %(company)s
 			AND a.purchase_date <= %(to_date)s
 			AND gle.account = aca.fixed_asset_account
+			AND gle.is_opening = 'No'
 		GROUP BY a.asset_category
 	""",
 		{"from_date": filters.from_date, "to_date": filters.to_date, "company": filters.company},
@@ -543,6 +544,7 @@ def get_asset_value_adjustment_map(filters):
 			AND a.company = %(company)s
 			AND a.purchase_date <= %(to_date)s
 			AND gle.account = aca.fixed_asset_account
+			AND gle.is_opening = 'No'
 		GROUP BY a.name
 	""",
 		{"from_date": filters.from_date, "to_date": filters.to_date, "company": filters.company},

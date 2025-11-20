@@ -51,6 +51,8 @@ doctype_list_js = {
 	],
 }
 
+page_js = {"print": "public/js/print.js"}
+
 extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
 override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
@@ -600,6 +602,7 @@ user_privacy_documents = [
 	},
 ]
 
+
 # ERPNext doctypes for Global Search
 global_search_doctypes = {
 	"Default": [
@@ -660,3 +663,8 @@ default_log_clearing_doctypes = {
 export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
+
+# Translation
+# ------------
+# List of apps whose translatable strings should be excluded from this app's translations.
+ignore_translatable_strings_from = ["frappe"]

@@ -975,7 +975,7 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		total_credit_amount = frappe.db.get_all(
 			"Journal Entry Account",
 			{"account": self.debtors_eur, "docstatus": 1, "reference_name": si.name},
-			"sum(credit) as amount",
+			[{"SUM": "credit", "as": "amount"}],
 			group_by="reference_name",
 		)[0].amount
 
@@ -1069,7 +1069,7 @@ class TestPaymentReconciliation(IntegrationTestCase):
 		total_credit_amount = frappe.db.get_all(
 			"Journal Entry Account",
 			{"account": self.debtors_eur, "docstatus": 1, "reference_name": si.name},
-			"sum(credit) as amount",
+			[{"SUM": "credit", "as": "amount"}],
 			group_by="reference_name",
 		)[0].amount
 

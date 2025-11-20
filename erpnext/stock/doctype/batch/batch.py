@@ -262,6 +262,7 @@ def get_batch_qty(
 			"warehouse": warehouse,
 			"creation": creation,
 			"batch_no": batch_no,
+			"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			"ignore_voucher_nos": ignore_voucher_nos,
 			"for_stock_levels": for_stock_levels,
 			"consider_negative_batches": consider_negative_batches,
@@ -404,8 +405,9 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 		serial_nos = get_serial_nos(serial_no)
 		batches = frappe.get_all(
 			"Serial No",
-			fields=["distinct batch_no"],
+			fields=["batch_no"],
 			filters={"item_code": item_code, "warehouse": warehouse, "name": ("in", serial_nos)},
+			distinct=True,
 		)
 
 		if not batches:

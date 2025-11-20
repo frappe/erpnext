@@ -23,6 +23,7 @@ class WorkOrderItem(Document):
 		description: DF.Text | None
 		include_item_in_manufacturing: DF.Check
 		is_additional_item: DF.Check
+		is_customer_provided_item: DF.Check
 		item_code: DF.Link | None
 		item_name: DF.Data | None
 		operation: DF.Link | None

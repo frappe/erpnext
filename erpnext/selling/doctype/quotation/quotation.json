@@ -78,6 +78,7 @@
   "referral_sales_partner",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "item_wise_tax_details",
   "bundle_items_section",
   "packed_items",
   "pricing_rule_details",
@@ -1107,6 +1108,14 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Last Scanned Warehouse"
+  },
+  {
+   "fieldname": "item_wise_tax_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Item Wise Tax Details",
+   "no_copy": 1,
+   "options": "Item Wise Tax Detail"
   }
  ],
  "icon": "fa fa-shopping-cart",

@@ -24,7 +24,6 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.controllers.stock_controller import StockController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
@@ -412,13 +411,15 @@ class AssetCapitalization(StockController):
 		elif self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-	def get_gl_entries(self, warehouse_account=None, default_expense_account=None, default_cost_center=None):
+	def get_gl_entries(
+		self, inventory_account_map=None, default_expense_account=None, default_cost_center=None
+	):
 		# Stock GL Entries
 		gl_entries = []
 
-		self.warehouse_account = warehouse_account
-		if not self.warehouse_account:
-			self.warehouse_account = get_warehouse_account_map(self.company)
+		self.inventory_account_map = inventory_account_map
+		if not self.inventory_account_map:
+			self.inventory_account_map = self.get_inventory_account_map()
 
 		precision = self.get_debit_field_precision()
 		self.sle_map = self.get_stock_ledger_details()
@@ -457,11 +458,12 @@ class AssetCapitalization(StockController):
 		for item_row in self.stock_items:
 			sle_list = self.sle_map.get(item_row.name)
 			if sle_list:
+				_inv_dict = self.get_inventory_account_dict(item_row, self.inventory_account_map)
 				for sle in sle_list:
 					stock_value_difference = flt(sle.stock_value_difference, precision)
 
 					if erpnext.is_perpetual_inventory_enabled(self.company):
-						account = self.warehouse_account[sle.warehouse]["account"]
+						account = _inv_dict["account"]
 					else:
 						account = self.get_company_default("default_expense_account")
 
@@ -476,7 +478,7 @@ class AssetCapitalization(StockController):
 								"remarks": self.get("remarks") or "Accounting Entry for Stock",
 								"credit": -1 * stock_value_difference,
 							},
-							self.warehouse_account[sle.warehouse]["account_currency"],
+							_inv_dict["account_currency"],
 							item=item_row,
 						)
 					)

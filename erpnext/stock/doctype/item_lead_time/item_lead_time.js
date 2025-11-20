@@ -6,18 +6,6 @@ frappe.ui.form.on("Item Lead Time", {
 		frm.trigger("setup_queries");
 	},
 
-	setup_queries(frm) {
-		frm.set_query("bom_no", () => {
-			return {
-				filters: {
-					item: frm.doc.item_code,
-					docstatus: 1,
-					with_operations: 1,
-				},
-			};
-		});
-	},
-
 	shift_time_in_hours(frm) {
 		frm.trigger("calculate_total_workstation_time");
 	},
@@ -27,6 +15,10 @@ frappe.ui.form.on("Item Lead Time", {
 	},
 
 	no_of_shift(frm) {
+		frm.trigger("calculate_total_workstation_time");
+	},
+
+	validate(frm) {
 		frm.trigger("calculate_total_workstation_time");
 	},
 
@@ -45,8 +37,7 @@ frappe.ui.form.on("Item Lead Time", {
 	},
 
 	calculate_no_of_units_produced(frm) {
-		let no_of_units_produced =
-			Math.ceil(frm.doc.total_workstation_time / frm.doc.manufacturing_time_in_mins) * 60;
+		let no_of_units_produced = (frm.doc.total_workstation_time / frm.doc.manufacturing_time_in_mins) * 60;
 		frm.set_value("no_of_units_produced", no_of_units_produced);
 	},
 

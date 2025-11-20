@@ -14,14 +14,12 @@ class ItemLeadTime(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		bom_no: DF.Link | None
 		buffer_time: DF.Int
 		capacity_per_day: DF.Int
 		daily_yield: DF.Percent
 		item_code: DF.Link | None
 		item_name: DF.Data | None
 		manufacturing_time_in_mins: DF.Int
-		no_of_days: DF.Int
 		no_of_shift: DF.Int
 		no_of_units_produced: DF.Int
 		no_of_workstations: DF.Int

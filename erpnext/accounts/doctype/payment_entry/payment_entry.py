@@ -1437,6 +1437,7 @@ class PaymentEntry(AccountsController):
 						else allocated_amount_in_company_currency / self.transaction_exchange_rate,
 						"advance_voucher_type": d.advance_voucher_type,
 						"advance_voucher_no": d.advance_voucher_no,
+						"transaction_exchange_rate": self.target_exchange_rate,
 					},
 					item=self,
 				)

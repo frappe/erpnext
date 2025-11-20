@@ -4,7 +4,7 @@
 import math
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
@@ -64,6 +64,22 @@ class MasterProductionSchedule(Document):
 
 	def validate(self):
 		self.set_to_date()
+		self.validate_company()
+
+	def validate_company(self):
+		if self.sales_forecast:
+			sales_forecast_company = frappe.db.get_value("Sales Forecast", self.sales_forecast, "company")
+			if sales_forecast_company != self.company:
+				frappe.throw(
+					_(
+						"The Company {0} of Sales Forecast {1} does not match with the Company {2} of Master Production Schedule {3}."
+					).format(
+						bold(sales_forecast_company),
+						bold(self.sales_forecast),
+						bold(self.company),
+						bold(self.name),
+					)
+				)
 
 	def set_to_date(self):
 		self.to_date = None
@@ -190,8 +206,8 @@ class MasterProductionSchedule(Document):
 		ignore_orders = []
 		if sales_order_schedules:
 			for row in sales_order_schedules:
-				if row.sales_order not in ignore_orders:
-					ignore_orders.append(row.sales_order)
+				if row.sales_order_item and row.sales_order_item not in ignore_orders:
+					ignore_orders.append(row.sales_order_item)
 
 		sales_orders = self.get_items_from_sales_orders(ignore_orders)
 
@@ -221,13 +237,13 @@ class MasterProductionSchedule(Document):
 
 		if self.sales_orders:
 			names = [s.sales_order for s in self.sales_orders if s.sales_order]
-			if ignore_orders:
-				names = [name for name in names if name not in ignore_orders]
-
 			if not names:
 				return []
 
 			query = query.where(doctype.parent.isin(names))
+
+		if ignore_orders:
+			query = query.where(doctype.name.notin(ignore_orders))
 
 		return query.run(as_dict=True)
 
@@ -239,6 +255,7 @@ class MasterProductionSchedule(Document):
 			doctype.stock_uom,
 			doctype.delivery_date,
 			doctype.sales_order,
+			doctype.sales_order_item,
 			doctype.stock_qty.as_("qty"),
 		)
 
@@ -248,9 +265,6 @@ class MasterProductionSchedule(Document):
 
 		if self.from_date:
 			query = query.where(doctype.delivery_date >= self.from_date)
-
-		if self.to_date:
-			query = query.where(doctype.delivery_date <= self.to_date)
 
 		return query.run(as_dict=True)
 
@@ -284,9 +298,6 @@ class MasterProductionSchedule(Document):
 			row = data[key]
 			row.cumulative_lead_time = math.ceil(row.cumulative_lead_time)
 			row.order_release_date = add_days(row.delivery_date, -row.cumulative_lead_time)
-			if getdate(row.order_release_date) < getdate(today()):
-				continue
-
 			row.planned_qty = row.qty
 			row.uom = row.stock_uom
 			row.warehouse = row.warehouse or self.parent_warehouse
@@ -457,3 +468,13 @@ def get_item_lead_time(item_code):
 		return result[0].cumulative_lead_time or 0
 
 	return 0
+
+
+@frappe.whitelist()
+def get_mps_details(mps):
+	return frappe.db.get_value(
+		"Master Production Schedule",
+		mps,
+		["name", "from_date", "to_date", "company", "posting_date"],
+		as_dict=True,
+	)

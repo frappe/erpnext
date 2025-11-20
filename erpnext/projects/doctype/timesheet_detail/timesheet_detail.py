@@ -90,7 +90,7 @@ class TimesheetDetail(Document):
 		)
 
 		self.billing_amount = self.billing_rate * (self.billing_hours or 0)
-		self.costing_amount = self.costing_rate * (self.billing_hours or self.hours or 0)
+		self.costing_amount = self.costing_rate * (self.hours or 0)
 
 	def validate_dates(self):
 		"""Validate that to_time is not before from_time."""

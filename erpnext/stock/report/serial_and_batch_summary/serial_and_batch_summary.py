@@ -183,14 +183,15 @@ def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
 	child_doctypes = frappe.get_all(
 		"DocField",
 		filters={"fieldname": "serial_and_batch_bundle"},
-		fields=["distinct parent as parent"],
+		fields=["parent"],
+		distinct=True,
 	)
 
 	query_filters = {"options": ["in", [d.parent for d in child_doctypes]]}
 	if txt:
 		query_filters["parent"] = ["like", f"%{txt}%"]
 
-	return frappe.get_all("DocField", filters=query_filters, fields=["distinct parent"], as_list=True)
+	return frappe.get_all("DocField", filters=query_filters, fields=["parent"], as_list=True, distinct=True)
 
 
 @frappe.whitelist()

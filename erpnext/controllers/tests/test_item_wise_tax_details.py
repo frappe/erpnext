@@ -73,32 +73,54 @@ class TestTaxesAndTotals(FrappeTestCase):
 			"taxes",
 			{
 				"charge_type": "On Item Quantity",
-				"account_head": "_Test Account Shipping - _TC",
+				"account_head": "_Test Account Shipping Charges - _TC",
 				"cost_center": "_Test Cost Center - _TC",
 				"description": "Shipping",
 				"rate": 50,
 			},
 		)
-		self.doc.set_missing_item_details()
-		calculate_taxes_and_totals(self.doc)
+		self.doc.save()
 
-		expected_values = {
-			"VAT": {"tax_rate": 10, "tax_amount": 10, "net_amount": 100},
-			"Service Tax": {"tax_rate": 14, "tax_amount": 1.4, "net_amount": 10},
-			"Customs Duty": {"tax_rate": 5, "tax_amount": 5.57, "net_amount": 111.4},
-			"Shipping": {"tax_rate": 50, "tax_amount": 50, "net_amount": 0.0},  # net_amount: here qty
-		}
+		expected_values = [
+			{
+				"item_row": self.doc.items[0].name,
+				"tax_row": self.doc.taxes[0].name,
+				"rate": 10.0,
+				"amount": 10.0,
+				"taxable_amount": 100.0,
+			},
+			{
+				"item_row": self.doc.items[0].name,
+				"tax_row": self.doc.taxes[1].name,
+				"rate": 14.0,
+				"amount": 1.4,
+				"taxable_amount": 10.0,
+			},
+			{
+				"item_row": self.doc.items[0].name,
+				"tax_row": self.doc.taxes[2].name,
+				"rate": 5.0,
+				"amount": 5.57,
+				"taxable_amount": 111.4,
+			},
+			{
+				"item_row": self.doc.items[0].name,
+				"tax_row": self.doc.taxes[3].name,
+				"rate": 50.0,
+				"amount": 50.0,
+				"taxable_amount": 0.0,
+			},
+		]
 
-		for tax in self.doc.taxes:
-			self.assertIn(tax.description, expected_values)
-			item_wise_tax_detail = json.loads(tax.item_wise_tax_detail)
-			tax_detail = item_wise_tax_detail[self.doc.items[0].item_code]
-			self.assertAlmostEqual(tax_detail.get("tax_rate"), expected_values[tax.description]["tax_rate"])
-			self.assertAlmostEqual(
-				tax_detail.get("tax_amount"), expected_values[tax.description]["tax_amount"]
-			)
-			self.assertAlmostEqual(
-				tax_detail.get("net_amount"), expected_values[tax.description]["net_amount"]
-			)
-			# Check if net_total is set for each tax
-			self.assertEqual(tax.net_amount, expected_values[tax.description]["net_amount"])
+		actual_values = [
+			{
+				"item_row": row.item_row,
+				"tax_row": row.tax_row,
+				"rate": row.rate,
+				"amount": row.amount,
+				"taxable_amount": row.taxable_amount,
+			}
+			for row in self.doc.item_wise_tax_details
+		]
+
+		self.assertEqual(actual_values, expected_values)

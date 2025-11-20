@@ -96,6 +96,7 @@ def get_expected_data(bom, warehouse, qty_to_produce, show_exploded_view=False):
 				item.item_code,
 				item.item_name,
 				item.description,
+				bom.name,
 				item.stock_qty,
 				item.stock_uom,
 				item.stock_qty * qty_to_produce / bom.quantity,
@@ -103,6 +104,8 @@ def get_expected_data(bom, warehouse, qty_to_produce, show_exploded_view=False):
 				floor(in_stock_qty / (item.stock_qty * qty_to_produce / bom.quantity))
 				if in_stock_qty
 				else None,
+				item.bom_no,
+				item.is_phantom_item,
 			]
 		)
 

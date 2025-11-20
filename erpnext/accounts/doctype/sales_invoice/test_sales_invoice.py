@@ -2077,12 +2077,12 @@ class TestSalesInvoice(ERPNextTestSuite):
 			{
 				"item": "_Test Item",
 				"taxable_amount": 10000.0,
-				"Service Tax": {"tax_rate": 10.0, "tax_amount": 1000.0, "net_amount": 10000.0},
+				"Service Tax": {"tax_rate": 10.0, "tax_amount": 1000.0, "taxable_amount": 10000.0},
 			},
 			{
 				"item": "_Test Item 2",
 				"taxable_amount": 5000.0,
-				"Service Tax": {"tax_rate": 10.0, "tax_amount": 500.0, "net_amount": 5000.0},
+				"Service Tax": {"tax_rate": 10.0, "tax_amount": 500.0, "taxable_amount": 5000.0},
 			},
 		]
 
@@ -3612,7 +3612,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		frappe.db.get_all(
 			"Payment Ledger Entry",
 			filters={"against_voucher_no": si.name, "delinked": 0},
-			fields=["sum(amount), sum(amount_in_account_currency)"],
+			fields=[{"SUM": "amount"}, {"SUM": "amount_in_account_currency"}],
 			as_list=1,
 		)
 
@@ -3980,29 +3980,29 @@ class TestSalesInvoice(ERPNextTestSuite):
 			target_doc=si,
 			args=json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
 		)
-		si.save().submit()
+		si.save()
 
 		expected = [
 			{
 				"charge_type": "Actual",
 				"account_head": "Freight and Forwarding Charges - _TC",
 				"tax_amount": 120.0,
-				"total": 1520.0,
-				"base_total": 1520.0,
+				"total": 1620.0,
+				"base_total": 1620.0,
 			},
 			{
 				"charge_type": "Actual",
 				"account_head": "Marketing Expenses - _TC",
 				"tax_amount": 150.0,
-				"total": 1670.0,
-				"base_total": 1670.0,
+				"total": 1770.0,
+				"base_total": 1770.0,
 			},
 			{
 				"charge_type": "Actual",
 				"account_head": "Miscellaneous Expenses - _TC",
 				"tax_amount": 60.0,
-				"total": 1610.0,
-				"base_total": 1610.0,
+				"total": 1830.0,
+				"base_total": 1830.0,
 			},
 		]
 		actual = [

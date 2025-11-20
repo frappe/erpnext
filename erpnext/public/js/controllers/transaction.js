@@ -594,6 +594,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// Experimental: This will be removed once stability is achieved.
 		if (!frappe.boot.sysdefaults.use_legacy_js_reactivity) {
 			var item = frappe.get_doc(cdt, cdn);
+
 			frappe.call({
 				doc: doc,
 				method: "process_item_selection",
@@ -619,6 +620,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		item.weight_per_unit = 0;
 		item.weight_uom = "";
+		item.uom = null; // make UOM blank to update the existing UOM when item changes
 		item.conversion_factor = 0;
 
 		if (["Sales Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {

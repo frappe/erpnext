@@ -1317,18 +1317,9 @@ class TestStockEntry(IntegrationTestCase):
 				posting_date="2021-07-02",  # Illegal SE
 				purpose="Material Transfer",
 			),
-			dict(
-				item_code=item_code,
-				qty=2,
-				from_warehouse=warehouse_names[0],
-				to_warehouse=warehouse_names[1],
-				batch_no=batch_no,
-				posting_date="2021-07-02",  # Illegal SE
-				purpose="Material Transfer",
-			),
 		]
 
-		self.assertRaises(frappe.ValidationError, create_stock_entries, sequence_of_entries)
+		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
 
 	@IntegrationTestCase.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle_batch(self):
@@ -2155,6 +2146,45 @@ class TestStockEntry(IntegrationTestCase):
 		)
 
 		self.assertEqual(incoming_rate, 125.0)
+
+	def test_prevent_reuse_delivered_serial_no_in_repack(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = "Test Prevent Reuse Delivered Serial No"
+		warehouse = "_Test Warehouse - _TC"
+
+		item_doc = make_item(item, {"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SHGJ.####"})
+
+		make_stock_entry(item_code="_Test Item", target=warehouse, qty=2, rate=100)
+		make_stock_entry(item_code=item, target=warehouse, qty=2, rate=100)
+
+		dn = create_delivery_note(item_code=item, qty=2)
+		delivered_serial_no = get_serial_nos_from_bundle(dn.get("items")[0].serial_and_batch_bundle)[0]
+
+		se = make_stock_entry(
+			item_code="_Test Item", source=warehouse, qty=1, purpose="Repack", do_not_save=True
+		)
+		se.append(
+			"items",
+			{
+				"item_code": item_doc.name,
+				"item_name": item_doc.item_name,
+				"s_warehouse": None,
+				"t_warehouse": warehouse,
+				"description": item_doc.description,
+				"uom": item_doc.stock_uom,
+				"qty": 1,
+				"use_serial_batch_fields": 1,
+				"serial_no": delivered_serial_no,
+			},
+		)
+
+		se.save()
+		status = frappe.db.get_value("Serial No", delivered_serial_no, "status")
+
+		self.assertEqual(status, "Delivered")
+		self.assertEqual(se.purpose, "Repack")
+		self.assertRaises(frappe.ValidationError, se.submit)
 
 
 def make_serialized_item(self, **args):

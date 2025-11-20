@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
+	get_cost_centers_with_children,
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
@@ -100,10 +101,6 @@ def get_data(filters):
 	gl_entries_by_account = {}
 
 	opening_balances = get_opening_balances(filters, ignore_is_opening)
-
-	# add filter inside list so that the query in financial_statements.py doesn't break
-	if filters.project:
-		filters.project = [filters.project]
 
 	set_gl_entries_by_account(
 		filters.company,
@@ -297,18 +294,12 @@ def get_opening_balance(
 			opening_balance = opening_balance.where(closing_balance.voucher_type != "Period Closing Voucher")
 
 	if filters.cost_center:
-		lft, rgt = frappe.db.get_value("Cost Center", filters.cost_center, ["lft", "rgt"])
-		cost_center = frappe.qb.DocType("Cost Center")
 		opening_balance = opening_balance.where(
-			closing_balance.cost_center.isin(
-				frappe.qb.from_(cost_center)
-				.select("name")
-				.where((cost_center.lft >= lft) & (cost_center.rgt <= rgt))
-			)
+			closing_balance.cost_center.isin(get_cost_centers_with_children(filters.get("cost_center")))
 		)
 
 	if filters.project:
-		opening_balance = opening_balance.where(closing_balance.project == filters.project)
+		opening_balance = opening_balance.where(closing_balance.project.isin(filters.project))
 
 	if frappe.db.count("Finance Book"):
 		if filters.get("include_default_book_entries"):

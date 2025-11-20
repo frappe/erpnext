@@ -13,6 +13,7 @@ from frappe.utils import flt, today
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.material_request.material_request import (
+	create_pick_list,
 	make_in_transit_stock_entry,
 	make_purchase_order,
 	make_stock_entry,
@@ -746,7 +747,7 @@ class TestMaterialRequest(IntegrationTestCase):
 			(mr.items[0].item_code, mr.items[0].warehouse),
 		)[0][0]
 
-		prod_order = raise_work_orders(mr.name)
+		prod_order = raise_work_orders(mr.name, mr.company)
 		po = frappe.get_doc("Work Order", prod_order[0])
 		po.wip_warehouse = "_Test Warehouse 1 - _TC"
 		po.submit()
@@ -788,7 +789,7 @@ class TestMaterialRequest(IntegrationTestCase):
 
 		self.assertEqual(requested_qty, existing_requested_qty + 120)
 
-		work_order = raise_work_orders(mr.name)
+		work_order = raise_work_orders(mr.name, mr.company)
 		wo = frappe.get_doc("Work Order", work_order[0])
 		wo.qty = 50
 		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
@@ -923,7 +924,7 @@ class TestMaterialRequest(IntegrationTestCase):
 			item_code="_Test FG Item", material_request_type="Manufacture", do_not_submit=False
 		)
 
-		work_order = raise_work_orders(mr.name)
+		work_order = raise_work_orders(mr.name, mr.company)
 		wo = frappe.get_doc("Work Order", work_order[0])
 		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
 		wo.submit()
@@ -932,6 +933,48 @@ class TestMaterialRequest(IntegrationTestCase):
 
 		self.assertEqual(mr.per_ordered, 100)
 		self.assertEqual(mr.status, "Ordered")
+
+	def test_material_request_qty_over_sales_order_limit(self):
+		from erpnext.controllers.status_updater import OverAllowanceError
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order()
+		mr = make_material_request(qty=100, do_not_submit=True)
+		mr.items[0].sales_order = so.name
+		mr.items[0].sales_order_item = so.items[0].name
+		mr.save()
+
+		self.assertRaises(OverAllowanceError, mr.submit)
+
+	def test_pending_qty_in_pick_list(self):
+		"""Test for pick list mapped doc qty from partially received Material Request Transfer"""
+		import json
+
+		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
+
+		mr = make_material_request(material_request_type="Material Transfer")
+		pl = create_pick_list(mr.name)
+		pl.save()
+		pl.locations[0].qty = 5
+		pl.locations[0].stock_qty = 5
+		pl.submit()
+
+		to_warehouse = create_warehouse("Test To Warehouse")
+
+		se_data = create_stock_entry(json.dumps(pl.as_dict()))
+		se = frappe.get_doc(se_data)
+		se.items[0].t_warehouse = to_warehouse
+		se.save()
+		se.submit()
+
+		pl.load_from_db()
+		self.assertEqual(pl.locations[0].picked_qty, se.items[0].qty)
+
+		mr.load_from_db()
+		self.assertEqual(mr.status, "Partially Received")
+
+		pl_for_pending = create_pick_list(mr.name)
+		self.assertEqual(pl_for_pending.locations[0].qty, 5)
 
 
 def get_in_transit_warehouse(company):

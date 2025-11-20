@@ -1,0 +1,18 @@
+{
+ "app": "erpnext",
+ "creation": "2025-11-12 13:07:51.988728",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "Folder",
+ "idx": 1,
+ "label": "Accounts",
+ "link_type": "DocType",
+ "logo_url": "",
+ "modified": "2025-11-17 17:39:36.915358",
+ "modified_by": "Administrator",
+ "name": "Accounts",
+ "owner": "Administrator",
+ "roles": [],
+ "standard": 1
+}

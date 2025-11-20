@@ -16,6 +16,8 @@
   "add_weekly_holidays",
   "weekly_off",
   "get_weekly_off_dates",
+  "column_break_euok",
+  "is_half_day",
   "add_local_holidays",
   "country",
   "subdivision",
@@ -136,12 +138,22 @@
    "fieldtype": "Button",
    "label": "Add to Holidays",
    "options": "get_local_holidays"
+  },
+  {
+   "fieldname": "column_break_euok",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_half_day",
+   "fieldtype": "Check",
+   "label": "Is Half Day"
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2024-03-27 13:09:49.920245",
+ "modified": "2025-08-28 15:17:05.313383",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Holiday List",
@@ -160,6 +172,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

@@ -10,7 +10,6 @@
   "item_code",
   "column_break_qwyo",
   "manufacturing_section",
-  "bom_no",
   "shift_time_in_hours",
   "no_of_workstations",
   "column_break_cdqv",
@@ -19,7 +18,6 @@
   "section_break_wuqi",
   "column_break_yilv",
   "manufacturing_time_in_mins",
-  "no_of_days",
   "no_of_units_produced",
   "column_break_bbsv",
   "daily_yield",
@@ -79,12 +77,6 @@
    "label": "Workstation"
   },
   {
-   "fieldname": "bom_no",
-   "fieldtype": "Link",
-   "label": "Default BOM",
-   "options": "BOM"
-  },
-  {
    "default": "1",
    "fieldname": "no_of_shift",
    "fieldtype": "Int",
@@ -101,7 +93,7 @@
    "label": "Manufacturing Time"
   },
   {
-   "description": "Per Day",
+   "description": "Per Day\nShift Time (In Hours) * No of Workstations * No of Shift",
    "fieldname": "total_workstation_time",
    "fieldtype": "Int",
    "label": "Total Workstation Time (In Hours)"
@@ -111,15 +103,17 @@
    "description": "(Good Units Produced / Total Units Produced) \u00d7 100",
    "fieldname": "daily_yield",
    "fieldtype": "Percent",
-   "label": "Daily Yield"
+   "label": "Daily Yield (%)"
   },
   {
+   "description": "(Daily Yield * No of Units Produced) / 100",
    "fieldname": "capacity_per_day",
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Capacity"
   },
   {
+   "description": "(Total Workstation Time / Manufacturing Time) * 60",
    "fieldname": "no_of_units_produced",
    "fieldtype": "Int",
    "label": "No of Units Produced"
@@ -175,12 +169,6 @@
    "label": "Purchase Time"
   },
   {
-   "default": "1",
-   "fieldname": "no_of_days",
-   "fieldtype": "Int",
-   "label": "No of Days"
-  },
-  {
    "fieldname": "manufacturing_time_tab",
    "fieldtype": "Tab Break",
    "label": "Manufacturing Time"
@@ -189,7 +177,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-31 13:12:38.458052",
+ "modified": "2025-10-30 11:45:03.602345",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Lead Time",

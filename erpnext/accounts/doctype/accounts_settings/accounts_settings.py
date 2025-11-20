@@ -75,6 +75,7 @@ class AccountsSettings(Document):
 		unlink_advance_payment_on_cancelation_of_order: DF.Check
 		unlink_payment_on_cancellation_of_invoice: DF.Check
 		use_legacy_budget_controller: DF.Check
+		use_legacy_controller_for_pcv: DF.Check
 	# end: auto-generated types
 
 	def validate(self):

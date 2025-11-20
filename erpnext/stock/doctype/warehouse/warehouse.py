@@ -7,6 +7,8 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.query_builder import Field
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint
 from frappe.utils.caching import request_cache
 from frappe.utils.nestedset import NestedSet
@@ -29,6 +31,7 @@ class Warehouse(NestedSet):
 		address_line_2: DF.Data | None
 		city: DF.Data | None
 		company: DF.Link
+		customer: DF.Link | None
 		default_in_transit_warehouse: DF.Link | None
 		disabled: DF.Check
 		email_id: DF.Data | None
@@ -58,13 +61,13 @@ class Warehouse(NestedSet):
 		self.name = self.warehouse_name
 
 	def onload(self):
-		"""load account name for General Ledger Report"""
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
 			account = self.account or get_warehouse_account(self)
 
 			if account:
 				self.set_onload("account", account)
 		load_address_and_contact(self)
+		self.set_onload("stock_exists", self.check_if_sle_exists(non_cancelled_only=True))
 
 	def validate(self):
 		self.warn_about_multiple_warehouse_account()
@@ -150,8 +153,11 @@ class Warehouse(NestedSet):
 				indicator="orange",
 			)
 
-	def check_if_sle_exists(self):
-		return frappe.db.exists("Stock Ledger Entry", {"warehouse": self.name})
+	def check_if_sle_exists(self, non_cancelled_only=False):
+		filters = {"warehouse": self.name}
+		if non_cancelled_only:
+			filters["is_cancelled"] = 0
+		return frappe.db.exists("Stock Ledger Entry", filters)
 
 	def check_if_child_exists(self):
 		return frappe.db.exists("Warehouse", {"parent_warehouse": self.name})
@@ -193,10 +199,12 @@ def get_children(doctype, parent=None, company=None, is_root=False, include_disa
 		include_disabled = json.loads(include_disabled)
 
 	fields = ["name as value", "is_group as expandable"]
+
 	filters = [
-		["ifnull(`parent_warehouse`, '')", "=", parent],
+		[IfNull(Field("parent_warehouse"), ""), "=", parent],
 		["company", "in", (company, None, "")],
 	]
+
 	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
 		filters.append(["disabled", "=", False])
 
@@ -232,7 +240,9 @@ def get_child_warehouses(warehouse):
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []
-	for d in frappe.get_all("Warehouse", fields=["name", "is_group"], filters={"account": account}):
+	for d in frappe.get_all(
+		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
+	):
 		if d.is_group:
 			warehouses.extend(get_child_warehouses(d.name))
 		else:

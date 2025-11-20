@@ -18,13 +18,11 @@ class ManufacturingSettings(Document):
 		from frappe.types import DF
 
 		add_corrective_operation_cost_in_finished_good_valuation: DF.Check
+		allow_editing_of_items_and_quantities_in_work_order: DF.Check
 		allow_overtime: DF.Check
 		allow_production_on_holidays: DF.Check
 		backflush_raw_materials_based_on: DF.Literal["BOM", "Material Transferred for Manufacture"]
 		capacity_planning_for_days: DF.Int
-		default_fg_warehouse: DF.Link | None
-		default_scrap_warehouse: DF.Link | None
-		default_wip_warehouse: DF.Link | None
 		disable_capacity_planning: DF.Check
 		enforce_time_logs: DF.Check
 		get_rm_cost_from_consumption_entry: DF.Check

@@ -435,7 +435,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 									);
 								}
 							} else {
-								if (!doc.items.every((item) => item.qty == item.subcontracted_quantity)) {
+								if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
 									this.frm.add_custom_button(
 										__("Subcontracting Order"),
 										() => {
@@ -500,17 +500,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		} else if (doc.docstatus === 0) {
 			this.frm.cscript.add_from_mappers();
 		}
-	}
-
-	onload() {
-		super.onload();
-		this.frm.set_query("supplier", function () {
-			return {
-				filters: {
-					is_transporter: 0,
-				},
-			};
-		});
 	}
 
 	get_items_from_open_material_requests() {
