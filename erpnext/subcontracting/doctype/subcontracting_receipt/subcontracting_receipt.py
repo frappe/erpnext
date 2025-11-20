@@ -547,12 +547,16 @@ class SubcontractingReceipt(SubcontractingController):
 				item.available_qty_for_consumption
 				and flt(item.available_qty_for_consumption, precision) - flt(item.consumed_qty, precision) < 0
 			):
-				msg = f"""Row {item.idx}: Consumed Qty {flt(item.consumed_qty, precision)}
-					must be less than or equal to Available Qty For Consumption
-					{flt(item.available_qty_for_consumption, precision)}
-					in Consumed Items Table."""
+				msg = _(
+					"""Row {0}: Consumed Qty {1} must be less than or equal to Available Qty For Consumption
+					{2} in Consumed Items Table."""
+				).format(
+					item.idx,
+					flt(item.consumed_qty, precision),
+					flt(item.available_qty_for_consumption, precision),
+				)
 
-				frappe.throw(_(msg))
+				frappe.throw(msg)
 
 	def validate_bom_required_qty(self):
 		if (
@@ -575,11 +579,12 @@ class SubcontractingReceipt(SubcontractingController):
 				diff = flt(consumed_qty, precision) - flt(required_qty, precision)
 
 				if diff < 0:
-					msg = f"""Additional {frappe.bold(abs(diff))} item {frappe.bold(bom_item.rm_item_code)} required
-						as per BOM to complete this transaction"""
+					msg = _(
+						"""Additional {0} item {1} required as per BOM to complete this transaction"""
+					).format(frappe.bold(abs(diff)), frappe.bold(bom_item.rm_item_code))
 
 					frappe.throw(
-						_(msg),
+						msg,
 						exc=BOMQuantityError,
 					)
 
