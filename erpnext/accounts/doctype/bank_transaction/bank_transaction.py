@@ -32,12 +32,9 @@ class BankTransaction(Document):
 		date: DF.Date | None
 		deposit: DF.Currency
 		description: DF.SmallText | None
-		exchange_rate: DF.Float
+		excluded_fee: DF.Currency
 		included_fee: DF.Currency
-		included_fee_currency: DF.Link | None
 		naming_series: DF.Literal["ACC-BTN-.YYYY.-"]
-		original_amount: DF.Currency
-		original_amount_currency: DF.Link | None
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
 		payment_entries: DF.Table[BankTransactionPayments]
@@ -50,6 +47,8 @@ class BankTransaction(Document):
 	# end: auto-generated types
 
 	def before_validate(self):
+		self.handle_included_fee()
+		self.handle_excluded_fee()
 		self.update_allocated_amount()
 
 	def validate(self):
@@ -126,7 +125,7 @@ class BankTransaction(Document):
 		self.allocate_payment_entries()
 		self.set_status()
 
-		if frappe.get_single_value("Accounts Settings", "enable_party_matching"):
+		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
 			self.auto_set_party()
 
 	def before_update_after_submit(self):
@@ -311,6 +310,21 @@ class BankTransaction(Document):
 			return
 
 		self.party_type, self.party = result
+
+	def handle_included_fee(self):
+		if self.included_fee and self.withdrawal:
+			if self.included_fee > self.withdrawal:
+				frappe.throw(_("Included fee is bigger than the withdrawal itself."))
+
+	def handle_excluded_fee(self):
+		# Include the excluded fee on validate to handle all further processing the same
+		if self.excluded_fee and self.excluded_fee > 0:
+			if self.deposit > 0:
+				self.deposit = self.deposit + self.excluded_fee
+			if self.withdrawal > 0:
+				self.withdrawal = self.withdrawal + self.excluded_fee
+			self.included_fee = self.included_fee + self.excluded_fee
+			self.excluded_fee = 0
 
 
 @frappe.whitelist()
