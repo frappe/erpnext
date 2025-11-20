@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-18 22:13\n"
+"PO-Revision-Date: 2025-11-20 22:23\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -30466,7 +30466,7 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.json
 #: erpnext/selling/page/point_of_sale/pos_controller.js:90
 msgid "Opening Balance Details"
-msgstr "Details zum Eröffnungsguthaben"
+msgstr "Details zum Eröffnungssaldo"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:192
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:342
@@ -56221,7 +56221,7 @@ msgstr "{0} ist geöffnet. Schließen Sie die Kasse oder stornieren Sie den vorh
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:95
 msgid "{0} is still in Draft. Please submit it before saving the Asset Repair."
-msgstr ""
+msgstr "{0} ist noch im Entwurf. Bitte buchen Sie es, bevor Sie die Vermögensgegenstand-Reparatur speichern."
 
 #: erpnext/assets/doctype/asset/asset.py:435
 msgid "{0} is still in Draft. Please submit it before saving the Asset."
