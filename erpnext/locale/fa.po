@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-19 22:23\n"
+"PO-Revision-Date: 2025-11-20 22:24\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -186,7 +186,7 @@ msgstr "% هدررفت فرآیند"
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Produced"
-msgstr ""
+msgstr "% تولید شده"
 
 #. Label of the progress (Percent) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -425,7 +425,7 @@ msgstr "(سفارش خرید + درخواست مواد + هزینه واقعی)"
 #. Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "(Total Workstation Time / Manufacturing Time) * 60"
-msgstr ""
+msgstr "(کل زمان ایستگاه کاری / زمان تولید) * 60"
 
 #. Description of the 'From No' (Int) field in DocType 'Share Transfer'
 #. Description of the 'To No' (Int) field in DocType 'Share Transfer'
@@ -7822,7 +7822,7 @@ msgstr "مشکی"
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Blank Line"
-msgstr ""
+msgstr "خط خالی"
 
 #. Label of the blanket_order (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -7906,7 +7906,7 @@ msgstr "راهنمای متن و متن بسته"
 #. Label of the bold_text (Check) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Bold Text"
-msgstr ""
+msgstr "متن پررنگ"
 
 #. Description of the 'Bold Text' (Check) field in DocType 'Financial Report
 #. Row'
@@ -30090,7 +30090,7 @@ msgstr ""
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Ongoing"
-msgstr ""
+msgstr "در حال انجام"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:228
 msgid "Ongoing Job Cards"
