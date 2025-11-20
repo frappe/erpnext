@@ -177,7 +177,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 	def test_subcontracting_over_receipt(self):
 		"""
 		Behaviour: Raise multiple SCRs against one SCO that in total
-		        receive more than the required qty in the SCO.
+		                receive more than the required qty in the SCO.
 		Expected Result: Error Raised for Over Receipt against SCO.
 		"""
 		from erpnext.controllers.subcontracting_controller import (
@@ -1787,7 +1787,7 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
 
-	def test_required_qty_validation_based_on_bom(self):
+	def test_bom_required_qty_validation_based_on_bom(self):
 		set_backflush_based_on("BOM")
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
@@ -1834,6 +1834,61 @@ class TestSubcontractingReceipt(IntegrationTestCase):
 		self.assertRaises(BOMQuantityError, scr.submit)
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
+
+	def test_bom_required_qty_validation_based_on_transfer(self):
+		from erpnext.controllers.subcontracting_controller import (
+			make_rm_stock_entry as make_subcontract_transfer_entry,
+		)
+
+		set_backflush_based_on("Material Transferred for Subcontract")
+		frappe.db.set_single_value("Buying Settings", "validate_consumed_qty", 1)
+
+		item_code = "_Test Subcontracted Validation FG Item 1"
+		rm_item1 = make_item(
+			properties={
+				"is_stock_item": 1,
+			}
+		).name
+
+		make_subcontracted_item(item_code=item_code, raw_materials=[rm_item1])
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": item_code,
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(
+			service_items=service_items,
+			include_exploded_items=0,
+		)
+
+		# inward raw material stock
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item1, qty=10, basic_rate=100)
+
+		rm_items = [
+			{
+				"item_code": item_code,
+				"rm_item_code": sco.supplied_items[0].rm_item_code,
+				"qty": sco.supplied_items[0].required_qty - 5,
+				"warehouse": "_Test Warehouse - _TC",
+				"stock_uom": "Nos",
+			},
+		]
+
+		# transfer partial raw materials
+		ste = frappe.get_doc(make_subcontract_transfer_entry(sco.name, rm_items))
+		ste.to_warehouse = "_Test Warehouse 1 - _TC"
+		ste.save()
+		ste.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		self.assertRaises(BOMQuantityError, scr.submit)
 
 
 def make_return_subcontracting_receipt(**args):
