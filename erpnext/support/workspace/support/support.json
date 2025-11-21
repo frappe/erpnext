@@ -1,6 +1,7 @@
 {
+ "app": "erpnext",
  "charts": [],
- "content": "[{\"id\":\"qzP2mZrGOu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"Fkdjo6bJ7A\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Issue\",\"col\":3}},{\"id\":\"OTS8kx2f3x\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Visit\",\"col\":3}},{\"id\":\"smDTSjBR3Z\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Level Agreement\",\"col\":3}},{\"id\":\"WCqL_gBYGU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"oxhWhXp9b2\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"Ff8Ab3nLLN\",\"type\":\"card\",\"data\":{\"card_name\":\"Issues\",\"col\":4}},{\"id\":\"_lndiuJTVP\",\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":4}},{\"id\":\"R_aNO5ESzJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Service Level Agreement\",\"col\":4}},{\"id\":\"N8aA2afWfi\",\"type\":\"card\",\"data\":{\"card_name\":\"Warranty\",\"col\":4}},{\"id\":\"M5fxGuFwUR\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"xKH0kO9q4P\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"IhRs_U52gr\",\"type\":\"paragraph\",\"data\":{\"text\":\"ERPNext's Support module is deprecated and will be removed in v17. Please use <a href=\\\"http://frappe.io/helpdesk\\\" draggable=\\\"false\\\">Frappe Helpdesk</a> instead.\",\"col\":12}},{\"id\":\"qzP2mZrGOu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"Fkdjo6bJ7A\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Issue\",\"col\":3}},{\"id\":\"OTS8kx2f3x\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Visit\",\"col\":3}},{\"id\":\"smDTSjBR3Z\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Level Agreement\",\"col\":3}},{\"id\":\"WCqL_gBYGU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"oxhWhXp9b2\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"Ff8Ab3nLLN\",\"type\":\"card\",\"data\":{\"card_name\":\"Issues\",\"col\":4}},{\"id\":\"_lndiuJTVP\",\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":4}},{\"id\":\"R_aNO5ESzJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Service Level Agreement\",\"col\":4}},{\"id\":\"N8aA2afWfi\",\"type\":\"card\",\"data\":{\"card_name\":\"Warranty\",\"col\":4}},{\"id\":\"M5fxGuFwUR\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"xKH0kO9q4P\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2020-03-02 15:48:23.224699",
  "custom_blocks": [],
  "docstatus": 0,
@@ -171,7 +172,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-05-24 14:47:23.408966",
+ "modified": "2025-11-21 15:33:41.827130",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
@@ -203,5 +204,6 @@
    "type": "DocType"
   }
  ],
- "title": "Support"
+ "title": "Support",
+ "type": "Workspace"
 }
