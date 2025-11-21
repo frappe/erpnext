@@ -313,10 +313,10 @@ class BankTransaction(Document):
 
 	def handle_included_fee(self):
 		"""
-		The included_fee is only handled for withdrawals. An included_fee for a deposit, is not credited to the account and is 
+		The included_fee is only handled for withdrawals. An included_fee for a deposit, is not credited to the account and is
 		therefore outside of the deposit value and can be larger than the deposit itself.
 		"""
-		
+
 		if self.included_fee and self.withdrawal:
 			if self.included_fee > self.withdrawal:
 				frappe.throw(_("Included fee is bigger than the withdrawal itself."))
