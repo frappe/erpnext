@@ -40,6 +40,15 @@ frappe.ui.form.on("Bank Account", {
 					}
 				);
 			});
+
+			frappe.call({
+				method: "get_bank_balance",
+				doc: frm.doc,
+				callback: function (r) {
+					frm.doc.account_balance = r.message;
+					frm.refresh_field("account_balance");
+				},
+			});
 		}
 	},
 

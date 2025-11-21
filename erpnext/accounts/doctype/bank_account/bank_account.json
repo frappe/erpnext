@@ -9,9 +9,11 @@
  "field_order": [
   "account_name",
   "account",
+  "account_currency",
   "bank",
   "account_type",
   "account_subtype",
+  "account_balance",
   "column_break_7",
   "disabled",
   "is_default",
@@ -207,6 +209,21 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fetch_from": "account.account_currency",
+   "fieldname": "account_balance",
+   "fieldtype": "Currency",
+   "label": "Account Balance ",
+   "options": "account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Company Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -252,7 +269,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2025-08-29 12:32:01.081687",
+ "modified": "2025-11-21 19:37:58.110513",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

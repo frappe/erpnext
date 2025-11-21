@@ -9,7 +9,9 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.document import Document
-from frappe.utils import comma_and, get_link_to_form
+from frappe.utils import comma_and, flt, get_link_to_form
+
+from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import get_account_details
 
 
 class BankAccount(Document):
@@ -22,6 +24,8 @@ class BankAccount(Document):
 		from frappe.types import DF
 
 		account: DF.Link | None
+		account_balance: DF.Currency
+		account_currency: DF.Link | None
 		account_name: DF.Data
 		account_subtype: DF.Link | None
 		account_type: DF.Link | None
@@ -86,6 +90,19 @@ class BankAccount(Document):
 				"is_default",
 				0,
 			)
+
+	@frappe.whitelist()
+	def get_bank_balance(self):
+		if self.bank:
+			plaid_access_token = frappe.get_value("Bank", self.bank, "plaid_access_token")
+			if plaid_access_token:
+				account_details = get_account_details(
+					account_id=self.integration_id, access_token=plaid_access_token
+				)
+				balance = (
+					account_details["balances"]["available"] or account_details["balances"]["current"] or 0
+				)
+				return flt(balance, self.precision("account_balance"))
 
 
 def get_party_bank_account(party_type, party):
