@@ -57,7 +57,7 @@ class TestCompany(IntegrationTestCase):
 		frappe.delete_doc("Company", "COA from Existing Company")
 
 	def test_coa_based_on_country_template(self):
-		countries = ["Canada", "Germany", "France"]
+		countries = ["United Kingdom", "Canada", "Germany", "France"]
 
 		for country in countries:
 			templates = get_charts_for_country(country)
