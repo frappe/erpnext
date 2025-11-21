@@ -312,6 +312,8 @@ class BankTransaction(Document):
 		self.party_type, self.party = result
 
 	def handle_included_fee(self):
+		# The included_fee is only handled for withdrawals. An included_fee for a deposit, is not credited to the account and is 
+		# therefore outside of the deposit value and can be larger than the deposit itself.
 		if self.included_fee and self.withdrawal:
 			if self.included_fee > self.withdrawal:
 				frappe.throw(_("Included fee is bigger than the withdrawal itself."))
@@ -320,7 +322,7 @@ class BankTransaction(Document):
 		# Include the excluded fee on validate to handle all further processing the same
 		if self.excluded_fee and self.excluded_fee > 0:
 			if self.deposit > 0:
-				self.deposit = self.deposit + self.excluded_fee
+				self.deposit = self.deposit - self.excluded_fee
 			if self.withdrawal > 0:
 				self.withdrawal = self.withdrawal + self.excluded_fee
 			self.included_fee = self.included_fee + self.excluded_fee
