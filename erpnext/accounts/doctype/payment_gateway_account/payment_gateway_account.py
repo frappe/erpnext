@@ -20,8 +20,7 @@ class PaymentGatewayAccount(Document):
 		is_default: DF.Check
 		message: DF.SmallText | None
 		payment_account: DF.Link
-		payment_channel: DF.Literal["", "Email", "Phone"]
-		payment_gateway: DF.Link
+		payment_channel: DF.Literal["", "Email", "Phone", "Other"]
 	# end: auto-generated types
 
 	def autoname(self):
