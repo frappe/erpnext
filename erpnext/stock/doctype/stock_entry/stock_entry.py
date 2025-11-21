@@ -8,6 +8,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	cint,
@@ -3153,6 +3154,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 					},
 				)
 
+				if d.docstatus == 1:
+					transfer_qty = frappe.get_value("Stock Entry Detail", d.ste_detail, "transfer_qty")
+
+					if (
+						transfer_qty < transferred_qty[0].qty
+						if transferred_qty and transferred_qty[0]
+						else 0.0
+					):
+						frappe.throw(
+							_(
+								"Row {0}: Transferred quantity cannot be greater than the requested quantity."
+							).format(d.idx)
+						)
+
 				stock_entries[(d.against_stock_entry, d.ste_detail)] = (
 					transferred_qty[0].qty if transferred_qty and transferred_qty[0] else 0.0
 				) or 0.0
@@ -3216,7 +3231,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			parent_se = frappe.get_value("Stock Entry", self.outgoing_stock_entry, "add_to_transit")
 
 		for item in self.items:
-			material_request = item.material_request or None
+			material_request = item.get("material_request")
 			if self.purpose == "Material Transfer" and material_request not in material_requests:
 				if self.outgoing_stock_entry and parent_se:
 					material_request = frappe.get_value(
@@ -3225,6 +3240,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
+				if status == "Completed":
+					qty = get_transferred_qty(material_request)
+					if qty.get("transfer_qty") > qty.get("transferred_qty"):
+						status = "In Transit"
+
 				frappe.db.set_value("Material Request", material_request, "transfer_status", status)
 
 	def set_serial_no_batch_for_finished_good(self):
@@ -3881,3 +3901,18 @@ def get_batchwise_serial_nos(item_code, row):
 			batchwise_serial_nos[batch_no] = sorted([serial_no.name for serial_no in serial_nos])
 
 	return batchwise_serial_nos
+
+
+def get_transferred_qty(material_request):
+	sed = DocType("Stock Entry Detail")
+
+	query = (
+		frappe.qb.from_(sed)
+		.select(
+			Sum(sed.transfer_qty).as_("transfer_qty"),
+			Sum(sed.transferred_qty).as_("transferred_qty"),
+		)
+		.where((sed.material_request == material_request) & (sed.docstatus == 1))
+	).run(as_dict=True)
+
+	return query[0]
