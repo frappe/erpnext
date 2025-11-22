@@ -310,7 +310,6 @@ def create_merge_logs(invoice_by_customer, closing_entry=None, invoice_by_defaul
             merge_log.set('pos_invoices', invoices)
             merge_log.save(ignore_permissions=True)
             merge_log.submit()
-
         if closing_entry:
             closing_entry.set_status(update=True, status='Submitted')
             closing_entry.db_set('error_message', '')
@@ -328,6 +327,11 @@ def create_merge_logs(invoice_by_customer, closing_entry=None, invoice_by_defaul
     finally:
         frappe.db.commit()
         frappe.publish_realtime('closing_process_complete', {'user': frappe.session.user})
+        pos_closing_settings = frappe.get_single("Custom Selling Settings")
+        if pos_closing_settings.enable_automated_pos_closing:
+            update_processed_branch(closing_entry.branch, closing_entry.posting_date, closing_entry.status)
+            automate_closing_single_branch(date=closing_entry.posting_date)
+
 
 def cancel_merge_logs(merge_logs, closing_entry=None):
     try:
