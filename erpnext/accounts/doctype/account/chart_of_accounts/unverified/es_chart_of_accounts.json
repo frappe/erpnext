@@ -1,0 +1,2347 @@
+{
+    "country_code": "es",
+    "name": "Spain - Plan General de Contabilidad",
+    "tree": {
+        "1. Financiación básica": {
+            "account_number": "1",
+            "root_type": "Equity",
+            "is_group": 1,
+            "10. Capital": {
+                "account_number": "10",
+                "root_type": "Equity",
+                "is_group": 1,
+                "100. Capital social": {
+                    "account_number": "100",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "101. Fondo social": {
+                    "account_number": "101",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "103. Socios por desembolsos no exigidos": {
+                    "account_number": "103",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "104. Socios por aportaciones no dinerarias pendientes": {
+                    "account_number": "104",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                }
+            },
+            "11. Reservas": {
+                "account_number": "11",
+                "root_type": "Equity",
+                "is_group": 1,
+                "110. Prima de emisión": {
+                    "account_number": "110",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "112. Reserva legal": {
+                    "account_number": "112",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "113. Reservas voluntarias": {
+                    "account_number": "113",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "114. Reservas por capital amortizado": {
+                    "account_number": "114",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "117. Reserva por fondo de comercio": {
+                    "account_number": "117",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "118. Aportaciones de socios o propietarios": {
+                    "account_number": "118",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                }
+            },
+            "12. Resultados pendientes de aplicación": {
+                "account_number": "12",
+                "root_type": "Equity",
+                "is_group": 1,
+                "120. Resultados negativos de ejercicios anteriores": {
+                    "account_number": "120",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "121. Resultados negativos de ejercicios anteriores (sociedades anónimas)": {
+                    "account_number": "121",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "129. Resultados del ejercicio": {
+                    "account_number": "129",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                }
+            },
+            "13. Subvenciones, donaciones y legados recibidos": {
+                "account_number": "13",
+                "root_type": "Equity",
+                "is_group": 1,
+                "130. Subvenciones oficiales de capital": {
+                    "account_number": "130",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                },
+                "131. Donaciones y legados de capital": {
+                    "account_number": "131",
+                    "root_type": "Equity",
+                    "account_type": "Equity",
+                    "is_group": 0
+                }
+            },
+            "14. Provisiones a largo plazo": {
+                "account_number": "14",
+                "root_type": "Liability",
+                "is_group": 1,
+                "140. Provisión por retribuciones a largo plazo al personal": {
+                    "account_number": "140",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "141. Provisión para actuaciones medioambientales": {
+                    "account_number": "141",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "142. Provisión para otras responsabilidades": {
+                    "account_number": "142",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "143. Provisión para reestructuraciones": {
+                    "account_number": "143",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "145. Provisión para operaciones comerciales": {
+                    "account_number": "145",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                }
+            },
+            "15. Deudas a largo plazo": {
+                "account_number": "15",
+                "root_type": "Liability",
+                "is_group": 1,
+                "150. Deudas a largo plazo con entidades de crédito": {
+                    "account_number": "150",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "151. Deudas a largo plazo": {
+                    "account_number": "151",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "152. Deudas a largo plazo transformables en subvenciones": {
+                    "account_number": "152",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "155. Deudas a largo plazo con entidades de crédito vinculadas": {
+                    "account_number": "155",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "156. Deudas a largo plazo con empresas del grupo": {
+                    "account_number": "156",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "157. Deudas a largo plazo con empresas asociadas": {
+                    "account_number": "157",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "158. Deudas a largo plazo con otras partes vinculadas": {
+                    "account_number": "158",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "159. Desembolsos pendientes sobre participaciones en el patrimonio neto a largo plazo": {
+                    "account_number": "159",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                }
+            },
+            "16. Deudas a largo plazo con partes vinculadas": {
+                "account_number": "16",
+                "root_type": "Liability",
+                "is_group": 1,
+                "160. Deudas a largo plazo con empresas del grupo": {
+                    "account_number": "160",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "161. Deudas a largo plazo con empresas asociadas": {
+                    "account_number": "161",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "162. Deudas a largo plazo con otras partes vinculadas": {
+                    "account_number": "162",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                }
+            },
+            "17. Deudas a largo plazo por préstamos recibidos y otros conceptos": {
+                "account_number": "17",
+                "root_type": "Liability",
+                "is_group": 1,
+                "170. Deudas a largo plazo con entidades de crédito": {
+                    "account_number": "170",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "171. Deudas a largo plazo": {
+                    "account_number": "171",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "172. Deudas a largo plazo transformables en subvenciones": {
+                    "account_number": "172",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "173. Proveedores de inmovilizado a largo plazo": {
+                    "account_number": "173",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "175. Efectos a pagar a largo plazo": {
+                    "account_number": "175",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "177. Obligaciones y bonos a largo plazo": {
+                    "account_number": "177",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "178. Obligaciones y bonos convertibles a largo plazo": {
+                    "account_number": "178",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                }
+            },
+            "18. Fianzas y depósitos recibidos a largo plazo": {
+                "account_number": "18",
+                "root_type": "Liability",
+                "is_group": 1,
+                "180. Fianzas recibidas a largo plazo": {
+                    "account_number": "180",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                },
+                "185. Depósitos recibidos a largo plazo": {
+                    "account_number": "185",
+                    "root_type": "Liability",
+                    "account_type": "Long Term Liability",
+                    "is_group": 0
+                }
+            }
+        },
+        "2. Inmovilizado": {
+            "account_number": "2",
+            "root_type": "Asset",
+            "is_group": 1,
+            "20. Inversiones inmobiliarias": {
+                "account_number": "20",
+                "root_type": "Asset",
+                "is_group": 1,
+                "200. Inversiones en terrenos y bienes naturales": {
+                    "account_number": "200",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "201. Inversiones en construcciones": {
+                    "account_number": "201",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                }
+            },
+            "21. Inmovilizaciones materiales": {
+                "account_number": "21",
+                "root_type": "Asset",
+                "is_group": 1,
+                "210. Terrenos y bienes naturales": {
+                    "account_number": "210",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "211. Construcciones": {
+                    "account_number": "211",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "212. Instalaciones técnicas": {
+                    "account_number": "212",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "213. Maquinaria": {
+                    "account_number": "213",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "214. Utillaje": {
+                    "account_number": "214",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "215. Otras instalaciones": {
+                    "account_number": "215",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "216. Mobiliario": {
+                    "account_number": "216",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "217. Equipos para procesos de información": {
+                    "account_number": "217",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "218. Elementos de transporte": {
+                    "account_number": "218",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "219. Otro inmovilizado material": {
+                    "account_number": "219",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                }
+            },
+            "22. Inmovilizaciones intangibles": {
+                "account_number": "22",
+                "root_type": "Asset",
+                "is_group": 1,
+                "220. Inversiones en investigación y desarrollo": {
+                    "account_number": "220",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "221. Concesiones administrativas": {
+                    "account_number": "221",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "222. Propiedad industrial": {
+                    "account_number": "222",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "223. Fondo de comercio": {
+                    "account_number": "223",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "224. Derechos de traspaso": {
+                    "account_number": "224",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "225. Aplicaciones informáticas": {
+                    "account_number": "225",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "226. Derechos sobre activos cedidos en uso": {
+                    "account_number": "226",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                },
+                "227. Anticipos para inmovilizaciones intangibles": {
+                    "account_number": "227",
+                    "root_type": "Asset",
+                    "account_type": "Fixed Asset",
+                    "is_group": 0
+                }
+            },
+            "23. Inversiones financieras a largo plazo en partes vinculadas": {
+                "account_number": "23",
+                "root_type": "Asset",
+                "is_group": 1,
+                "230. Participaciones a largo plazo en empresas del grupo": {
+                    "account_number": "230",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "231. Participaciones a largo plazo en empresas asociadas": {
+                    "account_number": "231",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "232. Valores representativos de deuda a largo plazo de empresas del grupo": {
+                    "account_number": "232",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "233. Valores representativos de deuda a largo plazo de empresas asociadas": {
+                    "account_number": "233",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "234. Créditos a largo plazo a empresas del grupo": {
+                    "account_number": "234",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "235. Créditos a largo plazo a empresas asociadas": {
+                    "account_number": "235",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                }
+            },
+            "24. Inversiones financieras a largo plazo": {
+                "account_number": "24",
+                "root_type": "Asset",
+                "is_group": 1,
+                "240. Participaciones a largo plazo en instrumentos de patrimonio": {
+                    "account_number": "240",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "241. Valores representativos de deuda a largo plazo": {
+                    "account_number": "241",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "242. Créditos a largo plazo": {
+                    "account_number": "242",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "249. Desembolsos pendientes sobre participaciones a largo plazo en el patrimonio neto": {
+                    "account_number": "249",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                }
+            },
+            "25. Amortización acumulada del inmovilizado intangible": {
+                "account_number": "25",
+                "root_type": "Asset",
+                "is_group": 1,
+                "250. Amortización acumulada de inversiones en investigación y desarrollo": {
+                    "account_number": "250",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "251. Amortización acumulada de concesiones administrativas": {
+                    "account_number": "251",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "252. Amortización acumulada de propiedad industrial": {
+                    "account_number": "252",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "253. Amortización acumulada de fondo de comercio": {
+                    "account_number": "253",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "254. Amortización acumulada de derechos de traspaso": {
+                    "account_number": "254",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "255. Amortización acumulada de aplicaciones informáticas": {
+                    "account_number": "255",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "256. Amortización acumulada de derechos sobre activos cedidos en uso": {
+                    "account_number": "256",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                }
+            },
+            "26. Amortización acumulada de las inversiones financieras a largo plazo": {
+                "account_number": "26",
+                "root_type": "Asset",
+                "is_group": 1,
+                "260. Amortización acumulada de participaciones a largo plazo en empresas del grupo": {
+                    "account_number": "260",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "261. Amortización acumulada de participaciones a largo plazo en empresas asociadas": {
+                    "account_number": "261",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "262. Amortización acumulada de valores representativos de deuda a largo plazo de empresas del grupo": {
+                    "account_number": "262",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "263. Amortización acumulada de valores representativos de deuda a largo plazo de empresas asociadas": {
+                    "account_number": "263",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "264. Amortización acumulada de créditos a largo plazo a empresas del grupo": {
+                    "account_number": "264",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "265. Amortización acumulada de créditos a largo plazo a empresas asociadas": {
+                    "account_number": "265",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "266. Amortización acumulada de participaciones a largo plazo en instrumentos de patrimonio": {
+                    "account_number": "266",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "267. Amortización acumulada de valores representativos de deuda a largo plazo": {
+                    "account_number": "267",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "268. Amortización acumulada de créditos a largo plazo": {
+                    "account_number": "268",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                }
+            },
+            "27. Amortización acumulada del inmovilizado material": {
+                "account_number": "27",
+                "root_type": "Asset",
+                "is_group": 1,
+                "270. Amortización acumulada de construcciones": {
+                    "account_number": "270",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "271. Amortización acumulada de instalaciones técnicas": {
+                    "account_number": "271",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "272. Amortización acumulada de maquinaria": {
+                    "account_number": "272",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "273. Amortización acumulada de utillaje": {
+                    "account_number": "273",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "274. Amortización acumulada de otras instalaciones": {
+                    "account_number": "274",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "275. Amortización acumulada de mobiliario": {
+                    "account_number": "275",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "276. Amortización acumulada de equipos para procesos de información": {
+                    "account_number": "276",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "277. Amortización acumulada de elementos de transporte": {
+                    "account_number": "277",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "278. Amortización acumulada de otro inmovilizado material": {
+                    "account_number": "278",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                }
+            },
+            "28. Amortización acumulada de las inversiones inmobiliarias": {
+                "account_number": "28",
+                "root_type": "Asset",
+                "is_group": 1,
+                "280. Amortización acumulada de inversiones en construcciones": {
+                    "account_number": "280",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                }
+            },
+            "29. Deterioro de valor del inmovilizado": {
+                "account_number": "29",
+                "root_type": "Asset",
+                "is_group": 1,
+                "290. Deterioro de valor de inversiones inmobiliarias": {
+                    "account_number": "290",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "291. Deterioro de valor del inmovilizado material": {
+                    "account_number": "291",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "292. Deterioro de valor del inmovilizado intangible": {
+                    "account_number": "292",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "293. Deterioro de valor de participaciones y valores representativos de deuda a largo plazo": {
+                    "account_number": "293",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                }
+            }
+        },
+        "3. Existencias": {
+            "account_number": "3",
+            "root_type": "Asset",
+            "is_group": 1,
+            "30. Mercaderías": {
+                "account_number": "30",
+                "root_type": "Asset",
+                "is_group": 1,
+                "300. Mercaderías": {
+                    "account_number": "300",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                }
+            },
+            "31. Materias primas": {
+                "account_number": "31",
+                "root_type": "Asset",
+                "is_group": 1,
+                "310. Materias primas": {
+                    "account_number": "310",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                }
+            },
+            "32. Otros aprovisionamientos": {
+                "account_number": "32",
+                "root_type": "Asset",
+                "is_group": 1,
+                "320. Materias auxiliares": {
+                    "account_number": "320",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                },
+                "321. Combustibles": {
+                    "account_number": "321",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                },
+                "322. Repuestos": {
+                    "account_number": "322",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                },
+                "325. Materiales diversos": {
+                    "account_number": "325",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                },
+                "326. Envases y embalajes": {
+                    "account_number": "326",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                },
+                "327. Material de oficina": {
+                    "account_number": "327",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                }
+            },
+            "33. Productos en curso": {
+                "account_number": "33",
+                "root_type": "Asset",
+                "is_group": 1,
+                "330. Productos en curso": {
+                    "account_number": "330",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                }
+            },
+            "34. Productos semiterminados": {
+                "account_number": "34",
+                "root_type": "Asset",
+                "is_group": 1,
+                "340. Productos semiterminados": {
+                    "account_number": "340",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                }
+            },
+            "35. Productos terminados": {
+                "account_number": "35",
+                "root_type": "Asset",
+                "is_group": 1,
+                "350. Productos terminados": {
+                    "account_number": "350",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                }
+            },
+            "36. Subproductos, residuos y materiales recuperados": {
+                "account_number": "36",
+                "root_type": "Asset",
+                "is_group": 1,
+                "360. Subproductos": {
+                    "account_number": "360",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                },
+                "361. Residuos": {
+                    "account_number": "361",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                },
+                "362. Materiales recuperados": {
+                    "account_number": "362",
+                    "root_type": "Asset",
+                    "account_type": "Stock",
+                    "is_group": 0
+                }
+            },
+            "39. Deterioro de valor de las existencias": {
+                "account_number": "39",
+                "root_type": "Asset",
+                "is_group": 1,
+                "390. Deterioro de valor de mercaderías": {
+                    "account_number": "390",
+                    "root_type": "Asset",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "391. Deterioro de valor de materias primas": {
+                    "account_number": "391",
+                    "root_type": "Asset",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "392. Deterioro de valor de otros aprovisionamientos": {
+                    "account_number": "392",
+                    "root_type": "Asset",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "393. Deterioro de valor de productos en curso": {
+                    "account_number": "393",
+                    "root_type": "Asset",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "394. Deterioro de valor de productos semiterminados": {
+                    "account_number": "394",
+                    "root_type": "Asset",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "395. Deterioro de valor de productos terminados": {
+                    "account_number": "395",
+                    "root_type": "Asset",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                }
+            }
+        },
+        "4. Acreedores y deudores por operaciones comerciales": {
+            "account_number": "4",
+            "root_type": "Liability",
+            "is_group": 1,
+            "40. Proveedores": {
+                "account_number": "40",
+                "root_type": "Liability",
+                "is_group": 1,
+                "400. Proveedores": {
+                    "account_number": "400",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "401. Proveedores, efectos comerciales a pagar": {
+                    "account_number": "401",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "402. Proveedores, empresas del grupo": {
+                    "account_number": "402",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "403. Proveedores, empresas asociadas": {
+                    "account_number": "403",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "407. Anticipos a proveedores": {
+                    "account_number": "407",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                }
+            },
+            "41. Acreedores varios": {
+                "account_number": "41",
+                "root_type": "Liability",
+                "is_group": 1,
+                "410. Acreedores por prestaciones de servicios": {
+                    "account_number": "410",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "411. Acreedores, efectos comerciales a pagar": {
+                    "account_number": "411",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                }
+            },
+            "42. Cuentas con personal asimilado": {
+                "account_number": "42",
+                "root_type": "Liability",
+                "is_group": 1,
+                "420. Acreedores, personal asimilado": {
+                    "account_number": "420",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "421. Deudores, personal asimilado": {
+                    "account_number": "421",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                }
+            },
+            "43. Clientes": {
+                "account_number": "43",
+                "root_type": "Asset",
+                "is_group": 1,
+                "430. Clientes": {
+                    "account_number": "430",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "431. Clientes, efectos comerciales a cobrar": {
+                    "account_number": "431",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "432. Clientes, empresas del grupo": {
+                    "account_number": "432",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "433. Clientes, empresas asociadas": {
+                    "account_number": "433",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "434. Clientes, otras partes vinculadas": {
+                    "account_number": "434",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "437. Anticipos de clientes": {
+                    "account_number": "437",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "438. Clientes de dudoso cobro": {
+                    "account_number": "438",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                }
+            },
+            "44. Deudores varios": {
+                "account_number": "44",
+                "root_type": "Asset",
+                "is_group": 1,
+                "440. Deudores": {
+                    "account_number": "440",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "441. Deudores, efectos comerciales a cobrar": {
+                    "account_number": "441",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                }
+            },
+            "45. Organismos de la Seguridad Social": {
+                "account_number": "45",
+                "root_type": "Liability",
+                "is_group": 1,
+                "450. Organismos de la Seguridad Social, deudores": {
+                    "account_number": "450",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "451. Organismos de la Seguridad Social, acreedores": {
+                    "account_number": "451",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                }
+            },
+            "46. Personal": {
+                "account_number": "46",
+                "root_type": "Liability",
+                "is_group": 1,
+                "460. Anticipos de remuneraciones": {
+                    "account_number": "460",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "465. Remuneraciones pendientes de pago": {
+                    "account_number": "465",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "467. Anticipos entregados a cuenta de futuras remuneraciones": {
+                    "account_number": "467",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                }
+            },
+            "47. Administraciones públicas": {
+                "account_number": "47",
+                "root_type": "Liability",
+                "is_group": 1,
+                "470. Hacienda Pública, deudora por IVA": {
+                    "account_number": "470",
+                    "root_type": "Asset",
+                    "account_type": "Tax",
+                    "is_group": 0
+                },
+                "471. Organismos de la Seguridad Social, deudores": {
+                    "account_number": "471",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "472. Hacienda Pública, acreedora por IVA soportado": {
+                    "account_number": "472",
+                    "root_type": "Liability",
+                    "account_type": "Tax",
+                    "is_group": 0
+                },
+                "473. Hacienda Pública, por retenciones practicadas": {
+                    "account_number": "473",
+                    "root_type": "Liability",
+                    "account_type": "Tax",
+                    "is_group": 0
+                },
+                "474. Activos por impuesto diferido": {
+                    "account_number": "474",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "475. Hacienda Pública, acreedora por conceptos fiscales": {
+                    "account_number": "475",
+                    "root_type": "Liability",
+                    "account_type": "Tax",
+                    "is_group": 0
+                },
+                "476. Organismos de la Seguridad Social, acreedores": {
+                    "account_number": "476",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "477. Hacienda Pública, acreedora por IVA repercutido": {
+                    "account_number": "477",
+                    "root_type": "Liability",
+                    "account_type": "Tax",
+                    "is_group": 0
+                },
+                "478. Activos por impuestos sobre beneficios": {
+                    "account_number": "478",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "479. Pasivos por diferencias temporarias imponibles": {
+                    "account_number": "479",
+                    "root_type": "Liability",
+                    "account_type": "Tax",
+                    "is_group": 0
+                }
+            },
+            "48. Ajustes por periodificación": {
+                "account_number": "48",
+                "root_type": "Liability",
+                "is_group": 1,
+                "480. Gastos anticipados": {
+                    "account_number": "480",
+                    "root_type": "Asset",
+                    "account_type": "Receivable",
+                    "is_group": 0
+                },
+                "485. Ingresos anticipados": {
+                    "account_number": "485",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                }
+            },
+            "49. Deterioro de valor de créditos comerciales": {
+                "account_number": "49",
+                "root_type": "Asset",
+                "is_group": 1,
+                "490. Deterioro de valor de créditos por operaciones comerciales": {
+                    "account_number": "490",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "493. Deterioro de valor de créditos por operaciones comerciales con partes vinculadas": {
+                    "account_number": "493",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                }
+            }
+        },
+        "5. Cuentas financieras": {
+            "account_number": "5",
+            "root_type": "Asset",
+            "is_group": 1,
+            "50. Inversiones financieras a corto plazo en instrumentos de patrimonio": {
+                "account_number": "50",
+                "root_type": "Asset",
+                "is_group": 1,
+                "500. Inversiones financieras a corto plazo en instrumentos de patrimonio": {
+                    "account_number": "500",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                }
+            },
+            "51. Deudas a corto plazo por préstamos recibidos y otros conceptos": {
+                "account_number": "51",
+                "root_type": "Liability",
+                "is_group": 1,
+                "510. Deudas a corto plazo por préstamos recibidos": {
+                    "account_number": "510",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "511. Deudas a corto plazo por préstamos recibidos de empresas del grupo": {
+                    "account_number": "511",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "512. Deudas a corto plazo por préstamos recibidos de empresas asociadas": {
+                    "account_number": "512",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "513. Deudas a corto plazo por préstamos recibidos de otras partes vinculadas": {
+                    "account_number": "513",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "515. Efectos a pagar a corto plazo": {
+                    "account_number": "515",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "516. Obligaciones y bonos a corto plazo": {
+                    "account_number": "516",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "517. Obligaciones y bonos convertibles a corto plazo": {
+                    "account_number": "517",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                }
+            },
+            "52. Deudas a corto plazo con entidades de crédito": {
+                "account_number": "52",
+                "root_type": "Liability",
+                "is_group": 1,
+                "520. Deudas a corto plazo con entidades de crédito": {
+                    "account_number": "520",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "521. Deudas a corto plazo con entidades de crédito vinculadas": {
+                    "account_number": "521",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "522. Deudas a corto plazo con entidades de crédito del grupo": {
+                    "account_number": "522",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "523. Deudas a corto plazo con entidades de crédito asociadas": {
+                    "account_number": "523",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                }
+            },
+            "53. Inversiones financieras a corto plazo en partes vinculadas": {
+                "account_number": "53",
+                "root_type": "Asset",
+                "is_group": 1,
+                "530. Participaciones a corto plazo en empresas del grupo": {
+                    "account_number": "530",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "531. Participaciones a corto plazo en empresas asociadas": {
+                    "account_number": "531",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "532. Valores representativos de deuda a corto plazo de empresas del grupo": {
+                    "account_number": "532",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "533. Valores representativos de deuda a corto plazo de empresas asociadas": {
+                    "account_number": "533",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "534. Créditos a corto plazo a empresas del grupo": {
+                    "account_number": "534",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "535. Créditos a corto plazo a empresas asociadas": {
+                    "account_number": "535",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "536. Créditos a corto plazo a otras partes vinculadas": {
+                    "account_number": "536",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                }
+            },
+            "54. Deudas a corto plazo con partes vinculadas": {
+                "account_number": "54",
+                "root_type": "Liability",
+                "is_group": 1,
+                "540. Deudas a corto plazo con empresas del grupo": {
+                    "account_number": "540",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "541. Deudas a corto plazo con empresas asociadas": {
+                    "account_number": "541",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "542. Deudas a corto plazo con otras partes vinculadas": {
+                    "account_number": "542",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                }
+            },
+            "55. Otras cuentas no bancarias": {
+                "account_number": "55",
+                "root_type": "Liability",
+                "is_group": 1,
+                "550. Titular de la explotación": {
+                    "account_number": "550",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "551. Cuenta corriente con socios y administradores": {
+                    "account_number": "551",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "552. Cuenta corriente con socios y administradores, empresas del grupo": {
+                    "account_number": "552",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                },
+                "553. Cuenta corriente con socios y administradores, empresas asociadas": {
+                    "account_number": "553",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                }
+            },
+            "56. Fianzas y depósitos recibidos a corto plazo": {
+                "account_number": "56",
+                "root_type": "Liability",
+                "is_group": 1,
+                "560. Fianzas recibidas a corto plazo": {
+                    "account_number": "560",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                },
+                "561. Depósitos recibidos a corto plazo": {
+                    "account_number": "561",
+                    "root_type": "Liability",
+                    "account_type": "Short Term Liability",
+                    "is_group": 0
+                }
+            },
+            "57. Tesorería": {
+                "account_number": "57",
+                "root_type": "Asset",
+                "is_group": 1,
+                "570. Caja, euros": {
+                    "account_number": "570",
+                    "root_type": "Asset",
+                    "account_type": "Cash",
+                    "is_group": 0
+                },
+                "571. Caja, moneda extranjera": {
+                    "account_number": "571",
+                    "root_type": "Asset",
+                    "account_type": "Cash",
+                    "is_group": 0
+                },
+                "572. Bancos e instituciones de crédito, cuenta corriente, euros": {
+                    "account_number": "572",
+                    "root_type": "Asset",
+                    "account_type": "Bank",
+                    "is_group": 0
+                },
+                "573. Bancos e instituciones de crédito, cuenta corriente, moneda extranjera": {
+                    "account_number": "573",
+                    "root_type": "Asset",
+                    "account_type": "Bank",
+                    "is_group": 0
+                },
+                "574. Bancos e instituciones de crédito, cuentas de ahorro, euros": {
+                    "account_number": "574",
+                    "root_type": "Asset",
+                    "account_type": "Bank",
+                    "is_group": 0
+                },
+                "575. Bancos e instituciones de crédito, cuentas de ahorro, moneda extranjera": {
+                    "account_number": "575",
+                    "root_type": "Asset",
+                    "account_type": "Bank",
+                    "is_group": 0
+                }
+            },
+            "58. Activos no corrientes mantenidos para la venta": {
+                "account_number": "58",
+                "root_type": "Asset",
+                "is_group": 1,
+                "580. Activos no corrientes mantenidos para la venta": {
+                    "account_number": "580",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "581. Activos no corrientes mantenidos para la venta, empresas del grupo": {
+                    "account_number": "581",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                },
+                "582. Activos no corrientes mantenidos para la venta, empresas asociadas": {
+                    "account_number": "582",
+                    "root_type": "Asset",
+                    "account_type": "Asset",
+                    "is_group": 0
+                }
+            },
+            "59. Deterioro de valor de activos financieros a corto plazo": {
+                "account_number": "59",
+                "root_type": "Asset",
+                "is_group": 1,
+                "590. Deterioro de valor de participaciones a corto plazo en instrumentos de patrimonio": {
+                    "account_number": "590",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                },
+                "593. Deterioro de valor de valores representativos de deuda a corto plazo": {
+                    "account_number": "593",
+                    "root_type": "Asset",
+                    "account_type": "Accumulated Depreciation",
+                    "is_group": 0
+                }
+            }
+        },
+        "6. Compras y gastos": {
+            "account_number": "6",
+            "root_type": "Expense",
+            "is_group": 1,
+            "60. Compras": {
+                "account_number": "60",
+                "root_type": "Expense",
+                "is_group": 1,
+                "600. Compras de mercaderías": {
+                    "account_number": "600",
+                    "root_type": "Expense",
+                    "account_type": "Cost of Goods Sold",
+                    "is_group": 0
+                },
+                "601. Compras de materias primas": {
+                    "account_number": "601",
+                    "root_type": "Expense",
+                    "account_type": "Cost of Goods Sold",
+                    "is_group": 0
+                },
+                "602. Compras de otros aprovisionamientos": {
+                    "account_number": "602",
+                    "root_type": "Expense",
+                    "account_type": "Cost of Goods Sold",
+                    "is_group": 0
+                },
+                "606. Descuentos sobre compras por pronto pago": {
+                    "account_number": "606",
+                    "root_type": "Expense",
+                    "account_type": "Expenses Included In Valuation",
+                    "is_group": 0
+                },
+                "607. Trabajos realizados por otras empresas": {
+                    "account_number": "607",
+                    "root_type": "Expense",
+                    "account_type": "Expenses Included In Valuation",
+                    "is_group": 0
+                },
+                "608. Devoluciones de compras y operaciones similares": {
+                    "account_number": "608",
+                    "root_type": "Expense",
+                    "account_type": "Cost of Goods Sold",
+                    "is_group": 0
+                },
+                "609. Rappels por compras": {
+                    "account_number": "609",
+                    "root_type": "Expense",
+                    "account_type": "Expenses Included In Valuation",
+                    "is_group": 0
+                }
+            },
+            "61. Variación de existencias": {
+                "account_number": "61",
+                "root_type": "Expense",
+                "is_group": 1,
+                "610. Variación de existencias de mercaderías": {
+                    "account_number": "610",
+                    "root_type": "Expense",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "611. Variación de existencias de materias primas": {
+                    "account_number": "611",
+                    "root_type": "Expense",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "612. Variación de existencias de otros aprovisionamientos": {
+                    "account_number": "612",
+                    "root_type": "Expense",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                }
+            },
+            "62. Servicios exteriores": {
+                "account_number": "62",
+                "root_type": "Expense",
+                "is_group": 1,
+                "621. Arrendamientos y cánones": {
+                    "account_number": "621",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "622. Reparaciones y conservación": {
+                    "account_number": "622",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "623. Servicios de profesionales independientes": {
+                    "account_number": "623",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "624. Transportes": {
+                    "account_number": "624",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "625. Primas de seguros": {
+                    "account_number": "625",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "626. Servicios bancarios y similares": {
+                    "account_number": "626",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "627. Publicidad, propaganda y relaciones públicas": {
+                    "account_number": "627",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "628. Suministros": {
+                    "account_number": "628",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "629. Otros servicios": {
+                    "account_number": "629",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "63. Tributos": {
+                "account_number": "63",
+                "root_type": "Expense",
+                "is_group": 1,
+                "630. Impuestos sobre beneficios": {
+                    "account_number": "630",
+                    "root_type": "Expense",
+                    "account_type": "Tax",
+                    "is_group": 0
+                },
+                "631. Otros tributos": {
+                    "account_number": "631",
+                    "root_type": "Expense",
+                    "account_type": "Tax",
+                    "is_group": 0
+                }
+            },
+            "64. Gastos de personal": {
+                "account_number": "64",
+                "root_type": "Expense",
+                "is_group": 1,
+                "640. Sueldos y salarios": {
+                    "account_number": "640",
+                    "root_type": "Expense",
+                    "account_type": "Employee Cost",
+                    "is_group": 0
+                },
+                "641. Seguridad Social a cargo de la empresa": {
+                    "account_number": "641",
+                    "root_type": "Expense",
+                    "account_type": "Employee Cost",
+                    "is_group": 0
+                },
+                "642. Seguridad Social a cargo del trabajador": {
+                    "account_number": "642",
+                    "root_type": "Expense",
+                    "account_type": "Employee Cost",
+                    "is_group": 0
+                },
+                "645. Remuneraciones pendientes de pago": {
+                    "account_number": "645",
+                    "root_type": "Liability",
+                    "account_type": "Payable",
+                    "is_group": 0
+                }
+            },
+            "65. Otros gastos de gestión": {
+                "account_number": "65",
+                "root_type": "Expense",
+                "is_group": 1,
+                "650. Pérdidas de créditos comerciales incobrables": {
+                    "account_number": "650",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "651. Pérdidas de créditos no comerciales incobrables": {
+                    "account_number": "651",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "659. Otros gastos de gestión": {
+                    "account_number": "659",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "66. Gastos financieros": {
+                "account_number": "66",
+                "root_type": "Expense",
+                "is_group": 1,
+                "660. Gastos financieros por actualización de provisiones": {
+                    "account_number": "660",
+                    "root_type": "Expense",
+                    "account_type": "Finance Costs",
+                    "is_group": 0
+                },
+                "662. Intereses de deudas": {
+                    "account_number": "662",
+                    "root_type": "Expense",
+                    "account_type": "Finance Costs",
+                    "is_group": 0
+                },
+                "663. Pérdidas en participaciones y valores representativos de deuda": {
+                    "account_number": "663",
+                    "root_type": "Expense",
+                    "account_type": "Finance Costs",
+                    "is_group": 0
+                },
+                "664. Pérdidas de créditos no comerciales": {
+                    "account_number": "664",
+                    "root_type": "Expense",
+                    "account_type": "Finance Costs",
+                    "is_group": 0
+                },
+                "665. Intereses por descuento de efectos y operaciones de factoring": {
+                    "account_number": "665",
+                    "root_type": "Expense",
+                    "account_type": "Finance Costs",
+                    "is_group": 0
+                },
+                "666. Pérdidas en valores representativos de deuda a corto plazo": {
+                    "account_number": "666",
+                    "root_type": "Expense",
+                    "account_type": "Finance Costs",
+                    "is_group": 0
+                },
+                "669. Otros gastos financieros": {
+                    "account_number": "669",
+                    "root_type": "Expense",
+                    "account_type": "Finance Costs",
+                    "is_group": 0
+                }
+            },
+            "67. Pérdidas procedentes del inmovilizado e inversiones": {
+                "account_number": "67",
+                "root_type": "Expense",
+                "is_group": 1,
+                "670. Pérdidas procedentes del inmovilizado intangible": {
+                    "account_number": "670",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "671. Pérdidas procedentes del inmovilizado material": {
+                    "account_number": "671",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "672. Pérdidas procedentes de las inversiones inmobiliarias": {
+                    "account_number": "672",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "673. Pérdidas procedentes de participaciones en instrumentos de patrimonio": {
+                    "account_number": "673",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "674. Pérdidas procedentes de valores representativos de deuda": {
+                    "account_number": "674",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "68. Dotaciones para amortizaciones": {
+                "account_number": "68",
+                "root_type": "Expense",
+                "is_group": 1,
+                "680. Dotaciones para amortizaciones del inmovilizado intangible": {
+                    "account_number": "680",
+                    "root_type": "Expense",
+                    "account_type": "Depreciation",
+                    "is_group": 0
+                },
+                "681. Dotaciones para amortizaciones del inmovilizado material": {
+                    "account_number": "681",
+                    "root_type": "Expense",
+                    "account_type": "Depreciation",
+                    "is_group": 0
+                },
+                "682. Dotaciones para amortizaciones de las inversiones inmobiliarias": {
+                    "account_number": "682",
+                    "root_type": "Expense",
+                    "account_type": "Depreciation",
+                    "is_group": 0
+                }
+            },
+            "69. Dotaciones a las provisiones": {
+                "account_number": "69",
+                "root_type": "Expense",
+                "is_group": 1,
+                "690. Dotaciones a las provisiones para operaciones comerciales": {
+                    "account_number": "690",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "691. Dotaciones a las provisiones para responsabilidades": {
+                    "account_number": "691",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "692. Dotaciones a las provisiones para actuaciones medioambientales": {
+                    "account_number": "692",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "693. Dotaciones a las provisiones para reestructuraciones": {
+                    "account_number": "693",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "694. Dotaciones a las provisiones para otras operaciones": {
+                    "account_number": "694",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                },
+                "699. Cancelación de deudas (Write Off)": {
+                    "account_number": "699",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            }
+        },
+        "7. Ventas e ingresos": {
+            "account_number": "7",
+            "root_type": "Income",
+            "is_group": 1,
+            "70. Ventas": {
+                "account_number": "70",
+                "root_type": "Income",
+                "is_group": 1,
+                "700. Ventas de mercaderías": {
+                    "account_number": "700",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "701. Ventas de productos terminados": {
+                    "account_number": "701",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "702. Ventas de productos semiterminados": {
+                    "account_number": "702",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "703. Ventas de subproductos y residuos": {
+                    "account_number": "703",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "704. Ventas de envases y embalajes": {
+                    "account_number": "704",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "705. Prestaciones de servicios": {
+                    "account_number": "705",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "708. Devoluciones de ventas y operaciones similares": {
+                    "account_number": "708",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "709. Rappels sobre ventas": {
+                    "account_number": "709",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "71. Variación de existencias": {
+                "account_number": "71",
+                "root_type": "Income",
+                "is_group": 1,
+                "710. Variación de existencias de productos terminados": {
+                    "account_number": "710",
+                    "root_type": "Income",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "711. Variación de existencias de productos en curso": {
+                    "account_number": "711",
+                    "root_type": "Income",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                },
+                "712. Variación de existencias de productos semiterminados": {
+                    "account_number": "712",
+                    "root_type": "Income",
+                    "account_type": "Stock Adjustment",
+                    "is_group": 0
+                }
+            },
+            "72. Trabajos realizados para la empresa": {
+                "account_number": "72",
+                "root_type": "Income",
+                "is_group": 1,
+                "720. Trabajos realizados para el inmovilizado intangible": {
+                    "account_number": "720",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "721. Trabajos realizados para el inmovilizado material": {
+                    "account_number": "721",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "722. Trabajos realizados para inversiones inmobiliarias": {
+                    "account_number": "722",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "723. Trabajos realizados para inversiones en curso": {
+                    "account_number": "723",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "73. Subvenciones, donaciones y legados": {
+                "account_number": "73",
+                "root_type": "Income",
+                "is_group": 1,
+                "730. Subvenciones oficiales a la explotación": {
+                    "account_number": "730",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "731. Subvenciones, donaciones y legados a la explotación de entidades públicas": {
+                    "account_number": "731",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "732. Subvenciones, donaciones y legados a la explotación de otras entidades": {
+                    "account_number": "732",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "74. Otros ingresos de gestión": {
+                "account_number": "74",
+                "root_type": "Income",
+                "is_group": 1,
+                "740. Ingresos de arrendamientos": {
+                    "account_number": "740",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "741. Ingresos de propiedad industrial cedida en explotación": {
+                    "account_number": "741",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "742. Ingresos por comisiones": {
+                    "account_number": "742",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "743. Ingresos por servicios diversos": {
+                    "account_number": "743",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "744. Ingresos por servicios al personal": {
+                    "account_number": "744",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "749. Otros ingresos de gestión": {
+                    "account_number": "749",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "76. Ingresos financieros": {
+                "account_number": "76",
+                "root_type": "Income",
+                "is_group": 1,
+                "760. Ingresos de participaciones en instrumentos de patrimonio": {
+                    "account_number": "760",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "761. Ingresos de valores representativos de deuda": {
+                    "account_number": "761",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "762. Ingresos de créditos": {
+                    "account_number": "762",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "765. Beneficios en activos financieros disponibles para la venta": {
+                    "account_number": "765",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "766. Beneficios por valoración de instrumentos financieros por su valor razonable": {
+                    "account_number": "766",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "768. Diferencias positivas de cambio": {
+                    "account_number": "768",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "769. Otros ingresos financieros": {
+                    "account_number": "769",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "77. Beneficios procedentes del inmovilizado e inversiones": {
+                "account_number": "77",
+                "root_type": "Income",
+                "is_group": 1,
+                "770. Beneficios procedentes del inmovilizado intangible": {
+                    "account_number": "770",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "771. Beneficios procedentes del inmovilizado material": {
+                    "account_number": "771",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "772. Beneficios procedentes de las inversiones inmobiliarias": {
+                    "account_number": "772",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "773. Beneficios procedentes de participaciones en instrumentos de patrimonio": {
+                    "account_number": "773",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "774. Beneficios procedentes de valores representativos de deuda": {
+                    "account_number": "774",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "78. Excesos y aplicaciones de provisiones": {
+                "account_number": "78",
+                "root_type": "Income",
+                "is_group": 1,
+                "780. Excesos de provisiones para operaciones comerciales": {
+                    "account_number": "780",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "781. Excesos de provisiones para responsabilidades": {
+                    "account_number": "781",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "782. Excesos de provisiones para actuaciones medioambientales": {
+                    "account_number": "782",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "783. Excesos de provisiones para reestructuraciones": {
+                    "account_number": "783",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "789. Excesos de provisiones para otras operaciones": {
+                    "account_number": "789",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "79. Excesos y aplicaciones de provisiones y de pérdidas por deterioro": {
+                "account_number": "79",
+                "root_type": "Income",
+                "is_group": 1,
+                "790. Reversión del deterioro de créditos comerciales": {
+                    "account_number": "790",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "791. Reversión del deterioro de existencias": {
+                    "account_number": "791",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "792. Reversión del deterioro de participaciones y valores representativos de deuda": {
+                    "account_number": "792",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "793. Reversión del deterioro del inmovilizado": {
+                    "account_number": "793",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                },
+                "799. Diferencias de redondeo": {
+                    "account_number": "799",
+                    "root_type": "Income",
+                    "account_type": "Round Off",
+                    "is_group": 0
+                }
+            }
+        },
+        "8. Gastos imputados al patrimonio neto": {
+            "account_number": "8",
+            "root_type": "Expense",
+            "is_group": 1,
+            "80. Gastos imputados al patrimonio neto": {
+                "account_number": "80",
+                "root_type": "Expense",
+                "is_group": 1,
+                "800. Gastos imputados al patrimonio neto": {
+                    "account_number": "800",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "81. Gastos por diferencias de conversión": {
+                "account_number": "81",
+                "root_type": "Expense",
+                "is_group": 1,
+                "810. Gastos por diferencias de conversión": {
+                    "account_number": "810",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "82. Gastos por coberturas de flujos de efectivo": {
+                "account_number": "82",
+                "root_type": "Expense",
+                "is_group": 1,
+                "820. Gastos por coberturas de flujos de efectivo": {
+                    "account_number": "820",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "83. Gastos por coberturas de inversiones netas en un negocio en el extranjero": {
+                "account_number": "83",
+                "root_type": "Expense",
+                "is_group": 1,
+                "830. Gastos por coberturas de inversiones netas en un negocio en el extranjero": {
+                    "account_number": "830",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "84. Gastos por valoración de activos y pasivos financieros por su valor razonable": {
+                "account_number": "84",
+                "root_type": "Expense",
+                "is_group": 1,
+                "840. Gastos por valoración de activos y pasivos financieros por su valor razonable": {
+                    "account_number": "840",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "85. Gastos por valoración de activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                "account_number": "85",
+                "root_type": "Expense",
+                "is_group": 1,
+                "850. Gastos por valoración de activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                    "account_number": "850",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "86. Gastos por ganancias actuariales y otros ajustes en activos por retribuciones a largo plazo de prestación definida": {
+                "account_number": "86",
+                "root_type": "Expense",
+                "is_group": 1,
+                "860. Gastos por ganancias actuariales y otros ajustes en activos por retribuciones a largo plazo de prestación definida": {
+                    "account_number": "860",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "87. Gastos por subvenciones, donaciones y legados recibidos": {
+                "account_number": "87",
+                "root_type": "Expense",
+                "is_group": 1,
+                "870. Gastos por subvenciones, donaciones y legados recibidos": {
+                    "account_number": "870",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "88. Gastos por subvenciones, donaciones y legados recibidos de capital": {
+                "account_number": "88",
+                "root_type": "Expense",
+                "is_group": 1,
+                "880. Gastos por subvenciones, donaciones y legados recibidos de capital": {
+                    "account_number": "880",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            },
+            "89. Gastos por subvenciones, donaciones y legados recibidos de capital no reintegrables": {
+                "account_number": "89",
+                "root_type": "Expense",
+                "is_group": 1,
+                "890. Gastos por subvenciones, donaciones y legados recibidos de capital no reintegrables": {
+                    "account_number": "890",
+                    "root_type": "Expense",
+                    "account_type": "Expense Account",
+                    "is_group": 0
+                }
+            }
+        },
+        "9. Ingresos imputados al patrimonio neto": {
+            "account_number": "9",
+            "root_type": "Income",
+            "is_group": 1,
+            "90. Ingresos imputados al patrimonio neto": {
+                "account_number": "90",
+                "root_type": "Income",
+                "is_group": 1,
+                "900. Ingresos imputados al patrimonio neto": {
+                    "account_number": "900",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "91. Ingresos por diferencias de conversión": {
+                "account_number": "91",
+                "root_type": "Income",
+                "is_group": 1,
+                "910. Ingresos por diferencias de conversión": {
+                    "account_number": "910",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "92. Ingresos por coberturas de flujos de efectivo": {
+                "account_number": "92",
+                "root_type": "Income",
+                "is_group": 1,
+                "920. Ingresos por coberturas de flujos de efectivo": {
+                    "account_number": "920",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "93. Ingresos por coberturas de inversiones netas en un negocio en el extranjero": {
+                "account_number": "93",
+                "root_type": "Income",
+                "is_group": 1,
+                "930. Ingresos por coberturas de inversiones netas en un negocio en el extranjero": {
+                    "account_number": "930",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "94. Ingresos por valoración de activos y pasivos financieros por su valor razonable": {
+                "account_number": "94",
+                "root_type": "Income",
+                "is_group": 1,
+                "940. Ingresos por valoración de activos y pasivos financieros por su valor razonable": {
+                    "account_number": "940",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "95. Ingresos por valoración de activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                "account_number": "95",
+                "root_type": "Income",
+                "is_group": 1,
+                "950. Ingresos por valoración de activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                    "account_number": "950",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "96. Ingresos por ganancias actuariales y otros ajustes en activos por retribuciones a largo plazo de prestación definida": {
+                "account_number": "96",
+                "root_type": "Income",
+                "is_group": 1,
+                "960. Ingresos por ganancias actuariales y otros ajustes en activos por retribuciones a largo plazo de prestación definida": {
+                    "account_number": "960",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "97. Ingresos por subvenciones, donaciones y legados recibidos": {
+                "account_number": "97",
+                "root_type": "Income",
+                "is_group": 1,
+                "970. Ingresos por subvenciones, donaciones y legados recibidos": {
+                    "account_number": "970",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "98. Ingresos por subvenciones, donaciones y legados recibidos de capital": {
+                "account_number": "98",
+                "root_type": "Income",
+                "is_group": 1,
+                "980. Ingresos por subvenciones, donaciones y legados recibidos de capital": {
+                    "account_number": "980",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            },
+            "99. Ingresos por subvenciones, donaciones y legados recibidos de capital no reintegrables": {
+                "account_number": "99",
+                "root_type": "Income",
+                "is_group": 1,
+                "990. Ingresos por subvenciones, donaciones y legados recibidos de capital no reintegrables": {
+                    "account_number": "990",
+                    "root_type": "Income",
+                    "account_type": "Income Account",
+                    "is_group": 0
+                }
+            }
+        }
+    }
+}
