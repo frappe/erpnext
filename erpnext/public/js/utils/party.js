@@ -124,6 +124,64 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 	});
 };
 
+erpnext.utils.get_party_gl_balance = function (frm) {
+	frappe.db.get_single_value("Accounts Settings", "show_gl_balance_in_document").then((value) => {
+		if (!value) {
+			return
+		}
+	});
+
+	let args = {};
+
+	if (in_list(SALES_DOCTYPES, frm.doc.doctype)) {
+			args = {
+				party: frm.doc.customer || frm.doc.party_name,
+				party_type: "Customer",
+			};
+		}
+
+		if (in_list(PURCHASE_DOCTYPES, frm.doc.doctype)) {
+			args = {
+				party: frm.doc.supplier,
+				party_type: "Supplier",
+			};
+		}
+
+	party_field = args.doctype == "Quotation" ? "party_name" : args.party_type == "Customer" ? "customer" : "supplier"
+
+	if(args.party && frm.doc.docstatus == 0) {
+		frappe.call({
+			method: "erpnext.accounts.utils.get_balance_on",
+			args: {
+				company: frm.doc.company,
+				party_type: args.party_type,
+				party: args.party,
+			},
+			callback: function(r) {
+				if (r.message) {
+					let balance = r.message;
+
+					if(balance == 0) {
+						frm.set_df_property(party_field, "description", "");
+						return
+					}
+					let color = balance <= 0 ? "green" : "red";
+					let html = `<b>Current GL Balance:</b>
+						<span style="color:${color}; font-weight:bold;">
+							${format_currency(balance, frm.doc.currency || "INR")}
+						</span>`;
+
+					frm.set_df_property(party_field, "description", html);
+				} else {
+					frm.set_df_property(party_field, "description", "");
+				}
+			}
+		});
+	} else {
+		frm.set_df_property(party_field, "description", "");
+	}
+}
+
 erpnext.utils.add_item = function (frm) {
 	if (frm.is_new()) {
 		var prev_route = frappe.get_prev_route();

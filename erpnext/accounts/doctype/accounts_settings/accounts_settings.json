@@ -40,6 +40,8 @@
   "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
+  "balance_view_settings_section",
+  "show_gl_balance_in_document",
   "item_price_settings_section",
   "maintain_same_internal_transaction_rate",
   "fetch_valuation_rate_for_internal_transaction",
@@ -99,7 +101,8 @@
   "payment_request_settings",
   "create_pr_in_draft_status",
   "budget_settings",
-  "use_legacy_budget_controller"
+  "use_legacy_budget_controller",
+  "column_break_xrnd"
  ],
  "fields": [
   {
@@ -658,6 +661,17 @@
    "fieldname": "use_legacy_controller_for_pcv",
    "fieldtype": "Check",
    "label": "Use Legacy Controller For Period Closing Voucher"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_gl_balance_in_document",
+   "fieldtype": "Check",
+   "label": "Show GL Balance in Document"
+  },
+  {
+   "fieldname": "balance_view_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Balance View Settings"
   }
  ],
  "grid_page_length": 50,
@@ -666,7 +680,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-20 14:06:08.870427",
+ "modified": "2025-11-22 11:42:23.968318",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

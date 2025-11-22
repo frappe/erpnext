@@ -112,6 +112,8 @@ erpnext.sales_common = {
 					this.frm.doc.customer_name && this.frm.doc.customer_name !== this.frm.doc.customer
 				);
 
+				erpnext.utils.get_party_gl_balance(this.frm);
+
 				this.toggle_editable_price_list_rate();
 				this.change_warehouse_labels_for_return();
 			}
@@ -170,6 +172,7 @@ erpnext.sales_common = {
 				erpnext.utils.get_party_details(this.frm, null, null, function () {
 					me.apply_price_list();
 				});
+				erpnext.utils.get_party_gl_balance(this.frm);
 			}
 
 			customer_address() {

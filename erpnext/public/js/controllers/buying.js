@@ -138,6 +138,8 @@ erpnext.buying = {
 					this.set_from_product_bundle();
 				}
 
+				erpnext.utils.get_party_gl_balance(this.frm);
+
 				this.toggle_subcontracting_fields();
 				super.refresh();
 			}
@@ -160,6 +162,7 @@ erpnext.buying = {
 				erpnext.utils.get_party_details(this.frm, null, null, function () {
 					me.apply_price_list();
 				});
+				erpnext.utils.get_party_gl_balance(this.frm);
 			}
 
 			company() {
