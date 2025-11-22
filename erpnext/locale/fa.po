@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-20 22:24\n"
+"PO-Revision-Date: 2025-11-22 22:59\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1127,7 +1127,7 @@ msgstr "مقدار پذیرفته شده"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Accepted Qty in Stock UOM"
-msgstr "مقدار پذیرفته شده در انبار UOM"
+msgstr "مقدار پذیرفته شده بر حسب واحد اندازه‌گیری موجودی"
 
 #. Label of the qty (Float) field in DocType 'Purchase Receipt Item'
 #. Label of the qty (Float) field in DocType 'Subcontracting Receipt Item'
@@ -3762,7 +3762,7 @@ msgstr "مبلغ تخصیص یافته"
 #. Reconciliation'
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "Allocated Entries"
-msgstr "ورودی های اختصاص داده شده"
+msgstr "ثبت‌های اختصاص داده شده"
 
 #: erpnext/public/js/templates/crm_activities.html:49
 msgid "Allocated To:"
@@ -4266,7 +4266,7 @@ msgstr "آیتم جایگزین نباید با کد آیتم مشابه باش�
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:378
 msgid "Alternatively, you can download the template and fill your data in."
-msgstr "همچنین می‌توانید الگو را دانلود کرده و داده های خود را پر کنید."
+msgstr "همچنین می‌توانید الگو را دانلود کرده و داده‌های خود را پر کنید."
 
 #. Option for the 'Action on New Invoice' (Select) field in DocType 'POS
 #. Profile'
@@ -4832,7 +4832,7 @@ msgstr "در هر خواندن اعمال می‌شود."
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:188
 msgid "Applied putaway rules."
-msgstr "اعمال قوانین حذف"
+msgstr "قوانین جانمایی اعمال شده."
 
 #. Label of the applies_to (Table) field in DocType 'Common Code'
 #: erpnext/edi/doctype/common_code/common_code.json
@@ -4910,7 +4910,7 @@ msgstr "اعمال روی"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Apply Putaway Rule"
-msgstr "اعمال قانون Putaway"
+msgstr "اعمال قانون جانمایی"
 
 #. Label of the apply_recursion_over (Float) field in DocType 'Pricing Rule'
 #. Label of the apply_recursion_over (Float) field in DocType 'Promotional
@@ -5075,7 +5075,7 @@ msgstr "آر (100 متر مربع)"
 
 #: erpnext/public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
-msgstr "آیا مطمئن هستید که می‌خواهید تمام داده های نمایشی را پاک کنید؟"
+msgstr "آیا مطمئن هستید که می‌خواهید تمام داده‌های نمایشی را پاک کنید؟"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:451
 msgid "Are you sure you want to delete this Item?"
@@ -5126,7 +5126,7 @@ msgstr "همانطور که در تاریخ"
 #. Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "As per Stock UOM"
-msgstr "مطابق با موجودی UOM"
+msgstr "مطابق واحد اندازه‌گیری موجودی"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:189
 msgid "As the field {0} is enabled, the field {1} is mandatory."
@@ -5864,7 +5864,7 @@ msgstr "ویژگی {0} چندین بار در جدول ویژگی‌ها انت�
 
 #: erpnext/stock/doctype/item/item.py:852
 msgid "Attributes"
-msgstr "ویژگی های"
+msgstr "ویژگی‌های"
 
 #. Name of a role
 #: erpnext/accounts/doctype/account/account.json
@@ -7212,7 +7212,7 @@ msgstr "مجموع مبلغ هزینه‌یابی مبنا"
 
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:46
 msgid "Based On Data ( in years )"
-msgstr "بر اساس داده ها (در سال)"
+msgstr "بر اساس داده‌ها (در سال)"
 
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:30
 msgid "Based On Document"
@@ -8781,7 +8781,7 @@ msgstr "نمی‌توان تراکنش را برای دستور کار تکمی�
 
 #: erpnext/stock/doctype/item/item.py:872
 msgid "Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item"
-msgstr "پس از تراکنش موجودی نمی‌توان ویژگی ها را تغییر داد. یک آیتم جدید بسازید و موجودی را به آیتم جدید منتقل کنید"
+msgstr "پس از تراکنش موجودی نمی‌توان ویژگی‌ها را تغییر داد. یک آیتم جدید بسازید و موجودی را به آیتم جدید منتقل کنید"
 
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.py:49
 msgid "Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."
@@ -8797,7 +8797,7 @@ msgstr "نمی‌توان تاریخ توقف سرویس را برای مورد 
 
 #: erpnext/stock/doctype/item/item.py:863
 msgid "Cannot change Variant properties after stock transaction. You will have to make a new Item to do this."
-msgstr "پس از تراکنش موجودی نمی‌توان ویژگی های گونه را تغییر داد. برای این کار باید یک آیتم جدید بسازید."
+msgstr "پس از تراکنش موجودی نمی‌توان ویژگی‌های گونه را تغییر داد. برای این کار باید یک آیتم جدید بسازید."
 
 #: erpnext/setup/doctype/company/company.py:286
 msgid "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
@@ -8988,7 +8988,7 @@ msgstr "ظرفیت (بر حسب روز)"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:69
 msgid "Capacity (Stock UOM)"
-msgstr "ظرفیت (Stock UOM)"
+msgstr "ظرفیت (واحد اندازه‌گیری موجودی)"
 
 #. Label of the capacity_planning (Section Break) field in DocType
 #. 'Manufacturing Settings'
@@ -9009,7 +9009,7 @@ msgstr "برنامه‌ریزی ظرفیت برای (بر حسب روز)"
 #. Label of the stock_capacity (Float) field in DocType 'Putaway Rule'
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.json
 msgid "Capacity in Stock UOM"
-msgstr "ظرفیت موجود در انبار UOM"
+msgstr "ظرفیت بر حسب واحد اندازه‌گیری موجودی"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:85
 msgid "Capacity must be greater than 0"
@@ -9636,7 +9636,7 @@ msgstr "بندها و شرایط"
 
 #: erpnext/public/js/utils/demo.js:11
 msgid "Clear Demo Data"
-msgstr "پاک کردن داده های نمایشی"
+msgstr "پاک کردن داده‌های نمایشی"
 
 #. Label of the clear_notifications (Check) field in DocType 'Transaction
 #. Deletion Record'
@@ -9680,7 +9680,7 @@ msgstr "تاریخ ترخیص به روز شد"
 
 #: erpnext/public/js/utils/demo.js:24
 msgid "Clearing Demo Data..."
-msgstr "در حال پاک کردن داده های نمایشی..."
+msgstr "در حال پاک کردن داده‌های نمایشی..."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:719
 msgid "Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
@@ -11819,7 +11819,7 @@ msgstr ""
 
 #: erpnext/setup/demo.py:55
 msgid "Could Not Delete Demo Data"
-msgstr "داده های نسخه ی نمایشی حذف نشد"
+msgstr "داده‌های نسخه ی نمایشی حذف نشد"
 
 #: erpnext/selling/doctype/quotation/quotation.py:606
 msgid "Could not auto create Customer due to the following missing mandatory field(s):"
@@ -13605,7 +13605,7 @@ msgstr ""
 
 #: erpnext/crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.js:15
 msgid "Data Based On"
-msgstr "داده ها بر اساس"
+msgstr "داده‌ها بر اساس"
 
 #. Label of the receivable_payable_fetch_method (Select) field in DocType
 #. 'Accounts Settings'
@@ -13622,7 +13622,7 @@ msgstr "پیکربندی درون‌بُرد داده"
 #. Label of a Card Break in the Home Workspace
 #: erpnext/setup/workspace/home/home.json
 msgid "Data Import and Settings"
-msgstr "درون‌بُرد داده ها و تنظیمات"
+msgstr "درون‌بُرد داده‌ها و تنظیمات"
 
 #. Label of the data_source (Select) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
@@ -14738,7 +14738,7 @@ msgstr "مقدار تحویل داده شده"
 #. Label of the delivered_qty (Float) field in DocType 'Pick List Item'
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "Delivered Qty (in Stock UOM)"
-msgstr "مقدار تحویل داده شده (به UOM موجودی)"
+msgstr "مقدار تحویل داده شده (بر حسب واحد اندازه‌گیری موجودی)"
 
 #: erpnext/selling/report/item_wise_sales_history/item_wise_sales_history.py:101
 msgid "Delivered Quantity"
@@ -19678,7 +19678,7 @@ msgstr "ایجاد تقاضا"
 
 #: erpnext/public/js/setup_wizard.js:54
 msgid "Generate Demo Data for Exploration"
-msgstr "داده های نسخه ی نمایشی را برای کاوش ایجاد کنید"
+msgstr "داده‌های نسخه ی نمایشی را برای کاوش ایجاد کنید"
 
 #: erpnext/accounts/doctype/sales_invoice/regional/italy.js:4
 msgid "Generate E-Invoice"
@@ -20990,7 +20990,7 @@ msgstr "اگر علامت زده شود، مبلغ مالیات به عنوان 
 
 #: erpnext/public/js/setup_wizard.js:56
 msgid "If checked, we will create demo data for you to explore the system. This demo data can be erased later."
-msgstr "در صورت علامت زدن، داده‌های نمایشی را برای شما ایجاد می‌کنیم تا سیستم را کاوش کنید. این داده های نمایشی را می‌توان بعداً پاک کرد."
+msgstr "در صورت علامت زدن، داده‌های نمایشی را برای شما ایجاد می‌کنیم تا سیستم را کاوش کنید. این داده‌های نمایشی را می‌توان بعداً پاک کرد."
 
 #. Description of the 'Service Address' (Small Text) field in DocType 'Warranty
 #. Claim'
@@ -21566,7 +21566,7 @@ msgstr "موجود"
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.html:22
 #: erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py:28
 msgid "In Stock Qty"
-msgstr "موجودی تعداد"
+msgstr "مقدار موجود"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Trip'
 #. Option for the 'Transfer Status' (Select) field in DocType 'Material
@@ -21878,7 +21878,7 @@ msgstr "شامل جدول زمانی در وضعیت پیش‌نویس"
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:108
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:51
 msgid "Include UOM"
-msgstr "شامل UOM شود"
+msgstr "شامل واحد اندازه‌گیری"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:131
 msgid "Include Zero Stock Items"
@@ -21904,7 +21904,7 @@ msgstr "شامل سود ناخالص"
 #. Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Including items for sub assemblies"
-msgstr "شامل آیتم‌ها برای زیر مونتاژ ها"
+msgstr "شامل آیتم‌های زیر مونتاژ ها"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Account'
 #. Option for the 'Root Type' (Select) field in DocType 'Ledger Merge'
@@ -23014,7 +23014,7 @@ msgstr "صدور فاکتور"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Invoicing Features"
-msgstr "ویژگی های صورتحساب"
+msgstr "ویژگی‌های صورتحساب"
 
 #. Option for the 'Payment Request Type' (Select) field in DocType 'Payment
 #. Request'
@@ -24741,7 +24741,7 @@ msgstr "تنظیمات گونه آیتم"
 
 #: erpnext/stock/doctype/item/item.js:876
 msgid "Item Variant {0} already exists with same attributes"
-msgstr "گونه آیتم {0} در حال حاضر با همان ویژگی ها وجود دارد"
+msgstr "گونه آیتم {0} در حال حاضر با همان ویژگی‌ها وجود دارد"
 
 #: erpnext/stock/doctype/item/item.py:768
 msgid "Item Variants updated"
@@ -24866,7 +24866,7 @@ msgstr "ارسال مجدد ارزیابی آیتم در حال انجام اس�
 
 #: erpnext/stock/doctype/item/item.py:942
 msgid "Item variant {0} exists with same attributes"
-msgstr "گونه آیتم {0} با همان ویژگی ها وجود دارد"
+msgstr "گونه آیتم {0} با همان ویژگی‌ها وجود دارد"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:83
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -27887,7 +27887,7 @@ msgstr "ادغام شد"
 
 #: erpnext/accounts/doctype/account/account.py:599
 msgid "Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"
-msgstr "ادغام تنها در صورتی امکان پذیر است که ویژگی های زیر در هر دو رکورد یکسان باشند. گروه، نوع ریشه، شرکت و ارز حساب است"
+msgstr "ادغام تنها در صورتی امکان پذیر است که ویژگی‌های زیر در هر دو رکورد یکسان باشند. گروه، نوع ریشه، شرکت و ارز حساب است"
 
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.js:16
 msgid "Merging {0} of {1}"
@@ -28170,7 +28170,7 @@ msgstr "حداقل مقدار"
 #. Description of the 'Minimum Order Qty' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Minimum quantity should be as per Stock UOM"
-msgstr "حداقل مقدار باید مطابق با موجودی UOM باشد"
+msgstr "حداقل مقدار باید مطابق واحد اندازه‌گیری موجودی باشد"
 
 #. Label of the minute (Text Editor) field in DocType 'Quality Meeting Minutes'
 #. Name of a UOM
@@ -30116,7 +30116,7 @@ msgstr "فقط «ثبت‌های پرداخت» انجام‌شده در برا�
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:105
 msgid "Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload"
-msgstr "برای درون‌بُرد داده ها فقط می‌توان از فایل های CSV و Excel استفاده کرد. لطفاً فرمت فایلی را که می‌خواهید آپلود کنید بررسی کنید"
+msgstr "برای درون‌بُرد داده‌ها فقط می‌توان از فایل های CSV و Excel استفاده کرد. لطفاً فرمت فایلی را که می‌خواهید آپلود کنید بررسی کنید"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -33605,7 +33605,7 @@ msgstr "مقدار انتخاب شده"
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "Picked Qty (in Stock UOM)"
-msgstr "مقدار انتخاب شده (در انبار UOM)"
+msgstr "مقدار انتخاب شده (بر حسب واحد اندازه‌گیری موجودی)"
 
 #. Option for the 'Pickup Type' (Select) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -34290,7 +34290,7 @@ msgstr "لطفاً مطمئن شوید که فایلی که استفاده می�
 
 #: erpnext/setup/doctype/company/company.js:209
 msgid "Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."
-msgstr "لطفاً مطمئن شوید که واقعاً می‌خواهید همه تراکنش‌های این شرکت را حذف کنید. داده های اصلی شما همانطور که هست باقی می ماند. این عمل قابل لغو نیست."
+msgstr "لطفاً مطمئن شوید که واقعاً می‌خواهید همه تراکنش‌های این شرکت را حذف کنید. داده‌های اصلی شما همانطور که هست باقی می ماند. این عمل قابل لغو نیست."
 
 #: erpnext/stock/doctype/item/item.js:578
 msgid "Please mention 'Weight UOM' along with Weight."
@@ -35661,7 +35661,7 @@ msgstr "طبقه های تخفیف قیمت یا محصول مورد نیاز ا
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:237
 msgid "Price per Unit (Stock UOM)"
-msgstr "قیمت هر واحد (Stock UOM)"
+msgstr "قیمت هر واحد (واحد اندازه‌گیری موجودی)"
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:13
 #: erpnext/selling/doctype/customer/customer_dashboard.py:27
@@ -36579,7 +36579,7 @@ msgstr "ردیابی موجودی از نظر پروژه "
 
 #: erpnext/controllers/trends.py:421
 msgid "Project-wise data is not available for Quotation"
-msgstr "داده های پروژه محور برای پیش‌فاکتور در دسترس نیست"
+msgstr "داده‌های پروژه محور برای پیش‌فاکتور در دسترس نیست"
 
 #. Label of the projected_qty (Float) field in DocType 'Material Request Plan
 #. Item'
@@ -37411,11 +37411,11 @@ msgstr "اهداف مورد نیاز"
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Putaway Rule"
-msgstr "قانون Putaway"
+msgstr "قانون جانمایی"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:52
 msgid "Putaway Rule already exists for Item {0} in Warehouse {1}."
-msgstr "قانون Putaway از قبل برای مورد {0} در انبار {1} وجود دارد."
+msgstr "قانون جانمایی از قبل برای آیتم {0} در انبار {1} وجود دارد."
 
 #. Label of the free_qty (Float) field in DocType 'Pricing Rule'
 #. Label of the free_qty (Float) field in DocType 'Promotional Scheme Product
@@ -37537,7 +37537,7 @@ msgstr "مقدار (انبار)"
 #. Label of the stock_qty (Float) field in DocType 'Pick List Item'
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "Qty (in Stock UOM)"
-msgstr ""
+msgstr "مقدار (بر حسب واحد موجودی)"
 
 #. Label of the qty_after_transaction (Float) field in DocType 'Stock Ledger
 #. Entry'
@@ -37622,7 +37622,7 @@ msgstr "تعداد به ازای موجودی UOM"
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Qty as per Stock UOM"
-msgstr "تعداد طبق موجودی UOM"
+msgstr "مقدار مطابق واحد اندازه‌گیری موجودی"
 
 #. Description of the 'Apply Recursion Over (As Per Transaction UOM)' (Float)
 #. field in DocType 'Pricing Rule'
@@ -37643,7 +37643,7 @@ msgstr "تعداد برای {0}"
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:231
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Qty in Stock UOM"
-msgstr "تعداد موجود در انبار UOM"
+msgstr "مقدار بر حسب واحد اندازه‌گیری موجودی"
 
 #. Label of the for_qty (Float) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.js:196
@@ -39151,7 +39151,7 @@ msgstr "مبلغ مقدار دریافتی"
 #. Item'
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Received Qty in Stock UOM"
-msgstr "مقدار دریافت شده به UOM موجودی"
+msgstr "مقدار دریافت شده بر حسب واحد اندازه‌گیری موجودی"
 
 #. Label of the received_qty (Float) field in DocType 'Purchase Receipt Item'
 #. Label of the received_qty (Float) field in DocType 'Subcontracting Receipt
@@ -40969,7 +40969,7 @@ msgstr "مقدار برگردانده شده "
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Returned Qty in Stock UOM"
-msgstr "تعداد برگردانده شده در انبار UOM"
+msgstr "مقدار برگردانده شده بر حسب واحد اندازه‌گیری موجودی"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:101
 msgid "Returned exchange rate is neither integer not float."
@@ -42318,7 +42318,7 @@ msgstr "ردیف {0}: تعداد نمی‌تواند بیشتر از {1} برا�
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:461
 msgid "Row {0}: Qty in Stock UOM can not be zero."
-msgstr "ردیف {0}: تعداد موجودی UOM در انبار نمی‌تواند صفر باشد."
+msgstr "ردیف {0}: مقدار بر حسب واحد اندازه‌گیری موجودی نمی‌تواند صفر باشد."
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:124
 msgid "Row {0}: Qty must be greater than 0."
@@ -45029,7 +45029,7 @@ msgstr "تنظیم پیش‌پرداخت و تخصیص (FIFO)"
 #. Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Set Basic Rate Manually"
-msgstr "نرخ پایه را به صورت دستی تنظیم کنید"
+msgstr "تنظیم نرخ پایه به صورت دستی"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:180
 msgid "Set Default Supplier"
@@ -45285,7 +45285,7 @@ msgstr "«انبار رزرو» را در هر ردیف از جدول آیتم�
 #. Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Sets 'Source Warehouse' in each row of the items table."
-msgstr "انبار منبع را در هر ردیف از جدول آیتم‌ها تنظیم می‌کند."
+msgstr "«انبار منبع» را در هر ردیف از جدول آیتم‌ها تنظیم می‌کند."
 
 #. Description of the 'Default Target Warehouse' (Link) field in DocType 'Stock
 #. Entry'
@@ -45833,7 +45833,7 @@ msgstr "نمایش فروشنده"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:120
 msgid "Show Stock Ageing Data"
-msgstr "نمایش داده های سالخوردگی موجودی"
+msgstr "نمایش داده‌های سالخوردگی موجودی"
 
 #. Label of the show_taxes_as_table_in_print (Check) field in DocType 'Accounts
 #. Settings'
@@ -45843,7 +45843,7 @@ msgstr "نمایش مالیات به عنوان جدول در چاپ"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:115
 msgid "Show Variant Attributes"
-msgstr "نمایش ویژگی های گونه"
+msgstr "نمایش ویژگی‌های گونه"
 
 #: erpnext/stock/doctype/item/item.js:138
 msgid "Show Variants"
@@ -47039,7 +47039,7 @@ msgstr "مقدار موجودی رزرو شده"
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "Stock Reserved Qty (in Stock UOM)"
-msgstr "تعداد موجودی رزرو شده (در انبار UOM)"
+msgstr "مقدار موجودی رزرو شده (بر حسب واحد اندازه‌گیری موجودی)"
 
 #. Label of the auto_accounting_for_stock_settings (Section Break) field in
 #. DocType 'Company'
@@ -47166,7 +47166,7 @@ msgstr "تنظیمات معاملات موجودی"
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Stock UOM"
-msgstr "UOM موجودی"
+msgstr "واحد اندازه‌گیری موجودی"
 
 #. Label of the conversion_factor_section (Section Break) field in DocType
 #. 'Stock Settings'
@@ -49885,7 +49885,7 @@ msgstr "اعداد برگ مطابقت ندارند"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:293
 msgid "The following Items, having Putaway Rules, could not be accomodated:"
-msgstr "موارد زیر که دارای قوانین Putaway هستند، قابل استفاده نیستند:"
+msgstr "آیتم‌های زیر، که دارای قوانین جانمایی هستند، قابل پذیرش نیستند:"
 
 #: erpnext/assets/doctype/asset/depreciation.py:340
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
@@ -49897,7 +49897,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.py:839
 msgid "The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template."
-msgstr "ویژگی های حذف شده زیر در گونه‌ها وجود دارد اما در قالب وجود ندارد. می‌توانید گونه‌ها را حذف کنید یا ویژگی(ها) را در قالب نگه دارید."
+msgstr "ویژگی‌های حذف شده زیر در گونه‌ها وجود دارد اما در قالب وجود ندارد. می‌توانید گونه‌ها را حذف کنید یا ویژگی(ها) را در قالب نگه دارید."
 
 #: erpnext/setup/doctype/employee/employee.py:176
 msgid "The following employees are currently still reporting to {0}:"
@@ -50967,7 +50967,7 @@ msgstr "برای گنجاندن مالیات در ردیف {0} در نرخ مو�
 
 #: erpnext/stock/doctype/item/item.py:638
 msgid "To merge, following properties must be same for both items"
-msgstr "برای ادغام، ویژگی های زیر باید برای هر دو مورد یکسان باشد"
+msgstr "برای ادغام، ویژگی‌های زیر باید برای هر دو مورد یکسان باشد"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:42
 msgid "To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled."
@@ -51315,7 +51315,7 @@ msgstr "کل مبلغ تحویل شده"
 
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:247
 msgid "Total Demand (Past Data)"
-msgstr "تقاضای کل (داده های گذشته)"
+msgstr "تقاضای کل (داده‌های گذشته)"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:223
 msgid "Total Equity"
@@ -51342,11 +51342,11 @@ msgstr "مجموع تجربه"
 
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:260
 msgid "Total Forecast (Future Data)"
-msgstr "کل پیش بینی (داده های آینده)"
+msgstr "کل پیش بینی (داده‌های آینده)"
 
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:253
 msgid "Total Forecast (Past Data)"
-msgstr "کل پیش بینی (داده های گذشته)"
+msgstr "کل پیش بینی (داده‌های گذشته)"
 
 #. Label of the total_gain_loss (Currency) field in DocType 'Exchange Rate
 #. Revaluation'
@@ -52867,7 +52867,7 @@ msgstr "تأیید نشده"
 
 #: erpnext/erpnext_integrations/utils.py:22
 msgid "Unverified Webhook Data"
-msgstr "داده های وب هوک تأیید نشده"
+msgstr "داده‌های وب هوک تأیید نشده"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:17
 msgid "Up"
@@ -53814,7 +53814,7 @@ msgstr "خطای ویژگی گونه"
 #: erpnext/public/js/templates/item_quick_entry.html:1
 #: erpnext/stock/doctype/item/item.json
 msgid "Variant Attributes"
-msgstr "ویژگی های گونه"
+msgstr "ویژگی‌های گونه"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:197
 msgid "Variant BOM"
@@ -55310,7 +55310,7 @@ msgstr "تاریخ شروع یا تاریخ پایان سال با {0} همپو�
 
 #: erpnext/edi/doctype/code_list/code_list_import.js:29
 msgid "You are importing data for the code list:"
-msgstr "شما در حال درون‌برد داده ها برای لیست کد هستید:"
+msgstr "شما در حال درون‌برد داده‌ها برای لیست کد هستید:"
 
 #: erpnext/controllers/accounts_controller.py:3773
 msgid "You are not allowed to update as per the conditions set in {} Workflow."
