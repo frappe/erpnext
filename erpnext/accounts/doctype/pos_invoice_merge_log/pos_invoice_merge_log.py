@@ -329,6 +329,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None, invoice_by_defaul
         frappe.publish_realtime('closing_process_complete', {'user': frappe.session.user})
         pos_closing_settings = frappe.get_single("Custom Selling Settings")
         if pos_closing_settings.enable_automated_pos_closing:
+            from cstm_erpnext.custom_accounts.common.pos_closing_entry_common import automate_closing_single_branch, update_processed_branch
             update_processed_branch(closing_entry.branch, closing_entry.posting_date, closing_entry.status)
             automate_closing_single_branch(date=closing_entry.posting_date)
 
