@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2025-11-16 09:35+0000\n"
-"PO-Revision-Date: 2025-11-22 22:59\n"
+"PO-Revision-Date: 2025-11-23 23:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1509,7 +1509,7 @@ msgstr "حساب: <b>{0}</b> یک کار سرمایه ای در حال انجا�
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:351
 msgid "Account: {0} can only be updated via Stock Transactions"
-msgstr "حساب: {0} فقط از طریق معاملات موجودی قابل به‌روزرسانی است"
+msgstr "حساب: {0} فقط از طریق تراکنش‌های موجودی قابل به‌روزرسانی است"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2786
 msgid "Account: {0} is not permitted under Payment Entry"
@@ -4188,7 +4188,7 @@ msgstr "نقش‌های اصلی مجاز عبارتند از «مشتری» و 
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allows to keep aside a specific quantity of inventory for a particular order."
-msgstr "اجازه می دهد تا مقدار مشخصی از موجودی را برای یک سفارش خاص کنار بگذارید."
+msgstr "اجازه می‌دهد تا مقدار مشخصی از موجودی را برای یک سفارش خاص کنار بگذارید."
 
 #. Description of the 'Allow Purchase Order with Zero Quantity' (Check) field
 #. in DocType 'Buying Settings'
@@ -8859,7 +8859,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/serial_no/serial_no.py:120
 msgid "Cannot delete Serial No {0}, as it is used in stock transactions"
-msgstr "نمی‌توان شماره سریال {0} را حذف کرد، زیرا در معاملات موجودی استفاده می‌شود"
+msgstr "نمی‌توان شماره سریال {0} را حذف کرد، زیرا در تراکنش‌های موجودی استفاده می‌شود"
 
 #: erpnext/setup/doctype/company/company.py:516
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -17027,7 +17027,7 @@ msgstr "فعال‌سازی این گزینه تضمین می‌کند که هر
 #. field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Enabling this option will allow you to record - <br><br> 1. Advances Received in a <b>Liability Account</b> instead of the <b>Asset Account</b><br><br>2. Advances Paid in an <b>Asset Account</b> instead of the <b> Liability Account</b>"
-msgstr "فعال کردن این گزینه به شما امکان می دهد ثبت کنید - <br><br> 1. پیش‌پرداخت‌های دریافت شده در <b>حساب بدهی</b> به جای <b>حساب دارایی</b><br><br>2. پیش‌پرداخت‌های پرداخت شده در <b>حساب دارایی</b> به جای <b> حساب بدهی</b>"
+msgstr "فعال کردن این گزینه به شما امکان می‌دهد ثبت کنید - <br><br> 1. پیش‌پرداخت‌های دریافت شده در <b>حساب بدهی</b> به جای <b>حساب دارایی</b><br><br>2. پیش‌پرداخت‌های پرداخت شده در <b>حساب دارایی</b> به جای <b> حساب بدهی</b>"
 
 #. Description of the 'Allow multi-currency invoices against single party
 #. account ' (Check) field in DocType 'Accounts Settings'
@@ -21095,7 +21095,7 @@ msgstr "اگر فعال شود، نرخ آیتم در انتقالات داخل�
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the source and target warehouse in the Material Transfer Stock Entry must be different else an error will be thrown. If inventory dimensions are present, same source and target warehouse can be allowed but atleast any one of the inventory dimension fields must be different."
-msgstr ""
+msgstr "در صورت فعال بودن، انبار مبدا و مقصد در ثبت موجودی انتقال مواد باید متفاوت باشند، در غیر این صورت خطا رخ خواهد داد. اگر ابعاد موجودی وجود داشته باشد، می‌توان انبار مبدا و هدف یکسانی را مجاز دانست، اما حداقل هر یک از فیلدهای ابعاد موجودی باید متفاوت باشند."
 
 #. Description of the 'Allow UOM with Conversion Rate Defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -21160,7 +21160,7 @@ msgstr "اگر آیتم‌ها موجود هستند، مراحل انتقال �
 #. (Link) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions."
-msgstr "در صورت ذکر شده، این سیستم فقط به کاربران دارای این نقش اجازه می‌دهد تا هر تراکنش موجودی را زودتر از آخرین تراکنش موجودی برای یک کالا و انبار خاص ایجاد یا اصلاح کنند. اگر به صورت خالی تنظیم شود، به همه کاربران اجازه می دهد تا تراکنش‌های قدیمی را ایجاد/ویرایش کنند."
+msgstr "در صورت ذکر شده، این سیستم فقط به کاربران دارای این نقش اجازه می‌دهد تا هر تراکنش موجودی را زودتر از آخرین تراکنش موجودی برای یک کالا و انبار خاص ایجاد یا اصلاح کنند. اگر به صورت خالی تنظیم شود، به همه کاربران اجازه می‌دهد تا تراکنش‌های قدیمی را ایجاد/ویرایش کنند."
 
 #. Description of the 'To Package No.' (Int) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -22117,7 +22117,7 @@ msgstr ""
 #. Description of the 'Delivery Note' (Link) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
 msgid "Indicates that the package is a part of this delivery (Only Draft)"
-msgstr "نشان می دهد که بسته بخشی از این تحویل است (فقط پیش‌نویس)"
+msgstr "نشان می‌دهد که بسته بخشی از این تحویل است (فقط پیش‌نویس)"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -29671,7 +29671,7 @@ msgstr "ایجاد بعد حسابداری برای {0} مجاز نیست"
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:265
 msgid "Not allowed to update stock transactions older than {0}"
-msgstr "به‌روزرسانی معاملات موجودی قدیمی‌تر از {0} مجاز نیست"
+msgstr "به‌روزرسانی تراکنش‌های موجودی قدیمی‌تر از {0} مجاز نیست"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:59
 msgid "Not authorized since {0} exceeds limits"
@@ -29828,7 +29828,7 @@ msgstr "از طریق ایمیل اطلاع دهید"
 #. Label of the reorder_email_notify (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Notify by Email on Creation of Automatic Material Request"
-msgstr "از طریق ایمیل در مورد ایجاد درخواست خودکار مواد مطلع شوید"
+msgstr "اطلاع رسانی از طریق ایمیل در مورد ایجاد درخواست خودکار مواد"
 
 #. Description of the 'Notify Via Email' (Check) field in DocType 'Appointment
 #. Booking Settings'
@@ -39849,7 +39849,7 @@ msgstr "سطح سفارش مجدد"
 
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:218
 msgid "Reorder Qty"
-msgstr "تعداد را دوباره سفارش دهید"
+msgstr "مقدار سفارش مجدد"
 
 #. Label of the reorder_levels (Table) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -40186,7 +40186,7 @@ msgstr "درخواست شده است"
 #: erpnext/stock/report/requested_items_to_be_transferred/requested_items_to_be_transferred.json
 #: erpnext/stock/workspace/stock/stock.json
 msgid "Requested Items To Be Transferred"
-msgstr "موارد درخواستی برای انتقال"
+msgstr "آیتم‌های درخواستی برای انتقال"
 
 #. Name of a report
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.json
@@ -45133,7 +45133,7 @@ msgstr "زمان پاسخ را برای اولویت {0} در ردیف {1} تن�
 #. (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Set Serial and Batch Bundle Naming Based on Naming Series"
-msgstr ""
+msgstr "تنظیم نامگذاری سریال و دسته‌ای باندل بر اساس سری نامگذاری"
 
 #. Label of the set_warehouse (Link) field in DocType 'Sales Order'
 #. Label of the set_warehouse (Link) field in DocType 'Delivery Note'
@@ -47074,7 +47074,7 @@ msgstr "تراکنش‌های موجودی"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Stock Transactions Settings"
-msgstr "تنظیمات معاملات موجودی"
+msgstr "تنظیمات تراکنش‌های موجودی"
 
 #. Label of the stock_uom (Link) field in DocType 'POS Invoice Item'
 #. Label of the stock_uom (Link) field in DocType 'Purchase Invoice Item'
@@ -47302,13 +47302,13 @@ msgstr "مقدار موجودی برای کد مورد کافی نیست: {0} د
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:252
 msgid "Stock transactions before {0} are frozen"
-msgstr "معاملات موجودی قبل از {0} مسدود می‌شوند"
+msgstr "تراکنش‌های موجودی قبل از {0} مسدود می‌شوند"
 
 #. Description of the 'Freeze Stocks Older Than (Days)' (Int) field in DocType
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Stock transactions that are older than the mentioned days cannot be modified."
-msgstr "معاملات موجودی با قدمت بیشتر از روزهای مذکور قابل تغییر نمی باشد."
+msgstr "تراکنش‌های موجودی با قدمت بیشتر از روزهای مذکور قابل تغییر نمی باشد."
 
 #. Description of the 'Auto Reserve Stock for Sales Order on Purchase' (Check)
 #. field in DocType 'Stock Settings'
@@ -48453,7 +48453,7 @@ msgstr "انبار تامین کننده"
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/packed_item/packed_item.json
 msgid "Supplier delivers to Customer"
-msgstr "تامین کننده به مشتری تحویل می دهد"
+msgstr "تامین کننده به مشتری تحویل می‌دهد"
 
 #. Description of the 'Supplier Numbers' (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -50295,7 +50295,7 @@ msgstr ""
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
-msgstr "این همه کارت های امتیازی مرتبط با این راه‌اندازی را پوشش می دهد"
+msgstr "این همه کارت های امتیازی مرتبط با این راه‌اندازی را پوشش می‌دهد"
 
 #: erpnext/controllers/status_updater.py:447
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
@@ -50460,7 +50460,7 @@ msgstr "این زمان‌بندی زمانی ایجاد شد که شیفت‌ه
 #. 'Dunning Type'
 #: erpnext/accounts/doctype/dunning_type/dunning_type.json
 msgid "This section allows the user to set the Body and Closing text of the Dunning Letter for the Dunning Type based on language, which can be used in Print."
-msgstr "این بخش به کاربر اجازه می دهد متن Body و Closing نامه اخطار بدهی را برای اخطار بدهی Type بر اساس زبان تنظیم کند که می‌تواند در Print استفاده شود."
+msgstr "این بخش به کاربر اجازه می‌دهد متن Body و Closing نامه اخطار بدهی را برای اخطار بدهی Type بر اساس زبان تنظیم کند که می‌تواند در Print استفاده شود."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:496
 msgid "This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc."
@@ -55322,7 +55322,7 @@ msgstr "شما مجاز به افزودن یا به‌روزرسانی ورود�
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:334
 msgid "You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
-msgstr "شما مجاز به انجام/ویرایش معاملات موجودی برای کالای {0} در انبار {1} قبل از این زمان نیستید."
+msgstr "شما مجاز به انجام/ویرایش تراکنش‌های موجودی برای کالای {0} در انبار {1} قبل از این زمان نیستید."
 
 #: erpnext/accounts/doctype/account/account.py:310
 msgid "You are not authorized to set Frozen value"
@@ -55755,7 +55755,7 @@ msgstr "انجام هر یک از موارد زیر:"
 #. Item'
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 msgid "product bundle item row's name in sales order. Also indicates that picked item is to be used for a product bundle"
-msgstr "نام ردیف آیتم‌های باندل محصول در سفارش فروش. همچنین نشان می دهد که آیتم انتخاب شده قرار است برای یک باندل محصول استفاده شود"
+msgstr "نام ردیف آیتم‌های باندل محصول در سفارش فروش. همچنین نشان می‌دهد که آیتم انتخاب شده قرار است برای یک باندل محصول استفاده شود"
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
