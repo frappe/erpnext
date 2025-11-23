@@ -1898,7 +1898,7 @@ def get_sub_assembly_items(
 	skip_available_sub_assembly_item=False,
 	fetch_phantom_items=False,
 ):
-	data = get_bom_children(parent=bom_no, return_all=False, fetch_phantom_items=fetch_phantom_items)
+	data = get_bom_children(parent=bom_no, return_all=True, fetch_phantom_items=fetch_phantom_items)
 	for d in data:
 		if d.expandable:
 			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
@@ -1921,31 +1921,32 @@ def get_sub_assembly_items(
 			elif warehouse:
 				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
 
-			bom_data.append(
-				frappe._dict(
-					{
-						"actual_qty": bin_details[d.item_code][0].get("actual_qty", 0)
-						if bin_details.get(d.item_code)
-						else 0,
-						"parent_item_code": parent_item_code,
-						"description": d.description,
-						"production_item": d.item_code,
-						"item_name": d.item_name,
-						"stock_uom": d.stock_uom,
-						"uom": d.stock_uom,
-						"bom_no": d.value,
-						"is_sub_contracted_item": d.is_sub_contracted_item,
-						"bom_level": indent,
-						"indent": indent,
-						"stock_qty": stock_qty,
-						"required_qty": required_qty,
-						"projected_qty": bin_details[d.item_code][0].get("projected_qty", 0)
-						if bin_details.get(d.item_code)
-						else 0,
-						"main_bom": bom_no,
-					}
+			if not d.is_phantom_item:
+				bom_data.append(
+					frappe._dict(
+						{
+							"actual_qty": bin_details[d.item_code][0].get("actual_qty", 0)
+							if bin_details.get(d.item_code)
+							else 0,
+							"parent_item_code": parent_item_code,
+							"description": d.description,
+							"production_item": d.item_code,
+							"item_name": d.item_name,
+							"stock_uom": d.stock_uom,
+							"uom": d.stock_uom,
+							"bom_no": d.value,
+							"is_sub_contracted_item": d.is_sub_contracted_item,
+							"bom_level": indent,
+							"indent": indent,
+							"stock_qty": stock_qty,
+							"required_qty": required_qty,
+							"projected_qty": bin_details[d.item_code][0].get("projected_qty", 0)
+							if bin_details.get(d.item_code)
+							else 0,
+							"main_bom": bom_no,
+						}
+					)
 				)
-			)
 
 			if d.value:
 				get_sub_assembly_items(
